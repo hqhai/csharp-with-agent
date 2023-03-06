@@ -3,6 +3,8 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
+#pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
+
 namespace Fsel.User.Infrastructure.Migrations
 {
     /// <inheritdoc />
@@ -40,8 +42,8 @@ namespace Fsel.User.Infrastructure.Migrations
                     DeletedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false),
                     Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    FullName = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    RefreshToken = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    FullName = table.Column<string>(type: "nvarchar(250)", maxLength: 250, nullable: false),
+                    RefreshToken = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: true),
                     RefreshTokenExpiryTime = table.Column<DateTime>(type: "datetime2", nullable: true),
                     UserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     NormalizedUserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
@@ -167,6 +169,16 @@ namespace Fsel.User.Infrastructure.Migrations
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.InsertData(
+                table: "AspNetRoles",
+                columns: new[] { "Id", "ConcurrencyStamp", "Name", "NormalizedName" },
+                values: new object[,]
+                {
+                    { "a010f9ec-352a-4c9f-a3bd-4f64d6ea9efd", null, "MasterAdmin", "MasterAdmin" },
+                    { "a11365f8-b8d1-4db6-a2d5-655d3b244a7a", null, "CSO", "CSO" },
+                    { "c695f3d4-5393-4465-b564-6dca656fa258", null, "Admin", "Admin" }
                 });
 
             migrationBuilder.CreateIndex(
