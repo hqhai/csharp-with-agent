@@ -44,7 +44,7 @@ namespace Fsel.Common.Helpers
         public static string ObjectToBase64(object data)
         {
             var json = JsonConvert.SerializeObject(data);
-            var plainTextBytes = System.Text.Encoding.UTF8.GetBytes(json);
+            var plainTextBytes = System.Text.Encoding.ASCII.GetBytes(json);
             return ByteArrayToBase64(plainTextBytes);
         }
 
