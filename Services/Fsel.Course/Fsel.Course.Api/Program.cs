@@ -1,3 +1,4 @@
+using Fsel.Common.ConfigSettings;
 using Fsel.Common.Constants;
 using Fsel.Course.Application.Querys.PlacementTestQuery;
 using Fsel.Course.Domain.IRepositories;
@@ -5,14 +6,17 @@ using Fsel.Course.Infrastructure;
 using Fsel.Course.Infrastructure.Repositories;
 using MediatR;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Mvc.Versioning;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.Swagger;
 using Swashbuckle.AspNetCore.SwaggerUI;
 using System.Reflection;
+using System.Text;
 using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -23,7 +27,6 @@ var appDomainAssembly = AppDomain.CurrentDomain.GetAssemblies();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-builder.Services.AddDbContext<CourseDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString(Settings.DefaultConnection)));
 
 builder.Services.AddApiVersioning();
 builder.Services
@@ -34,13 +37,40 @@ builder.Services
         options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
     });
 
-builder.Services.AddAuthentication();
-builder.Services.AddScoped<IPlacementTestRepository, PlacementTestRepository>();
-
 builder.Services
     .AddMediatR(AppDomain.CurrentDomain.GetAssemblies())
     .AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies())
     .AddHttpContextAccessor();
+
+var appSetting = builder.Configuration.Get<BaseAppSetting>() ?? new BaseAppSetting();
+builder.Services.AddSingleton(appSetting);
+
+builder.Services.AddDbContext<CourseDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString(Settings.DefaultConnection)));
+
+builder.Services
+.AddAuthentication(option =>
+{
+    option.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    option.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    option.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(option =>
+{
+    option.SaveToken = true;
+    option.RequireHttpsMetadata = false;
+    option.TokenValidationParameters = new TokenValidationParameters()
+    {
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+        ValidAudience = appSetting.Jwt?.Audience,
+        ValidIssuer = appSetting.Jwt?.Issuer,
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(appSetting.Jwt?.SecretKey ?? string.Empty))
+    };
+});
+
+builder.Services.AddScoped<IPlacementTestRepository, PlacementTestRepository>();
 
 var app = builder.Build();
 

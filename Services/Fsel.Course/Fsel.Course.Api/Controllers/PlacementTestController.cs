@@ -15,7 +15,7 @@ namespace Fsel.Course.Api.Controllers
     [ApiVersion(Settings.APIVersion)]
     [Route(Settings.APIDefaultRoute + "/[controller]")]
     [ApiController]
-    //[Authorize]
+    [Authorize]
     public class PlacementTestController : ControllerBase
     {
         private readonly IMediator _mediator;
