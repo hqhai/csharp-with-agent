@@ -13,7 +13,7 @@ using System.Net;
 namespace Fsel.Course.Api.Controllers
 {
     [ApiVersion(Settings.APIVersion)]
-    [Route(Settings.APIDefaultRoute + "/[controller]")]
+    [Route(Settings.APIDefaultRoute + "/placement-test")]
     [ApiController]
     [Authorize]
     public class PlacementTestController : ControllerBase

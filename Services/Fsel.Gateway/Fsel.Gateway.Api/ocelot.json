@@ -34,6 +34,24 @@
         "AuthenticationProviderKey": "Bearer",
         "AllowedScopes": []
       }
+    },
+    // Course Service
+    {
+      "SwaggerKey": "course",
+      "UpstreamPathTemplate": "/course-gateway/{everything}",
+      "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ],
+      "DownstreamPathTemplate": "/api/{everything}",
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 7203
+        }
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Bearer",
+        "AllowedScopes": []
+      }
     }
   ],
   "SwaggerEndPoints": [
@@ -54,6 +72,16 @@
           "Name": "Users API",
           "Version": "v1",
           "Url": "https://localhost:7202/swagger/v1/swagger.json"
+        }
+      ]
+    },
+    {
+      "Key": "course",
+      "Config": [
+        {
+          "Name": "Courses API",
+          "Version": "v1",
+          "Url": "https://localhost:7203/swagger/v1/swagger.json"
         }
       ]
     }
