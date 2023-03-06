@@ -1,7 +1,6 @@
 ﻿using Fsel.Common.ActionResults;
 using Fsel.Core.Base.BaseModels;
 using Fsel.Course.Common.Models.Entities;
-using Fsel.Course.Common.Models.Queries;
 using Fsel.Course.Domain.IRepositories;
 using Fsel.Course.Infrastructure.Repositories;
 using AutoMapper;
@@ -13,6 +12,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Fsel.Course.Common.Models.Queries.Lesson;
 
 namespace Fsel.Course.Application.Querys.PlacementTestQuery
 {

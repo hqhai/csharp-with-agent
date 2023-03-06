@@ -95,7 +95,7 @@ builder.Services
 });
 
 builder.Services.AddScoped<IPlacementTestRepository, PlacementTestRepository>();
-
+builder.Services.AddScoped<ILessonRepository, LessonRepository>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

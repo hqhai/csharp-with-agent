@@ -25,14 +25,15 @@ namespace Fsel.Course.Infrastructure
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.ApplyConfiguration(new PlacementTestEntityTypeConfiguration());
-
+            modelBuilder.ApplyConfiguration(new LessonEntityTypeConfiguration());
             base.OnModelCreating(modelBuilder);
         }
 
         #region Db Set
         public DbSet<PlacementTest> PlacementTests { get; set; }
+        public DbSet<Lesson> Lessons { get; set; }
         #endregion
-        
+
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             if (!optionsBuilder.IsConfigured)

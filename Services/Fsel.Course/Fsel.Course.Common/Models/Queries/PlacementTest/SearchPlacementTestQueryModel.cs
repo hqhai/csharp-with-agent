@@ -8,7 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Fsel.Course.Common.Models.Queries
+namespace Fsel.Course.Common.Models.Queries.Lesson
 {
     public class SearchPlacementTestQueryModel : BaseQueyModel
     {
