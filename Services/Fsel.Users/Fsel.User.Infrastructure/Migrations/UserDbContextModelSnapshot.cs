@@ -70,7 +70,8 @@ namespace Fsel.User.Infrastructure.Migrations
 
                     b.Property<string>("FullName")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit")
@@ -100,7 +101,8 @@ namespace Fsel.User.Infrastructure.Migrations
                         .HasColumnType("bit");
 
                     b.Property<string>("RefreshToken")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
 
                     b.Property<DateTime?>("RefreshTokenExpiryTime")
                         .HasColumnType("datetime2");
@@ -170,19 +172,19 @@ namespace Fsel.User.Infrastructure.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "177d29f4-a424-41e3-ad35-fba822a6480f",
+                            Id = "a010f9ec-352a-4c9f-a3bd-4f64d6ea9efd",
                             Name = "MasterAdmin",
                             NormalizedName = "MasterAdmin"
                         },
                         new
                         {
-                            Id = "1341158d-acf4-4f0a-ac9a-effe17d56cbb",
+                            Id = "c695f3d4-5393-4465-b564-6dca656fa258",
                             Name = "Admin",
                             NormalizedName = "Admin"
                         },
                         new
                         {
-                            Id = "a586e3a2-1112-41bc-b282-bea8b8c7c0bb",
+                            Id = "a11365f8-b8d1-4db6-a2d5-655d3b244a7a",
                             Name = "CSO",
                             NormalizedName = "CSO"
                         });

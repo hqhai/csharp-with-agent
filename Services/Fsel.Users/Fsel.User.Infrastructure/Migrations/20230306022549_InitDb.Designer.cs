@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fsel.User.Infrastructure.Migrations
 {
     [DbContext(typeof(UserDbContext))]
-    [Migration("20230305072734_InitDb")]
+    [Migration("20230306022549_InitDb")]
     partial class InitDb
     {
         /// <inheritdoc />
@@ -72,7 +72,9 @@ namespace Fsel.User.Infrastructure.Migrations
                         .HasColumnType("bit");
 
                     b.Property<string>("FullName")
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired()
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit")
@@ -102,7 +104,8 @@ namespace Fsel.User.Infrastructure.Migrations
                         .HasColumnType("bit");
 
                     b.Property<string>("RefreshToken")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
 
                     b.Property<DateTime?>("RefreshTokenExpiryTime")
                         .HasColumnType("datetime2");
@@ -168,6 +171,26 @@ namespace Fsel.User.Infrastructure.Migrations
                         .HasFilter("[NormalizedName] IS NOT NULL");
 
                     b.ToTable("AspNetRoles", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = "a010f9ec-352a-4c9f-a3bd-4f64d6ea9efd",
+                            Name = "MasterAdmin",
+                            NormalizedName = "MasterAdmin"
+                        },
+                        new
+                        {
+                            Id = "c695f3d4-5393-4465-b564-6dca656fa258",
+                            Name = "Admin",
+                            NormalizedName = "Admin"
+                        },
+                        new
+                        {
+                            Id = "a11365f8-b8d1-4db6-a2d5-655d3b244a7a",
+                            Name = "CSO",
+                            NormalizedName = "CSO"
+                        });
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
