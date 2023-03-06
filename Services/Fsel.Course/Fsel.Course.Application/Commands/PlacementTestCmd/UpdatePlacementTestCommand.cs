@@ -4,7 +4,6 @@ using Fsel.Common.Helpers;
 using Fsel.Course.Common.Enums;
 using Fsel.Course.Common.Models.Commands.PlacementTest;
 using Fsel.Course.Common.Models.Entities;
-using Fsel.Course.Domain.Entities;
 using Fsel.Course.Domain.IRepositories;
 using MediatR;
 using Microsoft.AspNetCore.Http;

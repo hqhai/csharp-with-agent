@@ -1,14 +1,11 @@
 ﻿using AutoMapper;
 using Fsel.Common.ActionResults;
 using Fsel.Common.Helpers;
-using Fsel.Core.Base.BaseModels;
 using Fsel.Course.Common.Enums;
 using Fsel.Course.Common.Models.Entities;
-using Fsel.Course.Common.Models.Queries;
 using Fsel.Course.Domain.IRepositories;
 using MediatR;
 using Microsoft.AspNetCore.Http;
-using Microsoft.EntityFrameworkCore;
 
 namespace Fsel.Course.Application.Querys.PlacementTestQuery
 {
@@ -34,7 +31,7 @@ namespace Fsel.Course.Application.Querys.PlacementTestQuery
 
             var placementTest = await _placementTestRepository.GetByIdAsync(request.Id);
 
-            if(placementTest == null)
+            if (placementTest == null)
             {
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 methodResult.AddErrorMessage(
