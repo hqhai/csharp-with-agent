@@ -1,6 +1,5 @@
 ﻿using AutoMapper;
 using Fsel.Common.ActionResults;
-using Fsel.User.Common.Helpers;
 using Fsel.User.Common.Models.Commands;
 using Fsel.User.Common.Models.Entities;
 using Fsel.User.Domain.Entities;
@@ -8,26 +7,19 @@ using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
-using System;
-using System.Collections.Generic;
-using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
-using System.Security.Claims;
-using System.Text;
-using System.Threading.Tasks;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace Fsel.User.Application.Commands.AuthCmd
 {
     public class LoginCommand : LoginCommandModel, IRequest<MethodResult<TokenModel>>
     {
     }
+
     public class LoginCommandHandler : IRequestHandler<LoginCommand, MethodResult<TokenModel>>
     {
         private readonly UserManager<Account> _userManager;
         private readonly IMediator _mediator;
         private readonly IMapper _mapper;
+
         public LoginCommandHandler(UserManager<Account> userManager,
             IMediator mediator,
             IMapper mapper)
@@ -42,6 +34,7 @@ namespace Fsel.User.Application.Commands.AuthCmd
             MethodResult<TokenModel> methodResult = new MethodResult<TokenModel>();
 
             #region Validation
+
             if (request.Username == null || request.Password == null)
             {
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
@@ -55,7 +48,8 @@ namespace Fsel.User.Application.Commands.AuthCmd
                 //methodResult.AddResultFromErrorList(placementTest.ErrorMessages);
                 return methodResult;
             }
-            #endregion
+
+            #endregion Validation
 
             methodResult = await _mediator.Send(new GenerateTokenCommand { Id = user.Id }).ConfigureAwait(false);
             return methodResult;

@@ -12,7 +12,6 @@ namespace Fsel.User.Infrastructure
     {
         public UserDbContext(DbContextOptions<UserDbContext> options) : base(options)
         {
-
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -22,8 +21,10 @@ namespace Fsel.User.Infrastructure
         }
 
         #region Db Set
+
         public DbSet<Account> Accounts { get; set; }
-        #endregion
+
+        #endregion Db Set
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {

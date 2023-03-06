@@ -4,17 +4,11 @@ using Fsel.Core.Base.Interfaces;
 using Fsel.Core.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Fsel.Core.Base
 {
     public class BaseRepository<T> : IRepository<T> where T : Entity
     {
-
         protected readonly BaseDbContext _dbBaseContext;
 
         protected readonly DbSet<T> _dbSet;
@@ -136,7 +130,7 @@ namespace Fsel.Core.Base
             await strategy.ExecuteAsync(async delegate
             {
                 using IDbContextTransaction? transaction = await _dbBaseContext.BeginTransactionAsync().ConfigureAwait(continueOnCapturedContext: false);
-                if(transaction != null)
+                if (transaction != null)
                     try
                     {
                         if ((await action().ConfigureAwait(continueOnCapturedContext: false))?.IsOK ?? false)

@@ -1,4 +1,3 @@
-using Fsel.Common.ConfigSettings;
 using Fsel.Common.Constants;
 using Fsel.User.Application.Services;
 using Fsel.User.Common.ConfigSettings;
@@ -9,7 +8,6 @@ using Fsel.User.Infrastructure.Repositories;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using Microsoft.OpenApi.Models;
 using System.Text.Json.Serialization;
 

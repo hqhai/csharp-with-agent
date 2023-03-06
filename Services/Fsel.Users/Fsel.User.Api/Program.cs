@@ -1,22 +1,14 @@
-using Fsel.Common.ConfigSettings;
 using Fsel.Common.Constants;
 using Fsel.User.Application.Services;
 using Fsel.User.Common.ConfigSettings;
 using Fsel.User.Domain.Entities;
 using Fsel.User.Infrastructure;
 using MediatR;
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc.Versioning;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using Swashbuckle.AspNetCore.Swagger;
-using Swashbuckle.AspNetCore.SwaggerUI;
-using System.Reflection;
 using System.Text;
 using System.Text.Json.Serialization;
 
@@ -91,7 +83,7 @@ builder.Services
         ValidateIssuer = true,
         ValidateAudience = true,
         ValidateLifetime = true,
-        ValidateIssuerSigningKey = true,    
+        ValidateIssuerSigningKey = true,
         ValidAudience = appSetting.Jwt?.Audience,
         ValidIssuer = appSetting.Jwt?.Issuer,
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(appSetting.Jwt?.SecretKey ?? string.Empty))
@@ -109,7 +101,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseRouting(); 
+app.UseRouting();
 
 app.UseHttpsRedirection();
 
