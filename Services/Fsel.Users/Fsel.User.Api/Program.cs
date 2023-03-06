@@ -4,7 +4,6 @@ using Fsel.User.Application.Services;
 using Fsel.User.Common.ConfigSettings;
 using Fsel.User.Domain.Entities;
 using Fsel.User.Infrastructure;
-//using Fsel.User.Infrastructure;
 using MediatR;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;

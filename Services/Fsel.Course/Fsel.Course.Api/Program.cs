@@ -26,7 +26,31 @@ var appDomainAssembly = AppDomain.CurrentDomain.GetAssemblies();
 //builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new OpenApiInfo { Title = "Course", Version = "v1" });
+    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Description = "Jwt Course",
+        Name = "Authorization",
+        In = ParameterLocation.Header,
+        Type = SecuritySchemeType.ApiKey,
+        Scheme = "Bearer",
+    });
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference =new OpenApiReference
+                {
+                    Type=ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },new string[] {}
+        }
+    });
+});
 
 builder.Services.AddApiVersioning();
 builder.Services
@@ -81,13 +105,6 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseCors("CorsPolicy");
-app.UseSwagger()
-    .UseSwaggerUI(delegate (SwaggerUIOptions c)
-    {
-        c.SwaggerEndpoint("/swagger/v1/swagger.json", "api v1");
-        c.OAuthAppName("Swagger UI");
-    });
 app.UseRouting(); 
 
 app.UseHttpsRedirection();
