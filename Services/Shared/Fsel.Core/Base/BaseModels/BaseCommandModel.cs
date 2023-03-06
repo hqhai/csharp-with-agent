@@ -5,6 +5,6 @@ namespace Fsel.Core.Base.BaseModels
     public class BaseCommandModel
     {
         [JsonIgnore]
-        public Guid? Id { get; set; }
+        public Guid Id { get; set; }
     }
 }

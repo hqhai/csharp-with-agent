@@ -33,18 +33,41 @@ namespace Fsel.Course.Api.Controllers
         [HttpGet]
         [ProducesResponseType(typeof(MethodResult<PagingItemsModel<PlacementTestModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.BadRequest)]
-        public async Task<IActionResult> Search([FromQuery] SearchPlacementTestQuery command)
+        public async Task<IActionResult> Search([FromQuery] SearchPlacementTestQuery query)
         {
             try
             {
-                MethodResult<PagingItemsModel<PlacementTestModel>> commandResult = await _mediator.Send(command).ConfigureAwait(false);
-                return commandResult.GetActionResult();
+                MethodResult<PagingItemsModel<PlacementTestModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
+                return queryResult.GetActionResult();
             }
             catch (Exception ex)
             {
-                VoidMethodResult errorCommandResult = new VoidMethodResult();
-                errorCommandResult.AddErrorMessage(MethodHelper.GetExceptionMessage(ex));
-                return errorCommandResult.GetActionResult();
+                VoidMethodResult errorResult = new VoidMethodResult();
+                errorResult.AddErrorMessage(MethodHelper.GetExceptionMessage(ex));
+                return errorResult.GetActionResult();
+            }
+        }
+
+        /// <summary>
+        /// Get Placement Test
+        /// </summary>
+        /// <param name="command"></param>
+        /// <returns></returns>
+        [HttpGet("{id}")]
+        [ProducesResponseType(typeof(MethodResult<PlacementTestModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.BadRequest)]
+        public async Task<IActionResult> Get([FromRoute] Guid id)
+        {
+            try
+            {
+                MethodResult<PlacementTestModel> queryResult = await _mediator.Send(new GetPlacementTestQuery { Id = id }).ConfigureAwait(false);
+                return queryResult.GetActionResult();
+            }
+            catch (Exception ex)
+            {
+                VoidMethodResult errorResult = new VoidMethodResult();
+                errorResult.AddErrorMessage(MethodHelper.GetExceptionMessage(ex));
+                return errorResult.GetActionResult();
             }
         }
 
@@ -65,9 +88,56 @@ namespace Fsel.Course.Api.Controllers
             }
             catch (Exception ex)
             {
-                VoidMethodResult errorCommandResult = new VoidMethodResult();
-                errorCommandResult.AddErrorMessage(MethodHelper.GetExceptionMessage(ex));
-                return errorCommandResult.GetActionResult();
+                VoidMethodResult errorResult = new VoidMethodResult();
+                errorResult.AddErrorMessage(MethodHelper.GetExceptionMessage(ex));
+                return errorResult.GetActionResult();
+            }
+        }
+
+        /// <summary>
+        /// Update a Placement Test
+        /// </summary>
+        /// <param name="command"></param>
+        /// <returns></returns>
+        [HttpPut("{id}")]
+        [ProducesResponseType(typeof(MethodResult<PlacementTestModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.BadRequest)]
+        public async Task<IActionResult> Update([FromRoute] Guid id, [FromBody] UpdatePlacementTestCommand command)
+        {
+            try
+            {
+                command.Id = id;
+                MethodResult<PlacementTestModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
+                return commandResult.GetActionResult();
+            }
+            catch (Exception ex)
+            {
+                VoidMethodResult errorResult = new VoidMethodResult();
+                errorResult.AddErrorMessage(MethodHelper.GetExceptionMessage(ex));
+                return errorResult.GetActionResult();
+            }
+        }
+
+        /// <summary>
+        /// Delete a Placement Test
+        /// </summary>
+        /// <param name="command"></param>
+        /// <returns></returns>
+        [HttpDelete("{id}")]
+        [ProducesResponseType(typeof(MethodResult<PlacementTestModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.BadRequest)]
+        public async Task<IActionResult> Delete([FromRoute] Guid id)
+        {
+            try
+            {
+                MethodResult<bool> commandResult = await _mediator.Send(new DeletePlacementTestCommand { Id = id }).ConfigureAwait(false);
+                return commandResult.GetActionResult();
+            }
+            catch (Exception ex)
+            {
+                VoidMethodResult errorResult = new VoidMethodResult();
+                errorResult.AddErrorMessage(MethodHelper.GetExceptionMessage(ex));
+                return errorResult.GetActionResult();
             }
         }
     }
