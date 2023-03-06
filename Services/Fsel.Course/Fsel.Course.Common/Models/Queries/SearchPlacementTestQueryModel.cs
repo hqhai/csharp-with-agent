@@ -1,12 +1,4 @@
-﻿using Fsel.Common.ActionResults;
-using Fsel.Core.Base.BaseModels;
-using Fsel.Course.Common.Models.Entities;
-using MediatR;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Fsel.Core.Base.BaseModels;
 
 namespace Fsel.Course.Common.Models.Queries
 {

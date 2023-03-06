@@ -19,7 +19,8 @@ namespace Fsel.Course.Api.Controllers
     public class PlacementTestController : ControllerBase
     {
         private readonly IMediator _mediator;
-        public PlacementTestController(IMediator mediator) 
+
+        public PlacementTestController(IMediator mediator)
         {
             _mediator = mediator;
         }

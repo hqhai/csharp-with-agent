@@ -1,5 +1,4 @@
 ﻿using Fsel.Core.Entities;
-using Microsoft.AspNetCore.Identity;
 using System.ComponentModel.DataAnnotations;
 
 namespace Fsel.User.Domain.Entities

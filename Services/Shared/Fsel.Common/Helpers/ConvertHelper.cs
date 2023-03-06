@@ -1,11 +1,6 @@
-﻿using Newtonsoft.Json.Linq;
-using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Fsel.Common.Helpers
 {
@@ -30,7 +25,6 @@ namespace Fsel.Common.Helpers
 
         public static Stream Base64ToStream(string base64Content)
         {
-
             var content = Base64ToByteArray(base64Content);
             Stream stream = new MemoryStream(content);
             return stream;
@@ -47,7 +41,6 @@ namespace Fsel.Common.Helpers
             }
         }
 
-
         public static string ObjectToBase64(object data)
         {
             var json = JsonConvert.SerializeObject(data);
@@ -59,7 +52,6 @@ namespace Fsel.Common.Helpers
         {
             return new MemoryStream(input);
         }
-
 
         public static void Capitalize(this JArray jArr)
         {

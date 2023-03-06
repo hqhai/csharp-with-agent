@@ -1,13 +1,7 @@
 ﻿using Fsel.User.Common.ConfigSettings;
 using Fsel.User.Common.Models.Entities;
-using Microsoft.AspNetCore.Identity;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net;
 using System.Net.Mail;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Fsel.User.Application.Services
 {
@@ -15,6 +9,7 @@ namespace Fsel.User.Application.Services
     {
         Task SendEmailAsync(SendEmailModel message);
     }
+
     public class EmailService : IEmailService
     {
         private readonly AppSetting _appSetting;

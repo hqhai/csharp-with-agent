@@ -1,9 +1,7 @@
 ﻿using AutoMapper;
-using Azure.Core;
 using Fsel.Common.ActionResults;
 using Fsel.User.Application.Services;
 using Fsel.User.Common.ConfigSettings;
-using Fsel.User.Common.Helpers;
 using Fsel.User.Common.Models.Commands;
 using Fsel.User.Common.Models.Entities;
 using Fsel.User.Domain.Entities;
@@ -11,21 +9,14 @@ using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.WebUtilities;
-using Microsoft.IdentityModel.Tokens;
-using System;
-using System.Collections.Generic;
-using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
-using System.Security.Claims;
 using System.Text;
-using System.Threading.Tasks;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace Fsel.User.Application.Commands.AuthCmd
 {
     public class SignUpCommand : SignUpCommandModel, IRequest<MethodResult<AccountModel>>
     {
     }
+
     public class SignUpCommandHandler : IRequestHandler<SignUpCommand, MethodResult<AccountModel>>
     {
         private readonly UserManager<Account> _userManager;
@@ -33,6 +24,7 @@ namespace Fsel.User.Application.Commands.AuthCmd
         private readonly AppSetting _appSetting;
         private readonly IEmailService _emailService;
         private readonly IMapper _mapper;
+
         public SignUpCommandHandler(UserManager<Account> userManager,
             RoleManager<IdentityRole> roleManager,
             AppSetting appSetting,
@@ -93,7 +85,7 @@ namespace Fsel.User.Application.Commands.AuthCmd
             token = WebEncoders.Base64UrlEncode(Encoding.ASCII.GetBytes(token));
 
             var configmationLink = $"{_appSetting?.Url?.EmailConfirmUrl}?token={token}&email={user.Email}";
-            var message = new SendEmailModel ( new List<string> { user.Email ?? string.Empty }, "Confirmation email by link: ", configmationLink);
+            var message = new SendEmailModel(new List<string> { user.Email ?? string.Empty }, "Confirmation email by link: ", configmationLink);
             await _emailService.SendEmailAsync(message);
 
             methodResult.Result = _mapper.Map<AccountModel>(user);

@@ -1,10 +1,5 @@
 ﻿using Fsel.Common.ActionResults;
 using Fsel.Core.Entities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Fsel.Core.Base.Interfaces
 {
