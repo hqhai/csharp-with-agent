@@ -1,9 +1,12 @@
 ﻿using AutoMapper;
 using Fsel.Common.ActionResults;
+using Fsel.Course.Application.Commands.PlacementTestCmd;
 using Fsel.Course.Common.Models.Commands.Lesson;
+using Fsel.Course.Common.Models.Commands.PlacementTest;
 using Fsel.Course.Common.Models.Entities;
 using Fsel.Course.Domain.Entities;
 using Fsel.Course.Domain.IRepositories;
+using Fsel.Course.Infrastructure.Repositories;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using System;
@@ -17,10 +20,12 @@ namespace Fsel.Course.Application.Commands.LessonCmd
     public class CreateLessonCommand : CreateLessonCommandModel, IRequest<MethodResult<LessonModel>>
     {
     }
+
     public class CreateLessonCommandHandler : IRequestHandler<CreateLessonCommand, MethodResult<LessonModel>>
     {
         private readonly ILessonRepository _lessonRepository;
         private readonly IMapper _mapper;
+
         public CreateLessonCommandHandler(ILessonRepository lessonRepository,
             IMapper mapper)
         {
@@ -33,6 +38,7 @@ namespace Fsel.Course.Application.Commands.LessonCmd
             MethodResult<LessonModel> methodResult = new MethodResult<LessonModel>();
 
             #region Validation
+
             Lesson lesson = _mapper.Map<Lesson>(request);
 
             if (!lesson.IsValid())
@@ -41,9 +47,11 @@ namespace Fsel.Course.Application.Commands.LessonCmd
                 methodResult.AddResultFromErrorList(lesson.ErrorMessages);
                 return methodResult;
             }
-            #endregion
 
-            await _lessonRepository.ExecuteTransactionAsync(async () => {
+            #endregion Validation
+
+            await _lessonRepository.ExecuteTransactionAsync(async () =>
+            {
                 lesson = _lessonRepository.Add(lesson);
                 await _lessonRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 

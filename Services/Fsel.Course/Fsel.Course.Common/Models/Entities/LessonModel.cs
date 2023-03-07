@@ -14,17 +14,13 @@ namespace Fsel.Course.Common.Models.Entities
         /// <summary>
         /// Nội dung hướng dẫn bài test
         /// </summary>
-        [MaxLength(1000)]
         public string? InstructionContent { get; set; }
 
         /// <summary>
         /// Tên bài test
         /// </summary>
-        [Required]
-        [MaxLength(250)]
         public string? Name { get; set; }
 
-        [MaxLength(250)]
         public string? DisplayName { get; set; }
 
         /// <summary>

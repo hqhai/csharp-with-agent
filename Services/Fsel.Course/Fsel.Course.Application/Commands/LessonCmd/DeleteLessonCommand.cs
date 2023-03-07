@@ -1,9 +1,12 @@
 ﻿using AutoMapper;
 using Fsel.Common.ActionResults;
+using Fsel.Common.Helpers;
 using Fsel.Core.Base.BaseModels;
+using Fsel.Course.Application.Commands.PlacementTestCmd;
 using Fsel.Course.Common.Models.Commands.Lesson;
 using Fsel.Course.Common.Models.Entities;
 using Fsel.Course.Domain.Entities;
+using Fsel.Course.Domain.Enums.ErrorCodes;
 using Fsel.Course.Domain.IRepositories;
 using Fsel.Course.Infrastructure.Repositories;
 using MediatR;
@@ -17,11 +20,12 @@ using System.Threading.Tasks;
 
 namespace Fsel.Course.Application.Commands.LessonCmd
 {
-    public class DeleteLessonCommand : IRequest<MethodResult<Guid>>
+    public class DeleteLessonCommand : IRequest<MethodResult<bool>>
     {
         public Guid Id { get; set; }
     }
-    public class DeleteLessonCommandHandler : IRequestHandler<DeleteLessonCommand, MethodResult<Guid>>
+
+    public class DeleteLessonCommandHandler : IRequestHandler<DeleteLessonCommand, MethodResult<bool>>
     {
         private readonly ILessonRepository _lessonRepository;
         private readonly IMapper _mapper;
@@ -33,38 +37,32 @@ namespace Fsel.Course.Application.Commands.LessonCmd
             _mapper = mapper;
         }
 
-        public async Task<MethodResult<Guid>> Handle(DeleteLessonCommand request, CancellationToken cancellationToken)
+        public async Task<MethodResult<bool>> Handle(DeleteLessonCommand request, CancellationToken cancellationToken)
         {
-            MethodResult<Guid> methodResult = new MethodResult<Guid>();
+            MethodResult<bool> methodResult = new MethodResult<bool>();
 
             #region Validation
-            var lesson = await _lessonRepository.GetByIdAsync(request.Id);
 
-            if (lesson == null )
+            var lesson = await _lessonRepository.GetByIdAsync(request.Id);
+            if (lesson == null)
             {
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                methodResult.AddErrorMessage("Lesson not found");
+                methodResult.AddErrorMessage(
+                    nameof(EnumLessonErrorCode.LS01V),
+                    new[] { MethodHelper.GenerateErrorResult(nameof(request.Id), request.Id) });
                 return methodResult;
             }
-            #endregion
 
-            await _lessonRepository.ExecuteTransactionAsync(async () => {
-                var IsLesson = await _lessonRepository.DeleteAsync(lesson);
-                if (IsLesson == true)
-                {
-                    await _lessonRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-                    methodResult.StatusCode = StatusCodes.Status201Created;
-                    methodResult.AddErrorMessage("Delete Lesson successfull");
-                    methodResult.Result = lesson.Id;
-                    return methodResult;
-                }
-                else
-                {
-                    methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                    methodResult.AddErrorMessage("Delete Lesson fails");
-                    return methodResult;
-                }
-                
+            #endregion Validation
+
+            await _lessonRepository.ExecuteTransactionAsync(async () =>
+            {
+                var result = await _lessonRepository.DeleteAsync(lesson);
+                await _lessonRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+
+                methodResult.StatusCode = StatusCodes.Status200OK;
+                methodResult.Result = result;
+                return methodResult;
             });
 
             return methodResult;

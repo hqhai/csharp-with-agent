@@ -1,9 +1,12 @@
 ﻿using AutoMapper;
 using Fsel.Common.ActionResults;
+using Fsel.Common.Helpers;
 using Fsel.Course.Common.Models.Commands.Lesson;
+using Fsel.Course.Common.Models.Commands.PlacementTest;
 using Fsel.Course.Common.Models.Entities;
 using Fsel.Course.Domain.Entities;
 using Fsel.Course.Domain.Enums;
+using Fsel.Course.Domain.Enums.ErrorCodes;
 using Fsel.Course.Domain.IRepositories;
 using MediatR;
 using Microsoft.AspNetCore.Http;
@@ -17,12 +20,13 @@ namespace Fsel.Course.Application.Commands.LessonCmd
 {
     public class UpdateLessonCommand : UpdateLessonCommandModel, IRequest<MethodResult<LessonModel>>
     {
-
     }
+
     public class UpdateLessonCommandHandler : IRequestHandler<UpdateLessonCommand, MethodResult<LessonModel>>
     {
         private readonly ILessonRepository _lessonRepository;
         private readonly IMapper _mapper;
+
         public UpdateLessonCommandHandler(ILessonRepository lessonRepository,
             IMapper mapper)
         {
@@ -33,25 +37,39 @@ namespace Fsel.Course.Application.Commands.LessonCmd
         public async Task<MethodResult<LessonModel>> Handle(UpdateLessonCommand request, CancellationToken cancellationToken)
         {
             MethodResult<LessonModel> methodResult = new MethodResult<LessonModel>();
-            
-            var updatelesson =await _lessonRepository.GetByIdAsync(request.Id);
-            if(updatelesson == null)
+
+            #region Validation
+
+            var lesson = await _lessonRepository.GetByIdAsync(request.Id);
+            if (lesson == null)
             {
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                methodResult.AddErrorMessage("Not Found Lesson");
+                methodResult.AddErrorMessage(
+                    nameof(EnumLessonErrorCode.LS01V),
+                    new[] { MethodHelper.GenerateErrorResult(nameof(request.Id), request.Id) });
+                return methodResult;
             }
-            else
+            _mapper.Map(request, lesson);
+
+            if (!lesson.IsValid())
             {
-                _mapper.Map(request, updatelesson);
-                await _lessonRepository.ExecuteTransactionAsync(async () =>
-                {
-                    var lesson = _lessonRepository.Update(updatelesson);
-                    await _lessonRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
-                    methodResult.StatusCode = StatusCodes.Status201Created;
-                    methodResult.Result = _mapper.Map<LessonModel>(lesson);
-                    return methodResult;
-                });  
+                methodResult.StatusCode = StatusCodes.Status400BadRequest;
+                methodResult.AddResultFromErrorList(lesson.ErrorMessages);
+                return methodResult;
             }
+
+            #endregion Validation
+
+            await _lessonRepository.ExecuteTransactionAsync(async () =>
+            {
+                lesson = _lessonRepository.Update(lesson);
+                await _lessonRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+
+                methodResult.StatusCode = StatusCodes.Status200OK;
+                methodResult.Result = _mapper.Map<LessonModel>(lesson);
+                return methodResult;
+            });
+
             return methodResult;
         }
     }

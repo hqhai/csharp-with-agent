@@ -9,7 +9,6 @@ namespace Fsel.Course.Common.Models.Commands.Lesson
 {
     public class UpdateLessonCommandModel
     {
-        public Guid Id { get; set; }
         public string? Name { get; set; }
         public string? DisplayName { get; set; }
         public string? InstructionContent { get; set; }
