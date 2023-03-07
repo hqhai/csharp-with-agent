@@ -13,6 +13,7 @@ using System.Linq;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
+using Unit = Fsel.Course.Domain.Entities.Unit;
 
 namespace Fsel.Course.Infrastructure
 {
@@ -21,6 +22,8 @@ namespace Fsel.Course.Infrastructure
         public CourseDbContext(DbContextOptions<CourseDbContext> options, IMediator mediator) : base(options, mediator)
         {
         }
+
+        public DbSet<Unit> Units { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
