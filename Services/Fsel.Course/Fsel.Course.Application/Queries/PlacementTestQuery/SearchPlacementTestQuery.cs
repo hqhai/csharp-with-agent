@@ -1,28 +1,23 @@
-﻿using Fsel.Common.ActionResults;
+﻿using AutoMapper;
+using Fsel.Common.ActionResults;
 using Fsel.Core.Base.BaseModels;
 using Fsel.Course.Common.Models.Entities;
 using Fsel.Course.Domain.IRepositories;
-using Fsel.Course.Infrastructure.Repositories;
-using AutoMapper;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Fsel.Course.Common.Models.Queries.Lesson;
 
 namespace Fsel.Course.Application.Querys.PlacementTestQuery
 {
     public class SearchPlacementTestQuery : SearchPlacementTestQueryModel, IRequest<MethodResult<PagingItemsModel<PlacementTestModel>>>
     {
     }
+
     public class SearchPlacementTestQueryHandler : IRequestHandler<SearchPlacementTestQuery, MethodResult<PagingItemsModel<PlacementTestModel>>>
     {
         private readonly IPlacementTestRepository _placementTestRepository;
         private readonly IMapper _mapper;
+
         public SearchPlacementTestQueryHandler(IMapper mapper, IPlacementTestRepository placementTestRepository)
         {
             _placementTestRepository = placementTestRepository;
@@ -40,18 +35,18 @@ namespace Fsel.Course.Application.Querys.PlacementTestQuery
             }
 
             var placementTestQuery = from i in _placementTestRepository.Queryable
-                                    select new PlacementTestModel
-                                    {
-                                        Id = i.Id,
-                                        Name = i.Name,
-                                        InstructionContent = i.InstructionContent,
-                                        IsActive = i.IsActive,
-                                        CourseLevel = i.CourseLevel,
-                                        CreatedDate = i.CreatedDate,
-                                        CreatedUserId = i.CreatedUserId,
-                                        UpdatedDate = i.UpdatedDate,
-                                        UpdatedUserId = i.UpdatedUserId,
-                                    };
+                                     select new PlacementTestModel
+                                     {
+                                         Id = i.Id,
+                                         Name = i.Name,
+                                         InstructionContent = i.InstructionContent,
+                                         IsActive = i.IsActive,
+                                         CourseLevel = i.CourseLevel,
+                                         CreatedDate = i.CreatedDate,
+                                         CreatedUserId = i.CreatedUserId,
+                                         UpdatedDate = i.UpdatedDate,
+                                         UpdatedUserId = i.UpdatedUserId,
+                                     };
             //Keyword
             if (!string.IsNullOrEmpty(request.Keyword))
             {

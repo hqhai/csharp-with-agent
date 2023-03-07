@@ -1,15 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using MediatR;
-using Fsel.Core.Base.Interfaces;
-using Fsel.Common.ActionResults;
+﻿using Fsel.Common.ActionResults;
 using Fsel.Common.Helpers;
+using Fsel.Core.Base.Interfaces;
+using MediatR;
+using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Reflection;
 using System.Text.Json.Serialization;
 
@@ -59,7 +54,8 @@ namespace Fsel.Core.Entities
 
         private List<INotification>? _domainEvents;
 
-        public IReadOnlyCollection<INotification> DomainEvents {
+        public IReadOnlyCollection<INotification> DomainEvents
+        {
             get
             {
                 if (_domainEvents != null)
@@ -139,6 +135,7 @@ namespace Fsel.Core.Entities
         }
 
         #region Validation
+
         protected List<ErrorResult> _errorMessages = new List<ErrorResult>();
 
         [JsonIgnore]
@@ -195,6 +192,7 @@ namespace Fsel.Core.Entities
 
             return _errorMessages.Count == 0;
         }
-        #endregion
+
+        #endregion Validation
     }
 }

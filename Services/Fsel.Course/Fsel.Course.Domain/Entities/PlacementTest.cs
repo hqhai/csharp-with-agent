@@ -1,11 +1,7 @@
 ﻿using Fsel.Core.Entities;
 using Fsel.Course.Domain.Enums;
-using System;
-using System.Collections.Generic;
+using Fsel.Course.Domain.Enums.ErrorCodes;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Fsel.Course.Domain.Entities
 {
@@ -14,14 +10,14 @@ namespace Fsel.Course.Domain.Entities
         /// <summary>
         /// Tên bài test
         /// </summary>
-        [Required]
-        [MaxLength(250)]
+        [Required(ErrorMessage = nameof(EnumPlacementTestErrorCode.PT01C))]
+        [MaxLength(250, ErrorMessage = nameof(EnumPlacementTestErrorCode.PT02C))]
         public string? Name { get; set; }
 
         /// <summary>
         /// Nội dung hướng dẫn bài test
         /// </summary>
-        [MaxLength(1000)]
+        [MaxLength(1000, ErrorMessage = nameof(EnumPlacementTestErrorCode.PT03C))]
         public string? InstructionContent { get; set; }
 
         /// <summary>

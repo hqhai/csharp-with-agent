@@ -4,15 +4,7 @@ using Fsel.Course.Domain.Entities;
 using Fsel.Course.Infrastructure.Configs;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Options;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Sockets;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Fsel.Course.Infrastructure
 {
@@ -30,6 +22,7 @@ namespace Fsel.Course.Infrastructure
         }
 
         #region Db Set
+
         public DbSet<PlacementTest> PlacementTests { get; set; }
         public DbSet<Lesson> Lessons { get; set; }
         #endregion

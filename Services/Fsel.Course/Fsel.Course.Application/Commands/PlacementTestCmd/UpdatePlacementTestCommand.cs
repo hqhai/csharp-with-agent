@@ -1,37 +1,47 @@
 ﻿using AutoMapper;
 using Fsel.Common.ActionResults;
+using Fsel.Common.Helpers;
 using Fsel.Course.Common.Models.Commands.PlacementTest;
 using Fsel.Course.Common.Models.Entities;
-using Fsel.Course.Domain.Entities;
+using Fsel.Course.Domain.Enums.ErrorCodes;
 using Fsel.Course.Domain.IRepositories;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 
 namespace Fsel.Course.Application.Commands.PlacementTestCmd
 {
-    public class CreatePlacementTestCommand : CreatePlacementTestCommandModel, IRequest<MethodResult<PlacementTestModel>>
+    public class UpdatePlacementTestCommand : UpdatePlacementTestCommandModel, IRequest<MethodResult<PlacementTestModel>>
     {
     }
 
-    public class CreatePlacementTestCommandHandler : IRequestHandler<CreatePlacementTestCommand, MethodResult<PlacementTestModel>>
+    public class UpdatePlacementTestCommandHandler : IRequestHandler<UpdatePlacementTestCommand, MethodResult<PlacementTestModel>>
     {
         private readonly IPlacementTestRepository _placementTestRepository;
         private readonly IMapper _mapper;
 
-        public CreatePlacementTestCommandHandler(IPlacementTestRepository placementTestRepository,
+        public UpdatePlacementTestCommandHandler(IPlacementTestRepository placementTestRepository,
             IMapper mapper)
         {
             _placementTestRepository = placementTestRepository;
             _mapper = mapper;
         }
 
-        public async Task<MethodResult<PlacementTestModel>> Handle(CreatePlacementTestCommand request, CancellationToken cancellationToken)
+        public async Task<MethodResult<PlacementTestModel>> Handle(UpdatePlacementTestCommand request, CancellationToken cancellationToken)
         {
             MethodResult<PlacementTestModel> methodResult = new MethodResult<PlacementTestModel>();
 
             #region Validation
 
-            PlacementTest placementTest = _mapper.Map<PlacementTest>(request);
+            var placementTest = await _placementTestRepository.GetByIdAsync(request.Id);
+            if (placementTest == null)
+            {
+                methodResult.StatusCode = StatusCodes.Status400BadRequest;
+                methodResult.AddErrorMessage(
+                    nameof(EnumPlacementTestErrorCode.PT01V),
+                    new[] { MethodHelper.GenerateErrorResult(nameof(request.Id), request.Id) });
+                return methodResult;
+            }
+            _mapper.Map(request, placementTest);
 
             if (!placementTest.IsValid())
             {
@@ -44,10 +54,10 @@ namespace Fsel.Course.Application.Commands.PlacementTestCmd
 
             await _placementTestRepository.ExecuteTransactionAsync(async () =>
             {
-                placementTest = _placementTestRepository.Add(placementTest);
+                placementTest = _placementTestRepository.Update(placementTest);
                 await _placementTestRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
-                methodResult.StatusCode = StatusCodes.Status201Created;
+                methodResult.StatusCode = StatusCodes.Status200OK;
                 methodResult.Result = _mapper.Map<PlacementTestModel>(placementTest);
                 return methodResult;
             });

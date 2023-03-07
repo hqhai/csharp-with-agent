@@ -1,9 +1,4 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Fsel.Common.ActionResults
 {
@@ -20,6 +15,23 @@ namespace Fsel.Common.ActionResults
         public void AddErrorMessage(ErrorResult errorResult)
         {
             _errorMessages.Add(errorResult);
+        }
+
+        public void AddErrorMessage(string errorCode, string[] errorValues)
+        {
+            ErrorResult errorResult = new ErrorResult
+            {
+                ErrorCode = errorCode,
+            };
+            if (errorValues != null && errorValues.Length != 0)
+            {
+                foreach (string item in errorValues)
+                {
+                    errorResult.ErrorValues.Add(item);
+                }
+            }
+
+            AddErrorMessage(errorResult);
         }
 
         public void AddErrorMessage(string errorCode, string errorMessage, string[] errorValues)
@@ -42,7 +54,7 @@ namespace Fsel.Common.ActionResults
 
         public void AddErrorMessage(string exceptionErrorMessage)
         {
-            AddErrorMessage("ERR_COM_API_SERVER_ERROR", new string[0], exceptionErrorMessage);
+            AddErrorMessage("API_SERVER_ERROR", new string[0], exceptionErrorMessage);
         }
 
         private void AddErrorMessage(string errorCode, string[] errorValues, string exceptionErrorMessage)

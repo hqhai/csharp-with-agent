@@ -1,23 +1,16 @@
 ﻿using AutoMapper;
 using Fsel.Common.ActionResults;
-using Fsel.Common.ConfigSettings;
 using Fsel.User.Common.ConfigSettings;
-using Fsel.User.Common.Helpers; 
-using Fsel.User.Common.Models.Commands;
+using Fsel.User.Common.Helpers;
 using Fsel.User.Common.Models.Entities;
 using Fsel.User.Domain.Entities;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
-using System;
-using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
 using System.Security.Claims;
 using System.Text;
-using System.Threading.Tasks;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Fsel.User.Application.Commands.AuthCmd
 {
@@ -25,12 +18,14 @@ namespace Fsel.User.Application.Commands.AuthCmd
     {
         public string? Id { get; set; }
     }
+
     public class GenerateTokenCommandHandler : IRequestHandler<GenerateTokenCommand, MethodResult<TokenModel>>
     {
         private readonly UserManager<Account> _userManager;
         private readonly AppSetting _appSetting;
         private readonly IMapper _mapper;
-        public GenerateTokenCommandHandler(UserManager<Account> userManager, 
+
+        public GenerateTokenCommandHandler(UserManager<Account> userManager,
             AppSetting appSetting,
             IMapper mapper)
         {
@@ -75,7 +70,7 @@ namespace Fsel.User.Application.Commands.AuthCmd
                 expires: DateTime.Now.AddMinutes(_appSetting.Jwt?.TokenValidityInMinutes ?? default),
                 signingCredentials: signin
                 );
-             
+
             var accessToken = new JwtSecurityTokenHandler().WriteToken(token);
             var refreshToken = TokenHelper.GenerateRefreshToken();
 
