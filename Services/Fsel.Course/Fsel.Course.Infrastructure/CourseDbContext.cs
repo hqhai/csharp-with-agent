@@ -17,11 +17,9 @@ namespace Fsel.Course.Infrastructure
         {
         }
 
-
         #region Db Set
 
         public DbSet<MockFinalTest> MockFinalTests { get; set; }
-
         public DbSet<UnitMockFinalTest> UnitMockFinalTests { get; set; }
         public DbSet<PlacementTest> PlacementTests { get; set; }
         public DbSet<Lesson> Lessons { get; set; }
@@ -30,11 +28,9 @@ namespace Fsel.Course.Infrastructure
         public DbSet<LessonVideo> LessonVideos { get; set; }
         public DbSet<LessonUnit> LessonUnits { get; set; }
         public DbSet<Domain.Entities.Unit> Units { get; set; }
-
         public DbSet<CourseUnits> CourseUnits { get; set; }
-        #endregion
 
-
+        #endregion Db Set
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
