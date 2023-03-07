@@ -19,5 +19,6 @@ namespace Fsel.Course.Domain.Entities
 
         [Required(ErrorMessage = nameof(EnumLessonUnitErrorCode.LU01C))]
         public Guid UnitId { get; set; }
+        
     }
 }

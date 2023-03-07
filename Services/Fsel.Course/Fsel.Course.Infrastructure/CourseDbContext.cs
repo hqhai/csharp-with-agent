@@ -18,13 +18,23 @@ namespace Fsel.Course.Infrastructure
         }
 
 
+        #region Db Set
+
         public DbSet<MockFinalTest> MockFinalTests { get; set; }
 
         public DbSet<UnitMockFinalTest> UnitMockFinalTests { get; set; }
-
-        public DbSet<EntityCourse> Courses { get; set; }
+        public DbSet<PlacementTest> PlacementTests { get; set; }
+        public DbSet<Lesson> Lessons { get; set; }
+        public DbSet<Domain.Entities.Course> Courses { get; set; }
+        public DbSet<Video> Videos { get; set; }
+        public DbSet<LessonVideo> LessonVideos { get; set; }
+        public DbSet<LessonUnit> LessonUnits { get; set; }
+        public DbSet<Domain.Entities.Unit> Units { get; set; }
 
         public DbSet<CourseUnits> CourseUnits { get; set; }
+        #endregion
+
+
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -36,14 +46,6 @@ namespace Fsel.Course.Infrastructure
             modelBuilder.ApplyConfiguration(new LessonUnitEntityTypeConfiguration());
             base.OnModelCreating(modelBuilder);
         }
-
-        #region Db Set
-
-        public DbSet<PlacementTest> PlacementTests { get; set; }
-        public DbSet<Lesson> Lessons { get; set; }
-        public DbSet<Video> Videos { get; set; }
-        public DbSet<Domain.Entities.Unit> Units { get; set; }
-        #endregion
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
