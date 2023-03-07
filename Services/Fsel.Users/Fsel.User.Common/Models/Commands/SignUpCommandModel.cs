@@ -19,6 +19,6 @@ namespace Fsel.User.Common.Models.Commands
         public string? ConfirmPassword { get; set; }
 
         [Required]
-        public EnumRole Role { get; set; }
+        public EnumRoleRegister Role { get; set; }
     }
 }
