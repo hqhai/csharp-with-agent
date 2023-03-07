@@ -86,6 +86,7 @@ builder.Services
     };
 });
 
+builder.Services.AddScoped<IUnitRepository, UnitRepository>();
 builder.Services.AddScoped<IPlacementTestRepository, PlacementTestRepository>();
 builder.Services.AddScoped<ILessonRepository, LessonRepository>();
 builder.Services.AddScoped<IVideoRepository, VideoRepository>();
