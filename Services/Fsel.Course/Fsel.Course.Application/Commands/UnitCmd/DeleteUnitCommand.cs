@@ -44,6 +44,26 @@ namespace Fsel.Course.Application.Commands.UnitCmd
                         new[] { MethodHelper.GenerateErrorResult(nameof(request.Id), request.Id) });
                     return methodResult;
                 }
+
+                /*await _unitRepository.ExecuteTransactionAsync(async () => {
+                    *//*unit = _unitRepository.Add(unit);*//*
+                    
+                     var delete = await _unitRepository.DeleteAsync(unit);
+                    await _unitRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+                    if(delete == true)
+                    {
+                        methodResult.StatusCode = StatusCodes.Status201Created;
+                        methodResult.Result = unit.Id;
+                    }
+                    else
+                    {
+                        methodResult.AddErrorMessage("Can't delete");
+                    }
+
+                    
+                    return methodResult;
+
+                });*/
                 await _unitRepository.ExecuteTransactionAsync(async () =>
                 {
                     var result = await _unitRepository.DeleteAsync(unit);

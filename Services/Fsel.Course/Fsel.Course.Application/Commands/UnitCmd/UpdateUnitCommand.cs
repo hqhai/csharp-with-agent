@@ -19,10 +19,10 @@ using System.Threading.Tasks;
 
 namespace Fsel.Course.Application.Commands.UnitCmd
 {
-    public class UpdateUnitCommand : UpdateUnitCommandModel, IRequest<MethodResult<UnitModel>> 
+    public class UpdateUnitCommand : UpdateUnitCommandModel, IRequest<MethodResult<UnitModel>>
     {
-
     }
+
     public class UpdateUnitCommandHandler : IRequestHandler<UpdateUnitCommand, MethodResult<UnitModel>>
     {
         private readonly IUnitRepository _unitRepository;
@@ -31,8 +31,8 @@ namespace Fsel.Course.Application.Commands.UnitCmd
         public UpdateUnitCommandHandler(IUnitRepository unitTestRepository,
             IMapper mapper)
         {
-            _unitRepository= unitTestRepository;
-            _mapper= mapper;
+            _unitRepository = unitTestRepository;
+            _mapper = mapper;
         }
 
         public async Task<MethodResult<UnitModel>> Handle(UpdateUnitCommand request, CancellationToken cancellationToken)
@@ -59,6 +59,16 @@ namespace Fsel.Course.Application.Commands.UnitCmd
                 return methodResult;
             }
 
+            var isUnitUsed = await _unitRepository.IsUnitUsed(request.Id);
+            if (isUnitUsed)
+            {
+                methodResult.StatusCode = StatusCodes.Status400BadRequest;
+                methodResult.AddErrorMessage(
+                    nameof(EnumUnitErrorCode.U02V),
+                    new[] { MethodHelper.GenerateErrorResult(nameof(request.Id), request.Id) });
+                return methodResult;
+            }
+
             #endregion Validation
 
             await _unitRepository.ExecuteTransactionAsync(async () =>
@@ -75,4 +85,3 @@ namespace Fsel.Course.Application.Commands.UnitCmd
         }
     }
 }
-

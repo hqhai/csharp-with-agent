@@ -6,31 +6,31 @@ using System.Threading.Tasks;
 
 namespace Fsel.Course.Domain.Enums.ErrorCodes
 {
-    public enum EnumUnitErrorCode
+    public enum EnumCourseErrorCode
     {
+        /// <summary>
+        /// Course does not exist
+        /// </summary>
+        C01V,
+
         /// <summary>
         /// Name cannot be empty
         /// </summary>
-        U01C,
+        C01C,
 
         /// <summary>
         /// Name limited to 250 characters
         /// </summary>
-        U02C,
+        C02C,
 
         /// <summary>
         /// Instruction Content limited to 1000 characters
         /// </summary>
-        U03C,
+        C03C,
 
         /// <summary>
-        /// Unit does not exist
+        /// Number of course >1
         /// </summary>
-        U01V,
-
-        /// <summary>
-        /// Unit have been use
-        /// </summary>
-        U02V,
+        C04C
     }
 }
