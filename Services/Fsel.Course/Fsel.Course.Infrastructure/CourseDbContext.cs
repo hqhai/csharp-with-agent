@@ -18,6 +18,7 @@ namespace Fsel.Course.Infrastructure
         {
             modelBuilder.ApplyConfiguration(new PlacementTestEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new LessonEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new VideoEntityTypeConfiguration());
             base.OnModelCreating(modelBuilder);
         }
 
@@ -25,6 +26,7 @@ namespace Fsel.Course.Infrastructure
 
         public DbSet<PlacementTest> PlacementTests { get; set; }
         public DbSet<Lesson> Lessons { get; set; }
+        public DbSet<Video> Videos { get; set; }
         #endregion
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)

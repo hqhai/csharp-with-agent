@@ -1,6 +1,6 @@
 ﻿using Fsel.Core.Entities;
-using Fsel.Course.Domain.Enums;
 using Fsel.Course.Domain.Enums.ErrorCodes;
+using Fsel.Course.Domain.Enums;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -10,10 +10,10 @@ using System.Threading.Tasks;
 
 namespace Fsel.Course.Domain.Entities
 {
-    public class Lesson : Entity
+    public class Video : Entity
     {
         /// <summary>
-        /// Tên bài test
+        /// Tên Video
         /// </summary>
         [Required(ErrorMessage = nameof(EnumLessonErrorCode.LS01C))]
         [MaxLength(250, ErrorMessage = nameof(EnumLessonErrorCode.LS02C))]
@@ -23,10 +23,7 @@ namespace Fsel.Course.Domain.Entities
         /// Nội dung hướng dẫn bài test
         /// </summary>
         [MaxLength(1000, ErrorMessage = nameof(EnumLessonErrorCode.LS03C))]
-        public string? InstructionContent { get; set; }
-
-        [MaxLength(250, ErrorMessage = nameof(EnumLessonErrorCode.LS02C))]
-        public string? DisplayName { get; set; }
+        public string? VideoFilePath { get; set; }
 
         /// <summary>
         /// Trạng thái kích hoạt
@@ -41,6 +38,5 @@ namespace Fsel.Course.Domain.Entities
         /// Trình độ khóa
         /// </summary>
         public EnumCourseLevel CourseLevel { get; set; }
-        public List<LessonVideo> lessonVideos { get; set; } = new List<LessonVideo>();
     }
 }

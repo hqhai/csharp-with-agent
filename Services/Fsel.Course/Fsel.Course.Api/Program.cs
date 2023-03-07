@@ -88,6 +88,7 @@ builder.Services
 
 builder.Services.AddScoped<IPlacementTestRepository, PlacementTestRepository>();
 builder.Services.AddScoped<ILessonRepository, LessonRepository>();
+builder.Services.AddScoped<IVideoRepository, VideoRepository>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

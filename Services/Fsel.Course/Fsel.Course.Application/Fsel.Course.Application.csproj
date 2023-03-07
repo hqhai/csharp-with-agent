@@ -11,6 +11,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Commands\VideoCmd\" />
+    <Folder Include="Queries\VideoQuery\" />
     <Folder Include="Services\" />
   </ItemGroup>
 
