@@ -32,7 +32,7 @@ namespace Fsel.Course.Api.Controllers
         }
 
         /// <summary>
-        /// Search Lesson 
+        /// Search Lesson
         /// </summary>
         /// <param name="command"></param>
         /// <returns></returns>
@@ -55,7 +55,7 @@ namespace Fsel.Course.Api.Controllers
         }
 
         /// <summary>
-        /// Get Lesson 
+        /// Get Lesson
         /// </summary>
         /// <param name="command"></param>
         /// <returns></returns>
@@ -78,7 +78,7 @@ namespace Fsel.Course.Api.Controllers
         }
 
         /// <summary>
-        /// Create a Lesson 
+        /// Create a Lesson
         /// </summary>
         /// <param name="command"></param>
         /// <returns></returns>
@@ -101,7 +101,7 @@ namespace Fsel.Course.Api.Controllers
         }
 
         /// <summary>
-        /// Update a Lesson 
+        /// Update a Lesson
         /// </summary>
         /// <param name="command"></param>
         /// <returns></returns>
@@ -125,7 +125,7 @@ namespace Fsel.Course.Api.Controllers
         }
 
         /// <summary>
-        /// Delete a Lesson 
+        /// Delete a Lesson
         /// </summary>
         /// <param name="command"></param>
         /// <returns></returns>

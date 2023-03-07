@@ -1,4 +1,5 @@
-﻿using Fsel.Course.Domain.Enums;
+﻿using Fsel.Core.Base.BaseModels;
+using Fsel.Course.Domain.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Fsel.Course.Common.Models.Commands.Lesson
 {
-    public class UpdateLessonCommandModel
+    public class UpdateLessonCommandModel : BaseCommandModel
     {
         public string? Name { get; set; }
         public string? DisplayName { get; set; }
