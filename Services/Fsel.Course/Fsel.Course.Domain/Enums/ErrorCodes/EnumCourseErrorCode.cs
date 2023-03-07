@@ -31,6 +31,11 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         /// <summary>
         /// Number of course >1
         /// </summary>
-        C04C
+        C04C,
+
+        /// <summary>
+        /// Unit have been use
+        /// </summary>
+        C02V,
     }
 }

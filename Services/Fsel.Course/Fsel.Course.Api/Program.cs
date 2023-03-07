@@ -88,7 +88,7 @@ builder.Services
 
 builder.Services.AddScoped<IUnitRepository, UnitRepository>();
 builder.Services.AddScoped<IPlacementTestRepository, PlacementTestRepository>();
-
+builder.Services.AddScoped<ICourseRepository, CourseRepository>();
 
 var app = builder.Build();
 

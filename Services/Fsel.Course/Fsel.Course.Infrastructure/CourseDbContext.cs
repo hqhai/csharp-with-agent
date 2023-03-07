@@ -32,6 +32,8 @@ namespace Fsel.Course.Infrastructure
         {
             modelBuilder.ApplyConfiguration(new PlacementTestEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new UnitMockFinalTestConfiuration());
+            modelBuilder.ApplyConfiguration(new UnitEntityTypeConfiuration());
+            modelBuilder.ApplyConfiguration(new CourseEntityTypeConfiguration());
 
             base.OnModelCreating(modelBuilder);
         }
