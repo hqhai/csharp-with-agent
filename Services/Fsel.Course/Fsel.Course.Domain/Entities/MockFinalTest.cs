@@ -10,24 +10,18 @@ using System.Threading.Tasks;
 
 namespace Fsel.Course.Domain.Entities
 {
-    public class Unit : Entity
+    public class MockFinalTest : Entity
     {
-        [Required(ErrorMessage = nameof(EnumUnitErrorCode.U01C))]
-        [MaxLength(250, ErrorMessage = nameof(EnumUnitErrorCode.U02C))]
+        [Required(ErrorMessage = nameof(EnumMockFinalTestErrorCode.MFT01V))]
+        [MaxLength(250, ErrorMessage = nameof(EnumMockFinalTestErrorCode.MFT01C))]
         public string? Name { get; set; }
-
-        [Required(ErrorMessage = nameof(EnumUnitErrorCode.U01C))]
-        [MaxLength(250, ErrorMessage = nameof(EnumUnitErrorCode.U02C))]
-        public string? DisplayName { get; set; }
 
         public bool IsActive { get; set; }
 
-        public EnumUnitType Type { get; set; }
+        public EnumCourseSkill CourseSkill { get; set; }
 
         public EnumCourseLevel CourseLevel { get; set; }
 
         public List<UnitMockFinalTest> UnitMockFinalTests { get; set; } = new List<UnitMockFinalTest>();
-
-        public List<CourseUnits> CourseUnits { get; set; } = new List<CourseUnits>();
     }
 }

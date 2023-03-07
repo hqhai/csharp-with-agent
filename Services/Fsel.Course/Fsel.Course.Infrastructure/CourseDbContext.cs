@@ -6,6 +6,9 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Unit = Fsel.Course.Domain.Entities.Unit;
+using EntityCourse = Fsel.Course.Domain.Entities.Course;
+
+/*using Course = Fsel.Course.Domain.Entities.Course;*/
 
 namespace Fsel.Course.Infrastructure
 {
@@ -17,9 +20,18 @@ namespace Fsel.Course.Infrastructure
 
         public DbSet<Unit> Units { get; set; }
 
+        public DbSet<MockFinalTest> MockFinalTests { get; set; }
+
+        public DbSet<UnitMockFinalTest> UnitMockFinalTests { get; set; }
+
+        public DbSet<EntityCourse> Courses { get; set; }
+
+        public DbSet<CourseUnits> CourseUnits { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.ApplyConfiguration(new PlacementTestEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new UnitMockFinalTestConfiuration());
 
             base.OnModelCreating(modelBuilder);
         }
