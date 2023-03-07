@@ -5,7 +5,6 @@ using Fsel.Course.Infrastructure.Configs;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
-using Unit = Fsel.Course.Domain.Entities.Unit;
 
 namespace Fsel.Course.Infrastructure
 {
@@ -15,13 +14,15 @@ namespace Fsel.Course.Infrastructure
         {
         }
 
-        public DbSet<Unit> Units { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.ApplyConfiguration(new PlacementTestEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new LessonEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new VideoEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new LessonVideoEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new UnitsEntityTypeConfigguration());
+            modelBuilder.ApplyConfiguration(new LessonUnitEntityTypeConfiguration());
             base.OnModelCreating(modelBuilder);
         }
 
@@ -30,6 +31,7 @@ namespace Fsel.Course.Infrastructure
         public DbSet<PlacementTest> PlacementTests { get; set; }
         public DbSet<Lesson> Lessons { get; set; }
         public DbSet<Video> Videos { get; set; }
+        public DbSet<Domain.Entities.Unit> Units { get; set; }
         #endregion
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)

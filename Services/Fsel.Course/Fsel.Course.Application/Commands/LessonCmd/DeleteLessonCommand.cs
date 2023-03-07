@@ -42,6 +42,16 @@ namespace Fsel.Course.Application.Commands.LessonCmd
             MethodResult<bool> methodResult = new MethodResult<bool>();
 
             #region Validation
+            var IsLessonUnit = await _lessonRepository.IsLessonUnit(request.Id);
+
+            if (IsLessonUnit)
+            {
+                methodResult.StatusCode = StatusCodes.Status400BadRequest;
+                methodResult.AddErrorMessage(
+                    nameof(EnumLessonErrorCode.LS02V),
+                    new[] { MethodHelper.GenerateErrorResult(nameof(request.Id), request.Id) });
+                return methodResult;
+            }
 
             var lesson = await _lessonRepository.GetByIdAsync(request.Id);
             if (lesson == null)

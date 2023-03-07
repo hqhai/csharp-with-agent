@@ -20,7 +20,7 @@ namespace Fsel.Course.Domain.Entities
         public string? Name { get; set; }
 
         /// <summary>
-        /// Nội dung hướng dẫn bài test
+        /// Link Video
         /// </summary>
         [MaxLength(1000, ErrorMessage = nameof(EnumLessonErrorCode.LS03C))]
         public string? VideoFilePath { get; set; }
@@ -38,5 +38,6 @@ namespace Fsel.Course.Domain.Entities
         /// Trình độ khóa
         /// </summary>
         public EnumCourseLevel CourseLevel { get; set; }
+        public List<LessonVideo> lessonVideos { get; set; } = new List<LessonVideo>();
     }
 }

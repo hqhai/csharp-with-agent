@@ -9,15 +9,15 @@ using System.Threading.Tasks;
 
 namespace Fsel.Course.Domain.Entities
 {
-    public class LessonVideo : Entity
+    public class LessonUnit : Entity
     {
         public Lesson? Lesson { get; set; }
-        public Video? Video { get; set; }
+        public Unit? Unit { get; set; }
 
-        [Required(ErrorMessage = nameof(EnumLessonVideoErrorCode.LV01C))]
+        [Required(ErrorMessage = nameof(EnumLessonUnitErrorCode.LU01C))]
         public Guid LessonId { get; set; }
 
-        [Required(ErrorMessage = nameof(EnumLessonVideoErrorCode.LV01C))]
-        public Guid VideoId { get; set; }
+        [Required(ErrorMessage = nameof(EnumLessonUnitErrorCode.LU01C))]
+        public Guid UnitId { get; set; }
     }
 }

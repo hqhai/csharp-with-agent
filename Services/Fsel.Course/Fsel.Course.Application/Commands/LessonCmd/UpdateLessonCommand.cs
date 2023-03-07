@@ -38,9 +38,20 @@ namespace Fsel.Course.Application.Commands.LessonCmd
 
         public async Task<MethodResult<LessonModel>> Handle(UpdateLessonCommand request, CancellationToken cancellationToken)
         {
+            
             MethodResult<LessonModel> methodResult = new MethodResult<LessonModel>();
 
             #region Validation
+            var IsLessonUnit = await _lessonRepository.IsLessonUnit(request.Id);
+
+            if (IsLessonUnit)
+            {
+                methodResult.StatusCode = StatusCodes.Status400BadRequest;
+                methodResult.AddErrorMessage(
+                    nameof(EnumLessonErrorCode.LS02V),
+                    new[] { MethodHelper.GenerateErrorResult(nameof(request.Id), request.Id) });
+                return methodResult;
+            }
 
             var lesson = await _lessonRepository.GetByIdAsync(request.Id);
             if (lesson == null)
@@ -52,8 +63,8 @@ namespace Fsel.Course.Application.Commands.LessonCmd
                 return methodResult;
             }
             _mapper.Map(request, lesson);
-
-            if (!lesson.IsValid())
+            
+            if (!lesson.IsValid() )
             {
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 methodResult.AddResultFromErrorList(lesson.ErrorMessages);

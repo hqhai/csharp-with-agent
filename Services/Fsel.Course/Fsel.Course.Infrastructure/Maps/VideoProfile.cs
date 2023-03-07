@@ -1,12 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using AutoMapper;
+using Fsel.Core.Extensions;
+using Fsel.Course.Common.Models.Commands.Videos;
+using Fsel.Course.Common.Models.Entities;
+using Fsel.Course.Domain.Entities;
 
 namespace Fsel.Course.Infrastructure.Maps
 {
-    internal class VideoProfile
+    public class VideoProfile : Profile
     {
+        public VideoProfile()
+        {
+            CreateMap<Video, VideoModel>().IgnoreAllNonExisting();
+            CreateMap<CreateVideoCommandModel, Video>().IgnoreAllNonExisting();
+            CreateMap<UpdateVideoCommandModel, Video>().IgnoreAllNonExisting();
+        }
     }
 }

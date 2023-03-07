@@ -27,5 +27,6 @@ namespace Fsel.Course.Domain.Entities
         public EnumUnitType Type { get; set; }
 
         public EnumCourseLevel CourseLevel { get; set; }
+        public List<LessonUnit> lessonUnits { get; set; } = new List<LessonUnit>();
     }
 }

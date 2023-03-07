@@ -1,30 +1,31 @@
-﻿namespace Fsel.Course.Domain.Enums.ErrorCodes
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Fsel.Course.Domain.Enums.ErrorCodes
 {
-    public enum EnumLessonErrorCode
+    public enum EnumLessonVideoErrorCode
     {
         /// <summary>
-        /// Lesson does not exist
+        /// Lesson Video does not exist
         /// </summary>
-        LS01V,
-
-        /// <summary>
-        /// Lesson was used
-        /// </summary>
-        LS02V,
+        LV01V,
 
         /// <summary>
         /// Name cannot be empty
         /// </summary>
-        LS01C,
+        LV01C,
 
         /// <summary>
         /// Name limited to 250 characters
         /// </summary>
-        LS02C,
+        LV02C,
 
         /// <summary>
         /// Instruction Content limited to 1000 characters
         /// </summary>
-        LS03C,
+        LV03C,
     }
 }
