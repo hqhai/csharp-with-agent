@@ -60,8 +60,8 @@ namespace Fsel.Course.Api.Controllers
         {
             try
             {
-                MethodResult<PlacementTestModel> queryResult = await _mediator.Send(new GetPlacementTestQuery { Id = id }).ConfigureAwait(false);
-                return queryResult.GetActionResult();
+                MethodResult<PlacementTestModel> commandResult = await _mediator.Send(new GetPlacementTestQuery { Id = id }).ConfigureAwait(false);
+                return commandResult.GetActionResult();
             }
             catch (Exception ex)
             {
