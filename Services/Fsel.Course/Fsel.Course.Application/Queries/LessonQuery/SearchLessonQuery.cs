@@ -1,9 +1,8 @@
 ﻿using AutoMapper;
 using Fsel.Common.ActionResults;
 using Fsel.Core.Base.BaseModels;
-
 using Fsel.Course.Common.Models.Entities;
-using Fsel.Course.Common.Models.Queries.Unit;
+using Fsel.Course.Common.Models.Queries.Lesson;
 using Fsel.Course.Domain.IRepositories;
 using MediatR;
 using Microsoft.AspNetCore.Http;
@@ -14,26 +13,25 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Fsel.Course.Application.Queries.UnitQuery
+namespace Fsel.Course.Application.Queries.LessonQuery
 {
-    public class SearchUnitQuery : SearchUnitQueryModel, IRequest<MethodResult<PagingItemsModel<UnitModel>>>
+    public class SearchLessonQuery : SearchLessonQueryModel, IRequest<MethodResult<PagingItemsModel<LessonModel>>>
     {
     }
-
-    public class SearchUnitQueryHandler : IRequestHandler<SearchUnitQuery, MethodResult<PagingItemsModel<UnitModel>>>
+    public class SearchLessonQueryHandler : IRequestHandler<SearchLessonQuery, MethodResult<PagingItemsModel<LessonModel>>>
     {
-        private readonly IUnitRepository _UnitRepository;
         private readonly IMapper _mapper;
+        private readonly ILessonRepository _lessonRepository;
 
-        public SearchUnitQueryHandler(IMapper mapper, IUnitRepository UnitRepository)
+        public SearchLessonQueryHandler(IMapper mapper, ILessonRepository lessonRepository)
         {
-            _UnitRepository= UnitRepository;
             _mapper = mapper;
+            _lessonRepository = lessonRepository;
         }
 
-        public async Task<MethodResult<PagingItemsModel<UnitModel>>> Handle(SearchUnitQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<PagingItemsModel<LessonModel>>> Handle(SearchLessonQuery request, CancellationToken cancellationToken)
         {
-            MethodResult<PagingItemsModel<UnitModel>> methodResult = new MethodResult<PagingItemsModel<UnitModel>>();
+            MethodResult<PagingItemsModel<LessonModel>> methodResult = new MethodResult<PagingItemsModel<LessonModel>>();
 
             if (request.PageSize > 100)
             {
@@ -41,14 +39,15 @@ namespace Fsel.Course.Application.Queries.UnitQuery
                 return methodResult;
             }
 
-            var UnitQuery = from i in _UnitRepository.Queryable
-                                     select new UnitModel
+            var lessonQuery = from i in _lessonRepository.Queryable
+                                     select new LessonModel
                                      {
                                          Id = i.Id,
                                          Name = i.Name,
-                                         DisplayName= i.DisplayName,
+                                         DisplayName = i.DisplayName,
+                                         InstructionContent = i.InstructionContent,
                                          IsActive = i.IsActive,
-                                         Type = i.Type,
+                                         TeacherId = i.TeacherId,
                                          CourseLevel = i.CourseLevel,
                                          CreatedDate = i.CreatedDate,
                                          CreatedUserId = i.CreatedUserId,
@@ -58,20 +57,20 @@ namespace Fsel.Course.Application.Queries.UnitQuery
             //Keyword
             if (!string.IsNullOrEmpty(request.Keyword))
             {
-                UnitQuery = UnitQuery.Where(m => m.Id.ToString() == request.Keyword || (m.Name ?? string.Empty).Contains(request.Keyword));
+                lessonQuery = lessonQuery.Where(m => m.Id.ToString() == request.Keyword || (m.Name ?? string.Empty).Contains(request.Keyword));
             }
 
-            int totalItem = await UnitQuery.CountAsync().ConfigureAwait(false);
-            var lists = await UnitQuery.OrderByDescending(x => x.Id)
+            int totalItem = await lessonQuery.CountAsync().ConfigureAwait(false);
+            var lists = await lessonQuery.OrderByDescending(x => x.Id)
                     .Skip((request.Page - 1) * request.PageSize)
                     .Take(request.PageSize)
                     .AsNoTracking()
                     .ToListAsync()
                     .ConfigureAwait(false);
 
-            methodResult.Result = new PagingItemsModel<UnitModel>
+            methodResult.Result = new PagingItemsModel<LessonModel>
             {
-                Items = _mapper.Map<IEnumerable<UnitModel>>(lists),
+                Items = _mapper.Map<IEnumerable<LessonModel>>(lists),
                 PagingInfo = new PagingInfoModel { Page = request.Page, PageSize = request.PageSize, TotalItems = totalItem }
             };
 

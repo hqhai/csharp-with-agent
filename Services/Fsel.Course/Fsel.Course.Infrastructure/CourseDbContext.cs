@@ -6,7 +6,6 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Unit = Fsel.Course.Domain.Entities.Unit;
-using EntityCourse = Fsel.Course.Domain.Entities.Course;
 
 /*using Course = Fsel.Course.Domain.Entities.Course;*/
 
@@ -18,29 +17,31 @@ namespace Fsel.Course.Infrastructure
         {
         }
 
-        public DbSet<Unit> Units { get; set; }
+        #region Db Set
 
         public DbSet<MockFinalTest> MockFinalTests { get; set; }
-
         public DbSet<UnitMockFinalTest> UnitMockFinalTests { get; set; }
-
-        public DbSet<EntityCourse> Courses { get; set; }
-
+        public DbSet<PlacementTest> PlacementTests { get; set; }
+        public DbSet<Lesson> Lessons { get; set; }
+        public DbSet<Domain.Entities.Course> Courses { get; set; }
+        public DbSet<Video> Videos { get; set; }
+        public DbSet<LessonVideo> LessonVideos { get; set; }
+        public DbSet<LessonUnit> LessonUnits { get; set; }
+        public DbSet<Domain.Entities.Unit> Units { get; set; }
         public DbSet<CourseUnits> CourseUnits { get; set; }
+
+        #endregion Db Set
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.ApplyConfiguration(new PlacementTestEntityTypeConfiguration());
-            modelBuilder.ApplyConfiguration(new UnitMockFinalTestConfiuration());
-
+            modelBuilder.ApplyConfiguration(new LessonEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new VideoEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new LessonVideoEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new UnitsEntityTypeConfigguration());
+            modelBuilder.ApplyConfiguration(new LessonUnitEntityTypeConfiguration());
             base.OnModelCreating(modelBuilder);
         }
-
-        #region Db Set
-
-        public DbSet<PlacementTest> PlacementTests { get; set; }
-
-        #endregion Db Set
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {

@@ -2,7 +2,7 @@
 using Fsel.Common.ActionResults;
 using Fsel.Core.Base.BaseModels;
 using Fsel.Course.Common.Models.Entities;
-using Fsel.Course.Common.Models.Queries;
+using Fsel.Course.Common.Models.Queries.Lesson;
 using Fsel.Course.Domain.IRepositories;
 using MediatR;
 using Microsoft.AspNetCore.Http;
