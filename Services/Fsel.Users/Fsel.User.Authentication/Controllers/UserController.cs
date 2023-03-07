@@ -7,33 +7,33 @@ using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
 
-namespace Fsel.User.Authentication.Controllers
+namespace Fsel.User.Userentication.Controllers
 {
     [ApiVersion(Settings.APIVersion)]
-    [Route(Settings.APIDefaultRoute + "/auth")]
+    [Route(Settings.APIDefaultRoute + "/user")]
     [ApiController]
-    public class AuthController : ControllerBase
+    public class UserController : ControllerBase
     {
         private readonly IMediator _mediator;
 
-        public AuthController(IMediator mediator)
+        public UserController(IMediator mediator)
         {
             _mediator = mediator;
         }
 
         /// <summary>
-        /// Login
+        /// Refresh Token
         /// </summary>
         /// <param name="command"></param>
         /// <returns></returns>
-        [HttpPost("login")]
-        [ProducesResponseType(typeof(MethodResult<TokenModel>), (int)HttpStatusCode.OK)]
+        [HttpPost("sign-up")]
+        [ProducesResponseType(typeof(MethodResult<AccountModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.BadRequest)]
-        public async Task<IActionResult> Login([FromBody] LoginCommand command)
+        public async Task<IActionResult> SignUp([FromBody] SignUpCommand command)
         {
             try
             {
-                MethodResult<TokenModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
+                MethodResult<AccountModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
                 return commandResult.GetActionResult();
             }
             catch (Exception ex)
@@ -45,18 +45,23 @@ namespace Fsel.User.Authentication.Controllers
         }
 
         /// <summary>
-        /// Refresh Token
+        /// Confirm Email
         /// </summary>
         /// <param name="command"></param>
         /// <returns></returns>
-        [HttpPost("refresh-token")]
-        [ProducesResponseType(typeof(MethodResult<TokenModel>), (int)HttpStatusCode.OK)]
+        [HttpPost("confirm-email")]
+        [ProducesResponseType(typeof(MethodResult<AccountModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.BadRequest)]
-        public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenCommand command)
+        public async Task<IActionResult> ConfirmEmail(string token, string email)
         {
             try
             {
-                MethodResult<TokenModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
+                ConfirmEmailCommand command = new ConfirmEmailCommand
+                {
+                    Token = token,
+                    Email = email
+                };
+                MethodResult<AccountModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
                 return commandResult.GetActionResult();
             }
             catch (Exception ex)
