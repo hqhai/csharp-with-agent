@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Fsel.Course.Domain.Enums
+﻿namespace Fsel.Course.Domain.Enums
 {
     public enum EnumCourseLevel
     {
@@ -18,6 +12,4 @@ namespace Fsel.Course.Domain.Enums
         Plus6,
         Plus7
     }
-
-    
 }

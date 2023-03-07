@@ -1,21 +1,13 @@
 using Fsel.Common.ConfigSettings;
 using Fsel.Common.Constants;
-using Fsel.Course.Application.Querys.PlacementTestQuery;
 using Fsel.Course.Domain.IRepositories;
 using Fsel.Course.Infrastructure;
 using Fsel.Course.Infrastructure.Repositories;
 using MediatR;
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Diagnostics.HealthChecks;
-using Microsoft.AspNetCore.Mvc.Versioning;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using Swashbuckle.AspNetCore.Swagger;
-using Swashbuckle.AspNetCore.SwaggerUI;
-using System.Reflection;
 using System.Text;
 using System.Text.Json.Serialization;
 
@@ -107,7 +99,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseRouting(); 
+app.UseRouting();
 
 app.UseHttpsRedirection();
 

@@ -1,8 +1,6 @@
 ﻿using Fsel.Common.ActionResults;
 using Fsel.Common.Constants;
 using Fsel.Common.Helpers;
-using Fsel.User.Application.Commands.AuthCmd;
-using Fsel.User.Common.Models.Entities;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -16,6 +14,7 @@ namespace Fsel.User.Api.Controllers
     public class UserController : ControllerBase
     {
         private readonly IMediator _mediator;
+
         public UserController(IMediator mediator)
         {
             _mediator = mediator;

@@ -1,18 +1,13 @@
-﻿using Newtonsoft.Json;
-using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
+﻿using System.Collections.Concurrent;
 using System.Globalization;
-using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Fsel.Common.Helpers
 {
     public static class MethodHelper
     {
         private static ConcurrentDictionary<string, Dictionary<string, string>>? ErrorMessages;
+
         public static string GenerateErrorResult(string propertyName, object? propertyValue)
         {
             return $"{propertyName.Substring(0, 1).ToLower(CultureInfo.InvariantCulture)}{propertyName.Substring(1, propertyName.Length - 1)}: {propertyValue}";
@@ -32,6 +27,5 @@ namespace Fsel.Common.Helpers
         {
             return "Message: " + ex.Message + ", InnerMessage: " + ex.InnerException?.Message;
         }
-
     }
 }

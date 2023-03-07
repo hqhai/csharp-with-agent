@@ -2,6 +2,7 @@
 using Fsel.Common.Constants;
 using Fsel.Common.Helpers;
 using Fsel.Core.Base.BaseModels;
+using Fsel.Course.Application.Commands.PlacementTestCmd;
 using Fsel.Course.Application.Commands.UnitCmd;
 using Fsel.Course.Application.Queries.UnitQuery;
 using Fsel.Course.Application.Querys.PlacementTestQuery;
@@ -63,13 +64,25 @@ namespace Fsel.Course.Api.Controllers
             }
         }
 
-        [HttpDelete]
+        [HttpDelete("{id}")]
         [ProducesResponseType(typeof(MethodResult<UnitModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.BadRequest)]
-        public async Task<IActionResult> delete(Guid id)
+        public async Task<IActionResult> delete([FromRoute] Guid id)
         {
 
-            return Ok(await _mediator.Send(new DeleteUnitCommand { Id=id}));
+            /*return Ok(await _mediator.Send(new DeleteUnitCommand { Id=id}));*/
+
+            try
+            {
+                MethodResult<bool> commandResult = await _mediator.Send(new DeleteUnitCommand { Id = id }).ConfigureAwait(false);
+                return commandResult.GetActionResult();
+            }
+            catch (Exception ex)
+            {
+                VoidMethodResult errorResult = new VoidMethodResult();
+                errorResult.AddErrorMessage(MethodHelper.GetExceptionMessage(ex));
+                return errorResult.GetActionResult();
+            }
         }
 
 

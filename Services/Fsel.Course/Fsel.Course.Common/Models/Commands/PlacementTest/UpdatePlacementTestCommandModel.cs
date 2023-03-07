@@ -1,8 +1,9 @@
-﻿using Fsel.Course.Domain.Enums;
+﻿using Fsel.Core.Base.BaseModels;
+using Fsel.Course.Domain.Enums;
 
 namespace Fsel.Course.Common.Models.Commands.PlacementTest
 {
-    public class CreatePlacementTestCommandModel
+    public class UpdatePlacementTestCommandModel : BaseCommandModel
     {
         public string? Name { get; set; }
 
