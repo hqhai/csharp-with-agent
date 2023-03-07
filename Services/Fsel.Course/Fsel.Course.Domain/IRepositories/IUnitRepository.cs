@@ -6,9 +6,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Unit = Fsel.Course.Domain.Entities.Unit;
+
 namespace Fsel.Course.Domain.IRepositories
 {
     public interface IUnitRepository : IRepository<Unit>
     {
+        Task<bool> IsUnitUsed(Guid id);
     }
 }
