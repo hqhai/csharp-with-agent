@@ -92,6 +92,7 @@ builder.Services.AddScoped<ILessonRepository, LessonRepository>();
 builder.Services.AddScoped<IVideoRepository, VideoRepository>();
 builder.Services.AddScoped<ICourseRepository, CourseRepository>();
 builder.Services.AddScoped<ICourseUnitRepository, CourseUnitRepository>();
+builder.Services.AddScoped<IUnitLessonRepository, UnitLessonRepository>();
 
 var app = builder.Build();
 

@@ -83,7 +83,7 @@ namespace Fsel.Core.Base
             }
         }
 
-        public bool IsIdsValid(IEnumerable<Guid> ids, int? siteId = null)
+        public bool IsIdsInValid(IEnumerable<Guid> ids, int? siteId = null)
         {
             return ids.Any(id => !_dbSet.Any(f => f.Id == id));
         }

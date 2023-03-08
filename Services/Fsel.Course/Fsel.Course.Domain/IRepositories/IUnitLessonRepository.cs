@@ -8,8 +8,8 @@ using System.Threading.Tasks;
 
 namespace Fsel.Course.Domain.IRepositories
 {
-    public interface ILessonRepository : IRepository<Lesson>
+    public interface IUnitLessonRepository : IRepository<UnitLesson>
     {
-        Task<bool> IsUnitLesson(Guid Id);
+        Task<List<UnitLesson>> GetListByUnitIdAsync(Guid Id);
     }
 }

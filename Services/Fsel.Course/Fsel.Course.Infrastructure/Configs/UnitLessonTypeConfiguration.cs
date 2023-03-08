@@ -9,17 +9,17 @@ using System.Threading.Tasks;
 
 namespace Fsel.Course.Infrastructure.Configs
 {
-    public class LessonUnitEntityTypeConfiguration : IEntityTypeConfiguration<LessonUnit>
+    public class UnitLessonEntityTypeConfiguration : IEntityTypeConfiguration<UnitLesson>
     {
-        public void Configure(EntityTypeBuilder<LessonUnit> builder)
+        public void Configure(EntityTypeBuilder<UnitLesson> builder)
         {
             builder.HasOne(a => a.Lesson)
-                .WithMany(b => b.lessonUnits)
+                .WithMany(b => b.UnitLessons)
                 .HasForeignKey(b => b.LessonId)
                 .OnDelete(DeleteBehavior.Cascade);
 
             builder.HasOne(a => a.Unit)
-                .WithMany(b => b.lessonUnits)
+                .WithMany(b => b.UnitLessons)
                 .HasForeignKey(b => b.UnitId)
                 .OnDelete(DeleteBehavior.Cascade);
         }
