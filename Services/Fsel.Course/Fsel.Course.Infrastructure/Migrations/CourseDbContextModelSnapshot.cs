@@ -118,8 +118,10 @@ namespace Fsel.Course.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(0);
 
-                    b.Property<int>("CourseLevel")
-                        .HasColumnType("int");
+                    b.Property<string>("CourseLevel")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2")
@@ -908,8 +910,10 @@ namespace Fsel.Course.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(0);
 
-                    b.Property<int>("CourseLevel")
-                        .HasColumnType("int");
+                    b.Property<string>("CourseLevel")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2")

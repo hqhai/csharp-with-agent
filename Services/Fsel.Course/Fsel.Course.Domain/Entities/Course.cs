@@ -21,6 +21,6 @@ namespace Fsel.Course.Domain.Entities
 
         public EnumCourseLevel CourseLevel { get; set; }
 
-        public List<CourseUnits> CourseUnits { get; set; } = new List<CourseUnits>();
+        public List<CourseUnit> CourseUnits { get; set; } = new List<CourseUnit>();
     }
 }
