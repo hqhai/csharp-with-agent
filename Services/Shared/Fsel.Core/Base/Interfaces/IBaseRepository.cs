@@ -12,6 +12,8 @@ namespace Fsel.Core.Base.Interfaces
 
         Task<bool> AnyAsync(Guid id, int? siteId = null);
 
+        bool IsIdsValid(IEnumerable<Guid> ids, int? siteId = null);
+
         Task<bool> AnyGuidAsync(Guid id, int? siteId = null);
 
         T Add(T newEntity);

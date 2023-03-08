@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Fsel.Course.Domain.Entities
 {
-    public class CourseUnits : Entity
+    public class CourseUnit : Entity
     {
         public Unit? Unit { get; set; }
 

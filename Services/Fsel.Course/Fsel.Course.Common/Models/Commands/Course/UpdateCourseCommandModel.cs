@@ -1,4 +1,5 @@
-﻿using Fsel.Course.Domain.Enums;
+﻿using Fsel.Core.Base.BaseModels;
+using Fsel.Course.Domain.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Fsel.Course.Common.Models.Commands.Course
 {
-    public class UpdateCourseCommandModel
+    public class UpdateCourseCommandModel : BaseCommandModel
     {
         public string? Name { get; set; }
 
@@ -16,6 +17,7 @@ namespace Fsel.Course.Common.Models.Commands.Course
         public int NumberOfLessons { get; set; }
 
         public bool IsPublish { get; set; }
+        public List<Guid>? UnitIds { get; set; }
 
         public EnumCourseLevel CourseLevel { get; set; }
     }

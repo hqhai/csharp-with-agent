@@ -1,9 +1,10 @@
 ﻿using AutoMapper;
 using Fsel.Common.ActionResults;
-
+using Fsel.Common.Helpers;
 using Fsel.Course.Common.Models.Commands.Course;
 using Fsel.Course.Common.Models.Entities;
 using Fsel.Course.Domain.Entities;
+using Fsel.Course.Domain.Enums.ErrorCodes;
 using Fsel.Course.Domain.IRepositories;
 using MediatR;
 using Microsoft.AspNetCore.Http;
@@ -23,11 +24,16 @@ namespace Fsel.Course.Application.Commands.Course
     public class CreateCourseCommandHandler : IRequestHandler<CreateCourseCommand, MethodResult<CourseModel>>
     {
         private readonly ICourseRepository _courseRepository;
+        private readonly ICourseUnitRepository _courseUnitRepository;
+        private readonly IUnitRepository _unitRepository;
         private readonly IMapper _mapper;
 
-        public CreateCourseCommandHandler(ICourseRepository courseRepository,
-            IMapper mapper)
+        public CreateCourseCommandHandler(ICourseRepository courseRepository, ICourseUnitRepository
+                            courseUnitRepository, IUnitRepository unitRepository,
+                            IMapper mapper)
         {
+            _unitRepository = unitRepository;
+            _courseUnitRepository = courseUnitRepository;
             _courseRepository = courseRepository;
             _mapper = mapper;
         }
@@ -39,6 +45,7 @@ namespace Fsel.Course.Application.Commands.Course
             #region Validation
 
             EntityCourse course = _mapper.Map<EntityCourse>(request);
+            /*  CourseUnits courseUnits = _mapper.Map<CourseUnits>(request);*/
 
             if (!course.IsValid())
             {
@@ -46,14 +53,44 @@ namespace Fsel.Course.Application.Commands.Course
                 methodResult.AddResultFromErrorList(course.ErrorMessages);
                 return methodResult;
             }
+            if (request.UnitIds == null)
+            {
+                methodResult.StatusCode = StatusCodes.Status400BadRequest;
+                methodResult.AddErrorMessage(
+                    nameof(EnumCourseErrorCode.C03V),
+                    new[] { MethodHelper.GenerateErrorResult(nameof(request.UnitIds), request.UnitIds) });
+                return methodResult;
+            }
+
+            if (_unitRepository.IsIdsValid(request.UnitIds))
+            {
+                methodResult.StatusCode = StatusCodes.Status400BadRequest;
+                methodResult.AddErrorMessage(
+                    nameof(EnumUnitErrorCode.U03V));
+
+                return methodResult;
+            }
 
             #endregion Validation
 
             await _courseRepository.ExecuteTransactionAsync(async () =>
             {
+                course.CourseUnits = request.UnitIds.Select(x => new CourseUnit
+                {
+                    UnitId = x
+                }).ToList();
+
                 course = _courseRepository.Add(course);
+
                 await _courseRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
+                //foreach (Guid unitId in request.UnitIds)
+                //{
+                //    var courseUnit = new CourseUnit { UnitId = unitId, CourseId = course.Id };
+                //    _courseUnitRepository.Add(courseUnit);
+                //}
+
+                //await _courseUnitRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
                 methodResult.StatusCode = StatusCodes.Status201Created;
                 methodResult.Result = _mapper.Map<CourseModel>(course);
                 return methodResult;

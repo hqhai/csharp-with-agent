@@ -28,7 +28,7 @@ namespace Fsel.Course.Infrastructure
         public DbSet<LessonVideo> LessonVideos { get; set; }
         public DbSet<LessonUnit> LessonUnits { get; set; }
         public DbSet<Domain.Entities.Unit> Units { get; set; }
-        public DbSet<CourseUnits> CourseUnits { get; set; }
+        public DbSet<CourseUnit> CourseUnits { get; set; }
 
         #endregion Db Set
 

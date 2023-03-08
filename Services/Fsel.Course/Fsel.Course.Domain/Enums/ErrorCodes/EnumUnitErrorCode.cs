@@ -32,5 +32,10 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         /// Unit have been use
         /// </summary>
         U02V,
+
+        /// <summary>
+        /// UnitId is not correct
+        /// </summary>
+        U03V
     }
 }

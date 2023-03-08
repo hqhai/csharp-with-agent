@@ -4,6 +4,7 @@ using Fsel.Core.Base.Interfaces;
 using Fsel.Core.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
+using System.Linq;
 
 namespace Fsel.Core.Base
 {
@@ -81,6 +82,11 @@ namespace Fsel.Core.Base
             {
                 throw;
             }
+        }
+
+        public bool IsIdsValid(IEnumerable<Guid> ids, int? siteId = null)
+        {
+            return ids.Any(id => !_dbSet.Any(f => f.Id == id));
         }
 
         public virtual Task<bool> DeleteAsync(T deleteEntity)
