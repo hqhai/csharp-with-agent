@@ -22,10 +22,12 @@ namespace Fsel.Course.Application.Commands.Course
     {
         private readonly ICourseRepository _courseRepository;
         private readonly IMapper _mapper;
+        private readonly ICourseUnitRepository _courseUnitRepository;
 
-        public DeleteCourseCommandHandler(ICourseRepository courseRepository,
+        public DeleteCourseCommandHandler(ICourseRepository courseRepository, ICourseUnitRepository courseUnitRepository,
             IMapper mapper)
         {
+            _courseRepository = courseRepository;
             _courseRepository = courseRepository;
             _mapper = mapper;
         }
@@ -51,6 +53,8 @@ namespace Fsel.Course.Application.Commands.Course
             await _courseRepository.ExecuteTransactionAsync(async () =>
             {
                 var result = await _courseRepository.DeleteAsync(course);
+                var courseUnitList = await _courseUnitRepository.GetListByUnitIdAsync
+
                 await _courseRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
                 methodResult.StatusCode = StatusCodes.Status200OK;

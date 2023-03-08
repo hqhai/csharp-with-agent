@@ -30,12 +30,6 @@ namespace Fsel.Course.Application.Commands.UnitCmd
 
                 var unit = await _unitRepository.GetByIdAsync(request.Id);
 
-                /* if (!unit.IsValid())
-                 {
-                     methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                     methodResult.AddResultFromErrorList(unit.ErrorMessages);
-                     return methodResult;
-                 }*/
                 if (unit == null)
                 {
                     methodResult.StatusCode = StatusCodes.Status400BadRequest;
@@ -45,25 +39,6 @@ namespace Fsel.Course.Application.Commands.UnitCmd
                     return methodResult;
                 }
 
-                /*await _unitRepository.ExecuteTransactionAsync(async () => {
-                    *//*unit = _unitRepository.Add(unit);*//*
-                    
-                     var delete = await _unitRepository.DeleteAsync(unit);
-                    await _unitRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
-                    if(delete == true)
-                    {
-                        methodResult.StatusCode = StatusCodes.Status201Created;
-                        methodResult.Result = unit.Id;
-                    }
-                    else
-                    {
-                        methodResult.AddErrorMessage("Can't delete");
-                    }
-
-                    
-                    return methodResult;
-
-                });*/
                 await _unitRepository.ExecuteTransactionAsync(async () =>
                 {
                     var result = await _unitRepository.DeleteAsync(unit);
