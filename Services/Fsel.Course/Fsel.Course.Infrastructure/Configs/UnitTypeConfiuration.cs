@@ -1,4 +1,5 @@
-﻿using Fsel.Course.Domain.Enums;
+﻿using Fsel.Course.Domain.Entities;
+using Fsel.Course.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using System;
@@ -6,14 +7,19 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using EntityCourse = Fsel.Course.Domain.Entities.Course;
 
 namespace Fsel.Course.Infrastructure.Configs
 {
-    public class CourseEntityTypeConfiguration : IEntityTypeConfiguration<EntityCourse>
+    public class UnitTypeConfiuration : IEntityTypeConfiguration<Unit>
     {
-        public void Configure(EntityTypeBuilder<EntityCourse> builder)
+        public void Configure(EntityTypeBuilder<Unit> builder)
         {
+            builder.Property(e => e.Type)
+                .HasMaxLength(100)
+                .HasConversion(
+                    v => v.ToString(),
+                    v => (EnumUnitType)Enum.Parse(typeof(EnumUnitType), v));
+
             builder.Property(e => e.CourseLevel)
                 .HasMaxLength(100)
                 .HasConversion(

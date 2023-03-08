@@ -38,11 +38,10 @@ namespace Fsel.Course.Infrastructure
             modelBuilder.ApplyConfiguration(new LessonEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new VideoEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new LessonVideoEntityTypeConfiguration());
-            modelBuilder.ApplyConfiguration(new UnitsEntityTypeConfigguration());
             modelBuilder.ApplyConfiguration(new LessonUnitEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new UnitMockFinalTestConfiuration());
-            modelBuilder.ApplyConfiguration(new UnitEntityTypeConfiuration());
-            modelBuilder.ApplyConfiguration(new CourseEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new UnitTypeConfiuration());
+            modelBuilder.ApplyConfiguration(new CourseTypeConfiguration());
 
             base.OnModelCreating(modelBuilder);
         }
