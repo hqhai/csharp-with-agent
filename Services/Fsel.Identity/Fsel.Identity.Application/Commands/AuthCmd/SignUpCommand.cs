@@ -1,0 +1,96 @@
+﻿using AutoMapper;
+using Fsel.Common.ActionResults;
+using Fsel.Identity.Application.Services;
+using Fsel.Identity.Common.ConfigSettings;
+using Fsel.Identity.Common.Models.Commands;
+using Fsel.Identity.Common.Models.Entities;
+using Fsel.Identity.Domain.Entities;
+using MediatR;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.WebUtilities;
+using System.Text;
+
+namespace Fsel.Identity.Application.Commands.AuthCmd
+{
+    public class SignUpCommand : SignUpCommandModel, IRequest<MethodResult<UserModel>>
+    {
+    }
+
+    public class SignUpCommandHandler : IRequestHandler<SignUpCommand, MethodResult<UserModel>>
+    {
+        private readonly UserManager<User> _userManager;
+        private readonly RoleManager<IdentityRole> _roleManager;
+        private readonly AppSetting _appSetting;
+        private readonly IEmailService _emailService;
+        private readonly IMapper _mapper;
+
+        public SignUpCommandHandler(UserManager<User> userManager,
+            RoleManager<IdentityRole> roleManager,
+            AppSetting appSetting,
+            IEmailService emailService,
+            IMediator mediator,
+            IMapper mapper)
+        {
+            _userManager = userManager;
+            _roleManager = roleManager;
+            _appSetting = appSetting;
+            _emailService = emailService;
+            _mapper = mapper;
+        }
+
+        public async Task<MethodResult<UserModel>> Handle(SignUpCommand request, CancellationToken cancellationToken)
+        {
+            MethodResult<UserModel> methodResult = new MethodResult<UserModel>();
+
+            //Check User Exist
+            var userExit = await _userManager.FindByEmailAsync(request.Email ?? string.Empty);
+            if (userExit != null)
+            {
+                methodResult.StatusCode = StatusCodes.Status400BadRequest;
+                methodResult.AddErrorMessage("This Email doesnot exit");
+                return methodResult;
+            }
+
+            //Add the Role in the database
+            var role = await _roleManager.FindByNameAsync(request.Role.ToString());
+            if (role == null)
+            {
+                role = new IdentityRole(request.Role.ToString())
+                {
+                    Name = request.Role.ToString(),
+                    NormalizedName = request.Role.ToString().ToUpper(),
+                };
+                await _roleManager.CreateAsync(role);
+            }
+
+            //Add the User in the database
+            var user = new User()
+            {
+                FullName = request.FullName,
+                Email = request.Email,
+                UserName = request.Email,
+                PhoneNumber = request.PhoneNumber,
+            };
+            var result = await _userManager.CreateAsync(user, request.Password ?? string.Empty);
+            if (!result.Succeeded)
+            {
+                methodResult.StatusCode = StatusCodes.Status400BadRequest;
+                methodResult.AddErrorMessage("Sign up fail");
+                return methodResult;
+            }
+            // Add Role to the user
+            await _userManager.AddToRoleAsync(user, request.Role.ToString());
+
+            var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+            token = WebEncoders.Base64UrlEncode(Encoding.ASCII.GetBytes(token));
+
+            var configmationLink = $"{_appSetting?.Url?.EmailConfirmUrl}?token={token}&email={user.Email}";
+            var message = new SendEmailModel(new List<string> { user.Email ?? string.Empty }, "Confirmation email by link: ", configmationLink);
+            await _emailService.SendEmailAsync(message);
+
+            methodResult.Result = _mapper.Map<UserModel>(user);
+            return methodResult;
+        }
+    }
+}
