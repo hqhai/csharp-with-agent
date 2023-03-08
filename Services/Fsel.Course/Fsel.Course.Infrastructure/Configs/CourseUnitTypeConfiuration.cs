@@ -9,9 +9,9 @@ using System.Threading.Tasks;
 
 namespace Fsel.Course.Infrastructure.Configs
 {
-    public class CourseUnitConfiuration : IEntityTypeConfiguration<CourseUnits>
+    public class CourseUnitTypeConfiuration : IEntityTypeConfiguration<CourseUnit>
     {
-        public void Configure(EntityTypeBuilder<CourseUnits> builder)
+        public void Configure(EntityTypeBuilder<CourseUnit> builder)
         {
             builder.HasOne(a => a.Unit)
                 .WithMany(b => b.CourseUnits)

@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace Fsel.Course.Infrastructure.Configs
 {
-    public class UnitsEntityTypeConfigguration : IEntityTypeConfiguration<Unit>
+    public class UnitTypeConfiuration : IEntityTypeConfiguration<Unit>
     {
         public void Configure(EntityTypeBuilder<Unit> builder)
         {
@@ -19,6 +19,12 @@ namespace Fsel.Course.Infrastructure.Configs
                 .HasConversion(
                     v => v.ToString(),
                     v => (EnumUnitType)Enum.Parse(typeof(EnumUnitType), v));
+
+            builder.Property(e => e.CourseLevel)
+                .HasMaxLength(100)
+                .HasConversion(
+                    v => v.ToString(),
+                    v => (EnumCourseLevel)Enum.Parse(typeof(EnumCourseLevel), v));
         }
     }
 }
