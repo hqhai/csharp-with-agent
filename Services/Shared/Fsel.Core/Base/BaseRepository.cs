@@ -43,7 +43,6 @@ namespace Fsel.Core.Base
         {
             try
             {
-                DateTime utcNow = DateTime.UtcNow;
                 newEntity.CreatedDate = DateTime.Now;
 
                 //newEntity.CreatedUserId = _authContext.CurrentUserId;
@@ -88,7 +87,7 @@ namespace Fsel.Core.Base
             try
             {
                 deleteEntity.IsDeleted = true;
-                deleteEntity.DeletedDate = DateTime.UtcNow;
+                deleteEntity.DeletedDate = DateTime.Now;
                 //deleteEntity.DeletedUserId = _authContext.CurrentUserId;
                 //deleteEntity.DeletedUserName = _authContext.CurrentUsername;
                 deleteEntity.AddDomainEvent(new EntityDeletedEvent<T>(deleteEntity));
@@ -105,7 +104,7 @@ namespace Fsel.Core.Base
         {
             try
             {
-                updateEntity.UpdatedDate = DateTime.UtcNow;
+                updateEntity.UpdatedDate = DateTime.Now;
                 //updateEntity.UpdatedUserId = _authContext.CurrentUserId;
                 //updateEntity.UpdatedUserName = _authContext.CurrentUsername;
                 updateEntity.AddDomainEvent(new EntityChangedEvent<T>(updateEntity));
