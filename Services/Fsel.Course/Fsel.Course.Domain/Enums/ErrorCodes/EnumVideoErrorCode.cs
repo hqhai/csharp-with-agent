@@ -13,6 +13,8 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         /// </summary>
         VD01V,
 
+        VD03V,
+
         /// <summary>
         /// Unit was used
         /// </summary>

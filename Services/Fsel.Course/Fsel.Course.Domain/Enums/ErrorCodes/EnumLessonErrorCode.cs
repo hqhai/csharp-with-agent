@@ -8,6 +8,11 @@
         LS01V,
 
         /// <summary>
+        /// Homeword not is correct
+        /// </summary>
+        LS03V,
+
+        /// <summary>
         /// Lesson was used
         /// </summary>
         LS02V,

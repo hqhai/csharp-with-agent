@@ -86,14 +86,17 @@ builder.Services
     };
 });
 
-builder.Services.AddScoped<IUnitRepository, UnitRepository>();
+builder.Services.AddScoped<ICourseUnitRepository, CourseUnitRepository>();
 builder.Services.AddScoped<IPlacementTestRepository, PlacementTestRepository>();
 builder.Services.AddScoped<ILessonRepository, LessonRepository>();
+builder.Services.AddScoped<ILessonHomeWorkRepository, LessonHomeWorkRepository>();
+builder.Services.AddScoped<ILessonExtraPracticeRepository, LessonExtraPracticeRepository>();
 builder.Services.AddScoped<IVideoRepository, VideoRepository>();
 builder.Services.AddScoped<IExtraPracticeRepository, ExtraPracticeRepository>();
 builder.Services.AddScoped<IClassForumRepository, ClassForumRepository>();
 builder.Services.AddScoped<IHomeWorkRepository, HomeWorkRepository>();
-
+builder.Services.AddScoped<ICourseRepository, CourseRepository>();
+builder.Services.AddScoped<IUnitRepository, UnitRepository>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

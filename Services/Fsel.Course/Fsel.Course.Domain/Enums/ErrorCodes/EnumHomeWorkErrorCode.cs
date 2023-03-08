@@ -13,6 +13,8 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         /// </summary>
         HW01V,
 
+        HW03V,
+
         /// <summary>
         /// Name cannot be empty
         /// </summary>
