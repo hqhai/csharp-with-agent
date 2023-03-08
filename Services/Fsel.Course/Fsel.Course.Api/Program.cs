@@ -96,6 +96,9 @@ builder.Services.AddScoped<IExtraPracticeRepository, ExtraPracticeRepository>();
 builder.Services.AddScoped<IClassForumRepository, ClassForumRepository>();
 builder.Services.AddScoped<IHomeWorkRepository, HomeWorkRepository>();
 builder.Services.AddScoped<ICourseRepository, CourseRepository>();
+builder.Services.AddScoped<ICourseUnitRepository, CourseUnitRepository>();
+builder.Services.AddScoped<IUnitLessonRepository, UnitLessonRepository>();
+
 builder.Services.AddScoped<IUnitRepository, UnitRepository>();
 var app = builder.Build();
 

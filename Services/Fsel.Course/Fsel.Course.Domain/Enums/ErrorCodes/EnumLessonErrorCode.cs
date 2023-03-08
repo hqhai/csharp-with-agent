@@ -31,5 +31,10 @@
         /// Instruction Content limited to 1000 characters
         /// </summary>
         LS03C,
+
+        /// <summary>
+        /// LessonId is not correct
+        /// </summary>
+        L03V,
     }
 }

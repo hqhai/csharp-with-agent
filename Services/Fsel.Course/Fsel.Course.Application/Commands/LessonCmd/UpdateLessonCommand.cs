@@ -55,10 +55,11 @@ namespace Fsel.Course.Application.Commands.LessonCmd
             MethodResult<LessonModel> methodResult = new MethodResult<LessonModel>();
 
             #region Validation
-
             var IsLessonUnit = await _lessonRepository.IsLessonUnit(request.Id);
 
-            if (IsLessonUnit)
+            var IsUnitLesson = await _lessonRepository.IsUnitLesson(request.Id);
+
+            if (IsUnitLesson)
             {
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 methodResult.AddErrorMessage(

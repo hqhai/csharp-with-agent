@@ -43,11 +43,11 @@ namespace Fsel.Course.Domain.Entities
         /// </summary>
         public EnumCourseLevel CourseLevel { get; set; }
 
-        public List<LessonVideo> lessonVideos { get; set; } = new List<LessonVideo>();
+        public List<LessonVideo> LessonVideos { get; set; } = new List<LessonVideo>();
 
-        public List<LessonUnit> lessonUnits { get; set; } = new List<LessonUnit>();
-        public List<ClassForum> lessonClassForum { get; set; } = new List<ClassForum>();
+        public List<ClassForum> LessonClassForum { get; set; } = new List<ClassForum>();
         public List<LessonHomeWork> LessonHomeWorks { get; set; } = new List<LessonHomeWork>();
         public List<LessonExtraPractice> LessonExtraPractices { get; set; } = new List<LessonExtraPractice>();
+        public List<UnitLesson> UnitLessons { get; set; } = new List<UnitLesson>();
     }
 }
