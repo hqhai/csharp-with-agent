@@ -90,6 +90,10 @@ builder.Services.AddScoped<IUnitRepository, UnitRepository>();
 builder.Services.AddScoped<IPlacementTestRepository, PlacementTestRepository>();
 builder.Services.AddScoped<ILessonRepository, LessonRepository>();
 builder.Services.AddScoped<IVideoRepository, VideoRepository>();
+builder.Services.AddScoped<IExtraPracticeRepository, ExtraPracticeRepository>();
+builder.Services.AddScoped<IClassForumRepository, ClassForumRepository>();
+builder.Services.AddScoped<IHomeWorkRepository, HomeWorkRepository>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

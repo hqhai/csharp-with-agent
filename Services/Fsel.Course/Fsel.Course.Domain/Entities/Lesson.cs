@@ -37,12 +37,17 @@ namespace Fsel.Course.Domain.Entities
         /// Giáo Viên ID
         /// </summary>
         public Guid? TeacherId { get; set; }
+
         /// <summary>
         /// Trình độ khóa
         /// </summary>
         public EnumCourseLevel CourseLevel { get; set; }
+
         public List<LessonVideo> lessonVideos { get; set; } = new List<LessonVideo>();
 
         public List<LessonUnit> lessonUnits { get; set; } = new List<LessonUnit>();
+        public List<ClassForum> lessonClassForum { get; set; } = new List<ClassForum>();
+        public List<LessonHomeWork> LessonHomeWorks { get; set; } = new List<LessonHomeWork>();
+        public List<LessonExtraPractice> LessonExtraPractices { get; set; } = new List<LessonExtraPractice>();
     }
 }

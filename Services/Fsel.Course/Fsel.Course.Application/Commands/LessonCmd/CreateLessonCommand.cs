@@ -17,7 +17,7 @@ using System.Threading.Tasks;
 
 namespace Fsel.Course.Application.Commands.LessonCmd
 {
-    public class CreateLessonCommand : CreateLessonCommandModel, IRequest<MethodResult<LessonModel>>
+    public class CreateLessonCommand : CreateHomeWorkCommandModel, IRequest<MethodResult<LessonModel>>
     {
     }
 

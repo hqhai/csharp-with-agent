@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Fsel.Course.Common.Models.Commands.Lesson
 {
-    public class CreateLessonCommandModel
+    public class CreateHomeWorkCommandModel
     {
         public string? Name { get; set; }
         public string? DisplayName { get; set; }

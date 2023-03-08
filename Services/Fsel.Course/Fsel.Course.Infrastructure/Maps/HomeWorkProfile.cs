@@ -11,13 +11,13 @@ using System.Threading.Tasks;
 
 namespace Fsel.Course.Infrastructure.Maps
 {
-    public class LessonProfile : Profile
+    public class HomeWorkProfile : Profile
     {
-        public LessonProfile()
+        public HomeWorkProfile()
         {
-            CreateMap<Lesson, LessonModel>().IgnoreAllNonExisting();
-            CreateMap<CreateHomeWorkCommandModel, Lesson>().IgnoreAllNonExisting();
-            CreateMap<UpdateHomeWorkCommandModel, Lesson>().IgnoreAllNonExisting();
+            CreateMap<HomeWork, HomeWorkModel>().IgnoreAllNonExisting();
+            CreateMap<CreateHomeWorkCommandModel, HomeWork>().IgnoreAllNonExisting();
+            CreateMap<UpdateHomeWorkCommandModel, HomeWork>().IgnoreAllNonExisting();
         }
     }
 }
