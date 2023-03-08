@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Fsel.Common.ActionResults;
+using Fsel.Common.Helpers;
 using Fsel.User.Common.ConfigSettings;
 using Fsel.User.Common.Helpers;
 using Fsel.User.Common.Models.Entities;
@@ -82,7 +83,7 @@ namespace Fsel.User.Application.Commands.AuthCmd
             {
                 AccessToken = accessToken,
                 RefreshToken = refreshToken,
-                Expiration = TimeZoneInfo.ConvertTimeFromUtc(token.ValidTo, TimeZoneInfo.Local),
+                Expiration = token.ValidTo.ConvertTimeFromUtc(TimeZoneInfo.Local),
                 FullName = user.FullName,
                 Roles = userRoles.ToList()
             };
