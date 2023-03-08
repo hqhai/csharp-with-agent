@@ -63,7 +63,7 @@ namespace Fsel.User.Application.Commands.AuthCmd
             //check 3: Check accessToken expire?
             long.TryParse(tokenInVerification.Claims.FirstOrDefault(x => x.Type == JwtRegisteredClaimNames.Exp)?.Value, out long utcExpireDate);
 
-            var expireDate = utcExpireDate.UnixTimeStampToDateTime();
+            var expireDate = utcExpireDate.ConvertUnixTimeStampToDateTime();
             if (expireDate > DateTime.UtcNow)
             {
                 methodResult.StatusCode = StatusCodes.Status200OK;
