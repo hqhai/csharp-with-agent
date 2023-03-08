@@ -22,5 +22,18 @@ namespace Fsel.Course.Infrastructure.Repositories
                 .Include(x => x.CourseUnits.Where(n => !n.IsDeleted))
                 .AnyAsync(x => x.Id == id && x.CourseUnits.Count > 0);
         }
+
+        public override async Task<EntityCourse?> GetIncludeByIdAsync(Guid id, int? siteId = null)
+        {
+            try
+            {
+                return await Queryable
+                .Include(x => x.CourseUnits.Where(n => !n.IsDeleted)).FirstOrDefaultAsync(x => x.Id == id);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
     }
 }

@@ -36,7 +36,7 @@ namespace Fsel.Course.Application.Commands.Course
 
             #region Validation
 
-            var course = await _courseRepository.GetByIdAsync(request.Id);
+            var course = await _courseRepository.GetIncludeByIdAsync(request.Id);
             if (course == null)
             {
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;

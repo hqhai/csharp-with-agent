@@ -40,6 +40,18 @@ namespace Fsel.Core.Base
             }
         }
 
+        public virtual async Task<T?> GetIncludeByIdAsync(Guid id, int? siteId = null)
+        {
+            try
+            {
+                return await _dbSet.SingleOrDefaultAsync((T c) => c.Id == id && !c.IsDeleted).ConfigureAwait(continueOnCapturedContext: false);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         public virtual T Add(T newEntity)
         {
             try
