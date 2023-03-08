@@ -69,7 +69,7 @@ namespace Fsel.Course.Application.Commands.Course
                 return methodResult;
             }
 
-            if (_unitRepository.IsIdsValid(request.UnitIds))
+            if (_unitRepository.IsIdsInValid(request.UnitIds))
             {
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 methodResult.AddErrorMessage(

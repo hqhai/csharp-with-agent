@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Fsel.Course.Domain.Enums.ErrorCodes
 {
-    public enum EnumLessonUnitErrorCode
+    public enum EnumUnitLessonErrorCode
     {
         /// <summary>
         /// Lesson Unit does not exist

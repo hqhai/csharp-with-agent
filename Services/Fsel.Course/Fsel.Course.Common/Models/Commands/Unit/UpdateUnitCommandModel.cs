@@ -16,6 +16,8 @@ namespace Fsel.Course.Common.Models.Commands.Unit
 
         public bool IsActive { get; set; }
 
+        public List<Guid>? LessonIds { get; set; }
+
         public EnumUnitType Type { get; set; }
 
         public EnumCourseLevel CourseLevel { get; set; }
