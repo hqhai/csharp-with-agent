@@ -16,10 +16,12 @@ namespace Fsel.Course.Application.Commands.UnitCmd
         {
             private readonly IUnitRepository _unitRepository;
             private readonly IMapper _mapper;
+            private readonly IUnitLessonRepository _unitLessonRepository;
 
-            public DeleteUnitCommandHandler(IUnitRepository unitRepository,
+            public DeleteUnitCommandHandler(IUnitRepository unitRepository, IUnitLessonRepository unitLessonRepository,
             IMapper mapper)
             {
+                _unitLessonRepository = unitLessonRepository;
                 _unitRepository = unitRepository;
                 _mapper = mapper;
             }
@@ -42,6 +44,12 @@ namespace Fsel.Course.Application.Commands.UnitCmd
                 await _unitRepository.ExecuteTransactionAsync(async () =>
                 {
                     var result = await _unitRepository.DeleteAsync(unit);
+
+                    var listUnitLesson = await _unitLessonRepository.GetListByUnitIdAsync(request.Id);
+                    foreach (var unitLesson in listUnitLesson)
+                    {
+                        var deleteUnit = await _unitLessonRepository.DeleteAsync(unitLesson);
+                    }
                     await _unitRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
                     methodResult.StatusCode = StatusCodes.Status200OK;

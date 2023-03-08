@@ -29,6 +29,6 @@ namespace Fsel.Course.Domain.Entities
         public List<UnitMockFinalTest> UnitMockFinalTests { get; set; } = new List<UnitMockFinalTest>();
 
         public List<CourseUnit> CourseUnits { get; set; } = new List<CourseUnit>();
-        public List<LessonUnit> lessonUnits { get; set; } = new List<LessonUnit>();
+        public List<UnitLesson> UnitLessons { get; set; } = new List<UnitLesson>();
     }
 }

@@ -45,7 +45,6 @@ namespace Fsel.Course.Application.Commands.Course
             #region Validation
 
             EntityCourse course = _mapper.Map<EntityCourse>(request);
-            /*  CourseUnits courseUnits = _mapper.Map<CourseUnits>(request);*/
 
             if (!course.IsValid())
             {
@@ -62,7 +61,7 @@ namespace Fsel.Course.Application.Commands.Course
                 return methodResult;
             }
 
-            if (_unitRepository.IsIdsValid(request.UnitIds))
+            if (_unitRepository.IsIdsInValid(request.UnitIds))
             {
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 methodResult.AddErrorMessage(
@@ -84,13 +83,6 @@ namespace Fsel.Course.Application.Commands.Course
 
                 await _courseRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
-                //foreach (Guid unitId in request.UnitIds)
-                //{
-                //    var courseUnit = new CourseUnit { UnitId = unitId, CourseId = course.Id };
-                //    _courseUnitRepository.Add(courseUnit);
-                //}
-
-                //await _courseUnitRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
                 methodResult.StatusCode = StatusCodes.Status201Created;
                 methodResult.Result = _mapper.Map<CourseModel>(course);
                 return methodResult;
