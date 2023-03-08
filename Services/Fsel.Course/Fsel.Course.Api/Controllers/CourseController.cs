@@ -3,9 +3,8 @@ using Fsel.Common.Constants;
 using Fsel.Common.Helpers;
 using Fsel.Core.Base.BaseModels;
 using Fsel.Course.Application.Commands.Course;
-using Fsel.Course.Application.Commands.UnitCmd;
 using Fsel.Course.Application.Queries.CourseQuery;
-using Fsel.Course.Application.Queries.UnitQuery;
+using Fsel.Course.Application.Querys.PlacementTestQuery;
 using Fsel.Course.Common.Models.Entities;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -64,6 +63,76 @@ namespace Fsel.Course.Api.Controllers
             {
                 MethodResult<CourseModel> queryResult = await _mediator.Send(command).ConfigureAwait(false);
                 return queryResult.GetActionResult();
+            }
+            catch (Exception ex)
+            {
+                VoidMethodResult errorResult = new VoidMethodResult();
+                errorResult.AddErrorMessage(MethodHelper.GetExceptionMessage(ex));
+                return errorResult.GetActionResult();
+            }
+        }
+
+        /// <summary>
+        /// Update a Course
+        /// </summary>
+        /// <param name="command"></param>
+        /// <returns></returns>
+        [HttpPut("{id}")]
+        [ProducesResponseType(typeof(MethodResult<CourseModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.BadRequest)]
+        public async Task<IActionResult> Update([FromRoute] Guid id, [FromBody] UpdateCourseCommand command)
+        {
+            try
+            {
+                command.Id = id;
+                MethodResult<CourseModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
+                return commandResult.GetActionResult();
+            }
+            catch (Exception ex)
+            {
+                VoidMethodResult errorResult = new VoidMethodResult();
+                errorResult.AddErrorMessage(MethodHelper.GetExceptionMessage(ex));
+                return errorResult.GetActionResult();
+            }
+        }
+
+        /// <summary>
+        /// Delete a Course
+        /// </summary>
+        /// <param name="command"></param>
+        /// <returns></returns>
+        [HttpDelete("{id}")]
+        [ProducesResponseType(typeof(MethodResult<CourseModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.BadRequest)]
+        public async Task<IActionResult> delete([FromRoute] Guid id)
+        {
+            try
+            {
+                MethodResult<bool> commandResult = await _mediator.Send(new DeleteCourseCommand { Id = id }).ConfigureAwait(false);
+                return commandResult.GetActionResult();
+            }
+            catch (Exception ex)
+            {
+                VoidMethodResult errorResult = new VoidMethodResult();
+                errorResult.AddErrorMessage(MethodHelper.GetExceptionMessage(ex));
+                return errorResult.GetActionResult();
+            }
+        }
+
+        /// <summary>
+        /// Get Course
+        /// </summary>
+        /// <param name="command"></param>
+        /// <returns></returns>
+        [HttpGet("{id}")]
+        [ProducesResponseType(typeof(MethodResult<CourseModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.BadRequest)]
+        public async Task<IActionResult> Get([FromRoute] Guid id)
+        {
+            try
+            {
+                MethodResult<CourseModel> commandResult = await _mediator.Send(new GetCourseQuery { Id = id }).ConfigureAwait(false);
+                return commandResult.GetActionResult();
             }
             catch (Exception ex)
             {

@@ -1,6 +1,8 @@
 ﻿using AutoMapper;
 using Fsel.Common.ActionResults;
 using Fsel.Common.Helpers;
+
+using Fsel.Course.Common.Models.Entities;
 using Fsel.Course.Domain.Enums.ErrorCodes;
 using Fsel.Course.Domain.IRepositories;
 using MediatR;
@@ -11,32 +13,30 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Fsel.Course.Application.Commands.Course
+namespace Fsel.Course.Application.Queries.CourseQuery
 {
-    public class DeleteCourseCommand : IRequest<MethodResult<bool>>
+    public class GetCourseQuery : IRequest<MethodResult<CourseModel>>
     {
         public Guid Id { get; set; }
     }
 
-    public class DeleteCourseCommandHandler : IRequestHandler<DeleteCourseCommand, MethodResult<bool>>
+    public class GetCourseQueryHandler : IRequestHandler<GetCourseQuery, MethodResult<CourseModel>>
     {
         private readonly ICourseRepository _courseRepository;
         private readonly IMapper _mapper;
 
-        public DeleteCourseCommandHandler(ICourseRepository courseRepository,
-            IMapper mapper)
+        public GetCourseQueryHandler(IMapper mapper, ICourseRepository courseRepository)
         {
             _courseRepository = courseRepository;
             _mapper = mapper;
         }
 
-        public async Task<MethodResult<bool>> Handle(DeleteCourseCommand request, CancellationToken cancellationToken)
+        public async Task<MethodResult<CourseModel>> Handle(GetCourseQuery request, CancellationToken cancellationToken)
         {
-            MethodResult<bool> methodResult = new MethodResult<bool>();
-
-            #region Validation
+            MethodResult<CourseModel> methodResult = new MethodResult<CourseModel>();
 
             var course = await _courseRepository.GetByIdAsync(request.Id);
+
             if (course == null)
             {
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
@@ -46,18 +46,8 @@ namespace Fsel.Course.Application.Commands.Course
                 return methodResult;
             }
 
-            #endregion Validation
-
-            await _courseRepository.ExecuteTransactionAsync(async () =>
-            {
-                var result = await _courseRepository.DeleteAsync(course);
-                await _courseRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
-
-                methodResult.StatusCode = StatusCodes.Status200OK;
-                methodResult.Result = result;
-                return methodResult;
-            });
-
+            methodResult.Result = _mapper.Map<CourseModel>(course);
+            methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }
     }
