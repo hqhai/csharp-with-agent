@@ -66,7 +66,7 @@ namespace Fsel.Core.Entities
 
         protected Entity()
         {
-            CreatedDate = DateTime.UtcNow;
+            CreatedDate = DateTime.Now;
             CreatedUserId = Guid.Empty;
             CreatedUserName = string.Empty;
             Id = Guid.Empty;
