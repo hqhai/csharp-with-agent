@@ -21,23 +21,23 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Fsel.Course.Application", "
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Fsel.Course.Common", "Services\Fsel.Course\Fsel.Course.Common\Fsel.Course.Common.csproj", "{5C5C730B-AC53-4A82-968E-E976828CBA77}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Fsel.Users", "Fsel.Users", "{497F115D-9F73-4C04-8E08-70CAB9D781C7}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Fsel.Identity", "Fsel.Identity", "{497F115D-9F73-4C04-8E08-70CAB9D781C7}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Fsel.User.Api", "Services\Fsel.Users\Fsel.User.Api\Fsel.User.Api.csproj", "{F6FBF4D6-5280-43FB-8103-D8BA994B7142}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Fsel.Identity.Api", "Services\Fsel.Identity\Fsel.Identity.Api\Fsel.Identity.Api.csproj", "{F6FBF4D6-5280-43FB-8103-D8BA994B7142}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Fsel.User.Application", "Services\Fsel.Users\Fsel.User.Application\Fsel.User.Application.csproj", "{6B9E7501-C444-4EEE-A280-C89B1F6FCEEE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Fsel.Identity.Application", "Services\Fsel.Identity\Fsel.Identity.Application\Fsel.Identity.Application.csproj", "{6B9E7501-C444-4EEE-A280-C89B1F6FCEEE}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Fsel.User.Common", "Services\Fsel.Users\Fsel.User.Common\Fsel.User.Common.csproj", "{022440DE-FF3A-4389-A294-D8280ED01F63}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Fsel.Identity.Common", "Services\Fsel.Identity\Fsel.Identity.Common\Fsel.Identity.Common.csproj", "{022440DE-FF3A-4389-A294-D8280ED01F63}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Fsel.User.Domain", "Services\Fsel.Users\Fsel.User.Domain\Fsel.User.Domain.csproj", "{A19E3234-3F80-4B2A-A643-4790FB75A643}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Fsel.Identity.Domain", "Services\Fsel.Identity\Fsel.Identity.Domain\Fsel.Identity.Domain.csproj", "{A19E3234-3F80-4B2A-A643-4790FB75A643}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Fsel.User.Infrastructure", "Services\Fsel.Users\Fsel.User.Infrastructure\Fsel.User.Infrastructure.csproj", "{661AFC53-F787-4EFA-826D-57F7CC233A5F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Fsel.Identity.Infrastructure", "Services\Fsel.Identity\Fsel.Identity.Infrastructure\Fsel.Identity.Infrastructure.csproj", "{661AFC53-F787-4EFA-826D-57F7CC233A5F}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Fsel.Gateway", "Fsel.Gateway", "{64106026-0913-4AE9-B201-35F7C12C5302}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Fsel.Gateway.Api", "Services\Fsel.Gateway\Fsel.Gateway.Api\Fsel.Gateway.Api.csproj", "{57F5C66C-BBAD-466E-8E03-29472AFD371C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Fsel.User.Authentication", "Services\Fsel.Users\Fsel.User.Authentication\Fsel.User.Authentication.csproj", "{F00661EB-79BF-4DF2-9079-615BC49E00DB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Fsel.Identity.Authentication", "Services\Fsel.Identity\Fsel.Identity.Authentication\Fsel.Identity.Authentication.csproj", "{F00661EB-79BF-4DF2-9079-615BC49E00DB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
