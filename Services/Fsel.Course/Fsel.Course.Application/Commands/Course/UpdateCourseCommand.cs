@@ -84,20 +84,6 @@ namespace Fsel.Course.Application.Commands.Course
 
             await _courseRepository.ExecuteTransactionAsync(async () =>
             {
-                var courseUnits = course.CourseUnits;
-                foreach (var courseUnit in courseUnits)
-                {
-                    bool unitExist = request.UnitIds.Contains(courseUnit.UnitId);
-                    if (unitExist == false)
-                    {
-                        await _courseUnitRepository.DeleteAsync(courseUnit);
-                    }
-                    else
-                    {
-                        request.UnitIds.Remove(courseUnit.UnitId);
-                    }
-                }
-                await _courseUnitRepository.UnitOfWork.SaveChangesAsync();
                 course.CourseUnits = request.UnitIds.Select(x => new CourseUnit
                 {
                     UnitId = x
