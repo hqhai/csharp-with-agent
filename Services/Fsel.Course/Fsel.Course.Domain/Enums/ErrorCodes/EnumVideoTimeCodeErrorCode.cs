@@ -6,7 +6,11 @@ using System.Threading.Tasks;
 
 namespace Fsel.Course.Domain.Enums.ErrorCodes
 {
-    internal class EnumVideoTimeCodeErrorCode
+    public enum EnumVideoTimeCodeErrorCode
     {
+        /// <summary>
+        /// Number of DisplayTime >1 ,Number of ExecutionTime >1
+        /// </summary>
+        VTC04C,
     }
 }

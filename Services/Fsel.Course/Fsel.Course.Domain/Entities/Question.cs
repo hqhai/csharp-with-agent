@@ -12,7 +12,7 @@ namespace Fsel.Course.Domain.Entities
 {
     public class Question : Entity
     {
-        public EnumQuestionType QuestionType { get; set; }
+        public EnumQuestionType EnumQuestionType { get; set; }
         public bool IsSave { get; set; }
 
         [Required(ErrorMessage = nameof(EnumQuestionErrorCode.Q01V))]
