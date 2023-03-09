@@ -24,7 +24,7 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         E02C,
 
         /// <summary>
-        /// Instruction Content limited to 1000 characters
+        /// MediaPost limited to 1000 characters
         /// </summary>
         E03C,
     }

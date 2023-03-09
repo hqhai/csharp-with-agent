@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Fsel.Course.Domain.Enums
 {
-    public enum EnumQuestion
+    public enum EnumQuestionType
     {
     }
 }

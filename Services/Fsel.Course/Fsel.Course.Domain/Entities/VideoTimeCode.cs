@@ -11,27 +11,27 @@ namespace Fsel.Course.Domain.Entities
 {
     public class VideoTimeCode : Entity
     {
-        public Int64 DisplayTime { get; set; }
+        public long DisplayTimeTicks { get; set; }
 
-        public Int64 ExecutionTime { get; set; }
+        public long ExecutionTimeTicks { get; set; }
 
-        public EnumVideoTimeCode Type { get; set; }
+        public EnumTimeCodeType TimeCodeType { get; set; }
 
         public Video? Video { get; set; }
         public Guid VideoId { get; set; }
 
         [NotMapped]
-        public TimeSpan Displaytime
+        public TimeSpan DisplayTime
         {
-            get { return TimeSpan.FromTicks(DisplayTime); }
-            set { DisplayTime = value.Ticks; }
+            get { return TimeSpan.FromTicks(DisplayTimeTicks); }
+            set { DisplayTimeTicks = value.Ticks; }
         }
 
         [NotMapped]
-        public TimeSpan DExecutionTime
+        public TimeSpan ExecutionTime
         {
-            get { return TimeSpan.FromTicks(ExecutionTime); }
-            set { ExecutionTime = value.Ticks; }
+            get { return TimeSpan.FromTicks(ExecutionTimeTicks); }
+            set { ExecutionTimeTicks = value.Ticks; }
         }
 
         public List<TimeCodeExcercise> TimeCodeExcercises { get; set; } = new List<TimeCodeExcercise>();

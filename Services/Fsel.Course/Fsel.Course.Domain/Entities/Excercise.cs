@@ -16,7 +16,7 @@ namespace Fsel.Course.Domain.Entities
         [MaxLength(250, ErrorMessage = nameof(EnumExcerciseErrorCode.E01C))]
         public string? Name { get; set; }
 
-        public EnumQuestion Question { get; set; }
+        public EnumQuestionType QuestionType { get; set; }
 
         [Required(ErrorMessage = nameof(EnumExcerciseErrorCode.E01V))]
         [MaxLength(1000, ErrorMessage = nameof(EnumExcerciseErrorCode.E03C))]
