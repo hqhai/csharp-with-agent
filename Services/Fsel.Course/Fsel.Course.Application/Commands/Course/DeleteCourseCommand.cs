@@ -27,7 +27,7 @@ namespace Fsel.Course.Application.Commands.Course
         public DeleteCourseCommandHandler(ICourseRepository courseRepository, ICourseUnitRepository courseUnitRepository,
             IMapper mapper)
         {
-            _courseRepository = courseRepository;
+            _courseUnitRepository = courseUnitRepository;
             _courseRepository = courseRepository;
             _mapper = mapper;
         }
@@ -53,7 +53,11 @@ namespace Fsel.Course.Application.Commands.Course
             await _courseRepository.ExecuteTransactionAsync(async () =>
             {
                 var result = await _courseRepository.DeleteAsync(course);
-                var courseUnitList = await _courseUnitRepository.GetListByUnitIdAsync
+                var courseUnitList = await _courseUnitRepository.GetListByUnitIdAsync(request.Id);
+                foreach (var courseUnit in courseUnitList)
+                {
+                    var deleteCourse = await _courseUnitRepository.DeleteAsync(courseUnit);
+                }
 
                 await _courseRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
