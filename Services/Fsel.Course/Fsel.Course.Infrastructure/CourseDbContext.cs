@@ -36,6 +36,16 @@ namespace Fsel.Course.Infrastructure
         public DbSet<Domain.Entities.Unit> Units { get; set; }
         public DbSet<CourseUnit> CourseUnits { get; set; }
 
+        public DbSet<VideoTimeCode> VideoTimeCodes { get; set; }
+
+        public DbSet<Excercise> Excercises { get; set; }
+
+        public DbSet<TimeCodeExcercise> TimeCodeExcercises { get; set; }
+
+        public DbSet<ExcerciseQuestion> ExcerciseQuestions { get; set; }
+
+        public DbSet<Question> Questions { get; set; }
+
         #endregion Db Set
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -53,6 +63,8 @@ namespace Fsel.Course.Infrastructure
             modelBuilder.ApplyConfiguration(new UnitMockFinalTestConfiuration());
             modelBuilder.ApplyConfiguration(new UnitTypeConfiuration());
             modelBuilder.ApplyConfiguration(new CourseTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new ExcerciseQuestionTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new TimeCodeExcerciseTypeConfiguration());
 
             base.OnModelCreating(modelBuilder);
         }

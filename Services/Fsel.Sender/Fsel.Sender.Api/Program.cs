@@ -12,6 +12,7 @@ builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
 builder.Services.AddApiVersioning();
 builder.Services
     .AddControllers()
@@ -20,10 +21,16 @@ builder.Services
         options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
         options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
     });
+//Where registering services
+builder.Services.AddCors(policy =>
+{
+    policy.AddPolicy("OpenCorsPolicy", opt => opt.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod());
+});
 builder.Services
     .AddMediatR(AppDomain.CurrentDomain.GetAssemblies())
     .AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies())
     .AddHttpContextAccessor();
+
 var appSetting = builder.Configuration.Get<AppSetting>() ?? new AppSetting();
 builder.Services.AddSingleton(appSetting);
 builder.Services.AddScoped<IEmailService, EmailService>();
@@ -43,6 +50,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+//app configurations
+app.UseCors("OpenCorsPolicy");
 app.UseHttpsRedirection();
 
 app.UseAuthorization();

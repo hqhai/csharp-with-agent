@@ -71,5 +71,28 @@ namespace Fsel.Identity.Userentication.Controllers
                 return errorCommandResult.GetActionResult();
             }
         }
+
+        /// <summary>
+        /// Forgot Password
+        /// </summary>
+        /// <param name="command"></param>
+        /// <returns></returns>
+        [HttpPost("forgot-password")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.BadRequest)]
+        public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordCommand command)
+        {
+            try
+            {
+                MethodResult<bool> commandResult = await _mediator.Send(command).ConfigureAwait(false);
+                return commandResult.GetActionResult();
+            }
+            catch (Exception ex)
+            {
+                VoidMethodResult errorCommandResult = new VoidMethodResult();
+                errorCommandResult.AddErrorMessage(MethodHelper.GetExceptionMessage(ex));
+                return errorCommandResult.GetActionResult();
+            }
+        }
     }
 }
