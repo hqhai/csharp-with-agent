@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Fsel.Course.Common.Models.Commands.Lesson
 {
-    public class UpdateHomeWorkCommandModel : BaseCommandModel
+    public class UpdateLessonCommandModel : BaseCommandModel
     {
         public string? Name { get; set; }
         public string? DisplayName { get; set; }
@@ -16,7 +16,8 @@ namespace Fsel.Course.Common.Models.Commands.Lesson
         public bool IsActive { get; set; }
         public Guid? TeacherId { get; set; }
         public List<Guid>? HomeWorkIds { get; set; }
-        public Guid VideoId { get; set; }
+        public List<Guid>? VideoIds { get; set; }
+        public Guid? ClassForumId { get; set; }
         public List<Guid>? ExtraPracticeIds { get; set; }
         public EnumCourseLevel CourseLevel { get; set; }
     }

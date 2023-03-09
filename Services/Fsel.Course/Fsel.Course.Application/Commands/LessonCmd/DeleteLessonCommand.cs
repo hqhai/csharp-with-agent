@@ -43,9 +43,9 @@ namespace Fsel.Course.Application.Commands.LessonCmd
 
             #region Validation
 
-            var IsUnitLesson = await _lessonRepository.IsUnitLesson(request.Id);
+            var IsUnitLesson = await _lessonRepository.GetIncludeByIdAsync(request.Id);
 
-            if (IsUnitLesson)
+            if (IsUnitLesson == null)
             {
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 methodResult.AddErrorMessage(

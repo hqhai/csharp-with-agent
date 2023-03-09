@@ -20,7 +20,7 @@ using System.Threading.Tasks;
 
 namespace Fsel.Course.Application.Commands.LessonCmd
 {
-    public class UpdateLessonCommand : UpdateHomeWorkCommandModel, IRequest<MethodResult<LessonModel>>
+    public class UpdateLessonCommand : UpdateLessonCommandModel, IRequest<MethodResult<LessonModel>>
     {
     }
 
@@ -55,7 +55,6 @@ namespace Fsel.Course.Application.Commands.LessonCmd
             MethodResult<LessonModel> methodResult = new MethodResult<LessonModel>();
 
             #region Validation
-            var IsLessonUnit = await _lessonRepository.IsLessonUnit(request.Id);
 
             var IsUnitLesson = await _lessonRepository.IsUnitLesson(request.Id);
 
@@ -94,6 +93,15 @@ namespace Fsel.Course.Application.Commands.LessonCmd
                 return methodResult;
             }
 
+            if (request.VideoIds == null)
+            {
+                methodResult.StatusCode = StatusCodes.Status400BadRequest;
+                methodResult.AddErrorMessage(
+                    nameof(EnumHomeWorkErrorCode.HW03V),
+                    new[] { MethodHelper.GenerateErrorResult(nameof(request.HomeWorkIds), request.HomeWorkIds) });
+                return methodResult;
+            }
+
             if (request.ExtraPracticeIds == null)
             {
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
@@ -103,7 +111,7 @@ namespace Fsel.Course.Application.Commands.LessonCmd
                 return methodResult;
             }
 
-            if (_extraPracticeRepository.IsIdsValid(request.ExtraPracticeIds))
+            if (_extraPracticeRepository.IsIdsInValid(request.ExtraPracticeIds))
             {
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 methodResult.AddErrorMessage(
@@ -112,15 +120,16 @@ namespace Fsel.Course.Application.Commands.LessonCmd
                 return methodResult;
             }
 
-            if (_homeWorkRepository.IsIdsValid(request.HomeWorkIds))
+            if (_videoRepository.IsIdsInValid(request.VideoIds))
             {
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 methodResult.AddErrorMessage(
-                    nameof(EnumHomeWorkErrorCode.HW03V));
+                    nameof(EnumVideoErrorCode.VD03V));
 
                 return methodResult;
             }
-            if (await _videoRepository.IsVideoLesson(request.VideoId))
+
+            if (_homeWorkRepository.IsIdsInValid(request.HomeWorkIds))
             {
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 methodResult.AddErrorMessage(
@@ -144,7 +153,15 @@ namespace Fsel.Course.Application.Commands.LessonCmd
             {
                 lesson.LessonExtraPractices = request.ExtraPracticeIds.Select(x => new LessonExtraPractice
                 {
-                    LessonId = x
+                    ExtracPraticeId = x
+                }).ToList();
+                lesson.LessonHomeWorks = request.HomeWorkIds.Select(x => new LessonHomeWork
+                {
+                    HomeWorkId = x
+                }).ToList();
+                lesson.LessonVideos = request.VideoIds.Select(x => new LessonVideo
+                {
+                    VideoId = x
                 }).ToList();
 
                 lesson = _lessonRepository.Update(lesson);
