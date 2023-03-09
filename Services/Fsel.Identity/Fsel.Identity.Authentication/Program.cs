@@ -9,6 +9,7 @@ using MediatR;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
+using Refit;
 using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -81,7 +82,11 @@ builder.Services.Configure<IdentityOptions>(options =>
 });
 
 builder.Services.AddScoped<IUserRepository, UserRepository>();
-builder.Services.AddScoped<IEmailService, EmailService>();
+
+builder.Services.AddRefitClient<ISenderService>().ConfigureHttpClient(x =>
+{
+    x.BaseAddress = new Uri("https://localhost:7036/api/v1");
+});
 
 var app = builder.Build();
 
@@ -91,6 +96,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+//app configurations
 
 app.UseHttpsRedirection();
 

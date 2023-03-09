@@ -11,6 +11,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\Fsel.Sender\Fsel.Sender.Common\Fsel.Sender.Common.csproj" />
     <ProjectReference Include="..\..\Shared\Fsel.Common\Fsel.Common.csproj" />
   </ItemGroup>
 
