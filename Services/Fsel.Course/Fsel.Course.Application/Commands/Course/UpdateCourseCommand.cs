@@ -26,11 +26,13 @@ namespace Fsel.Course.Application.Commands.Course
         private readonly ICourseRepository _courseRepository;
         private readonly IMapper _mapper;
         private readonly IUnitRepository _unitRepository;
+        private readonly ICourseUnitRepository _courseUnitRepository;
 
-        public UpdateCourseTestCommandHandler(ICourseRepository courseRepository,
+        public UpdateCourseTestCommandHandler(ICourseRepository courseRepository, ICourseUnitRepository courseUnitRepository,
             IMapper mapper,
             IUnitRepository unitRepository)
         {
+            _courseUnitRepository = courseUnitRepository;
             _courseRepository = courseRepository;
             _mapper = mapper;
             _unitRepository = unitRepository;
@@ -42,7 +44,7 @@ namespace Fsel.Course.Application.Commands.Course
 
             #region Validation
 
-            var course = await _courseRepository.GetByIdAsync(request.Id);
+            var course = await _courseRepository.GetIncludeByIdAsync(request.Id);
             if (course == null)
             {
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
@@ -82,6 +84,20 @@ namespace Fsel.Course.Application.Commands.Course
 
             await _courseRepository.ExecuteTransactionAsync(async () =>
             {
+                var courseUnits = course.CourseUnits;
+                foreach (var courseUnit in courseUnits)
+                {
+                    bool unitExist = request.UnitIds.Contains(courseUnit.UnitId);
+                    if (unitExist == false)
+                    {
+                        await _courseUnitRepository.DeleteAsync(courseUnit);
+                    }
+                    else
+                    {
+                        request.UnitIds.Remove(courseUnit.UnitId);
+                    }
+                }
+                await _courseUnitRepository.UnitOfWork.SaveChangesAsync();
                 course.CourseUnits = request.UnitIds.Select(x => new CourseUnit
                 {
                     UnitId = x

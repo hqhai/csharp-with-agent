@@ -53,12 +53,6 @@ namespace Fsel.Course.Application.Commands.Course
             await _courseRepository.ExecuteTransactionAsync(async () =>
             {
                 var result = await _courseRepository.DeleteAsync(course);
-                var courseUnitList = await _courseUnitRepository.GetListByUnitIdAsync(request.Id);
-                foreach (var courseUnit in courseUnitList)
-                {
-                    var deleteCourse = await _courseUnitRepository.DeleteAsync(courseUnit);
-                }
-
                 await _courseRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
                 methodResult.StatusCode = StatusCodes.Status200OK;
