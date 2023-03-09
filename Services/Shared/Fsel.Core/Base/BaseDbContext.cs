@@ -32,6 +32,12 @@ namespace Fsel.Core.Base
 
         public async Task<Guid> SaveEntitiesAsync(CancellationToken cancellationToken = default)
         {
+            var entryMain = ChangeTracker.Entries().FirstOrDefault();
+
+            if (entryMain != null)
+                foreach (var entry in ChangeTracker.Entries())
+                    entry.CurrentValues["IsDeleted"] = entryMain.CurrentValues["IsDeleted"];
+
             IExecutionStrategy strategy = Database.CreateExecutionStrategy();
 
             if (Database.IsInMemory())
