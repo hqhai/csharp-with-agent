@@ -6,26 +6,26 @@ using System.Threading.Tasks;
 
 namespace Fsel.Course.Domain.Enums.ErrorCodes
 {
-    public enum EnumExcerciseErrorCode
+    public enum EnumQuestionErrorCode
     {
         /// <summary>
-        /// Excercise does not exist
+        /// Course does not exist
         /// </summary>
-        E01V,
+        Q01V,
 
         /// <summary>
         /// Name cannot be empty
         /// </summary>
-        E01C,
+        Q01C,
 
         /// <summary>
         /// Name limited to 250 characters
         /// </summary>
-        E02C,
+        Q02C,
 
         /// <summary>
         /// Instruction Content limited to 1000 characters
         /// </summary>
-        E03C,
+        Q03C,
     }
 }

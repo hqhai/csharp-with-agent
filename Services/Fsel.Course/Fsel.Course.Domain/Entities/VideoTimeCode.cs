@@ -17,6 +17,7 @@ namespace Fsel.Course.Domain.Entities
 
         public EnumVideoTimeCode Type { get; set; }
 
+        public Video? Video { get; set; }
         public Guid VideoId { get; set; }
 
         [NotMapped]
@@ -32,5 +33,7 @@ namespace Fsel.Course.Domain.Entities
             get { return TimeSpan.FromTicks(ExecutionTime); }
             set { ExecutionTime = value.Ticks; }
         }
+
+        public List<TimeCodeExcercise> TimeCodeExcercises { get; set; } = new List<TimeCodeExcercise>();
     }
 }
