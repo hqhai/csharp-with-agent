@@ -10,5 +10,6 @@ namespace Fsel.Course.Domain.IRepositories
 {
     public interface ICourseUnitRepository : IRepository<CourseUnit>
     {
+        Task<List<CourseUnit>> GetListByUnitIdAsync(Guid Id);
     }
 }
