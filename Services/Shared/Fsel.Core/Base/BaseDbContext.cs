@@ -32,11 +32,7 @@ namespace Fsel.Core.Base
 
         public async Task<Guid> SaveEntitiesAsync(CancellationToken cancellationToken = default)
         {
-            var entryMain = ChangeTracker.Entries().FirstOrDefault();
-
-            if (entryMain != null)
-                foreach (var entry in ChangeTracker.Entries())
-                    entry.CurrentValues["IsDeleted"] = entryMain.CurrentValues["IsDeleted"];
+            UpdateSoftDataAsync();
 
             IExecutionStrategy strategy = Database.CreateExecutionStrategy();
 
@@ -70,6 +66,35 @@ namespace Fsel.Core.Base
                     throw;
                 }
             });
+        }
+
+        private void UpdateSoftDataAsync()
+        {
+            var entryMain = ChangeTracker.Entries().FirstOrDefault();
+
+            if (entryMain != null)
+                foreach (var entry in ChangeTracker.Entries())
+                {
+                    if (entryMain.State == EntityState.Modified && bool.TryParse(entryMain.CurrentValues[nameof(Entity.IsDeleted)]?.ToString(), out bool isDeleted) && isDeleted)
+                    {
+                        entry.CurrentValues[nameof(Entity.IsDeleted)] = entryMain.CurrentValues[nameof(Entity.IsDeleted)];
+                        entry.CurrentValues[nameof(Entity.DeletedDate)] = entryMain.CurrentValues[nameof(Entity.DeletedDate)];
+                        entry.CurrentValues[nameof(Entity.DeletedUserId)] = entryMain.CurrentValues[nameof(Entity.DeletedUserId)];
+                        entry.CurrentValues[nameof(Entity.DeletedUserName)] = entryMain.CurrentValues[nameof(Entity.DeletedUserName)];
+                    }
+                    else if (entryMain.State == EntityState.Modified)
+                    {
+                        entry.CurrentValues[nameof(Entity.UpdatedDate)] = entryMain.CurrentValues[nameof(Entity.UpdatedDate)];
+                        entry.CurrentValues[nameof(Entity.UpdatedUserId)] = entryMain.CurrentValues[nameof(Entity.UpdatedUserId)];
+                        entry.CurrentValues[nameof(Entity.UpdatedUserName)] = entryMain.CurrentValues[nameof(Entity.UpdatedUserName)];
+                    }
+                    else if (entryMain.State == EntityState.Added)
+                    {
+                        entry.CurrentValues[nameof(Entity.CreatedDate)] = entryMain.CurrentValues[nameof(Entity.CreatedDate)];
+                        entry.CurrentValues[nameof(Entity.CreatedUserId)] = entryMain.CurrentValues[nameof(Entity.CreatedUserId)];
+                        entry.CurrentValues[nameof(Entity.CreatedUserName)] = entryMain.CurrentValues[nameof(Entity.CreatedUserName)];
+                    }
+                }
         }
 
         private async Task DispatchDomainEventsAsync()
