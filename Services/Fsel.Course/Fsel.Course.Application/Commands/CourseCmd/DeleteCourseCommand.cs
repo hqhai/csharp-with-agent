@@ -11,7 +11,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Fsel.Course.Application.Commands.Course
+namespace Fsel.Course.Application.Commands.CourseCmd
 {
     public class DeleteCourseCommand : IRequest<MethodResult<bool>>
     {
@@ -22,10 +22,12 @@ namespace Fsel.Course.Application.Commands.Course
     {
         private readonly ICourseRepository _courseRepository;
         private readonly IMapper _mapper;
+        private readonly ICourseUnitRepository _courseUnitRepository;
 
-        public DeleteCourseCommandHandler(ICourseRepository courseRepository,
+        public DeleteCourseCommandHandler(ICourseRepository courseRepository, ICourseUnitRepository courseUnitRepository,
             IMapper mapper)
         {
+            _courseUnitRepository = courseUnitRepository;
             _courseRepository = courseRepository;
             _mapper = mapper;
         }

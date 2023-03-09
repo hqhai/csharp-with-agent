@@ -15,7 +15,7 @@ using System.Text;
 using System.Threading.Tasks;
 using EntityCourse = Fsel.Course.Domain.Entities.Course;
 
-namespace Fsel.Course.Application.Commands.Course
+namespace Fsel.Course.Application.Commands.CourseCmd
 {
     public class CreateCourseCommand : CreateCourseCommandModel, IRequest<MethodResult<CourseModel>>
     {

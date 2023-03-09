@@ -15,7 +15,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Fsel.Course.Application.Commands.Course
+namespace Fsel.Course.Application.Commands.CourseCmd
 {
     public class UpdateCourseCommand : UpdateCourseCommandModel, IRequest<MethodResult<CourseModel>>
     {
@@ -26,11 +26,13 @@ namespace Fsel.Course.Application.Commands.Course
         private readonly ICourseRepository _courseRepository;
         private readonly IMapper _mapper;
         private readonly IUnitRepository _unitRepository;
+        private readonly ICourseUnitRepository _courseUnitRepository;
 
-        public UpdateCourseTestCommandHandler(ICourseRepository courseRepository,
+        public UpdateCourseTestCommandHandler(ICourseRepository courseRepository, ICourseUnitRepository courseUnitRepository,
             IMapper mapper,
             IUnitRepository unitRepository)
         {
+            _courseUnitRepository = courseUnitRepository;
             _courseRepository = courseRepository;
             _mapper = mapper;
             _unitRepository = unitRepository;
@@ -42,7 +44,7 @@ namespace Fsel.Course.Application.Commands.Course
 
             #region Validation
 
-            var course = await _courseRepository.GetByIdAsync(request.Id);
+            var course = await _courseRepository.GetIncludeByIdAsync(request.Id);
             if (course == null)
             {
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
