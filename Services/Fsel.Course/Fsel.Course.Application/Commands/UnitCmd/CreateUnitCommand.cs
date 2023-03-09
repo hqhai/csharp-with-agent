@@ -1,9 +1,10 @@
-﻿
-using AutoMapper;
+﻿using AutoMapper;
 using Fsel.Common.ActionResults;
+using Fsel.Common.Helpers;
 using Fsel.Course.Common.Models.Commands.Unit;
 using Fsel.Course.Common.Models.Entities;
 using Fsel.Course.Domain.Entities;
+using Fsel.Course.Domain.Enums.ErrorCodes;
 using Fsel.Course.Domain.IRepositories;
 using Fsel.Course.Infrastructure.Repositories;
 using MediatR;
@@ -21,14 +22,18 @@ namespace Fsel.Course.Application.Commands.UnitCmd
     public class CreateUnitCommand : CreateUnitCommandModel, IRequest<MethodResult<UnitModel>>
     {
     }
+
     public class CreateUnitCommandHandler : IRequestHandler<CreateUnitCommand, MethodResult<UnitModel>>
     {
         private readonly IUnitRepository _unitRepository;
         private readonly IMapper _mapper;
-        public CreateUnitCommandHandler(IUnitRepository unitRepository,
+        private readonly ILessonRepository _lessonRepository;
+
+        public CreateUnitCommandHandler(IUnitRepository unitRepository, ILessonRepository lessonRepository,
             IMapper mapper)
         {
-            _unitRepository= unitRepository;
+            _lessonRepository = lessonRepository;
+            _unitRepository = unitRepository;
             _mapper = mapper;
         }
 
@@ -37,6 +42,7 @@ namespace Fsel.Course.Application.Commands.UnitCmd
             MethodResult<UnitModel> methodResult = new MethodResult<UnitModel>();
 
             #region Validation
+
             Unit unit = _mapper.Map<Unit>(request);
 
             if (!unit.IsValid())
@@ -45,10 +51,36 @@ namespace Fsel.Course.Application.Commands.UnitCmd
                 methodResult.AddResultFromErrorList(unit.ErrorMessages);
                 return methodResult;
             }
-            #endregion
 
-            await _unitRepository.ExecuteTransactionAsync(async () => {
+            if (request.LessonIds == null)
+            {
+                methodResult.StatusCode = StatusCodes.Status400BadRequest;
+                methodResult.AddErrorMessage(
+                    nameof(EnumUnitErrorCode.U03V),
+                    new[] { MethodHelper.GenerateErrorResult(nameof(request.LessonIds), request.LessonIds) });
+                return methodResult;
+            }
+
+            if (_lessonRepository.IsIdsInValid(request.LessonIds))
+            {
+                methodResult.StatusCode = StatusCodes.Status400BadRequest;
+                methodResult.AddErrorMessage(
+                    nameof(EnumLessonErrorCode.L03V));
+
+                return methodResult;
+            }
+
+            #endregion Validation
+
+            await _unitRepository.ExecuteTransactionAsync(async () =>
+            {
+                unit.UnitLessons = request.LessonIds.Select(x => new UnitLesson
+                {
+                    LessonId = x
+                }).ToList();
+
                 unit = _unitRepository.Add(unit);
+
                 await _unitRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
                 methodResult.StatusCode = StatusCodes.Status201Created;
@@ -59,6 +91,4 @@ namespace Fsel.Course.Application.Commands.UnitCmd
             return methodResult;
         }
     }
-
-
 }

@@ -15,11 +15,12 @@ namespace Fsel.Course.Infrastructure.Repositories
         public VideoRepository(CourseDbContext dbContext) : base(dbContext)
         {
         }
+
         public async Task<bool> IsVideoLesson(Guid Id)
         {
             return await Queryable
-                 .Include(x => x.lessonVideos.Where(n => !n.IsDeleted))
-                 .AnyAsync(x => x.Id == Id && x.lessonVideos.Count > 0);
+                 .Include(x => x.LessonVideos.Where(n => !n.IsDeleted))
+                 .AnyAsync(x => x.Id == Id && x.LessonVideos.Count > 0);
         }
     }
 }

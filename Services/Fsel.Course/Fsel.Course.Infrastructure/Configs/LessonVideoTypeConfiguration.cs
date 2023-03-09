@@ -9,11 +9,11 @@ namespace Fsel.Course.Infrastructure.Configs
         public void Configure(EntityTypeBuilder<LessonVideo> builder)
         {
             builder.HasOne(a => a.Lesson)
-                .WithMany(b => b.lessonVideos)
+                .WithMany(b => b.LessonVideos)
                 .HasForeignKey(b => b.LessonId)
                 .OnDelete(DeleteBehavior.Cascade);
             builder.HasOne(a => a.Video)
-                .WithMany(b => b.lessonVideos)
+                .WithMany(b => b.LessonVideos)
                 .HasForeignKey(b => b.VideoId)
                 .OnDelete(DeleteBehavior.Cascade);
         }

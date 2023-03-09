@@ -10,6 +10,6 @@ namespace Fsel.Course.Domain.IRepositories
 {
     public interface ILessonRepository : IRepository<Lesson>
     {
-        Task<bool> IsLessonUnit(Guid Id);
+        Task<bool> IsUnitLesson(Guid Id);
     }
 }

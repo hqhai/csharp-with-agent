@@ -1,0 +1,54 @@
+﻿using AutoMapper;
+using Fsel.Common.ActionResults;
+using Fsel.Common.Helpers;
+
+using Fsel.Course.Common.Models.Entities;
+using Fsel.Course.Domain.Enums.ErrorCodes;
+using Fsel.Course.Domain.IRepositories;
+using MediatR;
+using Microsoft.AspNetCore.Http;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Fsel.Course.Application.Queries.CourseQuery
+{
+    public class GetCourseQuery : IRequest<MethodResult<CourseModel>>
+    {
+        public Guid Id { get; set; }
+    }
+
+    public class GetCourseQueryHandler : IRequestHandler<GetCourseQuery, MethodResult<CourseModel>>
+    {
+        private readonly ICourseRepository _courseRepository;
+        private readonly IMapper _mapper;
+
+        public GetCourseQueryHandler(IMapper mapper, ICourseRepository courseRepository)
+        {
+            _courseRepository = courseRepository;
+            _mapper = mapper;
+        }
+
+        public async Task<MethodResult<CourseModel>> Handle(GetCourseQuery request, CancellationToken cancellationToken)
+        {
+            MethodResult<CourseModel> methodResult = new MethodResult<CourseModel>();
+
+            var course = await _courseRepository.GetByIdAsync(request.Id);
+
+            if (course == null)
+            {
+                methodResult.StatusCode = StatusCodes.Status400BadRequest;
+                methodResult.AddErrorMessage(
+                    nameof(EnumCourseErrorCode.C01V),
+                    new[] { MethodHelper.GenerateErrorResult(nameof(request.Id), request.Id) });
+                return methodResult;
+            }
+
+            methodResult.Result = _mapper.Map<CourseModel>(course);
+            methodResult.StatusCode = StatusCodes.Status200OK;
+            return methodResult;
+        }
+    }
+}

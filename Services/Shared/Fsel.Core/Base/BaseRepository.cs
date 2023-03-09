@@ -4,6 +4,7 @@ using Fsel.Core.Base.Interfaces;
 using Fsel.Core.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
+using System.Linq;
 
 namespace Fsel.Core.Base
 {
@@ -43,7 +44,6 @@ namespace Fsel.Core.Base
         {
             try
             {
-                DateTime utcNow = DateTime.UtcNow;
                 newEntity.CreatedDate = DateTime.Now;
 
                 //newEntity.CreatedUserId = _authContext.CurrentUserId;
@@ -83,12 +83,17 @@ namespace Fsel.Core.Base
             }
         }
 
+        public bool IsIdsInValid(IEnumerable<Guid> ids, int? siteId = null)
+        {
+            return ids.Any(id => !_dbSet.Any(f => f.Id == id));
+        }
+
         public virtual Task<bool> DeleteAsync(T deleteEntity)
         {
             try
             {
                 deleteEntity.IsDeleted = true;
-                deleteEntity.DeletedDate = DateTime.UtcNow;
+                deleteEntity.DeletedDate = DateTime.Now;
                 //deleteEntity.DeletedUserId = _authContext.CurrentUserId;
                 //deleteEntity.DeletedUserName = _authContext.CurrentUsername;
                 deleteEntity.AddDomainEvent(new EntityDeletedEvent<T>(deleteEntity));
@@ -105,7 +110,7 @@ namespace Fsel.Core.Base
         {
             try
             {
-                updateEntity.UpdatedDate = DateTime.UtcNow;
+                updateEntity.UpdatedDate = DateTime.Now;
                 //updateEntity.UpdatedUserId = _authContext.CurrentUserId;
                 //updateEntity.UpdatedUserName = _authContext.CurrentUsername;
                 updateEntity.AddDomainEvent(new EntityChangedEvent<T>(updateEntity));
