@@ -11,7 +11,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Fsel.Course.Application.Commands.Course
+namespace Fsel.Course.Application.Commands.CourseCmd
 {
     public class DeleteCourseCommand : IRequest<MethodResult<bool>>
     {
