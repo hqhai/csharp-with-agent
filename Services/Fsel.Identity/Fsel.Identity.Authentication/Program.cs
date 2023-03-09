@@ -82,17 +82,11 @@ builder.Services.Configure<IdentityOptions>(options =>
 });
 
 builder.Services.AddScoped<IUserRepository, UserRepository>();
-builder.Services.AddScoped<IEmailService, EmailService>();
 
-//Where registering services
-builder.Services.AddCors(policy => {
-    policy.AddPolicy("OpenCorsPolicy", opt => opt.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod());
-});
 builder.Services.AddRefitClient<ISenderService>().ConfigureHttpClient(x =>
 {
-    x.BaseAddress = new Uri("https://localhost:7036/api/v1/");
+    x.BaseAddress = new Uri("https://localhost:7036/api/v1");
 });
-
 
 var app = builder.Build();
 
@@ -103,7 +97,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 //app configurations
-app.UseCors("OpenCorsPolicy");
+
 app.UseHttpsRedirection();
 
 app.UseAuthorization();

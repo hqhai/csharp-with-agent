@@ -1,10 +1,11 @@
-﻿using System;
+﻿using Fsel.Common.Helpers;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Atlantic.Core.Api.Helpers
+namespace Fsel.Common.Helpers
 {
-    public class PasswordGenerator
+    public class PasswordGeneratorHelper
     {
         public int MinimumLengthPassword { get; private set; }
         public int MaximumLengthPassword { get; private set; }
@@ -19,20 +20,19 @@ namespace Atlantic.Core.Api.Helpers
         public static string AllSpecialChars { get; private set; }
         private readonly string _allAvailableChars;
 
-        private readonly RandomSecureVersion _randomSecure = new RandomSecureVersion();
+        private readonly RandomSecureHelper _randomSecure = new RandomSecureHelper();
         private readonly int _minimumNumberOfChars;
 
-        static PasswordGenerator()
+        static PasswordGeneratorHelper()
         {
             // Ranges not using confusing characters
             AllLowerCaseChars = GetCharRange('a', 'z', exclusiveChars: "ilo");
             AllUpperCaseChars = GetCharRange('A', 'Z', exclusiveChars: "IO");
             AllNumericChars = GetCharRange('2', '9');
             AllSpecialChars = "!@#%*()$?+-=";
-
         }
 
-        public PasswordGenerator(
+        public PasswordGeneratorHelper(
             int minimumLengthPassword = 8,
             int maximumLengthPassword = 15,
             int minimumLowerCaseChars = 1,
@@ -111,7 +111,7 @@ namespace Atlantic.Core.Api.Helpers
         {
             var lengthOfPassword = _randomSecure.Next(MinimumLengthPassword, MaximumLengthPassword);
 
-            // Get the required number of characters of each catagory and 
+            // Get the required number of characters of each catagory and
             // add random charactes of all catagories
             var minimumChars = GetRandomString(AllLowerCaseChars, MinimumLowerCaseChars) +
                             GetRandomString(AllUpperCaseChars, MinimumUpperCaseChars) +
@@ -154,8 +154,9 @@ namespace Atlantic.Core.Api.Helpers
 
     internal static class Extensions
     {
-        private static readonly Lazy<RandomSecureVersion> RandomSecure =
-            new Lazy<RandomSecureVersion>(() => new RandomSecureVersion());
+        private static readonly Lazy<RandomSecureHelper> RandomSecure =
+            new Lazy<RandomSecureHelper>(() => new RandomSecureHelper());
+
         public static IEnumerable<T> ShuffleSecure<T>(this IEnumerable<T> source)
         {
             var sourceArray = source.ToArray();

@@ -1,5 +1,6 @@
 using Fsel.Sender.Application.Services;
 using Fsel.Sender.Common.ConfigSettings;
+using MediatR;
 using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -19,6 +20,15 @@ builder.Services
         options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
         options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
     });
+//Where registering services
+builder.Services.AddCors(policy =>
+{
+    policy.AddPolicy("OpenCorsPolicy", opt => opt.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod());
+});
+builder.Services
+    .AddMediatR(AppDomain.CurrentDomain.GetAssemblies())
+    .AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies())
+    .AddHttpContextAccessor();
 
 var appSetting = builder.Configuration.Get<AppSetting>() ?? new AppSetting();
 builder.Services.AddSingleton(appSetting);
@@ -32,6 +42,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+//app configurations
+app.UseCors("OpenCorsPolicy");
 app.UseHttpsRedirection();
 
 app.UseAuthorization();

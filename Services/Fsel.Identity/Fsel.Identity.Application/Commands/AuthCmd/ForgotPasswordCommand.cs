@@ -9,6 +9,8 @@ using Fsel.Sender.Common.Models.Entities;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.WebUtilities;
+using System.Text;
 
 namespace Fsel.Identity.Application.Commands.AuthCmd
 {
@@ -22,13 +24,15 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
         private readonly UserManager<User> _userManager;
         private readonly ISenderService _senderService;
         private readonly IMapper _mapper;
+        private readonly SignInManager<User> _signInManager;
 
         public ForgotPasswordCommandHandler(UserManager<User> userManager, ISenderService senderService,
-            IMapper mapper)
+            IMapper mapper, SignInManager<User> signInManager)
         {
             _userManager = userManager;
             _senderService = senderService;
             _mapper = mapper;
+            _signInManager = signInManager;
         }
 
         public async Task<MethodResult<bool>> Handle(ForgotPasswordCommand request, CancellationToken cancellationToken)
@@ -44,29 +48,36 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             }
 
             var newPassword = new PasswordGeneratorHelper(8, 10).Generate();
-            var token = await _userManager.GeneratePasswordResetTokenAsync(user);
 
-            var resultUser = await _userManager.ResetPasswordAsync(user, token, newPassword);
-
-            if (!resultUser.Succeeded)
+            string resetToken = await _userManager.GeneratePasswordResetTokenAsync(user);
+            if (string.IsNullOrEmpty(resetToken))
             {
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                methodResult.AddErrorMessage("Sign up fail");
+                methodResult.AddErrorMessage("Error while generating reset token");
                 return methodResult;
             }
+            var result = await _userManager.ResetPasswordAsync(user, resetToken, newPassword);
+            if (!result.Succeeded)
+            {
+                methodResult.StatusCode = StatusCodes.Status400BadRequest;
+                methodResult.AddErrorMessage("Error while generating reset Password");
+                return methodResult;
+            }
+
             var sender = new SendEmailModel
             {
-                Content = "",
-                Subject = "Maajt ",
+                Content = $"Tài khoản của bạn đã được reset thành công mời bạn nhập mật khẩu mới :{newPassword}",
+                Subject = "Forgot Password ",
                 ToEmails = new List<string> { $"{request.Email}" }
             };
-            //var sendCommand = new SendMailCommand();
-            //sendCommand.Content = sender.Content;
-            //sendCommand.Subject = sender.Subject;
-            //sendCommand.ToEmails = sender.ToEmails;
+            var sendCommand = new SendEmailCommandModel();
+            sendCommand.Content = sender.Content;
+            sendCommand.Subject = sender.Subject;
+            sendCommand.ToEmails = sender.ToEmails;
 
-            //_senderService.SendEmailModel(sendCommand);
-
+            var IsSendMail = await _senderService.SendEmailAsync(sendCommand);
+            methodResult.Result = true;
+            methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }
     }

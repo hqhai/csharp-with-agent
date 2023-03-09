@@ -30,13 +30,13 @@ namespace Fsel.Sender.Api.Controllers
         /// <param name="command"></param>
         /// <returns></returns>
         [HttpPost]
-        [ProducesResponseType(typeof(MethodResult<SendEmailModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.BadRequest)]
         public async Task<IActionResult> SendEmail([FromBody] SendEmailCommand command)
         {
             try
             {
-                MethodResult<SendEmailModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
+                MethodResult<bool> commandResult = await _mediator.Send(command).ConfigureAwait(false);
                 return commandResult.GetActionResult();
             }
             catch (Exception ex)

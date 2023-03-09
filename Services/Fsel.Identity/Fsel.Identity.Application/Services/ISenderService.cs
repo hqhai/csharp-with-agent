@@ -1,7 +1,7 @@
 ﻿using Fsel.Common.ActionResults;
 using Fsel.Identity.Common.Models.Entities;
 using Fsel.Identity.Domain.Entities;
-using Fsel.Sender.Application.Commands.SendEmailCmd;
+using Fsel.Sender.Common.Models.Commands;
 using Microsoft.AspNetCore.Mvc;
 using Refit;
 using System;
@@ -15,6 +15,6 @@ namespace Fsel.Identity.Application.Services
     public interface ISenderService
     {
         [Post("/sender")]
-        Task<IApiResponse<MethodResult<UserModel>>> SendEmailModel([Body] SendEmailCommand command);
+        Task<IApiResponse<MethodResult<bool>>> SendEmailAsync([Body] SendEmailCommandModel command);
     }
 }

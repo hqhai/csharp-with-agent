@@ -60,7 +60,7 @@ namespace Fsel.Sender.Application.Services
                 }
                 return;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return;
             }

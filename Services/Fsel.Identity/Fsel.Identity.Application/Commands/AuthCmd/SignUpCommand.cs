@@ -5,6 +5,8 @@ using Fsel.Identity.Common.ConfigSettings;
 using Fsel.Identity.Common.Models.Commands;
 using Fsel.Identity.Common.Models.Entities;
 using Fsel.Identity.Domain.Entities;
+using Fsel.Sender.Common.Models.Commands;
+using Fsel.Sender.Common.Models.Entities;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -22,20 +24,20 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
         private readonly UserManager<User> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly AppSetting _appSetting;
-        private readonly IEmailService _emailService;
+        private readonly ISenderService _senderService;
         private readonly IMapper _mapper;
 
         public SignUpCommandHandler(UserManager<User> userManager,
             RoleManager<IdentityRole> roleManager,
             AppSetting appSetting,
-            IEmailService emailService,
             IMediator mediator,
+            ISenderService senderService,
             IMapper mapper)
         {
             _userManager = userManager;
             _roleManager = roleManager;
             _appSetting = appSetting;
-            _emailService = emailService;
+            _senderService = senderService;
             _mapper = mapper;
         }
 
@@ -86,8 +88,18 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             token = WebEncoders.Base64UrlEncode(Encoding.ASCII.GetBytes(token));
 
             var configmationLink = $"{_appSetting?.Url?.EmailConfirmUrl}?token={token}&email={user.Email}";
-            var message = new SendEmailModel(new List<string> { user.Email ?? string.Empty }, "Confirmation email by link: ", configmationLink);
-            await _emailService.SendEmailAsync(message);
+            var sender = new SendEmailModel
+            {
+                Content = $"\"Confirmation email by link: \", {configmationLink}",
+                Subject = "Xác thực tài khoản ",
+                ToEmails = new List<string> { $"{request.Email}" }
+            };
+            var sendCommand = new SendEmailCommandModel();
+            sendCommand.Content = sender.Content;
+            sendCommand.Subject = sender.Subject;
+            sendCommand.ToEmails = sender.ToEmails;
+
+            var IsSendMail = await _senderService.SendEmailAsync(sendCommand);
 
             methodResult.Result = _mapper.Map<UserModel>(user);
             return methodResult;

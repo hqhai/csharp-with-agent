@@ -10,6 +10,9 @@ namespace Fsel.Identity.Common.Models.Commands
     public class ResetPasswordCommandModel
     {
         [Required]
+        public Guid UserId { get; set; }
+
+        [Required]
         public string? OldPassword { get; set; }
 
         [Required]

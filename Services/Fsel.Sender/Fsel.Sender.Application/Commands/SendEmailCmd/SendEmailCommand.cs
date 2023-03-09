@@ -1,33 +1,38 @@
 ﻿using Fsel.Common.ActionResults;
 using Fsel.Sender.Application.Services;
+using Fsel.Sender.Common.ConfigSettings;
 using Fsel.Sender.Common.Models.Commands;
 using Fsel.Sender.Common.Models.Entities;
 using MediatR;
 using Microsoft.AspNetCore.Http;
+using MimeKit;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Mail;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace Fsel.Sender.Application.Commands.SendEmailCmd
 {
-    public class SendEmailCommand : SendEmailCommandModel, IRequest<MethodResult<SendEmailModel>>
+    public class SendEmailCommand : SendEmailCommandModel, IRequest<MethodResult<bool>>
     {
     }
 
-    public class LoginCommandHandler : IRequestHandler<SendEmailCommand, MethodResult<SendEmailModel>>
+    public class LoginCommandHandler : IRequestHandler<SendEmailCommand, MethodResult<bool>>
     {
         private readonly IEmailService _emailService;
+        private readonly AppSetting _appSetting;
 
-        public LoginCommandHandler(IEmailService emailService)
+        public LoginCommandHandler(IEmailService emailService, AppSetting appSetting)
         {
             _emailService = emailService;
+            _appSetting = appSetting;
         }
 
-        public async Task<MethodResult<SendEmailModel>> Handle(SendEmailCommand request, CancellationToken cancellationToken)
+        public async Task<MethodResult<bool>> Handle(SendEmailCommand request, CancellationToken cancellationToken)
         {
-            MethodResult<SendEmailModel> methodResult = new MethodResult<SendEmailModel>();
+            MethodResult<bool> methodResult = new MethodResult<bool>();
 
             #region Validation
 
@@ -41,18 +46,81 @@ namespace Fsel.Sender.Application.Commands.SendEmailCmd
             {
                 SendEmailModel sendEmail = new SendEmailModel();
                 sendEmail.Subject = request.Subject;
-                sendEmail.ToEmails = request.ToEmails;
-                sendEmail.BccEmails = request.BccEmails;
-                sendEmail.CcEmails = request.CcEmails;
+                if (request.ToEmails == null || request.ToEmails.Any(e => e == "string")) { }
+                else
+                {
+                    sendEmail.ToEmails = request.ToEmails;
+                }
+                if (request.BccEmails == null || request.BccEmails.Any(e => e == "string")) { }
+                else
+                {
+                    sendEmail.BccEmails = request.BccEmails;
+                }
+                if (request.CcEmails == null || request.CcEmails.Any(e => e == "string")) { }
+                else
+                {
+                    sendEmail.CcEmails = request.CcEmails;
+                }
                 sendEmail.Content = request.Content;
-                await _emailService.SendEmailAsync(sendEmail);
+                var emailMessage = CreateEmailMessageAsync(sendEmail);
+                await Send(emailMessage);
             }
 
             #endregion Validation
 
             methodResult.StatusCode = StatusCodes.Status200OK;
-
+            methodResult.Result = true;
             return methodResult;
+        }
+
+        private MimeMessage CreateEmailMessageAsync(SendEmailModel message)
+        {
+            var emailMessage = new MimeMessage();
+            emailMessage.From.Add(new MailboxAddress("email", _appSetting?.Smtp?.From ?? string.Empty));
+            if (message.ToEmails == null) return emailMessage;
+
+            foreach (var item in message.ToEmails)
+            {
+                emailMessage.To.Add(new MailboxAddress("email", item));
+            }
+            if (message.BccEmails != null)
+            {
+                foreach (var item in message.BccEmails)
+                {
+                    emailMessage.Bcc.Add(new MailboxAddress("email", item));
+                }
+            }
+            if (message.CcEmails != null)
+            {
+                foreach (var item in message.CcEmails)
+                {
+                    emailMessage.Cc.Add(new MailboxAddress("email", item));
+                }
+            }
+            emailMessage.Subject = message.Subject;
+            emailMessage.Body = new TextPart(MimeKit.Text.TextFormat.Text) { Text = message.Content };
+            return emailMessage;
+        }
+
+        private async Task Send(MimeMessage Mailmessage)
+        {
+            using var client = new MailKit.Net.Smtp.SmtpClient();
+            try
+            {
+                client.Connect(_appSetting?.Smtp?.SmtpServer ?? string.Empty, _appSetting?.Smtp?.Port ?? 0, true);
+                client.AuthenticationMechanisms.Remove("XOAUTH2");
+                client.Authenticate(_appSetting?.Smtp?.Username ?? string.Empty, _appSetting?.Smtp?.Password ?? string.Empty);
+                await client.SendAsync(Mailmessage);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+            finally
+            {
+                client.Disconnect(true);
+                client.Dispose();
+            }
         }
     }
 }
