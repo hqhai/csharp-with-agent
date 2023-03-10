@@ -4,7 +4,6 @@ using Fsel.Core.Base.Interfaces;
 using Fsel.Core.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
-using System.Linq;
 
 namespace Fsel.Core.Base
 {

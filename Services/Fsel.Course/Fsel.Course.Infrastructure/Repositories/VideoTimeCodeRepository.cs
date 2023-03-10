@@ -9,9 +9,9 @@ using System.Threading.Tasks;
 
 namespace Fsel.Course.Infrastructure.Repositories
 {
-    public class TimeCodeExcerciseRepository : BaseRepository<TimeCodeExcercise>, ITimeCodeExcerciseRepository
+    public class VideoTimeCodeRepository : BaseRepository<VideoTimeCode>, IVideoTimeCodeRepository
     {
-        public TimeCodeExcerciseRepository(CourseDbContext dbContext) : base(dbContext)
+        public VideoTimeCodeRepository(CourseDbContext dbContext) : base(dbContext)
         {
         }
     }

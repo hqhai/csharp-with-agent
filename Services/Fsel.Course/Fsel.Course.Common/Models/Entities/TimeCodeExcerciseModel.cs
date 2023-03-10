@@ -5,9 +5,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Fsel.Course.Common.Models.Queries.Video
+namespace Fsel.Course.Common.Models.Entities
 {
-    public class SearchVideoQueryModel : BaseQueyModel
+    public class TimeCodeExcerciseModel : BaseEntityModel
     {
     }
 }

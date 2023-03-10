@@ -1,4 +1,5 @@
 ﻿using Fsel.Core.Base.BaseModels;
+using Fsel.Course.Common.Models.Commands.VideoTimeCode;
 using Fsel.Course.Domain.Enums;
 using System;
 using System.Collections.Generic;
@@ -19,5 +20,6 @@ namespace Fsel.Course.Common.Models.Commands.Videos
         public Guid? TeacherId { get; set; }
 
         public EnumCourseLevel CourseLevel { get; set; }
+        public List<UpdateVideoTimeCodeCommandModel> VideoTimeCodes { get; set; } = new List<UpdateVideoTimeCodeCommandModel>();
     }
 }

@@ -16,5 +16,14 @@ namespace Fsel.Common.Helpers
         {
             return TimeZoneInfo.ConvertTimeFromUtc(dateTime, info);
         }
+
+        public static TimeSpan ConvertTimeSpan(this string? value)
+        {
+            if (!TimeSpan.TryParse(value, out TimeSpan result))
+            {
+                result = default;
+            }
+            return result;
+        }
     }
 }

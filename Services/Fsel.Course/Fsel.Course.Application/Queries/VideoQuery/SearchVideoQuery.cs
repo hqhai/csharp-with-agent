@@ -42,17 +42,18 @@ namespace Fsel.Course.Application.Queries.VideoQuery
             }
 
             var VideoQuery = from i in _videoRepository.Queryable
-                            select new VideoModel
-                            {
-                                Id = i.Id,
-                                Name = i.Name,
-                                IsActive = i.IsActive,
-                                CourseLevel = i.CourseLevel,
-                                CreatedDate = i.CreatedDate,
-                                CreatedUserId = i.CreatedUserId,
-                                UpdatedDate = i.UpdatedDate,
-                                UpdatedUserId = i.UpdatedUserId,
-                            };
+                             select new VideoModel
+                             {
+                                 Id = i.Id,
+                                 Name = i.Name,
+                                 IsActive = i.IsActive,
+                                 CourseLevel = i.CourseLevel,
+                                 CreatedDate = i.CreatedDate,
+                                 CreatedUserId = i.CreatedUserId,
+                                 UpdatedDate = i.UpdatedDate,
+                                 UpdatedUserId = i.UpdatedUserId,
+                             };
+
             //Keyword
             if (!string.IsNullOrEmpty(request.Keyword))
             {

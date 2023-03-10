@@ -35,6 +35,7 @@ namespace Fsel.Course.Application.Commands.VideoCmd
                 MethodResult<bool> methodResult = new MethodResult<bool>();
 
                 #region Validation
+
                 var IsLessonVideo = await _videoRepository.IsVideoLesson(request.Id);
 
                 if (IsLessonVideo)

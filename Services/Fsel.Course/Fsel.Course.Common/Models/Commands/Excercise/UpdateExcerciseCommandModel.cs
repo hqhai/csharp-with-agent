@@ -1,5 +1,5 @@
-﻿using Fsel.Course.Common.Models.Commands.Question;
-using Fsel.Course.Domain.Entities;
+﻿using Fsel.Core.Base.BaseModels;
+using Fsel.Course.Common.Models.Commands.Question;
 using Fsel.Course.Domain.Enums;
 using System;
 using System.Collections.Generic;
@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Fsel.Course.Common.Models.Commands.Excercise
 {
-    public class CreateExcerciseCommandModel
+    public class UpdateExcerciseCommandModel : BaseCommandModel
     {
         public string? Name { get; set; }
 
@@ -19,6 +19,6 @@ namespace Fsel.Course.Common.Models.Commands.Excercise
 
         public EnumCourseSkill CourseSkill { get; set; }
 
-        public List<CreateQuestionCommandModel> Questions { get; set; } = new List<CreateQuestionCommandModel>();
+        public List<UpdateQuestionCommandModel> Questions { get; set; } = new List<UpdateQuestionCommandModel>();
     }
 }

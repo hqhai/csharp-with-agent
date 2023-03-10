@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Fsel.Core.Base.BaseModels;
+using Fsel.Course.Domain.Entities;
 
 namespace Fsel.Course.Common.Models.Entities
 {
@@ -23,7 +24,7 @@ namespace Fsel.Course.Common.Models.Entities
         /// <summary>
         /// Time code information
         /// </summary>
-        /// 
+        ///
        /* public Guid? Time*/
         public long DisplayTimeTicks { get; set; }
 

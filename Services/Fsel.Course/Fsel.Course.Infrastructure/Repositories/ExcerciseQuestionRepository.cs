@@ -11,7 +11,7 @@ namespace Fsel.Course.Infrastructure.Repositories
 {
     public class ExcerciseQuestionRepository : BaseRepository<ExcerciseQuestion>, IExcerciseQuestionRepository
     {
-        public ExcerciseQuestionRepository(BaseDbContext dbContext) : base(dbContext)
+        public ExcerciseQuestionRepository(CourseDbContext dbContext) : base(dbContext)
         {
         }
     }

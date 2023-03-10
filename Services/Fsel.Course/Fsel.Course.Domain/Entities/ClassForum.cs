@@ -39,6 +39,6 @@ namespace Fsel.Course.Domain.Entities
 
         public EnumCourseSkill CourseSkill { get; set; }
         public Guid? LessonId { get; set; }
-        public Lesson? Lesson { get; set; }
+        public Lesson Lesson { get; set; } = new Lesson();
     }
 }
