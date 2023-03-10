@@ -13,6 +13,14 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         /// </summary>
         HW01V,
 
+        /// <summary>
+        /// HomeWork have been use
+        /// </summary>
+        HW02V,
+
+        /// <summary>
+        /// HomeWork null
+        /// </summary>
         HW03V,
 
         /// <summary>

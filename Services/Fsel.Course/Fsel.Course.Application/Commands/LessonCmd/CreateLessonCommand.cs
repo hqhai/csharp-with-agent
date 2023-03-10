@@ -111,6 +111,11 @@ namespace Fsel.Course.Application.Commands.LessonCmd
                 VideoId = x
             }).ToList();
 
+            ClassForum classForum = new ClassForum();
+            _mapper.Map(request.ClassForum, classForum);
+            classForum.LessonId = lesson.Id;
+            lesson.ClassForum = classForum;
+
             if (!lesson.IsValid())
             {
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;

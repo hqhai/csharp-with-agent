@@ -13,6 +13,14 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         /// </summary>
         EP01V,
 
+        /// <summary>
+        /// ExtraPractive have been use
+        /// </summary>
+        EP02V,
+
+        /// <summary>
+        /// ExtraPractive null
+        /// </summary>
         EP03V,
 
         /// <summary>
@@ -31,7 +39,7 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         EP03C,
 
         /// <summary>
-        /// Number of course >1
+        /// Number of ExtraPractive >1
         /// </summary>
         EP04C
     }

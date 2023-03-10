@@ -89,6 +89,7 @@ builder.Services
 builder.Services.AddScoped<ICourseUnitRepository, CourseUnitRepository>();
 builder.Services.AddScoped<IPlacementTestRepository, PlacementTestRepository>();
 builder.Services.AddScoped<ILessonRepository, LessonRepository>();
+builder.Services.AddScoped<ILessonVideoRepository, LessonVideoRepository>();
 builder.Services.AddScoped<ILessonHomeWorkRepository, LessonHomeWorkRepository>();
 builder.Services.AddScoped<ILessonExtraPracticeRepository, LessonExtraPracticeRepository>();
 builder.Services.AddScoped<IVideoRepository, VideoRepository>();

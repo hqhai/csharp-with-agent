@@ -6,36 +6,41 @@ using System.Threading.Tasks;
 
 namespace Fsel.Course.Domain.Enums.ErrorCodes
 {
-    public enum EnumUnitLessonErrorCode
+    public enum EnumeLessonHomeWordErrorCode
     {
         /// <summary>
-        /// Lesson Unit does not exist
+        /// Lesson HomeWord does not exist
         /// </summary>
-        LU01V,
+        EHW01V,
 
         /// <summary>
-        /// Lesson Unit was used
+        /// Lesson HomeWord have been use
         /// </summary>
-        LU02V,
+        EHW02V,
 
         /// <summary>
-        /// Lesson Unit not is correct
+        /// Lesson HomeWord null
         /// </summary>
-        LU03V,
+        EHW03V,
 
         /// <summary>
         /// Name cannot be empty
         /// </summary>
-        LU01C,
+        EHW01C,
 
         /// <summary>
         /// Name limited to 250 characters
         /// </summary>
-        LU02C,
+        EHW02C,
 
         /// <summary>
         /// Instruction Content limited to 1000 characters
         /// </summary>
-        LU03C,
+        EHW03C,
+
+        /// <summary>
+        /// Number of Lesson HomeWord >1
+        /// </summary>
+        EHW04C
     }
 }

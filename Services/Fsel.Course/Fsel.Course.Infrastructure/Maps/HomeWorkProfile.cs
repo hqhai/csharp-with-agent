@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Fsel.Core.Extensions;
+using Fsel.Course.Common.Models.Commands.HomeWork;
 using Fsel.Course.Common.Models.Commands.Lesson;
 using Fsel.Course.Common.Models.Entities;
 using Fsel.Course.Domain.Entities;

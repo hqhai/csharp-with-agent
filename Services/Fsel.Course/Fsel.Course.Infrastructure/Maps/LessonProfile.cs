@@ -16,8 +16,8 @@ namespace Fsel.Course.Infrastructure.Maps
         public LessonProfile()
         {
             CreateMap<Lesson, LessonModel>().IgnoreAllNonExisting();
-            CreateMap<CreateHomeWorkCommandModel, Lesson>().IgnoreAllNonExisting();
-            CreateMap<UpdateHomeWorkCommandModel, Lesson>().IgnoreAllNonExisting();
+            CreateMap<CreateLessonCommandModel, Lesson>().IgnoreAllNonExisting();
+            CreateMap<UpdateLessonCommandModel, Lesson>().IgnoreAllNonExisting();
         }
     }
 }

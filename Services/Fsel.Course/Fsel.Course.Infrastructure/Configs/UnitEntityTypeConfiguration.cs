@@ -10,15 +10,16 @@ using System.Threading.Tasks;
 
 namespace Fsel.Course.Infrastructure.Configs
 {
-    public class ExtraPracticeTypeConfiguration : IEntityTypeConfiguration<ExtraPractice>
+    public class UnitEntityTypeConfiguration : IEntityTypeConfiguration<Unit>
     {
-        public void Configure(EntityTypeBuilder<ExtraPractice> builder)
+        public void Configure(EntityTypeBuilder<Unit> builder)
         {
             builder.Property(e => e.Type)
                 .HasMaxLength(100)
                 .HasConversion(
                     v => v.ToString(),
-                    v => (EnumExtraPracticeType)Enum.Parse(typeof(EnumExtraPracticeType), v));
+                    v => (EnumUnitType)Enum.Parse(typeof(EnumUnitType), v));
+
             builder.Property(e => e.CourseLevel)
                 .HasMaxLength(100)
                 .HasConversion(

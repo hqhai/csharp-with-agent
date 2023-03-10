@@ -4,6 +4,7 @@ using Fsel.Course.Domain.Enums.ErrorCodes;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -18,8 +19,18 @@ namespace Fsel.Course.Domain.Entities
 
         public EnumGradingStyle GradingStyle { get; set; }
 
-        public TimeSpan? TaggetTimeLimit { get; set; }
-        public TimeSpan? TaggetWordLimit { get; set; }
+        [Range(1, int.MaxValue, ErrorMessage = nameof(EnumClassForumErrorCode.CF04C))]
+        public long TaggetTimeLimitTicks { get; set; }
+
+        [Range(1, int.MaxValue, ErrorMessage = nameof(EnumClassForumErrorCode.CF04C))]
+        public long TaggetWordLimit { get; set; }
+
+        [NotMapped]
+        public TimeSpan TaggetTimeLimit
+        {
+            get { return TimeSpan.FromTicks(TaggetTimeLimitTicks); }
+            set { TaggetTimeLimitTicks = value.Ticks; }
+        }
 
         [MaxLength(1000, ErrorMessage = nameof(EnumClassForumErrorCode.CF03C))]
         public string? MediaPost { get; set; }

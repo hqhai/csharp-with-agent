@@ -9,18 +9,18 @@ using System.Threading.Tasks;
 
 namespace Fsel.Course.Infrastructure.Configs
 {
-    public class LessonHomeWorkTypeConfiguration : IEntityTypeConfiguration<LessonHomeWork>
+    public class LessonExtraPracticeEntityTypeConfiguration : IEntityTypeConfiguration<LessonExtraPractice>
     {
-        public void Configure(EntityTypeBuilder<LessonHomeWork> builder)
+        public void Configure(EntityTypeBuilder<LessonExtraPractice> builder)
         {
             builder.HasOne(a => a.Lesson)
-                            .WithMany(b => b.LessonHomeWorks)
+                            .WithMany(b => b.LessonExtraPractices)
                             .HasForeignKey(b => b.LessonId)
                             .OnDelete(DeleteBehavior.Cascade);
 
-            builder.HasOne(a => a.HomeWork)
-                .WithMany(b => b.LessonHomeWorks)
-                .HasForeignKey(b => b.HomeWorkId)
+            builder.HasOne(a => a.ExtraPractice)
+                .WithMany(b => b.LessonExtraPractices)
+                .HasForeignKey(b => b.ExtracPraticeId)
                 .OnDelete(DeleteBehavior.Cascade);
         }
     }

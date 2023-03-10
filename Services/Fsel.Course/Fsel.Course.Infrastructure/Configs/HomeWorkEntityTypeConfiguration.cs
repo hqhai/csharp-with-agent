@@ -10,15 +10,15 @@ using Fsel.Course.Domain.Enums;
 
 namespace Fsel.Course.Infrastructure.Configs
 {
-    public class ClassForumTypeConfiguration : IEntityTypeConfiguration<ClassForum>
+    public class HomeWorkEntityTypeConfiguration : IEntityTypeConfiguration<HomeWork>
     {
-        public void Configure(EntityTypeBuilder<ClassForum> builder)
+        public void Configure(EntityTypeBuilder<HomeWork> builder)
         {
-            builder.Property(e => e.GradingStyle)
+            builder.Property(e => e.CourseLevel)
                 .HasMaxLength(100)
                 .HasConversion(
                     v => v.ToString(),
-                    v => (EnumGradingStyle)Enum.Parse(typeof(EnumGradingStyle), v));
+                    v => (EnumCourseLevel)Enum.Parse(typeof(EnumCourseLevel), v));
             builder.Property(e => e.CourseSkill)
                 .HasMaxLength(100)
                 .HasConversion(

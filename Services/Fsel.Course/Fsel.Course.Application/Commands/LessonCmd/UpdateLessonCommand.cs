@@ -1,22 +1,13 @@
 ﻿using AutoMapper;
 using Fsel.Common.ActionResults;
 using Fsel.Common.Helpers;
-using Fsel.Course.Application.Commands.PlacementTestCmd;
 using Fsel.Course.Common.Models.Commands.Lesson;
-using Fsel.Course.Common.Models.Commands.PlacementTest;
 using Fsel.Course.Common.Models.Entities;
 using Fsel.Course.Domain.Entities;
-using Fsel.Course.Domain.Enums;
 using Fsel.Course.Domain.Enums.ErrorCodes;
 using Fsel.Course.Domain.IRepositories;
-using Fsel.Course.Infrastructure.Repositories;
 using MediatR;
 using Microsoft.AspNetCore.Http;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Fsel.Course.Application.Commands.LessonCmd
 {
@@ -33,13 +24,15 @@ namespace Fsel.Course.Application.Commands.LessonCmd
         private readonly IHomeWorkRepository _homeWorkRepository;
         private readonly IVideoRepository _videoRepository;
         private readonly IExtraPracticeRepository _extraPracticeRepository;
+        private readonly IClassForumRepository _classForumRepository;
 
         public UpdateLessonCommandHandler(ILessonRepository lessonRepository
             , ILessonHomeWorkRepository lessonHomeWorkRepository
             , ILessonExtraPracticeRepository lessonExtraPracticeRepository
             , IMapper mapper, IHomeWorkRepository homeWorkRepository
             , IVideoRepository videoRepository
-            , IExtraPracticeRepository extraPracticeRepository)
+            , IExtraPracticeRepository extraPracticeRepository
+            , IClassForumRepository classForumRepository)
         {
             _lessonRepository = lessonRepository;
             _lessonHomeWorkRepository = lessonHomeWorkRepository;
@@ -48,6 +41,7 @@ namespace Fsel.Course.Application.Commands.LessonCmd
             _homeWorkRepository = homeWorkRepository;
             _videoRepository = videoRepository;
             _extraPracticeRepository = extraPracticeRepository;
+            _classForumRepository = classForumRepository;
         }
 
         public async Task<MethodResult<LessonModel>> Handle(UpdateLessonCommand request, CancellationToken cancellationToken)
@@ -98,7 +92,7 @@ namespace Fsel.Course.Application.Commands.LessonCmd
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 methodResult.AddErrorMessage(
                     nameof(EnumHomeWorkErrorCode.HW03V),
-                    new[] { MethodHelper.GenerateErrorResult(nameof(request.HomeWorkIds), request.HomeWorkIds) });
+                    new[] { MethodHelper.GenerateErrorResult(nameof(request.VideoIds), request.VideoIds) });
                 return methodResult;
             }
 
@@ -111,14 +105,14 @@ namespace Fsel.Course.Application.Commands.LessonCmd
                 return methodResult;
             }
 
-            if (_extraPracticeRepository.IsIdsInValid(request.ExtraPracticeIds))
-            {
-                methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                methodResult.AddErrorMessage(
-                    nameof(EnumExtraPractiveErrorCode.EP03V));
+            //if (_extraPracticeRepository.IsIdsInValid(request.ExtraPracticeIds))
+            //{
+            //    methodResult.StatusCode = StatusCodes.Status400BadRequest;
+            //    methodResult.AddErrorMessage(
+            //        nameof(EnumExtraPractiveErrorCode.EP03V));
 
-                return methodResult;
-            }
+            //    return methodResult;
+            //}
 
             if (_videoRepository.IsIdsInValid(request.VideoIds))
             {
@@ -128,15 +122,20 @@ namespace Fsel.Course.Application.Commands.LessonCmd
 
                 return methodResult;
             }
-
-            if (_homeWorkRepository.IsIdsInValid(request.HomeWorkIds))
+            if (_classForumRepository.IsIdsInValid(new List<Guid> { request.ClassForumId ?? Guid.Empty }))
             {
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 methodResult.AddErrorMessage(
-                    nameof(EnumHomeWorkErrorCode.HW03V));
-
-                return methodResult;
+                    nameof(EnumClassForumErrorCode.CF03V));
             }
+            //if (_homeWorkRepository.IsIdsInValid(request.HomeWorkIds))
+            //{
+            //    methodResult.StatusCode = StatusCodes.Status400BadRequest;
+            //    methodResult.AddErrorMessage(
+            //        nameof(EnumHomeWorkErrorCode.HW03V));
+
+            //    return methodResult;
+            //}
 
             _mapper.Map(request, lesson);
 
@@ -163,6 +162,7 @@ namespace Fsel.Course.Application.Commands.LessonCmd
                 {
                     VideoId = x
                 }).ToList();
+                _mapper.Map(request, lesson);
 
                 lesson = _lessonRepository.Update(lesson);
                 await _lessonRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);

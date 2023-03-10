@@ -13,12 +13,15 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         /// </summary>
         VD01V,
 
-        VD03V,
-
         /// <summary>
         /// Unit was used
         /// </summary>
         VD02V,
+
+        /// <summary>
+        /// Unit not is correct
+        /// </summary>
+        VD03V,
 
         /// <summary>
         /// Name cannot be empty

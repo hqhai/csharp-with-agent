@@ -14,6 +14,16 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         CF01V,
 
         /// <summary>
+        /// ClassForum have been use
+        /// </summary>
+        CF02V,
+
+        /// <summary>
+        /// ClassForum null
+        /// </summary>
+        CF03V,
+
+        /// <summary>
         /// Name cannot be empty
         /// </summary>
         CF01C,
