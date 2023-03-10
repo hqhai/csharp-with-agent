@@ -20,10 +20,10 @@ namespace Fsel.Course.Domain.Entities
         public EnumGradingStyle GradingStyle { get; set; }
 
         [Range(1, int.MaxValue, ErrorMessage = nameof(EnumClassForumErrorCode.CF04C))]
-        public long TaggetTimeLimitTicks { get; set; }
+        public long TaggetWordLimit { get; set; }
 
         [Range(1, int.MaxValue, ErrorMessage = nameof(EnumClassForumErrorCode.CF04C))]
-        public long TaggetWordLimit { get; set; }
+        public long TaggetTimeLimitTicks { get; set; }
 
         [NotMapped]
         public TimeSpan TaggetTimeLimit
