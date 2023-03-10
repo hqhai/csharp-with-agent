@@ -14,7 +14,7 @@ namespace Fsel.Course.Infrastructure.Configs
     {
         public void Configure(EntityTypeBuilder<Question> builder)
         {
-            builder.Property(e => e.EnumQuestionType)
+            builder.Property(e => e.QuestionType)
                  .HasMaxLength(100)
                  .HasConversion(
                      v => v.ToString(),

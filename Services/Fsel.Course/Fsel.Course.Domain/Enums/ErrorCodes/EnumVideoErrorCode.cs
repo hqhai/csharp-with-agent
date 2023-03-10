@@ -9,14 +9,19 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
     public enum EnumVideoErrorCode
     {
         /// <summary>
-        /// Unit does not exist
+        /// Video does not exist
         /// </summary>
         VD01V,
 
         /// <summary>
-        /// Unit was used
+        /// Lesson was used
         /// </summary>
         VD02V,
+
+        /// <summary>
+        /// Lesson not is correct
+        /// </summary>
+        VD03V,
 
         /// <summary>
         /// Name cannot be empty
