@@ -1,4 +1,5 @@
-﻿using Fsel.Course.Domain.Enums;
+﻿using Fsel.Course.Domain.Entities;
+using Fsel.Course.Domain.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,5 +19,6 @@ namespace Fsel.Course.Common.Models.Commands.Videos
         public Guid? TeacherId { get; set; }
 
         public EnumCourseLevel CourseLevel { get; set; }
+        public CreateVideoCommandModel? VideoTimeCode { get; set; }
     }
 }
