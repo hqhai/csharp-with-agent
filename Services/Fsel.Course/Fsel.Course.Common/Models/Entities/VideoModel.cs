@@ -7,44 +7,39 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Fsel.Core.Base.BaseModels;
+using Fsel.Course.Domain.Entities;
 
 namespace Fsel.Course.Common.Models.Entities
 {
     public class VideoModel : BaseEntityModel
     {
+        /// <summary>
+        /// Tên Video
+        /// </summary>
         public string? Name { get; set; }
 
+        /// <summary>
+        /// Link Video
+        /// </summary>
         public string? VideoFilePath { get; set; }
 
+        /// <summary>
+        /// Trạng thái kích hoạt
+        /// </summary>
         public bool IsActive { get; set; }
 
+        public EnumVideoType Type { get; set; }
+
+        /// <summary>
+        /// Giáo Viên ID
+        /// </summary>
         public Guid? TeacherId { get; set; }
 
         /// <summary>
-        /// Time code information
+        /// Trình độ khóa
         /// </summary>
-        /// 
-       /* public Guid? Time*/
-        public long DisplayTimeTicks { get; set; }
-
-        public long ExecutionTimeTicks { get; set; }
-
-        public EnumTimeCodeType TimeCodeType { get; set; }
-
-        /// <summary>
-        /// Excercise and Question information
-        /// </summary>
-
         public EnumCourseLevel CourseLevel { get; set; }
 
-        public string? ExcerciseName { get; set; }
-
-        public EnumQuestionType QuestionType { get; set; }
-
-        public string? MediaPost { get; set; }
-
-        public EnumQuestionType EnumQuestionType { get; set; }
-
-        public string? Config { get; set; }
+        public List<VideoTimeCodeModel>? VideoTimeCodes { get; set; }
     }
 }

@@ -8,8 +8,7 @@ using System.Threading.Tasks;
 
 namespace Fsel.Course.Domain.IRepositories
 {
-    public interface IVideoRepository : IRepository<Video>
+    public interface IVideoTimeCodeRepository : IRepository<VideoTimeCode>
     {
-        Task<bool> IsVideoLesson(Guid Id);
     }
 }
