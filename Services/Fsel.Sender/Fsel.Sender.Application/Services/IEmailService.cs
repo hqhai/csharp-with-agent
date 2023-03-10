@@ -1,9 +1,9 @@
-﻿using Fsel.Identity.Common.ConfigSettings;
-using Fsel.Identity.Common.Models.Entities;
+﻿using Fsel.Sender.Common.ConfigSettings;
+using Fsel.Sender.Common.Models.Entities;
 using System.Net;
 using System.Net.Mail;
 
-namespace Fsel.Identity.Application.Services
+namespace Fsel.Sender.Application.Services
 {
     public interface IEmailService
     {
@@ -26,11 +26,27 @@ namespace Fsel.Identity.Application.Services
                 var email = new MailMessage();
                 email.From = new MailAddress(_appSetting?.Smtp?.From ?? string.Empty);
                 email.Subject = message.Subject;
-                if (message.To == null) return;
-                foreach (var item in message.To)
+                if (message.ToEmails == null) return;
+
+                foreach (var item in message.ToEmails)
                 {
                     email.To.Add(new MailAddress(item));
                 }
+                if (message.BccEmails != null)
+                {
+                    foreach (var item in message.BccEmails)
+                    {
+                        email.To.Add(new MailAddress(item));
+                    }
+                }
+                if (message.CcEmails != null)
+                {
+                    foreach (var item in message.CcEmails)
+                    {
+                        email.To.Add(new MailAddress(item));
+                    }
+                }
+
                 email.Body = message.Content;
                 email.IsBodyHtml = true;
                 using (var client = new SmtpClient(_appSetting?.Smtp?.SmtpServer))
@@ -44,7 +60,7 @@ namespace Fsel.Identity.Application.Services
                 }
                 return;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return;
             }
