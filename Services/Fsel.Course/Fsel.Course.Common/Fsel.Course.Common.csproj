@@ -7,11 +7,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Fsel.Course.Domain\Fsel.Course.Domain.csproj" />
+    <Folder Include="Models\Queries\PlacementTest\" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Models\Queries\PlacementTest\" />
+    <ProjectReference Include="..\..\Shared\Fsel.Core\Fsel.Core.csproj" />
+    <ProjectReference Include="..\Fsel.Course.Domain\Fsel.Course.Domain.csproj" />
   </ItemGroup>
 
 </Project>
