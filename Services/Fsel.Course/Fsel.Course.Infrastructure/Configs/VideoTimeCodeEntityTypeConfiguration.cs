@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace Fsel.Course.Infrastructure.Configs
 {
-    public class VideoTimeCodeTypeConfiguration : IEntityTypeConfiguration<VideoTimeCode>
+    public class VideoTimeCodeEntityTypeConfiguration : IEntityTypeConfiguration<VideoTimeCode>
     {
         public void Configure(EntityTypeBuilder<VideoTimeCode> builder)
         {

@@ -19,6 +19,11 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         VD02V,
 
         /// <summary>
+        /// Unit not is correct
+        /// </summary>
+        VD03V,
+
+        /// <summary>
         /// Name cannot be empty
         /// </summary>
         VD01C,

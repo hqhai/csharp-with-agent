@@ -14,6 +14,16 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         LU01V,
 
         /// <summary>
+        /// Lesson Unit was used
+        /// </summary>
+        LU02V,
+
+        /// <summary>
+        /// Lesson Unit not is correct
+        /// </summary>
+        LU03V,
+
+        /// <summary>
         /// Name cannot be empty
         /// </summary>
         LU01C,

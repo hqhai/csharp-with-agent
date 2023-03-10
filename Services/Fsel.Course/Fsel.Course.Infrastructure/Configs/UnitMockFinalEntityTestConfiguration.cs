@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Fsel.Course.Infrastructure.Configs
 {
-    public class UnitMockFinalTestConfiuration : IEntityTypeConfiguration<UnitMockFinalTest>
+    public class UnitMockFinalEntityTestConfiguration : IEntityTypeConfiguration<UnitMockFinalTest>
     {
         public void Configure(EntityTypeBuilder<UnitMockFinalTest> builder)
         {

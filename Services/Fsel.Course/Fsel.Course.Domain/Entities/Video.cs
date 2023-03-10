@@ -30,6 +30,8 @@ namespace Fsel.Course.Domain.Entities
         /// </summary>
         public bool IsActive { get; set; }
 
+        public EnumVideoType Type { get; set; }
+
         /// <summary>
         /// Giáo Viên ID
         /// </summary>

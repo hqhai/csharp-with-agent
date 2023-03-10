@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Fsel.Course.Infrastructure.Configs
 {
-    public class ExcerciseQuestionTypeConfiguration : IEntityTypeConfiguration<ExcerciseQuestion>
+    public class ExcerciseQuestionEntityTypeConfiguration : IEntityTypeConfiguration<ExcerciseQuestion>
     {
         public void Configure(EntityTypeBuilder<ExcerciseQuestion> builder)
         {
