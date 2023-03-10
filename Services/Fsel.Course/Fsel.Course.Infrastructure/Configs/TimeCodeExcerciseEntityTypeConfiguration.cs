@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Fsel.Course.Infrastructure.Configs
 {
-    public class TimeCodeExcerciseTypeConfiguration : IEntityTypeConfiguration<TimeCodeExcercise>
+    public class TimeCodeExcerciseEntityTypeConfiguration : IEntityTypeConfiguration<TimeCodeExcercise>
     {
         public void Configure(EntityTypeBuilder<TimeCodeExcercise> builder)
         {

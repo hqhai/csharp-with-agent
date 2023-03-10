@@ -8,6 +8,16 @@
         PT01V,
 
         /// <summary>
+        /// Placement Test was used
+        /// </summary>
+        PT02V,
+
+        /// <summary>
+        /// Placement Test not is correct
+        /// </summary>
+        PT03V,
+
+        /// <summary>
         /// Name cannot be empty
         /// </summary>
         PT01C,

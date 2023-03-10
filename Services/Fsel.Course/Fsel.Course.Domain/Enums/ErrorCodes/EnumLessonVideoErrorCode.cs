@@ -14,6 +14,16 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         LV01V,
 
         /// <summary>
+        /// Lesson Video was used
+        /// </summary>
+        LV02V,
+
+        /// <summary>
+        /// Lesson Video not is correct
+        /// </summary>
+        LV03V,
+
+        /// <summary>
         /// Name cannot be empty
         /// </summary>
         LV01C,

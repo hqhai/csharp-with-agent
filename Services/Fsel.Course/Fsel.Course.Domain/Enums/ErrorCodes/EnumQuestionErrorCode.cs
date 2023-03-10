@@ -14,6 +14,16 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         Q01V,
 
         /// <summary>
+        /// Question was used
+        /// </summary>
+        Q02V,
+
+        /// <summary>
+        /// Question not is correct
+        /// </summary>
+        Q03V,
+
+        /// <summary>
         /// Question cannot be empty
         /// </summary>
         Q01C,

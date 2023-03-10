@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace Fsel.Course.Infrastructure.Configs
 {
-    public class QuestionTypeConfiguration : IEntityTypeConfiguration<Question>
+    public class QuestionEntityTypeConfiguration : IEntityTypeConfiguration<Question>
     {
         public void Configure(EntityTypeBuilder<Question> builder)
         {

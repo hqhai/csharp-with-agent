@@ -44,7 +44,9 @@ namespace Fsel.Course.Domain.Entities
         public EnumCourseLevel CourseLevel { get; set; }
 
         public List<LessonVideo> LessonVideos { get; set; } = new List<LessonVideo>();
-
+        public ClassForum ClassForum { get; set; } = new ClassForum();
+        public List<LessonHomeWork> LessonHomeWorks { get; set; } = new List<LessonHomeWork>();
+        public List<LessonExtraPractice> LessonExtraPractices { get; set; } = new List<LessonExtraPractice>();
         public List<UnitLesson> UnitLessons { get; set; } = new List<UnitLesson>();
     }
 }
