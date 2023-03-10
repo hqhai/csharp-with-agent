@@ -13,11 +13,7 @@ namespace Fsel.Course.Domain.Entities
     {
         public Lesson? Lesson { get; set; }
         public ExtraPractice? ExtraPractice { get; set; }
-
-        [Required(ErrorMessage = nameof(EnumLessonErrorCode.LS01C))]
         public Guid LessonId { get; set; }
-
-        [Required(ErrorMessage = nameof(EnumExtraPractiveErrorCode.EP01C))]
         public Guid ExtracPraticeId { get; set; }
     }
 }
