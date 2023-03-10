@@ -14,6 +14,16 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         C01V,
 
         /// <summary>
+        /// Unit have been use
+        /// </summary>
+        C02V,
+
+        /// <summary>
+        /// Unit null
+        /// </summary>
+        C03V,
+
+        /// <summary>
         /// Name cannot be empty
         /// </summary>
         C01C,
@@ -32,15 +42,5 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         /// Number of course >1
         /// </summary>
         C04C,
-
-        /// <summary>
-        /// Unit have been use
-        /// </summary>
-        C02V,
-
-        /// <summary>
-        /// Unit null
-        /// </summary>
-        C03V,
     }
 }

@@ -28,9 +28,10 @@ namespace Fsel.Course.Application.Commands.CourseCmd
         private readonly IUnitRepository _unitRepository;
         private readonly IMapper _mapper;
 
-        public CreateCourseCommandHandler(ICourseRepository courseRepository, ICourseUnitRepository
-                            courseUnitRepository, IUnitRepository unitRepository,
-                            IMapper mapper)
+        public CreateCourseCommandHandler(ICourseRepository courseRepository
+            , ICourseUnitRepository courseUnitRepository
+            , IUnitRepository unitRepository
+            , IMapper mapper)
         {
             _unitRepository = unitRepository;
             _courseUnitRepository = courseUnitRepository;

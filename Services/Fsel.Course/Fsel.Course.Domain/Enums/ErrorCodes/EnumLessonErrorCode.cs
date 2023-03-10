@@ -13,6 +13,11 @@
         LS02V,
 
         /// <summary>
+        /// Lesson not is correct
+        /// </summary>
+        LS03V,
+
+        /// <summary>
         /// Name cannot be empty
         /// </summary>
         LS01C,

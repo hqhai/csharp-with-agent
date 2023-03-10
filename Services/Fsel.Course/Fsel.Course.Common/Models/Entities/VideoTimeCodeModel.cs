@@ -14,9 +14,9 @@ namespace Fsel.Course.Common.Models.Entities
 {
     public class VideoTimeCodeModel : BaseEntityModel
     {
-        public long DisplayTimeTicks { get; set; }
+        public TimeSpan DisplayTime { get; set; }
 
-        public long ExecutionTimeTicks { get; set; }
+        public TimeSpan ExecutionTime { get; set; }
 
         public EnumTimeCodeType TimeCodeType { get; set; }
         public Guid VideoId { get; set; }

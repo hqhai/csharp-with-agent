@@ -2,6 +2,11 @@
 {
     public enum EnumCourseSkill
     {
-        Listening, Speaking, Reading, Writing, Vocabulary, Grammar
+        Listening,
+        Speaking,
+        Reading,
+        Writing,
+        Vocabulary,
+        Grammar
     }
 }

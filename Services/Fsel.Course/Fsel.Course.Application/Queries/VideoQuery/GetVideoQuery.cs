@@ -55,8 +55,8 @@ namespace Fsel.Course.Application.Queries.VideoQuery
                             VideoTimeCodes = i.VideoTimeCodes.Select(x => new VideoTimeCodeModel
                             {
                                 Id = x.Id,
-                                DisplayTimeTicks = x.DisplayTimeTicks,
-                                ExecutionTimeTicks = x.ExecutionTimeTicks,
+                                DisplayTime = x.DisplayTime,
+                                ExecutionTime = x.ExecutionTime,
                                 TimeCodeType = x.TimeCodeType,
                                 VideoId = x.VideoId,
                                 Excercises = x.TimeCodeExcercises.Where(n => n.Excercise != null).Select(n => n.Excercise ?? new Excercise()).Select(n => new ExerciseModel

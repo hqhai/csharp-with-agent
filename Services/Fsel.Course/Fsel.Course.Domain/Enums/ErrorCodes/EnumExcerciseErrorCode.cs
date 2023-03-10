@@ -14,6 +14,16 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         E01V,
 
         /// <summary>
+        /// Excercise have been use
+        /// </summary>
+        E02V,
+
+        /// <summary>
+        /// Excercise null
+        /// </summary>
+        E03V,
+
+        /// <summary>
         /// Name cannot be empty
         /// </summary>
         E01C,

@@ -14,10 +14,10 @@ namespace Fsel.Course.Domain.Entities
         public Lesson? Lesson { get; set; }
         public Video? Video { get; set; }
 
-        [Required(ErrorMessage = nameof(EnumLessonVideoErrorCode.LV01C))]
+        [Required(ErrorMessage = nameof(EnumLessonErrorCode.LS01C))]
         public Guid LessonId { get; set; }
 
-        [Required(ErrorMessage = nameof(EnumLessonVideoErrorCode.LV01C))]
+        [Required(ErrorMessage = nameof(EnumVideoErrorCode.VD01C))]
         public Guid VideoId { get; set; }
     }
 }
