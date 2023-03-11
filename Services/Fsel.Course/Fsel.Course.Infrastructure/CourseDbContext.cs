@@ -20,7 +20,7 @@ namespace Fsel.Course.Infrastructure
         #region Db Set
 
         public DbSet<MockTest> MockTests { get; set; }
-        public DbSet<UnitSkillMockTest> UnitMockFinalTests { get; set; }
+        public DbSet<UnitSkillMockTest> UnitSkillMockTests { get; set; }
         public DbSet<PlacementTest> PlacementTests { get; set; }
         public DbSet<Lesson> Lessons { get; set; }
         public DbSet<Domain.Entities.Course> Courses { get; set; }
@@ -66,7 +66,7 @@ namespace Fsel.Course.Infrastructure
             modelBuilder.ApplyConfiguration(new TimeCodeExcerciseEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new UnitEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new UnitLessonEntityTypeConfiguration());
-            modelBuilder.ApplyConfiguration(new UnitMockFinalEntityTestConfiguration());
+            modelBuilder.ApplyConfiguration(new UnitSkillMockTestEntityTestConfiguration());
             modelBuilder.ApplyConfiguration(new VideoEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new VideoTimeCodeEntityTypeConfiguration());
 

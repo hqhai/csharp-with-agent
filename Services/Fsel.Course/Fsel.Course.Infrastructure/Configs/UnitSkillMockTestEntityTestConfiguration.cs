@@ -4,12 +4,12 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Fsel.Course.Infrastructure.Configs
 {
-    public class UnitMockFinalEntityTestConfiguration : IEntityTypeConfiguration<UnitSkillMockTest>
+    public class UnitSkillMockTestEntityTestConfiguration : IEntityTypeConfiguration<UnitSkillMockTest>
     {
         public void Configure(EntityTypeBuilder<UnitSkillMockTest> builder)
         {
             builder.HasOne(a => a.Unit)
-                .WithMany(b => b.UnitMockFinalTests)
+                .WithMany(b => b.UnitSkillMockTests)
                 .HasForeignKey(b => b.UnitId)
                 .OnDelete(DeleteBehavior.Cascade);
 
