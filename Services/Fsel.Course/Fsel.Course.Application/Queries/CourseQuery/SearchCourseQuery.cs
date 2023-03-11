@@ -51,10 +51,10 @@ namespace Fsel.Course.Application.Queries.CourseQuery
                                   CourseLevel = i.CourseLevel,
                                   CreatedDate = i.CreatedDate,
                                   CreatedUserId = i.CreatedUserId,
-                                  CreatedUserName = i.CreatedUserName,
+                                  CreatedFullName = i.CreatedFullName,
                                   UpdatedDate = i.UpdatedDate,
                                   UpdatedUserId = i.UpdatedUserId,
-                                  UpdatedUserName = i.UpdatedUserName,
+                                  UpdatedFullName = i.UpdatedFullName,
                               };
             //Keyword
             if (!string.IsNullOrEmpty(request.Keyword))

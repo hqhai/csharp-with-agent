@@ -11,7 +11,7 @@ namespace Fsel.Course.Infrastructure.Repositories
 {
     public class HomeWorkRepository : BaseRepository<HomeWork>, IHomeWorkRepository
     {
-        public HomeWorkRepository(CourseDbContext dbContext) : base(dbContext)
+        public HomeWorkRepository(CourseDbContext dbContext, AuthContext authContext) : base(dbContext, authContext)
         {
         }
     }

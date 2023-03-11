@@ -3,6 +3,13 @@
     public class BaseAppSetting
     {
         public Jwt? Jwt { get; set; }
+        public string? ServiceName { get; set; }
+        public Services? Services { get; set; }
+    }
+
+    public class Services
+    {
+        public string? SenderApiUrl { get; set; }
     }
 
     public class Jwt

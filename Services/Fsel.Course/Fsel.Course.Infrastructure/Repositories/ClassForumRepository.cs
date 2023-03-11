@@ -11,7 +11,7 @@ namespace Fsel.Course.Infrastructure.Repositories
 {
     public class ClassForumRepository : BaseRepository<ClassForum>, IClassForumRepository
     {
-        public ClassForumRepository(CourseDbContext dbContext) : base(dbContext)
+        public ClassForumRepository(CourseDbContext dbContext, AuthContext authContext) : base(dbContext, authContext)
         {
         }
     }

@@ -11,7 +11,7 @@ namespace Fsel.Course.Infrastructure.Repositories
 {
     public class TimeCodeExcerciseRepository : BaseRepository<TimeCodeExcercise>, ITimeCodeExcerciseRepository
     {
-        public TimeCodeExcerciseRepository(BaseDbContext dbContext) : base(dbContext)
+        public TimeCodeExcerciseRepository(CourseDbContext dbContext, AuthContext authContext) : base(dbContext, authContext)
         {
         }
     }

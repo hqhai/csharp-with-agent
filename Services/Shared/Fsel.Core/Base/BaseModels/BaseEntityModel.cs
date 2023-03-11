@@ -8,9 +8,9 @@
 
         public Guid? UpdatedUserId { get; set; }
 
-        public string? CreatedUserName { get; set; }
+        public string? CreatedFullName { get; set; }
 
-        public string? UpdatedUserName { get; set; }
+        public string? UpdatedFullName { get; set; }
 
         public DateTime CreatedDate { get; set; }
 

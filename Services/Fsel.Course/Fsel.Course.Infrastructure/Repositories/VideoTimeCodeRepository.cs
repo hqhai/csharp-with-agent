@@ -11,7 +11,7 @@ namespace Fsel.Course.Infrastructure.Repositories
 {
     public class VideoTimeCodeRepository : BaseRepository<VideoTimeCode>, IVideoTimeCodeRepository
     {
-        public VideoTimeCodeRepository(BaseDbContext dbContext) : base(dbContext)
+        public VideoTimeCodeRepository(CourseDbContext dbContext, AuthContext authContext) : base(dbContext, authContext)
         {
         }
     }
