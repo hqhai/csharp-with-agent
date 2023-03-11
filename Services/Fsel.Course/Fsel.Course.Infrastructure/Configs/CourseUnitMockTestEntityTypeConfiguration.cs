@@ -9,7 +9,7 @@ namespace Fsel.Course.Infrastructure.Configs
         public void Configure(EntityTypeBuilder<CourseUnitMockTest> builder)
         {
             builder.HasOne(a => a.Unit)
-                .WithMany(b => b.CourseUnits)
+                .WithMany(b => b.CourseUnitMockTests)
                 .HasForeignKey(b => b.UnitId)
                 .OnDelete(DeleteBehavior.Cascade);
 

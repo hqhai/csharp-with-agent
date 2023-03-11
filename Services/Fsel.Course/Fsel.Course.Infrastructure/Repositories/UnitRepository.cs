@@ -14,8 +14,8 @@ namespace Fsel.Course.Infrastructure.Repositories
         public async Task<bool> IsUnitUsed(Guid id)
         {
             return await Queryable
-                .Include(x => x.CourseUnits.Where(n => !n.IsDeleted))
-                .AnyAsync(x => x.Id == id && x.CourseUnits.Count > 0);
+                .Include(x => x.CourseUnitMockTests.Where(n => !n.IsDeleted))
+                .AnyAsync(x => x.Id == id && x.CourseUnitMockTests.Count > 0);
         }
     }
 }

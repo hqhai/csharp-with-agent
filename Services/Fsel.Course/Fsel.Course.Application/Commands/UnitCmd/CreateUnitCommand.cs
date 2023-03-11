@@ -22,12 +22,14 @@ namespace Fsel.Course.Application.Commands.UnitCmd
         private readonly IUnitRepository _unitRepository;
         private readonly IMapper _mapper;
         private readonly ILessonRepository _lessonRepository;
+        private readonly IMockTestRepository _mockTestRepository;
 
-        public CreateUnitCommandHandler(IUnitRepository unitRepository, ILessonRepository lessonRepository,
+        public CreateUnitCommandHandler(IUnitRepository unitRepository, ILessonRepository lessonRepository, IMockTestRepository mockTestRepository,
             IMapper mapper)
         {
             _lessonRepository = lessonRepository;
             _unitRepository = unitRepository;
+            _mockTestRepository = mockTestRepository;
             _mapper = mapper;
         }
 
@@ -73,8 +75,14 @@ namespace Fsel.Course.Application.Commands.UnitCmd
                     LessonId = x
                 }).ToList();
 
-                /* var unitMockTest = from i in _unitRepository.Queryable.Include(i => i.UnitSkillMockTests.Where(i => i.IsDeleted))
-                                    .ThenInclude(i => i.MockTest ?? new MockTest()).*/
+                unit.UnitSkillMockTests = new List<UnitSkillMockTest>
+                {
+                    new UnitSkillMockTest
+                    {
+                        MockTestId = request.MockTestId,
+                        UnitId= request.MockTestId,
+                    }
+                };
 
                 unit = _unitRepository.Add(unit);
 

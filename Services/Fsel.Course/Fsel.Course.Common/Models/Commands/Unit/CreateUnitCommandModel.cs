@@ -16,6 +16,6 @@ namespace Fsel.Course.Common.Models.Commands.Unit
 
         public EnumCourseLevel CourseLevel { get; set; }
 
-        public Guid? MockTestId { get; set; }
+        public Guid MockTestId { get; set; }
     }
 }
