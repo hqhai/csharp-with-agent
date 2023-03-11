@@ -12,7 +12,7 @@ namespace Fsel.Course.Infrastructure.Repositories
 {
     public class LessonRepository : BaseRepository<Lesson>, ILessonRepository
     {
-        public LessonRepository(CourseDbContext dbContext) : base(dbContext)
+        public LessonRepository(CourseDbContext dbContext, AuthContext authContext) : base(dbContext, authContext)
         {
         }
 

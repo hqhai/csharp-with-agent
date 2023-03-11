@@ -22,7 +22,7 @@ namespace Fsel.Identity.Infrastructure
 
         #region Db Set
 
-        public DbSet<User> Users { get; set; }
+        public override DbSet<User> Users { get; set; }
 
         #endregion Db Set
 

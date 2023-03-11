@@ -11,7 +11,7 @@ namespace Fsel.Course.Infrastructure.Repositories
 {
     public class ExtraPracticeRepository : BaseRepository<ExtraPractice>, IExtraPracticeRepository
     {
-        public ExtraPracticeRepository(CourseDbContext dbContext) : base(dbContext)
+        public ExtraPracticeRepository(CourseDbContext dbContext, AuthContext authContext) : base(dbContext, authContext)
         {
         }
     }

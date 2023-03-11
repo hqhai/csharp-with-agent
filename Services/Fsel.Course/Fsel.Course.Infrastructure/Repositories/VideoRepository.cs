@@ -13,7 +13,7 @@ namespace Fsel.Course.Infrastructure.Repositories
 {
     public class VideoRepository : BaseRepository<Video>, IVideoRepository
     {
-        public VideoRepository(CourseDbContext dbContext) : base(dbContext)
+        public VideoRepository(CourseDbContext dbContext, AuthContext authContext) : base(dbContext, authContext)
         {
         }
 

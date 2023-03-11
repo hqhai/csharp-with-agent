@@ -1,5 +1,6 @@
 ﻿using Fsel.Common.ActionResults;
 using Fsel.Common.Helpers;
+using Fsel.Core.Base;
 using Fsel.Core.Base.Interfaces;
 using MediatR;
 using System.ComponentModel;
@@ -10,7 +11,7 @@ using System.Text.Json.Serialization;
 
 namespace Fsel.Core.Entities
 {
-    public class Entity : IValidationEntity, IEntity
+    public class Entity : ValidationEntity, IEntity
     {
         [Key]
         [Column(Order = 0)]
@@ -27,15 +28,15 @@ namespace Fsel.Core.Entities
 
         [Column(Order = 104)]
         [MaxLength(100)]
-        public string CreatedUserName { get; set; }
+        public string CreatedFullName { get; set; }
 
         [Column(Order = 105)]
         [MaxLength(100)]
-        public string? UpdatedUserName { get; set; }
+        public string? UpdatedFullName { get; set; }
 
         [Column(Order = 106)]
         [MaxLength(100)]
-        public string? DeletedUserName { get; set; }
+        public string? DeletedFullName { get; set; }
 
         [Column(Order = 107)]
         public DateTime CreatedDate { get; set; }
@@ -68,7 +69,7 @@ namespace Fsel.Core.Entities
         {
             CreatedDate = DateTime.Now;
             CreatedUserId = Guid.Empty;
-            CreatedUserName = string.Empty;
+            CreatedFullName = string.Empty;
             Id = Guid.Empty;
         }
 
@@ -133,66 +134,5 @@ namespace Fsel.Core.Entities
 
             return base.GetHashCode();
         }
-
-        #region Validation
-
-        protected List<ErrorResult> _errorMessages = new List<ErrorResult>();
-
-        [JsonIgnore]
-        public IReadOnlyCollection<ErrorResult> ErrorMessages => _errorMessages;
-
-        public Assembly GetAssembly()
-        {
-            return GetType().Assembly;
-        }
-
-        public void AddValidationError(string errorCode, string propertyName, object propertyValue)
-        {
-            AddValidationError(errorCode, new List<string> { MethodHelper.GenerateErrorResult(propertyName, propertyValue) });
-        }
-
-        public void AddValidationError(string errorCode, List<string> errorValues)
-        {
-            _errorMessages.Add(new ErrorResult
-            {
-                ErrorCode = errorCode,
-                ErrorMessage = MethodHelper.GetErrorMessage(errorCode, GetAssembly()),
-                ErrorValues = errorValues
-            });
-        }
-
-        public void AddValidationErrors(IEnumerable<ErrorResult> errorMessages)
-        {
-            _errorMessages.AddRange(errorMessages);
-        }
-
-        public virtual bool IsValid()
-        {
-            ValidationContext validationContext = new ValidationContext(this, null, null);
-            List<ValidationResult> list = new List<ValidationResult>();
-            if (!Validator.TryValidateObject(this, validationContext, list, validateAllProperties: true))
-            {
-                foreach (ValidationResult item in list)
-                {
-                    ErrorResult errorResult = new ErrorResult
-                    {
-                        ErrorCode = item.ErrorMessage
-                    };
-                    errorResult.ErrorMessage = MethodHelper.GetErrorMessage(item.ErrorMessage, GetAssembly());
-                    foreach (string memberName in item.MemberNames)
-                    {
-                        PropertyInfo? property = validationContext.ObjectType.GetProperty(memberName);
-                        object? value = property?.GetValue(validationContext.ObjectInstance, null);
-                        errorResult.ErrorValues.Add(MethodHelper.GenerateErrorResult(memberName, value));
-                    }
-
-                    _errorMessages.Add(errorResult);
-                }
-            }
-
-            return _errorMessages.Count == 0;
-        }
-
-        #endregion Validation
     }
 }
