@@ -3,14 +3,8 @@ using Fsel.Common.ActionResults;
 using Fsel.Common.Helpers;
 using Fsel.Course.Domain.Enums.ErrorCodes;
 using Fsel.Course.Domain.IRepositories;
-using Fsel.Course.Infrastructure.Repositories;
 using MediatR;
 using Microsoft.AspNetCore.Http;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Fsel.Course.Application.Commands.VideoCmd
 {
@@ -35,6 +29,7 @@ namespace Fsel.Course.Application.Commands.VideoCmd
                 MethodResult<bool> methodResult = new MethodResult<bool>();
 
                 #region Validation
+
                 var IsLessonVideo = await _videoRepository.IsVideoLesson(request.Id);
 
                 if (IsLessonVideo)

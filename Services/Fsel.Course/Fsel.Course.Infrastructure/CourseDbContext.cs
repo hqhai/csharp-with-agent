@@ -5,7 +5,6 @@ using Fsel.Course.Infrastructure.Configs;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
-using Unit = Fsel.Course.Domain.Entities.Unit;
 
 /*using Course = Fsel.Course.Domain.Entities.Course;*/
 

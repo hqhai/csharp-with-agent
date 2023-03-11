@@ -2,17 +2,11 @@
 using Fsel.Common.ActionResults;
 using Fsel.Core.Base.BaseModels;
 using Fsel.Course.Common.Models.Entities;
-using Fsel.Course.Common.Models.Queries;
 using Fsel.Course.Common.Models.Queries.Video;
 using Fsel.Course.Domain.IRepositories;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Fsel.Course.Application.Queries.VideoQuery
 {
@@ -42,17 +36,17 @@ namespace Fsel.Course.Application.Queries.VideoQuery
             }
 
             var VideoQuery = from i in _videoRepository.Queryable
-                            select new VideoModel
-                            {
-                                Id = i.Id,
-                                Name = i.Name,
-                                IsActive = i.IsActive,
-                                CourseLevel = i.CourseLevel,
-                                CreatedDate = i.CreatedDate,
-                                CreatedUserId = i.CreatedUserId,
-                                UpdatedDate = i.UpdatedDate,
-                                UpdatedUserId = i.UpdatedUserId,
-                            };
+                             select new VideoModel
+                             {
+                                 Id = i.Id,
+                                 Name = i.Name,
+                                 IsActive = i.IsActive,
+                                 CourseLevel = i.CourseLevel,
+                                 CreatedDate = i.CreatedDate,
+                                 CreatedUserId = i.CreatedUserId,
+                                 UpdatedDate = i.UpdatedDate,
+                                 UpdatedUserId = i.UpdatedUserId,
+                             };
             //Keyword
             if (!string.IsNullOrEmpty(request.Keyword))
             {

@@ -1,14 +1,10 @@
 ﻿using Fsel.Common.ActionResults;
+using Fsel.Core.Base;
 using Fsel.Identity.Common.Models.Commands;
 using Fsel.Identity.Domain.Entities;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Fsel.Identity.Application.Commands.AuthCmd
 {
@@ -19,11 +15,15 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
     public class ResetPasswordCommandHandler : IRequestHandler<ResetPasswordCommand, MethodResult<bool>>
     {
         private readonly UserManager<User> _userManager;
+
+        private readonly AuthContext _authContext;
         private readonly IMediator _mediator;
 
         public ResetPasswordCommandHandler(UserManager<User> userManager,
+            AuthContext authContext,
             IMediator mediator)
         {
+            _authContext = authContext;
             _userManager = userManager;
             _mediator = mediator;
         }
@@ -49,7 +49,8 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                 methodResult.AddErrorMessage("ConfirmPassword not null");
                 return methodResult;
             }
-            await ResetPassword(request.UserId, request.Password);
+
+            await ResetPassword(_authContext.CurrentUserId, request.Password);
             return methodResult;
         }
 

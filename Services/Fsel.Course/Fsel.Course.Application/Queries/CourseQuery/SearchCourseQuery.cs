@@ -7,11 +7,6 @@ using Fsel.Course.Domain.IRepositories;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Fsel.Course.Application.Queries.CourseQuery
 {
@@ -51,10 +46,10 @@ namespace Fsel.Course.Application.Queries.CourseQuery
                                   CourseLevel = i.CourseLevel,
                                   CreatedDate = i.CreatedDate,
                                   CreatedUserId = i.CreatedUserId,
-                                  CreatedUserName = i.CreatedUserName,
+                                  CreatedFullName = i.CreatedFullName,
                                   UpdatedDate = i.UpdatedDate,
                                   UpdatedUserId = i.UpdatedUserId,
-                                  UpdatedUserName = i.UpdatedUserName,
+                                  UpdatedFullName = i.UpdatedFullName,
                               };
             //Keyword
             if (!string.IsNullOrEmpty(request.Keyword))

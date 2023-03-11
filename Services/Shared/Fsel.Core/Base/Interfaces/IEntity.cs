@@ -10,11 +10,11 @@ namespace Fsel.Core.Base.Interfaces
 
         Guid? DeletedUserId { get; set; }
 
-        string CreatedUserName { get; set; }
+        string CreatedFullName { get; set; }
 
-        string? UpdatedUserName { get; set; }
+        string? UpdatedFullName { get; set; }
 
-        string? DeletedUserName { get; set; }
+        string? DeletedFullName { get; set; }
 
         DateTime CreatedDate { get; set; }
 

@@ -1,9 +1,4 @@
-﻿using Fsel.Common.Helpers;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-
-namespace Fsel.Common.Helpers
+﻿namespace Fsel.Common.Helpers
 {
     public class PasswordGeneratorHelper
     {

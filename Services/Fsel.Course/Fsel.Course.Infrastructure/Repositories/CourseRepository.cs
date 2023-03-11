@@ -1,18 +1,13 @@
 ﻿using Fsel.Core.Base;
 using Fsel.Course.Domain.IRepositories;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using EntityCourse = Fsel.Course.Domain.Entities.Course;
 
 namespace Fsel.Course.Infrastructure.Repositories
 {
     public class CourseRepository : BaseRepository<EntityCourse>, ICourseRepository
     {
-        public CourseRepository(CourseDbContext dbContext) : base(dbContext)
+        public CourseRepository(CourseDbContext dbContext, AuthContext authContext) : base(dbContext, authContext)
         {
         }
 
