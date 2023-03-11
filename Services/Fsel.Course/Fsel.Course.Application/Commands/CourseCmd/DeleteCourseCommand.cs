@@ -5,11 +5,6 @@ using Fsel.Course.Domain.Enums.ErrorCodes;
 using Fsel.Course.Domain.IRepositories;
 using MediatR;
 using Microsoft.AspNetCore.Http;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Fsel.Course.Application.Commands.CourseCmd
 {
@@ -22,9 +17,9 @@ namespace Fsel.Course.Application.Commands.CourseCmd
     {
         private readonly ICourseRepository _courseRepository;
         private readonly IMapper _mapper;
-        private readonly ICourseUnitRepository _courseUnitRepository;
+        private readonly ICourseUnitMockTestRepository _courseUnitRepository;
 
-        public DeleteCourseCommandHandler(ICourseRepository courseRepository, ICourseUnitRepository courseUnitRepository,
+        public DeleteCourseCommandHandler(ICourseRepository courseRepository, ICourseUnitMockTestRepository courseUnitRepository,
             IMapper mapper)
         {
             _courseUnitRepository = courseUnitRepository;

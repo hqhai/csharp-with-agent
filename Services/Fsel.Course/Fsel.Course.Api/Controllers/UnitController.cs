@@ -2,10 +2,8 @@
 using Fsel.Common.Constants;
 using Fsel.Common.Helpers;
 using Fsel.Core.Base.BaseModels;
-using Fsel.Course.Application.Commands.PlacementTestCmd;
 using Fsel.Course.Application.Commands.UnitCmd;
 using Fsel.Course.Application.Queries.UnitQuery;
-using Fsel.Course.Application.Querys.PlacementTestQuery;
 using Fsel.Course.Common.Models.Entities;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -49,6 +47,7 @@ namespace Fsel.Course.Api.Controllers
                 return errorResult.GetActionResult();
             }
         }
+
         /// <summary>
         /// Search Unit
         /// </summary>
@@ -71,6 +70,7 @@ namespace Fsel.Course.Api.Controllers
                 return errorResult.GetActionResult();
             }
         }
+
         /// <summary>
         /// Delete a Unit
         /// </summary>
@@ -81,7 +81,6 @@ namespace Fsel.Course.Api.Controllers
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.BadRequest)]
         public async Task<IActionResult> delete([FromRoute] Guid id)
         {
-
             /*return Ok(await _mediator.Send(new DeleteUnitCommand { Id=id}));*/
 
             try
@@ -143,6 +142,5 @@ namespace Fsel.Course.Api.Controllers
                 return errorResult.GetActionResult();
             }
         }
-
     }
 }

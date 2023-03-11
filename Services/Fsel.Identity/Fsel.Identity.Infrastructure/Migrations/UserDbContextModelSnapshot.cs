@@ -22,7 +22,7 @@ namespace Fsel.Identity.Infrastructure.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("Fsel.Identity.Domain.Entities.Account", b =>
+            modelBuilder.Entity("Fsel.Identity.Domain.Entities.User", b =>
                 {
                     b.Property<string>("Id")
                         .HasColumnType("nvarchar(450)");
@@ -33,33 +33,6 @@ namespace Fsel.Identity.Infrastructure.Migrations
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2")
-                        .HasColumnOrder(107);
-
-                    b.Property<Guid>("CreatedUserId")
-                        .HasColumnType("uniqueidentifier")
-                        .HasColumnOrder(101);
-
-                    b.Property<string>("CreatedUserName")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)")
-                        .HasColumnOrder(104);
-
-                    b.Property<DateTime?>("DeletedDate")
-                        .HasColumnType("datetime2")
-                        .HasColumnOrder(109);
-
-                    b.Property<Guid?>("DeletedUserId")
-                        .HasColumnType("uniqueidentifier")
-                        .HasColumnOrder(103);
-
-                    b.Property<string>("DeletedUserName")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)")
-                        .HasColumnOrder(106);
 
                     b.Property<string>("Email")
                         .HasMaxLength(256)
@@ -72,10 +45,6 @@ namespace Fsel.Identity.Infrastructure.Migrations
                         .IsRequired()
                         .HasMaxLength(250)
                         .HasColumnType("nvarchar(250)");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit")
-                        .HasColumnOrder(110);
 
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("bit");
@@ -112,19 +81,6 @@ namespace Fsel.Identity.Infrastructure.Migrations
 
                     b.Property<bool>("TwoFactorEnabled")
                         .HasColumnType("bit");
-
-                    b.Property<DateTime?>("UpdatedDate")
-                        .HasColumnType("datetime2")
-                        .HasColumnOrder(108);
-
-                    b.Property<Guid?>("UpdatedUserId")
-                        .HasColumnType("uniqueidentifier")
-                        .HasColumnOrder(102);
-
-                    b.Property<string>("UpdatedUserName")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)")
-                        .HasColumnOrder(105);
 
                     b.Property<string>("UserName")
                         .HasMaxLength(256)
@@ -172,19 +128,19 @@ namespace Fsel.Identity.Infrastructure.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "a010f9ec-352a-4c9f-a3bd-4f64d6ea9efd",
+                            Id = "d8842f4d-295f-4465-8531-4df80b79e1f2",
                             Name = "MasterAdmin",
                             NormalizedName = "MasterAdmin"
                         },
                         new
                         {
-                            Id = "c695f3d4-5393-4465-b564-6dca656fa258",
+                            Id = "7992932b-a03d-4eb6-8bd7-edadde25298e",
                             Name = "Admin",
                             NormalizedName = "Admin"
                         },
                         new
                         {
-                            Id = "a11365f8-b8d1-4db6-a2d5-655d3b244a7a",
+                            Id = "3d4b05b9-b5dd-48f2-a125-f8a22228272e",
                             Name = "CSO",
                             NormalizedName = "CSO"
                         });
@@ -307,7 +263,7 @@ namespace Fsel.Identity.Infrastructure.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
                 {
-                    b.HasOne("Fsel.Identity.Domain.Entities.Account", null)
+                    b.HasOne("Fsel.Identity.Domain.Entities.User", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -316,7 +272,7 @@ namespace Fsel.Identity.Infrastructure.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
                 {
-                    b.HasOne("Fsel.Identity.Domain.Entities.Account", null)
+                    b.HasOne("Fsel.Identity.Domain.Entities.User", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -331,7 +287,7 @@ namespace Fsel.Identity.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Fsel.Identity.Domain.Entities.Account", null)
+                    b.HasOne("Fsel.Identity.Domain.Entities.User", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -340,7 +296,7 @@ namespace Fsel.Identity.Infrastructure.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
                 {
-                    b.HasOne("Fsel.Identity.Domain.Entities.Account", null)
+                    b.HasOne("Fsel.Identity.Domain.Entities.User", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)

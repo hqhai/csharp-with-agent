@@ -1,22 +1,10 @@
 ﻿using AutoMapper;
 using Fsel.Common.ActionResults;
 using Fsel.Common.Helpers;
-using Fsel.Core.Base.BaseModels;
-using Fsel.Course.Application.Commands.PlacementTestCmd;
-using Fsel.Course.Common.Models.Commands.Lesson;
-using Fsel.Course.Common.Models.Entities;
-using Fsel.Course.Domain.Entities;
 using Fsel.Course.Domain.Enums.ErrorCodes;
 using Fsel.Course.Domain.IRepositories;
-using Fsel.Course.Infrastructure.Repositories;
 using MediatR;
 using Microsoft.AspNetCore.Http;
-using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Fsel.Course.Application.Commands.LessonCmd
 {

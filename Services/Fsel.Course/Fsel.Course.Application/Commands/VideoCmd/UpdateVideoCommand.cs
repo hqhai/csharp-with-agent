@@ -9,9 +9,11 @@ using Fsel.Course.Domain.IRepositories;
 using Fsel.Course.Infrastructure.Repositories;
 using MediatR;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace Fsel.Course.Application.Commands.VideoCmd
 {

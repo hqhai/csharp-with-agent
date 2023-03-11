@@ -1,8 +1,10 @@
 ﻿using AutoMapper;
 using Fsel.Common.ActionResults;
+using Fsel.Common.Helpers;
 using Fsel.Identity.Common.Models.Commands;
 using Fsel.Identity.Common.Models.Entities;
 using Fsel.Identity.Domain.Entities;
+using Fsel.Identity.Domain.Enums.ErrorCodes;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -41,6 +43,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             if (request.Username == null || request.Password == null)
             {
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
+                methodResult.AddErrorMessage(nameof(EnumAuthErrorCode.AU04ER), new[] { nameof(request.Username), nameof(request.Password) });
                 return methodResult;
             }
 
@@ -48,6 +51,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             if (user == null)
             {
                 methodResult.StatusCode = StatusCodes.Status401Unauthorized;
+                methodResult.AddErrorMessage(nameof(EnumAuthErrorCode.AU05ER), new[] { nameof(request.Username), nameof(request.Password) });
                 return methodResult;
             }
 
@@ -55,6 +59,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             if (!result.Succeeded)
             {
                 methodResult.StatusCode = StatusCodes.Status401Unauthorized;
+                methodResult.AddErrorMessage(nameof(EnumAuthErrorCode.AU05ER), new[] { nameof(request.Username), nameof(request.Password) });
                 return methodResult;
             }
 

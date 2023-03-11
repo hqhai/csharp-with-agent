@@ -9,22 +9,25 @@ namespace Fsel.Core.Base
 {
     public class BaseRepository<T> : IRepository<T> where T : Entity
     {
+        protected readonly AuthContext _authContext;
+
         protected readonly BaseDbContext _dbBaseContext;
 
         protected readonly DbSet<T> _dbSet;
 
-        //public int CurrentUserId => _authContext.CurrentUserId;
+        private Guid CurrentUserId => _authContext.CurrentUserId;
 
-        //public string CurrentUsername => _authContext.CurrentUsername;
+        private string CurrentFullName => _authContext.CurrentFullName ?? string.Empty;
 
         public IUnitOfWork UnitOfWork => _dbBaseContext;
 
         public IQueryable<T> Queryable => _dbSet.Where((T m) => !m.IsDeleted);
 
-        public BaseRepository(BaseDbContext dbContext)
+        public BaseRepository(BaseDbContext dbContext, AuthContext authContext)
         {
             _dbBaseContext = dbContext;
             _dbSet = _dbBaseContext.Set<T>();
+            _authContext = authContext;
         }
 
         public virtual async Task<T?> GetByIdAsync(Guid id, int? siteId = null)
@@ -56,9 +59,8 @@ namespace Fsel.Core.Base
             try
             {
                 newEntity.CreatedDate = DateTime.Now;
-
-                //newEntity.CreatedUserId = _authContext.CurrentUserId;
-                //newEntity.CreatedUserName = _authContext.CurrentUsername;
+                newEntity.CreatedUserId = CurrentUserId;
+                newEntity.CreatedFullName = CurrentFullName;
                 newEntity.Id = Guid.NewGuid();
                 newEntity.AddDomainEvent(new EntityCreatedEvent<T>(newEntity));
                 _dbBaseContext.TrackEntity(newEntity);
@@ -105,8 +107,8 @@ namespace Fsel.Core.Base
             {
                 deleteEntity.IsDeleted = true;
                 deleteEntity.DeletedDate = DateTime.Now;
-                //deleteEntity.DeletedUserId = _authContext.CurrentUserId;
-                //deleteEntity.DeletedUserName = _authContext.CurrentUsername;
+                deleteEntity.CreatedUserId = CurrentUserId;
+                deleteEntity.CreatedFullName = CurrentFullName;
                 deleteEntity.AddDomainEvent(new EntityDeletedEvent<T>(deleteEntity));
                 _dbBaseContext.TrackEntity(deleteEntity);
                 return Task.FromResult(result: true);
@@ -122,8 +124,8 @@ namespace Fsel.Core.Base
             try
             {
                 updateEntity.UpdatedDate = DateTime.Now;
-                //updateEntity.UpdatedUserId = _authContext.CurrentUserId;
-                //updateEntity.UpdatedUserName = _authContext.CurrentUsername;
+                updateEntity.CreatedUserId = CurrentUserId;
+                updateEntity.CreatedFullName = CurrentFullName;
                 updateEntity.AddDomainEvent(new EntityChangedEvent<T>(updateEntity));
                 _dbBaseContext.TrackEntity(updateEntity);
                 return _dbSet.Update(updateEntity).Entity;

@@ -1,36 +1,30 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Fsel.Course.Domain.Enums.ErrorCodes
+﻿namespace Fsel.Course.Domain.Enums.ErrorCodes
 {
-    public enum EnumMockFinalTestErrorCode
+    public enum EnumMockTestErrorCode
     {
         /// <summary>
         /// Mock Final Test does not exist
         /// </summary>
-        MFT01V,
+        MT01V,
 
         /// <summary>
         /// Mock Final Test  was used
         /// </summary>
-        MFT02V,
+        MT02V,
 
         /// <summary>
         /// Mock Final Test  not is correct
         /// </summary>
-        MFT03V,
+        MT03V,
 
         /// <summary>
         /// Name cannot be empty
         /// </summary>
-        MFT01C,
+        MT01C,
 
         /// <summary>
         /// Name limited to 250 characters
         /// </summary>
-        MFT02C,
+        MT02C,
     }
 }

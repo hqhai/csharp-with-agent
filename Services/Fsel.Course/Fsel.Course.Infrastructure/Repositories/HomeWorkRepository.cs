@@ -1,17 +1,12 @@
 ﻿using Fsel.Core.Base;
 using Fsel.Course.Domain.Entities;
 using Fsel.Course.Domain.IRepositories;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Fsel.Course.Infrastructure.Repositories
 {
     public class HomeWorkRepository : BaseRepository<HomeWork>, IHomeWorkRepository
     {
-        public HomeWorkRepository(CourseDbContext dbContext) : base(dbContext)
+        public HomeWorkRepository(CourseDbContext dbContext, AuthContext authContext) : base(dbContext, authContext)
         {
         }
     }
