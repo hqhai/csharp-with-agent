@@ -1,7 +1,9 @@
 ﻿using Fsel.Common.ActionResults;
+using Fsel.Common.Helpers;
 using Fsel.Core.Base;
 using Fsel.Identity.Common.Models.Commands;
 using Fsel.Identity.Domain.Entities;
+using Fsel.Identity.Domain.Enums.ErrorCodes;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -34,39 +36,53 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             if (request.OldPassword == null)
             {
                 methodResult.StatusCode = StatusCodes.Status401Unauthorized;
-                methodResult.AddErrorMessage("Old Password not null");
+                methodResult.AddErrorMessage(
+                    nameof(EnumAuthErrorCode.AU01V),
+                    new[] { MethodHelper.GenerateErrorResult(nameof(request.OldPassword), request.OldPassword) });
                 return methodResult;
             }
             if (request.Password == null)
             {
                 methodResult.StatusCode = StatusCodes.Status404NotFound;
-                methodResult.AddErrorMessage("Password not null");
+                methodResult.AddErrorMessage(
+                    nameof(EnumAuthErrorCode.AU02V),
+                    new[] { MethodHelper.GenerateErrorResult(nameof(request.Password), request.Password) });
                 return methodResult;
             }
             if (request.ConfirmPassword == null)
             {
                 methodResult.StatusCode = StatusCodes.Status404NotFound;
-                methodResult.AddErrorMessage("ConfirmPassword not null");
+                methodResult.AddErrorMessage(
+                    nameof(EnumAuthErrorCode.AU03V),
+                    new[] { MethodHelper.GenerateErrorResult(nameof(request.ConfirmPassword), request.ConfirmPassword) });
                 return methodResult;
             }
 
-            await ResetPassword(_authContext.CurrentUserId, request.Password);
-            return methodResult;
-        }
-
-        public async Task ResetPassword(Guid userId, string password)
-        {
-            var user = await _userManager.FindByIdAsync(userId.ToString());
+            var user = await _userManager.FindByEmailAsync(request.Email ?? string.Empty);
             if (user == null)
             {
-                return;
+                methodResult.StatusCode = StatusCodes.Status404NotFound;
+                methodResult.AddErrorMessage(
+                    nameof(EnumAuthErrorCode.AU04V),
+                    new[] { MethodHelper.GenerateErrorResult(nameof(request.Email), request.Email) });
+                return methodResult;
             }
-            else
+
+            var hashPasswordOle = _userManager.PasswordHasher.HashPassword(user, request.OldPassword);
+            if (hashPasswordOle != user.PasswordHash)
             {
-                var hashPassword = _userManager.PasswordHasher.HashPassword(user, password);
-                user.PasswordHash = hashPassword;
-                await _userManager.UpdateAsync(user);
+                methodResult.StatusCode = StatusCodes.Status404NotFound;
+                methodResult.AddErrorMessage(
+                    nameof(EnumAuthErrorCode.AU05V),
+                    new[] { MethodHelper.GenerateErrorResult(nameof(request.OldPassword), request.OldPassword) });
+                return methodResult;
             }
+
+            var hashPassword = _userManager.PasswordHasher.HashPassword(user, request.Password);
+            user.PasswordHash = hashPassword;
+            await _userManager.UpdateAsync(user);
+
+            return methodResult;
         }
     }
 }

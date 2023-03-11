@@ -1,10 +1,12 @@
 ﻿using AutoMapper;
 using Fsel.Common.ActionResults;
+using Fsel.Common.Helpers;
 using Fsel.Identity.Application.Services;
 using Fsel.Identity.Common.ConfigSettings;
 using Fsel.Identity.Common.Models.Commands;
 using Fsel.Identity.Common.Models.Entities;
 using Fsel.Identity.Domain.Entities;
+using Fsel.Identity.Domain.Enums.ErrorCodes;
 using Fsel.Sender.Common.Models.Commands;
 using Fsel.Sender.Common.Models.Entities;
 using MediatR;
@@ -50,7 +52,9 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             if (userExit != null)
             {
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                methodResult.AddErrorMessage("This Email doesnot exit");
+                methodResult.AddErrorMessage(
+                    nameof(EnumAuthErrorCode.AU04V),
+                    new[] { MethodHelper.GenerateErrorResult(nameof(request.Email), request.Email) });
                 return methodResult;
             }
 
@@ -78,7 +82,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             if (!result.Succeeded)
             {
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                methodResult.AddErrorMessage("Sign up fail");
+                methodResult.AddErrorMessage(nameof(EnumAuthErrorCode.AU10ER));
                 return methodResult;
             }
             // Add Role to the user
