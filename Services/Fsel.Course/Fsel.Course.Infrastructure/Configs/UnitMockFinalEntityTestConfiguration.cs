@@ -4,19 +4,19 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Fsel.Course.Infrastructure.Configs
 {
-    public class UnitMockFinalEntityTestConfiguration : IEntityTypeConfiguration<UnitMockFinalTest>
+    public class UnitMockFinalEntityTestConfiguration : IEntityTypeConfiguration<MockFinalTest>
     {
-        public void Configure(EntityTypeBuilder<UnitMockFinalTest> builder)
+        public void Configure(EntityTypeBuilder<MockFinalTest> builder)
         {
             builder.HasOne(a => a.Unit)
                 .WithMany(b => b.UnitMockFinalTests)
                 .HasForeignKey(b => b.UnitId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            builder.HasOne(a => a.MockFinalTest)
-                .WithMany(b => b.UnitMockFinalTests)
-                .HasForeignKey(b => b.MockFinalTestId)
-                .OnDelete(DeleteBehavior.Cascade);
+            /*builder.HasOne(a => a.MockTest)
+                .WithMany(b => b.CourseUnitMockTests)
+                .HasForeignKey(b => b.MockTestId)
+                .OnDelete(DeleteBehavior.Cascade);*/
         }
     }
 }

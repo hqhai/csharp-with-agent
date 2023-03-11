@@ -9,9 +9,9 @@ using System.Threading.Tasks;
 
 namespace Fsel.Course.Infrastructure.Configs
 {
-    public class CourseUnitEntityTypeConfiguration : IEntityTypeConfiguration<CourseUnit>
+    public class CourseUnitMockTestEntityTypeConfiguration : IEntityTypeConfiguration<CourseUnitMockTest>
     {
-        public void Configure(EntityTypeBuilder<CourseUnit> builder)
+        public void Configure(EntityTypeBuilder<CourseUnitMockTest> builder)
         {
             builder.HasOne(a => a.Unit)
                 .WithMany(b => b.CourseUnits)
@@ -19,9 +19,19 @@ namespace Fsel.Course.Infrastructure.Configs
                 .OnDelete(DeleteBehavior.Cascade);
 
             builder.HasOne(a => a.Course)
-                .WithMany(b => b.CourseUnits)
+                .WithMany(b => b.CourseUnitMockTests)
                 .HasForeignKey(b => b.CourseId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            builder.HasOne(a => a.MockTest)
+                .WithMany(b => b.CourseUnitMockTests)
+                .HasForeignKey(b => b.MockTestId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            /*builder.HasOne(a => a.MockTest)
+                .WithMany(b => b.CourseUnitMockTests)
+                .HasForeignKey(b => b.MockTestId)
+                .OnDelete(DeleteBehavior.Cascade);*/
         }
     }
 }

@@ -19,8 +19,8 @@ namespace Fsel.Course.Infrastructure
 
         #region Db Set
 
-        public DbSet<MockFinalTest> MockFinalTests { get; set; }
-        public DbSet<UnitMockFinalTest> UnitMockFinalTests { get; set; }
+        public DbSet<MockTest> MockTests { get; set; }
+        public DbSet<MockFinalTest> UnitMockFinalTests { get; set; }
         public DbSet<PlacementTest> PlacementTests { get; set; }
         public DbSet<Lesson> Lessons { get; set; }
         public DbSet<Domain.Entities.Course> Courses { get; set; }
@@ -34,7 +34,7 @@ namespace Fsel.Course.Infrastructure
         public DbSet<ClassForum> ClassForums { get; set; }
         public DbSet<UnitLesson> UnitLessons { get; set; }
         public DbSet<Domain.Entities.Unit> Units { get; set; }
-        public DbSet<CourseUnit> CourseUnits { get; set; }
+        public DbSet<CourseUnitMockTest> CourseUnitMockTests { get; set; }
 
         public DbSet<VideoTimeCode> VideoTimeCodes { get; set; }
 
@@ -52,7 +52,7 @@ namespace Fsel.Course.Infrastructure
         {
             modelBuilder.ApplyConfiguration(new ClassForumEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new CourseEntityTypeConfiguration());
-            modelBuilder.ApplyConfiguration(new CourseUnitEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new CourseUnitMockTestEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new ExcerciseEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new ExcerciseQuestionEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new ExtraPracticeEntityTypeConfiguration());

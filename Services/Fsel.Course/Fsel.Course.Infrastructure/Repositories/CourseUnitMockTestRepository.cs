@@ -11,13 +11,13 @@ using System.Threading.Tasks;
 
 namespace Fsel.Course.Infrastructure.Repositories
 {
-    public class CourseUnitRepository : BaseRepository<CourseUnit>, ICourseUnitRepository
+    public class CourseUnitMockTestRepository : BaseRepository<CourseUnitMockTest>, ICourseUnitMockTestRepository
     {
-        public CourseUnitRepository(CourseDbContext dbContext) : base(dbContext)
+        public CourseUnitMockTestRepository(CourseDbContext dbContext) : base(dbContext)
         {
         }
 
-        public async Task<List<CourseUnit>> GetListByUnitIdAsync(Guid courseId)
+        public async Task<List<CourseUnitMockTest>> GetListByUnitIdAsync(Guid courseId)
         {
             return await Queryable.Where(a => a.CourseId == courseId).ToListAsync();
         }
