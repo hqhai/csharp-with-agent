@@ -13,10 +13,10 @@ namespace Fsel.Course.Infrastructure.Configs
                 .HasForeignKey(b => b.UnitId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            /*builder.HasOne(a => a.MockTest)
-                .WithMany(b => b.CourseUnitMockTests)
+            builder.HasOne(a => a.MockTest)
+                .WithMany(b => b.UnitSkillMockTests)
                 .HasForeignKey(b => b.MockTestId)
-                .OnDelete(DeleteBehavior.Cascade);*/
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

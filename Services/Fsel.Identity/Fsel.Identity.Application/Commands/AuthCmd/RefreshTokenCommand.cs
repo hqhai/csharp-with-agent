@@ -4,6 +4,7 @@ using Fsel.Identity.Common.ConfigSettings;
 using Fsel.Identity.Common.Models.Commands;
 using Fsel.Identity.Common.Models.Entities;
 using Fsel.Identity.Domain.Entities;
+using Fsel.Identity.Domain.Enums.ErrorCodes;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -55,7 +56,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                 if (!result)//false
                 {
                     methodResult.StatusCode = StatusCodes.Status401Unauthorized;
-                    methodResult.AddErrorMessage("Invalid token");
+                    methodResult.AddErrorMessage(nameof(EnumAuthErrorCode.AU06ER));
                     return methodResult;
                 }
             }
@@ -67,7 +68,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             if (expireDate > DateTime.UtcNow)
             {
                 methodResult.StatusCode = StatusCodes.Status200OK;
-                methodResult.AddErrorMessage("Access token has not yet expired");
+                methodResult.AddErrorMessage(nameof(EnumAuthErrorCode.AU07ER));
                 return methodResult;
             }
 
@@ -76,13 +77,13 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             if (user == null)
             {
                 methodResult.StatusCode = StatusCodes.Status404NotFound;
-                methodResult.AddErrorMessage("Refresh token does not exist");
+                methodResult.AddErrorMessage(nameof(EnumAuthErrorCode.AU08ER));
                 return methodResult;
             }
             else if (user.RefreshTokenExpiryTime == null || user.RefreshTokenExpiryTime.Value <= DateTime.Now)
             {
                 methodResult.StatusCode = StatusCodes.Status401Unauthorized;
-                methodResult.AddErrorMessage("Refresh token has expired");
+                methodResult.AddErrorMessage(nameof(EnumAuthErrorCode.AU09ER));
                 return methodResult;
             }
 
