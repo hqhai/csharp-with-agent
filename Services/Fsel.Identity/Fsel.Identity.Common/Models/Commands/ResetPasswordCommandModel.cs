@@ -5,7 +5,7 @@ namespace Fsel.Identity.Common.Models.Commands
 {
     public class ResetPasswordCommandModel
     {
-        [JsonIgnore]
+        [Required]
         public string? Email { get; set; }
 
         [Required]
