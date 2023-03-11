@@ -5,13 +5,13 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Fsel.Course.Infrastructure.Repositories
 {
-    public class CourseUnitRepository : BaseRepository<CourseUnit>, ICourseUnitRepository
+    public class CourseUnitMockTestRepository : BaseRepository<CourseUnitMockTest>, ICourseUnitMockTestRepository
     {
-        public CourseUnitRepository(CourseDbContext dbContext, AuthContext authContext) : base(dbContext, authContext)
+        public CourseUnitMockTestRepository(CourseDbContext dbContext, AuthContext authContext) : base(dbContext, authContext)
         {
         }
 
-        public async Task<List<CourseUnit>> GetListByUnitIdAsync(Guid courseId)
+        public async Task<List<CourseUnitMockTest>> GetListByUnitIdAsync(Guid courseId)
         {
             return await Queryable.Where(a => a.CourseId == courseId).ToListAsync();
         }

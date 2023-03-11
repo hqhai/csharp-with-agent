@@ -20,9 +20,9 @@ namespace Fsel.Course.Application.Commands.CourseCmd
         private readonly ICourseRepository _courseRepository;
         private readonly IMapper _mapper;
         private readonly IUnitRepository _unitRepository;
-        private readonly ICourseUnitRepository _courseUnitRepository;
+        private readonly ICourseUnitMockTestRepository _courseUnitRepository;
 
-        public UpdateCourseTestCommandHandler(ICourseRepository courseRepository, ICourseUnitRepository courseUnitRepository,
+        public UpdateCourseTestCommandHandler(ICourseRepository courseRepository, ICourseUnitMockTestRepository courseUnitRepository,
             IMapper mapper,
             IUnitRepository unitRepository)
         {
@@ -78,7 +78,7 @@ namespace Fsel.Course.Application.Commands.CourseCmd
 
             await _courseRepository.ExecuteTransactionAsync(async () =>
             {
-                course.CourseUnits = request.UnitIds.Select(x => new CourseUnit
+                course.CourseUnitMockTests = request.UnitIds.Select(x => new CourseUnitMockTest
                 {
                     UnitId = x
                 }).ToList();

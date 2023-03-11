@@ -2,14 +2,14 @@
 
 namespace Fsel.Course.Domain.Entities
 {
-    public class UnitMockFinalTest : Entity
+    public class UnitSkillMockTest : Entity
     {
         public Unit? Unit { get; set; }
 
-        public MockFinalTest? MockFinalTest { get; set; }
+        public MockTest? MockTest { get; set; }
 
         public Guid UnitId { get; set; }
 
-        public Guid MockFinalTestId { get; set; }
+        public Guid MockTestId { get; set; }
     }
 }

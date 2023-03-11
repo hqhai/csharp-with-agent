@@ -14,8 +14,8 @@ namespace Fsel.Course.Infrastructure.Repositories
         public async Task<bool> IsUnitUsed(Guid id)
         {
             return await Queryable
-                .Include(x => x.CourseUnits.Where(n => !n.IsDeleted))
-                .AnyAsync(x => x.Id == id && x.CourseUnits.Count > 0);
+                .Include(x => x.CourseUnitMockTests.Where(n => !n.IsDeleted))
+                .AnyAsync(x => x.Id == id && x.CourseUnitMockTests.Count > 0);
         }
 
         public override async Task<EntityCourse?> GetIncludeByIdAsync(Guid id, int? siteId = null)
@@ -23,7 +23,7 @@ namespace Fsel.Course.Infrastructure.Repositories
             try
             {
                 return await Queryable
-                .Include(x => x.CourseUnits.Where(n => !n.IsDeleted)).FirstOrDefaultAsync(x => x.Id == id);
+                .Include(x => x.CourseUnitMockTests.Where(n => !n.IsDeleted)).FirstOrDefaultAsync(x => x.Id == id);
             }
             catch (Exception)
             {

@@ -17,9 +17,9 @@ namespace Fsel.Course.Application.Commands.CourseCmd
     {
         private readonly ICourseRepository _courseRepository;
         private readonly IMapper _mapper;
-        private readonly ICourseUnitRepository _courseUnitRepository;
+        private readonly ICourseUnitMockTestRepository _courseUnitRepository;
 
-        public DeleteCourseCommandHandler(ICourseRepository courseRepository, ICourseUnitRepository courseUnitRepository,
+        public DeleteCourseCommandHandler(ICourseRepository courseRepository, ICourseUnitMockTestRepository courseUnitRepository,
             IMapper mapper)
         {
             _courseUnitRepository = courseUnitRepository;

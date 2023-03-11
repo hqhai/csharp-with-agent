@@ -21,9 +21,9 @@ namespace Fsel.Course.Domain.Entities
 
         public EnumCourseLevel CourseLevel { get; set; }
 
-        public List<UnitMockFinalTest> UnitMockFinalTests { get; set; } = new List<UnitMockFinalTest>();
+        public List<UnitSkillMockTest> UnitSkillMockTests { get; set; } = new List<UnitSkillMockTest>();
 
-        public List<CourseUnit> CourseUnits { get; set; } = new List<CourseUnit>();
+        public List<CourseUnitMockTest> CourseUnits { get; set; } = new List<CourseUnitMockTest>();
         public List<UnitLesson> UnitLessons { get; set; } = new List<UnitLesson>();
     }
 }
