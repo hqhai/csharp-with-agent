@@ -1,19 +1,12 @@
 ﻿using AutoMapper;
 using Fsel.Common.ActionResults;
 using Fsel.Common.Helpers;
-using Fsel.Course.Application.Commands.PlacementTestCmd;
-using Fsel.Course.Common.Models.Commands.PlacementTest;
 using Fsel.Course.Common.Models.Commands.Videos;
 using Fsel.Course.Common.Models.Entities;
 using Fsel.Course.Domain.Enums.ErrorCodes;
 using Fsel.Course.Domain.IRepositories;
 using MediatR;
 using Microsoft.AspNetCore.Http;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Fsel.Course.Application.Commands.VideoCmd
 {

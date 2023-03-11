@@ -1,11 +1,9 @@
 ﻿using Fsel.Common.ActionResults;
 using Fsel.Common.Constants;
 using Fsel.Common.Helpers;
-using Fsel.Core.Base;
 using Fsel.Core.Base.BaseModels;
 using Fsel.Course.Application.Commands.CourseCmd;
 using Fsel.Course.Application.Queries.CourseQuery;
-using Fsel.Course.Application.Querys.PlacementTestQuery;
 using Fsel.Course.Common.Models.Entities;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;

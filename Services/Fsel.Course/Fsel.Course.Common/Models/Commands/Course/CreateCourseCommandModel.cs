@@ -1,12 +1,6 @@
-﻿using Fsel.Course.Domain.Enums.ErrorCodes;
+﻿using Fsel.Course.Common.Models.Entities;
+using Fsel.Course.Domain.Entities;
 using Fsel.Course.Domain.Enums;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Unit = Fsel.Course.Domain.Entities.Unit;
 
 namespace Fsel.Course.Common.Models.Commands.Course
 {
@@ -20,8 +14,8 @@ namespace Fsel.Course.Common.Models.Commands.Course
 
         public bool IsPublish { get; set; }
 
-        public List<Guid>? UnitIds { get; set; }
-
         public EnumCourseLevel CourseLevel { get; set; }
+
+        public List<CourseUnitMockTestModel>? CourseUnitMockTests { get; set; }
     }
 }

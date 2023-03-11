@@ -2,6 +2,6 @@
 {
     public enum EnumUnitType
     {
-        Default,MockFinalTest
+        Default, MockFinalTest
     }
 }

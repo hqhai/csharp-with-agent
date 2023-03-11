@@ -6,14 +6,8 @@ using Fsel.Course.Common.Models.Entities;
 using Fsel.Course.Domain.Entities;
 using Fsel.Course.Domain.Enums.ErrorCodes;
 using Fsel.Course.Domain.IRepositories;
-using Fsel.Course.Infrastructure.Repositories;
 using MediatR;
 using Microsoft.AspNetCore.Http;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Fsel.Course.Application.Commands.CourseCmd
 {
@@ -26,16 +20,22 @@ namespace Fsel.Course.Application.Commands.CourseCmd
         private readonly ICourseRepository _courseRepository;
         private readonly IMapper _mapper;
         private readonly IUnitRepository _unitRepository;
-        private readonly ICourseUnitRepository _courseUnitRepository;
+        private readonly ICourseUnitMockTestRepository _unitUnitMockTestRepository;
+        private readonly ICourseMockTestRepository _mockTestRepository;
+        private readonly ICourseUnitMockTestRepository _courseUnitRepository;
 
-        public UpdateCourseTestCommandHandler(ICourseRepository courseRepository, ICourseUnitRepository courseUnitRepository,
+        public UpdateCourseTestCommandHandler(ICourseRepository courseRepository, ICourseUnitMockTestRepository courseUnitRepository,
             IMapper mapper,
-            IUnitRepository unitRepository)
+            IUnitRepository unitRepository
+            , ICourseUnitMockTestRepository unitUnitMockTestRepository
+            , ICourseMockTestRepository mockTestRepository)
         {
             _courseUnitRepository = courseUnitRepository;
             _courseRepository = courseRepository;
             _mapper = mapper;
             _unitRepository = unitRepository;
+            _unitUnitMockTestRepository = unitUnitMockTestRepository;
+            _mockTestRepository = mockTestRepository;
         }
 
         public async Task<MethodResult<CourseModel>> Handle(UpdateCourseCommand request, CancellationToken cancellationToken)
@@ -62,21 +62,27 @@ namespace Fsel.Course.Application.Commands.CourseCmd
                 return methodResult;
             }
 
-            if (request.UnitIds == null)
+            if (request.CourseUnitMockTests == null)
             {
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 methodResult.AddErrorMessage(
-                    nameof(EnumCourseErrorCode.C03V),
-                    new[] { MethodHelper.GenerateErrorResult(nameof(request.UnitIds), request.UnitIds) });
+                    nameof(EnumCourseErrorCode.C03V));
                 return methodResult;
             }
 
-            if (_unitRepository.IsIdsInValid(request.UnitIds))
+            if (_unitRepository.IsIdsInValid(request.CourseUnitMockTests.Select(e => e.UnitId)))
             {
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 methodResult.AddErrorMessage(
                     nameof(EnumUnitErrorCode.U03V));
+                return methodResult;
+            }
 
+            if (_mockTestRepository.IsIdsInValid(request.CourseUnitMockTests.Select(e => e.MockTestId)))
+            {
+                methodResult.StatusCode = StatusCodes.Status400BadRequest;
+                methodResult.AddErrorMessage(
+                    nameof(EnumUnitErrorCode.U03V));
                 return methodResult;
             }
 
@@ -84,7 +90,7 @@ namespace Fsel.Course.Application.Commands.CourseCmd
 
             await _courseRepository.ExecuteTransactionAsync(async () =>
             {
-                course.CourseUnits = request.UnitIds.Select(x => new CourseUnit
+                course.CourseUnitMockTests = request.CourseUnitMockTests.Select(x => new CourseUnitMockTest
                 {
                     UnitId = x
                 }).ToList();

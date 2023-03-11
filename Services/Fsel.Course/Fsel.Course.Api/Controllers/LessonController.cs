@@ -3,16 +3,12 @@ using Fsel.Common.Constants;
 using Fsel.Common.Helpers;
 using Fsel.Core.Base.BaseModels;
 using Fsel.Course.Application.Commands.LessonCmd;
-using Fsel.Course.Application.Commands.PlacementTestCmd;
 using Fsel.Course.Application.Queries.LessonQuery;
-using Fsel.Course.Application.Querys.PlacementTestQuery;
 using Fsel.Course.Common.Models.Entities;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System;
 using System.Net;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 

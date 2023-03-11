@@ -5,7 +5,6 @@ using Fsel.Course.Infrastructure.Configs;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
-using Unit = Fsel.Course.Domain.Entities.Unit;
 
 /*using Course = Fsel.Course.Domain.Entities.Course;*/
 
@@ -19,8 +18,8 @@ namespace Fsel.Course.Infrastructure
 
         #region Db Set
 
-        public DbSet<MockFinalTest> MockFinalTests { get; set; }
-        public DbSet<UnitMockFinalTest> UnitMockFinalTests { get; set; }
+        public DbSet<MockTest> MockTests { get; set; }
+        public DbSet<UnitSkillMockTest> UnitSkillMockTests { get; set; }
         public DbSet<PlacementTest> PlacementTests { get; set; }
         public DbSet<Lesson> Lessons { get; set; }
         public DbSet<Domain.Entities.Course> Courses { get; set; }
@@ -34,7 +33,7 @@ namespace Fsel.Course.Infrastructure
         public DbSet<ClassForum> ClassForums { get; set; }
         public DbSet<UnitLesson> UnitLessons { get; set; }
         public DbSet<Domain.Entities.Unit> Units { get; set; }
-        public DbSet<CourseUnit> CourseUnits { get; set; }
+        public DbSet<CourseUnitMockTest> CourseUnitMockTests { get; set; }
 
         public DbSet<VideoTimeCode> VideoTimeCodes { get; set; }
 
@@ -52,7 +51,7 @@ namespace Fsel.Course.Infrastructure
         {
             modelBuilder.ApplyConfiguration(new ClassForumEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new CourseEntityTypeConfiguration());
-            modelBuilder.ApplyConfiguration(new CourseUnitEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new CourseUnitMockTestEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new ExcerciseEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new ExcerciseQuestionEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new ExtraPracticeEntityTypeConfiguration());
@@ -66,7 +65,7 @@ namespace Fsel.Course.Infrastructure
             modelBuilder.ApplyConfiguration(new TimeCodeExcerciseEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new UnitEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new UnitLessonEntityTypeConfiguration());
-            modelBuilder.ApplyConfiguration(new UnitMockFinalEntityTestConfiguration());
+            modelBuilder.ApplyConfiguration(new UnitSkillMockTestEntityTestConfiguration());
             modelBuilder.ApplyConfiguration(new VideoEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new VideoTimeCodeEntityTypeConfiguration());
 
