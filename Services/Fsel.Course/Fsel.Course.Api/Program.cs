@@ -27,6 +27,8 @@ builder.Services.AddScoped<ICourseRepository, CourseRepository>();
 builder.Services.AddScoped<ICourseUnitMockTestRepository, CourseUnitMockTestRepository>();
 builder.Services.AddScoped<IUnitLessonRepository, UnitLessonRepository>();
 builder.Services.AddScoped<IUnitRepository, UnitRepository>();
+builder.Services.AddScoped<IMockTestRepository, MockTestRepository>();
+/*builder.Services.AddScoped<I>*/
 
 var app = builder.Build();
 

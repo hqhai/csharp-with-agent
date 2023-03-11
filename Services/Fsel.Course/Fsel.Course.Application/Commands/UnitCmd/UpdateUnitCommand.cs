@@ -5,6 +5,7 @@ using Fsel.Common.Helpers;
 using Fsel.Course.Common.Models.Commands.Unit;
 using Fsel.Course.Common.Models.Entities;
 using Fsel.Course.Domain.Entities;
+using Fsel.Course.Domain.Enums;
 using Fsel.Course.Domain.Enums.ErrorCodes;
 using Fsel.Course.Domain.IRepositories;
 using MediatR;
@@ -21,13 +22,15 @@ namespace Fsel.Course.Application.Commands.UnitCmd
         private readonly IUnitRepository _unitRepository;
         private readonly IMapper _mapper;
         private readonly ILessonRepository _lessonRepository;
+        private readonly IMockTestRepository _mockTestRepository;
 
-        public UpdateUnitCommandHandler(IUnitRepository unitTestRepository, ILessonRepository lessonRepository,
+        public UpdateUnitCommandHandler(IUnitRepository unitTestRepository, ILessonRepository lessonRepository, IMockTestRepository mockTestRepository,
             IMapper mapper)
         {
             _lessonRepository = lessonRepository;
             _unitRepository = unitTestRepository;
             _mapper = mapper;
+            _mockTestRepository = mockTestRepository;
         }
 
         public async Task<MethodResult<UnitModel>> Handle(UpdateUnitCommand request, CancellationToken cancellationToken)
@@ -80,6 +83,14 @@ namespace Fsel.Course.Application.Commands.UnitCmd
 
                 return methodResult;
             }
+            if (_mockTestRepository.Queryable.Any(e => e.MockTestType == EnumMockTestType.UnitMockTest))
+            {
+                methodResult.StatusCode = StatusCodes.Status400BadRequest;
+                methodResult.AddErrorMessage(
+                    nameof(EnumMockTestErrorCode.MT04V));
+
+                return methodResult;
+            }
 
             #endregion Validation
 
@@ -89,6 +100,14 @@ namespace Fsel.Course.Application.Commands.UnitCmd
                 {
                     LessonId = x
                 }).ToList();
+
+                unit.UnitSkillMockTests = new List<UnitSkillMockTest>
+                {
+                    new UnitSkillMockTest
+                    {
+                        MockTestId = request.MockTestId,
+                    }
+                };
 
                 unit = _unitRepository.Update(unit);
 

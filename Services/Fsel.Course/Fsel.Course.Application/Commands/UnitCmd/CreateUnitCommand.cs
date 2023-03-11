@@ -4,6 +4,7 @@ using Fsel.Common.Helpers;
 using Fsel.Course.Common.Models.Commands.Unit;
 using Fsel.Course.Common.Models.Entities;
 using Fsel.Course.Domain.Entities;
+using Fsel.Course.Domain.Enums;
 using Fsel.Course.Domain.Enums.ErrorCodes;
 using Fsel.Course.Domain.IRepositories;
 using MediatR;
@@ -66,6 +67,15 @@ namespace Fsel.Course.Application.Commands.UnitCmd
                 return methodResult;
             }
 
+            if (_mockTestRepository.Queryable.Any(e => e.MockTestType == EnumMockTestType.UnitMockTest))
+            {
+                methodResult.StatusCode = StatusCodes.Status400BadRequest;
+                methodResult.AddErrorMessage(
+                    nameof(EnumMockTestErrorCode.MT04V));
+
+                return methodResult;
+            }
+
             #endregion Validation
 
             await _unitRepository.ExecuteTransactionAsync(async () =>
@@ -80,7 +90,6 @@ namespace Fsel.Course.Application.Commands.UnitCmd
                     new UnitSkillMockTest
                     {
                         MockTestId = request.MockTestId,
-                        UnitId= request.MockTestId,
                     }
                 };
 
