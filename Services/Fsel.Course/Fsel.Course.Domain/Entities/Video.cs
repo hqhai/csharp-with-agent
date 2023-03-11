@@ -1,12 +1,7 @@
 ﻿using Fsel.Core.Entities;
-using Fsel.Course.Domain.Enums.ErrorCodes;
 using Fsel.Course.Domain.Enums;
-using System;
-using System.Collections.Generic;
+using Fsel.Course.Domain.Enums.ErrorCodes;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Fsel.Course.Domain.Entities
 {

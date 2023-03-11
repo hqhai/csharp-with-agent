@@ -8,11 +8,6 @@ using Fsel.Course.Domain.Enums.ErrorCodes;
 using Fsel.Course.Domain.IRepositories;
 using MediatR;
 using Microsoft.AspNetCore.Http;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using EntityCourse = Fsel.Course.Domain.Entities.Course;
 
 namespace Fsel.Course.Application.Commands.CourseCmd
@@ -24,12 +19,12 @@ namespace Fsel.Course.Application.Commands.CourseCmd
     public class CreateCourseCommandHandler : IRequestHandler<CreateCourseCommand, MethodResult<CourseModel>>
     {
         private readonly ICourseRepository _courseRepository;
-        private readonly ICourseUnitRepository _courseUnitRepository;
+        private readonly ICourseUnitMockTestRepository _courseUnitRepository;
         private readonly IUnitRepository _unitRepository;
         private readonly IMapper _mapper;
 
         public CreateCourseCommandHandler(ICourseRepository courseRepository
-            , ICourseUnitRepository courseUnitRepository
+            , ICourseUnitMockTestRepository courseUnitRepository
             , IUnitRepository unitRepository
             , IMapper mapper)
         {
@@ -75,7 +70,7 @@ namespace Fsel.Course.Application.Commands.CourseCmd
 
             await _courseRepository.ExecuteTransactionAsync(async () =>
             {
-                course.CourseUnits = request.UnitIds.Select(x => new CourseUnit
+                course.CourseUnitMockTests = request.UnitIds.Select(x => new CourseUnitMockTest
                 {
                     UnitId = x
                 }).ToList();

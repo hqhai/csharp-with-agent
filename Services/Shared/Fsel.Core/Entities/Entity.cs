@@ -1,13 +1,9 @@
-﻿using Fsel.Common.ActionResults;
-using Fsel.Common.Helpers;
-using Fsel.Core.Base;
+﻿using Fsel.Core.Base;
 using Fsel.Core.Base.Interfaces;
 using MediatR;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Reflection;
-using System.Text.Json.Serialization;
 
 namespace Fsel.Core.Entities
 {

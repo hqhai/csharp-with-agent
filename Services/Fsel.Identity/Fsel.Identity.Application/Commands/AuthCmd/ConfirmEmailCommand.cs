@@ -1,8 +1,5 @@
 ﻿using AutoMapper;
-using Azure;
 using Fsel.Common.ActionResults;
-using Fsel.Identity.Application.Services;
-using Fsel.Identity.Common.ConfigSettings;
 using Fsel.Identity.Common.Models.Commands;
 using Fsel.Identity.Common.Models.Entities;
 using Fsel.Identity.Domain.Entities;
