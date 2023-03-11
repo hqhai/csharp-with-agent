@@ -12,7 +12,7 @@ namespace Fsel.Course.Infrastructure.Repositories
 {
     public class MockTestRepository : BaseRepository<MockTest>, IMockTestRepository
     {
-        public MockTestRepository(BaseDbContext dbContext, AuthContext authContext) : base(dbContext, authContext)
+        public MockTestRepository(CourseDbContext dbContext, AuthContext authContext) : base(dbContext, authContext)
         {
         }
 
