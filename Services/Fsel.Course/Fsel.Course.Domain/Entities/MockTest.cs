@@ -23,5 +23,7 @@ namespace Fsel.Course.Domain.Entities
         public EnumMockTestType MockTestType { get; set; }
 
         public List<CourseUnitMockTest> CourseUnitMockTests { get; set; } = new List<CourseUnitMockTest>();
+
+        public List<UnitSkillMockTest> UnitSkillMockTests { get; set; } = new List<UnitSkillMockTest>();
     }
 }
