@@ -9,6 +9,7 @@ using Fsel.Course.Domain.IRepositories;
 using Fsel.Course.Infrastructure.Repositories;
 using MediatR;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -78,6 +79,9 @@ namespace Fsel.Course.Application.Commands.UnitCmd
                 {
                     LessonId = x
                 }).ToList();
+
+                /* var unitMockTest = from i in _unitRepository.Queryable.Include(i => i.UnitSkillMockTests.Where(i => i.IsDeleted))
+                                    .ThenInclude(i => i.MockTest ?? new MockTest()).*/
 
                 unit = _unitRepository.Add(unit);
 

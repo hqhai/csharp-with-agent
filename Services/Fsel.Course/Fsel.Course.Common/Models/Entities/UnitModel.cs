@@ -1,4 +1,5 @@
 ﻿using Fsel.Core.Base.BaseModels;
+using Fsel.Course.Domain.Entities;
 using Fsel.Course.Domain.Enums;
 using System;
 using System.Collections.Generic;
@@ -11,7 +12,6 @@ namespace Fsel.Course.Common.Models.Entities
 {
     public class UnitModel : BaseEntityModel
     {
-
         public string? Name { get; set; }
 
         public string? DisplayName { get; set; }
@@ -21,5 +21,7 @@ namespace Fsel.Course.Common.Models.Entities
         public EnumUnitType Type { get; set; }
 
         public EnumCourseLevel CourseLevel { get; set; }
+
+        /*public List<MockTest>? MockTests { get; set; }*/
     }
 }
