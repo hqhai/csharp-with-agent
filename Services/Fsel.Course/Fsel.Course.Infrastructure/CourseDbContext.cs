@@ -60,6 +60,7 @@ namespace Fsel.Course.Infrastructure
             modelBuilder.ApplyConfiguration(new LessonExtraPracticeEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new LessonHomeWorkEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new LessonVideoEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new MockTestEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new PlacementTestEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new QuestionEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new TimeCodeExcerciseEntityTypeConfiguration());
