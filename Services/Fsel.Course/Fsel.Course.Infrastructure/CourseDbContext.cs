@@ -50,21 +50,25 @@ namespace Fsel.Course.Infrastructure
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.ApplyConfiguration(new PlacementTestEntityTypeConfiguration());
-            modelBuilder.ApplyConfiguration(new LessonEntityTypeConfiguration());
-            modelBuilder.ApplyConfiguration(new VideoEntityTypeConfiguration());
-            modelBuilder.ApplyConfiguration(new LessonVideoEntityTypeConfiguration());
-            modelBuilder.ApplyConfiguration(new LessonHomeWorkEntityTypeConfiguration());
-            modelBuilder.ApplyConfiguration(new LessonExtraPracticeEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new ClassForumEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new CourseEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new CourseUnitEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new ExcerciseEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new ExcerciseQuestionEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new ExtraPracticeEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new HomeWorkEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new LessonEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new LessonExtraPracticeEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new LessonHomeWorkEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new LessonVideoEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new PlacementTestEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new QuestionEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new TimeCodeExcerciseEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new UnitEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new UnitLessonEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new UnitMockFinalEntityTestConfiguration());
-            modelBuilder.ApplyConfiguration(new UnitEntityTypeConfiguration());
-            modelBuilder.ApplyConfiguration(new CourseEntityTypeConfiguration());
-            modelBuilder.ApplyConfiguration(new ExcerciseQuestionEntityTypeConfiguration());
-            modelBuilder.ApplyConfiguration(new TimeCodeExcerciseEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new VideoEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new VideoTimeCodeEntityTypeConfiguration());
 
             base.OnModelCreating(modelBuilder);
         }
