@@ -38,7 +38,7 @@ namespace Fsel.Course.Domain.Entities
         public bool IsActive { get; set; }
 
         public EnumCourseSkill CourseSkill { get; set; }
-        public Guid? LessonId { get; set; }
-        public Lesson Lesson { get; set; } = new Lesson();
+        public Guid LessonId { get; set; }
+        public Lesson? Lesson { get; set; }
     }
 }

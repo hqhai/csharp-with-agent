@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Fsel.Course.Common.Models.Entities
 {
-    public class ExerciseQuestionModel
+    public class ExcerciseQuestionModel
     {
         public Guid ExcerciseId { get; set; }
 

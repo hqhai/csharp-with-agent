@@ -98,23 +98,6 @@ namespace Fsel.Course.Application.Commands.LessonCmd
                 nameof(EnumVideoErrorCode.VD03V)); return methodResult;
             }
             Lesson lesson = _mapper.Map<Lesson>(request);
-            lesson.LessonHomeWorks = request.HomeWorkIds.Select((x) => new LessonHomeWork
-            {
-                HomeWorkId = x
-            }).ToList();
-            lesson.LessonExtraPractices = request.ExtraPracticeIds.Select((x) => new LessonExtraPractice
-            {
-                ExtracPraticeId = x
-            }).ToList();
-            lesson.LessonVideos = request.ExtraPracticeIds.Select((x) => new LessonVideo
-            {
-                VideoId = x
-            }).ToList();
-
-            ClassForum classForum = new ClassForum();
-            _mapper.Map(request.ClassForum, classForum);
-            classForum.LessonId = lesson.Id;
-            lesson.ClassForum = classForum;
 
             if (!lesson.IsValid())
             {
@@ -127,6 +110,24 @@ namespace Fsel.Course.Application.Commands.LessonCmd
 
             await _lessonRepository.ExecuteTransactionAsync(async () =>
             {
+                lesson.LessonHomeWorks = request.HomeWorkIds.Select((x) => new LessonHomeWork
+                {
+                    HomeWorkId = x
+                }).ToList();
+                lesson.LessonExtraPractices = request.ExtraPracticeIds.Select((x) => new LessonExtraPractice
+                {
+                    ExtracPraticeId = x
+                }).ToList();
+                lesson.LessonVideos = request.VideoIds.Select((x) => new LessonVideo
+                {
+                    VideoId = x
+                }).ToList();
+
+                ClassForum classForum = new ClassForum();
+                _mapper.Map(request.ClassForum, classForum);
+                classForum.LessonId = lesson.Id;
+                lesson.ClassForum = classForum;
+
                 lesson = _lessonRepository.Add(lesson);
                 await _lessonRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 

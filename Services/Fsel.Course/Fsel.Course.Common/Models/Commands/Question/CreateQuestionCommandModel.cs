@@ -12,7 +12,7 @@ namespace Fsel.Course.Common.Models.Commands.Question
 {
     public class CreateQuestionCommandModel
     {
-        public EnumQuestionType EnumQuestionType { get; set; }
+        public EnumQuestionType QuestionType { get; set; }
         public bool IsSave { get; set; }
         public string? Config { get; set; }
     }

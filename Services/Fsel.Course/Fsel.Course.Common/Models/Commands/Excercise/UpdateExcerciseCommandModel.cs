@@ -9,8 +9,9 @@ using System.Threading.Tasks;
 
 namespace Fsel.Course.Common.Models.Commands.Excercise
 {
-    public class UpdateExcerciseCommandModel : BaseCommandModel
+    public class UpdateExcerciseCommandModel
     {
+        public Guid Id { get; set; }
         public string? Name { get; set; }
 
         public EnumQuestionType QuestionType { get; set; }

@@ -6,8 +6,12 @@ using Fsel.Course.Common.Models.Entities;
 using Fsel.Course.Domain.Entities;
 using Fsel.Course.Domain.Enums.ErrorCodes;
 using Fsel.Course.Domain.IRepositories;
+using Fsel.Course.Infrastructure.Repositories;
 using MediatR;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
 
 namespace Fsel.Course.Application.Commands.VideoCmd
 {
@@ -18,12 +22,27 @@ namespace Fsel.Course.Application.Commands.VideoCmd
     public class UpdateVideoCommandHandler : IRequestHandler<UpdateVideoCommand, MethodResult<VideoModel>>
     {
         private readonly IVideoRepository _videoRepository;
+        private readonly IQuestionRepository _questionRepository;
+        private readonly IExcerciseRepository _excerciseRepository;
+        private readonly IExcerciseQuestionRepository _excerciseQuestionRepository;
+        private readonly ITimeCodeExcerciseRepository _timeCodeExcerciseRepository;
+        private readonly IVideoTimeCodeRepository _videoTimeCodeRepository;
         private readonly IMapper _mapper;
 
-        public UpdateVideoCommandHandler(IVideoRepository videoRepository,
-            IMapper mapper)
+        public UpdateVideoCommandHandler(IVideoRepository videoRepository
+            , IQuestionRepository questionRepository
+            , IExcerciseRepository excerciseRepository
+            , IExcerciseQuestionRepository excerciseQuestionRepository
+            , ITimeCodeExcerciseRepository timeCodeExcerciseRepository
+            , IVideoTimeCodeRepository videoTimeCodeRepository
+            , IMapper mapper)
         {
             _videoRepository = videoRepository;
+            _questionRepository = questionRepository;
+            _excerciseRepository = excerciseRepository;
+            _excerciseQuestionRepository = excerciseQuestionRepository;
+            _timeCodeExcerciseRepository = timeCodeExcerciseRepository;
+            _videoTimeCodeRepository = videoTimeCodeRepository;
             _mapper = mapper;
         }
 
@@ -52,7 +71,7 @@ namespace Fsel.Course.Application.Commands.VideoCmd
             }
 
             // Lưu dữ liệu Video
-            var video = await _videoRepository.GetByIdAsync(request.Id);
+            var video = await _videoRepository.GetIncludeByIdAsync(request.Id);
             if (video == null)
             {
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
@@ -70,56 +89,326 @@ namespace Fsel.Course.Application.Commands.VideoCmd
                 }
                 else
                 {
-                    VideoTimeCode videoTimeCode = video.VideoTimeCodes[request.VideoTimeCodes.IndexOf(x)];
-                    x.Excercises.ForEach(n =>
+                    if (_videoTimeCodeRepository.IsIdsInValid(new List<Guid>() { x.Id })) // check value khong co trong db == true
                     {
-                        if (n == null)
+                        VideoTimeCode videoTimeCode = video.VideoTimeCodes[request.VideoTimeCodes.IndexOf(x)];
+                        x.Excercises.ForEach(n =>
                         {
-                            methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                            methodResult.AddErrorMessage(nameof(EnumVideoErrorCode.VD03V));
-                        }
-                        else
-                        {
-                            Excercise excercise = _mapper.Map<Excercise>(n);
-                            videoTimeCode.TimeCodeExcercises.Add(new TimeCodeExcercise
-                            {
-                                Excercise = excercise
-                            });
-                            n.Questions.ForEach(q =>
-                            {
-                                if (q == null)
-                                {
-                                    methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                                    methodResult.AddErrorMessage(nameof(EnumVideoErrorCode.VD03V));
-                                }
-                                else
-                                {
-                                    Question question = _mapper.Map<Question>(q);
-                                    excercise.ExcerciseQuestions.Add(new ExcerciseQuestion
-                                    {
-                                        Question = question
-                                    });
-
-                                    if (!question.IsValid())
-                                    {
-                                        methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                                        methodResult.AddResultFromErrorList(question.ErrorMessages);
-                                    }
-                                }
-                            });
-
-                            if (!excercise.IsValid())
+                            if (_excerciseRepository.IsIdsInValid(new List<Guid>() { n.Id })) { }
+                            else if (n == null)
                             {
                                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                                methodResult.AddResultFromErrorList(excercise.ErrorMessages);
+                                methodResult.AddErrorMessage(nameof(EnumVideoErrorCode.VD03V));
                             }
-                        }
-                    });
+                            else
+                            {
+                                Excercise excercise = _mapper.Map<Excercise>(n);
+                                videoTimeCode.TimeCodeExcercises.Add(new TimeCodeExcercise
+                                {
+                                    Excercise = excercise
+                                });
+                                n.Questions.ForEach(q =>
+                                {
+                                    if (_excerciseRepository.IsIdsInValid(new List<Guid>() { q.Id })) { }
+                                    else if (q == null)
+                                    {
+                                        methodResult.StatusCode = StatusCodes.Status400BadRequest;
+                                        methodResult.AddErrorMessage(nameof(EnumVideoErrorCode.VD03V));
+                                    }
+                                    else
+                                    {
+                                        Question question = _mapper.Map<Question>(q);
+                                        excercise.ExcerciseQuestions.Add(new ExcerciseQuestion
+                                        {
+                                            Question = question
+                                        });
 
-                    if (!videoTimeCode.IsValid())
+                                        if (!question.IsValid())
+                                        {
+                                            methodResult.StatusCode = StatusCodes.Status400BadRequest;
+                                            methodResult.AddResultFromErrorList(question.ErrorMessages);
+                                        }
+                                    }
+                                });
+
+                                if (!excercise.IsValid())
+                                {
+                                    methodResult.StatusCode = StatusCodes.Status400BadRequest;
+                                    methodResult.AddResultFromErrorList(excercise.ErrorMessages);
+                                }
+                            }
+                        });
+                        if (!videoTimeCode.IsValid())
+                        {
+                            methodResult.StatusCode = StatusCodes.Status400BadRequest;
+                            methodResult.AddResultFromErrorList(videoTimeCode.ErrorMessages);
+                        }
+                    }
+                    else
                     {
-                        methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                        methodResult.AddResultFromErrorList(videoTimeCode.ErrorMessages);
+                        VideoTimeCode videoTimeCode = video.VideoTimeCodes[request.VideoTimeCodes.IndexOf(x)];
+                        // excercises trong videotimecode
+                        var excercises = _excerciseRepository.Queryable
+                                .Include(x => x.TimeCodeExcercises)
+                                .Where(x => x.TimeCodeExcercises.Select(e => e.VideoTimeCodeId).Contains(videoTimeCode.Id)).ToList();
+
+                        x.Excercises.ForEach(n =>
+                        {
+                            if (n == null)
+                            {
+                                methodResult.StatusCode = StatusCodes.Status400BadRequest;
+                                methodResult.AddErrorMessage(nameof(EnumVideoErrorCode.VD03V));
+                            }
+                            else
+                            {
+                                if (!excercises.Any(f => f.Id == n.Id)) //n - excercises khong co trong data excercises-videoTimecode
+                                {
+                                    var excercisevdt = _excerciseRepository.Queryable.FirstOrDefault(e => e.Id == n.Id);
+
+                                    if (excercisevdt == null)
+                                    {
+                                        Excercise excercise = _mapper.Map<Excercise>(n);
+                                        videoTimeCode.TimeCodeExcercises.Add(new TimeCodeExcercise
+                                        {
+                                            Excercise = excercise
+                                        });
+                                        var questions = _questionRepository.Queryable
+                                            .Include(x => x.ExcerciseQuestions)
+                                            .Where(x => x.ExcerciseQuestions.Select(e => e.ExcerciseId).Contains(excercise.Id)).ToList();
+                                        n.Questions.ForEach(q =>
+                                        {
+                                            if (q == null)
+                                            {
+                                                methodResult.StatusCode = StatusCodes.Status400BadRequest;
+                                                methodResult.AddErrorMessage(nameof(EnumVideoErrorCode.VD03V));
+                                            }
+                                            else
+                                            {
+                                                if (!questions.Any(f => f.Id == q.Id))// q khong co trong questions -Excercise
+                                                {
+                                                    var questionex = _questionRepository.Queryable.FirstOrDefault(e => e.Id == q.Id);
+                                                    if (questionex == null)
+                                                    {
+                                                        Question question = _mapper.Map<Question>(q);
+                                                        _mapper.Map(q, question);
+                                                        excercise.ExcerciseQuestions.Add(new ExcerciseQuestion
+                                                        {
+                                                            Question = question
+                                                        });
+
+                                                        if (!question.IsValid())
+                                                        {
+                                                            methodResult.StatusCode = StatusCodes.Status400BadRequest;
+                                                            methodResult.AddResultFromErrorList(question.ErrorMessages);
+                                                        }
+                                                    }
+                                                    else
+                                                    {
+                                                        _mapper.Map(q, questionex);
+                                                        excercise.ExcerciseQuestions.Add(new ExcerciseQuestion
+                                                        {
+                                                            Question = questionex
+                                                        });
+
+                                                        if (!questionex.IsValid())
+                                                        {
+                                                            methodResult.StatusCode = StatusCodes.Status400BadRequest;
+                                                            methodResult.AddResultFromErrorList(questionex.ErrorMessages);
+                                                        }
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    var question = questions.FirstOrDefault(e => e.Id == q.Id);
+                                                    _mapper.Map(q, question);
+                                                    if (question == null)
+                                                    {
+                                                        methodResult.StatusCode = StatusCodes.Status400BadRequest;
+                                                    }
+                                                    else
+                                                    {
+                                                        if (!question.IsValid())
+                                                        {
+                                                            methodResult.StatusCode = StatusCodes.Status400BadRequest;
+                                                            methodResult.AddResultFromErrorList(question.ErrorMessages);
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        });
+                                        if (!excercise.IsValid())
+                                        {
+                                            methodResult.StatusCode = StatusCodes.Status400BadRequest;
+                                            methodResult.AddResultFromErrorList(excercise.ErrorMessages);
+                                        }
+                                    }
+                                    else
+                                    {
+                                        _mapper.Map(n, excercisevdt);
+                                        videoTimeCode.TimeCodeExcercises.Add(new TimeCodeExcercise
+                                        {
+                                            Excercise = excercisevdt
+                                        });
+                                        var questions = _questionRepository.Queryable
+                                            .Include(x => x.ExcerciseQuestions)
+                                            .Where(x => x.ExcerciseQuestions.Select(e => e.ExcerciseId).Contains(excercisevdt.Id)).ToList();
+                                        n.Questions.ForEach(q =>
+                                        {
+                                            if (q == null)
+                                            {
+                                                methodResult.StatusCode = StatusCodes.Status400BadRequest;
+                                                methodResult.AddErrorMessage(nameof(EnumVideoErrorCode.VD03V));
+                                            }
+                                            else
+                                            {
+                                                if (!questions.Any(f => f.Id == q.Id))// q khong co trong questions -Excercise
+                                                {
+                                                    var questionex = _questionRepository.Queryable.FirstOrDefault(e => e.Id == q.Id);
+                                                    if (questionex == null)
+                                                    {
+                                                        Question question = _mapper.Map<Question>(q);
+                                                        _mapper.Map(q, question);
+                                                        excercisevdt.ExcerciseQuestions.Add(new ExcerciseQuestion
+                                                        {
+                                                            Question = question
+                                                        });
+
+                                                        if (!question.IsValid())
+                                                        {
+                                                            methodResult.StatusCode = StatusCodes.Status400BadRequest;
+                                                            methodResult.AddResultFromErrorList(question.ErrorMessages);
+                                                        }
+                                                    }
+                                                    else
+                                                    {
+                                                        _mapper.Map(q, questionex);
+                                                        excercisevdt.ExcerciseQuestions.Add(new ExcerciseQuestion
+                                                        {
+                                                            Question = questionex
+                                                        });
+
+                                                        if (!questionex.IsValid())
+                                                        {
+                                                            methodResult.StatusCode = StatusCodes.Status400BadRequest;
+                                                            methodResult.AddResultFromErrorList(questionex.ErrorMessages);
+                                                        }
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    var question = questions.FirstOrDefault(e => e.Id == q.Id);
+                                                    _mapper.Map(q, question);
+                                                    if (question == null)
+                                                    {
+                                                        methodResult.StatusCode = StatusCodes.Status400BadRequest;
+                                                    }
+                                                    else
+                                                    {
+                                                        if (!question.IsValid())
+                                                        {
+                                                            methodResult.StatusCode = StatusCodes.Status400BadRequest;
+                                                            methodResult.AddResultFromErrorList(question.ErrorMessages);
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        });
+                                        if (!excercisevdt.IsValid())
+                                        {
+                                            methodResult.StatusCode = StatusCodes.Status400BadRequest;
+                                            methodResult.AddResultFromErrorList(excercisevdt.ErrorMessages);
+                                        }
+                                    }
+                                }
+                                else  //n - excercises co trong data excercises-videoTimecode
+                                {
+                                    var excercise = excercises.FirstOrDefault(e => e.Id == n.Id);
+                                    if (excercise == null)
+                                    {
+                                        methodResult.StatusCode = StatusCodes.Status400BadRequest;
+                                    }
+                                    else
+                                    {
+                                        _mapper.Map(n, excercise);
+                                        var questions = _questionRepository.Queryable
+                                         .Include(x => x.ExcerciseQuestions)
+                                         .Where(x => x.ExcerciseQuestions.Select(e => e.ExcerciseId).Contains(excercise.Id)).ToList();
+                                        n.Questions.ForEach(q =>
+                                        {
+                                            if (q == null)
+                                            {
+                                                methodResult.StatusCode = StatusCodes.Status400BadRequest;
+                                                methodResult.AddErrorMessage(nameof(EnumVideoErrorCode.VD03V));
+                                            }
+                                            else
+                                            {
+                                                if (!questions.Any(f => f.Id == q.Id))// q khong co trong questions -Excercise
+                                                {
+                                                    var questionex = _questionRepository.Queryable.FirstOrDefault(e => e.Id == q.Id);
+                                                    if (questionex == null)
+                                                    {
+                                                        Question question = _mapper.Map<Question>(q);
+                                                        _mapper.Map(q, question);
+                                                        excercise.ExcerciseQuestions.Add(new ExcerciseQuestion
+                                                        {
+                                                            Question = question
+                                                        });
+
+                                                        if (!question.IsValid())
+                                                        {
+                                                            methodResult.StatusCode = StatusCodes.Status400BadRequest;
+                                                            methodResult.AddResultFromErrorList(question.ErrorMessages);
+                                                        }
+                                                    }
+                                                    else
+                                                    {
+                                                        _mapper.Map(q, questionex);
+                                                        excercise.ExcerciseQuestions.Add(new ExcerciseQuestion
+                                                        {
+                                                            Question = questionex
+                                                        });
+
+                                                        if (!questionex.IsValid())
+                                                        {
+                                                            methodResult.StatusCode = StatusCodes.Status400BadRequest;
+                                                            methodResult.AddResultFromErrorList(questionex.ErrorMessages);
+                                                        }
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    var question = questions.FirstOrDefault(e => e.Id == q.Id);
+                                                    _mapper.Map(q, question);
+                                                    if (question == null)
+                                                    {
+                                                        methodResult.StatusCode = StatusCodes.Status400BadRequest;
+                                                    }
+                                                    else
+                                                    {
+                                                        if (!question.IsValid())
+                                                        {
+                                                            methodResult.StatusCode = StatusCodes.Status400BadRequest;
+                                                            methodResult.AddResultFromErrorList(question.ErrorMessages);
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        });
+
+                                        if (!excercise.IsValid())
+                                        {
+                                            methodResult.StatusCode = StatusCodes.Status400BadRequest;
+                                            methodResult.AddResultFromErrorList(excercise.ErrorMessages);
+                                        }
+                                    }
+                                }
+                            }
+                        });
+                        if (!videoTimeCode.IsValid())
+                        {
+                            methodResult.StatusCode = StatusCodes.Status400BadRequest;
+                            methodResult.AddResultFromErrorList(videoTimeCode.ErrorMessages);
+                        }
                     }
                 }
             });

@@ -11,7 +11,7 @@ namespace Fsel.Course.Common.Models.Entities
     {
         public Guid ExcerciseId { get; set; }
 
-        public List<ExerciseModel>? Exercices { get; set; }
+        public List<ExcerciseModel>? Exercices { get; set; }
 
         public Guid VideoTimeCodeId { get; set; }
     }

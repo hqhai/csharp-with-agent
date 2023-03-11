@@ -1,11 +1,14 @@
 ﻿using AutoMapper;
 using Fsel.Common.ActionResults;
 using Fsel.Common.Helpers;
+using Fsel.Course.Common.Models.Entities;
+using Fsel.Course.Domain.Entities;
 using Fsel.Course.Domain.Enums.ErrorCodes;
 using Fsel.Course.Domain.IRepositories;
 using Fsel.Course.Infrastructure.Repositories;
 using MediatR;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -47,7 +50,13 @@ namespace Fsel.Course.Application.Commands.VideoCmd
                     return methodResult;
                 }
 
-                var video = await _videoRepository.GetByIdAsync(request.Id);
+                var video = await _videoRepository.Queryable
+                                               .Include(i => i.VideoTimeCodes.Where(x => !x.IsDeleted))
+                                               .ThenInclude(x => x.TimeCodeExcercises.Where(x => !x.IsDeleted && x.Excercise != null))
+                                               .ThenInclude(x => x.Excercise)
+                                               .ThenInclude(x => x.ExcerciseQuestions.Where(x => !x.IsDeleted))
+                                               .ThenInclude(x => x.Question)
+                                               .FirstOrDefaultAsync(x => x.Id == request.Id);
                 if (video == null)
                 {
                     methodResult.StatusCode = StatusCodes.Status400BadRequest;
