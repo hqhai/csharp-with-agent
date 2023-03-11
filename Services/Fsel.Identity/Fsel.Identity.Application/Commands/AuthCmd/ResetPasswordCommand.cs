@@ -58,7 +58,12 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                 return methodResult;
             }
 
-            var user = await _userManager.FindByEmailAsync(request.Email ?? string.Empty);
+            User? user = null;
+            if (string.IsNullOrEmpty(request.Email))
+                user = await _userManager.FindByIdAsync(_authContext.CurrentUserId.ToString());
+            else
+                user = await _userManager.FindByEmailAsync(request.Email ?? string.Empty);
+
             if (user == null)
             {
                 methodResult.StatusCode = StatusCodes.Status404NotFound;

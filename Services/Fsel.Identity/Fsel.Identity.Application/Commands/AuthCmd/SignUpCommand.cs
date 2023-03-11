@@ -103,7 +103,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             sendCommand.Subject = sender.Subject;
             sendCommand.ToEmails = sender.ToEmails;
 
-            var IsSendMail = await _senderService.SendEmailAsync(sendCommand);
+            await _senderService.SendEmailAsync(sendCommand);
 
             methodResult.Result = _mapper.Map<UserModel>(user);
             return methodResult;
