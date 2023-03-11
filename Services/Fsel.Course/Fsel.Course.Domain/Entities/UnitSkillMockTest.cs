@@ -11,6 +11,6 @@ namespace Fsel.Course.Domain.Entities
 
         public Guid UnitId { get; set; }
 
-        public Guid MockFinalTestId { get; set; }
+        public Guid MockTestId { get; set; }
     }
 }
