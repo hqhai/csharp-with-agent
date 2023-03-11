@@ -1,5 +1,4 @@
 ﻿using Fsel.Core.Entities;
-using System.ComponentModel.DataAnnotations;
 
 namespace Fsel.Course.Domain.Entities
 {

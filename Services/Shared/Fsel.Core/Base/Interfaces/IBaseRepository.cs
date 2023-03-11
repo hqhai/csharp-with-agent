@@ -9,6 +9,7 @@ namespace Fsel.Core.Base.Interfaces
         IUnitOfWork UnitOfWork { get; }
 
         Task<T?> GetByIdAsync(Guid id, int? siteId = null);
+
         Task<T?> GetIncludeByIdAsync(Guid id, int? siteId = null);
 
         Task<bool> AnyAsync(Guid id, int? siteId = null);

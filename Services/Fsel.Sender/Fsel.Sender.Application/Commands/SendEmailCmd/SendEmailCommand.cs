@@ -4,15 +4,8 @@ using Fsel.Sender.Common.ConfigSettings;
 using Fsel.Sender.Common.Models.Commands;
 using Fsel.Sender.Common.Models.Entities;
 using MediatR;
-using MailKit.Net.Smtp;
 using Microsoft.AspNetCore.Http;
 using MimeKit;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Mail;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Fsel.Sender.Application.Commands.SendEmailCmd
 {

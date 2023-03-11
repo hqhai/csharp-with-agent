@@ -1,27 +1,23 @@
 ﻿using AutoMapper;
 using Fsel.Common.ActionResults;
-using Fsel.Course.Common.Models.Commands.Unit;
 using Fsel.Course.Common.Models.Commands.Videos;
 using Fsel.Course.Common.Models.Entities;
 using Fsel.Course.Domain.Entities;
 using Fsel.Course.Domain.IRepositories;
 using MediatR;
 using Microsoft.AspNetCore.Http;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Fsel.Course.Application.Commands.VideoCmd
 {
     public class CreateVideoCommand : CreateVideoCommandModel, IRequest<MethodResult<VideoModel>>
     {
     }
+
     public class CreateVideoCommandHandler : IRequestHandler<CreateVideoCommand, MethodResult<VideoModel>>
     {
         private readonly IVideoRepository _videoRepository;
         private readonly IMapper _mapper;
+
         public CreateVideoCommandHandler(IVideoRepository videoRepository,
             IMapper mapper)
         {
@@ -34,6 +30,7 @@ namespace Fsel.Course.Application.Commands.VideoCmd
             MethodResult<VideoModel> methodResult = new MethodResult<VideoModel>();
 
             #region Validation
+
             Video video = _mapper.Map<Video>(request);
 
             if (!video.IsValid())
@@ -42,9 +39,11 @@ namespace Fsel.Course.Application.Commands.VideoCmd
                 methodResult.AddResultFromErrorList(video.ErrorMessages);
                 return methodResult;
             }
-            #endregion
 
-            await _videoRepository.ExecuteTransactionAsync(async () => {
+            #endregion Validation
+
+            await _videoRepository.ExecuteTransactionAsync(async () =>
+            {
                 video = _videoRepository.Add(video);
                 await _videoRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 

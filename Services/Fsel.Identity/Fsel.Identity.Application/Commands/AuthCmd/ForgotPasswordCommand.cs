@@ -2,15 +2,12 @@
 using Fsel.Common.ActionResults;
 using Fsel.Common.Helpers;
 using Fsel.Identity.Application.Services;
-using Fsel.Identity.Common.Models.Entities;
 using Fsel.Identity.Domain.Entities;
 using Fsel.Sender.Common.Models.Commands;
 using Fsel.Sender.Common.Models.Entities;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.WebUtilities;
-using System.Text;
 
 namespace Fsel.Identity.Application.Commands.AuthCmd
 {
