@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Fsel.Course.Domain.Entities
 {
-    public class MockFinalTest : Entity
+    public class UnitSkillMockTest : Entity
     {
         public Unit? Unit { get; set; }
 

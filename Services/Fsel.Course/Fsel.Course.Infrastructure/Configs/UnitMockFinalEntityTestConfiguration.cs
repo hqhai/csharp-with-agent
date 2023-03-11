@@ -4,9 +4,9 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Fsel.Course.Infrastructure.Configs
 {
-    public class UnitMockFinalEntityTestConfiguration : IEntityTypeConfiguration<MockFinalTest>
+    public class UnitMockFinalEntityTestConfiguration : IEntityTypeConfiguration<UnitSkillMockTest>
     {
-        public void Configure(EntityTypeBuilder<MockFinalTest> builder)
+        public void Configure(EntityTypeBuilder<UnitSkillMockTest> builder)
         {
             builder.HasOne(a => a.Unit)
                 .WithMany(b => b.UnitMockFinalTests)

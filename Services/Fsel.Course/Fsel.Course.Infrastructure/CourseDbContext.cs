@@ -20,7 +20,7 @@ namespace Fsel.Course.Infrastructure
         #region Db Set
 
         public DbSet<MockTest> MockTests { get; set; }
-        public DbSet<MockFinalTest> UnitMockFinalTests { get; set; }
+        public DbSet<UnitSkillMockTest> UnitMockFinalTests { get; set; }
         public DbSet<PlacementTest> PlacementTests { get; set; }
         public DbSet<Lesson> Lessons { get; set; }
         public DbSet<Domain.Entities.Course> Courses { get; set; }
