@@ -16,8 +16,6 @@ namespace Fsel.Course.Infrastructure
         {
         }
 
-        #region Db Set
-
         public DbSet<MockTest> MockTests { get; set; }
         public DbSet<UnitSkillMockTest> UnitSkillMockTests { get; set; }
         public DbSet<PlacementTest> PlacementTests { get; set; }
@@ -45,7 +43,6 @@ namespace Fsel.Course.Infrastructure
 
         public DbSet<Question> Questions { get; set; }
 
-        #endregion Db Set
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -86,18 +83,5 @@ namespace Fsel.Course.Infrastructure
                     options => options.MigrationsAssembly(GetType().Assembly.GetName().Name));
             }
         }
-
-        //public class UserContextDesignFactory : IDesignTimeDbContextFactory<CourseDbContext>
-        //{
-        //    public CourseDbContext CreateDbContext(string[] args)
-        //    {
-        //        var optionsBuilder = new DbContextOptionsBuilder<CourseDbContext>();
-
-        //        optionsBuilder.UseSqlServer(
-        //            "Data Source=183.91.11.235;Initial Catalog=env-dev.course-service;User ID=sa;Password=FselTech@2023",
-        //            options => options.MigrationsAssembly(GetType().Assembly.GetName().Name));
-        //        return new CourseDbContext(optionsBuilder.Options, );
-        //    }
-        //}
     }
 }

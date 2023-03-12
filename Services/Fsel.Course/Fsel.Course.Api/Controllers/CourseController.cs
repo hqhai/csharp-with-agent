@@ -1,4 +1,4 @@
-﻿using Fsel.Common.ActionResults;
+using Fsel.Common.ActionResults;
 using Fsel.Common.Constants;
 using Fsel.Common.Helpers;
 using Fsel.Core.Base.BaseModels;
@@ -16,7 +16,7 @@ namespace Fsel.Course.Api.Controllers
     [Route(Settings.APIDefaultRoute + "/course")]
     [ApiController]
     [Authorize]
-    public class CourseController : ControllerBase
+    public class COURSECONTROLLER : ControllerBase
     {
         private readonly IMediator _mediator;
 

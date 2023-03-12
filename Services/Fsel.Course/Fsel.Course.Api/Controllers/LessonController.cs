@@ -1,4 +1,4 @@
-﻿using Fsel.Common.ActionResults;
+using Fsel.Common.ActionResults;
 using Fsel.Common.Constants;
 using Fsel.Common.Helpers;
 using Fsel.Core.Base.BaseModels;
@@ -10,7 +10,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
 
-// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
 namespace Fsel.Course.Api.Controllers
 {
@@ -27,11 +26,7 @@ namespace Fsel.Course.Api.Controllers
             _mediator = mediator;
         }
 
-        /// <summary>
-        /// Search Lesson
-        /// </summary>
-        /// <param name="command"></param>
-        /// <returns></returns>
+
         [HttpGet]
         [ProducesResponseType(typeof(MethodResult<PagingItemsModel<LessonModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.BadRequest)]
@@ -96,11 +91,6 @@ namespace Fsel.Course.Api.Controllers
             }
         }
 
-        /// <summary>
-        /// Update a Lesson
-        /// </summary>
-        /// <param name="command"></param>
-        /// <returns></returns>
         [HttpPut("{id}")]
         [ProducesResponseType(typeof(MethodResult<LessonModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.BadRequest)]

@@ -1,4 +1,6 @@
-﻿using AutoMapper;
+// Copyright (c) Atlantic. All rights reserved.
+
+using AutoMapper;
 using Fsel.Common.ActionResults;
 using Fsel.Common.Helpers;
 using Fsel.Course.Common.Models.Commands.Lesson;
@@ -32,7 +34,7 @@ namespace Fsel.Course.Application.Commands.LessonCmd
             , IVideoRepository videoRepository
             , IExtraPracticeRepository extraPracticeRepository)
         {
-            _lessonRepository = lessonRepository;
+            _lessonRepository = lessonRepository ?? throw new ArgumentNullException(nameof(_lessonRepository));
             _lessonHomeWorkRepository = lessonHomeWorkRepository;
             _lessonExtraPracticeRepository = lessonExtraPracticeRepository;
             _mapper = mapper;
@@ -46,6 +48,8 @@ namespace Fsel.Course.Application.Commands.LessonCmd
             MethodResult<LessonModel> methodResult = new MethodResult<LessonModel>();
 
             #region Validation
+
+            ArgumentNullException.ThrowIfNull(nameof(request));
 
             if (request.HomeWorkIds == null)
             {
@@ -75,19 +79,22 @@ namespace Fsel.Course.Application.Commands.LessonCmd
             {
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 methodResult.AddErrorMessage(
-                nameof(EnumHomeWorkErrorCode.HW03V)); return methodResult;
+                nameof(EnumHomeWorkErrorCode.HW03V));
+                return methodResult;
             }
             if (_extraPracticeRepository.IsIdsInValid(request.ExtraPracticeIds))
             {
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 methodResult.AddErrorMessage(
-                nameof(EnumExtraPractiveErrorCode.EP03V)); return methodResult;
+                nameof(EnumExtraPractiveErrorCode.EP03V));
+                return methodResult;
             }
             if (_videoRepository.IsIdsInValid(request.VideoIds))
             {
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 methodResult.AddErrorMessage(
-                nameof(EnumVideoErrorCode.VD03V)); return methodResult;
+                nameof(EnumVideoErrorCode.VD03V));
+                return methodResult;
             }
             Lesson lesson = _mapper.Map<Lesson>(request);
             lesson.LessonHomeWorks = request.HomeWorkIds.Select((x) => new LessonHomeWork
