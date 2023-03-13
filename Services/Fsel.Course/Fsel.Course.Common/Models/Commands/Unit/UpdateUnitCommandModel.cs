@@ -1,4 +1,5 @@
 ﻿using Fsel.Core.Base.BaseModels;
+using Fsel.Course.Common.Models.Commands.UnitSkillMockTest;
 using Fsel.Course.Domain.Enums;
 
 namespace Fsel.Course.Common.Models.Commands.Unit
@@ -18,5 +19,7 @@ namespace Fsel.Course.Common.Models.Commands.Unit
         public EnumCourseLevel CourseLevel { get; set; }
 
         public Guid MockTestId { get; set; }
+
+        public List<CreateUnitSkillMockTestCommandModel>? UnitSkillMockTest { get; set; }
     }
 }

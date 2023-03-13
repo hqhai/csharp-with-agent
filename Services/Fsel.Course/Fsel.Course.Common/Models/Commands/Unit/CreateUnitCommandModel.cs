@@ -1,4 +1,6 @@
-﻿using Fsel.Course.Domain.Enums;
+﻿using Fsel.Course.Common.Models.Commands.UnitSkillMockTest;
+using Fsel.Course.Domain.Entities;
+using Fsel.Course.Domain.Enums;
 
 namespace Fsel.Course.Common.Models.Commands.Unit
 {
@@ -12,10 +14,12 @@ namespace Fsel.Course.Common.Models.Commands.Unit
 
         public List<Guid>? LessonIds { get; set; }
 
-        public EnumUnitType Type { get; set; }
+        public List<Guid>? MockTestIds { get; set; }
+
+        public EnumUnitType UnitType { get; set; }
 
         public EnumCourseLevel CourseLevel { get; set; }
 
-        public Guid MockTestId { get; set; }
+        public List<CreateUnitSkillMockTestCommandModel>? UnitSkillMockTest { get; set; }
     }
 }

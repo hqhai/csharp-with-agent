@@ -83,12 +83,41 @@ namespace Fsel.Course.Application.Commands.UnitCmd
 
                 return methodResult;
             }
-            if (_mockTestRepository.Queryable.Any(e => e.MockTestType == EnumMockTestType.UnitMockTest))
+            if (request.UnitSkillMockTest == null)
             {
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 methodResult.AddErrorMessage(
-                    nameof(EnumMockTestErrorCode.MT04V));
+                    nameof(EnumUnitSkillMockTestErrorCode.USMT01V));
 
+                return methodResult;
+            }
+            var mocktestIds = request.UnitSkillMockTest.Select(x => x.MockTestId).ToList();
+            if (_mockTestRepository.IsIdsInValid(mocktestIds))
+            {
+                methodResult.StatusCode = StatusCodes.Status400BadRequest;
+                methodResult.AddErrorMessage(
+                nameof(EnumMockTestErrorCode.MT03V));
+                return methodResult;
+            }
+            List<MockTest> mocktests = new List<MockTest>();
+            mocktestIds.ForEach(id =>
+            {
+                var mocktest = _mockTestRepository.Queryable.FirstOrDefault(x => x.Id == id);
+                if (mocktest == null)
+                {
+                    methodResult.StatusCode = StatusCodes.Status400BadRequest;
+                    methodResult.AddErrorMessage(nameof(EnumMockTestErrorCode.MT03V));
+                }
+                else
+                    mocktests.Add(mocktest);
+            });
+
+            var checkMockTest = mocktests.Any(x => x.MockTestType == EnumMockTestType.UnitMockTest);
+            if (!checkMockTest)
+            {
+                methodResult.StatusCode = StatusCodes.Status400BadRequest;
+                methodResult.AddErrorMessage(
+                nameof(EnumMockTestErrorCode.MT04V));
                 return methodResult;
             }
 
@@ -101,13 +130,14 @@ namespace Fsel.Course.Application.Commands.UnitCmd
                     LessonId = x
                 }).ToList();
 
-                unit.UnitSkillMockTests = new List<UnitSkillMockTest>
-                {
-                    new UnitSkillMockTest
-                    {
-                        MockTestId = request.MockTestId,
-                    }
-                };
+                /*  unit.UnitSkillMockTests = new List<UnitSkillMockTest>
+                  {
+                      new UnitSkillMockTest
+                      {
+                          MockTestId = request.MockTestId,
+                      }
+                  }*/
+                ;
 
                 unit = _unitRepository.Update(unit);
 

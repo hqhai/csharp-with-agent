@@ -30,7 +30,7 @@ namespace Fsel.Course.Application.Commands.UnitCmd
             {
                 MethodResult<bool> methodResult = new MethodResult<bool>();
 
-                var unit = await _unitRepository.GetByIdAsync(request.Id);
+                var unit = await _unitRepository.GetIncludeByIdAsync(request.Id);
 
                 if (unit == null)
                 {
