@@ -13,7 +13,7 @@ builder.AddSwaggerGens(appSetting);
 builder.AddAuthenticationJwtBearers(appSetting);
 builder.AddDbContexts<UserDbContext>();
 
-builder.Services.AddIdentity<User, IdentityRole>()
+builder.Services.AddIdentity<User, Role>()
         .AddEntityFrameworkStores<UserDbContext>()
         .AddDefaultTokenProviders();
 
