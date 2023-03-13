@@ -13,7 +13,6 @@ builder.AddSwaggerGens(appSetting);
 builder.AddAuthenticationJwtBearers(appSetting);
 builder.AddDbContexts<CourseDbContext>();
 
-builder.Services.AddScoped<ICourseUnitMockTestRepository, CourseUnitMockTestRepository>();
 builder.Services.AddScoped<IPlacementTestRepository, PlacementTestRepository>();
 builder.Services.AddScoped<ILessonRepository, LessonRepository>();
 builder.Services.AddScoped<ILessonVideoRepository, LessonVideoRepository>();
@@ -33,6 +32,10 @@ builder.Services.AddScoped<ICourseRepository, CourseRepository>();
 builder.Services.AddScoped<ICourseUnitMockTestRepository, CourseUnitMockTestRepository>();
 builder.Services.AddScoped<IUnitLessonRepository, UnitLessonRepository>();
 builder.Services.AddScoped<IUnitRepository, UnitRepository>();
+builder.Services.AddScoped<IMockTestRepository, MockTestRepository>();
+builder.Services.AddScoped<IExcerciseRepository, ExcerciseRepository>();
+builder.Services.AddScoped<IExcerciseQuestionRepository, ExcerciseQuestionRepository>();
+
 var app = builder.Build();
 
 app.UseServices();
