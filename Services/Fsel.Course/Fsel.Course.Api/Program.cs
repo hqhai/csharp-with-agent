@@ -33,6 +33,9 @@ builder.Services.AddScoped<ICourseUnitMockTestRepository, CourseUnitMockTestRepo
 builder.Services.AddScoped<IUnitLessonRepository, UnitLessonRepository>();
 builder.Services.AddScoped<IUnitRepository, UnitRepository>();
 builder.Services.AddScoped<IMockTestRepository, MockTestRepository>();
+builder.Services.AddScoped<IExcerciseRepository, ExcerciseRepository>();
+builder.Services.AddScoped<IExcerciseQuestionRepository, ExcerciseQuestionRepository>();
+
 var app = builder.Build();
 
 app.UseServices();

@@ -13,12 +13,14 @@ namespace Fsel.Course.Domain.Models.CommandModels.Units
 
         public List<Guid>? LessonIds { get; set; }
 
-        public List<Guid>? MockTestIds { get; set; }
-
         public EnumUnitType UnitType { get; set; }
 
         public EnumCourseLevel CourseLevel { get; set; }
 
-        public List<CreateUnitSkillMockTestCommandModel>? UnitSkillMockTest { get; set; }
+        public Guid MockTestId { get; set; }
+
+        public EnumMockTestType MockTestType { get; set; }
+
+       
     }
 }
