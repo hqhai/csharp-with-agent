@@ -1,7 +1,7 @@
 using AutoMapper;
 using Fsel.Core.Extensions;
 using Fsel.Course.Domain.Models.CommandModels.Courses;
-using Fsel.Course.Domain.Models.EntiyModels;
+using Fsel.Course.Domain.Models.EntityModels;
 using EntityCourse = Fsel.Course.Domain.Entities.Course;
 
 namespace Fsel.Course.Infrastructure.Maps

@@ -22,13 +22,13 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
     public class SignUpCommandHandler : IRequestHandler<SignUpCommand, MethodResult<UserModel>>
     {
         private readonly UserManager<User> _userManager;
-        private readonly RoleManager<IdentityRole> _roleManager;
+        private readonly RoleManager<Role> _roleManager;
         private readonly AppSetting _appSetting;
         private readonly ISenderService _senderService;
         private readonly IMapper _mapper;
 
         public SignUpCommandHandler(UserManager<User> userManager,
-            RoleManager<IdentityRole> roleManager,
+            RoleManager<Role> roleManager,
             AppSetting appSetting,
             IMediator mediator,
             ISenderService senderService,
@@ -60,7 +60,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             var role = await _roleManager.FindByNameAsync(request.Role.ToString());
             if (role == null)
             {
-                role = new IdentityRole(request.Role.ToString())
+                role = new Role
                 {
                     Name = request.Role.ToString(),
                     NormalizedName = request.Role.ToString().ToUpper(),
