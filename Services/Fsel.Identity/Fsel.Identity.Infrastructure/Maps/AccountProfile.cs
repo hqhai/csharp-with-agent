@@ -1,7 +1,7 @@
-﻿using AutoMapper;
+using AutoMapper;
 using Fsel.Core.Extensions;
-using Fsel.Identity.Common.Models.Entities;
 using Fsel.Identity.Domain.Entities;
+using Fsel.Identity.Domain.Models.EntityModels.Users;
 
 namespace Fsel.Identity.Infrastructure.Maps
 {

@@ -3,11 +3,11 @@
 using AutoMapper;
 using Fsel.Common.ActionResults;
 using Fsel.Common.Helpers;
-using Fsel.Course.Common.Models.Commands.Lesson;
-using Fsel.Course.Common.Models.Entities;
 using Fsel.Course.Domain.Entities;
 using Fsel.Course.Domain.Enums.ErrorCodes;
 using Fsel.Course.Domain.IRepositories;
+using Fsel.Course.Domain.Models.CommandModels.Lessons;
+using Fsel.Course.Domain.Models.EntiyModels;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 
@@ -97,23 +97,6 @@ namespace Fsel.Course.Application.Commands.LessonCmd
                 return methodResult;
             }
             Lesson lesson = _mapper.Map<Lesson>(request);
-            lesson.LessonHomeWorks = request.HomeWorkIds.Select((x) => new LessonHomeWork
-            {
-                HomeWorkId = x
-            }).ToList();
-            lesson.LessonExtraPractices = request.ExtraPracticeIds.Select((x) => new LessonExtraPractice
-            {
-                ExtracPraticeId = x
-            }).ToList();
-            lesson.LessonVideos = request.ExtraPracticeIds.Select((x) => new LessonVideo
-            {
-                VideoId = x
-            }).ToList();
-
-            ClassForum classForum = new ClassForum();
-            _mapper.Map(request.ClassForum, classForum);
-            classForum.LessonId = lesson.Id;
-            lesson.ClassForum = classForum;
 
             if (!lesson.IsValid())
             {
@@ -126,6 +109,24 @@ namespace Fsel.Course.Application.Commands.LessonCmd
 
             await _lessonRepository.ExecuteTransactionAsync(async () =>
             {
+                lesson.LessonHomeWorks = request.HomeWorkIds.Select((x) => new LessonHomeWork
+                {
+                    HomeWorkId = x
+                }).ToList();
+                lesson.LessonExtraPractices = request.ExtraPracticeIds.Select((x) => new LessonExtraPractice
+                {
+                    ExtracPraticeId = x
+                }).ToList();
+                lesson.LessonVideos = request.VideoIds.Select((x) => new LessonVideo
+                {
+                    VideoId = x
+                }).ToList();
+
+                ClassForum classForum = new ClassForum();
+                _mapper.Map(request.ClassForum, classForum);
+                classForum.LessonId = lesson.Id;
+                lesson.ClassForum = classForum;
+
                 lesson = _lessonRepository.Add(lesson);
                 await _lessonRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 

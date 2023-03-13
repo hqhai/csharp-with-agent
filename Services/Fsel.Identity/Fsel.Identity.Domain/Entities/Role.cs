@@ -9,8 +9,5 @@ namespace Fsel.Identity.Domain.Entities
     {
         [StringLength(500)]
         public string? Description { get; set; }
-
-        public DateTimeOffset? ValidTo { get; set; }
-
     }
 }

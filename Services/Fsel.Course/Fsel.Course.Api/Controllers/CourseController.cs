@@ -1,14 +1,14 @@
+using System.Net;
 using Fsel.Common.ActionResults;
 using Fsel.Common.Constants;
 using Fsel.Common.Helpers;
 using Fsel.Core.Base.BaseModels;
 using Fsel.Course.Application.Commands.CourseCmd;
 using Fsel.Course.Application.Queries.CourseQuery;
-using Fsel.Course.Common.Models.Entities;
+using Fsel.Course.Domain.Models.EntiyModels;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Net;
 
 namespace Fsel.Course.Api.Controllers
 {
@@ -16,7 +16,7 @@ namespace Fsel.Course.Api.Controllers
     [Route(Settings.APIDefaultRoute + "/course")]
     [ApiController]
     [Authorize]
-    public class COURSECONTROLLER : ControllerBase
+    public class CourseController : ControllerBase
     {
         private readonly IMediator _mediator;
 

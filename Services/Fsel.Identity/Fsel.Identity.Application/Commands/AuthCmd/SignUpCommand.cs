@@ -1,19 +1,17 @@
-﻿using AutoMapper;
+using System.Text;
+using AutoMapper;
 using Fsel.Common.ActionResults;
 using Fsel.Common.Helpers;
 using Fsel.Identity.Application.Services;
-using Fsel.Identity.Common.ConfigSettings;
-using Fsel.Identity.Common.Models.Commands;
-using Fsel.Identity.Common.Models.Entities;
 using Fsel.Identity.Domain.Entities;
 using Fsel.Identity.Domain.Enums.ErrorCodes;
-using Fsel.Sender.Common.Models.Commands;
-using Fsel.Sender.Common.Models.Entities;
+using Fsel.Identity.Domain.Models.CommandModels.Auths;
+using Fsel.Identity.Domain.Models.EntityModels.Users;
+using Fsel.Identity.Infrastructure.ValueSettings;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.WebUtilities;
-using System.Text;
 
 namespace Fsel.Identity.Application.Commands.AuthCmd
 {
@@ -92,18 +90,14 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             token = WebEncoders.Base64UrlEncode(Encoding.ASCII.GetBytes(token));
 
             var configmationLink = $"{_appSetting?.Url?.EmailConfirmUrl}?token={token}&email={user.Email}";
-            var sender = new SendEmailModel
+            var senderCommandModel = new SendEmailCommandModel
             {
                 Content = $"\"Confirmation email by link: \", {configmationLink}",
                 Subject = "Xác thực tài khoản ",
                 ToEmails = new List<string> { $"{request.Email}" }
             };
-            var sendCommand = new SendEmailCommandModel();
-            sendCommand.Content = sender.Content;
-            sendCommand.Subject = sender.Subject;
-            sendCommand.ToEmails = sender.ToEmails;
 
-            await _senderService.SendEmailAsync(sendCommand);
+            await _senderService.SendEmailAsync(senderCommandModel);
 
             methodResult.Result = _mapper.Map<UserModel>(user);
             return methodResult;

@@ -1,9 +1,9 @@
-﻿using Fsel.Core.Base;
-using Fsel.Core.Base.Interfaces;
-using MediatR;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Fsel.Core.Base;
+using Fsel.Core.Base.Interfaces;
+using MediatR;
 
 namespace Fsel.Core.Entities
 {
