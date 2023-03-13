@@ -2,11 +2,7 @@
 
 namespace Fsel.Course.Domain.Models.CommandModels.MockTests
 {
-    using System;
     using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
-    using System.Threading.Tasks;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums;
 
