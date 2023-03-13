@@ -26,5 +26,10 @@
         /// Name limited to 250 characters
         /// </summary>
         MT02C,
+
+        /// <summary>
+        /// Mock Type = UnitMockTest
+        /// </summary>
+        MT04V
     }
 }

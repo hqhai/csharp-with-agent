@@ -17,27 +17,12 @@ namespace Fsel.Course.Application.Commands.VideoCmd
     public class CreateVideoCommandHandler : IRequestHandler<CreateVideoCommand, MethodResult<VideoModel>>
     {
         private readonly IVideoRepository _videoRepository;
-        private readonly IQuestionRepository _questionRepository;
-        private readonly IExcerciseRepository _excerciseRepository;
-        private readonly IExcerciseQuestionRepository _excerciseQuestionRepository;
-        private readonly ITimeCodeExcerciseRepository _timeCodeExcerciseRepository;
-        private readonly IVideoTimeCodeRepository _videoTimeCodeRepository;
         private readonly IMapper _mapper;
 
         public CreateVideoCommandHandler(IVideoRepository videoRepository
-            , IQuestionRepository questionRepository
-            , IExcerciseRepository excerciseRepository
-            , IExcerciseQuestionRepository excerciseQuestionRepository
-            , ITimeCodeExcerciseRepository timeCodeExcerciseRepository
-            , IVideoTimeCodeRepository videoTimeCodeRepository
             , IMapper mapper)
         {
             _videoRepository = videoRepository;
-            _questionRepository = questionRepository;
-            _excerciseRepository = excerciseRepository;
-            _excerciseQuestionRepository = excerciseQuestionRepository;
-            _timeCodeExcerciseRepository = timeCodeExcerciseRepository;
-            _videoTimeCodeRepository = videoTimeCodeRepository;
             _mapper = mapper;
         }
 
