@@ -53,7 +53,7 @@ namespace Fsel.Course.Application.Commands.CourseCmd
             EntityCourse course = _mapper.Map<EntityCourse>(request);
 
             var units = request.CourseUnitMockTests.Where(e => e.UnitId != null).Select(x => x.UnitId).ToList();
-            if (_unitRepository.IsIdsInValid(request.CourseUnitMockTests.Select(x => x.UnitId)))
+            if (_unitRepository.IsIdsInValid(units.Where(e => e.HasValue).Select(e => e!.Value)))
             {
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 methodResult.AddErrorMessage(
@@ -63,7 +63,7 @@ namespace Fsel.Course.Application.Commands.CourseCmd
             }
 
             var mocktestIds = request.CourseUnitMockTests.Where(e => e.MockTestId != null).Select(x => x.MockTestId).ToList();
-            if (_mockTestRepository.IsIdsInValid(mocktestIds))
+            if (_mockTestRepository.IsIdsInValid(mocktestIds.Where(e => e.HasValue).Select(e => e!.Value)))
             {
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 methodResult.AddErrorMessage(
@@ -72,7 +72,7 @@ namespace Fsel.Course.Application.Commands.CourseCmd
                 return methodResult;
             }
 
-            List<MockTest> mocktests = new List<MockTest>();
+            List<Createmoc> mocktests = new List<MockTest>();
             mocktestIds.ForEach(id =>
             {
                 var mocktest = _mockTestRepository.Queryable.FirstOrDefault(x => x.Id == id);
