@@ -1,6 +1,6 @@
 using Fsel.Core.Extensions;
 using Fsel.Identity.Application.Services;
-using Fsel.Identity.Common.ConfigSettings;
+using Fsel.Identity.Infrastructure.ValueSettings;
 using Fsel.Identity.Domain.Entities;
 using Fsel.Identity.Domain.IRepositories;
 using Fsel.Identity.Infrastructure;

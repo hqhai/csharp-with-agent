@@ -1,7 +1,9 @@
-﻿using AutoMapper;
+using AutoMapper;
 using Fsel.Core.Extensions;
-using Fsel.Course.Common.Models.Commands.Videos;
-using Fsel.Course.Common.Models.Entities;
+using Fsel.Course.Domain.Entities;
+using Fsel.Course.Domain.Models.CommandModels.Videos;
+using Fsel.Course.Domain.Models.EntiyModels;
+
 using Fsel.Course.Domain.Entities;
 
 namespace Fsel.Course.Infrastructure.Maps

@@ -1,4 +1,4 @@
-﻿using Fsel.Common.ConfigSettings;
+using Fsel.Common.ValueSettings;
 using Fsel.Common.Constants;
 using Fsel.Core.Base;
 using MediatR;

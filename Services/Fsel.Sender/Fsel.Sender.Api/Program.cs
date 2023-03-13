@@ -1,5 +1,5 @@
 using Fsel.Sender.Application.Services;
-using Fsel.Sender.Common.ConfigSettings;
+using Fsel.Sender.Domain.ValueSettings;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
 using System.Text.Json.Serialization;

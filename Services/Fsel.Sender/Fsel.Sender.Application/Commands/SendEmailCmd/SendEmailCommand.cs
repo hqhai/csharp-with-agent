@@ -1,8 +1,8 @@
-﻿using Fsel.Common.ActionResults;
+using Fsel.Common.ActionResults;
 using Fsel.Sender.Application.Services;
-using Fsel.Sender.Common.ConfigSettings;
-using Fsel.Sender.Common.Models.Commands;
-using Fsel.Sender.Common.Models.Entities;
+using Fsel.Sender.Domain.ValueSettings;
+using Fsel.Sender.Domain.Models.Commands;
+using Fsel.Sender.Domain.Models.Entities;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using MimeKit;
@@ -40,17 +40,20 @@ namespace Fsel.Sender.Application.Commands.SendEmailCmd
             {
                 SendEmailModel sendEmail = new SendEmailModel();
                 sendEmail.Subject = request.Subject;
-                if (request.ToEmails == null || request.ToEmails.Any(e => e == "string")) { }
+                if (request.ToEmails == null || request.ToEmails.Any(e => e == "string"))
+                { }
                 else
                 {
                     sendEmail.ToEmails = request.ToEmails;
                 }
-                if (request.BccEmails == null || request.BccEmails.Any(e => e == "string")) { }
+                if (request.BccEmails == null || request.BccEmails.Any(e => e == "string"))
+                { }
                 else
                 {
                     sendEmail.BccEmails = request.BccEmails;
                 }
-                if (request.CcEmails == null || request.CcEmails.Any(e => e == "string")) { }
+                if (request.CcEmails == null || request.CcEmails.Any(e => e == "string"))
+                { }
                 else
                 {
                     sendEmail.CcEmails = request.CcEmails;
@@ -71,7 +74,8 @@ namespace Fsel.Sender.Application.Commands.SendEmailCmd
         {
             var emailMessage = new MimeMessage();
             emailMessage.From.Add(new MailboxAddress("email", _appSetting?.Smtp?.From ?? string.Empty));
-            if (message.ToEmails == null) return emailMessage;
+            if (message.ToEmails == null)
+                return emailMessage;
 
             foreach (var item in message.ToEmails)
             {

@@ -3,8 +3,8 @@
 using AutoMapper;
 using Fsel.Common.ActionResults;
 using Fsel.Common.Helpers;
-using Fsel.Course.Common.Models.Commands.Lesson;
-using Fsel.Course.Common.Models.Entities;
+using Fsel.Course.Domain.Models.CommandModels.Lessons;
+using Fsel.Course.Domain.Models.EntiyModels;
 using Fsel.Course.Domain.Entities;
 using Fsel.Course.Domain.Enums.ErrorCodes;
 using Fsel.Course.Domain.IRepositories;

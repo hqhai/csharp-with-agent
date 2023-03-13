@@ -1,8 +1,8 @@
-﻿using AutoMapper;
+using AutoMapper;
 using Fsel.Core.Extensions;
-using Fsel.Course.Common.Models.Commands.ClassForum;
-using Fsel.Course.Common.Models.Entities;
 using Fsel.Course.Domain.Entities;
+using Fsel.Course.Domain.Models.CommandModels.ClassForums;
+using Fsel.Course.Domain.Models.EntiyModels;
 
 namespace Fsel.Course.Infrastructure.Maps
 {

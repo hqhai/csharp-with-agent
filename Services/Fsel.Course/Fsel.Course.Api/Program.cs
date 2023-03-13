@@ -1,4 +1,4 @@
-using Fsel.Common.ConfigSettings;
+using Fsel.Common.ValueSettings;
 using Fsel.Core.Extensions;
 using Fsel.Course.Domain.IRepositories;
 using Fsel.Course.Infrastructure;

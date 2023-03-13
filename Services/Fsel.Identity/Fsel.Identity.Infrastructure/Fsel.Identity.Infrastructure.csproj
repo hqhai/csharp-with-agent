@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net7.0</TargetFramework>
@@ -11,10 +11,10 @@
     <Folder Include="Configs\" />
     <Folder Include="Maps\" />
     <Folder Include="Migrations\" />
+    <Folder Include="ServiceModels\" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Fsel.Identity.Common\Fsel.Identity.Common.csproj" />
     <ProjectReference Include="..\Fsel.Identity.Domain\Fsel.Identity.Domain.csproj" />
   </ItemGroup>
 

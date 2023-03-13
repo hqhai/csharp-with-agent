@@ -1,5 +1,5 @@
 using Fsel.Core.Extensions;
-using Fsel.Identity.Common.ConfigSettings;
+using Fsel.Identity.Infrastructure.ValueSettings;
 using Fsel.Identity.Domain.Entities;
 using Fsel.Identity.Infrastructure;
 using Microsoft.AspNetCore.Identity;
