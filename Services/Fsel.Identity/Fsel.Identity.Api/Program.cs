@@ -1,7 +1,7 @@
 using Fsel.Core.Extensions;
-using Fsel.Identity.Common.ConfigSettings;
 using Fsel.Identity.Domain.Entities;
 using Fsel.Identity.Infrastructure;
+using Fsel.Identity.Infrastructure.ValueSettings;
 using Microsoft.AspNetCore.Identity;
 
 var builder = WebApplication.CreateBuilder(args);

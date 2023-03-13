@@ -1,14 +1,16 @@
-﻿using Fsel.Common.ActionResults;
+// Copyright (c) Atlantic. All rights reserved.
+
+using System.Net;
+using Fsel.Common.ActionResults;
 using Fsel.Common.Constants;
 using Fsel.Common.Helpers;
 using Fsel.Core.Base.BaseModels;
 using Fsel.Course.Application.Commands.UnitCmd;
 using Fsel.Course.Application.Queries.UnitQuery;
-using Fsel.Course.Common.Models.Entities;
+using Fsel.Course.Domain.Models.EntityModels;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Net;
 
 namespace Fsel.Course.Api.Controllers
 {
@@ -79,10 +81,8 @@ namespace Fsel.Course.Api.Controllers
         [HttpDelete("{id}")]
         [ProducesResponseType(typeof(MethodResult<UnitModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.BadRequest)]
-        public async Task<IActionResult> delete([FromRoute] Guid id)
+        public async Task<IActionResult> Delete([FromRoute] Guid id)
         {
-            /*return Ok(await _mediator.Send(new DeleteUnitCommand { Id=id}));*/
-
             try
             {
                 MethodResult<bool> commandResult = await _mediator.Send(new DeleteUnitCommand { Id = id }).ConfigureAwait(false);

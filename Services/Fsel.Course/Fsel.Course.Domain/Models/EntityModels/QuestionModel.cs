@@ -1,0 +1,13 @@
+using Fsel.Core.Base.BaseModels;
+using Fsel.Course.Domain.Enums;
+
+namespace Fsel.Course.Domain.Models.EntiyModels
+{
+    public class QuestionModel : BaseEntityModel
+    {
+        public EnumQuestionType QuestionType { get; set; }
+        public bool IsSave { get; set; }
+
+        public string? Config { get; set; }
+    }
+}

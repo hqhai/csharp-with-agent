@@ -8,12 +8,12 @@
         VD01V,
 
         /// <summary>
-        /// Lesson was used
+        /// Video was used
         /// </summary>
         VD02V,
 
         /// <summary>
-        /// Lesson not is correct
+        /// Video not is correct
         /// </summary>
         VD03V,
 

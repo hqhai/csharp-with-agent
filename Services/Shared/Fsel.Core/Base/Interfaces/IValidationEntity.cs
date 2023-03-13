@@ -1,5 +1,5 @@
-﻿using Fsel.Common.ActionResults;
 using System.Reflection;
+using Fsel.Common.ActionResults;
 
 namespace Fsel.Core.Base.Interfaces
 {

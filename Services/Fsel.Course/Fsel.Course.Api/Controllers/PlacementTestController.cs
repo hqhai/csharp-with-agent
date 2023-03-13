@@ -1,14 +1,15 @@
+using System.Net;
 using Fsel.Common.ActionResults;
 using Fsel.Common.Constants;
 using Fsel.Common.Helpers;
 using Fsel.Core.Base.BaseModels;
 using Fsel.Course.Application.Commands.PlacementTestCmd;
+using Fsel.Course.Application.Queries.PlacementTestQuery;
 using Fsel.Course.Application.Querys.PlacementTestQuery;
-using Fsel.Course.Common.Models.Entities;
+using Fsel.Course.Domain.Models.EntityModels;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Net;
 
 namespace Fsel.Course.Api.Controllers
 {

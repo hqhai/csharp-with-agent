@@ -1,8 +1,8 @@
-﻿using Fsel.Core.Entities;
-using Fsel.Course.Domain.Enums;
-using Fsel.Course.Domain.Enums.ErrorCodes;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Fsel.Core.Entities;
+using Fsel.Course.Domain.Enums;
+using Fsel.Course.Domain.Enums.ErrorCodes;
 
 namespace Fsel.Course.Domain.Entities
 {
@@ -33,7 +33,7 @@ namespace Fsel.Course.Domain.Entities
         public bool IsActive { get; set; }
 
         public EnumCourseSkill CourseSkill { get; set; }
-        public Guid? LessonId { get; set; }
+        public Guid LessonId { get; set; }
         public Lesson? Lesson { get; set; }
     }
 }
