@@ -38,7 +38,6 @@ namespace Fsel.Course.Domain.Entities
         public EnumCourseLevel CourseLevel { get; set; }
 
         public List<LessonVideo> LessonVideos { get; set; } = new List<LessonVideo>();
-
         public List<VideoTimeCode> VideoTimeCodes { get; set; } = new List<VideoTimeCode>();
     }
 }

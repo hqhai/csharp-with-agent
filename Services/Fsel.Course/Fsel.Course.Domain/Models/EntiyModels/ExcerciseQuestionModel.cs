@@ -1,6 +1,6 @@
 namespace Fsel.Course.Domain.Models.EntiyModels
 {
-    public class ExerciseQuestionModel
+    public class ExcerciseQuestionModel
     {
         public Guid ExcerciseId { get; set; }
 

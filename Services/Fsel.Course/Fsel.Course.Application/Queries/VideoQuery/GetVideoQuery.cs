@@ -35,9 +35,9 @@ namespace Fsel.Course.Application.Queries.VideoQuery
             var query = from i in _videoRepository.Queryable
                                 .Include(i => i.VideoTimeCodes.Where(x => !x.IsDeleted))
                                 .ThenInclude(x => x.TimeCodeExcercises.Where(x => !x.IsDeleted && x.Excercise != null))
-                                .ThenInclude(x => x.Excercise ?? new Excercise())
+                                .ThenInclude(x => x.Excercise)
                                 .ThenInclude(x => x.ExcerciseQuestions.Where(x => !x.IsDeleted))
-                                .ThenInclude(x => x.Question ?? new Question())
+                                .ThenInclude(x => x.Question)
                                 .Where(x => x.Id == request.Id)
                         select new VideoModel
                         {
@@ -54,13 +54,13 @@ namespace Fsel.Course.Application.Queries.VideoQuery
                                 ExecutionTime = x.ExecutionTime,
                                 TimeCodeType = x.TimeCodeType,
                                 VideoId = x.VideoId,
-                                Excercises = x.TimeCodeExcercises.Where(n => n.Excercise != null).Select(n => n.Excercise ?? new Excercise()).Select(n => new ExerciseModel
+                                Excercises = x.TimeCodeExcercises.Select(n => n.Excercise).Select(n => new ExcerciseModel
                                 {
                                     Id = n.Id,
                                     QuestionType = n.QuestionType,
                                     MediaPost = n.MediaPost,
                                     CourseSkill = n.CourseSkill,
-                                    Questions = n.ExcerciseQuestions.Where(n => n.Question != null).Select(m => m.Question ?? new Question()).Select(m => new QuestionModel()
+                                    Questions = n.ExcerciseQuestions.Select(m => m.Question).Select(m => new QuestionModel()
                                     {
                                         Id = m.Id,
                                         QuestionType = m.QuestionType,
