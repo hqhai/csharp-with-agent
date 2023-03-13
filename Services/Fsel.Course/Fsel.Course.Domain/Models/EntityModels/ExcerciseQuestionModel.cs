@@ -1,4 +1,4 @@
-namespace Fsel.Course.Domain.Models.EntiyModels
+namespace Fsel.Course.Domain.Models.EntityModels
 {
     public class ExcerciseQuestionModel
     {

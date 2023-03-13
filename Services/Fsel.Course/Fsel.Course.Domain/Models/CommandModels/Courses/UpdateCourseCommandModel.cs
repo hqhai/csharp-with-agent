@@ -1,6 +1,6 @@
 using Fsel.Core.Base.BaseModels;
-using Fsel.Course.Common.Models.Entities;
 using Fsel.Course.Domain.Enums;
+using Fsel.Course.Domain.Models.CommandModels.CourseUnitMockTests;
 
 namespace Fsel.Course.Domain.Models.CommandModels.Courses
 {
@@ -15,6 +15,6 @@ namespace Fsel.Course.Domain.Models.CommandModels.Courses
         public bool IsPublish { get; set; }
 
         public EnumCourseLevel CourseLevel { get; set; }
-        public List<CourseUnitMockTestModel>? CourseUnitMockTests { get; set; }
+        public List<UpdateCourseUnitMockTestCommandModel>? CourseUnitMockTests { get; set; }
     }
 }

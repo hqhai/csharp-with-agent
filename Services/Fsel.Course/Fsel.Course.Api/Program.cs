@@ -31,7 +31,7 @@ builder.Services.AddScoped<IExcerciseRepository, ExcerciseRepository>();
 builder.Services.AddScoped<IExcerciseQuestionRepository, ExcerciseQuestionRepository>();
 builder.Services.AddScoped<ICourseRepository, CourseRepository>();
 builder.Services.AddScoped<ICourseUnitMockTestRepository, CourseUnitMockTestRepository>();
-builder.Services.AddScoped<ICourseMockTestRepository, CourseMockTestRepository>();
+builder.Services.AddScoped<IMockTestRepository, MockTestRepository>();
 
 var app = builder.Build();
 

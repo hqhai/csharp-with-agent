@@ -5,7 +5,8 @@ using Fsel.Course.Domain.Enums;
 using Fsel.Course.Domain.Enums.ErrorCodes;
 using Fsel.Course.Domain.IRepositories;
 using Fsel.Course.Domain.Models.CommandModels.Courses;
-using Fsel.Course.Domain.Models.EntiyModels;
+using Fsel.Course.Domain.Models.CommandModels.CourseUnitMockTests;
+using Fsel.Course.Domain.Models.EntityModels;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using EntityCourse = Fsel.Course.Domain.Entities.Course;
@@ -21,20 +22,17 @@ namespace Fsel.Course.Application.Commands.CourseCmd
         private readonly ICourseRepository _courseRepository;
         private readonly IUnitRepository _unitRepository;
         private readonly IMapper _mapper;
-        private readonly ICourseUnitMockTestRepository _unitUnitMockTestRepository;
-        private readonly ICourseMockTestRepository _mockTestRepository;
+        private readonly IMockTestRepository _mockTestRepository;
 
         public CreateCourseCommandHandler(ICourseRepository courseRepository
             , IUnitRepository unitRepository
             , IMapper mapper
-            , ICourseUnitMockTestRepository unitUnitMockTestRepository,
-            ICourseMockTestRepository mockTestRepository
+            , IMockTestRepository mockTestRepository
             )
         {
             _unitRepository = unitRepository;
             _courseRepository = courseRepository;
             _mapper = mapper;
-            _unitUnitMockTestRepository = unitUnitMockTestRepository;
             _mockTestRepository = mockTestRepository;
         }
 
@@ -53,9 +51,8 @@ namespace Fsel.Course.Application.Commands.CourseCmd
                 return methodResult;
             }
             EntityCourse course = _mapper.Map<EntityCourse>(request);
-
             var units = request.CourseUnitMockTests.Where(e => e.UnitId != null).Select(x => x.UnitId).ToList();
-            if (_unitRepository.IsIdsInValid(request.CourseUnitMockTests.Select(x => x.UnitId)))
+            if (_unitRepository.IsIdsInValid(units.Where(e => e.HasValue).Select(e => e!.Value)))
             {
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 methodResult.AddErrorMessage(
@@ -65,12 +62,11 @@ namespace Fsel.Course.Application.Commands.CourseCmd
             }
 
             var mocktestIds = request.CourseUnitMockTests.Where(e => e.MockTestId != null).Select(x => x.MockTestId).ToList();
-            if (_mockTestRepository.IsIdsInValid(mocktestIds))
+            if (_mockTestRepository.IsIdsInValid(mocktestIds.Where(e => e.HasValue).Select(e => e!.Value)))
             {
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 methodResult.AddErrorMessage(
-                    nameof(EnumLessonErrorCode.L03V));
-
+                nameof(EnumLessonErrorCode.L03V));
                 return methodResult;
             }
 
@@ -108,12 +104,6 @@ namespace Fsel.Course.Application.Commands.CourseCmd
 
             await _courseRepository.ExecuteTransactionAsync(async () =>
             {
-                course.CourseUnitMockTests = request.CourseUnitMockTests.Select(x => new CourseUnitMockTest
-                {
-                    UnitId = x.UnitId,
-                    MockTestId = x.MockTestId
-                }).ToList();
-
                 course = _courseRepository.Add(course);
 
                 await _courseRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
