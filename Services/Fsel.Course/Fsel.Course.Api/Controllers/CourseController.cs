@@ -16,7 +16,7 @@ namespace Fsel.Course.Api.Controllers
     [Route(Settings.APIDefaultRoute + "/course")]
     [ApiController]
     [Authorize]
-    public class COURSECONTROLLER : ControllerBase
+    public class CourseController : ControllerBase
     {
         private readonly IMediator _mediator;
 

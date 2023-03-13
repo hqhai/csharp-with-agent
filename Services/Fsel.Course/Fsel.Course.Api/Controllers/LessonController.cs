@@ -1,3 +1,5 @@
+// Copyright (c) Atlantic. All rights reserved.
+
 using Fsel.Common.ActionResults;
 using Fsel.Common.Constants;
 using Fsel.Common.Helpers;
@@ -9,7 +11,6 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
-
 
 namespace Fsel.Course.Api.Controllers
 {
@@ -25,7 +26,6 @@ namespace Fsel.Course.Api.Controllers
         {
             _mediator = mediator;
         }
-
 
         [HttpGet]
         [ProducesResponseType(typeof(MethodResult<PagingItemsModel<LessonModel>>), (int)HttpStatusCode.OK)]
@@ -98,7 +98,6 @@ namespace Fsel.Course.Api.Controllers
         {
             try
             {
-                command.Id = id;
                 MethodResult<LessonModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
                 return commandResult.GetActionResult();
             }
