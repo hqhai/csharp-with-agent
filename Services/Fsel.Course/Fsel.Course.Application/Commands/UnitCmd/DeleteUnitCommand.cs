@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using Fsel.Common.ActionResults;
 using Fsel.Common.Helpers;
 using Fsel.Course.Domain.Enums.ErrorCodes;
@@ -15,15 +15,14 @@ namespace Fsel.Course.Application.Commands.UnitCmd
         public class DeleteUnitCommandHandler : IRequestHandler<DeleteUnitCommand, MethodResult<bool>>
         {
             private readonly IUnitRepository _unitRepository;
-            private readonly IMapper _mapper;
+
             private readonly IUnitLessonRepository _unitLessonRepository;
 
-            public DeleteUnitCommandHandler(IUnitRepository unitRepository, IUnitLessonRepository unitLessonRepository,
-            IMapper mapper)
+            public DeleteUnitCommandHandler(IUnitRepository unitRepository, IUnitLessonRepository unitLessonRepository
+            )
             {
                 _unitLessonRepository = unitLessonRepository;
                 _unitRepository = unitRepository;
-                _mapper = mapper;
             }
 
             public async Task<MethodResult<bool>> Handle(DeleteUnitCommand request, CancellationToken cancellationToken)
