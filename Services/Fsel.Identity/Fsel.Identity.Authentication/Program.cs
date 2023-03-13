@@ -11,11 +11,11 @@ var builder = WebApplication.CreateBuilder(args);
 var appSetting = builder.AddAppSettings<AppSetting>();
 builder.AddServices();
 builder.AddSwaggerGens(appSetting);
-builder.AddDbContexts<UserDbContext>();
+builder.AddDbContexts<AuthDbContext>();
 builder.AddAuthentication();
 
 builder.Services.AddIdentity<User, Role>()
-        .AddEntityFrameworkStores<UserDbContext>()
+        .AddEntityFrameworkStores<AuthDbContext>()
         .AddDefaultTokenProviders();
 
 builder.Services.AddScoped<IUserRepository, UserRepository>();

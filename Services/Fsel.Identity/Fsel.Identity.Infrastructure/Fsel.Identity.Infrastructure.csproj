@@ -9,7 +9,6 @@
 
   <ItemGroup>
     <Folder Include="Configs\" />
-    <Folder Include="Maps\" />
     <Folder Include="Migrations\" />
     <Folder Include="ServiceModels\" />
   </ItemGroup>

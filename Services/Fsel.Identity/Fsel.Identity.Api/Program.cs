@@ -1,6 +1,8 @@
 using Fsel.Core.Extensions;
 using Fsel.Identity.Domain.Entities;
+using Fsel.Identity.Domain.IRepositories;
 using Fsel.Identity.Infrastructure;
+using Fsel.Identity.Infrastructure.Repositories;
 using Fsel.Identity.Infrastructure.ValueSettings;
 using Microsoft.AspNetCore.Identity;
 
@@ -12,6 +14,8 @@ builder.AddServices();
 builder.AddSwaggerGens(appSetting);
 builder.AddAuthenticationJwtBearers(appSetting);
 builder.AddDbContexts<UserDbContext>();
+builder.Services.AddScoped<IHumanRepository, HumanRepository>();
+builder.Services.AddScoped<IHumanRepository, HumanRepository>();
 
 builder.Services.AddIdentity<User, Role>()
         .AddEntityFrameworkStores<UserDbContext>()

@@ -6,7 +6,7 @@ using Fsel.Identity.Application.Services;
 using Fsel.Identity.Domain.Entities;
 using Fsel.Identity.Domain.Enums.ErrorCodes;
 using Fsel.Identity.Domain.Models.CommandModels.Auths;
-using Fsel.Identity.Domain.Models.EntityModels.Users;
+using Fsel.Identity.Domain.Models.EntityModels;
 using Fsel.Identity.Infrastructure.ValueSettings;
 using MediatR;
 using Microsoft.AspNetCore.Http;

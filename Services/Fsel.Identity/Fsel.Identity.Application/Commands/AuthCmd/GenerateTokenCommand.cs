@@ -5,7 +5,7 @@ using AutoMapper;
 using Fsel.Common.ActionResults;
 using Fsel.Common.Helpers;
 using Fsel.Identity.Domain.Entities;
-using Fsel.Identity.Domain.Models.EntityModels.Auths;
+using Fsel.Identity.Domain.Models.EntityModels;
 using Fsel.Identity.Infrastructure.ValueSettings;
 using MediatR;
 using Microsoft.AspNetCore.Http;
