@@ -2,18 +2,11 @@
 
 namespace Fsel.Course.Infrastructure.Maps
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
-    using System.Threading.Tasks;
-    using Fsel.Core.Extensions;
     using AutoMapper;
+    using Fsel.Core.Extensions;
     using Fsel.Course.Domain.Entities;
-    using Fsel.Course.Domain.Models.CommandModels.PlacementTests;
-    using Fsel.Course.Domain.Models.EntityModels;
-    using Fsel.Course.Domain.Models.CommandModels.CourseUnitMockTests;
     using Fsel.Course.Domain.Models.CommandModels.MockTests;
+    using Fsel.Course.Domain.Models.EntityModels;
 
     public class MockTestProfile : Profile
     {
