@@ -1,8 +1,8 @@
 using Fsel.Common.ActionResults;
 using Fsel.Sender.Application.Services;
-using Fsel.Sender.Domain.ValueSettings;
 using Fsel.Sender.Domain.Models.Commands;
 using Fsel.Sender.Domain.Models.Entities;
+using Fsel.Sender.Domain.ValueSettings;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using MimeKit;

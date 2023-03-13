@@ -1,11 +1,4 @@
 using AutoMapper;
-using Fsel.Course.Domain.Entities;
-using System;
-using Fsel.Core.Extensions;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Fsel.Course.Infrastructure.Maps
 {

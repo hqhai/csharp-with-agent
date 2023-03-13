@@ -1,16 +1,16 @@
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
 using AutoMapper;
 using Fsel.Common.ActionResults;
 using Fsel.Common.Helpers;
-using Fsel.Identity.Infrastructure.ValueSettings;
 using Fsel.Identity.Domain.Entities;
+using Fsel.Identity.Domain.Models.EntityModels.Auths;
+using Fsel.Identity.Infrastructure.ValueSettings;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Text;
-using Fsel.Identity.Domain.Models.EntityModels.Auths;
 
 namespace Fsel.Identity.Application.Commands.AuthCmd
 {

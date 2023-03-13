@@ -1,7 +1,7 @@
-using Fsel.Sender.Domain.ValueSettings;
-using Fsel.Sender.Domain.Models.Entities;
 using System.Net;
 using System.Net.Mail;
+using Fsel.Sender.Domain.Models.Entities;
+using Fsel.Sender.Domain.ValueSettings;
 
 namespace Fsel.Sender.Application.Services
 {

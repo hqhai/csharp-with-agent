@@ -2,12 +2,12 @@ using AutoMapper;
 using Fsel.Common.ActionResults;
 using Fsel.Identity.Domain.Entities;
 using Fsel.Identity.Domain.Enums.ErrorCodes;
+using Fsel.Identity.Domain.Models.CommandModels.Auths;
+using Fsel.Identity.Domain.Models.EntityModels.Auths;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Fsel.Identity.Domain.Models.CommandModels.Auths;
-using Fsel.Identity.Domain.Models.EntityModels.Auths;
 
 namespace Fsel.Identity.Application.Commands.AuthCmd
 {

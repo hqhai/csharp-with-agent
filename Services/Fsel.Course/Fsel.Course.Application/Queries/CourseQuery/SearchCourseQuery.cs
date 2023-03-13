@@ -1,12 +1,12 @@
 using AutoMapper;
 using Fsel.Common.ActionResults;
 using Fsel.Core.Base.BaseModels;
-using Fsel.Course.Domain.Models.EntiyModels;
 using Fsel.Course.Domain.IRepositories;
+using Fsel.Course.Domain.Models.EntiyModels;
+using Fsel.Course.Domain.Models.QueryModels.Courses;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
-using Fsel.Course.Domain.Models.QueryModels.Courses;
 
 namespace Fsel.Course.Application.Queries.CourseQuery
 {

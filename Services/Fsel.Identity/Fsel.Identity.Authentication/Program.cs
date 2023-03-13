@@ -1,10 +1,10 @@
 using Fsel.Core.Extensions;
 using Fsel.Identity.Application.Services;
-using Fsel.Identity.Infrastructure.ValueSettings;
 using Fsel.Identity.Domain.Entities;
 using Fsel.Identity.Domain.IRepositories;
 using Fsel.Identity.Infrastructure;
 using Fsel.Identity.Infrastructure.Repositories;
+using Fsel.Identity.Infrastructure.ValueSettings;
 using Microsoft.AspNetCore.Identity;
 
 var builder = WebApplication.CreateBuilder(args);

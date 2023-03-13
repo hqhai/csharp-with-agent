@@ -1,5 +1,5 @@
-using Fsel.Common.Enums;
 using System.ComponentModel.DataAnnotations;
+using Fsel.Common.Enums;
 
 namespace Fsel.Identity.Domain.Models.CommandModels.Auths
 {

@@ -1,3 +1,4 @@
+using System.Text;
 using AutoMapper;
 using Fsel.Common.ActionResults;
 using Fsel.Common.Helpers;
@@ -9,7 +10,6 @@ using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.WebUtilities;
-using System.Text;
 
 namespace Fsel.Identity.Application.Commands.AuthCmd
 {

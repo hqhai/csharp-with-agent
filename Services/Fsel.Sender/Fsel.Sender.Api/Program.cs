@@ -1,8 +1,8 @@
+using System.Text.Json.Serialization;
 using Fsel.Sender.Application.Services;
 using Fsel.Sender.Domain.ValueSettings;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
-using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 

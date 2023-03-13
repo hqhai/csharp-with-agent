@@ -1,9 +1,9 @@
-﻿using Fsel.Core.Base.Interfaces;
+using System.Diagnostics;
+using Fsel.Core.Base.Interfaces;
 using Fsel.Core.Entities;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
-using System.Diagnostics;
 
 namespace Fsel.Core.Base
 {

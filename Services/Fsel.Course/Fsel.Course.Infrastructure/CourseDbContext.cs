@@ -1,4 +1,4 @@
-﻿using Fsel.Common.Constants;
+using Fsel.Common.Constants;
 using Fsel.Core.Base;
 using Fsel.Course.Domain.Entities;
 using Fsel.Course.Infrastructure.Configs;
@@ -42,7 +42,6 @@ namespace Fsel.Course.Infrastructure
         public DbSet<ExcerciseQuestion> ExcerciseQuestions { get; set; }
 
         public DbSet<Question> Questions { get; set; }
-
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

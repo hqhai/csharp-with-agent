@@ -1,12 +1,12 @@
 using AutoMapper;
 using Fsel.Common.ActionResults;
+using Fsel.Course.Domain.Entities;
+using Fsel.Course.Domain.Enums.ErrorCodes;
+using Fsel.Course.Domain.IRepositories;
 using Fsel.Course.Domain.Models.CommandModels.Videos;
 using Fsel.Course.Domain.Models.EntiyModels;
-using Fsel.Course.Domain.Entities;
-using Fsel.Course.Domain.IRepositories;
 using MediatR;
 using Microsoft.AspNetCore.Http;
-using Fsel.Course.Domain.Enums.ErrorCodes;
 
 namespace Fsel.Course.Application.Commands.VideoCmd
 {
