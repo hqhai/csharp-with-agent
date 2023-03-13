@@ -1,4 +1,4 @@
-﻿using Fsel.Common.Constants;
+using Fsel.Common.Constants;
 using Fsel.Common.Enums;
 using Fsel.Identity.Domain.Entities;
 using Microsoft.AspNetCore.Identity;

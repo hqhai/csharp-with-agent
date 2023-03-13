@@ -1,16 +1,16 @@
-﻿using Fsel.Common.ActionResults;
+// Copyright (c) Atlantic. All rights reserved.
+
+using System.Net;
+using Fsel.Common.ActionResults;
 using Fsel.Common.Constants;
 using Fsel.Common.Helpers;
 using Fsel.Core.Base.BaseModels;
 using Fsel.Course.Application.Commands.LessonCmd;
 using Fsel.Course.Application.Queries.LessonQuery;
-using Fsel.Course.Common.Models.Entities;
+using Fsel.Course.Domain.Models.EntiyModels;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Net;
-
-// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
 namespace Fsel.Course.Api.Controllers
 {
@@ -27,11 +27,6 @@ namespace Fsel.Course.Api.Controllers
             _mediator = mediator;
         }
 
-        /// <summary>
-        /// Search Lesson
-        /// </summary>
-        /// <param name="command"></param>
-        /// <returns></returns>
         [HttpGet]
         [ProducesResponseType(typeof(MethodResult<PagingItemsModel<LessonModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.BadRequest)]
@@ -96,11 +91,6 @@ namespace Fsel.Course.Api.Controllers
             }
         }
 
-        /// <summary>
-        /// Update a Lesson
-        /// </summary>
-        /// <param name="command"></param>
-        /// <returns></returns>
         [HttpPut("{id}")]
         [ProducesResponseType(typeof(MethodResult<LessonModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.BadRequest)]
@@ -108,7 +98,6 @@ namespace Fsel.Course.Api.Controllers
         {
             try
             {
-                command.Id = id;
                 MethodResult<LessonModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
                 return commandResult.GetActionResult();
             }

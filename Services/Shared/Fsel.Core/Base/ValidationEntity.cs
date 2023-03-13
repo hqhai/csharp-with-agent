@@ -1,9 +1,9 @@
-﻿using Fsel.Common.ActionResults;
-using Fsel.Common.Helpers;
-using Fsel.Core.Base.Interfaces;
 using System.ComponentModel.DataAnnotations;
 using System.Reflection;
 using System.Text.Json.Serialization;
+using Fsel.Common.ActionResults;
+using Fsel.Common.Helpers;
+using Fsel.Core.Base.Interfaces;
 
 namespace Fsel.Core.Base
 {

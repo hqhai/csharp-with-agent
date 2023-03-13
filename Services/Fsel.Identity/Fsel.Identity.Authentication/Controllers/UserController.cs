@@ -1,11 +1,11 @@
-﻿using Fsel.Common.ActionResults;
+using System.Net;
+using Fsel.Common.ActionResults;
 using Fsel.Common.Constants;
 using Fsel.Common.Helpers;
 using Fsel.Identity.Application.Commands.AuthCmd;
-using Fsel.Identity.Common.Models.Entities;
+using Fsel.Identity.Domain.Models.EntityModels.Users;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using System.Net;
 
 namespace Fsel.Identity.Userentication.Controllers
 {

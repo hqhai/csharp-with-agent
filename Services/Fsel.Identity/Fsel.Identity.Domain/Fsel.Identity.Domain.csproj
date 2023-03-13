@@ -7,6 +7,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Models\Queries\**" />
+    <EmbeddedResource Remove="Models\Queries\**" />
+    <None Remove="Models\Queries\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Folder Include="Constants\" />
   </ItemGroup>
 

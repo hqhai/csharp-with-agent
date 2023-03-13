@@ -1,14 +1,14 @@
-﻿using AutoMapper;
+using AutoMapper;
 using Fsel.Common.ActionResults;
 using Fsel.Core.Base.BaseModels;
-using Fsel.Course.Common.Models.Entities;
-using Fsel.Course.Common.Models.Queries.Lesson;
 using Fsel.Course.Domain.IRepositories;
+using Fsel.Course.Domain.Models.EntiyModels;
+using Fsel.Course.Domain.Models.QueryModels.PlacementTests;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 
-namespace Fsel.Course.Application.Querys.PlacementTestQuery
+namespace Fsel.Course.Application.Queries.PlacementTestQuery
 {
     public class SearchPlacementTestQuery : SearchPlacementTestQueryModel, IRequest<MethodResult<PagingItemsModel<PlacementTestModel>>>
     {
@@ -27,7 +27,7 @@ namespace Fsel.Course.Application.Querys.PlacementTestQuery
 
         public async Task<MethodResult<PagingItemsModel<PlacementTestModel>>> Handle(SearchPlacementTestQuery request, CancellationToken cancellationToken)
         {
-            MethodResult<PagingItemsModel<PlacementTestModel>> methodResult = new MethodResult<PagingItemsModel<PlacementTestModel>>();
+            var methodResult = new MethodResult<PagingItemsModel<PlacementTestModel>>();
 
             if (request.PageSize > 100)
             {

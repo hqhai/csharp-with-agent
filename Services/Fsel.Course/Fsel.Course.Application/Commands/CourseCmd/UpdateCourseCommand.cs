@@ -1,11 +1,12 @@
-﻿using AutoMapper;
+using AutoMapper;
 using Fsel.Common.ActionResults;
 using Fsel.Common.Helpers;
-using Fsel.Course.Common.Models.Commands.Course;
-using Fsel.Course.Common.Models.Entities;
 using Fsel.Course.Domain.Entities;
+using Fsel.Course.Domain.Enums;
 using Fsel.Course.Domain.Enums.ErrorCodes;
 using Fsel.Course.Domain.IRepositories;
+using Fsel.Course.Domain.Models.CommandModels.Courses;
+using Fsel.Course.Domain.Models.EntiyModels;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 
@@ -70,19 +71,46 @@ namespace Fsel.Course.Application.Commands.CourseCmd
                 return methodResult;
             }
 
-            if (_unitRepository.IsIdsInValid(request.CourseUnitMockTests.Select(e => e.UnitId)))
+            var units = request.CourseUnitMockTests.Where(e => e.UnitId != null).Select(x => x.UnitId).ToList();
+            if (_unitRepository.IsIdsInValid(request.CourseUnitMockTests.Select(x => x.UnitId)))
             {
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 methodResult.AddErrorMessage(
-                    nameof(EnumUnitErrorCode.U03V));
+                    nameof(EnumLessonErrorCode.L03V));
+
                 return methodResult;
             }
 
-            if (_mockTestRepository.IsIdsInValid(request.CourseUnitMockTests.Select(e => e.MockTestId)))
+            var mocktestIds = request.CourseUnitMockTests.Where(e => e.MockTestId != null).Select(x => x.MockTestId).ToList();
+            if (_mockTestRepository.IsIdsInValid(mocktestIds))
             {
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 methodResult.AddErrorMessage(
-                    nameof(EnumUnitErrorCode.U03V));
+                    nameof(EnumLessonErrorCode.L03V));
+
+                return methodResult;
+            }
+
+            List<MockTest> mocktests = new List<MockTest>();
+            mocktestIds.ForEach(id =>
+            {
+                var mocktest = _mockTestRepository.Queryable.FirstOrDefault(x => x.Id == id);
+                if (mocktest == null)
+                {
+                    methodResult.StatusCode = StatusCodes.Status400BadRequest;
+                    methodResult.AddErrorMessage(nameof(EnumLessonErrorCode.L03V));
+                }
+                else
+                {
+                    mocktests.Add(mocktest);
+                }
+            });
+            var checkMockTest = mocktests.Any(x => x.MockTestType == EnumMockTestType.CourseMockTest);
+            if (!checkMockTest)
+            {
+                methodResult.StatusCode = StatusCodes.Status400BadRequest;
+                methodResult.AddErrorMessage(
+                nameof(EnumLessonErrorCode.L03V));
                 return methodResult;
             }
 
@@ -92,7 +120,8 @@ namespace Fsel.Course.Application.Commands.CourseCmd
             {
                 course.CourseUnitMockTests = request.CourseUnitMockTests.Select(x => new CourseUnitMockTest
                 {
-                    UnitId = x
+                    UnitId = x.UnitId,
+                    MockTestId = x.MockTestId
                 }).ToList();
 
                 course = _courseRepository.Update(course);
