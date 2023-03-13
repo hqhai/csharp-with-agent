@@ -1,5 +1,8 @@
-﻿using Fsel.Common.ConfigSettings;
+using System.Security.Claims;
+using System.Text;
+using System.Text.Json.Serialization;
 using Fsel.Common.Constants;
+using Fsel.Common.ValueSettings;
 using Fsel.Core.Base;
 using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -13,9 +16,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Refit;
-using System.Security.Claims;
-using System.Text;
-using System.Text.Json.Serialization;
 
 namespace Fsel.Core.Extensions
 {

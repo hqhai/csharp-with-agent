@@ -1,9 +1,9 @@
-﻿using Fsel.Common.ActionResults;
+using Fsel.Common.ActionResults;
 using Fsel.Common.Helpers;
 using Fsel.Core.Base;
-using Fsel.Identity.Common.Models.Commands;
 using Fsel.Identity.Domain.Entities;
 using Fsel.Identity.Domain.Enums.ErrorCodes;
+using Fsel.Identity.Domain.Models.CommandModels.Auths;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;

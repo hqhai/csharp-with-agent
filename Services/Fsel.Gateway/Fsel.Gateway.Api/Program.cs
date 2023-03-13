@@ -1,4 +1,4 @@
-using Fsel.Common.ConfigSettings;
+using Fsel.Common.ValueSettings;
 using Fsel.Core.Extensions;
 using Ocelot.DependencyInjection;
 using Ocelot.Middleware;

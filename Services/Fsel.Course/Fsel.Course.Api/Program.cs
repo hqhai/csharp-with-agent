@@ -1,4 +1,4 @@
-using Fsel.Common.ConfigSettings;
+using Fsel.Common.ValueSettings;
 using Fsel.Core.Extensions;
 using Fsel.Course.Domain.IRepositories;
 using Fsel.Course.Infrastructure;
@@ -18,6 +18,12 @@ builder.Services.AddScoped<ILessonRepository, LessonRepository>();
 builder.Services.AddScoped<ILessonVideoRepository, LessonVideoRepository>();
 builder.Services.AddScoped<ILessonHomeWorkRepository, LessonHomeWorkRepository>();
 builder.Services.AddScoped<ILessonExtraPracticeRepository, LessonExtraPracticeRepository>();
+builder.Services.AddScoped<IPlacementTestRepository, PlacementTestRepository>();
+builder.Services.AddScoped<IQuestionRepository, QuestionRepository>();
+builder.Services.AddScoped<ITimeCodeExcerciseRepository, TimeCodeExcerciseRepository>();
+builder.Services.AddScoped<IUnitRepository, UnitRepository>();
+builder.Services.AddScoped<IUnitLessonRepository, UnitLessonRepository>();
+builder.Services.AddScoped<IVideoTimeCodeRepository, VideoTimeCodeRepository>();
 builder.Services.AddScoped<IVideoRepository, VideoRepository>();
 builder.Services.AddScoped<IExtraPracticeRepository, ExtraPracticeRepository>();
 builder.Services.AddScoped<IClassForumRepository, ClassForumRepository>();
@@ -27,9 +33,6 @@ builder.Services.AddScoped<ICourseUnitMockTestRepository, CourseUnitMockTestRepo
 builder.Services.AddScoped<IUnitLessonRepository, UnitLessonRepository>();
 builder.Services.AddScoped<IUnitRepository, UnitRepository>();
 builder.Services.AddScoped<IMockTestRepository, MockTestRepository>();
-
-/*builder.Services.AddScoped<I>*/
-
 var app = builder.Build();
 
 app.UseServices();

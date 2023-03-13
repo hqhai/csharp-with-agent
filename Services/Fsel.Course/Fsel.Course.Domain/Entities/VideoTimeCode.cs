@@ -1,17 +1,17 @@
-﻿using Fsel.Core.Entities;
-using Fsel.Course.Domain.Enums;
-using Fsel.Course.Domain.Enums.ErrorCodes;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Fsel.Core.Entities;
+using Fsel.Course.Domain.Enums;
+using Fsel.Course.Domain.Enums.ErrorCodes;
 
 namespace Fsel.Course.Domain.Entities
 {
     public class VideoTimeCode : Entity
     {
-        [Range(1, int.MaxValue, ErrorMessage = nameof(EnumVideoTimeCodeErrorCode.VTC04C))]
+        [Range(1, long.MaxValue, ErrorMessage = nameof(EnumVideoTimeCodeErrorCode.VTC04C))]
         public long DisplayTimeTicks { get; set; }
 
-        [Range(1, int.MaxValue, ErrorMessage = nameof(EnumVideoTimeCodeErrorCode.VTC04C))]
+        [Range(1, long.MaxValue, ErrorMessage = nameof(EnumVideoTimeCodeErrorCode.VTC04C))]
         public long ExecutionTimeTicks { get; set; }
 
         public EnumTimeCodeType TimeCodeType { get; set; }

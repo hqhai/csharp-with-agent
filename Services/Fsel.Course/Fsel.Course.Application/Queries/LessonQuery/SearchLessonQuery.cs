@@ -1,9 +1,9 @@
-﻿using AutoMapper;
+using AutoMapper;
 using Fsel.Common.ActionResults;
 using Fsel.Core.Base.BaseModels;
-using Fsel.Course.Common.Models.Entities;
-using Fsel.Course.Common.Models.Queries.Lesson;
 using Fsel.Course.Domain.IRepositories;
+using Fsel.Course.Domain.Models.EntiyModels;
+using Fsel.Course.Domain.Models.QueryModels.Lessons;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;

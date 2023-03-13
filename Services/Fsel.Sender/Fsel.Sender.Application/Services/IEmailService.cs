@@ -1,7 +1,7 @@
-﻿using Fsel.Sender.Common.ConfigSettings;
-using Fsel.Sender.Common.Models.Entities;
 using System.Net;
 using System.Net.Mail;
+using Fsel.Sender.Domain.Models.Entities;
+using Fsel.Sender.Domain.ValueSettings;
 
 namespace Fsel.Sender.Application.Services
 {
@@ -26,7 +26,8 @@ namespace Fsel.Sender.Application.Services
                 var email = new MailMessage();
                 email.From = new MailAddress(_appSetting?.Smtp?.From ?? string.Empty);
                 email.Subject = message.Subject;
-                if (message.ToEmails == null) return;
+                if (message.ToEmails == null)
+                    return;
 
                 foreach (var item in message.ToEmails)
                 {

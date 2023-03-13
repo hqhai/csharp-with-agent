@@ -1,4 +1,4 @@
-﻿using Fsel.Common.Constants;
+using Fsel.Common.Constants;
 using Fsel.Core.Base;
 using Fsel.Course.Domain.Entities;
 using Fsel.Course.Infrastructure.Configs;
@@ -15,8 +15,6 @@ namespace Fsel.Course.Infrastructure
         public CourseDbContext(DbContextOptions<CourseDbContext> options, IMediator mediator) : base(options, mediator)
         {
         }
-
-        #region Db Set
 
         public DbSet<MockTest> MockTests { get; set; }
         public DbSet<UnitSkillMockTest> UnitSkillMockTests { get; set; }
@@ -44,8 +42,6 @@ namespace Fsel.Course.Infrastructure
         public DbSet<ExcerciseQuestion> ExcerciseQuestions { get; set; }
 
         public DbSet<Question> Questions { get; set; }
-
-        #endregion Db Set
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -86,18 +82,5 @@ namespace Fsel.Course.Infrastructure
                     options => options.MigrationsAssembly(GetType().Assembly.GetName().Name));
             }
         }
-
-        //public class UserContextDesignFactory : IDesignTimeDbContextFactory<CourseDbContext>
-        //{
-        //    public CourseDbContext CreateDbContext(string[] args)
-        //    {
-        //        var optionsBuilder = new DbContextOptionsBuilder<CourseDbContext>();
-
-        //        optionsBuilder.UseSqlServer(
-        //            "Data Source=183.91.11.235;Initial Catalog=env-dev.course-service;User ID=sa;Password=FselTech@2023",
-        //            options => options.MigrationsAssembly(GetType().Assembly.GetName().Name));
-        //        return new CourseDbContext(optionsBuilder.Options, );
-        //    }
-        //}
     }
 }
