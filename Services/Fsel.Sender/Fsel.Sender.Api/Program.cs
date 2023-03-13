@@ -1,7 +1,8 @@
-using Fsel.Sender.Application.Services;
-using Fsel.Sender.Common.ConfigSettings;
-using MediatR;
 using System.Text.Json.Serialization;
+using Fsel.Sender.Application.Services;
+using Fsel.Sender.Domain.ValueSettings;
+using MediatR;
+using Microsoft.AspNetCore.Identity;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -33,6 +34,13 @@ builder.Services
 var appSetting = builder.Configuration.Get<AppSetting>() ?? new AppSetting();
 builder.Services.AddSingleton(appSetting);
 builder.Services.AddScoped<IEmailService, EmailService>();
+
+builder.Services.Configure<IdentityOptions>(
+    opts =>
+    {
+        opts.SignIn.RequireConfirmedEmail = true;
+    }
+);
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

@@ -1,0 +1,18 @@
+using AutoMapper;
+using Fsel.Core.Extensions;
+using Fsel.Course.Domain.Entities;
+using Fsel.Course.Domain.Models.CommandModels.HomeWorks;
+using Fsel.Course.Domain.Models.EntiyModels;
+
+namespace Fsel.Course.Infrastructure.Maps
+{
+    public class HomeWorkProfile : Profile
+    {
+        public HomeWorkProfile()
+        {
+            CreateMap<HomeWork, HomeWorkModel>().IgnoreAllNonExisting();
+            CreateMap<CreateHomeWorkCommandModel, HomeWork>().IgnoreAllNonExisting();
+            CreateMap<UpdateHomeWorkCommandModel, HomeWork>().IgnoreAllNonExisting();
+        }
+    }
+}

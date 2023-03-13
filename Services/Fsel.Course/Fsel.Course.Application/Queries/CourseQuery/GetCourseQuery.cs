@@ -1,17 +1,12 @@
-﻿using AutoMapper;
+using AutoMapper;
 using Fsel.Common.ActionResults;
 using Fsel.Common.Helpers;
 
-using Fsel.Course.Common.Models.Entities;
 using Fsel.Course.Domain.Enums.ErrorCodes;
 using Fsel.Course.Domain.IRepositories;
+using Fsel.Course.Domain.Models.EntiyModels;
 using MediatR;
 using Microsoft.AspNetCore.Http;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Fsel.Course.Application.Queries.CourseQuery
 {

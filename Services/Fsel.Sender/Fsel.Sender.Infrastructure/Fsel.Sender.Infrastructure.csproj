@@ -9,7 +9,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\Shared\Fsel.Core\Fsel.Core.csproj" />
-    <ProjectReference Include="..\Fsel.Sender.Common\Fsel.Sender.Common.csproj" />
+    <ProjectReference Include="..\Fsel.Sender.Domain\Fsel.Sender.Domain.csproj" />
   </ItemGroup>
 
 </Project>

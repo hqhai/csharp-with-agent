@@ -1,9 +1,9 @@
-﻿using Fsel.Core.Base.Interfaces;
+using System.Diagnostics;
+using Fsel.Core.Base.Interfaces;
 using Fsel.Core.Entities;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
-using System.Diagnostics;
 
 namespace Fsel.Core.Base
 {
@@ -72,28 +72,13 @@ namespace Fsel.Core.Base
         {
             var entryMain = ChangeTracker.Entries().FirstOrDefault();
 
-            if (entryMain != null)
+            if (entryMain != null && entryMain.State == EntityState.Modified && bool.TryParse(entryMain.CurrentValues[nameof(Entity.IsDeleted)]?.ToString(), out bool isDeleted) && isDeleted)
                 foreach (var entry in ChangeTracker.Entries())
                 {
-                    if (entryMain.State == EntityState.Modified && bool.TryParse(entryMain.CurrentValues[nameof(Entity.IsDeleted)]?.ToString(), out bool isDeleted) && isDeleted)
-                    {
-                        entry.CurrentValues[nameof(Entity.IsDeleted)] = entryMain.CurrentValues[nameof(Entity.IsDeleted)];
-                        entry.CurrentValues[nameof(Entity.DeletedDate)] = entryMain.CurrentValues[nameof(Entity.DeletedDate)];
-                        entry.CurrentValues[nameof(Entity.DeletedUserId)] = entryMain.CurrentValues[nameof(Entity.DeletedUserId)];
-                        entry.CurrentValues[nameof(Entity.DeletedUserName)] = entryMain.CurrentValues[nameof(Entity.DeletedUserName)];
-                    }
-                    else if (entryMain.State == EntityState.Modified)
-                    {
-                        entry.CurrentValues[nameof(Entity.UpdatedDate)] = entryMain.CurrentValues[nameof(Entity.UpdatedDate)];
-                        entry.CurrentValues[nameof(Entity.UpdatedUserId)] = entryMain.CurrentValues[nameof(Entity.UpdatedUserId)];
-                        entry.CurrentValues[nameof(Entity.UpdatedUserName)] = entryMain.CurrentValues[nameof(Entity.UpdatedUserName)];
-                    }
-                    else if (entryMain.State == EntityState.Added)
-                    {
-                        entry.CurrentValues[nameof(Entity.CreatedDate)] = entryMain.CurrentValues[nameof(Entity.CreatedDate)];
-                        entry.CurrentValues[nameof(Entity.CreatedUserId)] = entryMain.CurrentValues[nameof(Entity.CreatedUserId)];
-                        entry.CurrentValues[nameof(Entity.CreatedUserName)] = entryMain.CurrentValues[nameof(Entity.CreatedUserName)];
-                    }
+                    entry.CurrentValues[nameof(Entity.IsDeleted)] = entryMain.CurrentValues[nameof(Entity.IsDeleted)];
+                    entry.CurrentValues[nameof(Entity.DeletedDate)] = entryMain.CurrentValues[nameof(Entity.DeletedDate)];
+                    entry.CurrentValues[nameof(Entity.DeletedUserId)] = entryMain.CurrentValues[nameof(Entity.DeletedUserId)];
+                    entry.CurrentValues[nameof(Entity.DeletedFullName)] = entryMain.CurrentValues[nameof(Entity.DeletedFullName)];
                 }
         }
 

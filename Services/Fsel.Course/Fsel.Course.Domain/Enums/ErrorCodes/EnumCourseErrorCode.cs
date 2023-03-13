@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Fsel.Course.Domain.Enums.ErrorCodes
+﻿namespace Fsel.Course.Domain.Enums.ErrorCodes
 {
     public enum EnumCourseErrorCode
     {
@@ -12,6 +6,16 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         /// Course does not exist
         /// </summary>
         C01V,
+
+        /// <summary>
+        /// Unit have been use
+        /// </summary>
+        C02V,
+
+        /// <summary>
+        /// Unit null
+        /// </summary>
+        C03V,
 
         /// <summary>
         /// Name cannot be empty
@@ -32,15 +36,5 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         /// Number of course >1
         /// </summary>
         C04C,
-
-        /// <summary>
-        /// Unit have been use
-        /// </summary>
-        C02V,
-
-        /// <summary>
-        /// Unit null
-        /// </summary>
-        C03V,
     }
 }

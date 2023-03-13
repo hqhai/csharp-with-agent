@@ -1,11 +1,10 @@
-﻿using Fsel.Common.Constants;
+using Fsel.Common.Constants;
 using Fsel.Core.Base;
 using Fsel.Course.Domain.Entities;
 using Fsel.Course.Infrastructure.Configs;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
-using Unit = Fsel.Course.Domain.Entities.Unit;
 
 /*using Course = Fsel.Course.Domain.Entities.Course;*/
 
@@ -17,18 +16,22 @@ namespace Fsel.Course.Infrastructure
         {
         }
 
-        #region Db Set
-
-        public DbSet<MockFinalTest> MockFinalTests { get; set; }
-        public DbSet<UnitMockFinalTest> UnitMockFinalTests { get; set; }
+        public DbSet<MockTest> MockTests { get; set; }
+        public DbSet<UnitSkillMockTest> UnitSkillMockTests { get; set; }
         public DbSet<PlacementTest> PlacementTests { get; set; }
         public DbSet<Lesson> Lessons { get; set; }
         public DbSet<Domain.Entities.Course> Courses { get; set; }
         public DbSet<Video> Videos { get; set; }
         public DbSet<LessonVideo> LessonVideos { get; set; }
+
+        public DbSet<LessonHomeWork> LessonHomeWorks { get; set; }
+        public DbSet<LessonExtraPractice> LessonExtraPractices { get; set; }
+        public DbSet<ExtraPractice> ExtraPractices { get; set; }
+        public DbSet<HomeWork> HomeWorks { get; set; }
+        public DbSet<ClassForum> ClassForums { get; set; }
         public DbSet<UnitLesson> UnitLessons { get; set; }
         public DbSet<Domain.Entities.Unit> Units { get; set; }
-        public DbSet<CourseUnit> CourseUnits { get; set; }
+        public DbSet<CourseUnitMockTest> CourseUnitMockTests { get; set; }
 
         public DbSet<VideoTimeCode> VideoTimeCodes { get; set; }
 
@@ -40,20 +43,28 @@ namespace Fsel.Course.Infrastructure
 
         public DbSet<Question> Questions { get; set; }
 
-        #endregion Db Set
-
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.ApplyConfiguration(new PlacementTestEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new ClassForumEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new CourseEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new CourseUnitMockTestEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new ExcerciseEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new ExcerciseQuestionEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new ExtraPracticeEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new HomeWorkEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new LessonEntityTypeConfiguration());
-            modelBuilder.ApplyConfiguration(new VideoEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new LessonExtraPracticeEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new LessonHomeWorkEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new LessonVideoEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new MockTestEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new PlacementTestEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new QuestionEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new TimeCodeExcerciseEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new UnitEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new UnitLessonEntityTypeConfiguration());
-            modelBuilder.ApplyConfiguration(new UnitMockFinalTestConfiuration());
-            modelBuilder.ApplyConfiguration(new UnitTypeConfiuration());
-            modelBuilder.ApplyConfiguration(new CourseTypeConfiguration());
-            modelBuilder.ApplyConfiguration(new ExcerciseQuestionTypeConfiguration());
-            modelBuilder.ApplyConfiguration(new TimeCodeExcerciseTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new UnitSkillMockTestEntityTestConfiguration());
+            modelBuilder.ApplyConfiguration(new VideoEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new VideoTimeCodeEntityTypeConfiguration());
 
             base.OnModelCreating(modelBuilder);
         }
@@ -71,18 +82,5 @@ namespace Fsel.Course.Infrastructure
                     options => options.MigrationsAssembly(GetType().Assembly.GetName().Name));
             }
         }
-
-        //public class UserContextDesignFactory : IDesignTimeDbContextFactory<CourseDbContext>
-        //{
-        //    public CourseDbContext CreateDbContext(string[] args)
-        //    {
-        //        var optionsBuilder = new DbContextOptionsBuilder<CourseDbContext>();
-
-        //        optionsBuilder.UseSqlServer(
-        //            "Data Source=183.91.11.235;Initial Catalog=env-dev.course-service;User ID=sa;Password=FselTech@2023",
-        //            options => options.MigrationsAssembly(GetType().Assembly.GetName().Name));
-        //        return new CourseDbContext(optionsBuilder.Options, );
-        //    }
-        //}
     }
 }

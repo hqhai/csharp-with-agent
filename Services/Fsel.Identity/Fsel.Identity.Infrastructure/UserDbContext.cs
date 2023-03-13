@@ -1,4 +1,4 @@
-﻿using Fsel.Common.Constants;
+using Fsel.Common.Constants;
 using Fsel.Common.Enums;
 using Fsel.Identity.Domain.Entities;
 using Microsoft.AspNetCore.Identity;
@@ -22,7 +22,7 @@ namespace Fsel.Identity.Infrastructure
 
         #region Db Set
 
-        public DbSet<User> Users { get; set; }
+        public override DbSet<User> Users { get; set; }
 
         #endregion Db Set
 

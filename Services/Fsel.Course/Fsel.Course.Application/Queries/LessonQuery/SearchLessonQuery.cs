@@ -1,23 +1,19 @@
-﻿using AutoMapper;
+using AutoMapper;
 using Fsel.Common.ActionResults;
 using Fsel.Core.Base.BaseModels;
-using Fsel.Course.Common.Models.Entities;
-using Fsel.Course.Common.Models.Queries.Lesson;
 using Fsel.Course.Domain.IRepositories;
+using Fsel.Course.Domain.Models.EntiyModels;
+using Fsel.Course.Domain.Models.QueryModels.Lessons;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Fsel.Course.Application.Queries.LessonQuery
 {
     public class SearchLessonQuery : SearchLessonQueryModel, IRequest<MethodResult<PagingItemsModel<LessonModel>>>
     {
     }
+
     public class SearchLessonQueryHandler : IRequestHandler<SearchLessonQuery, MethodResult<PagingItemsModel<LessonModel>>>
     {
         private readonly IMapper _mapper;
@@ -40,20 +36,20 @@ namespace Fsel.Course.Application.Queries.LessonQuery
             }
 
             var lessonQuery = from i in _lessonRepository.Queryable
-                                     select new LessonModel
-                                     {
-                                         Id = i.Id,
-                                         Name = i.Name,
-                                         DisplayName = i.DisplayName,
-                                         InstructionContent = i.InstructionContent,
-                                         IsActive = i.IsActive,
-                                         TeacherId = i.TeacherId,
-                                         CourseLevel = i.CourseLevel,
-                                         CreatedDate = i.CreatedDate,
-                                         CreatedUserId = i.CreatedUserId,
-                                         UpdatedDate = i.UpdatedDate,
-                                         UpdatedUserId = i.UpdatedUserId,
-                                     };
+                              select new LessonModel
+                              {
+                                  Id = i.Id,
+                                  Name = i.Name,
+                                  DisplayName = i.DisplayName,
+                                  InstructionContent = i.InstructionContent,
+                                  IsActive = i.IsActive,
+                                  TeacherId = i.TeacherId,
+                                  CourseLevel = i.CourseLevel,
+                                  CreatedDate = i.CreatedDate,
+                                  CreatedUserId = i.CreatedUserId,
+                                  UpdatedDate = i.UpdatedDate,
+                                  UpdatedUserId = i.UpdatedUserId,
+                              };
             //Keyword
             if (!string.IsNullOrEmpty(request.Keyword))
             {

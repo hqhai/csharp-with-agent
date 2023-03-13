@@ -1,16 +1,15 @@
-﻿using AutoMapper;
-using Azure;
+using System.Text;
+using AutoMapper;
 using Fsel.Common.ActionResults;
-using Fsel.Identity.Application.Services;
-using Fsel.Identity.Common.ConfigSettings;
-using Fsel.Identity.Common.Models.Commands;
-using Fsel.Identity.Common.Models.Entities;
+using Fsel.Common.Helpers;
 using Fsel.Identity.Domain.Entities;
+using Fsel.Identity.Domain.Enums.ErrorCodes;
+using Fsel.Identity.Domain.Models.CommandModels.Auths;
+using Fsel.Identity.Domain.Models.EntityModels.Users;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.WebUtilities;
-using System.Text;
 
 namespace Fsel.Identity.Application.Commands.AuthCmd
 {
@@ -42,7 +41,9 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             if (user == null)
             {
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                methodResult.AddErrorMessage("Email does not exist");
+                methodResult.AddErrorMessage(
+                    nameof(EnumAuthErrorCode.AU04V),
+                    new[] { MethodHelper.GenerateErrorResult(nameof(request.Email), request.Email) });
                 return methodResult;
             }
 
@@ -50,8 +51,8 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             var result = await _userManager.ConfirmEmailAsync(user, token);
             if (!result.Succeeded)
             {
-                methodResult.StatusCode = StatusCodes.Status403Forbidden;
-                methodResult.AddErrorMessage("Email verified fail");
+                methodResult.StatusCode = StatusCodes.Status500InternalServerError;
+                methodResult.AddErrorMessage(nameof(EnumAuthErrorCode.AU01ER));
                 return methodResult;
             }
 

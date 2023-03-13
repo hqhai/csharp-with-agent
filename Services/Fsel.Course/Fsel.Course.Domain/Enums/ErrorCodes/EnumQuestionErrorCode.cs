@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Fsel.Course.Domain.Enums.ErrorCodes
+﻿namespace Fsel.Course.Domain.Enums.ErrorCodes
 {
     public enum EnumQuestionErrorCode
     {
@@ -12,6 +6,16 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         /// Question does not exist
         /// </summary>
         Q01V,
+
+        /// <summary>
+        /// Question was used
+        /// </summary>
+        Q02V,
+
+        /// <summary>
+        /// Question not is correct
+        /// </summary>
+        Q03V,
 
         /// <summary>
         /// Question cannot be empty

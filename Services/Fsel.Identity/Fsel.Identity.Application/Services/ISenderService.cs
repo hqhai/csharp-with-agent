@@ -1,14 +1,5 @@
-﻿using Fsel.Common.ActionResults;
-using Fsel.Identity.Common.Models.Entities;
-using Fsel.Identity.Domain.Entities;
-using Fsel.Sender.Common.Models.Commands;
-using Microsoft.AspNetCore.Mvc;
+using Fsel.Common.ActionResults;
 using Refit;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Fsel.Identity.Application.Services
 {
@@ -16,5 +7,14 @@ namespace Fsel.Identity.Application.Services
     {
         [Post("/sender")]
         Task<IApiResponse<MethodResult<bool>>> SendEmailAsync([Body] SendEmailCommandModel command);
+    }
+
+    public class SendEmailCommandModel
+    {
+        public List<string> ToEmails { get; set; } = new List<string>();
+        public List<string> BccEmails { get; set; } = new List<string>();
+        public List<string> CcEmails { get; set; } = new List<string>();
+        public string? Subject { get; set; }
+        public string? Content { get; set; }
     }
 }

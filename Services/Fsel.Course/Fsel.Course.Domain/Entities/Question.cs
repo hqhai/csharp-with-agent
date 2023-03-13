@@ -1,18 +1,13 @@
-﻿using Fsel.Core.Entities;
+using System.ComponentModel.DataAnnotations;
+using Fsel.Core.Entities;
 using Fsel.Course.Domain.Enums;
 using Fsel.Course.Domain.Enums.ErrorCodes;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Fsel.Course.Domain.Entities
 {
     public class Question : Entity
     {
-        public EnumQuestionType EnumQuestionType { get; set; }
+        public EnumQuestionType QuestionType { get; set; }
         public bool IsSave { get; set; }
 
         [Required(ErrorMessage = nameof(EnumQuestionErrorCode.Q01V))]

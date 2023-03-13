@@ -1,18 +1,13 @@
-﻿using AutoMapper;
+using AutoMapper;
 using Fsel.Common.ActionResults;
 using Fsel.Core.Base.BaseModels;
 
-using Fsel.Course.Common.Models.Entities;
-using Fsel.Course.Common.Models.Queries.Unit;
 using Fsel.Course.Domain.IRepositories;
+using Fsel.Course.Domain.Models.EntiyModels;
+using Fsel.Course.Domain.Models.QueryModels.Units;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Fsel.Course.Application.Queries.UnitQuery
 {
@@ -27,7 +22,7 @@ namespace Fsel.Course.Application.Queries.UnitQuery
 
         public SearchUnitQueryHandler(IMapper mapper, IUnitRepository UnitRepository)
         {
-            _UnitRepository= UnitRepository;
+            _UnitRepository = UnitRepository;
             _mapper = mapper;
         }
 
@@ -42,19 +37,19 @@ namespace Fsel.Course.Application.Queries.UnitQuery
             }
 
             var UnitQuery = from i in _UnitRepository.Queryable
-                                     select new UnitModel
-                                     {
-                                         Id = i.Id,
-                                         Name = i.Name,
-                                         DisplayName= i.DisplayName,
-                                         IsActive = i.IsActive,
-                                         Type = i.Type,
-                                         CourseLevel = i.CourseLevel,
-                                         CreatedDate = i.CreatedDate,
-                                         CreatedUserId = i.CreatedUserId,
-                                         UpdatedDate = i.UpdatedDate,
-                                         UpdatedUserId = i.UpdatedUserId,
-                                     };
+                            select new UnitModel
+                            {
+                                Id = i.Id,
+                                Name = i.Name,
+                                DisplayName = i.DisplayName,
+                                IsActive = i.IsActive,
+                                Type = i.Type,
+                                CourseLevel = i.CourseLevel,
+                                CreatedDate = i.CreatedDate,
+                                CreatedUserId = i.CreatedUserId,
+                                UpdatedDate = i.UpdatedDate,
+                                UpdatedUserId = i.UpdatedUserId,
+                            };
             //Keyword
             if (!string.IsNullOrEmpty(request.Keyword))
             {

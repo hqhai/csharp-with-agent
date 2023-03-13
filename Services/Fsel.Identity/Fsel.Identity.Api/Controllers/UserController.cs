@@ -1,16 +1,18 @@
-﻿using Fsel.Common.ActionResults;
+using System.Net;
+using Fsel.Common.ActionResults;
 using Fsel.Common.Constants;
 using Fsel.Common.Helpers;
+using Fsel.Identity.Application.Commands.AuthCmd;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Net;
 
 namespace Fsel.Identity.Api.Controllers
 {
     [ApiVersion(Settings.APIVersion)]
     [Route(Settings.APIDefaultRoute + "/user")]
     [ApiController]
+    [Authorize]
     public class UserController : ControllerBase
     {
         private readonly IMediator _mediator;
@@ -21,18 +23,19 @@ namespace Fsel.Identity.Api.Controllers
         }
 
         /// <summary>
-        /// Login
+        /// Change Password
         /// </summary>
         /// <param name="command"></param>
         /// <returns></returns>
-        [Authorize]
-        [HttpGet]
+        [HttpPost("change-password")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.BadRequest)]
-        public IActionResult Get()
+        public async Task<IActionResult> ChangePassword([FromBody] ResetPasswordCommand command)
         {
             try
             {
-                return Ok(new string[] { "Catcher Wong", "James Li" });
+                MethodResult<bool> commandResult = await _mediator.Send(command).ConfigureAwait(false);
+                return commandResult.GetActionResult();
             }
             catch (Exception ex)
             {

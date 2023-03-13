@@ -1,11 +1,11 @@
-﻿using Fsel.Common.ActionResults;
+using System.Net;
+using Fsel.Common.ActionResults;
 using Fsel.Common.Constants;
 using Fsel.Common.Helpers;
 using Fsel.Identity.Application.Commands.AuthCmd;
-using Fsel.Identity.Common.Models.Entities;
+using Fsel.Identity.Domain.Models.EntityModels.Users;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using System.Net;
 
 namespace Fsel.Identity.Userentication.Controllers
 {
@@ -81,6 +81,29 @@ namespace Fsel.Identity.Userentication.Controllers
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.BadRequest)]
         public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordCommand command)
+        {
+            try
+            {
+                MethodResult<bool> commandResult = await _mediator.Send(command).ConfigureAwait(false);
+                return commandResult.GetActionResult();
+            }
+            catch (Exception ex)
+            {
+                VoidMethodResult errorCommandResult = new VoidMethodResult();
+                errorCommandResult.AddErrorMessage(MethodHelper.GetExceptionMessage(ex));
+                return errorCommandResult.GetActionResult();
+            }
+        }
+
+        /// <summary>
+        /// Reset Password
+        /// </summary>
+        /// <param name="command"></param>
+        /// <returns></returns>
+        [HttpPost("reset-password")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.BadRequest)]
+        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordCommand command)
         {
             try
             {

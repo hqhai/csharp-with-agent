@@ -2,17 +2,12 @@
 using Fsel.Course.Domain.Entities;
 using Fsel.Course.Domain.IRepositories;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Fsel.Course.Infrastructure.Repositories
 {
     public class VideoRepository : BaseRepository<Video>, IVideoRepository
     {
-        public VideoRepository(CourseDbContext dbContext) : base(dbContext)
+        public VideoRepository(CourseDbContext dbContext, AuthContext authContext) : base(dbContext, authContext)
         {
         }
 

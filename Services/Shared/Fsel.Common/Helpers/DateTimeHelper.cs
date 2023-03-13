@@ -1,6 +1,4 @@
-﻿using Newtonsoft.Json.Linq;
-
-namespace Fsel.Common.Helpers
+﻿namespace Fsel.Common.Helpers
 {
     public static class DateTimeHelper
     {
@@ -15,6 +13,15 @@ namespace Fsel.Common.Helpers
         public static DateTime ConvertTimeFromUtc(this DateTime dateTime, TimeZoneInfo info)
         {
             return TimeZoneInfo.ConvertTimeFromUtc(dateTime, info);
+        }
+
+        public static TimeSpan ConvertTimeSpan(this string? value)
+        {
+            if (!TimeSpan.TryParse(value, out TimeSpan result))
+            {
+                result = default;
+            }
+            return result;
         }
     }
 }

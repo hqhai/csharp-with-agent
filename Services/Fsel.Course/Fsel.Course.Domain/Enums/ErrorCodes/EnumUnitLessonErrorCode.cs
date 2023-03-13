@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Fsel.Course.Domain.Enums.ErrorCodes
+﻿namespace Fsel.Course.Domain.Enums.ErrorCodes
 {
     public enum EnumUnitLessonErrorCode
     {
@@ -12,6 +6,16 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         /// Lesson Unit does not exist
         /// </summary>
         LU01V,
+
+        /// <summary>
+        /// Lesson Unit was used
+        /// </summary>
+        LU02V,
+
+        /// <summary>
+        /// Lesson Unit not is correct
+        /// </summary>
+        LU03V,
 
         /// <summary>
         /// Name cannot be empty

@@ -1,22 +1,21 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Fsel.Course.Domain.Enums.ErrorCodes
+﻿namespace Fsel.Course.Domain.Enums.ErrorCodes
 {
     public enum EnumVideoErrorCode
     {
         /// <summary>
-        /// Unit does not exist
+        /// Video does not exist
         /// </summary>
         VD01V,
 
         /// <summary>
-        /// Unit was used
+        /// Video was used
         /// </summary>
         VD02V,
+
+        /// <summary>
+        /// Video not is correct
+        /// </summary>
+        VD03V,
 
         /// <summary>
         /// Name cannot be empty

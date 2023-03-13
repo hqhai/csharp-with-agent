@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Fsel.Course.Domain.Enums.ErrorCodes
+﻿namespace Fsel.Course.Domain.Enums.ErrorCodes
 {
     public enum EnumExcerciseErrorCode
     {
@@ -12,6 +6,16 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         /// Excercise does not exist
         /// </summary>
         E01V,
+
+        /// <summary>
+        /// Excercise have been use
+        /// </summary>
+        E02V,
+
+        /// <summary>
+        /// Excercise null
+        /// </summary>
+        E03V,
 
         /// <summary>
         /// Name cannot be empty

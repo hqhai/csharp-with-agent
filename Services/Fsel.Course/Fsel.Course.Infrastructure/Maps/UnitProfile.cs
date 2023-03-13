@@ -1,13 +1,8 @@
-﻿using AutoMapper;
+using AutoMapper;
 using Fsel.Core.Extensions;
-using Fsel.Course.Common.Models.Commands.Unit;
-using Fsel.Course.Common.Models.Entities;
 using Fsel.Course.Domain.Entities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Fsel.Course.Domain.Models.CommandModels.Units;
+using Fsel.Course.Domain.Models.EntiyModels;
 
 namespace Fsel.Course.Infrastructure.Maps
 {

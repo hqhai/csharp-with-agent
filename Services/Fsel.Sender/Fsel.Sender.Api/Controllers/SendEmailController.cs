@@ -1,14 +1,10 @@
-﻿using Fsel.Common.ActionResults;
+using System.Net;
+using Fsel.Common.ActionResults;
 using Fsel.Common.Constants;
 using Fsel.Common.Helpers;
-using Fsel.Core.Base.BaseModels;
 using Fsel.Sender.Application.Commands.SendEmailCmd;
-using Fsel.Sender.Common.Models.Entities;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using System.Net;
 
 namespace Fsel.Sender.Api.Controllers
 {

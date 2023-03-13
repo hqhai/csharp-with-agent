@@ -1,18 +1,13 @@
-﻿using AutoMapper;
+using AutoMapper;
 using Fsel.Common.ActionResults;
 using Fsel.Common.Helpers;
-using Fsel.Course.Common.Models.Commands.Course;
-using Fsel.Course.Common.Models.Entities;
 using Fsel.Course.Domain.Entities;
 using Fsel.Course.Domain.Enums.ErrorCodes;
 using Fsel.Course.Domain.IRepositories;
+using Fsel.Course.Domain.Models.CommandModels.Courses;
+using Fsel.Course.Domain.Models.EntiyModels;
 using MediatR;
 using Microsoft.AspNetCore.Http;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using EntityCourse = Fsel.Course.Domain.Entities.Course;
 
 namespace Fsel.Course.Application.Commands.CourseCmd
@@ -24,13 +19,14 @@ namespace Fsel.Course.Application.Commands.CourseCmd
     public class CreateCourseCommandHandler : IRequestHandler<CreateCourseCommand, MethodResult<CourseModel>>
     {
         private readonly ICourseRepository _courseRepository;
-        private readonly ICourseUnitRepository _courseUnitRepository;
+        private readonly ICourseUnitMockTestRepository _courseUnitRepository;
         private readonly IUnitRepository _unitRepository;
         private readonly IMapper _mapper;
 
-        public CreateCourseCommandHandler(ICourseRepository courseRepository, ICourseUnitRepository
-                            courseUnitRepository, IUnitRepository unitRepository,
-                            IMapper mapper)
+        public CreateCourseCommandHandler(ICourseRepository courseRepository
+            , ICourseUnitMockTestRepository courseUnitRepository
+            , IUnitRepository unitRepository
+            , IMapper mapper)
         {
             _unitRepository = unitRepository;
             _courseUnitRepository = courseUnitRepository;
@@ -74,7 +70,7 @@ namespace Fsel.Course.Application.Commands.CourseCmd
 
             await _courseRepository.ExecuteTransactionAsync(async () =>
             {
-                course.CourseUnits = request.UnitIds.Select(x => new CourseUnit
+                course.CourseUnitMockTests = request.UnitIds.Select(x => new CourseUnitMockTest
                 {
                     UnitId = x
                 }).ToList();

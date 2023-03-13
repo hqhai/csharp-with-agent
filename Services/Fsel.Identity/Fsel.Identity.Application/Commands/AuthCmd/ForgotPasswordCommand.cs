@@ -1,16 +1,12 @@
-﻿using AutoMapper;
+using AutoMapper;
 using Fsel.Common.ActionResults;
 using Fsel.Common.Helpers;
 using Fsel.Identity.Application.Services;
-using Fsel.Identity.Common.Models.Entities;
 using Fsel.Identity.Domain.Entities;
-using Fsel.Sender.Common.Models.Commands;
-using Fsel.Sender.Common.Models.Entities;
+using Fsel.Identity.Domain.Enums.ErrorCodes;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.WebUtilities;
-using System.Text;
 
 namespace Fsel.Identity.Application.Commands.AuthCmd
 {
@@ -42,8 +38,10 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             var user = await _userManager.FindByEmailAsync(request.Email ?? string.Empty);
             if (user == null)
             {
-                methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                methodResult.AddErrorMessage("Email does not exist");
+                methodResult.StatusCode = StatusCodes.Status404NotFound;
+                methodResult.AddErrorMessage(
+                    nameof(EnumAuthErrorCode.AU04V),
+                    new[] { MethodHelper.GenerateErrorResult(nameof(request.Email), request.Email) });
                 return methodResult;
             }
 
@@ -52,30 +50,26 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             string resetToken = await _userManager.GeneratePasswordResetTokenAsync(user);
             if (string.IsNullOrEmpty(resetToken))
             {
-                methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                methodResult.AddErrorMessage("Error while generating reset token");
+                methodResult.StatusCode = StatusCodes.Status500InternalServerError;
+                methodResult.AddErrorMessage(nameof(EnumAuthErrorCode.AU02ER));
                 return methodResult;
             }
             var result = await _userManager.ResetPasswordAsync(user, resetToken, newPassword);
             if (!result.Succeeded)
             {
-                methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                methodResult.AddErrorMessage("Error while generating reset Password");
+                methodResult.StatusCode = StatusCodes.Status500InternalServerError;
+                methodResult.AddErrorMessage(nameof(EnumAuthErrorCode.AU03ER));
                 return methodResult;
             }
 
-            var sender = new SendEmailModel
+            var sendCommandModel = new SendEmailCommandModel
             {
                 Content = $"Tài khoản của bạn đã được reset thành công mời bạn nhập mật khẩu mới :{newPassword}",
                 Subject = "Forgot Password ",
                 ToEmails = new List<string> { $"{request.Email}" }
             };
-            var sendCommand = new SendEmailCommandModel();
-            sendCommand.Content = sender.Content;
-            sendCommand.Subject = sender.Subject;
-            sendCommand.ToEmails = sender.ToEmails;
 
-            var IsSendMail = await _senderService.SendEmailAsync(sendCommand);
+            var IsSendMail = await _senderService.SendEmailAsync(sendCommandModel);
             methodResult.Result = true;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
