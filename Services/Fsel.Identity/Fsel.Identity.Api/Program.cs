@@ -15,8 +15,9 @@ builder.AddSwaggerGens(appSetting);
 builder.AddAuthenticationJwtBearers(appSetting);
 builder.AddDbContexts<UserDbContext>();
 builder.Services.AddScoped<IHumanRepository, HumanRepository>();
-builder.Services.AddScoped<IHumanRepository, HumanRepository>();
-
+builder.Services.AddScoped<IParentRepository, ParentRepository>();
+builder.Services.AddScoped<IStudentRepository, StudentRepository>();
+builder.Services.AddScoped<IParentStudentRepository, ParentStudentRepository>();
 builder.Services.AddIdentity<User, Role>()
         .AddEntityFrameworkStores<UserDbContext>()
         .AddDefaultTokenProviders();
