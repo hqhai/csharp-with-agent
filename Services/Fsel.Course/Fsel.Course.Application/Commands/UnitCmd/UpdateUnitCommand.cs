@@ -38,7 +38,7 @@ namespace Fsel.Course.Application.Commands.UnitCmd
 
             #region Validation
 
-            var unit = await _unitRepository.GetByIdAsync(request.Id);
+            var unit = await _unitRepository.GetIncludeByIdAsync(request.Id);
             if (unit == null)
             {
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
