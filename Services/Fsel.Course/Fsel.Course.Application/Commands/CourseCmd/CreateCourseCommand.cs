@@ -47,7 +47,6 @@ namespace Fsel.Course.Application.Commands.CourseCmd
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 methodResult.AddErrorMessage(
                     nameof(EnumLessonErrorCode.L03V));
-
                 return methodResult;
             }
             EntityCourse course = _mapper.Map<EntityCourse>(request);
