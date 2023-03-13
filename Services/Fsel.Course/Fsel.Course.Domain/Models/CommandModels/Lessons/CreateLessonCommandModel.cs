@@ -10,10 +10,10 @@ namespace Fsel.Course.Domain.Models.CommandModels.Lessons
         public string? InstructionContent { get; set; }
         public bool IsActive { get; set; }
         public Guid? TeacherId { get; set; }
-        public List<Guid>? HomeWorkIds { get; set; }
-        public List<Guid>? VideoIds { get; set; }
+        public IList<Guid>? HomeWorkIds { get; set; }
+        public IList<Guid>? VideoIds { get; set; }
         public CreateClassForumCommandModel? ClassForum { get; set; }
-        public List<Guid>? ExtraPracticeIds { get; set; }
+        public IList<Guid>? ExtraPracticeIds { get; set; }
         public EnumCourseLevel CourseLevel { get; set; }
     }
 }

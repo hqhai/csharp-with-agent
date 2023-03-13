@@ -1,4 +1,6 @@
+using Fsel.Course.Domain.Entities;
 using Fsel.Course.Domain.Enums;
+using Fsel.Course.Domain.Models.CommandModels.CourseUnitMockTests;
 
 namespace Fsel.Course.Domain.Models.CommandModels.Courses
 {
@@ -12,8 +14,8 @@ namespace Fsel.Course.Domain.Models.CommandModels.Courses
 
         public bool IsPublish { get; set; }
 
-        public List<Guid>? UnitIds { get; set; }
-
         public EnumCourseLevel CourseLevel { get; set; }
+
+        public List<CreateCourseUnitMockTestCommandModel>? CourseUnitMockTests { get; set; }
     }
 }

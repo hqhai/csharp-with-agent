@@ -6,7 +6,7 @@ using Fsel.Core.Base.BaseModels;
 using Fsel.Course.Application.Commands.PlacementTestCmd;
 using Fsel.Course.Application.Queries.PlacementTestQuery;
 using Fsel.Course.Application.Querys.PlacementTestQuery;
-using Fsel.Course.Domain.Models.EntiyModels;
+using Fsel.Course.Domain.Models.EntityModels;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

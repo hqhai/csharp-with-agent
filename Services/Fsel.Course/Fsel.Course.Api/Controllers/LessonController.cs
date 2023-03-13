@@ -7,7 +7,7 @@ using Fsel.Common.Helpers;
 using Fsel.Core.Base.BaseModels;
 using Fsel.Course.Application.Commands.LessonCmd;
 using Fsel.Course.Application.Queries.LessonQuery;
-using Fsel.Course.Domain.Models.EntiyModels;
+using Fsel.Course.Domain.Models.EntityModels;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

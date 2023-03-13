@@ -3,7 +3,7 @@ using Fsel.Common.ActionResults;
 using Fsel.Core.Base.BaseModels;
 
 using Fsel.Course.Domain.IRepositories;
-using Fsel.Course.Domain.Models.EntiyModels;
+using Fsel.Course.Domain.Models.EntityModels;
 using Fsel.Course.Domain.Models.QueryModels.Units;
 using MediatR;
 using Microsoft.AspNetCore.Http;

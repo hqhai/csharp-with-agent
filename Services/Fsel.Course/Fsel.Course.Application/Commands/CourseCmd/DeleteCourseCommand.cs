@@ -1,10 +1,11 @@
-﻿using AutoMapper;
+using AutoMapper;
 using Fsel.Common.ActionResults;
 using Fsel.Common.Helpers;
 using Fsel.Course.Domain.Enums.ErrorCodes;
 using Fsel.Course.Domain.IRepositories;
 using MediatR;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 
 namespace Fsel.Course.Application.Commands.CourseCmd
 {
@@ -33,7 +34,7 @@ namespace Fsel.Course.Application.Commands.CourseCmd
 
             #region Validation
 
-            var course = await _courseRepository.GetIncludeByIdAsync(request.Id);
+            var course = _courseRepository.Queryable.Where(e => e.Id == request.Id).Include(e => e.CourseUnitMockTests).FirstOrDefault();
             if (course == null)
             {
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;

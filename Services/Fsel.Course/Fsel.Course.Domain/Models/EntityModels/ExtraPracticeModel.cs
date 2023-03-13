@@ -1,4 +1,4 @@
-namespace Fsel.Course.Domain.Models.EntiyModels
+namespace Fsel.Course.Domain.Models.EntityModels
 {
     using Fsel.Core.Base.BaseModels;
 
