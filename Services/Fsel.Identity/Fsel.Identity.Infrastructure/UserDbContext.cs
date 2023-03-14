@@ -1,7 +1,6 @@
 using Fsel.Common.Constants;
 using Fsel.Common.Enums;
 using Fsel.Identity.Domain.Entities;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -43,11 +42,14 @@ namespace Fsel.Identity.Infrastructure
 
         private static void SeedRoles(ModelBuilder builder)
         {
-            builder.Entity<IdentityRole>().HasData
+            builder.Entity<Role>().HasData
                 (
-                    new IdentityRole() { Name = EnumRole.MasterAdmin.ToString(), NormalizedName = EnumRole.MasterAdmin.ToString() },
-                    new IdentityRole() { Name = EnumRole.Admin.ToString(), NormalizedName = EnumRole.Admin.ToString() },
-                    new IdentityRole() { Name = EnumRole.CSO.ToString(), NormalizedName = EnumRole.CSO.ToString() }
+                    new Role() { Name = EnumRole.MasterAdmin.ToString(), NormalizedName = EnumRole.MasterAdmin.ToString() },
+                    new Role() { Name = EnumRole.Admin.ToString(), NormalizedName = EnumRole.Admin.ToString() },
+                    new Role() { Name = EnumRole.CSO.ToString(), NormalizedName = EnumRole.CSO.ToString() },
+                    new Role() { Name = EnumRole.CSO.ToString(), NormalizedName = EnumRole.Teacher.ToString() },
+                    new Role() { Name = EnumRole.CSO.ToString(), NormalizedName = EnumRole.Parent.ToString() },
+                    new Role() { Name = EnumRole.CSO.ToString(), NormalizedName = EnumRole.Student.ToString() }
 
                 );
         }

@@ -63,7 +63,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                 role = new Role
                 {
                     Name = request.Role.ToString(),
-                    NormalizedName = request.Role.ToString().ToUpper(),
+                    NormalizedName = request.Role.ToString(),
                 };
                 await _roleManager.CreateAsync(role);
             }

@@ -1,5 +1,4 @@
 using Fsel.Course.Domain.Enums;
-using Fsel.Course.Domain.Models.CommandModels.UnitSkillMockTests;
 
 namespace Fsel.Course.Domain.Models.CommandModels.Units
 {
@@ -20,7 +19,5 @@ namespace Fsel.Course.Domain.Models.CommandModels.Units
         public Guid MockTestId { get; set; }
 
         public EnumMockTestType MockTestType { get; set; }
-
-       
     }
 }

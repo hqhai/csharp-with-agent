@@ -35,10 +35,10 @@
         "AllowedScopes": []
       }
     },
-    // Course Service
+    // Lcms Course Service
     {
-      "SwaggerKey": "course",
-      "UpstreamPathTemplate": "/course-gateway/{everything}",
+      "SwaggerKey": "lcms-course",
+      "UpstreamPathTemplate": "/lcms-course-gateway/{everything}",
       "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ],
       "DownstreamPathTemplate": "/api/{everything}",
       "DownstreamScheme": "https",
@@ -46,6 +46,24 @@
         {
           "Host": "localhost",
           "Port": 7203
+        }
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Bearer",
+        "AllowedScopes": []
+      }
+    },
+    // Lms Course Service
+    {
+      "SwaggerKey": "lms-course",
+      "UpstreamPathTemplate": "/lms-course-gateway/{everything}",
+      "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ],
+      "DownstreamPathTemplate": "/api/{everything}",
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 7204
         }
       ],
       "AuthenticationOptions": {
@@ -76,12 +94,22 @@
       ]
     },
     {
-      "Key": "course",
+      "Key": "lcms-course",
       "Config": [
         {
-          "Name": "Courses API",
+          "Name": "Lcms Courses API",
           "Version": "v1",
           "Url": "https://localhost:7203/swagger/v1/swagger.json"
+        }
+      ]
+    },
+    {
+      "Key": "lms-course",
+      "Config": [
+        {
+          "Name": "Lms Courses API",
+          "Version": "v1",
+          "Url": "https://localhost:7204/swagger/v1/swagger.json"
         }
       ]
     }

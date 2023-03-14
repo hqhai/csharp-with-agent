@@ -1,4 +1,4 @@
-﻿namespace Fsel.Common.Enums
+namespace Fsel.Common.Enums
 {
     public enum EnumRole
     {
