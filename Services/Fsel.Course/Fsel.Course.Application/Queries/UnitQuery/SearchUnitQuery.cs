@@ -37,12 +37,13 @@ namespace Fsel.Course.Application.Queries.UnitQuery
             }
 
             var UnitQuery = from i in _UnitRepository.Queryable
+                                    .Include(x => x.CourseUnitMockTests.Where(y => !y.IsDeleted))
                             select new UnitModel
                             {
                                 Id = i.Id,
                                 Name = i.Name,
                                 DisplayName = i.DisplayName,
-                                IsActive = i.IsActive,
+                                IsActive = !i.CourseUnitMockTests.Any(),
                                 Type = i.Type,
                                 CourseLevel = i.CourseLevel,
                                 CreatedDate = i.CreatedDate,

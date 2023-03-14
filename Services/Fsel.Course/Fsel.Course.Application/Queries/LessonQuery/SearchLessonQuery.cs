@@ -36,13 +36,14 @@ namespace Fsel.Course.Application.Queries.LessonQuery
             }
 
             var lessonQuery = from i in _lessonRepository.Queryable
+                              .Include(x => x.UnitLessons.Where(y => !y.IsDeleted))
                               select new LessonModel
                               {
                                   Id = i.Id,
                                   Name = i.Name,
                                   DisplayName = i.DisplayName,
                                   InstructionContent = i.InstructionContent,
-                                  IsActive = i.IsActive,
+                                  IsActive = !i.UnitLessons.Any(),
                                   TeacherId = i.TeacherId,
                                   CourseLevel = i.CourseLevel,
                                   CreatedDate = i.CreatedDate,

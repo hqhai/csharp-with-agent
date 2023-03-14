@@ -1,4 +1,4 @@
-﻿using Fsel.Core.Base;
+using Fsel.Core.Base;
 using Fsel.Course.Domain.Entities;
 using Fsel.Course.Domain.IRepositories;
 using Microsoft.EntityFrameworkCore;
@@ -9,6 +9,20 @@ namespace Fsel.Course.Infrastructure.Repositories
     {
         public LessonRepository(CourseDbContext dbContext, AuthContext authContext) : base(dbContext, authContext)
         {
+        }
+
+        public override async Task<Lesson?> GetIncludeByIdAsync(Guid id, int? siteId = null)
+        {
+            try
+            {
+                return await Queryable
+                .Include(x => x.UnitLessons.Where(n => !n.IsDeleted))
+                .FirstOrDefaultAsync(x => x.Id == id);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
 
         public async Task<bool> IsUnitLesson(Guid Id)
