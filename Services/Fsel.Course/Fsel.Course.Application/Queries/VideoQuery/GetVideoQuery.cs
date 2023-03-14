@@ -1,4 +1,5 @@
-using AutoMapper;
+// Copyright (c) Atlantic. All rights reserved.
+
 using Fsel.Common.ActionResults;
 using Fsel.Common.Helpers;
 using Fsel.Course.Domain.Enums.ErrorCodes;
@@ -17,13 +18,11 @@ namespace Fsel.Course.Application.Queries.VideoQuery
 
     public class GetVideoQueryHandler : IRequestHandler<GetVideoQuery, MethodResult<VideoModel>>
     {
-        private readonly IMapper _mapper;
         private readonly IVideoRepository _videoRepository;
 
-        public GetVideoQueryHandler(IMapper mapper, IVideoRepository videoRepository
+        public GetVideoQueryHandler(IVideoRepository videoRepository
             )
         {
-            _mapper = mapper;
             _videoRepository = videoRepository;
         }
 
@@ -74,7 +73,7 @@ namespace Fsel.Course.Application.Queries.VideoQuery
                          .Include(i => i.TimeCodeExcercise.Excercise).Include(i => i.ExcerciseQuestion.Question)
                          select i;*/
 
-            var video = await query.FirstOrDefaultAsync();
+            var video = query.FirstOrDefault();
             if (video == null)
             {
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
