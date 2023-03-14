@@ -1,8 +1,8 @@
-﻿namespace Fsel.Course.Domain.Enums
+namespace Fsel.Course.Domain.Enums
 {
     public enum EnumGradingStyle
     {
-        Teacher_Grading,
-        Auto_dot
+        TeacherGrading,
+        Autodot
     }
 }
