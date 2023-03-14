@@ -8,6 +8,6 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public EnumQuestionType QuestionType { get; set; }
         public bool IsSave { get; set; }
 
-        public string? Config { get; set; }
+        public object? Config { get; set; }
     }
 }

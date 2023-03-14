@@ -1,4 +1,6 @@
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using Fsel.Common.Helpers;
 using Fsel.Core.Entities;
 using Fsel.Course.Domain.Enums;
 using Fsel.Course.Domain.Enums.ErrorCodes;
@@ -12,7 +14,14 @@ namespace Fsel.Course.Domain.Entities
 
         [Required(ErrorMessage = nameof(EnumQuestionErrorCode.Q01V))]
         [MaxLength(1000, ErrorMessage = nameof(EnumQuestionErrorCode.Q03C))]
-        public string? Config { get; set; }
+        public string? ConfigStr { get; set; }
+
+        [NotMapped]
+        public object? Config
+        {
+            get { return ConvertHelper.Deserialize<object>(ConfigStr); }
+            set { ConfigStr = ConvertHelper.Serialize(value); }
+        }
 
         public List<ExcerciseQuestion> ExcerciseQuestions { get; set; } = new List<ExcerciseQuestion>();
     }

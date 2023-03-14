@@ -105,5 +105,21 @@ namespace Fsel.Common.Helpers
             arr[0] = char.ToUpper(arr[0]);
             return new string(arr);
         }
+
+        public static string Serialize(this object? data)
+        {
+            string jsonString = JsonConvert.SerializeObject(data);
+            return jsonString;
+        }
+
+        public static T? Deserialize<T>(this string? data)
+        {
+            if (string.IsNullOrEmpty(data))
+            {
+                return default;
+            }
+            T? obj = JsonConvert.DeserializeObject<T>(data);
+            return obj;
+        }
     }
 }
