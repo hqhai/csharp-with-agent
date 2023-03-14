@@ -20,7 +20,7 @@ builder.Services.AddScoped<IHumanRepository, HumanRepository>();
 builder.Services.AddScoped<IParentRepository, ParentRepository>();
 builder.Services.AddScoped<IStudentRepository, StudentRepository>();
 builder.Services.AddScoped<IParentStudentRepository, ParentStudentRepository>();
-
+builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.AddRefitClients(typeof(ISenderService), appSetting?.Services?.SenderApiUrl);
 
 builder.Services.AddIdentity<User, Role>()

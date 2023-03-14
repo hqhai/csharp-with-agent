@@ -32,8 +32,8 @@ namespace Fsel.Identity.Domain.Entities
 
         public virtual User? User { get; set; }
 
-        public string UserId { get; set; }
-        public Student? Student { get; set; }
+        public string? UserId { get; set; }
         public Parent? Parent { get; set; }
+        public Student? Student { get; set; }
     }
 }
