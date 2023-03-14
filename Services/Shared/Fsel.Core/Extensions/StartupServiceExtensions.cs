@@ -41,6 +41,7 @@ namespace Fsel.Core.Extensions
 
         private static void AddAuthContexts(this WebApplicationBuilder builder)
         {
+            //builder.Services.AddTransient<BaseAddressAuthorizationMessageHandler>();
             builder.Services.AddHttpContextAccessor();
             builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             builder.Services.AddScoped(x =>
@@ -128,7 +129,7 @@ namespace Fsel.Core.Extensions
             builder.Services.AddRefitClient(refitInterfaceType).ConfigureHttpClient(x =>
             {
                 x.BaseAddress = new Uri(url ?? string.Empty);
-            }).AddHttpMessageHandler<AuthorizationMessageHandler>();
+            })/*.AddHttpMessageHandler<AuthorizationMessageHandler>()*/;
         }
 
         public static void AddSwaggerGens(this WebApplicationBuilder builder, BaseAppSetting? baseAppSetting)
