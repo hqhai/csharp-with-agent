@@ -1,4 +1,4 @@
-namespace Fsel.Identity.Domain.Models.EntityModels.Users
+namespace Fsel.Identity.Domain.Models.EntityModels
 {
     public class UserModel
     {

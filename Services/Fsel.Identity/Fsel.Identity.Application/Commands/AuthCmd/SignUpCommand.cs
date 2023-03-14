@@ -1,12 +1,14 @@
 using System.Text;
 using AutoMapper;
 using Fsel.Common.ActionResults;
+using Fsel.Common.Enums;
 using Fsel.Common.Helpers;
 using Fsel.Identity.Application.Services;
 using Fsel.Identity.Domain.Entities;
 using Fsel.Identity.Domain.Enums.ErrorCodes;
+using Fsel.Identity.Domain.IRepositories;
 using Fsel.Identity.Domain.Models.CommandModels.Auths;
-using Fsel.Identity.Domain.Models.EntityModels.Users;
+using Fsel.Identity.Domain.Models.EntityModels;
 using Fsel.Identity.Infrastructure.ValueSettings;
 using MediatR;
 using Microsoft.AspNetCore.Http;
@@ -98,6 +100,29 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             };
 
             await _senderService.SendEmailAsync(senderCommandModel);
+
+            if (request.Role == EnumRoleRegister.Student)
+            {
+                if (request.Human == null)
+                {
+                }
+                else
+                {
+                    user.Human = _mapper.Map<Human>(request.Human);
+                    user.Human.Student = _mapper.Map<Student>(request.Human.Student);
+                }
+            }
+            else if (request.Role == EnumRoleRegister.Parent)
+            {
+                if (request.Human == null)
+                {
+                }
+                else
+                {
+                    user.Human = _mapper.Map<Human>(request.Human);
+                    _mapper.Map(request.Human.Parent, user.Human.Parent);
+                }
+            }
 
             methodResult.Result = _mapper.Map<UserModel>(user);
             return methodResult;

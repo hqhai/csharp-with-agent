@@ -1,4 +1,4 @@
-namespace Fsel.Identity.Domain.Models.EntityModels.Auths
+namespace Fsel.Identity.Domain.Models.EntityModels
 {
     public class TokenModel
     {

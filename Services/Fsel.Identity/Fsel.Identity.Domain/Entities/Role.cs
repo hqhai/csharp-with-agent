@@ -9,5 +9,8 @@ namespace Fsel.Identity.Domain.Entities
     {
         [StringLength(500)]
         public string? Description { get; set; }
+
+        public virtual ICollection<UserRole> UserRoles { get; set; }
+        public virtual ICollection<RoleClaim> RoleClaims { get; set; }
     }
 }
