@@ -1,40 +1,48 @@
+// Copyright (c) Atlantic. All rights reserved.
+
 namespace Fsel.Course.Domain.Enums.ErrorCodes
 {
-    public enum EnumCourseErrorCode
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Text;
+    using System.Threading.Tasks;
+
+    public enum EnumCourseUnitMockTestErrorCode
     {
         /// <summary>
-        /// Course does not exist
+        /// Course Unit MockTest does not exist
         /// </summary>
-        C01V,
+        CUM01V,
 
         /// <summary>
-        /// Course have been use
+        /// Course Unit MockTest have been use
         /// </summary>
-        C02V,
+        CUM02V,
 
         /// <summary>
-        /// Course null
+        /// Course Unit MockTest null
         /// </summary>
-        C03V,
+        CUM03V,
 
         /// <summary>
         /// Name cannot be empty
         /// </summary>
-        C01C,
+        CUM01C,
 
         /// <summary>
         /// Name limited to 250 characters
         /// </summary>
-        C02C,
+        CUM02C,
 
         /// <summary>
         /// Instruction Content limited to 1000 characters
         /// </summary>
-        C03C,
+        CUM03C,
 
         /// <summary>
         /// Number of course >1
         /// </summary>
-        C04C,
+        CUM04C,
     }
 }

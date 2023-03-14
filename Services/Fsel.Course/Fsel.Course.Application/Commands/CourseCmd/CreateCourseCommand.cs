@@ -46,16 +46,17 @@ namespace Fsel.Course.Application.Commands.CourseCmd
             {
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 methodResult.AddErrorMessage(
-                    nameof(EnumLessonErrorCode.L03V));
+                    nameof(EnumCourseUnitMockTestErrorCode.CUM03V));
                 return methodResult;
             }
+
             EntityCourse course = _mapper.Map<EntityCourse>(request);
             var units = request.CourseUnitMockTests.Where(e => e.UnitId != null).Select(x => x.UnitId).ToList();
             if (_unitRepository.IsIdsInValid(units.Where(e => e.HasValue).Select(e => e!.Value)))
             {
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 methodResult.AddErrorMessage(
-                    nameof(EnumLessonErrorCode.L03V));
+                    nameof(EnumUnitErrorCode.U03V));
 
                 return methodResult;
             }
@@ -65,7 +66,7 @@ namespace Fsel.Course.Application.Commands.CourseCmd
             {
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 methodResult.AddErrorMessage(
-                nameof(EnumLessonErrorCode.L03V));
+                nameof(EnumMockTestErrorCode.MT03V));
                 return methodResult;
             }
 
@@ -76,7 +77,7 @@ namespace Fsel.Course.Application.Commands.CourseCmd
                 if (mocktest == null)
                 {
                     methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                    methodResult.AddErrorMessage(nameof(EnumLessonErrorCode.L03V));
+                    methodResult.AddErrorMessage(nameof(EnumMockTestErrorCode.MT03V));
                 }
                 else
                 {
@@ -88,7 +89,7 @@ namespace Fsel.Course.Application.Commands.CourseCmd
             {
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 methodResult.AddErrorMessage(
-                nameof(EnumLessonErrorCode.L03V));
+                nameof(EnumMockTestErrorCode.MT05V));
                 return methodResult;
             }
 

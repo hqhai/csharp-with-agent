@@ -1,4 +1,4 @@
-﻿namespace Fsel.Course.Domain.Enums.ErrorCodes
+namespace Fsel.Course.Domain.Enums.ErrorCodes
 {
     public enum EnumMockTestErrorCode
     {
@@ -30,6 +30,12 @@
         /// <summary>
         /// Mock Type = UnitMockTest
         /// </summary>
-        MT04V
+        MT04V,
+
+        /// <summary>
+        /// Mock Type = CourseUnitMockTest
+        /// </summary>
+
+        MT05V
     }
 }

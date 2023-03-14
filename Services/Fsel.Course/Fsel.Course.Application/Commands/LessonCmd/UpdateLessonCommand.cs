@@ -50,6 +50,13 @@ namespace Fsel.Course.Application.Commands.LessonCmd
 
             #region Validation
 
+            if (request == null)
+            {
+                methodResult.StatusCode = StatusCodes.Status400BadRequest;
+                methodResult.AddErrorMessage("Not Found");
+                return methodResult;
+            }
+
             var IsUnitLesson = await _lessonRepository.IsUnitLesson(request.Id);
 
             if (IsUnitLesson)
@@ -91,7 +98,7 @@ namespace Fsel.Course.Application.Commands.LessonCmd
             {
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 methodResult.AddErrorMessage(
-                    nameof(EnumHomeWorkErrorCode.HW03V),
+                    nameof(EnumVideoErrorCode.VD03V),
                     new[] { MethodHelper.GenerateErrorResult(nameof(request.VideoIds), request.VideoIds) });
                 return methodResult;
             }
@@ -105,37 +112,21 @@ namespace Fsel.Course.Application.Commands.LessonCmd
                 return methodResult;
             }
 
-            //if (_extraPracticeRepository.IsIdsInValid(request.ExtraPracticeIds))
-            //{
-            //    methodResult.StatusCode = StatusCodes.Status400BadRequest;
-            //    methodResult.AddErrorMessage(
-            //        nameof(EnumExtraPractiveErrorCode.EP03V));
-
-            //    return methodResult;
-            //}
-
             if (_videoRepository.IsIdsInValid(request.VideoIds))
             {
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 methodResult.AddErrorMessage(
-                    nameof(EnumVideoErrorCode.VD03V));
+                    nameof(EnumHomeWorkErrorCode.HW03V));
 
                 return methodResult;
             }
+
             if (_classForumRepository.IsIdsInValid(new List<Guid> { request.ClassForumId ?? Guid.Empty }))
             {
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 methodResult.AddErrorMessage(
                     nameof(EnumClassForumErrorCode.CF03V));
             }
-            //if (_homeWorkRepository.IsIdsInValid(request.HomeWorkIds))
-            //{
-            //    methodResult.StatusCode = StatusCodes.Status400BadRequest;
-            //    methodResult.AddErrorMessage(
-            //        nameof(EnumHomeWorkErrorCode.HW03V));
-
-            //    return methodResult;
-            //}
 
             _mapper.Map(request, lesson);
 
