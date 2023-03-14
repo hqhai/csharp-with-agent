@@ -5,6 +5,7 @@ using Fsel.Course.Domain.Enums.ErrorCodes;
 using Fsel.Course.Domain.IRepositories;
 using MediatR;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 
 namespace Fsel.Course.Application.Commands.LessonCmd
 {
@@ -51,7 +52,10 @@ namespace Fsel.Course.Application.Commands.LessonCmd
 
             #region Validation
 
-            var lesson = await _lessonRepository.GetByIdAsync(request.Id);
+            var lesson = _lessonRepository.Queryable.Include(e => e.UnitLessons)
+                                .Include(e => e.ClassForum).Include(e => e.LessonHomeWorks)
+                                .Include(e => e.LessonVideos).Include(e => e.LessonExtraPractices)
+                                .FirstOrDefault(e => e.Id == request.Id);
             if (lesson == null)
             {
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
@@ -114,22 +118,6 @@ namespace Fsel.Course.Application.Commands.LessonCmd
 
             await _lessonRepository.ExecuteTransactionAsync(async () =>
             {
-                //Delete lessonVideo
-                lesson.LessonVideos.ForEach(x =>
-                {
-                    var lessonVideo = _lessonVideoRepository.DeleteAsync(x);
-                });
-                //Delete LessonExtraPractices
-                lesson.LessonExtraPractices.ForEach(x =>
-                {
-                    var lessonExtraPractice = _lessonExtraPracticeRepository.DeleteAsync(x);
-                });
-                //Delete lessonHomeWork
-                lesson.LessonHomeWorks.ForEach(x =>
-                {
-                    var lessonHomeWork = _lessonHomeWorkRepository.DeleteAsync(x);
-                });
-
                 var result = await _lessonRepository.DeleteAsync(lesson);
 
                 await _lessonHomeWorkRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);

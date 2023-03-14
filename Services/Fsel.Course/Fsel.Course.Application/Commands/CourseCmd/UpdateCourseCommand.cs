@@ -49,8 +49,7 @@ namespace Fsel.Course.Application.Commands.CourseCmd
             {
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 methodResult.AddErrorMessage(
-                    nameof(EnumCourseErrorCode.C01V),
-                    new[] { MethodHelper.GenerateErrorResult(nameof(request.Id), request.Id) });
+                    nameof(EnumCourseErrorCode.C01V));
                 return methodResult;
             }
             _mapper.Map(request, course);
@@ -66,7 +65,7 @@ namespace Fsel.Course.Application.Commands.CourseCmd
             {
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 methodResult.AddErrorMessage(
-                    nameof(EnumCourseErrorCode.C03V));
+                    nameof(EnumCourseUnitMockTestErrorCode.CUM03V));
                 return methodResult;
             }
 
@@ -75,7 +74,7 @@ namespace Fsel.Course.Application.Commands.CourseCmd
             {
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 methodResult.AddErrorMessage(
-                    nameof(EnumLessonErrorCode.L03V));
+                    nameof(EnumUnitErrorCode.U03V));
 
                 return methodResult;
             }
@@ -85,7 +84,7 @@ namespace Fsel.Course.Application.Commands.CourseCmd
             {
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 methodResult.AddErrorMessage(
-                nameof(EnumLessonErrorCode.L03V));
+                nameof(EnumMockTestErrorCode.MT03V));
                 return methodResult;
             }
 
@@ -96,7 +95,7 @@ namespace Fsel.Course.Application.Commands.CourseCmd
                 if (mocktest == null)
                 {
                     methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                    methodResult.AddErrorMessage(nameof(EnumLessonErrorCode.L03V));
+                    methodResult.AddErrorMessage(nameof(EnumMockTestErrorCode.MT03V));
                 }
                 else
                 {
@@ -108,7 +107,7 @@ namespace Fsel.Course.Application.Commands.CourseCmd
             {
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 methodResult.AddErrorMessage(
-                nameof(EnumLessonErrorCode.L03V));
+                nameof(EnumMockTestErrorCode.MT05V));
                 return methodResult;
             }
 
