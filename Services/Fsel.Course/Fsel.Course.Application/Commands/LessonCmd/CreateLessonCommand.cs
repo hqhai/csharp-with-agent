@@ -49,17 +49,31 @@ namespace Fsel.Course.Application.Commands.LessonCmd
 
             #region Validation
 
-            ArgumentNullException.ThrowIfNull(nameof(request));
+            if (request == null)
+            {
+                methodResult.StatusCode = StatusCodes.Status400BadRequest;
+                return methodResult;
+            }
 
             if (request.HomeWorkIds == null)
             {
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 methodResult.AddErrorMessage(
-                nameof(EnumUnitErrorCode.U03V),
+                nameof(EnumHomeWorkErrorCode.HW03V),
                 new[] { MethodHelper.GenerateErrorResult(nameof(request.HomeWorkIds), request.HomeWorkIds) });
                 return methodResult;
             }
+
             if (request.ExtraPracticeIds == null)
+            {
+                methodResult.StatusCode = StatusCodes.Status400BadRequest;
+                methodResult.AddErrorMessage(
+                nameof(EnumExtraPractiveErrorCode.EP03V),
+                new[] { MethodHelper.GenerateErrorResult(nameof(request.HomeWorkIds), request.HomeWorkIds) });
+                return methodResult;
+            }
+
+            if (request.VideoIds == null)
             {
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 methodResult.AddErrorMessage(
@@ -67,14 +81,7 @@ namespace Fsel.Course.Application.Commands.LessonCmd
                 new[] { MethodHelper.GenerateErrorResult(nameof(request.HomeWorkIds), request.HomeWorkIds) });
                 return methodResult;
             }
-            if (request.VideoIds == null)
-            {
-                methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                methodResult.AddErrorMessage(
-                nameof(EnumUnitErrorCode.U03V),
-                new[] { MethodHelper.GenerateErrorResult(nameof(request.HomeWorkIds), request.HomeWorkIds) });
-                return methodResult;
-            }
+
             if (_homeWorkRepository.IsIdsInValid(request.HomeWorkIds))
             {
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
@@ -82,6 +89,7 @@ namespace Fsel.Course.Application.Commands.LessonCmd
                 nameof(EnumHomeWorkErrorCode.HW03V));
                 return methodResult;
             }
+
             if (_extraPracticeRepository.IsIdsInValid(request.ExtraPracticeIds))
             {
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
@@ -89,6 +97,7 @@ namespace Fsel.Course.Application.Commands.LessonCmd
                 nameof(EnumExtraPractiveErrorCode.EP03V));
                 return methodResult;
             }
+
             if (_videoRepository.IsIdsInValid(request.VideoIds))
             {
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
@@ -96,6 +105,7 @@ namespace Fsel.Course.Application.Commands.LessonCmd
                 nameof(EnumVideoErrorCode.VD03V));
                 return methodResult;
             }
+
             Lesson lesson = _mapper.Map<Lesson>(request);
 
             if (!lesson.IsValid())

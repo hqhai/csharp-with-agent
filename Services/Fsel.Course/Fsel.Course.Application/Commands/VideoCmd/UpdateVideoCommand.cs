@@ -72,7 +72,7 @@ namespace Fsel.Course.Application.Commands.VideoCmd
             if (video == null)
             {
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                methodResult.AddErrorMessage(nameof(EnumVideoTimeCodeErrorCode.VTC03V));
+                methodResult.AddErrorMessage(nameof(EnumVideoErrorCode.VD03V));
                 return methodResult;
             }
             video = _mapper.Map(request, video);
@@ -82,7 +82,7 @@ namespace Fsel.Course.Application.Commands.VideoCmd
                 if (x == null)
                 {
                     methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                    methodResult.AddErrorMessage(nameof(EnumVideoErrorCode.VD03V));
+                    methodResult.AddErrorMessage(nameof(EnumVideoTimeCodeErrorCode.VTC03V));
                 }
                 else
                 {
@@ -96,7 +96,7 @@ namespace Fsel.Course.Application.Commands.VideoCmd
                             else if (n == null)
                             {
                                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                                methodResult.AddErrorMessage(nameof(EnumVideoErrorCode.VD03V));
+                                methodResult.AddErrorMessage(nameof(EnumExcerciseErrorCode.E03V));
                             }
                             else
                             {
@@ -112,7 +112,7 @@ namespace Fsel.Course.Application.Commands.VideoCmd
                                     else if (q == null)
                                     {
                                         methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                                        methodResult.AddErrorMessage(nameof(EnumVideoErrorCode.VD03V));
+                                        methodResult.AddErrorMessage(nameof(EnumQuestionErrorCode.Q03V));
                                     }
                                     else
                                     {
@@ -156,7 +156,7 @@ namespace Fsel.Course.Application.Commands.VideoCmd
                             if (n == null)
                             {
                                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                                methodResult.AddErrorMessage(nameof(EnumVideoErrorCode.VD03V));
+                                methodResult.AddErrorMessage(nameof(EnumExcerciseErrorCode.E03V));
                             }
                             else
                             {
@@ -179,7 +179,7 @@ namespace Fsel.Course.Application.Commands.VideoCmd
                                             if (q == null)
                                             {
                                                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                                                methodResult.AddErrorMessage(nameof(EnumVideoErrorCode.VD03V));
+                                                methodResult.AddErrorMessage(nameof(EnumQuestionErrorCode.Q03V));
                                             }
                                             else
                                             {
@@ -256,7 +256,7 @@ namespace Fsel.Course.Application.Commands.VideoCmd
                                             if (q == null)
                                             {
                                                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                                                methodResult.AddErrorMessage(nameof(EnumVideoErrorCode.VD03V));
+                                                methodResult.AddErrorMessage(nameof(EnumQuestionErrorCode.Q03V));
                                             }
                                             else
                                             {
@@ -337,7 +337,7 @@ namespace Fsel.Course.Application.Commands.VideoCmd
                                             if (q == null)
                                             {
                                                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                                                methodResult.AddErrorMessage(nameof(EnumVideoErrorCode.VD03V));
+                                                methodResult.AddErrorMessage(nameof(EnumQuestionErrorCode.Q03V));
                                             }
                                             else
                                             {
