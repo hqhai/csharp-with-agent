@@ -7,9 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Commands\HumanCmd\" />
-    <Folder Include="Commands\StudentCmd\" />
-    <Folder Include="Commands\Parent\" />
     <Folder Include="Queries\" />
   </ItemGroup>
 

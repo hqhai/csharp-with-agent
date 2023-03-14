@@ -2,16 +2,17 @@ using Fsel.Common.ActionResults;
 using Fsel.Core.Applications.InternalEvents;
 using Fsel.Core.Base.Interfaces;
 using Fsel.Core.Entities;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 
 namespace Fsel.Core.Base
 {
-    public class BaseRepository<T> : IRepository<T> where T : Entity
+    public class BaseIdentityRepository<T, TUser> : IRepository<T> where T : Entity where TUser : IdentityUser
     {
         protected readonly AuthContext _authContext;
 
-        protected readonly BaseDbContext _dbBaseContext;
+        protected readonly BaseIdentityDbContext<TUser> _dbBaseContext;
 
         protected readonly DbSet<T> _dbSet;
 
@@ -23,7 +24,7 @@ namespace Fsel.Core.Base
 
         public IQueryable<T> Queryable => _dbSet.Where((T m) => !m.IsDeleted);
 
-        public BaseRepository(BaseDbContext dbContext, AuthContext authContext)
+        public BaseIdentityRepository(BaseIdentityDbContext<TUser> dbContext, AuthContext authContext)
         {
             _dbBaseContext = dbContext;
             _dbSet = _dbBaseContext.Set<T>();

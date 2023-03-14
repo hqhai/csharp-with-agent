@@ -14,6 +14,9 @@
 
   <ItemGroup>
     <Folder Include="Constants\" />
+    <Folder Include="Models\CommandModels\Human\" />
+    <Folder Include="Models\CommandModels\Parents\" />
+    <Folder Include="Models\CommandModels\Students\" />
     <Folder Include="Models\QueryModels\" />
   </ItemGroup>
 

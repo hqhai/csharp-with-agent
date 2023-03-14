@@ -12,7 +12,7 @@ namespace Fsel.Identity.Infrastructure.Repositories
     using Fsel.Identity.Domain.IRepositories;
     using Microsoft.AspNetCore.Identity;
 
-    public class StudentRepository : BaseRepository<Student>, IStudentRepository
+    public class StudentRepository : BaseIdentityRepository<Student, User>, IStudentRepository
     {
         public StudentRepository(UserDbContext dbContext, AuthContext authContext) : base(dbContext, authContext)
         {

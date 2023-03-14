@@ -25,4 +25,3 @@ namespace Fsel.Identity.Domain.Models.EntityModels
         public Guid UserId { get; set; }
     }
 }
-}

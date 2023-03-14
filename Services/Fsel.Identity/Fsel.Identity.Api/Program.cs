@@ -1,4 +1,5 @@
 using Fsel.Core.Extensions;
+using Fsel.Identity.Application.Services;
 using Fsel.Identity.Domain.Entities;
 using Fsel.Identity.Domain.IRepositories;
 using Fsel.Identity.Infrastructure;
@@ -14,10 +15,14 @@ builder.AddServices();
 builder.AddSwaggerGens(appSetting);
 builder.AddAuthenticationJwtBearers(appSetting);
 builder.AddDbContexts<UserDbContext>();
+
 builder.Services.AddScoped<IHumanRepository, HumanRepository>();
 builder.Services.AddScoped<IParentRepository, ParentRepository>();
 builder.Services.AddScoped<IStudentRepository, StudentRepository>();
 builder.Services.AddScoped<IParentStudentRepository, ParentStudentRepository>();
+
+builder.AddRefitClients(typeof(ISenderService), appSetting?.Services?.SenderApiUrl);
+
 builder.Services.AddIdentity<User, Role>()
         .AddEntityFrameworkStores<UserDbContext>()
         .AddDefaultTokenProviders();
