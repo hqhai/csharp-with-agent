@@ -19,13 +19,13 @@ namespace Fsel.Identity.Infrastructure
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            //SeedRoles(modelBuilder);
+            SeedRoles(modelBuilder);
 
-            //modelBuilder.ApplyConfiguration(new UserEntityTypeConfiguration());
-            //modelBuilder.ApplyConfiguration(new HumanEntityTypeConfiguration());
-            //modelBuilder.ApplyConfiguration(new StudentEntityTypeConfiguration());
-            //modelBuilder.ApplyConfiguration(new ParentEntityTypeConfiguration());
-            //modelBuilder.ApplyConfiguration(new ParentStudentEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new HumanEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new ParentEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new ParentStudentEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new StudentEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new UserEntityTypeConfiguration());
 
             base.OnModelCreating(modelBuilder);
         }
@@ -33,19 +33,11 @@ namespace Fsel.Identity.Infrastructure
         #region Db Set
 
         public override DbSet<User> Users { get; set; }
-
         public DbSet<Role> Roles { get; set; }
-
-        //public DbSet<Human> Humans { get; set; }
-
-        //public DbSet<Student> Students { get; set; }
-
-        //public DbSet<RoleClaim> RoleClaims { get; set; }
-        //public DbSet<UserClaim> UserClaims { get; set; }
-        //public DbSet<UserRole> UserRoles { get; set; }
-        //public DbSet<Parent> Parents { get; set; }
-
-        //public DbSet<ParentStudent> ParentStudents { get; set; }
+        public DbSet<Human> Humans { get; set; }
+        public DbSet<Student> Students { get; set; }
+        public DbSet<Parent> Parents { get; set; }
+        public DbSet<ParentStudent> ParentStudents { get; set; }
 
         #endregion Db Set
 

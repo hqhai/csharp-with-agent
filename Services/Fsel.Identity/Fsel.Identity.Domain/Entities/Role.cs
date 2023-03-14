@@ -10,9 +10,8 @@ namespace Fsel.Identity.Domain.Entities
     using System.Threading.Tasks;
     using Microsoft.AspNetCore.Identity;
 
-    public class Role : IdentityRole<Guid>
+    public class Role : IdentityRole
     {
-        [Required]
         [MaxLength(250)]
         public string? Discription { get; set; }
     }

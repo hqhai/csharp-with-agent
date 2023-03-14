@@ -15,8 +15,5 @@ namespace Fsel.Identity.Domain.Entities
         public DateTime? RefreshTokenExpiryTime { get; set; }
 
         public virtual Human? Human { get; set; }
-
-        //public virtual ICollection<Role> UserRoles { get; set; }
-        //public virtual ICollection<UserClaim> UserClaims { get; set; }
     }
 }
