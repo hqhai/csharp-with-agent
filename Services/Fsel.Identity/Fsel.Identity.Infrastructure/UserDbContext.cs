@@ -34,7 +34,8 @@ namespace Fsel.Identity.Infrastructure
 
         public override DbSet<User> Users { get; set; }
 
-        //public DbSet<Role> Roles { get; set; }
+        public DbSet<Role> Roles { get; set; }
+
         //public DbSet<Human> Humans { get; set; }
 
         //public DbSet<Student> Students { get; set; }
@@ -64,14 +65,14 @@ namespace Fsel.Identity.Infrastructure
 
         private static void SeedRoles(ModelBuilder builder)
         {
-            builder.Entity<IdentityRole>().HasData
+            builder.Entity<Role>().HasData
                 (
-                    new IdentityRole() { Name = EnumRole.MasterAdmin.ToString(), NormalizedName = EnumRole.MasterAdmin.ToString() },
-                    new IdentityRole() { Name = EnumRole.Admin.ToString(), NormalizedName = EnumRole.Admin.ToString() },
-                    new IdentityRole() { Name = EnumRole.CSO.ToString(), NormalizedName = EnumRole.CSO.ToString() },
-                    new IdentityRole() { Name = EnumRole.CSO.ToString(), NormalizedName = EnumRole.Teacher.ToString() },
-                    new IdentityRole() { Name = EnumRole.CSO.ToString(), NormalizedName = EnumRole.Parent.ToString() },
-                    new IdentityRole() { Name = EnumRole.CSO.ToString(), NormalizedName = EnumRole.Student.ToString() }
+                    new Role() { Name = EnumRole.MasterAdmin.ToString(), NormalizedName = EnumRole.MasterAdmin.ToString() },
+                    new Role() { Name = EnumRole.Admin.ToString(), NormalizedName = EnumRole.Admin.ToString() },
+                    new Role() { Name = EnumRole.CSO.ToString(), NormalizedName = EnumRole.CSO.ToString() },
+                    new Role() { Name = EnumRole.CSO.ToString(), NormalizedName = EnumRole.Teacher.ToString() },
+                    new Role() { Name = EnumRole.CSO.ToString(), NormalizedName = EnumRole.Parent.ToString() },
+                    new Role() { Name = EnumRole.CSO.ToString(), NormalizedName = EnumRole.Student.ToString() }
 
                 );
         }

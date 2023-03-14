@@ -9,7 +9,7 @@ namespace Fsel.Identity.Domain.Entities
     using System.Threading.Tasks;
     using Microsoft.AspNetCore.Identity;
 
-    public class RoleClaim : IdentityRoleClaim<string>
+    public class RoleClaim : IdentityRoleClaim<Guid>
     {
     }
 }

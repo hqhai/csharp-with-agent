@@ -8,7 +8,8 @@ using Microsoft.EntityFrameworkCore.Storage;
 
 namespace Fsel.Core.Base
 {
-    public class BaseIdentityRepository<T, TUser> : IRepository<T> where T : Entity where TUser : IdentityUser
+    public class BaseIdentityRepository<T, TUser> : IRepository<T> where T : Entity
+        where TUser : IdentityUser
     {
         protected readonly AuthContext _authContext;
 

@@ -14,7 +14,7 @@ builder.AddSwaggerGens(appSetting);
 builder.AddDbContexts<UserDbContext>();
 builder.AddAuthentication();
 
-builder.Services.AddIdentity<User, IdentityRole>()
+builder.Services.AddIdentity<User, Role>()
         .AddEntityFrameworkStores<UserDbContext>()
         .AddDefaultTokenProviders();
 

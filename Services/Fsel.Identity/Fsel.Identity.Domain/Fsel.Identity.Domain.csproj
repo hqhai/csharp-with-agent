@@ -13,12 +13,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Remove="Entities\RoleClaim.cs" />
-    <Compile Remove="Entities\UserClaim.cs" />
-    <Compile Remove="Entities\UserRole.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
     <Folder Include="Constants\" />
     <Folder Include="Models\QueryModels\" />
   </ItemGroup>
