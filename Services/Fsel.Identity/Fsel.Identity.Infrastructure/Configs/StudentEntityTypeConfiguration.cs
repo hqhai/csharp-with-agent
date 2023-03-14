@@ -17,6 +17,9 @@ namespace Fsel.Identity.Infrastructure.Configs
                  .HasConversion(
                      v => v.ToString(),
                      v => (EnumCourseLevel)Enum.Parse(typeof(EnumCourseLevel), v));
+            builder.HasOne(a => a.Human)
+                    .WithOne(b => b.Student)
+                    .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

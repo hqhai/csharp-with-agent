@@ -1,4 +1,4 @@
-﻿// Copyright (c) Atlantic. All rights reserved.
+// Copyright (c) Atlantic. All rights reserved.
 
 namespace Fsel.Identity.Application.Commands.Parent
 {
@@ -8,7 +8,7 @@ namespace Fsel.Identity.Application.Commands.Parent
     using System.Text;
     using System.Threading.Tasks;
 
-    internal class CreateParentCommandModel
+    public class CreateParentCommand
     {
     }
 }

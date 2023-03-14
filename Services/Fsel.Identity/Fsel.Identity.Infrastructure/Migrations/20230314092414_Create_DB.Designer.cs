@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fsel.Identity.Infrastructure.Migrations
 {
     [DbContext(typeof(UserDbContext))]
-    [Migration("20230314065233_CeateRegister")]
-    partial class CeateRegister
+    [Migration("20230314092414_Create_DB")]
+    partial class Create_DB
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -98,15 +98,14 @@ namespace Fsel.Identity.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(102);
 
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("UserId1")
+                    b.Property<string>("UserId")
+                        .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("UserId1");
+                    b.HasIndex("UserId")
+                        .IsUnique();
 
                     b.ToTable("Humans");
                 });
@@ -176,7 +175,8 @@ namespace Fsel.Identity.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("HumanId");
+                    b.HasIndex("HumanId")
+                        .IsUnique();
 
                     b.ToTable("Parents");
                 });
@@ -245,6 +245,31 @@ namespace Fsel.Identity.Infrastructure.Migrations
                     b.HasIndex("StudentId");
 
                     b.ToTable("ParentStudents");
+                });
+
+            modelBuilder.Entity("Fsel.Identity.Domain.Entities.RoleClaim", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ClaimType")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ClaimValue")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("RoleId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RoleId");
+
+                    b.ToTable("RoleClaims");
                 });
 
             modelBuilder.Entity("Fsel.Identity.Domain.Entities.Student", b =>
@@ -324,7 +349,8 @@ namespace Fsel.Identity.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("HumanId");
+                    b.HasIndex("HumanId")
+                        .IsUnique();
 
                     b.ToTable("Students");
                 });
@@ -406,6 +432,31 @@ namespace Fsel.Identity.Infrastructure.Migrations
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
+            modelBuilder.Entity("Fsel.Identity.Domain.Entities.UserRole", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("RoleId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RoleId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("UserRoles");
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
                 {
                     b.Property<string>("Id")
@@ -435,19 +486,19 @@ namespace Fsel.Identity.Infrastructure.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "f5b72c70-02e5-42f4-b669-6264d6d6d9d6",
+                            Id = "98db7b9b-b757-42b8-8d2a-917236dc632f",
                             Name = "MasterAdmin",
                             NormalizedName = "MasterAdmin"
                         },
                         new
                         {
-                            Id = "2066942b-0c2d-4922-b44e-55a05d0c8537",
+                            Id = "558e496a-28d1-48e3-8df9-a9979d6c6257",
                             Name = "Admin",
                             NormalizedName = "Admin"
                         },
                         new
                         {
-                            Id = "aeba545b-ff0a-45b3-8bf8-f62e9aaf1ff5",
+                            Id = "1275c745-ac51-4552-a112-f69fa5eea5d2",
                             Name = "CSO",
                             NormalizedName = "CSO"
                         });
@@ -467,6 +518,10 @@ namespace Fsel.Identity.Infrastructure.Migrations
                     b.Property<string>("ClaimValue")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("Discriminator")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("UserId")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
@@ -476,6 +531,10 @@ namespace Fsel.Identity.Infrastructure.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("AspNetUserClaims", (string)null);
+
+                    b.HasDiscriminator<string>("Discriminator").HasValue("IdentityUserClaim<string>");
+
+                    b.UseTphMappingStrategy();
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
@@ -527,14 +586,33 @@ namespace Fsel.Identity.Infrastructure.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
 
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasIndex("UserId");
+
                     b.HasDiscriminator().HasValue("Role");
+                });
+
+            modelBuilder.Entity("Fsel.Identity.Domain.Entities.UserClaim", b =>
+                {
+                    b.HasBaseType("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>");
+
+                    b.Property<string>("UserId1")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasIndex("UserId1");
+
+                    b.HasDiscriminator().HasValue("UserClaim");
                 });
 
             modelBuilder.Entity("Fsel.Identity.Domain.Entities.Human", b =>
                 {
                     b.HasOne("Fsel.Identity.Domain.Entities.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId1");
+                        .WithOne("Human")
+                        .HasForeignKey("Fsel.Identity.Domain.Entities.Human", "UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("User");
                 });
@@ -542,8 +620,8 @@ namespace Fsel.Identity.Infrastructure.Migrations
             modelBuilder.Entity("Fsel.Identity.Domain.Entities.Parent", b =>
                 {
                     b.HasOne("Fsel.Identity.Domain.Entities.Human", "Human")
-                        .WithMany()
-                        .HasForeignKey("HumanId")
+                        .WithOne("Parent")
+                        .HasForeignKey("Fsel.Identity.Domain.Entities.Parent", "HumanId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -553,11 +631,11 @@ namespace Fsel.Identity.Infrastructure.Migrations
             modelBuilder.Entity("Fsel.Identity.Domain.Entities.ParentStudent", b =>
                 {
                     b.HasOne("Fsel.Identity.Domain.Entities.Parent", "Parent")
-                        .WithMany()
+                        .WithMany("ParentStudents")
                         .HasForeignKey("ParentId");
 
                     b.HasOne("Fsel.Identity.Domain.Entities.Student", "Student")
-                        .WithMany()
+                        .WithMany("ParentStudents")
                         .HasForeignKey("StudentId");
 
                     b.Navigation("Parent");
@@ -565,15 +643,43 @@ namespace Fsel.Identity.Infrastructure.Migrations
                     b.Navigation("Student");
                 });
 
+            modelBuilder.Entity("Fsel.Identity.Domain.Entities.RoleClaim", b =>
+                {
+                    b.HasOne("Fsel.Identity.Domain.Entities.Role", null)
+                        .WithMany("RoleClaims")
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("Fsel.Identity.Domain.Entities.Student", b =>
                 {
                     b.HasOne("Fsel.Identity.Domain.Entities.Human", "Human")
-                        .WithMany()
-                        .HasForeignKey("HumanId")
+                        .WithOne("Student")
+                        .HasForeignKey("Fsel.Identity.Domain.Entities.Student", "HumanId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Human");
+                });
+
+            modelBuilder.Entity("Fsel.Identity.Domain.Entities.UserRole", b =>
+                {
+                    b.HasOne("Fsel.Identity.Domain.Entities.Role", "Role")
+                        .WithMany("UserRoles")
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Fsel.Identity.Domain.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Role");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
@@ -601,6 +707,53 @@ namespace Fsel.Identity.Infrastructure.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("Fsel.Identity.Domain.Entities.Role", b =>
+                {
+                    b.HasOne("Fsel.Identity.Domain.Entities.User", null)
+                        .WithMany("UserRoles")
+                        .HasForeignKey("UserId");
+                });
+
+            modelBuilder.Entity("Fsel.Identity.Domain.Entities.UserClaim", b =>
+                {
+                    b.HasOne("Fsel.Identity.Domain.Entities.User", null)
+                        .WithMany("UserClaims")
+                        .HasForeignKey("UserId1");
+                });
+
+            modelBuilder.Entity("Fsel.Identity.Domain.Entities.Human", b =>
+                {
+                    b.Navigation("Parent");
+
+                    b.Navigation("Student");
+                });
+
+            modelBuilder.Entity("Fsel.Identity.Domain.Entities.Parent", b =>
+                {
+                    b.Navigation("ParentStudents");
+                });
+
+            modelBuilder.Entity("Fsel.Identity.Domain.Entities.Student", b =>
+                {
+                    b.Navigation("ParentStudents");
+                });
+
+            modelBuilder.Entity("Fsel.Identity.Domain.Entities.User", b =>
+                {
+                    b.Navigation("Human");
+
+                    b.Navigation("UserClaims");
+
+                    b.Navigation("UserRoles");
+                });
+
+            modelBuilder.Entity("Fsel.Identity.Domain.Entities.Role", b =>
+                {
+                    b.Navigation("RoleClaims");
+
+                    b.Navigation("UserRoles");
                 });
 #pragma warning restore 612, 618
         }

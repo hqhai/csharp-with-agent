@@ -1,4 +1,4 @@
-﻿// Copyright (c) Atlantic. All rights reserved.
+// Copyright (c) Atlantic. All rights reserved.
 
 namespace Fsel.Identity.Application.Commands.StudentCmd
 {
@@ -8,7 +8,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
     using System.Text;
     using System.Threading.Tasks;
 
-    internal class UpdateParentCommandModel
+    public class UpdateParentCommand
     {
     }
 }

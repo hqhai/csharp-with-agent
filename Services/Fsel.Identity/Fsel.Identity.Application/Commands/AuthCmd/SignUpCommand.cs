@@ -1,10 +1,12 @@
 using System.Text;
 using AutoMapper;
 using Fsel.Common.ActionResults;
+using Fsel.Common.Enums;
 using Fsel.Common.Helpers;
 using Fsel.Identity.Application.Services;
 using Fsel.Identity.Domain.Entities;
 using Fsel.Identity.Domain.Enums.ErrorCodes;
+using Fsel.Identity.Domain.IRepositories;
 using Fsel.Identity.Domain.Models.CommandModels.Auths;
 using Fsel.Identity.Domain.Models.EntityModels;
 using Fsel.Identity.Infrastructure.ValueSettings;
@@ -26,19 +28,31 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
         private readonly AppSetting _appSetting;
         private readonly ISenderService _senderService;
         private readonly IMapper _mapper;
+        private readonly IHumanRepository _humanRepository;
+        private readonly IParentRepository _parentRepository;
+        private readonly IStudentRepository _studentRepository;
+        private readonly IParentStudentRepository _parentStudentRepository;
 
         public SignUpCommandHandler(UserManager<User> userManager,
             RoleManager<Role> roleManager,
             AppSetting appSetting,
             IMediator mediator,
             ISenderService senderService,
-            IMapper mapper)
+            IMapper mapper,
+            IHumanRepository humanRepository,
+            IParentRepository parentRepository,
+            IStudentRepository studentRepository,
+            IParentStudentRepository parentStudentRepository)
         {
             _userManager = userManager;
             _roleManager = roleManager;
             _appSetting = appSetting;
             _senderService = senderService;
             _mapper = mapper;
+            _humanRepository = humanRepository;
+            _parentRepository = parentRepository;
+            _studentRepository = studentRepository;
+            _parentStudentRepository = parentStudentRepository;
         }
 
         public async Task<MethodResult<UserModel>> Handle(SignUpCommand request, CancellationToken cancellationToken)
@@ -98,6 +112,29 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             };
 
             await _senderService.SendEmailAsync(senderCommandModel);
+
+            if (request.Role == EnumRoleRegister.Student)
+            {
+                if (request.Human == null)
+                {
+                }
+                else
+                {
+                    user.Human = _mapper.Map<Human>(request.Human);
+                    user.Human.Student = _mapper.Map<Student>(request.Human.Student);
+                }
+            }
+            else if (request.Role == EnumRoleRegister.Parent)
+            {
+                if (request.Human == null)
+                {
+                }
+                else
+                {
+                    user.Human = _mapper.Map<Human>(request.Human);
+                    _mapper.Map(request.Human.Parent, user.Human.Parent);
+                }
+            }
 
             methodResult.Result = _mapper.Map<UserModel>(user);
             return methodResult;

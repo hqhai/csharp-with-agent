@@ -30,8 +30,10 @@ namespace Fsel.Identity.Domain.Entities
         [MaxLength(1000, ErrorMessage = nameof(EnumHumanErrorCode.HM03C))]
         public string? AvatarPath { get; set; }
 
-        public User? User { get; set; }
+        public virtual User? User { get; set; }
 
-        public Guid UserId { get; set; }
+        public string UserId { get; set; }
+        public Student? Student { get; set; }
+        public Parent? Parent { get; set; }
     }
 }

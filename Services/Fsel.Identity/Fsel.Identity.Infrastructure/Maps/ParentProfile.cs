@@ -2,14 +2,10 @@
 
 namespace Fsel.Identity.Infrastructure.Maps
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
-    using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Core.Extensions;
     using Fsel.Identity.Domain.Entities;
+    using Fsel.Identity.Domain.Models.CommandModels.Parents;
     using Fsel.Identity.Domain.Models.EntityModels;
 
     public class ParentProfile : Profile
@@ -17,6 +13,8 @@ namespace Fsel.Identity.Infrastructure.Maps
         public ParentProfile()
         {
             CreateMap<Parent, ParentModel>().IgnoreAllNonExisting();
+            CreateMap<CreateParentCommandModel, Parent>().IgnoreAllNonExisting();
+            CreateMap<UpdateParentCommandModel, Parent>().IgnoreAllNonExisting();
         }
     }
 }

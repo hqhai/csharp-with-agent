@@ -15,6 +15,15 @@ namespace Fsel.Identity.Infrastructure.Configs
     {
         public void Configure(EntityTypeBuilder<ParentStudent> builder)
         {
+            builder.HasOne(a => a.Student)
+                .WithMany(b => b.ParentStudents)
+                .HasForeignKey(b => b.StudentId)
+                .OnDelete(DeleteBehavior.ClientSetNull);
+
+            builder.HasOne(a => a.Parent)
+                .WithMany(b => b.ParentStudents)
+                .HasForeignKey(b => b.ParentId)
+                .OnDelete(DeleteBehavior.ClientSetNull);
         }
     }
 }

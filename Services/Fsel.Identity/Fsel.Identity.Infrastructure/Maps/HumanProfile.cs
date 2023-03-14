@@ -10,6 +10,7 @@ namespace Fsel.Identity.Infrastructure.Maps
     using AutoMapper;
     using Fsel.Core.Extensions;
     using Fsel.Identity.Domain.Entities;
+    using Fsel.Identity.Domain.Models.CommandModels.Humans;
     using Fsel.Identity.Domain.Models.EntityModels;
 
     public class HumanProfile : Profile
@@ -17,6 +18,8 @@ namespace Fsel.Identity.Infrastructure.Maps
         public HumanProfile()
         {
             CreateMap<Human, HumanModel>().IgnoreAllNonExisting();
+            CreateMap<CreateHumanCommandModel, Human>().IgnoreAllNonExisting();
+            CreateMap<UpdateHumanCommandModel, Human>().IgnoreAllNonExisting();
         }
     }
 }
