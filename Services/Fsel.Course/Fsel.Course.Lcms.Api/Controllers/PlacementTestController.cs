@@ -1,6 +1,7 @@
 using System.Net;
 using Fsel.Common.ActionResults;
 using Fsel.Common.Constants;
+using Fsel.Common.Enums;
 using Fsel.Common.Helpers;
 using Fsel.Core.Base.BaseModels;
 using Fsel.Course.Application.Commands.PlacementTestCmd;
@@ -16,7 +17,7 @@ namespace Fsel.Course.Lcms.Api.Controllers
     [ApiVersion(Settings.APIVersion)]
     [Route(Settings.APIDefaultRoute + "/placement-test")]
     [ApiController]
-    [Authorize]
+    [Authorize(Roles = nameof(EnumRole.MasterAdmin))]
     public class PlacementTestController : ControllerBase
     {
         private readonly IMediator _mediator;

@@ -1,4 +1,4 @@
-﻿using Fsel.Core.Base;
+using Fsel.Core.Base;
 using Fsel.Course.Domain.Entities;
 using Fsel.Course.Domain.IRepositories;
 using Microsoft.EntityFrameworkCore;
@@ -11,7 +11,7 @@ namespace Fsel.Course.Infrastructure.Repositories
         {
         }
 
-        public async Task<bool> IsUnitLesson(Guid Id)
+        public async Task<bool> IsLessonUsed(Guid Id)
         {
             return await Queryable
                  .Include(x => x.UnitLessons.Where(n => !n.IsDeleted))

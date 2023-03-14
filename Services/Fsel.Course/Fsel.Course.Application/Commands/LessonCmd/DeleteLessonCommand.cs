@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using Fsel.Common.ActionResults;
 using Fsel.Common.Helpers;
 using Fsel.Course.Domain.Enums.ErrorCodes;
@@ -51,17 +51,6 @@ namespace Fsel.Course.Application.Commands.LessonCmd
 
             #region Validation
 
-            var IsUnitLesson = await _lessonRepository.IsUnitLesson(request.Id);
-
-            if (IsUnitLesson)
-            {
-                methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                methodResult.AddErrorMessage(
-                    nameof(EnumLessonErrorCode.LS02V),
-                    new[] { MethodHelper.GenerateErrorResult(nameof(request.Id), request.Id) });
-                return methodResult;
-            }
-
             var lesson = await _lessonRepository.GetByIdAsync(request.Id);
             if (lesson == null)
             {
@@ -107,6 +96,17 @@ namespace Fsel.Course.Application.Commands.LessonCmd
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 methodResult.AddErrorMessage(
                     nameof(EnumLessonVideoErrorCode.LV03V));
+                return methodResult;
+            }
+
+            var isLessonUsed = await _lessonRepository.IsLessonUsed(request.Id);
+
+            if (isLessonUsed)
+            {
+                methodResult.StatusCode = StatusCodes.Status400BadRequest;
+                methodResult.AddErrorMessage(
+                    nameof(EnumLessonErrorCode.LS02V),
+                    new[] { MethodHelper.GenerateErrorResult(nameof(request.Id), request.Id) });
                 return methodResult;
             }
 

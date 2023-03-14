@@ -3,6 +3,7 @@
 using System.Net;
 using Fsel.Common.ActionResults;
 using Fsel.Common.Constants;
+using Fsel.Common.Enums;
 using Fsel.Common.Helpers;
 using Fsel.Core.Base.BaseModels;
 using Fsel.Course.Application.Commands.LessonCmd;
@@ -17,7 +18,7 @@ namespace Fsel.Course.Lcms.Api.Controllers
     [ApiVersion(Settings.APIVersion)]
     [Route(Settings.APIDefaultRoute + "/lesson")]
     [ApiController]
-    [Authorize]
+    [Authorize(Roles = nameof(EnumRole.MasterAdmin))]
     public class LessonController : ControllerBase
     {
         private readonly IMediator _mediator;

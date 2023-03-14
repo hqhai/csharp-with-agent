@@ -42,7 +42,7 @@ namespace Fsel.Core.Extensions
         private static void AddAuthContexts(this WebApplicationBuilder builder)
         {
             builder.Services.AddHttpContextAccessor();
-            builder.Services.AddTransient<IHttpContextAccessor, HttpContextAccessor>();
+            builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             builder.Services.AddScoped(x =>
             {
                 var authContext = new AuthContext();

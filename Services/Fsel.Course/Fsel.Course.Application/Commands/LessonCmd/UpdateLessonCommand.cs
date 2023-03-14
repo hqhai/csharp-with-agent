@@ -50,17 +50,6 @@ namespace Fsel.Course.Application.Commands.LessonCmd
 
             #region Validation
 
-            var IsUnitLesson = await _lessonRepository.IsUnitLesson(request.Id);
-
-            if (IsUnitLesson)
-            {
-                methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                methodResult.AddErrorMessage(
-                    nameof(EnumLessonErrorCode.LS02V),
-                    new[] { MethodHelper.GenerateErrorResult(nameof(request.Id), request.Id) });
-                return methodResult;
-            }
-
             var lesson = await _lessonRepository.GetByIdAsync(request.Id);
             if (lesson == null)
             {
@@ -102,6 +91,17 @@ namespace Fsel.Course.Application.Commands.LessonCmd
                 methodResult.AddErrorMessage(
                     nameof(EnumExtraPractiveErrorCode.EP03V),
                     new[] { MethodHelper.GenerateErrorResult(nameof(request.ExtraPracticeIds), request.ExtraPracticeIds) });
+                return methodResult;
+            }
+
+            var isLessonUsed = await _lessonRepository.IsLessonUsed(request.Id);
+
+            if (isLessonUsed)
+            {
+                methodResult.StatusCode = StatusCodes.Status400BadRequest;
+                methodResult.AddErrorMessage(
+                    nameof(EnumLessonErrorCode.LS02V),
+                    new[] { MethodHelper.GenerateErrorResult(nameof(request.Id), request.Id) });
                 return methodResult;
             }
 

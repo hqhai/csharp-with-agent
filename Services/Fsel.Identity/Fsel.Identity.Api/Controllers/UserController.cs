@@ -1,6 +1,7 @@
 using System.Net;
 using Fsel.Common.ActionResults;
 using Fsel.Common.Constants;
+using Fsel.Common.Enums;
 using Fsel.Common.Helpers;
 using Fsel.Identity.Application.Commands.AuthCmd;
 using MediatR;
@@ -30,6 +31,10 @@ namespace Fsel.Identity.Api.Controllers
         [HttpPost("change-password")]
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.BadRequest)]
+        [Authorize(Roles = nameof(EnumRole.CSO))]
+        [Authorize(Roles = nameof(EnumRole.Teacher))]
+        [Authorize(Roles = nameof(EnumRole.Parent))]
+        [Authorize(Roles = nameof(EnumRole.Student))]
         public async Task<IActionResult> ChangePassword([FromBody] ResetPasswordCommand command)
         {
             try
