@@ -1,11 +1,12 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+﻿using System;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
 namespace Fsel.Course.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class CreateDB : Migration
+    public partial class CreateDb : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -18,9 +19,9 @@ namespace Fsel.Course.Infrastructure.Migrations
                     CreatedUserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     UpdatedUserId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     DeletedUserId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    CreatedUserName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    UpdatedUserName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
-                    DeletedUserName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
+                    CreatedFullName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    UpdatedFullName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
+                    DeletedFullName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
                     CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     UpdatedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     DeletedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
@@ -44,17 +45,17 @@ namespace Fsel.Course.Infrastructure.Migrations
                     CreatedUserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     UpdatedUserId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     DeletedUserId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    CreatedUserName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    UpdatedUserName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
-                    DeletedUserName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
+                    CreatedFullName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    UpdatedFullName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
+                    DeletedFullName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
                     CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     UpdatedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     DeletedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(250)", maxLength: 250, nullable: false),
-                    QuestionType = table.Column<int>(type: "int", nullable: false),
+                    QuestionType = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     MediaPost = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: false),
-                    CourseSkill = table.Column<int>(type: "int", nullable: false)
+                    CourseSkill = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -69,9 +70,9 @@ namespace Fsel.Course.Infrastructure.Migrations
                     CreatedUserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     UpdatedUserId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     DeletedUserId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    CreatedUserName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    UpdatedUserName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
-                    DeletedUserName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
+                    CreatedFullName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    UpdatedFullName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
+                    DeletedFullName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
                     CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     UpdatedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     DeletedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
@@ -96,9 +97,9 @@ namespace Fsel.Course.Infrastructure.Migrations
                     CreatedUserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     UpdatedUserId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     DeletedUserId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    CreatedUserName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    UpdatedUserName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
-                    DeletedUserName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
+                    CreatedFullName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    UpdatedFullName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
+                    DeletedFullName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
                     CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     UpdatedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     DeletedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
@@ -123,9 +124,9 @@ namespace Fsel.Course.Infrastructure.Migrations
                     CreatedUserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     UpdatedUserId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     DeletedUserId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    CreatedUserName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    UpdatedUserName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
-                    DeletedUserName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
+                    CreatedFullName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    UpdatedFullName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
+                    DeletedFullName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
                     CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     UpdatedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     DeletedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
@@ -143,28 +144,28 @@ namespace Fsel.Course.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "MockFinalTests",
+                name: "MockTests",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     CreatedUserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     UpdatedUserId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     DeletedUserId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    CreatedUserName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    UpdatedUserName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
-                    DeletedUserName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
+                    CreatedFullName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    UpdatedFullName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
+                    DeletedFullName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
                     CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     UpdatedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     DeletedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(250)", maxLength: 250, nullable: false),
                     IsActive = table.Column<bool>(type: "bit", nullable: false),
-                    CourseSkill = table.Column<int>(type: "int", nullable: false),
-                    CourseLevel = table.Column<int>(type: "int", nullable: false)
+                    CourseType = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    MockTestType = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_MockFinalTests", x => x.Id);
+                    table.PrimaryKey("PK_MockTests", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -175,9 +176,9 @@ namespace Fsel.Course.Infrastructure.Migrations
                     CreatedUserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     UpdatedUserId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     DeletedUserId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    CreatedUserName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    UpdatedUserName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
-                    DeletedUserName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
+                    CreatedFullName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    UpdatedFullName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
+                    DeletedFullName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
                     CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     UpdatedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     DeletedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
@@ -200,16 +201,16 @@ namespace Fsel.Course.Infrastructure.Migrations
                     CreatedUserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     UpdatedUserId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     DeletedUserId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    CreatedUserName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    UpdatedUserName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
-                    DeletedUserName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
+                    CreatedFullName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    UpdatedFullName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
+                    DeletedFullName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
                     CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     UpdatedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     DeletedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false),
-                    EnumQuestionType = table.Column<int>(type: "int", nullable: false),
+                    QuestionType = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     IsSave = table.Column<bool>(type: "bit", nullable: false),
-                    Config = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: false)
+                    ConfigStr = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -224,9 +225,9 @@ namespace Fsel.Course.Infrastructure.Migrations
                     CreatedUserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     UpdatedUserId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     DeletedUserId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    CreatedUserName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    UpdatedUserName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
-                    DeletedUserName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
+                    CreatedFullName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    UpdatedFullName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
+                    DeletedFullName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
                     CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     UpdatedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     DeletedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
@@ -250,9 +251,9 @@ namespace Fsel.Course.Infrastructure.Migrations
                     CreatedUserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     UpdatedUserId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     DeletedUserId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    CreatedUserName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    UpdatedUserName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
-                    DeletedUserName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
+                    CreatedFullName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    UpdatedFullName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
+                    DeletedFullName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
                     CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     UpdatedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     DeletedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
@@ -277,21 +278,21 @@ namespace Fsel.Course.Infrastructure.Migrations
                     CreatedUserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     UpdatedUserId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     DeletedUserId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    CreatedUserName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    UpdatedUserName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
-                    DeletedUserName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
+                    CreatedFullName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    UpdatedFullName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
+                    DeletedFullName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
                     CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     UpdatedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     DeletedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false),
                     Title = table.Column<string>(type: "nvarchar(250)", maxLength: 250, nullable: false),
                     GradingStyle = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    TaggetTimeLimitTicks = table.Column<long>(type: "bigint", nullable: false),
                     TaggetWordLimit = table.Column<long>(type: "bigint", nullable: false),
+                    TaggetTimeLimitTicks = table.Column<long>(type: "bigint", nullable: false),
                     MediaPost = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: true),
                     IsActive = table.Column<bool>(type: "bit", nullable: false),
                     CourseSkill = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    LessonId = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
+                    LessonId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -300,7 +301,8 @@ namespace Fsel.Course.Infrastructure.Migrations
                         name: "FK_ClassForums_Lessons_LessonId",
                         column: x => x.LessonId,
                         principalTable: "Lessons",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -311,9 +313,9 @@ namespace Fsel.Course.Infrastructure.Migrations
                     CreatedUserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     UpdatedUserId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     DeletedUserId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    CreatedUserName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    UpdatedUserName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
-                    DeletedUserName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
+                    CreatedFullName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    UpdatedFullName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
+                    DeletedFullName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
                     CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     UpdatedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     DeletedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
@@ -346,9 +348,9 @@ namespace Fsel.Course.Infrastructure.Migrations
                     CreatedUserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     UpdatedUserId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     DeletedUserId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    CreatedUserName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    UpdatedUserName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
-                    DeletedUserName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
+                    CreatedFullName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    UpdatedFullName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
+                    DeletedFullName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
                     CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     UpdatedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     DeletedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
@@ -381,9 +383,9 @@ namespace Fsel.Course.Infrastructure.Migrations
                     CreatedUserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     UpdatedUserId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     DeletedUserId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    CreatedUserName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    UpdatedUserName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
-                    DeletedUserName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
+                    CreatedFullName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    UpdatedFullName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
+                    DeletedFullName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
                     CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     UpdatedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     DeletedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
@@ -409,34 +411,42 @@ namespace Fsel.Course.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "CourseUnits",
+                name: "CourseUnitMockTests",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     CreatedUserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     UpdatedUserId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     DeletedUserId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    CreatedUserName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    UpdatedUserName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
-                    DeletedUserName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
+                    CreatedFullName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    UpdatedFullName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
+                    DeletedFullName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
                     CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     UpdatedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     DeletedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false),
-                    UnitId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    CourseId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                    OrderNumber = table.Column<int>(type: "int", nullable: false),
+                    UnitId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    CourseId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    MockTestId = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_CourseUnits", x => x.Id);
+                    table.PrimaryKey("PK_CourseUnitMockTests", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_CourseUnits_Courses_CourseId",
+                        name: "FK_CourseUnitMockTests_Courses_CourseId",
                         column: x => x.CourseId,
                         principalTable: "Courses",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_CourseUnits_Units_UnitId",
+                        name: "FK_CourseUnitMockTests_MockTests_MockTestId",
+                        column: x => x.MockTestId,
+                        principalTable: "MockTests",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_CourseUnitMockTests_Units_UnitId",
                         column: x => x.UnitId,
                         principalTable: "Units",
                         principalColumn: "Id",
@@ -451,9 +461,9 @@ namespace Fsel.Course.Infrastructure.Migrations
                     CreatedUserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     UpdatedUserId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     DeletedUserId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    CreatedUserName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    UpdatedUserName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
-                    DeletedUserName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
+                    CreatedFullName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    UpdatedFullName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
+                    DeletedFullName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
                     CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     UpdatedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     DeletedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
@@ -479,34 +489,34 @@ namespace Fsel.Course.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "UnitMockFinalTests",
+                name: "UnitSkillMockTests",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     CreatedUserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     UpdatedUserId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     DeletedUserId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    CreatedUserName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    UpdatedUserName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
-                    DeletedUserName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
+                    CreatedFullName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    UpdatedFullName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
+                    DeletedFullName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
                     CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     UpdatedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     DeletedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false),
                     UnitId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    MockFinalTestId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                    MockTestId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_UnitMockFinalTests", x => x.Id);
+                    table.PrimaryKey("PK_UnitSkillMockTests", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_UnitMockFinalTests_MockFinalTests_MockFinalTestId",
-                        column: x => x.MockFinalTestId,
-                        principalTable: "MockFinalTests",
+                        name: "FK_UnitSkillMockTests_MockTests_MockTestId",
+                        column: x => x.MockTestId,
+                        principalTable: "MockTests",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_UnitMockFinalTests_Units_UnitId",
+                        name: "FK_UnitSkillMockTests_Units_UnitId",
                         column: x => x.UnitId,
                         principalTable: "Units",
                         principalColumn: "Id",
@@ -521,9 +531,9 @@ namespace Fsel.Course.Infrastructure.Migrations
                     CreatedUserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     UpdatedUserId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     DeletedUserId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    CreatedUserName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    UpdatedUserName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
-                    DeletedUserName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
+                    CreatedFullName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    UpdatedFullName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
+                    DeletedFullName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
                     CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     UpdatedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     DeletedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
@@ -556,16 +566,16 @@ namespace Fsel.Course.Infrastructure.Migrations
                     CreatedUserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     UpdatedUserId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     DeletedUserId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    CreatedUserName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    UpdatedUserName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
-                    DeletedUserName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
+                    CreatedFullName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    UpdatedFullName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
+                    DeletedFullName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
                     CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     UpdatedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     DeletedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false),
                     DisplayTimeTicks = table.Column<long>(type: "bigint", nullable: false),
                     ExecutionTimeTicks = table.Column<long>(type: "bigint", nullable: false),
-                    TimeCodeType = table.Column<int>(type: "int", nullable: false),
+                    TimeCodeType = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     VideoId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
@@ -587,9 +597,9 @@ namespace Fsel.Course.Infrastructure.Migrations
                     CreatedUserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     UpdatedUserId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     DeletedUserId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    CreatedUserName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    UpdatedUserName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
-                    DeletedUserName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
+                    CreatedFullName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    UpdatedFullName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
+                    DeletedFullName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
                     CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     UpdatedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     DeletedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
@@ -618,17 +628,21 @@ namespace Fsel.Course.Infrastructure.Migrations
                 name: "IX_ClassForums_LessonId",
                 table: "ClassForums",
                 column: "LessonId",
-                unique: true,
-                filter: "[LessonId] IS NOT NULL");
+                unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_CourseUnits_CourseId",
-                table: "CourseUnits",
+                name: "IX_CourseUnitMockTests_CourseId",
+                table: "CourseUnitMockTests",
                 column: "CourseId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_CourseUnits_UnitId",
-                table: "CourseUnits",
+                name: "IX_CourseUnitMockTests_MockTestId",
+                table: "CourseUnitMockTests",
+                column: "MockTestId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_CourseUnitMockTests_UnitId",
+                table: "CourseUnitMockTests",
                 column: "UnitId");
 
             migrationBuilder.CreateIndex(
@@ -692,13 +706,13 @@ namespace Fsel.Course.Infrastructure.Migrations
                 column: "UnitId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_UnitMockFinalTests_MockFinalTestId",
-                table: "UnitMockFinalTests",
-                column: "MockFinalTestId");
+                name: "IX_UnitSkillMockTests_MockTestId",
+                table: "UnitSkillMockTests",
+                column: "MockTestId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_UnitMockFinalTests_UnitId",
-                table: "UnitMockFinalTests",
+                name: "IX_UnitSkillMockTests_UnitId",
+                table: "UnitSkillMockTests",
                 column: "UnitId");
 
             migrationBuilder.CreateIndex(
@@ -714,7 +728,7 @@ namespace Fsel.Course.Infrastructure.Migrations
                 name: "ClassForums");
 
             migrationBuilder.DropTable(
-                name: "CourseUnits");
+                name: "CourseUnitMockTests");
 
             migrationBuilder.DropTable(
                 name: "ExcerciseQuestions");
@@ -738,7 +752,7 @@ namespace Fsel.Course.Infrastructure.Migrations
                 name: "UnitLessons");
 
             migrationBuilder.DropTable(
-                name: "UnitMockFinalTests");
+                name: "UnitSkillMockTests");
 
             migrationBuilder.DropTable(
                 name: "Courses");
@@ -762,7 +776,7 @@ namespace Fsel.Course.Infrastructure.Migrations
                 name: "Lessons");
 
             migrationBuilder.DropTable(
-                name: "MockFinalTests");
+                name: "MockTests");
 
             migrationBuilder.DropTable(
                 name: "Units");
