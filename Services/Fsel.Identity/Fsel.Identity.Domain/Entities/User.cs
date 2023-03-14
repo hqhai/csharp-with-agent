@@ -16,7 +16,7 @@ namespace Fsel.Identity.Domain.Entities
 
         public virtual Human? Human { get; set; }
 
-        public virtual ICollection<Role> UserRoles { get; set; }
-        public virtual ICollection<UserClaim> UserClaims { get; set; }
+        //public virtual ICollection<Role> UserRoles { get; set; }
+        //public virtual ICollection<UserClaim> UserClaims { get; set; }
     }
 }

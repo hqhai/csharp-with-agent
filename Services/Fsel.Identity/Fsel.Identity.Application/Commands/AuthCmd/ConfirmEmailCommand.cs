@@ -20,15 +20,12 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
     public class ConfirmEmailCommandHandler : IRequestHandler<ConfirmEmailCommand, MethodResult<UserModel>>
     {
         private readonly UserManager<User> _userManager;
-        private readonly RoleManager<Role> _roleManager;
         private readonly IMapper _mapper;
 
         public ConfirmEmailCommandHandler(UserManager<User> userManager,
-            RoleManager<Role> roleManager,
             IMapper mapper)
         {
             _userManager = userManager;
-            _roleManager = roleManager;
             _mapper = mapper;
         }
 

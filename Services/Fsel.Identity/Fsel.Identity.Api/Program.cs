@@ -24,7 +24,7 @@ builder.Services.AddScoped<IParentStudentRepository, ParentStudentRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.AddRefitClients(typeof(ISenderService), appSetting?.Services?.SenderApiUrl);
 
-builder.Services.AddIdentity<User, Role>()
+builder.Services.AddIdentity<User, IdentityRole>()
         .AddEntityFrameworkStores<UserDbContext>()
         .AddDefaultTokenProviders();
 
