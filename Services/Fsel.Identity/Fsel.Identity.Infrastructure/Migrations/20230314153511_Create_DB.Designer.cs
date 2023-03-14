@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fsel.Identity.Infrastructure.Migrations
 {
     [DbContext(typeof(UserDbContext))]
-    [Migration("20230314150949_Create_DB")]
+    [Migration("20230314153511_Create_DB")]
     partial class Create_DB
     {
         /// <inheritdoc />
@@ -77,6 +77,10 @@ namespace Fsel.Identity.Infrastructure.Migrations
                         .IsRequired()
                         .HasMaxLength(250)
                         .HasColumnType("nvarchar(250)");
+
+                    b.Property<string>("Gender")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit")
@@ -143,11 +147,6 @@ namespace Fsel.Identity.Infrastructure.Migrations
                     b.Property<Guid?>("DeletedUserId")
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(103);
-
-                    b.Property<string>("Gender")
-                        .IsRequired()
-                        .HasMaxLength(250)
-                        .HasColumnType("nvarchar(250)");
 
                     b.Property<Guid>("HumanId")
                         .HasColumnType("uniqueidentifier");
@@ -297,7 +296,6 @@ namespace Fsel.Identity.Infrastructure.Migrations
                         .HasColumnOrder(110);
 
                     b.Property<string>("Membership")
-                        .IsRequired()
                         .HasMaxLength(250)
                         .HasColumnType("nvarchar(250)");
 
@@ -561,37 +559,37 @@ namespace Fsel.Identity.Infrastructure.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "31c2a947-ef68-48ed-a4ac-74db53d2d945",
+                            Id = "3a715a55-6a0a-47a9-b810-f8f1108514b4",
                             Name = "MasterAdmin",
                             NormalizedName = "MasterAdmin"
                         },
                         new
                         {
-                            Id = "1d1d10a7-56d2-4513-bb7a-960f155f31c0",
+                            Id = "1e63ac94-5e95-4fe1-a534-548bb972eabf",
                             Name = "Admin",
                             NormalizedName = "Admin"
                         },
                         new
                         {
-                            Id = "08ce07aa-8668-4a06-9d83-eda1f9f997d2",
+                            Id = "bab858f3-f52a-47cd-a9fc-af5d02bebd79",
                             Name = "CSO",
                             NormalizedName = "CSO"
                         },
                         new
                         {
-                            Id = "ce526337-57ce-48e7-8bda-3081cfa3863c",
+                            Id = "97f5de28-9a99-415d-8932-f2918d36e6fa",
                             Name = "CSO",
                             NormalizedName = "Teacher"
                         },
                         new
                         {
-                            Id = "c8f37667-8ad5-4873-9fec-2a06c135de06",
+                            Id = "755c38e5-3f70-4458-83c6-b85f486aeeb1",
                             Name = "CSO",
                             NormalizedName = "Parent"
                         },
                         new
                         {
-                            Id = "70d63a34-572a-4ae1-b393-bcf675cd4ac2",
+                            Id = "d206fb0d-86af-4c16-9fc4-502efad2dbf2",
                             Name = "CSO",
                             NormalizedName = "Student"
                         });

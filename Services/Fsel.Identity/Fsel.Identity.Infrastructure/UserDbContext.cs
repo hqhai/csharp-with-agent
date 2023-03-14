@@ -64,9 +64,9 @@ namespace Fsel.Identity.Infrastructure
                     new Role() { Name = EnumRole.MasterAdmin.ToString(), NormalizedName = EnumRole.MasterAdmin.ToString() },
                     new Role() { Name = EnumRole.Admin.ToString(), NormalizedName = EnumRole.Admin.ToString() },
                     new Role() { Name = EnumRole.CSO.ToString(), NormalizedName = EnumRole.CSO.ToString() },
-                    new Role() { Name = EnumRole.CSO.ToString(), NormalizedName = EnumRole.Teacher.ToString() },
-                    new Role() { Name = EnumRole.CSO.ToString(), NormalizedName = EnumRole.Parent.ToString() },
-                    new Role() { Name = EnumRole.CSO.ToString(), NormalizedName = EnumRole.Student.ToString() }
+                    new Role() { Name = EnumRole.Teacher.ToString(), NormalizedName = EnumRole.Teacher.ToString() },
+                    new Role() { Name = EnumRole.Parent.ToString(), NormalizedName = EnumRole.Parent.ToString() },
+                    new Role() { Name = EnumRole.Student.ToString(), NormalizedName = EnumRole.Student.ToString() }
 
                 );
         }

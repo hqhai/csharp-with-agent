@@ -10,8 +10,8 @@ namespace Fsel.Identity.Infrastructure.Configs
     {
         public void Configure(EntityTypeBuilder<User> builder)
         {
-            //builder.HasOne<Human>(x => x.Human).WithOne(b => b.User)
-            //    .OnDelete(DeleteBehavior.Cascade);
+            builder.HasOne(x => x.Human).WithOne(b => b.User)
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

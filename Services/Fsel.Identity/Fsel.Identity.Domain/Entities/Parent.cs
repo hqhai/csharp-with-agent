@@ -14,10 +14,6 @@ namespace Fsel.Identity.Domain.Entities
 
     public class Parent : Entity
     {
-        [Required(ErrorMessage = nameof(EnumParentErrorCode.PA01C))]
-        [MaxLength(250, ErrorMessage = nameof(EnumParentErrorCode.PA02C))]
-        public string? Gender { get; set; }
-
         [MaxLength(250, ErrorMessage = nameof(EnumParentErrorCode.PA02C))]
         public string? Occupation { get; set; }
 

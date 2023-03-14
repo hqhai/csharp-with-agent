@@ -9,6 +9,7 @@ namespace Fsel.Identity.Domain.Entities
     using System.Text;
     using System.Threading.Tasks;
     using Fsel.Core.Entities;
+    using Fsel.Identity.Domain.Enums;
     using Fsel.Identity.Domain.Enums.ErrorCodes;
 
     public class Human : Entity
@@ -30,9 +31,11 @@ namespace Fsel.Identity.Domain.Entities
         [MaxLength(1000, ErrorMessage = nameof(EnumHumanErrorCode.HM03C))]
         public string? AvatarPath { get; set; }
 
-        public virtual User? User { get; set; }
+        public EnumGender? Gender { get; set; }
 
+        public virtual User? User { get; set; }
         public string? UserId { get; set; }
+
         public Parent? Parent { get; set; }
         public Student? Student { get; set; }
     }

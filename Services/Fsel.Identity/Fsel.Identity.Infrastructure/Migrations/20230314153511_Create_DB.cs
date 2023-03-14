@@ -184,6 +184,7 @@ namespace Fsel.Identity.Infrastructure.Migrations
                     Address = table.Column<string>(type: "nvarchar(250)", maxLength: 250, nullable: true),
                     Email = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     AvatarPath = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: true),
+                    Gender = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
                     UserId = table.Column<string>(type: "nvarchar(450)", nullable: true)
                 },
                 constraints: table =>
@@ -212,7 +213,6 @@ namespace Fsel.Identity.Infrastructure.Migrations
                     UpdatedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     DeletedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false),
-                    Gender = table.Column<string>(type: "nvarchar(250)", maxLength: 250, nullable: false),
                     Occupation = table.Column<string>(type: "nvarchar(250)", maxLength: 250, nullable: true),
                     HumanId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
@@ -242,7 +242,7 @@ namespace Fsel.Identity.Infrastructure.Migrations
                     UpdatedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     DeletedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false),
-                    Membership = table.Column<string>(type: "nvarchar(250)", maxLength: 250, nullable: false),
+                    Membership = table.Column<string>(type: "nvarchar(250)", maxLength: 250, nullable: true),
                     Occupation = table.Column<string>(type: "nvarchar(250)", maxLength: 250, nullable: true),
                     School = table.Column<string>(type: "nvarchar(250)", maxLength: 250, nullable: true),
                     CourseLevel = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
@@ -298,12 +298,12 @@ namespace Fsel.Identity.Infrastructure.Migrations
                 columns: new[] { "Id", "ConcurrencyStamp", "Discriminator", "Discription", "Name", "NormalizedName" },
                 values: new object[,]
                 {
-                    { "08ce07aa-8668-4a06-9d83-eda1f9f997d2", null, "Role", null, "CSO", "CSO" },
-                    { "1d1d10a7-56d2-4513-bb7a-960f155f31c0", null, "Role", null, "Admin", "Admin" },
-                    { "31c2a947-ef68-48ed-a4ac-74db53d2d945", null, "Role", null, "MasterAdmin", "MasterAdmin" },
-                    { "70d63a34-572a-4ae1-b393-bcf675cd4ac2", null, "Role", null, "CSO", "Student" },
-                    { "c8f37667-8ad5-4873-9fec-2a06c135de06", null, "Role", null, "CSO", "Parent" },
-                    { "ce526337-57ce-48e7-8bda-3081cfa3863c", null, "Role", null, "CSO", "Teacher" }
+                    { "1e63ac94-5e95-4fe1-a534-548bb972eabf", null, "Role", null, "Admin", "Admin" },
+                    { "3a715a55-6a0a-47a9-b810-f8f1108514b4", null, "Role", null, "MasterAdmin", "MasterAdmin" },
+                    { "755c38e5-3f70-4458-83c6-b85f486aeeb1", null, "Role", null, "CSO", "Parent" },
+                    { "97f5de28-9a99-415d-8932-f2918d36e6fa", null, "Role", null, "CSO", "Teacher" },
+                    { "bab858f3-f52a-47cd-a9fc-af5d02bebd79", null, "Role", null, "CSO", "CSO" },
+                    { "d206fb0d-86af-4c16-9fc4-502efad2dbf2", null, "Role", null, "CSO", "Student" }
                 });
 
             migrationBuilder.CreateIndex(

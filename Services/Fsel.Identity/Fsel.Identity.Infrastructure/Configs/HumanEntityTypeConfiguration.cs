@@ -3,6 +3,7 @@
 namespace Fsel.Identity.Infrastructure.Configs
 {
     using Fsel.Identity.Domain.Entities;
+    using Fsel.Identity.Domain.Enums;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -10,9 +11,15 @@ namespace Fsel.Identity.Infrastructure.Configs
     {
         public void Configure(EntityTypeBuilder<Human> builder)
         {
-            builder.HasOne<User>(x => x.User).WithOne(b => b.Human)
+            builder.HasOne(x => x.User).WithOne(b => b.Human)
                 .HasForeignKey<Human>(b => b.UserId)
                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Property(e => e.Gender)
+                 .HasMaxLength(100)
+                 .HasConversion(
+                    v => v.HasValue ? v.ToString() : null,
+                    v => !string.IsNullOrEmpty(v) ? (EnumGender)Enum.Parse(typeof(EnumGender), v) : null);
         }
     }
 }
