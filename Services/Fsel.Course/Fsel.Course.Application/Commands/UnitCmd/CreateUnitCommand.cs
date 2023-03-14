@@ -94,9 +94,7 @@ namespace Fsel.Course.Application.Commands.UnitCmd
                  };
 
                 unit = _unitRepository.Add(unit);
-
                 await _unitRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
-
                 methodResult.StatusCode = StatusCodes.Status201Created;
                 methodResult.Result = _mapper.Map<UnitModel>(unit);
                 return methodResult;
