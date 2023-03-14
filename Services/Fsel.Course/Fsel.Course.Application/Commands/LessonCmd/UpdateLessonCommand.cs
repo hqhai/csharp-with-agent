@@ -125,7 +125,7 @@ namespace Fsel.Course.Application.Commands.LessonCmd
             {
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 methodResult.AddErrorMessage(
-                    nameof(EnumHomeWorkErrorCode.VD03V));
+                    nameof(EnumVideoErrorCode.VD03V));
 
                 return methodResult;
             }
