@@ -5,7 +5,7 @@ using Fsel.Common.Helpers;
 using Fsel.Identity.Domain.Entities;
 using Fsel.Identity.Domain.Enums.ErrorCodes;
 using Fsel.Identity.Domain.Models.CommandModels.Auths;
-using Fsel.Identity.Domain.Models.EntityModels.Users;
+using Fsel.Identity.Domain.Models.EntityModels;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -20,15 +20,12 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
     public class ConfirmEmailCommandHandler : IRequestHandler<ConfirmEmailCommand, MethodResult<UserModel>>
     {
         private readonly UserManager<User> _userManager;
-        private readonly RoleManager<Role> _roleManager;
         private readonly IMapper _mapper;
 
         public ConfirmEmailCommandHandler(UserManager<User> userManager,
-            RoleManager<Role> roleManager,
             IMapper mapper)
         {
             _userManager = userManager;
-            _roleManager = roleManager;
             _mapper = mapper;
         }
 

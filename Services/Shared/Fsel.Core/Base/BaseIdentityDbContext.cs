@@ -9,7 +9,8 @@ using Microsoft.EntityFrameworkCore.Storage;
 
 namespace Fsel.Core.Base
 {
-    public class BaseIdentityDbContext<TUser> : IdentityUserContext<TUser>, IBaseDbContext where TUser : IdentityUser
+    public class BaseIdentityDbContext<TUser> : IdentityDbContext<TUser>, IBaseDbContext
+        where TUser : IdentityUser
     {
         private readonly IMediator _mediator;
 

@@ -1,12 +1,14 @@
 using System.Text;
 using AutoMapper;
 using Fsel.Common.ActionResults;
+using Fsel.Common.Enums;
 using Fsel.Common.Helpers;
 using Fsel.Identity.Application.Services;
 using Fsel.Identity.Domain.Entities;
 using Fsel.Identity.Domain.Enums.ErrorCodes;
+using Fsel.Identity.Domain.IRepositories;
 using Fsel.Identity.Domain.Models.CommandModels.Auths;
-using Fsel.Identity.Domain.Models.EntityModels.Users;
+using Fsel.Identity.Domain.Models.EntityModels;
 using Fsel.Identity.Infrastructure.ValueSettings;
 using MediatR;
 using Microsoft.AspNetCore.Http;
@@ -26,11 +28,12 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
         private readonly AppSetting _appSetting;
         private readonly ISenderService _senderService;
         private readonly IMapper _mapper;
+        private readonly IHumanRepository _humanRepository;
 
         public SignUpCommandHandler(UserManager<User> userManager,
             RoleManager<Role> roleManager,
             AppSetting appSetting,
-            IMediator mediator,
+            IHumanRepository humanRepository,
             ISenderService senderService,
             IMapper mapper)
         {
@@ -39,6 +42,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             _appSetting = appSetting;
             _senderService = senderService;
             _mapper = mapper;
+            _humanRepository = humanRepository;
         }
 
         public async Task<MethodResult<UserModel>> Handle(SignUpCommand request, CancellationToken cancellationToken)
@@ -98,6 +102,32 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             };
 
             await _senderService.SendEmailAsync(senderCommandModel);
+
+            var human = _mapper.Map<Human>(request.Human);
+            if (request.Role == EnumRoleRegister.Student)
+            {
+                human.Student = new Student
+                {
+                    HumanId = human.Id,
+                };
+            }
+            else if (request.Role == EnumRoleRegister.Parent)
+            {
+                human.Parent = new Domain.Entities.Parent
+                {
+                    HumanId = human.Id,
+                };
+            }
+            await _humanRepository.ExecuteTransactionAsync(async () =>
+            {
+                human = _humanRepository.Add(human);
+
+                await _humanRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+
+                methodResult.StatusCode = StatusCodes.Status201Created;
+                methodResult.Result = _mapper.Map<UserModel>(user);
+                return methodResult;
+            });
 
             methodResult.Result = _mapper.Map<UserModel>(user);
             return methodResult;

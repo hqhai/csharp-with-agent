@@ -1,6 +1,7 @@
 using AutoMapper;
 using Fsel.Common.ActionResults;
 using Fsel.Common.Helpers;
+using Fsel.Course.Domain.Entities;
 using Fsel.Course.Domain.Enums.ErrorCodes;
 using Fsel.Course.Domain.IRepositories;
 using Fsel.Course.Domain.Models.EntityModels;
@@ -29,7 +30,7 @@ namespace Fsel.Course.Application.Queries.LessonQuery
         {
             MethodResult<LessonModel> methodResult = new MethodResult<LessonModel>();
 
-            var lesson = await _lessonRepository.GetByIdAsync(request.Id);
+            var lesson = await _lessonRepository.GetIncludeByIdAsync(request.Id);
 
             if (lesson == null)
             {
@@ -40,7 +41,12 @@ namespace Fsel.Course.Application.Queries.LessonQuery
                 return methodResult;
             }
 
-            methodResult.Result = _mapper.Map<LessonModel>(lesson);
+            var lessonModel = _mapper.Map<LessonModel>(lesson);
+            lessonModel.IsActive = !lesson.UnitLessons.Any();
+
+            methodResult.Result = lessonModel;
+
+            /*methodResult.Result = _mapper.Map<LessonModel>(lesson);*/
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }

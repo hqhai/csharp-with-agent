@@ -11,6 +11,20 @@ namespace Fsel.Course.Infrastructure.Repositories
         {
         }
 
+        public override async Task<Lesson?> GetIncludeByIdAsync(Guid id, int? siteId = null)
+        {
+            try
+            {
+                return await Queryable
+                .Include(x => x.UnitLessons.Where(n => !n.IsDeleted))
+                .FirstOrDefaultAsync(x => x.Id == id);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         public async Task<bool> IsLessonUsed(Guid Id)
         {
             return await Queryable

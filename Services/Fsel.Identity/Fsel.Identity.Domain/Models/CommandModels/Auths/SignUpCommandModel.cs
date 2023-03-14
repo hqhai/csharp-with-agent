@@ -1,5 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using Fsel.Common.Enums;
+using Fsel.Identity.Domain.Entities;
+using Fsel.Identity.Domain.Models.CommandModels.Humans;
 
 namespace Fsel.Identity.Domain.Models.CommandModels.Auths
 {
@@ -22,5 +24,7 @@ namespace Fsel.Identity.Domain.Models.CommandModels.Auths
 
         [Required]
         public EnumRoleRegister Role { get; set; }
+
+        public CreateHumanCommandModel? Human { get; set; }
     }
 }

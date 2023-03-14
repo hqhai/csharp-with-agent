@@ -1,21 +1,34 @@
+// Copyright (c) Atlantic. All rights reserved.
+
 using Fsel.Common.Constants;
 using Fsel.Common.Enums;
+using Fsel.Core.Base;
 using Fsel.Identity.Domain.Entities;
+using Fsel.Identity.Infrastructure.Configs;
+using MediatR;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 
 namespace Fsel.Identity.Infrastructure
 {
-    public class UserDbContext : IdentityDbContext<User>
+    public class UserDbContext : BaseIdentityDbContext<User>
     {
-        public UserDbContext(DbContextOptions<UserDbContext> options) : base(options)
+        public UserDbContext(DbContextOptions<UserDbContext> options, IMediator mediator) : base(options, mediator)
         {
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             SeedRoles(modelBuilder);
+
+            modelBuilder.ApplyConfiguration(new HumanEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new ParentEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new ParentStudentEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new StudentEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new UserEntityTypeConfiguration());
+
             base.OnModelCreating(modelBuilder);
         }
 
@@ -23,6 +36,10 @@ namespace Fsel.Identity.Infrastructure
 
         public override DbSet<User> Users { get; set; }
         public DbSet<Role> Roles { get; set; }
+        public DbSet<Human> Humans { get; set; }
+        public DbSet<Student> Students { get; set; }
+        public DbSet<Parent> Parents { get; set; }
+        public DbSet<ParentStudent> ParentStudents { get; set; }
 
         #endregion Db Set
 
@@ -47,9 +64,9 @@ namespace Fsel.Identity.Infrastructure
                     new Role() { Name = EnumRole.MasterAdmin.ToString(), NormalizedName = EnumRole.MasterAdmin.ToString() },
                     new Role() { Name = EnumRole.Admin.ToString(), NormalizedName = EnumRole.Admin.ToString() },
                     new Role() { Name = EnumRole.CSO.ToString(), NormalizedName = EnumRole.CSO.ToString() },
-                    new Role() { Name = EnumRole.CSO.ToString(), NormalizedName = EnumRole.Teacher.ToString() },
-                    new Role() { Name = EnumRole.CSO.ToString(), NormalizedName = EnumRole.Parent.ToString() },
-                    new Role() { Name = EnumRole.CSO.ToString(), NormalizedName = EnumRole.Student.ToString() }
+                    new Role() { Name = EnumRole.Teacher.ToString(), NormalizedName = EnumRole.Teacher.ToString() },
+                    new Role() { Name = EnumRole.Parent.ToString(), NormalizedName = EnumRole.Parent.ToString() },
+                    new Role() { Name = EnumRole.Student.ToString(), NormalizedName = EnumRole.Student.ToString() }
 
                 );
         }

@@ -16,13 +16,10 @@ namespace Fsel.Course.Application.Commands.VideoCmd
         public class DeleteVideoCommandHandler : IRequestHandler<DeleteVideoCommand, MethodResult<bool>>
         {
             private readonly IVideoRepository _videoRepository;
-            private readonly IMapper _mapper;
 
-            public DeleteVideoCommandHandler(IVideoRepository videoRepository,
-            IMapper mapper)
+            public DeleteVideoCommandHandler(IVideoRepository videoRepository)
             {
                 _videoRepository = videoRepository;
-                _mapper = mapper;
             }
 
             public async Task<MethodResult<bool>> Handle(DeleteVideoCommand request, CancellationToken cancellationToken)

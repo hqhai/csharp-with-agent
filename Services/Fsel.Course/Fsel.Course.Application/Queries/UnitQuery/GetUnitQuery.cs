@@ -29,7 +29,7 @@ namespace Fsel.Course.Application.Queries.UnitQuery
         {
             MethodResult<UnitModel> methodResult = new MethodResult<UnitModel>();
 
-            var unit = await _unitRepository.GetByIdAsync(request.Id);
+            var unit = await _unitRepository.GetIncludeByIdAsync(request.Id);
 
             if (unit == null)
             {
@@ -40,7 +40,10 @@ namespace Fsel.Course.Application.Queries.UnitQuery
                 return methodResult;
             }
 
-            methodResult.Result = _mapper.Map<UnitModel>(unit);
+            var unitModel = _mapper.Map<UnitModel>(unit);
+            unitModel.IsActive = !unit.CourseUnitMockTests.Any();
+
+            methodResult.Result = unitModel;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }

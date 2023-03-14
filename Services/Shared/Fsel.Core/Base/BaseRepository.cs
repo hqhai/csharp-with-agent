@@ -1,4 +1,4 @@
-﻿using Fsel.Common.ActionResults;
+using Fsel.Common.ActionResults;
 using Fsel.Core.Applications.InternalEvents;
 using Fsel.Core.Base.Interfaces;
 using Fsel.Core.Entities;

@@ -8,7 +8,6 @@ namespace Fsel.Course.Domain.Models.CommandModels.Lessons
         public string? Name { get; set; }
         public string? DisplayName { get; set; }
         public string? InstructionContent { get; set; }
-        public bool IsActive { get; set; }
         public Guid? TeacherId { get; set; }
         public List<Guid>? HomeWorkIds { get; set; }
         public List<Guid>? VideoIds { get; set; }
