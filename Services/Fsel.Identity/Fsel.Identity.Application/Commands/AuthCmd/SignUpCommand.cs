@@ -101,7 +101,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                 ToEmails = new List<string> { $"{request.Email}" }
             };
 
-            await _senderService.SendEmailAsync(senderCommandModel);
+            var check = await _senderService.SendEmailAsync(senderCommandModel);
 
             var human = _mapper.Map<Human>(request);
             if (request.Role == EnumRoleRegister.Student)
