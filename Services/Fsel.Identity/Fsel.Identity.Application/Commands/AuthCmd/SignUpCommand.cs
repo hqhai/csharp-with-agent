@@ -122,7 +122,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                 }
             }
 
-            var human = _mapper.Map<Human>(request.Human);
+            var human = _mapper.Map<Human>(request);
             if (request.Role == EnumRoleRegister.Student)
             {
                 human.Student = new Student
