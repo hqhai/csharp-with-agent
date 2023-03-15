@@ -123,6 +123,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             }
 
             var human = _mapper.Map<Human>(request);
+            human.UserId = user.Id;
             if (request.Role == EnumRoleRegister.Student)
             {
                 human.Student = new Student

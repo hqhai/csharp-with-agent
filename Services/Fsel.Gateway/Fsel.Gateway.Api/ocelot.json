@@ -83,11 +83,7 @@
           "Host": "localhost",
           "Port": 7206
         }
-      ],
-      "AuthenticationOptions": {
-        "AuthenticationProviderKey": "Bearer",
-        "AllowedScopes": []
-      }
+      ]
     }
   ],
   "SwaggerEndPoints": [
