@@ -10,8 +10,6 @@ namespace Fsel.Course.Domain.Models.CommandModels.Videos
 
         public string? VideoFilePath { get; set; }
 
-        public bool IsActive { get; set; }
-
         public Guid? TeacherId { get; set; }
 
         public EnumCourseLevel CourseLevel { get; set; }
