@@ -1,6 +1,5 @@
 using Fsel.Common.Enums;
 using Fsel.Core.Base.BaseModels;
-using Fsel.Course.Domain.Enums;
 using Fsel.Course.Domain.Models.CommandModels.VideoTimeCodes;
 
 namespace Fsel.Course.Domain.Models.CommandModels.Videos

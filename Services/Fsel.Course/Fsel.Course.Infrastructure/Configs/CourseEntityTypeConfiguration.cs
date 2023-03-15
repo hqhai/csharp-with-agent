@@ -1,7 +1,7 @@
+using Fsel.Common.Enums;
 using Fsel.Course.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using Fsel.Common.Enums;
 using EntityCourse = Fsel.Course.Domain.Entities.Course;
 
 namespace Fsel.Course.Infrastructure.Configs

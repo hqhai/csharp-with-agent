@@ -1,7 +1,5 @@
 using AutoMapper;
 using Fsel.Common.ActionResults;
-using Fsel.Common.Helpers;
-using Fsel.Course.Domain.Entities;
 using Fsel.Course.Domain.Enums;
 using Fsel.Course.Domain.Enums.ErrorCodes;
 using Fsel.Course.Domain.IRepositories;

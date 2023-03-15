@@ -116,7 +116,6 @@ namespace Fsel.Common.Helpers
         {
             try
             {
-
                 if (string.IsNullOrEmpty(data))
                 {
                     return default;
