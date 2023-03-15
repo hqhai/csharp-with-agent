@@ -1,0 +1,102 @@
+version: '3.5'
+services:
+    GatewayService:
+        container_name: gateway
+        image: ${DOCKER_REGISTRY-}gatewaymicroservice:v1
+        build:
+            context: ./
+            dockerfile: Gateway.Dockerfile
+        ports:
+            - 5200:80
+            - 7200:443
+    AuthService:
+        container_name: auth
+        image: ${DOCKER_REGISTRY-}authsmicroservice:v1
+        build:
+            context: ./
+            dockerfile: Auth.Dockerfile
+        environment:
+            - CONNECTIONSTRINGS__DEFAULTCONNECTION=Data Source=183.91.11.235;Initial Catalog=env-dev.user-service;User Id=sa;Password=FselTech@2023;TrustServerCertificate=true;
+            - SERVICENAME=Gateway
+            - JWT__SECRETKEY=JsonWebApiTokenWithSwaggerAuthorizationAuthenticationAspNetCore
+            - JWT__ISSUER=baseWebApiIssuer
+            - JWT__AUDIENCE=baseWebApiAudience
+            - JWT__SUBJECT=baseWebApiSubject
+            - JWT__TOKENVALIDITYINMINUTES=60
+            - JWT__REFRESHTOKENVALIDITYINDAYS=7
+            - URL__EMAILCONFIRMURL=https://localhost:7200/auth-gateway/v1/user/confirm-email
+            - SERVICES_SENDERAPIURL=https://localhost:7200/sender-gateway/v1
+        ports:
+            - 5201:80
+            - 7201:443
+    UserService:
+        container_name: user
+        image: ${DOCKER_REGISTRY-}usersmicroservice:v1
+        build:
+            context: ./
+            dockerfile: User.Dockerfile
+        environment:
+            - CONNECTIONSTRINGS__DEFAULTCONNECTION=Data Source=183.91.11.235;Initial Catalog=env-dev.user-service;User Id=sa;Password=FselTech@2023;TrustServerCertificate=true;
+            - SERVICENAME=User
+            - JWT__SECRETKEY=JsonWebApiTokenWithSwaggerAuthorizationAuthenticationAspNetCore
+            - JWT__ISSUER=baseWebApiIssuer
+            - JWT__AUDIENCE=baseWebApiAudience
+            - JWT__SUBJECT=baseWebApiSubject
+            - JWT__TOKENVALIDITYINMINUTES=60
+            - JWT__REFRESHTOKENVALIDITYINDAYS=7
+            - SERVICES_SENDERAPIURL=https://localhost:7200/sender-gateway/v1
+        ports:
+            - 5202:80
+            - 7202:443
+    LcmsService:
+        container_name: lcms
+        image: ${DOCKER_REGISTRY-}lcmsmicroservice:v1
+        build:
+            context: ./
+            dockerfile: Lcms.Dockerfile
+        environment:
+            - CONNECTIONSTRINGS__DEFAULTCONNECTION=Data Source=183.91.11.235;Initial Catalog=env-dev.course-service;User Id=sa;Password=FselTech@2023;TrustServerCertificate=true;
+            - SERVICENAME=Lcms Course
+            - JWT__SECRETKEY=JsonWebApiTokenWithSwaggerAuthorizationAuthenticationAspNetCore
+            - JWT__ISSUER=baseWebApiIssuer
+            - JWT__AUDIENCE=baseWebApiAudience
+            - JWT__SUBJECT=baseWebApiSubject
+            - JWT__TOKENVALIDITYINMINUTES=60
+            - JWT__REFRESHTOKENVALIDITYINDAYS=7
+        ports:
+            - 5203:80
+            - 7203:443
+    LmsService:
+        container_name: lms
+        image: ${DOCKER_REGISTRY-}lmsmicroservice:v1
+        build:
+            context: ./
+            dockerfile: Lms.Dockerfile
+        environment:
+            - CONNECTIONSTRINGS__DEFAULTCONNECTION=Data Source=183.91.11.235;Initial Catalog=env-dev.course-service;User Id=sa;Password=FselTech@2023;TrustServerCertificate=true;
+            - SERVICENAME=Lms Course
+            - JWT__SECRETKEY=JsonWebApiTokenWithSwaggerAuthorizationAuthenticationAspNetCore
+            - JWT__ISSUER=baseWebApiIssuer
+            - JWT__AUDIENCE=baseWebApiAudience
+            - JWT__SUBJECT=baseWebApiSubject
+            - JWT__TOKENVALIDITYINMINUTES=60
+            - JWT__REFRESHTOKENVALIDITYINDAYS=7
+        ports:
+            - 5204:80
+            - 7204:443
+    SenderService:
+        container_name: sender
+        image: ${DOCKER_REGISTRY-}sendersmicroservice:v1
+        build:
+            context: ./
+            dockerfile: Sender.Dockerfile
+        environment:
+            - SERVICENAME=Sender
+            - SMTP__FROM=phanminhphucdctb@gmail.com
+            - SMTP__SMTPSERVER=smtp.gmail.com
+            - SMTP__PORT=465
+            - SMTP__USERNAME=phanminhphucdctb@gmail.com
+            - SMTP__PASSWORD=afyverhrmlidxwbf
+        ports:
+            - 5206:80
+            - 7206:443
