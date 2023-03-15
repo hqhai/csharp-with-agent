@@ -36,11 +36,13 @@ namespace Fsel.Course.Infrastructure
         public DbSet<TimeCodeExcercise> TimeCodeExcercises { get; set; }
         public DbSet<ExcerciseQuestion> ExcerciseQuestions { get; set; }
         public DbSet<Question> Questions { get; set; }
+        public DbSet<CourseTeacher> CourseTeachers { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.ApplyConfiguration(new ClassForumEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new CourseEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new CourseTeacherEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new CourseUnitMockTestEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new ExcerciseEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new ExcerciseQuestionEntityTypeConfiguration());

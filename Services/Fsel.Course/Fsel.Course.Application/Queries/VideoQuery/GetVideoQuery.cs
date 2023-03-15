@@ -80,7 +80,7 @@ namespace Fsel.Course.Application.Queries.VideoQuery
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 methodResult.AddErrorMessage(
                     nameof(EnumVideoErrorCode.VD01V),
-                    new[] { MethodHelper.GenerateErrorResult(nameof(request.Id), request.Id) });
+                    new[] { MethodHelper.GenerateErrorResult(nameof(request.Id), request?.Id) });
                 return methodResult;
             }
 
