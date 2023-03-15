@@ -70,6 +70,24 @@
         "AuthenticationProviderKey": "Bearer",
         "AllowedScopes": []
       }
+    },
+    // Sender Service
+    {
+      "SwaggerKey": "sender",
+      "UpstreamPathTemplate": "/sender-gateway/{everything}",
+      "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ],
+      "DownstreamPathTemplate": "/api/{everything}",
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 7206
+        }
+      ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Bearer",
+        "AllowedScopes": []
+      }
     }
   ],
   "SwaggerEndPoints": [
@@ -110,6 +128,16 @@
           "Name": "Lms Courses API",
           "Version": "v1",
           "Url": "https://localhost:7204/swagger/v1/swagger.json"
+        }
+      ]
+    },
+    {
+      "Key": "sender",
+      "Config": [
+        {
+          "Name": "Senders API",
+          "Version": "v1",
+          "Url": "https://localhost:7206/swagger/v1/swagger.json"
         }
       ]
     }

@@ -27,17 +27,6 @@ namespace Fsel.Course.Application.Commands.VideoCmd
 
                 #region Validation
 
-                var IsLessonVideo = await _videoRepository.IsVideoLesson(request.Id);
-
-                if (IsLessonVideo)
-                {
-                    methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                    methodResult.AddErrorMessage(
-                        nameof(EnumVideoErrorCode.VD02V),
-                        new[] { MethodHelper.GenerateErrorResult(nameof(request.Id), request.Id) });
-                    return methodResult;
-                }
-
                 var video = await _videoRepository.Queryable
                                                .Include(i => i.VideoTimeCodes.Where(x => !x.IsDeleted))
                                                .ThenInclude(x => x.TimeCodeExcercises.Where(x => !x.IsDeleted && x.Excercise != null))
@@ -50,6 +39,17 @@ namespace Fsel.Course.Application.Commands.VideoCmd
                     methodResult.StatusCode = StatusCodes.Status400BadRequest;
                     methodResult.AddErrorMessage(
                         nameof(EnumVideoErrorCode.VD01V),
+                        new[] { MethodHelper.GenerateErrorResult(nameof(request.Id), request.Id) });
+                    return methodResult;
+                }
+
+                var isVideoUsed = await _videoRepository.IsVideoUsed(request.Id);
+
+                if (isVideoUsed)
+                {
+                    methodResult.StatusCode = StatusCodes.Status400BadRequest;
+                    methodResult.AddErrorMessage(
+                        nameof(EnumVideoErrorCode.VD02V),
                         new[] { MethodHelper.GenerateErrorResult(nameof(request.Id), request.Id) });
                     return methodResult;
                 }
