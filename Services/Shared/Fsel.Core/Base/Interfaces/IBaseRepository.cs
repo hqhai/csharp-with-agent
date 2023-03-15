@@ -1,4 +1,4 @@
-﻿using Fsel.Common.ActionResults;
+using Fsel.Common.ActionResults;
 using Fsel.Core.Entities;
 
 namespace Fsel.Core.Base.Interfaces
@@ -11,6 +11,8 @@ namespace Fsel.Core.Base.Interfaces
         Task<T?> GetByIdAsync(Guid id, int? siteId = null);
 
         Task<T?> GetIncludeByIdAsync(Guid id, int? siteId = null);
+
+        Task<IEnumerable<T>> GetByIdsAsync(IEnumerable<Guid> ids, int? siteId = null);
 
         Task<bool> AnyAsync(Guid id, int? siteId = null);
 

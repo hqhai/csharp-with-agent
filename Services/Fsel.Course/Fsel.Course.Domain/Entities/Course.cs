@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using Fsel.Common.Enums;
 using Fsel.Core.Entities;
 using Fsel.Course.Domain.Enums;
 using Fsel.Course.Domain.Enums.ErrorCodes;
@@ -17,10 +18,10 @@ namespace Fsel.Course.Domain.Entities
         [Range(1, int.MaxValue, ErrorMessage = nameof(EnumCourseErrorCode.C04C))]
         public int NumberOfLessons { get; set; }
 
-        public bool IsPublish { get; set; }
+        public EnumCourseStatus Status { get; set; }
 
         public EnumCourseLevel CourseLevel { get; set; }
 
-        public List<CourseUnitMockTest> CourseUnitMockTests { get; set; } = new List<CourseUnitMockTest>();
+        public ICollection<CourseUnitMockTest> CourseUnitMockTests { get; set; } = new List<CourseUnitMockTest>();
     }
 }

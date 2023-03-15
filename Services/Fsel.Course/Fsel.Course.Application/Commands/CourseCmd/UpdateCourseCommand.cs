@@ -61,7 +61,15 @@ namespace Fsel.Course.Application.Commands.CourseCmd
                 return methodResult;
             }
 
-            if (request.CourseUnitMockTests == null)
+            if (course.Status != EnumCourseStatus.New)
+            {
+                methodResult.StatusCode = StatusCodes.Status400BadRequest;
+                methodResult.AddErrorMessage(
+                nameof(EnumCourseErrorCode.C02V));
+                return methodResult;
+            }
+
+            if (request?.CourseUnitMockTests == null)
             {
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 methodResult.AddErrorMessage(
@@ -79,8 +87,8 @@ namespace Fsel.Course.Application.Commands.CourseCmd
                 return methodResult;
             }
 
-            var mocktestIds = request.CourseUnitMockTests.Where(e => e.MockTestId != null).Select(x => x.MockTestId).ToList();
-            if (_mockTestRepository.IsIdsInValid(mocktestIds.Where(e => e.HasValue).Select(e => e!.Value)))
+            var mocktestIds = request.CourseUnitMockTests.Where(e => e.MockTestId != null).Select(x => x.MockTestId ?? Guid.Empty);
+            if (_mockTestRepository.IsIdsInValid(mocktestIds))
             {
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 methodResult.AddErrorMessage(
@@ -88,20 +96,8 @@ namespace Fsel.Course.Application.Commands.CourseCmd
                 return methodResult;
             }
 
-            List<MockTest> mocktests = new List<MockTest>();
-            mocktestIds.ForEach(id =>
-            {
-                var mocktest = _mockTestRepository.Queryable.FirstOrDefault(x => x.Id == id);
-                if (mocktest == null)
-                {
-                    methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                    methodResult.AddErrorMessage(nameof(EnumMockTestErrorCode.MT03V));
-                }
-                else
-                {
-                    mocktests.Add(mocktest);
-                }
-            });
+            var mocktests = await _mockTestRepository.GetByIdsAsync(mocktestIds);
+
             var checkMockTest = mocktests.Any(x => x.MockTestType == EnumMockTestType.CourseMockTest);
             if (!checkMockTest)
             {

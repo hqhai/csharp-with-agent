@@ -41,6 +41,15 @@ namespace Fsel.Course.Application.Commands.CourseCmd
 
             #region Validation
 
+            EntityCourse course = _mapper.Map<EntityCourse>(request);
+
+            if (!course.IsValid())
+            {
+                methodResult.StatusCode = StatusCodes.Status400BadRequest;
+                methodResult.AddResultFromErrorList(course.ErrorMessages);
+                return methodResult;
+            }
+
             if (request.CourseUnitMockTests == null)
             {
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
@@ -49,7 +58,6 @@ namespace Fsel.Course.Application.Commands.CourseCmd
                 return methodResult;
             }
 
-            EntityCourse course = _mapper.Map<EntityCourse>(request);
             var units = request.CourseUnitMockTests.Where(e => e.UnitId != null).Select(x => x.UnitId).ToList();
             if (_unitRepository.IsIdsInValid(units.Where(e => e.HasValue).Select(e => e!.Value)))
             {
@@ -60,8 +68,8 @@ namespace Fsel.Course.Application.Commands.CourseCmd
                 return methodResult;
             }
 
-            var mocktestIds = request.CourseUnitMockTests.Where(e => e.MockTestId != null).Select(x => x.MockTestId).ToList();
-            if (_mockTestRepository.IsIdsInValid(mocktestIds.Where(e => e.HasValue).Select(e => e!.Value)))
+            var mocktestIds = request.CourseUnitMockTests.Where(e => e.MockTestId != null).Select(x => x.MockTestId ?? Guid.Empty);
+            if (_mockTestRepository.IsIdsInValid(mocktestIds))
             {
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 methodResult.AddErrorMessage(
@@ -69,33 +77,14 @@ namespace Fsel.Course.Application.Commands.CourseCmd
                 return methodResult;
             }
 
-            List<MockTest> mocktests = new List<MockTest>();
-            mocktestIds.ForEach(id =>
-            {
-                var mocktest = _mockTestRepository.Queryable.FirstOrDefault(x => x.Id == id);
-                if (mocktest == null)
-                {
-                    methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                    methodResult.AddErrorMessage(nameof(EnumMockTestErrorCode.MT03V));
-                }
-                else
-                {
-                    mocktests.Add(mocktest);
-                }
-            });
+            var mocktests = await _mockTestRepository.GetByIdsAsync(mocktestIds);
+
             var checkMockTest = mocktests.Any(x => x.MockTestType == EnumMockTestType.CourseMockTest);
             if (!checkMockTest)
             {
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 methodResult.AddErrorMessage(
                 nameof(EnumMockTestErrorCode.MT05V));
-                return methodResult;
-            }
-
-            if (!course.IsValid())
-            {
-                methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                methodResult.AddResultFromErrorList(course.ErrorMessages);
                 return methodResult;
             }
 

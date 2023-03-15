@@ -41,12 +41,9 @@ namespace Fsel.Course.Application.Queries.LessonQuery
                 return methodResult;
             }
 
-            var lessonModel = _mapper.Map<LessonModel>(lesson);
-            lessonModel.IsActive = !lesson.UnitLessons.Any();
+            lesson.IsActive = !lesson.UnitLessons.Any();
 
-            methodResult.Result = lessonModel;
-
-            /*methodResult.Result = _mapper.Map<LessonModel>(lesson);*/
+            methodResult.Result = _mapper.Map<LessonModel>(lesson);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }

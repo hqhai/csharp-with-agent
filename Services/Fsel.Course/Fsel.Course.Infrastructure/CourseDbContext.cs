@@ -23,7 +23,6 @@ namespace Fsel.Course.Infrastructure
         public DbSet<Domain.Entities.Course> Courses { get; set; }
         public DbSet<Video> Videos { get; set; }
         public DbSet<LessonVideo> LessonVideos { get; set; }
-
         public DbSet<LessonHomeWork> LessonHomeWorks { get; set; }
         public DbSet<LessonExtraPractice> LessonExtraPractices { get; set; }
         public DbSet<ExtraPractice> ExtraPractices { get; set; }
@@ -32,15 +31,10 @@ namespace Fsel.Course.Infrastructure
         public DbSet<UnitLesson> UnitLessons { get; set; }
         public DbSet<Domain.Entities.Unit> Units { get; set; }
         public DbSet<CourseUnitMockTest> CourseUnitMockTests { get; set; }
-
         public DbSet<VideoTimeCode> VideoTimeCodes { get; set; }
-
         public DbSet<Excercise> Excercises { get; set; }
-
         public DbSet<TimeCodeExcercise> TimeCodeExcercises { get; set; }
-
         public DbSet<ExcerciseQuestion> ExcerciseQuestions { get; set; }
-
         public DbSet<Question> Questions { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

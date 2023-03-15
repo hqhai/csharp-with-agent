@@ -1,5 +1,6 @@
 using AutoMapper;
 using Fsel.Common.ActionResults;
+using Fsel.Course.Domain.Enums;
 using Fsel.Course.Domain.Enums.ErrorCodes;
 using Fsel.Course.Domain.IRepositories;
 using MediatR;
@@ -39,6 +40,14 @@ namespace Fsel.Course.Application.Commands.CourseCmd
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 methodResult.AddErrorMessage(
                     nameof(EnumCourseErrorCode.C01V));
+                return methodResult;
+            }
+
+            if (course.Status != EnumCourseStatus.New)
+            {
+                methodResult.StatusCode = StatusCodes.Status400BadRequest;
+                methodResult.AddErrorMessage(
+                nameof(EnumCourseErrorCode.C02V));
                 return methodResult;
             }
 

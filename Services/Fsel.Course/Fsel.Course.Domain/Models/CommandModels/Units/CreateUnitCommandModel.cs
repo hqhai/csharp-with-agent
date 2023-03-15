@@ -1,3 +1,4 @@
+using Fsel.Common.Enums;
 using Fsel.Course.Domain.Enums;
 
 namespace Fsel.Course.Domain.Models.CommandModels.Units

@@ -50,13 +50,13 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             MethodResult<UserModel> methodResult = new MethodResult<UserModel>();
 
             //Check User Exist
-            var userExit = await _userManager.FindByEmailAsync(request.Email ?? string.Empty);
+            var userExit = await _userManager.FindByEmailAsync(request?.Email ?? string.Empty);
             if (userExit != null)
             {
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 methodResult.AddErrorMessage(
                     nameof(EnumAuthErrorCode.AU04V),
-                    new[] { MethodHelper.GenerateErrorResult(nameof(request.Email), request.Email) });
+                    new[] { MethodHelper.GenerateErrorResult(nameof(request.Email), request?.Email) });
                 return methodResult;
             }
 
