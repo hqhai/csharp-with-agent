@@ -35,7 +35,6 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         /// <summary>
         /// Mock Type = CourseUnitMockTest
         /// </summary>
-
         MT05V
     }
 }

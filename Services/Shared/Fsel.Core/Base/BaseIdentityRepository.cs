@@ -56,6 +56,18 @@ namespace Fsel.Core.Base
             }
         }
 
+        public virtual async Task<IEnumerable<T>> GetByIdsAsync(IEnumerable<Guid> ids, int? siteId = null)
+        {
+            try
+            {
+                return await _dbSet.Where((T c) => ids.Contains(c.Id) && !c.IsDeleted).ToListAsync().ConfigureAwait(continueOnCapturedContext: false);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         public virtual T Add(T newEntity)
         {
             try

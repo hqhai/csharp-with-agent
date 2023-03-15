@@ -1,4 +1,3 @@
-using AutoMapper;
 using Fsel.Common.ActionResults;
 using Fsel.Common.Helpers;
 using Fsel.Course.Domain.Enums.ErrorCodes;

@@ -2,11 +2,6 @@
 
 namespace Fsel.Identity.Infrastructure.Maps
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
-    using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Core.Extensions;
     using Fsel.Identity.Domain.Entities;

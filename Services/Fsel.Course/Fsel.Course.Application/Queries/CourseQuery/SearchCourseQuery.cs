@@ -42,7 +42,7 @@ namespace Fsel.Course.Application.Queries.CourseQuery
                                   Name = i.Name,
                                   NumberOfLessons = i.NumberOfLessons,
                                   NumberOfUnits = i.NumberOfUnits,
-                                  IsPublish = i.IsPublish,
+                                  Status = i.Status,
                                   CourseLevel = i.CourseLevel,
                                   CreatedDate = i.CreatedDate,
                                   CreatedUserId = i.CreatedUserId,

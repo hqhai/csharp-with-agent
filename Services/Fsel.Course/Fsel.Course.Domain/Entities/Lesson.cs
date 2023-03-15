@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
+using Fsel.Common.Enums;
 using Fsel.Core.Entities;
-using Fsel.Course.Domain.Enums;
 using Fsel.Course.Domain.Enums.ErrorCodes;
 
 namespace Fsel.Course.Domain.Entities

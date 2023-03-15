@@ -1,4 +1,4 @@
-using Fsel.Course.Domain.Enums;
+using Fsel.Common.Enums;
 using Fsel.Course.Domain.Models.CommandModels.ClassForums;
 
 namespace Fsel.Course.Domain.Models.CommandModels.Lessons

@@ -99,6 +99,7 @@ namespace Fsel.Course.Lcms.Api.Controllers
         {
             try
             {
+                command.Id = id;
                 MethodResult<LessonModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
                 return commandResult.GetActionResult();
             }

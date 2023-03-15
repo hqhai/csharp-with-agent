@@ -114,12 +114,19 @@ namespace Fsel.Common.Helpers
 
         public static T? Deserialize<T>(this string? data)
         {
-            if (string.IsNullOrEmpty(data))
+            try
+            {
+                if (string.IsNullOrEmpty(data))
+                {
+                    return default;
+                }
+                T? obj = JsonConvert.DeserializeObject<T>(data);
+                return obj;
+            }
+            catch
             {
                 return default;
             }
-            T? obj = JsonConvert.DeserializeObject<T>(data);
-            return obj;
         }
     }
 }

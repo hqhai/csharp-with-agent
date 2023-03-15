@@ -4,7 +4,6 @@ namespace Fsel.Identity.Domain.Models.CommandModels.Students
 {
     using System;
     using Fsel.Common.Enums;
-    using Fsel.Identity.Domain.Entities;
 
     public class CreateStudentCommandModel
     {

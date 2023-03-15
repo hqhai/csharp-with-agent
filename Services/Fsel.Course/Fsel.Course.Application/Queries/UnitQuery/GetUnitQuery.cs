@@ -40,10 +40,9 @@ namespace Fsel.Course.Application.Queries.UnitQuery
                 return methodResult;
             }
 
-            var unitModel = _mapper.Map<UnitModel>(unit);
-            unitModel.IsActive = !unit.CourseUnitMockTests.Any();
+            unit.IsActive = !unit.CourseUnitMockTests.Any();
 
-            methodResult.Result = unitModel;
+            methodResult.Result = _mapper.Map<UnitModel>(unit);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }

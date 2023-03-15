@@ -1,4 +1,4 @@
-using Fsel.Course.Domain.Enums;
+using Fsel.Common.Enums;
 
 namespace Fsel.Course.Domain.Models.CommandModels.PlacementTests
 {
