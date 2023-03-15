@@ -128,5 +128,14 @@ namespace Fsel.Common.Helpers
                 return default;
             }
         }
+
+        public static TEnum? EnumParse<TEnum>(this string? data) where TEnum : Enum
+        {
+            if (Enum.TryParse(typeof(TEnum), data, false, out object? result))
+            {
+                return (TEnum)result;
+            }
+            return default;
+        }
     }
 }

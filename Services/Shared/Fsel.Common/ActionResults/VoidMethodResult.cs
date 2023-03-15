@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Fsel.Common.ActionResults
 {
@@ -15,6 +15,17 @@ namespace Fsel.Common.ActionResults
         public void AddErrorMessage(ErrorResult errorResult)
         {
             _errorMessages.Add(errorResult);
+        }
+
+        public void AddErrorMessage(IReadOnlyCollection<ErrorResult>? errorResults)
+        {
+            if (errorResults != null)
+            {
+                foreach (var errorResult in errorResults)
+                {
+                    _errorMessages.Add(errorResult);
+                }
+            }
         }
 
         public void AddErrorMessage(string errorCode, string[] errorValues)

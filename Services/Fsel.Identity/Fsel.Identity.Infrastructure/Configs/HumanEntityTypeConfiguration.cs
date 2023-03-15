@@ -2,6 +2,7 @@
 
 namespace Fsel.Identity.Infrastructure.Configs
 {
+    using Fsel.Common.Helpers;
     using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.Enums;
     using Microsoft.EntityFrameworkCore;
@@ -19,7 +20,7 @@ namespace Fsel.Identity.Infrastructure.Configs
                  .HasMaxLength(100)
                  .HasConversion(
                     v => v.HasValue ? v.ToString() : null,
-                    v => !string.IsNullOrEmpty(v) ? (EnumGender)Enum.Parse(typeof(EnumGender), v) : null);
+                    v => v.EnumParse<EnumGender>());
         }
     }
 }

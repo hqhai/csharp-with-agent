@@ -4,7 +4,9 @@ namespace Fsel.Identity.Infrastructure.Configs
 {
     using System;
     using Fsel.Common.Enums;
+    using Fsel.Common.Helpers;
     using Fsel.Identity.Domain.Entities;
+    using Fsel.Identity.Domain.Enums;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -16,7 +18,7 @@ namespace Fsel.Identity.Infrastructure.Configs
                  .HasMaxLength(100)
                  .HasConversion(
                      v => v.ToString(),
-                     v => (EnumCourseLevel)Enum.Parse(typeof(EnumCourseLevel), v));
+                     v => v.EnumParse<EnumCourseLevel>());
             builder.HasOne(a => a.Human)
                     .WithOne(b => b.Student)
                     .OnDelete(DeleteBehavior.Cascade);

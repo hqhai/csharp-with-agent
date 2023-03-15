@@ -1,4 +1,5 @@
-﻿using Fsel.Course.Domain.Entities;
+using Fsel.Common.Helpers;
+using Fsel.Course.Domain.Entities;
 using Fsel.Course.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -13,13 +14,13 @@ namespace Fsel.Course.Infrastructure.Configs
                 .HasMaxLength(100)
                 .HasConversion(
                     v => v.ToString(),
-                    v => (EnumQuestionType)Enum.Parse(typeof(EnumQuestionType), v));
+                    v => v.EnumParse<EnumQuestionType>());
 
             builder.Property(e => e.CourseSkill)
                .HasMaxLength(100)
                .HasConversion(
                    v => v.ToString(),
-                   v => (EnumCourseSkill)Enum.Parse(typeof(EnumCourseSkill), v));
+                   v => v.EnumParse<EnumCourseSkill>());
         }
     }
 }
