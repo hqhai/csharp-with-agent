@@ -4,8 +4,8 @@ services:
         container_name: gateway
         image: ${DOCKER_REGISTRY-}gatewaymicroservice:v1
         build:
-            context: ./Services/Fsel.Gateway/Fsel.Gateway.Api
-            dockerfile: Dockerfile
+            context: ./
+            dockerfile: Gateway.Dockerfile
         ports:
             - 5200:80
             - 7200:443
@@ -13,8 +13,8 @@ services:
         container_name: auth
         image: ${DOCKER_REGISTRY-}authsmicroservice:v1
         build:
-            context: ./Services/Fsel.Identity/Fsel.Identity.Authentication
-            dockerfile: Dockerfile
+            context: ./
+            dockerfile: Auth.Dockerfile
         environment:
             - CONNECTIONSTRINGS__DEFAULTCONNECTION=Data Source=183.91.11.235;Initial Catalog=env-dev.user-service;User Id=sa;Password=FselTech@2023;TrustServerCertificate=true;
             - SERVICENAME=Gateway
@@ -33,8 +33,8 @@ services:
         container_name: user
         image: ${DOCKER_REGISTRY-}usersmicroservice:v1
         build:
-            context: ./Services/Fsel.Identity/Fsel.Identity.Api
-            dockerfile: Dockerfile
+            context: ./
+            dockerfile: User.Dockerfile
         environment:
             - CONNECTIONSTRINGS__DEFAULTCONNECTION=Data Source=183.91.11.235;Initial Catalog=env-dev.user-service;User Id=sa;Password=FselTech@2023;TrustServerCertificate=true;
             - SERVICENAME=User
@@ -52,8 +52,8 @@ services:
         container_name: lcms
         image: ${DOCKER_REGISTRY-}lcmsmicroservice:v1
         build:
-            context: ./Services/Fsel.Course/Fsel.Course.Lcms.Api
-            dockerfile: Dockerfile
+            context: ./
+            dockerfile: Lcms.Dockerfile
         environment:
             - CONNECTIONSTRINGS__DEFAULTCONNECTION=Data Source=183.91.11.235;Initial Catalog=env-dev.course-service;User Id=sa;Password=FselTech@2023;TrustServerCertificate=true;
             - SERVICENAME=Lcms Course
@@ -70,8 +70,8 @@ services:
         container_name: lms
         image: ${DOCKER_REGISTRY-}lmsmicroservice:v1
         build:
-            context: ./Services/Fsel.Course/Fsel.Course.Lms.Api
-            dockerfile: Dockerfile
+            context: ./
+            dockerfile: Lms.Dockerfile
         environment:
             - CONNECTIONSTRINGS__DEFAULTCONNECTION=Data Source=183.91.11.235;Initial Catalog=env-dev.course-service;User Id=sa;Password=FselTech@2023;TrustServerCertificate=true;
             - SERVICENAME=Lms Course
@@ -88,8 +88,8 @@ services:
         container_name: sender
         image: ${DOCKER_REGISTRY-}sendersmicroservice:v1
         build:
-            context: ./Services/Fsel.Sender/Fsel.Sender.Api
-            dockerfile: Dockerfile
+            context: ./
+            dockerfile: Sender.Dockerfile
         environment:
             - SERVICENAME=Sender
             - SMTP__FROM=phanminhphucdctb@gmail.com
