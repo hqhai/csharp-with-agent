@@ -1,4 +1,5 @@
 using Fsel.Common.Enums;
+using Fsel.Common.Helpers;
 using Fsel.Course.Domain.Entities;
 using Fsel.Course.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
@@ -14,12 +15,12 @@ namespace Fsel.Course.Infrastructure.Configs
                 .HasMaxLength(100)
                 .HasConversion(
                     v => v.ToString(),
-                    v => (EnumCourseLevel)Enum.Parse(typeof(EnumCourseLevel), v));
+                    v => v.EnumParse<EnumCourseLevel>());
             builder.Property(e => e.Type)
                 .HasMaxLength(100)
                 .HasConversion(
                     v => v.ToString(),
-                    v => (EnumVideoType)Enum.Parse(typeof(EnumVideoType), v));
+                    v => v.EnumParse<EnumVideoType>());
         }
     }
 }

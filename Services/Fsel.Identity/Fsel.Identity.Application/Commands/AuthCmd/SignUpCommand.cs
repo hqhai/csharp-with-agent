@@ -1,4 +1,5 @@
 using System.Text;
+using System.Transactions;
 using AutoMapper;
 using Fsel.Common.ActionResults;
 using Fsel.Common.Enums;
@@ -60,18 +61,6 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                 return methodResult;
             }
 
-            //Add the Role in the database
-            var role = await _roleManager.FindByNameAsync(request.Role.ToString());
-            if (role == null)
-            {
-                role = new Role
-                {
-                    Name = request.Role.ToString(),
-                    NormalizedName = request.Role.ToString(),
-                };
-                await _roleManager.CreateAsync(role);
-            }
-
             //Add the User in the database
             var user = new User()
             {
@@ -80,28 +69,58 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                 UserName = request.Email,
                 PhoneNumber = request.PhoneNumber,
             };
-            var result = await _userManager.CreateAsync(user, request.Password ?? string.Empty);
-            if (!result.Succeeded)
+
+            using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {
-                methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                methodResult.AddErrorMessage(nameof(EnumAuthErrorCode.AU10ER));
-                return methodResult;
+                try
+                {
+                    //Add the Role in the database
+                    var role = await _roleManager.FindByNameAsync(request.Role.ToString());
+                    if (role == null)
+                    {
+                        role = new Role
+                        {
+                            Name = request.Role.ToString(),
+                            NormalizedName = request.Role.ToString(),
+                        };
+                        await _roleManager.CreateAsync(role);
+                    }
+                    var result = await _userManager.CreateAsync(user, request.Password ?? string.Empty);
+                    if (!result.Succeeded)
+                    {
+                        methodResult.StatusCode = StatusCodes.Status400BadRequest;
+                        methodResult.AddErrorMessage(nameof(EnumAuthErrorCode.AU10ER));
+                        return methodResult;
+                    }
+                    // Add Role to the user
+                    await _userManager.AddToRoleAsync(user, request.Role.ToString());
+
+                    var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+                    token = WebEncoders.Base64UrlEncode(Encoding.ASCII.GetBytes(token));
+
+                    var configmationLink = $"{_appSetting?.Url?.EmailConfirmUrl}?token={token}&email={user.Email}";
+                    var senderCommandModel = new SendEmailCommandModel
+                    {
+                        Content = $"\"Confirmation email by link: \", {configmationLink}",
+                        Subject = "Xác thực tài khoản ",
+                        ToEmails = new List<string> { $"{request.Email}" }
+                    };
+
+                    var sendResult = await _senderService.SendEmailAsync(senderCommandModel);
+                    if (!sendResult.IsSuccessStatusCode)
+                    {
+                        scope.Dispose();
+                        methodResult.StatusCode = (int)sendResult.StatusCode;
+                        methodResult.AddErrorMessage(sendResult.Content?.ErrorMessages);
+                        return methodResult;
+                    }
+                    scope.Complete();
+                }
+                catch
+                {
+                    scope.Dispose();
+                }
             }
-            // Add Role to the user
-            await _userManager.AddToRoleAsync(user, request.Role.ToString());
-
-            var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-            token = WebEncoders.Base64UrlEncode(Encoding.ASCII.GetBytes(token));
-
-            var configmationLink = $"{_appSetting?.Url?.EmailConfirmUrl}?token={token}&email={user.Email}";
-            var senderCommandModel = new SendEmailCommandModel
-            {
-                Content = $"\"Confirmation email by link: \", {configmationLink}",
-                Subject = "Xác thực tài khoản ",
-                ToEmails = new List<string> { $"{request.Email}" }
-            };
-
-            await _senderService.SendEmailAsync(senderCommandModel);
 
             var human = _mapper.Map<Human>(request.Human);
             if (request.Role == EnumRoleRegister.Student)
