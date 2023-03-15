@@ -24,6 +24,6 @@ namespace Fsel.Identity.Domain.Models.CommandModels.Auths
         [Required]
         public EnumRoleRegister Role { get; set; }
 
-        public CreateHumanCommandModel? Human { get; set; }
+        public DateTime? Birthday { get; set; }
     }
 }
