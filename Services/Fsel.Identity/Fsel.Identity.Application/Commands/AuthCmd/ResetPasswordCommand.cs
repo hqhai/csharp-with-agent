@@ -19,13 +19,16 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
         private readonly UserManager<User> _userManager;
 
         private readonly AuthContext _authContext;
+        private readonly SignInManager<User> _signInManager;
         private readonly IMediator _mediator;
 
         public ResetPasswordCommandHandler(UserManager<User> userManager,
             AuthContext authContext,
+            SignInManager<User> signInManager,
             IMediator mediator)
         {
             _authContext = authContext;
+            _signInManager = signInManager;
             _userManager = userManager;
             _mediator = mediator;
         }
@@ -77,8 +80,8 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                 return methodResult;
             }
 
-            var hashPasswordOle = _userManager.PasswordHasher.HashPassword(user, request.OldPassword);
-            if (hashPasswordOle != user.PasswordHash)
+            var checkOldPassword = await _signInManager.PasswordSignInAsync(user.UserName ?? string.Empty, request.OldPassword, false, false);
+            if (!checkOldPassword.Succeeded)
             {
                 methodResult.StatusCode = StatusCodes.Status404NotFound;
                 methodResult.AddErrorMessage(
@@ -91,6 +94,8 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             user.PasswordHash = hashPassword;
             await _userManager.UpdateAsync(user);
 
+            methodResult.StatusCode = StatusCodes.Status200OK;
+            methodResult.Result = true;
             return methodResult;
         }
     }
