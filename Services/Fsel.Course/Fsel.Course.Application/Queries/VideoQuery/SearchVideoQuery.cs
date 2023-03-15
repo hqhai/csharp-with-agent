@@ -36,11 +36,12 @@ namespace Fsel.Course.Application.Queries.VideoQuery
             }
 
             var VideoQuery = from i in _videoRepository.Queryable
+                             .Include(x => x.LessonVideos.Where(y => !y.IsDeleted))
                              select new VideoModel
                              {
                                  Id = i.Id,
                                  Name = i.Name,
-                                 IsActive = i.IsActive,
+                                 IsActive = !i.LessonVideos.Any(),
                                  CourseLevel = i.CourseLevel,
                                  CreatedDate = i.CreatedDate,
                                  CreatedUserId = i.CreatedUserId,

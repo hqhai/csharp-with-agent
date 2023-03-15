@@ -31,6 +31,7 @@ namespace Fsel.Course.Application.Queries.VideoQuery
             MethodResult<VideoModel> methodResult = new MethodResult<VideoModel>();
 
             var query = from i in _videoRepository.Queryable
+                                .Include(x => x.LessonVideos.Where(y => !y.IsDeleted))
                                 .Include(i => i.VideoTimeCodes.Where(x => !x.IsDeleted))
                                 .ThenInclude(x => x.TimeCodeExcercises.Where(x => !x.IsDeleted && x.Excercise != null))
                                 .ThenInclude(x => x.Excercise)
@@ -42,7 +43,7 @@ namespace Fsel.Course.Application.Queries.VideoQuery
                             Id = i.Id,
                             Name = i.Name,
                             VideoFilePath = i.VideoFilePath,
-                            IsActive = i.IsActive,
+                            IsActive = !i.LessonVideos.Any(),
                             TeacherId = i.TeacherId,
                             CourseLevel = i.CourseLevel,
                             VideoTimeCodes = i.VideoTimeCodes.Select(x => new VideoTimeCodeModel
