@@ -1,0 +1,34 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sender-app
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: sender-app
+  template:
+    metadata:
+      labels:
+        app: sender-app
+    spec:
+      containers:
+      - name: sender
+        image: senderfselacr.azurecr.io/fsel_src
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 80
+# service type loadbalancer       
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: sender-app-svc
+spec:
+  selector:
+    app: sender-app
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+  type: LoadBalancer
