@@ -57,12 +57,12 @@ namespace Fsel.Course.Application.Queries.CourseQuery
                 courseQuery = courseQuery.Where(m => m.Id.ToString() == request.Keyword || (m.Name ?? string.Empty).Contains(request.Keyword));
             }
 
-            int totalItem = await courseQuery.CountAsync().ConfigureAwait(false);
+            int totalItem = await courseQuery.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
             var lists = await courseQuery.OrderByDescending(x => x.Id)
                     .Skip((request.Page - 1) * request.PageSize)
                     .Take(request.PageSize)
                     .AsNoTracking()
-                    .ToListAsync()
+                    .ToListAsync(cancellationToken: cancellationToken)
                     .ConfigureAwait(false);
 
             methodResult.Result = new PagingItemsModel<CourseModel>

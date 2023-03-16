@@ -9,6 +9,7 @@ using Fsel.Course.Domain.Models.CommandModels.Units;
 using Fsel.Course.Domain.Models.EntityModels;
 using MediatR;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 
 namespace Fsel.Course.Application.Commands.UnitCmd
 {
@@ -38,21 +39,16 @@ namespace Fsel.Course.Application.Commands.UnitCmd
 
             #region Validation
 
-            var unit = await _unitRepository.GetIncludeByIdAsync(request.Id);
+            var unit = await _unitRepository.Queryable
+                                    .Include(e => e.UnitLessons)
+                                    .Include(e => e.UnitSkillMockTests)
+                                    .FirstOrDefaultAsync(e => e.Id == request.Id, cancellationToken: cancellationToken);
             if (unit == null)
             {
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 methodResult.AddErrorMessage(
                     nameof(EnumUnitErrorCode.U01V),
-                    new[] { MethodHelper.GenerateErrorResult(nameof(request.Id), request.Id) });
-                return methodResult;
-            }
-            _mapper.Map(request, unit);
-
-            if (!unit.IsValid())
-            {
-                methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                methodResult.AddResultFromErrorList(unit.ErrorMessages);
+                    new[] { MethodHelper.GenerateErrorResult(nameof(request.Id), request?.Id) });
                 return methodResult;
             }
 
@@ -65,6 +61,7 @@ namespace Fsel.Course.Application.Commands.UnitCmd
                     new[] { MethodHelper.GenerateErrorResult(nameof(request.Id), request.Id) });
                 return methodResult;
             }
+
             if (request.LessonIds == null)
             {
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
@@ -78,10 +75,11 @@ namespace Fsel.Course.Application.Commands.UnitCmd
             {
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 methodResult.AddErrorMessage(
-                    nameof(EnumLessonErrorCode.L03V));
+                    nameof(EnumLessonErrorCode.LS03V));
 
                 return methodResult;
             }
+
             var checkMockTest = _mockTestRepository.Queryable.Any(x => x.MockTestType == EnumMockTestType.UnitMockTest && x.Id == request.MockTestId);
             if (!checkMockTest)
             {
@@ -91,26 +89,20 @@ namespace Fsel.Course.Application.Commands.UnitCmd
                 return methodResult;
             }
 
+            _mapper.Map(request, unit);
+
+            if (!unit.IsValid())
+            {
+                methodResult.StatusCode = StatusCodes.Status400BadRequest;
+                methodResult.AddResultFromErrorList(unit.ErrorMessages);
+                return methodResult;
+            }
+
             #endregion Validation
 
             await _unitRepository.ExecuteTransactionAsync(async () =>
             {
-                unit.UnitLessons = request.LessonIds.Select(x => new UnitLesson
-                {
-                    LessonId = x
-                }).ToList();
-
-                unit.UnitSkillMockTests = new List<UnitSkillMockTest>
-                  {
-                      new UnitSkillMockTest
-                      {
-                          MockTestId = request.MockTestId,
-                      }
-                  }
-              ;
-
                 unit = _unitRepository.Update(unit);
-
                 await _unitRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
                 methodResult.StatusCode = StatusCodes.Status201Created;

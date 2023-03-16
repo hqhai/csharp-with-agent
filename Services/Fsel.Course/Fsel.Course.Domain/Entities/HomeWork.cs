@@ -10,22 +10,37 @@ namespace Fsel.Course.Domain.Entities
 {
     public class HomeWork : Entity
     {
+        /// <summary>
+        /// Tên bài tập
+        /// </summary>
         [Required(ErrorMessage = nameof(EnumHomeWorkErrorCode.HW01C))]
         [MaxLength(250, ErrorMessage = nameof(EnumHomeWorkErrorCode.HW02C))]
         public string? Name { get; set; }
 
         /// <summary>
-        /// Nội dung hướng dẫn bài test
+        ///  Nội dung bài tập
         /// </summary>
         [MaxLength(1000, ErrorMessage = nameof(EnumHomeWorkErrorCode.HW03C))]
         public string? InstructionContent { get; set; }
 
-        [MaxLength(1000, ErrorMessage = nameof(EnumHomeWorkErrorCode.HW03C))]
+        /// <summary>
+        /// Media Post
+        /// </summary>
+        [MaxLength(1000, ErrorMessage = nameof(EnumHomeWorkErrorCode.HW04C))]
         public string? MediaPost { get; set; }
 
         public bool IsActive { get; set; }
+
+        /// <summary>
+        /// Trình độ Level
+        /// </summary>
         public EnumCourseLevel CourseLevel { get; set; }
+
+        /// <summary>
+        /// Loại kỹ năng
+        /// </summary>
         public EnumCourseSkill CourseSkill { get; set; }
-        public List<LessonHomeWork> LessonHomeWorks { get; set; } = new List<LessonHomeWork>();
+
+        public ICollection<LessonHomeWork> LessonHomeWorks { get; set; } = new List<LessonHomeWork>();
     }
 }

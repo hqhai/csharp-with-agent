@@ -8,16 +8,28 @@ namespace Fsel.Course.Domain.Entities
 {
     public class ClassForum : Entity
     {
+        /// <summary>
+        /// Nội dung
+        /// </summary>
         [Required(ErrorMessage = nameof(EnumClassForumErrorCode.CF01C))]
         [MaxLength(250, ErrorMessage = nameof(EnumClassForumErrorCode.CF02C))]
         public string? Title { get; set; }
 
+        /// <summary>
+        /// Cách chấm điểm
+        /// </summary>
         public EnumGradingStyle GradingStyle { get; set; }
 
+        /// <summary>
+        /// Số từ giới hạn
+        /// </summary>
         [Range(1, int.MaxValue, ErrorMessage = nameof(EnumClassForumErrorCode.CF04C))]
         public long TaggetWordLimit { get; set; }
 
-        [Range(1, int.MaxValue, ErrorMessage = nameof(EnumClassForumErrorCode.CF04C))]
+        /// <summary>
+        /// Thời gian giới hạn
+        /// </summary>
+        [Range(1, int.MaxValue, ErrorMessage = nameof(EnumClassForumErrorCode.CF05C))]
         public long TaggetTimeLimitTicks { get; set; }
 
         [NotMapped]
@@ -27,12 +39,19 @@ namespace Fsel.Course.Domain.Entities
             set { TaggetTimeLimitTicks = value.Ticks; }
         }
 
+        /// <summary>
+        /// Media Post
+        /// </summary>
         [MaxLength(1000, ErrorMessage = nameof(EnumClassForumErrorCode.CF03C))]
         public string? MediaPost { get; set; }
 
         public bool IsActive { get; set; }
 
+        /// <summary>
+        /// Loại kỹ năng
+        /// </summary>
         public EnumCourseSkill CourseSkill { get; set; }
+
         public Guid LessonId { get; set; }
         public Lesson? Lesson { get; set; }
     }

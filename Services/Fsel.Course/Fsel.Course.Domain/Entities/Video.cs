@@ -11,14 +11,14 @@ namespace Fsel.Course.Domain.Entities
         /// <summary>
         /// Tên Video
         /// </summary>
-        [Required(ErrorMessage = nameof(EnumLessonErrorCode.LS01C))]
-        [MaxLength(250, ErrorMessage = nameof(EnumLessonErrorCode.LS02C))]
+        [Required(ErrorMessage = nameof(EnumVideoErrorCode.VD01C))]
+        [MaxLength(250, ErrorMessage = nameof(EnumVideoErrorCode.VD02C))]
         public string? Name { get; set; }
 
         /// <summary>
         /// Link Video
         /// </summary>
-        [MaxLength(1000, ErrorMessage = nameof(EnumLessonErrorCode.LS03C))]
+        [MaxLength(1000, ErrorMessage = nameof(EnumVideoErrorCode.VD03C))]
         public string? VideoFilePath { get; set; }
 
         /// <summary>
@@ -26,6 +26,9 @@ namespace Fsel.Course.Domain.Entities
         /// </summary>
         public bool IsActive { get; set; }
 
+        /// <summary>
+        /// Loại Video
+        /// </summary>
         public EnumVideoType Type { get; set; }
 
         /// <summary>
@@ -38,7 +41,7 @@ namespace Fsel.Course.Domain.Entities
         /// </summary>
         public EnumCourseLevel CourseLevel { get; set; }
 
-        public List<LessonVideo> LessonVideos { get; set; } = new List<LessonVideo>();
-        public List<VideoTimeCode> VideoTimeCodes { get; set; } = new List<VideoTimeCode>();
+        public ICollection<LessonVideo> LessonVideos { get; set; } = new List<LessonVideo>();
+        public ICollection<VideoTimeCode> VideoTimeCodes { get; set; } = new List<VideoTimeCode>();
     }
 }

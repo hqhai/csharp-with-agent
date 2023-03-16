@@ -49,12 +49,12 @@ namespace Fsel.Course.Application.Commands.UnitCmd
                 return methodResult;
             }
 
-            if (request.LessonIds == null)
+            if (request?.LessonIds == null)
             {
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 methodResult.AddErrorMessage(
                     nameof(EnumUnitErrorCode.U03V),
-                    new[] { MethodHelper.GenerateErrorResult(nameof(request.LessonIds), request.LessonIds) });
+                    new[] { MethodHelper.GenerateErrorResult(nameof(request.LessonIds), request?.LessonIds) });
                 return methodResult;
             }
 
@@ -62,7 +62,7 @@ namespace Fsel.Course.Application.Commands.UnitCmd
             {
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 methodResult.AddErrorMessage(
-                    nameof(EnumLessonErrorCode.L03V));
+                    nameof(EnumLessonErrorCode.LS03V));
 
                 return methodResult;
             }

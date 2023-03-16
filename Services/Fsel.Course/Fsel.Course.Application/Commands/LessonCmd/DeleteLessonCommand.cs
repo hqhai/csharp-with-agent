@@ -61,7 +61,7 @@ namespace Fsel.Course.Application.Commands.LessonCmd
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 methodResult.AddErrorMessage(
                     nameof(EnumLessonErrorCode.LS01V),
-                    new[] { MethodHelper.GenerateErrorResult(nameof(request.Id), request.Id) });
+                    new[] { MethodHelper.GenerateErrorResult(nameof(request.Id), request?.Id) });
                 return methodResult;
             }
 
@@ -75,7 +75,7 @@ namespace Fsel.Course.Application.Commands.LessonCmd
             if (lesson.ClassForum == null)
             {
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                methodResult.AddErrorMessage(nameof(EnumHomeWorkErrorCode.HW03V));
+                methodResult.AddErrorMessage(nameof(EnumClassForumErrorCode.CF03V));
                 return methodResult;
             }
 
@@ -110,7 +110,7 @@ namespace Fsel.Course.Application.Commands.LessonCmd
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 methodResult.AddErrorMessage(
                     nameof(EnumLessonErrorCode.LS02V),
-                    new[] { MethodHelper.GenerateErrorResult(nameof(request.Id), request.Id) });
+                    new[] { MethodHelper.GenerateErrorResult(nameof(request.Id), request?.Id) });
                 return methodResult;
             }
 
@@ -119,12 +119,7 @@ namespace Fsel.Course.Application.Commands.LessonCmd
             await _lessonRepository.ExecuteTransactionAsync(async () =>
             {
                 var result = await _lessonRepository.DeleteAsync(lesson);
-
-                await _lessonHomeWorkRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
-                await _lessonExtraPracticeRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
-                await _lessonVideoRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
                 await _lessonRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
-
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 methodResult.Result = result;
                 return methodResult;

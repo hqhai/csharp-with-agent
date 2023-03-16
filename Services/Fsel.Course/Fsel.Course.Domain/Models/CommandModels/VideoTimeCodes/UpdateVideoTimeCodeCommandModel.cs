@@ -7,7 +7,6 @@ namespace Fsel.Course.Domain.Models.CommandModels.VideoTimeCodes
 {
     public class UpdateVideoTimeCodeCommandModel
     {
-        public Guid Id { get; set; }
         public EnumTimeCodeType TimeCodeType { get; set; }
         public string? DisplayTimeStr { get; set; }
         public string? ExecutionTimeStr { get; set; }

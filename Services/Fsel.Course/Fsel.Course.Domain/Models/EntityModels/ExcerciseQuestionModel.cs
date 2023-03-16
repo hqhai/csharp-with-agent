@@ -6,6 +6,6 @@ namespace Fsel.Course.Domain.Models.EntityModels
 
         public Guid QuestionId { get; set; }
 
-        public List<QuestionModel>? Questions { get; set; }
+        public ICollection<QuestionModel>? Questions { get; set; }
     }
 }

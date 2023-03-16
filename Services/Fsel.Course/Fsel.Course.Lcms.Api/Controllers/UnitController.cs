@@ -29,33 +29,8 @@ namespace Fsel.Course.Lcms.Api.Controllers
         }
 
         /// <summary>
-        /// Create a Unit
-        /// </summary>
-        /// <param name="command"></param>
-        /// <returns></returns>
-        [HttpPost]
-        [ProducesResponseType(typeof(MethodResult<UnitModel>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.BadRequest)]
-        public async Task<IActionResult> Create([FromBody] CreateUnitCommand command)
-        {
-            try
-            {
-                MethodResult<UnitModel> queryResult = await _mediator.Send(command).ConfigureAwait(false);
-                return queryResult.GetActionResult();
-            }
-            catch (Exception ex)
-            {
-                VoidMethodResult errorResult = new VoidMethodResult();
-                errorResult.AddErrorMessage(MethodHelper.GetExceptionMessage(ex));
-                return errorResult.GetActionResult();
-            }
-        }
-
-        /// <summary>
         /// Search Unit
         /// </summary>
-        /// <param name="command"></param>
-        /// <returns></returns>
         [HttpGet]
         [ProducesResponseType(typeof(MethodResult<PagingItemsModel<UnitModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.BadRequest)]
@@ -75,19 +50,38 @@ namespace Fsel.Course.Lcms.Api.Controllers
         }
 
         /// <summary>
-        /// Delete a Unit
+        /// Get Unit
         /// </summary>
-        /// <param name="command"></param>
-        /// <returns></returns>
-        [HttpDelete("{id}")]
+        [HttpGet("{id}")]
         [ProducesResponseType(typeof(MethodResult<UnitModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.BadRequest)]
-        public async Task<IActionResult> Delete([FromRoute] Guid id)
+        public async Task<IActionResult> Get([FromRoute] Guid id)
         {
             try
             {
-                MethodResult<bool> commandResult = await _mediator.Send(new DeleteUnitCommand { Id = id }).ConfigureAwait(false);
-                return commandResult.GetActionResult();
+                MethodResult<UnitModel> queryResult = await _mediator.Send(new GetUnitQuery { Id = id }).ConfigureAwait(false);
+                return queryResult.GetActionResult();
+            }
+            catch (Exception ex)
+            {
+                VoidMethodResult errorResult = new VoidMethodResult();
+                errorResult.AddErrorMessage(MethodHelper.GetExceptionMessage(ex));
+                return errorResult.GetActionResult();
+            }
+        }
+
+        /// <summary>
+        /// Create a Unit
+        /// </summary>
+        [HttpPost]
+        [ProducesResponseType(typeof(MethodResult<UnitModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.BadRequest)]
+        public async Task<IActionResult> Create([FromBody] CreateUnitCommand command)
+        {
+            try
+            {
+                MethodResult<UnitModel> queryResult = await _mediator.Send(command).ConfigureAwait(false);
+                return queryResult.GetActionResult();
             }
             catch (Exception ex)
             {
@@ -100,8 +94,6 @@ namespace Fsel.Course.Lcms.Api.Controllers
         /// <summary>
         /// Update a Unit
         /// </summary>
-        /// <param name="command"></param>
-        /// <returns></returns>
         [HttpPut("{id}")]
         [ProducesResponseType(typeof(MethodResult<UnitModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.BadRequest)]
@@ -122,19 +114,17 @@ namespace Fsel.Course.Lcms.Api.Controllers
         }
 
         /// <summary>
-        /// Get Unit
+        /// Delete a Unit
         /// </summary>
-        /// <param name="command"></param>
-        /// <returns></returns>
-        [HttpGet("{id}")]
+        [HttpDelete("{id}")]
         [ProducesResponseType(typeof(MethodResult<UnitModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.BadRequest)]
-        public async Task<IActionResult> Get([FromRoute] Guid id)
+        public async Task<IActionResult> Delete([FromRoute] Guid id)
         {
             try
             {
-                MethodResult<UnitModel> queryResult = await _mediator.Send(new GetUnitQuery { Id = id }).ConfigureAwait(false);
-                return queryResult.GetActionResult();
+                MethodResult<bool> commandResult = await _mediator.Send(new DeleteUnitCommand { Id = id }).ConfigureAwait(false);
+                return commandResult.GetActionResult();
             }
             catch (Exception ex)
             {

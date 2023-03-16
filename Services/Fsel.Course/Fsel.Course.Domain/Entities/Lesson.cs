@@ -20,7 +20,10 @@ namespace Fsel.Course.Domain.Entities
         [MaxLength(1000, ErrorMessage = nameof(EnumLessonErrorCode.LS03C))]
         public string? InstructionContent { get; set; }
 
-        [MaxLength(250, ErrorMessage = nameof(EnumLessonErrorCode.LS02C))]
+        /// <summary>
+        /// Tên hiển thị
+        /// </summary>
+        [MaxLength(250, ErrorMessage = nameof(EnumLessonErrorCode.LS04C))]
         public string? DisplayName { get; set; }
 
         /// <summary>
@@ -38,10 +41,10 @@ namespace Fsel.Course.Domain.Entities
         /// </summary>
         public EnumCourseLevel CourseLevel { get; set; }
 
-        public List<LessonVideo> LessonVideos { get; set; } = new List<LessonVideo>();
+        public ICollection<LessonVideo> LessonVideos { get; set; } = new List<LessonVideo>();
         public ClassForum? ClassForum { get; set; }
-        public List<LessonHomeWork> LessonHomeWorks { get; set; } = new List<LessonHomeWork>();
-        public List<LessonExtraPractice> LessonExtraPractices { get; set; } = new List<LessonExtraPractice>();
-        public List<UnitLesson> UnitLessons { get; set; } = new List<UnitLesson>();
+        public ICollection<LessonHomeWork> LessonHomeWorks { get; set; } = new List<LessonHomeWork>();
+        public ICollection<LessonExtraPractice> LessonExtraPractices { get; set; } = new List<LessonExtraPractice>();
+        public ICollection<UnitLesson> UnitLessons { get; set; } = new List<UnitLesson>();
     }
 }

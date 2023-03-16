@@ -1,4 +1,4 @@
-﻿namespace Fsel.Course.Domain.Enums.ErrorCodes
+namespace Fsel.Course.Domain.Enums.ErrorCodes
 {
     public enum EnumVideoErrorCode
     {
@@ -28,7 +28,7 @@
         VD02C,
 
         /// <summary>
-        /// Instruction Content limited to 1000 characters
+        /// VideoFilePath Content limited to 1000 characters
         /// </summary>
         VD03C,
     }

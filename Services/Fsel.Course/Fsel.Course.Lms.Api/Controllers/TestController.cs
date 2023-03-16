@@ -22,12 +22,10 @@ namespace Fsel.Course.Lms.Api.Controllers
         /// <summary>
         /// Search Course
         /// </summary>
-        /// <param name="command"></param>
-        /// <returns></returns>
         [HttpGet]
         [ProducesResponseType(typeof(MethodResult<string>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.BadRequest)]
-        public async Task<IActionResult> Search()
+        public IActionResult Search()
         {
             try
             {

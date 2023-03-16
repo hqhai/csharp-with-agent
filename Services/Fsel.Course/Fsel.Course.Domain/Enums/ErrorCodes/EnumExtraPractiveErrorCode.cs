@@ -1,4 +1,4 @@
-﻿namespace Fsel.Course.Domain.Enums.ErrorCodes
+namespace Fsel.Course.Domain.Enums.ErrorCodes
 {
     public enum EnumExtraPractiveErrorCode
     {
@@ -33,7 +33,7 @@
         EP03C,
 
         /// <summary>
-        /// Number of ExtraPractive >1
+        /// FilePath Content limited to 1000 characters
         /// </summary>
         EP04C
     }

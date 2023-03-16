@@ -9,7 +9,6 @@ namespace Fsel.Course.Infrastructure.Maps
     {
         public QuestionProfile()
         {
-            //CreateMap<Question, QuestionModel>().IgnoreAllNonExisting();
             CreateMap<CreateQuestionCommandModel, Question>().IgnoreAllNonExisting();
             CreateMap<UpdateQuestionCommandModel, Question>().IgnoreAllNonExisting();
         }

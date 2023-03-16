@@ -4,7 +4,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
     {
         public Guid ExcerciseId { get; set; }
 
-        public List<ExcerciseModel>? Exercices { get; set; }
+        public ICollection<ExcerciseModel>? Exercices { get; set; }
 
         public Guid VideoTimeCodeId { get; set; }
     }

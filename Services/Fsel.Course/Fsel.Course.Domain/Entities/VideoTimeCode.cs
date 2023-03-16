@@ -8,12 +8,21 @@ namespace Fsel.Course.Domain.Entities
 {
     public class VideoTimeCode : Entity
     {
+        /// <summary>
+        /// Thời gian bắt đầu xuất hiện TimeCode
+        /// </summary>
         [Range(1, long.MaxValue, ErrorMessage = nameof(EnumVideoTimeCodeErrorCode.VTC04C))]
         public long DisplayTimeTicks { get; set; }
 
-        [Range(1, long.MaxValue, ErrorMessage = nameof(EnumVideoTimeCodeErrorCode.VTC04C))]
+        /// <summary>
+        /// Thời gian hiện làm bài
+        /// </summary>
+        [Range(1, long.MaxValue, ErrorMessage = nameof(EnumVideoTimeCodeErrorCode.VTC03C))]
         public long ExecutionTimeTicks { get; set; }
 
+        /// <summary>
+        /// Loại TimeCode
+        /// </summary>
         public EnumTimeCodeType TimeCodeType { get; set; }
 
         public Video? Video { get; set; }
@@ -33,6 +42,6 @@ namespace Fsel.Course.Domain.Entities
             set { ExecutionTimeTicks = value.Ticks; }
         }
 
-        public List<TimeCodeExcercise> TimeCodeExcercises { get; set; } = new List<TimeCodeExcercise>();
+        public ICollection<TimeCodeExcercise> TimeCodeExcercises { get; set; } = new List<TimeCodeExcercise>();
     }
 }

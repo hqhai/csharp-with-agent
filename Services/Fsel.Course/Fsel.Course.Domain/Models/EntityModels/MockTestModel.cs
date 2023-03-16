@@ -17,8 +17,8 @@ namespace Fsel.Course.Domain.Models.EntityModels
 
         public EnumMockTestType MockTestType { get; set; }
 
-        public List<CourseUnitMockTest>? CourseUnitMockTests { get; set; }
+        public ICollection<CourseUnitMockTest>? CourseUnitMockTests { get; set; }
 
-        public List<UnitSkillMockTest>? UnitSkillMockTests { get; set; }
+        public ICollection<UnitSkillMockTest>? UnitSkillMockTests { get; set; }
     }
 }

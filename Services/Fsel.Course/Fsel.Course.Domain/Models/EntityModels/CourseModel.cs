@@ -8,6 +8,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
     public class CourseModel : BaseEntityModel
     {
         public string? Name { get; set; }
+
         public int NumberOfUnits { get; set; }
 
         public int NumberOfLessons { get; set; }
@@ -16,7 +17,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
 
         public EnumCourseLevel CourseLevel { get; set; }
 
-        public List<CourseUnitMockTest>? CourseUnitMockTests { get; set; }
-        public List<CourseTeacher>? CourseTeachers { get; set; }
+        public ICollection<CourseUnitMockTest>? CourseUnitMockTests { get; set; }
+        public ICollection<CourseTeacher>? CourseTeachers { get; set; }
     }
 }

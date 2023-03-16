@@ -39,8 +39,6 @@ namespace Fsel.Course.Application.Commands.VideoCmd
                 return methodResult;
             }
 
-            // Lưu dữ liệu Video
-
             Video video = _mapper.Map<Video>(request);
 
             request.VideoTimeCodes.ForEach(x =>
@@ -52,7 +50,7 @@ namespace Fsel.Course.Application.Commands.VideoCmd
                 }
                 else
                 {
-                    VideoTimeCode videoTimeCode = video.VideoTimeCodes[request.VideoTimeCodes.IndexOf(x)];
+                    VideoTimeCode videoTimeCode = video.VideoTimeCodes.ElementAt(request.VideoTimeCodes.IndexOf(x));
                     x.Excercises.ForEach(n =>
                     {
                         if (n == null)

@@ -21,14 +21,10 @@ namespace Fsel.Course.Application.Commands.CourseCmd
     public class UpdateActiveStatusCommandHandler : IRequestHandler<ActiveCourseCommand, MethodResult<bool>>
     {
         private readonly ICourseRepository _courseRepository;
-        private readonly IMapper _mapper;
 
-        public UpdateActiveStatusCommandHandler(
-            ICourseRepository courseRepository,
-            IMapper mapper)
+        public UpdateActiveStatusCommandHandler(ICourseRepository courseRepository)
         {
             _courseRepository = courseRepository;
-            _mapper = mapper;
         }
 
         public async Task<MethodResult<bool>> Handle(ActiveCourseCommand request, CancellationToken cancellationToken)
@@ -40,7 +36,7 @@ namespace Fsel.Course.Application.Commands.CourseCmd
             var course = await _courseRepository.Queryable
                             .Include(e => e.CourseTeachers)
                             .Where(e => e.Id == request.Id)
-                            .FirstOrDefaultAsync();
+                            .FirstOrDefaultAsync(cancellationToken: cancellationToken);
 
             if (course == null)
             {
@@ -55,7 +51,7 @@ namespace Fsel.Course.Application.Commands.CourseCmd
             {
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 methodResult.AddErrorMessage(
-                    nameof(EnumCourseErrorCode.C05V));
+                    nameof(EnumCourseErrorCode.C03V));
                 methodResult.Result = false;
                 return methodResult;
             }

@@ -26,8 +26,6 @@ namespace Fsel.Identity.Api.Controllers
         /// <summary>
         /// Change Password
         /// </summary>
-        /// <param name="command"></param>
-        /// <returns></returns>
         [HttpPost("change-password")]
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.BadRequest)]

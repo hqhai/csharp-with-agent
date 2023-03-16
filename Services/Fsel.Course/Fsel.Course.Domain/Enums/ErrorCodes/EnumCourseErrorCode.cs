@@ -13,19 +13,9 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         C02V,
 
         /// <summary>
-        /// Course null
-        /// </summary>
-        C03V,
-
-        /// <summary>
-        /// Course already exists and more than 1
-        /// </summary>
-        C04V,
-
-        /// <summary>
         /// Course is not in a new state
         /// </summary>
-        C05V,
+        C03V,
 
         /// <summary>
         /// Name cannot be empty
@@ -38,13 +28,13 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         C02C,
 
         /// <summary>
-        /// Instruction Content limited to 1000 characters
+        /// NumberOfUnits of course >1
         /// </summary>
         C03C,
 
         /// <summary>
-        /// Number of course >1
+        /// NumberOfLessons of course >1
         /// </summary>
-        C04C,
+        C04C
     }
 }

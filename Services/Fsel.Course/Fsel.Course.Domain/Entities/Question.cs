@@ -9,10 +9,14 @@ namespace Fsel.Course.Domain.Entities
 {
     public class Question : Entity
     {
+        /// <summary>
+        /// Loại câu hỏi
+        /// </summary>
         public EnumQuestionType QuestionType { get; set; }
+
         public bool IsSave { get; set; }
 
-        [Required(ErrorMessage = nameof(EnumQuestionErrorCode.Q01V))]
+        [Required(ErrorMessage = nameof(EnumQuestionErrorCode.Q01C))]
         [MaxLength(1000, ErrorMessage = nameof(EnumQuestionErrorCode.Q03C))]
         public string? ConfigStr { get; set; }
 
@@ -23,6 +27,6 @@ namespace Fsel.Course.Domain.Entities
             set { ConfigStr = ConvertHelper.Serialize(value); }
         }
 
-        public List<ExcerciseQuestion> ExcerciseQuestions { get; set; } = new List<ExcerciseQuestion>();
+        public ICollection<ExcerciseQuestion> ExcerciseQuestions { get; set; } = new List<ExcerciseQuestion>();
     }
 }

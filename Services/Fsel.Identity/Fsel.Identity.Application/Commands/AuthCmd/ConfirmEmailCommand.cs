@@ -33,7 +33,6 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
         {
             MethodResult<UserModel> methodResult = new MethodResult<UserModel>();
 
-            //Check User Exist
             var user = await _userManager.FindByEmailAsync(request.Email ?? string.Empty);
             if (user == null)
             {

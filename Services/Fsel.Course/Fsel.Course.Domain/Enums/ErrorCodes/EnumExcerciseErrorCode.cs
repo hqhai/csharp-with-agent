@@ -1,4 +1,4 @@
-﻿namespace Fsel.Course.Domain.Enums.ErrorCodes
+namespace Fsel.Course.Domain.Enums.ErrorCodes
 {
     public enum EnumExcerciseErrorCode
     {
@@ -6,11 +6,6 @@
         /// Excercise does not exist
         /// </summary>
         E01V,
-
-        /// <summary>
-        /// Excercise have been use
-        /// </summary>
-        E02V,
 
         /// <summary>
         /// Excercise null
@@ -30,6 +25,6 @@
         /// <summary>
         /// MediaPost limited to 1000 characters
         /// </summary>
-        E03C,
+        E03C
     }
 }

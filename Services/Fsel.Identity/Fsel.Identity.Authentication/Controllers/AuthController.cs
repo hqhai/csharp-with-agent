@@ -24,8 +24,6 @@ namespace Fsel.Identity.Authentication.Controllers
         /// <summary>
         /// Login
         /// </summary>
-        /// <param name="command"></param>
-        /// <returns></returns>
         [HttpPost("login")]
         [ProducesResponseType(typeof(MethodResult<TokenModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.BadRequest)]
@@ -47,8 +45,6 @@ namespace Fsel.Identity.Authentication.Controllers
         /// <summary>
         /// Refresh Token
         /// </summary>
-        /// <param name="command"></param>
-        /// <returns></returns>
         [HttpPost("refresh-token")]
         [ProducesResponseType(typeof(MethodResult<TokenModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.BadRequest)]

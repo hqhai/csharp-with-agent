@@ -1,7 +1,8 @@
-﻿namespace Fsel.Course.Domain.Enums
+namespace Fsel.Course.Domain.Enums
 {
     public enum EnumUnitType
     {
-        Default, MockFinalTest
+        Default,
+        MockFinalTest
     }
 }

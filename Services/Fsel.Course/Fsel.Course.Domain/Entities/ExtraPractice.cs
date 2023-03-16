@@ -10,22 +10,37 @@ namespace Fsel.Course.Domain.Entities
 {
     public class ExtraPractice : Entity
     {
+        /// <summary>
+        /// Tên ExtraPractice
+        /// </summary>
         [Required(ErrorMessage = nameof(EnumExtraPractiveErrorCode.EP01C))]
         [MaxLength(250, ErrorMessage = nameof(EnumExtraPractiveErrorCode.EP02C))]
         public string? Name { get; set; }
 
         /// <summary>
-        /// Nội dung hướng dẫn bài test
+        /// Nội dung ExtraPractice
         /// </summary>
         [MaxLength(1000, ErrorMessage = nameof(EnumExtraPractiveErrorCode.EP03C))]
         public string? InstructionContent { get; set; }
 
-        [MaxLength(1000, ErrorMessage = nameof(EnumExtraPractiveErrorCode.EP03C))]
+        /// <summary>
+        /// File Link
+        /// </summary>
+        [MaxLength(1000, ErrorMessage = nameof(EnumExtraPractiveErrorCode.EP04C))]
         public string? FilePath { get; set; }
 
         public bool IsActive { get; set; }
+
+        /// <summary>
+        /// Loại ExtraPractice
+        /// </summary>
         public EnumExtraPracticeType Type { get; set; }
+
+        /// <summary>
+        /// Trình độ Level
+        /// </summary>
         public EnumCourseLevel CourseLevel { get; set; }
-        public List<LessonExtraPractice> LessonExtraPractices { get; set; } = new List<LessonExtraPractice>();
+
+        public ICollection<LessonExtraPractice> LessonExtraPractices { get; set; } = new List<LessonExtraPractice>();
     }
 }

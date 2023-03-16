@@ -25,11 +25,11 @@ namespace Fsel.Course.Infrastructure.Repositories
             }
         }
 
-        public async Task<bool> IsLessonUsed(Guid Id)
+        public async Task<bool> IsLessonUsed(Guid id)
         {
             return await Queryable
                  .Include(x => x.UnitLessons.Where(n => !n.IsDeleted))
-                 .AnyAsync(x => x.Id == Id && x.UnitLessons.Count > 0);
+                 .AnyAsync(x => x.Id == id && x.UnitLessons.Count > 0);
         }
     }
 }

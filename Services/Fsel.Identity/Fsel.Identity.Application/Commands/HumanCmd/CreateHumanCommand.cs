@@ -19,21 +19,12 @@ namespace Fsel.Identity.Application.Commands.HumanCmd
     {
         private readonly IMapper _mapper;
         private readonly IHumanRepository _humanRepository;
-        private readonly IParentRepository _parentRepository;
-        private readonly IStudentRepository _studentRepository;
-        private readonly IParentStudentRepository _parentStudentRepository;
 
         public CreateCourseCommandHandler(IMapper mapper
-            , IHumanRepository humanRepository
-            , IParentRepository parentRepository
-            , IStudentRepository studentRepository
-            , IParentStudentRepository parentStudentRepository)
+            , IHumanRepository humanRepository)
         {
             _mapper = mapper;
             _humanRepository = humanRepository;
-            _parentRepository = parentRepository;
-            _studentRepository = studentRepository;
-            _parentStudentRepository = parentStudentRepository;
         }
 
         public async Task<MethodResult<HumanModel>> Handle(CreateHumanCommand request, CancellationToken cancellationToken)

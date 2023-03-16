@@ -50,7 +50,6 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
         {
             MethodResult<UserModel> methodResult = new MethodResult<UserModel>();
 
-            //Check User Exist
             var userExit = await _userManager.FindByEmailAsync(request?.Email ?? string.Empty);
             if (userExit != null)
             {
@@ -61,7 +60,6 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                 return methodResult;
             }
 
-            //Add the User in the database
             var user = new User()
             {
                 FullName = request.FullName,
@@ -74,7 +72,6 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             {
                 try
                 {
-                    //Add the Role in the database
                     var role = await _roleManager.FindByNameAsync(request.Role.ToString());
                     if (role == null)
                     {
@@ -92,7 +89,6 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                         methodResult.AddErrorMessage(nameof(EnumAuthErrorCode.AU10ER));
                         return methodResult;
                     }
-                    // Add Role to the user
                     await _userManager.AddToRoleAsync(user, request.Role.ToString());
 
                     var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
