@@ -30,6 +30,7 @@ builder.Services.AddScoped<IHomeWorkRepository, HomeWorkRepository>();
 builder.Services.AddScoped<IExcerciseRepository, ExcerciseRepository>();
 builder.Services.AddScoped<IExcerciseQuestionRepository, ExcerciseQuestionRepository>();
 builder.Services.AddScoped<ICourseRepository, CourseRepository>();
+builder.Services.AddScoped<ICourseTeacherRepository, CourseTeacherRepository>();
 builder.Services.AddScoped<ICourseUnitMockTestRepository, CourseUnitMockTestRepository>();
 builder.Services.AddScoped<IMockTestRepository, MockTestRepository>();
 

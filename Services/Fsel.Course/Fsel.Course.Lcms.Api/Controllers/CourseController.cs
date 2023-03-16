@@ -104,11 +104,34 @@ namespace Fsel.Course.Lcms.Api.Controllers
         [HttpDelete("{id}")]
         [ProducesResponseType(typeof(MethodResult<CourseModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.BadRequest)]
-        public async Task<IActionResult> delete([FromRoute] Guid id)
+        public async Task<IActionResult> Delete([FromRoute] Guid id)
         {
             try
             {
                 MethodResult<bool> commandResult = await _mediator.Send(new DeleteCourseCommand { Id = id }).ConfigureAwait(false);
+                return commandResult.GetActionResult();
+            }
+            catch (Exception ex)
+            {
+                VoidMethodResult errorResult = new VoidMethodResult();
+                errorResult.AddErrorMessage(MethodHelper.GetExceptionMessage(ex));
+                return errorResult.GetActionResult();
+            }
+        }
+
+        /// <summary>
+        /// Update a Course in Active
+        /// </summary>
+        /// <param name="command"></param>
+        /// <returns></returns>
+        [HttpPut("active/{id}")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.BadRequest)]
+        public async Task<IActionResult> Active([FromRoute] Guid id)
+        {
+            try
+            {
+                MethodResult<bool> commandResult = await _mediator.Send(new ActiveCourseCommand { Id = id }).ConfigureAwait(false);
                 return commandResult.GetActionResult();
             }
             catch (Exception ex)

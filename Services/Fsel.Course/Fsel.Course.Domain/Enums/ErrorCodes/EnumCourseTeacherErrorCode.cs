@@ -1,50 +1,42 @@
+// Copyright (c) Atlantic. All rights reserved.
+
 namespace Fsel.Course.Domain.Enums.ErrorCodes
 {
-    public enum EnumCourseErrorCode
+    public enum EnumCourseTeacherErrorCode
     {
         /// <summary>
-        /// Course does not exist
+        /// CourseTeacher does not exist
         /// </summary>
-        C01V,
+        CT01V,
 
         /// <summary>
-        /// Course have been use
+        /// CourseTeacher have been use
         /// </summary>
-        C02V,
+        CT02V,
 
         /// <summary>
-        /// Course null
+        /// mCourseTeacher null
         /// </summary>
-        C03V,
-
-        /// <summary>
-        /// Course already exists and more than 1
-        /// </summary>
-        C04V,
-
-        /// <summary>
-        /// Course is not in a new state
-        /// </summary>
-        C05V,
+        CT03V,
 
         /// <summary>
         /// Name cannot be empty
         /// </summary>
-        C01C,
+        CT01C,
 
         /// <summary>
         /// Name limited to 250 characters
         /// </summary>
-        C02C,
+        CT02C,
 
         /// <summary>
         /// Instruction Content limited to 1000 characters
         /// </summary>
-        C03C,
+        CT03C,
 
         /// <summary>
         /// Number of course >1
         /// </summary>
-        C04C,
+        CT04C,
     }
 }
