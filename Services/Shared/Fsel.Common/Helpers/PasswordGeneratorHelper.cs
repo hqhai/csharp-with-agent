@@ -108,8 +108,6 @@ namespace Fsel.Common.Helpers
         {
             var lengthOfPassword = _randomSecure.Next(MinimumLengthPassword, MaximumLengthPassword);
 
-            // Get the required number of characters of each catagory and
-            // add random charactes of all catagories
             var minimumChars = GetRandomString(AllLowerCaseChars, MinimumLowerCaseChars) +
                             GetRandomString(AllUpperCaseChars, MinimumUpperCaseChars) +
                             GetRandomString(AllNumericChars, MinimumNumericChars) +
@@ -117,7 +115,6 @@ namespace Fsel.Common.Helpers
             var rest = GetRandomString(_allAvailableChars, lengthOfPassword - minimumChars.Length);
             var unshuffeledResult = minimumChars + rest;
 
-            // Shuffle the result so the order of the characters are unpredictable
             var result = unshuffeledResult.ShuffleTextSecure();
             return result;
         }

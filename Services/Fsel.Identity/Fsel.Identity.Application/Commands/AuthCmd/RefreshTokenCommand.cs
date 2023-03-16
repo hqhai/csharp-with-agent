@@ -53,7 +53,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             if (validatedToken is JwtSecurityToken jwtSecurityToken)
             {
                 var result = jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256, StringComparison.InvariantCultureIgnoreCase);
-                if (!result)//false
+                if (!result)
                 {
                     methodResult.StatusCode = StatusCodes.Status401Unauthorized;
                     methodResult.AddErrorMessage(nameof(EnumAuthErrorCode.AU06ER));
@@ -61,7 +61,6 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                 }
             }
 
-            //check 3: Check accessToken expire?
             long.TryParse(tokenInVerification.Claims.FirstOrDefault(x => x.Type == JwtRegisteredClaimNames.Exp)?.Value, out long utcExpireDate);
 
             var expireDate = utcExpireDate.ConvertUnixTimeStampToDateTime();
@@ -72,7 +71,6 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                 return methodResult;
             }
 
-            //check 4: Check refreshtoken exist in DB
             var user = _userManager.Users.FirstOrDefault(x => x.RefreshToken == request.RefreshToken);
             if (user == null)
             {

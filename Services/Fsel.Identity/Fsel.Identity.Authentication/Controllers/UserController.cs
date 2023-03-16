@@ -24,8 +24,6 @@ namespace Fsel.Identity.Userentication.Controllers
         /// <summary>
         /// Refresh Token
         /// </summary>
-        /// <param name="command"></param>
-        /// <returns></returns>
         [HttpPost("sign-up")]
         [ProducesResponseType(typeof(MethodResult<UserModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.BadRequest)]
@@ -47,8 +45,6 @@ namespace Fsel.Identity.Userentication.Controllers
         /// <summary>
         /// Confirm Email
         /// </summary>
-        /// <param name="command"></param>
-        /// <returns></returns>
         [HttpGet("confirm-email")]
         [ProducesResponseType(typeof(MethodResult<UserModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.BadRequest)]
@@ -75,8 +71,6 @@ namespace Fsel.Identity.Userentication.Controllers
         /// <summary>
         /// Forgot Password
         /// </summary>
-        /// <param name="command"></param>
-        /// <returns></returns>
         [HttpPost("forgot-password")]
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.BadRequest)]
@@ -98,8 +92,6 @@ namespace Fsel.Identity.Userentication.Controllers
         /// <summary>
         /// Reset Password
         /// </summary>
-        /// <param name="command"></param>
-        /// <returns></returns>
         [HttpPost("reset-password")]
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.BadRequest)]

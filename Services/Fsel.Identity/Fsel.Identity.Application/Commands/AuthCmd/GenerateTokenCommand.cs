@@ -23,14 +23,11 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
     {
         private readonly UserManager<User> _userManager;
         private readonly AppSetting _appSetting;
-        private readonly IMapper _mapper;
 
         public GenerateTokenCommandHandler(UserManager<User> userManager,
-            AppSetting appSetting,
-            IMapper mapper)
+            AppSetting appSetting)
         {
             _userManager = userManager;
-            _mapper = mapper;
             _appSetting = appSetting;
         }
 
@@ -42,7 +39,6 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             if (user == null)
             {
                 methodResult.StatusCode = StatusCodes.Status401Unauthorized;
-                //methodResult.AddResultFromErrorList(placementTest.ErrorMessages);
                 return methodResult;
             }
 

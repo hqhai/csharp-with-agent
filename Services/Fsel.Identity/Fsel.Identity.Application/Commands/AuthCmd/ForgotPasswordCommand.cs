@@ -19,16 +19,11 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
     {
         private readonly UserManager<User> _userManager;
         private readonly ISenderService _senderService;
-        private readonly IMapper _mapper;
-        private readonly SignInManager<User> _signInManager;
 
-        public ForgotPasswordCommandHandler(UserManager<User> userManager, ISenderService senderService,
-            IMapper mapper, SignInManager<User> signInManager)
+        public ForgotPasswordCommandHandler(UserManager<User> userManager, ISenderService senderService)
         {
             _userManager = userManager;
             _senderService = senderService;
-            _mapper = mapper;
-            _signInManager = signInManager;
         }
 
         public async Task<MethodResult<bool>> Handle(ForgotPasswordCommand request, CancellationToken cancellationToken)

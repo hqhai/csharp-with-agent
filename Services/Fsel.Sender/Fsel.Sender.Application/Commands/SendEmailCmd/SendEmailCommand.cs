@@ -15,12 +15,10 @@ namespace Fsel.Sender.Application.Commands.SendEmailCmd
 
     public class LoginCommandHandler : IRequestHandler<SendEmailCommand, MethodResult<bool>>
     {
-        private readonly IEmailService _emailService;
         private readonly AppSetting _appSetting;
 
-        public LoginCommandHandler(IEmailService emailService, AppSetting appSetting)
+        public LoginCommandHandler(AppSetting appSetting)
         {
-            _emailService = emailService;
             _appSetting = appSetting;
         }
 
