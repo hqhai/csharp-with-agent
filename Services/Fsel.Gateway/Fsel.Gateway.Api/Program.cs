@@ -12,7 +12,9 @@ builder.AddAuthenticationJwtBearers(appSetting);
 builder.Services.AddSwaggerForOcelot(builder.Configuration);
 builder.Services.AddSwaggerGen();
 
-builder.Configuration.AddJsonFile("ocelot.json", optional: false, reloadOnChange: true);
+builder.Configuration
+    .AddJsonFile("ocelot.json", optional: false, reloadOnChange: true)
+    .AddEnvironmentVariables();
 builder.Services.AddOcelot(builder.Configuration);
 
 var app = builder.Build();
