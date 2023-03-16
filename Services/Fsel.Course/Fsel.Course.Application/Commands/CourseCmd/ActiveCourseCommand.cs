@@ -69,7 +69,7 @@ namespace Fsel.Course.Application.Commands.CourseCmd
                                             e.Status == EnumCourseStatus.Active &&
                                             e.CourseTeachers.Count == teacherIds.Count &&
                                             e.CourseTeachers.All(x => teacherIds.Contains(x.TeacherId)))
-                                .ToListAsync();
+                                .ToListAsync(cancellationToken: cancellationToken);
 
             await _courseRepository.ExecuteTransactionAsync(async () =>
             {
