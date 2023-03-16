@@ -37,7 +37,11 @@ namespace Fsel.Course.Application.Commands.CourseCmd
 
             #region Validation
 
-            var course = _courseRepository.Queryable.Where(e => e.Id == request.Id).Include(e => e.CourseTeachers).FirstOrDefault();
+            var course = await _courseRepository.Queryable
+                            .Include(e => e.CourseTeachers)
+                            .Where(e => e.Id == request.Id)
+                            .FirstOrDefaultAsync();
+
             if (course == null)
             {
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
@@ -47,49 +51,37 @@ namespace Fsel.Course.Application.Commands.CourseCmd
                 return methodResult;
             }
 
-            var courses = _courseRepository.Queryable
-                                .Where(e => e.CourseLevel == course.CourseLevel && e.Status == EnumCourseStatus.Active)
-                                .Include(e => e.CourseTeachers).ToList();
-            if (courses == null)
+            if (course.Status != EnumCourseStatus.New)
             {
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 methodResult.AddErrorMessage(
-                    nameof(EnumCourseErrorCode.C01V));
+                    nameof(EnumCourseErrorCode.C05V));
                 methodResult.Result = false;
                 return methodResult;
             }
 
-            List<Guid> courseIds = new List<Guid>();
-            course.CourseTeachers.ForEach(z => courseIds.Add(z.TeacherId));
-
-            courses.ForEach(x =>
-            {
-                if (x.CourseTeachers.Count != course.CourseTeachers.Count)
-                {
-                    courses.Remove(x);
-                }
-                else if (courseIds.Any(id => !x.CourseTeachers.Any(f => f.TeacherId == id)))
-                {
-                    courses.Remove(x);
-                }
-            });
-
-            if (courses.Count > 0)
-            {
-                course.Status = EnumCourseStatus.Active;
-                courses.ForEach(x => x.Status = EnumCourseStatus.InActive);
-            }
-            else
-            {
-                course.Status = EnumCourseStatus.Active;
-            }
-
             #endregion Validation
+
+            var teacherIds = course.CourseTeachers.Select(x => x.TeacherId).ToList();
+            var courses = await _courseRepository.Queryable
+                                .Include(e => e.CourseTeachers)
+                                .Where(e => e.CourseLevel == course.CourseLevel &&
+                                            e.Status == EnumCourseStatus.Active &&
+                                            e.CourseTeachers.Count == teacherIds.Count &&
+                                            e.CourseTeachers.All(x => teacherIds.Contains(x.TeacherId)))
+                                .ToListAsync();
 
             await _courseRepository.ExecuteTransactionAsync(async () =>
             {
-                courses.ForEach(x => _courseRepository.Update(x));
+                course.Status = EnumCourseStatus.Active;
                 course = _courseRepository.Update(course);
+
+                foreach (var item in courses)
+                {
+                    item.Status = EnumCourseStatus.InActive;
+                    _courseRepository.Update(item);
+                }
+
                 await _courseRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
                 methodResult.StatusCode = StatusCodes.Status201Created;
                 methodResult.Result = true;
