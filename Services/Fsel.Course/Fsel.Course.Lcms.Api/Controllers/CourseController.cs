@@ -80,11 +80,11 @@ namespace Fsel.Course.Lcms.Api.Controllers
         [HttpPut("{id}")]
         [ProducesResponseType(typeof(MethodResult<CourseModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.BadRequest)]
-        public async Task<IActionResult> Update([FromRoute] Guid Id, [FromBody] UpdateCourseCommand command)
+        public async Task<IActionResult> Update([FromRoute] Guid id, [FromBody] UpdateCourseCommand command)
         {
             try
             {
-                command.Id = Id;
+                command.Id = id;
                 MethodResult<CourseModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
                 return commandResult.GetActionResult();
             }
@@ -104,11 +104,11 @@ namespace Fsel.Course.Lcms.Api.Controllers
         [HttpDelete("{id}")]
         [ProducesResponseType(typeof(MethodResult<CourseModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.BadRequest)]
-        public async Task<IActionResult> Delete([FromRoute] Guid Id)
+        public async Task<IActionResult> Delete([FromRoute] Guid id)
         {
             try
             {
-                MethodResult<bool> commandResult = await _mediator.Send(new DeleteCourseCommand { Id = Id }).ConfigureAwait(false);
+                MethodResult<bool> commandResult = await _mediator.Send(new DeleteCourseCommand { Id = id }).ConfigureAwait(false);
                 return commandResult.GetActionResult();
             }
             catch (Exception ex)
@@ -124,14 +124,14 @@ namespace Fsel.Course.Lcms.Api.Controllers
         /// </summary>
         /// <param name="command"></param>
         /// <returns></returns>
-        [HttpPut("active/{Id}")]
+        [HttpPut("active/{id}")]
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.BadRequest)]
-        public async Task<IActionResult> Active([FromRoute] Guid Id)
+        public async Task<IActionResult> Active([FromRoute] Guid id)
         {
             try
             {
-                MethodResult<bool> commandResult = await _mediator.Send(new ActiveCourseCommand { Id = Id }).ConfigureAwait(false);
+                MethodResult<bool> commandResult = await _mediator.Send(new ActiveCourseCommand { Id = id }).ConfigureAwait(false);
                 return commandResult.GetActionResult();
             }
             catch (Exception ex)
