@@ -9,6 +9,14 @@ services:
         ports:
             - 5200:80
             - 7200:443
+        environment:
+            - ASPNETCORE_ENVIRONMENT=Development
+            - JWT__SECRETKEY=JsonWebApiTokenWithSwaggerAuthorizationAuthenticationAspNetCore
+            - JWT__ISSUER=baseWebApiIssuer
+            - JWT__AUDIENCE=baseWebApiAudience
+            - JWT__SUBJECT=baseWebApiSubject
+            - JWT__TOKENVALIDITYINMINUTES=60
+            - JWT__REFRESHTOKENVALIDITYINDAYS=7
     AuthService:
         container_name: auth
         image: ${DOCKER_REGISTRY-}authsmicroservice:v1
@@ -16,8 +24,9 @@ services:
             context: ./
             dockerfile: Auth.Dockerfile
         environment:
+            - ASPNETCORE_ENVIRONMENT=Development
             - CONNECTIONSTRINGS__DEFAULTCONNECTION=Data Source=183.91.11.235;Initial Catalog=env-dev.user-service;User Id=sa;Password=FselTech@2023;TrustServerCertificate=true;
-            - SERVICENAME=Gateway
+            - SERVICENAME=Auth
             - JWT__SECRETKEY=JsonWebApiTokenWithSwaggerAuthorizationAuthenticationAspNetCore
             - JWT__ISSUER=baseWebApiIssuer
             - JWT__AUDIENCE=baseWebApiAudience
@@ -36,6 +45,7 @@ services:
             context: ./
             dockerfile: User.Dockerfile
         environment:
+            - ASPNETCORE_ENVIRONMENT=Development
             - CONNECTIONSTRINGS__DEFAULTCONNECTION=Data Source=183.91.11.235;Initial Catalog=env-dev.user-service;User Id=sa;Password=FselTech@2023;TrustServerCertificate=true;
             - SERVICENAME=User
             - JWT__SECRETKEY=JsonWebApiTokenWithSwaggerAuthorizationAuthenticationAspNetCore
@@ -55,6 +65,7 @@ services:
             context: ./
             dockerfile: Lcms.Dockerfile
         environment:
+            - ASPNETCORE_ENVIRONMENT=Development
             - CONNECTIONSTRINGS__DEFAULTCONNECTION=Data Source=183.91.11.235;Initial Catalog=env-dev.course-service;User Id=sa;Password=FselTech@2023;TrustServerCertificate=true;
             - SERVICENAME=Lcms Course
             - JWT__SECRETKEY=JsonWebApiTokenWithSwaggerAuthorizationAuthenticationAspNetCore
@@ -73,6 +84,7 @@ services:
             context: ./
             dockerfile: Lms.Dockerfile
         environment:
+            - ASPNETCORE_ENVIRONMENT=Development
             - CONNECTIONSTRINGS__DEFAULTCONNECTION=Data Source=183.91.11.235;Initial Catalog=env-dev.course-service;User Id=sa;Password=FselTech@2023;TrustServerCertificate=true;
             - SERVICENAME=Lms Course
             - JWT__SECRETKEY=JsonWebApiTokenWithSwaggerAuthorizationAuthenticationAspNetCore
@@ -91,6 +103,7 @@ services:
             context: ./
             dockerfile: Sender.Dockerfile
         environment:
+            - ASPNETCORE_ENVIRONMENT=Development
             - SERVICENAME=Sender
             - SMTP__FROM=phanminhphucdctb@gmail.com
             - SMTP__SMTPSERVER=smtp.gmail.com
