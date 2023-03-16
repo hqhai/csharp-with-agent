@@ -17,7 +17,7 @@ spec:
         image: lmsfselacr.azurecr.io/fsel_src
         imagePullPolicy: Always
         ports:
-        - containerPort: 5204
+        - containerPort: 80
 # service type loadbalancer       
 ---
 apiVersion: v1
@@ -29,6 +29,6 @@ spec:
     app: lms-api
   ports:
     - protocol: TCP
-      port: 5204
-      targetPort: 5204
+      port: 80
+      targetPort: 80
   type: LoadBalancer
