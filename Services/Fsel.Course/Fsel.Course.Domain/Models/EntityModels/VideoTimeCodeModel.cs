@@ -17,6 +17,6 @@ namespace Fsel.Course.Domain.Models.EntityModels
 
         public TimeSpan ExecutionTime { get; set; }
 
-        public List<ExcerciseModel>? Excercises { get; set; }
+        public ICollection<ExcerciseModel>? Excercises { get; set; }
     }
 }

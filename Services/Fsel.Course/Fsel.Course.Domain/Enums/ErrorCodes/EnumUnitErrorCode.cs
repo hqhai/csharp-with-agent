@@ -1,4 +1,4 @@
-﻿namespace Fsel.Course.Domain.Enums.ErrorCodes
+namespace Fsel.Course.Domain.Enums.ErrorCodes
 {
     public enum EnumUnitErrorCode
     {
@@ -13,9 +13,14 @@
         U02C,
 
         /// <summary>
-        /// Instruction Content limited to 1000 characters
+        /// DisplayName cannot be empty
         /// </summary>
         U03C,
+
+        /// <summary>
+        /// DisplayName limited to 250 characters
+        /// </summary>
+        U04C,
 
         /// <summary>
         /// Unit does not exist

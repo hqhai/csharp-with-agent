@@ -69,10 +69,6 @@ namespace Fsel.Course.Application.Queries.VideoQuery
                                 }).ToList(),
                             }).ToList(),
                         };
-            /*var video2 = from i in _videoRepository.Queryable.Include(i => i.VideoTimeCode)
-                         .Include(i => i.VideoTimeCode.TimeCodeExcercises).Include(i => i.VideoTimeCode.TimeCodeExcercises)
-                         .Include(i => i.TimeCodeExcercise.Excercise).Include(i => i.ExcerciseQuestion.Question)
-                         select i;*/
 
             var video = query.FirstOrDefault();
             if (video == null)

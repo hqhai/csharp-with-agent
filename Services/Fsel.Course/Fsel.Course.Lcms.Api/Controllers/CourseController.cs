@@ -29,8 +29,6 @@ namespace Fsel.Course.Lcms.Api.Controllers
         /// <summary>
         /// Search Course
         /// </summary>
-        /// <param name="command"></param>
-        /// <returns></returns>
         [HttpGet]
         [ProducesResponseType(typeof(MethodResult<PagingItemsModel<CourseModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.BadRequest)]
@@ -52,8 +50,6 @@ namespace Fsel.Course.Lcms.Api.Controllers
         /// <summary>
         /// Create a Course
         /// </summary>
-        /// <param name="command"></param>
-        /// <returns></returns>
         [HttpPost]
         [ProducesResponseType(typeof(MethodResult<CourseModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.BadRequest)]
@@ -75,8 +71,6 @@ namespace Fsel.Course.Lcms.Api.Controllers
         /// <summary>
         /// Update a Course
         /// </summary>
-        /// <param name="command"></param>
-        /// <returns></returns>
         [HttpPut("{id}")]
         [ProducesResponseType(typeof(MethodResult<CourseModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.BadRequest)]
@@ -99,8 +93,6 @@ namespace Fsel.Course.Lcms.Api.Controllers
         /// <summary>
         /// Delete a Course
         /// </summary>
-        /// <param name="command"></param>
-        /// <returns></returns>
         [HttpDelete("{id}")]
         [ProducesResponseType(typeof(MethodResult<CourseModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.BadRequest)]
@@ -122,8 +114,6 @@ namespace Fsel.Course.Lcms.Api.Controllers
         /// <summary>
         /// Update a Course in Active
         /// </summary>
-        /// <param name="command"></param>
-        /// <returns></returns>
         [HttpPut("active/{id}")]
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.BadRequest)]
@@ -145,8 +135,6 @@ namespace Fsel.Course.Lcms.Api.Controllers
         /// <summary>
         /// Get Course
         /// </summary>
-        /// <param name="command"></param>
-        /// <returns></returns>
         [HttpGet("{id}")]
         [ProducesResponseType(typeof(MethodResult<CourseModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.BadRequest)]

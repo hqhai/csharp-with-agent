@@ -1,19 +1,14 @@
-﻿namespace Fsel.Course.Domain.Enums.ErrorCodes
+namespace Fsel.Course.Domain.Enums.ErrorCodes
 {
     public enum EnumClassForumErrorCode
     {
         /// <summary>
-        /// ClassForum does not exist
+        /// ClassForum null
         /// </summary>
         CF01V,
 
         /// <summary>
-        /// ClassForum have been use
-        /// </summary>
-        CF02V,
-
-        /// <summary>
-        /// ClassForum null
+        /// Video not is correct
         /// </summary>
         CF03V,
 
@@ -28,13 +23,18 @@
         CF02C,
 
         /// <summary>
-        /// Instruction Content limited to 1000 characters
+        /// MediaPost Content limited to 1000 characters
         /// </summary>
         CF03C,
 
         /// <summary>
-        /// Number of course >1
+        /// TaggetWordLimit of course > 0
         /// </summary>
-        CF04C
+        CF04C,
+
+        /// <summary>
+        /// TaggetTimeLimitTicks of course > 0
+        /// </summary>
+        CF05C
     }
 }

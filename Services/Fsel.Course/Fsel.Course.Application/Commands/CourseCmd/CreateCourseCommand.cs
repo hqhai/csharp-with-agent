@@ -53,7 +53,7 @@ namespace Fsel.Course.Application.Commands.CourseCmd
             {
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 methodResult.AddErrorMessage(
-                    nameof(EnumCourseUnitMockTestErrorCode.CUM03V));
+                    nameof(EnumCourseUnitMockTestErrorCode.CUM01V));
                 return methodResult;
             }
 
@@ -67,8 +67,8 @@ namespace Fsel.Course.Application.Commands.CourseCmd
                 return methodResult;
             }
 
-            var mocktestIds = request.CourseUnitMockTests.Where(e => e.MockTestId != null).Select(x => x.MockTestId ?? Guid.Empty);
-            if (_mockTestRepository.IsIdsInValid(mocktestIds))
+            var mocktestIds = request.CourseUnitMockTests.Where(e => e.MockTestId != null).Select(x => x.MockTestId);
+            if (_mockTestRepository.IsIdsInValid(mocktestIds.Where(e => e.HasValue).Select(e => e!.Value)))
             {
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 methodResult.AddErrorMessage(
@@ -76,7 +76,7 @@ namespace Fsel.Course.Application.Commands.CourseCmd
                 return methodResult;
             }
 
-            var mocktests = await _mockTestRepository.GetByIdsAsync(mocktestIds);
+            var mocktests = await _mockTestRepository.GetByIdsAsync(mocktestIds.Where(e => e.HasValue).Select(e => e!.Value));
 
             var checkMockTest = mocktests.Any(x => x.MockTestType == EnumMockTestType.CourseMockTest);
             if (!checkMockTest)

@@ -130,11 +130,11 @@ namespace Fsel.Course.Application.Commands.LessonCmd
                 return methodResult;
             }
 
-            if (_classForumRepository.IsIdsInValid(new List<Guid> { request.ClassForumId ?? Guid.Empty }))
+            if (_classForumRepository.IsIdsInValid(new List<Guid> { request.ClassForumId }))
             {
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 methodResult.AddErrorMessage(
-                    nameof(EnumClassForumErrorCode.CF03V));
+                    nameof(EnumClassForumErrorCode.CF01V));
             }
 
             if (_homeWorkRepository.IsIdsInValid(request.HomeWorkIds))

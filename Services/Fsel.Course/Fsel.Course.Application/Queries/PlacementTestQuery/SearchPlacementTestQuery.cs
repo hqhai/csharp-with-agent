@@ -54,12 +54,12 @@ namespace Fsel.Course.Application.Queries.PlacementTestQuery
                 placementTestQuery = placementTestQuery.Where(m => m.Id.ToString() == request.Keyword || (m.Name ?? string.Empty).Contains(request.Keyword));
             }
 
-            int totalItem = await placementTestQuery.CountAsync().ConfigureAwait(false);
+            int totalItem = await placementTestQuery.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
             var lists = await placementTestQuery.OrderByDescending(x => x.Id)
                     .Skip((request.Page - 1) * request.PageSize)
                     .Take(request.PageSize)
                     .AsNoTracking()
-                    .ToListAsync()
+                    .ToListAsync(cancellationToken: cancellationToken)
                     .ConfigureAwait(false);
 
             methodResult.Result = new PagingItemsModel<PlacementTestModel>

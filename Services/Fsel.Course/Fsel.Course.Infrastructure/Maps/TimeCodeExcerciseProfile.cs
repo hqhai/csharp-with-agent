@@ -6,9 +6,6 @@ namespace Fsel.Course.Infrastructure.Maps
     {
         public TimeCodeExcerciseProfile()
         {
-            //CreateMap<TimeCodeExcercise, TimeCodeExcercise>().IgnoreAllNonExisting();
-            //CreateMap<CreateTimeCodeExcerciseCommandModel, TimeCodeExcercise>().IgnoreAllNonExisting();
-            //CreateMap<UpdateTimeCodeExcerciseCommandModel, TimeCodeExcercise>().IgnoreAllNonExisting();
         }
     }
 }

@@ -29,8 +29,6 @@ namespace Fsel.Course.Lcms.Api.Controllers
         /// <summary>
         /// Search Video
         /// </summary>
-        /// <param name="command"></param>
-        /// <returns></returns>
         [HttpGet]
         [ProducesResponseType(typeof(MethodResult<PagingItemsModel<VideoModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.BadRequest)]
@@ -52,8 +50,6 @@ namespace Fsel.Course.Lcms.Api.Controllers
         /// <summary>
         /// Get Video
         /// </summary>
-        /// <param name="command"></param>
-        /// <returns></returns>
         [HttpGet("{id}")]
         [ProducesResponseType(typeof(MethodResult<VideoModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.BadRequest)]
@@ -75,8 +71,6 @@ namespace Fsel.Course.Lcms.Api.Controllers
         /// <summary>
         /// Create a Video
         /// </summary>
-        /// <param name="command"></param>
-        /// <returns></returns>
         [HttpPost]
         [ProducesResponseType(typeof(MethodResult<VideoModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.BadRequest)]
@@ -98,8 +92,6 @@ namespace Fsel.Course.Lcms.Api.Controllers
         /// <summary>
         /// Update a Video
         /// </summary>
-        /// <param name="command"></param>
-        /// <returns></returns>
         [HttpPut("{id}")]
         [ProducesResponseType(typeof(MethodResult<VideoModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.BadRequest)]
@@ -122,8 +114,6 @@ namespace Fsel.Course.Lcms.Api.Controllers
         /// <summary>
         /// Delete a Video
         /// </summary>
-        /// <param name="command"></param>
-        /// <returns></returns>
         [HttpDelete("{id}")]
         [ProducesResponseType(typeof(MethodResult<VideoModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.BadRequest)]

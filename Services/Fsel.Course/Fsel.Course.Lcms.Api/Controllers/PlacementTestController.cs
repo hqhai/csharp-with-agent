@@ -30,8 +30,6 @@ namespace Fsel.Course.Lcms.Api.Controllers
         /// <summary>
         /// Search Placement Test
         /// </summary>
-        /// <param name="command"></param>
-        /// <returns></returns>
         [HttpGet]
         [ProducesResponseType(typeof(MethodResult<PagingItemsModel<PlacementTestModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.BadRequest)]
@@ -53,8 +51,6 @@ namespace Fsel.Course.Lcms.Api.Controllers
         /// <summary>
         /// Get Placement Test
         /// </summary>
-        /// <param name="command"></param>
-        /// <returns></returns>
         [HttpGet("{id}")]
         [ProducesResponseType(typeof(MethodResult<PlacementTestModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.BadRequest)]
@@ -76,8 +72,6 @@ namespace Fsel.Course.Lcms.Api.Controllers
         /// <summary>
         /// Create a Placement Test
         /// </summary>
-        /// <param name="command"></param>
-        /// <returns></returns>
         [HttpPost]
         [ProducesResponseType(typeof(MethodResult<PlacementTestModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.BadRequest)]
@@ -99,8 +93,6 @@ namespace Fsel.Course.Lcms.Api.Controllers
         /// <summary>
         /// Update a Placement Test
         /// </summary>
-        /// <param name="command"></param>
-        /// <returns></returns>
         [HttpPut("{id}")]
         [ProducesResponseType(typeof(MethodResult<PlacementTestModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.BadRequest)]
@@ -123,8 +115,6 @@ namespace Fsel.Course.Lcms.Api.Controllers
         /// <summary>
         /// Delete a Placement Test
         /// </summary>
-        /// <param name="command"></param>
-        /// <returns></returns>
         [HttpDelete("{id}")]
         [ProducesResponseType(typeof(MethodResult<PlacementTestModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.BadRequest)]

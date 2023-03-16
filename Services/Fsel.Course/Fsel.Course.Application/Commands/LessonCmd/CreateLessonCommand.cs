@@ -26,21 +26,24 @@ namespace Fsel.Course.Application.Commands.LessonCmd
         private readonly IHomeWorkRepository _homeWorkRepository;
         private readonly IVideoRepository _videoRepository;
         private readonly IExtraPracticeRepository _extraPracticeRepository;
+        private readonly IClassForumRepository _classForumRepository;
 
         public CreateLessonCommandHandler(ILessonRepository lessonRepository
             , ILessonHomeWorkRepository lessonHomeWorkRepository
             , ILessonExtraPracticeRepository lessonExtraPracticeRepository
             , IMapper mapper, IHomeWorkRepository homeWorkRepository
             , IVideoRepository videoRepository
-            , IExtraPracticeRepository extraPracticeRepository)
+            , IExtraPracticeRepository extraPracticeRepository
+            , IClassForumRepository classForumRepository)
         {
-            _lessonRepository = lessonRepository ?? throw new ArgumentNullException(nameof(_lessonRepository));
+            _lessonRepository = lessonRepository;
             _lessonHomeWorkRepository = lessonHomeWorkRepository;
             _lessonExtraPracticeRepository = lessonExtraPracticeRepository;
             _mapper = mapper;
             _homeWorkRepository = homeWorkRepository;
             _videoRepository = videoRepository;
             _extraPracticeRepository = extraPracticeRepository;
+            _classForumRepository = classForumRepository;
         }
 
         public async Task<MethodResult<LessonModel>> Handle(CreateLessonCommand request, CancellationToken cancellationToken)
@@ -69,7 +72,7 @@ namespace Fsel.Course.Application.Commands.LessonCmd
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 methodResult.AddErrorMessage(
                 nameof(EnumExtraPractiveErrorCode.EP03V),
-                new[] { MethodHelper.GenerateErrorResult(nameof(request.HomeWorkIds), request.HomeWorkIds) });
+                new[] { MethodHelper.GenerateErrorResult(nameof(request.ExtraPracticeIds), request.ExtraPracticeIds) });
                 return methodResult;
             }
 
@@ -78,9 +81,20 @@ namespace Fsel.Course.Application.Commands.LessonCmd
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 methodResult.AddErrorMessage(
                 nameof(EnumVideoErrorCode.VD03V),
-                new[] { MethodHelper.GenerateErrorResult(nameof(request.HomeWorkIds), request.HomeWorkIds) });
+                new[] { MethodHelper.GenerateErrorResult(nameof(request.VideoIds), request.VideoIds) });
                 return methodResult;
             }
+
+            if (request.ClassForum == null)
+            {
+                methodResult.StatusCode = StatusCodes.Status400BadRequest;
+                methodResult.AddErrorMessage(
+                nameof(EnumClassForumErrorCode.CF03V));
+                return methodResult;
+            }
+
+            ClassForum classForum = new ClassForum();
+            _mapper.Map(request.ClassForum, classForum);
 
             if (_homeWorkRepository.IsIdsInValid(request.HomeWorkIds))
             {
@@ -103,6 +117,14 @@ namespace Fsel.Course.Application.Commands.LessonCmd
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 methodResult.AddErrorMessage(
                 nameof(EnumVideoErrorCode.VD03V));
+                return methodResult;
+            }
+
+            if (_classForumRepository.IsIdsInValid(new List<Guid> { classForum.Id }))
+            {
+                methodResult.StatusCode = StatusCodes.Status400BadRequest;
+                methodResult.AddErrorMessage(
+                nameof(EnumClassForumErrorCode.CF03V));
                 return methodResult;
             }
 
@@ -132,8 +154,6 @@ namespace Fsel.Course.Application.Commands.LessonCmd
                     VideoId = x
                 }).ToList();
 
-                ClassForum classForum = new ClassForum();
-                _mapper.Map(request.ClassForum, classForum);
                 classForum.LessonId = lesson.Id;
                 lesson.ClassForum = classForum;
 

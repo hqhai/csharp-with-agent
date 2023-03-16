@@ -1,7 +1,9 @@
-﻿namespace Fsel.Course.Domain.Enums
+namespace Fsel.Course.Domain.Enums
 {
     public enum EnumTimeCodeType
     {
-        Standalone, UnitTest, SkillTest
+        Standalone,
+        UnitTest,
+        SkillTest
     }
 }

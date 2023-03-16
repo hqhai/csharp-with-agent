@@ -1,4 +1,4 @@
-﻿namespace Fsel.Course.Domain.Enums.ErrorCodes
+namespace Fsel.Course.Domain.Enums.ErrorCodes
 {
     public enum EnumLessonErrorCode
     {
@@ -33,8 +33,8 @@
         LS03C,
 
         /// <summary>
-        /// LessonId is not correct
+        /// DisplayName limited to 250 characters
         /// </summary>
-        L03V,
+        LS04C
     }
 }

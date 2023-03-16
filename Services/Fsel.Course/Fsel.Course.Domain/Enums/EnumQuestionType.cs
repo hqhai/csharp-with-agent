@@ -1,4 +1,4 @@
-﻿namespace Fsel.Course.Domain.Enums
+namespace Fsel.Course.Domain.Enums
 {
     public enum EnumQuestionType
     {
@@ -8,9 +8,12 @@
         Listing,
         MatchingType1,
         MatchingType2,
-        ShortAnswer,
-        GapFill,
-        GapFillWordBank,
+        ShortAnswerWordBase,
+        ShortAnswerWordCount,
+        GapFillScoreByQuestion,
+        GapFillWordBankScoreByQuestion,
+        GapFillScoreByGap,
+        GapFillWordBankScoreByGap,
         DragAndDropSsentenceOrder,
         DragAndDropPicture,
         MultipleOptionSentenceCompletion,

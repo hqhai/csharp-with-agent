@@ -8,11 +8,6 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         MT01V,
 
         /// <summary>
-        /// Mock Final Test  was used
-        /// </summary>
-        MT02V,
-
-        /// <summary>
         /// Mock Final Test  not is correct
         /// </summary>
         MT03V,

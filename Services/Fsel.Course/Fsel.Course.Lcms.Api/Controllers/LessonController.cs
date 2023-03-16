@@ -28,6 +28,9 @@ namespace Fsel.Course.Lcms.Api.Controllers
             _mediator = mediator;
         }
 
+        /// <summary>
+        /// Search Lesson
+        /// </summary>
         [HttpGet]
         [ProducesResponseType(typeof(MethodResult<PagingItemsModel<LessonModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.BadRequest)]
@@ -49,8 +52,6 @@ namespace Fsel.Course.Lcms.Api.Controllers
         /// <summary>
         /// Get Lesson
         /// </summary>
-        /// <param name="command"></param>
-        /// <returns></returns>
         [HttpGet("{id}")]
         [ProducesResponseType(typeof(MethodResult<LessonModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.BadRequest)]
@@ -72,8 +73,6 @@ namespace Fsel.Course.Lcms.Api.Controllers
         /// <summary>
         /// Create a Lesson
         /// </summary>
-        /// <param name="command"></param>
-        /// <returns></returns>
         [HttpPost]
         [ProducesResponseType(typeof(MethodResult<LessonModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.BadRequest)]
@@ -92,6 +91,9 @@ namespace Fsel.Course.Lcms.Api.Controllers
             }
         }
 
+        /// <summary>
+        /// Update a Lesson
+        /// </summary>
         [HttpPut("{id}")]
         [ProducesResponseType(typeof(MethodResult<LessonModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.BadRequest)]
@@ -114,8 +116,6 @@ namespace Fsel.Course.Lcms.Api.Controllers
         /// <summary>
         /// Delete a Lesson
         /// </summary>
-        /// <param name="command"></param>
-        /// <returns></returns>
         [HttpDelete("{id}")]
         [ProducesResponseType(typeof(MethodResult<LessonModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.BadRequest)]

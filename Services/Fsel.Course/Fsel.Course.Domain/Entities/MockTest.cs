@@ -7,18 +7,27 @@ namespace Fsel.Course.Domain.Entities
 {
     public class MockTest : Entity
     {
-        [Required(ErrorMessage = nameof(EnumMockTestErrorCode.MT01V))]
-        [MaxLength(250, ErrorMessage = nameof(EnumMockTestErrorCode.MT01C))]
+        /// <summary>
+        /// Tên MockTest
+        /// </summary>
+        [Required(ErrorMessage = nameof(EnumMockTestErrorCode.MT01C))]
+        [MaxLength(250, ErrorMessage = nameof(EnumMockTestErrorCode.MT02C))]
         public string? Name { get; set; }
 
         public bool IsActive { get; set; }
 
+        /// <summary>
+        /// Loại Course
+        /// </summary>
         public EnumCourseType CourseType { get; set; }
 
+        /// <summary>
+        /// Loại MockTest
+        /// </summary>
         public EnumMockTestType MockTestType { get; set; }
 
-        public List<CourseUnitMockTest> CourseUnitMockTests { get; set; } = new List<CourseUnitMockTest>();
+        public ICollection<CourseUnitMockTest> CourseUnitMockTests { get; set; } = new List<CourseUnitMockTest>();
 
-        public List<UnitSkillMockTest> UnitSkillMockTests { get; set; } = new List<UnitSkillMockTest>();
+        public ICollection<UnitSkillMockTest> UnitSkillMockTests { get; set; } = new List<UnitSkillMockTest>();
     }
 }

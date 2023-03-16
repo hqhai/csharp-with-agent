@@ -1,4 +1,4 @@
-﻿namespace Fsel.Course.Domain.Enums.ErrorCodes
+namespace Fsel.Course.Domain.Enums.ErrorCodes
 {
     public enum EnumHomeWorkErrorCode
     {
@@ -6,11 +6,6 @@
         /// HomeWork does not exist
         /// </summary>
         HW01V,
-
-        /// <summary>
-        /// HomeWork have been use
-        /// </summary>
-        HW02V,
 
         /// <summary>
         /// HomeWork null
@@ -33,7 +28,7 @@
         HW03C,
 
         /// <summary>
-        /// Number of course >1
+        /// MediaPost Content limited to 1000 characters
         /// </summary>
         HW04C
     }

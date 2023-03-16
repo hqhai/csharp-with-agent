@@ -1,4 +1,4 @@
-﻿namespace Fsel.Course.Domain.Enums.ErrorCodes
+namespace Fsel.Course.Domain.Enums.ErrorCodes
 {
     public enum EnumPlacementTestErrorCode
     {
@@ -6,16 +6,6 @@
         /// Placement Test does not exist
         /// </summary>
         PT01V,
-
-        /// <summary>
-        /// Placement Test was used
-        /// </summary>
-        PT02V,
-
-        /// <summary>
-        /// Placement Test not is correct
-        /// </summary>
-        PT03V,
 
         /// <summary>
         /// Name cannot be empty

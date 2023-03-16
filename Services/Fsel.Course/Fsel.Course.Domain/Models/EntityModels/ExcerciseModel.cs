@@ -13,6 +13,6 @@ namespace Fsel.Course.Domain.Models.EntityModels
 
         public EnumCourseSkill CourseSkill { get; set; }
 
-        public List<QuestionModel>? Questions { get; set; }
+        public ICollection<QuestionModel>? Questions { get; set; }
     }
 }
