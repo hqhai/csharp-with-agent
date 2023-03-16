@@ -61,7 +61,8 @@ namespace Fsel.Course.Application.Commands.VideoCmd
                                     .ThenInclude(e => e.TimeCodeExcercises)
                                     .ThenInclude(e => e.Excercise)
                                     .ThenInclude(e => e.ExcerciseQuestions)
-                                    .ThenInclude(e => e.Question).FirstOrDefaultAsync(e => e.Id == request.Id, cancellationToken: cancellationToken);
+                                    .ThenInclude(e => e.Question)
+                                    .FirstOrDefaultAsync(e => e.Id == request.Id, cancellationToken: cancellationToken);
             if (video == null)
             {
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
