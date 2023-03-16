@@ -5,8 +5,8 @@
 
 FROM mcr.microsoft.com/dotnet/aspnet:7.0 AS base
 WORKDIR /app
-EXPOSE 5203
-EXPOSE 7203
+EXPOSE 80
+EXPOSE 443
 
 FROM mcr.microsoft.com/dotnet/sdk:7.0 AS build
 WORKDIR /src
@@ -26,5 +26,6 @@ RUN dotnet publish "Fsel.Course.Lcms.Api.csproj" -c Release -o /app/publish /p:U
 
 FROM base AS final
 WORKDIR /app
+ENV ASPNETCORE_ENVIRONMENT=Development
 COPY --from=publish /app/publish .
 ENTRYPOINT ["dotnet", "Fsel.Course.Lcms.Api.dll"]

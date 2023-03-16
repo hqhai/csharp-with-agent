@@ -5,8 +5,7 @@
 
 FROM mcr.microsoft.com/dotnet/aspnet:7.0 AS base
 WORKDIR /app
-EXPOSE 5201
-EXPOSE 7201
+EXPOSE 80
 
 FROM mcr.microsoft.com/dotnet/sdk:7.0 AS build
 WORKDIR /src
@@ -26,5 +25,6 @@ RUN dotnet publish "Fsel.Identity.Authentication.csproj" -c Release -o /app/publ
 
 FROM base AS final
 WORKDIR /app
+ENV ASPNETCORE_ENVIRONMENT=Development
 COPY --from=publish /app/publish .
 ENTRYPOINT ["dotnet", "Fsel.Identity.Authentication.dll"]

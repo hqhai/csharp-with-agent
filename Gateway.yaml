@@ -17,7 +17,7 @@ spec:
         image: gatewayfselacr.azurecr.io/fsel_src
         imagePullPolicy: Always
         ports:
-        - containerPort: 5200
+        - containerPort: 80
 # service type loadbalancer       
 ---
 apiVersion: v1
@@ -29,6 +29,6 @@ spec:
     app: gateway-api
   ports:
     - protocol: TCP
-      port: 5200
-      targetPort: 5200
+      port: 80
+      targetPort: 80
   type: LoadBalancer
