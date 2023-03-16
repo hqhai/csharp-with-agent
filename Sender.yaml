@@ -1,16 +1,16 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: sender-app
+  name: sender-api
 spec:
   replicas: 2
   selector:
     matchLabels:
-      app: sender-app
+      app: sender-api
   template:
     metadata:
       labels:
-        app: sender-app
+        app: sender-api
     spec:
       containers:
       - name: sender
@@ -23,10 +23,10 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: sender-app-svc
+  name: sender-api-svc
 spec:
   selector:
-    app: sender-app
+    app: sender-api
   ports:
     - protocol: TCP
       port: 80
