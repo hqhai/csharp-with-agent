@@ -56,13 +56,8 @@ namespace Fsel.Course.Application.Commands.VideoCmd
                 return methodResult;
             }
 
-            var video = await _videoRepository.Queryable
-                                    .Include(e => e.VideoTimeCodes)
-                                    .ThenInclude(e => e.TimeCodeExcercises)
-                                    .ThenInclude(e => e.Excercise)
-                                    .ThenInclude(e => e.ExcerciseQuestions)
-                                    .ThenInclude(e => e.Question)
-                                    .FirstOrDefaultAsync(e => e.Id == request.Id, cancellationToken: cancellationToken);
+            // Lưu dữ liệu Video
+            var video = await _videoRepository.GetIncludeByIdAsync(request.Id);
             if (video == null)
             {
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
@@ -81,375 +76,80 @@ namespace Fsel.Course.Application.Commands.VideoCmd
                     new[] { MethodHelper.GenerateErrorResult(nameof(request.Id), request.Id) });
                 return methodResult;
             }
-            foreach (var videoTimeCode in request.VideoTimeCodes)
+
+            request.VideoTimeCodes.ForEach(x =>
             {
-                var videoTimeCodeAdd = _mapper.Map<VideoTimeCode>(videoTimeCode);
-                if (!videoTimeCodeAdd.IsValid())
+                if (x == null)
                 {
                     methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                    methodResult.AddResultFromErrorList(videoTimeCodeAdd.ErrorMessages);
-                    return methodResult;
+                    methodResult.AddErrorMessage(nameof(EnumVideoTimeCodeErrorCode.VTC03V));
                 }
-                foreach (var excersise in videoTimeCode.Excercises)
+                else
                 {
-                    var excersiseAdd = _mapper.Map<Excercise>(excersise);
-                    if (!excersiseAdd.IsValid())
+                    VideoTimeCode videoTimeCode = video.VideoTimeCodes.ElementAt(request.VideoTimeCodes.IndexOf(x));
+                    x.Excercises.ForEach(n =>
                     {
-                        methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                        methodResult.AddResultFromErrorList(excersiseAdd.ErrorMessages);
-                        return methodResult;
-                    }
-                    foreach (var question in excersise.Questions)
-                    {
-                        var questionAdd = _mapper.Map<Question>(question);
-                        if (!excersiseAdd.IsValid())
+                        if (n == null)
                         {
                             methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                            methodResult.AddResultFromErrorList(questionAdd.ErrorMessages);
-                            return methodResult;
+                            methodResult.AddErrorMessage(nameof(EnumExcerciseErrorCode.E03V));
                         }
+                        else
+                        {
+                            Excercise excercise = _mapper.Map<Excercise>(n);
+                            videoTimeCode.TimeCodeExcercises.Add(new TimeCodeExcercise
+                            {
+                                Excercise = excercise
+                            });
+                            n.Questions.ForEach(q =>
+                            {
+                                if (q == null)
+                                {
+                                    methodResult.StatusCode = StatusCodes.Status400BadRequest;
+                                    methodResult.AddErrorMessage(nameof(EnumQuestionErrorCode.Q03V));
+                                }
+                                else
+                                {
+                                    Question question = _mapper.Map<Question>(q);
+                                    excercise.ExcerciseQuestions.Add(new ExcerciseQuestion
+                                    {
+                                        Question = question
+                                    });
+
+                                    if (!question.IsValid())
+                                    {
+                                        methodResult.StatusCode = StatusCodes.Status400BadRequest;
+                                        methodResult.AddResultFromErrorList(question.ErrorMessages);
+                                    }
+                                }
+                            });
+
+                            if (!excercise.IsValid())
+                            {
+                                methodResult.StatusCode = StatusCodes.Status400BadRequest;
+                                methodResult.AddResultFromErrorList(excercise.ErrorMessages);
+                            }
+                        }
+                    });
+
+                    if (!videoTimeCode.IsValid())
+                    {
+                        methodResult.StatusCode = StatusCodes.Status400BadRequest;
+                        methodResult.AddResultFromErrorList(videoTimeCode.ErrorMessages);
                     }
                 }
+            });
+
+            if (!video.IsValid())
+            {
+                methodResult.StatusCode = StatusCodes.Status400BadRequest;
+                methodResult.AddResultFromErrorList(video.ErrorMessages);
+                return methodResult;
             }
-
-            #region Update
-
-            //request.VideoTimeCodes.ForEach(x =>
-            //{
-            //    if (x == null)
-            //    {
-            //        methodResult.StatusCode = StatusCodes.Status400BadRequest;
-            //        methodResult.AddErrorMessage(nameof(EnumVideoTimeCodeErrorCode.VTC03V));
-            //    }
-            //    else
-            //    {
-            //        if (_videoTimeCodeRepository.IsIdsInValid(new List<Guid>() { x.Id })) // check value khong co trong db == true
-            //        {
-            //            VideoTimeCode videoTimeCode = video.VideoTimeCodes.ElementAt(request.VideoTimeCodes.IndexOf(x));
-            //            x.Excercises.ForEach(n =>
-            //            {
-            //                if (_excerciseRepository.IsIdsInValid(new List<Guid>() { n.Id }))
-            //                { }
-            //                else if (n == null)
-            //                {
-            //                    methodResult.StatusCode = StatusCodes.Status400BadRequest;
-            //                    methodResult.AddErrorMessage(nameof(EnumExcerciseErrorCode.E03V));
-            //                }
-            //                else
-            //                {
-            //                    Excercise excercise = _mapper.Map<Excercise>(n);
-            //                    videoTimeCode.TimeCodeExcercises.Add(new TimeCodeExcercise
-            //                    {
-            //                        Excercise = excercise
-            //                    });
-            //                    n.Questions.ForEach(q =>
-            //                    {
-            //                        if (_excerciseRepository.IsIdsInValid(new List<Guid>() { q.Id }))
-            //                        { }
-            //                        else if (q == null)
-            //                        {
-            //                            methodResult.StatusCode = StatusCodes.Status400BadRequest;
-            //                            methodResult.AddErrorMessage(nameof(EnumQuestionErrorCode.Q03V));
-            //                        }
-            //                        else
-            //                        {
-            //                            Question question = _mapper.Map<Question>(q);
-            //                            excercise.ExcerciseQuestions.Add(new ExcerciseQuestion
-            //                            {
-            //                                Question = question
-            //                            });
-
-            //                            if (!question.IsValid())
-            //                            {
-            //                                methodResult.StatusCode = StatusCodes.Status400BadRequest;
-            //                                methodResult.AddResultFromErrorList(question.ErrorMessages);
-            //                            }
-            //                        }
-            //                    });
-
-            //                    if (!excercise.IsValid())
-            //                    {
-            //                        methodResult.StatusCode = StatusCodes.Status400BadRequest;
-            //                        methodResult.AddResultFromErrorList(excercise.ErrorMessages);
-            //                    }
-            //                }
-            //            });
-            //            if (!videoTimeCode.IsValid())
-            //            {
-            //                methodResult.StatusCode = StatusCodes.Status400BadRequest;
-            //                methodResult.AddResultFromErrorList(videoTimeCode.ErrorMessages);
-            //            }
-            //        }
-            //        else
-            //        {
-            //            VideoTimeCode videoTimeCode = video.VideoTimeCodes.ElementAt(request.VideoTimeCodes.IndexOf(x));
-            //            // excercises trong videotimecode
-            //            var excercises = _excerciseRepository.Queryable
-            //                    .Include(x => x.TimeCodeExcercises)
-            //                    .Where(x => x.TimeCodeExcercises.Select(e => e.VideoTimeCodeId).Contains(videoTimeCode.Id)).ToList();
-
-            //            x.Excercises.ForEach(n =>
-            //            {
-            //                if (n == null)
-            //                {
-            //                    methodResult.StatusCode = StatusCodes.Status400BadRequest;
-            //                    methodResult.AddErrorMessage(nameof(EnumExcerciseErrorCode.E03V));
-            //                }
-            //                else
-            //                {
-            //                    if (!excercises.Any(f => f.Id == n.Id)) //n - excercises khong co trong data excercises-videoTimecode
-            //                    {
-            //                        var excercisevdt = _excerciseRepository.Queryable.FirstOrDefault(e => e.Id == n.Id);
-
-            //                        if (excercisevdt == null)
-            //                        {
-            //                            Excercise excercise = _mapper.Map<Excercise>(n);
-            //                            videoTimeCode.TimeCodeExcercises.Add(new TimeCodeExcercise
-            //                            {
-            //                                Excercise = excercise
-            //                            });
-            //                            var questions = _questionRepository.Queryable
-            //                                .Include(x => x.ExcerciseQuestions)
-            //                                .Where(x => x.ExcerciseQuestions.Select(e => e.ExcerciseId).Contains(excercise.Id)).ToList();
-            //                            n.Questions.ForEach(q =>
-            //                            {
-            //                                if (q == null)
-            //                                {
-            //                                    methodResult.StatusCode = StatusCodes.Status400BadRequest;
-            //                                    methodResult.AddErrorMessage(nameof(EnumQuestionErrorCode.Q03V));
-            //                                }
-            //                                else
-            //                                {
-            //                                    if (!questions.Any(f => f.Id == q.Id))// q khong co trong questions -Excercise
-            //                                    {
-            //                                        var questionex = _questionRepository.Queryable.FirstOrDefault(e => e.Id == q.Id);
-            //                                        if (questionex == null)
-            //                                        {
-            //                                            Question question = _mapper.Map<Question>(q);
-            //                                            _mapper.Map(q, question);
-            //                                            excercise.ExcerciseQuestions.Add(new ExcerciseQuestion
-            //                                            {
-            //                                                Question = question
-            //                                            });
-
-            //                                            if (!question.IsValid())
-            //                                            {
-            //                                                methodResult.StatusCode = StatusCodes.Status400BadRequest;
-            //                                                methodResult.AddResultFromErrorList(question.ErrorMessages);
-            //                                            }
-            //                                        }
-            //                                        else
-            //                                        {
-            //                                            _mapper.Map(q, questionex);
-            //                                            excercise.ExcerciseQuestions.Add(new ExcerciseQuestion
-            //                                            {
-            //                                                Question = questionex
-            //                                            });
-
-            //                                            if (!questionex.IsValid())
-            //                                            {
-            //                                                methodResult.StatusCode = StatusCodes.Status400BadRequest;
-            //                                                methodResult.AddResultFromErrorList(questionex.ErrorMessages);
-            //                                            }
-            //                                        }
-            //                                    }
-            //                                    else
-            //                                    {
-            //                                        var question = questions.FirstOrDefault(e => e.Id == q.Id);
-            //                                        _mapper.Map(q, question);
-            //                                        if (question == null)
-            //                                        {
-            //                                            methodResult.StatusCode = StatusCodes.Status400BadRequest;
-            //                                        }
-            //                                        else
-            //                                        {
-            //                                            if (!question.IsValid())
-            //                                            {
-            //                                                methodResult.StatusCode = StatusCodes.Status400BadRequest;
-            //                                                methodResult.AddResultFromErrorList(question.ErrorMessages);
-            //                                            }
-            //                                        }
-            //                                    }
-            //                                }
-            //                            });
-            //                            if (!excercise.IsValid())
-            //                            {
-            //                                methodResult.StatusCode = StatusCodes.Status400BadRequest;
-            //                                methodResult.AddResultFromErrorList(excercise.ErrorMessages);
-            //                            }
-            //                        }
-            //                        else
-            //                        {
-            //                            _mapper.Map(n, excercisevdt);
-            //                            videoTimeCode.TimeCodeExcercises.Add(new TimeCodeExcercise
-            //                            {
-            //                                Excercise = excercisevdt
-            //                            });
-            //                            var questions = _questionRepository.Queryable
-            //                                .Include(x => x.ExcerciseQuestions)
-            //                                .Where(x => x.ExcerciseQuestions.Select(e => e.ExcerciseId).Contains(excercisevdt.Id)).ToList();
-            //                            n.Questions.ForEach(q =>
-            //                            {
-            //                                if (q == null)
-            //                                {
-            //                                    methodResult.StatusCode = StatusCodes.Status400BadRequest;
-            //                                    methodResult.AddErrorMessage(nameof(EnumQuestionErrorCode.Q03V));
-            //                                }
-            //                                else
-            //                                {
-            //                                    if (!questions.Any(f => f.Id == q.Id))// q khong co trong questions -Excercise
-            //                                    {
-            //                                        var questionex = _questionRepository.Queryable.FirstOrDefault(e => e.Id == q.Id);
-            //                                        if (questionex == null)
-            //                                        {
-            //                                            Question question = _mapper.Map<Question>(q);
-            //                                            _mapper.Map(q, question);
-            //                                            excercisevdt.ExcerciseQuestions.Add(new ExcerciseQuestion
-            //                                            {
-            //                                                Question = question
-            //                                            });
-
-            //                                            if (!question.IsValid())
-            //                                            {
-            //                                                methodResult.StatusCode = StatusCodes.Status400BadRequest;
-            //                                                methodResult.AddResultFromErrorList(question.ErrorMessages);
-            //                                            }
-            //                                        }
-            //                                        else
-            //                                        {
-            //                                            _mapper.Map(q, questionex);
-            //                                            excercisevdt.ExcerciseQuestions.Add(new ExcerciseQuestion
-            //                                            {
-            //                                                Question = questionex
-            //                                            });
-
-            //                                            if (!questionex.IsValid())
-            //                                            {
-            //                                                methodResult.StatusCode = StatusCodes.Status400BadRequest;
-            //                                                methodResult.AddResultFromErrorList(questionex.ErrorMessages);
-            //                                            }
-            //                                        }
-            //                                    }
-            //                                    else
-            //                                    {
-            //                                        var question = questions.FirstOrDefault(e => e.Id == q.Id);
-            //                                        _mapper.Map(q, question);
-            //                                        if (question == null)
-            //                                        {
-            //                                            methodResult.StatusCode = StatusCodes.Status400BadRequest;
-            //                                        }
-            //                                        else
-            //                                        {
-            //                                            if (!question.IsValid())
-            //                                            {
-            //                                                methodResult.StatusCode = StatusCodes.Status400BadRequest;
-            //                                                methodResult.AddResultFromErrorList(question.ErrorMessages);
-            //                                            }
-            //                                        }
-            //                                    }
-            //                                }
-            //                            });
-            //                            if (!excercisevdt.IsValid())
-            //                            {
-            //                                methodResult.StatusCode = StatusCodes.Status400BadRequest;
-            //                                methodResult.AddResultFromErrorList(excercisevdt.ErrorMessages);
-            //                            }
-            //                        }
-            //                    }
-            //                    else  //n - excercises co trong data excercises-videoTimecode
-            //                    {
-            //                        var excercise = excercises.FirstOrDefault(e => e.Id == n.Id);
-            //                        if (excercise == null)
-            //                        {
-            //                            methodResult.StatusCode = StatusCodes.Status400BadRequest;
-            //                        }
-            //                        else
-            //                        {
-            //                            _mapper.Map(n, excercise);
-            //                            var questions = _questionRepository.Queryable
-            //                             .Include(x => x.ExcerciseQuestions)
-            //                             .Where(x => x.ExcerciseQuestions.Select(e => e.ExcerciseId).Contains(excercise.Id)).ToList();
-            //                            n.Questions.ForEach(q =>
-            //                            {
-            //                                if (q == null)
-            //                                {
-            //                                    methodResult.StatusCode = StatusCodes.Status400BadRequest;
-            //                                    methodResult.AddErrorMessage(nameof(EnumQuestionErrorCode.Q03V));
-            //                                }
-            //                                else
-            //                                {
-            //                                    if (!questions.Any(f => f.Id == q.Id))// q khong co trong questions -Excercise
-            //                                    {
-            //                                        var questionex = _questionRepository.Queryable.FirstOrDefault(e => e.Id == q.Id);
-            //                                        if (questionex == null)
-            //                                        {
-            //                                            Question question = _mapper.Map<Question>(q);
-            //                                            _mapper.Map(q, question);
-            //                                            excercise.ExcerciseQuestions.Add(new ExcerciseQuestion
-            //                                            {
-            //                                                Question = question
-            //                                            });
-
-            //                                            if (!question.IsValid())
-            //                                            {
-            //                                                methodResult.StatusCode = StatusCodes.Status400BadRequest;
-            //                                                methodResult.AddResultFromErrorList(question.ErrorMessages);
-            //                                            }
-            //                                        }
-            //                                        else
-            //                                        {
-            //                                            _mapper.Map(q, questionex);
-            //                                            excercise.ExcerciseQuestions.Add(new ExcerciseQuestion
-            //                                            {
-            //                                                Question = questionex
-            //                                            });
-
-            //                                            if (!questionex.IsValid())
-            //                                            {
-            //                                                methodResult.StatusCode = StatusCodes.Status400BadRequest;
-            //                                                methodResult.AddResultFromErrorList(questionex.ErrorMessages);
-            //                                            }
-            //                                        }
-            //                                    }
-            //                                    else
-            //                                    {
-            //                                        var question = questions.FirstOrDefault(e => e.Id == q.Id);
-            //                                        _mapper.Map(q, question);
-            //                                        if (question == null)
-            //                                        {
-            //                                            methodResult.StatusCode = StatusCodes.Status400BadRequest;
-            //                                        }
-            //                                        else
-            //                                        {
-            //                                            if (!question.IsValid())
-            //                                            {
-            //                                                methodResult.StatusCode = StatusCodes.Status400BadRequest;
-            //                                                methodResult.AddResultFromErrorList(question.ErrorMessages);
-            //                                            }
-            //                                        }
-            //                                    }
-            //                                }
-            //                            });
-
-            //                            if (!excercise.IsValid())
-            //                            {
-            //                                methodResult.StatusCode = StatusCodes.Status400BadRequest;
-            //                                methodResult.AddResultFromErrorList(excercise.ErrorMessages);
-            //                            }
-            //                        }
-            //                    }
-            //                }
-            //            });
-            //            if (!videoTimeCode.IsValid())
-            //            {
-            //                methodResult.StatusCode = StatusCodes.Status400BadRequest;
-            //                methodResult.AddResultFromErrorList(videoTimeCode.ErrorMessages);
-            //            }
-            //        }
-            //    }
-            //});
-
-            #endregion Update
+            else if (!methodResult.IsOK)
+            {
+                return methodResult;
+            }
 
             if (!video.IsValid())
             {

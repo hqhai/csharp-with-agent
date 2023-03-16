@@ -5,7 +5,6 @@ namespace Fsel.Course.Domain.Models.CommandModels.Excercises
 {
     public class UpdateExcerciseCommandModel
     {
-        public Guid Id { get; set; }
         public string? Name { get; set; }
 
         public EnumQuestionType QuestionType { get; set; }
