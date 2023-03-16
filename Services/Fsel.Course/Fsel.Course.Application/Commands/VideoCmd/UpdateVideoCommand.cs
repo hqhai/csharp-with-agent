@@ -80,6 +80,36 @@ namespace Fsel.Course.Application.Commands.VideoCmd
                     new[] { MethodHelper.GenerateErrorResult(nameof(request.Id), request.Id) });
                 return methodResult;
             }
+            foreach (var videoTimeCode in request.VideoTimeCodes)
+            {
+                var videoTimeCodeAdd = _mapper.Map<VideoTimeCode>(videoTimeCode);
+                if (!videoTimeCodeAdd.IsValid())
+                {
+                    methodResult.StatusCode = StatusCodes.Status400BadRequest;
+                    methodResult.AddResultFromErrorList(videoTimeCodeAdd.ErrorMessages);
+                    return methodResult;
+                }
+                foreach (var excersise in videoTimeCode.Excercises)
+                {
+                    var excersiseAdd = _mapper.Map<Excercise>(excersise);
+                    if (!excersiseAdd.IsValid())
+                    {
+                        methodResult.StatusCode = StatusCodes.Status400BadRequest;
+                        methodResult.AddResultFromErrorList(excersiseAdd.ErrorMessages);
+                        return methodResult;
+                    }
+                    foreach (var question in excersise.Questions)
+                    {
+                        var questionAdd = _mapper.Map<Question>(question);
+                        if (!excersiseAdd.IsValid())
+                        {
+                            methodResult.StatusCode = StatusCodes.Status400BadRequest;
+                            methodResult.AddResultFromErrorList(questionAdd.ErrorMessages);
+                            return methodResult;
+                        }
+                    }
+                }
+            }
 
             #region Update
 
