@@ -26,5 +26,6 @@ RUN dotnet publish "Fsel.Identity.Api.csproj" -c Release -o /app/publish /p:UseA
 
 FROM base AS final
 WORKDIR /app
+ENV ASPNETCORE_ENVIRONMENT=Development
 COPY --from=publish /app/publish .
 ENTRYPOINT ["dotnet", "Fsel.Identity.Api.dll"]
