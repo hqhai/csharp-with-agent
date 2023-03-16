@@ -20,17 +20,14 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
 
         private readonly AuthContext _authContext;
         private readonly SignInManager<User> _signInManager;
-        private readonly IMediator _mediator;
 
         public ResetPasswordCommandHandler(UserManager<User> userManager,
             AuthContext authContext,
-            SignInManager<User> signInManager,
-            IMediator mediator)
+            SignInManager<User> signInManager)
         {
             _authContext = authContext;
             _signInManager = signInManager;
             _userManager = userManager;
-            _mediator = mediator;
         }
 
         public async Task<MethodResult<bool>> Handle(ResetPasswordCommand request, CancellationToken cancellationToken)

@@ -1,4 +1,4 @@
-﻿using System.Security.Cryptography;
+using System.Security.Cryptography;
 
 namespace Fsel.Common.Helpers
 {
@@ -16,14 +16,13 @@ namespace Fsel.Common.Helpers
 
         public int Next(int maximumValue)
         {
-            // Do not use Next() % maximumValue because the distribution is not OK
-            return Next(0, maximumValue);
+            return Next(0, maximumValue);
         }
 
         public int Next(int minimumValue, int maximumValue)
         {
-            var seed = Next();             //  Generate uniformly distributed random integers within a given range.
-            return new Random(seed).Next(minimumValue, maximumValue);
+            var seed = Next();
+            return new Random(seed).Next(minimumValue, maximumValue);
         }
     }
 }

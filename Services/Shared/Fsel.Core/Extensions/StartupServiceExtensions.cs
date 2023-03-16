@@ -40,7 +40,6 @@ namespace Fsel.Core.Extensions
 
         private static void AddAuthContexts(this WebApplicationBuilder builder)
         {
-            //builder.Services.AddTransient<BaseAddressAuthorizationMessageHandler>();
             builder.Services.AddHttpContextAccessor();
             builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             builder.Services.AddScoped(x =>
@@ -68,13 +67,8 @@ namespace Fsel.Core.Extensions
             builder.Services.AddAuthentication();
             builder.Services.Configure<IdentityOptions>(options =>
             {
-                // Password settings
                 options.Password.RequireDigit = true;
                 options.Password.RequiredLength = 6;
-                //options.Password.RequireNonAlphanumeric = true;
-                //options.Password.RequireUppercase = false;
-                //options.Password.RequireLowercase = false;
-                //options.Password.RequiredUniqueChars = 6;
                 options.SignIn.RequireConfirmedEmail = true;
                 options.User.RequireUniqueEmail = true;
                 options.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@.";
@@ -128,7 +122,7 @@ namespace Fsel.Core.Extensions
             builder.Services.AddRefitClient(refitInterfaceType).ConfigureHttpClient(x =>
             {
                 x.BaseAddress = new Uri(url ?? string.Empty);
-            })/*.AddHttpMessageHandler<AuthorizationMessageHandler>()*/;
+            });
         }
 
         public static void AddSwaggerGens(this WebApplicationBuilder builder, BaseAppSetting? baseAppSetting)
