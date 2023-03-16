@@ -135,6 +135,7 @@ namespace Fsel.Course.Application.Commands.LessonCmd
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 methodResult.AddErrorMessage(
                     nameof(EnumClassForumErrorCode.CF01V));
+                return methodResult;
             }
 
             if (_homeWorkRepository.IsIdsInValid(request.HomeWorkIds))
@@ -145,8 +146,6 @@ namespace Fsel.Course.Application.Commands.LessonCmd
 
                 return methodResult;
             }
-
-            _mapper.Map(request, lesson);
 
             if (!lesson.IsValid())
             {

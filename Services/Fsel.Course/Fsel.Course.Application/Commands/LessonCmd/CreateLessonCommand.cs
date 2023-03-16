@@ -120,14 +120,6 @@ namespace Fsel.Course.Application.Commands.LessonCmd
                 return methodResult;
             }
 
-            if (_classForumRepository.IsIdsInValid(new List<Guid> { classForum.Id }))
-            {
-                methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                methodResult.AddErrorMessage(
-                nameof(EnumClassForumErrorCode.CF03V));
-                return methodResult;
-            }
-
             Lesson lesson = _mapper.Map<Lesson>(request);
 
             if (!lesson.IsValid())
