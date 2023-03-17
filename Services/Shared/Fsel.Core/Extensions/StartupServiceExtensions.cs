@@ -14,6 +14,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using Ocelot.Values;
 using Refit;
 
 namespace Fsel.Core.Extensions
@@ -36,6 +37,26 @@ namespace Fsel.Core.Extensions
                 .AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies())
                 .AddHttpContextAccessor();
             builder.AddAuthContexts();
+            builder.AddCors();
+        }
+
+        private static void AddCors(this WebApplicationBuilder builder)
+        {
+            builder.Services.AddCors(options =>
+            {
+                options.AddDefaultPolicy(
+                    builder =>
+                    {
+                        builder.AllowAnyOrigin()
+                               .AllowAnyMethod()
+                               .AllowAnyHeader();
+                    });
+                options.AddPolicy(Settings.CorsPolicy, builder => builder
+                        .AllowAnyOrigin()
+                        .SetIsOriginAllowedToAllowWildcardSubdomains()
+                        .AllowAnyMethod()
+                        .AllowAnyHeader());
+            });
         }
 
         private static void AddAuthContexts(this WebApplicationBuilder builder)
