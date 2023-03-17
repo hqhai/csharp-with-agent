@@ -45,10 +45,10 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             var userRoles = await _userManager.GetRolesAsync(user);
             var authClaims = new List<Claim>
             {
-                new Claim(ClaimTypes.Name, user.UserName ?? string.Empty),
-                new Claim(ClaimTypes.GivenName, user.FullName ?? string.Empty),
-                new Claim(ClaimTypes.Email, user.Email ?? string.Empty),
-                new Claim(ClaimTypes.NameIdentifier, user.Id ?? string.Empty),
+                new Claim(JwtRegisteredClaimNames.Name, user.UserName ?? string.Empty),
+                new Claim(JwtRegisteredClaimNames.GivenName, user.FullName ?? string.Empty),
+                new Claim(JwtRegisteredClaimNames.Email, user.Email ?? string.Empty),
+                new Claim(JwtRegisteredClaimNames.NameId, user.Id ?? string.Empty),
                 new Claim(JwtRegisteredClaimNames.Sub, _appSetting.Jwt?.Subject ?? string.Empty),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
             };
