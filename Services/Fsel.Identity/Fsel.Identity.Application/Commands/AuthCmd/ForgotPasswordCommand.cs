@@ -1,4 +1,3 @@
-using AutoMapper;
 using Fsel.Common.ActionResults;
 using Fsel.Common.Helpers;
 using Fsel.Identity.Application.Services;
@@ -64,7 +63,15 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                 ToEmails = new List<string> { $"{request.Email}" }
             };
 
-            var IsSendMail = await _senderService.SendEmailAsync(sendCommandModel);
+            var isSendMail = await _senderService.SendEmailAsync(sendCommandModel);
+
+            if (isSendMail.IsSuccessStatusCode)
+            {
+                methodResult.StatusCode = StatusCodes.Status500InternalServerError;
+                methodResult.AddErrorMessage(nameof(EnumAuthErrorCode.AU13ER));
+                return methodResult;
+            }
+
             methodResult.Result = true;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;

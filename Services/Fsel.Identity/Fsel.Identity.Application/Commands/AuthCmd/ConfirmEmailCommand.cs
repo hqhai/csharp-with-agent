@@ -1,6 +1,7 @@
 using System.Text;
 using AutoMapper;
 using Fsel.Common.ActionResults;
+using Fsel.Common.Enums.ErrorCodes;
 using Fsel.Common.Helpers;
 using Fsel.Identity.Domain.Entities;
 using Fsel.Identity.Domain.Enums.ErrorCodes;
@@ -48,7 +49,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             if (!result.Succeeded)
             {
                 methodResult.StatusCode = StatusCodes.Status500InternalServerError;
-                methodResult.AddErrorMessage(nameof(EnumAuthErrorCode.AU01ER));
+                methodResult.AddErrorMessage(nameof(EnumCommonErrorCode.SSE01));
                 return methodResult;
             }
 

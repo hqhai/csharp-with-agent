@@ -73,8 +73,23 @@ namespace Fsel.Identity.Domain.Enums.ErrorCodes
         AU09ER,
 
         /// <summary>
-        /// Sign up fail
+        /// User Failed to Create
         /// </summary>
         AU10ER,
+
+        /// <summary>
+        /// Send Auth erorr
+        /// </summary>
+        AU11ER,
+
+        /// <summary>
+        /// User was active
+        /// </summary>
+        AU12ER,
+
+        /// <summary>
+        /// Not Send Email
+        /// </summary>
+        AU13ER,
     }
 }

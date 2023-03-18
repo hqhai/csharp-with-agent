@@ -69,6 +69,33 @@ namespace Fsel.Identity.Userentication.Controllers
         }
 
         /// <summary>
+        /// Confirm OTP
+        /// </summary>
+        [HttpGet("confirm-otp")]
+        [ProducesResponseType(typeof(MethodResult<TokenModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.BadRequest)]
+        public async Task<IActionResult> ConfirmOTP(string code, string? email)
+        {
+            try
+            {
+                ComfirmOTPCommand command = new ComfirmOTPCommand
+                {
+                    Code = code,
+                    Email = email,
+                    //PhoneNumber = phonenumber
+                };
+                MethodResult<TokenModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
+                return commandResult.GetActionResult();
+            }
+            catch (Exception ex)
+            {
+                VoidMethodResult errorCommandResult = new VoidMethodResult();
+                errorCommandResult.AddErrorMessage(MethodHelper.GetExceptionMessage(ex));
+                return errorCommandResult.GetActionResult();
+            }
+        }
+
+        /// <summary>
         /// Forgot Password
         /// </summary>
         [HttpPost("forgot-password")]
