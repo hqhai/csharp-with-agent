@@ -41,10 +41,10 @@ namespace Fsel.Core.Extensions
             app.UseAuthentication();
             app.UseAuthorization();
             app.MapControllers();
-            app.UseCors();
+            app.UseAppCors();
         }
 
-        private static void UseCors(this WebApplication app)
+        private static void UseAppCors(this WebApplication app)
         {
             app.UseCors();
             app.UseCors(Settings.CorsPolicy);
