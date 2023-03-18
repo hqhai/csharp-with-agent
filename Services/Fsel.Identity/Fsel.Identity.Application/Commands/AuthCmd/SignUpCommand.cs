@@ -43,7 +43,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             {
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 methodResult.AddErrorMessage(
-                    nameof(EnumAuthErrorCode.AU04V),
+                    nameof(EnumAuthErrorCode.AU14ER),
                     new[] { MethodHelper.GenerateErrorResult(nameof(request.Email), request?.Email) });
                 return methodResult;
             }

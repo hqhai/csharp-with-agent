@@ -20,6 +20,21 @@ namespace Fsel.Identity.Domain.Enums.ErrorCodes
         PA03V,
 
         /// <summary>
+        /// Account Student by Parent has been initialized error
+        /// </summary>
+        PA04V,
+
+        /// <summary>
+        /// Send Student Account Email Failed
+        /// </summary>
+        PA05V,
+
+        /// <summary>
+        /// TransactionS error
+        /// </summary>
+        PA06V,
+
+        /// <summary>
         /// Name cannot be empty
         /// </summary>
         PA01C,
@@ -37,6 +52,11 @@ namespace Fsel.Identity.Domain.Enums.ErrorCodes
         /// <summary>
         /// Number of course >1
         /// </summary>
-        PA04C
+        PA04C,
+
+        /// <summary>
+        /// Username already exists
+        /// </summary>
+        PA05C
     }
 }

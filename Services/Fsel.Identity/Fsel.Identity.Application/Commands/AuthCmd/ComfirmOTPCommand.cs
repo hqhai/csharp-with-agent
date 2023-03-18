@@ -61,6 +61,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                 return methodResult;
             }
             bool signInResult = false;
+
             if (request?.Email != null && request.Code != null)
             {
                 signInResult = await _userManager.VerifyTwoFactorTokenAsync(user, "Email", request.Code);
@@ -70,7 +71,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             {
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 methodResult.AddErrorMessage(
-                    nameof(EnumAuthErrorCode.AU04V),
+                    nameof(EnumAuthErrorCode.AU15ER),
                     new[] { MethodHelper.GenerateErrorResult(nameof(request.Email), request?.Email) });
                 return methodResult;
             }

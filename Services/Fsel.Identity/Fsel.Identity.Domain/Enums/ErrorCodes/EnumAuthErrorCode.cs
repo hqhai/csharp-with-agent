@@ -91,5 +91,15 @@ namespace Fsel.Identity.Domain.Enums.ErrorCodes
         /// Not Send Email
         /// </summary>
         AU13ER,
+
+        /// <summary>
+        /// Account already exists
+        /// </summary>
+        AU14ER,
+
+        /// <summary>
+        /// Invalid OTP, please try again
+        /// </summary>
+        AU15ER
     }
 }

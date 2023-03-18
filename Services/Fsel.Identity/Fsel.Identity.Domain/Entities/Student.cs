@@ -8,6 +8,7 @@ namespace Fsel.Identity.Domain.Entities
     using Fsel.Common.Enums;
     using Fsel.Core.Entities;
     using Fsel.Identity.Domain.Enums.ErrorCodes;
+    using Newtonsoft.Json;
 
     public class Student : Entity
     {
@@ -17,7 +18,7 @@ namespace Fsel.Identity.Domain.Entities
         [MaxLength(250, ErrorMessage = nameof(EnumStudentErrorCode.ST02C))]
         public string? Occupation { get; set; }
 
-        [MaxLength(250, ErrorMessage = nameof(EnumStudentErrorCode.ST02C))]
+        [MaxLength(250, ErrorMessage = nameof(EnumStudentErrorCode.ST03C))]
         public string? School { get; set; }
 
         public EnumCourseLevel CourseLevel { get; set; }
@@ -28,6 +29,7 @@ namespace Fsel.Identity.Domain.Entities
 
         public Guid HumanId { get; set; }
 
-        public List<ParentStudent> ParentStudents { get; set; } = new List<ParentStudent>();
+        [JsonIgnore]
+        public ICollection<ParentStudent> ParentStudents { get; set; } = new List<ParentStudent>();
     }
 }
