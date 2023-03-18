@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Fsel.Common.ActionResults
 {
@@ -7,23 +7,25 @@ namespace Fsel.Common.ActionResults
     {
         public string? ErrorCode { get; set; }
 
-        public string? ErrorMessage { get; set; }
-
-        public List<string> ErrorValues { get; set; }
+        public IList<Error> Errors { get; set; }
 
         public ErrorResult()
         {
-            ErrorValues = new List<string>();
+            Errors = new List<Error>();
         }
+    }
 
-        public override string ToString()
+    [NotMapped]
+    public class Error
+    {
+        public Error()
         {
-            if (ErrorValues != null && ErrorValues.Count > 0)
-            {
-                return "[" + ErrorCode + ": " + ErrorMessage + " (" + string.Join(',', ErrorValues) + ")]";
-            }
-
-            return "[" + ErrorCode + ": " + ErrorMessage + "]";
+            ErrorValues = new List<object>();
+            ExactValues = new List<object>();
         }
+
+        public string? ErrorField { get; set; }
+        public IList<object> ErrorValues { get; set; }
+        public IList<object> ExactValues { get; set; }
     }
 }

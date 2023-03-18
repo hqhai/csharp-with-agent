@@ -3,11 +3,10 @@ using System.Reflection;
 using System.Text.Json.Serialization;
 using Fsel.Common.ActionResults;
 using Fsel.Common.Helpers;
-using Fsel.Core.Base.Interfaces;
 
 namespace Fsel.Core.Base
 {
-    public class ValidationEntity : IValidationEntity
+    public class ValidationEntity
     {
         #region Validation
 
@@ -21,22 +20,40 @@ namespace Fsel.Core.Base
             return GetType().Assembly;
         }
 
-        public void AddValidationError(string errorCode, string propertyName, object propertyValue)
+        public Error AddError(IList<object> errorValues, string? errorField = null)
         {
-            AddValidationError(errorCode, new List<string> { MethodHelper.GenerateErrorResult(propertyName, propertyValue) });
+            return new Error
+            {
+                ErrorField = errorField,
+                ErrorValues = errorValues
+            };
         }
 
-        public void AddValidationError(string errorCode, List<string> errorValues)
+        public IList<Error> AddErrors(IList<object> errorValues, string? errorField = null)
         {
-            _errorMessages.Add(new ErrorResult
+            return new List<Error>() { AddError(errorValues, errorField) };
+        }
+
+        public ErrorResult AddErrorResult(string errorCode, IList<object> errorValues, string? errorField = null)
+        {
+            return new ErrorResult
             {
                 ErrorCode = errorCode,
-                ErrorMessage = MethodHelper.GetErrorMessage(errorCode, GetAssembly()),
-                ErrorValues = errorValues
-            });
+                Errors = AddErrors(errorValues, errorField)
+            };
         }
 
-        public void AddValidationErrors(IEnumerable<ErrorResult> errorMessages)
+        public void AddErrorResults(string errorCode, IList<object> errorValues, string? errorField = null)
+        {
+            _errorMessages.Add(AddErrorResult(errorCode, errorValues, errorField));
+        }
+
+        public void AddErrorResults(ErrorResult errorMessages)
+        {
+            _errorMessages.Add(errorMessages);
+        }
+
+        public void AddErrorResults(IEnumerable<ErrorResult> errorMessages)
         {
             _errorMessages.AddRange(errorMessages);
         }
@@ -53,12 +70,13 @@ namespace Fsel.Core.Base
                     {
                         ErrorCode = item.ErrorMessage
                     };
-                    errorResult.ErrorMessage = MethodHelper.GetErrorMessage(item.ErrorMessage, GetAssembly());
+
+                    //errorResult.ErrorMessage = MethodHelper.GetErrorMessage(item.ErrorMessage, GetAssembly());
                     foreach (string memberName in item.MemberNames)
                     {
                         PropertyInfo? property = validationContext.ObjectType.GetProperty(memberName);
                         object? value = property?.GetValue(validationContext.ObjectInstance, null);
-                        errorResult.ErrorValues.Add(MethodHelper.GenerateErrorResult(memberName, value));
+                        //errorResult.ErrorValues.Add(MethodHelper.GenerateErrorResult(memberName, value));
                     }
 
                     _errorMessages.Add(errorResult);

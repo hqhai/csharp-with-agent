@@ -38,7 +38,7 @@ namespace Fsel.Common.ActionResults
             {
                 foreach (string item in errorValues)
                 {
-                    errorResult.ErrorValues.Add(item);
+                    //errorResult.ErrorValues.Add(item);
                 }
             }
 
@@ -50,13 +50,13 @@ namespace Fsel.Common.ActionResults
             ErrorResult errorResult = new ErrorResult
             {
                 ErrorCode = errorCode,
-                ErrorMessage = errorMessage
+                //ErrorMessage = errorMessage
             };
             if (errorValues != null && errorValues.Length != 0)
             {
                 foreach (string item in errorValues)
                 {
-                    errorResult.ErrorValues.Add(item);
+                    //errorResult.ErrorValues.Add(item);
                 }
             }
 
@@ -73,8 +73,8 @@ namespace Fsel.Common.ActionResults
             _errorMessages.Add(new ErrorResult
             {
                 ErrorCode = errorCode,
-                ErrorMessage = "Error: " + exceptionErrorMessage,
-                ErrorValues = new List<string>(errorValues)
+                //ErrorMessage = "Error: " + exceptionErrorMessage,
+                //ErrorValues = new List<string>(errorValues)
             });
         }
 
@@ -83,8 +83,8 @@ namespace Fsel.Common.ActionResults
             _errorMessages.Add(new ErrorResult
             {
                 ErrorCode = errorCode,
-                ErrorMessage = "Error: " + errorMessage + ", Exception Message: " + exceptionErrorMessage,
-                ErrorValues = new List<string>(errorValues)
+                //ErrorMessage = "Error: " + errorMessage + ", Exception Message: " + exceptionErrorMessage,
+                //ErrorValues = new List<string>(errorValues)
             });
         }
 
