@@ -37,6 +37,9 @@ namespace Fsel.Course.Application.Queries.VideoQuery
 
             var VideoQuery = from i in _videoRepository.Queryable
                              .Include(x => x.LessonVideos.Where(y => !y.IsDeleted))
+                             .Include(x => x.VideoTimeCodes)
+                             .ThenInclude(x => x.TimeCodeExcercises)
+                             .ThenInclude(x => x.Excercise)
                              select new VideoModel
                              {
                                  Id = i.Id,
@@ -44,9 +47,20 @@ namespace Fsel.Course.Application.Queries.VideoQuery
                                  IsActive = !i.LessonVideos.Any(),
                                  CourseLevel = i.CourseLevel,
                                  CreatedDate = i.CreatedDate,
-                                 CreatedUserId = i.CreatedUserId,
-                                 UpdatedDate = i.UpdatedDate,
-                                 UpdatedUserId = i.UpdatedUserId,
+                                 VideoTimeCodes = i.VideoTimeCodes.Select(x => new VideoTimeCodeModel
+                                 {
+                                     Id = x.Id,
+                                     DisplayTime = x.DisplayTime,
+                                     ExecutionTime = x.ExecutionTime,
+                                     TimeCodeType = x.TimeCodeType,
+                                     Excercises = x.TimeCodeExcercises.Select(n => n.Excercise).Select(n => new ExcerciseModel
+                                     {
+                                         Id = n.Id,
+                                         QuestionType = n.QuestionType,
+                                         MediaPost = n.MediaPost,
+                                         CourseSkill = n.CourseSkill
+                                     }).ToList(),
+                                 }).ToList(),
                              };
             //Keyword
             if (!string.IsNullOrEmpty(request.Keyword))
