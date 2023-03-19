@@ -30,7 +30,7 @@ namespace Fsel.Course.Application.Queries.CourseQuery
         {
             MethodResult<CourseModel> methodResult = new MethodResult<CourseModel>();
 
-            var course = await _courseRepository.GetByIdAsync(request.Id);
+            var course = await _courseRepository.GetIncludeByIdAsync(request.Id);
 
             if (course == null)
             {
