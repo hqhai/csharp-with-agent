@@ -1,3 +1,4 @@
+using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using System.Text.Json.Serialization;
@@ -14,6 +15,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using Ocelot.Values;
 using Refit;
 
 namespace Fsel.Core.Extensions
@@ -36,6 +38,26 @@ namespace Fsel.Core.Extensions
                 .AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies())
                 .AddHttpContextAccessor();
             builder.AddAuthContexts();
+            builder.AddCors();
+        }
+
+        private static void AddCors(this WebApplicationBuilder builder)
+        {
+            builder.Services.AddCors(options =>
+            {
+                options.AddDefaultPolicy(
+                    builder =>
+                    {
+                        builder.AllowAnyOrigin()
+                               .AllowAnyMethod()
+                               .AllowAnyHeader();
+                    });
+                options.AddPolicy(Settings.CorsPolicy, builder => builder
+                        .AllowAnyOrigin()
+                        .SetIsOriginAllowedToAllowWildcardSubdomains()
+                        .AllowAnyMethod()
+                        .AllowAnyHeader());
+            });
         }
 
         private static void AddAuthContexts(this WebApplicationBuilder builder)
@@ -50,13 +72,13 @@ namespace Fsel.Core.Extensions
                 var user = httpContextAccessor?.HttpContext?.User;
                 if (user != null)
                 {
-                    if (Guid.TryParse(user.FindFirstValue(ClaimTypes.NameIdentifier), out Guid id))
+                    if (Guid.TryParse(user.FindFirstValue(JwtRegisteredClaimNames.NameId), out Guid id))
                     {
                         authContext.CurrentUserId = id;
                     }
-                    authContext.CurrentUsername = user.FindFirstValue(ClaimTypes.Name);
-                    authContext.CurrentFullName = user.FindFirstValue(ClaimTypes.GivenName);
-                    authContext.Email = user.FindFirstValue(ClaimTypes.Email);
+                    authContext.CurrentUsername = user.FindFirstValue(JwtRegisteredClaimNames.Name);
+                    authContext.CurrentFullName = user.FindFirstValue(JwtRegisteredClaimNames.GivenName);
+                    authContext.Email = user.FindFirstValue(JwtRegisteredClaimNames.Email);
                 }
                 return authContext;
             });

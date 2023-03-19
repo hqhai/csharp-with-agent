@@ -1,4 +1,4 @@
-﻿namespace Fsel.Common.Constants
+namespace Fsel.Common.Constants
 {
     public static class Settings
     {
@@ -31,5 +31,7 @@
         public const string SettingFileName = "appsettings.json";
 
         public const string DefaultConnection = "DefaultConnection";
+
+        public const string CorsPolicy = "CorsPolicy";
     }
 }
