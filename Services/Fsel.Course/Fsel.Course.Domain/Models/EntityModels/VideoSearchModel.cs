@@ -17,7 +17,6 @@ namespace Fsel.Course.Domain.Models.EntityModels
 
         public EnumCourseLevel CourseLevel { get; set; }
 
-        public ICollection<ExcerciseSearchModel>? Excercises { get; set; }
-        public ICollection<VideoTimeCodeSearchModel>? VideoTimeCodes { get; set; }
+        public ICollection<VideoExcerciseSearchModel>? Excercises { get; set; }
     }
 }

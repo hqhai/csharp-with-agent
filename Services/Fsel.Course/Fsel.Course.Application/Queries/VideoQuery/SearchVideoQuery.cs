@@ -44,12 +44,13 @@ namespace Fsel.Course.Application.Queries.VideoQuery
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 return methodResult;
             }
-            var VideoQuery = _videoRepository.Queryable
-                                .Include(video => video.VideoTimeCodes)
-                                    .ThenInclude(videoTimeCode => videoTimeCode.TimeCodeType)
-                                .Include(video => video.VideoTimeCodes)
-                                    .ThenInclude(videoTimeCode => videoTimeCode.TimeCodeExcercises)
-                                        .ThenInclude(timeCodeExcercise => timeCodeExcercise.Excercise)
+            var videoQuery = _videoRepository.Queryable
+                             .Include(video => video.VideoTimeCodes
+                             .Where(x => request.TimeCodeType == null ? false : x.TimeCodeType == request.TimeCodeType))
+                                .ThenInclude(videoTimeCode => videoTimeCode.TimeCodeExcercises)
+                                    .ThenInclude(timeCodeExcercise => timeCodeExcercise.Excercise)
+                                    .Where(x => request.Level == null ? false : x.CourseLevel == request.Level)
+                                    .Where(x => request.TeacherId == null ? false : x.TeacherId == request.TeacherId)
                                 .Select(video => new VideoSearchModel
                                 {
                                     Id = video.Id,
@@ -60,14 +61,11 @@ namespace Fsel.Course.Application.Queries.VideoQuery
                                     CreatedFullName = video.CreatedFullName,
                                     UpdatedDate = video.UpdatedDate,
                                     UpdatedFullName = video.UpdatedFullName,
-                                    VideoTimeCodes = (from v in video.VideoTimeCodes
-                                                      select new VideoTimeCodeSearchModel { TimeCodeType = v.TimeCodeType }
-                                       ).AsEnumerable().ToList(),
                                     Excercises = video.VideoTimeCodes.SelectMany(videoTimeCode => videoTimeCode.TimeCodeExcercises)
                                                                      .Select(timeCodeExcercise => timeCodeExcercise.Excercise)
                                                                      .GroupBy(excercise => excercise.CourseSkill)
                                                                      .OrderByDescending(courseSkillGroup => courseSkillGroup.Count())
-                                                                     .Select(courseSkillGroup => new ExcerciseSearchModel
+                                                                     .Select(courseSkillGroup => new VideoExcerciseSearchModel
                                                                      {
                                                                          CourseSkill = courseSkillGroup.Key,
                                                                          Count = courseSkillGroup.Count()
@@ -77,14 +75,13 @@ namespace Fsel.Course.Application.Queries.VideoQuery
             //Keyword
             if (!string.IsNullOrEmpty(request.Keyword))
             {
-                VideoQuery = VideoQuery.Where(m => m.Id.ToString() == request.Keyword
+                videoQuery = videoQuery.Where(m => m.Id.ToString() == request.Keyword
                                         || (m.Name ?? string.Empty).Contains(request.Keyword)
-                                        || (m.CourseLevel.ToString() ?? string.Empty).Contains(request.Keyword)
                                         );
             }
 
-            int totalItem = await VideoQuery.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
-            var lists = await VideoQuery.OrderByDescending(x => x.Id)
+            int totalItem = await videoQuery.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
+            var lists = await videoQuery.OrderByDescending(x => x.Id)
                     .Skip((request.Page - 1) * request.PageSize)
                     .Take(request.PageSize)
                     .AsNoTracking()
