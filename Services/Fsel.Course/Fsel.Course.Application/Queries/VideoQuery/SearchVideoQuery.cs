@@ -45,23 +45,23 @@ namespace Fsel.Course.Application.Queries.VideoQuery
                 return methodResult;
             }
             var videoQuery = _videoRepository.Queryable
-                             .Include(video => video.VideoTimeCodes
-                             .Where(x => request.TimeCodeType == null ? false : x.TimeCodeType == request.TimeCodeType))
-                                .ThenInclude(videoTimeCode => videoTimeCode.TimeCodeExcercises)
-                                    .ThenInclude(timeCodeExcercise => timeCodeExcercise.Excercise)
-                                    .Where(x => request.Level == null ? false : x.CourseLevel == request.Level)
-                                    .Where(x => request.TeacherId == null ? false : x.TeacherId == request.TeacherId)
-                                .Select(video => new VideoSearchModel
-                                {
-                                    Id = video.Id,
-                                    Name = video.Name,
-                                    IsActive = !video.LessonVideos.Any(),
-                                    CourseLevel = video.CourseLevel,
-                                    CreatedDate = video.CreatedDate,
-                                    CreatedFullName = video.CreatedFullName,
-                                    UpdatedDate = video.UpdatedDate,
-                                    UpdatedFullName = video.UpdatedFullName,
-                                    Excercises = video.VideoTimeCodes.SelectMany(videoTimeCode => videoTimeCode.TimeCodeExcercises)
+                        .Include(video => video.VideoTimeCodes)
+                        .ThenInclude(videoTimeCode => videoTimeCode.TimeCodeExcercises)
+                        .ThenInclude(timeCodeExcercise => timeCodeExcercise.Excercise)
+                        .Where(x => request.Level == null ? true : x.CourseLevel == request.Level)
+                        .Where(x => request.TeacherId == null ? true : x.TeacherId == request.TeacherId)
+                        .Where(x => request.TimeCodeType == null ? true : x.VideoTimeCodes.Select(n => n.TimeCodeType).Contains(request.TimeCodeType))
+                        .Select(video => new VideoSearchModel
+                        {
+                            Id = video.Id,
+                            Name = video.Name,
+                            IsActive = !video.LessonVideos.Any(),
+                            CourseLevel = video.CourseLevel,
+                            CreatedDate = video.CreatedDate,
+                            CreatedFullName = video.CreatedFullName,
+                            UpdatedDate = video.UpdatedDate,
+                            UpdatedFullName = video.UpdatedFullName,
+                            Excercises = video.VideoTimeCodes.SelectMany(videoTimeCode => videoTimeCode.TimeCodeExcercises)
                                                                      .Select(timeCodeExcercise => timeCodeExcercise.Excercise)
                                                                      .GroupBy(excercise => excercise.CourseSkill)
                                                                      .OrderByDescending(courseSkillGroup => courseSkillGroup.Count())
@@ -70,7 +70,7 @@ namespace Fsel.Course.Application.Queries.VideoQuery
                                                                          CourseSkill = courseSkillGroup.Key,
                                                                          Count = courseSkillGroup.Count()
                                                                      }).ToList()
-                                });
+                        });
 
             //Keyword
             if (!string.IsNullOrEmpty(request.Keyword))

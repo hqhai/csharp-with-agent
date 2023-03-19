@@ -21,8 +21,5 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public EnumCourseLevel CourseLevel { get; set; }
 
         public ICollection<VideoTimeCodeModel>? VideoTimeCodes { get; set; }
-
-        [JsonIgnore]
-        public ICollection<Excercise>? Excercises { get; set; }
     }
 }
