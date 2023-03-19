@@ -33,10 +33,10 @@ namespace Fsel.Sender.Api.Controllers
                 MethodResult<bool> commandResult = await _mediator.Send(command).ConfigureAwait(false);
                 return commandResult.GetActionResult();
             }
-            catch (Exception ex)
+            catch
             {
                 VoidMethodResult errorResult = new VoidMethodResult();
-                errorResult.AddErrorMessage(MethodHelper.GetExceptionMessage(ex));
+                errorResult.AddError();
                 return errorResult.GetActionResult();
             }
         }

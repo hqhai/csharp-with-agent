@@ -34,7 +34,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             if (user == null)
             {
                 methodResult.StatusCode = StatusCodes.Status404NotFound;
-                methodResult.AddErrorMessage(
+                methodResult.AddError(
                     nameof(EnumAuthErrorCode.AU04V),
                     new[] { MethodHelper.GenerateErrorResult(nameof(request.Email), request.Email) });
                 return methodResult;
@@ -46,14 +46,14 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             if (string.IsNullOrEmpty(resetToken))
             {
                 methodResult.StatusCode = StatusCodes.Status500InternalServerError;
-                methodResult.AddErrorMessage(nameof(EnumAuthErrorCode.AU02ER));
+                methodResult.AddError(nameof(EnumAuthErrorCode.AU02ER));
                 return methodResult;
             }
             var result = await _userManager.ResetPasswordAsync(user, resetToken, newPassword);
             if (!result.Succeeded)
             {
                 methodResult.StatusCode = StatusCodes.Status500InternalServerError;
-                methodResult.AddErrorMessage(nameof(EnumAuthErrorCode.AU03ER));
+                methodResult.AddError(nameof(EnumAuthErrorCode.AU03ER));
                 return methodResult;
             }
 

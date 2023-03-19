@@ -34,10 +34,10 @@ namespace Fsel.Identity.Userentication.Controllers
                 MethodResult<UserModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
                 return commandResult.GetActionResult();
             }
-            catch (Exception ex)
+            catch
             {
                 VoidMethodResult errorCommandResult = new VoidMethodResult();
-                errorCommandResult.AddErrorMessage(MethodHelper.GetExceptionMessage(ex));
+                errorCommandResult.AddError();
                 return errorCommandResult.GetActionResult();
             }
         }
@@ -60,10 +60,10 @@ namespace Fsel.Identity.Userentication.Controllers
                 MethodResult<UserModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
                 return commandResult.GetActionResult();
             }
-            catch (Exception ex)
+            catch
             {
                 VoidMethodResult errorCommandResult = new VoidMethodResult();
-                errorCommandResult.AddErrorMessage(MethodHelper.GetExceptionMessage(ex));
+                errorCommandResult.AddError();
                 return errorCommandResult.GetActionResult();
             }
         }
@@ -81,10 +81,10 @@ namespace Fsel.Identity.Userentication.Controllers
                 MethodResult<bool> commandResult = await _mediator.Send(command).ConfigureAwait(false);
                 return commandResult.GetActionResult();
             }
-            catch (Exception ex)
+            catch
             {
                 VoidMethodResult errorCommandResult = new VoidMethodResult();
-                errorCommandResult.AddErrorMessage(MethodHelper.GetExceptionMessage(ex));
+                errorCommandResult.AddError();
                 return errorCommandResult.GetActionResult();
             }
         }
@@ -102,10 +102,10 @@ namespace Fsel.Identity.Userentication.Controllers
                 MethodResult<bool> commandResult = await _mediator.Send(command).ConfigureAwait(false);
                 return commandResult.GetActionResult();
             }
-            catch (Exception ex)
+            catch
             {
                 VoidMethodResult errorCommandResult = new VoidMethodResult();
-                errorCommandResult.AddErrorMessage(MethodHelper.GetExceptionMessage(ex));
+                errorCommandResult.AddError();
                 return errorCommandResult.GetActionResult();
             }
         }

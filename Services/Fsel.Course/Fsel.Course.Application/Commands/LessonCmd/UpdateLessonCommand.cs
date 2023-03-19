@@ -53,7 +53,7 @@ namespace Fsel.Course.Application.Commands.LessonCmd
             if (request == null)
             {
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                methodResult.AddErrorMessage("Not Found");
+                methodResult.AddError("Not Found");
                 return methodResult;
             }
 
@@ -61,7 +61,7 @@ namespace Fsel.Course.Application.Commands.LessonCmd
             if (lesson == null)
             {
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                methodResult.AddErrorMessage(
+                methodResult.AddError(
                     nameof(EnumLessonErrorCode.LS01V),
                     new[] { MethodHelper.GenerateErrorResult(nameof(request.Id), request.Id) });
                 return methodResult;
@@ -77,7 +77,7 @@ namespace Fsel.Course.Application.Commands.LessonCmd
             if (request.HomeWorkIds == null)
             {
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                methodResult.AddErrorMessage(
+                methodResult.AddError(
                     nameof(EnumHomeWorkErrorCode.HW03V),
                     new[] { MethodHelper.GenerateErrorResult(nameof(request.HomeWorkIds), request.HomeWorkIds) });
                 return methodResult;
@@ -86,7 +86,7 @@ namespace Fsel.Course.Application.Commands.LessonCmd
             if (request.VideoIds == null)
             {
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                methodResult.AddErrorMessage(
+                methodResult.AddError(
                     nameof(EnumVideoErrorCode.VD03V),
                     new[] { MethodHelper.GenerateErrorResult(nameof(request.VideoIds), request.VideoIds) });
                 return methodResult;
@@ -95,7 +95,7 @@ namespace Fsel.Course.Application.Commands.LessonCmd
             if (request.ExtraPracticeIds == null)
             {
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                methodResult.AddErrorMessage(
+                methodResult.AddError(
                     nameof(EnumExtraPractiveErrorCode.EP03V),
                     new[] { MethodHelper.GenerateErrorResult(nameof(request.ExtraPracticeIds), request.ExtraPracticeIds) });
                 return methodResult;
@@ -106,7 +106,7 @@ namespace Fsel.Course.Application.Commands.LessonCmd
             if (isLessonUsed)
             {
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                methodResult.AddErrorMessage(
+                methodResult.AddError(
                     nameof(EnumLessonErrorCode.LS02V),
                     new[] { MethodHelper.GenerateErrorResult(nameof(request.Id), request.Id) });
                 return methodResult;
@@ -115,7 +115,7 @@ namespace Fsel.Course.Application.Commands.LessonCmd
             if (_extraPracticeRepository.IsIdsInValid(request.ExtraPracticeIds))
             {
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                methodResult.AddErrorMessage(
+                methodResult.AddError(
                     nameof(EnumExtraPractiveErrorCode.EP03V));
 
                 return methodResult;
@@ -124,7 +124,7 @@ namespace Fsel.Course.Application.Commands.LessonCmd
             if (_videoRepository.IsIdsInValid(request.VideoIds))
             {
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                methodResult.AddErrorMessage(
+                methodResult.AddError(
                     nameof(EnumVideoErrorCode.VD03V));
 
                 return methodResult;
@@ -133,7 +133,7 @@ namespace Fsel.Course.Application.Commands.LessonCmd
             if (_classForumRepository.IsIdsInValid(new List<Guid> { request.ClassForumId }))
             {
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                methodResult.AddErrorMessage(
+                methodResult.AddError(
                     nameof(EnumClassForumErrorCode.CF01V));
                 return methodResult;
             }
@@ -141,7 +141,7 @@ namespace Fsel.Course.Application.Commands.LessonCmd
             if (_homeWorkRepository.IsIdsInValid(request.HomeWorkIds))
             {
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                methodResult.AddErrorMessage(
+                methodResult.AddError(
                     nameof(EnumHomeWorkErrorCode.HW03V));
 
                 return methodResult;

@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
 using System.Reflection;
 using System.Text.Json.Serialization;
 using Fsel.Common.ActionResults;
@@ -20,32 +21,32 @@ namespace Fsel.Core.Base
             return GetType().Assembly;
         }
 
-        public Error AddError(IList<object> errorValues, string? errorField = null)
+        public IList<Error> GetErrors(IList<object>? errorValues, string? fieldName = null, IList<object>? exactValues = null)
         {
-            return new Error
-            {
-                ErrorField = errorField,
-                ErrorValues = errorValues
-            };
+            return new List<Error>() { new Error(fieldName, errorValues, exactValues) };
         }
 
-        public IList<Error> AddErrors(IList<object> errorValues, string? errorField = null)
-        {
-            return new List<Error>() { AddError(errorValues, errorField) };
-        }
-
-        public ErrorResult AddErrorResult(string errorCode, IList<object> errorValues, string? errorField = null)
+        public ErrorResult GetErrorResult(string? errorCode, IList<object>? errorValues, string? fieldName = null, IList<object>? exactValues = null)
         {
             return new ErrorResult
             {
                 ErrorCode = errorCode,
-                Errors = AddErrors(errorValues, errorField)
+                Errors = GetErrors(errorValues, fieldName, exactValues)
             };
         }
 
-        public void AddErrorResults(string errorCode, IList<object> errorValues, string? errorField = null)
+        public void AddErrorResults(string? errorCode, IList<object>? errorValues, string? fieldName = null, IList<object>? exactValues = null)
         {
-            _errorMessages.Add(AddErrorResult(errorCode, errorValues, errorField));
+            _errorMessages.Add(GetErrorResult(errorCode, errorValues, fieldName, exactValues));
+        }
+
+        public void AddErrorResults(string? errorCode, IList<Error> errors)
+        {
+            _errorMessages.Add(new ErrorResult
+            {
+                ErrorCode = errorCode,
+                Errors = errors
+            });
         }
 
         public void AddErrorResults(ErrorResult errorMessages)
@@ -76,10 +77,18 @@ namespace Fsel.Core.Base
                     {
                         PropertyInfo? property = validationContext.ObjectType.GetProperty(memberName);
                         object? value = property?.GetValue(validationContext.ObjectInstance, null);
-                        //errorResult.ErrorValues.Add(MethodHelper.GenerateErrorResult(memberName, value));
-                    }
 
-                    _errorMessages.Add(errorResult);
+                        if (value != null)
+                        {
+                            var errorValues = new List<object> { value };
+                            var customAttrs = property?.GetCustomAttributesData();
+                            var customAttr = customAttrs?.FirstOrDefault(x => x.NamedArguments.Select(n => n.TypedValue.Value).Contains(item.ErrorMessage));
+                            var extracValues = customAttr?.ConstructorArguments.Select(x => x.Value).Cast<object>().ToList();
+
+                            errorResult.Errors.Add(new Error(memberName, errorValues, extracValues));
+                        }
+                    }
+                    AddErrorResults(errorResult);
                 }
             }
 

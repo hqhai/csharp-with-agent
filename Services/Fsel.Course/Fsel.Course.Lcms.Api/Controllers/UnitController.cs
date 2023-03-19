@@ -41,10 +41,10 @@ namespace Fsel.Course.Lcms.Api.Controllers
                 MethodResult<PagingItemsModel<UnitModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
                 return queryResult.GetActionResult();
             }
-            catch (Exception ex)
+            catch
             {
                 VoidMethodResult errorResult = new VoidMethodResult();
-                errorResult.AddErrorMessage(MethodHelper.GetExceptionMessage(ex));
+                errorResult.AddError();
                 return errorResult.GetActionResult();
             }
         }
@@ -62,10 +62,10 @@ namespace Fsel.Course.Lcms.Api.Controllers
                 MethodResult<UnitModel> queryResult = await _mediator.Send(new GetUnitQuery { Id = id }).ConfigureAwait(false);
                 return queryResult.GetActionResult();
             }
-            catch (Exception ex)
+            catch
             {
                 VoidMethodResult errorResult = new VoidMethodResult();
-                errorResult.AddErrorMessage(MethodHelper.GetExceptionMessage(ex));
+                errorResult.AddError();
                 return errorResult.GetActionResult();
             }
         }
@@ -83,10 +83,10 @@ namespace Fsel.Course.Lcms.Api.Controllers
                 MethodResult<UnitModel> queryResult = await _mediator.Send(command).ConfigureAwait(false);
                 return queryResult.GetActionResult();
             }
-            catch (Exception ex)
+            catch
             {
                 VoidMethodResult errorResult = new VoidMethodResult();
-                errorResult.AddErrorMessage(MethodHelper.GetExceptionMessage(ex));
+                errorResult.AddError();
                 return errorResult.GetActionResult();
             }
         }
@@ -105,10 +105,10 @@ namespace Fsel.Course.Lcms.Api.Controllers
                 MethodResult<UnitModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
                 return commandResult.GetActionResult();
             }
-            catch (Exception ex)
+            catch
             {
                 VoidMethodResult errorResult = new VoidMethodResult();
-                errorResult.AddErrorMessage(MethodHelper.GetExceptionMessage(ex));
+                errorResult.AddError();
                 return errorResult.GetActionResult();
             }
         }
@@ -126,10 +126,10 @@ namespace Fsel.Course.Lcms.Api.Controllers
                 MethodResult<bool> commandResult = await _mediator.Send(new DeleteUnitCommand { Id = id }).ConfigureAwait(false);
                 return commandResult.GetActionResult();
             }
-            catch (Exception ex)
+            catch
             {
                 VoidMethodResult errorResult = new VoidMethodResult();
-                errorResult.AddErrorMessage(MethodHelper.GetExceptionMessage(ex));
+                errorResult.AddError();
                 return errorResult.GetActionResult();
             }
         }

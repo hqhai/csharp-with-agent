@@ -39,10 +39,10 @@ namespace Fsel.Course.Lcms.Api.Controllers
                 MethodResult<PagingItemsModel<VideoModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
                 return queryResult.GetActionResult();
             }
-            catch (Exception ex)
+            catch
             {
                 VoidMethodResult errorResult = new VoidMethodResult();
-                errorResult.AddErrorMessage(MethodHelper.GetExceptionMessage(ex));
+                errorResult.AddError();
                 return errorResult.GetActionResult();
             }
         }
@@ -60,10 +60,10 @@ namespace Fsel.Course.Lcms.Api.Controllers
                 MethodResult<VideoModel> queryResult = await _mediator.Send(new GetVideoQuery { Id = id }).ConfigureAwait(false);
                 return queryResult.GetActionResult();
             }
-            catch (Exception ex)
+            catch
             {
                 VoidMethodResult errorResult = new VoidMethodResult();
-                errorResult.AddErrorMessage(MethodHelper.GetExceptionMessage(ex));
+                errorResult.AddError();
                 return errorResult.GetActionResult();
             }
         }
@@ -81,10 +81,10 @@ namespace Fsel.Course.Lcms.Api.Controllers
                 MethodResult<VideoModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
                 return commandResult.GetActionResult();
             }
-            catch (Exception ex)
+            catch
             {
                 VoidMethodResult errorResult = new VoidMethodResult();
-                errorResult.AddErrorMessage(MethodHelper.GetExceptionMessage(ex));
+                errorResult.AddError();
                 return errorResult.GetActionResult();
             }
         }
@@ -103,10 +103,10 @@ namespace Fsel.Course.Lcms.Api.Controllers
                 MethodResult<VideoModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
                 return commandResult.GetActionResult();
             }
-            catch (Exception ex)
+            catch
             {
                 VoidMethodResult errorResult = new VoidMethodResult();
-                errorResult.AddErrorMessage(MethodHelper.GetExceptionMessage(ex));
+                errorResult.AddError();
                 return errorResult.GetActionResult();
             }
         }
@@ -124,10 +124,10 @@ namespace Fsel.Course.Lcms.Api.Controllers
                 MethodResult<bool> commandResult = await _mediator.Send(new DeleteVideoCommand { Id = id }).ConfigureAwait(false);
                 return commandResult.GetActionResult();
             }
-            catch (Exception ex)
+            catch
             {
                 VoidMethodResult errorResult = new VoidMethodResult();
-                errorResult.AddErrorMessage(MethodHelper.GetExceptionMessage(ex));
+                errorResult.AddError();
                 return errorResult.GetActionResult();
             }
         }

@@ -32,10 +32,10 @@ namespace Fsel.Course.Lms.Api.Controllers
                 MethodResult<string> queryResult = new MethodResult<string> { Result = nameof(Search) };
                 return queryResult.GetActionResult();
             }
-            catch (Exception ex)
+            catch
             {
                 VoidMethodResult errorResult = new VoidMethodResult();
-                errorResult.AddErrorMessage(MethodHelper.GetExceptionMessage(ex));
+                errorResult.AddError();
                 return errorResult.GetActionResult();
             }
         }

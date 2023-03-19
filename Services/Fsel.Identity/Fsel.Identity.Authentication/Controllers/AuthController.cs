@@ -34,10 +34,10 @@ namespace Fsel.Identity.Authentication.Controllers
                 MethodResult<TokenModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
                 return commandResult.GetActionResult();
             }
-            catch (Exception ex)
+            catch
             {
                 VoidMethodResult errorCommandResult = new VoidMethodResult();
-                errorCommandResult.AddErrorMessage(MethodHelper.GetExceptionMessage(ex));
+                errorCommandResult.AddError();
                 return errorCommandResult.GetActionResult();
             }
         }
@@ -55,11 +55,11 @@ namespace Fsel.Identity.Authentication.Controllers
                 MethodResult<TokenModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
                 return commandResult.GetActionResult();
             }
-            catch (Exception ex)
+            catch
             {
-                VoidMethodResult errorCommandResult = new VoidMethodResult();
-                errorCommandResult.AddErrorMessage(MethodHelper.GetExceptionMessage(ex));
-                return errorCommandResult.GetActionResult();
+                VoidMethodResult errorResult = new VoidMethodResult();
+                errorResult.AddError();
+                return errorResult.GetActionResult();
             }
         }
     }

@@ -8,21 +8,8 @@ namespace Fsel.Course.Domain.Models.CommandModels.VideoTimeCodes
     public class UpdateVideoTimeCodeCommandModel
     {
         public EnumTimeCodeType TimeCodeType { get; set; }
-        public string? DisplayTimeStr { get; set; }
-        public string? ExecutionTimeStr { get; set; }
-
-        [JsonIgnore]
-        public TimeSpan DisplayTime
-        {
-            get { return DisplayTimeStr.ConvertTimeSpan(); }
-        }
-
-        [JsonIgnore]
-        public TimeSpan ExecutionTime
-        {
-            get { return ExecutionTimeStr.ConvertTimeSpan(); }
-        }
-
+        public long DisplayTime { get; set; }
+        public long ExecutionTime { get; set; }
         public List<UpdateExcerciseCommandModel> Excercises { get; set; } = new List<UpdateExcerciseCommandModel>();
     }
 }
