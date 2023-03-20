@@ -36,21 +36,37 @@ namespace Fsel.Course.Application.Queries.UnitQuery
                 return methodResult;
             }
 
-            var UnitQuery = from i in _UnitRepository.Queryable
+            var UnitQuery = _UnitRepository.Queryable
+                                    .Where(x => request.CourseLevel == null ? true : x.CourseLevel == request.CourseLevel)
                                     .Include(x => x.CourseUnitMockTests.Where(y => !y.IsDeleted))
-                            select new UnitModel
+                                    .Where(x => request.CourseLevel == null ? true : x.CourseLevel == request.CourseLevel)
+                                    .Include(unit => unit.UnitLessons)
+                                    .ThenInclude(unitLesson => unitLesson.Lesson)
+                                    .ThenInclude(lesson => lesson.LessonVideos)
+                                    .ThenInclude(lessonVideo => lessonVideo.Video)
+                                    .Where(x => request.TeacherId == null || x.UnitLessons.Select(l => l.Lesson)
+                                                                                   .SelectMany(lv => lv.LessonVideos)
+                                                                                   .Select(v => v.Video)
+                                                                                   .Select(n => n.TeacherId).Contains(request.TeacherId.Value))
+
+                            .Select(unit => new UnitModel
                             {
-                                Id = i.Id,
-                                Name = i.Name,
-                                DisplayName = i.DisplayName,
-                                IsActive = !i.CourseUnitMockTests.Any(),
-                                Type = i.Type,
-                                CourseLevel = i.CourseLevel,
-                                CreatedDate = i.CreatedDate,
-                                CreatedUserId = i.CreatedUserId,
-                                UpdatedDate = i.UpdatedDate,
-                                UpdatedUserId = i.UpdatedUserId,
-                            };
+                                Id = unit.Id,
+                                Name = unit.Name,
+                                DisplayName = unit.DisplayName,
+                                IsActive = !unit.CourseUnitMockTests.Any(),
+                                Type = unit.Type,
+                                CourseLevel = unit.CourseLevel,
+                                CreatedDate = unit.CreatedDate,
+                                CreatedUserId = unit.CreatedUserId,
+                                UpdatedDate = unit.UpdatedDate,
+                                UpdatedUserId = unit.UpdatedUserId,
+                                TeacherId = unit.UnitLessons.Select(l => l.Lesson)
+                                                .SelectMany(lv => lv.LessonVideos)
+                                                .Select(v => v.Video)
+                                                .Select(n => n.TeacherId).FirstOrDefault(),
+                            });
+
             //Keyword
             if (!string.IsNullOrEmpty(request.Keyword))
             {
