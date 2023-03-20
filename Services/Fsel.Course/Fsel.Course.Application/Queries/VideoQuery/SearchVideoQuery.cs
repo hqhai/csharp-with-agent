@@ -1,7 +1,6 @@
 using AutoMapper;
 using Fsel.Common.ActionResults;
 using Fsel.Core.Base.BaseModels;
-using Fsel.Course.Domain.Entities;
 using Fsel.Course.Domain.Enums;
 using Fsel.Course.Domain.IRepositories;
 using Fsel.Course.Domain.Models.EntityModels;
@@ -32,7 +31,12 @@ namespace Fsel.Course.Application.Queries.VideoQuery
         {
             MethodResult<PagingItemsModel<VideoSearchModel>> methodResult = new MethodResult<PagingItemsModel<VideoSearchModel>>();
 
-            if (request.PageSize > 100)
+            if (request == null)
+            {
+                methodResult.StatusCode = StatusCodes.Status400BadRequest;
+                return methodResult;
+            }
+            else if (request.PageSize > 100)
             {
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 return methodResult;
