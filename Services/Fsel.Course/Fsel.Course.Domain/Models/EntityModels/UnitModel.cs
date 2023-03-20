@@ -12,6 +12,8 @@ namespace Fsel.Course.Domain.Models.EntityModels
 
         public bool IsActive { get; set; }
 
+        public Guid? TeacherId { get; set; }
+
         public EnumUnitType Type { get; set; }
 
         public EnumCourseLevel CourseLevel { get; set; }
