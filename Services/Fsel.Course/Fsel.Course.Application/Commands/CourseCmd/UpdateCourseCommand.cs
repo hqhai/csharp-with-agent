@@ -77,8 +77,7 @@ namespace Fsel.Course.Application.Commands.CourseCmd
 
             if (request.CourseTeachers == null)
             {
-                methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                methodResult.AddErrorMessage(
+                methodResult.AddErrorBadRequest(
                     nameof(EnumCourseTeacherErrorCode.CT04V));
                 return methodResult;
             }
