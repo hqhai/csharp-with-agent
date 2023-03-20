@@ -1,6 +1,10 @@
+// Copyright (c) Atlantic. All rights reserved.
+
 using AutoMapper;
 using Fsel.Common.ActionResults;
 using Fsel.Core.Base.BaseModels;
+using Fsel.Course.Application.Services;
+using Fsel.Course.Domain.Entities;
 using Fsel.Course.Domain.IRepositories;
 using Fsel.Course.Domain.Models.EntityModels;
 using Fsel.Course.Domain.Models.QueryModels.Courses;
@@ -10,24 +14,26 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Fsel.Course.Application.Queries.CourseQuery
 {
-    public class SearchCourseQuery : SearchCourseQueryModel, IRequest<MethodResult<PagingItemsModel<CourseModel>>>
+    public class SearchCourseQuery : SearchCourseQueryModel, IRequest<MethodResult<PagingItemsModel<CourseSearchModel>>>
     {
     }
 
-    public class SearchCourseQueryHandler : IRequestHandler<SearchCourseQuery, MethodResult<PagingItemsModel<CourseModel>>>
+    public class SearchCourseQueryHandler : IRequestHandler<SearchCourseQuery, MethodResult<PagingItemsModel<CourseSearchModel>>>
     {
         private readonly ICourseRepository _courseRepository;
         private readonly IMapper _mapper;
+        private readonly IUserService _userService;
 
-        public SearchCourseQueryHandler(IMapper mapper, ICourseRepository courseRepository)
+        public SearchCourseQueryHandler(IMapper mapper, ICourseRepository courseRepository, IUserService userService)
         {
             _courseRepository = courseRepository;
+            _userService = userService;
             _mapper = mapper;
         }
 
-        public async Task<MethodResult<PagingItemsModel<CourseModel>>> Handle(SearchCourseQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<PagingItemsModel<CourseSearchModel>>> Handle(SearchCourseQuery request, CancellationToken cancellationToken)
         {
-            MethodResult<PagingItemsModel<CourseModel>> methodResult = new MethodResult<PagingItemsModel<CourseModel>>();
+            MethodResult<PagingItemsModel<CourseSearchModel>> methodResult = new MethodResult<PagingItemsModel<CourseSearchModel>>();
 
             if (request.PageSize > 100)
             {
@@ -35,22 +41,27 @@ namespace Fsel.Course.Application.Queries.CourseQuery
                 return methodResult;
             }
 
-            var courseQuery = from i in _courseRepository.Queryable
-                              select new CourseModel
+            var courseQuery = _courseRepository.Queryable
+                              .Include(course => course.CourseTeachers)
+                              .Where(x => request.CourseLevel == null || x.CourseLevel == request.CourseLevel)
+                              .Where(x => request.TeacherId == null || x.CourseTeachers.Select(n => n.TeacherId).Contains(request.TeacherId.Value))
+                              .Select(course => new CourseSearchModel
                               {
-                                  Id = i.Id,
-                                  Name = i.Name,
-                                  NumberOfLessons = i.NumberOfLessons,
-                                  NumberOfUnits = i.NumberOfUnits,
-                                  Status = i.Status,
-                                  CourseLevel = i.CourseLevel,
-                                  CreatedDate = i.CreatedDate,
-                                  CreatedUserId = i.CreatedUserId,
-                                  CreatedFullName = i.CreatedFullName,
-                                  UpdatedDate = i.UpdatedDate,
-                                  UpdatedUserId = i.UpdatedUserId,
-                                  UpdatedFullName = i.UpdatedFullName,
-                              };
+                                  Id = course.Id,
+                                  Name = course.Name,
+                                  NumberOfLessons = course.NumberOfLessons,
+                                  NumberOfUnits = course.NumberOfUnits,
+                                  Status = course.Status,
+                                  CourseLevel = course.CourseLevel,
+                                  CreatedDate = course.CreatedDate,
+                                  CreatedUserId = course.CreatedUserId,
+                                  CreatedFullName = course.CreatedFullName,
+                                  UpdatedDate = course.UpdatedDate,
+                                  UpdatedUserId = course.UpdatedUserId,
+                                  UpdatedFullName = course.UpdatedFullName,
+                                  TeacherId = course.CourseTeachers.Select(x => x.TeacherId).FirstOrDefault(),
+                              });
+
             //Keyword
             if (!string.IsNullOrEmpty(request.Keyword))
             {
@@ -65,9 +76,18 @@ namespace Fsel.Course.Application.Queries.CourseQuery
                     .ToListAsync(cancellationToken: cancellationToken)
                     .ConfigureAwait(false);
 
-            methodResult.Result = new PagingItemsModel<CourseModel>
+            var teachers = await _userService.GetTeacherByIdsAsync(new GetTeacherByIdsQueryModel { Ids = courseQuery.Select(x => x.TeacherId ?? Guid.Empty).ToList() });
+            if (teachers.IsSuccessStatusCode)
             {
-                Items = _mapper.Map<IEnumerable<CourseModel>>(lists),
+                foreach (var item in lists)
+                {
+                    item.TeacherName = teachers.Content?.Result?.FirstOrDefault(x => x.Id == item.TeacherId)?.Human.FullName;
+                }
+            }
+
+            methodResult.Result = new PagingItemsModel<CourseSearchModel>
+            {
+                Items = _mapper.Map<IEnumerable<CourseSearchModel>>(lists),
                 PagingInfo = new PagingInfoModel { Page = request.Page, PageSize = request.PageSize, TotalItems = totalItem }
             };
 
