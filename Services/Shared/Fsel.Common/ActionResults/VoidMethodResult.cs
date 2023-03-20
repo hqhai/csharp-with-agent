@@ -1,3 +1,4 @@
+using Fsel.Common.Enums.ErrorCodes;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -56,7 +57,7 @@ namespace Fsel.Common.ActionResults
 
         public void AddErrorServer()
         {
-            AddError(StatusCodes.Status500InternalServerError, "API_SERVER_ERROR");
+            AddError(StatusCodes.Status500InternalServerError, nameof(EnumSystemErrorCode.ServerError));
         }
 
         public void AddError(string? errorCode)
