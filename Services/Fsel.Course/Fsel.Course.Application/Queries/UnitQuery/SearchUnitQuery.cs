@@ -86,7 +86,7 @@ namespace Fsel.Course.Application.Queries.UnitQuery
             var teachers = await _userService.GetTeacherByIdsAsync(new GetTeacherByIdsQueryModel { Ids = unitQuery.Select(x => x.TeacherId ?? Guid.Empty).ToList() });
             if (teachers.IsSuccessStatusCode)
             {
-                foreach (var item in unitQuery)
+                foreach (var item in lists)
                 {
                     item.TeacherName = teachers.Content?.Result?.FirstOrDefault(x => x.Id == item.TeacherId)?.Human.FullName;
                 }

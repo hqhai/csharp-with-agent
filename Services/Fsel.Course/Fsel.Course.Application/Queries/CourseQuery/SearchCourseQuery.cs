@@ -79,7 +79,7 @@ namespace Fsel.Course.Application.Queries.CourseQuery
             var teachers = await _userService.GetTeacherByIdsAsync(new GetTeacherByIdsQueryModel { Ids = courseQuery.Select(x => x.TeacherId ?? Guid.Empty).ToList() });
             if (teachers.IsSuccessStatusCode)
             {
-                foreach (var item in courseQuery)
+                foreach (var item in lists)
                 {
                     item.TeacherName = teachers.Content?.Result?.FirstOrDefault(x => x.Id == item.TeacherId)?.Human.FullName;
                 }
