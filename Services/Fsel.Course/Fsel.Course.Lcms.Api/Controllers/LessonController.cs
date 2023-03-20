@@ -36,17 +36,8 @@ namespace Fsel.Course.Lcms.Api.Controllers
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.BadRequest)]
         public async Task<IActionResult> Search([FromQuery] SearchLessonQuery query)
         {
-            try
-            {
-                MethodResult<PagingItemsModel<LessonModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
-                return queryResult.GetActionResult();
-            }
-            catch (Exception ex)
-            {
-                VoidMethodResult errorResult = new VoidMethodResult();
-                errorResult.AddErrorMessage(MethodHelper.GetExceptionMessage(ex));
-                return errorResult.GetActionResult();
-            }
+            MethodResult<PagingItemsModel<LessonModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
         }
 
         /// <summary>
@@ -57,17 +48,8 @@ namespace Fsel.Course.Lcms.Api.Controllers
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.BadRequest)]
         public async Task<IActionResult> Get([FromRoute] Guid id)
         {
-            try
-            {
-                MethodResult<LessonModel> queryResult = await _mediator.Send(new GetLessonQuery { Id = id }).ConfigureAwait(false);
-                return queryResult.GetActionResult();
-            }
-            catch (Exception ex)
-            {
-                VoidMethodResult errorResult = new VoidMethodResult();
-                errorResult.AddErrorMessage(MethodHelper.GetExceptionMessage(ex));
-                return errorResult.GetActionResult();
-            }
+            MethodResult<LessonModel> queryResult = await _mediator.Send(new GetLessonQuery { Id = id }).ConfigureAwait(false);
+            return queryResult.GetActionResult();
         }
 
         /// <summary>
@@ -78,17 +60,8 @@ namespace Fsel.Course.Lcms.Api.Controllers
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.BadRequest)]
         public async Task<IActionResult> Create([FromBody] CreateLessonCommand command)
         {
-            try
-            {
-                MethodResult<LessonModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
-                return commandResult.GetActionResult();
-            }
-            catch (Exception ex)
-            {
-                VoidMethodResult errorResult = new VoidMethodResult();
-                errorResult.AddErrorMessage(MethodHelper.GetExceptionMessage(ex));
-                return errorResult.GetActionResult();
-            }
+            MethodResult<LessonModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
         }
 
         /// <summary>
@@ -99,18 +72,9 @@ namespace Fsel.Course.Lcms.Api.Controllers
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.BadRequest)]
         public async Task<IActionResult> Update([FromRoute] Guid id, [FromBody] UpdateLessonCommand command)
         {
-            try
-            {
-                command.Id = id;
-                MethodResult<LessonModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
-                return commandResult.GetActionResult();
-            }
-            catch (Exception ex)
-            {
-                VoidMethodResult errorResult = new VoidMethodResult();
-                errorResult.AddErrorMessage(MethodHelper.GetExceptionMessage(ex));
-                return errorResult.GetActionResult();
-            }
+            command.Id = id;
+            MethodResult<LessonModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
         }
 
         /// <summary>
@@ -121,17 +85,8 @@ namespace Fsel.Course.Lcms.Api.Controllers
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.BadRequest)]
         public async Task<IActionResult> Delete([FromRoute] Guid id)
         {
-            try
-            {
-                MethodResult<bool> commandResult = await _mediator.Send(new DeleteLessonCommand { Id = id }).ConfigureAwait(false);
-                return commandResult.GetActionResult();
-            }
-            catch (Exception ex)
-            {
-                VoidMethodResult errorResult = new VoidMethodResult();
-                errorResult.AddErrorMessage(MethodHelper.GetExceptionMessage(ex));
-                return errorResult.GetActionResult();
-            }
+            MethodResult<bool> commandResult = await _mediator.Send(new DeleteLessonCommand { Id = id }).ConfigureAwait(false);
+            return commandResult.GetActionResult();
         }
     }
 }

@@ -36,7 +36,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             if (request.OldPassword == null)
             {
                 methodResult.StatusCode = StatusCodes.Status401Unauthorized;
-                methodResult.AddErrorMessage(
+                methodResult.AddError(
                     nameof(EnumAuthErrorCode.AU01V),
                     new[] { MethodHelper.GenerateErrorResult(nameof(request.OldPassword), request.OldPassword) });
                 return methodResult;
@@ -44,7 +44,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             if (request.Password == null)
             {
                 methodResult.StatusCode = StatusCodes.Status404NotFound;
-                methodResult.AddErrorMessage(
+                methodResult.AddError(
                     nameof(EnumAuthErrorCode.AU02V),
                     new[] { MethodHelper.GenerateErrorResult(nameof(request.Password), request.Password) });
                 return methodResult;
@@ -52,7 +52,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             if (request.ConfirmPassword == null)
             {
                 methodResult.StatusCode = StatusCodes.Status404NotFound;
-                methodResult.AddErrorMessage(
+                methodResult.AddError(
                     nameof(EnumAuthErrorCode.AU03V),
                     new[] { MethodHelper.GenerateErrorResult(nameof(request.ConfirmPassword), request.ConfirmPassword) });
                 return methodResult;
@@ -71,7 +71,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             if (user == null)
             {
                 methodResult.StatusCode = StatusCodes.Status404NotFound;
-                methodResult.AddErrorMessage(
+                methodResult.AddError(
                     nameof(EnumAuthErrorCode.AU04V),
                     new[] { MethodHelper.GenerateErrorResult(nameof(request.Email), request.Email) });
                 return methodResult;
@@ -81,7 +81,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             if (!checkOldPassword.Succeeded)
             {
                 methodResult.StatusCode = StatusCodes.Status404NotFound;
-                methodResult.AddErrorMessage(
+                methodResult.AddError(
                     nameof(EnumAuthErrorCode.AU05V),
                     new[] { MethodHelper.GenerateErrorResult(nameof(request.OldPassword), request.OldPassword) });
                 return methodResult;

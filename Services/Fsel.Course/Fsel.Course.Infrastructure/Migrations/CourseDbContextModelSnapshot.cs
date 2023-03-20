@@ -80,7 +80,7 @@ namespace Fsel.Course.Infrastructure.Migrations
                         .HasMaxLength(1000)
                         .HasColumnType("nvarchar(1000)");
 
-                    b.Property<long>("TaggetTimeLimitTicks")
+                    b.Property<long>("TaggetTimeLimit")
                         .HasColumnType("bigint");
 
                     b.Property<long>("TaggetWordLimit")
@@ -213,6 +213,10 @@ namespace Fsel.Course.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(101);
 
+                    b.Property<string>("Deggree")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
                     b.Property<DateTime?>("DeletedDate")
                         .HasColumnType("datetime2")
                         .HasColumnOrder(109);
@@ -226,9 +230,21 @@ namespace Fsel.Course.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(103);
 
+                    b.Property<string>("Experience")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit")
                         .HasColumnOrder(110);
+
+                    b.Property<string>("Nationality")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<string>("Strength")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
 
                     b.Property<Guid>("TeacherId")
                         .HasColumnType("uniqueidentifier");
@@ -371,7 +387,6 @@ namespace Fsel.Course.Infrastructure.Migrations
                         .HasColumnOrder(110);
 
                     b.Property<string>("MediaPost")
-                        .IsRequired()
                         .HasMaxLength(1000)
                         .HasColumnType("nvarchar(1000)");
 
@@ -1519,10 +1534,10 @@ namespace Fsel.Course.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(103);
 
-                    b.Property<long>("DisplayTimeTicks")
+                    b.Property<long>("DisplayTime")
                         .HasColumnType("bigint");
 
-                    b.Property<long>("ExecutionTimeTicks")
+                    b.Property<long>("ExecutionTime")
                         .HasColumnType("bigint");
 
                     b.Property<bool>("IsDeleted")

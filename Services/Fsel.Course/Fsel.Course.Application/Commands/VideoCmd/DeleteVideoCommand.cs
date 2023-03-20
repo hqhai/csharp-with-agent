@@ -37,7 +37,7 @@ namespace Fsel.Course.Application.Commands.VideoCmd
                 if (video == null)
                 {
                     methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                    methodResult.AddErrorMessage(
+                    methodResult.AddError(
                         nameof(EnumVideoErrorCode.VD01V),
                         new[] { MethodHelper.GenerateErrorResult(nameof(request.Id), request.Id) });
                     return methodResult;
@@ -48,7 +48,7 @@ namespace Fsel.Course.Application.Commands.VideoCmd
                 if (isVideoUsed)
                 {
                     methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                    methodResult.AddErrorMessage(
+                    methodResult.AddError(
                         nameof(EnumVideoErrorCode.VD02V),
                         new[] { MethodHelper.GenerateErrorResult(nameof(request.Id), request.Id) });
                     return methodResult;

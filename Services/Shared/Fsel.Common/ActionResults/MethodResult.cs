@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Fsel.Common.ActionResults
@@ -7,20 +7,23 @@ namespace Fsel.Common.ActionResults
     {
         public T? Result { get; set; }
 
-        public void AddResultFromErrorList(IEnumerable<ErrorResult> errorMessages)
+        public void AddResultFromErrorList(IEnumerable<ErrorResult>? errorMessages)
         {
-            foreach (ErrorResult errorMessage in errorMessages)
+            if (errorMessages != null)
             {
-                AddErrorMessage(errorMessage);
+                foreach (ErrorResult errorMessage in errorMessages)
+                {
+                    AddError(errorMessage);
+                }
             }
         }
 
         public override IActionResult GetActionResult()
         {
             ObjectResult objectResult = new ObjectResult(this);
-            if (!base.StatusCode.HasValue)
+            if (!StatusCode.HasValue)
             {
-                if (base.IsOK)
+                if (IsOK)
                 {
                     objectResult.StatusCode = ((Result != null) ? StatusCodes.Status200OK : StatusCodes.Status204NoContent);
                 }
@@ -32,7 +35,7 @@ namespace Fsel.Common.ActionResults
                 return objectResult;
             }
 
-            objectResult.StatusCode = base.StatusCode;
+            objectResult.StatusCode = StatusCode;
             return objectResult;
         }
     }

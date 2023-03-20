@@ -36,17 +36,8 @@ namespace Fsel.Course.Lcms.Api.Controllers
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.BadRequest)]
         public async Task<IActionResult> Search([FromQuery] SearchUnitQuery query)
         {
-            try
-            {
-                MethodResult<PagingItemsModel<UnitModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
-                return queryResult.GetActionResult();
-            }
-            catch (Exception ex)
-            {
-                VoidMethodResult errorResult = new VoidMethodResult();
-                errorResult.AddErrorMessage(MethodHelper.GetExceptionMessage(ex));
-                return errorResult.GetActionResult();
-            }
+            MethodResult<PagingItemsModel<UnitModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
         }
 
         /// <summary>
@@ -57,17 +48,8 @@ namespace Fsel.Course.Lcms.Api.Controllers
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.BadRequest)]
         public async Task<IActionResult> Get([FromRoute] Guid id)
         {
-            try
-            {
-                MethodResult<UnitModel> queryResult = await _mediator.Send(new GetUnitQuery { Id = id }).ConfigureAwait(false);
-                return queryResult.GetActionResult();
-            }
-            catch (Exception ex)
-            {
-                VoidMethodResult errorResult = new VoidMethodResult();
-                errorResult.AddErrorMessage(MethodHelper.GetExceptionMessage(ex));
-                return errorResult.GetActionResult();
-            }
+            MethodResult<UnitModel> queryResult = await _mediator.Send(new GetUnitQuery { Id = id }).ConfigureAwait(false);
+            return queryResult.GetActionResult();
         }
 
         /// <summary>
@@ -78,17 +60,8 @@ namespace Fsel.Course.Lcms.Api.Controllers
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.BadRequest)]
         public async Task<IActionResult> Create([FromBody] CreateUnitCommand command)
         {
-            try
-            {
-                MethodResult<UnitModel> queryResult = await _mediator.Send(command).ConfigureAwait(false);
-                return queryResult.GetActionResult();
-            }
-            catch (Exception ex)
-            {
-                VoidMethodResult errorResult = new VoidMethodResult();
-                errorResult.AddErrorMessage(MethodHelper.GetExceptionMessage(ex));
-                return errorResult.GetActionResult();
-            }
+            MethodResult<UnitModel> queryResult = await _mediator.Send(command).ConfigureAwait(false);
+            return queryResult.GetActionResult();
         }
 
         /// <summary>
@@ -99,18 +72,9 @@ namespace Fsel.Course.Lcms.Api.Controllers
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.BadRequest)]
         public async Task<IActionResult> Update([FromRoute] Guid id, [FromBody] UpdateUnitCommand command)
         {
-            try
-            {
-                command.Id = id;
-                MethodResult<UnitModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
-                return commandResult.GetActionResult();
-            }
-            catch (Exception ex)
-            {
-                VoidMethodResult errorResult = new VoidMethodResult();
-                errorResult.AddErrorMessage(MethodHelper.GetExceptionMessage(ex));
-                return errorResult.GetActionResult();
-            }
+            command.Id = id;
+            MethodResult<UnitModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
         }
 
         /// <summary>
@@ -121,17 +85,8 @@ namespace Fsel.Course.Lcms.Api.Controllers
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.BadRequest)]
         public async Task<IActionResult> Delete([FromRoute] Guid id)
         {
-            try
-            {
-                MethodResult<bool> commandResult = await _mediator.Send(new DeleteUnitCommand { Id = id }).ConfigureAwait(false);
-                return commandResult.GetActionResult();
-            }
-            catch (Exception ex)
-            {
-                VoidMethodResult errorResult = new VoidMethodResult();
-                errorResult.AddErrorMessage(MethodHelper.GetExceptionMessage(ex));
-                return errorResult.GetActionResult();
-            }
+            MethodResult<bool> commandResult = await _mediator.Send(new DeleteUnitCommand { Id = id }).ConfigureAwait(false);
+            return commandResult.GetActionResult();
         }
     }
 }

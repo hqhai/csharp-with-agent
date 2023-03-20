@@ -1,5 +1,7 @@
 using Fsel.Common.ActionResults;
+using Fsel.Common.Helpers;
 using Fsel.Sender.Application.Services;
+using Fsel.Sender.Domain.Enums.ErrorCodes;
 using Fsel.Sender.Domain.Models.Commands;
 using Fsel.Sender.Domain.Models.Entities;
 using Fsel.Sender.Domain.ValueSettings;
@@ -30,33 +32,31 @@ namespace Fsel.Sender.Application.Commands.SendEmailCmd
 
             if (request == null)
             {
-                methodResult.StatusCode = StatusCodes.Status401Unauthorized;
-                methodResult.AddErrorMessage("SendEmail Failes");
+                methodResult.StatusCode = StatusCodes.Status400BadRequest;
+                methodResult.AddError(nameof(EnumSendEmailErrorCode.SM01ER));
                 return methodResult;
             }
             else
             {
                 SendEmailModel sendEmail = new SendEmailModel();
                 sendEmail.Subject = request.Subject;
-                if (request.ToEmails == null || request.ToEmails.Any(e => e == "string"))
-                { }
-                else
+                if (request.ToEmails == null || !request.ToEmails.IsValidEmail())
                 {
-                    sendEmail.ToEmails = request.ToEmails;
                 }
-                if (request.BccEmails == null || request.BccEmails.Any(e => e == "string"))
-                { }
-                else
+                else if (request.CcEmails != null || !request.CcEmails.IsValidEmail())
                 {
-                    sendEmail.BccEmails = request.BccEmails;
+
                 }
-                if (request.CcEmails == null || request.CcEmails.Any(e => e == "string"))
-                { }
-                else
+                else if (request.BccEmails != null || !request.BccEmails.IsValidEmail())
                 {
-                    sendEmail.CcEmails = request.CcEmails;
+
                 }
+
+                sendEmail.ToEmails = request.ToEmails;
+                sendEmail.CcEmails = request.CcEmails;
+                sendEmail.BccEmails = request.BccEmails;
                 sendEmail.Content = request.Content;
+
                 var emailMessage = CreateEmailMessageAsync(sendEmail);
                 await Send(emailMessage);
             }
@@ -103,9 +103,9 @@ namespace Fsel.Sender.Application.Commands.SendEmailCmd
             using var client = new MailKit.Net.Smtp.SmtpClient();
             try
             {
-                client.Connect(_appSetting?.Smtp?.SmtpServer ?? string.Empty, _appSetting?.Smtp?.Port ?? 0, true);
+                await client.ConnectAsync(_appSetting?.Smtp?.SmtpServer ?? string.Empty, _appSetting?.Smtp?.Port ?? 0, true);
                 client.AuthenticationMechanisms.Remove("XOAUTH2");
-                client.Authenticate(_appSetting?.Smtp?.Username ?? string.Empty, _appSetting?.Smtp?.Password ?? string.Empty);
+                await client.AuthenticateAsync(_appSetting?.Smtp?.Username ?? string.Empty, _appSetting?.Smtp?.Password ?? string.Empty);
                 await client.SendAsync(Mailmessage);
             }
             catch (Exception)

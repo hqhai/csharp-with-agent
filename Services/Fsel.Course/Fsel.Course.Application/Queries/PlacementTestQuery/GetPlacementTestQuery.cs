@@ -34,7 +34,7 @@ namespace Fsel.Course.Application.Querys.PlacementTestQuery
             if (placementTest == null)
             {
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                methodResult.AddErrorMessage(
+                methodResult.AddError(
                     nameof(EnumPlacementTestErrorCode.PT01V),
                     new[] { MethodHelper.GenerateErrorResult(nameof(request.Id), request.Id) });
                 return methodResult;

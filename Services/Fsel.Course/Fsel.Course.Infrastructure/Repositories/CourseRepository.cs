@@ -1,4 +1,4 @@
-﻿using Fsel.Core.Base;
+using Fsel.Core.Base;
 using Fsel.Course.Domain.IRepositories;
 using Microsoft.EntityFrameworkCore;
 using EntityCourse = Fsel.Course.Domain.Entities.Course;
@@ -23,7 +23,7 @@ namespace Fsel.Course.Infrastructure.Repositories
             try
             {
                 return await Queryable
-                .Include(x => x.CourseUnitMockTests.Where(n => !n.IsDeleted)).FirstOrDefaultAsync(x => x.Id == id);
+                .Include(x => x.CourseUnitMockTests.Where(n => !n.IsDeleted)).Include(x => x.CourseTeachers.Where(c => !c.IsDeleted)).FirstOrDefaultAsync(x => x.Id == id);
             }
             catch (Exception)
             {

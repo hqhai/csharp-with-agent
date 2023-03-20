@@ -1,6 +1,8 @@
 using Fsel.Common.Enums;
 using Fsel.Core.Base.BaseModels;
+using Fsel.Course.Domain.Entities;
 using Fsel.Course.Domain.Enums;
+using Newtonsoft.Json;
 
 namespace Fsel.Course.Domain.Models.EntityModels
 {
