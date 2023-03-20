@@ -24,7 +24,10 @@ builder.Services.AddScoped<ITeacherRepository, TeacherRepository>();
 builder.Services.AddScoped<IParentRepository, ParentRepository>();
 builder.Services.AddScoped<IStudentRepository, StudentRepository>();
 builder.Services.AddScoped<IParentStudentRepository, ParentStudentRepository>();
-
+builder.Services.AddCors(policy =>
+{
+    policy.AddPolicy("OpenCorsPolicy", opt => opt.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod());
+});
 builder.AddRefitClients(typeof(ISenderService), appSetting?.Services?.SenderApiUrl);
 
 //App config
@@ -39,7 +42,7 @@ if (app.Environment.IsDevelopment())
 //app configurations
 
 app.UseHttpsRedirection();
-
+app.UseCors("OpenCorsPolicy");
 app.UseAuthorization();
 
 app.MapControllers();
