@@ -56,7 +56,6 @@ namespace Fsel.Course.Application.Queries.VideoQuery
                                 Exercises = x.TimeCodeExercises.Select(n => n.Exercise).Select(n => new ExerciseModel
                                 {
                                     Id = n.Id,
-                                    QuestionType = n.QuestionType,
                                     MediaPost = n.MediaPost,
                                     CourseSkill = n.CourseSkill,
                                     Questions = n.ExerciseQuestions.Select(m => m.Question).Select(m => new QuestionModel()

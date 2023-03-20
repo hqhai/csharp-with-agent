@@ -7,8 +7,6 @@ namespace Fsel.Course.Domain.Models.EntityModels
     {
         public string? Name { get; set; }
 
-        public EnumQuestionType QuestionType { get; set; }
-
         public string? MediaPost { get; set; }
 
         public EnumCourseSkill CourseSkill { get; set; }

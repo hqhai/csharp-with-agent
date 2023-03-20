@@ -16,11 +16,6 @@ namespace Fsel.Course.Domain.Entities
         public string? Name { get; set; }
 
         /// <summary>
-        /// Loại bài tập
-        /// </summary>
-        public EnumQuestionType QuestionType { get; set; }
-
-        /// <summary>
         /// Media Post
         /// </summary>
         [MaxLength(1000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
