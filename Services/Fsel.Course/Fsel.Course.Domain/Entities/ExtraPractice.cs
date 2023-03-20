@@ -2,6 +2,7 @@
 
 using System.ComponentModel.DataAnnotations;
 using Fsel.Common.Enums;
+using Fsel.Common.Enums.ErrorCodes;
 using Fsel.Core.Entities;
 using Fsel.Course.Domain.Enums;
 using Fsel.Course.Domain.Enums.ErrorCodes;
@@ -13,20 +14,20 @@ namespace Fsel.Course.Domain.Entities
         /// <summary>
         /// Tên ExtraPractice
         /// </summary>
-        [Required(ErrorMessage = nameof(EnumExtraPractiveErrorCode.EP01C))]
-        [MaxLength(250, ErrorMessage = nameof(EnumExtraPractiveErrorCode.EP02C))]
+        [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
+        [MaxLength(250, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? Name { get; set; }
 
         /// <summary>
         /// Nội dung ExtraPractice
         /// </summary>
-        [MaxLength(1000, ErrorMessage = nameof(EnumExtraPractiveErrorCode.EP03C))]
+        [MaxLength(1000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? InstructionContent { get; set; }
 
         /// <summary>
         /// File Link
         /// </summary>
-        [MaxLength(1000, ErrorMessage = nameof(EnumExtraPractiveErrorCode.EP04C))]
+        [MaxLength(1000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? FilePath { get; set; }
 
         public bool IsActive { get; set; }

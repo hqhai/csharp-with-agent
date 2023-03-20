@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Fsel.Common.Enums.ErrorCodes;
 using Fsel.Common.Helpers;
 using Fsel.Core.Entities;
 using Fsel.Course.Domain.Enums;
@@ -16,8 +17,8 @@ namespace Fsel.Course.Domain.Entities
 
         public bool IsSave { get; set; }
 
-        [Required(ErrorMessage = nameof(EnumQuestionErrorCode.Q01C))]
-        [MaxLength(1000, ErrorMessage = nameof(EnumQuestionErrorCode.Q03C))]
+        [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
+        [MaxLength(1000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? ConfigStr { get; set; }
 
         [NotMapped]

@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using Fsel.Common.Enums.ErrorCodes;
 using Fsel.Core.Entities;
 using Fsel.Course.Domain.Enums;
 using Fsel.Course.Domain.Enums.ErrorCodes;
@@ -10,8 +11,8 @@ namespace Fsel.Course.Domain.Entities
         /// <summary>
         /// Tên Excercise
         /// </summary>
-        [Required(ErrorMessage = nameof(EnumExcerciseErrorCode.E01C))]
-        [MaxLength(250, ErrorMessage = nameof(EnumExcerciseErrorCode.E02C))]
+        [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
+        [MaxLength(250, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? Name { get; set; }
 
         /// <summary>
@@ -22,7 +23,7 @@ namespace Fsel.Course.Domain.Entities
         /// <summary>
         /// Media Post
         /// </summary>
-        [MaxLength(1000, ErrorMessage = nameof(EnumExcerciseErrorCode.E03C))]
+        [MaxLength(1000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? MediaPost { get; set; }
 
         /// <summary>
