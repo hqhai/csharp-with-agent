@@ -2,7 +2,6 @@ using System.Net;
 using Fsel.Common.ActionResults;
 using Fsel.Common.Constants;
 using Fsel.Common.Enums;
-using Fsel.Common.Helpers;
 using Fsel.Identity.Application.Commands.AuthCmd;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -35,17 +34,8 @@ namespace Fsel.Identity.Api.Controllers
         [Authorize(Roles = nameof(EnumRole.Student))]
         public async Task<IActionResult> ChangePassword([FromBody] ResetPasswordCommand command)
         {
-            try
-            {
-                MethodResult<bool> commandResult = await _mediator.Send(command).ConfigureAwait(false);
-                return commandResult.GetActionResult();
-            }
-            catch (Exception ex)
-            {
-                VoidMethodResult errorCommandResult = new VoidMethodResult();
-                errorCommandResult.AddErrorMessage(MethodHelper.GetExceptionMessage(ex));
-                return errorCommandResult.GetActionResult();
-            }
+            MethodResult<bool> commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
         }
     }
 }

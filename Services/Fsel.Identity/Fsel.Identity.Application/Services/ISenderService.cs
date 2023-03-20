@@ -11,9 +11,9 @@ namespace Fsel.Identity.Application.Services
 
     public class SendEmailCommandModel
     {
-        public List<string> ToEmails { get; set; } = new List<string>();
-        public List<string> BccEmails { get; set; } = new List<string>();
-        public List<string> CcEmails { get; set; } = new List<string>();
+        public IList<string> ToEmails { get; set; } = new List<string>();
+        public IList<string> BccEmails { get; set; } = new List<string>();
+        public IList<string> CcEmails { get; set; } = new List<string>();
         public string? Subject { get; set; }
         public string? Content { get; set; }
     }

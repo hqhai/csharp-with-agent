@@ -325,6 +325,84 @@ namespace Fsel.Identity.Infrastructure.Migrations
                     b.ToTable("Students");
                 });
 
+            modelBuilder.Entity("Fsel.Identity.Domain.Entities.Teacher", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(0);
+
+                    b.Property<string>("CertificationPath")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(107);
+
+                    b.Property<string>("CreatedFullName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(104);
+
+                    b.Property<Guid>("CreatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(101);
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(109);
+
+                    b.Property<string>("DeletedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(106);
+
+                    b.Property<Guid?>("DeletedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(103);
+
+                    b.Property<Guid>("HumanId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit")
+                        .HasColumnOrder(110);
+
+                    b.Property<string>("PassportPath")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<string>("PoliceClearancePath")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<string>("UniversityDegreePath")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(108);
+
+                    b.Property<string>("UpdatedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(105);
+
+                    b.Property<Guid?>("UpdatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(102);
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("HumanId")
+                        .IsUnique();
+
+                    b.ToTable("Teachers");
+                });
+
             modelBuilder.Entity("Fsel.Identity.Domain.Entities.User", b =>
                 {
                     b.Property<string>("Id")
@@ -556,38 +634,38 @@ namespace Fsel.Identity.Infrastructure.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "3a715a55-6a0a-47a9-b810-f8f1108514b4",
+                            Id = "c8c28631-0bc0-4166-b062-4aff0d38e70c",
                             Name = "MasterAdmin",
                             NormalizedName = "MasterAdmin"
                         },
                         new
                         {
-                            Id = "1e63ac94-5e95-4fe1-a534-548bb972eabf",
+                            Id = "69976022-5dbb-4292-bab6-e94b6701061e",
                             Name = "Admin",
                             NormalizedName = "Admin"
                         },
                         new
                         {
-                            Id = "bab858f3-f52a-47cd-a9fc-af5d02bebd79",
+                            Id = "8d89a29a-b40a-4045-b0ed-679d7a5ff990",
                             Name = "CSO",
                             NormalizedName = "CSO"
                         },
                         new
                         {
-                            Id = "97f5de28-9a99-415d-8932-f2918d36e6fa",
-                            Name = "CSO",
+                            Id = "1eeba88e-ed0c-48c4-8d7e-a17c5a2cc3fe",
+                            Name = "Teacher",
                             NormalizedName = "Teacher"
                         },
                         new
                         {
-                            Id = "755c38e5-3f70-4458-83c6-b85f486aeeb1",
-                            Name = "CSO",
+                            Id = "24ce207d-8732-4a32-83ef-c5f05805f124",
+                            Name = "Parent",
                             NormalizedName = "Parent"
                         },
                         new
                         {
-                            Id = "d206fb0d-86af-4c16-9fc4-502efad2dbf2",
-                            Name = "CSO",
+                            Id = "069ae2a9-2729-4905-a8fa-c6c9f9172d1d",
+                            Name = "Student",
                             NormalizedName = "Student"
                         });
                 });
@@ -633,6 +711,17 @@ namespace Fsel.Identity.Infrastructure.Migrations
                     b.HasOne("Fsel.Identity.Domain.Entities.Human", "Human")
                         .WithOne("Student")
                         .HasForeignKey("Fsel.Identity.Domain.Entities.Student", "HumanId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Human");
+                });
+
+            modelBuilder.Entity("Fsel.Identity.Domain.Entities.Teacher", b =>
+                {
+                    b.HasOne("Fsel.Identity.Domain.Entities.Human", "Human")
+                        .WithOne("Teacher")
+                        .HasForeignKey("Fsel.Identity.Domain.Entities.Teacher", "HumanId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -695,6 +784,8 @@ namespace Fsel.Identity.Infrastructure.Migrations
                     b.Navigation("Parent");
 
                     b.Navigation("Student");
+
+                    b.Navigation("Teacher");
                 });
 
             modelBuilder.Entity("Fsel.Identity.Domain.Entities.Parent", b =>

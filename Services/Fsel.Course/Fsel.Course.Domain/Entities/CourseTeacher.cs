@@ -4,8 +4,8 @@ namespace Fsel.Course.Domain.Entities
 {
     using System;
     using System.ComponentModel.DataAnnotations;
+    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Entities;
-    using Fsel.Course.Domain.Enums.ErrorCodes;
 
     public class CourseTeacher : Entity
     {
@@ -13,7 +13,19 @@ namespace Fsel.Course.Domain.Entities
 
         public Guid TeacherId { get; set; }
 
-        [Required(ErrorMessage = nameof(EnumCourseErrorCode.C01V))]
+        [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         public Guid CourseId { get; set; }
+
+        [MaxLength(1000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
+        public string? Nationality { get; set; }
+
+        [MaxLength(1000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
+        public string? Deggree { get; set; }
+
+        [MaxLength(1000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
+        public string? Experience { get; set; }
+
+        [MaxLength(1000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
+        public string? Strength { get; set; }
     }
 }

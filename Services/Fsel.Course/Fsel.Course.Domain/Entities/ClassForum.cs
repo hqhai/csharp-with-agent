@@ -1,5 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using DataAnnotationsExtensions;
+using Fsel.Common.Enums.ErrorCodes;
 using Fsel.Core.Entities;
 using Fsel.Course.Domain.Enums;
 using Fsel.Course.Domain.Enums.ErrorCodes;
@@ -11,8 +13,8 @@ namespace Fsel.Course.Domain.Entities
         /// <summary>
         /// Nội dung
         /// </summary>
-        [Required(ErrorMessage = nameof(EnumClassForumErrorCode.CF01C))]
-        [MaxLength(250, ErrorMessage = nameof(EnumClassForumErrorCode.CF02C))]
+        [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
+        [MaxLength(250, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? Title { get; set; }
 
         /// <summary>
@@ -23,26 +25,25 @@ namespace Fsel.Course.Domain.Entities
         /// <summary>
         /// Số từ giới hạn
         /// </summary>
-        [Range(1, int.MaxValue, ErrorMessage = nameof(EnumClassForumErrorCode.CF04C))]
+        [Min(1, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
         public long TaggetWordLimit { get; set; }
 
         /// <summary>
         /// Thời gian giới hạn
         /// </summary>
-        [Range(1, int.MaxValue, ErrorMessage = nameof(EnumClassForumErrorCode.CF05C))]
-        public long TaggetTimeLimitTicks { get; set; }
+        [Min(1, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
+        public long TaggetTimeLimit { get; set; }
 
         [NotMapped]
-        public TimeSpan TaggetTimeLimit
+        public TimeSpan TaggetTimeSpanLimit
         {
-            get { return TimeSpan.FromTicks(TaggetTimeLimitTicks); }
-            set { TaggetTimeLimitTicks = value.Ticks; }
+            get { return TimeSpan.FromTicks(TaggetTimeLimit); }
         }
 
         /// <summary>
         /// Media Post
         /// </summary>
-        [MaxLength(1000, ErrorMessage = nameof(EnumClassForumErrorCode.CF03C))]
+        [MaxLength(1000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? MediaPost { get; set; }
 
         public bool IsActive { get; set; }

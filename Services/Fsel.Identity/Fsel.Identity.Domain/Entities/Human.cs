@@ -4,27 +4,28 @@ namespace Fsel.Identity.Domain.Entities
 {
     using System;
     using System.ComponentModel.DataAnnotations;
+    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Entities;
     using Fsel.Identity.Domain.Enums;
     using Fsel.Identity.Domain.Enums.ErrorCodes;
 
     public class Human : Entity
     {
-        [Required(ErrorMessage = nameof(EnumHumanErrorCode.HM01C))]
-        [MaxLength(250, ErrorMessage = nameof(EnumHumanErrorCode.HM02C))]
+        [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
+        [MaxLength(250, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? FullName { get; set; }
 
         public DateTime? Birthday { get; set; }
 
         public string? PhoneNumber { get; set; }
 
-        [MaxLength(250, ErrorMessage = nameof(EnumHumanErrorCode.HM02C))]
+        [MaxLength(250, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? Address { get; set; }
 
         [EmailAddress]
         public string? Email { get; set; }
 
-        [MaxLength(1000, ErrorMessage = nameof(EnumHumanErrorCode.HM03C))]
+        [MaxLength(1000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? AvatarPath { get; set; }
 
         public EnumGender? Gender { get; set; }
@@ -34,5 +35,6 @@ namespace Fsel.Identity.Domain.Entities
 
         public Parent? Parent { get; set; }
         public Student? Student { get; set; }
+        public Teacher? Teacher { get; set; }
     }
 }

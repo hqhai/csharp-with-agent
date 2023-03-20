@@ -41,10 +41,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             var user = await _userManager.FindByEmailAsync(request?.Email ?? string.Empty);
             if (user != null && user.EmailConfirmed)
             {
-                methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                methodResult.AddErrorMessage(
-                    nameof(EnumAuthErrorCode.AU14ER),
-                    new[] { MethodHelper.GenerateErrorResult(nameof(request.Email), request?.Email) });
+                methodResult.AddErrorBadRequest(nameof(EnumAuthErrorCode.AU04V), nameof(request.Email), request?.Email);
                 return methodResult;
             }
 
@@ -80,8 +77,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
 
                     if (!result.Succeeded)
                     {
-                        methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                        methodResult.AddErrorMessage(nameof(EnumAuthErrorCode.AU10ER));
+                        methodResult.AddErrorBadRequest(nameof(EnumAuthErrorCode.AU10ER), nameof(request.Password), request?.Password);
                         return methodResult;
                     }
                     await _userManager.AddToRoleAsync(user, request?.Role.ToString() ?? string.Empty);
@@ -92,8 +88,9 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
 
                     if (!sendResult.IsOK)
                     {
-                        methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                        methodResult.AddErrorMessage(nameof(EnumAuthErrorCode.AU10ER));
+                        scope.Dispose();
+                        methodResult.StatusCode = (int)sendResult.StatusCode;
+                        methodResult.AddResultFromErrorList(sendResult.Content?.ErrorMessages);
                         return methodResult;
                     }
                     scope.Complete();

@@ -8,7 +8,7 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         CF01V,
 
         /// <summary>
-        /// Video not is correct
+        /// ClassForum not is correct
         /// </summary>
         CF03V,
 

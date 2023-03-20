@@ -8,6 +8,7 @@ using Fsel.Identity.Infrastructure.Configs;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 
 namespace Fsel.Identity.Infrastructure
 {
@@ -19,9 +20,11 @@ namespace Fsel.Identity.Infrastructure
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            SeedRoles(modelBuilder);
+            ArgumentNullException.ThrowIfNull(modelBuilder);
+            //SeedRoles(modelBuilder);
 
             modelBuilder.ApplyConfiguration(new HumanEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new TeacherEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new ParentEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new ParentStudentEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new StudentEntityTypeConfiguration());
@@ -35,6 +38,7 @@ namespace Fsel.Identity.Infrastructure
         public override DbSet<User> Users { get; set; }
         public DbSet<Role> Roles { get; set; }
         public DbSet<Human> Humans { get; set; }
+        public DbSet<Teacher> Teachers { get; set; }
         public DbSet<Student> Students { get; set; }
         public DbSet<Parent> Parents { get; set; }
         public DbSet<ParentStudent> ParentStudents { get; set; }
@@ -43,6 +47,8 @@ namespace Fsel.Identity.Infrastructure
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
+            ArgumentNullException.ThrowIfNull(optionsBuilder);
+
             if (!optionsBuilder.IsConfigured)
             {
                 IConfigurationRoot configuration = new ConfigurationBuilder()
@@ -65,7 +71,6 @@ namespace Fsel.Identity.Infrastructure
                     new Role() { Name = EnumRole.Teacher.ToString(), NormalizedName = EnumRole.Teacher.ToString() },
                     new Role() { Name = EnumRole.Parent.ToString(), NormalizedName = EnumRole.Parent.ToString() },
                     new Role() { Name = EnumRole.Student.ToString(), NormalizedName = EnumRole.Student.ToString() }
-
                 );
         }
     }

@@ -15,5 +15,7 @@ namespace Fsel.Course.Domain.Models.CommandModels.Courses
 
         public EnumCourseLevel CourseLevel { get; set; }
         public IList<UpdateCourseUnitMockTestCommandModel>? CourseUnitMockTests { get; set; }
+
+        public IList<CreateCourseTeacherCommandModel>? CourseTeachers { get; set; }
     }
 }

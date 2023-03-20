@@ -1,6 +1,7 @@
 using System.Reflection;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Newtonsoft.Json.Serialization;
 
 namespace Fsel.Common.Helpers
 {
@@ -106,9 +107,14 @@ namespace Fsel.Common.Helpers
             return new string(arr);
         }
 
-        public static string Serialize(this object? data)
+        public static string Serialize(this object? data, bool isCamelCase = false)
         {
-            string jsonString = JsonConvert.SerializeObject(data);
+            var serializerSettings = new JsonSerializerSettings();
+            if (isCamelCase)
+            {
+                serializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
+            }
+            string jsonString = JsonConvert.SerializeObject(data, serializerSettings);
             return jsonString;
         }
 

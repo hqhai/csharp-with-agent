@@ -11,8 +11,8 @@ var builder = WebApplication.CreateBuilder(args);
 var appSetting = builder.AddAppSettings<AppSetting>();
 builder.AddServices();
 builder.AddSwaggerGens(appSetting);
-builder.AddDbContexts<UserDbContext>();
 builder.AddAuthentication();
+builder.AddDbContexts<UserDbContext>();
 
 builder.Services.AddIdentity<User, Role>()
         .AddEntityFrameworkStores<UserDbContext>()
@@ -20,10 +20,14 @@ builder.Services.AddIdentity<User, Role>()
 
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IHumanRepository, HumanRepository>();
+builder.Services.AddScoped<ITeacherRepository, TeacherRepository>();
 builder.Services.AddScoped<IParentRepository, ParentRepository>();
 builder.Services.AddScoped<IStudentRepository, StudentRepository>();
 builder.Services.AddScoped<IParentStudentRepository, ParentStudentRepository>();
-
+builder.Services.AddCors(policy =>
+{
+    policy.AddPolicy("OpenCorsPolicy", opt => opt.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod());
+});
 builder.AddRefitClients(typeof(ISenderService), appSetting?.Services?.SenderApiUrl);
 
 //App config
@@ -38,7 +42,7 @@ if (app.Environment.IsDevelopment())
 //app configurations
 
 app.UseHttpsRedirection();
-
+app.UseCors("OpenCorsPolicy");
 app.UseAuthorization();
 
 app.MapControllers();

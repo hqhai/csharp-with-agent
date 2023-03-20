@@ -16,19 +16,23 @@ builder.AddSwaggerGens(appSetting);
 builder.AddAuthenticationJwtBearers(appSetting);
 builder.AddDbContexts<UserDbContext>();
 
-builder.Services.AddScoped<IUserRepository, UserRepository>();
-builder.Services.AddScoped<IHumanRepository, HumanRepository>();
-builder.Services.AddScoped<IParentRepository, ParentRepository>();
-builder.Services.AddScoped<IStudentRepository, StudentRepository>();
-builder.Services.AddScoped<IParentStudentRepository, ParentStudentRepository>();
-builder.Services.AddScoped<IUserRepository, UserRepository>();
-builder.AddRefitClients(typeof(ISenderService), appSetting?.Services?.SenderApiUrl);
-
 builder.Services.AddIdentity<User, Role>()
         .AddEntityFrameworkStores<UserDbContext>()
         .AddDefaultTokenProviders();
 
-var app = builder.Build();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IHumanRepository, HumanRepository>();
+builder.Services.AddScoped<ITeacherRepository, TeacherRepository>();
+builder.Services.AddScoped<IParentRepository, ParentRepository>();
+builder.Services.AddScoped<IStudentRepository, StudentRepository>();
+builder.Services.AddScoped<IParentStudentRepository, ParentStudentRepository>();
+builder.Services.AddCors(policy =>
+{
+    policy.AddPolicy("OpenCorsPolicy", opt => opt.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod());
+});
+builder.AddRefitClients(typeof(ISenderService), appSetting?.Services?.SenderApiUrl);
 
+var app = builder.Build();
+app.UseCors("OpenCorsPolicy");
 app.UseServices();
 app.Run();
