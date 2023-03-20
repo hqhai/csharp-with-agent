@@ -46,7 +46,7 @@ namespace Fsel.Course.Application.Commands.UnitCmd
             if (unit == null)
             {
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                methodResult.AddErrorMessage(
+                methodResult.AddError(
                     nameof(EnumUnitErrorCode.U01V),
                     new[] { MethodHelper.GenerateErrorResult(nameof(request.Id), request?.Id) });
                 return methodResult;
@@ -56,7 +56,7 @@ namespace Fsel.Course.Application.Commands.UnitCmd
             if (isUnitUsed)
             {
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                methodResult.AddErrorMessage(
+                methodResult.AddError(
                     nameof(EnumUnitErrorCode.U02V),
                     new[] { MethodHelper.GenerateErrorResult(nameof(request.Id), request.Id) });
                 return methodResult;
@@ -65,7 +65,7 @@ namespace Fsel.Course.Application.Commands.UnitCmd
             if (request.LessonIds == null)
             {
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                methodResult.AddErrorMessage(
+                methodResult.AddError(
                     nameof(EnumUnitErrorCode.U03V),
                     new[] { MethodHelper.GenerateErrorResult(nameof(request.LessonIds), request.LessonIds) });
                 return methodResult;
@@ -74,7 +74,7 @@ namespace Fsel.Course.Application.Commands.UnitCmd
             if (_lessonRepository.IsIdsInValid(request.LessonIds))
             {
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                methodResult.AddErrorMessage(
+                methodResult.AddError(
                     nameof(EnumLessonErrorCode.LS03V));
 
                 return methodResult;
@@ -84,7 +84,7 @@ namespace Fsel.Course.Application.Commands.UnitCmd
             if (!checkMockTest)
             {
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                methodResult.AddErrorMessage(
+                methodResult.AddError(
                 nameof(EnumMockTestErrorCode.MT04V));
                 return methodResult;
             }

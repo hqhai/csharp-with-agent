@@ -59,7 +59,7 @@ namespace Fsel.Course.Application.Commands.LessonCmd
             if (lesson == null)
             {
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                methodResult.AddErrorMessage(
+                methodResult.AddError(
                     nameof(EnumLessonErrorCode.LS01V),
                     new[] { MethodHelper.GenerateErrorResult(nameof(request.Id), request?.Id) });
                 return methodResult;
@@ -75,14 +75,14 @@ namespace Fsel.Course.Application.Commands.LessonCmd
             if (lesson.ClassForum == null)
             {
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                methodResult.AddErrorMessage(nameof(EnumClassForumErrorCode.CF03V));
+                methodResult.AddError(nameof(EnumClassForumErrorCode.CF03V));
                 return methodResult;
             }
 
             if (lesson.LessonExtraPractices == null)
             {
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                methodResult.AddErrorMessage(
+                methodResult.AddError(
                     nameof(EnumLessonExtraPracticeErrorCode.ELP03V));
                 return methodResult;
             }
@@ -90,7 +90,7 @@ namespace Fsel.Course.Application.Commands.LessonCmd
             if (lesson.LessonHomeWorks == null)
             {
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                methodResult.AddErrorMessage(
+                methodResult.AddError(
                     nameof(EnumeLessonHomeWordErrorCode.EHW03V));
                 return methodResult;
             }
@@ -98,7 +98,7 @@ namespace Fsel.Course.Application.Commands.LessonCmd
             if (lesson.LessonVideos == null)
             {
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                methodResult.AddErrorMessage(
+                methodResult.AddError(
                     nameof(EnumLessonVideoErrorCode.LV03V));
                 return methodResult;
             }
@@ -108,7 +108,7 @@ namespace Fsel.Course.Application.Commands.LessonCmd
             if (isLessonUsed)
             {
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                methodResult.AddErrorMessage(
+                methodResult.AddError(
                     nameof(EnumLessonErrorCode.LS02V),
                     new[] { MethodHelper.GenerateErrorResult(nameof(request.Id), request?.Id) });
                 return methodResult;

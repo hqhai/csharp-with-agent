@@ -34,7 +34,7 @@ namespace Fsel.Course.Application.Queries.UnitQuery
             if (unit == null)
             {
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                methodResult.AddErrorMessage(
+                methodResult.AddError(
                     nameof(EnumUnitErrorCode.U01V),
                     new[] { MethodHelper.GenerateErrorResult(nameof(request.Id), request.Id) });
                 return methodResult;

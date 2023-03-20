@@ -1,5 +1,3 @@
-using System.Text.Json.Serialization;
-using Fsel.Common.Helpers;
 using Fsel.Core.Base.BaseModels;
 using Fsel.Course.Domain.Enums;
 
@@ -12,13 +10,8 @@ namespace Fsel.Course.Domain.Models.CommandModels.ClassForums
         public EnumGradingStyle GradingStyle { get; set; }
 
         public long TaggetWordLimit { get; set; }
-        public string? TaggetTimeLimitStr { get; set; }
 
-        [JsonIgnore]
-        public TimeSpan TaggetTimeLimit
-        {
-            get { return DateTimeHelper.ConvertTimeSpan(TaggetTimeLimitStr); }
-        }
+        public long TaggetTimeLimit { get; set; }
 
         public string? MediaPost { get; set; }
 

@@ -39,26 +39,30 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
 
             #region Validation
 
-            if (request.Username == null || request.Password == null)
+            if (request.Username == null)
             {
-                methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                methodResult.AddErrorMessage(nameof(EnumAuthErrorCode.AU04ER), new[] { nameof(request.Username), nameof(request.Password) });
+                methodResult.AddErrorBadRequest(nameof(EnumAuthErrorCode.AU04ER),
+                    new Error(nameof(request.Username)), new Error(nameof(request.Password)));
                 return methodResult;
             }
 
             var user = await _userManager.FindByNameAsync(request.Username) ?? await _userManager.FindByEmailAsync(request.Username) ?? await _userManager.Users.FirstOrDefaultAsync(x => x.PhoneNumber == request.Username);
             if (user == null)
             {
-                methodResult.StatusCode = StatusCodes.Status401Unauthorized;
-                methodResult.AddErrorMessage(nameof(EnumAuthErrorCode.AU05ER), new[] { nameof(request.Username), nameof(request.Password) });
+                methodResult.AddError(
+                    StatusCodes.Status401Unauthorized,
+                    nameof(EnumAuthErrorCode.AU05ER),
+                    new Error(nameof(request.Username), request.Username), new Error(nameof(request.Password), request.Password));
                 return methodResult;
             }
 
             var result = await _signInManager.PasswordSignInAsync(user, request.Password, false, false);
             if (!result.Succeeded)
             {
-                methodResult.StatusCode = StatusCodes.Status401Unauthorized;
-                methodResult.AddErrorMessage(nameof(EnumAuthErrorCode.AU05ER), new[] { nameof(request.Username), nameof(request.Password) });
+                methodResult.AddError(
+                    StatusCodes.Status401Unauthorized,
+                    nameof(EnumAuthErrorCode.AU05ER),
+                    new Error(nameof(request.Username), request.Username), new Error(nameof(request.Password), request.Password));
                 return methodResult;
             }
 

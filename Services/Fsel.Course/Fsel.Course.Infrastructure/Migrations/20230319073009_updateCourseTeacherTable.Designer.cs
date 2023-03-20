@@ -4,6 +4,7 @@ using Fsel.Course.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fsel.Course.Infrastructure.Migrations
 {
     [DbContext(typeof(CourseDbContext))]
-    partial class CourseDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230319073009_updateCourseTeacherTable")]
+    partial class updateCourseTeacherTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -80,7 +83,7 @@ namespace Fsel.Course.Infrastructure.Migrations
                         .HasMaxLength(1000)
                         .HasColumnType("nvarchar(1000)");
 
-                    b.Property<long>("TaggetTimeLimit")
+                    b.Property<long>("TaggetTimeLimitTicks")
                         .HasColumnType("bigint");
 
                     b.Property<long>("TaggetWordLimit")
@@ -1534,10 +1537,10 @@ namespace Fsel.Course.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(103);
 
-                    b.Property<long>("DisplayTime")
+                    b.Property<long>("DisplayTimeTicks")
                         .HasColumnType("bigint");
 
-                    b.Property<long>("ExecutionTime")
+                    b.Property<long>("ExecutionTimeTicks")
                         .HasColumnType("bigint");
 
                     b.Property<bool>("IsDeleted")

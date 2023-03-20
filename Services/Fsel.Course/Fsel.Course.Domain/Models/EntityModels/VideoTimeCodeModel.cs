@@ -13,9 +13,9 @@ namespace Fsel.Course.Domain.Models.EntityModels
 
         public Guid VideoId { get; set; }
 
-        public TimeSpan DisplayTime { get; set; }
+        public long DisplayTime { get; set; }
 
-        public TimeSpan ExecutionTime { get; set; }
+        public long ExecutionTime { get; set; }
 
         public ICollection<ExcerciseModel>? Excercises { get; set; }
     }
