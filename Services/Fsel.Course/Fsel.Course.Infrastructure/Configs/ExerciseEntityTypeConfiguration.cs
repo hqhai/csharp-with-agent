@@ -10,12 +10,6 @@ namespace Fsel.Course.Infrastructure.Configs
     {
         public void Configure(EntityTypeBuilder<Exercise> builder)
         {
-            builder.Property(e => e.QuestionType)
-                .HasMaxLength(100)
-                .HasConversion(
-                    v => v.ToString(),
-                    v => v.EnumParse<EnumQuestionType>());
-
             builder.Property(e => e.CourseSkill)
                .HasMaxLength(100)
                .HasConversion(

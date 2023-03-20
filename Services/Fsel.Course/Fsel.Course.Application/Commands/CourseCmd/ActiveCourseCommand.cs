@@ -48,7 +48,7 @@ namespace Fsel.Course.Application.Commands.CourseCmd
 
             if (course.Status != EnumCourseStatus.New)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.C03V), nameof(course.Status), course.Status);
+                methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.C02V), nameof(course.Status), course.Status);
                 return methodResult;
             }
 
