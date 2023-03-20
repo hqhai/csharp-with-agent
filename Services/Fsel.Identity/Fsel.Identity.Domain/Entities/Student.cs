@@ -28,6 +28,6 @@ namespace Fsel.Identity.Domain.Entities
 
         public Guid HumanId { get; set; }
 
-        public List<ParentStudent> ParentStudents { get; set; } = new List<ParentStudent>();
+        public IList<ParentStudent> ParentStudents { get; set; } = new List<ParentStudent>();
     }
 }
