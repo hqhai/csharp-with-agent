@@ -2,6 +2,7 @@ using System.Linq;
 using AutoMapper;
 using Fsel.Common.ActionResults;
 using Fsel.Core.Base.BaseModels;
+using Fsel.Course.Application.Services;
 using Fsel.Course.Domain.Entities;
 using Fsel.Course.Domain.IRepositories;
 using Fsel.Course.Domain.Models.EntityModels;
@@ -20,22 +21,16 @@ namespace Fsel.Course.Application.Queries.LessonQuery
     {
         private readonly IMapper _mapper;
         private readonly ILessonRepository _lessonRepository;
-        private readonly ILessonVideoRepository _lessonVideoRepository;
-        private readonly IVideoRepository _videoRepository;
-        private readonly IVideoTimeCodeRepository _videoTimeCodeRepository;
+        private readonly IUserService _userService;
 
         public SearchLessonQueryHandler(IMapper mapper
             , ILessonRepository lessonRepository
-            , ILessonVideoRepository lessonVideoRepository
-            , IVideoRepository videoRepository
-            , IVideoTimeCodeRepository videoTimeCodeRepository
+            , IUserService userService
             )
         {
             _mapper = mapper;
             _lessonRepository = lessonRepository;
-            _lessonVideoRepository = lessonVideoRepository;
-            _videoRepository = videoRepository;
-            _videoTimeCodeRepository = videoTimeCodeRepository;
+            _userService = userService;
         }
 
         public async Task<MethodResult<PagingItemsModel<LessonSearchModel>>> Handle(SearchLessonQuery request, CancellationToken cancellationToken)
@@ -63,6 +58,7 @@ namespace Fsel.Course.Application.Queries.LessonQuery
                         {
                             Id = x.Id,
                             Name = x.Name,
+                            TeacherId = x.TeacherId,
                             CourseLevel = x.CourseLevel,
                             TimeCodeType = x.LessonVideos.Where(y => y.Video != null)
                                                         .Select(y => y.Video)
@@ -75,6 +71,17 @@ namespace Fsel.Course.Application.Queries.LessonQuery
                             UpdatedFullName = x.UpdatedFullName,
                             IsActive = x.IsActive
                         });
+
+            var teachers = await _userService.GetTeacherByIdsAsync(new GetTeacherByIdsQueryModel { Ids = lessonQuery.Select(x => x.TeacherId ?? Guid.Empty).ToList() });
+
+            if (teachers.IsSuccessStatusCode)
+            {
+                foreach (var item in lessonQuery)
+                {
+                    item.TeacherName = teachers.Content?.Result?.FirstOrDefault(x => x.Id == item.Id)?.Human.FullName;
+                }
+            }
+
             //Keyword
             if (!string.IsNullOrEmpty(request.Keyword))
             {
