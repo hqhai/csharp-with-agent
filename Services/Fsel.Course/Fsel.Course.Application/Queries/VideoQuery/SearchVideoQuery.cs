@@ -44,8 +44,8 @@ namespace Fsel.Course.Application.Queries.VideoQuery
             var videoQuery = _videoRepository.Queryable
                         .Include(x => x.LessonVideos.Where(y => !y.IsDeleted))
                         .Include(video => video.VideoTimeCodes.Where(x => !x.IsDeleted))
-                        .ThenInclude(videoTimeCode => videoTimeCode.TimeCodeExcercises.Where(x => !x.IsDeleted && x.Excercise != null))
-                        .ThenInclude(timeCodeExcercise => timeCodeExcercise.Excercise)
+                        .ThenInclude(videoTimeCode => videoTimeCode.TimeCodeExercises.Where(x => !x.IsDeleted && x.Exercise != null))
+                        .ThenInclude(timeCodeExercise => timeCodeExercise.Exercise)
                         .Where(x => x.Type == EnumVideoType.Lesson)
                         .Where(x => !request.Level.HasValue || x.CourseLevel == request.Level.Value)
                         .Where(x => !request.TeacherId.HasValue || x.TeacherId == request.TeacherId.Value)
@@ -60,11 +60,11 @@ namespace Fsel.Course.Application.Queries.VideoQuery
                             CreatedFullName = video.CreatedFullName,
                             UpdatedDate = video.UpdatedDate,
                             UpdatedFullName = video.UpdatedFullName,
-                            Excercises = video.VideoTimeCodes.SelectMany(videoTimeCode => videoTimeCode.TimeCodeExcercises)
-                                                                     .Select(timeCodeExcercise => timeCodeExcercise.Excercise)
+                            Exercises = video.VideoTimeCodes.SelectMany(videoTimeCode => videoTimeCode.TimeCodeExercises)
+                                                                     .Select(timeCodeExercise => timeCodeExercise.Exercise)
                                                                      .GroupBy(excercise => excercise.CourseSkill)
                                                                      .OrderByDescending(courseSkillGroup => courseSkillGroup.Count())
-                                                                     .Select(courseSkillGroup => new VideoExcerciseSearchModel
+                                                                     .Select(courseSkillGroup => new VideoExerciseSearchModel
                                                                      {
                                                                          CourseSkill = courseSkillGroup.Key,
                                                                          Count = courseSkillGroup.Count()

@@ -1,7 +1,7 @@
 using System.Text.Json.Serialization;
 using Fsel.Common.Helpers;
 using Fsel.Course.Domain.Enums;
-using Fsel.Course.Domain.Models.CommandModels.Excercises;
+using Fsel.Course.Domain.Models.CommandModels.Exercises;
 
 namespace Fsel.Course.Domain.Models.CommandModels.VideoTimeCodes
 {
@@ -10,6 +10,6 @@ namespace Fsel.Course.Domain.Models.CommandModels.VideoTimeCodes
         public EnumTimeCodeType TimeCodeType { get; set; }
         public long DisplayTime { get; set; }
         public long ExecutionTime { get; set; }
-        public List<CreateExcerciseCommandModel> Excercises { get; set; } = new List<CreateExcerciseCommandModel>();
+        public List<CreateExerciseCommandModel> Exercises { get; set; } = new List<CreateExerciseCommandModel>();
     }
 }

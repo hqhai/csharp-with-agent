@@ -6,10 +6,10 @@ using Fsel.Course.Domain.Enums.ErrorCodes;
 
 namespace Fsel.Course.Domain.Entities
 {
-    public class Excercise : Entity
+    public class Exercise : Entity
     {
         /// <summary>
-        /// Tên Excercise
+        /// Tên Exercise
         /// </summary>
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         [MaxLength(250, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
@@ -31,7 +31,7 @@ namespace Fsel.Course.Domain.Entities
         /// </summary>
         public EnumCourseSkill CourseSkill { get; set; }
 
-        public ICollection<TimeCodeExcercise> TimeCodeExcercises { get; set; } = new List<TimeCodeExcercise>();
-        public ICollection<ExcerciseQuestion> ExcerciseQuestions { get; set; } = new List<ExcerciseQuestion>();
+        public ICollection<TimeCodeExercise> TimeCodeExercises { get; set; } = new List<TimeCodeExercise>();
+        public ICollection<ExerciseQuestion> ExerciseQuestions { get; set; } = new List<ExerciseQuestion>();
     }
 }

@@ -3,7 +3,7 @@ using Fsel.Course.Domain.Entities;
 
 namespace Fsel.Course.Domain.IRepositories
 {
-    public interface ITimeCodeExcerciseRepository : IRepository<TimeCodeExcercise>
+    public interface IExerciseRepository : IRepository<Exercise>
     {
     }
 }

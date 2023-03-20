@@ -49,18 +49,18 @@ namespace Fsel.Course.Application.Commands.VideoCmd
                 else
                 {
                     VideoTimeCode videoTimeCode = video.VideoTimeCodes.ElementAt(request.VideoTimeCodes.IndexOf(x));
-                    x.Excercises.ForEach(n =>
+                    x.Exercises.ForEach(n =>
                     {
                         if (n == null)
                         {
-                            methodResult.AddErrorBadRequest(nameof(EnumExcerciseErrorCode.E03V), nameof(x.Excercises));
+                            methodResult.AddErrorBadRequest(nameof(EnumExerciseErrorCode.E03V), nameof(x.Exercises));
                         }
                         else
                         {
-                            Excercise excercise = _mapper.Map<Excercise>(n);
-                            videoTimeCode.TimeCodeExcercises.Add(new TimeCodeExcercise
+                            Exercise excercise = _mapper.Map<Exercise>(n);
+                            videoTimeCode.TimeCodeExercises.Add(new TimeCodeExercise
                             {
-                                Excercise = excercise
+                                Exercise = excercise
                             });
                             n.Questions.ForEach(q =>
                             {
@@ -71,7 +71,7 @@ namespace Fsel.Course.Application.Commands.VideoCmd
                                 else
                                 {
                                     Question question = _mapper.Map<Question>(q);
-                                    excercise.ExcerciseQuestions.Add(new ExcerciseQuestion
+                                    excercise.ExerciseQuestions.Add(new ExerciseQuestion
                                     {
                                         Question = question
                                     });
