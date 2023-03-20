@@ -1,4 +1,5 @@
 using Fsel.Common.Enums;
+using Fsel.Course.Domain.Models.CommandModels.CourseTeachers;
 using Fsel.Course.Domain.Models.CommandModels.CourseUnitMockTests;
 
 namespace Fsel.Course.Domain.Models.CommandModels.Courses
@@ -14,5 +15,7 @@ namespace Fsel.Course.Domain.Models.CommandModels.Courses
         public EnumCourseLevel CourseLevel { get; set; }
 
         public IList<CreateCourseUnitMockTestCommandModel>? CourseUnitMockTests { get; set; }
+
+        public IList<CreateCourseTeacherCommandModel>? CourseTeachers { get; set; }
     }
 }

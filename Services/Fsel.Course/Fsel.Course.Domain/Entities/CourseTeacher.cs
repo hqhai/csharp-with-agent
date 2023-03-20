@@ -15,5 +15,17 @@ namespace Fsel.Course.Domain.Entities
 
         [Required(ErrorMessage = nameof(EnumCourseErrorCode.C01V))]
         public Guid CourseId { get; set; }
+
+        [MaxLength(1000, ErrorMessage = nameof(EnumCourseTeacherErrorCode.CT03C))]
+        public string? Nationality { get; set; }
+
+        [MaxLength(1000, ErrorMessage = nameof(EnumCourseTeacherErrorCode.CT03C))]
+        public string? Deggree { get; set; }
+
+        [MaxLength(1000, ErrorMessage = nameof(EnumCourseTeacherErrorCode.CT03C))]
+        public string? Experience { get; set; }
+
+        [MaxLength(1000, ErrorMessage = nameof(EnumCourseTeacherErrorCode.CT03C))]
+        public string? Strength { get; set; }
     }
 }
