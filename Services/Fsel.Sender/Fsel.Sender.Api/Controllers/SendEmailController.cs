@@ -28,17 +28,8 @@ namespace Fsel.Sender.Api.Controllers
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.BadRequest)]
         public async Task<IActionResult> SendEmail([FromBody] SendEmailCommand command)
         {
-            try
-            {
-                MethodResult<bool> commandResult = await _mediator.Send(command).ConfigureAwait(false);
-                return commandResult.GetActionResult();
-            }
-            catch
-            {
-                VoidMethodResult errorResult = new VoidMethodResult();
-                errorResult.AddError();
-                return errorResult.GetActionResult();
-            }
+            MethodResult<bool> commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
         }
     }
 }

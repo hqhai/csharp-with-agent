@@ -29,17 +29,8 @@ namespace Fsel.Identity.Authentication.Controllers
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.BadRequest)]
         public async Task<IActionResult> Login([FromBody] LoginCommand command)
         {
-            try
-            {
-                MethodResult<TokenModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
-                return commandResult.GetActionResult();
-            }
-            catch
-            {
-                VoidMethodResult errorCommandResult = new VoidMethodResult();
-                errorCommandResult.AddError();
-                return errorCommandResult.GetActionResult();
-            }
+            MethodResult<TokenModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
         }
 
         /// <summary>
@@ -50,17 +41,8 @@ namespace Fsel.Identity.Authentication.Controllers
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.BadRequest)]
         public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenCommand command)
         {
-            try
-            {
-                MethodResult<TokenModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
-                return commandResult.GetActionResult();
-            }
-            catch
-            {
-                VoidMethodResult errorResult = new VoidMethodResult();
-                errorResult.AddError();
-                return errorResult.GetActionResult();
-            }
+            MethodResult<TokenModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
         }
     }
 }

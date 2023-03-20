@@ -29,17 +29,8 @@ namespace Fsel.Identity.Userentication.Controllers
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.BadRequest)]
         public async Task<IActionResult> SignUp([FromBody] SignUpCommand command)
         {
-            try
-            {
-                MethodResult<UserModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
-                return commandResult.GetActionResult();
-            }
-            catch
-            {
-                VoidMethodResult errorCommandResult = new VoidMethodResult();
-                errorCommandResult.AddError();
-                return errorCommandResult.GetActionResult();
-            }
+            MethodResult<UserModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
         }
 
         /// <summary>
@@ -50,22 +41,13 @@ namespace Fsel.Identity.Userentication.Controllers
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.BadRequest)]
         public async Task<IActionResult> ConfirmEmail(string token, string email)
         {
-            try
+            ConfirmEmailCommand command = new ConfirmEmailCommand
             {
-                ConfirmEmailCommand command = new ConfirmEmailCommand
-                {
-                    Token = token,
-                    Email = email
-                };
-                MethodResult<UserModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
-                return commandResult.GetActionResult();
-            }
-            catch
-            {
-                VoidMethodResult errorCommandResult = new VoidMethodResult();
-                errorCommandResult.AddError();
-                return errorCommandResult.GetActionResult();
-            }
+                Token = token,
+                Email = email
+            };
+            MethodResult<UserModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
         }
 
         /// <summary>
@@ -76,17 +58,8 @@ namespace Fsel.Identity.Userentication.Controllers
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.BadRequest)]
         public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordCommand command)
         {
-            try
-            {
-                MethodResult<bool> commandResult = await _mediator.Send(command).ConfigureAwait(false);
-                return commandResult.GetActionResult();
-            }
-            catch
-            {
-                VoidMethodResult errorCommandResult = new VoidMethodResult();
-                errorCommandResult.AddError();
-                return errorCommandResult.GetActionResult();
-            }
+            MethodResult<bool> commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
         }
 
         /// <summary>
@@ -97,17 +70,8 @@ namespace Fsel.Identity.Userentication.Controllers
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.BadRequest)]
         public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordCommand command)
         {
-            try
-            {
-                MethodResult<bool> commandResult = await _mediator.Send(command).ConfigureAwait(false);
-                return commandResult.GetActionResult();
-            }
-            catch
-            {
-                VoidMethodResult errorCommandResult = new VoidMethodResult();
-                errorCommandResult.AddError();
-                return errorCommandResult.GetActionResult();
-            }
+            MethodResult<bool> commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
         }
     }
 }

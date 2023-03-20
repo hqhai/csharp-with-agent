@@ -34,17 +34,8 @@ namespace Fsel.Course.Lcms.Api.Controllers
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.BadRequest)]
         public async Task<IActionResult> Search([FromQuery] SearchCourseQuery query)
         {
-            try
-            {
-                MethodResult<PagingItemsModel<CourseModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
-                return queryResult.GetActionResult();
-            }
-            catch
-            {
-                VoidMethodResult errorResult = new VoidMethodResult();
-                errorResult.AddError();
-                return errorResult.GetActionResult();
-            }
+            MethodResult<PagingItemsModel<CourseModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
         }
 
         /// <summary>
@@ -55,17 +46,8 @@ namespace Fsel.Course.Lcms.Api.Controllers
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.BadRequest)]
         public async Task<IActionResult> Create([FromBody] CreateCourseCommand command)
         {
-            try
-            {
-                MethodResult<CourseModel> queryResult = await _mediator.Send(command).ConfigureAwait(false);
-                return queryResult.GetActionResult();
-            }
-            catch
-            {
-                VoidMethodResult errorResult = new VoidMethodResult();
-                errorResult.AddError();
-                return errorResult.GetActionResult();
-            }
+            MethodResult<CourseModel> queryResult = await _mediator.Send(command).ConfigureAwait(false);
+            return queryResult.GetActionResult();
         }
 
         /// <summary>
@@ -76,18 +58,9 @@ namespace Fsel.Course.Lcms.Api.Controllers
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.BadRequest)]
         public async Task<IActionResult> Update([FromRoute] Guid id, [FromBody] UpdateCourseCommand command)
         {
-            try
-            {
-                command.Id = id;
-                MethodResult<CourseModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
-                return commandResult.GetActionResult();
-            }
-            catch
-            {
-                VoidMethodResult errorResult = new VoidMethodResult();
-                errorResult.AddError();
-                return errorResult.GetActionResult();
-            }
+            command.Id = id;
+            MethodResult<CourseModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
         }
 
         /// <summary>
@@ -98,17 +71,8 @@ namespace Fsel.Course.Lcms.Api.Controllers
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.BadRequest)]
         public async Task<IActionResult> Delete([FromRoute] Guid id)
         {
-            try
-            {
-                MethodResult<bool> commandResult = await _mediator.Send(new DeleteCourseCommand { Id = id }).ConfigureAwait(false);
-                return commandResult.GetActionResult();
-            }
-            catch
-            {
-                VoidMethodResult errorResult = new VoidMethodResult();
-                errorResult.AddError();
-                return errorResult.GetActionResult();
-            }
+            MethodResult<bool> commandResult = await _mediator.Send(new DeleteCourseCommand { Id = id }).ConfigureAwait(false);
+            return commandResult.GetActionResult();
         }
 
         /// <summary>
@@ -119,17 +83,8 @@ namespace Fsel.Course.Lcms.Api.Controllers
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.BadRequest)]
         public async Task<IActionResult> Active([FromRoute] Guid id)
         {
-            try
-            {
-                MethodResult<bool> commandResult = await _mediator.Send(new ActiveCourseCommand { Id = id }).ConfigureAwait(false);
-                return commandResult.GetActionResult();
-            }
-            catch
-            {
-                VoidMethodResult errorResult = new VoidMethodResult();
-                errorResult.AddError();
-                return errorResult.GetActionResult();
-            }
+            MethodResult<bool> commandResult = await _mediator.Send(new ActiveCourseCommand { Id = id }).ConfigureAwait(false);
+            return commandResult.GetActionResult();
         }
 
         /// <summary>
@@ -140,17 +95,8 @@ namespace Fsel.Course.Lcms.Api.Controllers
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.BadRequest)]
         public async Task<IActionResult> Get([FromRoute] Guid id)
         {
-            try
-            {
-                MethodResult<CourseModel> commandResult = await _mediator.Send(new GetCourseQuery { Id = id }).ConfigureAwait(false);
-                return commandResult.GetActionResult();
-            }
-            catch
-            {
-                VoidMethodResult errorResult = new VoidMethodResult();
-                errorResult.AddError();
-                return errorResult.GetActionResult();
-            }
+            MethodResult<CourseModel> commandResult = await _mediator.Send(new GetCourseQuery { Id = id }).ConfigureAwait(false);
+            return commandResult.GetActionResult();
         }
     }
 }

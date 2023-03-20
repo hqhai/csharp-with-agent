@@ -1,6 +1,8 @@
 using Fsel.Common.Constants;
+using Fsel.Core.Middlewares;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Ocelot.Middleware;
 
 namespace Fsel.Core.Extensions
@@ -42,12 +44,18 @@ namespace Fsel.Core.Extensions
             app.UseAuthorization();
             app.MapControllers();
             app.UseAppCors();
+            app.UseMiddlewares();
         }
 
         private static void UseAppCors(this WebApplication app)
         {
             app.UseCors();
             app.UseCors(Settings.CorsPolicy);
+        }
+
+        private static void UseMiddlewares(this WebApplication app)
+        {
+            app.ExceptionMiddlewareHandler();
         }
     }
 }

@@ -27,17 +27,8 @@ namespace Fsel.Course.Lms.Api.Controllers
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.BadRequest)]
         public IActionResult Search()
         {
-            try
-            {
-                MethodResult<string> queryResult = new MethodResult<string> { Result = nameof(Search) };
-                return queryResult.GetActionResult();
-            }
-            catch
-            {
-                VoidMethodResult errorResult = new VoidMethodResult();
-                errorResult.AddError();
-                return errorResult.GetActionResult();
-            }
+            MethodResult<string> queryResult = new MethodResult<string> { Result = nameof(Search) };
+            return queryResult.GetActionResult();
         }
     }
 }

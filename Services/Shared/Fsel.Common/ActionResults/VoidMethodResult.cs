@@ -54,9 +54,9 @@ namespace Fsel.Common.ActionResults
             }
         }
 
-        public void AddError()
+        public void AddErrorServer()
         {
-            AddError("API_SERVER_ERROR");
+            AddError(StatusCodes.Status500InternalServerError, "API_SERVER_ERROR");
         }
 
         public void AddError(string? errorCode)
