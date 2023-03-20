@@ -5,6 +5,7 @@ namespace Fsel.Identity.Api.Controllers
     using System.Net;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
+    using Fsel.Common.Enums;
     using Fsel.Common.Helpers;
     using Fsel.Identity.Application.Commands.ParentCmd;
     using Fsel.Identity.Domain.Models.EntityModels;
@@ -30,6 +31,7 @@ namespace Fsel.Identity.Api.Controllers
         [HttpPost("create-student")]
         [ProducesResponseType(typeof(MethodResult<UserModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.BadRequest)]
+        [Authorize(Roles = nameof(EnumRole.Parent))]
         public async Task<IActionResult> CreateStudent([FromBody] CreateStudentByParentCommand command)
         {
             try

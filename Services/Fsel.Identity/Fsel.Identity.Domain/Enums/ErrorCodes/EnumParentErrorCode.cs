@@ -35,6 +35,11 @@ namespace Fsel.Identity.Domain.Enums.ErrorCodes
         PA06V,
 
         /// <summary>
+        /// parent had more than 2 students
+        /// </summary>
+        PA07V,
+
+        /// <summary>
         /// Name cannot be empty
         /// </summary>
         PA01C,

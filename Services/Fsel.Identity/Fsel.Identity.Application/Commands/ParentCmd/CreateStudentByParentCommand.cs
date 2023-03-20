@@ -62,30 +62,42 @@ namespace Fsel.Identity.Application.Commands.ParentCmd
                 try
                 {
                     IdentityResult result;
-                    var parent = await _parentRepository.Queryable.Include(e => e.ParentStudents)
-                                                                  .FirstOrDefaultAsync(e => e.Id == _authContext.CurrentUserId, cancellationToken: cancellationToken);
-                    if (parent != null && parent.ParentStudents.Count <= 2)
+                    var userparent = await _userManager.Users.Include(e => e.Human)
+                                                         .ThenInclude(e => e.Parent)
+                                                         .Where(e => e.Id == _authContext.CurrentUserId.ToString())
+                                                         .FirstOrDefaultAsync(cancellationToken: cancellationToken);
+                    if (userparent == null)
                     {
-                        user = _mapper.Map<User>(request);
-
-                        //user.Human = _mapper.Map<Human>(request);
-
-                        //user.Human.Student = _mapper.Map<Student>(request);
-                        //user.Human.Student.ParentStudents = (ICollection<ParentStudent>)parent.ParentStudents.Select(e => new ParentStudent
-                        //{
-                        //    ParentId = parent.Id
-                        //});
-                        result = await _userManager.CreateAsync(user, request?.Password ?? string.Empty);
-
-                        if (!result.Succeeded)
-                        {
-                            methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                            methodResult.AddErrorMessage(nameof(EnumParentErrorCode.PA04V));
-                            return methodResult;
-                        }
-                        await _userManager.AddToRoleAsync(user, "Student");
+                        methodResult.StatusCode = StatusCodes.Status400BadRequest;
+                        methodResult.AddErrorMessage(nameof(EnumParentErrorCode.PA03V));
+                        return methodResult;
                     }
+                    var countStudentPr = userparent.Human.Parent.ParentStudents.Count();
+                    if (countStudentPr >= 2)
+                    {
+                        methodResult.StatusCode = StatusCodes.Status400BadRequest;
+                        methodResult.AddErrorMessage(nameof(EnumParentErrorCode.PA07V));
+                        return methodResult;
+                    }
+                    var parent = userparent.Human.Parent;
+                    user = _mapper.Map<User>(request);
 
+                    user.Human = _mapper.Map<Human>(request);
+
+                    user.Human.Student = _mapper.Map<Student>(request);
+                    user.Human.Student.ParentStudents = (ICollection<ParentStudent>)parent.ParentStudents.Select(e => new ParentStudent
+                    {
+                        ParentId = parent.Id
+                    });
+                    result = await _userManager.CreateAsync(user, request?.Password ?? string.Empty);
+
+                    if (!result.Succeeded)
+                    {
+                        methodResult.StatusCode = StatusCodes.Status400BadRequest;
+                        methodResult.AddErrorMessage(nameof(EnumParentErrorCode.PA04V));
+                        return methodResult;
+                    }
+                    await _userManager.AddToRoleAsync(user, "Student");
                     var sendResult = await _mediator.Send(new SendOTPCommand { Email = userParent?.Email ?? string.Empty }, cancellationToken).ConfigureAwait(false);
 
                     if (!sendResult.IsOK)
