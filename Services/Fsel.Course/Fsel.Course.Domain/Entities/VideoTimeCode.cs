@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using DataAnnotationsExtensions;
+using Fsel.Common.Enums.ErrorCodes;
 using Fsel.Core.Entities;
 using Fsel.Course.Domain.Enums;
 using Fsel.Course.Domain.Enums.ErrorCodes;
@@ -11,13 +12,13 @@ namespace Fsel.Course.Domain.Entities
         /// <summary>
         /// Thời gian bắt đầu xuất hiện TimeCode
         /// </summary>
-        [Min(1, ErrorMessage = nameof(EnumVideoTimeCodeErrorCode.VTC04C))]
+        [Min(1, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
         public long DisplayTime { get; set; }
 
         /// <summary>
         /// Thời gian hiện làm bài
         /// </summary>
-        [Min(1, ErrorMessage = nameof(EnumVideoTimeCodeErrorCode.VTC03C))]
+        [Min(1, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
         public long ExecutionTime { get; set; }
 
         /// <summary>

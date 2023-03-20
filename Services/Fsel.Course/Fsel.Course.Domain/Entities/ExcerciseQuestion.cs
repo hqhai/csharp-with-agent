@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using Fsel.Common.Enums.ErrorCodes;
 using Fsel.Core.Entities;
 using Fsel.Course.Domain.Enums.ErrorCodes;
 
@@ -10,10 +11,10 @@ namespace Fsel.Course.Domain.Entities
 
         public Question? Question { get; set; }
 
-        [Required(ErrorMessage = nameof(EnumExcerciseErrorCode.E01V))]
+        [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         public Guid ExcerciseId { get; set; }
 
-        [Required(ErrorMessage = nameof(EnumQuestionErrorCode.Q01V))]
+        [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         public Guid QuestionId { get; set; }
     }
 }

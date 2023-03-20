@@ -8,22 +8,23 @@ namespace Fsel.Identity.Domain.Entities
     using System.Linq;
     using System.Text;
     using System.Threading.Tasks;
+    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Entities;
     using Fsel.Identity.Domain.Enums;
     using Fsel.Identity.Domain.Enums.ErrorCodes;
 
     public class Teacher : Entity
     {
-        [MaxLength(1000, ErrorMessage = nameof(EnumTeacherErrorCode.TE01C))]
+        [MaxLength(1000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? PassportPath { get; set; }
 
-        [MaxLength(1000, ErrorMessage = nameof(EnumTeacherErrorCode.TE02C))]
+        [MaxLength(1000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? UniversityDegreePath { get; set; }
 
-        [MaxLength(1000, ErrorMessage = nameof(EnumTeacherErrorCode.TE03C))]
+        [MaxLength(1000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? CertificationPath { get; set; }
 
-        [MaxLength(1000, ErrorMessage = nameof(EnumTeacherErrorCode.TE04C))]
+        [MaxLength(1000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? PoliceClearancePath { get; set; }
 
         public Human? Human { get; set; }

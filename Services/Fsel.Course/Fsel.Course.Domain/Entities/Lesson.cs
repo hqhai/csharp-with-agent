@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using Fsel.Common.Enums;
+using Fsel.Common.Enums.ErrorCodes;
 using Fsel.Core.Entities;
 using Fsel.Course.Domain.Enums.ErrorCodes;
 
@@ -10,20 +11,20 @@ namespace Fsel.Course.Domain.Entities
         /// <summary>
         /// Tên bài test
         /// </summary>
-        [Required(ErrorMessage = nameof(EnumLessonErrorCode.LS01C))]
-        [MaxLength(250, ErrorMessage = nameof(EnumLessonErrorCode.LS02C))]
+        [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
+        [MaxLength(250, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? Name { get; set; }
 
         /// <summary>
         /// Nội dung hướng dẫn bài test
         /// </summary>
-        [MaxLength(1000, ErrorMessage = nameof(EnumLessonErrorCode.LS03C))]
+        [MaxLength(1000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? InstructionContent { get; set; }
 
         /// <summary>
         /// Tên hiển thị
         /// </summary>
-        [MaxLength(250, ErrorMessage = nameof(EnumLessonErrorCode.LS04C))]
+        [MaxLength(250, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? DisplayName { get; set; }
 
         /// <summary>
