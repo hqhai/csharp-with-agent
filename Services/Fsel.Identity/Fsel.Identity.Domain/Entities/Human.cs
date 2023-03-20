@@ -34,5 +34,6 @@ namespace Fsel.Identity.Domain.Entities
 
         public Parent? Parent { get; set; }
         public Student? Student { get; set; }
+        public Teacher? Teacher { get; set; }
     }
 }
