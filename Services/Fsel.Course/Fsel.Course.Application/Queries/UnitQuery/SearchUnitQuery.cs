@@ -1,7 +1,7 @@
 using AutoMapper;
 using Fsel.Common.ActionResults;
 using Fsel.Core.Base.BaseModels;
-
+using Fsel.Course.Application.Services;
 using Fsel.Course.Domain.IRepositories;
 using Fsel.Course.Domain.Models.EntityModels;
 using Fsel.Course.Domain.Models.QueryModels.Units;
@@ -19,11 +19,13 @@ namespace Fsel.Course.Application.Queries.UnitQuery
     {
         private readonly IUnitRepository _unitRepository;
         private readonly IMapper _mapper;
+        private readonly IUserService _userService;
 
-        public SearchUnitQueryHandler(IMapper mapper, IUnitRepository unitRepository)
+        public SearchUnitQueryHandler(IMapper mapper, IUnitRepository unitRepository, IUserService userService)
         {
             _unitRepository = unitRepository;
             _mapper = mapper;
+            _userService = userService;
         }
 
         public async Task<MethodResult<PagingItemsModel<UnitModel>>> Handle(SearchUnitQuery request, CancellationToken cancellationToken)
@@ -49,7 +51,7 @@ namespace Fsel.Course.Application.Queries.UnitQuery
                                                                                    .Select(v => v.Video)
                                                                                    .Select(n => n.TeacherId).Contains(request.TeacherId.Value))
 
-                            .Select(unit => new UnitModel
+                            .Select(unit => new UnitSearchModel
                             {
                                 Id = unit.Id,
                                 Name = unit.Name,
@@ -66,7 +68,14 @@ namespace Fsel.Course.Application.Queries.UnitQuery
                                                 .Select(v => v.Video)
                                                 .Select(n => n.TeacherId).FirstOrDefault(),
                             });
-
+            var teachers = await _userService.GetTeacherByIdsAsync(new GetTeacherByIdsQueryModel { Ids = unitQuery.Select(x => x.TeacherId ?? Guid.Empty).ToList() });
+            if (teachers.IsSuccessStatusCode)
+            {
+                foreach (var item in unitQuery)
+                {
+                    item.TeacherName = teachers.Content?.Result?.FirstOrDefault(x => x.Id == item.Id)?.Human.FullName;
+                }
+            }
             //Keyword
             if (!string.IsNullOrEmpty(request.Keyword))
             {

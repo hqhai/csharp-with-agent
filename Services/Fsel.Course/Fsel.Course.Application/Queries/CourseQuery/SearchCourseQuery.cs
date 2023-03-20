@@ -3,6 +3,7 @@
 using AutoMapper;
 using Fsel.Common.ActionResults;
 using Fsel.Core.Base.BaseModels;
+using Fsel.Course.Application.Services;
 using Fsel.Course.Domain.Entities;
 using Fsel.Course.Domain.IRepositories;
 using Fsel.Course.Domain.Models.EntityModels;
@@ -21,10 +22,12 @@ namespace Fsel.Course.Application.Queries.CourseQuery
     {
         private readonly ICourseRepository _courseRepository;
         private readonly IMapper _mapper;
+        private readonly IUserService _userService;
 
-        public SearchCourseQueryHandler(IMapper mapper, ICourseRepository courseRepository)
+        public SearchCourseQueryHandler(IMapper mapper, ICourseRepository courseRepository, IUserService userService)
         {
             _courseRepository = courseRepository;
+            _userService = userService;
             _mapper = mapper;
         }
 
@@ -42,7 +45,7 @@ namespace Fsel.Course.Application.Queries.CourseQuery
                               .Include(course => course.CourseTeachers)
                               .Where(x => request.CourseLevel == null || x.CourseLevel == request.CourseLevel)
                               .Where(x => request.TeacherId == null || x.CourseTeachers.Select(n => n.TeacherId).Contains(request.TeacherId.Value))
-                              .Select(course => new CourseModel
+                              .Select(course => new CourseSearchModel
                               {
                                   Id = course.Id,
                                   Name = course.Name,
@@ -58,6 +61,15 @@ namespace Fsel.Course.Application.Queries.CourseQuery
                                   UpdatedFullName = course.UpdatedFullName,
                                   TeacherId = course.CourseTeachers.Select(x => x.TeacherId).FirstOrDefault(),
                               });
+
+            var teachers = await _userService.GetTeacherByIdsAsync(new GetTeacherByIdsQueryModel { Ids = courseQuery.Select(x => x.TeacherId ?? Guid.Empty).ToList() });
+            if (teachers.IsSuccessStatusCode)
+            {
+                foreach (var item in courseQuery)
+                {
+                    item.TeacherName = teachers.Content?.Result?.FirstOrDefault(x => x.Id == item.Id)?.Human.FullName;
+                }
+            }
 
             //Keyword
             if (!string.IsNullOrEmpty(request.Keyword))
