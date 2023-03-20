@@ -1,6 +1,9 @@
+// Copyright (c) Atlantic. All rights reserved.
+
 using AutoMapper;
 using Fsel.Common.ActionResults;
 using Fsel.Core.Base.BaseModels;
+using Fsel.Course.Domain.Entities;
 using Fsel.Course.Domain.IRepositories;
 using Fsel.Course.Domain.Models.EntityModels;
 using Fsel.Course.Domain.Models.QueryModels.Courses;
@@ -35,22 +38,43 @@ namespace Fsel.Course.Application.Queries.CourseQuery
                 return methodResult;
             }
 
-            var courseQuery = from i in _courseRepository.Queryable
-                              select new CourseModel
+            var courseQuery = _courseRepository.Queryable
+                              .Include(course => course.CourseTeachers)
+                              .Where(x => request.CourseLevel == null ? true : x.CourseLevel == request.CourseLevel)
+                              .Where(x => request.TeacherId == null || x.CourseTeachers.Select(n => n.TeacherId).Contains(request.TeacherId.Value))
+                              .Select(course => new CourseModel
                               {
-                                  Id = i.Id,
-                                  Name = i.Name,
-                                  NumberOfLessons = i.NumberOfLessons,
-                                  NumberOfUnits = i.NumberOfUnits,
-                                  Status = i.Status,
-                                  CourseLevel = i.CourseLevel,
-                                  CreatedDate = i.CreatedDate,
-                                  CreatedUserId = i.CreatedUserId,
-                                  CreatedFullName = i.CreatedFullName,
-                                  UpdatedDate = i.UpdatedDate,
-                                  UpdatedUserId = i.UpdatedUserId,
-                                  UpdatedFullName = i.UpdatedFullName,
-                              };
+                                  Id = course.Id,
+                                  Name = course.Name,
+                                  NumberOfLessons = course.NumberOfLessons,
+                                  NumberOfUnits = course.NumberOfUnits,
+                                  Status = course.Status,
+                                  CourseLevel = course.CourseLevel,
+                                  CreatedDate = course.CreatedDate,
+                                  CreatedUserId = course.CreatedUserId,
+                                  CreatedFullName = course.CreatedFullName,
+                                  UpdatedDate = course.UpdatedDate,
+                                  UpdatedUserId = course.UpdatedUserId,
+                                  UpdatedFullName = course.UpdatedFullName,
+                                  TeacherId = course.CourseTeachers.Select(x => x.TeacherId).FirstOrDefault(),
+                              });
+
+            /*  select new CourseModel
+              {
+                  Id = i.Id,
+                  Name = i.Name,
+                  NumberOfLessons = i.NumberOfLessons,
+                  NumberOfUnits = i.NumberOfUnits,
+                  Status = i.Status,
+                  CourseLevel = i.CourseLevel,
+                  CreatedDate = i.CreatedDate,
+                  CreatedUserId = i.CreatedUserId,
+                  CreatedFullName = i.CreatedFullName,
+                  UpdatedDate = i.UpdatedDate,
+                  UpdatedUserId = i.UpdatedUserId,
+                  UpdatedFullName = i.UpdatedFullName,
+                  TeacherId = i.CourseTeachers.Select(x => x.TeacherId).FirstOrDefault(),
+              };*/
             //Keyword
             if (!string.IsNullOrEmpty(request.Keyword))
             {
