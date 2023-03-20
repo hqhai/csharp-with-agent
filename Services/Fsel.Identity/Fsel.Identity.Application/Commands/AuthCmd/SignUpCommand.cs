@@ -90,7 +90,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                     {
                         scope.Dispose();
                         methodResult.StatusCode = (int)sendResult.StatusCode;
-                        methodResult.AddResultFromErrorList(sendResult.Content?.ErrorMessages);
+                        methodResult.AddResultFromErrorList(sendResult.ErrorMessages);
                         return methodResult;
                     }
                     scope.Complete();
@@ -100,7 +100,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                 catch
                 {
                     methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                    methodResult.AddErrorMessage(nameof(EnumAuthErrorCode.AU11ER));
+                    methodResult.AddError(nameof(EnumAuthErrorCode.AU11ER));
                     scope.Dispose();
                 }
             }

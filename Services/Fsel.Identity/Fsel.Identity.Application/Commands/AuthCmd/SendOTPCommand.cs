@@ -37,7 +37,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             if (user == null)
             {
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                methodResult.AddErrorMessage(
+                methodResult.AddError(
                     nameof(EnumAuthErrorCode.AU04ER),
                     new[] { MethodHelper.GenerateErrorResult(nameof(request.Email), request?.Email) });
                 return methodResult;
@@ -45,7 +45,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             else if (user.EmailConfirmed)
             {
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                methodResult.AddErrorMessage(
+                methodResult.AddError(
                     nameof(EnumAuthErrorCode.AU12ER),
                     new[] { MethodHelper.GenerateErrorResult(nameof(request.Email), request?.Email) });
                 return methodResult;
@@ -64,7 +64,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                 if (!sendResult1.IsSuccessStatusCode)
                 {
                     methodResult.StatusCode = (int)sendResult1.StatusCode;
-                    methodResult.AddErrorMessage(sendResult1.Content?.ErrorMessages);
+                    methodResult.AddError(sendResult1.Content?.ErrorMessages);
                     return methodResult;
                 }
             }

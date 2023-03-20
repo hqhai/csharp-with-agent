@@ -1,3 +1,5 @@
+// Copyright (c) Atlantic. All rights reserved.
+
 namespace Fsel.Identity.Domain.Enums.ErrorCodes
 {
     public enum EnumAuthErrorCode
@@ -26,6 +28,11 @@ namespace Fsel.Identity.Domain.Enums.ErrorCodes
         /// Old password is incorrect
         /// </summary>
         AU05V,
+
+        /// <summary>
+        /// UserName cannot empty
+        /// </summary>
+        AU06V,
 
         /// <summary>
         /// Email verified fail

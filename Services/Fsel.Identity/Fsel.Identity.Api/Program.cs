@@ -33,6 +33,5 @@ builder.Services.AddCors(policy =>
 builder.AddRefitClients(typeof(ISenderService), appSetting?.Services?.SenderApiUrl);
 
 var app = builder.Build();
-app.UseCors("OpenCorsPolicy");
 app.UseServices();
 app.Run();

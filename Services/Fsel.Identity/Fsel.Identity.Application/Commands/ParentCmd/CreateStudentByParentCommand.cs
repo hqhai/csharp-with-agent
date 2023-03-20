@@ -1,14 +1,13 @@
+// Copyright (c) Atlantic. All rights reserved.
+
 namespace Fsel.Identity.Application.Commands.ParentCmd
 {
-    using System.Transactions;
     using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Enums;
     using Fsel.Common.Helpers;
-    using Fsel.Core.Base;
-    using Fsel.Identity.Application.Commands.AuthCmd;
     using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.Enums.ErrorCodes;
-    using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Domain.Models.CommandModels.Parents;
     using Fsel.Identity.Domain.Models.EntityModels;
     using MediatR;
@@ -18,103 +17,101 @@ namespace Fsel.Identity.Application.Commands.ParentCmd
 
     public class CreateStudentByParentCommand : CreateStudentByParentCommandModel, IRequest<MethodResult<UserModel>>
     {
+        public Guid Ids { get; set; }
     }
 
     public class CreateStudentByParentCommandHandler : IRequestHandler<CreateStudentByParentCommand, MethodResult<UserModel>>
     {
         private readonly UserManager<User> _userManager;
-        private readonly AuthContext _authContext;
-        private readonly IParentRepository _parentRepository;
         private readonly IMapper _mapper;
-        private readonly IMediator _mediator;
 
         public CreateStudentByParentCommandHandler(UserManager<User> userManager,
-            AuthContext authContext,
-            IParentRepository parentRepository,
-            IMapper mapper,
-            IMediator mediator)
+            IMapper mapper)
         {
             _userManager = userManager;
-            _authContext = authContext;
-            _parentRepository = parentRepository;
             _mapper = mapper;
-            _mediator = mediator;
         }
 
         public async Task<MethodResult<UserModel>> Handle(CreateStudentByParentCommand request, CancellationToken cancellationToken)
         {
             MethodResult<UserModel> methodResult = new MethodResult<UserModel>();
+            if (request == null)
+            {
+                methodResult.StatusCode = StatusCodes.Status400BadRequest;
+                methodResult.AddError(nameof(EnumParentErrorCode.PA08V));
+                return methodResult;
+            }
 
             var isUser = await _userManager.Users.AnyAsync(e => e.UserName == request.UserName, cancellationToken: cancellationToken);
             if (isUser)
             {
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                methodResult.AddErrorMessage(
-                    nameof(EnumParentErrorCode.PA05C),
-                    new[] { MethodHelper.GenerateErrorResult(nameof(request.UserName), request?.UserName) });
+                methodResult.AddError(
+                    nameof(EnumAuthErrorCode.AU05V),
+                    new[] { MethodHelper.GenerateErrorResult(nameof(request.UserName), request.UserName) });
                 return methodResult;
             }
 
-            var userParent = await _userManager.FindByNameAsync(request?.UserName ?? string.Empty);
             User user = new();
-            using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+            IdentityResult result;
+            var userparent = await _userManager.Users.Include(e => e.Human)
+                                                 .ThenInclude(e => e.Parent).Where(e => e.Id == request.Ids.ToString())
+                                                 .FirstOrDefaultAsync(cancellationToken: cancellationToken);
+
+            if (userparent == null)
             {
-                try
-                {
-                    IdentityResult result;
-                    var userparent = await _userManager.Users.Include(e => e.Human)
-                                                         .ThenInclude(e => e.Parent)
-                                                         .Where(e => e.Id == _authContext.CurrentUserId.ToString())
-                                                         .FirstOrDefaultAsync(cancellationToken: cancellationToken);
-                    if (userparent == null)
-                    {
-                        methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                        methodResult.AddErrorMessage(nameof(EnumParentErrorCode.PA03V));
-                        return methodResult;
-                    }
-                    var countStudentPr = userparent.Human.Parent.ParentStudents.Count();
-                    if (countStudentPr >= 2)
-                    {
-                        methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                        methodResult.AddErrorMessage(nameof(EnumParentErrorCode.PA07V));
-                        return methodResult;
-                    }
-                    var parent = userparent.Human.Parent;
-                    user = _mapper.Map<User>(request);
-
-                    user.Human = _mapper.Map<Human>(request);
-
-                    user.Human.Student = _mapper.Map<Student>(request);
-                    user.Human.Student.ParentStudents = (ICollection<ParentStudent>)parent.ParentStudents.Select(e => new ParentStudent
-                    {
-                        ParentId = parent.Id
-                    });
-                    result = await _userManager.CreateAsync(user, request?.Password ?? string.Empty);
-
-                    if (!result.Succeeded)
-                    {
-                        methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                        methodResult.AddErrorMessage(nameof(EnumParentErrorCode.PA04V));
-                        return methodResult;
-                    }
-                    await _userManager.AddToRoleAsync(user, "Student");
-                    var sendResult = await _mediator.Send(new SendOTPCommand { Email = userParent?.Email ?? string.Empty }, cancellationToken).ConfigureAwait(false);
-
-                    if (!sendResult.IsOK)
-                    {
-                        methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                        methodResult.AddErrorMessage(nameof(EnumParentErrorCode.PA05V));
-                        return methodResult;
-                    }
-                    scope.Complete();
-                }
-                catch
-                {
-                    methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                    methodResult.AddErrorMessage(nameof(EnumParentErrorCode.PA06V));
-                    scope.Dispose();
-                }
+                methodResult.StatusCode = StatusCodes.Status400BadRequest;
+                methodResult.AddError(nameof(EnumParentErrorCode.PA03V));
+                return methodResult;
             }
+
+            var countStudentPr = userparent.Human?.Parent?.ParentStudents.Count;
+            if (countStudentPr >= 2)
+            {
+                methodResult.StatusCode = StatusCodes.Status400BadRequest;
+                methodResult.AddError(nameof(EnumParentErrorCode.PA07V));
+                return methodResult;
+            }
+
+            var parent = userparent.Human?.Parent;
+            if (parent == null)
+            {
+                methodResult.StatusCode = StatusCodes.Status400BadRequest;
+                methodResult.AddError(nameof(EnumParentErrorCode.PA03V));
+                return methodResult;
+            }
+
+            user = _mapper.Map<User>(request);
+            user.FullName = request.Name;
+            user.Human = new Human
+            {
+                FullName = request.Name,
+                AvatarPath = request.AvatarPath,
+                CreatedFullName = userparent.FullName ?? string.Empty,
+            };
+
+            user.Human.Student = new Student
+            {
+                School = request.School,
+                CreatedFullName = userparent.FullName ?? string.Empty,
+                CourseLevel = EnumCourseLevel.A2
+            };
+
+            user.Human.Student.ParentStudents = parent.ParentStudents.Select(e => new ParentStudent
+            {
+                ParentId = parent.Id
+            }).ToList();
+
+            result = await _userManager.CreateAsync(user, request.Password ?? string.Empty);
+
+            if (!result.Succeeded)
+            {
+                methodResult.StatusCode = StatusCodes.Status400BadRequest;
+                methodResult.AddError(nameof(EnumParentErrorCode.PA04V));
+                return methodResult;
+            }
+            await _userManager.AddToRoleAsync(user, EnumRoleRegister.Student.ToString());
+
             methodResult.StatusCode = StatusCodes.Status201Created;
             methodResult.Result = _mapper.Map<UserModel>(user);
             return methodResult;

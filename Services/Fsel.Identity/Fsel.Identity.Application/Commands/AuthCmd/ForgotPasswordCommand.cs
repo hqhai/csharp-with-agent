@@ -68,7 +68,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             if (isSendMail.IsSuccessStatusCode)
             {
                 methodResult.StatusCode = StatusCodes.Status500InternalServerError;
-                methodResult.AddErrorMessage(nameof(EnumAuthErrorCode.AU13ER));
+                methodResult.AddError(nameof(EnumAuthErrorCode.AU13ER));
                 return methodResult;
             }
 

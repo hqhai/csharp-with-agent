@@ -1,18 +1,15 @@
-// Copyright (c) Atlantic. All rights reserved.
+using System.Net;
+using Fsel.Common.ActionResults;
+using Fsel.Common.Constants;
+using Fsel.Common.Enums;
+using Fsel.Identity.Application.Commands.ParentCmd;
+using Fsel.Identity.Domain.Models.EntityModels;
+using MediatR;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Fsel.Identity.Api.Controllers
 {
-    using System.Net;
-    using Fsel.Common.ActionResults;
-    using Fsel.Common.Constants;
-    using Fsel.Common.Enums;
-    using Fsel.Common.Helpers;
-    using Fsel.Identity.Application.Commands.ParentCmd;
-    using Fsel.Identity.Domain.Models.EntityModels;
-    using MediatR;
-    using Microsoft.AspNetCore.Authorization;
-    using Microsoft.AspNetCore.Mvc;
-
     [ApiVersion(Settings.APIVersion)]
     [Route(Settings.APIDefaultRoute + "/parent")]
     [ApiController]
@@ -26,25 +23,15 @@ namespace Fsel.Identity.Api.Controllers
         }
 
         /// <summary>
-        /// Create Student
+        /// create student
         /// </summary>
-        [HttpPost("create-student")]
+        [HttpPost("createstudent")]
         [ProducesResponseType(typeof(MethodResult<UserModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.BadRequest)]
-        [Authorize(Roles = nameof(EnumRole.Parent))]
         public async Task<IActionResult> CreateStudent([FromBody] CreateStudentByParentCommand command)
         {
-            try
-            {
-                MethodResult<UserModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
-                return commandResult.GetActionResult();
-            }
-            catch (Exception ex)
-            {
-                VoidMethodResult errorCommandResult = new VoidMethodResult();
-                errorCommandResult.AddErrorMessage(MethodHelper.GetExceptionMessage(ex));
-                return errorCommandResult.GetActionResult();
-            }
+            MethodResult<UserModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
         }
     }
 }
