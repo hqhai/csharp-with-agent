@@ -7,5 +7,6 @@ namespace Fsel.Identity.Domain.IRepositories
 
     public interface ITeacherRepository : IRepository<Teacher>
     {
+        Task<IList<Teacher>> GetIncludeByIdsAsync(IList<Guid> ids, int? siteId = null);
     }
 }
