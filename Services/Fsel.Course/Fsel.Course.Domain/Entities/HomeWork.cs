@@ -2,6 +2,7 @@
 
 using System.ComponentModel.DataAnnotations;
 using Fsel.Common.Enums;
+using Fsel.Common.Enums.ErrorCodes;
 using Fsel.Core.Entities;
 using Fsel.Course.Domain.Enums;
 using Fsel.Course.Domain.Enums.ErrorCodes;
@@ -13,20 +14,20 @@ namespace Fsel.Course.Domain.Entities
         /// <summary>
         /// Tên bài tập
         /// </summary>
-        [Required(ErrorMessage = nameof(EnumHomeWorkErrorCode.HW01C))]
-        [MaxLength(250, ErrorMessage = nameof(EnumHomeWorkErrorCode.HW02C))]
+        [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
+        [MaxLength(250, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? Name { get; set; }
 
         /// <summary>
         ///  Nội dung bài tập
         /// </summary>
-        [MaxLength(1000, ErrorMessage = nameof(EnumHomeWorkErrorCode.HW03C))]
+        [MaxLength(1000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? InstructionContent { get; set; }
 
         /// <summary>
         /// Media Post
         /// </summary>
-        [MaxLength(1000, ErrorMessage = nameof(EnumHomeWorkErrorCode.HW04C))]
+        [MaxLength(1000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? MediaPost { get; set; }
 
         public bool IsActive { get; set; }

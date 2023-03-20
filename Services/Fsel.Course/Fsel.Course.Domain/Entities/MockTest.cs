@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using Fsel.Common.Enums.ErrorCodes;
 using Fsel.Core.Entities;
 using Fsel.Course.Domain.Enums;
 using Fsel.Course.Domain.Enums.ErrorCodes;
@@ -10,8 +11,8 @@ namespace Fsel.Course.Domain.Entities
         /// <summary>
         /// Tên MockTest
         /// </summary>
-        [Required(ErrorMessage = nameof(EnumMockTestErrorCode.MT01C))]
-        [MaxLength(250, ErrorMessage = nameof(EnumMockTestErrorCode.MT02C))]
+        [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
+        [MaxLength(250, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? Name { get; set; }
 
         public bool IsActive { get; set; }
