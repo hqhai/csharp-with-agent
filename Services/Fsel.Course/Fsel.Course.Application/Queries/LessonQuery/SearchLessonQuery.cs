@@ -69,6 +69,7 @@ namespace Fsel.Course.Application.Queries.LessonQuery
                                                         .Select(y => y.TimeCodeType)
                                                         .FirstOrDefault(),
                             CreatedFullName = x.CreatedFullName,
+                            UpdatedUserId = x.UpdatedUserId,
                             CreatedDate = x.CreatedDate,
                             UpdatedDate = x.UpdatedDate,
                             UpdatedFullName = x.UpdatedFullName,
