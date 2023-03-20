@@ -1,7 +1,6 @@
 using AutoMapper;
 using Fsel.Common.ActionResults;
 using Fsel.Core.Base.BaseModels;
-using Fsel.Course.Domain.Entities;
 using Fsel.Course.Domain.Enums;
 using Fsel.Course.Domain.IRepositories;
 using Fsel.Course.Domain.Models.EntityModels;
@@ -20,36 +19,34 @@ namespace Fsel.Course.Application.Queries.VideoQuery
     {
         private readonly IMapper _mapper;
         private readonly IVideoRepository _videoRepository;
-        private readonly IVideoTimeCodeRepository _videoTimeCodeRepository;
-        private readonly ITimeCodeExcerciseRepository _timeCodeExcerciseRepository;
-        private readonly IExcerciseRepository _excerciseRepository;
 
         public SearchVideoQueryHandler(IMapper mapper
-            , IVideoRepository videoRepository
-            , IVideoTimeCodeRepository videoTimeCodeRepository
-            , ITimeCodeExcerciseRepository timeCodeExcerciseRepository
-            , IExcerciseRepository excerciseRepository)
+            , IVideoRepository videoRepository)
         {
             _mapper = mapper;
             _videoRepository = videoRepository;
-            _videoTimeCodeRepository = videoTimeCodeRepository;
-            _timeCodeExcerciseRepository = timeCodeExcerciseRepository;
-            _excerciseRepository = excerciseRepository;
         }
 
         public async Task<MethodResult<PagingItemsModel<VideoSearchModel>>> Handle(SearchVideoQuery request, CancellationToken cancellationToken)
         {
             MethodResult<PagingItemsModel<VideoSearchModel>> methodResult = new MethodResult<PagingItemsModel<VideoSearchModel>>();
 
-            if (request.PageSize > 100)
+            if (request == null)
+            {
+                methodResult.StatusCode = StatusCodes.Status400BadRequest;
+                return methodResult;
+            }
+            else if (request.PageSize > 100)
             {
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 return methodResult;
             }
             var videoQuery = _videoRepository.Queryable
-                        .Include(video => video.VideoTimeCodes)
-                        .ThenInclude(videoTimeCode => videoTimeCode.TimeCodeExcercises)
+                        .Include(x => x.LessonVideos.Where(y => !y.IsDeleted))
+                        .Include(video => video.VideoTimeCodes.Where(x => !x.IsDeleted))
+                        .ThenInclude(videoTimeCode => videoTimeCode.TimeCodeExcercises.Where(x => !x.IsDeleted && x.Excercise != null))
                         .ThenInclude(timeCodeExcercise => timeCodeExcercise.Excercise)
+                        .Where(x => x.Type == EnumVideoType.Lesson)
                         .Where(x => !request.Level.HasValue || x.CourseLevel == request.Level.Value)
                         .Where(x => !request.TeacherId.HasValue || x.TeacherId == request.TeacherId.Value)
                         .Where(x => request.TimeCodeType == null || x.VideoTimeCodes.Select(n => n.TimeCodeType).Contains(request.TimeCodeType.Value))
