@@ -17,12 +17,12 @@ namespace Fsel.Course.Application.Queries.UnitQuery
 
     public class SearchUnitQueryHandler : IRequestHandler<SearchUnitQuery, MethodResult<PagingItemsModel<UnitModel>>>
     {
-        private readonly IUnitRepository _UnitRepository;
+        private readonly IUnitRepository _unitRepository;
         private readonly IMapper _mapper;
 
-        public SearchUnitQueryHandler(IMapper mapper, IUnitRepository UnitRepository)
+        public SearchUnitQueryHandler(IMapper mapper, IUnitRepository unitRepository)
         {
-            _UnitRepository = UnitRepository;
+            _unitRepository = unitRepository;
             _mapper = mapper;
         }
 
@@ -36,10 +36,10 @@ namespace Fsel.Course.Application.Queries.UnitQuery
                 return methodResult;
             }
 
-            var UnitQuery = _UnitRepository.Queryable
-                                    .Where(x => request.CourseLevel == null ? true : x.CourseLevel == request.CourseLevel)
+            var unitQuery = _unitRepository.Queryable
                                     .Include(x => x.CourseUnitMockTests.Where(y => !y.IsDeleted))
-                                    .Where(x => request.CourseLevel == null ? true : x.CourseLevel == request.CourseLevel)
+                                    .Where(x => request.CourseLevel == null || x.CourseLevel == request.CourseLevel)
+                                    .Where(x => request.CourseLevel == null || x.CourseLevel == request.CourseLevel)
                                     .Include(unit => unit.UnitLessons)
                                     .ThenInclude(unitLesson => unitLesson.Lesson)
                                     .ThenInclude(lesson => lesson.LessonVideos)
@@ -70,11 +70,11 @@ namespace Fsel.Course.Application.Queries.UnitQuery
             //Keyword
             if (!string.IsNullOrEmpty(request.Keyword))
             {
-                UnitQuery = UnitQuery.Where(m => m.Id.ToString() == request.Keyword || (m.Name ?? string.Empty).Contains(request.Keyword));
+                unitQuery = unitQuery.Where(m => m.Id.ToString() == request.Keyword || (m.Name ?? string.Empty).Contains(request.Keyword));
             }
 
-            int totalItem = await UnitQuery.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
-            var lists = await UnitQuery.OrderByDescending(x => x.Id)
+            int totalItem = await unitQuery.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
+            var lists = await unitQuery.OrderByDescending(x => x.Id)
                     .Skip((request.Page - 1) * request.PageSize)
                     .Take(request.PageSize)
                     .AsNoTracking()

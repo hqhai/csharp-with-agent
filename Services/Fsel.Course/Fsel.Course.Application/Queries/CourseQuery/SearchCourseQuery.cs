@@ -40,7 +40,7 @@ namespace Fsel.Course.Application.Queries.CourseQuery
 
             var courseQuery = _courseRepository.Queryable
                               .Include(course => course.CourseTeachers)
-                              .Where(x => request.CourseLevel == null ? true : x.CourseLevel == request.CourseLevel)
+                              .Where(x => request.CourseLevel == null || x.CourseLevel == request.CourseLevel)
                               .Where(x => request.TeacherId == null || x.CourseTeachers.Select(n => n.TeacherId).Contains(request.TeacherId.Value))
                               .Select(course => new CourseModel
                               {
@@ -59,22 +59,6 @@ namespace Fsel.Course.Application.Queries.CourseQuery
                                   TeacherId = course.CourseTeachers.Select(x => x.TeacherId).FirstOrDefault(),
                               });
 
-            /*  select new CourseModel
-              {
-                  Id = i.Id,
-                  Name = i.Name,
-                  NumberOfLessons = i.NumberOfLessons,
-                  NumberOfUnits = i.NumberOfUnits,
-                  Status = i.Status,
-                  CourseLevel = i.CourseLevel,
-                  CreatedDate = i.CreatedDate,
-                  CreatedUserId = i.CreatedUserId,
-                  CreatedFullName = i.CreatedFullName,
-                  UpdatedDate = i.UpdatedDate,
-                  UpdatedUserId = i.UpdatedUserId,
-                  UpdatedFullName = i.UpdatedFullName,
-                  TeacherId = i.CourseTeachers.Select(x => x.TeacherId).FirstOrDefault(),
-              };*/
             //Keyword
             if (!string.IsNullOrEmpty(request.Keyword))
             {
