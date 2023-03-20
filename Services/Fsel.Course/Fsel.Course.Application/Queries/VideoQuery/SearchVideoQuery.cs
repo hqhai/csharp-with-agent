@@ -1,6 +1,8 @@
 using AutoMapper;
 using Fsel.Common.ActionResults;
 using Fsel.Core.Base.BaseModels;
+using Fsel.Course.Domain.Entities;
+using Fsel.Course.Domain.Enums;
 using Fsel.Course.Domain.IRepositories;
 using Fsel.Course.Domain.Models.EntityModels;
 using Fsel.Course.Domain.Models.QueryModels.Videos;
@@ -48,9 +50,9 @@ namespace Fsel.Course.Application.Queries.VideoQuery
                         .Include(video => video.VideoTimeCodes)
                         .ThenInclude(videoTimeCode => videoTimeCode.TimeCodeExcercises)
                         .ThenInclude(timeCodeExcercise => timeCodeExcercise.Excercise)
-                        .Where(x => request.Level == null ? true : x.CourseLevel == request.Level)
-                        .Where(x => request.TeacherId == null ? true : x.TeacherId == request.TeacherId)
-                        .Where(x => request.TimeCodeType == null ? true : x.VideoTimeCodes.Select(n => n.TimeCodeType).Contains(request.TimeCodeType))
+                        .Where(x => !request.Level.HasValue || x.CourseLevel == request.Level.Value)
+                        .Where(x => !request.TeacherId.HasValue || x.TeacherId == request.TeacherId.Value)
+                        .Where(x => request.TimeCodeType == null || x.VideoTimeCodes.Select(n => n.TimeCodeType).Contains(request.TimeCodeType.Value))
                         .Select(video => new VideoSearchModel
                         {
                             Id = video.Id,
