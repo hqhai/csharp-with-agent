@@ -29,9 +29,9 @@ namespace Fsel.Course.Application.Commands.VideoCmd
 
                 var video = await _videoRepository.Queryable
                                                .Include(i => i.VideoTimeCodes.Where(x => !x.IsDeleted))
-                                               .ThenInclude(x => x.TimeCodeExcercises.Where(x => !x.IsDeleted && x.Excercise != null))
-                                               .ThenInclude(x => x.Excercise)
-                                               .ThenInclude(x => x.ExcerciseQuestions.Where(x => !x.IsDeleted))
+                                               .ThenInclude(x => x.TimeCodeExercises.Where(x => !x.IsDeleted && x.Exercise != null))
+                                               .ThenInclude(x => x.Exercise)
+                                               .ThenInclude(x => x.ExerciseQuestions.Where(x => !x.IsDeleted))
                                                .ThenInclude(x => x.Question)
                                                .FirstOrDefaultAsync(x => x.Id == request.Id);
                 if (video == null)

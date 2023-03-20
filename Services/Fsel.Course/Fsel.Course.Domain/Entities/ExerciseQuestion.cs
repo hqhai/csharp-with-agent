@@ -5,15 +5,16 @@ using Fsel.Course.Domain.Enums.ErrorCodes;
 
 namespace Fsel.Course.Domain.Entities
 {
-    public class TimeCodeExcercise : Entity
+    public class ExerciseQuestion : Entity
     {
-        public VideoTimeCode? VideoTimeCode { get; set; }
-        public Excercise? Excercise { get; set; }
+        public Exercise? Exercise { get; set; }
+
+        public Question? Question { get; set; }
 
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
-        public Guid ExcerciseId { get; set; }
+        public Guid ExerciseId { get; set; }
 
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
-        public Guid VideoTimeCodeId { get; set; }
+        public Guid QuestionId { get; set; }
     }
 }

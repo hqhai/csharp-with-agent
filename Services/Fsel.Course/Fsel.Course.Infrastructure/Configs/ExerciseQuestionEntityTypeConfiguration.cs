@@ -4,17 +4,17 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Fsel.Course.Infrastructure.Configs
 {
-    public class ExcerciseQuestionEntityTypeConfiguration : IEntityTypeConfiguration<ExcerciseQuestion>
+    public class ExerciseQuestionEntityTypeConfiguration : IEntityTypeConfiguration<ExerciseQuestion>
     {
-        public void Configure(EntityTypeBuilder<ExcerciseQuestion> builder)
+        public void Configure(EntityTypeBuilder<ExerciseQuestion> builder)
         {
-            builder.HasOne(a => a.Excercise)
-                .WithMany(b => b.ExcerciseQuestions)
-                .HasForeignKey(b => b.ExcerciseId)
+            builder.HasOne(a => a.Exercise)
+                .WithMany(b => b.ExerciseQuestions)
+                .HasForeignKey(b => b.ExerciseId)
                 .OnDelete(DeleteBehavior.Cascade);
 
             builder.HasOne(a => a.Question)
-                .WithMany(b => b.ExcerciseQuestions)
+                .WithMany(b => b.ExerciseQuestions)
                 .HasForeignKey(b => b.QuestionId)
                 .OnDelete(DeleteBehavior.Cascade);
         }

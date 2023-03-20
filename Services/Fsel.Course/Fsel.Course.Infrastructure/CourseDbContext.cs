@@ -32,9 +32,9 @@ namespace Fsel.Course.Infrastructure
         public DbSet<Domain.Entities.Unit> Units { get; set; }
         public DbSet<CourseUnitMockTest> CourseUnitMockTests { get; set; }
         public DbSet<VideoTimeCode> VideoTimeCodes { get; set; }
-        public DbSet<Excercise> Excercises { get; set; }
-        public DbSet<TimeCodeExcercise> TimeCodeExcercises { get; set; }
-        public DbSet<ExcerciseQuestion> ExcerciseQuestions { get; set; }
+        public DbSet<Exercise> Exercises { get; set; }
+        public DbSet<TimeCodeExercise> TimeCodeExercises { get; set; }
+        public DbSet<ExerciseQuestion> ExerciseQuestions { get; set; }
         public DbSet<Question> Questions { get; set; }
         public DbSet<CourseTeacher> CourseTeachers { get; set; }
 
@@ -44,8 +44,8 @@ namespace Fsel.Course.Infrastructure
             modelBuilder.ApplyConfiguration(new CourseEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new CourseTeacherEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new CourseUnitMockTestEntityTypeConfiguration());
-            modelBuilder.ApplyConfiguration(new ExcerciseEntityTypeConfiguration());
-            modelBuilder.ApplyConfiguration(new ExcerciseQuestionEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new ExerciseEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new ExerciseQuestionEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new ExtraPracticeEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new HomeWorkEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new LessonEntityTypeConfiguration());
@@ -55,7 +55,7 @@ namespace Fsel.Course.Infrastructure
             modelBuilder.ApplyConfiguration(new MockTestEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new PlacementTestEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new QuestionEntityTypeConfiguration());
-            modelBuilder.ApplyConfiguration(new TimeCodeExcerciseEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new TimeCodeExerciseEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new UnitEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new UnitLessonEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new UnitSkillMockTestEntityTestConfiguration());

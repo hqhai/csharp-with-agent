@@ -1,14 +1,14 @@
 namespace Fsel.Course.Domain.Enums.ErrorCodes
 {
-    public enum EnumExcerciseErrorCode
+    public enum EnumExerciseErrorCode
     {
         /// <summary>
-        /// Excercise does not exist
+        /// Exercise does not exist
         /// </summary>
         E01V,
 
         /// <summary>
-        /// Excercise null
+        /// Exercise null
         /// </summary>
         E03V,
 
