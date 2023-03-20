@@ -21,7 +21,7 @@ namespace Fsel.Identity.Infrastructure
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             ArgumentNullException.ThrowIfNull(modelBuilder);
-            SeedRoles(modelBuilder);
+            //SeedRoles(modelBuilder);
 
             modelBuilder.ApplyConfiguration(new HumanEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new TeacherEntityTypeConfiguration());
