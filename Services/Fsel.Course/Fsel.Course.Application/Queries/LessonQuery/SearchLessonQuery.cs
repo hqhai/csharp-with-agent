@@ -1,6 +1,8 @@
+using System.Linq;
 using AutoMapper;
 using Fsel.Common.ActionResults;
 using Fsel.Core.Base.BaseModels;
+using Fsel.Course.Domain.Entities;
 using Fsel.Course.Domain.IRepositories;
 using Fsel.Course.Domain.Models.EntityModels;
 using Fsel.Course.Domain.Models.QueryModels.Lessons;
@@ -10,24 +12,35 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Fsel.Course.Application.Queries.LessonQuery
 {
-    public class SearchLessonQuery : SearchLessonQueryModel, IRequest<MethodResult<PagingItemsModel<LessonModel>>>
+    public class SearchLessonQuery : SearchLessonQueryModel, IRequest<MethodResult<PagingItemsModel<LessonSearchModel>>>
     {
     }
 
-    public class SearchLessonQueryHandler : IRequestHandler<SearchLessonQuery, MethodResult<PagingItemsModel<LessonModel>>>
+    public class SearchLessonQueryHandler : IRequestHandler<SearchLessonQuery, MethodResult<PagingItemsModel<LessonSearchModel>>>
     {
         private readonly IMapper _mapper;
         private readonly ILessonRepository _lessonRepository;
+        private readonly ILessonVideoRepository _lessonVideoRepository;
+        private readonly IVideoRepository _videoRepository;
+        private readonly IVideoTimeCodeRepository _videoTimeCodeRepository;
 
-        public SearchLessonQueryHandler(IMapper mapper, ILessonRepository lessonRepository)
+        public SearchLessonQueryHandler(IMapper mapper
+            , ILessonRepository lessonRepository
+            , ILessonVideoRepository lessonVideoRepository
+            , IVideoRepository videoRepository
+            , IVideoTimeCodeRepository videoTimeCodeRepository
+            )
         {
             _mapper = mapper;
             _lessonRepository = lessonRepository;
+            _lessonVideoRepository = lessonVideoRepository;
+            _videoRepository = videoRepository;
+            _videoTimeCodeRepository = videoTimeCodeRepository;
         }
 
-        public async Task<MethodResult<PagingItemsModel<LessonModel>>> Handle(SearchLessonQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<PagingItemsModel<LessonSearchModel>>> Handle(SearchLessonQuery request, CancellationToken cancellationToken)
         {
-            MethodResult<PagingItemsModel<LessonModel>> methodResult = new MethodResult<PagingItemsModel<LessonModel>>();
+            MethodResult<PagingItemsModel<LessonSearchModel>> methodResult = new MethodResult<PagingItemsModel<LessonSearchModel>>();
 
             if (request.PageSize > 100)
             {
@@ -35,22 +48,33 @@ namespace Fsel.Course.Application.Queries.LessonQuery
                 return methodResult;
             }
 
-            var lessonQuery = from i in _lessonRepository.Queryable
-                              .Include(x => x.UnitLessons.Where(y => !y.IsDeleted))
-                              select new LessonModel
-                              {
-                                  Id = i.Id,
-                                  Name = i.Name,
-                                  DisplayName = i.DisplayName,
-                                  InstructionContent = i.InstructionContent,
-                                  IsActive = !i.UnitLessons.Any(),
-                                  TeacherId = i.TeacherId,
-                                  CourseLevel = i.CourseLevel,
-                                  CreatedDate = i.CreatedDate,
-                                  CreatedUserId = i.CreatedUserId,
-                                  UpdatedDate = i.UpdatedDate,
-                                  UpdatedUserId = i.UpdatedUserId,
-                              };
+            var lessonQuery = _lessonRepository.Queryable
+                        .Include(x => x.LessonVideos.Where(y => !y.IsDeleted && y.Video != null))
+                        .ThenInclude(x => x.Video)
+                        .ThenInclude(x => x.VideoTimeCodes.Where(y => !y.IsDeleted && y.Video != null))
+                        .Where(x => !request.TeacherId.HasValue || x.TeacherId == request.TeacherId)
+                        .Where(x => !request.CourseLevel.HasValue || x.CourseLevel == request.CourseLevel)
+                        .Where(x => !request.TimeCodeType.HasValue || x.LessonVideos.Where(y => y.Video != null)
+                                                                                     .Select(y => y.Video)
+                                                                                     .SelectMany(y => y.VideoTimeCodes)
+                                                                                     .Select(y => y.TimeCodeType)
+                                                                                     .Contains(request.TimeCodeType.Value))
+                        .Select(x => new LessonSearchModel
+                        {
+                            Id = x.Id,
+                            Name = x.Name,
+                            CourseLevel = x.CourseLevel,
+                            TimeCodeType = x.LessonVideos.Where(y => y.Video != null)
+                                                        .Select(y => y.Video)
+                                                        .SelectMany(y => y.VideoTimeCodes)
+                                                        .Select(y => y.TimeCodeType)
+                                                        .FirstOrDefault(),
+                            CreatedFullName = x.CreatedFullName,
+                            CreatedDate = x.CreatedDate,
+                            UpdatedDate = x.UpdatedDate,
+                            UpdatedFullName = x.UpdatedFullName,
+                            IsActive = x.IsActive
+                        });
             //Keyword
             if (!string.IsNullOrEmpty(request.Keyword))
             {
@@ -65,9 +89,9 @@ namespace Fsel.Course.Application.Queries.LessonQuery
                     .ToListAsync(cancellationToken: cancellationToken)
                     .ConfigureAwait(false);
 
-            methodResult.Result = new PagingItemsModel<LessonModel>
+            methodResult.Result = new PagingItemsModel<LessonSearchModel>
             {
-                Items = _mapper.Map<IEnumerable<LessonModel>>(lists),
+                Items = _mapper.Map<IEnumerable<LessonSearchModel>>(lists),
                 PagingInfo = new PagingInfoModel { Page = request.Page, PageSize = request.PageSize, TotalItems = totalItem }
             };
 
