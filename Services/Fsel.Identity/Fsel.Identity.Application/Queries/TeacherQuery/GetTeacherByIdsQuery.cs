@@ -35,7 +35,7 @@ namespace Fsel.Identity.Application.Queries.TeacherQuery
                 return methodResult;
             }
 
-            var teachers = await _teacherRepository.GetByIdsAsync(request.Ids);
+            var teachers = await _teacherRepository.GetIncludeByIdsAsync(request.Ids);
 
             methodResult.Result = _mapper.Map<IList<TeacherModel>>(teachers);
             methodResult.StatusCode = StatusCodes.Status200OK;
