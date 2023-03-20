@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using DataAnnotationsExtensions;
 using Fsel.Core.Entities;
 using Fsel.Course.Domain.Enums;
 using Fsel.Course.Domain.Enums.ErrorCodes;
@@ -23,20 +24,19 @@ namespace Fsel.Course.Domain.Entities
         /// <summary>
         /// Số từ giới hạn
         /// </summary>
-        [Range(1, int.MaxValue, ErrorMessage = nameof(EnumClassForumErrorCode.CF04C))]
+        [Min(1, ErrorMessage = nameof(EnumClassForumErrorCode.CF04C))]
         public long TaggetWordLimit { get; set; }
 
         /// <summary>
         /// Thời gian giới hạn
         /// </summary>
-        [Range(1, int.MaxValue, ErrorMessage = nameof(EnumClassForumErrorCode.CF05C))]
-        public long TaggetTimeLimitTicks { get; set; }
+        [Min(1, ErrorMessage = nameof(EnumClassForumErrorCode.CF05C))]
+        public long TaggetTimeLimit { get; set; }
 
         [NotMapped]
-        public TimeSpan TaggetTimeLimit
+        public TimeSpan TaggetTimeSpanLimit
         {
-            get { return TimeSpan.FromTicks(TaggetTimeLimitTicks); }
-            set { TaggetTimeLimitTicks = value.Ticks; }
+            get { return TimeSpan.FromTicks(TaggetTimeLimit); }
         }
 
         /// <summary>

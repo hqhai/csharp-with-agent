@@ -55,8 +55,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                 var result = jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256, StringComparison.InvariantCultureIgnoreCase);
                 if (!result)
                 {
-                    methodResult.StatusCode = StatusCodes.Status401Unauthorized;
-                    methodResult.AddErrorMessage(nameof(EnumAuthErrorCode.AU06ER));
+                    methodResult.AddError(StatusCodes.Status401Unauthorized, nameof(EnumAuthErrorCode.AU06ER));
                     return methodResult;
                 }
             }
@@ -66,23 +65,20 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             var expireDate = utcExpireDate.ConvertUnixTimeStampToDateTime();
             if (expireDate > DateTime.UtcNow)
             {
-                methodResult.StatusCode = StatusCodes.Status200OK;
-                methodResult.AddErrorMessage(nameof(EnumAuthErrorCode.AU07ER));
+                methodResult.AddError(StatusCodes.Status401Unauthorized, nameof(EnumAuthErrorCode.AU07ER));
                 return methodResult;
             }
 
             var user = _userManager.Users.FirstOrDefault(x => x.RefreshToken == request.RefreshToken);
             if (user == null)
             {
-                methodResult.StatusCode = StatusCodes.Status404NotFound;
-                methodResult.AddErrorMessage(nameof(EnumAuthErrorCode.AU08ER));
+                methodResult.AddError(StatusCodes.Status401Unauthorized, nameof(EnumAuthErrorCode.AU06ER),
+                    nameof(request.RefreshToken), request.RefreshToken);
                 return methodResult;
             }
             else if (user.RefreshTokenExpiryTime == null || user.RefreshTokenExpiryTime.Value <= DateTime.Now)
             {
-                methodResult.StatusCode = StatusCodes.Status401Unauthorized;
-                methodResult.AddErrorMessage(nameof(EnumAuthErrorCode.AU09ER));
-                return methodResult;
+                methodResult.AddError(StatusCodes.Status401Unauthorized, nameof(EnumAuthErrorCode.AU09ER));
             }
 
             methodResult = await _mediator.Send(new GenerateTokenCommand { Id = user.Id }).ConfigureAwait(false);

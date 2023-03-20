@@ -34,17 +34,8 @@ namespace Fsel.Course.Lcms.Api.Controllers
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.BadRequest)]
         public async Task<IActionResult> Search([FromQuery] SearchVideoQuery query)
         {
-            try
-            {
-                MethodResult<PagingItemsModel<VideoModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
-                return queryResult.GetActionResult();
-            }
-            catch (Exception ex)
-            {
-                VoidMethodResult errorResult = new VoidMethodResult();
-                errorResult.AddErrorMessage(MethodHelper.GetExceptionMessage(ex));
-                return errorResult.GetActionResult();
-            }
+            MethodResult<PagingItemsModel<VideoModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
         }
 
         /// <summary>
@@ -55,17 +46,8 @@ namespace Fsel.Course.Lcms.Api.Controllers
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.BadRequest)]
         public async Task<IActionResult> Get([FromRoute] Guid id)
         {
-            try
-            {
-                MethodResult<VideoModel> queryResult = await _mediator.Send(new GetVideoQuery { Id = id }).ConfigureAwait(false);
-                return queryResult.GetActionResult();
-            }
-            catch (Exception ex)
-            {
-                VoidMethodResult errorResult = new VoidMethodResult();
-                errorResult.AddErrorMessage(MethodHelper.GetExceptionMessage(ex));
-                return errorResult.GetActionResult();
-            }
+            MethodResult<VideoModel> queryResult = await _mediator.Send(new GetVideoQuery { Id = id }).ConfigureAwait(false);
+            return queryResult.GetActionResult();
         }
 
         /// <summary>
@@ -76,17 +58,8 @@ namespace Fsel.Course.Lcms.Api.Controllers
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.BadRequest)]
         public async Task<IActionResult> Create([FromBody] CreateVideoCommand command)
         {
-            try
-            {
-                MethodResult<VideoModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
-                return commandResult.GetActionResult();
-            }
-            catch (Exception ex)
-            {
-                VoidMethodResult errorResult = new VoidMethodResult();
-                errorResult.AddErrorMessage(MethodHelper.GetExceptionMessage(ex));
-                return errorResult.GetActionResult();
-            }
+            MethodResult<VideoModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
         }
 
         /// <summary>
@@ -97,18 +70,9 @@ namespace Fsel.Course.Lcms.Api.Controllers
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.BadRequest)]
         public async Task<IActionResult> Update([FromRoute] Guid id, [FromBody] UpdateVideoCommand command)
         {
-            try
-            {
-                command.Id = id;
-                MethodResult<VideoModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
-                return commandResult.GetActionResult();
-            }
-            catch (Exception ex)
-            {
-                VoidMethodResult errorResult = new VoidMethodResult();
-                errorResult.AddErrorMessage(MethodHelper.GetExceptionMessage(ex));
-                return errorResult.GetActionResult();
-            }
+            command.Id = id;
+            MethodResult<VideoModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
         }
 
         /// <summary>
@@ -119,17 +83,8 @@ namespace Fsel.Course.Lcms.Api.Controllers
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.BadRequest)]
         public async Task<IActionResult> Delete([FromRoute] Guid id)
         {
-            try
-            {
-                MethodResult<bool> commandResult = await _mediator.Send(new DeleteVideoCommand { Id = id }).ConfigureAwait(false);
-                return commandResult.GetActionResult();
-            }
-            catch (Exception ex)
-            {
-                VoidMethodResult errorResult = new VoidMethodResult();
-                errorResult.AddErrorMessage(MethodHelper.GetExceptionMessage(ex));
-                return errorResult.GetActionResult();
-            }
+            MethodResult<bool> commandResult = await _mediator.Send(new DeleteVideoCommand { Id = id }).ConfigureAwait(false);
+            return commandResult.GetActionResult();
         }
     }
 }

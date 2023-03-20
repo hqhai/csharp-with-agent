@@ -1,4 +1,4 @@
-using System.ComponentModel.DataAnnotations;
+using DataAnnotationsExtensions;
 using Fsel.Core.Entities;
 using Fsel.Course.Domain.Enums.ErrorCodes;
 using Newtonsoft.Json;
@@ -10,7 +10,7 @@ namespace Fsel.Course.Domain.Entities
         /// <summary>
         /// Số thứ tự
         /// </summary>
-        [Range(1, int.MaxValue, ErrorMessage = nameof(EnumCourseUnitMockTestErrorCode.CUM01C))]
+        [Min(1, ErrorMessage = nameof(EnumCourseUnitMockTestErrorCode.CUM01C))]
         public int OrderNumber { get; set; }
 
         [JsonIgnore]

@@ -51,9 +51,7 @@ namespace Fsel.Course.Application.Commands.CourseCmd
 
             if (request.CourseUnitMockTests == null)
             {
-                methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                methodResult.AddErrorMessage(
-                    nameof(EnumCourseUnitMockTestErrorCode.CUM01V));
+                methodResult.AddErrorBadRequest(nameof(EnumCourseUnitMockTestErrorCode.CUM01V), nameof(request.CourseUnitMockTests));
                 return methodResult;
             }
 
@@ -68,19 +66,14 @@ namespace Fsel.Course.Application.Commands.CourseCmd
             var units = request.CourseUnitMockTests.Where(e => e.UnitId != null).Select(x => x.UnitId).ToList();
             if (_unitRepository.IsIdsInValid(units.Where(e => e.HasValue).Select(e => e!.Value)))
             {
-                methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                methodResult.AddErrorMessage(
-                    nameof(EnumUnitErrorCode.U03V));
-
+                methodResult.AddErrorBadRequest(nameof(EnumUnitErrorCode.U03V), nameof(request.CourseUnitMockTests));
                 return methodResult;
             }
 
             var mocktestIds = request.CourseUnitMockTests.Where(e => e.MockTestId != null).Select(x => x.MockTestId);
             if (_mockTestRepository.IsIdsInValid(mocktestIds.Where(e => e.HasValue).Select(e => e!.Value)))
             {
-                methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                methodResult.AddErrorMessage(
-                nameof(EnumMockTestErrorCode.MT03V));
+                methodResult.AddErrorBadRequest(nameof(EnumMockTestErrorCode.MT03V), nameof(request.CourseUnitMockTests));
                 return methodResult;
             }
 
@@ -89,9 +82,7 @@ namespace Fsel.Course.Application.Commands.CourseCmd
             var checkMockTest = mocktests.Any(x => x.MockTestType == EnumMockTestType.CourseMockTest);
             if (!checkMockTest)
             {
-                methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                methodResult.AddErrorMessage(
-                nameof(EnumMockTestErrorCode.MT05V));
+                methodResult.AddErrorBadRequest(nameof(EnumMockTestErrorCode.MT05V), nameof(request.CourseUnitMockTests), mocktests.Select(x => x.Id));
                 return methodResult;
             }
 
