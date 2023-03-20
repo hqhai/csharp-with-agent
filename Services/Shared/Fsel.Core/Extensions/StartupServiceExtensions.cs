@@ -72,13 +72,13 @@ namespace Fsel.Core.Extensions
                 var user = httpContextAccessor?.HttpContext?.User;
                 if (user != null)
                 {
-                    if (Guid.TryParse(user.FindFirstValue(JwtRegisteredClaimNames.NameId), out Guid id))
+                    if (Guid.TryParse(user.FindFirstValue(ClaimTypes.NameIdentifier), out Guid id))
                     {
                         authContext.CurrentUserId = id;
                     }
-                    authContext.CurrentUsername = user.FindFirstValue(JwtRegisteredClaimNames.Name);
-                    authContext.CurrentFullName = user.FindFirstValue(JwtRegisteredClaimNames.GivenName);
-                    authContext.Email = user.FindFirstValue(JwtRegisteredClaimNames.Email);
+                    authContext.CurrentUsername = user.FindFirstValue(ClaimTypes.Name);
+                    authContext.CurrentFullName = user.FindFirstValue(ClaimTypes.GivenName);
+                    authContext.Email = user.FindFirstValue(ClaimTypes.Email);
                 }
                 return authContext;
             });
