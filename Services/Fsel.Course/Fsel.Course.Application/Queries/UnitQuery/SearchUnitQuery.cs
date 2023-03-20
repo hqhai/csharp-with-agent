@@ -11,11 +11,11 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Fsel.Course.Application.Queries.UnitQuery
 {
-    public class SearchUnitQuery : SearchUnitQueryModel, IRequest<MethodResult<PagingItemsModel<UnitModel>>>
+    public class SearchUnitQuery : SearchUnitQueryModel, IRequest<MethodResult<PagingItemsModel<UnitSearchModel>>>
     {
     }
 
-    public class SearchUnitQueryHandler : IRequestHandler<SearchUnitQuery, MethodResult<PagingItemsModel<UnitModel>>>
+    public class SearchUnitQueryHandler : IRequestHandler<SearchUnitQuery, MethodResult<PagingItemsModel<UnitSearchModel>>>
     {
         private readonly IUnitRepository _unitRepository;
         private readonly IMapper _mapper;
@@ -28,9 +28,9 @@ namespace Fsel.Course.Application.Queries.UnitQuery
             _userService = userService;
         }
 
-        public async Task<MethodResult<PagingItemsModel<UnitModel>>> Handle(SearchUnitQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<PagingItemsModel<UnitSearchModel>>> Handle(SearchUnitQuery request, CancellationToken cancellationToken)
         {
-            MethodResult<PagingItemsModel<UnitModel>> methodResult = new MethodResult<PagingItemsModel<UnitModel>>();
+            MethodResult<PagingItemsModel<UnitSearchModel>> methodResult = new MethodResult<PagingItemsModel<UnitSearchModel>>();
 
             if (request.PageSize > 100)
             {
@@ -68,14 +68,7 @@ namespace Fsel.Course.Application.Queries.UnitQuery
                                                 .Select(v => v.Video)
                                                 .Select(n => n.TeacherId).FirstOrDefault(),
                             });
-            var teachers = await _userService.GetTeacherByIdsAsync(new GetTeacherByIdsQueryModel { Ids = unitQuery.Select(x => x.TeacherId ?? Guid.Empty).ToList() });
-            if (teachers.IsSuccessStatusCode)
-            {
-                foreach (var item in unitQuery)
-                {
-                    item.TeacherName = teachers.Content?.Result?.FirstOrDefault(x => x.Id == item.Id)?.Human.FullName;
-                }
-            }
+
             //Keyword
             if (!string.IsNullOrEmpty(request.Keyword))
             {
@@ -90,9 +83,18 @@ namespace Fsel.Course.Application.Queries.UnitQuery
                     .ToListAsync(cancellationToken: cancellationToken)
                     .ConfigureAwait(false);
 
-            methodResult.Result = new PagingItemsModel<UnitModel>
+            var teachers = await _userService.GetTeacherByIdsAsync(new GetTeacherByIdsQueryModel { Ids = unitQuery.Select(x => x.TeacherId ?? Guid.Empty).ToList() });
+            if (teachers.IsSuccessStatusCode)
             {
-                Items = _mapper.Map<IEnumerable<UnitModel>>(lists),
+                foreach (var item in unitQuery)
+                {
+                    item.TeacherName = teachers.Content?.Result?.FirstOrDefault(x => x.Id == item.TeacherId)?.Human.FullName;
+                }
+            }
+
+            methodResult.Result = new PagingItemsModel<UnitSearchModel>
+            {
+                Items = _mapper.Map<IEnumerable<UnitSearchModel>>(lists),
                 PagingInfo = new PagingInfoModel { Page = request.Page, PageSize = request.PageSize, TotalItems = totalItem }
             };
 
