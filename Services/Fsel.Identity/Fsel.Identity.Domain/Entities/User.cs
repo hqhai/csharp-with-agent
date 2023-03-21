@@ -10,11 +10,6 @@ namespace Fsel.Identity.Domain.Entities
         [MaxLength(250, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? FullName { get; set; }
 
-        [MaxLength(1000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
-        public string? RefreshToken { get; set; }
-
-        public DateTime? RefreshTokenExpiryTime { get; set; }
-
         public virtual Human? Human { get; set; }
     }
 }

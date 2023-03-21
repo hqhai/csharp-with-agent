@@ -21,7 +21,7 @@ namespace Fsel.Identity.Infrastructure
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             ArgumentNullException.ThrowIfNull(modelBuilder);
-            //SeedRoles(modelBuilder);
+            SeedRoles(modelBuilder);
 
             modelBuilder.ApplyConfiguration(new HumanEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new TeacherEntityTypeConfiguration());
@@ -36,6 +36,7 @@ namespace Fsel.Identity.Infrastructure
         #region Db Set
 
         public override DbSet<User> Users { get; set; }
+        public DbSet<UserToken> UserTokens { get; set; }
         public DbSet<Role> Roles { get; set; }
         public DbSet<Human> Humans { get; set; }
         public DbSet<Teacher> Teachers { get; set; }
