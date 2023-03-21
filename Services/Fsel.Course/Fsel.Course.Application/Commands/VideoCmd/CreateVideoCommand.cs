@@ -34,7 +34,7 @@ namespace Fsel.Course.Application.Commands.VideoCmd
 
             if (request.VideoTimeCodes == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumVideoErrorCode.VD03V),
+                methodResult.AddErrorBadRequest(nameof(EnumVideoErrorCode.VideoNotCorrect),
                                                 nameof(request.VideoTimeCodes));
                 return methodResult;
             }
@@ -45,7 +45,7 @@ namespace Fsel.Course.Application.Commands.VideoCmd
             {
                 if (x == null)
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumVideoTimeCodeErrorCode.VTC03V),
+                    methodResult.AddErrorBadRequest(nameof(EnumVideoTimeCodeErrorCode.VideoTimeCodeNotCorrect),
                                                     nameof(request.VideoTimeCodes));
                 }
                 else
@@ -55,7 +55,7 @@ namespace Fsel.Course.Application.Commands.VideoCmd
                     {
                         if (n == null)
                         {
-                            methodResult.AddErrorBadRequest(nameof(EnumExerciseErrorCode.E03V),
+                            methodResult.AddErrorBadRequest(nameof(EnumExerciseErrorCode.ExerciseNull),
                                                             nameof(x.Exercises));
                         }
                         else
@@ -69,7 +69,7 @@ namespace Fsel.Course.Application.Commands.VideoCmd
                             {
                                 if (q == null)
                                 {
-                                    methodResult.AddErrorBadRequest(nameof(EnumQuestionErrorCode.Q03V),
+                                    methodResult.AddErrorBadRequest(nameof(EnumQuestionErrorCode.QuestionNotCorrect),
                                                                     nameof(n.Questions));
                                 }
                                 else

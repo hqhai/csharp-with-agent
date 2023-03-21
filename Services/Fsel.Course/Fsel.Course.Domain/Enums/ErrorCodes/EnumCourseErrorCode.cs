@@ -5,11 +5,11 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         /// <summary>
         /// Course does not exist
         /// </summary>
-        C01V,
+        CourseNotExist,
 
         /// <summary>
         /// Course is not in a new state
         /// </summary>
-        C02V
+        CourseNotInNewState
     }
 }

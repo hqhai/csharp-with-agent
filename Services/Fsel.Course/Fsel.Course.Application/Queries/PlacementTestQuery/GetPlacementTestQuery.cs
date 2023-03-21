@@ -34,7 +34,7 @@ namespace Fsel.Course.Application.Querys.PlacementTestQuery
             if (placementTest == null)
             {
                 methodResult.AddErrorBadRequest(
-                    nameof(EnumPlacementTestErrorCode.PT01V),
+                    nameof(EnumPlacementTestErrorCode.PlacementTestNotExist),
                     nameof(request.Id), request.Id);
                 return methodResult;
             }

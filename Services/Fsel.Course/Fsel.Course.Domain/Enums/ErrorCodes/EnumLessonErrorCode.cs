@@ -5,36 +5,16 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         /// <summary>
         /// Lesson does not exist
         /// </summary>
-        LS01V,
+        LessonNotExist,
 
         /// <summary>
         /// Lesson was used
         /// </summary>
-        LS02V,
+        LessonUsed,
 
         /// <summary>
         /// Lesson not is correct
         /// </summary>
-        LS03V,
-
-        /// <summary>
-        /// Name cannot be empty
-        /// </summary>
-        LS01C,
-
-        /// <summary>
-        /// Name limited to 250 characters
-        /// </summary>
-        LS02C,
-
-        /// <summary>
-        /// Instruction Content limited to 1000 characters
-        /// </summary>
-        LS03C,
-
-        /// <summary>
-        /// DisplayName limited to 250 characters
-        /// </summary>
-        LS04C
+        LessonNotCorrect,
     }
 }

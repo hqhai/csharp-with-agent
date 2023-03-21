@@ -60,7 +60,7 @@ namespace Fsel.Course.Application.Commands.LessonCmd
             var lesson = await _lessonRepository.GetByIdAsync(request.Id);
             if (lesson == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumLessonErrorCode.LS01V),
+                methodResult.AddErrorBadRequest(nameof(EnumLessonErrorCode.LessonNotExist),
                                                 nameof(request.Id), request.Id);
                 return methodResult;
             }
@@ -74,20 +74,20 @@ namespace Fsel.Course.Application.Commands.LessonCmd
 
             if (request.HomeWorkIds == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumHomeWorkErrorCode.HW03V),
+                methodResult.AddErrorBadRequest(nameof(EnumHomeWorkErrorCode.HomeWorkNull),
                                                 nameof(request.HomeWorkIds), request.HomeWorkIds);
                 return methodResult;
             }
 
             if (request.VideoIds == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumVideoErrorCode.VD03V), nameof(request.VideoIds), request.VideoIds);
+                methodResult.AddErrorBadRequest(nameof(EnumVideoErrorCode.VideoNotCorrect), nameof(request.VideoIds), request.VideoIds);
                 return methodResult;
             }
 
             if (request.ExtraPracticeIds == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumExtraPractiveErrorCode.EP03V),
+                methodResult.AddErrorBadRequest(nameof(EnumExtraPractiveErrorCode.ExtraPractiveNull),
                     nameof(request.ExtraPracticeIds), request.ExtraPracticeIds);
                 return methodResult;
             }
@@ -97,7 +97,7 @@ namespace Fsel.Course.Application.Commands.LessonCmd
             if (isLessonUsed)
             {
                 methodResult.AddErrorBadRequest(
-                    nameof(EnumLessonErrorCode.LS02V), nameof(request.Id), request.Id);
+                    nameof(EnumLessonErrorCode.LessonUsed), nameof(request.Id), request.Id);
                 return methodResult;
             }
 
@@ -105,7 +105,7 @@ namespace Fsel.Course.Application.Commands.LessonCmd
             {
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 methodResult.AddError(
-                    nameof(EnumExtraPractiveErrorCode.EP03V));
+                    nameof(EnumExtraPractiveErrorCode.ExtraPractiveNull));
 
                 return methodResult;
             }
@@ -114,7 +114,7 @@ namespace Fsel.Course.Application.Commands.LessonCmd
             {
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 methodResult.AddError(
-                    nameof(EnumVideoErrorCode.VD03V));
+                    nameof(EnumVideoErrorCode.VideoNotCorrect));
 
                 return methodResult;
             }
@@ -123,7 +123,7 @@ namespace Fsel.Course.Application.Commands.LessonCmd
             {
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 methodResult.AddError(
-                    nameof(EnumClassForumErrorCode.CF01V));
+                    nameof(EnumClassForumErrorCode.ClassForumNull));
                 return methodResult;
             }
 
@@ -131,7 +131,7 @@ namespace Fsel.Course.Application.Commands.LessonCmd
             {
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 methodResult.AddError(
-                    nameof(EnumHomeWorkErrorCode.HW03V));
+                    nameof(EnumHomeWorkErrorCode.HomeWorkNull));
 
                 return methodResult;
             }

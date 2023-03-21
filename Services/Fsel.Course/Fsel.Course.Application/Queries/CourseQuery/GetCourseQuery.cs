@@ -35,7 +35,7 @@ namespace Fsel.Course.Application.Queries.CourseQuery
             if (course == null)
             {
                 methodResult.AddErrorBadRequest(
-                    nameof(EnumCourseErrorCode.C01V),
+                    nameof(EnumCourseErrorCode.CourseNotExist),
                     nameof(request.Id), request.Id);
                 return methodResult;
             }

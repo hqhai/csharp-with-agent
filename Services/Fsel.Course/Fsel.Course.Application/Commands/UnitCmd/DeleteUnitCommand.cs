@@ -31,7 +31,7 @@ namespace Fsel.Course.Application.Commands.UnitCmd
                                     .FirstOrDefaultAsync(e => e.Id == request.Id, cancellationToken: cancellationToken);
             if (unit == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumUnitErrorCode.U01V),
+                methodResult.AddErrorBadRequest(nameof(EnumUnitErrorCode.UnitNotExist),
                                                 nameof(request.Id), request?.Id);
                 return methodResult;
             }

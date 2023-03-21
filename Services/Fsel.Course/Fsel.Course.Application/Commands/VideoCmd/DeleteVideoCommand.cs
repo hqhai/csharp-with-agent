@@ -37,7 +37,7 @@ namespace Fsel.Course.Application.Commands.VideoCmd
                 if (video == null)
                 {
                     methodResult.AddErrorBadRequest(
-                        nameof(EnumVideoErrorCode.VD01V),
+                        nameof(EnumVideoErrorCode.VideoNotExist),
                         nameof(request.Id), request.Id);
                     return methodResult;
                 }
@@ -47,7 +47,7 @@ namespace Fsel.Course.Application.Commands.VideoCmd
                 if (isVideoUsed)
                 {
                     methodResult.AddErrorBadRequest(
-                        nameof(EnumVideoErrorCode.VD02V),
+                        nameof(EnumVideoErrorCode.VideoUsed),
                         nameof(request.Id), request.Id);
                     return methodResult;
                 }

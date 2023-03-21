@@ -3,33 +3,18 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
     public enum EnumMockTestErrorCode
     {
         /// <summary>
-        /// Mock Final Test does not exist
-        /// </summary>
-        MT01V,
-
-        /// <summary>
         /// Mock Final Test  not is correct
         /// </summary>
-        MT03V,
-
-        /// <summary>
-        /// Name cannot be empty
-        /// </summary>
-        MT01C,
-
-        /// <summary>
-        /// Name limited to 250 characters
-        /// </summary>
-        MT02C,
+        MockfinalTestNotCorrect,
 
         /// <summary>
         /// Mock Type = UnitMockTest
         /// </summary>
-        MT04V,
+        MockTypeEqualUnitMockTest,
 
         /// <summary>
         /// Mock Type = CourseUnitMockTest
         /// </summary>
-        MT05V
+        MockTestEqualCourseUnitMockTest
     }
 }

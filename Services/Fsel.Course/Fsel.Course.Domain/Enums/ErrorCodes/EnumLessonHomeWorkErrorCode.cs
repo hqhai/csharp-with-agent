@@ -5,6 +5,6 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         /// <summary>
         /// Lesson HomeWork null
         /// </summary>
-        EHW03V
+        LessonHomeWorkNull
     }
 }

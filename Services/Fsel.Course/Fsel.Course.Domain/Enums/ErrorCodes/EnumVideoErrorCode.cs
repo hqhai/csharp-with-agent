@@ -5,31 +5,16 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         /// <summary>
         /// Video does not exist
         /// </summary>
-        VD01V,
+        VideoNotExist,
 
         /// <summary>
         /// Video was used
         /// </summary>
-        VD02V,
+        VideoUsed,
 
         /// <summary>
         /// Video not is correct
         /// </summary>
-        VD03V,
-
-        /// <summary>
-        /// Name cannot be empty
-        /// </summary>
-        VD01C,
-
-        /// <summary>
-        /// Name limited to 250 characters
-        /// </summary>
-        VD02C,
-
-        /// <summary>
-        /// VideoFilePath Content limited to 1000 characters
-        /// </summary>
-        VD03C,
+        VideoNotCorrect,
     }
 }

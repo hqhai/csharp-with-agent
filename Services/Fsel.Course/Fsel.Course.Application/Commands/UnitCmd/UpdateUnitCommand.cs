@@ -45,7 +45,7 @@ namespace Fsel.Course.Application.Commands.UnitCmd
                                     .FirstOrDefaultAsync(e => e.Id == request.Id, cancellationToken: cancellationToken);
             if (unit == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumUnitErrorCode.U01V),
+                methodResult.AddErrorBadRequest(nameof(EnumUnitErrorCode.UnitNotExist),
                                                 nameof(request.Id), request?.Id);
                 return methodResult;
             }
@@ -53,7 +53,7 @@ namespace Fsel.Course.Application.Commands.UnitCmd
             var isUnitUsed = await _unitRepository.IsUnitUsed(request.Id);
             if (isUnitUsed)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumUnitErrorCode.U02V), nameof(request.Id), request.Id);
+                methodResult.AddErrorBadRequest(nameof(EnumUnitErrorCode.UnitHaveUsed), nameof(request.Id), request.Id);
                 return methodResult;
             }
 
@@ -61,13 +61,13 @@ namespace Fsel.Course.Application.Commands.UnitCmd
             {
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 methodResult.AddErrorBadRequest(
-                    nameof(EnumUnitErrorCode.U03V), nameof(request.LessonIds), request.LessonIds);
+                    nameof(EnumUnitErrorCode.UnitIdNotCorrect), nameof(request.LessonIds), request.LessonIds);
                 return methodResult;
             }
 
             if (_lessonRepository.IsIdsInValid(request.LessonIds))
             {
-                methodResult.AddErrorBadRequest(nameof(EnumLessonErrorCode.LS03V),
+                methodResult.AddErrorBadRequest(nameof(EnumLessonErrorCode.LessonNotCorrect),
                                                 nameof(request.LessonIds), request.LessonIds);
 
                 return methodResult;
@@ -78,7 +78,7 @@ namespace Fsel.Course.Application.Commands.UnitCmd
             {
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 methodResult.AddError(
-                nameof(EnumMockTestErrorCode.MT04V));
+                nameof(EnumMockTestErrorCode.MockTypeEqualUnitMockTest));
                 return methodResult;
             }
 
