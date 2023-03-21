@@ -7,6 +7,12 @@ namespace Fsel.Identity.Infrastructure.ValueSettings
     public class AppSetting : BaseAppSetting
     {
         public Smtp? Smtp { get; set; }
+        public Otp? Otp { get; set; }
+    }
+
+    public class Otp
+    {
+        public int StepTime { get; set; }
     }
 
     public class Smtp

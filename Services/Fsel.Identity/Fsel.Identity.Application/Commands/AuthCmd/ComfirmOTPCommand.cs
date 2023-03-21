@@ -13,6 +13,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Domain.Models.CommandModels.Auths;
     using Fsel.Identity.Domain.Models.EntityModels;
+    using Fsel.Identity.Infrastructure.ValueSettings;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Identity;
@@ -29,23 +30,27 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
         private readonly IMapper _mapper;
         private readonly SignInManager<User> _signInManager;
         private readonly IHumanRepository _humanRepository;
+        private readonly AppSetting _appSetting;
 
         public ComfirmOTPCommandHandler(UserManager<User> userManager
             , IMediator mediator
             , IMapper mapper
             , SignInManager<User> signInManager
-            , IHumanRepository humanRepository)
+            , IHumanRepository humanRepository
+            , AppSetting appSetting)
         {
             _userManager = userManager;
             _mediator = mediator;
             _mapper = mapper;
             _signInManager = signInManager;
             _humanRepository = humanRepository;
+            _appSetting = appSetting;
         }
 
         public async Task<MethodResult<TokenModel>> Handle(ComfirmOTPCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
+            ArgumentNullException.ThrowIfNull(_appSetting.Otp);
             MethodResult<TokenModel> methodResult = new MethodResult<TokenModel>();
             User? user = new User();
             if (request.Email != null)
@@ -78,8 +83,8 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             else if (signInResult)
             {
                 RandomSecureHelper randomSecure = new RandomSecureHelper();
-                var totp = new Totp(Encoding.UTF8.GetBytes(randomSecure.Secretstrings()), step: 60);
-                bool isCodeValid = totp.VerifyTotp(request.Code, out long timeStepMatched, new VerificationWindow(60));
+                var totp = new Totp(Encoding.UTF8.GetBytes(randomSecure.Secretstrings()), step: _appSetting.Otp.StepTime);
+                bool isCodeValid = totp.VerifyTotp(request.Code, out long timeStepMatched, new VerificationWindow(_appSetting.Otp.StepTime));
                 if (!isCodeValid)
                 {
                     methodResult.StatusCode = StatusCodes.Status400BadRequest;
