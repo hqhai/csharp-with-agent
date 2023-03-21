@@ -10,6 +10,6 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         /// <summary>
         /// Video Time Code not is correct
         /// </summary>
-        VideoTimeCodeNotCorrect,
+        VideoTimeCodeNotCorrect
     }
 }

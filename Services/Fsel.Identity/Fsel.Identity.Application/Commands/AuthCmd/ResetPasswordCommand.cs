@@ -36,21 +36,21 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             if (request.OldPassword == null)
             {
                 methodResult.AddErrorBadRequest(
-                    nameof(EnumAuthErrorCode.AU01V),
+                    nameof(EnumAuthErrorCode.OldPassWordNotEmpty),
                     nameof(request.OldPassword), request.OldPassword);
                 return methodResult;
             }
             if (request.Password == null)
             {
                 methodResult.AddErrorBadRequest(
-                    nameof(EnumAuthErrorCode.AU02V),
+                    nameof(EnumAuthErrorCode.PasswordNotEmpty),
                     nameof(request.Password), request.Password);
                 return methodResult;
             }
             if (request.ConfirmPassword == null)
             {
                 methodResult.AddErrorBadRequest(
-                    nameof(EnumAuthErrorCode.AU03V),
+                    nameof(EnumAuthErrorCode.ConfirmPasswordNotEmpty),
                     nameof(request.ConfirmPassword), request.ConfirmPassword);
                 return methodResult;
             }
@@ -68,7 +68,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             if (user == null)
             {
                 methodResult.AddErrorBadRequest(
-                    nameof(EnumAuthErrorCode.AU04V),
+                    nameof(EnumAuthErrorCode.EmailNotExist),
                     nameof(request.Email), request.Email);
                 return methodResult;
             }
@@ -77,7 +77,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             if (!checkOldPassword.Succeeded)
             {
                 methodResult.AddErrorBadRequest(
-                    nameof(EnumAuthErrorCode.AU05V),
+                    nameof(EnumAuthErrorCode.OldPasswordIncorrect),
                     nameof(request.OldPassword), request.OldPassword);
                 return methodResult;
             }

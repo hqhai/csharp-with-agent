@@ -33,7 +33,7 @@ namespace Fsel.Sender.Application.Commands.SendEmailCmd
             if (request == null)
             {
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                methodResult.AddError(nameof(EnumSendEmailErrorCode.SM01ER));
+                methodResult.AddError(nameof(EnumSendEmailErrorCode.SendEmailFail));
                 return methodResult;
             }
             else
@@ -45,11 +45,9 @@ namespace Fsel.Sender.Application.Commands.SendEmailCmd
                 }
                 else if (request.CcEmails != null || !request.CcEmails.IsValidEmail())
                 {
-
                 }
                 else if (request.BccEmails != null || !request.BccEmails.IsValidEmail())
                 {
-
                 }
 
                 sendEmail.ToEmails = request.ToEmails;
