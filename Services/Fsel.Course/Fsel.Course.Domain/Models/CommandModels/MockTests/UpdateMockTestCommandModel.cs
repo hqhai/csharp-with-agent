@@ -3,6 +3,7 @@
 namespace Fsel.Course.Domain.Models.CommandModels.MockTests
 {
     using System.Collections.Generic;
+    using Fsel.Common.Enums;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums;
 
