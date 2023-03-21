@@ -45,85 +45,82 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
 
         public async Task<MethodResult<TokenModel>> Handle(ComfirmOTPCommand request, CancellationToken cancellationToken)
         {
+            ArgumentNullException.ThrowIfNull(request);
             MethodResult<TokenModel> methodResult = new MethodResult<TokenModel>();
-            if (request != null)
+            User? user = new User();
+            if (request.Email != null)
             {
-                User? user = new User();
-                if (request.Email != null)
-                {
-                    user = await _userManager.FindByEmailAsync(request.Email);
-                }
-
-                if (user == null)
-                {
-                    methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                    methodResult.AddError(
-                        nameof(EnumAuthErrorCode.AU04V),
-                        new[] { MethodHelper.GenerateErrorResult(nameof(request.Email), request.Email) });
-                    return methodResult;
-                }
-                bool signInResult = false;
-
-                if (request.Email != null && request.Code != null)
-                {
-                    signInResult = await _userManager.VerifyTwoFactorTokenAsync(user, "Email", request.Code);
-                }
-                if (!signInResult)
-                {
-                    methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                    methodResult.AddError(
-                        nameof(EnumAuthErrorCode.AU15ER),
-                        new[] { MethodHelper.GenerateErrorResult(nameof(request.Email), request.Email) });
-                    return methodResult;
-                }
-                else if (signInResult)
-                {
-                    RandomSecureHelper randomSecure = new RandomSecureHelper();
-                    var totp = new Totp(Encoding.UTF8.GetBytes(randomSecure.Secretstrings()));
-                    bool isCodeValid = totp.VerifyTotp(request.Code, out long timeStepMatched, VerificationWindow.RfcSpecifiedNetworkDelay);
-                    if (!isCodeValid)
-                    {
-                        methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                        methodResult.AddError(nameof(EnumAuthErrorCode.AU16ER));
-                        return methodResult;
-                    }
-                }
-
-                var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-                await _userManager.ConfirmEmailAsync(user, token);
-                await _userManager.SetTwoFactorEnabledAsync(user, false);
-                await _signInManager.SignInAsync(user, false);
-
-                var roles = await _userManager.GetRolesAsync(user);
-                Human human = _mapper.Map<Human>(user);
-                human.UserId = user.Id;
-
-                if (roles.Contains(EnumRoleRegister.Student.ToString()))
-                {
-                    human.Student = new Student
-                    {
-                        HumanId = human.Id,
-                    };
-                }
-                else if (roles.Contains(EnumRoleRegister.Parent.ToString()))
-                {
-                    human.Parent = new Parent
-                    {
-                        HumanId = human.Id,
-                    };
-                }
-
-                await _humanRepository.ExecuteTransactionAsync(async () =>
-                {
-                    human = _humanRepository.Add(human);
-
-                    await _humanRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
-                    return methodResult;
-                });
-
-                methodResult = await _mediator.Send(new GenerateTokenCommand { Id = user.Id }, cancellationToken).ConfigureAwait(false);
+                user = await _userManager.FindByEmailAsync(request.Email);
             }
-            methodResult.StatusCode = StatusCodes.Status400BadRequest;
+
+            if (user == null)
+            {
+                methodResult.StatusCode = StatusCodes.Status400BadRequest;
+                methodResult.AddError(
+                    nameof(EnumAuthErrorCode.AU04V),
+                    new[] { MethodHelper.GenerateErrorResult(nameof(request.Email), request.Email) });
+                return methodResult;
+            }
+            bool signInResult = false;
+
+            if (request.Email != null && request.Code != null)
+            {
+                signInResult = await _userManager.VerifyTwoFactorTokenAsync(user, "Email", request.Code);
+            }
+            if (!signInResult)
+            {
+                methodResult.StatusCode = StatusCodes.Status400BadRequest;
+                methodResult.AddError(
+                    nameof(EnumAuthErrorCode.AU15ER),
+                    new[] { MethodHelper.GenerateErrorResult(nameof(request.Email), request.Email) });
+                return methodResult;
+            }
+            else if (signInResult)
+            {
+                RandomSecureHelper randomSecure = new RandomSecureHelper();
+                var totp = new Totp(Encoding.UTF8.GetBytes(randomSecure.Secretstrings()), step: 60);
+                bool isCodeValid = totp.VerifyTotp(request.Code, out long timeStepMatched, new VerificationWindow(60));
+                if (!isCodeValid)
+                {
+                    methodResult.StatusCode = StatusCodes.Status400BadRequest;
+                    methodResult.AddError(nameof(EnumAuthErrorCode.AU16ER));
+                    return methodResult;
+                }
+            }
+
+            var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+            await _userManager.ConfirmEmailAsync(user, token);
+            await _userManager.SetTwoFactorEnabledAsync(user, false);
+            await _signInManager.SignInAsync(user, false);
+
+            var roles = await _userManager.GetRolesAsync(user);
+            Human human = _mapper.Map<Human>(user);
+            human.UserId = user.Id;
+
+            if (roles.Contains(EnumRoleRegister.Student.ToString()))
+            {
+                human.Student = new Student
+                {
+                    HumanId = human.Id,
+                };
+            }
+            else if (roles.Contains(EnumRoleRegister.Parent.ToString()))
+            {
+                human.Parent = new Parent
+                {
+                    HumanId = human.Id,
+                };
+            }
+
+            await _humanRepository.ExecuteTransactionAsync(async () =>
+            {
+                human = _humanRepository.Add(human);
+
+                await _humanRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+                return methodResult;
+            });
+
+            methodResult = await _mediator.Send(new GenerateTokenCommand { Id = user.Id }, cancellationToken).ConfigureAwait(false);
             return methodResult;
         }
     }

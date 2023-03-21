@@ -32,53 +32,49 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
 
         public async Task<MethodResult<bool>> Handle(SendOTPCommand request, CancellationToken cancellationToken)
         {
+            ArgumentNullException.ThrowIfNull(request);
             MethodResult<bool> methodResult = new MethodResult<bool>();
-            if (request != null)
+            var user = await _userManager.FindByEmailAsync(request.Email ?? string.Empty);
+            if (user == null)
             {
-                var user = await _userManager.FindByEmailAsync(request.Email ?? string.Empty);
-                if (user == null)
-                {
-                    methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                    methodResult.AddError(
-                        nameof(EnumAuthErrorCode.AU04ER),
-                        new[] { MethodHelper.GenerateErrorResult(nameof(request.Email), request.Email) });
-                    return methodResult;
-                }
-                else if (user.EmailConfirmed)
-                {
-                    methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                    methodResult.AddError(
-                        nameof(EnumAuthErrorCode.AU12ER),
-                        new[] { MethodHelper.GenerateErrorResult(nameof(request.Email), request.Email) });
-                    return methodResult;
-                }
+                methodResult.StatusCode = StatusCodes.Status400BadRequest;
+                methodResult.AddError(
+                    nameof(EnumAuthErrorCode.AU04ER),
+                    new[] { MethodHelper.GenerateErrorResult(nameof(request.Email), request.Email) });
+                return methodResult;
+            }
+            else if (user.EmailConfirmed)
+            {
+                methodResult.StatusCode = StatusCodes.Status400BadRequest;
+                methodResult.AddError(
+                    nameof(EnumAuthErrorCode.AU12ER),
+                    new[] { MethodHelper.GenerateErrorResult(nameof(request.Email), request.Email) });
+                return methodResult;
+            }
 
-                if (request.Email != null)
+            if (request.Email != null)
+            {
+                var otp = await _userManager.GenerateTwoFactorTokenAsync(user, nameof(request.Email));
+                var senderCommandModel1 = new SendEmailCommandModel
                 {
-                    var otp = await _userManager.GenerateTwoFactorTokenAsync(user, nameof(request.Email));
-                    var senderCommandModel1 = new SendEmailCommandModel
-                    {
-                        Content = $"\"[LMS -FSEL]: \"",
-                        Subject = $"Xin chào {user.FullName} \r\n\r\n"
-                                  + $"Hệ thống giáo dục LMS FSEL xin gửi đến bạn mã xác thực OTP : {otp} "
-                                  + $"Mã OTP chỉ có giá trị hiệu lực trong thời gian 3 phút. \r\n\r\nXin chân thành cảm ơn!",
-                        ToEmails = new List<string> { $"{request.Email}" }
-                    };
-                    var sendResult1 = await _senderService.SendEmailAsync(senderCommandModel1);
-                    if (!sendResult1.IsSuccessStatusCode)
-                    {
-                        methodResult.StatusCode = (int)sendResult1.StatusCode;
-                        methodResult.AddError(sendResult1.Content?.ErrorMessages);
-                        return methodResult;
-                    }
-                }
-                else
+                    Content = $"Xin chào {user.FullName} \r\n\r\n"
+                              + $"Hệ thống giáo dục LMS FSEL xin gửi đến bạn mã xác thực OTP : {otp} "
+                              + $"\r\n\r\nMã OTP chỉ có giá trị hiệu lực trong thời gian 3 phút. \r\n\r\nXin chân thành cảm ơn!",
+                    Subject = $"\"[LMS -FSEL]: \"",
+                    ToEmails = new List<string> { $"{request.Email}" }
+                };
+                var sendResult1 = await _senderService.SendEmailAsync(senderCommandModel1);
+                if (!sendResult1.IsSuccessStatusCode)
                 {
-                    //Send PhoneNumber
+                    methodResult.StatusCode = (int)sendResult1.StatusCode;
+                    methodResult.AddError(sendResult1.Content?.ErrorMessages);
+                    return methodResult;
                 }
             }
-            methodResult.StatusCode = StatusCodes.Status400BadRequest;
-            methodResult.Result = false;
+            else
+            {
+                //Send PhoneNumber
+            }
             return methodResult;
         }
     }

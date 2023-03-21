@@ -38,9 +38,10 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
 
         public async Task<MethodResult<UserModel>> Handle(SignUpCommand request, CancellationToken cancellationToken)
         {
+            ArgumentNullException.ThrowIfNull(request);
             MethodResult<UserModel> methodResult = new MethodResult<UserModel>();
             User? user = null;
-            if (request != null && request.Email != null)
+            if (request.Email != null)
             {
                 user = await _userManager.FindByEmailAsync(request.Email);
                 if (user != null && user.EmailConfirmed)
@@ -49,7 +50,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                     return methodResult;
                 }
             }
-            else if (request != null && request.PhoneNumber != null)
+            else if (request.PhoneNumber != null)
             {
                 user = await _userManager.Users.FirstOrDefaultAsync(e => e.PhoneNumber == request.PhoneNumber, cancellationToken: cancellationToken);
                 if (user != null && user.EmailConfirmed)

@@ -40,11 +40,6 @@ namespace Fsel.Identity.Domain.Enums.ErrorCodes
         PA07V,
 
         /// <summary>
-        /// Request not null
-        /// </summary>
-        PA08V,
-
-        /// <summary>
         /// Name cannot be empty
         /// </summary>
         PA01C,

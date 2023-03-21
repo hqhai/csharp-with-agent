@@ -34,72 +34,68 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
 
         public async Task<MethodResult<bool>> Handle(ResetPasswordCommand request, CancellationToken cancellationToken)
         {
+            ArgumentNullException.ThrowIfNull(request);
             MethodResult<bool> methodResult = new MethodResult<bool>();
-            if (request != null)
+            if (request.OldPassword == null)
             {
-                if (request.OldPassword == null)
-                {
-                    methodResult.StatusCode = StatusCodes.Status401Unauthorized;
-                    methodResult.AddError(
-                        nameof(EnumAuthErrorCode.AU01V),
-                        new[] { MethodHelper.GenerateErrorResult(nameof(request.OldPassword), request.OldPassword) });
-                    return methodResult;
-                }
-                if (request.Password == null)
-                {
-                    methodResult.StatusCode = StatusCodes.Status404NotFound;
-                    methodResult.AddError(
-                        nameof(EnumAuthErrorCode.AU02V),
-                        new[] { MethodHelper.GenerateErrorResult(nameof(request.Password), request.Password) });
-                    return methodResult;
-                }
-                if (request.ConfirmPassword == null)
-                {
-                    methodResult.StatusCode = StatusCodes.Status404NotFound;
-                    methodResult.AddError(
-                        nameof(EnumAuthErrorCode.AU03V),
-                        new[] { MethodHelper.GenerateErrorResult(nameof(request.ConfirmPassword), request.ConfirmPassword) });
-                    return methodResult;
-                }
-
-                User? user;
-                if (string.IsNullOrEmpty(request.Email))
-                {
-                    user = await _userManager.FindByIdAsync(_authContext.CurrentUserId.ToString());
-                }
-                else
-                {
-                    user = await _userManager.FindByEmailAsync(request.Email);
-                }
-
-                if (user == null)
-                {
-                    methodResult.StatusCode = StatusCodes.Status404NotFound;
-                    methodResult.AddError(
-                        nameof(EnumAuthErrorCode.AU04V),
-                        new[] { MethodHelper.GenerateErrorResult(nameof(request.Email), request.Email) });
-                    return methodResult;
-                }
-
-                var checkOldPassword = await _signInManager.PasswordSignInAsync(user.UserName ?? string.Empty, request.OldPassword, false, false);
-                if (!checkOldPassword.Succeeded)
-                {
-                    methodResult.StatusCode = StatusCodes.Status404NotFound;
-                    methodResult.AddError(
-                        nameof(EnumAuthErrorCode.AU05V),
-                        new[] { MethodHelper.GenerateErrorResult(nameof(request.OldPassword), request.OldPassword) });
-                    return methodResult;
-                }
-
-                var hashPassword = _userManager.PasswordHasher.HashPassword(user, request.Password);
-                user.PasswordHash = hashPassword;
-                await _userManager.UpdateAsync(user);
-
-                methodResult.StatusCode = StatusCodes.Status200OK;
-                methodResult.Result = true;
+                methodResult.StatusCode = StatusCodes.Status401Unauthorized;
+                methodResult.AddError(
+                    nameof(EnumAuthErrorCode.AU01V),
+                    new[] { MethodHelper.GenerateErrorResult(nameof(request.OldPassword), request.OldPassword) });
+                return methodResult;
             }
-            methodResult.StatusCode = StatusCodes.Status400BadRequest;
-            methodResult.Result = false;
+            if (request.Password == null)
+            {
+                methodResult.StatusCode = StatusCodes.Status404NotFound;
+                methodResult.AddError(
+                    nameof(EnumAuthErrorCode.AU02V),
+                    new[] { MethodHelper.GenerateErrorResult(nameof(request.Password), request.Password) });
+                return methodResult;
+            }
+            if (request.ConfirmPassword == null)
+            {
+                methodResult.StatusCode = StatusCodes.Status404NotFound;
+                methodResult.AddError(
+                    nameof(EnumAuthErrorCode.AU03V),
+                    new[] { MethodHelper.GenerateErrorResult(nameof(request.ConfirmPassword), request.ConfirmPassword) });
+                return methodResult;
+            }
+
+            User? user;
+            if (string.IsNullOrEmpty(request.Email))
+            {
+                user = await _userManager.FindByIdAsync(_authContext.CurrentUserId.ToString());
+            }
+            else
+            {
+                user = await _userManager.FindByEmailAsync(request.Email);
+            }
+
+            if (user == null)
+            {
+                methodResult.StatusCode = StatusCodes.Status404NotFound;
+                methodResult.AddError(
+                    nameof(EnumAuthErrorCode.AU04V),
+                    new[] { MethodHelper.GenerateErrorResult(nameof(request.Email), request.Email) });
+                return methodResult;
+            }
+
+            var checkOldPassword = await _signInManager.PasswordSignInAsync(user.UserName ?? string.Empty, request.OldPassword, false, false);
+            if (!checkOldPassword.Succeeded)
+            {
+                methodResult.StatusCode = StatusCodes.Status404NotFound;
+                methodResult.AddError(
+                    nameof(EnumAuthErrorCode.AU05V),
+                    new[] { MethodHelper.GenerateErrorResult(nameof(request.OldPassword), request.OldPassword) });
+                return methodResult;
+            }
+
+            var hashPassword = _userManager.PasswordHasher.HashPassword(user, request.Password);
+            user.PasswordHash = hashPassword;
+            await _userManager.UpdateAsync(user);
+
+            methodResult.StatusCode = StatusCodes.Status200OK;
+            methodResult.Result = true;
             return methodResult;
         }
     }

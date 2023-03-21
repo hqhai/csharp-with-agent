@@ -33,45 +33,37 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
 
         public async Task<MethodResult<TokenModel>> Handle(LoginCommand request, CancellationToken cancellationToken)
         {
+            ArgumentNullException.ThrowIfNull(request);
+
             MethodResult<TokenModel> methodResult = new MethodResult<TokenModel>();
-
-            #region Validation
-
-            if (request != null)
+            if (request.Username == null)
             {
-                if (request.Username == null)
-                {
-                    methodResult.AddErrorBadRequest(nameof(EnumAuthErrorCode.AU04ER),
-                        new Error(nameof(request.Username)), new Error(nameof(request.Password)));
-                    return methodResult;
-                }
-
-                var user = await _userManager.FindByNameAsync(request.Username) ?? await _userManager.FindByEmailAsync(request.Username) ??
-                    await _userManager.Users.FirstOrDefaultAsync(x => x.PhoneNumber == request.Username, cancellationToken: cancellationToken);
-                if (user == null)
-                {
-                    methodResult.AddError(
-                        StatusCodes.Status401Unauthorized,
-                        nameof(EnumAuthErrorCode.AU05ER),
-                        new Error(nameof(request.Username), request.Username), new Error(nameof(request.Password), request.Password));
-                    return methodResult;
-                }
-
-                var result = await _signInManager.PasswordSignInAsync(user, request.Password, false, false);
-                if (!result.Succeeded)
-                {
-                    methodResult.AddError(
-                        StatusCodes.Status401Unauthorized,
-                        nameof(EnumAuthErrorCode.AU05ER),
-                        new Error(nameof(request.Username), request.Username), new Error(nameof(request.Password), request.Password));
-                    return methodResult;
-                }
-                methodResult = await _mediator.Send(new GenerateTokenCommand { Id = user.Id }, cancellationToken).ConfigureAwait(false);
+                methodResult.AddErrorBadRequest(nameof(EnumAuthErrorCode.AU04ER),
+                    new Error(nameof(request.Username)), new Error(nameof(request.Password)));
+                return methodResult;
             }
 
-            #endregion Validation
+            var user = await _userManager.FindByNameAsync(request.Username) ?? await _userManager.FindByEmailAsync(request.Username) ??
+                await _userManager.Users.FirstOrDefaultAsync(x => x.PhoneNumber == request.Username, cancellationToken: cancellationToken);
+            if (user == null)
+            {
+                methodResult.AddError(
+                    StatusCodes.Status401Unauthorized,
+                    nameof(EnumAuthErrorCode.AU05ER),
+                    new Error(nameof(request.Username), request.Username), new Error(nameof(request.Password), request.Password));
+                return methodResult;
+            }
 
-            methodResult.StatusCode = StatusCodes.Status400BadRequest;
+            var result = await _signInManager.PasswordSignInAsync(user, request.Password, false, false);
+            if (!result.Succeeded)
+            {
+                methodResult.AddError(
+                    StatusCodes.Status401Unauthorized,
+                    nameof(EnumAuthErrorCode.AU05ER),
+                    new Error(nameof(request.Username), request.Username), new Error(nameof(request.Password), request.Password));
+                return methodResult;
+            }
+            methodResult = await _mediator.Send(new GenerateTokenCommand { Id = user.Id }, cancellationToken).ConfigureAwait(false);
             return methodResult;
         }
     }

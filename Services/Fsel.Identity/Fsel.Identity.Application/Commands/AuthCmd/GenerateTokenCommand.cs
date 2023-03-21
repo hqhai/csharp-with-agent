@@ -40,19 +40,18 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
 
         public async Task<MethodResult<TokenModel>> Handle(GenerateTokenCommand request, CancellationToken cancellationToken)
         {
+            ArgumentNullException.ThrowIfNull(request);
             MethodResult<TokenModel> methodResult = new MethodResult<TokenModel>();
-            if (request != null)
+            var user = await _userManager.FindByIdAsync(request.Id ?? string.Empty);
+            if (user == null)
             {
-                var user = await _userManager.FindByIdAsync(request.Id ?? string.Empty);
-                if (user == null)
-                {
-                    methodResult.StatusCode = StatusCodes.Status401Unauthorized;
-                    return methodResult;
-                }
+                methodResult.StatusCode = StatusCodes.Status401Unauthorized;
+                return methodResult;
+            }
 
-                var userRoles = await _userManager.GetRolesAsync(user);
-                var jti = Guid.NewGuid().ToString();
-                var authClaims = new List<Claim>
+            var userRoles = await _userManager.GetRolesAsync(user);
+            var jti = Guid.NewGuid().ToString();
+            var authClaims = new List<Claim>
             {
                 new Claim(JwtRegisteredClaimNames.Name, user.UserName ?? string.Empty),
                 new Claim(JwtRegisteredClaimNames.GivenName, user.FullName ?? string.Empty),
@@ -62,46 +61,45 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                 new Claim(JwtRegisteredClaimNames.Jti, jti),
             };
 
-                foreach (var userRole in userRoles)
-                {
-                    authClaims.Add(new Claim(ClaimTypes.Role, userRole));
-                }
-
-                var secretKeyBytes = Encoding.ASCII.GetBytes(_appSetting.Jwt?.SecretKey ?? string.Empty);
-                var signin = new SigningCredentials(new SymmetricSecurityKey(secretKeyBytes), SecurityAlgorithms.HmacSha256);
-                var token = new JwtSecurityToken(
-                    _appSetting.Jwt?.Issuer ?? string.Empty,
-                    _appSetting.Jwt?.Audience ?? string.Empty,
-                    authClaims,
-                    expires: DateTime.Now.AddMinutes(_appSetting.Jwt?.TokenValidityInMinutes ?? default),
-                    signingCredentials: signin
-                    );
-
-                var accessToken = new JwtSecurityTokenHandler().WriteToken(token);
-                var refreshToken = TokenHelper.GenerateRefreshToken();
-
-                await _userTokenRepository.AddAsync(new UserToken
-                {
-                    Name = jti,
-                    Value = accessToken,
-                    RefreshToken = refreshToken,
-                    LoginProvider = JwtBearerDefaults.AuthenticationScheme,
-                    UserId = user.Id ?? string.Empty,
-                    RefreshTokenExpiryTime = DateTime.Now.AddDays(_appSetting.Jwt?.RefreshTokenValidityInDays ?? default)
-                });
-
-                var tokenLogin = new TokenModel
-                {
-                    AccessToken = accessToken,
-                    RefreshToken = refreshToken,
-                    Expiration = token.ValidTo.ConvertTimeFromUtc(TimeZoneInfo.Local),
-                    FullName = user.FullName,
-                    Roles = userRoles.ToList()
-                };
-
-                methodResult.Result = tokenLogin;
+            foreach (var userRole in userRoles)
+            {
+                authClaims.Add(new Claim(ClaimTypes.Role, userRole));
             }
-            methodResult.StatusCode = StatusCodes.Status400BadRequest;
+
+            var secretKeyBytes = Encoding.ASCII.GetBytes(_appSetting.Jwt?.SecretKey ?? string.Empty);
+            var signin = new SigningCredentials(new SymmetricSecurityKey(secretKeyBytes), SecurityAlgorithms.HmacSha256);
+            var token = new JwtSecurityToken(
+                _appSetting.Jwt?.Issuer ?? string.Empty,
+                _appSetting.Jwt?.Audience ?? string.Empty,
+                authClaims,
+                expires: DateTime.Now.AddMinutes(_appSetting.Jwt?.TokenValidityInMinutes ?? default),
+                signingCredentials: signin
+                );
+
+            var accessToken = new JwtSecurityTokenHandler().WriteToken(token);
+            var refreshToken = TokenHelper.GenerateRefreshToken();
+
+            await _userTokenRepository.AddAsync(new UserToken
+            {
+                Name = jti,
+                Value = accessToken,
+                RefreshToken = refreshToken,
+                LoginProvider = JwtBearerDefaults.AuthenticationScheme,
+                UserId = user.Id ?? string.Empty,
+                RefreshTokenExpiryTime = DateTime.Now.AddDays(_appSetting.Jwt?.RefreshTokenValidityInDays ?? default)
+            });
+
+            var tokenLogin = new TokenModel
+            {
+                AccessToken = accessToken,
+                RefreshToken = refreshToken,
+                Expiration = token.ValidTo.ConvertTimeFromUtc(TimeZoneInfo.Local),
+                FullName = user.FullName,
+                Roles = userRoles.ToList()
+            };
+
+            methodResult.Result = tokenLogin;
+            methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }
     }

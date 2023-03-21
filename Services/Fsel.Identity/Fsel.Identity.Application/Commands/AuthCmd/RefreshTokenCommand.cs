@@ -43,7 +43,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
         public async Task<MethodResult<TokenModel>> Handle(RefreshTokenCommand request, CancellationToken cancellationToken)
         {
             MethodResult<TokenModel> methodResult = new MethodResult<TokenModel>();
-
+            ArgumentNullException.ThrowIfNull(request);
             var jwtTokenHandler = new JwtSecurityTokenHandler();
             var secretKeyBytes = Encoding.ASCII.GetBytes(_appSetting.Jwt?.SecretKey ?? string.Empty);
             var tokenValidateParam = new TokenValidationParameters
@@ -90,7 +90,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
 
             await _userTokenRepository.Remove(refreshToken);
 
-            methodResult = await _mediator.Send(new GenerateTokenCommand { Id = refreshToken.UserId }).ConfigureAwait(false);
+            methodResult = await _mediator.Send(new GenerateTokenCommand { Id = refreshToken.UserId }, cancellationToken).ConfigureAwait(false);
             return methodResult;
         }
     }
