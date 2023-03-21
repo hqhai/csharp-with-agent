@@ -6,7 +6,7 @@ using Newtonsoft.Json;
 
 namespace Fsel.Course.Domain.Models.EntityModels
 {
-    public class VideoModel : BaseEntityModel
+    public class VideoModel : BaseModel
     {
         public string? Name { get; set; }
 

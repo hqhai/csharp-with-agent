@@ -57,13 +57,13 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             if (request.Email != null)
             {
                 var otp = await _userManager.GenerateTwoFactorTokenAsync(user, nameof(request.Email));
-                var senderCommandModel1 = new SendEmailCommandModel
+                var senderCommandModel = new SendEmailCommandModel
                 {
                     Content = string.Format(CultureInfo.InvariantCulture, StringValues.SendOtpContent, user.FullName, otp),
                     Subject = StringValues.SendOtpSubject,
                     ToEmails = new List<string> { $"{request.Email}" }
                 };
-                var sendResult1 = await _senderService.SendEmailAsync(senderCommandModel1);
+                var sendResult1 = await _senderService.SendEmailAsync(senderCommandModel);
                 if (!sendResult1.IsSuccessStatusCode)
                 {
                     methodResult.StatusCode = (int)sendResult1.StatusCode;

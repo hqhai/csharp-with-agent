@@ -6,7 +6,7 @@ namespace Fsel.Identity.Domain.Models.EntityModels
     using Fsel.Core.Base.BaseModels;
     using Fsel.Identity.Domain.Entities;
 
-    public class ParentModel : BaseEntityModel
+    public class ParentModel : BaseModel
     {
         public string? Gender { get; set; }
         public string? Occupation { get; set; }
