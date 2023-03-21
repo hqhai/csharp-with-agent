@@ -1,3 +1,5 @@
+// Copyright (c) Atlantic. All rights reserved.
+
 using Fsel.Common.ValueSettings;
 
 namespace Fsel.Identity.Infrastructure.ValueSettings
@@ -5,7 +7,6 @@ namespace Fsel.Identity.Infrastructure.ValueSettings
     public class AppSetting : BaseAppSetting
     {
         public Smtp? Smtp { get; set; }
-        public Url? Url { get; set; }
     }
 
     public class Smtp
@@ -15,10 +16,5 @@ namespace Fsel.Identity.Infrastructure.ValueSettings
         public int Port { get; set; }
         public string? Username { get; set; }
         public string? Password { get; set; }
-    }
-
-    public class Url
-    {
-        public string? EmailConfirmUrl { get; set; }
     }
 }

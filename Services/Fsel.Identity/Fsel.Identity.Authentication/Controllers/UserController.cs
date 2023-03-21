@@ -34,23 +34,6 @@ namespace Fsel.Identity.Userentication.Controllers
         }
 
         /// <summary>
-        /// Confirm Email
-        /// </summary>
-        [HttpGet("confirm-email")]
-        [ProducesResponseType(typeof(MethodResult<UserModel>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.BadRequest)]
-        public async Task<IActionResult> ConfirmEmail(string token, string email)
-        {
-            ConfirmEmailCommand command = new ConfirmEmailCommand
-            {
-                Token = token,
-                Email = email
-            };
-            MethodResult<UserModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
-            return commandResult.GetActionResult();
-        }
-
-        /// <summary>
         /// Confirm OTP
         /// </summary>
         [HttpGet("confirm-otp")]
