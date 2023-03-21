@@ -3,11 +3,9 @@ using Fsel.Course.Domain.Enums;
 
 namespace Fsel.Course.Domain.Models.EntityModels
 {
-    public class ExcerciseModel : BaseEntityModel
+    public class ExerciseModel : BaseEntityModel
     {
         public string? Name { get; set; }
-
-        public EnumQuestionType QuestionType { get; set; }
 
         public string? MediaPost { get; set; }
 

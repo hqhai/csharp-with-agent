@@ -28,6 +28,6 @@ namespace Fsel.Course.Domain.Entities
             set { ConfigStr = ConvertHelper.Serialize(value); }
         }
 
-        public ICollection<ExcerciseQuestion> ExcerciseQuestions { get; set; } = new List<ExcerciseQuestion>();
+        public ICollection<ExerciseQuestion> ExerciseQuestions { get; set; } = new List<ExerciseQuestion>();
     }
 }

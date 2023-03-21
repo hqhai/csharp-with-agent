@@ -63,7 +63,7 @@ namespace Fsel.Course.Application.Commands.CourseCmd
             {
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 methodResult.AddError(
-                nameof(EnumCourseErrorCode.C03V));
+                nameof(EnumCourseErrorCode.C02V));
                 return methodResult;
             }
 

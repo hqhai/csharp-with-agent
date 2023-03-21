@@ -24,9 +24,9 @@ namespace Fsel.Course.Infrastructure.Repositories
             {
                 return await Queryable
                 .Include(x => x.VideoTimeCodes.Where(n => !n.IsDeleted))
-                .ThenInclude(x => x.TimeCodeExcercises.Where(n => !n.IsDeleted))
-                .ThenInclude(x => x.Excercise)
-                .ThenInclude(x => x.ExcerciseQuestions.Where(n => !n.IsDeleted))
+                .ThenInclude(x => x.TimeCodeExercises.Where(n => !n.IsDeleted))
+                .ThenInclude(x => x.Exercise)
+                .ThenInclude(x => x.ExerciseQuestions.Where(n => !n.IsDeleted))
                 .ThenInclude(x => x.Question)
                 .FirstOrDefaultAsync(x => x.Id == id);
             }

@@ -1,8 +1,8 @@
 namespace Fsel.Course.Domain.Models.EntityModels
 {
-    public class ExcerciseQuestionModel
+    public class ExerciseQuestionModel
     {
-        public Guid ExcerciseId { get; set; }
+        public Guid ExerciseId { get; set; }
 
         public Guid QuestionId { get; set; }
 

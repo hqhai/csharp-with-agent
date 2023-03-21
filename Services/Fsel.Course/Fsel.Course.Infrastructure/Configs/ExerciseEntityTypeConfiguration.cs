@@ -6,16 +6,10 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Fsel.Course.Infrastructure.Configs
 {
-    public class ExcerciseEntityTypeConfiguration : IEntityTypeConfiguration<Excercise>
+    public class ExerciseEntityTypeConfiguration : IEntityTypeConfiguration<Exercise>
     {
-        public void Configure(EntityTypeBuilder<Excercise> builder)
+        public void Configure(EntityTypeBuilder<Exercise> builder)
         {
-            builder.Property(e => e.QuestionType)
-                .HasMaxLength(100)
-                .HasConversion(
-                    v => v.ToString(),
-                    v => v.EnumParse<EnumQuestionType>());
-
             builder.Property(e => e.CourseSkill)
                .HasMaxLength(100)
                .HasConversion(

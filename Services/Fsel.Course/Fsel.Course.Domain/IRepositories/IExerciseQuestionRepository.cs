@@ -3,7 +3,7 @@ using Fsel.Course.Domain.Entities;
 
 namespace Fsel.Course.Domain.IRepositories
 {
-    public interface IExcerciseQuestionRepository : IRepository<ExcerciseQuestion>
+    public interface IExerciseQuestionRepository : IRepository<ExerciseQuestion>
     {
     }
 }

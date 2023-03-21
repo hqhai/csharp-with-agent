@@ -4,18 +4,18 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Fsel.Course.Infrastructure.Configs
 {
-    public class TimeCodeExcerciseEntityTypeConfiguration : IEntityTypeConfiguration<TimeCodeExcercise>
+    public class TimeCodeExerciseEntityTypeConfiguration : IEntityTypeConfiguration<TimeCodeExercise>
     {
-        public void Configure(EntityTypeBuilder<TimeCodeExcercise> builder)
+        public void Configure(EntityTypeBuilder<TimeCodeExercise> builder)
         {
             builder.HasOne(a => a.VideoTimeCode)
-                .WithMany(b => b.TimeCodeExcercises)
+                .WithMany(b => b.TimeCodeExercises)
                 .HasForeignKey(b => b.VideoTimeCodeId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            builder.HasOne(a => a.Excercise)
-                .WithMany(b => b.TimeCodeExcercises)
-                .HasForeignKey(b => b.ExcerciseId)
+            builder.HasOne(a => a.Exercise)
+                .WithMany(b => b.TimeCodeExercises)
+                .HasForeignKey(b => b.ExerciseId)
                 .OnDelete(DeleteBehavior.Cascade);
         }
     }

@@ -1,13 +1,11 @@
 using Fsel.Course.Domain.Enums;
 using Fsel.Course.Domain.Models.CommandModels.Questions;
 
-namespace Fsel.Course.Domain.Models.CommandModels.Excercises
+namespace Fsel.Course.Domain.Models.CommandModels.Exercises
 {
-    public class UpdateExcerciseCommandModel
+    public class UpdateExerciseCommandModel
     {
         public string? Name { get; set; }
-
-        public EnumQuestionType QuestionType { get; set; }
 
         public string? MediaPost { get; set; }
 

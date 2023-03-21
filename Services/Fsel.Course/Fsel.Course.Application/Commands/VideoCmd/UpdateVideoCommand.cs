@@ -20,17 +20,17 @@ namespace Fsel.Course.Application.Commands.VideoCmd
     {
         private readonly IVideoRepository _videoRepository;
         private readonly IQuestionRepository _questionRepository;
-        private readonly IExcerciseRepository _excerciseRepository;
-        private readonly IExcerciseQuestionRepository _excerciseQuestionRepository;
-        private readonly ITimeCodeExcerciseRepository _timeCodeExcerciseRepository;
+        private readonly IExerciseRepository _excerciseRepository;
+        private readonly IExerciseQuestionRepository _excerciseQuestionRepository;
+        private readonly ITimeCodeExerciseRepository _timeCodeExerciseRepository;
         private readonly IVideoTimeCodeRepository _videoTimeCodeRepository;
         private readonly IMapper _mapper;
 
         public UpdateVideoCommandHandler(IVideoRepository videoRepository
             , IQuestionRepository questionRepository
-            , IExcerciseRepository excerciseRepository
-            , IExcerciseQuestionRepository excerciseQuestionRepository
-            , ITimeCodeExcerciseRepository timeCodeExcerciseRepository
+            , IExerciseRepository excerciseRepository
+            , IExerciseQuestionRepository excerciseQuestionRepository
+            , ITimeCodeExerciseRepository timeCodeExerciseRepository
             , IVideoTimeCodeRepository videoTimeCodeRepository
             , IMapper mapper)
         {
@@ -38,7 +38,7 @@ namespace Fsel.Course.Application.Commands.VideoCmd
             _questionRepository = questionRepository;
             _excerciseRepository = excerciseRepository;
             _excerciseQuestionRepository = excerciseQuestionRepository;
-            _timeCodeExcerciseRepository = timeCodeExcerciseRepository;
+            _timeCodeExerciseRepository = timeCodeExerciseRepository;
             _videoTimeCodeRepository = videoTimeCodeRepository;
             _mapper = mapper;
         }
@@ -87,19 +87,19 @@ namespace Fsel.Course.Application.Commands.VideoCmd
                 else
                 {
                     VideoTimeCode videoTimeCode = video.VideoTimeCodes.ElementAt(request.VideoTimeCodes.IndexOf(x));
-                    x.Excercises.ForEach(n =>
+                    x.Exercises.ForEach(n =>
                     {
                         if (n == null)
                         {
                             methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                            methodResult.AddError(nameof(EnumExcerciseErrorCode.E03V));
+                            methodResult.AddError(nameof(EnumExerciseErrorCode.E03V));
                         }
                         else
                         {
-                            Excercise excercise = _mapper.Map<Excercise>(n);
-                            videoTimeCode.TimeCodeExcercises.Add(new TimeCodeExcercise
+                            Exercise excercise = _mapper.Map<Exercise>(n);
+                            videoTimeCode.TimeCodeExercises.Add(new TimeCodeExercise
                             {
-                                Excercise = excercise
+                                Exercise = excercise
                             });
                             n.Questions.ForEach(q =>
                             {
@@ -111,7 +111,7 @@ namespace Fsel.Course.Application.Commands.VideoCmd
                                 else
                                 {
                                     Question question = _mapper.Map<Question>(q);
-                                    excercise.ExcerciseQuestions.Add(new ExcerciseQuestion
+                                    excercise.ExerciseQuestions.Add(new ExerciseQuestion
                                     {
                                         Question = question
                                     });
