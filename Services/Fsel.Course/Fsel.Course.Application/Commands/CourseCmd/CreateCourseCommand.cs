@@ -51,7 +51,7 @@ namespace Fsel.Course.Application.Commands.CourseCmd
 
             if (request.CourseUnitMockTests == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumCourseUnitMockTestErrorCode.CourseUnitMockTestNull), nameof(request.CourseUnitMockTests));
+                methodResult.AddErrorBadRequest(nameof(EnumCourseUnitMockTestErrorCode.TestNull), nameof(request.CourseUnitMockTests));
                 return methodResult;
             }
 

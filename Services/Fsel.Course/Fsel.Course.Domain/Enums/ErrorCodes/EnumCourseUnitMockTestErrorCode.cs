@@ -7,6 +7,6 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         /// <summary>
         /// Course Unit MockTest null
         /// </summary>
-        CourseUnitMockTestNull,
+        TestNull,
     }
 }
