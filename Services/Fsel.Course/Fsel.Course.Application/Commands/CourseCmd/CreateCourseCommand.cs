@@ -72,16 +72,16 @@ namespace Fsel.Course.Application.Commands.CourseCmd
             var mocktestIds = request.CourseUnitMockTests.Where(e => e.MockTestId != null).Select(x => x.MockTestId);
             if (_mockTestRepository.IsIdsInValid(mocktestIds.Where(e => e.HasValue).Select(e => e!.Value)))
             {
-                methodResult.AddErrorBadRequest(nameof(EnumMockTestErrorCode.MockfinalTestNotCorrect), nameof(request.CourseUnitMockTests));
+                methodResult.AddErrorBadRequest(nameof(EnumMockTestErrorCode.TestNotCorrect), nameof(request.CourseUnitMockTests));
                 return methodResult;
             }
 
             var mocktests = await _mockTestRepository.GetByIdsAsync(mocktestIds.Where(e => e.HasValue).Select(e => e!.Value));
 
-            var checkMockTest = mocktests.Any(x => x.MockTestType == EnumMockTestType.CourseMockTest);
+            var checkMockTest = mocktests.All(x => x.MockTestType == EnumMockTestType.CourseMockTest);
             if (!checkMockTest)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumMockTestErrorCode.MockTestEqualCourseUnitMockTest), nameof(request.CourseUnitMockTests), mocktests.Select(x => x.Id));
+                methodResult.AddErrorBadRequest(nameof(EnumMockTestErrorCode.TestInValid), nameof(request.CourseUnitMockTests), mocktests.Select(x => x.Id));
                 return methodResult;
             }
 

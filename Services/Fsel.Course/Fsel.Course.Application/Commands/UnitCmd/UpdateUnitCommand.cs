@@ -78,7 +78,7 @@ namespace Fsel.Course.Application.Commands.UnitCmd
             {
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 methodResult.AddError(
-                nameof(EnumMockTestErrorCode.MockTypeEqualUnitMockTest));
+                nameof(EnumMockTestErrorCode.MockTestInValid));
                 return methodResult;
             }
 

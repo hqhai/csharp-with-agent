@@ -5,16 +5,16 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         /// <summary>
         /// Mock Final Test  not is correct
         /// </summary>
-        MockfinalTestNotCorrect,
+        TestNotCorrect,
 
         /// <summary>
         /// Mock Type = UnitMockTest
         /// </summary>
-        MockTypeEqualUnitMockTest,
+        MockTestInValid,
 
         /// <summary>
         /// Mock Type = CourseUnitMockTest
         /// </summary>
-        MockTestEqualCourseUnitMockTest
+        TestInValid
     }
 }
