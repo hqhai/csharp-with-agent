@@ -1,3 +1,5 @@
+// Copyright (c) Atlantic. All rights reserved.
+
 using System.ComponentModel.DataAnnotations;
 
 namespace Fsel.Identity.Domain.Models.CommandModels.Auths
@@ -8,6 +10,6 @@ namespace Fsel.Identity.Domain.Models.CommandModels.Auths
         public string? Username { get; set; }
 
         [Required]
-        public string? Password { get; set; }
+        public string Password { get; set; } = string.Empty;
     }
 }

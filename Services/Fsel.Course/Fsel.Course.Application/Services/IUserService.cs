@@ -22,7 +22,7 @@ namespace Fsel.Course.Application.Services
         public IList<Guid>? Ids { get; set; }
     }
 
-    public class TeacherModel : BaseEntityModel
+    public class TeacherModel : BaseModel
     {
         public string? PassportPath { get; set; }
 

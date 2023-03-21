@@ -11,7 +11,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
     using Fsel.Core.Base.BaseModels;
     using Fsel.Course.Domain.Enums;
 
-    public class UnitSearchModel : BaseEntityModel
+    public class UnitSearchModel : BaseModel
     {
         public string? Name { get; set; }
 

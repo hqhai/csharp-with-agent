@@ -1,4 +1,5 @@
-using AutoMapper;
+// Copyright (c) Atlantic. All rights reserved.
+
 using Fsel.Common.ActionResults;
 using Fsel.Common.Helpers;
 using Fsel.Identity.Application.Services;
@@ -28,8 +29,8 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
 
         public async Task<MethodResult<bool>> Handle(ForgotPasswordCommand request, CancellationToken cancellationToken)
         {
+            ArgumentNullException.ThrowIfNull(request);
             MethodResult<bool> methodResult = new MethodResult<bool>();
-
             var user = await _userManager.FindByEmailAsync(request.Email ?? string.Empty);
             if (user == null)
             {
@@ -64,7 +65,15 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                 ToEmails = new List<string> { $"{request.Email}" }
             };
 
-            var IsSendMail = await _senderService.SendEmailAsync(sendCommandModel);
+            var isSendMail = await _senderService.SendEmailAsync(sendCommandModel);
+
+            if (isSendMail.IsSuccessStatusCode)
+            {
+                methodResult.StatusCode = StatusCodes.Status500InternalServerError;
+                methodResult.AddError(nameof(EnumAuthErrorCode.AU13ER));
+                return methodResult;
+            }
+
             methodResult.Result = true;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;

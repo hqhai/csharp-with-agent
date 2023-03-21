@@ -1,9 +1,10 @@
+// Copyright (c) Atlantic. All rights reserved.
+
 namespace Fsel.Sender.Domain.ValueSettings
 {
     public class AppSetting
     {
         public Smtp? Smtp { get; set; }
-        public Url? Url { get; set; }
     }
 
     public class Smtp
@@ -13,10 +14,5 @@ namespace Fsel.Sender.Domain.ValueSettings
         public int Port { get; set; }
         public string? Username { get; set; }
         public string? Password { get; set; }
-    }
-
-    public class Url
-    {
-        public string? EmailConfirmUrl { get; set; }
     }
 }

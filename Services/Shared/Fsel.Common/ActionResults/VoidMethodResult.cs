@@ -1,3 +1,5 @@
+// Copyright (c) Atlantic. All rights reserved.
+
 using Fsel.Common.Enums.ErrorCodes;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;

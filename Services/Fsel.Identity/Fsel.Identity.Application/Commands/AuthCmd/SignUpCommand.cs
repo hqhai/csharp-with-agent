@@ -1,20 +1,16 @@
-using System.Text;
+// Copyright (c) Atlantic. All rights reserved.
+
 using System.Transactions;
 using AutoMapper;
 using Fsel.Common.ActionResults;
-using Fsel.Common.Enums;
-using Fsel.Common.Helpers;
-using Fsel.Identity.Application.Services;
 using Fsel.Identity.Domain.Entities;
 using Fsel.Identity.Domain.Enums.ErrorCodes;
-using Fsel.Identity.Domain.IRepositories;
 using Fsel.Identity.Domain.Models.CommandModels.Auths;
 using Fsel.Identity.Domain.Models.EntityModels;
-using Fsel.Identity.Infrastructure.ValueSettings;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.EntityFrameworkCore;
 
 namespace Fsel.Identity.Application.Commands.AuthCmd
 {
@@ -26,123 +22,122 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
     {
         private readonly UserManager<User> _userManager;
         private readonly RoleManager<Role> _roleManager;
-        private readonly AppSetting _appSetting;
-        private readonly ISenderService _senderService;
         private readonly IMapper _mapper;
-        private readonly IHumanRepository _humanRepository;
+        private readonly IMediator _mediator;
 
         public SignUpCommandHandler(UserManager<User> userManager,
             RoleManager<Role> roleManager,
-            AppSetting appSetting,
-            IHumanRepository humanRepository,
-            ISenderService senderService,
-            IMapper mapper)
+            IMapper mapper,
+            IMediator mediator)
         {
             _userManager = userManager;
             _roleManager = roleManager;
-            _appSetting = appSetting;
-            _senderService = senderService;
             _mapper = mapper;
-            _humanRepository = humanRepository;
+            _mediator = mediator;
         }
 
         public async Task<MethodResult<UserModel>> Handle(SignUpCommand request, CancellationToken cancellationToken)
         {
+            ArgumentNullException.ThrowIfNull(request);
             MethodResult<UserModel> methodResult = new MethodResult<UserModel>();
-
-            var userExit = await _userManager.FindByEmailAsync(request?.Email ?? string.Empty);
-            if (userExit != null)
+            User? user = null;
+            if (request.Email != null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumAuthErrorCode.AU04V), nameof(request.Email), request?.Email);
-                return methodResult;
+                user = await _userManager.FindByEmailAsync(request.Email);
+                if (user != null && user.EmailConfirmed)
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumAuthErrorCode.AU08V), nameof(request.Email), request.Email);
+                    return methodResult;
+                }
             }
-
-            var user = new User()
+            else if (request.PhoneNumber != null)
             {
-                FullName = request.FullName,
-                Email = request.Email,
-                UserName = request.Email,
-                PhoneNumber = request.PhoneNumber,
-            };
+                user = await _userManager.Users.FirstOrDefaultAsync(e => e.PhoneNumber == request.PhoneNumber, cancellationToken: cancellationToken);
+                if (user != null && user.EmailConfirmed)
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumAuthErrorCode.AU09V), nameof(request.PhoneNumber), request.PhoneNumber);
+                    return methodResult;
+                }
+            }
 
             using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {
                 try
                 {
-                    var role = await _roleManager.FindByNameAsync(request.Role.ToString());
+                    var role = await _roleManager.FindByNameAsync(request?.Role.ToString() ?? string.Empty);
                     if (role == null)
                     {
                         role = new Role
                         {
-                            Name = request.Role.ToString(),
-                            NormalizedName = request.Role.ToString(),
+                            Name = request?.Role.ToString(),
+                            NormalizedName = request?.Role.ToString(),
                         };
                         await _roleManager.CreateAsync(role);
                     }
-                    var result = await _userManager.CreateAsync(user, request.Password ?? string.Empty);
+
+                    IdentityResult result;
+                    if (user != null)
+                    {
+                        var hashPassword = _userManager.PasswordHasher.HashPassword(user, request?.Password ?? string.Empty);
+                        user.PasswordHash = hashPassword;
+                        GetUser(user, request ?? new SignUpCommand());
+                        result = await _userManager.UpdateAsync(user);
+                    }
+                    else
+                    {
+                        user = new();
+                        GetUser(user, request ?? new SignUpCommand());
+                        result = await _userManager.CreateAsync(user, request?.Password ?? string.Empty);
+                    }
+
                     if (!result.Succeeded)
                     {
                         methodResult.AddErrorBadRequest(nameof(EnumAuthErrorCode.AU10ER), nameof(request.Password), request?.Password);
                         return methodResult;
                     }
-                    await _userManager.AddToRoleAsync(user, request.Role.ToString());
+                    await _userManager.AddToRoleAsync(user, request?.Role.ToString() ?? string.Empty);
 
-                    var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-                    token = WebEncoders.Base64UrlEncode(Encoding.ASCII.GetBytes(token));
+                    #region Send Code OTP
 
-                    var configmationLink = $"{_appSetting?.Url?.EmailConfirmUrl}?token={token}&email={user.Email}";
-                    var senderCommandModel = new SendEmailCommandModel
+                    var sendResult = new MethodResult<bool>();
+                    if (request != null && request.Email != null)
                     {
-                        Content = $"\"Confirmation email by link: \", {configmationLink}",
-                        Subject = "Xác thực tài khoản ",
-                        ToEmails = new List<string> { $"{request.Email}" }
-                    };
+                        sendResult = await _mediator.Send(new SendOTPCommand { Email = user.Email }, cancellationToken).ConfigureAwait(false);
+                    }
+                    else
+                    {
+                    }
 
-                    var sendResult = await _senderService.SendEmailAsync(senderCommandModel);
-                    if (!sendResult.IsSuccessStatusCode)
+                    if (!sendResult.IsOK)
                     {
                         scope.Dispose();
-                        methodResult.StatusCode = (int)sendResult.StatusCode;
-                        methodResult.AddResultFromErrorList(sendResult.Content?.ErrorMessages);
+                        methodResult.StatusCode = sendResult?.StatusCode ?? default;
+                        methodResult.AddResultFromErrorList(sendResult?.ErrorMessages);
                         return methodResult;
                     }
                     scope.Complete();
+
+                    #endregion Send Code OTP
                 }
                 catch
                 {
+                    methodResult.StatusCode = StatusCodes.Status400BadRequest;
+                    methodResult.AddError(nameof(EnumAuthErrorCode.AU11ER));
                     scope.Dispose();
                 }
             }
-
-            var human = _mapper.Map<Human>(request);
-            human.UserId = user.Id;
-            if (request.Role == EnumRoleRegister.Student)
-            {
-                human.Student = new Student
-                {
-                    HumanId = human.Id,
-                };
-            }
-            else if (request.Role == EnumRoleRegister.Parent)
-            {
-                human.Parent = new Domain.Entities.Parent
-                {
-                    HumanId = human.Id,
-                };
-            }
-            await _humanRepository.ExecuteTransactionAsync(async () =>
-            {
-                human = _humanRepository.Add(human);
-
-                await _humanRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
-
-                methodResult.StatusCode = StatusCodes.Status201Created;
-                methodResult.Result = _mapper.Map<UserModel>(user);
-                return methodResult;
-            });
-
+            methodResult.StatusCode = StatusCodes.Status200OK;
             methodResult.Result = _mapper.Map<UserModel>(user);
             return methodResult;
+        }
+
+        private static void GetUser(User user, SignUpCommandModel request)
+        {
+            user.FullName = request.FullName;
+            user.Email = request.Email;
+            user.UserName = request.Email;
+            user.PhoneNumber = request.PhoneNumber;
+            user.TwoFactorEnabled = true;
         }
     }
 }
