@@ -1,6 +1,7 @@
+// Copyright (c) Atlantic. All rights reserved.
+
 using System.ComponentModel.DataAnnotations;
 using Fsel.Common.Enums;
-using Fsel.Identity.Domain.Models.CommandModels.Humans;
 
 namespace Fsel.Identity.Domain.Models.CommandModels.Auths
 {
@@ -11,7 +12,7 @@ namespace Fsel.Identity.Domain.Models.CommandModels.Auths
 
         public string? PhoneNumber { get; set; }
 
-        [Required, EmailAddress]
+        [EmailAddress]
         public string? Email { get; set; }
 
         [Required]

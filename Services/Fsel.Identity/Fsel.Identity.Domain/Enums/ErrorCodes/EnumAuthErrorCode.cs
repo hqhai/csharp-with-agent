@@ -35,6 +35,21 @@ namespace Fsel.Identity.Domain.Enums.ErrorCodes
         AU06V,
 
         /// <summary>
+        /// PhoneNumber does not exist
+        /// </summary>
+        AU07V,
+
+        /// <summary>
+        /// Duplicate email, please select another email
+        /// </summary>
+        AU08V,
+
+        /// <summary>
+        /// Duplicate PhoneNumber, please select another PhoneNumber
+        /// </summary>
+        AU09V,
+
+        /// <summary>
         /// Email verified fail
         /// </summary>
         AU01ER,
@@ -107,6 +122,11 @@ namespace Fsel.Identity.Domain.Enums.ErrorCodes
         /// <summary>
         /// Invalid OTP, please try again
         /// </summary>
-        AU15ER
+        AU15ER,
+
+        /// <summary>
+        /// OTP has expired, please click on the Resend code button below to receive a new OTP
+        /// </summary>
+        AU16ER
     }
 }

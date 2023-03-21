@@ -1,7 +1,8 @@
+// Copyright (c) Atlantic. All rights reserved.
+
 using System.Transactions;
 using AutoMapper;
 using Fsel.Common.ActionResults;
-using Fsel.Common.Helpers;
 using Fsel.Identity.Domain.Entities;
 using Fsel.Identity.Domain.Enums.ErrorCodes;
 using Fsel.Identity.Domain.Models.CommandModels.Auths;
@@ -9,6 +10,7 @@ using Fsel.Identity.Domain.Models.EntityModels;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 
 namespace Fsel.Identity.Application.Commands.AuthCmd
 {
@@ -37,12 +39,24 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
         public async Task<MethodResult<UserModel>> Handle(SignUpCommand request, CancellationToken cancellationToken)
         {
             MethodResult<UserModel> methodResult = new MethodResult<UserModel>();
-
-            var user = await _userManager.FindByEmailAsync(request?.Email ?? string.Empty);
-            if (user != null && user.EmailConfirmed)
+            User? user = null;
+            if (request != null && request.Email != null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumAuthErrorCode.AU04V), nameof(request.Email), request?.Email);
-                return methodResult;
+                user = await _userManager.FindByEmailAsync(request.Email);
+                if (user != null && user.EmailConfirmed)
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumAuthErrorCode.AU08V), nameof(request.Email), request.Email);
+                    return methodResult;
+                }
+            }
+            else if (request != null && request.PhoneNumber != null)
+            {
+                user = await _userManager.Users.FirstOrDefaultAsync(e => e.PhoneNumber == request.PhoneNumber, cancellationToken: cancellationToken);
+                if (user != null && user.EmailConfirmed)
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumAuthErrorCode.AU09V), nameof(request.PhoneNumber), request.PhoneNumber);
+                    return methodResult;
+                }
             }
 
             using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
@@ -61,18 +75,18 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                     }
 
                     IdentityResult result;
-                    if (user == null)
-                    {
-                        user = new();
-                        GetUser(user, request ?? new SignUpCommand());
-                        result = await _userManager.CreateAsync(user, request?.Password ?? string.Empty);
-                    }
-                    else
+                    if (user != null)
                     {
                         var hashPassword = _userManager.PasswordHasher.HashPassword(user, request?.Password ?? string.Empty);
                         user.PasswordHash = hashPassword;
                         GetUser(user, request ?? new SignUpCommand());
                         result = await _userManager.UpdateAsync(user);
+                    }
+                    else
+                    {
+                        user = new();
+                        GetUser(user, request ?? new SignUpCommand());
+                        result = await _userManager.CreateAsync(user, request?.Password ?? string.Empty);
                     }
 
                     if (!result.Succeeded)
@@ -84,13 +98,20 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
 
                     #region Send Code OTP
 
-                    var sendResult = await _mediator.Send(new SendOTPCommand { Email = user.Email }, cancellationToken).ConfigureAwait(false);
+                    var sendResult = new MethodResult<bool>();
+                    if (request != null && request.Email != null)
+                    {
+                        sendResult = await _mediator.Send(new SendOTPCommand { Email = user.Email }, cancellationToken).ConfigureAwait(false);
+                    }
+                    else
+                    {
+                    }
 
                     if (!sendResult.IsOK)
                     {
                         scope.Dispose();
-                        methodResult.StatusCode = (int)sendResult.StatusCode;
-                        methodResult.AddResultFromErrorList(sendResult.ErrorMessages);
+                        methodResult.StatusCode = sendResult?.StatusCode ?? default;
+                        methodResult.AddResultFromErrorList(sendResult?.ErrorMessages);
                         return methodResult;
                     }
                     scope.Complete();
@@ -104,7 +125,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                     scope.Dispose();
                 }
             }
-
+            methodResult.StatusCode = StatusCodes.Status200OK;
             methodResult.Result = _mapper.Map<UserModel>(user);
             return methodResult;
         }

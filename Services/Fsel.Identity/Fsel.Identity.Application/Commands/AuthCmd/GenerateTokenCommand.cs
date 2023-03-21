@@ -1,7 +1,8 @@
+// Copyright (c) Atlantic. All rights reserved.
+
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using AutoMapper;
 using Fsel.Common.ActionResults;
 using Fsel.Common.Helpers;
 using Fsel.Identity.Domain.Entities;
@@ -34,16 +35,17 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
         public async Task<MethodResult<TokenModel>> Handle(GenerateTokenCommand request, CancellationToken cancellationToken)
         {
             MethodResult<TokenModel> methodResult = new MethodResult<TokenModel>();
-
-            var user = await _userManager.FindByIdAsync(request.Id ?? string.Empty);
-            if (user == null)
+            if (request != null)
             {
-                methodResult.StatusCode = StatusCodes.Status401Unauthorized;
-                return methodResult;
-            }
+                var user = await _userManager.FindByIdAsync(request.Id ?? string.Empty);
+                if (user == null)
+                {
+                    methodResult.StatusCode = StatusCodes.Status401Unauthorized;
+                    return methodResult;
+                }
 
-            var userRoles = await _userManager.GetRolesAsync(user);
-            var authClaims = new List<Claim>
+                var userRoles = await _userManager.GetRolesAsync(user);
+                var authClaims = new List<Claim>
             {
                 new Claim(JwtRegisteredClaimNames.Name, user.UserName ?? string.Empty),
                 new Claim(JwtRegisteredClaimNames.GivenName, user.FullName ?? string.Empty),
@@ -53,38 +55,40 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
             };
 
-            foreach (var userRole in userRoles)
-            {
-                authClaims.Add(new Claim(ClaimTypes.Role, userRole));
+                foreach (var userRole in userRoles)
+                {
+                    authClaims.Add(new Claim(ClaimTypes.Role, userRole));
+                }
+
+                var secretKeyBytes = Encoding.ASCII.GetBytes(_appSetting.Jwt?.SecretKey ?? string.Empty);
+                var signin = new SigningCredentials(new SymmetricSecurityKey(secretKeyBytes), SecurityAlgorithms.HmacSha256);
+                var token = new JwtSecurityToken(
+                    _appSetting.Jwt?.Issuer ?? string.Empty,
+                    _appSetting.Jwt?.Audience ?? string.Empty,
+                    authClaims,
+                    expires: DateTime.Now.AddMinutes(_appSetting.Jwt?.TokenValidityInMinutes ?? default),
+                    signingCredentials: signin
+                    );
+
+                var accessToken = new JwtSecurityTokenHandler().WriteToken(token);
+                var refreshToken = TokenHelper.GenerateRefreshToken();
+
+                user.RefreshToken = refreshToken;
+                user.RefreshTokenExpiryTime = DateTime.Now.AddDays(_appSetting.Jwt?.RefreshTokenValidityInDays ?? default);
+
+                await _userManager.UpdateAsync(user);
+                var tokenLogin = new TokenModel
+                {
+                    AccessToken = accessToken,
+                    RefreshToken = refreshToken,
+                    Expiration = token.ValidTo.ConvertTimeFromUtc(TimeZoneInfo.Local),
+                    FullName = user.FullName,
+                    Roles = userRoles.ToList()
+                };
+
+                methodResult.Result = tokenLogin;
             }
-
-            var secretKeyBytes = Encoding.ASCII.GetBytes(_appSetting.Jwt?.SecretKey ?? string.Empty);
-            var signin = new SigningCredentials(new SymmetricSecurityKey(secretKeyBytes), SecurityAlgorithms.HmacSha256);
-            var token = new JwtSecurityToken(
-                _appSetting.Jwt?.Issuer ?? string.Empty,
-                _appSetting.Jwt?.Audience ?? string.Empty,
-                authClaims,
-                expires: DateTime.Now.AddMinutes(_appSetting.Jwt?.TokenValidityInMinutes ?? default),
-                signingCredentials: signin
-                );
-
-            var accessToken = new JwtSecurityTokenHandler().WriteToken(token);
-            var refreshToken = TokenHelper.GenerateRefreshToken();
-
-            user.RefreshToken = refreshToken;
-            user.RefreshTokenExpiryTime = DateTime.Now.AddDays(_appSetting.Jwt?.RefreshTokenValidityInDays ?? default);
-
-            await _userManager.UpdateAsync(user);
-            var tokenLogin = new TokenModel
-            {
-                AccessToken = accessToken,
-                RefreshToken = refreshToken,
-                Expiration = token.ValidTo.ConvertTimeFromUtc(TimeZoneInfo.Local),
-                FullName = user.FullName,
-                Roles = userRoles.ToList()
-            };
-
-            methodResult.Result = tokenLogin;
+            methodResult.StatusCode = StatusCodes.Status400BadRequest;
             return methodResult;
         }
     }

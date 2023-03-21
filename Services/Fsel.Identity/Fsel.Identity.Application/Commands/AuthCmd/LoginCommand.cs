@@ -1,4 +1,5 @@
-using AutoMapper;
+// Copyright (c) Atlantic. All rights reserved.
+
 using Fsel.Common.ActionResults;
 using Fsel.Identity.Domain.Entities;
 using Fsel.Identity.Domain.Enums.ErrorCodes;
@@ -20,16 +21,13 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
         private readonly UserManager<User> _userManager;
         private readonly SignInManager<User> _signInManager;
         private readonly IMediator _mediator;
-        private readonly IMapper _mapper;
 
         public LoginCommandHandler(UserManager<User> userManager,
             SignInManager<User> signInManager,
-            IMediator mediator,
-            IMapper mapper)
+            IMediator mediator)
         {
             _userManager = userManager;
             _signInManager = signInManager;
-            _mapper = mapper;
             _mediator = mediator;
         }
 
@@ -39,36 +37,41 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
 
             #region Validation
 
-            if (request.Username == null)
+            if (request != null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumAuthErrorCode.AU04ER),
-                    new Error(nameof(request.Username)), new Error(nameof(request.Password)));
-                return methodResult;
-            }
+                if (request.Username == null)
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumAuthErrorCode.AU04ER),
+                        new Error(nameof(request.Username)), new Error(nameof(request.Password)));
+                    return methodResult;
+                }
 
-            var user = await _userManager.FindByNameAsync(request.Username) ?? await _userManager.FindByEmailAsync(request.Username) ?? await _userManager.Users.FirstOrDefaultAsync(x => x.PhoneNumber == request.Username);
-            if (user == null)
-            {
-                methodResult.AddError(
-                    StatusCodes.Status401Unauthorized,
-                    nameof(EnumAuthErrorCode.AU05ER),
-                    new Error(nameof(request.Username), request.Username), new Error(nameof(request.Password), request.Password));
-                return methodResult;
-            }
+                var user = await _userManager.FindByNameAsync(request.Username) ?? await _userManager.FindByEmailAsync(request.Username) ??
+                    await _userManager.Users.FirstOrDefaultAsync(x => x.PhoneNumber == request.Username, cancellationToken: cancellationToken);
+                if (user == null)
+                {
+                    methodResult.AddError(
+                        StatusCodes.Status401Unauthorized,
+                        nameof(EnumAuthErrorCode.AU05ER),
+                        new Error(nameof(request.Username), request.Username), new Error(nameof(request.Password), request.Password));
+                    return methodResult;
+                }
 
-            var result = await _signInManager.PasswordSignInAsync(user, request.Password, false, false);
-            if (!result.Succeeded)
-            {
-                methodResult.AddError(
-                    StatusCodes.Status401Unauthorized,
-                    nameof(EnumAuthErrorCode.AU05ER),
-                    new Error(nameof(request.Username), request.Username), new Error(nameof(request.Password), request.Password));
-                return methodResult;
+                var result = await _signInManager.PasswordSignInAsync(user, request.Password, false, false);
+                if (!result.Succeeded)
+                {
+                    methodResult.AddError(
+                        StatusCodes.Status401Unauthorized,
+                        nameof(EnumAuthErrorCode.AU05ER),
+                        new Error(nameof(request.Username), request.Username), new Error(nameof(request.Password), request.Password));
+                    return methodResult;
+                }
+                methodResult = await _mediator.Send(new GenerateTokenCommand { Id = user.Id }, cancellationToken).ConfigureAwait(false);
             }
 
             #endregion Validation
 
-            methodResult = await _mediator.Send(new GenerateTokenCommand { Id = user.Id }).ConfigureAwait(false);
+            methodResult.StatusCode = StatusCodes.Status400BadRequest;
             return methodResult;
         }
     }

@@ -1,7 +1,8 @@
+// Copyright (c) Atlantic. All rights reserved.
+
 using System.Text;
 using AutoMapper;
 using Fsel.Common.ActionResults;
-using Fsel.Common.Enums.ErrorCodes;
 using Fsel.Common.Helpers;
 using Fsel.Identity.Domain.Entities;
 using Fsel.Identity.Domain.Enums.ErrorCodes;
@@ -33,27 +34,29 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
         public async Task<MethodResult<UserModel>> Handle(ConfirmEmailCommand request, CancellationToken cancellationToken)
         {
             MethodResult<UserModel> methodResult = new MethodResult<UserModel>();
-
-            var user = await _userManager.FindByEmailAsync(request.Email ?? string.Empty);
-            if (user == null)
+            if (request != null)
             {
-                methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                methodResult.AddError(
-                    nameof(EnumAuthErrorCode.AU04V),
-                    new[] { MethodHelper.GenerateErrorResult(nameof(request.Email), request.Email) });
-                return methodResult;
-            }
+                var user = await _userManager.FindByEmailAsync(request.Email ?? string.Empty);
+                if (user == null)
+                {
+                    methodResult.StatusCode = StatusCodes.Status400BadRequest;
+                    methodResult.AddError(
+                        nameof(EnumAuthErrorCode.AU04V),
+                        new[] { MethodHelper.GenerateErrorResult(nameof(request.Email), request.Email) });
+                    return methodResult;
+                }
 
-            var token = Encoding.ASCII.GetString(WebEncoders.Base64UrlDecode(request.Token ?? string.Empty));
-            var result = await _userManager.ConfirmEmailAsync(user, token);
-            if (!result.Succeeded)
-            {
-                methodResult.StatusCode = StatusCodes.Status500InternalServerError;
-                methodResult.AddError(nameof(EnumAuthErrorCode.AU01ER));
-                return methodResult;
+                var token = Encoding.ASCII.GetString(WebEncoders.Base64UrlDecode(request.Token ?? string.Empty));
+                var result = await _userManager.ConfirmEmailAsync(user, token);
+                if (!result.Succeeded)
+                {
+                    methodResult.StatusCode = StatusCodes.Status500InternalServerError;
+                    methodResult.AddError(nameof(EnumAuthErrorCode.AU01ER));
+                    return methodResult;
+                }
+                methodResult.Result = _mapper.Map<UserModel>(user);
             }
-
-            methodResult.Result = _mapper.Map<UserModel>(user);
+            methodResult.StatusCode = StatusCodes.Status400BadRequest;
             return methodResult;
         }
     }

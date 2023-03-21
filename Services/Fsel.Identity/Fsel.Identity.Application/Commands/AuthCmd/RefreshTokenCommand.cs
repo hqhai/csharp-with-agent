@@ -1,3 +1,5 @@
+// Copyright (c) Atlantic. All rights reserved.
+
 using System.IdentityModel.Tokens.Jwt;
 using System.Text;
 using Fsel.Common.ActionResults;
@@ -81,7 +83,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                 methodResult.AddError(StatusCodes.Status401Unauthorized, nameof(EnumAuthErrorCode.AU09ER));
             }
 
-            methodResult = await _mediator.Send(new GenerateTokenCommand { Id = user.Id }).ConfigureAwait(false);
+            methodResult = await _mediator.Send(new GenerateTokenCommand { Id = user.Id }, cancellationToken).ConfigureAwait(false);
             return methodResult;
         }
     }
