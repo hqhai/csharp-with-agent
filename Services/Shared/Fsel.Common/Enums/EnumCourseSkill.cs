@@ -1,4 +1,4 @@
-﻿namespace Fsel.Course.Domain.Enums
+namespace Fsel.Common.Enums
 {
     public enum EnumCourseSkill
     {
