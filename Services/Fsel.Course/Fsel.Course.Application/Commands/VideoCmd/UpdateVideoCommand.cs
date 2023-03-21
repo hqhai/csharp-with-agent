@@ -70,10 +70,9 @@ namespace Fsel.Course.Application.Commands.VideoCmd
 
             if (isVideoUsed)
             {
-                methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                methodResult.AddError(
+                methodResult.AddErrorBadRequest(
                     nameof(EnumVideoErrorCode.VD02V),
-                    new[] { MethodHelper.GenerateErrorResult(nameof(request.Id), request.Id) });
+                    nameof(request.Id), request.Id);
                 return methodResult;
             }
 

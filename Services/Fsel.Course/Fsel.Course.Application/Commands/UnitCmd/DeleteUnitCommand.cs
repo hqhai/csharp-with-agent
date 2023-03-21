@@ -31,10 +31,8 @@ namespace Fsel.Course.Application.Commands.UnitCmd
                                     .FirstOrDefaultAsync(e => e.Id == request.Id, cancellationToken: cancellationToken);
             if (unit == null)
             {
-                methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                methodResult.AddError(
-                    nameof(EnumUnitErrorCode.U01V),
-                    new[] { MethodHelper.GenerateErrorResult(nameof(request.Id), request?.Id) });
+                methodResult.AddErrorBadRequest(nameof(EnumUnitErrorCode.U01V),
+                                                nameof(request.Id), request?.Id);
                 return methodResult;
             }
 

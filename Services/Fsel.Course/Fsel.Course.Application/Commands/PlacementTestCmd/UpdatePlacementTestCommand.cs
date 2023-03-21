@@ -35,10 +35,8 @@ namespace Fsel.Course.Application.Commands.PlacementTestCmd
             var placementTest = await _placementTestRepository.GetByIdAsync(request.Id);
             if (placementTest == null)
             {
-                methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                methodResult.AddError(
-                    nameof(EnumPlacementTestErrorCode.PT01V),
-                    new[] { MethodHelper.GenerateErrorResult(nameof(request.Id), request.Id) });
+                methodResult.AddErrorBadRequest(nameof(EnumPlacementTestErrorCode.PT01V),
+                                                nameof(request.Id), request.Id);
                 return methodResult;
             }
             _mapper.Map(request, placementTest);

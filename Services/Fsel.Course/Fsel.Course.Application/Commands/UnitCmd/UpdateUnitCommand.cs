@@ -45,35 +45,30 @@ namespace Fsel.Course.Application.Commands.UnitCmd
                                     .FirstOrDefaultAsync(e => e.Id == request.Id, cancellationToken: cancellationToken);
             if (unit == null)
             {
-                methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                methodResult.AddError(
-                    nameof(EnumUnitErrorCode.U01V),
-                    new[] { MethodHelper.GenerateErrorResult(nameof(request.Id), request?.Id) });
+                methodResult.AddErrorBadRequest(nameof(EnumUnitErrorCode.U01V),
+                                                nameof(request.Id), request?.Id);
                 return methodResult;
             }
 
             var isUnitUsed = await _unitRepository.IsUnitUsed(request.Id);
             if (isUnitUsed)
             {
-                methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                methodResult.AddError(
-                    nameof(EnumUnitErrorCode.U02V),
-                    new[] { MethodHelper.GenerateErrorResult(nameof(request.Id), request.Id) });
+                methodResult.AddErrorBadRequest(nameof(EnumUnitErrorCode.U02V), nameof(request.Id), request.Id);
                 return methodResult;
             }
 
             if (request.LessonIds == null)
             {
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                methodResult.AddError(
-                    nameof(EnumUnitErrorCode.U03V),
-                    new[] { MethodHelper.GenerateErrorResult(nameof(request.LessonIds), request.LessonIds) });
+                methodResult.AddErrorBadRequest(
+                    nameof(EnumUnitErrorCode.U03V), nameof(request.LessonIds), request.LessonIds);
                 return methodResult;
             }
 
             if (_lessonRepository.IsIdsInValid(request.LessonIds))
             {
-                methodResult.AddErrorBadRequest(nameof(EnumLessonErrorCode.LS03V), nameof(request.LessonIds), request.LessonIds);
+                methodResult.AddErrorBadRequest(nameof(EnumLessonErrorCode.LS03V),
+                                                nameof(request.LessonIds), request.LessonIds);
 
                 return methodResult;
             }

@@ -53,7 +53,8 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             var userExit = await _userManager.FindByEmailAsync(request?.Email ?? string.Empty);
             if (userExit != null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumAuthErrorCode.AU04V), nameof(request.Email), request?.Email);
+                methodResult.AddErrorBadRequest(nameof(EnumAuthErrorCode.AU04V),
+                                                nameof(request.Email), request?.Email);
                 return methodResult;
             }
 
@@ -82,7 +83,8 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                     var result = await _userManager.CreateAsync(user, request.Password ?? string.Empty);
                     if (!result.Succeeded)
                     {
-                        methodResult.AddErrorBadRequest(nameof(EnumAuthErrorCode.AU10ER), nameof(request.Password), request?.Password);
+                        methodResult.AddErrorBadRequest(nameof(EnumAuthErrorCode.AU10ER),
+                                                        nameof(request.Password), request?.Password);
                         return methodResult;
                     }
                     await _userManager.AddToRoleAsync(user, request.Role.ToString());

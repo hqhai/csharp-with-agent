@@ -34,7 +34,8 @@ namespace Fsel.Course.Application.Commands.VideoCmd
 
             if (request.VideoTimeCodes == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumVideoErrorCode.VD03V), nameof(request.VideoTimeCodes));
+                methodResult.AddErrorBadRequest(nameof(EnumVideoErrorCode.VD03V),
+                                                nameof(request.VideoTimeCodes));
                 return methodResult;
             }
 
@@ -44,7 +45,8 @@ namespace Fsel.Course.Application.Commands.VideoCmd
             {
                 if (x == null)
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumVideoTimeCodeErrorCode.VTC03V), nameof(request.VideoTimeCodes));
+                    methodResult.AddErrorBadRequest(nameof(EnumVideoTimeCodeErrorCode.VTC03V),
+                                                    nameof(request.VideoTimeCodes));
                 }
                 else
                 {
@@ -53,7 +55,8 @@ namespace Fsel.Course.Application.Commands.VideoCmd
                     {
                         if (n == null)
                         {
-                            methodResult.AddErrorBadRequest(nameof(EnumExerciseErrorCode.E03V), nameof(x.Exercises));
+                            methodResult.AddErrorBadRequest(nameof(EnumExerciseErrorCode.E03V),
+                                                            nameof(x.Exercises));
                         }
                         else
                         {
@@ -66,7 +69,8 @@ namespace Fsel.Course.Application.Commands.VideoCmd
                             {
                                 if (q == null)
                                 {
-                                    methodResult.AddErrorBadRequest(nameof(EnumQuestionErrorCode.Q03V), nameof(n.Questions));
+                                    methodResult.AddErrorBadRequest(nameof(EnumQuestionErrorCode.Q03V),
+                                                                    nameof(n.Questions));
                                 }
                                 else
                                 {

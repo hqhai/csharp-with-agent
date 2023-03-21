@@ -51,16 +51,15 @@ namespace Fsel.Course.Application.Commands.UnitCmd
 
             if (request?.LessonIds == null)
             {
-                methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                methodResult.AddError(
-                    nameof(EnumUnitErrorCode.U03V),
-                    new[] { MethodHelper.GenerateErrorResult(nameof(request.LessonIds), request?.LessonIds) });
+                methodResult.AddErrorBadRequest(nameof(EnumUnitErrorCode.U03V),
+                                                nameof(request.LessonIds), request?.LessonIds);
                 return methodResult;
             }
 
             if (_lessonRepository.IsIdsInValid(request.LessonIds))
             {
-                methodResult.AddErrorBadRequest(nameof(EnumLessonErrorCode.LS03V), nameof(request.LessonIds), request.LessonIds);
+                methodResult.AddErrorBadRequest(nameof(EnumLessonErrorCode.LS03V),
+                                                nameof(request.LessonIds), request.LessonIds);
                 return methodResult;
             }
 

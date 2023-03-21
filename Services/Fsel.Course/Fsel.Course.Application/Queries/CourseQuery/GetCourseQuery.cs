@@ -34,10 +34,9 @@ namespace Fsel.Course.Application.Queries.CourseQuery
 
             if (course == null)
             {
-                methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                methodResult.AddError(
+                methodResult.AddErrorBadRequest(
                     nameof(EnumCourseErrorCode.C01V),
-                    new[] { MethodHelper.GenerateErrorResult(nameof(request.Id), request.Id) });
+                    nameof(request.Id), request.Id);
                 return methodResult;
             }
 

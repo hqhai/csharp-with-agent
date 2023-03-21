@@ -33,10 +33,9 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             var user = await _userManager.FindByEmailAsync(request.Email ?? string.Empty);
             if (user == null)
             {
-                methodResult.StatusCode = StatusCodes.Status404NotFound;
-                methodResult.AddError(
+                methodResult.AddErrorBadRequest(
                     nameof(EnumAuthErrorCode.AU04V),
-                    new[] { MethodHelper.GenerateErrorResult(nameof(request.Email), request.Email) });
+                    nameof(request.Email), request.Email);
                 return methodResult;
             }
 

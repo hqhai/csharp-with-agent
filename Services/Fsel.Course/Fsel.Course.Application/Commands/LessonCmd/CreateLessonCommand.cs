@@ -87,19 +87,22 @@ namespace Fsel.Course.Application.Commands.LessonCmd
 
             if (_homeWorkRepository.IsIdsInValid(request.HomeWorkIds))
             {
-                methodResult.AddErrorBadRequest(nameof(EnumHomeWorkErrorCode.HW03V), nameof(request.HomeWorkIds), request.HomeWorkIds);
+                methodResult.AddErrorBadRequest(nameof(EnumHomeWorkErrorCode.HW03V),
+                                                nameof(request.HomeWorkIds), request.HomeWorkIds);
                 return methodResult;
             }
 
             if (_extraPracticeRepository.IsIdsInValid(request.ExtraPracticeIds))
             {
-                methodResult.AddErrorBadRequest(nameof(EnumExtraPractiveErrorCode.EP03V), nameof(request.ExtraPracticeIds), request.ExtraPracticeIds);
+                methodResult.AddErrorBadRequest(nameof(EnumExtraPractiveErrorCode.EP03V),
+                                                nameof(request.ExtraPracticeIds), request.ExtraPracticeIds);
                 return methodResult;
             }
 
             if (_videoRepository.IsIdsInValid(request.VideoIds))
             {
-                methodResult.AddErrorBadRequest(nameof(EnumVideoErrorCode.VD03V), nameof(request.VideoIds), request.VideoIds);
+                methodResult.AddErrorBadRequest(nameof(EnumVideoErrorCode.VD03V),
+                                                nameof(request.VideoIds), request.VideoIds);
                 return methodResult;
             }
 
