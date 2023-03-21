@@ -8,14 +8,14 @@ namespace Fsel.Course.Domain.Entities.QuestionTypeConfigs.Answers
     using System.Text;
     using System.Threading.Tasks;
 
-    public class MatchingType1Answer
+    public class MatchingTypeAnswer
     {
-        public IList<MatchingType1Answers>? Answers { get; set; }
+        public IList<MatchingTypeAnswers>? Answers { get; set; }
 
         public int Scores { get; set; }
     }
 
-    public class MatchingType1Answers
+    public class MatchingTypeAnswers
     {
         public int FromId { get; set; }
 

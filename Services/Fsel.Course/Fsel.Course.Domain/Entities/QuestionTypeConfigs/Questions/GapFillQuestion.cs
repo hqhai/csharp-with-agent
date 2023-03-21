@@ -2,20 +2,16 @@
 
 namespace Fsel.Course.Domain.Entities.QuestionTypeConfigs.Questions
 {
-    using System;
     using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
-    using System.Threading.Tasks;
 
-    public class GapFillAWordBankScoreByGapQuestion
+    public class GapFillQuestion
     {
         public string? Name { get; set; }
 
-        public IList<GapFillAWordBankScoreByGapQuestionContent>? Contents { get; set; }
+        public IList<GapFillScoreBySubQuesionContent>? Contents { get; set; }
     }
 
-    public class GapFillAWordBankScoreByGapQuestionContent
+    public class GapFillScoreBySubQuesionContent
     {
         public int Id { get; set; }
 
