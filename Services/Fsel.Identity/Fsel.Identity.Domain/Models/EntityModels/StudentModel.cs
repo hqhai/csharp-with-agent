@@ -7,7 +7,7 @@ namespace Fsel.Identity.Domain.Models.EntityModels
     using Fsel.Core.Base.BaseModels;
     using Fsel.Identity.Domain.Entities;
 
-    public class StudentModel : BaseEntityModel
+    public class StudentModel : BaseModel
     {
         public string? Membership { get; set; }
 

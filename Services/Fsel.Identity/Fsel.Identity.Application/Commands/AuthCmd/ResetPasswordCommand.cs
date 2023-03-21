@@ -1,3 +1,5 @@
+// Copyright (c) Atlantic. All rights reserved.
+
 using Fsel.Common.ActionResults;
 using Fsel.Common.Helpers;
 using Fsel.Core.Base;
@@ -32,6 +34,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
 
         public async Task<MethodResult<bool>> Handle(ResetPasswordCommand request, CancellationToken cancellationToken)
         {
+            ArgumentNullException.ThrowIfNull(request);
             MethodResult<bool> methodResult = new MethodResult<bool>();
             if (request.OldPassword == null)
             {
@@ -55,14 +58,14 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                 return methodResult;
             }
 
-            User? user = null;
+            User? user;
             if (string.IsNullOrEmpty(request.Email))
             {
                 user = await _userManager.FindByIdAsync(_authContext.CurrentUserId.ToString());
             }
             else
             {
-                user = await _userManager.FindByEmailAsync(request.Email ?? string.Empty);
+                user = await _userManager.FindByEmailAsync(request.Email);
             }
 
             if (user == null)

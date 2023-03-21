@@ -5,7 +5,7 @@ using Fsel.Course.Domain.Enums;
 
 namespace Fsel.Course.Domain.Models.EntityModels
 {
-    public class CourseModel : BaseEntityModel
+    public class CourseModel : BaseModel
     {
         public string? Name { get; set; }
 

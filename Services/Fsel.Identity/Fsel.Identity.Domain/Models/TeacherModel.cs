@@ -6,7 +6,7 @@ namespace Fsel.Identity.Domain.Models
     using Fsel.Core.Base.BaseModels;
     using Fsel.Identity.Domain.Models.EntityModels;
 
-    public class TeacherModel : BaseEntityModel
+    public class TeacherModel : BaseModel
     {
         public string? PassportPath { get; set; }
 
