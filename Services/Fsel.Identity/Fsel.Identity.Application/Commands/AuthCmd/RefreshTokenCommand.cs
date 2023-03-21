@@ -6,8 +6,10 @@ using Fsel.Common.ActionResults;
 using Fsel.Common.Helpers;
 using Fsel.Identity.Domain.Entities;
 using Fsel.Identity.Domain.Enums.ErrorCodes;
+using Fsel.Identity.Domain.IRepositories;
 using Fsel.Identity.Domain.Models.CommandModels.Auths;
 using Fsel.Identity.Domain.Models.EntityModels;
+using Fsel.Identity.Infrastructure;
 using Fsel.Identity.Infrastructure.ValueSettings;
 using MediatR;
 using Microsoft.AspNetCore.Http;
@@ -23,14 +25,17 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
     public class RefreshTokenCommandHandler : IRequestHandler<RefreshTokenCommand, MethodResult<TokenModel>>
     {
         private readonly UserManager<User> _userManager;
+        private readonly IUserTokenRepository _userTokenRepository;
         private readonly AppSetting _appSetting;
         private readonly IMediator _mediator;
 
         public RefreshTokenCommandHandler(UserManager<User> userManager,
+            IUserTokenRepository userTokenRepository,
             AppSetting appSetting,
             IMediator mediator)
         {
             _userManager = userManager;
+            _userTokenRepository = userTokenRepository;
             _mediator = mediator;
             _appSetting = appSetting;
         }
@@ -65,25 +70,27 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             long.TryParse(tokenInVerification.Claims.FirstOrDefault(x => x.Type == JwtRegisteredClaimNames.Exp)?.Value, out long utcExpireDate);
 
             var expireDate = utcExpireDate.ConvertUnixTimeStampToDateTime();
-            if (expireDate > DateTime.UtcNow)
+            if (expireDate < DateTime.Now)
             {
                 methodResult.AddError(StatusCodes.Status401Unauthorized, nameof(EnumAuthErrorCode.AU07ER));
                 return methodResult;
             }
 
-            var user = _userManager.Users.FirstOrDefault(x => x.RefreshToken == request.RefreshToken);
-            if (user == null)
+            var refreshToken = await _userTokenRepository.GetByRefreshTokenAsync(request.RefreshToken);
+            if (refreshToken == null)
             {
                 methodResult.AddError(StatusCodes.Status401Unauthorized, nameof(EnumAuthErrorCode.AU06ER),
                     nameof(request.RefreshToken), request.RefreshToken);
                 return methodResult;
             }
-            else if (user.RefreshTokenExpiryTime == null || user.RefreshTokenExpiryTime.Value <= DateTime.Now)
+            else if (refreshToken.RefreshTokenExpiryTime == null || refreshToken.RefreshTokenExpiryTime.Value <= DateTime.Now)
             {
                 methodResult.AddError(StatusCodes.Status401Unauthorized, nameof(EnumAuthErrorCode.AU09ER));
             }
 
-            methodResult = await _mediator.Send(new GenerateTokenCommand { Id = user.Id }, cancellationToken).ConfigureAwait(false);
+            await _userTokenRepository.Remove(refreshToken);
+
+            methodResult = await _mediator.Send(new GenerateTokenCommand { Id = refreshToken.UserId }).ConfigureAwait(false);
             return methodResult;
         }
     }
