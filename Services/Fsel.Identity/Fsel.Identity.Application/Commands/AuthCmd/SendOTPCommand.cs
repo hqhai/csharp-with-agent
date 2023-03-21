@@ -3,8 +3,10 @@
 namespace Fsel.Identity.Application.Commands.AuthCmd
 {
     using System.Collections.Generic;
+    using System.Globalization;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Constants;
     using Fsel.Common.Helpers;
     using Fsel.Identity.Application.Services;
     using Fsel.Identity.Domain.Entities;
@@ -57,10 +59,8 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                 var otp = await _userManager.GenerateTwoFactorTokenAsync(user, nameof(request.Email));
                 var senderCommandModel1 = new SendEmailCommandModel
                 {
-                    Content = $"Xin chào {user.FullName} \r\n\r\n"
-                              + $"Hệ thống giáo dục LMS FSEL xin gửi đến bạn mã xác thực OTP : {otp} "
-                              + $"\r\n\r\nMã OTP chỉ có giá trị hiệu lực trong thời gian 3 phút. \r\n\r\nXin chân thành cảm ơn!",
-                    Subject = $"\"[LMS -FSEL]: \"",
+                    Content = string.Format(CultureInfo.InvariantCulture, StringValues.SendOtpContent, user.FullName, otp),
+                    Subject = StringValues.SendOtpSubject,
                     ToEmails = new List<string> { $"{request.Email}" }
                 };
                 var sendResult1 = await _senderService.SendEmailAsync(senderCommandModel1);
