@@ -5,9 +5,12 @@ using AutoMapper;
 using Fsel.Common.ActionResults;
 using Fsel.Common.Helpers;
 using Fsel.Identity.Domain.Entities;
+using Fsel.Identity.Domain.IRepositories;
 using Fsel.Identity.Domain.Models.EntityModels;
+using Fsel.Identity.Infrastructure;
 using Fsel.Identity.Infrastructure.ValueSettings;
 using MediatR;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
@@ -22,12 +25,15 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
     public class GenerateTokenCommandHandler : IRequestHandler<GenerateTokenCommand, MethodResult<TokenModel>>
     {
         private readonly UserManager<User> _userManager;
+        private readonly IUserTokenRepository _userTokenRepository;
         private readonly AppSetting _appSetting;
 
         public GenerateTokenCommandHandler(UserManager<User> userManager,
+            IUserTokenRepository userTokenRepository,
             AppSetting appSetting)
         {
             _userManager = userManager;
+            _userTokenRepository = userTokenRepository;
             _appSetting = appSetting;
         }
 
@@ -43,6 +49,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             }
 
             var userRoles = await _userManager.GetRolesAsync(user);
+            var jti = Guid.NewGuid().ToString();
             var authClaims = new List<Claim>
             {
                 new Claim(JwtRegisteredClaimNames.Name, user.UserName ?? string.Empty),
@@ -50,7 +57,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                 new Claim(JwtRegisteredClaimNames.Email, user.Email ?? string.Empty),
                 new Claim(JwtRegisteredClaimNames.NameId, user.Id ?? string.Empty),
                 new Claim(JwtRegisteredClaimNames.Sub, _appSetting.Jwt?.Subject ?? string.Empty),
-                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                new Claim(JwtRegisteredClaimNames.Jti, jti),
             };
 
             foreach (var userRole in userRoles)
@@ -71,10 +78,16 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             var accessToken = new JwtSecurityTokenHandler().WriteToken(token);
             var refreshToken = TokenHelper.GenerateRefreshToken();
 
-            user.RefreshToken = refreshToken;
-            user.RefreshTokenExpiryTime = DateTime.Now.AddDays(_appSetting.Jwt?.RefreshTokenValidityInDays ?? default);
+            await _userTokenRepository.AddAsync(new UserToken
+            {
+                Name = jti,
+                Value = accessToken,
+                RefreshToken = refreshToken,
+                LoginProvider = JwtBearerDefaults.AuthenticationScheme,
+                UserId = user.Id ?? string.Empty,
+                RefreshTokenExpiryTime = DateTime.Now.AddDays(_appSetting.Jwt?.RefreshTokenValidityInDays ?? default)
+            });
 
-            await _userManager.UpdateAsync(user);
             var tokenLogin = new TokenModel
             {
                 AccessToken = accessToken,
