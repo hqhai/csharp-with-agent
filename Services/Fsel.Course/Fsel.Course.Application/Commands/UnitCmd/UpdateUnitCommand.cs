@@ -73,9 +73,7 @@ namespace Fsel.Course.Application.Commands.UnitCmd
 
             if (_lessonRepository.IsIdsInValid(request.LessonIds))
             {
-                methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                methodResult.AddError(
-                    nameof(EnumLessonErrorCode.LS03V));
+                methodResult.AddErrorBadRequest(nameof(EnumLessonErrorCode.LS03V), nameof(request.LessonIds), request.LessonIds);
 
                 return methodResult;
             }

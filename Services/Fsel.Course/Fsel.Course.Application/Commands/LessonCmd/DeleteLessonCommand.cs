@@ -91,7 +91,7 @@ namespace Fsel.Course.Application.Commands.LessonCmd
             {
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 methodResult.AddError(
-                    nameof(EnumeLessonHomeWordErrorCode.EHW03V));
+                    nameof(EnumeLessonHomeWorkErrorCode.EHW03V));
                 return methodResult;
             }
 

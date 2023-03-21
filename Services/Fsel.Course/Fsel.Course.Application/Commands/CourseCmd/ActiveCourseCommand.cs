@@ -40,9 +40,7 @@ namespace Fsel.Course.Application.Commands.CourseCmd
 
             if (course == null)
             {
-                methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.C01V), nameof(request.Id), request.Id);
-                methodResult.Result = false;
                 return methodResult;
             }
 
