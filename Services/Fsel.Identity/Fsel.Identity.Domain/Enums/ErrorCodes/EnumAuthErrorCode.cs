@@ -30,24 +30,14 @@ namespace Fsel.Identity.Domain.Enums.ErrorCodes
         OldPasswordIncorrect,
 
         /// <summary>
-        /// UserName cannot empty
-        /// </summary>
-        AU06V,
-
-        /// <summary>
-        /// PhoneNumber does not exist
-        /// </summary>
-        AU07V,
-
-        /// <summary>
         /// Duplicate email, please select another email
         /// </summary>
-        AU08V,
+        DuplicateEmail,
 
         /// <summary>
         /// Duplicate PhoneNumber, please select another PhoneNumber
         /// </summary>
-        AU09V,
+        DuplicatePhoneNumber,
 
         /// <summary>
         /// Email verified fail
@@ -97,36 +87,31 @@ namespace Fsel.Identity.Domain.Enums.ErrorCodes
         /// <summary>
         /// User Failed to Create
         /// </summary>
-        AU10ER,
+        UserFailToCreate,
 
         /// <summary>
         /// Send Auth erorr
         /// </summary>
-        AU11ER,
+        SendAuthErorr,
 
         /// <summary>
         /// User was active
         /// </summary>
-        AU12ER,
+        UserActive,
 
         /// <summary>
-        /// Not Send Email
+        /// Error Sending Email
         /// </summary>
-        AU13ER,
-
-        /// <summary>
-        /// Account already exists
-        /// </summary>
-        AU14ER,
+        ErrorSendEmail,
 
         /// <summary>
         /// Invalid OTP, please try again
         /// </summary>
-        AU15ER,
+        InvalidOTP,
 
         /// <summary>
         /// OTP has expired, please click on the Resend code button below to receive a new OTP
         /// </summary>
-        AU16ER
+        OTPExpired
     }
 }

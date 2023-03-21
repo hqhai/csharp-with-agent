@@ -48,7 +48,7 @@ namespace Fsel.Identity.Application.Commands.ParentCmd
             {
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 methodResult.AddError(
-                    nameof(EnumAuthErrorCode.AU05V),
+                    nameof(EnumAuthErrorCode.OldPasswordIncorrect),
                     new[] { MethodHelper.GenerateErrorResult(nameof(request.UserName), request.UserName) });
                 return methodResult;
             }
