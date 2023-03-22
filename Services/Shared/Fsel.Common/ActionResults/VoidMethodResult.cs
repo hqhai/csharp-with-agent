@@ -88,13 +88,13 @@ namespace Fsel.Common.ActionResults
             });
         }
 
-        public void AddError(int statusCode, string? fieldName, string? errorCode, params object[]? errorValues)
+        public void AddError(int statusCode, string? errorCode, string? fieldName, params object[]? errorValues)
         {
             StatusCode = statusCode;
             AddError(errorCode, fieldName, errorValues);
         }
 
-        public void AddError(int statusCode, string? fieldName, string? errorCode, object? errorValue)
+        public void AddError(int statusCode, string? errorCode, string? fieldName, object? errorValue)
         {
             if (errorValue != null)
             {
@@ -111,20 +111,20 @@ namespace Fsel.Common.ActionResults
 
         public void AddErrorBadRequest(string? errorCode, string? fieldName = null, params object[]? errorValues)
         {
-            AddError(StatusCodes.Status400BadRequest, errorCode, fieldName, errorValues);
+            AddError(StatusCodes.Status200OK, errorCode, fieldName, errorValues);
         }
 
         public void AddErrorBadRequest(string? errorCode, string? fieldName, object? errorValue)
         {
             if (errorValue != null)
             {
-                AddError(StatusCodes.Status400BadRequest, errorCode, fieldName, errorValue);
+                AddError(StatusCodes.Status200OK, errorCode, fieldName, errorValue);
             }
         }
 
         public void AddErrorBadRequest(string? errorCode, params Error[]? errors)
         {
-            AddError(StatusCodes.Status400BadRequest, errorCode, errors);
+            AddError(StatusCodes.Status200OK, errorCode, errors);
         }
 
         public virtual IActionResult GetActionResult()

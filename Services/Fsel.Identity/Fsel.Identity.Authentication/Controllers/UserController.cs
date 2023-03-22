@@ -26,7 +26,7 @@ namespace Fsel.Identity.Userentication.Controllers
         /// </summary>
         [HttpPost("sign-up")]
         [ProducesResponseType(typeof(MethodResult<UserModel>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> SignUp([FromBody] SignUpCommand command)
         {
             MethodResult<UserModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
@@ -38,7 +38,7 @@ namespace Fsel.Identity.Userentication.Controllers
         /// </summary>
         [HttpGet("confirm-otp")]
         [ProducesResponseType(typeof(MethodResult<TokenModel>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> ConfirmOTP(string code, string? email)
         {
             ComfirmOTPCommand command = new ComfirmOTPCommand
@@ -56,7 +56,7 @@ namespace Fsel.Identity.Userentication.Controllers
         /// </summary>
         [HttpPost("forgot-password")]
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordCommand command)
         {
             MethodResult<bool> commandResult = await _mediator.Send(command).ConfigureAwait(false);
@@ -68,7 +68,7 @@ namespace Fsel.Identity.Userentication.Controllers
         /// </summary>
         [HttpPost("reset-password")]
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordCommand command)
         {
             MethodResult<bool> commandResult = await _mediator.Send(command).ConfigureAwait(false);
