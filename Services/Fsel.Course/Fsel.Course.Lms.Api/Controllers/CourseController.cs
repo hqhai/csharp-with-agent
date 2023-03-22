@@ -5,6 +5,7 @@ using Fsel.Common.Enums;
 using Fsel.Common.Helpers;
 using Fsel.Core.Base.BaseModels;
 using Fsel.Course.Domain.Models.EntityModels;
+using Fsel.Course.Domain.Models.QueryModels.Courses;
 using Fsel.Course.Lms.Application.Queries;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -26,15 +27,15 @@ namespace Fsel.Course.Lms.Api.Controllers
         }
 
         /// <summary>
-        /// Search Course
+        /// Get List unit by courseId
         /// </summary>
-        [HttpGet]
-        [ProducesResponseType(typeof(MethodResult<PagingItemsModel<CourseSearchModel>>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.BadRequest)]
-        public async Task<IActionResult> Search([FromQuery] SearchCourseQuery query)
+        [HttpGet("{id}")]
+        [ProducesResponseType(typeof(MethodResult<CourseModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> Get([FromRoute] Guid id)
         {
-            MethodResult<PagingItemsModel<CourseSearchLMSModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
-            return queryResult.GetActionResult();
+            MethodResult<CourseModel> commandResult = await _mediator.Send(new GetUnitByCourseQuery { Id = id }).ConfigureAwait(false);
+            return commandResult.GetActionResult();
         }
     }
 }

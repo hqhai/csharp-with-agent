@@ -6,6 +6,7 @@ namespace Fsel.Course.Infrastructure.Maps
     using Fsel.Core.Extensions;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Models.CommandModels.CourseUnitMockTests;
+    using Fsel.Course.Domain.Models.EntityModels;
 
     public class CourseUnitMockTestProfile : Profile
     {
@@ -13,6 +14,7 @@ namespace Fsel.Course.Infrastructure.Maps
         {
             CreateMap<CreateCourseUnitMockTestCommandModel, CourseUnitMockTest>().IgnoreAllNonExisting();
             CreateMap<UpdateCourseUnitMockTestCommandModel, CourseUnitMockTest>().IgnoreAllNonExisting();
+            CreateMap<CourseUnitMockTest, CourseUnitMockTestModel>().IgnoreAllNonExisting();
         }
     }
 }

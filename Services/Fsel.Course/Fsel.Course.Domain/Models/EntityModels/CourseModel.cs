@@ -19,7 +19,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
 
         public Guid? TeacherId { get; set; }
 
-        public ICollection<CourseUnitMockTest>? CourseUnitMockTests { get; set; }
-        public ICollection<CourseTeacher>? CourseTeachers { get; set; }
+        public IList<CourseUnitMockTestModel>? CourseUnitMockTests { get; set; }
+        public IList<CourseTeacherModel>? CourseTeachers { get; set; }
     }
 }
