@@ -1,7 +1,8 @@
+// Copyright (c) Atlantic. All rights reserved.
+
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using AutoMapper;
 using Fsel.Common.ActionResults;
 using Fsel.Common.Helpers;
 using Fsel.Identity.Domain.Entities;
@@ -39,8 +40,8 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
 
         public async Task<MethodResult<TokenModel>> Handle(GenerateTokenCommand request, CancellationToken cancellationToken)
         {
+            ArgumentNullException.ThrowIfNull(request);
             MethodResult<TokenModel> methodResult = new MethodResult<TokenModel>();
-
             var user = await _userManager.FindByIdAsync(request.Id ?? string.Empty);
             if (user == null)
             {
@@ -98,6 +99,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             };
 
             methodResult.Result = tokenLogin;
+            methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }
     }

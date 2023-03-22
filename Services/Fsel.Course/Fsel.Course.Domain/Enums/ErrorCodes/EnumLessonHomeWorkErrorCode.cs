@@ -1,10 +1,10 @@
 namespace Fsel.Course.Domain.Enums.ErrorCodes
 {
-    public enum EnumeLessonHomeWordErrorCode
+    public enum EnumeLessonHomeWorkErrorCode
     {
         /// <summary>
-        /// Lesson HomeWord null
+        /// Lesson HomeWork null
         /// </summary>
-        EHW03V
+        LessonHomeWorkNull
     }
 }

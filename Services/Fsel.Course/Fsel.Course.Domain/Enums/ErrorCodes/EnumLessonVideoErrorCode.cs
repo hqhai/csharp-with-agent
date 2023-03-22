@@ -5,6 +5,6 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         /// <summary>
         /// Lesson Video not is correct
         /// </summary>
-        LV03V
+        LessonVideoNotCorrect
     }
 }

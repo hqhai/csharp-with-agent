@@ -1,3 +1,5 @@
+// Copyright (c) Atlantic. All rights reserved.
+
 namespace Fsel.Identity.Domain.Enums.ErrorCodes
 {
     public enum EnumAuthErrorCode
@@ -5,76 +7,111 @@ namespace Fsel.Identity.Domain.Enums.ErrorCodes
         /// <summary>
         /// Old Password cannot empty
         /// </summary>
-        AU01V,
+        OldPassWordNotEmpty,
 
         /// <summary>
         /// Password cannot empty
         /// </summary>
-        AU02V,
+        PasswordNotEmpty,
 
         /// <summary>
         /// Confirm Password cannot empty
         /// </summary>
-        AU03V,
+        ConfirmPasswordNotEmpty,
 
         /// <summary>
         /// Email does not exist
         /// </summary>
-        AU04V,
+        EmailNotExist,
 
         /// <summary>
         /// Old password is incorrect
         /// </summary>
-        AU05V,
+        OldPasswordIncorrect,
+
+        /// <summary>
+        /// Duplicate email, please select another email
+        /// </summary>
+        DuplicateEmail,
+
+        /// <summary>
+        /// Duplicate PhoneNumber, please select another PhoneNumber
+        /// </summary>
+        DuplicatePhoneNumber,
 
         /// <summary>
         /// Email verified fail
         /// </summary>
-        AU01ER,
+        EmailVerifiedFail,
 
         /// <summary>
         /// Error while generating reset token
         /// </summary>
-        AU02ER,
+        ErrorResetToken,
 
         /// <summary>
         /// Error while generating reset Password
         /// </summary>
-        AU03ER,
+        ErrorResetPassword,
 
         /// <summary>
         /// Username and Password cannot empty
         /// </summary>
-        AU04ER,
+        UserNameAndPasswordNotEmpty,
 
         /// <summary>
         /// Username and Password  is incorrect
         /// </summary>
-        AU05ER,
+        UserNameAndPasswordIncorrect,
 
         /// <summary>
         /// Invalid token
         /// </summary>
-        AU06ER,
+        InvalidToken,
 
         /// <summary>
         /// Access token has not yet expired
         /// </summary>
-        AU07ER,
-
-        /// <summary>
-        /// Refresh token does not exist
-        /// </summary>
-        AU08ER,
+        AccessTokenNotYetExpired,
 
         /// <summary>
         /// Refresh token has expired
         /// </summary>
-        AU09ER,
+        RefreshTokenExpired,
 
         /// <summary>
         /// Sign up fail
         /// </summary>
-        AU10ER,
+        SignUpFail,
+
+        /// <summary>
+        /// User Failed to Create
+        /// </summary>
+        UserFailToCreate,
+
+        /// <summary>
+        /// Send Auth erorr
+        /// </summary>
+        SendAuthErorr,
+
+        /// <summary>
+        /// User was active
+        /// </summary>
+        UserActive,
+
+        /// <summary>
+        /// Error Sending Email
+        /// </summary>
+        ErrorSendEmail,
+
+        /// <summary>
+        /// Invalid OTP, please try again
+        /// </summary>
+        InvalidOTP,
+
+        /// <summary>
+        /// OTP has expired, please click on the Resend code button below to receive a new OTP
+        /// </summary>
+        OTPExpired
     }
 }

@@ -1,3 +1,5 @@
+// Copyright (c) Atlantic. All rights reserved.
+
 using System.Security.Cryptography;
 
 namespace Fsel.Common.Helpers
@@ -23,6 +25,14 @@ namespace Fsel.Common.Helpers
         {
             var seed = Next();
             return new Random(seed).Next(minimumValue, maximumValue);
+        }
+
+        public string Secretstrings()
+        {
+            var randomBytes = new byte[32];
+            _rngProvider.GetBytes(randomBytes);
+            string secret = BitConverter.ToString(randomBytes).Replace("-", "");
+            return secret;
         }
     }
 }

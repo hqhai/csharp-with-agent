@@ -6,7 +6,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
     using Fsel.Common.Enums;
     using Fsel.Core.Base.BaseModels;
 
-    public class VideoSearchModel : BaseEntityModel
+    public class VideoSearchModel : BaseModel
     {
         public string? Name { get; set; }
 

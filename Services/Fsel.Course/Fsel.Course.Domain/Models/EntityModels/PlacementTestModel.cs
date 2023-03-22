@@ -3,7 +3,7 @@ using Fsel.Core.Base.BaseModels;
 
 namespace Fsel.Course.Domain.Models.EntityModels
 {
-    public class PlacementTestModel : BaseEntityModel
+    public class PlacementTestModel : BaseModel
     {
         public string? Name { get; set; }
 

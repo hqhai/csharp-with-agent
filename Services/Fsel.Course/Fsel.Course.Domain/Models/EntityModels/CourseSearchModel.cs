@@ -12,7 +12,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums;
 
-    public class CourseSearchModel : BaseEntityModel
+    public class CourseSearchModel : BaseModel
     {
         public string? Name { get; set; }
 

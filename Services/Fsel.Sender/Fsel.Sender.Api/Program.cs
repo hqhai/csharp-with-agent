@@ -3,6 +3,9 @@ using Fsel.Sender.Application.Services;
 using Fsel.Sender.Domain.ValueSettings;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
+using Azure;
+using Azure.Communication;
+using Azure.Communication.Sms;
 
 var builder = WebApplication.CreateBuilder(args);
 

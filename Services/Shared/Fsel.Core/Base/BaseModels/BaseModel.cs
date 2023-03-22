@@ -1,6 +1,6 @@
-﻿namespace Fsel.Core.Base.BaseModels
+namespace Fsel.Core.Base.BaseModels
 {
-    public class BaseEntityModel
+    public class BaseModel
     {
         public Guid Id { get; set; }
 

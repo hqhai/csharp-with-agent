@@ -36,10 +36,9 @@ namespace Fsel.Course.Application.Commands.VideoCmd
                                                .FirstOrDefaultAsync(x => x.Id == request.Id);
                 if (video == null)
                 {
-                    methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                    methodResult.AddError(
-                        nameof(EnumVideoErrorCode.VD01V),
-                        new[] { MethodHelper.GenerateErrorResult(nameof(request.Id), request.Id) });
+                    methodResult.AddErrorBadRequest(
+                        nameof(EnumVideoErrorCode.VideoNotExist),
+                        nameof(request.Id), request.Id);
                     return methodResult;
                 }
 
@@ -47,10 +46,9 @@ namespace Fsel.Course.Application.Commands.VideoCmd
 
                 if (isVideoUsed)
                 {
-                    methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                    methodResult.AddError(
-                        nameof(EnumVideoErrorCode.VD02V),
-                        new[] { MethodHelper.GenerateErrorResult(nameof(request.Id), request.Id) });
+                    methodResult.AddErrorBadRequest(
+                        nameof(EnumVideoErrorCode.VideoUsed),
+                        nameof(request.Id), request.Id);
                     return methodResult;
                 }
 

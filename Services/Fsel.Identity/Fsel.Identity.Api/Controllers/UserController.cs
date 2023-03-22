@@ -27,7 +27,7 @@ namespace Fsel.Identity.Api.Controllers
         /// </summary>
         [HttpPost("change-password")]
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         [Authorize(Roles = nameof(EnumRole.CSO))]
         [Authorize(Roles = nameof(EnumRole.Teacher))]
         [Authorize(Roles = nameof(EnumRole.Parent))]

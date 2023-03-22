@@ -7,11 +7,6 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         /// <summary>
         /// Course Unit MockTest null
         /// </summary>
-        CUM01V,
-
-        /// <summary>
-        /// Number of course >1
-        /// </summary>
-        CUM01C
+        TestNull,
     }
 }

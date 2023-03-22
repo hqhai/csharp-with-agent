@@ -28,7 +28,7 @@ namespace Fsel.Identity.Api.Controllers
         /// </summary>
         [HttpPost("get-by-ids")]
         [ProducesResponseType(typeof(MethodResult<IList<TeacherModel>>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetByIds([FromBody] GetTeacherByIdsQuery query)
         {
             MethodResult<IList<TeacherModel>> commandResult = await _mediator.Send(query).ConfigureAwait(false);
