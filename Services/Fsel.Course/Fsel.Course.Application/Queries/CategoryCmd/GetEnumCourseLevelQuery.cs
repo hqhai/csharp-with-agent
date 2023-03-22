@@ -1,0 +1,32 @@
+// Copyright (c) Atlantic. All rights reserved.
+
+using Fsel.Common.ActionResults;
+using Fsel.Common.Enums;
+using Fsel.Common.Helpers;
+using MediatR;
+using Microsoft.AspNetCore.Http;
+
+namespace Fsel.Course.Application.Queries.CategoryCmd
+{
+    public class GetEnumCourseLevelQuery : IRequest<MethodResult<IList<EnumCourseLevel>>>
+    {
+        public EnumCourseType? CourseType { get; set; }
+    }
+
+    public class GetEnumLevelQueryHandler : IRequestHandler<GetEnumCourseLevelQuery, MethodResult<IList<EnumCourseLevel>>>
+    {
+        public GetEnumLevelQueryHandler()
+        {
+        }
+
+        public async Task<MethodResult<IList<EnumCourseLevel>>> Handle(GetEnumCourseLevelQuery request, CancellationToken cancellationToken)
+        {
+            ArgumentNullException.ThrowIfNull(request);
+            MethodResult<IList<EnumCourseLevel>> methodResult = new MethodResult<IList<EnumCourseLevel>>();
+
+            methodResult.Result = request.CourseType.GetEnumCourseLevels();
+            methodResult.StatusCode = StatusCodes.Status200OK;
+            return methodResult;
+        }
+    }
+}

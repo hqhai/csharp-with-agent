@@ -25,7 +25,7 @@ namespace Fsel.Identity.Api.Controllers
         /// <summary>
         /// create student
         /// </summary>
-        [HttpPost("createstudent")]
+        [HttpPost("create-student")]
         [ProducesResponseType(typeof(MethodResult<UserModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.BadRequest)]
         public async Task<IActionResult> CreateStudent([FromBody] CreateStudentByParentCommand command)

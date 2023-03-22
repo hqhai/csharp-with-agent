@@ -11,12 +11,6 @@ namespace Fsel.Course.Infrastructure.Configs
     {
         public void Configure(EntityTypeBuilder<Unit> builder)
         {
-            builder.Property(e => e.Type)
-                .HasMaxLength(100)
-                .HasConversion(
-                    v => v.ToString(),
-                    v => v.EnumParse<EnumUnitType>());
-
             builder.Property(e => e.CourseLevel)
                 .HasMaxLength(100)
                 .HasConversion(

@@ -1,3 +1,4 @@
+using System;
 using System.Reflection;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -142,6 +143,16 @@ namespace Fsel.Common.Helpers
                 return (TEnum)result;
             }
             return default;
+        }
+
+        public static IList<TEnum> EnumToList<TEnum>() where TEnum : Enum
+        {
+            return Enum.GetValues(typeof(TEnum)).Cast<TEnum>().ToList();
+        }
+
+        public static IList<string> EnumToListStr<TEnum>() where TEnum : Enum
+        {
+            return EnumToList<TEnum>().Select(x => x.ToString()).ToList();
         }
     }
 }

@@ -57,7 +57,6 @@ namespace Fsel.Course.Application.Queries.UnitQuery
                                 Name = unit.Name,
                                 DisplayName = unit.DisplayName,
                                 IsActive = !unit.CourseUnitMockTests.Any(),
-                                Type = unit.Type,
                                 CourseLevel = unit.CourseLevel,
                                 CreatedDate = unit.CreatedDate,
                                 CreatedUserId = unit.CreatedUserId,
