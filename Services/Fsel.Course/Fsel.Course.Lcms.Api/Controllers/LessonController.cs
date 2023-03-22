@@ -32,7 +32,7 @@ namespace Fsel.Course.Lcms.Api.Controllers
         /// </summary>
         [HttpGet]
         [ProducesResponseType(typeof(MethodResult<PagingItemsModel<LessonSearchModel>>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> Search([FromQuery] SearchLessonQuery query)
         {
             MethodResult<PagingItemsModel<LessonSearchModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
@@ -44,7 +44,7 @@ namespace Fsel.Course.Lcms.Api.Controllers
         /// </summary>
         [HttpGet("{id}")]
         [ProducesResponseType(typeof(MethodResult<LessonModel>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> Get([FromRoute] Guid id)
         {
             MethodResult<LessonModel> queryResult = await _mediator.Send(new GetLessonQuery { Id = id }).ConfigureAwait(false);
@@ -56,7 +56,7 @@ namespace Fsel.Course.Lcms.Api.Controllers
         /// </summary>
         [HttpPost]
         [ProducesResponseType(typeof(MethodResult<LessonModel>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> Create([FromBody] CreateLessonCommand command)
         {
             MethodResult<LessonModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
@@ -68,7 +68,7 @@ namespace Fsel.Course.Lcms.Api.Controllers
         /// </summary>
         [HttpPut("{id}")]
         [ProducesResponseType(typeof(MethodResult<LessonModel>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> Update([FromRoute] Guid id, [FromBody] UpdateLessonCommand command)
         {
             command.Id = id;
@@ -81,7 +81,7 @@ namespace Fsel.Course.Lcms.Api.Controllers
         /// </summary>
         [HttpDelete("{id}")]
         [ProducesResponseType(typeof(MethodResult<LessonModel>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> Delete([FromRoute] Guid id)
         {
             MethodResult<bool> commandResult = await _mediator.Send(new DeleteLessonCommand { Id = id }).ConfigureAwait(false);

@@ -24,7 +24,7 @@ namespace Fsel.Course.Lms.Api.Controllers
         /// </summary>
         [HttpGet]
         [ProducesResponseType(typeof(MethodResult<string>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public IActionResult Search()
         {
             MethodResult<string> queryResult = new MethodResult<string> { Result = nameof(Search) };

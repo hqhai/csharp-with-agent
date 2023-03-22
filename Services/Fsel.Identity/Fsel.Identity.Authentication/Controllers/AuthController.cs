@@ -26,7 +26,7 @@ namespace Fsel.Identity.Authentication.Controllers
         /// </summary>
         [HttpPost("login")]
         [ProducesResponseType(typeof(MethodResult<TokenModel>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> Login([FromBody] LoginCommand command)
         {
             MethodResult<TokenModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
@@ -38,7 +38,7 @@ namespace Fsel.Identity.Authentication.Controllers
         /// </summary>
         [HttpPost("refresh-token")]
         [ProducesResponseType(typeof(MethodResult<TokenModel>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenCommand command)
         {
             MethodResult<TokenModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
