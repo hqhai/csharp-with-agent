@@ -10,6 +10,7 @@ namespace Fsel.Interaction.Application.Commands.CustomerSurveyCmd
     using Fsel.Interaction.Domain.Models.EntityModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
+    using Newtonsoft.Json;
 
     public class CreateCustomerSurveyCommand : CreateCustomerSurveyCommandModel, IRequest<MethodResult<IList<CustomerSurveyModel>>>
     {
@@ -34,6 +35,27 @@ namespace Fsel.Interaction.Application.Commands.CustomerSurveyCmd
             MethodResult<IList<CustomerSurveyModel>> methodResult = new MethodResult<IList<CustomerSurveyModel>>();
 
             List<CustomerSurvey> customerSurveys = new List<CustomerSurvey>();
+
+            //Chuyển đổi json
+            var jsonObject = JsonConvert.DeserializeObject<Dictionary<string, object>>(request.Answers);
+            var surveys = (List<object>)jsonObject["surveys"];
+            foreach (var survey in surveys)
+            {
+                var surveyDict = (Dictionary<string, object>)survey;
+                var answers = (List<object>)surveyDict["answers"];
+                foreach (var answer in answers)
+                {
+                    var answerList = (List<object>)answer;
+                    foreach (var item in answerList)
+                    {
+                        var itemDict = (Dictionary<string, object>)item;
+                        var id = (string)itemDict["Id"];
+                        var content = (string)itemDict["Content"];
+                        Console.WriteLine($"Id: {id}, Content: {content}");
+                    }
+                }
+            }
+
             request.Answers.ForEach(x =>
             {
                 CustomerSurvey customerSurvey = new();
