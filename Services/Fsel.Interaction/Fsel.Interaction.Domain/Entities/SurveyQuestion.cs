@@ -13,10 +13,18 @@ namespace Fsel.Interaction.Domain.Entities
         [MaxLength(250, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? Question { get; set; }
 
+        [MaxLength(1000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
+        public string? Description { get; set; }
+
+        [MaxLength(500, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
+        public string? Icon { get; set; }
+
+        public int DisplayOrder { get; set; }
+
         public EnumSurveyQuestion Type { get; set; }
 
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
-        [MaxLength(250, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
+        [MaxLength(1000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? Answers { get; set; }
 
         public IList<CustomerSurvey> CustomerSurveys { get; set; } = new List<CustomerSurvey>();

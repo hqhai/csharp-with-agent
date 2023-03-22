@@ -4,7 +4,6 @@ namespace Fsel.Common.Enums
 {
     public enum EnumSurveyQuestion
     {
-        RegisterAccount,
         FselSource,
         ChooseDirection,
         ChooseLanguage,
