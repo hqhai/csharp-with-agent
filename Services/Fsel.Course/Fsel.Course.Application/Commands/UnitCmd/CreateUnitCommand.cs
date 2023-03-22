@@ -51,19 +51,15 @@ namespace Fsel.Course.Application.Commands.UnitCmd
 
             if (request?.LessonIds == null)
             {
-                methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                methodResult.AddError(
-                    nameof(EnumUnitErrorCode.U03V),
-                    new[] { MethodHelper.GenerateErrorResult(nameof(request.LessonIds), request?.LessonIds) });
+                methodResult.AddErrorBadRequest(nameof(EnumUnitErrorCode.UnitIdNotCorrect),
+                                                nameof(request.LessonIds), request?.LessonIds);
                 return methodResult;
             }
 
             if (_lessonRepository.IsIdsInValid(request.LessonIds))
             {
-                methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                methodResult.AddError(
-                    nameof(EnumLessonErrorCode.LS03V));
-
+                methodResult.AddErrorBadRequest(nameof(EnumLessonErrorCode.LessonNotCorrect),
+                                                nameof(request.LessonIds), request.LessonIds);
                 return methodResult;
             }
 
@@ -72,7 +68,7 @@ namespace Fsel.Course.Application.Commands.UnitCmd
             {
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 methodResult.AddError(
-                nameof(EnumMockTestErrorCode.MT04V));
+                nameof(EnumMockTestErrorCode.MockTestInValid));
                 return methodResult;
             }
 

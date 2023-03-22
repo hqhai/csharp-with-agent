@@ -27,8 +27,9 @@ namespace Fsel.Sender.Application.Services
                 email.From = new MailAddress(_appSetting?.Smtp?.From ?? string.Empty);
                 email.Subject = message.Subject;
                 if (message.ToEmails == null)
+                {
                     return;
-
+                }
                 foreach (var item in message.ToEmails)
                 {
                     email.To.Add(new MailAddress(item));

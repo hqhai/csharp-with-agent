@@ -1,4 +1,5 @@
-using AutoMapper;
+// Copyright (c) Atlantic. All rights reserved.
+
 using Fsel.Common.ActionResults;
 using Fsel.Common.Helpers;
 using Fsel.Identity.Application.Services;
@@ -28,15 +29,14 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
 
         public async Task<MethodResult<bool>> Handle(ForgotPasswordCommand request, CancellationToken cancellationToken)
         {
+            ArgumentNullException.ThrowIfNull(request);
             MethodResult<bool> methodResult = new MethodResult<bool>();
-
             var user = await _userManager.FindByEmailAsync(request.Email ?? string.Empty);
             if (user == null)
             {
-                methodResult.StatusCode = StatusCodes.Status404NotFound;
-                methodResult.AddError(
-                    nameof(EnumAuthErrorCode.AU04V),
-                    new[] { MethodHelper.GenerateErrorResult(nameof(request.Email), request.Email) });
+                methodResult.AddErrorBadRequest(
+                    nameof(EnumAuthErrorCode.EmailNotExist),
+                    nameof(request.Email), request.Email);
                 return methodResult;
             }
 
@@ -46,14 +46,14 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             if (string.IsNullOrEmpty(resetToken))
             {
                 methodResult.StatusCode = StatusCodes.Status500InternalServerError;
-                methodResult.AddError(nameof(EnumAuthErrorCode.AU02ER));
+                methodResult.AddError(nameof(EnumAuthErrorCode.ErrorResetToken));
                 return methodResult;
             }
             var result = await _userManager.ResetPasswordAsync(user, resetToken, newPassword);
             if (!result.Succeeded)
             {
                 methodResult.StatusCode = StatusCodes.Status500InternalServerError;
-                methodResult.AddError(nameof(EnumAuthErrorCode.AU03ER));
+                methodResult.AddError(nameof(EnumAuthErrorCode.ErrorResetPassword));
                 return methodResult;
             }
 
@@ -64,7 +64,15 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                 ToEmails = new List<string> { $"{request.Email}" }
             };
 
-            var IsSendMail = await _senderService.SendEmailAsync(sendCommandModel);
+            var isSendMail = await _senderService.SendEmailAsync(sendCommandModel);
+
+            if (isSendMail.IsSuccessStatusCode)
+            {
+                methodResult.StatusCode = StatusCodes.Status500InternalServerError;
+                methodResult.AddError(nameof(EnumAuthErrorCode.ErrorSendEmail));
+                return methodResult;
+            }
+
             methodResult.Result = true;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;

@@ -60,25 +60,25 @@ namespace Fsel.Course.Application.Commands.LessonCmd
 
             if (request.HomeWorkIds == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumHomeWorkErrorCode.HW03V), nameof(request.HomeWorkIds));
+                methodResult.AddErrorBadRequest(nameof(EnumHomeWorkErrorCode.HomeWorkNull), nameof(request.HomeWorkIds));
                 return methodResult;
             }
 
             if (request.ExtraPracticeIds == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumExtraPractiveErrorCode.EP03V), nameof(request.ExtraPracticeIds));
+                methodResult.AddErrorBadRequest(nameof(EnumExtraPractiveErrorCode.ExtraPractiveNull), nameof(request.ExtraPracticeIds));
                 return methodResult;
             }
 
             if (request.VideoIds == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumVideoErrorCode.VD03V), nameof(request.VideoIds));
+                methodResult.AddErrorBadRequest(nameof(EnumVideoErrorCode.VideoNotCorrect), nameof(request.VideoIds));
                 return methodResult;
             }
 
             if (request.ClassForum == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumClassForumErrorCode.CF03V), nameof(request.ClassForum));
+                methodResult.AddErrorBadRequest(nameof(EnumClassForumErrorCode.ClassForumIsNotCorrect), nameof(request.ClassForum));
                 return methodResult;
             }
 
@@ -87,19 +87,22 @@ namespace Fsel.Course.Application.Commands.LessonCmd
 
             if (_homeWorkRepository.IsIdsInValid(request.HomeWorkIds))
             {
-                methodResult.AddErrorBadRequest(nameof(EnumHomeWorkErrorCode.HW03V), nameof(request.HomeWorkIds), request.HomeWorkIds);
+                methodResult.AddErrorBadRequest(nameof(EnumHomeWorkErrorCode.HomeWorkNull),
+                                                nameof(request.HomeWorkIds), request.HomeWorkIds);
                 return methodResult;
             }
 
             if (_extraPracticeRepository.IsIdsInValid(request.ExtraPracticeIds))
             {
-                methodResult.AddErrorBadRequest(nameof(EnumExtraPractiveErrorCode.EP03V), nameof(request.ExtraPracticeIds), request.ExtraPracticeIds);
+                methodResult.AddErrorBadRequest(nameof(EnumExtraPractiveErrorCode.ExtraPractiveNull),
+                                                nameof(request.ExtraPracticeIds), request.ExtraPracticeIds);
                 return methodResult;
             }
 
             if (_videoRepository.IsIdsInValid(request.VideoIds))
             {
-                methodResult.AddErrorBadRequest(nameof(EnumVideoErrorCode.VD03V), nameof(request.VideoIds), request.VideoIds);
+                methodResult.AddErrorBadRequest(nameof(EnumVideoErrorCode.VideoNotCorrect),
+                                                nameof(request.VideoIds), request.VideoIds);
                 return methodResult;
             }
 

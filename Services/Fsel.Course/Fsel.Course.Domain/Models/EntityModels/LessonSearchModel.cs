@@ -7,7 +7,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
     using Fsel.Core.Base.BaseModels;
     using Fsel.Course.Domain.Enums;
 
-    public class LessonSearchModel : BaseEntityModel
+    public class LessonSearchModel : BaseModel
     {
         public string? Name { get; set; }
         public Guid? TeacherId { get; set; }

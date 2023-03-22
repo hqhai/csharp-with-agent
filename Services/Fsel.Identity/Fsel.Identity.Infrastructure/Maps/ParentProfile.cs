@@ -13,7 +13,6 @@ namespace Fsel.Identity.Infrastructure.Maps
         public ParentProfile()
         {
             CreateMap<Parent, ParentModel>().IgnoreAllNonExisting();
-            CreateMap<CreateParentCommandModel, Parent>().IgnoreAllNonExisting();
             CreateMap<UpdateParentCommandModel, Parent>().IgnoreAllNonExisting();
         }
     }

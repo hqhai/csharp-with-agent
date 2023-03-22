@@ -3,7 +3,7 @@ using Fsel.Course.Domain.Enums;
 
 namespace Fsel.Course.Domain.Models.EntityModels
 {
-    public class QuestionModel : BaseEntityModel
+    public class QuestionModel : BaseModel
     {
         public EnumQuestionType QuestionType { get; set; }
         public bool IsSave { get; set; }

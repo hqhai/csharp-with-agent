@@ -45,37 +45,30 @@ namespace Fsel.Course.Application.Commands.UnitCmd
                                     .FirstOrDefaultAsync(e => e.Id == request.Id, cancellationToken: cancellationToken);
             if (unit == null)
             {
-                methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                methodResult.AddError(
-                    nameof(EnumUnitErrorCode.U01V),
-                    new[] { MethodHelper.GenerateErrorResult(nameof(request.Id), request?.Id) });
+                methodResult.AddErrorBadRequest(nameof(EnumUnitErrorCode.UnitNotExist),
+                                                nameof(request.Id), request?.Id);
                 return methodResult;
             }
 
             var isUnitUsed = await _unitRepository.IsUnitUsed(request.Id);
             if (isUnitUsed)
             {
-                methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                methodResult.AddError(
-                    nameof(EnumUnitErrorCode.U02V),
-                    new[] { MethodHelper.GenerateErrorResult(nameof(request.Id), request.Id) });
+                methodResult.AddErrorBadRequest(nameof(EnumUnitErrorCode.UnitHaveUsed), nameof(request.Id), request.Id);
                 return methodResult;
             }
 
             if (request.LessonIds == null)
             {
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                methodResult.AddError(
-                    nameof(EnumUnitErrorCode.U03V),
-                    new[] { MethodHelper.GenerateErrorResult(nameof(request.LessonIds), request.LessonIds) });
+                methodResult.AddErrorBadRequest(
+                    nameof(EnumUnitErrorCode.UnitIdNotCorrect), nameof(request.LessonIds), request.LessonIds);
                 return methodResult;
             }
 
             if (_lessonRepository.IsIdsInValid(request.LessonIds))
             {
-                methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                methodResult.AddError(
-                    nameof(EnumLessonErrorCode.LS03V));
+                methodResult.AddErrorBadRequest(nameof(EnumLessonErrorCode.LessonNotCorrect),
+                                                nameof(request.LessonIds), request.LessonIds);
 
                 return methodResult;
             }
@@ -85,7 +78,7 @@ namespace Fsel.Course.Application.Commands.UnitCmd
             {
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 methodResult.AddError(
-                nameof(EnumMockTestErrorCode.MT04V));
+                nameof(EnumMockTestErrorCode.MockTestInValid));
                 return methodResult;
             }
 

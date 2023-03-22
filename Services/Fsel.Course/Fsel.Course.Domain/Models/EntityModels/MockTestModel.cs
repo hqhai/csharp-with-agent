@@ -8,7 +8,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums;
 
-    public class MockTestModel : BaseEntityModel
+    public class MockTestModel : BaseModel
     {
         public string? Name { get; set; }
 

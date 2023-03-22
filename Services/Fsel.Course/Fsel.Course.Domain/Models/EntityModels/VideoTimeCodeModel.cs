@@ -3,7 +3,7 @@ using Fsel.Course.Domain.Enums;
 
 namespace Fsel.Course.Domain.Models.EntityModels
 {
-    public class VideoTimeCodeModel : BaseEntityModel
+    public class VideoTimeCodeModel : BaseModel
     {
         public long DisplayTimeTicks { get; set; }
 
