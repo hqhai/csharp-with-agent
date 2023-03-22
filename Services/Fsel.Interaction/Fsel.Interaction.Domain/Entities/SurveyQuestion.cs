@@ -1,8 +1,10 @@
 // Copyright (c) Atlantic. All rights reserved.
 
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using Fsel.Common.Enums;
 using Fsel.Common.Enums.ErrorCodes;
+using Fsel.Common.Helpers;
 using Fsel.Core.Entities;
 
 namespace Fsel.Interaction.Domain.Entities
@@ -10,7 +12,7 @@ namespace Fsel.Interaction.Domain.Entities
     public class SurveyQuestion : Entity
     {
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
-        [MaxLength(250, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
+        [MaxLength(500, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? Question { get; set; }
 
         [MaxLength(1000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
@@ -25,7 +27,14 @@ namespace Fsel.Interaction.Domain.Entities
 
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         [MaxLength(1000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
-        public string? Answers { get; set; }
+        public string? AnswerStr { get; set; }
+
+        [NotMapped]
+        public object? Answers
+        {
+            get { return ConvertHelper.Deserialize<object>(AnswerStr); }
+            set { AnswerStr = ConvertHelper.Serialize(value); }
+        }
 
         public IList<CustomerSurvey> CustomerSurveys { get; set; } = new List<CustomerSurvey>();
     }

@@ -11,8 +11,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Entities\SurveyQuestionConfigs\Questions\" />
-    <Folder Include="Models\CommandModels\" />
     <Folder Include="Models\QueryModels\" />
   </ItemGroup>
 

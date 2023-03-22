@@ -9,6 +9,6 @@ namespace Fsel.Common.Enums
         ChooseLanguage,
         YourPosition,
         AgeGender,
-        ChooseSchedule
+        StudyTime
     }
 }

@@ -3,14 +3,23 @@
 namespace Fsel.Interaction.Domain.Entities
 {
     using System.ComponentModel.DataAnnotations;
+    using System.ComponentModel.DataAnnotations.Schema;
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Common.Helpers;
     using Fsel.Core.Entities;
 
     public class CustomerSurvey : Entity
     {
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         [MaxLength(250, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
-        public string? Answers { get; set; }
+        public string? AnswerStr { get; set; }
+
+        [NotMapped]
+        public object? Answers
+        {
+            get { return ConvertHelper.Deserialize<object>(AnswerStr); }
+            set { AnswerStr = ConvertHelper.Serialize(value); }
+        }
 
         public Guid UserId { get; set; }
         public SurveyQuestion? SurveyQuestion { get; set; }

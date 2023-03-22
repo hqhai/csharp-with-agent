@@ -5,6 +5,7 @@ namespace Fsel.Interaction.Infrastructure.Maps
     using AutoMapper;
     using Fsel.Core.Extensions;
     using Fsel.Interaction.Domain.Entities;
+    using Fsel.Interaction.Domain.Models.CommandModels.CustomerSurveys;
     using Fsel.Interaction.Domain.Models.EntityModels;
 
     public class CustomerSurveyProfile : Profile
@@ -12,6 +13,7 @@ namespace Fsel.Interaction.Infrastructure.Maps
         public CustomerSurveyProfile()
         {
             CreateMap<CustomerSurvey, CustomerSurveyModel>().IgnoreAllNonExisting();
+            CreateMap<CreateCustomerSurveyCommandModel, CustomerSurvey>().IgnoreAllNonExisting();
         }
     }
 }
