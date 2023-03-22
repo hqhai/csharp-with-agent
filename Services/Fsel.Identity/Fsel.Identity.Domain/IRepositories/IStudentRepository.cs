@@ -9,6 +9,6 @@ namespace Fsel.Identity.Domain.IRepositories
 
     public interface IStudentRepository : IRepository<Student>
     {
-        Task GetIncludeByIdAsync(Guid? id);
+        Task<Student?> GetIncludeByIdAsync(Guid? id);
     }
 }
