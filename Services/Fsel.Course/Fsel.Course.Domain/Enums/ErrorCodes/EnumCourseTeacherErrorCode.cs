@@ -11,28 +11,8 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
     public enum EnumCourseTeacherErrorCode
     {
         /// <summary>
-        /// Course Teacher does not exist
-        /// </summary>
-        CT01V,
-
-        /// <summary>
-        /// Course Teacher  was used
-        /// </summary>
-        CT02V,
-
-        /// <summary>
-        /// Course Teacher  not is correct
-        /// </summary>
-        CT03V,
-
-        /// <summary>
-        /// Field limited to 1000 characters
-        /// </summary>
-        CT03C,
-
-        /// <summary>
         /// Course Teacher null
         /// </summary>
-        CT04V
+        CourseTeacherNull
     }
 }

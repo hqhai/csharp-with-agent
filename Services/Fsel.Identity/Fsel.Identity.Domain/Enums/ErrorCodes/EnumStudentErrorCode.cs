@@ -30,13 +30,8 @@ namespace Fsel.Identity.Domain.Enums.ErrorCodes
         ST02C,
 
         /// <summary>
-        /// Instruction Content limited to 1000 characters
+        /// School limited to 250 characters
         /// </summary>
         ST03C,
-
-        /// <summary>
-        /// Number of course >1
-        /// </summary>
-        ST04C
     }
 }

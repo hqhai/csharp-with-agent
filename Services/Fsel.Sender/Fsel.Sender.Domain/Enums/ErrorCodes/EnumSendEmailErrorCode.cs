@@ -7,7 +7,6 @@ namespace Fsel.Sender.Domain.Enums.ErrorCodes
         /// <summary>
         /// Send email Fail
         /// </summary>
-        SM01ER,
-
+        SendEmailFail,
     }
 }

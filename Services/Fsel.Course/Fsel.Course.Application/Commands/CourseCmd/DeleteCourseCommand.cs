@@ -37,16 +37,13 @@ namespace Fsel.Course.Application.Commands.CourseCmd
             var course = _courseRepository.Queryable.Where(e => e.Id == request.Id).Include(e => e.CourseUnitMockTests).Include(e => e.CourseTeachers).FirstOrDefault();
             if (course == null)
             {
-                methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                methodResult.AddError(nameof(EnumCourseErrorCode.C01V));
+                methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.CourseNotExist), nameof(request.Id), request.Id);
                 return methodResult;
             }
 
             if (course.Status != EnumCourseStatus.New)
             {
-                methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                methodResult.AddError(
-                nameof(EnumCourseErrorCode.C02V));
+                methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.CourseNotInNewState), nameof(course.Status), course.Status);
                 return methodResult;
             }
 

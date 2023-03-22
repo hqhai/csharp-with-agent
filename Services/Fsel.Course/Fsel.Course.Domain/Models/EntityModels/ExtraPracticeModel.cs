@@ -2,7 +2,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
 {
     using Fsel.Core.Base.BaseModels;
 
-    public class ExtraPracticeModel : BaseEntityModel
+    public class ExtraPracticeModel : BaseModel
     {
     }
 }
