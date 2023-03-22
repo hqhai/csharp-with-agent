@@ -33,7 +33,7 @@ namespace Fsel.Course.Lcms.Api.Controllers
         /// </summary>
         [HttpGet]
         [ProducesResponseType(typeof(MethodResult<PagingItemsModel<UnitSearchModel>>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> Search([FromQuery] SearchUnitQuery query)
         {
             MethodResult<PagingItemsModel<UnitSearchModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
@@ -45,7 +45,7 @@ namespace Fsel.Course.Lcms.Api.Controllers
         /// </summary>
         [HttpGet("{id}")]
         [ProducesResponseType(typeof(MethodResult<UnitModel>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> Get([FromRoute] Guid id)
         {
             MethodResult<UnitModel> queryResult = await _mediator.Send(new GetUnitQuery { Id = id }).ConfigureAwait(false);
@@ -57,7 +57,7 @@ namespace Fsel.Course.Lcms.Api.Controllers
         /// </summary>
         [HttpPost]
         [ProducesResponseType(typeof(MethodResult<UnitModel>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> Create([FromBody] CreateUnitCommand command)
         {
             MethodResult<UnitModel> queryResult = await _mediator.Send(command).ConfigureAwait(false);
@@ -69,7 +69,7 @@ namespace Fsel.Course.Lcms.Api.Controllers
         /// </summary>
         [HttpPut("{id}")]
         [ProducesResponseType(typeof(MethodResult<UnitModel>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> Update([FromRoute] Guid id, [FromBody] UpdateUnitCommand command)
         {
             command.Id = id;
@@ -82,7 +82,7 @@ namespace Fsel.Course.Lcms.Api.Controllers
         /// </summary>
         [HttpDelete("{id}")]
         [ProducesResponseType(typeof(MethodResult<UnitModel>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> Delete([FromRoute] Guid id)
         {
             MethodResult<bool> commandResult = await _mediator.Send(new DeleteUnitCommand { Id = id }).ConfigureAwait(false);
