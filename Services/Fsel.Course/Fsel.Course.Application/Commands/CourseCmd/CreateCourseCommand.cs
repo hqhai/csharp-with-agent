@@ -51,37 +51,37 @@ namespace Fsel.Course.Application.Commands.CourseCmd
 
             if (request.CourseUnitMockTests == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumCourseUnitMockTestErrorCode.CUM01V), nameof(request.CourseUnitMockTests));
+                methodResult.AddErrorBadRequest(nameof(EnumCourseUnitMockTestErrorCode.TestNull), nameof(request.CourseUnitMockTests));
                 return methodResult;
             }
 
             if (request.CourseTeachers == null)
             {
                 methodResult.AddErrorBadRequest(
-                    nameof(EnumCourseTeacherErrorCode.CT04V));
+                    nameof(EnumCourseTeacherErrorCode.CourseTeacherNull));
                 return methodResult;
             }
 
             var units = request.CourseUnitMockTests.Where(e => e.UnitId != null).Select(x => x.UnitId).ToList();
             if (_unitRepository.IsIdsInValid(units.Where(e => e.HasValue).Select(e => e!.Value)))
             {
-                methodResult.AddErrorBadRequest(nameof(EnumUnitErrorCode.U03V), nameof(request.CourseUnitMockTests));
+                methodResult.AddErrorBadRequest(nameof(EnumUnitErrorCode.UnitIdNotCorrect), nameof(request.CourseUnitMockTests));
                 return methodResult;
             }
 
             var mocktestIds = request.CourseUnitMockTests.Where(e => e.MockTestId != null).Select(x => x.MockTestId);
             if (_mockTestRepository.IsIdsInValid(mocktestIds.Where(e => e.HasValue).Select(e => e!.Value)))
             {
-                methodResult.AddErrorBadRequest(nameof(EnumMockTestErrorCode.MT03V), nameof(request.CourseUnitMockTests));
+                methodResult.AddErrorBadRequest(nameof(EnumMockTestErrorCode.TestNotCorrect), nameof(request.CourseUnitMockTests));
                 return methodResult;
             }
 
             var mocktests = await _mockTestRepository.GetByIdsAsync(mocktestIds.Where(e => e.HasValue).Select(e => e!.Value));
 
-            var checkMockTest = mocktests.Any(x => x.MockTestType == EnumMockTestType.CourseMockTest);
+            var checkMockTest = mocktests.All(x => x.MockTestType == EnumMockTestType.CourseMockTest);
             if (!checkMockTest)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumMockTestErrorCode.MT05V), nameof(request.CourseUnitMockTests), mocktests.Select(x => x.Id));
+                methodResult.AddErrorBadRequest(nameof(EnumMockTestErrorCode.TestInValid), nameof(request.CourseUnitMockTests), mocktests.Select(x => x.Id));
                 return methodResult;
             }
 

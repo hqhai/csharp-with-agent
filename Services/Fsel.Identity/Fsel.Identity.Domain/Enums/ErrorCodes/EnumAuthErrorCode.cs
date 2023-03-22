@@ -7,126 +7,111 @@ namespace Fsel.Identity.Domain.Enums.ErrorCodes
         /// <summary>
         /// Old Password cannot empty
         /// </summary>
-        AU01V,
+        OldPassWordNotEmpty,
 
         /// <summary>
         /// Password cannot empty
         /// </summary>
-        AU02V,
+        PasswordNotEmpty,
 
         /// <summary>
         /// Confirm Password cannot empty
         /// </summary>
-        AU03V,
+        ConfirmPasswordNotEmpty,
 
         /// <summary>
         /// Email does not exist
         /// </summary>
-        AU04V,
+        EmailNotExist,
 
         /// <summary>
         /// Old password is incorrect
         /// </summary>
-        AU05V,
-
-        /// <summary>
-        /// UserName cannot empty
-        /// </summary>
-        AU06V,
-
-        /// <summary>
-        /// PhoneNumber does not exist
-        /// </summary>
-        AU07V,
+        OldPasswordIncorrect,
 
         /// <summary>
         /// Duplicate email, please select another email
         /// </summary>
-        AU08V,
+        DuplicateEmail,
 
         /// <summary>
         /// Duplicate PhoneNumber, please select another PhoneNumber
         /// </summary>
-        AU09V,
+        DuplicatePhoneNumber,
 
         /// <summary>
         /// Email verified fail
         /// </summary>
-        AU01ER,
+        EmailVerifiedFail,
 
         /// <summary>
         /// Error while generating reset token
         /// </summary>
-        AU02ER,
+        ErrorResetToken,
 
         /// <summary>
         /// Error while generating reset Password
         /// </summary>
-        AU03ER,
+        ErrorResetPassword,
 
         /// <summary>
         /// Username and Password cannot empty
         /// </summary>
-        AU04ER,
+        UserNameAndPasswordNotEmpty,
 
         /// <summary>
         /// Username and Password  is incorrect
         /// </summary>
-        AU05ER,
+        UserNameAndPasswordIncorrect,
 
         /// <summary>
         /// Invalid token
         /// </summary>
-        AU06ER,
+        InvalidToken,
 
         /// <summary>
         /// Access token has not yet expired
         /// </summary>
-        AU07ER,
-
-        /// <summary>
-        /// Refresh token does not exist
-        /// </summary>
-        AU08ER,
+        AccessTokenNotYetExpired,
 
         /// <summary>
         /// Refresh token has expired
         /// </summary>
-        AU09ER,
+        RefreshTokenExpired,
+
+        /// <summary>
+        /// Sign up fail
+        /// </summary>
+        SignUpFail,
 
         /// <summary>
         /// User Failed to Create
         /// </summary>
-        AU10ER,
+        UserFailToCreate,
 
         /// <summary>
         /// Send Auth erorr
         /// </summary>
-        AU11ER,
+        SendAuthErorr,
 
         /// <summary>
         /// User was active
         /// </summary>
-        AU12ER,
+        UserActive,
 
         /// <summary>
-        /// Not Send Email
+        /// Error Sending Email
         /// </summary>
-        AU13ER,
-
-        /// <summary>
-        /// Account already exists
-        /// </summary>
-        AU14ER,
+        ErrorSendEmail,
 
         /// <summary>
         /// Invalid OTP, please try again
         /// </summary>
-        AU15ER,
+        InvalidOTP,
 
         /// <summary>
         /// OTP has expired, please click on the Resend code button below to receive a new OTP
         /// </summary>
-        AU16ER
+        OTPExpired
     }
 }

@@ -62,7 +62,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             {
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 methodResult.AddError(
-                    nameof(EnumAuthErrorCode.AU04V),
+                    nameof(EnumAuthErrorCode.EmailNotExist),
                     new[] { MethodHelper.GenerateErrorResult(nameof(request.Email), request.Email) });
                 return methodResult;
             }
@@ -76,7 +76,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             {
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 methodResult.AddError(
-                    nameof(EnumAuthErrorCode.AU15ER),
+                    nameof(EnumAuthErrorCode.InvalidOTP),
                     new[] { MethodHelper.GenerateErrorResult(nameof(request.Email), request.Email) });
                 return methodResult;
             }
@@ -88,7 +88,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                 if (!isCodeValid)
                 {
                     methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                    methodResult.AddError(nameof(EnumAuthErrorCode.AU16ER));
+                    methodResult.AddError(nameof(EnumAuthErrorCode.OTPExpired));
                     return methodResult;
                 }
             }

@@ -5,6 +5,6 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         /// <summary>
         /// Lesson ExtraPractive null
         /// </summary>
-        ELP03V
+        LessonExtraPractiveNull
     }
 }

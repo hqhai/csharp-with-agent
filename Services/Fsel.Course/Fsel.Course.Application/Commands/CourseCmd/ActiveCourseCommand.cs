@@ -40,15 +40,13 @@ namespace Fsel.Course.Application.Commands.CourseCmd
 
             if (course == null)
             {
-                methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.C01V), nameof(request.Id), request.Id);
-                methodResult.Result = false;
+                methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.CourseNotExist), nameof(request.Id), request.Id);
                 return methodResult;
             }
 
             if (course.Status != EnumCourseStatus.New)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.C02V), nameof(course.Status), course.Status);
+                methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.CourseNotInNewState), nameof(course.Status), course.Status);
                 return methodResult;
             }
 

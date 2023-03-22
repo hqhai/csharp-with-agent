@@ -38,7 +38,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             MethodResult<TokenModel> methodResult = new MethodResult<TokenModel>();
             if (request.Username == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumAuthErrorCode.AU04ER),
+                methodResult.AddErrorBadRequest(nameof(EnumAuthErrorCode.UserNameAndPasswordNotEmpty),
                     new Error(nameof(request.Username)), new Error(nameof(request.Password)));
                 return methodResult;
             }
@@ -49,7 +49,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             {
                 methodResult.AddError(
                     StatusCodes.Status401Unauthorized,
-                    nameof(EnumAuthErrorCode.AU05ER),
+                    nameof(EnumAuthErrorCode.UserNameAndPasswordIncorrect),
                     new Error(nameof(request.Username), request.Username), new Error(nameof(request.Password), request.Password));
                 return methodResult;
             }
@@ -59,7 +59,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             {
                 methodResult.AddError(
                     StatusCodes.Status401Unauthorized,
-                    nameof(EnumAuthErrorCode.AU05ER),
+                    nameof(EnumAuthErrorCode.UserNameAndPasswordIncorrect),
                     new Error(nameof(request.Username), request.Username), new Error(nameof(request.Password), request.Password));
                 return methodResult;
             }

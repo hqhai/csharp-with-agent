@@ -62,7 +62,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                 var result = jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256, StringComparison.InvariantCultureIgnoreCase);
                 if (!result)
                 {
-                    methodResult.AddError(StatusCodes.Status401Unauthorized, nameof(EnumAuthErrorCode.AU06ER));
+                    methodResult.AddError(StatusCodes.Status401Unauthorized, nameof(EnumAuthErrorCode.InvalidToken));
                     return methodResult;
                 }
             }
@@ -72,20 +72,20 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             var expireDate = utcExpireDate.ConvertUnixTimeStampToDateTime();
             if (expireDate < DateTime.Now)
             {
-                methodResult.AddError(StatusCodes.Status401Unauthorized, nameof(EnumAuthErrorCode.AU07ER));
+                methodResult.AddError(StatusCodes.Status401Unauthorized, nameof(EnumAuthErrorCode.AccessTokenNotYetExpired));
                 return methodResult;
             }
 
             var refreshToken = await _userTokenRepository.GetByRefreshTokenAsync(request.RefreshToken);
             if (refreshToken == null)
             {
-                methodResult.AddError(StatusCodes.Status401Unauthorized, nameof(EnumAuthErrorCode.AU06ER),
+                methodResult.AddError(StatusCodes.Status401Unauthorized, nameof(EnumAuthErrorCode.InvalidToken),
                     nameof(request.RefreshToken), request.RefreshToken);
                 return methodResult;
             }
             else if (refreshToken.RefreshTokenExpiryTime == null || refreshToken.RefreshTokenExpiryTime.Value <= DateTime.Now)
             {
-                methodResult.AddError(StatusCodes.Status401Unauthorized, nameof(EnumAuthErrorCode.AU09ER));
+                methodResult.AddError(StatusCodes.Status401Unauthorized, nameof(EnumAuthErrorCode.RefreshTokenExpired));
             }
 
             await _userTokenRepository.Remove(refreshToken);

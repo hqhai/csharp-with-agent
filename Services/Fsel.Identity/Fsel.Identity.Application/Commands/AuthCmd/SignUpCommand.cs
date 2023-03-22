@@ -46,7 +46,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                 user = await _userManager.FindByEmailAsync(request.Email);
                 if (user != null && user.EmailConfirmed)
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumAuthErrorCode.AU08V), nameof(request.Email), request.Email);
+                    methodResult.AddErrorBadRequest(nameof(EnumAuthErrorCode.DuplicateEmail), nameof(request.Email), request.Email);
                     return methodResult;
                 }
             }
@@ -55,7 +55,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                 user = await _userManager.Users.FirstOrDefaultAsync(e => e.PhoneNumber == request.PhoneNumber, cancellationToken: cancellationToken);
                 if (user != null && user.EmailConfirmed)
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumAuthErrorCode.AU09V), nameof(request.PhoneNumber), request.PhoneNumber);
+                    methodResult.AddErrorBadRequest(nameof(EnumAuthErrorCode.DuplicatePhoneNumber), nameof(request.PhoneNumber), request.PhoneNumber);
                     return methodResult;
                 }
             }
@@ -92,7 +92,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
 
                     if (!result.Succeeded)
                     {
-                        methodResult.AddErrorBadRequest(nameof(EnumAuthErrorCode.AU10ER), nameof(request.Password), request?.Password);
+                        methodResult.AddErrorBadRequest(nameof(EnumAuthErrorCode.UserFailToCreate), nameof(request.Password), request?.Password);
                         return methodResult;
                     }
                     await _userManager.AddToRoleAsync(user, request?.Role.ToString() ?? string.Empty);
@@ -122,7 +122,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                 catch
                 {
                     methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                    methodResult.AddError(nameof(EnumAuthErrorCode.AU11ER));
+                    methodResult.AddError(nameof(EnumAuthErrorCode.SendAuthErorr));
                     scope.Dispose();
                 }
             }

@@ -33,7 +33,7 @@ namespace Fsel.Sender.Application.Commands.SendEmailCmd
             if (request == null)
             {
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                methodResult.AddError(nameof(EnumSendEmailErrorCode.SM01ER));
+                methodResult.AddError(nameof(EnumSendEmailErrorCode.SendEmailFail));
                 return methodResult;
             }
             else
