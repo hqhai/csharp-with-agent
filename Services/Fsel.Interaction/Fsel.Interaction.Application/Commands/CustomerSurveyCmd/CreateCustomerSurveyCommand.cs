@@ -10,54 +10,60 @@ namespace Fsel.Interaction.Application.Commands.CustomerSurveyCmd
     using Fsel.Interaction.Domain.Models.EntityModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
-    using Microsoft.EntityFrameworkCore;
 
-    public class CreateCustomerSurveyCommand : CreateCustomerSurveyCommandModel, IRequest<MethodResult<CustomerSurveyModel>>
+    public class CreateCustomerSurveyCommand : CreateCustomerSurveyCommandModel, IRequest<MethodResult<IList<CustomerSurveyModel>>>
     {
     }
 
-    public class CreateCustomerSurveyCommandHandler : IRequestHandler<CreateCustomerSurveyCommand, MethodResult<CustomerSurveyModel>>
+    public class CreateCustomerSurveyCommandHandler : IRequestHandler<CreateCustomerSurveyCommand, MethodResult<IList<CustomerSurveyModel>>>
     {
         private readonly ICustomerSurveyRepository _customerSurveyRepository;
-        private readonly ISurveyQuestionRepository _surveyQuestionRepository;
         private readonly IMapper _mapper;
 
-        public CreateCustomerSurveyCommandHandler(ICustomerSurveyRepository customerSurveyRepository,
-            ISurveyQuestionRepository surveyQuestionRepository,
+        public CreateCustomerSurveyCommandHandler(
+            ICustomerSurveyRepository customerSurveyRepository,
             IMapper mapper)
         {
             _customerSurveyRepository = customerSurveyRepository;
-            _surveyQuestionRepository = surveyQuestionRepository;
             _mapper = mapper;
         }
 
-        public async Task<MethodResult<CustomerSurveyModel>> Handle(CreateCustomerSurveyCommand request, CancellationToken cancellationToken)
+        public async Task<MethodResult<IList<CustomerSurveyModel>>> Handle(CreateCustomerSurveyCommand request, CancellationToken cancellationToken)
         {
-            MethodResult<CustomerSurveyModel> methodResult = new MethodResult<CustomerSurveyModel>();
-            CustomerSurvey customerSurvey = _mapper.Map<CustomerSurvey>(request);
+            ArgumentNullException.ThrowIfNull(request);
+            MethodResult<IList<CustomerSurveyModel>> methodResult = new MethodResult<IList<CustomerSurveyModel>>();
 
-            var surveyquestion = await _surveyQuestionRepository.Queryable.AnyAsync(e => e.Id == request.SurveyQuestionId, cancellationToken: cancellationToken);
-            if (surveyquestion)
+            List<CustomerSurvey> customerSurveys = new List<CustomerSurvey>();
+            request.Answers.ForEach(x =>
             {
-                methodResult.AddErrorBadRequest(nameof(EnumUnitErrorCode.U03V), nameof(request.CourseUnitMockTests));
-                return methodResult;
-            }
+                CustomerSurvey customerSurvey = new();
+                customerSurvey.SurveyQuestionId = x.SurveyQuestionId;
+                customerSurvey.Answer = x.Answer;
+                customerSurvey.UserId = request.UserId;
 
-            if (!customerSurvey.IsValid())
+                customerSurveys.Add(customerSurvey);
+            });
+            foreach (var item in customerSurveys)
             {
-                methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                methodResult.AddResultFromErrorList(customerSurvey.ErrorMessages);
-                return methodResult;
+                if (!item.IsValid())
+                {
+                    methodResult.StatusCode = StatusCodes.Status400BadRequest;
+                    methodResult.AddResultFromErrorList(item.ErrorMessages);
+                    return methodResult;
+                }
             }
 
             await _customerSurveyRepository.ExecuteTransactionAsync(async () =>
             {
-                customerSurvey = _customerSurveyRepository.Add(customerSurvey);
+                foreach (var item in customerSurveys)
+                {
+                    _customerSurveyRepository.Add(item);
+                }
 
                 await _customerSurveyRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
                 methodResult.StatusCode = StatusCodes.Status201Created;
-                methodResult.Result = _mapper.Map<CustomerSurveyModel>(customerSurvey);
+                methodResult.Result = (IList<CustomerSurveyModel>?)customerSurveys;
                 return methodResult;
             });
 

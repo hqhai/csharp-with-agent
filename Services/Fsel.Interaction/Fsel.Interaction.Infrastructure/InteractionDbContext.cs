@@ -1,6 +1,9 @@
+using System.Reflection.Emit;
 using Fsel.Common.Constants;
+using Fsel.Common.Enums;
 using Fsel.Core.Base;
 using Fsel.Interaction.Domain.Entities;
+using Fsel.Interaction.Domain.Entities.SurveyQuestionConfigs;
 using Fsel.Interaction.Infrastructure.Configs;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -16,6 +19,9 @@ namespace Fsel.Interaction.Infrastructure
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            ArgumentNullException.ThrowIfNull(modelBuilder);
+            SeedRoles(modelBuilder);
+
             modelBuilder.ApplyConfiguration(new SurveyQuestionEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new CustomerSurveyEntityTypeConfiguration());
             base.OnModelCreating(modelBuilder);
@@ -26,6 +32,7 @@ namespace Fsel.Interaction.Infrastructure
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
+            ArgumentNullException.ThrowIfNull(optionsBuilder);
             if (!optionsBuilder.IsConfigured)
             {
                 IConfigurationRoot configuration = new ConfigurationBuilder()
@@ -36,6 +43,10 @@ namespace Fsel.Interaction.Infrastructure
                     configuration.GetConnectionString(Settings.DefaultConnection),
                     options => options.MigrationsAssembly(GetType().Assembly.GetName().Name));
             }
+        }
+
+        private static void SeedRoles(ModelBuilder builder)
+        {
         }
     }
 }

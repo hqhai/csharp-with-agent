@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Interaction.Domain.Entities.SurveyQuestionConfigs.QuestionAnswers
+namespace Fsel.Interaction.Domain.Entities.SurveyQuestionConfigs
 {
     public class ChooseLanguageQuestion
     {

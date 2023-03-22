@@ -15,7 +15,7 @@ namespace Fsel.Interaction.Domain.Entities
         public string? AnswerStr { get; set; }
 
         [NotMapped]
-        public object? Answers
+        public object? Answer
         {
             get { return ConvertHelper.Deserialize<object>(AnswerStr); }
             set { AnswerStr = ConvertHelper.Serialize(value); }
