@@ -85,18 +85,19 @@ namespace Fsel.Identity.Application.Commands.ParentCmd
 
             #endregion Validation
 
-            var result = await CreateUserStudentAsync(request, parent);
-            if (!result.Succeeded)
+            var user = await CreateUserStudentAsync(request, parent);
+            if (user == null)
             {
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 methodResult.AddError(nameof(EnumParentErrorCode.CreateStudentFail));
                 return methodResult;
             }
 
+            methodResult.Result = _mapper.Map<UserModel>(user);
             return methodResult;
         }
 
-        private async Task<IdentityResult> CreateUserStudentAsync(CreateStudentByParentCommandModel request, Parent parent)
+        private async Task<User?> CreateUserStudentAsync(CreateStudentByParentCommandModel request, Parent parent)
         {
             var user = _mapper.Map<User>(request);
             user.FullName = request.Name;
@@ -108,7 +109,12 @@ namespace Fsel.Identity.Application.Commands.ParentCmd
 
             var identityResult = await _userManager.CreateAsync(user, request.Password ?? string.Empty);
             await CreateHumanAsync(request, user, parent);
-            return identityResult;
+
+            if (!identityResult.Succeeded)
+            {
+                return null;
+            }
+            return user;
         }
 
         private async Task CreateHumanAsync(CreateStudentByParentCommandModel request, User user, Parent parent)
