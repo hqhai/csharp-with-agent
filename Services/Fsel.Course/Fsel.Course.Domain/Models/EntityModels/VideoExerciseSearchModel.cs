@@ -2,6 +2,7 @@
 
 namespace Fsel.Course.Domain.Models.EntityModels
 {
+    using Fsel.Common.Enums;
     using Fsel.Course.Domain.Enums;
 
     public class VideoExerciseSearchModel
