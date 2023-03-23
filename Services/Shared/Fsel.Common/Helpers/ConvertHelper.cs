@@ -114,7 +114,7 @@ namespace Fsel.Common.Helpers
             {
                 serializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
             }
-            string jsonString = JsonConvert.SerializeObject(data, serializerSettings);
+            string jsonString = System.Text.Json.JsonSerializer.Serialize(data);
             return jsonString;
         }
 
@@ -126,7 +126,7 @@ namespace Fsel.Common.Helpers
                 {
                     return default;
                 }
-                T? obj = JsonConvert.DeserializeObject<T>(data);
+                T? obj = System.Text.Json.JsonSerializer.Deserialize<T>(data);
                 return obj;
             }
             catch

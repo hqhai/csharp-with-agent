@@ -171,6 +171,78 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("SurveyQuestions");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("763d8bb9-cdbe-42e7-aa16-35a1915c3512"),
+                            AnswerStr = "{\"FselSourceQuestions\":[{\"Id\":1,\"Content\":\"T\\u00ECm ki\\u1EBFm Google\",\"Image\":\"Google\"},{\"Id\":2,\"Content\":\"Facebook\",\"Image\":\"Facebook\"},{\"Id\":3,\"Content\":\"Youtube\",\"Image\":\"Youtube\"},{\"Id\":4,\"Content\":\"Tiktok\",\"Image\":\"Tiktok\"},{\"Id\":5,\"Content\":\"B\\u1EA1n b\\u00E8/Gia \\u0111\\u00ECnh\",\"Image\":\"B\\u1EA1n b\\u00E8/Gia \\u0111\\u00ECnh\"},{\"Id\":6,\"Content\":\"Tin t\\u1EE9c/B\\u00E1o ch\\u00ED/Blog\",\"Image\":\"Tin t\\u1EE9c/B\\u00E1o ch\\u00ED/Blog\"},{\"Id\":7,\"Content\":\"Tivi\",\"Image\":\"Tivi\"},{\"Id\":8,\"Content\":\"Kh\\u00E1c....\",\"Image\":\"Kh\\u00E1c....\"}]}",
+                            CreatedDate = new DateTime(2023, 3, 23, 9, 48, 2, 368, DateTimeKind.Local).AddTicks(709),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            Description = "addd",
+                            DisplayOrder = 1,
+                            Icon = "addd",
+                            IsDeleted = false,
+                            Question = "Bạn biết đến Fsel từ đâu?",
+                            Type = "FselSource"
+                        },
+                        new
+                        {
+                            Id = new Guid("96d16b4c-bb28-46b3-ad7d-e9c11beeeba9"),
+                            AnswerStr = "{\"ChooseDirectionQuestions\":[{\"Id\":1,\"Content\":\"B\\u1EA1n \\u0111\\u00E3 bi\\u1EBFt m\\u1ED9t ch\\u00FAt Ti\\u1EBFng Anh\"},{\"Id\":2,\"Content\":\"\\u0110\\u00E2y l\\u00E0 l\\u1EA7n \\u0111\\u1EA7u b\\u1EA1n h\\u1ECDc Ti\\u1EBFng Anh\"}]}",
+                            CreatedDate = new DateTime(2023, 3, 23, 9, 48, 2, 368, DateTimeKind.Local).AddTicks(1437),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            Description = "addd",
+                            DisplayOrder = 1,
+                            Icon = "addd",
+                            IsDeleted = false,
+                            Question = "Chọn hướng đi của bạn",
+                            Type = "ChooseDirection"
+                        },
+                        new
+                        {
+                            Id = new Guid("6410b229-32b8-457f-8556-92d93f27ef63"),
+                            AnswerStr = "{\"ChooseLanguageQuestions\":[{\"Id\":1,\"Content\":\"V\\u0103n h\\u00F3a\",\"Image\":\"V\\u0103n h\\u00F3a\"},{\"Id\":2,\"Content\":\"Du l\\u1ECBch\",\"Image\":\"Du l\\u1ECBch\"},{\"Id\":3,\"Content\":\"K\\u1EBFt b\\u1EA1n v\\u00E0 chia s\\u1EBB\",\"Image\":\"K\\u1EBFt b\\u1EA1n v\\u00E0 chia s\\u1EBB\"},{\"Id\":4,\"Content\":\"H\\u1ECDc t\\u1EADp\",\"Image\":\"H\\u1ECDc t\\u1EADp\"},{\"Id\":5,\"Content\":\"C\\u01A1 h\\u1ED9i ngh\\u1EC1 nghi\\u1EC7p\",\"Image\":\"C\\u01A1 h\\u1ED9i ngh\\u1EC1 nghi\\u1EC7p\"},{\"Id\":6,\"Content\":\"Kh\\u00E1c....\",\"Image\":\"Kh\\u00E1c....\"}]}",
+                            CreatedDate = new DateTime(2023, 3, 23, 9, 48, 2, 368, DateTimeKind.Local).AddTicks(1614),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            Description = "addd",
+                            DisplayOrder = 1,
+                            Icon = "addd",
+                            IsDeleted = false,
+                            Question = "Tại sao bạn học ngoại ngữ",
+                            Type = "ChooseLanguage"
+                        },
+                        new
+                        {
+                            Id = new Guid("adeaeda6-0e41-4ceb-a3fd-1b195317d776"),
+                            AnswerStr = "{\"StudyTimeQuestions\":[{\"Id\":1,\"Content\":\"8 - 10 am\"},{\"Id\":2,\"Content\":\"1 - 3 pm\"},{\"Id\":3,\"Content\":\"3 - 5 pm\"},{\"Id\":4,\"Content\":\"5 - 9 pm\"},{\"Id\":5,\"Content\":\"7 - 10 pm\"}]}",
+                            CreatedDate = new DateTime(2023, 3, 23, 9, 48, 2, 368, DateTimeKind.Local).AddTicks(1825),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            Description = "addd",
+                            DisplayOrder = 1,
+                            Icon = "addd",
+                            IsDeleted = false,
+                            Question = "Chọn thời gian học tập ",
+                            Type = "StudyTime"
+                        },
+                        new
+                        {
+                            Id = new Guid("2be9a620-143d-41f6-815b-2038c21a7b23"),
+                            AnswerStr = "{\"Birthday\":null,\"AgeGenderQuestions\":[{\"Id\":1,\"Gender\":0},{\"Id\":2,\"Gender\":1},{\"Id\":3,\"Gender\":2}]}",
+                            CreatedDate = new DateTime(2023, 3, 23, 9, 48, 2, 368, DateTimeKind.Local).AddTicks(1989),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            Description = "addd",
+                            DisplayOrder = 1,
+                            Icon = "addd",
+                            IsDeleted = false,
+                            Question = "Xác định độ tuổi và giới tính",
+                            Type = "AgeGender"
+                        });
                 });
 
             modelBuilder.Entity("Fsel.Interaction.Domain.Entities.CustomerSurvey", b =>

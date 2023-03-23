@@ -2,23 +2,25 @@
 
 namespace Fsel.Interaction.Domain.Entities.SurveyQuestionConfigs
 {
+    using Fsel.Interaction.Domain.Enums;
+
     public class AgeGenderQuestion
     {
         public DateTime? Birthday { get; set; }
 
-        public IList<GenderQuestion>? GenderQuestions { get; set; }
+        public IList<AgeGenderQuestionAnswers>? AgeGenderQuestions { get; set; }
     }
 
-    public class GenderQuestion
+    public class AgeGenderQuestionAnswers
     {
-        public string? Gender { get; set; }
         public int Id { get; set; }
+        public EnumGender Gender { get; set; }
     }
 
     public class AgeGenderAnswer
     {
         public DateTime? Birthday { get; set; }
 
-        public GenderQuestion? GenderQuestion { get; set; }
+        public AgeGenderQuestionAnswers? AgeGenderAnswers { get; set; }
     }
 }

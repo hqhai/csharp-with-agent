@@ -36,56 +36,39 @@ namespace Fsel.Interaction.Application.Commands.CustomerSurveyCmd
 
             List<CustomerSurvey> customerSurveys = new List<CustomerSurvey>();
 
-            //Chuyển đổi json
-            var jsonObject = JsonConvert.DeserializeObject<Dictionary<string, object>>(request.Answers);
-            var surveys = (List<object>)jsonObject["surveys"];
-            foreach (var survey in surveys)
+            foreach (var item in request.Answers)
             {
-                var surveyDict = (Dictionary<string, object>)survey;
-                var answers = (List<object>)surveyDict["answers"];
-                foreach (var answer in answers)
+                var customerSurvey = new CustomerSurvey
                 {
-                    var answerList = (List<object>)answer;
-                    foreach (var item in answerList)
-                    {
-                        var itemDict = (Dictionary<string, object>)item;
-                        var id = (string)itemDict["Id"];
-                        var content = (string)itemDict["Content"];
-                        Console.WriteLine($"Id: {id}, Content: {content}");
-                    }
-                }
-            }
-
-            request.Answers.ForEach(x =>
-            {
-                CustomerSurvey customerSurvey = new();
-                customerSurvey.SurveyQuestionId = x.SurveyQuestionId;
-                customerSurvey.Answer = x.Answer;
-                customerSurvey.UserId = request.UserId;
-
-                customerSurveys.Add(customerSurvey);
-            });
-            foreach (var item in customerSurveys)
-            {
-                if (!item.IsValid())
+                    Answer = item.Answer,
+                    UserId = request.UserId,
+                    SurveyQuestionId = item.SurveyQuestionId
+                };
+                if (!customerSurvey.IsValid())
                 {
                     methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                    methodResult.AddResultFromErrorList(item.ErrorMessages);
+                    methodResult.AddResultFromErrorList(customerSurvey.ErrorMessages);
                     return methodResult;
                 }
-            }
 
+                customerSurveys.Add(customerSurvey);
+            }
             await _customerSurveyRepository.ExecuteTransactionAsync(async () =>
             {
+                IList<CustomerSurveyModel> customerSurveyModels = new List<CustomerSurveyModel>();
                 foreach (var item in customerSurveys)
                 {
                     _customerSurveyRepository.Add(item);
+                    var customerSurveyModel = _mapper.Map<CustomerSurveyModel>(item);
+                    customerSurveyModels.Add(customerSurveyModel);
                 }
-
+                foreach (var item in customerSurveys)
+                {
+                }
                 await _customerSurveyRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
                 methodResult.StatusCode = StatusCodes.Status201Created;
-                methodResult.Result = (IList<CustomerSurveyModel>?)customerSurveys;
+                methodResult.Result = customerSurveyModels;
                 return methodResult;
             });
 

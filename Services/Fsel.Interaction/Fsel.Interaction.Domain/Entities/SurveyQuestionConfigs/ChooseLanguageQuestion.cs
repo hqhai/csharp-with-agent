@@ -4,24 +4,18 @@ namespace Fsel.Interaction.Domain.Entities.SurveyQuestionConfigs
 {
     public class ChooseLanguageQuestion
     {
-        public IList<ChooseLanguageQuestions>? ChooseLanguageQuestions { get; set; }
+        public IList<ChooseLanguageQuestionAnswers>? ChooseLanguageQuestions { get; set; }
     }
 
-    public class ChooseLanguageQuestions
+    public class ChooseLanguageQuestionAnswers
     {
         public int Id { get; set; }
         public string? Content { get; set; }
         public string? Image { get; set; }
     }
 
-    public class ChooseLanguageAnswers
-    {
-        public int Id { get; set; }
-        public string? Content { get; set; }
-    }
-
     public class ChooseLanguageAnswer
     {
-        public IList<ChooseLanguageAnswers>? ChooseLanguageAnswers { get; set; }
+        public IList<ChooseLanguageQuestionAnswers>? ChooseLanguageAnswers { get; set; }
     }
 }

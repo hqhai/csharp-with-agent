@@ -4,10 +4,10 @@ namespace Fsel.Interaction.Domain.Entities.SurveyQuestionConfigs
 {
     public class StudyTimeQuestion
     {
-        public IList<StudyTimeQuestions>? StudyTimeQuestions { get; set; }
+        public IList<StudyTimeQuestionAnswers>? StudyTimeQuestions { get; set; }
     }
 
-    public class StudyTimeQuestions
+    public class StudyTimeQuestionAnswers
     {
         public int Id { get; set; }
         public string? Content { get; set; }
@@ -15,6 +15,6 @@ namespace Fsel.Interaction.Domain.Entities.SurveyQuestionConfigs
 
     public class StudyTimeAnswer
     {
-        public StudyTimeQuestions? StudyTimeQuestions { get; set; }
+        public StudyTimeQuestionAnswers? StudyTimeAnswers { get; set; }
     }
 }

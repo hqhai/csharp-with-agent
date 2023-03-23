@@ -5,6 +5,7 @@ namespace Fsel.Interaction.Application.Queries
     using System.Linq;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Helpers;
     using Fsel.Interaction.Domain.IRepositories;
     using Fsel.Interaction.Domain.Models.EntityModels;
     using MediatR;

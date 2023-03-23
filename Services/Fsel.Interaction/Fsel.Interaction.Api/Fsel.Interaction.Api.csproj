@@ -15,4 +15,8 @@
     <ProjectReference Include="..\Fsel.Interaction.Application\Fsel.Interaction.Application.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Resources\" />
+  </ItemGroup>
+
 </Project>

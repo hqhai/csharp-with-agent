@@ -4,10 +4,10 @@ namespace Fsel.Interaction.Domain.Entities.SurveyQuestionConfigs
 {
     public class ChooseDirectionQuestion
     {
-        public IList<ChooseDirectionQuestions>? ChooseDirectionQuestions { get; set; }
+        public IList<ChooseDirectionQuestionAnswers>? ChooseDirectionQuestions { get; set; }
     }
 
-    public class ChooseDirectionQuestions
+    public class ChooseDirectionQuestionAnswers
     {
         public int Id { get; set; }
         public string? Content { get; set; }
@@ -15,6 +15,6 @@ namespace Fsel.Interaction.Domain.Entities.SurveyQuestionConfigs
 
     public class ChooseDirectionAnswer
     {
-        public ChooseDirectionQuestions? ChooseDirectionQuestions { get; set; }
+        public ChooseDirectionQuestionAnswers? ChooseDirectionAnswers { get; set; }
     }
 }
