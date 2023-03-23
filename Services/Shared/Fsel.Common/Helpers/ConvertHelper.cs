@@ -1,8 +1,6 @@
 using System;
 using System.Reflection;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using Newtonsoft.Json.Serialization;
+using System.Text.Json;
 
 namespace Fsel.Common.Helpers
 {
@@ -45,7 +43,7 @@ namespace Fsel.Common.Helpers
 
         public static string ObjectToBase64(object data)
         {
-            var json = JsonConvert.SerializeObject(data);
+            var json = JsonSerializer.Serialize(data);
             var plainTextBytes = System.Text.Encoding.ASCII.GetBytes(json);
             return ByteArrayToBase64(plainTextBytes);
         }
@@ -53,48 +51,6 @@ namespace Fsel.Common.Helpers
         public static Stream ByteArrayToStream(byte[] input)
         {
             return new MemoryStream(input);
-        }
-
-        public static void Capitalize(this JArray jArr)
-        {
-            foreach (var x in jArr.ToList())
-            {
-                var childObj = x as JObject;
-                if (childObj != null)
-                {
-                    childObj.Capitalize();
-                    continue;
-                }
-                var childArr = x as JArray;
-                if (childArr != null)
-                {
-                    childArr.Capitalize();
-                }
-            }
-        }
-
-        public static void Capitalize(this JObject jObj)
-        {
-            foreach (var kvp in jObj.Cast<KeyValuePair<string, JToken>>().ToList())
-            {
-                jObj.Remove(kvp.Key);
-                var newKey = kvp.Key.Capitalize();
-                var childObj = kvp.Value as JObject;
-                if (childObj != null)
-                {
-                    childObj.Capitalize();
-                    jObj.Add(newKey, childObj);
-                    return;
-                }
-                var childArr = kvp.Value as JArray;
-                if (childArr != null)
-                {
-                    childArr.Capitalize();
-                    jObj.Add(newKey, childArr);
-                    return;
-                }
-                jObj.Add(newKey, kvp.Value);
-            }
         }
 
         public static string Capitalize(this string str)
@@ -110,12 +66,12 @@ namespace Fsel.Common.Helpers
 
         public static string Serialize(this object? data, bool isCamelCase = false)
         {
-            var serializerSettings = new JsonSerializerSettings();
+            var options = new JsonSerializerOptions();
             if (isCamelCase)
             {
-                serializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
+                options.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
             }
-            string jsonString = JsonConvert.SerializeObject(data, serializerSettings);
+            string jsonString = JsonSerializer.Serialize(data, options);
             return jsonString;
         }
 
@@ -127,7 +83,7 @@ namespace Fsel.Common.Helpers
                 {
                     return default;
                 }
-                T? obj = JsonConvert.DeserializeObject<T>(data);
+                T? obj = JsonSerializer.Deserialize<T>(data);
                 return obj;
             }
             catch
