@@ -1,6 +1,7 @@
 using System;
 using System.Reflection;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace Fsel.Common.Helpers
 {
@@ -66,7 +67,7 @@ namespace Fsel.Common.Helpers
 
         public static string Serialize(this object? data, bool isCamelCase = false)
         {
-            var options = new JsonSerializerOptions();
+            var options = new JsonSerializerOptions { Converters = { new JsonStringEnumConverter() } };
             if (isCamelCase)
             {
                 options.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
@@ -75,7 +76,7 @@ namespace Fsel.Common.Helpers
             return jsonString;
         }
 
-        public static T? Deserialize<T>(this string? data)
+        public static T? Deserialize<T>(this string? data, bool isCamelCase = false)
         {
             try
             {
@@ -83,12 +84,27 @@ namespace Fsel.Common.Helpers
                 {
                     return default;
                 }
-                T? obj = JsonSerializer.Deserialize<T>(data);
+
+                var options = new JsonSerializerOptions { Converters = { new JsonStringEnumConverter() } };
+                if (isCamelCase)
+                {
+                    options.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+                }
+                T? obj = JsonSerializer.Deserialize<T>(data, options);
                 return obj;
             }
             catch
             {
                 return default;
+            }
+        }
+
+        public static T? DeserializeFromFilePath<T>(string path, bool isCamelCase = false)
+        {
+            using (StreamReader sr = new StreamReader(path))
+            {
+                string jsonString = sr.ReadToEnd();
+                return Deserialize<T>(jsonString, isCamelCase);
             }
         }
 
