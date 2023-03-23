@@ -43,7 +43,7 @@ namespace Fsel.Course.Domain.Entities
         /// </summary>
         public EnumCourseLevel CourseLevel { get; set; }
 
-        public ICollection<LessonVideoModel> LessonVideos { get; set; } = new List<LessonVideoModel>();
-        public ICollection<VideoTimeCodeModel> VideoTimeCodes { get; set; } = new List<VideoTimeCodeModel>();
+        public ICollection<LessonVideo> LessonVideos { get; set; } = new List<LessonVideo>();
+        public ICollection<VideoTimeCode> VideoTimeCodes { get; set; } = new List<VideoTimeCode>();
     }
 }

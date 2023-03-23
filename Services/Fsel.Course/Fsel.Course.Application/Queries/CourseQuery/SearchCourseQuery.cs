@@ -69,7 +69,7 @@ namespace Fsel.Course.Application.Queries.CourseQuery
             }
 
             int totalItem = await courseQuery.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
-            var lists = await courseQuery.OrderByDescending(x => x.Id)
+            var lists = await courseQuery.OrderByDescending(x => x.CreatedDate)
                     .Skip((request.Page - 1) * request.PageSize)
                     .Take(request.PageSize)
                     .AsNoTracking()

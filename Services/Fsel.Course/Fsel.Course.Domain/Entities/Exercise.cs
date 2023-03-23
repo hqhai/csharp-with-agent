@@ -25,7 +25,7 @@ namespace Fsel.Course.Domain.Entities
         /// </summary>
         public EnumCourseSkill CourseSkill { get; set; }
 
-        public IList<TimeCodeExercise> TimeCodeExercises { get; set; } = new List<TimeCodeExercise>();
-        public IList<ExerciseQuestion> ExerciseQuestions { get; set; } = new List<ExerciseQuestion>();
+        public ICollection<TimeCodeExercise> TimeCodeExercises { get; set; } = new List<TimeCodeExercise>();
+        public ICollection<ExerciseQuestion> ExerciseQuestions { get; set; } = new List<ExerciseQuestion>();
     }
 }
