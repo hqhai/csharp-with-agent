@@ -5,7 +5,9 @@ namespace Fsel.Interaction.Api.Controllers
     using System.Net;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
+    using Fsel.Common.Helpers;
     using Fsel.Interaction.Application.Queries;
+    using Fsel.Interaction.Domain.Entities;
     using Fsel.Interaction.Domain.Models.EntityModels;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;

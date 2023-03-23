@@ -32,9 +32,6 @@ namespace Fsel.Interaction.Api.Controllers
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> Create([FromBody] CreateCustomerSurveyCommand command)
         {
-            var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, Settings.SurveyQuestionFileName);
-            var surveyQuestions = ConvertHelper.DeserializeFromFilePath<IList<SurveyQuestion>>(path);
-
             MethodResult<IList<CustomerSurveyModel>> queryResult = await _mediator.Send(command).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
