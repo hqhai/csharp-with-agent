@@ -4,6 +4,8 @@ using AutoMapper;
 using Fsel.Common.ActionResults;
 using Fsel.Core.Base.BaseModels;
 using Fsel.Course.Application.Services;
+using Fsel.Course.Application.Services.UserServices;
+using Fsel.Course.Application.Services.UserServices.Models;
 using Fsel.Course.Domain.IRepositories;
 using Fsel.Course.Domain.Models.EntityModels;
 using Fsel.Course.Domain.Models.QueryModels.Courses;

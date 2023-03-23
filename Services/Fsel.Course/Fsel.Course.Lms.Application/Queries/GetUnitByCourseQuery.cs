@@ -4,21 +4,21 @@ namespace Fsel.Course.Lms.Application.Queries
 {
     using System;
     using System.Collections.Generic;
-    using System.Collections.ObjectModel;
     using System.Linq;
-    using System.Text;
     using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Core.Base;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
-    using Fsel.Course.Domain.Models.QueryModels.Courses;
+    using Fsel.Course.Lms.Application.Services.StudentServices;
+    using Fsel.Course.Lms.Application.Services.StudentServices.Models;
     using MediatR;
     using Microsoft.AspNetCore.Http;
+    using Microsoft.AspNetCore.Identity;
     using Microsoft.EntityFrameworkCore;
-    using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
     public class GetUnitByCourseQuery : IRequest<MethodResult<CourseModel>>
     {
@@ -29,11 +29,15 @@ namespace Fsel.Course.Lms.Application.Queries
     {
         private readonly ICourseRepository _courseRepository;
         private readonly IMapper _mapper;
+        private readonly IUserService _studentService;
 
-        public GetUnitByCourseQueryHandler(IMapper mapper, ICourseRepository courseRepository)
+        public GetUnitByCourseQueryHandler(IMapper mapper,
+            ICourseRepository courseRepository,
+            IUserService studentService)
         {
             _courseRepository = courseRepository;
             _mapper = mapper;
+            _studentService = studentService;
         }
 
         public async Task<MethodResult<CourseModel>> Handle(GetUnitByCourseQuery request, CancellationToken cancellationToken)
@@ -52,7 +56,9 @@ namespace Fsel.Course.Lms.Application.Queries
                                   Name = i.Name,
                                   CourseLevel = i.CourseLevel,
                                   CourseUnitMockTests = _mapper.Map<IList<CourseUnitMockTestModel>>(i.CourseUnitMockTests),
+                                  CourseClasses = _mapper.Map<IList<CourseClassModel>>(i.CourseClasses),
                               };
+            /* var students = await _studentService.GetStudentByIdsAsync(new GetStudentByIdQueryModel { Ids = courseQuery.Select(x => x.) });*/
             var course = courseQuery.FirstOrDefault();
             if (course == null)
             {
