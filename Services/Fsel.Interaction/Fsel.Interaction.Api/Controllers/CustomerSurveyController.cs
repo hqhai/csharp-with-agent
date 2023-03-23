@@ -5,7 +5,9 @@ namespace Fsel.Interaction.Api.Controllers
     using System.Net;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
+    using Fsel.Common.Helpers;
     using Fsel.Interaction.Application.Commands.CustomerSurveyCmd;
+    using Fsel.Interaction.Domain.Entities;
     using Fsel.Interaction.Domain.Models.EntityModels;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
@@ -30,6 +32,9 @@ namespace Fsel.Interaction.Api.Controllers
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> Create([FromBody] CreateCustomerSurveyCommand command)
         {
+            var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, Settings.SurveyQuestionFileName);
+            var surveyQuestions = ConvertHelper.DeserializeFromFilePath<IList<SurveyQuestion>>(path);
+
             MethodResult<IList<CustomerSurveyModel>> queryResult = await _mediator.Send(command).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }

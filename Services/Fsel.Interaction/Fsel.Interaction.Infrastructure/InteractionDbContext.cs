@@ -1,5 +1,6 @@
 using Fsel.Common.Constants;
 using Fsel.Common.Enums;
+using Fsel.Common.Helpers;
 using Fsel.Core.Base;
 using Fsel.Interaction.Domain.Entities;
 using Fsel.Interaction.Domain.Entities.SurveyQuestionConfigs.SurverQuestionSources;
@@ -46,59 +47,62 @@ namespace Fsel.Interaction.Infrastructure
 
         private static void SeedSurveyQuestions(ModelBuilder builder)
         {
-            builder.Entity<SurveyQuestion>().HasData
-            (
-                new SurveyQuestion()
-                {
-                    Id = Guid.NewGuid(),
-                    Question = "Bạn biết đến Fsel từ đâu?",
-                    Description = "addd",
-                    Icon = "addd",
-                    DisplayOrder = 1,
-                    Type = EnumSurveyQuestion.FselSource,
-                    Answers = FselSourceQuestionSource.FselSourceQuestion
-                },
-                new SurveyQuestion()
-                {
-                    Id = Guid.NewGuid(),
-                    Question = "Chọn hướng đi của bạn",
-                    Description = "addd",
-                    Icon = "addd",
-                    DisplayOrder = 1,
-                    Type = EnumSurveyQuestion.ChooseDirection,
-                    Answers = ChooseDirectionQuestionSourse.ChooseDirectionQuestion
-                },
-                new SurveyQuestion()
-                {
-                    Id = Guid.NewGuid(),
-                    Question = "Tại sao bạn học ngoại ngữ",
-                    Description = "addd",
-                    Icon = "addd",
-                    DisplayOrder = 1,
-                    Type = EnumSurveyQuestion.ChooseLanguage,
-                    Answers = ChooseLanguageQuestionSourse.ChooseLanguageQuestion
-                },
-                new SurveyQuestion()
-                {
-                    Id = Guid.NewGuid(),
-                    Question = "Chọn thời gian học tập ",
-                    Description = "addd",
-                    Icon = "addd",
-                    DisplayOrder = 1,
-                    Type = EnumSurveyQuestion.StudyTime,
-                    Answers = StudyTimeQuestionSourse.StudyTimeQuestion
-                },
-                new SurveyQuestion()
-                {
-                    Id = Guid.NewGuid(),
-                    Question = "Xác định độ tuổi và giới tính",
-                    Description = "addd",
-                    Icon = "addd",
-                    DisplayOrder = 1,
-                    Type = EnumSurveyQuestion.AgeGender,
-                    Answers = AgeGenderQuestionSourse.AgeGenderQuestion
-                }
-            );
+            var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, Settings.SurveyQuestionFileName);
+            var surveyQuestions = ConvertHelper.DeserializeFromFilePath<IList<SurveyQuestion>>(path);
+
+            //builder.Entity<SurveyQuestion>().HasData
+            //(
+            //    new SurveyQuestion()
+            //    {
+            //        Id = Guid.NewGuid(),
+            //        Question = "Bạn biết đến Fsel từ đâu?",
+            //        Description = "addd",
+            //        Icon = "addd",
+            //        DisplayOrder = 1,
+            //        Type = EnumSurveyQuestion.FselSource,
+            //        Answers = FselSourceQuestionSource.FselSourceQuestion
+            //    },
+            //    new SurveyQuestion()
+            //    {
+            //        Id = Guid.NewGuid(),
+            //        Question = "Chọn hướng đi của bạn",
+            //        Description = "addd",
+            //        Icon = "addd",
+            //        DisplayOrder = 1,
+            //        Type = EnumSurveyQuestion.ChooseDirection,
+            //        Answers = ChooseDirectionQuestionSourse.ChooseDirectionQuestion
+            //    },
+            //    new SurveyQuestion()
+            //    {
+            //        Id = Guid.NewGuid(),
+            //        Question = "Tại sao bạn học ngoại ngữ",
+            //        Description = "addd",
+            //        Icon = "addd",
+            //        DisplayOrder = 1,
+            //        Type = EnumSurveyQuestion.ChooseLanguage,
+            //        Answers = ChooseLanguageQuestionSourse.ChooseLanguageQuestion
+            //    },
+            //    new SurveyQuestion()
+            //    {
+            //        Id = Guid.NewGuid(),
+            //        Question = "Chọn thời gian học tập ",
+            //        Description = "addd",
+            //        Icon = "addd",
+            //        DisplayOrder = 1,
+            //        Type = EnumSurveyQuestion.StudyTime,
+            //        Answers = StudyTimeQuestionSourse.StudyTimeQuestion
+            //    },
+            //    new SurveyQuestion()
+            //    {
+            //        Id = Guid.NewGuid(),
+            //        Question = "Xác định độ tuổi và giới tính",
+            //        Description = "addd",
+            //        Icon = "addd",
+            //        DisplayOrder = 1,
+            //        Type = EnumSurveyQuestion.AgeGender,
+            //        Answers = AgeGenderQuestionSourse.AgeGenderQuestion
+            //    }
+            //);
         }
     }
 }

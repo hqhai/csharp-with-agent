@@ -7,7 +7,7 @@ namespace Fsel.Common.Enums
         FselSource,
         ChooseDirection,
         ChooseLanguage,
-        YourPosition,
+        YourPlace,
         AgeGender,
         StudyTime
     }

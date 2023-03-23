@@ -2,7 +2,7 @@
 
 namespace Fsel.Interaction.Domain.Entities.SurveyQuestionConfigs.SurverQuestionSources
 {
-    public class YourPositionQuestionSourse
+    public class YourPlaceQuestionSourse
     {
     }
 }

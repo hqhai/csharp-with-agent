@@ -107,6 +107,15 @@ namespace Fsel.Common.Helpers
             return new string(arr);
         }
 
+        public static T? DeserializeFromFilePath<T>(string path)
+        {
+            using (StreamReader sr = new StreamReader(path))
+            {
+                string jsonString = sr.ReadToEnd();
+                return Deserialize<T>(jsonString);
+            }
+        }
+
         public static string Serialize(this object? data, bool isCamelCase = false)
         {
             var serializerSettings = new JsonSerializerSettings();
@@ -118,7 +127,7 @@ namespace Fsel.Common.Helpers
             return jsonString;
         }
 
-        public static T? Deserialize<T>(this string? data)
+        public static T? Deserialize<T>(this string? data, bool isCamelCase = false)
         {
             try
             {

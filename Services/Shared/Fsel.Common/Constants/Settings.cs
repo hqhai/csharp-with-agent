@@ -30,6 +30,8 @@ namespace Fsel.Common.Constants
 
         public const string SettingFileName = "appsettings.json";
 
+        public const string SurveyQuestionFileName = "Resources//SurveyQuestions.json";
+
         public const string DefaultConnection = "DefaultConnection";
 
         public const string CorsPolicy = "CorsPolicy";

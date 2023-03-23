@@ -1,0 +1,168 @@
+[
+  {
+    "question": "Bạn biết đến Fsel từ đâu?",
+    "description": "addd",
+    "icon": "addd",
+    "displayOrder": 1,
+    "type": "FselSource",
+    "answers": [
+      {
+        "Id": 1,
+        "Content": "Tìm kiếm Google",
+        "Image": "Google"
+      },
+      {
+        "Id": 2,
+        "Content": "Facebook",
+        "Image": "Facebook"
+      },
+      {
+        "Id": 3,
+        "Content": "Youtube",
+        "Image": "Youtube"
+      },
+      {
+        "Id": 4,
+        "Content": "Tiktok",
+        "Image": "Tiktok"
+      },
+      {
+        "Id": 5,
+        "Content": "Bạn bè/Gia đình",
+        "Image": "Bạn bè/Gia đình"
+      },
+      {
+        "Id": 6,
+        "Content": "Tin tức/Báo chí/Blog",
+        "Image": "Tin tức/Báo chí/Blog"
+      },
+      {
+        "Id": 7,
+        "Content": "Tivi",
+        "Image": "Tivi"
+      },
+      {
+        "Id": 8,
+        "Content": "Khác....",
+        "Image": "Khác...."
+      }
+    ]
+  },
+  {
+    "question": "Chọn hướng đi của bạn",
+    "description": "addd",
+    "icon": "addd",
+    "displayOrder": 2,
+    "type": "ChooseDirection",
+    "answers": [
+      {
+        "Id": 1,
+        "Content": "Bạn đã biết một chút Tiếng Anh"
+      },
+      {
+        "Id": 2,
+        "Content": "Đây là lần đầu bạn học Tiếng Anh"
+      }
+    ]
+  },
+  {
+    "question": "Tại sao bạn học ngoại ngữ",
+    "description": "addd",
+    "icon": "addd",
+    "displayOrder": 3,
+    "type": "ChooseLanguage",
+    "answers": [
+      {
+        "Id": 1,
+        "Content": "Văn hóa",
+        "Image": "Văn hóa"
+      },
+      {
+        "Id": 2,
+        "Content": "Du lịch",
+        "Image": "Du lịch"
+      },
+      {
+        "Id": 3,
+        "Content": "Kết bạn và chia sẻ",
+        "Image": "Kết bạn và chia sẻ"
+      },
+      {
+        "Id": 4,
+        "Content": "Học tập",
+        "Image": "Học tập"
+      },
+      {
+        "Id": 5,
+        "Content": "Cơ hội nghề nghiệp",
+        "Image": "Cơ hội nghề nghiệp"
+      },
+      {
+        "Id": 6,
+        "Content": "Khác....",
+        "Image": "Khác...."
+      }
+    ]
+  },
+  {
+    "question": "Vị trí của bạn",
+    "description": "addd",
+    "icon": "addd",
+    "displayOrder": 4,
+    "type": "YourPlace",
+    "answers": null
+  },
+  {
+    "question": "Chọn thời gian học tập ",
+    "description": "addd",
+    "icon": "addd",
+    "displayOrder": 5,
+    "type": "StudyTime",
+    "answers": [
+      {
+        "Id": 1,
+        "Content": "8 - 10 am"
+      },
+      {
+        "Id": 2,
+        "Content": "1 - 3 pm"
+      },
+      {
+        "Id": 3,
+        "Content": "3 - 5 pm"
+      },
+      {
+        "Id": 4,
+        "Content": "5 - 9 pm"
+      },
+      {
+        "Id": 5,
+        "Content": "7 - 10 pm"
+      }
+    ]
+  },
+  {
+    "question": "Xác định độ tuổi và giới tính",
+    "description": "addd",
+    "icon": "addd",
+    "displayOrder": 6,
+    "type": "AgeGender",
+    "answers": {
+      "Birthday": null,
+      "AgeGenderQuestions": [
+        {
+          "Id": 1,
+          "Gender": 0
+        },
+        {
+          "Id": 2,
+          "Gender": 1
+        },
+        {
+          "Id": 3,
+          "Gender": 2
+        }
+      ]
+    }
+  }
+]

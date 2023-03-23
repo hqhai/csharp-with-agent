@@ -2,11 +2,11 @@
 
 namespace Fsel.Interaction.Domain.Entities.SurveyQuestionConfigs
 {
-    public class YourPositionQuestion
+    public class YourPlaceQuestion
     {
     }
 
-    public class YourPositionAnswer
+    public class YourPlaceAnswer
     {
         public string? CountryCode { get; set; }
         public string? CountryName { get; set; }
