@@ -23,8 +23,6 @@ namespace Fsel.Course.Domain.Models.EntityModels
 
         public string? TeacherName { get; set; }
 
-        public EnumUnitType Type { get; set; }
-
         public EnumCourseLevel CourseLevel { get; set; }
     }
 }
