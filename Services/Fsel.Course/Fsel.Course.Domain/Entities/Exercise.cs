@@ -8,7 +8,7 @@ namespace Fsel.Course.Domain.Entities
     public class Exercise : Entity
     {
         /// <summary>
-        /// Tên Exercise
+        /// Name Exercise
         /// </summary>
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         [MaxLength(250, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
@@ -21,7 +21,7 @@ namespace Fsel.Course.Domain.Entities
         public string? MediaPost { get; set; }
 
         /// <summary>
-        /// Loại kỹ năng
+        /// Course Skill
         /// </summary>
         public EnumCourseSkill CourseSkill { get; set; }
 
