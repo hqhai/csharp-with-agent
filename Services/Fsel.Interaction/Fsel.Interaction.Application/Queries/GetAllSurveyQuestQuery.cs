@@ -31,6 +31,7 @@ namespace Fsel.Interaction.Application.Queries
 
             var surveyQuestionquery = await _surveyQuestionRepository.Queryable.Select(x => new SurveyQuestionModel
             {
+                Id = x.Id,
                 Type = x.Type,
                 Description = x.Description,
                 DisplayOrder = x.DisplayOrder,

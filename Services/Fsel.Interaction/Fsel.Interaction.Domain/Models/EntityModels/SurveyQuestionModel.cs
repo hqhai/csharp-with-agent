@@ -3,9 +3,10 @@
 namespace Fsel.Interaction.Domain.Models.EntityModels
 {
     using Fsel.Common.Enums;
+    using Fsel.Core.Base.BaseModels;
     using Fsel.Interaction.Domain.Entities;
 
-    public class SurveyQuestionModel
+    public class SurveyQuestionModel : BaseModel
     {
         public string? Question { get; set; }
         public string? Description { get; set; }
