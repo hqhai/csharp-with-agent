@@ -41,6 +41,6 @@ namespace Fsel.Course.Domain.Entities
             get { return TimeSpan.FromTicks(ExecutionTime); }
         }
 
-        public ICollection<TimeCodeExercise> TimeCodeExercises { get; set; } = new List<TimeCodeExercise>();
+        public ICollection<TimeCodeExerciseModel> TimeCodeExercises { get; set; } = new List<TimeCodeExerciseModel>();
     }
 }

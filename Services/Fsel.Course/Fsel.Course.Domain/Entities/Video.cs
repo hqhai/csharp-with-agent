@@ -4,6 +4,7 @@ using Fsel.Common.Enums.ErrorCodes;
 using Fsel.Core.Entities;
 using Fsel.Course.Domain.Enums;
 using Fsel.Course.Domain.Enums.ErrorCodes;
+using Fsel.Course.Domain.Models.EntityModels;
 
 namespace Fsel.Course.Domain.Entities
 {
@@ -42,7 +43,7 @@ namespace Fsel.Course.Domain.Entities
         /// </summary>
         public EnumCourseLevel CourseLevel { get; set; }
 
-        public ICollection<LessonVideo> LessonVideos { get; set; } = new List<LessonVideo>();
-        public ICollection<VideoTimeCode> VideoTimeCodes { get; set; } = new List<VideoTimeCode>();
+        public ICollection<LessonVideoModel> LessonVideos { get; set; } = new List<LessonVideoModel>();
+        public ICollection<VideoTimeCodeModel> VideoTimeCodes { get; set; } = new List<VideoTimeCodeModel>();
     }
 }

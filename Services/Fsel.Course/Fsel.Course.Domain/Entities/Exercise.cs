@@ -2,8 +2,6 @@ using System.ComponentModel.DataAnnotations;
 using Fsel.Common.Enums;
 using Fsel.Common.Enums.ErrorCodes;
 using Fsel.Core.Entities;
-using Fsel.Course.Domain.Enums;
-using Fsel.Course.Domain.Enums.ErrorCodes;
 
 namespace Fsel.Course.Domain.Entities
 {
@@ -27,7 +25,7 @@ namespace Fsel.Course.Domain.Entities
         /// </summary>
         public EnumCourseSkill CourseSkill { get; set; }
 
-        public ICollection<TimeCodeExercise> TimeCodeExercises { get; set; } = new List<TimeCodeExercise>();
-        public ICollection<ExerciseQuestion> ExerciseQuestions { get; set; } = new List<ExerciseQuestion>();
+        public IList<TimeCodeExercise> TimeCodeExercises { get; set; } = new List<TimeCodeExercise>();
+        public IList<ExerciseQuestion> ExerciseQuestions { get; set; } = new List<ExerciseQuestion>();
     }
 }

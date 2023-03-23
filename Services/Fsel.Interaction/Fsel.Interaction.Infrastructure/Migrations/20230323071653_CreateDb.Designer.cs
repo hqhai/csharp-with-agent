@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fsel.Interaction.Infrastructure.Migrations
 {
     [DbContext(typeof(InteractionDbContext))]
-    [Migration("20230323044348_CreateDb")]
+    [Migration("20230323071653_CreateDb")]
     partial class CreateDb
     {
         /// <inheritdoc />
@@ -180,7 +180,7 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                         {
                             Id = new Guid("492d8bb9-cdbe-42e7-aa16-35a1915c3621"),
                             AnswerStr = "[{\"Id\":1,\"Content\":\"T\\u00ECm ki\\u1EBFm Google\",\"Image\":\"Google\"},{\"Id\":2,\"Content\":\"Facebook\",\"Image\":\"Facebook\"},{\"Id\":3,\"Content\":\"Youtube\",\"Image\":\"Youtube\"},{\"Id\":4,\"Content\":\"Tiktok\",\"Image\":\"Tiktok\"},{\"Id\":5,\"Content\":\"B\\u1EA1n b\\u00E8/Gia \\u0111\\u00ECnh\",\"Image\":\"B\\u1EA1n b\\u00E8/Gia \\u0111\\u00ECnh\"},{\"Id\":6,\"Content\":\"Tin t\\u1EE9c/B\\u00E1o ch\\u00ED/Blog\",\"Image\":\"Tin t\\u1EE9c/B\\u00E1o ch\\u00ED/Blog\"},{\"Id\":7,\"Content\":\"Tivi\",\"Image\":\"Tivi\"},{\"Id\":8,\"Content\":\"Kh\\u00E1c....\",\"Image\":\"Kh\\u00E1c....\"}]",
-                            CreatedDate = new DateTime(2023, 3, 23, 11, 43, 47, 776, DateTimeKind.Local).AddTicks(410),
+                            CreatedDate = new DateTime(2023, 3, 23, 14, 16, 52, 887, DateTimeKind.Local).AddTicks(7776),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             Description = "addd",
@@ -194,7 +194,7 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                         {
                             Id = new Guid("763d8bb9-cdbe-42e7-aa16-35a1915c3512"),
                             AnswerStr = "[{\"Id\":1,\"Content\":\"B\\u1EA1n \\u0111\\u00E3 bi\\u1EBFt m\\u1ED9t ch\\u00FAt Ti\\u1EBFng Anh\"},{\"Id\":2,\"Content\":\"\\u0110\\u00E2y l\\u00E0 l\\u1EA7n \\u0111\\u1EA7u b\\u1EA1n h\\u1ECDc Ti\\u1EBFng Anh\"}]",
-                            CreatedDate = new DateTime(2023, 3, 23, 11, 43, 47, 779, DateTimeKind.Local).AddTicks(5507),
+                            CreatedDate = new DateTime(2023, 3, 23, 14, 16, 52, 891, DateTimeKind.Local).AddTicks(2785),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             Description = "addd",
@@ -208,7 +208,7 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                         {
                             Id = new Guid("721d8bb9-cdbe-42e7-aa16-35a1915c1123"),
                             AnswerStr = "[{\"Id\":1,\"Content\":\"V\\u0103n h\\u00F3a\",\"Image\":\"V\\u0103n h\\u00F3a\"},{\"Id\":2,\"Content\":\"Du l\\u1ECBch\",\"Image\":\"Du l\\u1ECBch\"},{\"Id\":3,\"Content\":\"K\\u1EBFt b\\u1EA1n v\\u00E0 chia s\\u1EBB\",\"Image\":\"K\\u1EBFt b\\u1EA1n v\\u00E0 chia s\\u1EBB\"},{\"Id\":4,\"Content\":\"H\\u1ECDc t\\u1EADp\",\"Image\":\"H\\u1ECDc t\\u1EADp\"},{\"Id\":5,\"Content\":\"C\\u01A1 h\\u1ED9i ngh\\u1EC1 nghi\\u1EC7p\",\"Image\":\"C\\u01A1 h\\u1ED9i ngh\\u1EC1 nghi\\u1EC7p\"},{\"Id\":6,\"Content\":\"Kh\\u00E1c....\",\"Image\":\"Kh\\u00E1c....\"}]",
-                            CreatedDate = new DateTime(2023, 3, 23, 11, 43, 47, 779, DateTimeKind.Local).AddTicks(7604),
+                            CreatedDate = new DateTime(2023, 3, 23, 14, 16, 52, 892, DateTimeKind.Local).AddTicks(1868),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             Description = "addd",
@@ -222,7 +222,7 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                         {
                             Id = new Guid("713d8bb9-cdbe-42e7-aa16-35a1915c3532"),
                             AnswerStr = "null",
-                            CreatedDate = new DateTime(2023, 3, 23, 11, 43, 47, 779, DateTimeKind.Local).AddTicks(9172),
+                            CreatedDate = new DateTime(2023, 3, 23, 14, 16, 52, 892, DateTimeKind.Local).AddTicks(9346),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             Description = "addd",
@@ -236,7 +236,7 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                         {
                             Id = new Guid("adeaeda6-0e41-4ceb-a3fd-1b195317d776"),
                             AnswerStr = "[{\"Id\":1,\"Content\":\"8 - 10 am\"},{\"Id\":2,\"Content\":\"1 - 3 pm\"},{\"Id\":3,\"Content\":\"3 - 5 pm\"},{\"Id\":4,\"Content\":\"5 - 9 pm\"},{\"Id\":5,\"Content\":\"7 - 10 pm\"}]",
-                            CreatedDate = new DateTime(2023, 3, 23, 11, 43, 47, 780, DateTimeKind.Local).AddTicks(464),
+                            CreatedDate = new DateTime(2023, 3, 23, 14, 16, 52, 893, DateTimeKind.Local).AddTicks(3969),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             Description = "addd",
@@ -249,8 +249,8 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                         new
                         {
                             Id = new Guid("2be9a620-143d-41f6-815b-2038c21a7b23"),
-                            AnswerStr = "{\"Birthday\":null,\"AgeGenderQuestions\":[{\"Id\":1,\"Gender\":0},{\"Id\":2,\"Gender\":1},{\"Id\":3,\"Gender\":2}]}",
-                            CreatedDate = new DateTime(2023, 3, 23, 11, 43, 47, 780, DateTimeKind.Local).AddTicks(2797),
+                            AnswerStr = "{\"Birthday\":null,\"AgeGenderQuestions\":[{\"Id\":1,\"Gender\":\"Male\"},{\"Id\":2,\"Gender\":\"FeMale\"},{\"Id\":3,\"Gender\":\"Other\"}]}",
+                            CreatedDate = new DateTime(2023, 3, 23, 14, 16, 52, 893, DateTimeKind.Local).AddTicks(9351),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             Description = "addd",

@@ -7,6 +7,7 @@ namespace Fsel.Interaction.Api.Controllers
     using Fsel.Common.Constants;
     using Fsel.Common.Helpers;
     using Fsel.Interaction.Application.Commands.CustomerSurveyCmd;
+    using Fsel.Interaction.Application.Queries;
     using Fsel.Interaction.Domain.Entities;
     using Fsel.Interaction.Domain.Models.EntityModels;
     using MediatR;
@@ -33,6 +34,18 @@ namespace Fsel.Interaction.Api.Controllers
         public async Task<IActionResult> Create([FromBody] CreateCustomerSurveyCommand command)
         {
             MethodResult<IList<CustomerSurveyModel>> queryResult = await _mediator.Send(command).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// GetAll Survey Question
+        /// </summary>
+        [HttpGet]
+        [ProducesResponseType(typeof(MethodResult<IList<SurveyQuestionModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetAll()
+        {
+            MethodResult<IList<SurveyQuestionModel>> queryResult = await _mediator.Send(new GetAllSurveyQuestQuery()).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
     }

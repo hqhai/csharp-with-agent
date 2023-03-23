@@ -158,15 +158,15 @@
       "AgeGenderQuestions": [
         {
           "Id": 1,
-          "Gender": 0
+          "Gender": "Male"
         },
         {
           "Id": 2,
-          "Gender": 1
+          "Gender": "Female"
         },
         {
           "Id": 3,
-          "Gender": 2
+          "Gender": "Other"
         }
       ]
     }
