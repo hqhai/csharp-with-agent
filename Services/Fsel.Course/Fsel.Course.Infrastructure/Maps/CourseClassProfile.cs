@@ -11,7 +11,6 @@ namespace Fsel.Course.Infrastructure.Maps
     {
         public CourseClassProfile()
         {
-            CreateMap<IList<CourseClass>, IList<CourseClassModel>>().IgnoreAllNonExisting();
         }
     }
 }

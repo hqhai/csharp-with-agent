@@ -7,10 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Queries\ClassQuery\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\Fsel.Class.Infrastructure\Fsel.Class.Infrastructure.csproj" />
   </ItemGroup>
 

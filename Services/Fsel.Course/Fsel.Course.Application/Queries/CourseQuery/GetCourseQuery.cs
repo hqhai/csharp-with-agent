@@ -28,6 +28,7 @@ namespace Fsel.Course.Application.Queries.CourseQuery
 
         public async Task<MethodResult<CourseModel>> Handle(GetCourseQuery request, CancellationToken cancellationToken)
         {
+            ArgumentNullException.ThrowIfNull(request);
             MethodResult<CourseModel> methodResult = new MethodResult<CourseModel>();
 
             var course = await _courseRepository.GetIncludeByIdAsync(request.Id);
@@ -35,7 +36,7 @@ namespace Fsel.Course.Application.Queries.CourseQuery
             if (course == null)
             {
                 methodResult.AddErrorBadRequest(
-                    nameof(EnumCourseErrorCode.CourseNotExist),
+                    nameof(EnumCourseErrorCode.ListCourseNotExist),
                     nameof(request.Id), request.Id);
                 return methodResult;
             }

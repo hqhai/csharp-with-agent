@@ -15,11 +15,19 @@ namespace Fsel.Course.Application.Services
     {
         [Post("/teacher/get-by-ids")]
         Task<IApiResponse<MethodResult<IList<TeacherModel>>>> GetTeacherByIdsAsync([Body] GetTeacherByIdsQueryModel command);
+
+        [Post("/teacher/get-by-id")]
+        Task<IApiResponse<MethodResult<TeacherModel>>> GetTeacherByIdAsync([Body] GetTeacherByIdQueryModel command);
     }
 
     public class GetTeacherByIdsQueryModel
     {
         public IList<Guid>? Ids { get; set; }
+    }
+
+    public class GetTeacherByIdQueryModel
+    {
+        public Guid Id { get; set; }
     }
 
     public class TeacherModel : BaseModel

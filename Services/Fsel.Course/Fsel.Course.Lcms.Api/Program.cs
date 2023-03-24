@@ -38,7 +38,7 @@ builder.Services.AddScoped<ICourseStudentRepository, CourseStudentRepository>();
 builder.Services.AddScoped<ICourseClassRepository, CourseClassRepository>();
 
 builder.AddRefitClients(typeof(IUserService), appSetting?.Services?.UserApiUrl);
-
+builder.AddRefitClients(typeof(IClassService), appSetting?.Services?.ClassApiUrl);
 var app = builder.Build();
 
 app.UseServices();

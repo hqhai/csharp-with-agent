@@ -1,5 +1,6 @@
 using AutoMapper;
 using Fsel.Common.ActionResults;
+using Fsel.Course.Application.Services;
 using Fsel.Course.Domain.Enums;
 using Fsel.Course.Domain.Enums.ErrorCodes;
 using Fsel.Course.Domain.IRepositories;
@@ -21,17 +22,20 @@ namespace Fsel.Course.Application.Commands.CourseCmd
         private readonly IUnitRepository _unitRepository;
         private readonly IMapper _mapper;
         private readonly IMockTestRepository _mockTestRepository;
+        private readonly IUserService _userService;
 
         public CreateCourseCommandHandler(ICourseRepository courseRepository
             , IUnitRepository unitRepository
             , IMapper mapper
             , IMockTestRepository mockTestRepository
+            , IUserService userService
             )
         {
             _unitRepository = unitRepository;
             _courseRepository = courseRepository;
             _mapper = mapper;
             _mockTestRepository = mockTestRepository;
+            _userService = userService;
         }
 
         public async Task<MethodResult<CourseModel>> Handle(CreateCourseCommand request, CancellationToken cancellationToken)
@@ -84,6 +88,17 @@ namespace Fsel.Course.Application.Commands.CourseCmd
                 methodResult.AddErrorBadRequest(nameof(EnumMockTestErrorCode.TestInValid), nameof(request.CourseUnitMockTests), mocktests.Select(x => x.Id));
                 return methodResult;
             }
+
+            var teachersResult = await _userService.GetTeacherByIdsAsync(new GetTeacherByIdsQueryModel { Ids = course.CourseTeachers.Select(x => x.TeacherId).ToList() });
+            if (!teachersResult.IsSuccessStatusCode)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.ListTeacherCourseNotExist), nameof(request.CourseTeachers));
+                return methodResult;
+            }
+            var teacherNames = teachersResult?.Content?.Result?.Select(x => x.Human?.FullName).ToList();
+            var nameTeacher = string.Join(", ", teacherNames ?? new List<string?>());
+
+            course.Name = $"{course.CourseLevel}-" + nameTeacher;
 
             #endregion Validation
 

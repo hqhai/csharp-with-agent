@@ -74,13 +74,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Fsel.Interaction.Api", "Ser
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Fsel.Class", "Fsel.Class", "{104C3440-61F6-4010-86B3-8175815BA92C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Fsel.Class.Application", "Services\Fsel.Class\Fsel.Class.Application\Fsel.Class.Application.csproj", "{256602E6-E452-46A7-B459-1EA541A7F5BC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Fsel.Class.Application", "Services\Fsel.Class\Fsel.Class.Application\Fsel.Class.Application.csproj", "{256602E6-E452-46A7-B459-1EA541A7F5BC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Fsel.Class.Doman", "Services\Fsel.Class\Fsel.Class.Doman\Fsel.Class.Doman.csproj", "{5BA67D79-E822-4BD4-8B7D-C0F2AA8356EE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Fsel.Class.Doman", "Services\Fsel.Class\Fsel.Class.Doman\Fsel.Class.Doman.csproj", "{5BA67D79-E822-4BD4-8B7D-C0F2AA8356EE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Fsel.Class.Infrastructure", "Services\Fsel.Class\Fsel.Class.Infrastructure\Fsel.Class.Infrastructure.csproj", "{5F1F159B-B014-4CE6-B8D3-0CBD3CFD0138}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Fsel.Class.Infrastructure", "Services\Fsel.Class\Fsel.Class.Infrastructure\Fsel.Class.Infrastructure.csproj", "{5F1F159B-B014-4CE6-B8D3-0CBD3CFD0138}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Fsel.Class.Api", "Services\Fsel.Class\Fsel.Class.Api\Fsel.Class.Api.csproj", "{D64C7ABD-13B7-4A9F-8456-F969126D41FA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Fsel.Class.Api", "Services\Fsel.Class\Fsel.Class.Api\Fsel.Class.Api.csproj", "{D64C7ABD-13B7-4A9F-8456-F969126D41FA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -2,9 +2,6 @@
 
 namespace Fsel.Class.Infrastructure.Repositories
 {
-    using System;
-    using System.Linq;
-    using System.Threading.Tasks;
     using Fsel.Class.Doman.IRepositories;
     using Fsel.Core.Base;
     using Classes = Fsel.Class.Doman.Entities.Class;

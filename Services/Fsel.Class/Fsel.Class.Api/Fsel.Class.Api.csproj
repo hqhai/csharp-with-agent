@@ -15,8 +15,4 @@
     <ProjectReference Include="..\Fsel.Class.Application\Fsel.Class.Application.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Controllers\" />
-  </ItemGroup>
-
 </Project>

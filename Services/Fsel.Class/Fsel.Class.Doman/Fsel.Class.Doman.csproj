@@ -10,8 +10,4 @@
     <ProjectReference Include="..\..\Shared\Fsel.Core\Fsel.Core.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Models\QueryModels\Classes\" />
-  </ItemGroup>
-
 </Project>
