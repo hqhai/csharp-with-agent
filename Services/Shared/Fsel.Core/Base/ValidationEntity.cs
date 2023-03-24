@@ -87,6 +87,10 @@ namespace Fsel.Core.Base
 
                             errorResult.Errors.Add(new Error(memberName, errorValues, extracValues));
                         }
+                        else
+                        {
+                            errorResult.Errors.Add(new Error(memberName));
+                        }
                     }
                     AddErrorResults(errorResult);
                 }
