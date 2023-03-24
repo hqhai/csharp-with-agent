@@ -62,17 +62,19 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Fsel.Course.Lcms.Api", "Ser
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Fsel.Course.Lms.Api", "Services\Fsel.Course\Fsel.Course.Lms.Api\Fsel.Course.Lms.Api.csproj", "{197343D9-2502-4775-9988-1249E377A7AF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Fsel.Course.Lms.Application", "Services\Fsel.Course\Fsel.Course.Lms.Application\Fsel.Course.Lms.Application.csproj", "{0E19660F-D919-428C-9702-AE4ED4A7886C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Fsel.Course.Lms.Application", "Services\Fsel.Course\Fsel.Course.Lms.Application\Fsel.Course.Lms.Application.csproj", "{0E19660F-D919-428C-9702-AE4ED4A7886C}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Fsel.Interaction", "Fsel.Interaction", "{C73BC8D0-81BE-4B39-8D9C-2499A3B3905B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Fsel.Interaction.Application", "Services\Fsel.Interaction\Fsel.Interaction.Application\Fsel.Interaction.Application.csproj", "{994987E5-BAC5-4D1B-A169-1E5DB694D77E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Fsel.Interaction.Application", "Services\Fsel.Interaction\Fsel.Interaction.Application\Fsel.Interaction.Application.csproj", "{994987E5-BAC5-4D1B-A169-1E5DB694D77E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Fsel.Interaction.Domain", "Services\Fsel.Interaction\Fsel.Interaction.Domain\Fsel.Interaction.Domain.csproj", "{92EFAC9B-1612-4190-BF2F-56F75259003C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Fsel.Interaction.Domain", "Services\Fsel.Interaction\Fsel.Interaction.Domain\Fsel.Interaction.Domain.csproj", "{92EFAC9B-1612-4190-BF2F-56F75259003C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Fsel.Interaction.Infrastructure", "Services\Fsel.Interaction\Fsel.Interaction.Infrastructure\Fsel.Interaction.Infrastructure.csproj", "{255DA686-CCB6-4733-A76E-B5A93D2D7A98}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Fsel.Interaction.Infrastructure", "Services\Fsel.Interaction\Fsel.Interaction.Infrastructure\Fsel.Interaction.Infrastructure.csproj", "{255DA686-CCB6-4733-A76E-B5A93D2D7A98}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Fsel.Interaction.Api", "Services\Fsel.Interaction\Fsel.Interaction.Api\Fsel.Interaction.Api.csproj", "{9AFCAF07-B2A0-48D6-8D1F-980B0676BB19}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Fsel.Interaction.Api", "Services\Fsel.Interaction\Fsel.Interaction.Api\Fsel.Interaction.Api.csproj", "{9AFCAF07-B2A0-48D6-8D1F-980B0676BB19}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Fsel.Interaction", "Fsel.Interaction", "{C4EFE99F-B7CE-4C90-B10C-38DAC147EBF1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -148,6 +150,26 @@ Global
 		{197343D9-2502-4775-9988-1249E377A7AF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{197343D9-2502-4775-9988-1249E377A7AF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{197343D9-2502-4775-9988-1249E377A7AF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0E19660F-D919-428C-9702-AE4ED4A7886C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0E19660F-D919-428C-9702-AE4ED4A7886C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0E19660F-D919-428C-9702-AE4ED4A7886C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0E19660F-D919-428C-9702-AE4ED4A7886C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{994987E5-BAC5-4D1B-A169-1E5DB694D77E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{994987E5-BAC5-4D1B-A169-1E5DB694D77E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{994987E5-BAC5-4D1B-A169-1E5DB694D77E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{994987E5-BAC5-4D1B-A169-1E5DB694D77E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{92EFAC9B-1612-4190-BF2F-56F75259003C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{92EFAC9B-1612-4190-BF2F-56F75259003C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{92EFAC9B-1612-4190-BF2F-56F75259003C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{92EFAC9B-1612-4190-BF2F-56F75259003C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{255DA686-CCB6-4733-A76E-B5A93D2D7A98}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{255DA686-CCB6-4733-A76E-B5A93D2D7A98}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{255DA686-CCB6-4733-A76E-B5A93D2D7A98}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{255DA686-CCB6-4733-A76E-B5A93D2D7A98}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9AFCAF07-B2A0-48D6-8D1F-980B0676BB19}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9AFCAF07-B2A0-48D6-8D1F-980B0676BB19}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9AFCAF07-B2A0-48D6-8D1F-980B0676BB19}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9AFCAF07-B2A0-48D6-8D1F-980B0676BB19}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -175,6 +197,12 @@ Global
 		{6D6DC205-C2B8-4C65-824D-C827B76A11AE} = {C83462DD-D506-47E8-A3AE-FA90D7DE973D}
 		{06095DB5-3242-48B9-8713-557E2605E16D} = {7FDF6C08-1B24-4D79-BC5D-63213C874C90}
 		{197343D9-2502-4775-9988-1249E377A7AF} = {7FDF6C08-1B24-4D79-BC5D-63213C874C90}
+		{0E19660F-D919-428C-9702-AE4ED4A7886C} = {7FDF6C08-1B24-4D79-BC5D-63213C874C90}
+		{994987E5-BAC5-4D1B-A169-1E5DB694D77E} = {C4EFE99F-B7CE-4C90-B10C-38DAC147EBF1}
+		{92EFAC9B-1612-4190-BF2F-56F75259003C} = {C4EFE99F-B7CE-4C90-B10C-38DAC147EBF1}
+		{255DA686-CCB6-4733-A76E-B5A93D2D7A98} = {C4EFE99F-B7CE-4C90-B10C-38DAC147EBF1}
+		{9AFCAF07-B2A0-48D6-8D1F-980B0676BB19} = {C4EFE99F-B7CE-4C90-B10C-38DAC147EBF1}
+		{C4EFE99F-B7CE-4C90-B10C-38DAC147EBF1} = {5E7078A9-8DE2-459D-854D-7D8625E92C43}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {C3F5014D-C4B6-471E-9F07-3E7AE3B37304}

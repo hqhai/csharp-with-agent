@@ -17,4 +17,3 @@ namespace Fsel.Course.Lms.Application.Services.StudentServices
         Task<IApiResponse<MethodResult<StudentModel>>> GetStudentByIdsAsync([Body] GetStudentByIdQueryModel command);
     }
 }
-}
