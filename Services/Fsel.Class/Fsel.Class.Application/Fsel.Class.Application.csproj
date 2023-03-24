@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net7.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Folder Include="Queries\ClassQuery\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Fsel.Class.Infrastructure\Fsel.Class.Infrastructure.csproj" />
+  </ItemGroup>
+
+</Project>
