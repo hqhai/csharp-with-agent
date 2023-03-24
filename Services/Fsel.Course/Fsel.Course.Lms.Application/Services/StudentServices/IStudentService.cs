@@ -11,9 +11,10 @@ namespace Fsel.Course.Lms.Application.Services.StudentServices
     using Fsel.Course.Lms.Application.Services.StudentServices.Models;
     using Refit;
 
-    public interface IUserService
+    public interface IStudentService
     {
         [Post("/student/get-by-ids")]
-        Task<IApiResponse<MethodResult<IList<StudentModel>>>> GetStudentByIdsAsync([Body] GetStudentByIdQueryModel command);
+        Task<IApiResponse<MethodResult<StudentModel>>> GetStudentByIdsAsync([Body] GetStudentByIdQueryModel command);
     }
+}
 }

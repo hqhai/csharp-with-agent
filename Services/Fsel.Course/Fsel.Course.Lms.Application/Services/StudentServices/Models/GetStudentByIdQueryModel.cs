@@ -10,6 +10,6 @@ namespace Fsel.Course.Lms.Application.Services.StudentServices.Models
 
     public class GetStudentByIdQueryModel
     {
-        public IList<Guid>? Ids { get; set; }
+        public Guid Id { get; set; }
     }
 }
