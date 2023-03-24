@@ -9,10 +9,13 @@ namespace Fsel.Identity.Api.Controllers
     using Fsel.Identity.Domain.Models.EntityModels;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
+    using Fsel.Common.Enums;
+    using Microsoft.AspNetCore.Authorization;
 
     [ApiVersion(Settings.APIVersion)]
     [Route(Settings.APIDefaultRoute + "/student")]
     [ApiController]
+    //[Authorize(Roles = nameof(EnumRole.Student))]
     public class StudentController : ControllerBase
     {
         private readonly IMediator _mediator;
@@ -25,10 +28,10 @@ namespace Fsel.Identity.Api.Controllers
         /// <summary>
         /// Get Student by UserId
         /// </summary>
-        [HttpGet("{id}")]
+        [HttpGet("get-by-user-id/{id}")]
         [ProducesResponseType(typeof(MethodResult<StudentModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> Get([FromRoute] string id)
+        public async Task<IActionResult> GetByUserId([FromRoute] string? id)
         {
             MethodResult<StudentModel> commandResult = await _mediator.Send(new GetStudentByUserIdQuery { Id = id }).ConfigureAwait(false);
             return commandResult.GetActionResult();

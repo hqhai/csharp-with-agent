@@ -9,11 +9,13 @@ namespace Fsel.Course.Lms.Application.Services.StudentServices
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
     using Fsel.Course.Lms.Application.Services.StudentServices.Models;
+    using Microsoft.AspNetCore.Mvc;
+    using Microsoft.AspNetCore.Mvc.Routing;
     using Refit;
 
     public interface IStudentService
     {
-        [Post("/student/get-by-ids")]
-        Task<IApiResponse<MethodResult<StudentModel>>> GetStudentByIdsAsync([Body] GetStudentByIdQueryModel command);
+        [Get("/student/get-by-user-id/{id}")]
+        Task<IApiResponse<MethodResult<StudentModel>>> GetStudentByUserIdAsync([FromRoute] string id);
     }
 }

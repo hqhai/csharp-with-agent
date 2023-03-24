@@ -8,8 +8,8 @@ namespace Fsel.Course.Lms.Application.Services.StudentServices.Models
     using System.Text;
     using System.Threading.Tasks;
 
-    public class GetStudentByIdQueryModel
+    public class GetStudentByUserIdQueryModel
     {
-        public Guid Id { get; set; }
+        public string? Id { get; set; }
     }
 }

@@ -27,14 +27,14 @@ namespace Fsel.Course.Lms.Api.Controllers
         }
 
         /// <summary>
-        /// Get List unit by courseId
+        /// Get units by course Id
         /// </summary>
-        [HttpGet("{id}")]
+        [HttpGet]
         [ProducesResponseType(typeof(MethodResult<CourseModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> Get([FromRoute] Guid id)
+        public async Task<IActionResult> GetUnitsByCourseId()
         {
-            MethodResult<CourseModel> commandResult = await _mediator.Send(new GetUnitByCourseQuery { Id = id }).ConfigureAwait(false);
+            MethodResult<CourseModel> commandResult = await _mediator.Send(new GetUnitByCourseQuery()).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
     }

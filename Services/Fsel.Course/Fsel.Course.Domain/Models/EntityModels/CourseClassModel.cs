@@ -9,5 +9,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public Guid CourseId { get; set; }
 
         public Guid ClassId { get; set; }
+
+        public ICollection<CourseModel>? Course { get; set; }
     }
 }
