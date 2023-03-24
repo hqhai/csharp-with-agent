@@ -1,17 +1,15 @@
 using System.ComponentModel.DataAnnotations;
+using Fsel.Common.Enums;
 using Fsel.Common.Enums.ErrorCodes;
 using Fsel.Core.Entities;
-using Fsel.Course.Domain.Enums;
-using Fsel.Course.Domain.Enums.ErrorCodes;
 
 namespace Fsel.Course.Domain.Entities
 {
     public class Exercise : Entity
     {
         /// <summary>
-        /// Tên Exercise
+        /// Name Exercise
         /// </summary>
-        [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         [MaxLength(250, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? Name { get; set; }
 
@@ -22,7 +20,7 @@ namespace Fsel.Course.Domain.Entities
         public string? MediaPost { get; set; }
 
         /// <summary>
-        /// Loại kỹ năng
+        /// Course Skill
         /// </summary>
         public EnumCourseSkill CourseSkill { get; set; }
 

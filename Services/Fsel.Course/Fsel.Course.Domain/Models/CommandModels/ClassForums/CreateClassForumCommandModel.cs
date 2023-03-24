@@ -1,4 +1,5 @@
 using System.Text.Json.Serialization;
+using Fsel.Common.Enums;
 using Fsel.Common.Helpers;
 using Fsel.Course.Domain.Enums;
 

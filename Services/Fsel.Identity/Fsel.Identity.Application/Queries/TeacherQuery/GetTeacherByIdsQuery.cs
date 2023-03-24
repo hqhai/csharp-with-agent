@@ -1,7 +1,7 @@
 using AutoMapper;
 using Fsel.Common.ActionResults;
 using Fsel.Identity.Domain.IRepositories;
-using Fsel.Identity.Domain.Models;
+using Fsel.Identity.Domain.Models.EntityModels;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;

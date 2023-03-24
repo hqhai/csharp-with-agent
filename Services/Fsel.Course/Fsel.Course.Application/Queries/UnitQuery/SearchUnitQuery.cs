@@ -59,7 +59,6 @@ namespace Fsel.Course.Application.Queries.UnitQuery
                                 Name = unit.Name,
                                 DisplayName = unit.DisplayName,
                                 IsActive = !unit.CourseUnitMockTests.Any(),
-                                Type = unit.Type,
                                 CourseLevel = unit.CourseLevel,
                                 CreatedDate = unit.CreatedDate,
                                 CreatedUserId = unit.CreatedUserId,
@@ -78,7 +77,7 @@ namespace Fsel.Course.Application.Queries.UnitQuery
             }
 
             int totalItem = await unitQuery.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
-            var lists = await unitQuery.OrderByDescending(x => x.Id)
+            var lists = await unitQuery.OrderByDescending(x => x.CreatedDate)
                     .Skip((request.Page - 1) * request.PageSize)
                     .Take(request.PageSize)
                     .AsNoTracking()

@@ -14,7 +14,7 @@ namespace Fsel.Identity.Domain.Models.CommandModels.Parents
         [Required]
         public string? UserName { get; set; }
 
-        public DateTime? BirthDay { get; set; }
+        public DateTime? Birthday { get; set; }
 
         public EnumGender Gender { get; set; }
 

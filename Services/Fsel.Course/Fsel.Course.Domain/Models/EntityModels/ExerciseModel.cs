@@ -1,3 +1,4 @@
+using Fsel.Common.Enums;
 using Fsel.Core.Base.BaseModels;
 using Fsel.Course.Domain.Enums;
 
@@ -11,6 +12,6 @@ namespace Fsel.Course.Domain.Models.EntityModels
 
         public EnumCourseSkill CourseSkill { get; set; }
 
-        public ICollection<QuestionModel>? Questions { get; set; }
+        public IList<QuestionModel>? Questions { get; set; }
     }
 }

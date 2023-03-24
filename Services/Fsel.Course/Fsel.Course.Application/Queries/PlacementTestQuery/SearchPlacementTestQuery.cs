@@ -55,7 +55,7 @@ namespace Fsel.Course.Application.Queries.PlacementTestQuery
             }
 
             int totalItem = await placementTestQuery.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
-            var lists = await placementTestQuery.OrderByDescending(x => x.Id)
+            var lists = await placementTestQuery.OrderByDescending(x => x.CreatedDate)
                     .Skip((request.Page - 1) * request.PageSize)
                     .Take(request.PageSize)
                     .AsNoTracking()

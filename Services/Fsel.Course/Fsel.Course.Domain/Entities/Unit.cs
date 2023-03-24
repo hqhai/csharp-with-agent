@@ -26,11 +26,6 @@ namespace Fsel.Course.Domain.Entities
         public bool IsActive { get; set; }
 
         /// <summary>
-        /// Loại Unit
-        /// </summary>
-        public EnumUnitType Type { get; set; }
-
-        /// <summary>
         /// Trình dộ Level
         /// </summary>
         public EnumCourseLevel CourseLevel { get; set; }
