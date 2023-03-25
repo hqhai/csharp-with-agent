@@ -37,6 +37,8 @@ namespace Fsel.Course.Infrastructure
         public DbSet<ExerciseQuestion> ExerciseQuestions { get; set; }
         public DbSet<Question> Questions { get; set; }
         public DbSet<CourseTeacher> CourseTeachers { get; set; }
+        public DbSet<UnitStudent> UnitStudents { get; set; }
+        public DbSet<LessonStudent> LessonStudents { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

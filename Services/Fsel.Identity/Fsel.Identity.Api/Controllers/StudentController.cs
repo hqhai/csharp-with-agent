@@ -15,7 +15,6 @@ namespace Fsel.Identity.Api.Controllers
     [ApiVersion(Settings.APIVersion)]
     [Route(Settings.APIDefaultRoute + "/student")]
     [ApiController]
-    //[Authorize(Roles = nameof(EnumRole.Student))]
     public class StudentController : ControllerBase
     {
         private readonly IMediator _mediator;

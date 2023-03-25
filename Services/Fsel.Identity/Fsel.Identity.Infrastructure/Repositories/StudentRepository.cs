@@ -13,7 +13,7 @@ namespace Fsel.Identity.Infrastructure.Repositories
         {
         }
 
-        public async Task<Student?> GetIncludeByIdAsync(Guid? id)
+        public override async Task<Student?> GetIncludeByIdAsync(Guid id, int? siteId = null)
         {
             try
             {
@@ -26,20 +26,6 @@ namespace Fsel.Identity.Infrastructure.Repositories
                 throw;
             }
         }
-
-        /*public override async Task<Student?> GetIncludeByIdAsync(Guid id, int? siteId = null)
-        {
-            try
-            {
-                return await Queryable
-                .Include(x => x.Human)
-                .FirstOrDefaultAsync(x => x.Id == id);
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }*/
 
         public async Task<IList<Student>> GetIncludeByIdsAsync(IList<Guid> ids, int? siteId = null)
         {
