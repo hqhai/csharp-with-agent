@@ -15,11 +15,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Fsel.Course.Domain\Fsel.Course.Domain.csproj" />
+    <Folder Include="Migrations\" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Migrations\" />
+    <ProjectReference Include="..\Fsel.Course.Domain\Fsel.Course.Domain.csproj" />
   </ItemGroup>
 
 </Project>

@@ -56,10 +56,10 @@ namespace Fsel.Course.Application.Queries.CourseQuery
                                   UpdatedFullName = course.UpdatedFullName,
                                   CourseTeachers = _mapper.Map<IList<CourseTeacherModel>>(course.CourseTeachers)
                               }).ToListAsync(cancellationToken: cancellationToken);
-            if (courseQuery == null)
+            if (courseQuery.Count == 0)
             {
                 methodResult.AddErrorBadRequest(
-                  nameof(EnumCourseErrorCode.CourseNotExist));
+                  nameof(EnumCourseErrorCode.ListCourseNotExist));
                 return methodResult;
             }
             methodResult.Result = courseQuery;

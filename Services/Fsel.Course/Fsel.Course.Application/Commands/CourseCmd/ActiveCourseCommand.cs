@@ -4,7 +4,6 @@ namespace Fsel.Course.Application.Commands.CourseCmd
 {
     using System.Linq;
     using System.Threading.Tasks;
-    using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.Enums.ErrorCodes;

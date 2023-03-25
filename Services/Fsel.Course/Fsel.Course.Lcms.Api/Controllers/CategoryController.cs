@@ -2,15 +2,15 @@
 
 namespace Fsel.Course.Lcms.Api.Controllers
 {
-    using Fsel.Common.ActionResults;
     using System.Net;
+    using System.Threading.Tasks;
+    using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
     using Fsel.Common.Enums;
+    using Fsel.Course.Application.Queries.CategoryCmd;
     using MediatR;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
-    using Fsel.Course.Application.Queries.CategoryCmd;
-    using System.Threading.Tasks;
 
     [ApiVersion(Settings.APIVersion)]
     [Route(Settings.APIDefaultRoute + "/category")]

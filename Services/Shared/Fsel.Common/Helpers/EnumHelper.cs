@@ -36,48 +36,48 @@ namespace Fsel.Common.Helpers
             return courseLevels;
         }
 
-        public static string? GetClassCodeByEnumCourseLevel(this EnumCourseLevel? enumCourseLevel)
+        public static string? GetTrainingCodeByEnumCourseLevel(this EnumCourseLevel? enumCourseLevel)
         {
-            var classCode = "";
+            var trainingCode = "";
             switch (enumCourseLevel)
             {
                 case EnumCourseLevel.A2:
-                    classCode = "A";
+                    trainingCode = "A2";
                     break;
 
                 case EnumCourseLevel.B1:
-                    classCode = EnumCourseLevel.B1.ToString();
+                    trainingCode = EnumCourseLevel.B1.ToString();
                     break;
 
                 case EnumCourseLevel.B1Plus:
-                    classCode = "B1+";
+                    trainingCode = "B1+";
                     break;
 
                 case EnumCourseLevel.B2:
-                    classCode = EnumCourseLevel.B2.ToString();
+                    trainingCode = EnumCourseLevel.B2.ToString();
                     break;
 
                 case EnumCourseLevel.C1:
-                    classCode = EnumCourseLevel.C1.ToString();
+                    trainingCode = EnumCourseLevel.C1.ToString();
                     break;
 
                 case EnumCourseLevel.RFE:
-                    classCode = EnumCourseLevel.RFE.ToString();
+                    trainingCode = EnumCourseLevel.RFE.ToString();
                     break;
 
                 case EnumCourseLevel.MS1:
-                    classCode = EnumCourseLevel.MS1.ToString();
+                    trainingCode = EnumCourseLevel.MS1.ToString();
                     break;
 
                 case EnumCourseLevel.MS2:
-                    classCode = EnumCourseLevel.MS2.ToString();
+                    trainingCode = EnumCourseLevel.MS2.ToString();
                     break;
 
                 case EnumCourseLevel.MS3:
-                    classCode = EnumCourseLevel.MS3.ToString();
+                    trainingCode = EnumCourseLevel.MS3.ToString();
                     break;
             }
-            return classCode;
+            return trainingCode;
         }
 
         public static IList<string> GetListCourseLevels(this EnumCourseType? courseType)

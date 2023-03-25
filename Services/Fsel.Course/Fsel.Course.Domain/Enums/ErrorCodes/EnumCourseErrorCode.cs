@@ -26,5 +26,15 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         /// Course not in Class
         /// </summary>
         CourseNotInClass,
+
+        /// <summary>
+        /// Classes new not exist
+        /// </summary>
+        ClassesNewNotExitst,
+
+        /// <summary>
+        /// Students not exist
+        /// </summary>
+        StudentsNotExist,
     }
 }

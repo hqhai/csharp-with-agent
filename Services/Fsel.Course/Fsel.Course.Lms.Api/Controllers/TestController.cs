@@ -2,8 +2,10 @@ using System.Net;
 using Fsel.Common.ActionResults;
 using Fsel.Common.Constants;
 using Fsel.Common.Enums;
+using Fsel.Course.Application.Commands.CourseCmd;
 using Fsel.Course.Application.Queries.CourseQuery;
-using Fsel.Course.Application.Services;
+using Fsel.Course.Application.Services.TrainingServices.Models;
+using Fsel.Course.Domain.Models.CommandModels.Courses;
 using Fsel.Course.Domain.Models.EntityModels;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -14,8 +16,6 @@ namespace Fsel.Course.Lms.Api.Controllers
     [ApiVersion(Settings.APIVersion)]
     [Route(Settings.APIDefaultRoute + "/test")]
     [ApiController]
-    [Authorize(Roles = nameof(EnumRole.Parent))]
-    [Authorize(Roles = nameof(EnumRole.Student))]
     public class TestController : ControllerBase
     {
         private readonly IMediator _mediator;
@@ -50,14 +50,26 @@ namespace Fsel.Course.Lms.Api.Controllers
         }
 
         /// <summary>
-        /// Get Class in course
+        /// Get training in course
         /// </summary>
-        [HttpGet("class-course")]
-        [ProducesResponseType(typeof(MethodResult<ClassModel>), (int)HttpStatusCode.OK)]
+        [HttpGet("training-course")]
+        [ProducesResponseType(typeof(MethodResult<TrainingModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetClassIncourse([FromQuery] GetClassCourseQuery query)
+        public async Task<IActionResult> GetClassIncourse([FromQuery] GetTrainingCourseQuery query)
         {
-            MethodResult<ClassModel> queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            MethodResult<TrainingModel> queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// create class
+        /// </summary>
+        [HttpPost]
+        [ProducesResponseType(typeof(MethodResult<CourseModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> Create([FromBody] CreateClassCommand query)
+        {
+            MethodResult<CourseModel> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
     }

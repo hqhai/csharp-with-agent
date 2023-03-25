@@ -1,6 +1,8 @@
 using Fsel.Common.ValueSettings;
 using Fsel.Core.Extensions;
 using Fsel.Course.Application.Services;
+using Fsel.Course.Application.Services.TrainingServices;
+using Fsel.Course.Application.Services.UserServices;
 using Fsel.Course.Domain.IRepositories;
 using Fsel.Course.Infrastructure;
 using Fsel.Course.Infrastructure.Repositories;
@@ -34,11 +36,11 @@ builder.Services.AddScoped<ICourseRepository, CourseRepository>();
 builder.Services.AddScoped<ICourseTeacherRepository, CourseTeacherRepository>();
 builder.Services.AddScoped<ICourseUnitMockTestRepository, CourseUnitMockTestRepository>();
 builder.Services.AddScoped<IMockTestRepository, MockTestRepository>();
-builder.Services.AddScoped<ICourseStudentRepository, CourseStudentRepository>();
-builder.Services.AddScoped<ICourseClassRepository, CourseClassRepository>();
+builder.Services.AddScoped<ICourseStudentTrainingRepository, CourseStudentTrainingRepository>();
+builder.Services.AddScoped<ICourseTrainingRepository, CourseTrainingRepository>();
 
 builder.AddRefitClients(typeof(IUserService), appSetting?.Services?.UserApiUrl);
-builder.AddRefitClients(typeof(IClassService), appSetting?.Services?.ClassApiUrl);
+builder.AddRefitClients(typeof(ITrainingService), appSetting?.Services?.ClassApiUrl);
 var app = builder.Build();
 
 app.UseServices();

@@ -13,5 +13,10 @@ namespace Fsel.Identity.Domain.Enums.ErrorCodes
         /// Student null
         /// </summary>
         StudentNull,
+
+        /// <summary>
+        /// User null
+        /// </summary>
+        UserNull,
     }
 }

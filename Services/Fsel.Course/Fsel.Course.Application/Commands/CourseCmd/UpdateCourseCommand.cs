@@ -1,6 +1,9 @@
+// Copyright (c) Atlantic. All rights reserved.
+
 using AutoMapper;
 using Fsel.Common.ActionResults;
-using Fsel.Course.Application.Services;
+using Fsel.Course.Application.Services.UserServices;
+using Fsel.Course.Application.Services.UserServices.Models;
 using Fsel.Course.Domain.Enums;
 using Fsel.Course.Domain.Enums.ErrorCodes;
 using Fsel.Course.Domain.IRepositories;
