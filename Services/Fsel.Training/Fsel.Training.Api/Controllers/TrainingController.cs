@@ -10,11 +10,13 @@ namespace Fsel.Training.Api.Controllers
     using Fsel.Training.Application.Queries.TrainingQuery;
     using Fsel.Training.Doman.Models.EntityModels;
     using MediatR;
+    using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
 
     [ApiVersion(Settings.APIVersion)]
     [Route(Settings.APIDefaultRoute + "/class")]
     [ApiController]
+    [Authorize]
     public class TrainingController : ControllerBase
     {
         private readonly IMediator _mediator;

@@ -5,8 +5,8 @@ namespace Fsel.Training.Application.Queries.TrainingQuery
     using System.Collections.Generic;
     using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Enums;
     using Fsel.Training.Doman.Entities;
-    using Fsel.Training.Doman.Enums;
     using Fsel.Training.Doman.Enums.ErrorCodes;
     using Fsel.Training.Doman.IRepositories;
     using Fsel.Training.Doman.Models.EntityModels;

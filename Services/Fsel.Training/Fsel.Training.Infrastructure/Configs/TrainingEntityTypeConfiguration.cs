@@ -2,11 +2,11 @@
 
 namespace Fsel.Training.Infrastructure.Configs
 {
-    using Fsel.Training.Doman.Enums;
+    using Fsel.Common.Enums;
     using Fsel.Common.Helpers;
+    using Fsel.Training.Doman.Entities;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.Metadata.Builders;
-    using Fsel.Training.Doman.Entities;
 
     public class TrainingEntityTypeConfiguration : IEntityTypeConfiguration<Class>
     {

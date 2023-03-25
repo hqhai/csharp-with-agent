@@ -1,10 +1,11 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Training.Doman.Models.CommandModels.Trainings
+namespace Fsel.Training.Application.Services.UserServices.Models
 {
-    public class CreateTrainingCommandModel
+    using System;
+
+    public class UpdateStudentByClassIdModel
     {
-        public string? Code { get; set; }
         public Guid? ClassId { get; set; }
         public Guid UserId { get; set; }
     }

@@ -7,6 +7,7 @@ namespace Fsel.Training.Application.Services.UserServices
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
     using Fsel.Course.Application.Services.UserServices.Models;
+    using Fsel.Training.Application.Services.UserServices.Models;
     using Refit;
 
     public interface IUserService
@@ -22,5 +23,8 @@ namespace Fsel.Training.Application.Services.UserServices
 
         [Get("/user/get-student-by-class-id/{id}")]
         Task<IApiResponse<MethodResult<IList<StudentModel>>>> GetStudentByClassIdAsync([Body] Guid id);
+
+        [Put("/user/update-student-class")]
+        Task<IApiResponse<MethodResult<StudentModel>>> UpdateStudentByClassIdAsync([Body] UpdateStudentByClassIdModel command);
     }
 }

@@ -45,10 +45,10 @@ namespace Fsel.Identity.Api.Controllers
         /// <summary>
         /// Get student by User Id
         /// </summary>
-        [HttpGet("get-student-by-id/{id}")]
+        [HttpGet("get-student-by-id/{id:guid}")]
         [ProducesResponseType(typeof(MethodResult<StudentModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetStudentById([FromQuery] Guid id)
+        public async Task<IActionResult> GetStudentById([FromRoute] Guid id)
         {
             MethodResult<StudentModel> commandResult = await _mediator.Send(new GetStudentByUserIdQuery { id = id }).ConfigureAwait(false);
             return commandResult.GetActionResult();
@@ -57,10 +57,10 @@ namespace Fsel.Identity.Api.Controllers
         /// <summary>
         /// search
         /// </summary>
-        [HttpGet("get-student-by-class-id/{id}")]
+        [HttpGet("get-student-by-class-id/{id:guid}")]
         [ProducesResponseType(typeof(MethodResult<IList<StudentModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetStudentByClassId([FromQuery] Guid id)
+        public async Task<IActionResult> GetStudentByClassId([FromRoute] Guid id)
         {
             MethodResult<IList<StudentModel>> commandResult = await _mediator.Send(new GetStudentByClassIdQuery { ClassId = id }).ConfigureAwait(false);
             return commandResult.GetActionResult();

@@ -2,7 +2,7 @@
 
 namespace Fsel.Training.Doman.Models.EntityModels
 {
-    using Fsel.Training.Doman.Enums;
+    using Fsel.Common.Enums;
     using Fsel.Core.Base.BaseModels;
 
     public class TrainingModel : BaseModel

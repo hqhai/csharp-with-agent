@@ -4,9 +4,9 @@ namespace Fsel.Training.Doman.Entities
 {
     using System;
     using System.ComponentModel.DataAnnotations;
+    using Fsel.Common.Enums;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Entities;
-    using Fsel.Training.Doman.Enums;
 
     public class Class : Entity
     {

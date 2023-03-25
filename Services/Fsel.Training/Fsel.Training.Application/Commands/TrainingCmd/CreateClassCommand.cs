@@ -5,9 +5,10 @@ namespace Fsel.Training.Application.Commands.TrainingCmd
     using System.Threading;
     using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Enums;
     using Fsel.Training.Application.Services.UserServices;
+    using Fsel.Training.Application.Services.UserServices.Models;
     using Fsel.Training.Doman.Entities;
-    using Fsel.Training.Doman.Enums.ErrorCodes;
     using Fsel.Training.Doman.IRepositories;
     using Fsel.Training.Doman.Models.CommandModels.Trainings;
     using Fsel.Training.Doman.Models.EntityModels;
@@ -55,17 +56,18 @@ namespace Fsel.Training.Application.Commands.TrainingCmd
                     var liststudent = students.Content?.Result;
                     if (liststudent != null && liststudent.Count > 12)
                     {
+                        await UpdateClassAsync(classnew);
+                        classnew = new();
                         await CreateClassAsync(request, classnew);
-                        methodResult.StatusCode = StatusCodes.Status201Created;
-                        methodResult.Result = _mapper.Map<TrainingModel>(classnew);
                     }
                 }
-                else
+                var student = await _userService.UpdateStudentByClassIdAsync(new UpdateStudentByClassIdModel
                 {
-                    methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                    methodResult.AddErrorBadRequest(nameof(EnumTrainingErrorCode.StudentsNotExits));
-                    return methodResult;
-                }
+                    UserId = request.UserId,
+                    ClassId = classnew.Id
+                });
+                methodResult.StatusCode = StatusCodes.Status201Created;
+                methodResult.Result = _mapper.Map<TrainingModel>(classnew);
             }
 
             #endregion Validation
@@ -77,7 +79,15 @@ namespace Fsel.Training.Application.Commands.TrainingCmd
         {
             classnew = new Class();
             classnew.Code = request?.Code;
+            classnew.Name = request?.Code;
             _trainingRepository.Add(classnew);
+            await _trainingRepository.UnitOfWork.SaveEntitiesAsync().ConfigureAwait(false);
+        }
+
+        private async Task UpdateClassAsync(Class classnew)
+        {
+            classnew.Status = EnumTrainingType.Active;
+            _trainingRepository.Update(classnew);
             await _trainingRepository.UnitOfWork.SaveEntitiesAsync().ConfigureAwait(false);
         }
     }

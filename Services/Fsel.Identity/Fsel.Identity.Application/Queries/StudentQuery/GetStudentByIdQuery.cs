@@ -35,15 +35,16 @@ namespace Fsel.Identity.Application.Queries.StudentQuery
 
             MethodResult<StudentModel> methodResult = new MethodResult<StudentModel>();
 
-            var student = await _userManager.Users.Include(x => x.Human)
+            var user = await _userManager.Users.Include(x => x.Human)
                                                     .ThenInclude(x => x.Student)
                                                     .FirstOrDefaultAsync(x => x.Id == request.id.ToString(), cancellationToken: cancellationToken);
-            if (student == null)
+            if (user == null)
             {
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 methodResult.AddError(nameof(EnumStudentErrorCode.StudentNull));
                 return methodResult;
             }
+            var student = user.Human?.Student;
             methodResult.Result = _mapper.Map<StudentModel>(student);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
