@@ -39,6 +39,7 @@ namespace Fsel.Course.Infrastructure
         public DbSet<CourseTeacher> CourseTeachers { get; set; }
         public DbSet<UnitStudent> UnitStudents { get; set; }
         public DbSet<LessonStudent> LessonStudents { get; set; }
+        public DbSet<CourseClass> CourseClasses { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -63,6 +64,9 @@ namespace Fsel.Course.Infrastructure
             modelBuilder.ApplyConfiguration(new UnitSkillMockTestEntityTestConfiguration());
             modelBuilder.ApplyConfiguration(new VideoEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new VideoTimeCodeEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new LessonStudentEntityTypeConfiguraion());
+            modelBuilder.ApplyConfiguration(new UnitStudentEntityConfiguration());
+            modelBuilder.ApplyConfiguration(new CourseClassEntityTypeConfiguration());
 
             base.OnModelCreating(modelBuilder);
         }

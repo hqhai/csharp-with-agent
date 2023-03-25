@@ -18,6 +18,8 @@ builder.Services.AddScoped<ICourseRepository, CourseRepository>();
 builder.Services.AddScoped<ICourseTeacherRepository, CourseTeacherRepository>();
 builder.Services.AddScoped<ICourseUnitMockTestRepository, CourseUnitMockTestRepository>();
 builder.Services.AddScoped<ICourseClassRepository, CourseClassRepository>();
+builder.Services.AddScoped<ILessonStudentRepository, LessonStudentRepository>();
+builder.Services.AddScoped<ILessonRepository, LessonRepository>();
 builder.AddRefitClients(typeof(IStudentService), appSetting?.Services?.UserApiUrl);
 
 var app = builder.Build();
