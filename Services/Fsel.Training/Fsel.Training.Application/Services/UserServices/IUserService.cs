@@ -18,10 +18,10 @@ namespace Fsel.Training.Application.Services.UserServices
         [Post("/teacher/get-by-id/{id}")]
         Task<IApiResponse<MethodResult<TeacherModel>>> GetTeacherByIdAsync([Body] Guid id);
 
-        [Get("/user/get-student-by-id/{id}")]
+        [Get("/user/get-student-by-id")]
         Task<IApiResponse<MethodResult<StudentModel>>> GetStudentByIdAsync([Body] Guid id);
 
-        [Get("/user/get-student-by-class-id/{id}")]
+        [Get("/user/get-student-by-class-id")]
         Task<IApiResponse<MethodResult<IList<StudentModel>>>> GetStudentByClassIdAsync([Body] Guid id);
 
         [Put("/user/update-student-class")]

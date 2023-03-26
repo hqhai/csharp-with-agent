@@ -60,7 +60,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                     methodResult.AddErrorBadRequest(nameof(EnumStudentErrorCode.UserNull), nameof(request.UserId), request.UserId);
                     return methodResult;
                 }
-                student.Id = request.ClassId;
+                student.ClassId = request.ClassId;
                 await _studentRepository.ExecuteTransactionAsync(async () =>
                 {
                     student = _studentRepository.Update(student);

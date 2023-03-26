@@ -45,24 +45,24 @@ namespace Fsel.Identity.Api.Controllers
         /// <summary>
         /// Get student by User Id
         /// </summary>
-        [HttpGet("get-student-by-id/{id:guid}")]
+        [HttpGet("get-student-by-id")]
         [ProducesResponseType(typeof(MethodResult<StudentModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetStudentById([FromRoute] Guid id)
+        public async Task<IActionResult> GetStudentById([FromQuery] GetStudentByUserIdQuery query)
         {
-            MethodResult<StudentModel> commandResult = await _mediator.Send(new GetStudentByUserIdQuery { id = id }).ConfigureAwait(false);
+            MethodResult<StudentModel> commandResult = await _mediator.Send(query).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
 
         /// <summary>
         /// search
         /// </summary>
-        [HttpGet("get-student-by-class-id/{id:guid}")]
+        [HttpGet("get-student-by-class-id")]
         [ProducesResponseType(typeof(MethodResult<IList<StudentModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetStudentByClassId([FromRoute] Guid id)
+        public async Task<IActionResult> GetStudentByClassId([FromQuery] GetStudentByClassIdQuery query)
         {
-            MethodResult<IList<StudentModel>> commandResult = await _mediator.Send(new GetStudentByClassIdQuery { ClassId = id }).ConfigureAwait(false);
+            MethodResult<IList<StudentModel>> commandResult = await _mediator.Send(query).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
 
@@ -72,7 +72,7 @@ namespace Fsel.Identity.Api.Controllers
         [HttpPut("update-student-class")]
         [ProducesResponseType(typeof(MethodResult<StudentModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> UpdateStudentByClassId([FromQuery] UpdateStudentByClassCommand query)
+        public async Task<IActionResult> UpdateStudentByClassId([FromBody] UpdateStudentByClassCommand query)
         {
             MethodResult<StudentModel> commandResult = await _mediator.Send(query).ConfigureAwait(false);
             return commandResult.GetActionResult();

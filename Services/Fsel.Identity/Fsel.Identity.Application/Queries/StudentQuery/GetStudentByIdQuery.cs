@@ -4,7 +4,6 @@ namespace Fsel.Identity.Application.Queries.StudentQuery
 {
     using AutoMapper;
     using Fsel.Common.ActionResults;
-    using Fsel.Core.Base;
     using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.Enums.ErrorCodes;
     using Fsel.Identity.Domain.Models.EntityModels;
@@ -15,7 +14,7 @@ namespace Fsel.Identity.Application.Queries.StudentQuery
 
     public class GetStudentByUserIdQuery : IRequest<MethodResult<StudentModel>>
     {
-        public Guid id { get; set; }
+        public Guid Id { get; set; }
     }
 
     public class GetStudentByUserIdQueryHandler : IRequestHandler<GetStudentByUserIdQuery, MethodResult<StudentModel>>
@@ -37,7 +36,7 @@ namespace Fsel.Identity.Application.Queries.StudentQuery
 
             var user = await _userManager.Users.Include(x => x.Human)
                                                     .ThenInclude(x => x.Student)
-                                                    .FirstOrDefaultAsync(x => x.Id == request.id.ToString(), cancellationToken: cancellationToken);
+                                                    .FirstOrDefaultAsync(x => x.Id == request.Id.ToString(), cancellationToken: cancellationToken);
             if (user == null)
             {
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;

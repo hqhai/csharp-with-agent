@@ -49,7 +49,7 @@ namespace Fsel.Course.Lms.Api.Controllers
             return queryResult.GetActionResult();
         }
 
-        /// <summary>
+        /// <summary>z
         /// Get training in course
         /// </summary>
         [HttpGet("training-course")]
