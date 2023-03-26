@@ -1,11 +1,7 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Course.Lms.Application.Queries
+namespace Fsel.Course.Lms.Application.Queries.UnitQuery
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
     using System.Threading;
     using System.Threading.Tasks;
     using AutoMapper;
@@ -17,8 +13,6 @@ namespace Fsel.Course.Lms.Application.Queries
     using Fsel.Course.Lms.Application.Services.StudentServices;
     using MediatR;
     using Microsoft.AspNetCore.Http;
-    using Microsoft.EntityFrameworkCore;
-    using Org.BouncyCastle.Math.EC.Rfc7748;
 
     public class GetLessonByUnitQuery : IRequest<MethodResult<LessonModel>>
     {
@@ -48,7 +42,7 @@ namespace Fsel.Course.Lms.Application.Queries
 
         public async Task<MethodResult<LessonModel>> Handle(GetLessonByUnitQuery request, CancellationToken cancellationToken)
         {
-            MethodResult<LessonModel> methodResult = new MethodResult<LessonModel>();
+            var methodResult = new MethodResult<LessonModel>();
 
             var user = _authContext.CurrentUserId.ToString();
             var student = await _studentService.GetStudentByUserIdAsync(user);

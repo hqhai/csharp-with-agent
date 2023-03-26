@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Course.Lms.Application.Queries
+namespace Fsel.Course.Lms.Application.Queries.UnitQuery
 {
     using System.Linq;
     using System.Threading.Tasks;
@@ -42,7 +42,7 @@ namespace Fsel.Course.Lms.Application.Queries
 
         public async Task<MethodResult<CourseModel>> Handle(GetUnitByCourseQuery request, CancellationToken cancellationToken)
         {
-            MethodResult<CourseModel> methodResult = new MethodResult<CourseModel>();
+            var methodResult = new MethodResult<CourseModel>();
 
             var user = _authContext.CurrentUserId.ToString();
             var student = await _studentService.GetStudentByUserIdAsync(user);

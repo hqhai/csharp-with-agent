@@ -1,12 +1,12 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Course.Application.Services.TrainingServices
+namespace Fsel.Course.Lms.Application.Services.TrainingServices
 {
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums;
-    using Fsel.Course.Application.Services.TrainingServices.Models;
     using Fsel.Course.Domain.Models.CommandModels.Courses;
+    using Fsel.Course.Lms.Application.Services.TrainingServices.Models;
     using Refit;
 
     public interface ITrainingService

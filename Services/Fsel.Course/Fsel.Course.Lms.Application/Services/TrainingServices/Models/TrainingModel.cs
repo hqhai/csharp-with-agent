@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Course.Application.Services.TrainingServices.Models
+namespace Fsel.Course.Lms.Application.Services.TrainingServices.Models
 {
     using System;
     using Fsel.Common.Enums;

@@ -1,14 +1,11 @@
 using System.Net;
 using Fsel.Common.ActionResults;
 using Fsel.Common.Constants;
-using Fsel.Common.Enums;
-using Fsel.Course.Application.Commands.CourseCmd;
-using Fsel.Course.Application.Queries.CourseQuery;
-using Fsel.Course.Application.Services.TrainingServices.Models;
-using Fsel.Course.Domain.Models.CommandModels.Courses;
 using Fsel.Course.Domain.Models.EntityModels;
+using Fsel.Course.Lms.Application.Commands.CourseCmd;
+using Fsel.Course.Lms.Application.Queries.CourseQuery;
+using Fsel.Course.Lms.Application.Services.TrainingServices.Models;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Fsel.Course.Lms.Api.Controllers

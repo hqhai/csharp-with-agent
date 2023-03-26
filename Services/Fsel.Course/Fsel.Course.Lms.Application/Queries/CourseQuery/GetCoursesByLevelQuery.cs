@@ -1,16 +1,14 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Course.Application.Queries.CourseQuery
+namespace Fsel.Course.Lms.Application.Queries.CourseQuery
 {
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums;
-    using Fsel.Course.Application.Services;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
-    using Fsel.Course.Domain.Models.QueryModels.Courses;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;

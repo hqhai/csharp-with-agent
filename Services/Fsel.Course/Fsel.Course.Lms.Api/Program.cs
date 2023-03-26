@@ -1,11 +1,10 @@
 using Fsel.Common.ValueSettings;
 using Fsel.Core.Extensions;
-using Fsel.Course.Application.Services.TrainingServices;
-using Fsel.Course.Application.Services.UserServices;
 using Fsel.Course.Domain.IRepositories;
 using Fsel.Course.Infrastructure;
 using Fsel.Course.Infrastructure.Repositories;
-using Fsel.Course.Lms.Application.Services.StudentServices;
+using Fsel.Course.Lms.Application.Services.TrainingServices;
+using Fsel.Course.Lms.Application.Services.UserServices;
 
 var builder = WebApplication.CreateBuilder(args);
 

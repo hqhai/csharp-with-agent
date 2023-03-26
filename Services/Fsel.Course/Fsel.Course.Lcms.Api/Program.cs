@@ -1,7 +1,5 @@
 using Fsel.Common.ValueSettings;
 using Fsel.Core.Extensions;
-using Fsel.Course.Application.Services;
-using Fsel.Course.Application.Services.TrainingServices;
 using Fsel.Course.Application.Services.UserServices;
 using Fsel.Course.Domain.IRepositories;
 using Fsel.Course.Infrastructure;
@@ -40,7 +38,6 @@ builder.Services.AddScoped<ICourseStudentTrainingRepository, CourseStudentTraini
 builder.Services.AddScoped<ICourseTrainingRepository, CourseTrainingRepository>();
 
 builder.AddRefitClients(typeof(IUserService), appSetting?.Services?.UserApiUrl);
-builder.AddRefitClients(typeof(ITrainingService), appSetting?.Services?.ClassApiUrl);
 var app = builder.Build();
 
 app.UseServices();
