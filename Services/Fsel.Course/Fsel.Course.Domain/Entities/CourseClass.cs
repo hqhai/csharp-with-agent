@@ -2,6 +2,8 @@
 
 namespace Fsel.Course.Domain.Entities
 {
+    using System;
+    using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Entities;
@@ -10,9 +12,10 @@ namespace Fsel.Course.Domain.Entities
     {
         public Course? Course { get; set; }
 
-        public Guid ClassId { get; set; }
-
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         public Guid CourseId { get; set; }
+
+        [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
+        public Guid ClassId { get; set; }
     }
 }
