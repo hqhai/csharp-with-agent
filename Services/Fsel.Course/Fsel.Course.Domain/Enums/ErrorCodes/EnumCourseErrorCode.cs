@@ -25,8 +25,7 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         /// <summary>
         /// Student not in class
         /// </summary>
-        StudentNotInClass
-        CourseNotInNewState,
+        StudentNotInClass,
 
         /// <summary>
         /// List Teacher by course does not exist
