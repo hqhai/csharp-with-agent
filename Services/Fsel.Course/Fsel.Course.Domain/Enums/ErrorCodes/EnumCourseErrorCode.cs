@@ -10,6 +10,16 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         /// <summary>
         /// Course is not in a new state
         /// </summary>
-        CourseNotInNewState
+        CourseNotInNewState,
+
+        /// <summary>
+        /// User Not Student
+        /// </summary>
+        NotStudent,
+
+        /// <summary>
+        /// Student not in class
+        /// </summary>
+        StudentNotInClass
     }
 }

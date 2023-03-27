@@ -1,5 +1,6 @@
 using Fsel.Common.Enums;
 using Fsel.Core.Base.BaseModels;
+using Fsel.Course.Domain.Entities;
 
 namespace Fsel.Course.Domain.Models.EntityModels
 {
@@ -16,5 +17,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public Guid? TeacherId { get; set; }
 
         public EnumCourseLevel CourseLevel { get; set; }
+        public ICollection<UnitLesson> UnitLessons { get; set; } = new List<UnitLesson>();
+        public ICollection<LessonStudent> LessonStudents { get; set; } = new List<LessonStudent>();
     }
 }

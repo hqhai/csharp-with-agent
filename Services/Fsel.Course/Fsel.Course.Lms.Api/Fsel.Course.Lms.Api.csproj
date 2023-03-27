@@ -15,7 +15,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Fsel.Course.Application\Fsel.Course.Application.csproj" />
+    <ProjectReference Include="..\Fsel.Course.Lms.Application\Fsel.Course.Lms.Application.csproj" />
   </ItemGroup>
 
 </Project>
