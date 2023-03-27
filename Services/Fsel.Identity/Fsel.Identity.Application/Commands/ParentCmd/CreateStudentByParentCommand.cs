@@ -102,12 +102,13 @@ namespace Fsel.Identity.Application.Commands.ParentCmd
             var user = _mapper.Map<User>(request);
             user.FullName = request.Name;
             user.EmailConfirmed = true;
+
+            var identityResult = await _userManager.CreateAsync(user, request.Password ?? string.Empty);
             await _userManager.AddToRoleAsync(user, EnumRoleRegister.Student.ToString());
 
             var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
             await _userManager.ConfirmEmailAsync(user, token);
 
-            var identityResult = await _userManager.CreateAsync(user, request.Password ?? string.Empty);
             await CreateHumanAsync(request, user, parent);
 
             if (!identityResult.Succeeded)
