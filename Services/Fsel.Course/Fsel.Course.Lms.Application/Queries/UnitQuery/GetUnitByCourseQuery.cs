@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Course.Lms.Application.Queries.UnitQuery
+namespace Fsel.Course.Lms.Application.Queries
 {
     using System.Linq;
     using System.Threading.Tasks;
@@ -25,24 +25,24 @@ namespace Fsel.Course.Lms.Application.Queries.UnitQuery
         private readonly IMapper _mapper;
         private readonly IStudentService _studentService;
         private readonly AuthContext _authContext;
-        private readonly ICourseClassStudentRepository _courseClassRepository;
+        private readonly ICourseClassStudentRepository _courseClassStudentRepository;
 
         public GetUnitByCourseQueryHandler(IMapper mapper,
             AuthContext authContext,
             ICourseRepository courseRepository,
-            ICourseClassStudentRepository courseClassRepository,
+            ICourseClassStudentRepository courseClassStudentRepository,
             IStudentService studentService)
         {
             _courseRepository = courseRepository;
             _mapper = mapper;
             _studentService = studentService;
             _authContext = authContext;
-            _courseClassRepository = courseClassRepository;
+            _courseClassStudentRepository = courseClassStudentRepository;
         }
 
         public async Task<MethodResult<CourseModel>> Handle(GetUnitByCourseQuery request, CancellationToken cancellationToken)
         {
-            var methodResult = new MethodResult<CourseModel>();
+            MethodResult<CourseModel> methodResult = new MethodResult<CourseModel>();
 
             var user = _authContext.CurrentUserId.ToString();
             var student = await _studentService.GetStudentByUserIdAsync(user);
@@ -51,12 +51,12 @@ namespace Fsel.Course.Lms.Application.Queries.UnitQuery
                 methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.NotStudent));
                 return methodResult;
             }
-            var classId = student.Content?.Result?.ClassId;
+            var classId = student.Content?.Result.ClassId;
 
-            var courseClass = await _courseClassRepository.Queryable
+            var courseClassStudent = await _courseClassStudentRepository.Queryable
                             .FirstOrDefaultAsync(x => x.ClassId == classId, cancellationToken: cancellationToken);
 
-            if (courseClass == null)
+            if (courseClassStudent == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.StudentNotInClass));
                 return methodResult;
@@ -67,14 +67,14 @@ namespace Fsel.Course.Lms.Application.Queries.UnitQuery
                              .ThenInclude(unit => unit.Unit)
                              .Include(x => x.CourseUnitMockTests)
                              .ThenInclude(unit => unit.MockTest)
-                             .Where(x => x.Id == courseClass.CourseId)
+                             .Where(x => x.Id == courseClassStudent.CourseId)
                               select new CourseModel
                               {
                                   Id = i.Id,
                                   Name = i.Name,
                                   CourseLevel = i.CourseLevel,
                                   CourseUnitMockTests = _mapper.Map<IList<CourseUnitMockTestModel>>(i.CourseUnitMockTests),
-                                  CourseClasses = _mapper.Map<IList<CourseClassStudentModel>>(i.CourseClasses),
+                                  CourseClasses = _mapper.Map<IList<CourseClassStudentModel>>(i.CourseClassStudents),
                               };
             var course = courseQuery.FirstOrDefault();
             methodResult.Result = course;

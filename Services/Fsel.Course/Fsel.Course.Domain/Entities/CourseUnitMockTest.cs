@@ -12,7 +12,7 @@ namespace Fsel.Course.Domain.Entities
         /// Số thứ tự
         /// </summary>
         [Min(1, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
-        public int OrderNumber { get; set; }
+        public int DisplayOrder { get; set; }
 
         [JsonIgnore]
         public Unit? Unit { get; set; }
@@ -29,5 +29,7 @@ namespace Fsel.Course.Domain.Entities
         public Guid CourseId { get; set; }
 
         public Guid? MockTestId { get; set; }
+
+        public ICollection<CourseUnitMockTestResult> CourseUnitMockTestResults { get; set; } = new List<CourseUnitMockTestResult>();
     }
 }

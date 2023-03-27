@@ -47,7 +47,5 @@ namespace Fsel.Course.Domain.Entities
         public ICollection<LessonHomeWork> LessonHomeWorks { get; set; } = new List<LessonHomeWork>();
         public ICollection<LessonExtraPractice> LessonExtraPractices { get; set; } = new List<LessonExtraPractice>();
         public ICollection<UnitLesson> UnitLessons { get; set; } = new List<UnitLesson>();
-
-        public ICollection<LessonStudent> LessonStudents { get; set; } = new List<LessonStudent>();
     }
 }

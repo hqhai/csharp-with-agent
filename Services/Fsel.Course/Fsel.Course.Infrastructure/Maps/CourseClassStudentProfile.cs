@@ -7,9 +7,9 @@ namespace Fsel.Course.Infrastructure.Maps
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Models.EntityModels;
 
-    public class CourseClassProfile : Profile
+    public class CourseClassStudentProfile : Profile
     {
-        public CourseClassProfile()
+        public CourseClassStudentProfile()
         {
             CreateMap<CourseClassStudent, CourseClassStudentModel>().IgnoreAllNonExisting();
         }

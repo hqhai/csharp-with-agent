@@ -6,9 +6,9 @@ namespace Fsel.Course.Infrastructure.Repositories
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.IRepositories;
 
-    public class LessonStudentRepository : BaseRepository<LessonStudent>, ILessonStudentRepository
+    public class UnitLessonResultRepository : BaseRepository<UnitLessonResult>, IUnitLessonResultRepository
     {
-        public LessonStudentRepository(CourseDbContext dbContext, AuthContext authContext) : base(dbContext, authContext)
+        public UnitLessonResultRepository(CourseDbContext dbContext, AuthContext authContext) : base(dbContext, authContext)
         {
         }
     }

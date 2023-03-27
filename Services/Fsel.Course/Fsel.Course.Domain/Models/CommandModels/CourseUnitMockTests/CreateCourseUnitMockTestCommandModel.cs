@@ -6,7 +6,7 @@ namespace Fsel.Course.Domain.Models.CommandModels.CourseUnitMockTests
 
     public class CreateCourseUnitMockTestCommandModel
     {
-        public int OrderNumber { get; set; }
+        public int DisplayOrder { get; set; }
         public Guid? UnitId { get; set; }
 
         public Guid? MockTestId { get; set; }
