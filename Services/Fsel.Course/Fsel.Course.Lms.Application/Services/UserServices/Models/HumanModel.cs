@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Course.Lms.Application.Services.StudentServices.Models
+namespace Fsel.Course.Lms.Application.Services.UserServices.Models
 {
     using System;
     using System.Collections.Generic;
@@ -12,5 +12,6 @@ namespace Fsel.Course.Lms.Application.Services.StudentServices.Models
     {
         public string? FullName { get; set; }
         public string? Birthday { get; set; }
+        public string? AvatarPath { get; set; }
     }
 }

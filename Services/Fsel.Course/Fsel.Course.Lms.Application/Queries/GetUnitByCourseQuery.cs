@@ -10,7 +10,8 @@ namespace Fsel.Course.Lms.Application.Queries
     using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
-    using Fsel.Course.Lms.Application.Services.StudentServices;
+    using Fsel.Course.Lms.Application.Services.UserServices;
+    using Fsel.Course.Lms.Application.Services.UserServices.Models;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -23,7 +24,7 @@ namespace Fsel.Course.Lms.Application.Queries
     {
         private readonly ICourseRepository _courseRepository;
         private readonly IMapper _mapper;
-        private readonly IStudentService _studentService;
+        private readonly IUserService _userService;
         private readonly AuthContext _authContext;
         private readonly ICourseClassStudentRepository _courseClassStudentRepository;
 
@@ -31,11 +32,11 @@ namespace Fsel.Course.Lms.Application.Queries
             AuthContext authContext,
             ICourseRepository courseRepository,
             ICourseClassStudentRepository courseClassStudentRepository,
-            IStudentService studentService)
+            IUserService userService)
         {
             _courseRepository = courseRepository;
             _mapper = mapper;
-            _studentService = studentService;
+            _userService = userService;
             _authContext = authContext;
             _courseClassStudentRepository = courseClassStudentRepository;
         }
@@ -45,7 +46,7 @@ namespace Fsel.Course.Lms.Application.Queries
             MethodResult<CourseModel> methodResult = new MethodResult<CourseModel>();
 
             var user = _authContext.CurrentUserId.ToString();
-            var studentResult = await _studentService.GetStudentByUserIdAsync(user);
+            var studentResult = await _userService.GetStudentByUserIdAsync(user);
             if (studentResult == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.NotStudent));
@@ -72,6 +73,7 @@ namespace Fsel.Course.Lms.Application.Queries
                              .ThenInclude(unit => unit.Unit)
                              .Include(x => x.CourseUnitMockTests)
                              .ThenInclude(unit => unit.MockTest)
+                             .Include(x => x.CourseTeachers)
                              .Where(x => x.Id == courseClassStudent.CourseId)
                               select new CourseModel
                               {
@@ -79,9 +81,25 @@ namespace Fsel.Course.Lms.Application.Queries
                                   Name = i.Name,
                                   CourseLevel = i.CourseLevel,
                                   CourseUnitMockTests = _mapper.Map<IList<CourseUnitMockTestModel>>(i.CourseUnitMockTests),
-                                  CourseClasses = _mapper.Map<IList<CourseClassStudentModel>>(i.CourseClassStudents),
+                                  CourseTeachers = _mapper.Map<List<CourseTeacherModel>>(i.CourseTeachers),
                               };
             var course = courseQuery.FirstOrDefault();
+
+            var teachersResult = await _userService.GetTeacherByIdsAsync(new GetTeacherByIdsQueryModel { Ids = course?.CourseTeachers?.Select(x => x.TeacherId).ToList() });
+            if (teachersResult.IsSuccessStatusCode)
+            {
+                var teachers = teachersResult?.Content?.Result;
+                if (teachers != null && course?.CourseTeachers != null)
+                {
+                    foreach (var item in course.CourseTeachers)
+                    {
+                        var teacher = teachers.FirstOrDefault(x => x.Id == item.TeacherId);
+                        item.FullName = teacher?.Human?.FullName;
+                        item.AvatarPath = teacher?.Human?.AvatarPath;
+                    }
+                }
+            }
+
             methodResult.Result = course;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;

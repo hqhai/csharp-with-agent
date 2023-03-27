@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Course.Lms.Application.Services.StudentServices.Models
+namespace Fsel.Course.Lms.Application.Services.UserServices.Models
 {
     using System;
     using System.Collections.Generic;
