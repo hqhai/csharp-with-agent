@@ -45,16 +45,21 @@ namespace Fsel.Course.Lms.Application.Queries
             MethodResult<CourseModel> methodResult = new MethodResult<CourseModel>();
 
             var user = _authContext.CurrentUserId.ToString();
-            var student = await _studentService.GetStudentByUserIdAsync(user);
-            if (student == null)
+            var studentResult = await _studentService.GetStudentByUserIdAsync(user);
+            if (studentResult == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.NotStudent));
                 return methodResult;
             }
-            var classId = student.Content?.Result.ClassId;
+            var student = studentResult.Content?.Result;
+            if (student == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.StudentNull));
+                return methodResult;
+            }
 
             var courseClassStudent = await _courseClassStudentRepository.Queryable
-                            .FirstOrDefaultAsync(x => x.ClassId == classId, cancellationToken: cancellationToken);
+                            .FirstOrDefaultAsync(x => x.StudentId == student.Id, cancellationToken: cancellationToken);
 
             if (courseClassStudent == null)
             {
