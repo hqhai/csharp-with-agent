@@ -4,7 +4,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
 {
     using System;
 
-    public class CourseClassModel
+    public class CourseClassStudentModel
     {
         public Guid CourseId { get; set; }
 

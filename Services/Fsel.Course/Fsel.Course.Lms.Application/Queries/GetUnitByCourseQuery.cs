@@ -25,19 +25,19 @@ namespace Fsel.Course.Lms.Application.Queries
         private readonly IMapper _mapper;
         private readonly IStudentService _studentService;
         private readonly AuthContext _authContext;
-        private readonly ICourseClassRepository _courseClassRepository;
+        private readonly ICourseClassStudentRepository _courseClassStudentRepository;
 
         public GetUnitByCourseQueryHandler(IMapper mapper,
             AuthContext authContext,
             ICourseRepository courseRepository,
-            ICourseClassRepository courseClassRepository,
+            ICourseClassStudentRepository courseClassStudentRepository,
             IStudentService studentService)
         {
             _courseRepository = courseRepository;
             _mapper = mapper;
             _studentService = studentService;
             _authContext = authContext;
-            _courseClassRepository = courseClassRepository;
+            _courseClassStudentRepository = courseClassStudentRepository;
         }
 
         public async Task<MethodResult<CourseModel>> Handle(GetUnitByCourseQuery request, CancellationToken cancellationToken)
@@ -53,10 +53,10 @@ namespace Fsel.Course.Lms.Application.Queries
             }
             var classId = student.Content?.Result.ClassId;
 
-            var courseClass = await _courseClassRepository.Queryable
+            var courseClassStudent = await _courseClassStudentRepository.Queryable
                             .FirstOrDefaultAsync(x => x.ClassId == classId, cancellationToken: cancellationToken);
 
-            if (courseClass == null)
+            if (courseClassStudent == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.StudentNotInClass));
                 return methodResult;
@@ -67,14 +67,14 @@ namespace Fsel.Course.Lms.Application.Queries
                              .ThenInclude(unit => unit.Unit)
                              .Include(x => x.CourseUnitMockTests)
                              .ThenInclude(unit => unit.MockTest)
-                             .Where(x => x.Id == courseClass.CourseId)
+                             .Where(x => x.Id == courseClassStudent.CourseId)
                               select new CourseModel
                               {
                                   Id = i.Id,
                                   Name = i.Name,
                                   CourseLevel = i.CourseLevel,
                                   CourseUnitMockTests = _mapper.Map<IList<CourseUnitMockTestModel>>(i.CourseUnitMockTests),
-                                  CourseClasses = _mapper.Map<IList<CourseClassModel>>(i.CourseClasses),
+                                  CourseClasses = _mapper.Map<IList<CourseClassStudentModel>>(i.CourseClassStudents),
                               };
             var course = courseQuery.FirstOrDefault();
             methodResult.Result = course;

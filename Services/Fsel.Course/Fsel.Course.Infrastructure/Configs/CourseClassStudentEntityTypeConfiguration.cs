@@ -11,17 +11,12 @@ namespace Fsel.Course.Infrastructure.Configs
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-    public class UnitStudentEntityConfiguration : IEntityTypeConfiguration<UnitStudent>
+    public class CourseClassStudentEntityTypeConfiguration : IEntityTypeConfiguration<CourseClassStudent>
     {
-        public void Configure(EntityTypeBuilder<UnitStudent> builder)
+        public void Configure(EntityTypeBuilder<CourseClassStudent> builder)
         {
-            builder.HasOne(a => a.Unit)
-                .WithMany(b => b.UnitStudents)
-                .HasForeignKey(b => b.UnitId)
-                .OnDelete(DeleteBehavior.Cascade);
-
             builder.HasOne(a => a.Course)
-                .WithMany(b => b.UnitStudents)
+                .WithMany(b => b.CourseClassStudents)
                 .HasForeignKey(b => b.CourseId)
                 .OnDelete(DeleteBehavior.Cascade);
         }
