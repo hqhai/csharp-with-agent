@@ -8,16 +8,21 @@ namespace Fsel.Course.Domain.Entities
     using Fsel.Core.Entities;
     using Fsel.Course.Domain.Enums;
 
-    public class CourseUnitMockTestResult : Entity
+    public class UnitResult : Entity
     {
         public long? Result { get; set; }
 
         public EnumResultStatus Status { get; set; }
 
-        public CourseUnitMockTest? CourseUnitMockTest { get; set; }
+        public Course? Course { get; set; }
 
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
-        public Guid CourseUnitMockTestId { get; set; }
+        public Guid CourseId { get; set; }
+
+        public Unit? Unit { get; set; }
+
+        [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
+        public Guid UnitId { get; set; }
 
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         public Guid StudentId { get; set; }

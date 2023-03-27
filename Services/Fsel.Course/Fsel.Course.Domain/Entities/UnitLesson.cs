@@ -14,6 +14,6 @@ namespace Fsel.Course.Domain.Entities
 
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         public Guid UnitId { get; set; }
-        public ICollection<UnitLessonResult> UnitLessonResults { get; set; } = new List<UnitLessonResult>();
+        public ICollection<LessonResult> UnitLessonResults { get; set; } = new List<LessonResult>();
     }
 }
