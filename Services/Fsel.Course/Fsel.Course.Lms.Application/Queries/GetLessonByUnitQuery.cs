@@ -54,7 +54,7 @@ namespace Fsel.Course.Lms.Application.Queries
             var student = await _studentService.GetStudentByUserIdAsync(user);
             if (student == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.NotStudent));
+                methodResult.AddErrorBadRequest(nameof(EnumLessonErrorCode.NotStudent));
                 return methodResult;
             }
             /*   var lessonStudent = await _lessonStudentRepository.Queryable.FirstOrDefault(x => x.StudentId)*/
