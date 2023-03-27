@@ -2,6 +2,7 @@
 
 namespace Fsel.Course.Lms.Application.Services.UserServices.Models
 {
+    using System;
     using Fsel.Core.Base.BaseModels;
 
     public class TeacherModel : BaseModel
@@ -13,6 +14,8 @@ namespace Fsel.Course.Lms.Application.Services.UserServices.Models
         public string? CertificationPath { get; set; }
 
         public string? PoliceClearancePath { get; set; }
+
+        public Guid HumanId { get; set; }
 
         public HumanModel? Human { get; set; }
     }

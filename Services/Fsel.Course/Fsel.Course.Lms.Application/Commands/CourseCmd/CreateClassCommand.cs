@@ -10,8 +10,8 @@ namespace Fsel.Course.Lms.Application.Commands.CourseCmd
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.CommandModels.Courses;
     using Fsel.Course.Domain.Models.EntityModels;
-    using Fsel.Course.Lms.Application.Services.StudentServices;
     using Fsel.Course.Lms.Application.Services.TrainingServices;
+    using Fsel.Course.Lms.Application.Services.UserServices;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -23,16 +23,16 @@ namespace Fsel.Course.Lms.Application.Commands.CourseCmd
     public class CreateClassCommandHandler : IRequestHandler<CreateClassCommand, MethodResult<CourseModel>>
     {
         private readonly ICourseRepository _courseRepository;
-        private readonly IStudentService _studentService;
+        private readonly IUserService _userService;
         private readonly IMapper _mapper;
         private readonly ITrainingService _trainingService;
 
-        public CreateClassCommandHandler(ICourseRepository courseRepository, IStudentService studentService
+        public CreateClassCommandHandler(ICourseRepository courseRepository, IUserService userService
             , IMapper mapper
             , ITrainingService trainingService)
         {
             _courseRepository = courseRepository;
-            _studentService = studentService;
+            _userService = userService;
             _mapper = mapper;
             _trainingService = trainingService;
         }
@@ -51,7 +51,7 @@ namespace Fsel.Course.Lms.Application.Commands.CourseCmd
             });
             var classId = classs?.Content?.Result?.Id;
 
-            var student = await _studentService.GetStudentByUserIdAsync(request.UserId.ToString());
+            var student = await _userService.GetStudentByUserIdAsync(request.UserId.ToString());
             if (!student.IsSuccessStatusCode)
             {
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
@@ -72,7 +72,7 @@ namespace Fsel.Course.Lms.Application.Commands.CourseCmd
                 });
             }
 
-            student = await _studentService.UpdateStudentByClassAsync(classId ?? Guid.Empty);
+            student = await _userService.UpdateStudentByClassAsync(classId ?? Guid.Empty);
 
             #endregion Validation
 

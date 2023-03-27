@@ -3,7 +3,6 @@ using Fsel.Core.Extensions;
 using Fsel.Course.Domain.IRepositories;
 using Fsel.Course.Infrastructure;
 using Fsel.Course.Infrastructure.Repositories;
-using Fsel.Course.Lms.Application.Services.StudentServices;
 using Fsel.Course.Lms.Application.Services.TrainingServices;
 using Fsel.Course.Lms.Application.Services.UserServices;
 
@@ -24,7 +23,6 @@ builder.Services.AddScoped<IUnitLessonResultRepository, UnitLessonResultReposito
 builder.Services.AddScoped<ILessonRepository, LessonRepository>();
 builder.Services.AddScoped<IMockTestRepository, MockTestRepository>();
 
-builder.AddRefitClients(typeof(IStudentService), appSetting?.Services?.UserApiUrl);
 builder.AddRefitClients(typeof(IUserService), appSetting?.Services?.UserApiUrl);
 builder.AddRefitClients(typeof(ITrainingService), appSetting?.Services?.ClassApiUrl);
 builder.Services.AddCors(policy =>

@@ -3,7 +3,7 @@ using Fsel.Common.ActionResults;
 using Fsel.Common.Constants;
 using Fsel.Common.Enums;
 using Fsel.Course.Domain.Models.EntityModels;
-using Fsel.Course.Lms.Application.Queries.UnitQuery;
+using Fsel.Course.Lms.Application.Queries;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

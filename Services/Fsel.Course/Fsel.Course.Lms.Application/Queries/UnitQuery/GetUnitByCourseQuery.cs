@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Course.Lms.Application.Queries.UnitQuery
+namespace Fsel.Course.Lms.Application.Queries
 {
     using System.Linq;
     using System.Threading.Tasks;
@@ -10,7 +10,8 @@ namespace Fsel.Course.Lms.Application.Queries.UnitQuery
     using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
-    using Fsel.Course.Lms.Application.Services.StudentServices;
+    using Fsel.Course.Lms.Application.Services.UserServices;
+    using Fsel.Course.Lms.Application.Services.UserServices.Models;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -23,7 +24,7 @@ namespace Fsel.Course.Lms.Application.Queries.UnitQuery
     {
         private readonly ICourseRepository _courseRepository;
         private readonly IMapper _mapper;
-        private readonly IStudentService _studentService;
+        private readonly IUserService _userService;
         private readonly AuthContext _authContext;
         private readonly ICourseClassStudentRepository _courseClassStudentRepository;
 
@@ -31,30 +32,35 @@ namespace Fsel.Course.Lms.Application.Queries.UnitQuery
             AuthContext authContext,
             ICourseRepository courseRepository,
             ICourseClassStudentRepository courseClassStudentRepository,
-            IStudentService studentService)
+            IUserService userService)
         {
             _courseRepository = courseRepository;
             _mapper = mapper;
-            _studentService = studentService;
+            _userService = userService;
             _authContext = authContext;
             _courseClassStudentRepository = courseClassStudentRepository;
         }
 
         public async Task<MethodResult<CourseModel>> Handle(GetUnitByCourseQuery request, CancellationToken cancellationToken)
         {
-            var methodResult = new MethodResult<CourseModel>();
+            MethodResult<CourseModel> methodResult = new MethodResult<CourseModel>();
 
             var user = _authContext.CurrentUserId.ToString();
-            var student = await _studentService.GetStudentByUserIdAsync(user);
-            if (student == null)
+            var studentResult = await _userService.GetStudentByUserIdAsync(user);
+            if (studentResult == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.NotStudent));
                 return methodResult;
             }
-            var classId = student.Content?.Result?.ClassId;
+            var student = studentResult.Content?.Result;
+            if (student == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.StudentNull));
+                return methodResult;
+            }
 
             var courseClassStudent = await _courseClassStudentRepository.Queryable
-                            .FirstOrDefaultAsync(x => x.ClassId == classId, cancellationToken: cancellationToken);
+                            .FirstOrDefaultAsync(x => x.StudentId == student.Id, cancellationToken: cancellationToken);
 
             if (courseClassStudent == null)
             {
@@ -67,6 +73,7 @@ namespace Fsel.Course.Lms.Application.Queries.UnitQuery
                              .ThenInclude(unit => unit.Unit)
                              .Include(x => x.CourseUnitMockTests)
                              .ThenInclude(unit => unit.MockTest)
+                             .Include(x => x.CourseTeachers)
                              .Where(x => x.Id == courseClassStudent.CourseId)
                               select new CourseModel
                               {
@@ -74,9 +81,25 @@ namespace Fsel.Course.Lms.Application.Queries.UnitQuery
                                   Name = i.Name,
                                   CourseLevel = i.CourseLevel,
                                   CourseUnitMockTests = _mapper.Map<IList<CourseUnitMockTestModel>>(i.CourseUnitMockTests),
-                                  CourseClassStudents = _mapper.Map<IList<CourseClassStudentModel>>(i.CourseClassStudents),
+                                  CourseTeachers = _mapper.Map<List<CourseTeacherModel>>(i.CourseTeachers),
                               };
             var course = courseQuery.FirstOrDefault();
+
+            var teachersResult = await _userService.GetTeacherByIdsAsync(new GetTeacherByIdsQueryModel { Ids = course?.CourseTeachers?.Select(x => x.TeacherId).ToList() });
+            if (teachersResult.IsSuccessStatusCode)
+            {
+                var teachers = teachersResult?.Content?.Result;
+                if (teachers != null && course?.CourseTeachers != null)
+                {
+                    foreach (var item in course.CourseTeachers)
+                    {
+                        var teacher = teachers.FirstOrDefault(x => x.Id == item.TeacherId);
+                        item.FullName = teacher?.Human?.FullName;
+                        item.AvatarPath = teacher?.Human?.AvatarPath;
+                    }
+                }
+            }
+
             methodResult.Result = course;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
