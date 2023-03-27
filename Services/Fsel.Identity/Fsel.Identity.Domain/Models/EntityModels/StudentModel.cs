@@ -19,8 +19,6 @@ namespace Fsel.Identity.Domain.Models.EntityModels
 
         public Guid ClassId { get; set; }
 
-        public Human? Human { get; set; }
-
         public Guid HumanId { get; set; }
     }
 }

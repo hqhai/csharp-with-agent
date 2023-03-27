@@ -1,6 +1,7 @@
+// Copyright (c) Atlantic. All rights reserved.
+
 using AutoMapper;
 using Fsel.Common.ActionResults;
-using Fsel.Common.Helpers;
 using Fsel.Course.Domain.Entities;
 using Fsel.Course.Domain.Enums.ErrorCodes;
 using Fsel.Course.Domain.IRepositories;
@@ -8,7 +9,6 @@ using Fsel.Course.Domain.Models.CommandModels.Videos;
 using Fsel.Course.Domain.Models.EntityModels;
 using MediatR;
 using Microsoft.AspNetCore.Http;
-using Microsoft.EntityFrameworkCore;
 
 namespace Fsel.Course.Application.Commands.VideoCmd
 {
@@ -19,33 +19,19 @@ namespace Fsel.Course.Application.Commands.VideoCmd
     public class UpdateVideoCommandHandler : IRequestHandler<UpdateVideoCommand, MethodResult<VideoModel>>
     {
         private readonly IVideoRepository _videoRepository;
-        private readonly IQuestionRepository _questionRepository;
-        private readonly IExerciseRepository _excerciseRepository;
-        private readonly IExerciseQuestionRepository _excerciseQuestionRepository;
-        private readonly ITimeCodeExerciseRepository _timeCodeExerciseRepository;
-        private readonly IVideoTimeCodeRepository _videoTimeCodeRepository;
         private readonly IMapper _mapper;
 
         public UpdateVideoCommandHandler(IVideoRepository videoRepository
-            , IQuestionRepository questionRepository
-            , IExerciseRepository excerciseRepository
-            , IExerciseQuestionRepository excerciseQuestionRepository
-            , ITimeCodeExerciseRepository timeCodeExerciseRepository
-            , IVideoTimeCodeRepository videoTimeCodeRepository
             , IMapper mapper)
         {
             _videoRepository = videoRepository;
-            _questionRepository = questionRepository;
-            _excerciseRepository = excerciseRepository;
-            _excerciseQuestionRepository = excerciseQuestionRepository;
-            _timeCodeExerciseRepository = timeCodeExerciseRepository;
-            _videoTimeCodeRepository = videoTimeCodeRepository;
             _mapper = mapper;
         }
 
         public async Task<MethodResult<VideoModel>> Handle(UpdateVideoCommand request, CancellationToken cancellationToken)
         {
             MethodResult<VideoModel> methodResult = new MethodResult<VideoModel>();
+            ArgumentNullException.ThrowIfNull(request);
 
             #region Validation
 

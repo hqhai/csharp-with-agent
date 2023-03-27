@@ -1,4 +1,4 @@
-﻿using Fsel.Core.Base.Interfaces;
+using Fsel.Core.Base.Interfaces;
 using EntityCourse = Fsel.Course.Domain.Entities.Course;
 
 namespace Fsel.Course.Domain.IRepositories

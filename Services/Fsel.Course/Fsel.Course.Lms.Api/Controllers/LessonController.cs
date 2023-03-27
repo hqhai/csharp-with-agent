@@ -3,7 +3,6 @@
 namespace Fsel.Course.Lms.Api.Controllers
 {
     using Fsel.Common.Constants;
-    using Fsel.Common.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
 

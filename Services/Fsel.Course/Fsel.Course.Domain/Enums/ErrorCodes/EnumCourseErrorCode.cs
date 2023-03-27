@@ -8,6 +8,11 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         CourseNotExist,
 
         /// <summary>
+        /// List Course does not exist
+        /// </summary>
+        ListCourseNotExist,
+
+        /// <summary>
         /// Course is not in a new state
         /// </summary>
         CourseNotInNewState,
@@ -21,6 +26,31 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         /// Student not in class
         /// </summary>
         StudentNotInClass,
+
+        /// <summary>
+        /// List Teacher by course does not exist
+        /// </summary>
+        ListTeacherCourseNotExist,
+
+        /// <summary>
+        /// Course not in Class
+        /// </summary>
+        CourseNotInClass,
+
+        /// <summary>
+        /// Classes new not exist
+        /// </summary>
+        ClassesNewNotExitst,
+
+        /// <summary>
+        /// Students not exist
+        /// </summary>
+        StudentsNotExist,
+
+        /// <summary>
+        /// Classes not exist
+        /// </summary>
+        ClassesNotExitst,
 
         /// <summary>
         /// Student is null

@@ -1,3 +1,5 @@
+// Copyright (c) Atlantic. All rights reserved.
+
 using System.Net;
 using Fsel.Common.ActionResults;
 using Fsel.Common.Constants;
@@ -12,7 +14,6 @@ namespace Fsel.Identity.Api.Controllers
     [ApiVersion(Settings.APIVersion)]
     [Route(Settings.APIDefaultRoute + "/user")]
     [ApiController]
-    [Authorize]
     public class UserController : ControllerBase
     {
         private readonly IMediator _mediator;

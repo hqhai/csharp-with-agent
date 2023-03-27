@@ -109,6 +109,23 @@ namespace Fsel.Common.ActionResults
             AddError(errorCode, errors);
         }
 
+        public void AddError(int statusCode, IReadOnlyCollection<ErrorResult>? errorResults)
+        {
+            StatusCode = statusCode;
+            if (errorResults != null)
+            {
+                foreach (var errorResult in errorResults)
+                {
+                    _errorMessages.Add(errorResult);
+                }
+            }
+        }
+
+        public void AddErrorBadRequest(IReadOnlyCollection<ErrorResult>? errorResults)
+        {
+            AddError(StatusCodes.Status200OK, errorResults);
+        }
+
         public void AddErrorBadRequest(string? errorCode, string? fieldName = null, params object[]? errorValues)
         {
             AddError(StatusCodes.Status200OK, errorCode, fieldName, errorValues);

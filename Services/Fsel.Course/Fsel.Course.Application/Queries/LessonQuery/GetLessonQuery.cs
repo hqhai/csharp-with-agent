@@ -1,6 +1,7 @@
+// Copyright (c) Atlantic. All rights reserved.
+
 using AutoMapper;
 using Fsel.Common.ActionResults;
-using Fsel.Common.Helpers;
 using Fsel.Course.Domain.Enums.ErrorCodes;
 using Fsel.Course.Domain.IRepositories;
 using Fsel.Course.Domain.Models.EntityModels;
@@ -28,7 +29,7 @@ namespace Fsel.Course.Application.Queries.LessonQuery
         public async Task<MethodResult<LessonModel>> Handle(GetLessonQuery request, CancellationToken cancellationToken)
         {
             MethodResult<LessonModel> methodResult = new MethodResult<LessonModel>();
-
+            ArgumentNullException.ThrowIfNull(request);
             var lesson = await _lessonRepository.GetIncludeByIdAsync(request.Id);
 
             if (lesson == null)

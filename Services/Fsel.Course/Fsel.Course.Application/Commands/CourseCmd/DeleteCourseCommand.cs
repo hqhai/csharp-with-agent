@@ -1,4 +1,5 @@
-using AutoMapper;
+// Copyright (c) Atlantic. All rights reserved.
+
 using Fsel.Common.ActionResults;
 using Fsel.Course.Domain.Enums;
 using Fsel.Course.Domain.Enums.ErrorCodes;
@@ -17,15 +18,10 @@ namespace Fsel.Course.Application.Commands.CourseCmd
     public class DeleteCourseCommandHandler : IRequestHandler<DeleteCourseCommand, MethodResult<bool>>
     {
         private readonly ICourseRepository _courseRepository;
-        private readonly IMapper _mapper;
-        private readonly ICourseUnitMockTestRepository _courseUnitRepository;
 
-        public DeleteCourseCommandHandler(ICourseRepository courseRepository, ICourseUnitMockTestRepository courseUnitRepository,
-            IMapper mapper)
+        public DeleteCourseCommandHandler(ICourseRepository courseRepository)
         {
-            _courseUnitRepository = courseUnitRepository;
             _courseRepository = courseRepository;
-            _mapper = mapper;
         }
 
         public async Task<MethodResult<bool>> Handle(DeleteCourseCommand request, CancellationToken cancellationToken)
@@ -37,7 +33,7 @@ namespace Fsel.Course.Application.Commands.CourseCmd
             var course = _courseRepository.Queryable.Where(e => e.Id == request.Id).Include(e => e.CourseUnitMockTests).Include(e => e.CourseTeachers).FirstOrDefault();
             if (course == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.CourseNotExist), nameof(request.Id), request.Id);
+                methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.CourseNotExist), nameof(request.Id), request?.Id);
                 return methodResult;
             }
 

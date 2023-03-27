@@ -4,7 +4,6 @@ using Fsel.Common.Enums;
 using Fsel.Common.Enums.ErrorCodes;
 using Fsel.Core.Entities;
 using Fsel.Course.Domain.Enums;
-using Fsel.Course.Domain.Enums.ErrorCodes;
 
 namespace Fsel.Course.Domain.Entities
 {
@@ -42,5 +41,7 @@ namespace Fsel.Course.Domain.Entities
         public ICollection<CourseUnitMockTest> CourseUnitMockTests { get; set; } = new List<CourseUnitMockTest>();
         public ICollection<CourseTeacher> CourseTeachers { get; set; } = new List<CourseTeacher>();
         public ICollection<CourseClassStudent> CourseClassStudents { get; set; } = new List<CourseClassStudent>();
+        public ICollection<UnitResult> UnitResults { get; set; } = new List<UnitResult>();
+        public ICollection<LessonResult> LessonResults { get; set; } = new List<LessonResult>();
     }
 }
