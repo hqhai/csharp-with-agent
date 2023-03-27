@@ -20,6 +20,11 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         /// <summary>
         /// Student not in class
         /// </summary>
-        StudentNotInClass
+        StudentNotInClass,
+
+        /// <summary>
+        /// Student is null
+        /// </summary>
+        StudentNull,
     }
 }
