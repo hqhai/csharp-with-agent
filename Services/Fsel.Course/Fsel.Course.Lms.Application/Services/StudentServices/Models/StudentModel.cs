@@ -3,12 +3,6 @@
 namespace Fsel.Course.Lms.Application.Services.StudentServices.Models
 {
     using System;
-    using System.Collections.Generic;
-    using System.ComponentModel.DataAnnotations;
-    using System.Linq;
-    using System.Text;
-    using System.Threading.Tasks;
-    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Common.Enums;
     using Fsel.Core.Base.BaseModels;
 
@@ -25,7 +19,5 @@ namespace Fsel.Course.Lms.Application.Services.StudentServices.Models
         public Guid ClassId { get; set; }
 
         public HumanModel? Human { get; set; }
-
-        public Guid HumanId { get; set; }
     }
 }

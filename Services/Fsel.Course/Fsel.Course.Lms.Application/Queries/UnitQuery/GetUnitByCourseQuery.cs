@@ -25,12 +25,12 @@ namespace Fsel.Course.Lms.Application.Queries.UnitQuery
         private readonly IMapper _mapper;
         private readonly IStudentService _studentService;
         private readonly AuthContext _authContext;
-        private readonly ICourseClassRepository _courseClassRepository;
+        private readonly ICourseClassStudentRepository _courseClassRepository;
 
         public GetUnitByCourseQueryHandler(IMapper mapper,
             AuthContext authContext,
             ICourseRepository courseRepository,
-            ICourseClassRepository courseClassRepository,
+            ICourseClassStudentRepository courseClassRepository,
             IStudentService studentService)
         {
             _courseRepository = courseRepository;
@@ -51,7 +51,7 @@ namespace Fsel.Course.Lms.Application.Queries.UnitQuery
                 methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.NotStudent));
                 return methodResult;
             }
-            var classId = student.Content?.Result.ClassId;
+            var classId = student.Content?.Result?.ClassId;
 
             var courseClass = await _courseClassRepository.Queryable
                             .FirstOrDefaultAsync(x => x.ClassId == classId, cancellationToken: cancellationToken);
@@ -74,7 +74,7 @@ namespace Fsel.Course.Lms.Application.Queries.UnitQuery
                                   Name = i.Name,
                                   CourseLevel = i.CourseLevel,
                                   CourseUnitMockTests = _mapper.Map<IList<CourseUnitMockTestModel>>(i.CourseUnitMockTests),
-                                  CourseClasses = _mapper.Map<IList<CourseClassModel>>(i.CourseClasses),
+                                  CourseClasses = _mapper.Map<IList<CourseClassStudentModel>>(i.CourseClasses),
                               };
             var course = courseQuery.FirstOrDefault();
             methodResult.Result = course;

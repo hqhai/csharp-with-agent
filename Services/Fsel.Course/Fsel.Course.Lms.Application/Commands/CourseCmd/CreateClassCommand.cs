@@ -10,8 +10,8 @@ namespace Fsel.Course.Lms.Application.Commands.CourseCmd
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.CommandModels.Courses;
     using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Course.Lms.Application.Services.StudentServices;
     using Fsel.Course.Lms.Application.Services.TrainingServices;
-    using Fsel.Course.Lms.Application.Services.UserServices;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -23,16 +23,16 @@ namespace Fsel.Course.Lms.Application.Commands.CourseCmd
     public class CreateClassCommandHandler : IRequestHandler<CreateClassCommand, MethodResult<CourseModel>>
     {
         private readonly ICourseRepository _courseRepository;
-        private readonly IUserService _userService;
+        private readonly IStudentService _studentService;
         private readonly IMapper _mapper;
         private readonly ITrainingService _trainingService;
 
-        public CreateClassCommandHandler(ICourseRepository courseRepository, IUserService userService
+        public CreateClassCommandHandler(ICourseRepository courseRepository, IStudentService studentService
             , IMapper mapper
             , ITrainingService trainingService)
         {
             _courseRepository = courseRepository;
-            _userService = userService;
+            _studentService = studentService;
             _mapper = mapper;
             _trainingService = trainingService;
         }
@@ -44,10 +44,15 @@ namespace Fsel.Course.Lms.Application.Commands.CourseCmd
 
             #region Validation
 
-            var training = await _trainingService.CreateTrainingByCheckId(request);
+            var training = await _trainingService.CreateTrainingByCheckId(new Services.TrainingServices.Models.CreateClassStudentModel
+            {
+                ClassId = request.ClassId,
+                Code = request.Code,
+                UserId = request.UserId
+            });
             var classId = training?.Content?.Result?.Id;
 
-            var students = await _userService.GetStudentByClassIdAsync(classId ?? Guid.Empty);
+            var students = await _studentService.GetStudentByClassIdAsync(classId ?? Guid.Empty);
             var liststudent = students?.Content?.Result;
 
             if (liststudent == null || liststudent.Count == 0)
@@ -58,7 +63,12 @@ namespace Fsel.Course.Lms.Application.Commands.CourseCmd
             }
             else if (liststudent.Count > 12)
             {
-                training = await _trainingService.CreateTrainingByCheckId(request);
+                training = await _trainingService.CreateTrainingByCheckId(new Services.TrainingServices.Models.CreateClassStudentModel
+                {
+                    ClassId = request.ClassId,
+                    Code = request.Code,
+                    UserId = request.UserId
+                });
             }
             classId = training?.Content?.Result?.Id;
 
@@ -72,11 +82,11 @@ namespace Fsel.Course.Lms.Application.Commands.CourseCmd
                 methodResult.AddError(nameof(EnumCourseErrorCode.CourseNotExist));
                 return methodResult;
             }
-            var student = await _userService.GetStudentByIdAsync(request.UserId);
+            var student = await _studentService.GetStudentByUserIdAsync(request.UserId.ToString());
             if (!student.IsSuccessStatusCode)
             {
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                methodResult.AddError(nameof(EnumTrainingErrorCode.UserIdNotExist));
+                methodResult.AddError(nameof(EnumCourseClassStudentErrorCode.UserIdNotExist));
                 return methodResult;
             }
             var studentId = student?.Content?.Result?.Id;
@@ -85,8 +95,13 @@ namespace Fsel.Course.Lms.Application.Commands.CourseCmd
                 CourseId = request.CourseId,
                 StudentId = studentId ?? Guid.Empty
             });
+            course.CourseClasses.Add(new CourseClassStudent
+            {
+                CourseId = request.CourseId,
+                ClassId = classId ?? Guid.Empty
+            });
 
-            student = await _userService.UpdateStudentByClassAsync(classId ?? Guid.Empty);
+            student = await _studentService.UpdateStudentByClassAsync(classId ?? Guid.Empty);
 
             #endregion Validation
 

@@ -9,18 +9,19 @@ namespace Fsel.Training.Application.Commands.TrainingCmd
     using Fsel.Training.Application.Services.UserServices;
     using Fsel.Training.Application.Services.UserServices.Models;
     using Fsel.Training.Doman.Entities;
+    using Fsel.Training.Doman.Enums.ErrorCodes;
     using Fsel.Training.Doman.IRepositories;
-    using Fsel.Training.Doman.Models.CommandModels.Trainings;
+    using Fsel.Training.Doman.Models.CommandModels.Classes;
     using Fsel.Training.Doman.Models.EntityModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class CreateClassCommand : CreateTrainingCommandModel, IRequest<MethodResult<TrainingModel>>
+    public class CreateClassCommand : CreateClassCommandModel, IRequest<MethodResult<ClassModel>>
     {
     }
 
-    public class CreateTrainingCommandHandler : IRequestHandler<CreateClassCommand, MethodResult<TrainingModel>>
+    public class CreateTrainingCommandHandler : IRequestHandler<CreateClassCommand, MethodResult<ClassModel>>
     {
         private readonly ITrainingRepository _trainingRepository;
         private readonly IUserService _userService;
@@ -35,60 +36,73 @@ namespace Fsel.Training.Application.Commands.TrainingCmd
             _mapper = mapper;
         }
 
-        public async Task<MethodResult<TrainingModel>> Handle(CreateClassCommand request, CancellationToken cancellationToken)
+        public async Task<MethodResult<ClassModel>> Handle(CreateClassCommand request, CancellationToken cancellationToken)
         {
-            MethodResult<TrainingModel> methodResult = new MethodResult<TrainingModel>();
+            MethodResult<ClassModel> methodResult = new MethodResult<ClassModel>();
 
             #region Validation
 
-            Class? classnew = await _trainingRepository.Queryable.FirstOrDefaultAsync(x => x.Code == request.Code, cancellationToken: cancellationToken);
+            Class? classnew = await _trainingRepository.Queryable.FirstOrDefaultAsync(x => x.Code == request.Code || x.Id == request.ClassId, cancellationToken: cancellationToken);
             if (classnew == null)
             {
-                await CreateClassAsync(request, classnew);
-                methodResult.StatusCode = StatusCodes.Status201Created;
-                methodResult.Result = _mapper.Map<TrainingModel>(classnew);
-            }
-            else
-            {
-                var students = await _userService.GetStudentByClassIdAsync(classnew.Id);
-                if (students != null && students.IsSuccessStatusCode)
+                var classs = await _trainingRepository.Queryable
+                                                .OrderByDescending(c => c.CreatedDate)
+                                                .FirstOrDefaultAsync(cancellationToken: cancellationToken);
+                if (classs == null)
                 {
-                    var liststudent = students.Content?.Result;
-                    if (liststudent != null && liststudent.Count > 12)
-                    {
-                        await UpdateClassAsync(classnew);
-                        classnew = new();
-                        await CreateClassAsync(request, classnew);
-                    }
+                    methodResult.StatusCode = StatusCodes.Status400BadRequest;
+                    methodResult.AddError(nameof(EnumClassErrorCode.ClassNull));
+                    return methodResult;
                 }
-                var student = await _userService.UpdateStudentByClassIdAsync(new UpdateStudentByClassIdModel
+                var ischeckclass = await _userService.GetStudentByClassIdCheckAsync(classs.Id.ToString());
+                var isclass = ischeckclass?.Content?.Result;
+                if (isclass == false)
                 {
-                    ClassId = classnew.Id,
-                    UserId = request.UserId
-                });
-                methodResult.StatusCode = StatusCodes.Status201Created;
-                methodResult.Result = _mapper.Map<TrainingModel>(classnew);
+                    classnew = await CreateClassAsync(request, classnew);
+                    methodResult.StatusCode = StatusCodes.Status201Created;
+                    methodResult.Result = _mapper.Map<ClassModel>(classnew);
+                }
             }
+            var students = await _userService.GetStudentByClassIdAsync(classnew.Id.ToString());
+            if (students != null && students.IsSuccessStatusCode)
+            {
+                var liststudent = students.Content?.Result;
+                if (liststudent != null && liststudent.Count > 12)
+                {
+                    classnew = await UpdateClassAsync(classnew);
+                    classnew = new();
+                    await CreateClassAsync(request, classnew);
+                }
+            }
+            var student = await _userService.UpdateStudentByClassIdAsync(new UpdateStudentByClassIdModel
+            {
+                ClassId = classnew.Id,
+                UserId = request.UserId
+            });
+            methodResult.StatusCode = StatusCodes.Status201Created;
+            methodResult.Result = _mapper.Map<ClassModel>(classnew);
 
             #endregion Validation
 
             return methodResult;
         }
 
-        private async Task CreateClassAsync(CreateClassCommand request, Class? classnew)
+        private async Task<Class> CreateClassAsync(CreateClassCommand request, Class? classnew)
         {
             classnew = new Class();
             classnew.Code = request?.Code;
             classnew.Name = request?.Code;
             _trainingRepository.Add(classnew);
             await _trainingRepository.UnitOfWork.SaveEntitiesAsync().ConfigureAwait(false);
+            return classnew;
         }
 
-        private async Task UpdateClassAsync(Class classnew)
+        private async Task<Class> UpdateClassAsync(Class classnew)
         {
             classnew.Status = EnumTrainingType.Active;
             _trainingRepository.Update(classnew);
             await _trainingRepository.UnitOfWork.SaveEntitiesAsync().ConfigureAwait(false);
+            return classnew;
         }
     }
 }

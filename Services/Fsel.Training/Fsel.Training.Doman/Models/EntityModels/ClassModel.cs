@@ -5,7 +5,7 @@ namespace Fsel.Training.Doman.Models.EntityModels
     using Fsel.Common.Enums;
     using Fsel.Core.Base.BaseModels;
 
-    public class TrainingModel : BaseModel
+    public class ClassModel : BaseModel
     {
         public string? Code { get; set; }
         public string? Name { get; set; }
@@ -14,7 +14,5 @@ namespace Fsel.Training.Doman.Models.EntityModels
         public DateTime TimeEnd { get; set; }
 
         public EnumTrainingType Status { get; set; }
-
-        public Guid StudentId { get; set; }
     }
 }

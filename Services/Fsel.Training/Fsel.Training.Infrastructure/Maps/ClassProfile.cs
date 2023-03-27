@@ -7,11 +7,11 @@ namespace Fsel.Training.Infrastructure.Maps
     using Fsel.Core.Extensions;
     using Fsel.Training.Doman.Entities;
 
-    public class TrainingProfile : Profile
+    public class ClassProfile : Profile
     {
-        public TrainingProfile()
+        public ClassProfile()
         {
-            CreateMap<Class, TrainingModel>().IgnoreAllNonExisting();
+            CreateMap<Class, ClassModel>().IgnoreAllNonExisting();
         }
     }
 }

@@ -6,17 +6,16 @@ namespace Fsel.Training.Api.Controllers
     using System.Net;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
+    using Fsel.Common.Enums;
     using Fsel.Training.Application.Commands.TrainingCmd;
-    using Fsel.Training.Application.Queries.TrainingQuery;
+    using Fsel.Training.Application.Queries.ClassQuery;
     using Fsel.Training.Doman.Models.EntityModels;
     using MediatR;
-    using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
 
     [ApiVersion(Settings.APIVersion)]
     [Route(Settings.APIDefaultRoute + "/class")]
     [ApiController]
-    [Authorize]
     public class TrainingController : ControllerBase
     {
         private readonly IMediator _mediator;
@@ -27,26 +26,26 @@ namespace Fsel.Training.Api.Controllers
         }
 
         /// <summary>
-        /// get training in status new
+        /// get class in status new
         /// </summary>
-        [HttpPost("get-class-new")]
-        [ProducesResponseType(typeof(MethodResult<IList<TrainingModel>>), (int)HttpStatusCode.OK)]
+        [HttpGet("get-class-new")]
+        [ProducesResponseType(typeof(MethodResult<IList<ClassModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.BadRequest)]
         public async Task<IActionResult> GetClassNew()
         {
-            MethodResult<IList<TrainingModel>> commandResult = await _mediator.Send(new GetClassByStatusNewQuery()).ConfigureAwait(false);
+            MethodResult<IList<ClassModel>> commandResult = await _mediator.Send(new GetClassByStatusNewQuery()).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
 
         /// <summary>
         /// get new class code
         /// </summary>
-        [HttpPost("get-new-class-code")]
+        [HttpGet("get-new-class-code")]
         [ProducesResponseType(typeof(MethodResult<string>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetNewClassCode([FromQuery] GetNewTrainingCodeQuery command)
+        public async Task<IActionResult> GetNewClassCode([FromRoute] EnumCourseLevel courseLevel)
         {
-            MethodResult<string> commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            MethodResult<string> commandResult = await _mediator.Send(new GetNewClassCodeQuery { CourseLevel = courseLevel }).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
 
@@ -54,11 +53,11 @@ namespace Fsel.Training.Api.Controllers
         /// Create a class
         /// </summary>
         [HttpPost("create-class")]
-        [ProducesResponseType(typeof(MethodResult<TrainingModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(MethodResult<ClassModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> Create([FromBody] CreateClassCommand command)
         {
-            MethodResult<TrainingModel> queryResult = await _mediator.Send(command).ConfigureAwait(false);
+            MethodResult<ClassModel> queryResult = await _mediator.Send(command).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
     }

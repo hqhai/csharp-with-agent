@@ -1,18 +1,17 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Identity.Application.Queries.UserQuery
+namespace Fsel.Identity.Application.Queries.StudentQuery
 {
     using System;
     using System.Threading;
     using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Common.ActionResults;
-    using Fsel.Identity.Domain.Entities;
+    using Fsel.Identity.Domain.Enums.ErrorCodes;
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Domain.Models.EntityModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
-    using Microsoft.AspNetCore.Identity;
     using Microsoft.EntityFrameworkCore;
 
     public class GetStudentByUserIdQuery : IRequest<MethodResult<StudentModel>>
@@ -23,26 +22,28 @@ namespace Fsel.Identity.Application.Queries.UserQuery
     public class GetStudentByUserIdQueryHandler : IRequestHandler<GetStudentByUserIdQuery, MethodResult<StudentModel>>
     {
         private readonly IMapper _mapper;
-        private readonly UserManager<User> _userManager;
         private readonly IStudentRepository _studentRepository;
 
-        public GetStudentByUserIdQueryHandler(IMapper mapper, UserManager<User> userManager, IStudentRepository studentRepository)
+        public GetStudentByUserIdQueryHandler(IMapper mapper, IStudentRepository studentRepository)
         {
             _mapper = mapper;
-            _userManager = userManager;
             _studentRepository = studentRepository;
         }
 
         public async Task<MethodResult<StudentModel>> Handle(GetStudentByUserIdQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-
+            var methodResult = new MethodResult<StudentModel>();
             var student = await _studentRepository.Queryable
                                         .Include(i => i.Human)
                                         .FirstOrDefaultAsync(i => i.Human != null && i.Human.UserId == request.Id, cancellationToken);
 
-            MethodResult<StudentModel> methodResult = new MethodResult<StudentModel>();
-
+            if (student == null)
+            {
+                methodResult.StatusCode = StatusCodes.Status400BadRequest;
+                methodResult.AddError(nameof(EnumStudentErrorCode.StudentNull));
+                return methodResult;
+            }
             methodResult.Result = _mapper.Map<StudentModel>(student);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;

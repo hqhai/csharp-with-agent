@@ -21,12 +21,9 @@ builder.AddServices();
 builder.AddSwaggerGens(appSetting);
 builder.AddAuthenticationJwtBearers(appSetting);
 builder.AddDbContexts<TrainingDbContext>();
-builder.Services.AddCors(policy =>
-{
-    policy.AddPolicy("OpenCorsPolicy", opt => opt.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod());
-});
 builder.Services.AddScoped<ITrainingRepository, TrainingRepository>();
 builder.AddRefitClients(typeof(IUserService), appSetting?.Services?.UserApiUrl);
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -35,11 +32,5 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-app.UseCors("OpenCorsPolicy");
-app.UseHttpsRedirection();
-
-app.UseAuthorization();
-
-app.MapControllers();
-
+app.UseServices();
 app.Run();

@@ -1,11 +1,13 @@
 using System.Net;
 using Fsel.Common.ActionResults;
 using Fsel.Common.Constants;
+using Fsel.Common.Enums;
 using Fsel.Course.Domain.Models.EntityModels;
 using Fsel.Course.Lms.Application.Commands.CourseCmd;
 using Fsel.Course.Lms.Application.Queries.CourseQuery;
 using Fsel.Course.Lms.Application.Services.TrainingServices.Models;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Fsel.Course.Lms.Api.Controllers
@@ -13,6 +15,7 @@ namespace Fsel.Course.Lms.Api.Controllers
     [ApiVersion(Settings.APIVersion)]
     [Route(Settings.APIDefaultRoute + "/test")]
     [ApiController]
+    [Authorize(Roles = nameof(EnumRole.Student))]
     public class TestController : ControllerBase
     {
         private readonly IMediator _mediator;
@@ -50,11 +53,11 @@ namespace Fsel.Course.Lms.Api.Controllers
         /// Get training in course
         /// </summary>
         [HttpGet("training-course")]
-        [ProducesResponseType(typeof(MethodResult<TrainingModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(MethodResult<ClassModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetClassIncourse([FromQuery] GetTrainingCourseQuery query)
         {
-            MethodResult<TrainingModel> queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            MethodResult<ClassModel> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
 

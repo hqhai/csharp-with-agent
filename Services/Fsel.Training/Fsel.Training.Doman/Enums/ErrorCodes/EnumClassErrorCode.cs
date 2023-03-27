@@ -2,7 +2,7 @@
 
 namespace Fsel.Training.Doman.Enums.ErrorCodes
 {
-    public enum EnumTrainingErrorCode
+    public enum EnumClassErrorCode
     {
         /// <summary>
         /// Trainings not exits
@@ -12,6 +12,16 @@ namespace Fsel.Training.Doman.Enums.ErrorCodes
         /// <summary>
         /// Students not exits
         /// </summary>
-        StudentsNotExits
+        StudentsNotExits,
+
+        /// <summary>
+        /// Class has too many students
+        /// </summary>
+        ClassHasTooManyStudents,
+
+        /// <summary>
+        /// Class null
+        /// </summary>
+        ClassNull,
     }
 }

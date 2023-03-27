@@ -46,5 +46,10 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         /// Students not exist
         /// </summary>
         StudentsNotExist,
+
+        /// <summary>
+        /// Classes not exist
+        /// </summary>
+        ClassesNotExitst,
     }
 }

@@ -1,16 +1,14 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Course.Domain.IRepositories
+namespace Fsel.Course.Domain.Enums.ErrorCodes
 {
     using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Text;
     using System.Threading.Tasks;
-    using Fsel.Core.Base.Interfaces;
-    using Fsel.Course.Domain.Entities;
 
-    public interface ICourseClassRepository : IRepository<CourseClass>
+    public enum EnumCourseStudentErrorCode
     {
     }
 }

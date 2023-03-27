@@ -11,31 +11,31 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class GetTrainingCourseQuery : IRequest<MethodResult<TrainingModel>>
+    public class GetTrainingCourseQuery : IRequest<MethodResult<ClassModel>>
     {
         public Guid CourseId { get; set; }
     }
 
-    public class GetClassCourseQueryHandler : IRequestHandler<GetTrainingCourseQuery, MethodResult<TrainingModel>>
+    public class GetClassCourseQueryHandler : IRequestHandler<GetTrainingCourseQuery, MethodResult<ClassModel>>
     {
         private readonly ICourseRepository _courseRepository;
         private readonly ITrainingService _trainingService;
-        private readonly ICourseTrainingRepository _courseTrainingRepository;
+        private readonly ICourseClassStudentRepository _courseClassStudentRepository;
 
         public GetClassCourseQueryHandler(
             ICourseRepository courseRepository,
             ITrainingService trainingService,
-            ICourseTrainingRepository courseTrainingRepository)
+            ICourseClassStudentRepository courseClassStudentRepository)
         {
             _courseRepository = courseRepository;
             _trainingService = trainingService;
-            _courseTrainingRepository = courseTrainingRepository;
+            _courseClassStudentRepository = courseClassStudentRepository;
         }
 
-        public async Task<MethodResult<TrainingModel>> Handle(GetTrainingCourseQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<ClassModel>> Handle(GetTrainingCourseQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            MethodResult<TrainingModel> methodResult = new MethodResult<TrainingModel>();
+            MethodResult<ClassModel> methodResult = new MethodResult<ClassModel>();
 
             var course = await _courseRepository.GetByIdAsync(request.CourseId);
             if (course == null)
@@ -47,18 +47,28 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
             }
             var trainingContents = await _trainingService.GetTrainingByStatusNewAsync();
 
-            var trainings = trainingContents?.Content?.Result;
-            if (trainings != null && trainings.Count > 0)
+            var classnews = trainingContents?.Content?.Result;
+            if (classnews != null && classnews.Count > 0)
             {
-                var CourseClasses = await _courseTrainingRepository.Queryable.Where(e => e.CourseId == request.CourseId)
-                                                            .Where(e => trainings.Select(x => x.Id).Contains(e.ClassId))
+                var courseClassStudents = await _courseClassStudentRepository.Queryable.Where(e => e.CourseId == request.CourseId)
+                                                            .Where(e => classnews.Select(x => x.Id).Contains(e.ClassId))
                                                             .ToListAsync(cancellationToken: cancellationToken);
-                if (CourseClasses != null && CourseClasses.Count > 0)
+                if (courseClassStudents != null && courseClassStudents.Count > 0)
                 {
-                    var training = trainings.Where(e => CourseClasses.Select(e => e.ClassId).Contains(e.Id)).FirstOrDefault();
-                    methodResult.Result = training;
-                    methodResult.StatusCode = StatusCodes.Status200OK;
-                    return methodResult;
+                    var classes = classnews.Where(e => courseClassStudents.Select(x => x.ClassId).Contains(e.Id)).ToList();
+                    if (classes == null || classes.Count == 0)
+                    {
+                        methodResult.AddErrorBadRequest(
+                      nameof(EnumCourseErrorCode.ClassesNotExitst),
+                      nameof(request.CourseId), request.CourseId);
+                        return methodResult;
+                    }
+                    else
+                    {
+                        methodResult.Result = classes.FirstOrDefault();
+                        methodResult.StatusCode = StatusCodes.Status200OK;
+                        return methodResult;
+                    }
                 }
                 else
                 {
@@ -71,8 +81,9 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
                        nameof(request.CourseId), request.CourseId);
                         return methodResult;
                     }
-                    methodResult.Result = new TrainingModel { Code = trainingcode };
+                    methodResult.Result = new ClassModel { Code = trainingcode };
                     methodResult.StatusCode = StatusCodes.Status200OK;
+                    return methodResult;
                 }
             }
             methodResult.AddErrorBadRequest(

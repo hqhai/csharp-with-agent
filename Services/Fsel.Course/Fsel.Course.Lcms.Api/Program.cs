@@ -34,8 +34,8 @@ builder.Services.AddScoped<ICourseRepository, CourseRepository>();
 builder.Services.AddScoped<ICourseTeacherRepository, CourseTeacherRepository>();
 builder.Services.AddScoped<ICourseUnitMockTestRepository, CourseUnitMockTestRepository>();
 builder.Services.AddScoped<IMockTestRepository, MockTestRepository>();
-builder.Services.AddScoped<ICourseStudentTrainingRepository, CourseStudentTrainingRepository>();
-builder.Services.AddScoped<ICourseTrainingRepository, CourseTrainingRepository>();
+builder.Services.AddScoped<ICourseStudentRepository, CourseStudentRepository>();
+builder.Services.AddScoped<ICourseClassStudentRepository, CourseClassStudentRepository>();
 
 builder.AddRefitClients(typeof(IUserService), appSetting?.Services?.UserApiUrl);
 var app = builder.Build();

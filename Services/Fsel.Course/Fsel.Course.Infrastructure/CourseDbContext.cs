@@ -38,7 +38,7 @@ namespace Fsel.Course.Infrastructure
         public DbSet<Question> Questions { get; set; }
         public DbSet<CourseTeacher> CourseTeachers { get; set; }
         public DbSet<CourseStudent> CourseStudents { get; set; }
-        public DbSet<CourseClass> CourseClasses { get; set; }
+        public DbSet<CourseClassStudent> CourseClassStudents { get; set; }
         public DbSet<UnitStudent> UnitStudents { get; set; }
         public DbSet<LessonStudent> LessonStudents { get; set; }
 

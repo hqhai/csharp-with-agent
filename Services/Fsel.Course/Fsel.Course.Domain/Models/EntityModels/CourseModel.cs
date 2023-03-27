@@ -20,6 +20,6 @@ namespace Fsel.Course.Domain.Models.EntityModels
 
         public IList<CourseUnitMockTestModel>? CourseUnitMockTests { get; set; }
         public IList<CourseTeacherModel>? CourseTeachers { get; set; }
-        public IList<CourseClassModel>? CourseClasses { get; set; }
+        public IList<CourseClassStudentModel>? CourseClasses { get; set; }
     }
 }

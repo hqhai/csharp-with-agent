@@ -1,8 +1,8 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Training.Doman.Models.CommandModels.Trainings
+namespace Fsel.Training.Doman.Models.CommandModels.Classes
 {
-    public class CreateTrainingCommandModel
+    public class CreateClassCommandModel
     {
         public string? Code { get; set; }
         public Guid? ClassId { get; set; }

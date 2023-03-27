@@ -2,7 +2,7 @@
 
 namespace Fsel.Course.Domain.Enums.ErrorCodes
 {
-    public enum EnumTrainingErrorCode
+    public enum EnumCourseClassStudentErrorCode
     {
         /// <summary>
         /// User Id not exist

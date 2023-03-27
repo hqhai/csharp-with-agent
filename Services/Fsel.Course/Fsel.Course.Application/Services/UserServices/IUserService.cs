@@ -7,6 +7,7 @@ namespace Fsel.Course.Application.Services.UserServices
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
     using Fsel.Course.Application.Services.UserServices.Models;
+    using Microsoft.AspNetCore.Mvc;
     using Refit;
 
     public interface IUserService
@@ -17,8 +18,8 @@ namespace Fsel.Course.Application.Services.UserServices
         [Post("/teacher/get-by-id/{id}")]
         Task<IApiResponse<MethodResult<TeacherModel>>> GetTeacherByIdAsync([Body] Guid id);
 
-        [Get("/user/get-student-by-id/{id}")]
-        Task<IApiResponse<MethodResult<StudentModel>>> GetStudentByIdAsync([Body] Guid id);
+        [Get("/student/get-by-user-id/{id}")]
+        Task<IApiResponse<MethodResult<StudentModel>>> GetStudentByUserIdAsync([FromRoute] string id);
 
         [Get("/user/get-student-by-class-id/{id}")]
         Task<IApiResponse<MethodResult<IList<StudentModel>>>> GetStudentByClassIdAsync([Body] Guid id);

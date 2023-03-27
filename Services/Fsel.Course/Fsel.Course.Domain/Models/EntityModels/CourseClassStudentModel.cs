@@ -3,11 +3,11 @@
 namespace Fsel.Course.Domain.Models.EntityModels
 {
     using System;
-    using Fsel.Core.Base.BaseModels;
 
-    public class CourseTrainingModel : BaseModel
+    public class CourseClassStudentModel
     {
-        public Guid TrainingId { get; set; }
         public Guid CourseId { get; set; }
+        public Guid StudentId { get; set; }
+        public Guid ClassId { get; set; }
     }
 }
