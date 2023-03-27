@@ -3,15 +3,11 @@
 namespace Fsel.Course.Domain.Entities
 {
     using System;
-    using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations;
-    using System.Linq;
-    using System.Text;
-    using System.Threading.Tasks;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Entities;
 
-    public class CourseClass : Entity
+    public class CourseClassStudent : Entity
     {
         public Course? Course { get; set; }
 
@@ -20,5 +16,8 @@ namespace Fsel.Course.Domain.Entities
 
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         public Guid ClassId { get; set; }
+
+        [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
+        public Guid StudentId { get; set; }
     }
 }

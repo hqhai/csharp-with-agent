@@ -13,7 +13,7 @@ namespace Fsel.Interaction.Infrastructure.Configs
             builder.HasOne(a => a.SurveyQuestion)
                   .WithMany(b => b.CustomerSurveys)
                   .HasForeignKey(b => b.SurveyQuestionId)
-                  .OnDelete(DeleteBehavior.Cascade);
+                  .OnDelete(DeleteBehavior.NoAction);
         }
     }
 }

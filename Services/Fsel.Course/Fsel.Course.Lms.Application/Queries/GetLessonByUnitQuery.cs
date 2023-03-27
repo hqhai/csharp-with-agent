@@ -28,13 +28,13 @@ namespace Fsel.Course.Lms.Application.Queries
     {
         private readonly IMapper _mapper;
         private readonly IStudentService _studentService;
-        private readonly ILessonStudentRepository _lessonStudentRepository;
+        private readonly IUnitLessonResultRepository _lessonStudentRepository;
         private readonly AuthContext _authContext;
         private readonly ILessonRepository _lessonRepository;
 
         public GetLessonByUnitQueryHandler(IMapper mapper,
             IStudentService studentService,
-            ILessonStudentRepository lessonStudentRepository,
+            IUnitLessonResultRepository lessonStudentRepository,
             AuthContext authContext,
             ILessonRepository lessonRepository
             )

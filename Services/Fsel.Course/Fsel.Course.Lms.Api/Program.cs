@@ -17,8 +17,8 @@ builder.AddDbContexts<CourseDbContext>();
 builder.Services.AddScoped<ICourseRepository, CourseRepository>();
 builder.Services.AddScoped<ICourseTeacherRepository, CourseTeacherRepository>();
 builder.Services.AddScoped<ICourseUnitMockTestRepository, CourseUnitMockTestRepository>();
-builder.Services.AddScoped<ICourseClassRepository, CourseClassRepository>();
-builder.Services.AddScoped<ILessonStudentRepository, LessonStudentRepository>();
+builder.Services.AddScoped<ICourseClassStudentRepository, CourseClassStudentRepository>();
+builder.Services.AddScoped<IUnitLessonResultRepository, UnitLessonResultRepository>();
 builder.Services.AddScoped<ILessonRepository, LessonRepository>();
 builder.AddRefitClients(typeof(IStudentService), appSetting?.Services?.UserApiUrl);
 

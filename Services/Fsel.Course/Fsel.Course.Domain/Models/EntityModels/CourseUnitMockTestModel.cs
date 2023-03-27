@@ -2,7 +2,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
 {
     public class CourseUnitMockTestModel
     {
-        public int OrderNumber { get; set; }
+        public int DisplayOrder { get; set; }
 
         public Guid? UnitId { get; set; }
 
