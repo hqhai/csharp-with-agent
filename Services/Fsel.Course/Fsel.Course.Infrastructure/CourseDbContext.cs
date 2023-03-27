@@ -65,7 +65,6 @@ namespace Fsel.Course.Infrastructure
             modelBuilder.ApplyConfiguration(new VideoEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new VideoTimeCodeEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new UnitLessonResultEntityTypeConfiguraion());
-            modelBuilder.ApplyConfiguration(new CourseUnitMockTestResultEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new CourseClassStudentEntityTypeConfiguration());
 
             base.OnModelCreating(modelBuilder);

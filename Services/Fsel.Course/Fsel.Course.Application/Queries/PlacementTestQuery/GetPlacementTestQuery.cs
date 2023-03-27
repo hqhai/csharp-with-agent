@@ -1,13 +1,14 @@
+// Copyright (c) Atlantic. All rights reserved.
+
 using AutoMapper;
 using Fsel.Common.ActionResults;
-using Fsel.Common.Helpers;
 using Fsel.Course.Domain.Enums.ErrorCodes;
 using Fsel.Course.Domain.IRepositories;
 using Fsel.Course.Domain.Models.EntityModels;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 
-namespace Fsel.Course.Application.Querys.PlacementTestQuery
+namespace Fsel.Course.Application.Queries.PlacementTestQuery
 {
     public class GetPlacementTestQuery : IRequest<MethodResult<PlacementTestModel>>
     {

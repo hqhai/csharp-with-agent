@@ -2,7 +2,6 @@ using System.Net;
 using Fsel.Common.ActionResults;
 using Fsel.Common.Constants;
 using Fsel.Common.Enums;
-using Fsel.Common.Helpers;
 using Fsel.Core.Base.BaseModels;
 using Fsel.Course.Application.Commands.CourseCmd;
 using Fsel.Course.Application.Queries.CourseQuery;

@@ -1,11 +1,7 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Course.Lms.Application.Queries
+namespace Fsel.Course.Lms.Application.Queries.UnitQuery
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
     using System.Threading;
     using System.Threading.Tasks;
     using AutoMapper;
@@ -17,8 +13,6 @@ namespace Fsel.Course.Lms.Application.Queries
     using Fsel.Course.Lms.Application.Services.UserServices;
     using MediatR;
     using Microsoft.AspNetCore.Http;
-    using Microsoft.EntityFrameworkCore;
-    using Org.BouncyCastle.Math.EC.Rfc7748;
 
     public class GetLessonByUnitQuery : IRequest<MethodResult<LessonModel>>
     {
@@ -27,43 +21,32 @@ namespace Fsel.Course.Lms.Application.Queries
     public class GetLessonByUnitQueryHandler : IRequestHandler<GetLessonByUnitQuery, MethodResult<LessonModel>>
     {
         private readonly IMapper _mapper;
-        private readonly IUserService _studentService;
+        private readonly IUserService _userService;
         private readonly IUnitLessonResultRepository _lessonStudentRepository;
         private readonly AuthContext _authContext;
-        private readonly ILessonRepository _lessonRepository;
 
         public GetLessonByUnitQueryHandler(IMapper mapper,
-            IUserService studentService,
+            IUserService userService,
             IUnitLessonResultRepository lessonStudentRepository,
             AuthContext authContext,
             ILessonRepository lessonRepository
             )
         {
-            _mapper = mapper;
-            _studentService = studentService;
-            _lessonStudentRepository = lessonStudentRepository;
+            _userService = userService;
             _authContext = authContext;
-            _lessonRepository = lessonRepository;
         }
 
         public async Task<MethodResult<LessonModel>> Handle(GetLessonByUnitQuery request, CancellationToken cancellationToken)
         {
-            MethodResult<LessonModel> methodResult = new MethodResult<LessonModel>();
+            var methodResult = new MethodResult<LessonModel>();
 
             var user = _authContext.CurrentUserId.ToString();
-            var student = await _studentService.GetStudentByUserIdAsync(user);
+            var student = await _userService.GetStudentByUserIdAsync(user);
             if (student == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.NotStudent));
                 return methodResult;
             }
-            /*   var lessonStudent = await _lessonStudentRepository.Queryable.FirstOrDefault(x => x.StudentId)*/
-
-            /*   var lessonQuery = from i in _lessonRepository.Queryable
-                                 .Include(x => x.LessonStudents)*/
-            /*.ThenInclude(x => x.StudentId)*/
-
-            /*    .Include(x => x.UnitLessons).Where(x => x.)*/
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }

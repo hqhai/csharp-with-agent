@@ -1,5 +1,7 @@
 namespace Fsel.Common.Helpers
 {
+    using System.Globalization;
+
     public static class DateTimeHelper
     {
         public static DateTime ConvertUnixTimeStampToDateTime(this long unixTimeStamp)
@@ -21,6 +23,12 @@ namespace Fsel.Common.Helpers
                 result = default;
             }
             return result;
+        }
+
+        public static int ConvertInt()
+        {
+            int weekNumber = CultureInfo.CurrentCulture.Calendar.GetWeekOfYear(DateTime.Now, CalendarWeekRule.FirstFourDayWeek, DayOfWeek.Monday);
+            return weekNumber;
         }
     }
 }

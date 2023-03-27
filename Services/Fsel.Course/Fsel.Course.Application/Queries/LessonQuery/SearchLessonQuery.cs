@@ -1,7 +1,8 @@
+// Copyright (c) Atlantic. All rights reserved.
+
 using AutoMapper;
 using Fsel.Common.ActionResults;
 using Fsel.Core.Base.BaseModels;
-using Fsel.Course.Application.Services;
 using Fsel.Course.Application.Services.UserServices;
 using Fsel.Course.Application.Services.UserServices.Models;
 using Fsel.Course.Domain.IRepositories;
@@ -36,13 +37,8 @@ namespace Fsel.Course.Application.Queries.LessonQuery
         public async Task<MethodResult<PagingItemsModel<LessonSearchModel>>> Handle(SearchLessonQuery request, CancellationToken cancellationToken)
         {
             MethodResult<PagingItemsModel<LessonSearchModel>> methodResult = new MethodResult<PagingItemsModel<LessonSearchModel>>();
-
-            if (request == null)
-            {
-                methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                return methodResult;
-            }
-            else if (request.PageSize > 100)
+            ArgumentNullException.ThrowIfNull(request);
+            if (request.PageSize > 100)
             {
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 return methodResult;

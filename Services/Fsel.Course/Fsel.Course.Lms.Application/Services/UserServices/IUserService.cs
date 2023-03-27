@@ -4,13 +4,10 @@ namespace Fsel.Course.Lms.Application.Services.UserServices
 {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
     using Fsel.Course.Lms.Application.Services.UserServices.Models;
     using Microsoft.AspNetCore.Mvc;
-    using Microsoft.AspNetCore.Mvc.Routing;
     using Refit;
 
     public interface IUserService
@@ -18,7 +15,19 @@ namespace Fsel.Course.Lms.Application.Services.UserServices
         [Get("/student/get-by-user-id/{id}")]
         Task<IApiResponse<MethodResult<StudentModel>>> GetStudentByUserIdAsync([FromRoute] string id);
 
+        [Get("/student/get-student-by-class-id/{id}")]
+        Task<IApiResponse<MethodResult<IList<StudentModel>>>> GetStudentByClassIdAsync([Body] Guid id);
+
+        [Put("/student/update-student-class")]
+        Task<IApiResponse<MethodResult<StudentModel>>> UpdateStudentByClassAsync([Body] Guid id);
+
+        [Get("/student/get-class-has-too-many-students/{id}")]
+        Task<IApiResponse<MethodResult<bool>>> GetStudentByClassIdCheckAsync([FromRoute] string id);
+
         [Post("/teacher/get-by-ids")]
         Task<IApiResponse<MethodResult<IList<TeacherModel>>>> GetTeacherByIdsAsync([Body] GetTeacherByIdsQueryModel command);
+
+        [Post("/teacher/get-by-id/{id}")]
+        Task<IApiResponse<MethodResult<TeacherModel>>> GetTeacherByIdAsync([Body] Guid id);
     }
 }

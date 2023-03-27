@@ -13,6 +13,7 @@ namespace Fsel.Identity.Api.Controllers
     [ApiVersion(Settings.APIVersion)]
     [Route(Settings.APIDefaultRoute + "/parent")]
     [ApiController]
+    [Authorize(Roles = nameof(EnumRole.Parent))]
     public class ParentController : ControllerBase
     {
         private readonly IMediator _mediator;

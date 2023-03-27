@@ -13,5 +13,20 @@ namespace Fsel.Identity.Domain.Enums.ErrorCodes
         /// Student null
         /// </summary>
         StudentNull,
+
+        /// <summary>
+        /// User null
+        /// </summary>
+        UserNull,
+
+        /// <summary>
+        /// Students does not exist
+        /// </summary>
+        StudentsNotExist,
+
+        /// <summary>
+        /// Class with more than 12 students
+        /// </summary>
+        ClassMoreThan12Students,
     }
 }
