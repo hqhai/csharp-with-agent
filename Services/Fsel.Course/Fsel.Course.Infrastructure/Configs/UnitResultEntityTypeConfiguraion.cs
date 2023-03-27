@@ -2,24 +2,24 @@
 
 namespace Fsel.Course.Infrastructure.Configs
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
-    using System.Threading.Tasks;
     using Fsel.Common.Helpers;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-    public class UnitLessonResultEntityTypeConfiguraion : IEntityTypeConfiguration<UnitLessonResult>
+    public class UnitResultEntityTypeConfiguraion : IEntityTypeConfiguration<UnitResult>
     {
-        public void Configure(EntityTypeBuilder<UnitLessonResult> builder)
+        public void Configure(EntityTypeBuilder<UnitResult> builder)
         {
-            builder.HasOne(a => a.UnitLesson)
-                .WithMany(b => b.UnitLessonResults)
-                .HasForeignKey(b => b.UnitLessonId)
+            builder.HasOne(a => a.Course)
+                .WithMany(b => b.UnitResults)
+                .HasForeignKey(b => b.CourseId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.HasOne(a => a.Unit)
+                .WithMany(b => b.UnitResults)
+                .HasForeignKey(b => b.UnitId)
                 .OnDelete(DeleteBehavior.Cascade);
 
             builder.Property(e => e.Status)

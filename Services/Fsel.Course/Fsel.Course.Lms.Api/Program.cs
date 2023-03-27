@@ -19,7 +19,7 @@ builder.Services.AddScoped<ICourseRepository, CourseRepository>();
 builder.Services.AddScoped<ICourseTeacherRepository, CourseTeacherRepository>();
 builder.Services.AddScoped<ICourseUnitMockTestRepository, CourseUnitMockTestRepository>();
 builder.Services.AddScoped<ICourseClassStudentRepository, CourseClassStudentRepository>();
-builder.Services.AddScoped<IUnitLessonResultRepository, UnitLessonResultRepository>();
+builder.Services.AddScoped<ILessonResultRepository, LessonResultRepository>();
 builder.Services.AddScoped<ILessonRepository, LessonRepository>();
 builder.Services.AddScoped<IMockTestRepository, MockTestRepository>();
 
