@@ -14,7 +14,7 @@ namespace Fsel.Course.Lms.Application.Queries
     using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
-    using Fsel.Course.Lms.Application.Services.StudentServices;
+    using Fsel.Course.Lms.Application.Services.UserServices;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -27,13 +27,13 @@ namespace Fsel.Course.Lms.Application.Queries
     public class GetLessonByUnitQueryHandler : IRequestHandler<GetLessonByUnitQuery, MethodResult<LessonModel>>
     {
         private readonly IMapper _mapper;
-        private readonly IStudentService _studentService;
+        private readonly IUserService _studentService;
         private readonly IUnitLessonResultRepository _lessonStudentRepository;
         private readonly AuthContext _authContext;
         private readonly ILessonRepository _lessonRepository;
 
         public GetLessonByUnitQueryHandler(IMapper mapper,
-            IStudentService studentService,
+            IUserService studentService,
             IUnitLessonResultRepository lessonStudentRepository,
             AuthContext authContext,
             ILessonRepository lessonRepository
