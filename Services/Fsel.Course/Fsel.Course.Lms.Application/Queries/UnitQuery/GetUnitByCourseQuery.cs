@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Course.Lms.Application.Queries
+namespace Fsel.Course.Lms.Application.Queries.UnitQuery
 {
     using System.Linq;
     using System.Threading.Tasks;
@@ -25,12 +25,12 @@ namespace Fsel.Course.Lms.Application.Queries
         private readonly IMapper _mapper;
         private readonly IStudentService _studentService;
         private readonly AuthContext _authContext;
-        private readonly ICourseClassStudentRepository _courseClassStudentRepository;
+        private readonly ICourseClassRepository _courseClassRepository;
 
         public GetUnitByCourseQueryHandler(IMapper mapper,
             AuthContext authContext,
             ICourseRepository courseRepository,
-            ICourseClassStudentRepository courseClassStudentRepository,
+            ICourseClassRepository courseClassRepository,
             IStudentService studentService)
         {
             _courseRepository = courseRepository;
@@ -42,7 +42,7 @@ namespace Fsel.Course.Lms.Application.Queries
 
         public async Task<MethodResult<CourseModel>> Handle(GetUnitByCourseQuery request, CancellationToken cancellationToken)
         {
-            MethodResult<CourseModel> methodResult = new MethodResult<CourseModel>();
+            var methodResult = new MethodResult<CourseModel>();
 
             var user = _authContext.CurrentUserId.ToString();
             var student = await _studentService.GetStudentByUserIdAsync(user);
@@ -51,7 +51,7 @@ namespace Fsel.Course.Lms.Application.Queries
                 methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.NotStudent));
                 return methodResult;
             }
-            var classId = student.Content?.Result.ClassId;
+            var classId = student.Content?.Result?.ClassId;
 
             var courseClassStudent = await _courseClassStudentRepository.Queryable
                             .FirstOrDefaultAsync(x => x.ClassId == classId, cancellationToken: cancellationToken);
@@ -74,7 +74,7 @@ namespace Fsel.Course.Lms.Application.Queries
                                   Name = i.Name,
                                   CourseLevel = i.CourseLevel,
                                   CourseUnitMockTests = _mapper.Map<IList<CourseUnitMockTestModel>>(i.CourseUnitMockTests),
-                                  CourseClasses = _mapper.Map<IList<CourseClassStudentModel>>(i.CourseClassStudents),
+                                  CourseClasses = _mapper.Map<IList<CourseClassModel>>(i.CourseClasses),
                               };
             var course = courseQuery.FirstOrDefault();
             methodResult.Result = course;
