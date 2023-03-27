@@ -21,12 +21,12 @@ namespace Fsel.Training.Application.Queries.ClassQuery
     public class GetClassByStatusNewQueryHandler : IRequestHandler<GetClassByStatusNewQuery, MethodResult<IList<ClassModel>>>
     {
         private readonly IMapper _mapper;
-        private readonly ITrainingRepository _trainingRepository;
+        private readonly IClassRepository _classRepository;
 
-        public GetClassByStatusNewQueryHandler(IMapper mapper, ITrainingRepository trainingRepository)
+        public GetClassByStatusNewQueryHandler(IMapper mapper, IClassRepository classRepository)
         {
             _mapper = mapper;
-            _trainingRepository = trainingRepository;
+            _classRepository = classRepository;
         }
 
         public async Task<MethodResult<IList<ClassModel>>> Handle(GetClassByStatusNewQuery request, CancellationToken cancellationToken)
@@ -34,14 +34,14 @@ namespace Fsel.Training.Application.Queries.ClassQuery
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<IList<ClassModel>> methodResult = new MethodResult<IList<ClassModel>>();
 
-            List<Class> trainings = await _trainingRepository.Queryable.Where(e => e.Status == EnumTrainingType.New)
+            List<Class> classes = await _classRepository.Queryable.Where(e => e.Status == EnumClassType.New)
                                                             .ToListAsync(cancellationToken: cancellationToken);
-            if (trainings.Count == 0)
+            if (classes.Count == 0)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumClassErrorCode.TrainingsNotExits));
+                methodResult.AddErrorBadRequest(nameof(EnumClassErrorCode.ClasssNotExits));
                 return methodResult;
             }
-            methodResult.Result = _mapper.Map<IList<ClassModel>>(trainings);
+            methodResult.Result = _mapper.Map<IList<ClassModel>>(classes);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }

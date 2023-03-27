@@ -21,7 +21,7 @@ builder.AddServices();
 builder.AddSwaggerGens(appSetting);
 builder.AddAuthenticationJwtBearers(appSetting);
 builder.AddDbContexts<TrainingDbContext>();
-builder.Services.AddScoped<ITrainingRepository, TrainingRepository>();
+builder.Services.AddScoped<IClassRepository, ClassRepository>();
 builder.AddRefitClients(typeof(IUserService), appSetting?.Services?.UserApiUrl);
 
 var app = builder.Build();

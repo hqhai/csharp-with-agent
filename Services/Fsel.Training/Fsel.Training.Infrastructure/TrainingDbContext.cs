@@ -18,7 +18,7 @@ namespace Fsel.Training.Infrastructure
         {
             ArgumentNullException.ThrowIfNull(modelBuilder);
 
-            modelBuilder.ApplyConfiguration(new TrainingEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new ClassEntityTypeConfiguration());
             base.OnModelCreating(modelBuilder);
         }
 

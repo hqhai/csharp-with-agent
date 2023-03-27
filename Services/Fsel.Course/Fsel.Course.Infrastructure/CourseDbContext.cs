@@ -45,7 +45,6 @@ namespace Fsel.Course.Infrastructure
         {
             modelBuilder.ApplyConfiguration(new ClassForumEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new CourseEntityTypeConfiguration());
-            modelBuilder.ApplyConfiguration(new CourseStudentEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new CourseTeacherEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new CourseUnitMockTestEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new ExerciseEntityTypeConfiguration());
@@ -66,7 +65,6 @@ namespace Fsel.Course.Infrastructure
             modelBuilder.ApplyConfiguration(new VideoEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new VideoTimeCodeEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new UnitLessonResultEntityTypeConfiguraion());
-            modelBuilder.ApplyConfiguration(new CourseUnitMockTestResultEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new CourseClassStudentEntityTypeConfiguration());
 
             base.OnModelCreating(modelBuilder);

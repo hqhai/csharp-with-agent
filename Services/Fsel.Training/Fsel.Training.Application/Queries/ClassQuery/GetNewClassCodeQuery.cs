@@ -13,11 +13,11 @@ namespace Fsel.Training.Application.Queries.ClassQuery
         public EnumCourseLevel CourseLevel { get; set; }
     }
 
-    public class GetNewTrainingCodeQueryHandler : IRequestHandler<GetNewClassCodeQuery, MethodResult<string>>
+    public class GetNewClassCodeQueryHandler : IRequestHandler<GetNewClassCodeQuery, MethodResult<string>>
     {
-        private readonly ITrainingRepository _trainingRepository;
+        private readonly IClassRepository _trainingRepository;
 
-        public GetNewTrainingCodeQueryHandler(ITrainingRepository trainingRepository)
+        public GetNewClassCodeQueryHandler(IClassRepository trainingRepository)
         {
             _trainingRepository = trainingRepository;
         }
@@ -32,7 +32,7 @@ namespace Fsel.Training.Application.Queries.ClassQuery
             int lastTwoDigitsOfYear = currentYear % 100;
             int lastDigitOfYear = lastTwoDigitsOfYear % 10;
             var stt = $"{_trainingRepository.Queryable.Count():000}";
-            var level = EnumHelper.GetTrainingCodeByEnumCourseLevel(request.CourseLevel);
+            var level = EnumHelper.GetClassCodeByEnumCourseLevel(request.CourseLevel);
 
             string codeTraining = $"{level}_{weekString}{lastDigitOfYear}{stt}S";
             methodResult.Result = codeTraining;

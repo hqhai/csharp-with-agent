@@ -13,6 +13,6 @@ namespace Fsel.Training.Doman.Models.EntityModels
 
         public DateTime TimeEnd { get; set; }
 
-        public EnumTrainingType Status { get; set; }
+        public EnumClassType Status { get; set; }
     }
 }

@@ -6,9 +6,9 @@ namespace Fsel.Training.Infrastructure.Repositories
     using Fsel.Core.Base;
     using Fsel.Training.Doman.Entities;
 
-    public class TrainingRepository : BaseRepository<Class>, ITrainingRepository
+    public class ClassRepository : BaseRepository<Class>, IClassRepository
     {
-        public TrainingRepository(TrainingDbContext dbContext, AuthContext authContext) : base(dbContext, authContext)
+        public ClassRepository(TrainingDbContext dbContext, AuthContext authContext) : base(dbContext, authContext)
         {
         }
     }

@@ -18,5 +18,8 @@ namespace Fsel.Course.Lms.Application.Services.StudentServices
 
         [Put("/student/update-student-class")]
         Task<IApiResponse<MethodResult<StudentModel>>> UpdateStudentByClassAsync([Body] Guid id);
+
+        [Get("/student/get-class-has-too-many-students/{id}")]
+        Task<IApiResponse<MethodResult<bool>>> GetStudentByClassIdCheckAsync([FromRoute] string id);
     }
 }

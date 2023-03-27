@@ -2,7 +2,7 @@
 
 namespace Fsel.Common.Enums
 {
-    public enum EnumTrainingType
+    public enum EnumClassType
     {
         New,
         Active

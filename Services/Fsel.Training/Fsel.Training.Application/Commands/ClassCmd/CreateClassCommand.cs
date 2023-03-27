@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Training.Application.Commands.TrainingCmd
+namespace Fsel.Training.Application.Commands.ClassCmd
 {
     using System.Threading;
     using AutoMapper;
@@ -21,31 +21,32 @@ namespace Fsel.Training.Application.Commands.TrainingCmd
     {
     }
 
-    public class CreateTrainingCommandHandler : IRequestHandler<CreateClassCommand, MethodResult<ClassModel>>
+    public class CreateClassCommandHandler : IRequestHandler<CreateClassCommand, MethodResult<ClassModel>>
     {
-        private readonly ITrainingRepository _trainingRepository;
+        private readonly IClassRepository _classRepository;
         private readonly IUserService _userService;
         private readonly IMapper _mapper;
 
-        public CreateTrainingCommandHandler(ITrainingRepository trainingRepository,
+        public CreateClassCommandHandler(IClassRepository classRepository,
             IUserService userService,
             IMapper mapper)
         {
-            _trainingRepository = trainingRepository;
+            _classRepository = classRepository;
             _userService = userService;
             _mapper = mapper;
         }
 
         public async Task<MethodResult<ClassModel>> Handle(CreateClassCommand request, CancellationToken cancellationToken)
         {
+            ArgumentNullException.ThrowIfNull(request);
             MethodResult<ClassModel> methodResult = new MethodResult<ClassModel>();
 
             #region Validation
 
-            Class? classnew = await _trainingRepository.Queryable.FirstOrDefaultAsync(x => x.Code == request.Code || x.Id == request.ClassId, cancellationToken: cancellationToken);
+            Class? classnew = await _classRepository.Queryable.FirstOrDefaultAsync(x => x.Code == request.Code, cancellationToken: cancellationToken);
             if (classnew == null)
             {
-                var classs = await _trainingRepository.Queryable
+                var classs = await _classRepository.Queryable
                                                 .OrderByDescending(c => c.CreatedDate)
                                                 .FirstOrDefaultAsync(cancellationToken: cancellationToken);
                 if (classs == null)
@@ -59,8 +60,6 @@ namespace Fsel.Training.Application.Commands.TrainingCmd
                 if (isclass == false)
                 {
                     classnew = await CreateClassAsync(request, classnew);
-                    methodResult.StatusCode = StatusCodes.Status201Created;
-                    methodResult.Result = _mapper.Map<ClassModel>(classnew);
                 }
             }
             var students = await _userService.GetStudentByClassIdAsync(classnew.Id.ToString());
@@ -71,9 +70,10 @@ namespace Fsel.Training.Application.Commands.TrainingCmd
                 {
                     classnew = await UpdateClassAsync(classnew);
                     classnew = new();
-                    await CreateClassAsync(request, classnew);
+                    classnew = await CreateClassAsync(request, classnew);
                 }
             }
+
             var student = await _userService.UpdateStudentByClassIdAsync(new UpdateStudentByClassIdModel
             {
                 ClassId = classnew.Id,
@@ -92,16 +92,16 @@ namespace Fsel.Training.Application.Commands.TrainingCmd
             classnew = new Class();
             classnew.Code = request?.Code;
             classnew.Name = request?.Code;
-            _trainingRepository.Add(classnew);
-            await _trainingRepository.UnitOfWork.SaveEntitiesAsync().ConfigureAwait(false);
+            _classRepository.Add(classnew);
+            await _classRepository.UnitOfWork.SaveEntitiesAsync().ConfigureAwait(false);
             return classnew;
         }
 
         private async Task<Class> UpdateClassAsync(Class classnew)
         {
-            classnew.Status = EnumTrainingType.Active;
-            _trainingRepository.Update(classnew);
-            await _trainingRepository.UnitOfWork.SaveEntitiesAsync().ConfigureAwait(false);
+            classnew.Status = EnumClassType.Active;
+            _classRepository.Update(classnew);
+            await _classRepository.UnitOfWork.SaveEntitiesAsync().ConfigureAwait(false);
             return classnew;
         }
     }

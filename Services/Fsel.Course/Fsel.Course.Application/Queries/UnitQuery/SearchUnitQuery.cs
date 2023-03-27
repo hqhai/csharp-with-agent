@@ -1,3 +1,5 @@
+// Copyright (c) Atlantic. All rights reserved.
+
 using AutoMapper;
 using Fsel.Common.ActionResults;
 using Fsel.Core.Base.BaseModels;
@@ -31,6 +33,7 @@ namespace Fsel.Course.Application.Queries.UnitQuery
 
         public async Task<MethodResult<PagingItemsModel<UnitSearchModel>>> Handle(SearchUnitQuery request, CancellationToken cancellationToken)
         {
+            ArgumentNullException.ThrowIfNull(request);
             MethodResult<PagingItemsModel<UnitSearchModel>> methodResult = new MethodResult<PagingItemsModel<UnitSearchModel>>();
 
             if (request.PageSize > 100)
@@ -41,7 +44,6 @@ namespace Fsel.Course.Application.Queries.UnitQuery
 
             var unitQuery = _unitRepository.Queryable
                                     .Include(x => x.CourseUnitMockTests.Where(y => !y.IsDeleted))
-                                    .Where(x => request.CourseLevel == null || x.CourseLevel == request.CourseLevel)
                                     .Where(x => request.CourseLevel == null || x.CourseLevel == request.CourseLevel)
                                     .Include(unit => unit.UnitLessons)
                                     .ThenInclude(unitLesson => unitLesson.Lesson)
@@ -88,7 +90,7 @@ namespace Fsel.Course.Application.Queries.UnitQuery
             {
                 foreach (var item in lists)
                 {
-                    item.TeacherName = teachers.Content?.Result?.FirstOrDefault(x => x.Id == item.TeacherId)?.Human.FullName;
+                    item.TeacherName = teachers.Content?.Result?.FirstOrDefault(x => x.Id == item.TeacherId)?.Human?.FullName;
                 }
             }
 

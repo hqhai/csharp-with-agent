@@ -11,12 +11,12 @@ namespace Fsel.Course.Lms.Application.Services.TrainingServices
     public interface ITrainingService
     {
         [Get("/class/get-class-new")]
-        Task<IApiResponse<MethodResult<IList<ClassModel>>>> GetTrainingByStatusNewAsync();
+        Task<IApiResponse<MethodResult<IList<ClassModel>>>> GetClassByStatusNewAsync();
 
         [Get("/class/get-new-class-code")]
-        Task<IApiResponse<MethodResult<string>>> GetNewTrainingCodeAsync([Body] EnumCourseLevel enumCourseLevel);
+        Task<IApiResponse<MethodResult<string>>> GetNewClassCodeAsync([Query] EnumCourseLevel courseLevel);
 
         [Post("/class/create-class")]
-        Task<IApiResponse<MethodResult<ClassModel>>> CreateTrainingByCheckId([Body] CreateClassStudentModel command);
+        Task<IApiResponse<MethodResult<ClassModel>>> CreateClassByCheckId([Body] CreateClassStudentModel command);
     }
 }

@@ -25,12 +25,12 @@ namespace Fsel.Course.Lms.Application.Queries.UnitQuery
         private readonly IMapper _mapper;
         private readonly IStudentService _studentService;
         private readonly AuthContext _authContext;
-        private readonly ICourseClassRepository _courseClassRepository;
+        private readonly ICourseClassStudentRepository _courseClassStudentRepository;
 
         public GetUnitByCourseQueryHandler(IMapper mapper,
             AuthContext authContext,
             ICourseRepository courseRepository,
-            ICourseClassRepository courseClassRepository,
+            ICourseClassStudentRepository courseClassStudentRepository,
             IStudentService studentService)
         {
             _courseRepository = courseRepository;
@@ -74,7 +74,7 @@ namespace Fsel.Course.Lms.Application.Queries.UnitQuery
                                   Name = i.Name,
                                   CourseLevel = i.CourseLevel,
                                   CourseUnitMockTests = _mapper.Map<IList<CourseUnitMockTestModel>>(i.CourseUnitMockTests),
-                                  CourseClasses = _mapper.Map<IList<CourseClassModel>>(i.CourseClasses),
+                                  CourseClassStudents = _mapper.Map<IList<CourseClassStudentModel>>(i.CourseClassStudents),
                               };
             var course = courseQuery.FirstOrDefault();
             methodResult.Result = course;

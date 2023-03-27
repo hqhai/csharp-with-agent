@@ -15,7 +15,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
     using Microsoft.AspNetCore.Identity;
     using Microsoft.EntityFrameworkCore;
 
-    public class UpdateStudentByClassCommand : UpdateStudentByTrainingCommandModel, IRequest<MethodResult<StudentModel>>
+    public class UpdateStudentByClassCommand : UpdateStudentByClassCommandModel, IRequest<MethodResult<StudentModel>>
     {
     }
 

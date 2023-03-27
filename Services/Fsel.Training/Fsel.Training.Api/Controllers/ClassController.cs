@@ -7,7 +7,7 @@ namespace Fsel.Training.Api.Controllers
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
     using Fsel.Common.Enums;
-    using Fsel.Training.Application.Commands.TrainingCmd;
+    using Fsel.Training.Application.Commands.ClassCmd;
     using Fsel.Training.Application.Queries.ClassQuery;
     using Fsel.Training.Doman.Models.EntityModels;
     using MediatR;
@@ -16,11 +16,11 @@ namespace Fsel.Training.Api.Controllers
     [ApiVersion(Settings.APIVersion)]
     [Route(Settings.APIDefaultRoute + "/class")]
     [ApiController]
-    public class TrainingController : ControllerBase
+    public class ClassController : ControllerBase
     {
         private readonly IMediator _mediator;
 
-        public TrainingController(IMediator mediator)
+        public ClassController(IMediator mediator)
         {
             _mediator = mediator;
         }
@@ -43,9 +43,9 @@ namespace Fsel.Training.Api.Controllers
         [HttpGet("get-new-class-code")]
         [ProducesResponseType(typeof(MethodResult<string>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetNewClassCode([FromRoute] EnumCourseLevel courseLevel)
+        public async Task<IActionResult> GetNewClassCode([FromQuery] GetNewClassCodeQuery query)
         {
-            MethodResult<string> commandResult = await _mediator.Send(new GetNewClassCodeQuery { CourseLevel = courseLevel }).ConfigureAwait(false);
+            MethodResult<string> commandResult = await _mediator.Send(query).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
 

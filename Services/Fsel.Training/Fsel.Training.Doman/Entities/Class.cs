@@ -37,6 +37,6 @@ namespace Fsel.Training.Doman.Entities
         /// <summary>
         /// Status
         /// </summary>
-        public EnumTrainingType Status { get; set; }
+        public EnumClassType Status { get; set; }
     }
 }

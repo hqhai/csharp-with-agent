@@ -7,7 +7,7 @@ namespace Fsel.Training.Doman.Enums.ErrorCodes
         /// <summary>
         /// Trainings not exits
         /// </summary>
-        TrainingsNotExits,
+        ClasssNotExits,
 
         /// <summary>
         /// Students not exits

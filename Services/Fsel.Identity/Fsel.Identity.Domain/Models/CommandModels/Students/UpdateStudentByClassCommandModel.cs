@@ -2,7 +2,7 @@
 
 namespace Fsel.Identity.Domain.Models.CommandModels.Students
 {
-    public class UpdateStudentByTrainingCommandModel
+    public class UpdateStudentByClassCommandModel
     {
         public Guid ClassId { get; set; }
         public Guid UserId { get; set; }

@@ -12,6 +12,6 @@ namespace Fsel.Course.Lms.Application.Services.TrainingServices.Models
         public string? Name { get; set; }
         public DateTime TimeStart { get; set; }
         public DateTime TimeEnd { get; set; }
-        public EnumTrainingType Status { get; set; }
+        public EnumClassType Status { get; set; }
     }
 }

@@ -44,44 +44,13 @@ namespace Fsel.Course.Lms.Application.Commands.CourseCmd
 
             #region Validation
 
-            var training = await _trainingService.CreateTrainingByCheckId(new Services.TrainingServices.Models.CreateClassStudentModel
+            var classs = await _trainingService.CreateClassByCheckId(new Services.TrainingServices.Models.CreateClassStudentModel
             {
-                ClassId = request.ClassId,
                 Code = request.Code,
                 UserId = request.UserId
             });
-            var classId = training?.Content?.Result?.Id;
+            var classId = classs?.Content?.Result?.Id;
 
-            var students = await _studentService.GetStudentByClassIdAsync(classId ?? Guid.Empty);
-            var liststudent = students?.Content?.Result;
-
-            if (liststudent == null || liststudent.Count == 0)
-            {
-                methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                methodResult.AddError(nameof(EnumCourseErrorCode.StudentsNotExist));
-                return methodResult;
-            }
-            else if (liststudent.Count > 12)
-            {
-                training = await _trainingService.CreateTrainingByCheckId(new Services.TrainingServices.Models.CreateClassStudentModel
-                {
-                    ClassId = request.ClassId,
-                    Code = request.Code,
-                    UserId = request.UserId
-                });
-            }
-            classId = training?.Content?.Result?.Id;
-
-            var course = await _courseRepository.Queryable.Include(e => e.CourseStudentTrainings)
-                                                            .Where(e => e.Id == request.CourseId)
-                                                            .FirstOrDefaultAsync(cancellationToken: cancellationToken);
-
-            if (course == null)
-            {
-                methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                methodResult.AddError(nameof(EnumCourseErrorCode.CourseNotExist));
-                return methodResult;
-            }
             var student = await _studentService.GetStudentByUserIdAsync(request.UserId.ToString());
             if (!student.IsSuccessStatusCode)
             {
@@ -90,16 +59,18 @@ namespace Fsel.Course.Lms.Application.Commands.CourseCmd
                 return methodResult;
             }
             var studentId = student?.Content?.Result?.Id;
-            course.CourseStudentTrainings.Add(new CourseStudent
+            var course = await _courseRepository.Queryable.Include(e => e.CourseClassStudents)
+                                                            .Where(e => e.Id == request.CourseId)
+                                                            .FirstOrDefaultAsync(cancellationToken: cancellationToken);
+            if (course != null && course.CourseClassStudents.Count == 0)
             {
-                CourseId = request.CourseId,
-                StudentId = studentId ?? Guid.Empty
-            });
-            course.CourseClasses.Add(new CourseClassStudent
-            {
-                CourseId = request.CourseId,
-                ClassId = classId ?? Guid.Empty
-            });
+                course.CourseClassStudents.Add(new CourseClassStudent
+                {
+                    CourseId = request.CourseId,
+                    ClassId = classId ?? Guid.Empty,
+                    StudentId = request.UserId
+                });
+            }
 
             student = await _studentService.UpdateStudentByClassAsync(classId ?? Guid.Empty);
 
@@ -107,7 +78,7 @@ namespace Fsel.Course.Lms.Application.Commands.CourseCmd
 
             await _courseRepository.ExecuteTransactionAsync(async () =>
             {
-                course = _courseRepository.Update(course);
+                course = _courseRepository.Update(course ?? new Course());
                 await _courseRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
                 methodResult.StatusCode = StatusCodes.Status201Created;
                 methodResult.Result = _mapper.Map<CourseModel>(course);

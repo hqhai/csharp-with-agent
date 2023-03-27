@@ -1,5 +1,6 @@
+// Copyright (c) Atlantic. All rights reserved.
+
 using Fsel.Common.ActionResults;
-using Fsel.Common.Helpers;
 using Fsel.Course.Domain.Enums.ErrorCodes;
 using Fsel.Course.Domain.IRepositories;
 using MediatR;

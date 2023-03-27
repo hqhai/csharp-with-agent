@@ -8,7 +8,7 @@ namespace Fsel.Training.Infrastructure.Configs
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-    public class TrainingEntityTypeConfiguration : IEntityTypeConfiguration<Class>
+    public class ClassEntityTypeConfiguration : IEntityTypeConfiguration<Class>
     {
         public void Configure(EntityTypeBuilder<Class> builder)
         {
@@ -16,7 +16,7 @@ namespace Fsel.Training.Infrastructure.Configs
                 .HasMaxLength(100)
                 .HasConversion(
                     v => v.ToString(),
-                    v => v.EnumParse<EnumTrainingType>());
+                    v => v.EnumParse<EnumClassType>());
         }
     }
 }

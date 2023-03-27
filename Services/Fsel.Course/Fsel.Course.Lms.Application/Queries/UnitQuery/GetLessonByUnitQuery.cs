@@ -19,14 +19,11 @@ namespace Fsel.Course.Lms.Application.Queries.UnitQuery
     public class GetLessonByUnitQueryHandler : IRequestHandler<GetLessonByUnitQuery, MethodResult<LessonModel>>
     {
         private readonly IStudentService _studentService;
-        private readonly ILessonStudentRepository _lessonStudentRepository;
         private readonly AuthContext _authContext;
 
         public GetLessonByUnitQueryHandler(
             IStudentService studentService,
-            ILessonStudentRepository lessonStudentRepository,
-            AuthContext authContext,
-            ILessonRepository lessonRepository
+            AuthContext authContext
             )
         {
             _studentService = studentService;

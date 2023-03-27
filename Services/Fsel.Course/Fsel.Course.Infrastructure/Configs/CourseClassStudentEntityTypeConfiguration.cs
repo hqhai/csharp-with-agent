@@ -6,7 +6,7 @@ namespace Fsel.Course.Infrastructure.Configs
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-    public class CourseClassEntityTypeConfiguration : IEntityTypeConfiguration<CourseClass>
+    public class CourseClassStudentEntityTypeConfiguration : IEntityTypeConfiguration<CourseClassStudent>
     {
         public void Configure(EntityTypeBuilder<CourseClassStudent> builder)
         {
