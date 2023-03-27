@@ -34,10 +34,10 @@ namespace Fsel.Course.Application.Commands.VideoCmd
 
             #region Validation
 
+            ArgumentNullException.ThrowIfNull(request);
             if (request.VideoTimeCodes == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumVideoErrorCode.VideoNotCorrect),
-                                                nameof(request.VideoTimeCodes));
+                methodResult.AddErrorBadRequest(nameof(EnumVideoErrorCode.VideoNotCorrect), nameof(request.VideoTimeCodes));
                 return methodResult;
             }
 
@@ -47,8 +47,7 @@ namespace Fsel.Course.Application.Commands.VideoCmd
             {
                 if (x == null)
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumVideoTimeCodeErrorCode.VideoTimeCodeNotCorrect),
-                                                    nameof(request.VideoTimeCodes));
+                    methodResult.AddErrorBadRequest(nameof(EnumVideoTimeCodeErrorCode.VideoTimeCodeNotCorrect), nameof(request.VideoTimeCodes));
                 }
                 else
                 {
@@ -57,8 +56,7 @@ namespace Fsel.Course.Application.Commands.VideoCmd
                     {
                         if (n == null)
                         {
-                            methodResult.AddErrorBadRequest(nameof(EnumExerciseErrorCode.ExerciseNull),
-                                                            nameof(x.Exercises));
+                            methodResult.AddErrorBadRequest(nameof(EnumExerciseErrorCode.ExerciseNull), nameof(x.Exercises));
                         }
                         else
                         {
@@ -71,8 +69,7 @@ namespace Fsel.Course.Application.Commands.VideoCmd
                             {
                                 if (q == null)
                                 {
-                                    methodResult.AddErrorBadRequest(nameof(EnumQuestionErrorCode.QuestionNotCorrect),
-                                                                    nameof(n.Questions));
+                                    methodResult.AddErrorBadRequest(nameof(EnumQuestionErrorCode.QuestionNotCorrect), nameof(n.Questions));
                                 }
                                 else
                                 {
@@ -84,32 +81,28 @@ namespace Fsel.Course.Application.Commands.VideoCmd
 
                                     if (!question.IsValid())
                                     {
-                                        methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                                        methodResult.AddResultFromErrorList(question.ErrorMessages);
+                                        methodResult.AddErrorBadRequest(question.ErrorMessages);
                                     }
                                 }
                             });
 
                             if (!excercise.IsValid())
                             {
-                                methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                                methodResult.AddResultFromErrorList(excercise.ErrorMessages);
+                                methodResult.AddErrorBadRequest(excercise.ErrorMessages);
                             }
                         }
                     });
 
                     if (!videoTimeCode.IsValid())
                     {
-                        methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                        methodResult.AddResultFromErrorList(videoTimeCode.ErrorMessages);
+                        methodResult.AddErrorBadRequest(videoTimeCode.ErrorMessages);
                     }
                 }
             });
 
             if (!video.IsValid())
             {
-                methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                methodResult.AddResultFromErrorList(video.ErrorMessages);
+                methodResult.AddErrorBadRequest(video.ErrorMessages);
                 return methodResult;
             }
             else if (!methodResult.IsOK)
