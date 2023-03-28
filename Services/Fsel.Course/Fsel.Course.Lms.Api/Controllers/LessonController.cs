@@ -26,12 +26,12 @@ namespace Fsel.Course.Lms.Api.Controllers
         }
 
         /// <summary>
-        /// Get units by course Id
+        /// Get List Lesson
         /// </summary>
         [HttpGet("{Id}")]
         [ProducesResponseType(typeof(MethodResult<IList<LessonModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> Get([FromRoute] Guid Id)
+        public async Task<IActionResult> GetListLesson([FromRoute] Guid Id)
         {
             MethodResult<IList<LessonModel>> queryResult = await _mediator.Send(new GetListLessonQuery
             { UnitId = Id }).ConfigureAwait(false);
