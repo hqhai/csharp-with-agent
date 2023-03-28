@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Identity.Domain.Enums
+namespace Fsel.Identity.Domain.Enums.ErrorCodes
 {
     public enum EnumTeacherErrorCode
     {
@@ -23,5 +23,15 @@ namespace Fsel.Identity.Domain.Enums
         /// Police Clearance Path limited to 1000 characters
         /// </summary>
         TE04C,
+
+        /// <summary>
+        /// teacher does not exist
+        /// </summary>
+        TeacherIdDoesNotExitst,
+
+        /// <summary>
+        /// teachers does not exist
+        /// </summary>
+        TeachersDoesNotExitst,
     }
 }

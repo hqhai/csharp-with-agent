@@ -2,6 +2,7 @@ using System;
 using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using static Org.BouncyCastle.Math.EC.ECCurve;
 
 namespace Fsel.Common.Helpers
 {
@@ -70,7 +71,7 @@ namespace Fsel.Common.Helpers
             var options = new JsonSerializerOptions { Converters = { new JsonStringEnumConverter() } };
             if (isCamelCase)
             {
-                options.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+                options.PropertyNameCaseInsensitive = true;
             }
             string jsonString = JsonSerializer.Serialize(data, options);
             return jsonString;
@@ -88,7 +89,7 @@ namespace Fsel.Common.Helpers
                 var options = new JsonSerializerOptions { Converters = { new JsonStringEnumConverter() } };
                 if (isCamelCase)
                 {
-                    options.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+                    options.PropertyNameCaseInsensitive = true;
                 }
                 T? obj = JsonSerializer.Deserialize<T>(data, options);
                 return obj;
@@ -99,25 +100,28 @@ namespace Fsel.Common.Helpers
             }
         }
 
-        public static bool TryParse<T>(this object? config, out T? result)
+        public static T? Deserialize<T>(this object? objects, bool isCamelCase = false)
         {
-            var str = config.Serialize();
-            result = str.Deserialize<T>(true);
-            if (result == null)
+            try
             {
-                return false;
-            }
-            return true;
-        }
+                var data = objects.Serialize();
+                if (string.IsNullOrEmpty(data))
+                {
+                    return default;
+                }
 
-        public static bool TryParse<T>(this string? str, out T? result)
-        {
-            result = str.Deserialize<T>(true);
-            if (result == null)
-            {
-                return false;
+                var options = new JsonSerializerOptions { Converters = { new JsonStringEnumConverter() } };
+                if (isCamelCase)
+                {
+                    options.PropertyNameCaseInsensitive = true;
+                }
+                T? obj = JsonSerializer.Deserialize<T>(data, options);
+                return obj;
             }
-            return true;
+            catch
+            {
+                return default;
+            }
         }
 
         public static T? DeserializeFromFilePath<T>(string path, bool isCamelCase = false)

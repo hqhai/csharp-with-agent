@@ -1,5 +1,7 @@
 using AutoMapper;
 using Fsel.Common.ActionResults;
+using Fsel.Identity.Domain.Entities;
+using Fsel.Identity.Domain.Enums.ErrorCodes;
 using Fsel.Identity.Domain.IRepositories;
 using Fsel.Identity.Domain.Models.EntityModels;
 using MediatR;
@@ -36,7 +38,11 @@ namespace Fsel.Identity.Application.Queries.TeacherQuery
             }
 
             var teachers = await _teacherRepository.GetIncludeByIdsAsync(request.Ids);
-
+            if (teachers == null || teachers.Count == 0)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumTeacherErrorCode.TeachersDoesNotExitst));
+                return methodResult;
+            }
             methodResult.Result = _mapper.Map<IList<TeacherModel>>(teachers);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;

@@ -39,10 +39,10 @@ namespace Fsel.Identity.Api.Controllers
         /// <summary>
         /// Get teacher by Id
         /// </summary>
-        [HttpPost("get-by-id")]
+        [HttpGet("get-by-id")]
         [ProducesResponseType(typeof(MethodResult<TeacherModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetById([FromBody] GetTeacherByIdQuery query)
+        public async Task<IActionResult> GetById([FromQuery] GetTeacherByIdQuery query)
         {
             MethodResult<TeacherModel> commandResult = await _mediator.Send(query).ConfigureAwait(false);
             return commandResult.GetActionResult();

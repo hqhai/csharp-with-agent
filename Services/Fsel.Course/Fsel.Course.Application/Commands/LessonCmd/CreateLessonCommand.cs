@@ -2,7 +2,6 @@
 
 using AutoMapper;
 using Fsel.Common.ActionResults;
-using Fsel.Common.Helpers;
 using Fsel.Course.Domain.Entities;
 using Fsel.Course.Domain.Enums.ErrorCodes;
 using Fsel.Course.Domain.IRepositories;
@@ -20,30 +19,21 @@ namespace Fsel.Course.Application.Commands.LessonCmd
     public class CreateLessonCommandHandler : IRequestHandler<CreateLessonCommand, MethodResult<LessonModel>>
     {
         private readonly ILessonRepository _lessonRepository;
-        private readonly ILessonHomeWorkRepository _lessonHomeWorkRepository;
-        private readonly ILessonExtraPracticeRepository _lessonExtraPracticeRepository;
         private readonly IMapper _mapper;
         private readonly IHomeWorkRepository _homeWorkRepository;
         private readonly IVideoRepository _videoRepository;
         private readonly IExtraPracticeRepository _extraPracticeRepository;
-        private readonly IClassForumRepository _classForumRepository;
 
         public CreateLessonCommandHandler(ILessonRepository lessonRepository
-            , ILessonHomeWorkRepository lessonHomeWorkRepository
-            , ILessonExtraPracticeRepository lessonExtraPracticeRepository
             , IMapper mapper, IHomeWorkRepository homeWorkRepository
             , IVideoRepository videoRepository
-            , IExtraPracticeRepository extraPracticeRepository
-            , IClassForumRepository classForumRepository)
+            , IExtraPracticeRepository extraPracticeRepository)
         {
             _lessonRepository = lessonRepository;
-            _lessonHomeWorkRepository = lessonHomeWorkRepository;
-            _lessonExtraPracticeRepository = lessonExtraPracticeRepository;
             _mapper = mapper;
             _homeWorkRepository = homeWorkRepository;
             _videoRepository = videoRepository;
             _extraPracticeRepository = extraPracticeRepository;
-            _classForumRepository = classForumRepository;
         }
 
         public async Task<MethodResult<LessonModel>> Handle(CreateLessonCommand request, CancellationToken cancellationToken)
@@ -87,22 +77,19 @@ namespace Fsel.Course.Application.Commands.LessonCmd
 
             if (_homeWorkRepository.IsIdsInValid(request.HomeWorkIds))
             {
-                methodResult.AddErrorBadRequest(nameof(EnumHomeWorkErrorCode.HomeWorkNull),
-                                                nameof(request.HomeWorkIds), request.HomeWorkIds);
+                methodResult.AddErrorBadRequest(nameof(EnumHomeWorkErrorCode.HomeWorkNull), nameof(request.HomeWorkIds), request.HomeWorkIds);
                 return methodResult;
             }
 
             if (_extraPracticeRepository.IsIdsInValid(request.ExtraPracticeIds))
             {
-                methodResult.AddErrorBadRequest(nameof(EnumExtraPractiveErrorCode.ExtraPractiveNull),
-                                                nameof(request.ExtraPracticeIds), request.ExtraPracticeIds);
+                methodResult.AddErrorBadRequest(nameof(EnumExtraPractiveErrorCode.ExtraPractiveNull), nameof(request.ExtraPracticeIds), request.ExtraPracticeIds);
                 return methodResult;
             }
 
             if (_videoRepository.IsIdsInValid(request.VideoIds))
             {
-                methodResult.AddErrorBadRequest(nameof(EnumVideoErrorCode.VideoNotCorrect),
-                                                nameof(request.VideoIds), request.VideoIds);
+                methodResult.AddErrorBadRequest(nameof(EnumVideoErrorCode.VideoNotCorrect), nameof(request.VideoIds), request.VideoIds);
                 return methodResult;
             }
 

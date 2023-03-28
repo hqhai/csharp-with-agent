@@ -23,12 +23,15 @@ namespace Fsel.Course.Lms.Application.Queries.VideoQuery
     public class GetVideoStandaloneQueryHandler : IRequestHandler<GetVideoQuery, MethodResult<VideoModel>>
     {
         private readonly IVideoRepository _videoRepository;
+        private readonly QuestionTypeConverter _questionTypeConverter;
         private readonly IMapper _mapper;
 
         public GetVideoStandaloneQueryHandler(IVideoRepository videoRepository,
+            QuestionTypeConverter questionTypeConverter,
             IMapper mapper)
         {
             _videoRepository = videoRepository;
+            _questionTypeConverter = questionTypeConverter;
             _mapper = mapper;
         }
 
@@ -82,7 +85,7 @@ namespace Fsel.Course.Lms.Application.Queries.VideoQuery
                             QuestionType = m.QuestionType,
                             IsSave = m.IsSave,
                             CorrectTotal = m.CorrectTotal,
-                            Config = EnumQuestionTypeConverter.QuestionTypeConverter(m.QuestionType, m.Config),
+                            Config = _questionTypeConverter.QuestionTypeConverterObject(m.QuestionType, m.Config),
                             VideoTimeCodeAnswer = _mapper.Map<VideoTimeCodeAnswerModel>(m.VideoTimeCodeAnswer)
                         }).ToList()
                     }).ToList(),

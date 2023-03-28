@@ -2,7 +2,7 @@
 
 using AutoMapper;
 using Fsel.Common.ActionResults;
-using Fsel.Common.Helpers;
+using Fsel.Course.Application.Services.UserServices;
 using Fsel.Course.Domain.Entities;
 using Fsel.Course.Domain.Enums.ErrorCodes;
 using Fsel.Course.Domain.IRepositories;
@@ -11,6 +11,7 @@ using Fsel.Course.Domain.Models.EntityModels;
 using Fsel.Course.Infrastructure.Common;
 using MediatR;
 using Microsoft.AspNetCore.Http;
+using static System.Collections.Specialized.BitVector32;
 
 namespace Fsel.Course.Application.Commands.VideoCmd
 {
@@ -21,18 +22,28 @@ namespace Fsel.Course.Application.Commands.VideoCmd
     public class CreateVideoCommandHandler : IRequestHandler<CreateVideoCommand, MethodResult<VideoModel>>
     {
         private readonly IVideoRepository _videoRepository;
+        private readonly QuestionTypeValidation _questionTypeValidation;
+        private readonly QuestionTypeCountConverter _questionTypeCountConverter;
         private readonly IMapper _mapper;
+        private readonly IUserService _userService;
 
         public CreateVideoCommandHandler(IVideoRepository videoRepository
-            , IMapper mapper)
+            , QuestionTypeValidation questionTypeValidation
+            , QuestionTypeCountConverter questionTypeCountConverter
+            , IMapper mapper
+            , IUserService userService)
         {
             _videoRepository = videoRepository;
+            _questionTypeValidation = questionTypeValidation;
+            _questionTypeCountConverter = questionTypeCountConverter;
             _mapper = mapper;
+            _userService = userService;
         }
 
         public async Task<MethodResult<VideoModel>> Handle(CreateVideoCommand request, CancellationToken cancellationToken)
         {
             MethodResult<VideoModel> methodResult = new MethodResult<VideoModel>();
+            ArgumentNullException.ThrowIfNull(request);
 
             #region Validation
 
@@ -42,6 +53,13 @@ namespace Fsel.Course.Application.Commands.VideoCmd
                 methodResult.AddErrorBadRequest(nameof(EnumVideoErrorCode.VideoNotCorrect), nameof(request.VideoTimeCodes));
                 return methodResult;
             }
+            //var isTeacher = await _userService.GetTeacherByIdAsync(request.TeacherId);
+            //var isCheck = isTeacher?.Content?.Result;
+            //if (isCheck == null)
+            //{
+            //    methodResult.AddErrorBadRequest(nameof(EnumVideoErrorCode.TeacherIdDoesNotExitst), nameof(request.TeacherId));
+            //    return methodResult;
+            //}
 
             Video video = _mapper.Map<Video>(request);
 
@@ -76,7 +94,12 @@ namespace Fsel.Course.Application.Commands.VideoCmd
                                 else
                                 {
                                     Question question = _mapper.Map<Question>(q);
-                                    question.CorrectTotal = q.Config.GetTotalCorrectByQuestionType(q.QuestionType);
+                                    var ischeck = _questionTypeValidation.TryParseQuestionTypeAsync(question.Config, question.QuestionType);
+                                    if (!ischeck.Result)
+                                    {
+                                        methodResult.AddErrorBadRequest(nameof(EnumVideoErrorCode.ConfigIsInTheWrongFormat), nameof(question.Config));
+                                    }
+                                    question.CorrectTotal = _questionTypeCountConverter.GetTotalCorrectByQuestionType(question.Config, question.QuestionType);
                                     excercise.ExerciseQuestions.Add(new ExerciseQuestion
                                     {
                                         Question = question

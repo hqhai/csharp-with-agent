@@ -10,7 +10,7 @@ namespace Fsel.Course.Domain.Models.CommandModels.Videos
 
         public string? VideoFilePath { get; set; }
 
-        public Guid? TeacherId { get; set; }
+        public Guid TeacherId { get; set; }
 
         public EnumCourseLevel CourseLevel { get; set; }
         public List<UpdateVideoTimeCodeCommandModel> VideoTimeCodes { get; set; } = new List<UpdateVideoTimeCodeCommandModel>();

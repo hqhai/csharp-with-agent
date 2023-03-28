@@ -3,6 +3,7 @@ using Fsel.Core.Extensions;
 using Fsel.Course.Application.Services.UserServices;
 using Fsel.Course.Domain.IRepositories;
 using Fsel.Course.Infrastructure;
+using Fsel.Course.Infrastructure.Common;
 using Fsel.Course.Infrastructure.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -36,6 +37,9 @@ builder.Services.AddScoped<ICourseUnitMockTestRepository, CourseUnitMockTestRepo
 builder.Services.AddScoped<IMockTestRepository, MockTestRepository>();
 builder.Services.AddScoped<ICourseClassStudentRepository, CourseClassStudentRepository>();
 
+builder.Services.AddScoped<QuestionTypeConverter>();
+builder.Services.AddScoped<QuestionTypeCountConverter>();
+builder.Services.AddScoped<QuestionTypeValidation>();
 builder.AddRefitClients(typeof(IUserService), appSetting?.Services?.UserApiUrl);
 var app = builder.Build();
 
