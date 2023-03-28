@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Course.Lms.Application.Queries
+namespace Fsel.Course.Lms.Application.Queries.CourseQuery
 {
     using System.Linq;
     using System.Threading.Tasks;
@@ -16,11 +16,11 @@ namespace Fsel.Course.Lms.Application.Queries
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class GetUnitByCourseQuery : IRequest<MethodResult<CourseModel>>
+    public class GetCourseQuery : IRequest<MethodResult<CourseModel>>
     {
     }
 
-    public class GetUnitByCourseQueryHandler : IRequestHandler<GetUnitByCourseQuery, MethodResult<CourseModel>>
+    public class GetCourseQueryHandler : IRequestHandler<GetCourseQuery, MethodResult<CourseModel>>
     {
         private readonly ICourseRepository _courseRepository;
         private readonly IMapper _mapper;
@@ -28,7 +28,7 @@ namespace Fsel.Course.Lms.Application.Queries
         private readonly AuthContext _authContext;
         private readonly ICourseClassStudentRepository _courseClassStudentRepository;
 
-        public GetUnitByCourseQueryHandler(IMapper mapper,
+        public GetCourseQueryHandler(IMapper mapper,
             AuthContext authContext,
             ICourseRepository courseRepository,
             ICourseClassStudentRepository courseClassStudentRepository,
@@ -41,9 +41,9 @@ namespace Fsel.Course.Lms.Application.Queries
             _courseClassStudentRepository = courseClassStudentRepository;
         }
 
-        public async Task<MethodResult<CourseModel>> Handle(GetUnitByCourseQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<CourseModel>> Handle(GetCourseQuery request, CancellationToken cancellationToken)
         {
-            MethodResult<CourseModel> methodResult = new MethodResult<CourseModel>();
+            var methodResult = new MethodResult<CourseModel>();
 
             var user = _authContext.CurrentUserId.ToString();
             var studentResult = await _userService.GetStudentByUserIdAsync(user);

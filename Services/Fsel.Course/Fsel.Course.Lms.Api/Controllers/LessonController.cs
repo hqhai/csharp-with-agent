@@ -37,5 +37,17 @@ namespace Fsel.Course.Lms.Api.Controllers
             { UnitId = Id }).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
+
+        /// <summary>
+        /// Get Lesson score
+        /// </summary>
+        [HttpGet("get-lesson-score")]
+        [ProducesResponseType(typeof(MethodResult<LessonModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetLessonScore([FromQuery] GetLessonScoreQuery query)
+        {
+            MethodResult<LessonScoreModel> queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
     }
 }
