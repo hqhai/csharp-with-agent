@@ -4,19 +4,15 @@ namespace Fsel.Course.Domain.Entities
 {
     using System;
     using System.ComponentModel.DataAnnotations;
-    using System.ComponentModel.DataAnnotations.Schema;
     using DataAnnotationsExtensions;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Entities;
     using Fsel.Course.Domain.Enums;
-    using MediatR;
 
     public class LessonResult : Entity
     {
-        public long? Result { get; set; }
-
-        [Min(1, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
-        public long TimeWatchVideo { get; set; }
+        [Min(0, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
+        public double Percent { get; set; }
 
         public EnumResultStatus Status { get; set; }
 
@@ -38,10 +34,6 @@ namespace Fsel.Course.Domain.Entities
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         public Guid StudentId { get; set; }
 
-        [NotMapped]
-        public TimeSpan TimeWatchVideoSpan
-        {
-            get { return TimeSpan.FromTicks(TimeWatchVideo); }
-        }
+        public ICollection<VideoResult> VideoResults { get; set; } = new List<VideoResult>();
     }
 }

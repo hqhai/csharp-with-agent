@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using DataAnnotationsExtensions;
 using Fsel.Common.Enums.ErrorCodes;
 using Fsel.Common.Helpers;
 using Fsel.Core.Entities;
@@ -13,6 +14,12 @@ namespace Fsel.Course.Domain.Entities
         /// Loại câu hỏi
         /// </summary>
         public EnumQuestionType QuestionType { get; set; }
+
+        /// <summary>
+        /// Tổng số câu trả lời đúng
+        /// </summary>
+        [Min(0, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
+        public int CorrectTotal { get; set; }
 
         public bool IsSave { get; set; }
 
@@ -28,5 +35,6 @@ namespace Fsel.Course.Domain.Entities
         }
 
         public ICollection<ExerciseQuestion> ExerciseQuestions { get; set; } = new List<ExerciseQuestion>();
+        public VideoTimeCodeAnswer? VideoTimeCodeAnswer { get; set; }
     }
 }

@@ -1,3 +1,4 @@
+﻿using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
@@ -28,7 +29,7 @@ namespace Fsel.Course.Infrastructure.Migrations
                     Name = table.Column<string>(type: "nvarchar(250)", maxLength: 250, nullable: false),
                     NumberOfUnits = table.Column<int>(type: "int", nullable: false),
                     NumberOfLessons = table.Column<int>(type: "int", nullable: false),
-                    IsPublish = table.Column<bool>(type: "bit", nullable: false),
+                    Status = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     CourseLevel = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false)
                 },
                 constraints: table =>
@@ -37,7 +38,7 @@ namespace Fsel.Course.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Excercises",
+                name: "Exercises",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
@@ -51,14 +52,13 @@ namespace Fsel.Course.Infrastructure.Migrations
                     UpdatedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     DeletedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(250)", maxLength: 250, nullable: false),
-                    QuestionType = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    MediaPost = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(250)", maxLength: 250, nullable: true),
+                    MediaPost = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: true),
                     CourseSkill = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Excercises", x => x.Id);
+                    table.PrimaryKey("PK_Exercises", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -208,6 +208,7 @@ namespace Fsel.Course.Infrastructure.Migrations
                     DeletedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false),
                     QuestionType = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    CorrectTotal = table.Column<int>(type: "int", nullable: false),
                     IsSave = table.Column<bool>(type: "bit", nullable: false),
                     ConfigStr = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: false)
                 },
@@ -234,7 +235,6 @@ namespace Fsel.Course.Infrastructure.Migrations
                     Name = table.Column<string>(type: "nvarchar(250)", maxLength: 250, nullable: false),
                     DisplayName = table.Column<string>(type: "nvarchar(250)", maxLength: 250, nullable: false),
                     IsActive = table.Column<bool>(type: "bit", nullable: false),
-                    Type = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     CourseLevel = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false)
                 },
                 constraints: table =>
@@ -270,6 +270,69 @@ namespace Fsel.Course.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "CourseClassStudents",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CreatedUserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    UpdatedUserId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    DeletedUserId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    CreatedFullName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    UpdatedFullName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
+                    DeletedFullName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UpdatedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    DeletedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
+                    CourseId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    StudentId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    ClassId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_CourseClassStudents", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_CourseClassStudents_Courses_CourseId",
+                        column: x => x.CourseId,
+                        principalTable: "Courses",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "CourseTeachers",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CreatedUserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    UpdatedUserId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    DeletedUserId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    CreatedFullName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    UpdatedFullName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
+                    DeletedFullName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UpdatedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    DeletedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
+                    TeacherId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CourseId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Nationality = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: true),
+                    Deggree = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: true),
+                    Experience = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: true),
+                    Strength = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_CourseTeachers", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_CourseTeachers_Courses_CourseId",
+                        column: x => x.CourseId,
+                        principalTable: "Courses",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "ClassForums",
                 columns: table => new
                 {
@@ -287,7 +350,7 @@ namespace Fsel.Course.Infrastructure.Migrations
                     Title = table.Column<string>(type: "nvarchar(250)", maxLength: 250, nullable: false),
                     GradingStyle = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     TaggetWordLimit = table.Column<long>(type: "bigint", nullable: false),
-                    TaggetTimeLimitTicks = table.Column<long>(type: "bigint", nullable: false),
+                    TaggetTimeLimit = table.Column<long>(type: "bigint", nullable: false),
                     MediaPost = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: true),
                     IsActive = table.Column<bool>(type: "bit", nullable: false),
                     CourseSkill = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
@@ -375,7 +438,7 @@ namespace Fsel.Course.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "ExcerciseQuestions",
+                name: "ExerciseQuestions",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
@@ -389,20 +452,20 @@ namespace Fsel.Course.Infrastructure.Migrations
                     UpdatedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     DeletedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false),
-                    ExcerciseId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    ExerciseId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     QuestionId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_ExcerciseQuestions", x => x.Id);
+                    table.PrimaryKey("PK_ExerciseQuestions", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_ExcerciseQuestions_Excercises_ExcerciseId",
-                        column: x => x.ExcerciseId,
-                        principalTable: "Excercises",
+                        name: "FK_ExerciseQuestions_Exercises_ExerciseId",
+                        column: x => x.ExerciseId,
+                        principalTable: "Exercises",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_ExcerciseQuestions_Questions_QuestionId",
+                        name: "FK_ExerciseQuestions_Questions_QuestionId",
                         column: x => x.QuestionId,
                         principalTable: "Questions",
                         principalColumn: "Id",
@@ -424,7 +487,7 @@ namespace Fsel.Course.Infrastructure.Migrations
                     UpdatedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     DeletedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false),
-                    OrderNumber = table.Column<int>(type: "int", nullable: false),
+                    DisplayOrder = table.Column<int>(type: "int", nullable: false),
                     UnitId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     CourseId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     MockTestId = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
@@ -572,8 +635,8 @@ namespace Fsel.Course.Infrastructure.Migrations
                     UpdatedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     DeletedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false),
-                    DisplayTimeTicks = table.Column<long>(type: "bigint", nullable: false),
-                    ExecutionTimeTicks = table.Column<long>(type: "bigint", nullable: false),
+                    DisplayTime = table.Column<long>(type: "bigint", nullable: false),
+                    ExecutionTime = table.Column<long>(type: "bigint", nullable: false),
                     TimeCodeType = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     VideoId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
@@ -589,7 +652,7 @@ namespace Fsel.Course.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "TimeCodeExcercises",
+                name: "CourseUnitMockTestResults",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
@@ -603,24 +666,208 @@ namespace Fsel.Course.Infrastructure.Migrations
                     UpdatedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     DeletedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false),
-                    ExcerciseId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Percent = table.Column<double>(type: "float", nullable: true),
+                    Status = table.Column<int>(type: "int", nullable: false),
+                    CourseId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    UnitId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    StudentId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CourseUnitMockTestId = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_CourseUnitMockTestResults", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_CourseUnitMockTestResults_CourseUnitMockTests_CourseUnitMockTestId",
+                        column: x => x.CourseUnitMockTestId,
+                        principalTable: "CourseUnitMockTests",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_CourseUnitMockTestResults_Courses_CourseId",
+                        column: x => x.CourseId,
+                        principalTable: "Courses",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_CourseUnitMockTestResults_Units_UnitId",
+                        column: x => x.UnitId,
+                        principalTable: "Units",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "LessonResult",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CreatedUserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    UpdatedUserId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    DeletedUserId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    CreatedFullName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    UpdatedFullName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
+                    DeletedFullName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UpdatedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    DeletedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
+                    Percent = table.Column<double>(type: "float", nullable: false),
+                    Status = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    CourseId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    UnitId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    LessonId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    StudentId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    UnitLessonId = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_LessonResult", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_LessonResult_Courses_CourseId",
+                        column: x => x.CourseId,
+                        principalTable: "Courses",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_LessonResult_Lessons_LessonId",
+                        column: x => x.LessonId,
+                        principalTable: "Lessons",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_LessonResult_UnitLessons_UnitLessonId",
+                        column: x => x.UnitLessonId,
+                        principalTable: "UnitLessons",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_LessonResult_Units_UnitId",
+                        column: x => x.UnitId,
+                        principalTable: "Units",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "TimeCodeExercises",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CreatedUserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    UpdatedUserId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    DeletedUserId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    CreatedFullName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    UpdatedFullName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
+                    DeletedFullName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UpdatedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    DeletedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
+                    ExerciseId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     VideoTimeCodeId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_TimeCodeExcercises", x => x.Id);
+                    table.PrimaryKey("PK_TimeCodeExercises", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_TimeCodeExcercises_Excercises_ExcerciseId",
-                        column: x => x.ExcerciseId,
-                        principalTable: "Excercises",
+                        name: "FK_TimeCodeExercises_Exercises_ExerciseId",
+                        column: x => x.ExerciseId,
+                        principalTable: "Exercises",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_TimeCodeExcercises_VideoTimeCodes_VideoTimeCodeId",
+                        name: "FK_TimeCodeExercises_VideoTimeCodes_VideoTimeCodeId",
                         column: x => x.VideoTimeCodeId,
                         principalTable: "VideoTimeCodes",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "VideoResults",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CreatedUserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    UpdatedUserId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    DeletedUserId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    CreatedFullName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    UpdatedFullName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
+                    DeletedFullName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UpdatedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    DeletedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
+                    Percent = table.Column<double>(type: "float", nullable: false),
+                    CorrectCount = table.Column<int>(type: "int", nullable: false),
+                    CorrectTotal = table.Column<int>(type: "int", nullable: false),
+                    Status = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    LessonResultId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    VideoId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    StudentId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_VideoResults", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_VideoResults_LessonResult_LessonResultId",
+                        column: x => x.LessonResultId,
+                        principalTable: "LessonResult",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_VideoResults_Videos_VideoId",
+                        column: x => x.VideoId,
+                        principalTable: "Videos",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "VideoTimeCodeAnswers",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CreatedUserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    UpdatedUserId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    DeletedUserId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    CreatedFullName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    UpdatedFullName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
+                    DeletedFullName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UpdatedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    DeletedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
+                    AnswerStr = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: false),
+                    CorrectCount = table.Column<int>(type: "int", nullable: false),
+                    QuestionId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    VideoResultId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    ExerciseId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    VideoTimeCodeId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_VideoTimeCodeAnswers", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_VideoTimeCodeAnswers_Exercises_ExerciseId",
+                        column: x => x.ExerciseId,
+                        principalTable: "Exercises",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_VideoTimeCodeAnswers_Questions_QuestionId",
+                        column: x => x.QuestionId,
+                        principalTable: "Questions",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_VideoTimeCodeAnswers_VideoResults_VideoResultId",
+                        column: x => x.VideoResultId,
+                        principalTable: "VideoResults",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_VideoTimeCodeAnswers_VideoTimeCodes_VideoTimeCodeId",
+                        column: x => x.VideoTimeCodeId,
+                        principalTable: "VideoTimeCodes",
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateIndex(
@@ -628,6 +875,31 @@ namespace Fsel.Course.Infrastructure.Migrations
                 table: "ClassForums",
                 column: "LessonId",
                 unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_CourseClassStudents_CourseId",
+                table: "CourseClassStudents",
+                column: "CourseId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_CourseTeachers_CourseId",
+                table: "CourseTeachers",
+                column: "CourseId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_CourseUnitMockTestResults_CourseId",
+                table: "CourseUnitMockTestResults",
+                column: "CourseId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_CourseUnitMockTestResults_CourseUnitMockTestId",
+                table: "CourseUnitMockTestResults",
+                column: "CourseUnitMockTestId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_CourseUnitMockTestResults_UnitId",
+                table: "CourseUnitMockTestResults",
+                column: "UnitId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_CourseUnitMockTests_CourseId",
@@ -645,13 +917,13 @@ namespace Fsel.Course.Infrastructure.Migrations
                 column: "UnitId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ExcerciseQuestions_ExcerciseId",
-                table: "ExcerciseQuestions",
-                column: "ExcerciseId");
+                name: "IX_ExerciseQuestions_ExerciseId",
+                table: "ExerciseQuestions",
+                column: "ExerciseId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ExcerciseQuestions_QuestionId",
-                table: "ExcerciseQuestions",
+                name: "IX_ExerciseQuestions_QuestionId",
+                table: "ExerciseQuestions",
                 column: "QuestionId");
 
             migrationBuilder.CreateIndex(
@@ -675,6 +947,26 @@ namespace Fsel.Course.Infrastructure.Migrations
                 column: "LessonId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_LessonResult_CourseId",
+                table: "LessonResult",
+                column: "CourseId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_LessonResult_LessonId",
+                table: "LessonResult",
+                column: "LessonId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_LessonResult_UnitId",
+                table: "LessonResult",
+                column: "UnitId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_LessonResult_UnitLessonId",
+                table: "LessonResult",
+                column: "UnitLessonId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_LessonVideos_LessonId",
                 table: "LessonVideos",
                 column: "LessonId");
@@ -685,13 +977,13 @@ namespace Fsel.Course.Infrastructure.Migrations
                 column: "VideoId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_TimeCodeExcercises_ExcerciseId",
-                table: "TimeCodeExcercises",
-                column: "ExcerciseId");
+                name: "IX_TimeCodeExercises_ExerciseId",
+                table: "TimeCodeExercises",
+                column: "ExerciseId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_TimeCodeExcercises_VideoTimeCodeId",
-                table: "TimeCodeExcercises",
+                name: "IX_TimeCodeExercises_VideoTimeCodeId",
+                table: "TimeCodeExercises",
                 column: "VideoTimeCodeId");
 
             migrationBuilder.CreateIndex(
@@ -715,6 +1007,37 @@ namespace Fsel.Course.Infrastructure.Migrations
                 column: "UnitId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_VideoResults_LessonResultId",
+                table: "VideoResults",
+                column: "LessonResultId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_VideoResults_VideoId",
+                table: "VideoResults",
+                column: "VideoId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_VideoTimeCodeAnswers_ExerciseId",
+                table: "VideoTimeCodeAnswers",
+                column: "ExerciseId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_VideoTimeCodeAnswers_QuestionId",
+                table: "VideoTimeCodeAnswers",
+                column: "QuestionId",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_VideoTimeCodeAnswers_VideoResultId",
+                table: "VideoTimeCodeAnswers",
+                column: "VideoResultId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_VideoTimeCodeAnswers_VideoTimeCodeId",
+                table: "VideoTimeCodeAnswers",
+                column: "VideoTimeCodeId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_VideoTimeCodes_VideoId",
                 table: "VideoTimeCodes",
                 column: "VideoId");
@@ -727,10 +1050,16 @@ namespace Fsel.Course.Infrastructure.Migrations
                 name: "ClassForums");
 
             migrationBuilder.DropTable(
-                name: "CourseUnitMockTests");
+                name: "CourseClassStudents");
 
             migrationBuilder.DropTable(
-                name: "ExcerciseQuestions");
+                name: "CourseTeachers");
+
+            migrationBuilder.DropTable(
+                name: "CourseUnitMockTestResults");
+
+            migrationBuilder.DropTable(
+                name: "ExerciseQuestions");
 
             migrationBuilder.DropTable(
                 name: "LessonExtraPractices");
@@ -745,19 +1074,16 @@ namespace Fsel.Course.Infrastructure.Migrations
                 name: "PlacementTests");
 
             migrationBuilder.DropTable(
-                name: "TimeCodeExcercises");
-
-            migrationBuilder.DropTable(
-                name: "UnitLessons");
+                name: "TimeCodeExercises");
 
             migrationBuilder.DropTable(
                 name: "UnitSkillMockTests");
 
             migrationBuilder.DropTable(
-                name: "Courses");
+                name: "VideoTimeCodeAnswers");
 
             migrationBuilder.DropTable(
-                name: "Questions");
+                name: "CourseUnitMockTests");
 
             migrationBuilder.DropTable(
                 name: "ExtraPractices");
@@ -766,22 +1092,37 @@ namespace Fsel.Course.Infrastructure.Migrations
                 name: "HomeWorks");
 
             migrationBuilder.DropTable(
-                name: "Excercises");
+                name: "Exercises");
+
+            migrationBuilder.DropTable(
+                name: "Questions");
+
+            migrationBuilder.DropTable(
+                name: "VideoResults");
 
             migrationBuilder.DropTable(
                 name: "VideoTimeCodes");
 
             migrationBuilder.DropTable(
-                name: "Lessons");
-
-            migrationBuilder.DropTable(
                 name: "MockTests");
 
             migrationBuilder.DropTable(
-                name: "Units");
+                name: "LessonResult");
 
             migrationBuilder.DropTable(
                 name: "Videos");
+
+            migrationBuilder.DropTable(
+                name: "Courses");
+
+            migrationBuilder.DropTable(
+                name: "UnitLessons");
+
+            migrationBuilder.DropTable(
+                name: "Lessons");
+
+            migrationBuilder.DropTable(
+                name: "Units");
         }
     }
 }

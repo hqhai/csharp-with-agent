@@ -14,7 +14,7 @@ namespace Fsel.Course.Domain.Enums
         GapFillWordBankScoreByQuestion,
         GapFillScoreByGap,
         GapFillWordBankScoreByGap,
-        DragAndDropSsentenceOrder,
+        DragAndDropSentenceOrder,
         DragAndDropPicture,
         MultipleOptionSentenceCompletion,
         ExercisePreparation,
