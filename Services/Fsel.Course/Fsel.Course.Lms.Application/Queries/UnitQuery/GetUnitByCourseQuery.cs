@@ -69,7 +69,7 @@ namespace Fsel.Course.Lms.Application.Queries
             }
 
             var courseQuery = from i in _courseRepository.Queryable
-                            .Include(x => x.CourseUnitMockTests)
+                             .Include(x => x.CourseUnitMockTests)
                              .ThenInclude(unit => unit.Unit)
                              .Include(x => x.CourseUnitMockTests)
                              .ThenInclude(unit => unit.MockTest)

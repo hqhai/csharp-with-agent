@@ -31,5 +31,10 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         /// Student is null
         /// </summary>
         StudentNull,
+
+        /// <summary>
+        /// List Lesson does not exist
+        /// </summary>
+        ListLessonNotExist,
     }
 }
