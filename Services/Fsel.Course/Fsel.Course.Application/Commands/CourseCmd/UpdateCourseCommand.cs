@@ -84,6 +84,13 @@ namespace Fsel.Course.Application.Commands.CourseCmd
                 return methodResult;
             }
 
+            if (request.CourseUnitMockTests.Any(x => x.MockTestId.HasValue && x.UnitId.HasValue))
+            {
+                methodResult.AddErrorBadRequest(
+                    nameof(EnumCourseErrorCode.MocktestIdAndUnitIdAreMutuallyExclusive));
+                return methodResult;
+            }
+
             var units = request.CourseUnitMockTests.Where(e => e.UnitId != null).Select(x => x.UnitId).ToList();
             if (_unitRepository.IsIdsInValid(units.Where(e => e.HasValue).Select(e => e!.Value)))
             {
