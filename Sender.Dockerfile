@@ -26,6 +26,6 @@ RUN dotnet publish "Fsel.Sender.Api.csproj" -c Release -o /app/publish /p:UseApp
 
 FROM base AS final
 WORKDIR /app
-ENV ASPNETCORE_ENVIRONMENT=Development
+ENV ASPNETCORE_ENVIRONMENT=Testing
 COPY --from=publish /app/publish .
 ENTRYPOINT ["dotnet", "Fsel.Sender.Api.dll"]

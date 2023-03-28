@@ -39,6 +39,7 @@ builder.Services.AddScoped<ICourseClassStudentRepository, CourseClassStudentRepo
 builder.Services.AddScoped<ILessonRepository, LessonRepository>();
 builder.Services.AddScoped<IMockTestRepository, MockTestRepository>();
 builder.Services.AddScoped<ILessonResultRepository, LessonResultRepository>();
+
 builder.AddRefitClients(typeof(IUserService), appSetting?.Services?.UserApiUrl);
 builder.AddRefitClients(typeof(ITrainingService), appSetting?.Services?.ClassApiUrl);
 builder.Services.AddCors(policy =>
