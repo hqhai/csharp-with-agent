@@ -12,6 +12,7 @@ namespace Fsel.Course.Domain.Entities.QuestionTypeConfigs.Questions
     {
         public string? Name { get; set; }
 
-        public int ExactWordCount { get; set; }
+        public int? ExactWordCount { get; set; }
+        public object Content { get; set; }
     }
 }
