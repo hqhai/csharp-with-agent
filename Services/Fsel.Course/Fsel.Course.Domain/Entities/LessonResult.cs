@@ -9,8 +9,9 @@ namespace Fsel.Course.Domain.Entities
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Entities;
     using Fsel.Course.Domain.Enums;
+    using MediatR;
 
-    public class UnitLessonResult : Entity
+    public class LessonResult : Entity
     {
         public long? Result { get; set; }
 
@@ -19,10 +20,20 @@ namespace Fsel.Course.Domain.Entities
 
         public EnumResultStatus Status { get; set; }
 
-        public UnitLesson? UnitLesson { get; set; }
+        public Course? Course { get; set; }
 
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
-        public Guid UnitLessonId { get; set; }
+        public Guid CourseId { get; set; }
+
+        public Unit? Unit { get; set; }
+
+        [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
+        public Guid UnitId { get; set; }
+
+        public Lesson? Lesson { get; set; }
+
+        [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
+        public Guid LessonId { get; set; }
 
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         public Guid StudentId { get; set; }

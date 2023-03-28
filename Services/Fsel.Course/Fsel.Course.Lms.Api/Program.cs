@@ -37,6 +37,8 @@ builder.Services.AddScoped<ICourseUnitMockTestRepository, CourseUnitMockTestRepo
 builder.Services.AddScoped<IMockTestRepository, MockTestRepository>();
 builder.Services.AddScoped<ICourseClassStudentRepository, CourseClassStudentRepository>();
 builder.Services.AddScoped<IUnitLessonResultRepository, UnitLessonResultRepository>();
+builder.Services.AddScoped<ILessonRepository, LessonRepository>();
+builder.Services.AddScoped<IMockTestRepository, MockTestRepository>();
 
 builder.AddRefitClients(typeof(IUserService), appSetting?.Services?.UserApiUrl);
 builder.AddRefitClients(typeof(ITrainingService), appSetting?.Services?.ClassApiUrl);
