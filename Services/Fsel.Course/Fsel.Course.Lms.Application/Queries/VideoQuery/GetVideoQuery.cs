@@ -5,8 +5,8 @@ namespace Fsel.Course.Lms.Application.Queries.VideoQuery
     using System;
     using System.Linq;
     using System.Threading.Tasks;
+    using AutoMapper;
     using Fsel.Common.ActionResults;
-    using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
@@ -23,11 +23,13 @@ namespace Fsel.Course.Lms.Application.Queries.VideoQuery
     public class GetVideoStandaloneQueryHandler : IRequestHandler<GetVideoQuery, MethodResult<VideoModel>>
     {
         private readonly IVideoRepository _videoRepository;
+        private readonly IMapper _mapper;
 
-        public GetVideoStandaloneQueryHandler(IVideoRepository videoRepository
-            )
+        public GetVideoStandaloneQueryHandler(IVideoRepository videoRepository,
+            IMapper mapper)
         {
             _videoRepository = videoRepository;
+            _mapper = mapper;
         }
 
         public async Task<MethodResult<VideoModel>> Handle(GetVideoQuery request, CancellationToken cancellationToken)
@@ -41,6 +43,7 @@ namespace Fsel.Course.Lms.Application.Queries.VideoQuery
                                 .ThenInclude(x => x.Exercise)
                                 .ThenInclude(x => x.ExerciseQuestions.Where(x => !x.IsDeleted))
                                 .ThenInclude(x => x.Question)
+                                .ThenInclude(x => x.VideoTimeCodeAnswer)
                                 .Where(x => x.Id == request.VideoId)
                         select i;
 
@@ -49,7 +52,7 @@ namespace Fsel.Course.Lms.Application.Queries.VideoQuery
             if (video == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumVideoErrorCode.VideoNotExist),
-                                                nameof(request.VideoId), request.VideoId);
+                                                nameof(request.VideoId), request?.VideoId);
                 return methodResult;
             }
 
@@ -78,7 +81,9 @@ namespace Fsel.Course.Lms.Application.Queries.VideoQuery
                             Id = m.Id,
                             QuestionType = m.QuestionType,
                             IsSave = m.IsSave,
-                            Config = EnumQuestionTypeConverter.QuestionTypeConverter(m.QuestionType, m.Config)
+                            CorrectTotal = m.CorrectTotal,
+                            Config = EnumQuestionTypeConverter.QuestionTypeConverter(m.QuestionType, m.Config),
+                            VideoTimeCodeAnswer = _mapper.Map<VideoTimeCodeAnswerModel>(m.VideoTimeCodeAnswer)
                         }).ToList()
                     }).ToList(),
                 }).ToList(),
