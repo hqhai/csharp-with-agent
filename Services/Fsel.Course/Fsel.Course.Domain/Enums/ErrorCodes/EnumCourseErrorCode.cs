@@ -56,5 +56,10 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         /// Student is null
         /// </summary>
         StudentNull,
+
+        /// <summary>
+        /// MocktestId and UnitId cannot have values at the same time.
+        /// </summary>
+        MocktestIdAndUnitIdAreMutuallyExclusive
     }
 }
