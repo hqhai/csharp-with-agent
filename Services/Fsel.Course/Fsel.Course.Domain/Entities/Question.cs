@@ -19,7 +19,7 @@ namespace Fsel.Course.Domain.Entities
         /// Tổng số câu trả lời đúng
         /// </summary>
         [Min(0, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
-        public int CorrectTotal { get; set; }
+        public int? CorrectTotal { get; set; }
 
         public bool IsSave { get; set; }
 

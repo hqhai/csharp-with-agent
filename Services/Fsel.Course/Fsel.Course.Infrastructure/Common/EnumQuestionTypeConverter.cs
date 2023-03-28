@@ -2,33 +2,11 @@
 
 namespace Fsel.Course.Infrastructure.Common
 {
-    using Fsel.Common.Helpers;
     using Fsel.Course.Domain.Entities.QuestionTypeConfigs.Questions;
     using Fsel.Course.Domain.Enums;
 
     public static class EnumQuestionTypeConverter
     {
-        public static bool TryParse<T>(this object? config, out T? result)
-        {
-            var str = config.Serialize();
-            result = str.Deserialize<T>(true);
-            if (result == null)
-            {
-                return false;
-            }
-            return true;
-        }
-
-        public static bool TryParse<T>(this string? str, out T? result)
-        {
-            result = str.Deserialize<T>(true);
-            if (result == null)
-            {
-                return false;
-            }
-            return true;
-        }
-
         public static object? QuestionTypeConverter(EnumQuestionType type, object config)
         {
             switch (type)
@@ -36,141 +14,212 @@ namespace Fsel.Course.Infrastructure.Common
                 case EnumQuestionType.Multichoice:
                 case EnumQuestionType.Dropdown:
                 case EnumQuestionType.Checklist:
-                    return ConverTypeQuestion(config);
+                    return ClearAnswerTypeMutipleChoiQuestion(config, type);
 
                 case EnumQuestionType.Listing:
-                    return ConverTypeListingQuestion(config);
+                    return ClearAnswerTypeListingQuestion(config, type);
 
                 case EnumQuestionType.MatchingType1:
                 case EnumQuestionType.MatchingType2:
-                    return ConverTypeMaschingQuestion(config);
+                    return ClearAnswerTypeMaschingQuestion(config, type);
 
                 case EnumQuestionType.ShortAnswerWordBase:
-                    return ConverTypeShortBaseQuestion(config);
+                    return ClearAnswerTypeShortBaseQuestion(config, type);
 
                 case EnumQuestionType.ShortAnswerWordCount:
-                    return ConverTypeShortCountQuestion(config);
+                    return ClearAnswerTypeShortCountQuestion(config, type);
 
                 case EnumQuestionType.GapFillScoreByQuestion:
                 case EnumQuestionType.GapFillWordBankScoreByQuestion:
                 case EnumQuestionType.GapFillWordBankScoreByGap:
                 case EnumQuestionType.GapFillScoreByGap:
-                    return ConverTypeGapFillQuestion(config);
+                    return ClearAnswerTypeGapFillQuestion(config, type);
 
                 case EnumQuestionType.DragAndDropSentenceOrder:
-                    return ConverTypeDragDropOrderQuestion(config);
+                    return ClearAnswerTypeDragDropOrderQuestion(config, type);
 
                 case EnumQuestionType.DragAndDropPicture:
-                    return ConverTypeDragDropPictureQuestion(config);
+                    return ClearAnswerTypeDragDropPictureQuestion(config, type);
+
+                case EnumQuestionType.MultipleOptionSentenceCompletion:
+                    return ClearAnswerTypeMultipleOptionQuestion(config, type);
 
                 case EnumQuestionType.ExercisePreparation:
-                    return ConverTypeQuestion(config);
+                    return ClearAnswerTypeExercisePreparationQuestion(config, type);
 
                 default:
                     throw new ArgumentException("Invalid question type");
             }
         }
 
-        public static object? ConverTypeShortBaseQuestion(object config)
+        public static object? ClearAnswerTypeExercisePreparationQuestion(object config, EnumQuestionType type)
         {
-            if (config.TryParse<ShortAnswerQuestionWordBaseQuestion>(out var question))
+            if (config.TryParseQuestionType(type))
             {
-                question.Content = null;
-                return question;
-            }
-            return null;
-        }
-
-        public static object? ConverTypeListingQuestion(object config)
-        {
-            if (config.TryParse<ListingQuestion>(out var question))
-            {
-                question.ExactWordCount = null;
-                return question;
-            }
-            return null;
-        }
-
-        public static object? ConverTypeQuestion(object config)
-        {
-            if (config.TryParse<MutipleChoiceQuestion>(out var question))
-            {
-                for (int i = question.Contents.Count - 1; i >= 0; i--)
+                var data = config as ExercisePreparationQuestion;
+                if (data != null)
                 {
-                    question.Contents[i].IsCorrect = null;
+                    return data;
                 }
-                return question;
             }
             return null;
         }
 
-        public static object? ConverTypeShortCountQuestion(object config)
+        public static object? ClearAnswerTypeMultipleOptionQuestion(object config, EnumQuestionType type)
         {
-            if (config.TryParse<ShortAnswerQuestionWordCountBaseQuestion>(out var question))
+            if (config.TryParseQuestionType(type))
             {
-                question.ExactWordCount = null;
-                return question;
-            }
-            return null;
-        }
-
-        public static object? ConverTypeMaschingQuestion(object config)
-        {
-            if (config.TryParse<MatchingTypeQuestion>(out var question))
-            {
-                for (int i = question.Links.Count - 1; i >= 0; i--)
+                var data = config as MultipleOptionSentenceCompletionQuestion;
+                if (data != null && data.Contents != null)
                 {
-                    question.Links.RemoveAt(i);
-                }
-                return question;
-            }
-            return null;
-        }
-
-        public static object? ConverTypeGapFillQuestion(object config)
-        {
-            if (config.TryParse<GapFillQuestion>(out var question))
-            {
-                foreach (var item in question.Contents)
-                {
-                    item.Words.ForEach(y =>
+                    foreach (var item in data.Contents)
                     {
-                        item?.Words?.Remove(y);
-                    });
+                        if (item != null)
+                        {
+                            item.Answers.ForEach(x =>
+                            {
+                                x.IsCorrect = null;
+                            });
+                        }
+                    }
                 }
-                return question;
+                return data;
             }
             return null;
         }
 
-        public static object? ConverTypeDragDropOrderQuestion(object config)
+        public static object? ClearAnswerTypeShortBaseQuestion(object config, EnumQuestionType type)
         {
-            if (config.TryParse<DragAndDropSentenceOrderQuestion>(out var question))
+            if (config.TryParseQuestionType(type))
             {
-                foreach (var item in question.Contents)
+                var data = config as ShortAnswerQuestionWordBaseQuestion;
+                if (data != null)
                 {
-                    item.Words.ForEach(y =>
-                    {
-                        item?.Words?.Remove(y);
-                    });
+                    data.Content = null;
                 }
-                return question;
+                return data;
             }
             return null;
         }
 
-        public static object? ConverTypeDragDropPictureQuestion(object config)
+        public static object? ClearAnswerTypeListingQuestion(object config, EnumQuestionType type)
         {
-            if (config.TryParse<DragAndDropPictureQuestion>(out var question))
+            if (config.TryParseQuestionType(type))
             {
-                foreach (var item in question?.Contents)
+                var data = config as ListingQuestion;
+                if (data != null)
                 {
-                    item.Words.ForEach(y =>
-                    {
-                        y.Content = null;
-                    });
+                    data.ExactWordCount = null;
                 }
-                return question;
+                return data;
+            }
+            return null;
+        }
+
+        public static object? ClearAnswerTypeMutipleChoiQuestion(object config, EnumQuestionType type)
+        {
+            if (config.TryParseQuestionType(type))
+            {
+                var data = config as MutipleChoiceQuestion;
+                if (data != null && data.Contents != null)
+                {
+                    for (int i = data.Contents.Count - 1; i >= 0; i--)
+                    {
+                        data.Contents[i].IsCorrect = null;
+                    }
+                }
+                return data;
+            }
+            return null;
+        }
+
+        public static object? ClearAnswerTypeShortCountQuestion(object config, EnumQuestionType type)
+        {
+            if (config.TryParseQuestionType(type))
+            {
+                var data = config as ShortAnswerQuestionWordCountBaseQuestion;
+                if (data != null)
+                {
+                    data.ExactWordCount = null;
+                }
+                return data;
+            }
+            return null;
+        }
+
+        public static object? ClearAnswerTypeMaschingQuestion(object config, EnumQuestionType type)
+        {
+            if (config.TryParseQuestionType(type))
+            {
+                var data = config as MatchingTypeQuestion;
+                if (data != null && data.Links != null)
+                {
+                    for (int i = data.Links.Count - 1; i >= 0; i--)
+                    {
+                        data.Links.RemoveAt(i);
+                    }
+                }
+                return data;
+            }
+            return null;
+        }
+
+        public static object? ClearAnswerTypeGapFillQuestion(object config, EnumQuestionType type)
+        {
+            if (config.TryParseQuestionType(type))
+            {
+                var data = config as GapFillQuestion;
+                if (data != null && data.Contents != null)
+                {
+                    foreach (var item in data.Contents)
+                    {
+                        item.Words.ForEach(y =>
+                        {
+                            item?.Words?.Remove(y);
+                        });
+                    }
+                }
+                return data;
+            }
+            return null;
+        }
+
+        public static object? ClearAnswerTypeDragDropOrderQuestion(object config, EnumQuestionType type)
+        {
+            if (config.TryParseQuestionType(type))
+            {
+                var data = config as DragAndDropSentenceOrderQuestion;
+                if (data != null && data.Contents != null)
+                {
+                    foreach (var item in data.Contents)
+                    {
+                        item.Words.ForEach(y =>
+                        {
+                            item?.Words?.Remove(y);
+                        });
+                    }
+                }
+                return data;
+            }
+            return null;
+        }
+
+        public static object? ClearAnswerTypeDragDropPictureQuestion(object config, EnumQuestionType type)
+        {
+            if (config.TryParseQuestionType(type))
+            {
+                var data = config as DragAndDropPictureQuestion;
+                if (data != null && data.Contents != null)
+                {
+                    foreach (var item in data.Contents)
+                    {
+                        item.Words.ForEach(y =>
+                        {
+                            y.Content = null;
+                        });
+                    }
+                }
+                return data;
             }
             return null;
         }

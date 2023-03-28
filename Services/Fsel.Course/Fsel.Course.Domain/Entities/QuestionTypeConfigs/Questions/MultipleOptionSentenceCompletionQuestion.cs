@@ -29,6 +29,6 @@ namespace Fsel.Course.Domain.Entities.QuestionTypeConfigs.Questions
 
         public string? Word { get; set; }
 
-        public bool IsCorrect { get; set; }
+        public bool? IsCorrect { get; set; }
     }
 }

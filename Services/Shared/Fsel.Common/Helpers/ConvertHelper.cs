@@ -99,6 +99,27 @@ namespace Fsel.Common.Helpers
             }
         }
 
+        public static bool TryParse<T>(this object? config, out T? result)
+        {
+            var str = config.Serialize();
+            result = str.Deserialize<T>(true);
+            if (result == null)
+            {
+                return false;
+            }
+            return true;
+        }
+
+        public static bool TryParse<T>(this string? str, out T? result)
+        {
+            result = str.Deserialize<T>(true);
+            if (result == null)
+            {
+                return false;
+            }
+            return true;
+        }
+
         public static T? DeserializeFromFilePath<T>(string path, bool isCamelCase = false)
         {
             using (StreamReader sr = new StreamReader(path))
