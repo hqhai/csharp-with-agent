@@ -28,7 +28,7 @@ namespace Fsel.Course.Lms.Api.Controllers
         /// <summary>
         /// Get video id
         /// </summary>
-        [HttpGet("get-video-timecode-lesson")]
+        [HttpGet]
         [ProducesResponseType(typeof(MethodResult<VideoModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> Get([FromQuery] GetVideoQuery query)
