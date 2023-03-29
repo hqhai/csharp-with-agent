@@ -1,4 +1,3 @@
-using Fsel.Common.Enums;
 using Fsel.Core.Base.BaseModels;
 
 namespace Fsel.Course.Domain.Models.EntityModels

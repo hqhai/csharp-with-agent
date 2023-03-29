@@ -1,5 +1,4 @@
 using System.ComponentModel.DataAnnotations;
-using DataAnnotationsExtensions;
 using Fsel.Common.Enums;
 using Fsel.Common.Enums.ErrorCodes;
 using Fsel.Core.Entities;
@@ -19,13 +18,13 @@ namespace Fsel.Course.Domain.Entities
         /// <summary>
         /// Số lượng Unit
         /// </summary>
-        [Min(1, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
+        [Range(1, 10000_0000, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
         public int NumberOfUnits { get; set; }
 
         /// <summary>
         /// Số Lượng Lesson
         /// </summary>
-        [Min(1, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
+        [Range(1, 10000_0000, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
         public int NumberOfLessons { get; set; }
 
         /// <summary>

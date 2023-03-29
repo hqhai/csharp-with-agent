@@ -59,8 +59,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
                 return methodResult;
             }
 
-            var courseClassStudent = await _courseClassStudentRepository.Queryable
-                            .FirstOrDefaultAsync(x => x.StudentId == student.Id, cancellationToken: cancellationToken);
+            var courseClassStudent = await _courseClassStudentRepository.Queryable.FirstOrDefaultAsync(x => x.StudentId == student.Id, cancellationToken);
 
             if (courseClassStudent == null)
             {
@@ -83,7 +82,8 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
                                   CourseUnitMockTests = _mapper.Map<IList<CourseUnitMockTestModel>>(i.CourseUnitMockTests),
                                   CourseTeachers = _mapper.Map<List<CourseTeacherModel>>(i.CourseTeachers),
                               };
-            var course = courseQuery.FirstOrDefault();
+
+            var course = await courseQuery.FirstOrDefaultAsync(cancellationToken);
 
             var teachersResult = await _userService.GetTeacherByIdsAsync(new GetTeacherByIdsQueryModel { Ids = course?.CourseTeachers?.Select(x => x.TeacherId).ToList() });
             if (teachersResult.IsSuccessStatusCode)
