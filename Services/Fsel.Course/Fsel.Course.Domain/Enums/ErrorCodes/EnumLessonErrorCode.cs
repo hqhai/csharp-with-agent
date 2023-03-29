@@ -16,5 +16,25 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         /// Lesson not is correct
         /// </summary>
         LessonNotCorrect,
+
+        /// <summary>
+        /// User Not Student
+        /// </summary>
+        NotStudent,
+
+        /// <summary>
+        /// Student not in class
+        /// </summary>
+        StudentNotInClass,
+
+        /// <summary>
+        /// Student is null
+        /// </summary>
+        StudentNull,
+
+        /// <summary>
+        /// List Lesson does not exist
+        /// </summary>
+        ListLessonNotExist,
     }
 }

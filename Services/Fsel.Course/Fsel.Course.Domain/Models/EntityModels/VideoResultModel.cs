@@ -1,0 +1,24 @@
+// Copyright (c) Atlantic. All rights reserved.
+
+namespace Fsel.Course.Domain.Models.EntityModels
+{
+    using System;
+    using System.Collections.Generic;
+    using Fsel.Core.Base.BaseModels;
+    using Fsel.Course.Domain.Entities;
+    using Fsel.Course.Domain.Enums;
+
+    public class VideoResultModel : BaseQueyModel
+    {
+        public double Percent { get; set; }
+        public int CorrectCount { get; set; }
+        public int CorrectTotal { get; set; }
+        public EnumResultStatus Status { get; set; }
+        public LessonResult? LessonResult { get; set; }
+        public Guid LessonResultId { get; set; }
+        public Video? Video { get; set; }
+        public Guid VideoId { get; set; }
+        public Guid StudentId { get; set; }
+        public IList<VideoTimeCodeAnswerModel>? VideoTimeCodeAnswers { get; set; }
+    }
+}

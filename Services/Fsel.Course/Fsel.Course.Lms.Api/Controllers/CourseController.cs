@@ -4,6 +4,7 @@ using Fsel.Common.Constants;
 using Fsel.Common.Enums;
 using Fsel.Course.Domain.Models.EntityModels;
 using Fsel.Course.Lms.Application.Queries;
+using Fsel.Course.Lms.Application.Queries.CourseQuery;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -31,7 +32,7 @@ namespace Fsel.Course.Lms.Api.Controllers
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> Get()
         {
-            MethodResult<CourseModel> commandResult = await _mediator.Send(new GetUnitByCourseQuery()).ConfigureAwait(false);
+            MethodResult<CourseModel> commandResult = await _mediator.Send(new GetCourseQuery()).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
     }
