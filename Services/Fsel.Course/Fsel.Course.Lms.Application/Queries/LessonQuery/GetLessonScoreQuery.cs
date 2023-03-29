@@ -68,21 +68,14 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
                                             TotalCount = g.Select(x => x.q).Sum(x => x.CorrectTotal),
                                             CorrectCount = g.Select(x => x.vtca).Sum(x => x.CorrectCount)
                                         };
-            var lessonSkillScores = await lessonSkillScoreQuery.ToListAsync(cancellationToken);
             var correctCount = lessonSkillScoreQuery.Select(x => x.CorrectCount).Sum();
             var totalCount = lessonSkillScoreQuery.Select(x => x.TotalCount).Sum();
-            var percent = lessonScore.Percent;
-            try
+            if (totalCount != 0)
             {
-                percent = (correctCount / totalCount) * 100;
+                lessonScore.Percent = (correctCount / totalCount) * 100;
             }
-            catch (DivideByZeroException)
-            {
-                methodResult.AddErrorBadRequest(
-                  nameof(EnumLessonErrorCode.PercentDivideByZero));
-                return methodResult;
-            }
-            lessonScore.LessonSkillScores = lessonSkillScores;
+
+            lessonScore.LessonSkillScores = await lessonSkillScoreQuery.ToListAsync(cancellationToken);
             methodResult.Result = lessonScore;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
