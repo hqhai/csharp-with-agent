@@ -3,7 +3,6 @@
 namespace Fsel.Course.Domain.Entities
 {
     using System.ComponentModel.DataAnnotations;
-    using DataAnnotationsExtensions;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Entities;
     using Fsel.Course.Domain.Enums;
@@ -13,19 +12,19 @@ namespace Fsel.Course.Domain.Entities
         /// <summary>
         /// Phần trăm câu trả lời
         /// </summary>
-        [Min(0, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
+        [Range(1, 10000_0000, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
         public double Percent { get; set; }
 
         /// <summary>
         /// Số câu trả lời đúng của Student
         /// </summary>
-        [Min(0, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
+        [Range(1, 10000_0000, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
         public int CorrectCount { get; set; }
 
         /// <summary>
         /// Tổng số câu trả lời đúng
         /// </summary>
-        [Min(0, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
+        [Range(1, 10000_0000, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
         public int CorrectTotal { get; set; }
 
         /// <summary>

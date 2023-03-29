@@ -7,11 +7,10 @@ namespace Fsel.Course.Domain.Entities
     using System.ComponentModel.DataAnnotations;
     using Fsel.Core.Entities;
     using Fsel.Course.Domain.Enums;
-    using DataAnnotationsExtensions;
 
     public class UnitResult : Entity
     {
-        [Min(0, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
+        [Range(1, 10000_0000, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
         public double? Percent { get; set; }
 
         public EnumResultStatus Status { get; set; }

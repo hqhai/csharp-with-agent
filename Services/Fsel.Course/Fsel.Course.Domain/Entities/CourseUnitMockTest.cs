@@ -1,4 +1,4 @@
-using DataAnnotationsExtensions;
+using System.ComponentModel.DataAnnotations;
 using Fsel.Common.Enums.ErrorCodes;
 using Fsel.Core.Entities;
 using Fsel.Course.Domain.Enums.ErrorCodes;
@@ -11,7 +11,7 @@ namespace Fsel.Course.Domain.Entities
         /// <summary>
         /// Số thứ tự
         /// </summary>
-        [Min(1, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
+        [Range(1, 10000_0000, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
         public int DisplayOrder { get; set; }
 
         [JsonIgnore]

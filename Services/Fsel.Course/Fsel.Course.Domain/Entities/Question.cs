@@ -1,6 +1,5 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using DataAnnotationsExtensions;
 using Fsel.Common.Enums.ErrorCodes;
 using Fsel.Common.Helpers;
 using Fsel.Core.Entities;
@@ -18,7 +17,7 @@ namespace Fsel.Course.Domain.Entities
         /// <summary>
         /// Tổng số câu trả lời đúng
         /// </summary>
-        [Min(0, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
+        [Range(1, 10000_0000, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
         public int CorrectTotal { get; set; }
 
         public bool IsSave { get; set; }
