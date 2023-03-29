@@ -8,7 +8,7 @@ namespace Fsel.Course.Infrastructure.Common
 
     public class QuestionTypeValidation
     {
-        public async Task<bool> TryParseQuestionTypeAsync(object? config, EnumQuestionType type)
+        public bool TryParseQuestionType(object? config, EnumQuestionType type)
         {
             switch (type)
             {

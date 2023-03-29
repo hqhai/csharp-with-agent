@@ -112,7 +112,7 @@ namespace Fsel.Course.Infrastructure.Common
             {
                 for (int i = data.Contents.Count - 1; i >= 0; i--)
                 {
-                    data.Contents[i].IsCorrect = null;
+                    data.Contents[i].IsCorrect = default;
                 }
                 return data;
             }

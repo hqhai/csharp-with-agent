@@ -115,8 +115,8 @@ namespace Fsel.Course.Application.Commands.VideoCmd
                                 else
                                 {
                                     Question question = _mapper.Map<Question>(q);
-                                    var ischeck = _questionTypeValidation.TryParseQuestionTypeAsync(question.Config, question.QuestionType);
-                                    if (!ischeck.Result)
+                                    var ischeck = _questionTypeValidation.TryParseQuestionType(question.Config, question.QuestionType);
+                                    if (!ischeck)
                                     {
                                         methodResult.AddErrorBadRequest(nameof(EnumVideoErrorCode.ConfigIsInTheWrongFormat), nameof(question.Config));
                                     }

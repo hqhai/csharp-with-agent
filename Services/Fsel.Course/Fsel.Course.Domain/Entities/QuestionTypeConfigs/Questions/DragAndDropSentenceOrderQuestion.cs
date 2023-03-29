@@ -3,17 +3,22 @@
 namespace Fsel.Course.Domain.Entities.QuestionTypeConfigs.Questions
 {
     using System.Collections.Generic;
+    using System.Text.Json.Serialization;
 
     public class DragAndDropSentenceOrderQuestion
     {
+        [JsonRequired]
         public string? Name { get; set; }
 
+        [JsonRequired]
         public IList<DragAndDropSentenceOrderQuestionContent>? Contents { get; set; }
     }
 
     public class DragAndDropSentenceOrderQuestionContent
     {
         public int Id { get; set; }
+
+        [JsonRequired]
         public IList<string>? Words { get; set; }
     }
 }

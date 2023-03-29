@@ -1,8 +1,6 @@
-using System;
 using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using static Org.BouncyCastle.Math.EC.ECCurve;
 
 namespace Fsel.Common.Helpers
 {
@@ -100,23 +98,12 @@ namespace Fsel.Common.Helpers
             }
         }
 
-        public static T? Deserialize<T>(this object? objects, bool isCamelCase = false)
+        public static T? Deserialize<T>(this object? objects)
         {
             try
             {
                 var data = objects.Serialize();
-                if (string.IsNullOrEmpty(data))
-                {
-                    return default;
-                }
-
-                var options = new JsonSerializerOptions { Converters = { new JsonStringEnumConverter() } };
-                if (isCamelCase)
-                {
-                    options.PropertyNameCaseInsensitive = true;
-                }
-                T? obj = JsonSerializer.Deserialize<T>(data, options);
-                return obj;
+                return Deserialize<T>(data);
             }
             catch
             {

@@ -2,24 +2,26 @@
 
 namespace Fsel.Course.Domain.Entities.QuestionTypeConfigs.Questions
 {
-    using System;
     using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
-    using System.Threading.Tasks;
+    using System.Text.Json.Serialization;
 
     public class MultipleOptionSentenceCompletionQuestion
     {
+        [JsonRequired]
         public string? Name { get; set; }
 
+        [JsonRequired]
         public IList<MultipleOptionSentenceCompletionQuestionContent>? Contents { get; set; }
     }
 
     public class MultipleOptionSentenceCompletionQuestionContent
     {
         public int Id { get; set; }
+
+        [JsonRequired]
         public string? Content { get; set; }
 
+        [JsonRequired]
         public IList<MultipleOptionSentenceCompletionQuestionAnswer>? Answers { get; set; }
     }
 
@@ -27,8 +29,10 @@ namespace Fsel.Course.Domain.Entities.QuestionTypeConfigs.Questions
     {
         public int Id { get; set; }
 
+        [JsonRequired]
         public string? Word { get; set; }
 
+        [JsonRequired]
         public bool? IsCorrect { get; set; }
     }
 }
