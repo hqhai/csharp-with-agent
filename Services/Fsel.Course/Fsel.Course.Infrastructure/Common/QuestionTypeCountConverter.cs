@@ -8,29 +8,29 @@ namespace Fsel.Course.Infrastructure.Common
 
     public class QuestionTypeCountConverter
     {
-        public int? GetTotalCorrectByQuestionType(object config, EnumQuestionType type)
+        public int GetTotalCorrectByQuestionType(object config, EnumQuestionType type)
         {
             switch (type)
             {
                 case EnumQuestionType.Multichoice:
                 case EnumQuestionType.Dropdown:
-                    return GetTotalCorrectTypeMultichoiceQuestion(config);
+                    return GetTotalCorrectTypeDefaultQuestion();
 
                 case EnumQuestionType.Checklist:
                     return GetTotalCorrectTypeCheckListQuestion(config);
 
                 case EnumQuestionType.Listing:
-                    return GetTotalCorrectTypeListingQuestion(config);
+                    return GetTotalCorrectTypeDefaultQuestion();
 
                 case EnumQuestionType.MatchingType1:
                 case EnumQuestionType.MatchingType2:
                     return GetTotalCorrectTypeMaschingQuestion(config);
 
                 case EnumQuestionType.ShortAnswerWordBase:
-                    return GetTotalCorrectTypeShortBaseQuestion(config);
+                    return GetTotalCorrectTypeDefaultQuestion();
 
                 case EnumQuestionType.ShortAnswerWordCount:
-                    return GetTotalCorrectTypeShortCountQuestion(config);
+                    return GetTotalCorrectTypeDefaultQuestion();
 
                 case EnumQuestionType.GapFillScoreByQuestion:
                 case EnumQuestionType.GapFillWordBankScoreByQuestion:
@@ -48,14 +48,14 @@ namespace Fsel.Course.Infrastructure.Common
                     return GetTotalCorrectTypeMultipleOptionQuestion(config);
 
                 case EnumQuestionType.ExercisePreparation:
-                    return GetTotalCorrectTypeExercisePreparationQuestion(config);
+                    return default;
 
                 default:
                     throw new ArgumentException("Invalid question type");
             }
         }
 
-        private static int? GetTotalCorrectTypeMultipleOptionQuestion(object config)
+        private static int GetTotalCorrectTypeMultipleOptionQuestion(object config)
         {
             var data = config.Deserialize<MultipleOptionSentenceCompletionQuestion>();
             int number = 0;
@@ -73,30 +73,10 @@ namespace Fsel.Course.Infrastructure.Common
                 }
                 return number;
             }
-            return null;
+            return default;
         }
 
-        private static int? GetTotalCorrectTypeExercisePreparationQuestion(object config)
-        {
-            var data = config.Deserialize<ExercisePreparationQuestion>();
-            if (data != null)
-            {
-                return 1;
-            }
-            return null;
-        }
-
-        private static int? GetTotalCorrectTypeShortBaseQuestion(object config)
-        {
-            var data = config.Deserialize<ShortAnswerQuestionWordBaseQuestion>();
-            if (data != null)
-            {
-                return 1;
-            }
-            return null;
-        }
-
-        private static int? GetTotalCorrectTypeCheckListQuestion(object config)
+        private static int GetTotalCorrectTypeCheckListQuestion(object config)
         {
             var data = config.Deserialize<MutipleChoiceQuestion>();
             int number = 0;
@@ -111,40 +91,15 @@ namespace Fsel.Course.Infrastructure.Common
                 }
                 return number;
             }
-            return null;
+            return default;
         }
 
-        private static int? GetTotalCorrectTypeListingQuestion(object config)
+        private static int GetTotalCorrectTypeDefaultQuestion()
         {
-            var data = config.Deserialize<ListingQuestion>();
-            if (data != null)
-            {
-                return 1;
-            }
-            return null;
+            return 1;
         }
 
-        private static int? GetTotalCorrectTypeMultichoiceQuestion(object config)
-        {
-            var data = config.Deserialize<MutipleChoiceQuestion>();
-            if (data != null)
-            {
-                return 1;
-            }
-            return null;
-        }
-
-        private static int? GetTotalCorrectTypeShortCountQuestion(object config)
-        {
-            var data = config.Deserialize<ShortAnswerQuestionWordCountBaseQuestion>();
-            if (data != null)
-            {
-                return 1;
-            }
-            return null;
-        }
-
-        private static int? GetTotalCorrectTypeMaschingQuestion(object config)
+        private static int GetTotalCorrectTypeMaschingQuestion(object config)
         {
             var data = config.Deserialize<MatchingTypeQuestion>();
             int number = 0;
@@ -156,10 +111,10 @@ namespace Fsel.Course.Infrastructure.Common
                 }
                 return number;
             }
-            return null;
+            return default;
         }
 
-        private static int? GetTotalCorrectTypeGapFillQuestion(object config)
+        private static int GetTotalCorrectTypeGapFillQuestion(object config)
         {
             var data = config.Deserialize<GapFillQuestion>();
             int number = 0;
@@ -174,10 +129,10 @@ namespace Fsel.Course.Infrastructure.Common
                 }
                 return number;
             }
-            return null;
+            return default;
         }
 
-        private static int? GetTotalCorrectTypeDragDropOrderQuestion(object config)
+        private static int GetTotalCorrectTypeDragDropOrderQuestion(object config)
         {
             var data = config.Deserialize<DragAndDropSentenceOrderQuestion>();
             int number = 0;
@@ -189,10 +144,10 @@ namespace Fsel.Course.Infrastructure.Common
                 }
                 return number;
             }
-            return null;
+            return default;
         }
 
-        private static int? GetTotalCorrectTypeDragDropPictureQuestion(object config)
+        private static int GetTotalCorrectTypeDragDropPictureQuestion(object config)
         {
             var data = config.Deserialize<DragAndDropPictureQuestion>();
             int number = 0;
@@ -207,7 +162,7 @@ namespace Fsel.Course.Infrastructure.Common
                 }
                 return number;
             }
-            return null;
+            return default;
         }
     }
 }
