@@ -36,5 +36,10 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         /// List Lesson does not exist
         /// </summary>
         ListLessonNotExist,
+
+        /// <summary>
+        /// PerCent Divide by 0
+        /// </summary>
+        PercentDivideByZero,
     }
 }
