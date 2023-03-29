@@ -36,6 +36,7 @@ namespace Fsel.Course.Application.Commands.UnitCmd
         public async Task<MethodResult<UnitModel>> Handle(UpdateUnitCommand request, CancellationToken cancellationToken)
         {
             MethodResult<UnitModel> methodResult = new MethodResult<UnitModel>();
+            ArgumentNullException.ThrowIfNull(request);
 
             #region Validation
 

@@ -76,9 +76,7 @@ namespace Fsel.Course.Application.Queries.VideoQuery
             //Keyword
             if (!string.IsNullOrEmpty(request.Keyword))
             {
-                videoQuery = videoQuery.Where(m => m.Id.ToString() == request.Keyword
-                                        || (m.Name ?? string.Empty).Contains(request.Keyword)
-                                        );
+                videoQuery = videoQuery.Where(m => m.Id.ToString() == request.Keyword || (m.Name ?? string.Empty).Contains(request.Keyword));
             }
 
             int totalItem = await videoQuery.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);

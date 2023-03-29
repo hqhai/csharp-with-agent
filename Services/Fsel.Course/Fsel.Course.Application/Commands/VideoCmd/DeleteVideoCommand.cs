@@ -12,61 +12,62 @@ namespace Fsel.Course.Application.Commands.VideoCmd
     public class DeleteVideoCommand : IRequest<MethodResult<bool>>
     {
         public Guid Id { get; set; }
+    }
 
-        public class DeleteVideoCommandHandler : IRequestHandler<DeleteVideoCommand, MethodResult<bool>>
+    public class DeleteVideoCommandHandler : IRequestHandler<DeleteVideoCommand, MethodResult<bool>>
+    {
+        private readonly IVideoRepository _videoRepository;
+
+        public DeleteVideoCommandHandler(IVideoRepository videoRepository)
         {
-            private readonly IVideoRepository _videoRepository;
+            _videoRepository = videoRepository;
+        }
 
-            public DeleteVideoCommandHandler(IVideoRepository videoRepository)
+        public async Task<MethodResult<bool>> Handle(DeleteVideoCommand request, CancellationToken cancellationToken)
+        {
+            MethodResult<bool> methodResult = new MethodResult<bool>();
+            ArgumentNullException.ThrowIfNull(request);
+
+            #region Validation
+
+            var video = await _videoRepository.Queryable
+                                           .Include(i => i.VideoTimeCodes.Where(x => !x.IsDeleted))
+                                           .ThenInclude(x => x.TimeCodeExercises.Where(x => !x.IsDeleted && x.Exercise != null))
+                                           .ThenInclude(x => x.Exercise)
+                                           .ThenInclude(x => x.ExerciseQuestions.Where(x => !x.IsDeleted))
+                                           .ThenInclude(x => x.Question)
+                                           .FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken: cancellationToken);
+            if (video == null)
             {
-                _videoRepository = videoRepository;
-            }
-
-            public async Task<MethodResult<bool>> Handle(DeleteVideoCommand request, CancellationToken cancellationToken)
-            {
-                MethodResult<bool> methodResult = new MethodResult<bool>();
-
-                #region Validation
-
-                var video = await _videoRepository.Queryable
-                                               .Include(i => i.VideoTimeCodes.Where(x => !x.IsDeleted))
-                                               .ThenInclude(x => x.TimeCodeExercises.Where(x => !x.IsDeleted && x.Exercise != null))
-                                               .ThenInclude(x => x.Exercise)
-                                               .ThenInclude(x => x.ExerciseQuestions.Where(x => !x.IsDeleted))
-                                               .ThenInclude(x => x.Question)
-                                               .FirstOrDefaultAsync(x => x.Id == request.Id);
-                if (video == null)
-                {
-                    methodResult.AddErrorBadRequest(
-                        nameof(EnumVideoErrorCode.VideoNotExist),
-                        nameof(request.Id), request.Id);
-                    return methodResult;
-                }
-
-                var isVideoUsed = await _videoRepository.IsVideoUsed(request.Id);
-
-                if (isVideoUsed)
-                {
-                    methodResult.AddErrorBadRequest(
-                        nameof(EnumVideoErrorCode.VideoUsed),
-                        nameof(request.Id), request.Id);
-                    return methodResult;
-                }
-
-                #endregion Validation
-
-                await _videoRepository.ExecuteTransactionAsync(async () =>
-                {
-                    var result = await _videoRepository.DeleteAsync(video);
-                    await _videoRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
-
-                    methodResult.StatusCode = StatusCodes.Status200OK;
-                    methodResult.Result = result;
-                    return methodResult;
-                });
-
+                methodResult.AddErrorBadRequest(
+                    nameof(EnumVideoErrorCode.VideoNotExist),
+                    nameof(request.Id), request.Id);
                 return methodResult;
             }
+
+            var isVideoUsed = await _videoRepository.IsVideoUsed(request.Id);
+
+            if (isVideoUsed)
+            {
+                methodResult.AddErrorBadRequest(
+                    nameof(EnumVideoErrorCode.VideoUsed),
+                    nameof(request.Id), request.Id);
+                return methodResult;
+            }
+
+            #endregion Validation
+
+            await _videoRepository.ExecuteTransactionAsync(async () =>
+            {
+                var result = await _videoRepository.DeleteAsync(video);
+                await _videoRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+
+                methodResult.StatusCode = StatusCodes.Status200OK;
+                methodResult.Result = result;
+                return methodResult;
+            });
+
+            return methodResult;
         }
     }
 }

@@ -1,6 +1,7 @@
+// Copyright (c) Atlantic. All rights reserved.
+
 using AutoMapper;
 using Fsel.Common.ActionResults;
-using Fsel.Common.Helpers;
 using Fsel.Course.Domain.Entities;
 using Fsel.Course.Domain.Enums.ErrorCodes;
 using Fsel.Course.Domain.IRepositories;
@@ -18,8 +19,6 @@ namespace Fsel.Course.Application.Commands.LessonCmd
     public class UpdateLessonCommandHandler : IRequestHandler<UpdateLessonCommand, MethodResult<LessonModel>>
     {
         private readonly ILessonRepository _lessonRepository;
-        private readonly ILessonHomeWorkRepository _lessonHomeWorkRepository;
-        private readonly ILessonExtraPracticeRepository _lessonExtraPracticeRepository;
         private readonly IMapper _mapper;
         private readonly IHomeWorkRepository _homeWorkRepository;
         private readonly IVideoRepository _videoRepository;
@@ -27,16 +26,12 @@ namespace Fsel.Course.Application.Commands.LessonCmd
         private readonly IClassForumRepository _classForumRepository;
 
         public UpdateLessonCommandHandler(ILessonRepository lessonRepository
-            , ILessonHomeWorkRepository lessonHomeWorkRepository
-            , ILessonExtraPracticeRepository lessonExtraPracticeRepository
             , IMapper mapper, IHomeWorkRepository homeWorkRepository
             , IVideoRepository videoRepository
             , IExtraPracticeRepository extraPracticeRepository
             , IClassForumRepository classForumRepository)
         {
             _lessonRepository = lessonRepository;
-            _lessonHomeWorkRepository = lessonHomeWorkRepository;
-            _lessonExtraPracticeRepository = lessonExtraPracticeRepository;
             _mapper = mapper;
             _homeWorkRepository = homeWorkRepository;
             _videoRepository = videoRepository;
@@ -47,6 +42,7 @@ namespace Fsel.Course.Application.Commands.LessonCmd
         public async Task<MethodResult<LessonModel>> Handle(UpdateLessonCommand request, CancellationToken cancellationToken)
         {
             MethodResult<LessonModel> methodResult = new MethodResult<LessonModel>();
+            ArgumentNullException.ThrowIfNull(request);
 
             #region Validation
 

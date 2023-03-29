@@ -3,18 +3,23 @@
 namespace Fsel.Course.Domain.Entities.QuestionTypeConfigs.Questions
 {
     using System.Collections.Generic;
+    using System.Text.Json.Serialization;
 
     public class DragAndDropPictureQuestion
     {
+        [JsonRequired]
         public string? Name { get; set; }
 
+        [JsonRequired]
         public IList<DragAndDropPictureQuestionContent>? Contents { get; set; }
     }
 
     public class DragAndDropPictureQuestionContent
     {
+        [JsonRequired]
         public IList<DragAndDropPictureQuestionImages>? Images { get; set; }
 
+        [JsonRequired]
         public IList<DragAndDropPictureQuestionWord>? Words { get; set; }
     }
 
@@ -22,12 +27,15 @@ namespace Fsel.Course.Domain.Entities.QuestionTypeConfigs.Questions
     {
         public int Id { get; set; }
 
+        [JsonRequired]
         public string? Path { get; set; }
     }
 
     public class DragAndDropPictureQuestionWord
     {
         public int Id { get; set; }
+
+        [JsonRequired]
         public string? Content { get; set; }
     }
 }

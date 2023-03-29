@@ -1,4 +1,3 @@
-using System;
 using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -70,7 +69,7 @@ namespace Fsel.Common.Helpers
             var options = new JsonSerializerOptions { Converters = { new JsonStringEnumConverter() } };
             if (isCamelCase)
             {
-                options.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+                options.PropertyNameCaseInsensitive = true;
             }
             string jsonString = JsonSerializer.Serialize(data, options);
             return jsonString;
@@ -88,10 +87,23 @@ namespace Fsel.Common.Helpers
                 var options = new JsonSerializerOptions { Converters = { new JsonStringEnumConverter() } };
                 if (isCamelCase)
                 {
-                    options.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+                    options.PropertyNameCaseInsensitive = true;
                 }
                 T? obj = JsonSerializer.Deserialize<T>(data, options);
                 return obj;
+            }
+            catch
+            {
+                return default;
+            }
+        }
+
+        public static T? Deserialize<T>(this object? objects)
+        {
+            try
+            {
+                var data = objects.Serialize();
+                return Deserialize<T>(data);
             }
             catch
             {

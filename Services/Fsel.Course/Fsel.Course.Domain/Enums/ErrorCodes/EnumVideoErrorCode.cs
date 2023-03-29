@@ -16,5 +16,15 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         /// Video not is correct
         /// </summary>
         VideoNotCorrect,
+
+        /// <summary>
+        /// TeacherId does not exist
+        /// </summary>
+        TeacherIdDoesNotExitst,
+
+        /// <summary>
+        /// Config is in the wrong format
+        /// </summary>
+        ConfigIsInTheWrongFormat
     }
 }

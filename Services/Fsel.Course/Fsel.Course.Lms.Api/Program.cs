@@ -2,9 +2,11 @@ using Fsel.Common.ValueSettings;
 using Fsel.Core.Extensions;
 using Fsel.Course.Domain.IRepositories;
 using Fsel.Course.Infrastructure;
+using Fsel.Course.Infrastructure.Common;
 using Fsel.Course.Infrastructure.Repositories;
 using Fsel.Course.Lms.Application.Services.TrainingServices;
 using Fsel.Course.Lms.Application.Services.UserServices;
+using Microsoft.Extensions.DependencyInjection;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -41,6 +43,10 @@ builder.Services.AddScoped<IMockTestRepository, MockTestRepository>();
 builder.Services.AddScoped<IVideoResultRepository, VideoResultRepository>();
 builder.Services.AddScoped<ILessonResultRepository, LessonResultRepository>();
 builder.Services.AddScoped<IVideoTimeCodeAnswerRepository, VideoTimeCodeAnswerRepository>();
+
+builder.Services.AddScoped<QuestionTypeConverter>();
+builder.Services.AddScoped<QuestionTypeCountConverter>();
+builder.Services.AddScoped<QuestionTypeValidation>();
 
 builder.AddRefitClients(typeof(IUserService), appSetting?.Services?.UserApiUrl);
 builder.AddRefitClients(typeof(ITrainingService), appSetting?.Services?.ClassApiUrl);
