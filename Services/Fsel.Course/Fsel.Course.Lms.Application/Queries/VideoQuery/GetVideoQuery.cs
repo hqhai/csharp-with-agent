@@ -50,7 +50,7 @@ namespace Fsel.Course.Lms.Application.Queries.VideoQuery
                                 .Where(x => x.Id == request.VideoId)
                         select i;
 
-            var video = query.FirstOrDefault();
+            var video = await query.FirstOrDefaultAsync(cancellationToken);
 
             if (video == null)
             {

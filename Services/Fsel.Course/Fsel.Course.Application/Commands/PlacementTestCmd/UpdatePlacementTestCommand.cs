@@ -28,6 +28,7 @@ namespace Fsel.Course.Application.Commands.PlacementTestCmd
 
         public async Task<MethodResult<PlacementTestModel>> Handle(UpdatePlacementTestCommand request, CancellationToken cancellationToken)
         {
+            ArgumentNullException.ThrowIfNull(request);
             MethodResult<PlacementTestModel> methodResult = new MethodResult<PlacementTestModel>();
 
             #region Validation

@@ -1,3 +1,5 @@
+// Copyright (c) Atlantic. All rights reserved.
+
 using System.Net;
 using System.Net.Mail;
 using Fsel.Sender.Domain.Models.Entities;

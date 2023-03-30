@@ -8,7 +8,6 @@ using Fsel.Identity.Infrastructure.Configs;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Options;
 
 namespace Fsel.Identity.Infrastructure
 {
