@@ -6,9 +6,11 @@ namespace Fsel.Training.Application.Commands.ClassCmd
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums;
+    using Fsel.Training.Application.Queries.ClassQuery;
     using Fsel.Training.Application.Services.UserServices;
     using Fsel.Training.Application.Services.UserServices.Models;
     using Fsel.Training.Doman.Entities;
+    using Fsel.Training.Doman.Enums.ErrorCodes;
     using Fsel.Training.Doman.IRepositories;
     using Fsel.Training.Doman.Models.CommandModels.Classes;
     using Fsel.Training.Doman.Models.EntityModels;
@@ -40,20 +42,24 @@ namespace Fsel.Training.Application.Commands.ClassCmd
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<ClassModel> methodResult = new MethodResult<ClassModel>();
 
-            Class? classnew = await _classRepository.Queryable.FirstOrDefaultAsync(x => x.Code == request.Code, cancellationToken: cancellationToken);
+            var classnew = await _classRepository.Queryable.FirstOrDefaultAsync(x => x.Code == request.Code, cancellationToken);
+            var studentsResult = await _userService.GetStudentByClassIdAsync(classnew?.Id.ToString() ?? string.Empty);
+            var students = studentsResult.Content?.Result;
+
             if (classnew == null)
             {
-                classnew = await CreateClassAsync(request, classnew);
+                classnew = await CreateClassAsync(request.Code, classnew);
             }
-            var students = await _userService.GetStudentByClassIdAsync(classnew.Id.ToString());
-            if (students != null && students.IsSuccessStatusCode)
+            else if(studentsResult != null && studentsResult.IsSuccessStatusCode && students != null)
             {
-                var liststudent = students.Content?.Result;
-                if (liststudent != null && liststudent.Count > 12)
+                if (students.Count == 11)
                 {
                     classnew = await UpdateClassAsync(classnew);
-                    classnew = new();
-                    classnew = await CreateClassAsync(request, classnew);
+                }
+                else if (students.Count > 11)
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumClassErrorCode.ClassHasTooManyStudents));
+                    return methodResult;
                 }
             }
             var student = await _userService.UpdateStudentByClassIdAsync(new UpdateStudentByClassIdModel
@@ -66,14 +72,14 @@ namespace Fsel.Training.Application.Commands.ClassCmd
             return methodResult;
         }
 
-        private async Task<Class> CreateClassAsync(CreateClassCommand request, Class? classnew)
+        private async Task<Class> CreateClassAsync(string? code, Class? entityClass)
         {
-            classnew = new Class();
-            classnew.Code = request?.Code;
-            classnew.Name = request?.Code;
-            _classRepository.Add(classnew);
+            entityClass = new Class();
+            entityClass.Code = code;
+            entityClass.Name = code;
+            _classRepository.Add(entityClass);
             await _classRepository.UnitOfWork.SaveEntitiesAsync().ConfigureAwait(false);
-            return classnew;
+            return entityClass;
         }
 
         private async Task<Class> UpdateClassAsync(Class classnew)

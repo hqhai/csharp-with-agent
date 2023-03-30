@@ -37,11 +37,10 @@ namespace Fsel.Course.Infrastructure
         public DbSet<ExerciseQuestion> ExerciseQuestions { get; set; }
         public DbSet<Question> Questions { get; set; }
         public DbSet<CourseTeacher> CourseTeachers { get; set; }
-        public DbSet<UnitResult> CourseUnitMockTestResults { get; set; }
-        public DbSet<LessonResult> UnitLessonResults { get; set; }
         public DbSet<CourseClassStudent> CourseClassStudents { get; set; }
         public DbSet<VideoResult> VideoResults { get; set; }
         public DbSet<LessonResult> LessonResults { get; set; }
+        public DbSet<UnitResult> UnitResults { get; set; }
         public DbSet<CourseResult> CourseResults { get; set; }
         public DbSet<VideoTimeCodeAnswer> VideoTimeCodeAnswers { get; set; }
 

@@ -4,6 +4,7 @@ using Fsel.Course.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fsel.Course.Infrastructure.Migrations
 {
     [DbContext(typeof(CourseDbContext))]
-    partial class CourseDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230330063513_CreateCourseResult")]
+    partial class CreateCourseResult
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1069,7 +1072,7 @@ namespace Fsel.Course.Infrastructure.Migrations
 
                     b.HasIndex("UnitLessonId");
 
-                    b.ToTable("LessonResults");
+                    b.ToTable("LessonResult");
                 });
 
             modelBuilder.Entity("Fsel.Course.Domain.Entities.LessonVideo", b =>
@@ -1635,7 +1638,7 @@ namespace Fsel.Course.Infrastructure.Migrations
 
                     b.HasIndex("UnitId");
 
-                    b.ToTable("UnitResults");
+                    b.ToTable("CourseUnitMockTestResults");
                 });
 
             modelBuilder.Entity("Fsel.Course.Domain.Entities.UnitSkillMockTest", b =>
@@ -2245,7 +2248,7 @@ namespace Fsel.Course.Infrastructure.Migrations
                         .IsRequired();
 
                     b.HasOne("Fsel.Course.Domain.Entities.CourseUnitMockTest", null)
-                        .WithMany("UnitResults")
+                        .WithMany("CourseUnitMockTestResults")
                         .HasForeignKey("CourseUnitMockTestId");
 
                     b.HasOne("Fsel.Course.Domain.Entities.Unit", "Unit")
@@ -2360,7 +2363,7 @@ namespace Fsel.Course.Infrastructure.Migrations
 
             modelBuilder.Entity("Fsel.Course.Domain.Entities.CourseUnitMockTest", b =>
                 {
-                    b.Navigation("UnitResults");
+                    b.Navigation("CourseUnitMockTestResults");
                 });
 
             modelBuilder.Entity("Fsel.Course.Domain.Entities.Exercise", b =>

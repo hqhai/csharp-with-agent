@@ -47,32 +47,11 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
             var classContents = await _trainingService.GetClassByStatusNewAsync();
 
             var classnews = classContents?.Content?.Result;
+            var courseClassStudents = await _courseClassStudentRepository.Queryable.Where(e => e.CourseId == request.CourseId)
+                                                        .Where(e => classnews != null && classnews.Select(x => x.Id).Contains(e.ClassId))
+                                                        .ToListAsync(cancellationToken: cancellationToken);
 
-            if (classnews != null && classnews.Count > 0)
-            {
-                var courseClassStudents = await _courseClassStudentRepository.Queryable.Where(e => e.CourseId == request.CourseId)
-                                                            .Where(e => classnews.Select(x => x.Id).Contains(e.ClassId))
-                                                            .ToListAsync(cancellationToken: cancellationToken);
-                if (courseClassStudents != null && courseClassStudents.Count > 0)
-                {
-                    var classes = classnews.Where(e => courseClassStudents.Select(x => x.ClassId).Contains(e.Id)).ToList();
-                    if (classes == null || classes.FirstOrDefault() == null)
-                    {
-                        methodResult.AddErrorBadRequest(
-                      nameof(EnumCourseErrorCode.ClassesNotExitst),
-                      nameof(request.CourseId), request.CourseId);
-                        return methodResult;
-                    }
-                    else
-                    {
-                        var classs = classes.FirstOrDefault();
-                        methodResult.Result = classs?.Code;
-                        methodResult.StatusCode = StatusCodes.Status200OK;
-                        return methodResult;
-                    }
-                }
-            }
-            else
+            if (classnews == null || classnews.Count == 0 || courseClassStudents == null || courseClassStudents.Count == 0)
             {
                 var code = await _trainingService.GetNewClassCodeAsync(course.CourseLevel);
                 var classcode = code?.Content?.Result;
@@ -86,6 +65,25 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
                 methodResult.Result = classcode;
                 methodResult.StatusCode = StatusCodes.Status200OK;
             }
+            else
+            {
+                var classes = classnews.Where(e => courseClassStudents.Select(x => x.ClassId).Contains(e.Id)).ToList();
+                if (classes == null || classes.FirstOrDefault() == null)
+                {
+                    methodResult.AddErrorBadRequest(
+                  nameof(EnumCourseErrorCode.ClassesNotExitst),
+                  nameof(request.CourseId), request.CourseId);
+                    return methodResult;
+                }
+                else
+                {
+                    var classs = classes.FirstOrDefault();
+                    methodResult.Result = classs?.Code;
+                    methodResult.StatusCode = StatusCodes.Status200OK;
+                    return methodResult;
+                }
+            }
+
             return methodResult;
         }
     }
