@@ -38,6 +38,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
                               .Include(course => course.CourseTeachers)
                               .Where(x => request.CourseLevel == null || x.CourseLevel == request.CourseLevel)
                               .Where(x => x.Status == EnumCourseStatus.Active)
+                              .AsNoTracking()
                               .Select(course => new CourseModel
                               {
                                   Id = course.Id,

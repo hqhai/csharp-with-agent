@@ -46,12 +46,12 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
             }
             var classContents = await _trainingService.GetClassByStatusNewAsync();
 
-            var classnews = classContents?.Content?.Result;
+            var classNews = classContents?.Content?.Result;
             var courseClassStudents = await _courseClassStudentRepository.Queryable.Where(e => e.CourseId == request.CourseId)
-                                                        .Where(e => classnews != null && classnews.Select(x => x.Id).Contains(e.ClassId))
+                                                        .Where(e => classNews != null && classNews.Select(x => x.Id).Contains(e.ClassId))
                                                         .ToListAsync(cancellationToken: cancellationToken);
 
-            if (classnews == null || classnews.Count == 0 || courseClassStudents == null || courseClassStudents.Count == 0)
+            if (classNews == null || classNews.Count == 0 || courseClassStudents == null || courseClassStudents.Count == 0)
             {
                 var code = await _trainingService.GetNewClassCodeAsync(course.CourseLevel);
                 var classcode = code?.Content?.Result;
@@ -67,7 +67,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
             }
             else
             {
-                var classes = classnews.Where(e => courseClassStudents.Select(x => x.ClassId).Contains(e.Id)).ToList();
+                var classes = classNews.Where(e => courseClassStudents.Select(x => x.ClassId).Contains(e.Id)).ToList();
                 if (classes == null || classes.FirstOrDefault() == null)
                 {
                     methodResult.AddErrorBadRequest(

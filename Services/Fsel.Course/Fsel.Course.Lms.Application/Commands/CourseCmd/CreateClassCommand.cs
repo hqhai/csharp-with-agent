@@ -70,6 +70,7 @@ namespace Fsel.Course.Lms.Application.Commands.CourseCmd
                                                        .ThenInclude(x => x.UnitLessons.Where(y => y.IsDeleted == false))
                                                        .ThenInclude(x => x.Lesson)
                                                        .ThenInclude(x => x.LessonVideos)
+                                                       .AsNoTracking()
                                                        .Where(x => x.Id == request.CourseId).FirstOrDefaultAsync(cancellationToken: cancellationToken);
             if (course == null)
             {
@@ -103,26 +104,6 @@ namespace Fsel.Course.Lms.Application.Commands.CourseCmd
                             StudentId = _authContext.CurrentUserId,
                             UnitId = x.Id,
                         }).ToList();
-
-            //var lessonResults = from u in units
-            //                    join ul in units.SelectMany(x => x.UnitLessons) on u.Id equals ul.UnitId
-            //                    join l in units.SelectMany(x => x.UnitLessons).Select(x => x.Lesson) on ul.LessonId equals l.Id
-            //                    join lr in units.SelectMany(x => x.UnitLessons).Select(x => x.Lesson).SelectMany(x => x.LessonResults) on l.Id equals lr.LessonId
-            //                    join lv in units.SelectMany(x => x.UnitLessons).Select(x => x.Lesson).SelectMany(x => x.LessonVideos) on l.Id equals lv.LessonId
-            //                    join v in units.SelectMany(x => x.UnitLessons).Select(x => x.Lesson).SelectMany(x => x.LessonVideos).Select(x => x.Video) on lv.VideoId equals v.Id
-
-            //                    select new LessonResult
-            //                    {
-            //                        StudentId = _authContext.CurrentUserId,
-            //                        UnitId = u.Id,
-            //                        LessonId = l.Id,
-            //                        VideoResult = new VideoResult
-            //                        {
-            //                            LessonResultId = lr.Id,
-            //                            VideoId = v.Id,
-            //                            StudentId = _authContext.CurrentUserId
-            //                        }
-            //                    };
 
             var lessonResults = units
                                 .GroupBy(x => x?.Id)
