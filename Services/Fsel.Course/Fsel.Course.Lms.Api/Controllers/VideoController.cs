@@ -41,7 +41,7 @@ namespace Fsel.Course.Lms.Api.Controllers
         /// <summary>
         /// Create video time code answer
         /// </summary>
-        [HttpGet("create-video-time-code-answer")]
+        [HttpPost("create-video-time-code-answer")]
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> CreateVideoTimeCodeAnswer([FromBody] CreateVideoTimeCodeAnswerCommand query)

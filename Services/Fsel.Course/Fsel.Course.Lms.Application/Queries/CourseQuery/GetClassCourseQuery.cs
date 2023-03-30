@@ -47,6 +47,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
             var classContents = await _trainingService.GetClassByStatusNewAsync();
 
             var classnews = classContents?.Content?.Result;
+
             if (classnews != null && classnews.Count > 0)
             {
                 var courseClassStudents = await _courseClassStudentRepository.Queryable.Where(e => e.CourseId == request.CourseId)
@@ -70,25 +71,21 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
                         return methodResult;
                     }
                 }
-                else
+            }
+            else
+            {
+                var code = await _trainingService.GetNewClassCodeAsync(course.CourseLevel);
+                var classcode = code?.Content?.Result;
+                if (classcode == null)
                 {
-                    var code = await _trainingService.GetNewClassCodeAsync(course.CourseLevel);
-                    var classcode = code?.Content?.Result;
-                    if (classcode == null)
-                    {
-                        methodResult.AddErrorBadRequest(
-                       nameof(EnumCourseErrorCode.CourseNotInClass),
-                       nameof(request.CourseId), request.CourseId);
-                        return methodResult;
-                    }
-                    methodResult.Result = classcode;
-                    methodResult.StatusCode = StatusCodes.Status200OK;
+                    methodResult.AddErrorBadRequest(
+                   nameof(EnumCourseErrorCode.CourseNotInClass),
+                   nameof(request.CourseId), request.CourseId);
                     return methodResult;
                 }
+                methodResult.Result = classcode;
+                methodResult.StatusCode = StatusCodes.Status200OK;
             }
-            methodResult.AddErrorBadRequest(
-                     nameof(EnumCourseErrorCode.ClassesNewNotExitst));
-            methodResult.StatusCode = StatusCodes.Status400BadRequest;
             return methodResult;
         }
     }

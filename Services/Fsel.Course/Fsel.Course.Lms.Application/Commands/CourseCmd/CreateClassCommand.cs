@@ -51,11 +51,11 @@ namespace Fsel.Course.Lms.Application.Commands.CourseCmd
             var classs = await _trainingService.CreateClassByCheckId(new Services.TrainingServices.Models.CreateClassStudentModel
             {
                 Code = request.Code,
-                UserId = request.UserId
+                UserId = _authContext.CurrentUserId
             });
             var classId = classs?.Content?.Result?.Id;
 
-            var student = await _userService.GetStudentByUserIdAsync(request.UserId.ToString());
+            var student = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId.ToString());
             if (!student.IsSuccessStatusCode)
             {
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
@@ -80,8 +80,8 @@ namespace Fsel.Course.Lms.Application.Commands.CourseCmd
                 course.CourseClassStudents.Add(new CourseClassStudent
                 {
                     CourseId = request.CourseId,
-                    ClassId = classId ?? Guid.Empty,
-                    StudentId = request.UserId
+                    ClassId = classId ?? default,
+                    StudentId = studentId ?? default
                 });
             }
 

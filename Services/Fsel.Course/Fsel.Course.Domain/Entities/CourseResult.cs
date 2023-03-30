@@ -2,14 +2,14 @@
 
 namespace Fsel.Course.Domain.Entities
 {
-    using DataAnnotationsExtensions;
+    using System.ComponentModel.DataAnnotations;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Entities;
     using Fsel.Course.Domain.Enums;
 
     public class CourseResult : Entity
     {
-        [Min(0, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
+        [MinLength(0, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
         public int Result { get; set; }
 
         public EnumCourseStatus Status { get; set; }
