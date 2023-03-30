@@ -23,8 +23,6 @@ namespace Fsel.Course.Domain.Entities
         [MaxLength(250, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? DisplayName { get; set; }
 
-        public bool IsActive { get; set; }
-
         /// <summary>
         /// Trình dộ Level
         /// </summary>

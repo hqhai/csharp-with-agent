@@ -53,6 +53,7 @@ namespace Fsel.Course.Application.Commands.VideoCmd
                 return methodResult;
             }
 
+            #region Tạm thời không validate isTeacher
             //var isTeacher = await _userService.GetTeacherByIdAsync(request.TeacherId);
             //var isCheck = isTeacher?.Content?.Result;
             //if (isCheck == null)
@@ -60,6 +61,18 @@ namespace Fsel.Course.Application.Commands.VideoCmd
             //    methodResult.AddErrorBadRequest(nameof(EnumVideoErrorCode.TeacherIdDoesNotExitst), nameof(request.TeacherId));
             //    return methodResult;
             //}
+            #endregion
+
+            #region Tạm thời không validate VideoUsed
+            //var isVideoUsed = await _videoRepository.IsVideoUsed(request.Id);
+            //if (isVideoUsed)
+            //{
+            //    methodResult.AddErrorBadRequest(
+            //        nameof(EnumVideoErrorCode.VideoUsed),
+            //        nameof(request.Id), request.Id);
+            //    return methodResult;
+            //}
+            #endregion
 
             // Lưu dữ liệu Video
             var video = await _videoRepository.GetIncludeByIdAsync(request.Id);
@@ -70,16 +83,6 @@ namespace Fsel.Course.Application.Commands.VideoCmd
                 return methodResult;
             }
             video = _mapper.Map(request, video);
-
-            var isVideoUsed = await _videoRepository.IsVideoUsed(request.Id);
-
-            if (isVideoUsed)
-            {
-                methodResult.AddErrorBadRequest(
-                    nameof(EnumVideoErrorCode.VideoUsed),
-                    nameof(request.Id), request.Id);
-                return methodResult;
-            }
 
             request.VideoTimeCodes.ForEach(x =>
             {

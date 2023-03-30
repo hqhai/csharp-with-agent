@@ -7,6 +7,24 @@ namespace Fsel.Common.Helpers
 
     public static class EnumHelper
     {
+        private static IList<KeyValuePair<EnumCourseType, EnumCourseLevel>> _courseTypeLevel = new List<KeyValuePair<EnumCourseType, EnumCourseLevel>>
+        {
+            new KeyValuePair<EnumCourseType, EnumCourseLevel>(EnumCourseType.Academy, EnumCourseLevel.A2),
+            new KeyValuePair<EnumCourseType, EnumCourseLevel>(EnumCourseType.Academy, EnumCourseLevel.B1),
+            new KeyValuePair<EnumCourseType, EnumCourseLevel>(EnumCourseType.Academy, EnumCourseLevel.B1Plus),
+            new KeyValuePair<EnumCourseType, EnumCourseLevel>(EnumCourseType.Academy, EnumCourseLevel.B2),
+            new KeyValuePair<EnumCourseType, EnumCourseLevel>(EnumCourseType.Academy, EnumCourseLevel.C1),
+            new KeyValuePair<EnumCourseType, EnumCourseLevel>(EnumCourseType.Ielts, EnumCourseLevel.RFE),
+            new KeyValuePair<EnumCourseType, EnumCourseLevel>(EnumCourseType.Ielts, EnumCourseLevel.MS1),
+            new KeyValuePair<EnumCourseType, EnumCourseLevel>(EnumCourseType.Ielts, EnumCourseLevel.MS2),
+            new KeyValuePair<EnumCourseType, EnumCourseLevel>(EnumCourseType.Ielts, EnumCourseLevel.MS3),
+        };
+
+        public static EnumCourseType GetEnumCourseType(this EnumCourseLevel courseLevel)
+        {
+            return _courseTypeLevel.FirstOrDefault(x => x.Value == courseLevel).Key;
+        }
+
         public static IList<EnumCourseLevel> GetEnumCourseLevels(this EnumCourseType? courseType)
         {
             var courseLevels = new List<EnumCourseLevel>();
@@ -15,66 +33,22 @@ namespace Fsel.Common.Helpers
                 return courseLevels;
             }
 
-            switch (courseType)
-            {
-                case EnumCourseType.Academy:
-                    courseLevels.Add(EnumCourseLevel.A2);
-                    courseLevels.Add(EnumCourseLevel.B1);
-                    courseLevels.Add(EnumCourseLevel.B1Plus);
-                    courseLevels.Add(EnumCourseLevel.B2);
-                    courseLevels.Add(EnumCourseLevel.C1);
-                    break;
-
-                case EnumCourseType.Ielts:
-                    courseLevels.Add(EnumCourseLevel.RFE);
-                    courseLevels.Add(EnumCourseLevel.MS1);
-                    courseLevels.Add(EnumCourseLevel.MS2);
-                    courseLevels.Add(EnumCourseLevel.MS3);
-                    break;
-            }
+            courseLevels = _courseTypeLevel.Where(x => x.Key == courseType).Select(x => x.Value).ToList();
 
             return courseLevels;
         }
 
-        public static string? GetClassCodeByEnumCourseLevel(this EnumCourseLevel? enumCourseLevel)
+        public static string? GetCodeByEnumCourseLevel(this EnumCourseLevel? enumCourseLevel)
         {
             var classCode = "";
             switch (enumCourseLevel)
             {
-                case EnumCourseLevel.A2:
-                    classCode = "A2";
-                    break;
-
-                case EnumCourseLevel.B1:
-                    classCode = EnumCourseLevel.B1.ToString();
-                    break;
-
                 case EnumCourseLevel.B1Plus:
                     classCode = "B1+";
                     break;
 
-                case EnumCourseLevel.B2:
-                    classCode = EnumCourseLevel.B2.ToString();
-                    break;
-
-                case EnumCourseLevel.C1:
-                    classCode = EnumCourseLevel.C1.ToString();
-                    break;
-
-                case EnumCourseLevel.RFE:
-                    classCode = EnumCourseLevel.RFE.ToString();
-                    break;
-
-                case EnumCourseLevel.MS1:
-                    classCode = EnumCourseLevel.MS1.ToString();
-                    break;
-
-                case EnumCourseLevel.MS2:
-                    classCode = EnumCourseLevel.MS2.ToString();
-                    break;
-
-                case EnumCourseLevel.MS3:
-                    classCode = EnumCourseLevel.MS3.ToString();
+                default:
+                    classCode = enumCourseLevel.ToString();
                     break;
             }
             return classCode;

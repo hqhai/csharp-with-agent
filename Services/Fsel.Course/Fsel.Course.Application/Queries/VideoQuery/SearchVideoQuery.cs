@@ -56,7 +56,7 @@ namespace Fsel.Course.Application.Queries.VideoQuery
                         {
                             Id = video.Id,
                             Name = video.Name,
-                            IsActive = !video.LessonVideos.Any(),
+                            IsActive = video.LessonVideos.Any(),
                             CourseLevel = video.CourseLevel,
                             CreatedDate = video.CreatedDate,
                             CreatedFullName = video.CreatedFullName,

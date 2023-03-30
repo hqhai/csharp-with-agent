@@ -28,11 +28,6 @@ namespace Fsel.Course.Domain.Entities
         public string? DisplayName { get; set; }
 
         /// <summary>
-        /// Trạng thái kích hoạt
-        /// </summary>
-        public bool IsActive { get; set; }
-
-        /// <summary>
         /// Giáo Viên ID
         /// </summary>
         public Guid? TeacherId { get; set; }

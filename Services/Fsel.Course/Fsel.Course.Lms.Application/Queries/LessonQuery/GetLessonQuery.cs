@@ -32,7 +32,7 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
             MethodResult<LessonModel> methodResult = new MethodResult<LessonModel>();
             ArgumentNullException.ThrowIfNull(request);
             var lesson = await _lessonRepository.Queryable
-                            .Include(x => x.LessonVideos)
+                            .Include(x => x.LessonVideos.Where(y => !y.IsDeleted))
                             .ThenInclude(x => x.Video)
                             .FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
 
@@ -44,10 +44,9 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
                 return methodResult;
             }
 
-            lesson.IsActive = !lesson.UnitLessons.Any();
-
             var lessonModel = _mapper.Map<LessonModel>(lesson);
-            lessonModel.Video =  _mapper.Map<VideoModel>(lesson.LessonVideos.Select(x => x.Video).Where(x => x != null && !x.IsDeleted).FirstOrDefault());
+            lessonModel.Video = _mapper.Map<VideoModel>(lesson.LessonVideos.Select(x => x.Video).Where(x => x != null && !x.IsDeleted).FirstOrDefault());
+            lessonModel.IsActive = lesson.UnitLessons.Any();
 
             methodResult.Result = lessonModel;
             methodResult.StatusCode = StatusCodes.Status200OK;

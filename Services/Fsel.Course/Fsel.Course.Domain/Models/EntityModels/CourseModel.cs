@@ -16,6 +16,8 @@ namespace Fsel.Course.Domain.Models.EntityModels
 
         public EnumCourseLevel CourseLevel { get; set; }
 
+        public EnumCourseType CourseType { get; set; }
+
         public IList<CourseUnitMockTestModel>? CourseUnitMockTests { get; set; }
         public IList<CourseTeacherModel>? CourseTeachers { get; set; }
         public IList<CourseClassStudentModel>? CourseClassStudents { get; set; }
