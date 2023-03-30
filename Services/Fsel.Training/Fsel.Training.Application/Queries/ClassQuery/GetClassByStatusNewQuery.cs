@@ -36,7 +36,7 @@ namespace Fsel.Training.Application.Queries.ClassQuery
 
             List<Class> classes = await _classRepository.Queryable.Where(e => e.Status == EnumClassType.New)
                                                             .ToListAsync(cancellationToken: cancellationToken);
-            if (classes.Count == 0)
+            if (classes == null || classes.Count == 0)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumClassErrorCode.ClasssNotExits));
                 return methodResult;
