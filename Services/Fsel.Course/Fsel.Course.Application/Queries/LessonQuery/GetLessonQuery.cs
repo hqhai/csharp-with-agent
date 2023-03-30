@@ -40,9 +40,10 @@ namespace Fsel.Course.Application.Queries.LessonQuery
                 return methodResult;
             }
 
-            lesson.IsActive = !lesson.UnitLessons.Any();
+            var lessonModel = _mapper.Map<LessonModel>(lesson);
+            lessonModel.IsActive = lesson.UnitLessons.Any();
 
-            methodResult.Result = _mapper.Map<LessonModel>(lesson);
+            methodResult.Result = lessonModel;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }

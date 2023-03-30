@@ -42,7 +42,7 @@ namespace Fsel.Course.Application.Queries.VideoQuery
                             Id = i.Id,
                             Name = i.Name,
                             VideoFilePath = i.VideoFilePath,
-                            IsActive = !i.LessonVideos.Any(),
+                            IsActive = i.LessonVideos.Any(),
                             TeacherId = i.TeacherId,
                             CourseLevel = i.CourseLevel,
                             VideoTimeCodes = i.VideoTimeCodes.Select(x => new VideoTimeCodeModel
