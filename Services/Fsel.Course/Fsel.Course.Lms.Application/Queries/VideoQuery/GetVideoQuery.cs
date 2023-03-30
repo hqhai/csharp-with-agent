@@ -51,11 +51,7 @@ namespace Fsel.Course.Lms.Application.Queries.VideoQuery
                                 .AsNoTracking()
                         select i;
 
-<<<<<<< HEAD
             var video = await query.FirstOrDefaultAsync(cancellationToken);
-=======
-            var video = await query.FirstOrDefaultAsync(cancellationToken: cancellationToken);
->>>>>>> 64752245772ca125e3dba8295b32fbdf5004d191
 
             if (video == null)
             {
