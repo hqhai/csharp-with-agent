@@ -47,7 +47,7 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
             lesson.IsActive = !lesson.UnitLessons.Any();
 
             var lessonModel = _mapper.Map<LessonModel>(lesson);
-            lessonModel.Video =  _mapper.Map<VideoModel>(lesson.LessonVideos.Select(x => x.Video).Where(x => x != null && !x.IsDeleted).FirstOrDefault());
+            lessonModel.Video = _mapper.Map<VideoModel>(lesson.LessonVideos.Select(x => x.Video).Where(x => x != null && !x.IsDeleted).FirstOrDefault());
 
             methodResult.Result = lessonModel;
             methodResult.StatusCode = StatusCodes.Status200OK;
