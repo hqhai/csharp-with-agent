@@ -8,6 +8,7 @@ namespace Fsel.Course.Lcms.Api.Controllers
     using Fsel.Common.Constants;
     using Fsel.Common.Enums;
     using Fsel.Course.Application.Queries.CategoryCmd;
+    using Fsel.Course.Application.Queries.CategoryQuery;
     using MediatR;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;

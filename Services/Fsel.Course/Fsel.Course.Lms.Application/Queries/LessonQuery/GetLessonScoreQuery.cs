@@ -4,7 +4,6 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
 {
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base;
-    using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using MediatR;

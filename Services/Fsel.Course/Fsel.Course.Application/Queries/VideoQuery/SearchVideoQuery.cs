@@ -64,7 +64,7 @@ namespace Fsel.Course.Application.Queries.VideoQuery
                             UpdatedFullName = video.UpdatedFullName,
                             Exercises = video.VideoTimeCodes.SelectMany(videoTimeCode => videoTimeCode.TimeCodeExercises)
                                                                      .Select(timeCodeExercise => timeCodeExercise.Exercise)
-                                                                     .GroupBy(excercise => excercise.CourseSkill)
+                                                                     .GroupBy(excercise => (excercise ?? new()).CourseSkill)
                                                                      .OrderByDescending(courseSkillGroup => courseSkillGroup.Count())
                                                                      .Select(courseSkillGroup => new VideoExerciseSearchModel
                                                                      {

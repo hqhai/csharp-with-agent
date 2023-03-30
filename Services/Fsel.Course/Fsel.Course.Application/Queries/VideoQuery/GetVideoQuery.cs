@@ -34,7 +34,7 @@ namespace Fsel.Course.Application.Queries.VideoQuery
                                 .Include(i => i.VideoTimeCodes.Where(x => !x.IsDeleted))
                                 .ThenInclude(x => x.TimeCodeExercises.Where(x => !x.IsDeleted && x.Exercise != null))
                                 .ThenInclude(x => x.Exercise)
-                                .ThenInclude(x => x.ExerciseQuestions.Where(x => !x.IsDeleted))
+                                .ThenInclude(x => (x ?? new()).ExerciseQuestions.Where(x => !x.IsDeleted))
                                 .ThenInclude(x => x.Question)
                                 .Where(x => x.Id == request.Id)
                         select new VideoModel
@@ -54,22 +54,22 @@ namespace Fsel.Course.Application.Queries.VideoQuery
                                 VideoId = x.VideoId,
                                 Exercises = x.TimeCodeExercises.Select(n => n.Exercise).Select(n => new ExerciseModel
                                 {
-                                    Id = n.Id,
-                                    MediaPost = n.MediaPost,
-                                    CourseSkill = n.CourseSkill,
-                                    Questions = n.ExerciseQuestions.Select(m => m.Question).Select(m => new QuestionModel()
+                                    Id = (n ?? new()).Id,
+                                    MediaPost = (n ?? new()).MediaPost,
+                                    CourseSkill = (n ?? new()).CourseSkill,
+                                    Questions = (n ?? new()).ExerciseQuestions.Select(m => m.Question).Select(m => new QuestionModel()
                                     {
-                                        Id = m.Id,
-                                        QuestionType = m.QuestionType,
-                                        CorrectTotal = m.CorrectTotal,
-                                        IsSave = m.IsSave,
-                                        Config = m.Config
+                                        Id = (m ?? new()).Id,
+                                        QuestionType = (m ?? new()).QuestionType,
+                                        CorrectTotal = (m ?? new()).CorrectTotal,
+                                        IsSave = (m ?? new()).IsSave,
+                                        Config = (m ?? new()).Config
                                     }).ToList()
                                 }).ToList(),
                             }).ToList(),
                         };
 
-            var video = query.FirstOrDefault();
+            var video = await query.FirstOrDefaultAsync(cancellationToken: cancellationToken);
             if (video == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumVideoErrorCode.VideoNotExist),

@@ -47,12 +47,12 @@ namespace Fsel.Course.Application.Queries.UnitQuery
                                     .Where(x => request.CourseLevel == null || x.CourseLevel == request.CourseLevel)
                                     .Include(unit => unit.UnitLessons)
                                     .ThenInclude(unitLesson => unitLesson.Lesson)
-                                    .ThenInclude(lesson => lesson.LessonVideos)
+                                    .ThenInclude(lesson => (lesson ?? new()).LessonVideos)
                                     .ThenInclude(lessonVideo => lessonVideo.Video)
                                     .Where(x => request.TeacherId == null || x.UnitLessons.Select(l => l.Lesson)
-                                                                                   .SelectMany(lv => lv.LessonVideos)
+                                                                                   .SelectMany(lv => (lv ?? new()).LessonVideos)
                                                                                    .Select(v => v.Video)
-                                                                                   .Select(n => n.TeacherId).Contains(request.TeacherId.Value))
+                                                                                   .Select(n => (n ?? new()).TeacherId).Contains(request.TeacherId.Value))
 
                             .Select(unit => new UnitSearchModel
                             {
@@ -66,9 +66,9 @@ namespace Fsel.Course.Application.Queries.UnitQuery
                                 UpdatedDate = unit.UpdatedDate,
                                 UpdatedUserId = unit.UpdatedUserId,
                                 TeacherId = unit.UnitLessons.Select(l => l.Lesson)
-                                                .SelectMany(lv => lv.LessonVideos)
+                                                .SelectMany(lv => (lv ?? new()).LessonVideos)
                                                 .Select(v => v.Video)
-                                                .Select(n => n.TeacherId).FirstOrDefault(),
+                                                .Select(n => (n ?? new()).TeacherId).FirstOrDefault(),
                             });
 
             //Keyword

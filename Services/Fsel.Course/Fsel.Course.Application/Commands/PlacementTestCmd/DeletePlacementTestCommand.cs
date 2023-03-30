@@ -1,6 +1,6 @@
-using AutoMapper;
+// Copyright (c) Atlantic. All rights reserved.
+
 using Fsel.Common.ActionResults;
-using Fsel.Common.Helpers;
 using Fsel.Course.Domain.Enums.ErrorCodes;
 using Fsel.Course.Domain.IRepositories;
 using MediatR;
@@ -16,13 +16,11 @@ namespace Fsel.Course.Application.Commands.PlacementTestCmd
     public class DeletePlacementTestCommandHandler : IRequestHandler<DeletePlacementTestCommand, MethodResult<bool>>
     {
         private readonly IPlacementTestRepository _placementTestRepository;
-        private readonly IMapper _mapper;
 
-        public DeletePlacementTestCommandHandler(IPlacementTestRepository placementTestRepository,
-            IMapper mapper)
+        public DeletePlacementTestCommandHandler(IPlacementTestRepository placementTestRepository
+            )
         {
             _placementTestRepository = placementTestRepository;
-            _mapper = mapper;
         }
 
         public async Task<MethodResult<bool>> Handle(DeletePlacementTestCommand request, CancellationToken cancellationToken)
