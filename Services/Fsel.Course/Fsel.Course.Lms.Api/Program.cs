@@ -43,10 +43,13 @@ builder.Services.AddScoped<IMockTestRepository, MockTestRepository>();
 builder.Services.AddScoped<IVideoResultRepository, VideoResultRepository>();
 builder.Services.AddScoped<ILessonResultRepository, LessonResultRepository>();
 builder.Services.AddScoped<IVideoTimeCodeAnswerRepository, VideoTimeCodeAnswerRepository>();
+builder.Services.AddScoped<ICourseResultRepository, CourseResultRepository>();
 
 builder.Services.AddScoped<QuestionTypeConverter>();
 builder.Services.AddScoped<QuestionTypeCountConverter>();
 builder.Services.AddScoped<QuestionTypeValidation>();
+builder.Services.AddScoped<AnswerTypeCountConverter>();
+builder.Services.AddScoped<AnswerTypeValidatetion>();
 
 builder.AddRefitClients(typeof(IUserService), appSetting?.Services?.UserApiUrl);
 builder.AddRefitClients(typeof(ITrainingService), appSetting?.Services?.ClassApiUrl);

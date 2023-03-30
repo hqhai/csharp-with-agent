@@ -5,10 +5,11 @@ namespace Fsel.Course.Lms.Application.Commands.CourseCmd
     using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Core.Base;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
-    using Fsel.Course.Domain.Models.CommandModels.Courses;
+    using Fsel.Course.Domain.Models.CommandModels.Classes;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Services.TrainingServices;
     using Fsel.Course.Lms.Application.Services.UserServices;
@@ -26,15 +27,18 @@ namespace Fsel.Course.Lms.Application.Commands.CourseCmd
         private readonly IUserService _userService;
         private readonly IMapper _mapper;
         private readonly ITrainingService _trainingService;
+        private readonly AuthContext _authContext;
 
         public CreateClassCommandHandler(ICourseRepository courseRepository, IUserService userService
             , IMapper mapper
-            , ITrainingService trainingService)
+            , ITrainingService trainingService
+            , AuthContext authContext)
         {
             _courseRepository = courseRepository;
             _userService = userService;
             _mapper = mapper;
             _trainingService = trainingService;
+            _authContext = authContext;
         }
 
         public async Task<MethodResult<CourseModel>> Handle(CreateClassCommand request, CancellationToken cancellationToken)
@@ -59,10 +63,19 @@ namespace Fsel.Course.Lms.Application.Commands.CourseCmd
                 return methodResult;
             }
             var studentId = student?.Content?.Result?.Id;
-            var course = await _courseRepository.Queryable.Include(e => e.CourseClassStudents)
-                                                            .Where(e => e.Id == request.CourseId)
-                                                            .FirstOrDefaultAsync(cancellationToken: cancellationToken);
-            if (course != null && course.CourseClassStudents.Count == 0)
+            var course = await _courseRepository.Queryable.Include(x => x.CourseResult)
+                                                       .Include(e => e.CourseClassStudents.Where(y => y.IsDeleted == false))
+                                                       .Include(x => x.CourseUnitMockTests.Where(y => y.IsDeleted == false))
+                                                       .ThenInclude(x => x.Unit)
+                                                       .ThenInclude(x => x.UnitLessons.Where(y => y.IsDeleted == false))
+                                                       .Where(x => x.Id == request.CourseId).FirstOrDefaultAsync(cancellationToken: cancellationToken);
+            if (course == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.CourseNotExist));
+                return methodResult;
+            }
+
+            if (course.CourseClassStudents.Count == 0)
             {
                 course.CourseClassStudents.Add(new CourseClassStudent
                 {
@@ -72,6 +85,45 @@ namespace Fsel.Course.Lms.Application.Commands.CourseCmd
                 });
             }
 
+            var courseResult = new CourseResult
+            {
+                StudentId = _authContext.CurrentUserId
+            };
+
+            var units = course.CourseUnitMockTests
+                        .Where(x => x.UnitId != null)
+                        .Select(x => x.Unit)
+                        .ToList();
+
+            var unitResults = units
+                        .Select(x => new UnitResult
+                        {
+                            StudentId = _authContext.CurrentUserId,
+                            UnitId = x.Id
+                        }).ToList();
+
+            var lessonResults = from u in units
+                                join ul in units.SelectMany(x => x.UnitLessons) on u.Id equals ul.UnitId
+                                join l in units.SelectMany(x => x.UnitLessons).Select(x => x.Lesson) on ul.LessonId equals l.Id
+                                join lr in units.SelectMany(x => x.UnitLessons).Select(x => x.Lesson).SelectMany(x => x.LessonResults) on l.Id equals lr.LessonId
+                                join lv in units.SelectMany(x => x.UnitLessons).Select(x => x.Lesson).SelectMany(x => x.LessonVideos) on l.Id equals lv.LessonId
+                                join v in units.SelectMany(x => x.UnitLessons).Select(x => x.Lesson).SelectMany(x => x.LessonVideos).Select(x => x.Video) on lv.VideoId equals v.Id
+                                select new LessonResult
+                                {
+                                    StudentId = _authContext.CurrentUserId,
+                                    UnitId = u.Id,
+                                    LessonId = l.Id,
+                                    VideoResult = new VideoResult
+                                    {
+                                        LessonResultId = lr.Id,
+                                        VideoId = v.Id,
+                                        StudentId = _authContext.CurrentUserId
+                                    }
+                                };
+
+            course.CourseResult = courseResult;
+            course.UnitResults = unitResults;
+            course.LessonResults = lessonResults.ToList();
             student = await _userService.UpdateStudentByClassAsync(classId ?? Guid.Empty);
 
             #endregion Validation

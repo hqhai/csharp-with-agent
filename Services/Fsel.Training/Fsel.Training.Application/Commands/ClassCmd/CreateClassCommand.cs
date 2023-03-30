@@ -9,7 +9,6 @@ namespace Fsel.Training.Application.Commands.ClassCmd
     using Fsel.Training.Application.Services.UserServices;
     using Fsel.Training.Application.Services.UserServices.Models;
     using Fsel.Training.Doman.Entities;
-    using Fsel.Training.Doman.Enums.ErrorCodes;
     using Fsel.Training.Doman.IRepositories;
     using Fsel.Training.Doman.Models.CommandModels.Classes;
     using Fsel.Training.Doman.Models.EntityModels;
@@ -41,26 +40,10 @@ namespace Fsel.Training.Application.Commands.ClassCmd
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<ClassModel> methodResult = new MethodResult<ClassModel>();
 
-            #region Validation
-
             Class? classnew = await _classRepository.Queryable.FirstOrDefaultAsync(x => x.Code == request.Code, cancellationToken: cancellationToken);
             if (classnew == null)
             {
-                var classs = await _classRepository.Queryable
-                                                .OrderByDescending(c => c.CreatedDate)
-                                                .FirstOrDefaultAsync(cancellationToken: cancellationToken);
-                if (classs == null)
-                {
-                    methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                    methodResult.AddError(nameof(EnumClassErrorCode.ClassNull));
-                    return methodResult;
-                }
-                var ischeckclass = await _userService.GetStudentByClassIdCheckAsync(classs.Id.ToString());
-                var isclass = ischeckclass?.Content?.Result;
-                if (isclass == false)
-                {
-                    classnew = await CreateClassAsync(request, classnew);
-                }
+                classnew = await CreateClassAsync(request, classnew);
             }
             var students = await _userService.GetStudentByClassIdAsync(classnew.Id.ToString());
             if (students != null && students.IsSuccessStatusCode)
@@ -73,7 +56,6 @@ namespace Fsel.Training.Application.Commands.ClassCmd
                     classnew = await CreateClassAsync(request, classnew);
                 }
             }
-
             var student = await _userService.UpdateStudentByClassIdAsync(new UpdateStudentByClassIdModel
             {
                 ClassId = classnew.Id,
@@ -81,9 +63,6 @@ namespace Fsel.Training.Application.Commands.ClassCmd
             });
             methodResult.StatusCode = StatusCodes.Status201Created;
             methodResult.Result = _mapper.Map<ClassModel>(classnew);
-
-            #endregion Validation
-
             return methodResult;
         }
 

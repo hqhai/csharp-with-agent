@@ -10,8 +10,6 @@ namespace Fsel.Course.Domain.Entities.QuestionTypeConfigs.Answers
 
     public class DragAndDropPictureAnswer
     {
-        public int Scores { get; set; }
-
         public IList<DragAndDropPictureAnswers>? Answers { get; set; }
     }
 

@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Course.Domain.Models.CommandModels.Courses
+namespace Fsel.Course.Domain.Models.CommandModels.Classes
 {
     using System;
 

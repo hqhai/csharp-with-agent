@@ -34,6 +34,6 @@ namespace Fsel.Course.Domain.Entities
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         public Guid StudentId { get; set; }
 
-        public ICollection<VideoResult> VideoResults { get; set; } = new List<VideoResult>();
+        public VideoResult? VideoResult { get; set; }
     }
 }

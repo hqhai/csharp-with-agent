@@ -6,8 +6,6 @@ namespace Fsel.Course.Domain.Entities.QuestionTypeConfigs.Answers
 
     public class MutipleChoiceAnswer
     {
-        public int Scores { get; set; }
-
         public IList<MutipleChoiceAnswers>? Answers { get; set; }
     }
 

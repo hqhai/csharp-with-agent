@@ -22,7 +22,11 @@ namespace Fsel.Core.Base.Interfaces
 
         T Add(T newEntity);
 
+        Task AddList(IEnumerable<T> newEntities);
+
         T Update(T updateEntity);
+
+        void UpdateList(IEnumerable<T> updateEntities);
 
         Task<bool> DeleteAsync(T deleteEntity);
 
