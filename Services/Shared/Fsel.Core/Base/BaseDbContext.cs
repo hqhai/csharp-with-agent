@@ -73,6 +73,7 @@ namespace Fsel.Core.Base
             var entryMain = ChangeTracker.Entries().FirstOrDefault();
 
             if (entryMain != null && entryMain.State == EntityState.Modified && bool.TryParse(entryMain.CurrentValues[nameof(Entity.IsDeleted)]?.ToString(), out bool isDeleted) && isDeleted)
+            {
                 foreach (var entry in ChangeTracker.Entries())
                 {
                     entry.CurrentValues[nameof(Entity.IsDeleted)] = entryMain.CurrentValues[nameof(Entity.IsDeleted)];
@@ -80,6 +81,7 @@ namespace Fsel.Core.Base
                     entry.CurrentValues[nameof(Entity.DeletedUserId)] = entryMain.CurrentValues[nameof(Entity.DeletedUserId)];
                     entry.CurrentValues[nameof(Entity.DeletedFullName)] = entryMain.CurrentValues[nameof(Entity.DeletedFullName)];
                 }
+            }
         }
 
         private async Task DispatchDomainEventsAsync()

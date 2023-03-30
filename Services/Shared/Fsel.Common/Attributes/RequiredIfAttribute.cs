@@ -9,7 +9,7 @@ namespace Fsel.Common.Attributes
         public string? PropertyName { get; }
         public object? Value { get; }
 
-        public RequiredIfAttribute(string propertyName, object value = null, string errorMessage = "")
+        public RequiredIfAttribute(string propertyName, object? value = null, string errorMessage = "")
         {
             PropertyName = propertyName;
             Value = value;
