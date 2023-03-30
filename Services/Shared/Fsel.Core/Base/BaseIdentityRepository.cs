@@ -86,6 +86,47 @@ namespace Fsel.Core.Base
             }
         }
 
+        public virtual async Task AddList(IEnumerable<T> newEntities)
+        {
+            try
+            {
+                foreach (var newEntity in newEntities)
+                {
+                    newEntity.CreatedDate = DateTime.Now;
+                    newEntity.CreatedUserId = CurrentUserId;
+                    newEntity.CreatedFullName = CurrentFullName;
+                    newEntity.Id = Guid.NewGuid();
+                    newEntity.AddDomainEvent(new EntityCreatedEvent<T>(newEntity));
+                    _dbBaseContext.TrackEntity(newEntity);
+                }
+                await _dbSet.AddRangeAsync(newEntities);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public virtual void UpdateList(IEnumerable<T> updateEntities)
+        {
+            try
+            {
+                foreach (var updateEntity in updateEntities)
+                {
+                    updateEntity.UpdatedDate = DateTime.Now;
+                    updateEntity.CreatedUserId = CurrentUserId;
+                    updateEntity.CreatedFullName = CurrentFullName;
+                    updateEntity.AddDomainEvent(new EntityChangedEvent<T>(updateEntity));
+                    _dbBaseContext.TrackEntity(updateEntity);
+                }
+                _dbSet.UpdateRange(updateEntities);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         public virtual async Task<bool> AnyAsync(Guid id, int? siteId = null)
         {
             try

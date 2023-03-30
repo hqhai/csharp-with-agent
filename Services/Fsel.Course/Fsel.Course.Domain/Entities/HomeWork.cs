@@ -21,13 +21,11 @@ namespace Fsel.Course.Domain.Entities
         /// <summary>
         ///  Nội dung bài tập
         /// </summary>
-        [MaxLength(1000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? InstructionContent { get; set; }
 
         /// <summary>
         /// Media Post
         /// </summary>
-        [MaxLength(1000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? MediaPost { get; set; }
 
         public bool IsActive { get; set; }

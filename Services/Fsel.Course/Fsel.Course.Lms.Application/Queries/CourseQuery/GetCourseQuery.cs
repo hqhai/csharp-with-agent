@@ -74,6 +74,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
                              .ThenInclude(unit => unit.MockTest)
                              .Include(x => x.CourseTeachers)
                              .Where(x => x.Id == courseClassStudent.CourseId)
+                             .AsNoTracking()
                               select new CourseModel
                               {
                                   Id = i.Id,

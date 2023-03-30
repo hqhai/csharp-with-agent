@@ -11,7 +11,6 @@ namespace Fsel.Course.Domain.Entities
     public class VideoTimeCodeAnswer : Entity
     {
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
-        [MaxLength(1000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? AnswerStr { get; set; }
 
         [NotMapped]

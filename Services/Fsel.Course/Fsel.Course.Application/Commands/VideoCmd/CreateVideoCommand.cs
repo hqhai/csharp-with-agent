@@ -11,7 +11,6 @@ using Fsel.Course.Domain.Models.EntityModels;
 using Fsel.Course.Infrastructure.Common;
 using MediatR;
 using Microsoft.AspNetCore.Http;
-using static System.Collections.Specialized.BitVector32;
 
 namespace Fsel.Course.Application.Commands.VideoCmd
 {

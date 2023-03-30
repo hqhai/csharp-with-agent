@@ -21,7 +21,6 @@ namespace Fsel.Course.Domain.Entities
         /// <summary>
         /// Nội dung ExtraPractice
         /// </summary>
-        [MaxLength(1000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? InstructionContent { get; set; }
 
         /// <summary>

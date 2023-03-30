@@ -30,6 +30,6 @@ namespace Fsel.Course.Domain.Entities
 
         public Guid? MockTestId { get; set; }
 
-        public ICollection<UnitResult> CourseUnitMockTestResults { get; set; } = new List<UnitResult>();
+        public ICollection<UnitResult> UnitResults { get; set; } = new List<UnitResult>();
     }
 }

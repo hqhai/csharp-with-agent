@@ -22,6 +22,6 @@ namespace Fsel.Course.Domain.Entities.QuestionTypeConfigs.Questions
         public string? Content { get; set; }
 
         [JsonRequired]
-        public string? Words { get; set; }
+        public IList<string>? Words { get; set; }
     }
 }
