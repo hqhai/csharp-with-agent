@@ -3,7 +3,6 @@
 namespace Fsel.Identity.Application.Commands.HumanCmd
 {
     using System.Threading.Tasks;
-    using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Identity.Domain.Models.CommandModels.Humans;
     using Fsel.Identity.Domain.Models.EntityModels;
@@ -15,12 +14,8 @@ namespace Fsel.Identity.Application.Commands.HumanCmd
 
     public class UpdateHumanCommandHandler : IRequestHandler<UpdateHumanCommand, MethodResult<HumanModel>>
     {
-        private readonly IMapper _mapper;
-
-        public UpdateHumanCommandHandler(
-            IMapper mapper)
+        public UpdateHumanCommandHandler()
         {
-            _mapper = mapper;
         }
 
         public async Task<MethodResult<HumanModel>> Handle(UpdateHumanCommand request, CancellationToken cancellationToken)
