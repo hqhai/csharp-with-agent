@@ -25,7 +25,7 @@ namespace Fsel.Course.Domain.Entities.QuestionTypeConfigs.Questions
 
     public class DragAndDropPictureQuestionImages
     {
-        public int Id { get; set; }
+        public long Id { get; set; }
 
         [JsonRequired]
         public string? Path { get; set; }
@@ -33,7 +33,7 @@ namespace Fsel.Course.Domain.Entities.QuestionTypeConfigs.Questions
 
     public class DragAndDropPictureQuestionWord
     {
-        public int Id { get; set; }
+        public long Id { get; set; }
 
         [JsonRequired]
         public string? Content { get; set; }

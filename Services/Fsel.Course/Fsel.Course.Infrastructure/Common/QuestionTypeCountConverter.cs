@@ -93,9 +93,9 @@ namespace Fsel.Course.Infrastructure.Common
         private static int GetTotalCorrectTypeMaschingQuestion(object config)
         {
             var data = config.Deserialize<MatchingTypeQuestion>();
-            if (data != null && data.Links != null)
+            if (data != null && data.Link != null)
             {
-                return data.Links.Count;
+                return data.Link.Count;
             }
             return default;
         }
