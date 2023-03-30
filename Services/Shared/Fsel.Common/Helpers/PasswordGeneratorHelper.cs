@@ -148,7 +148,7 @@ namespace Fsel.Common.Helpers
 
     internal static class Extensions
     {
-        private static readonly Lazy<RandomSecureHelper> RandomSecure =
+        private static readonly Lazy<RandomSecureHelper> s_randomSecure =
             new Lazy<RandomSecureHelper>(() => new RandomSecureHelper());
 
         public static IEnumerable<T> ShuffleSecure<T>(this IEnumerable<T> source)
@@ -156,7 +156,7 @@ namespace Fsel.Common.Helpers
             var sourceArray = source.ToArray();
             for (int counter = 0; counter < sourceArray.Length; counter++)
             {
-                int randomIndex = RandomSecure.Value.Next(counter, sourceArray.Length);
+                int randomIndex = s_randomSecure.Value.Next(counter, sourceArray.Length);
                 yield return sourceArray[randomIndex];
 
                 sourceArray[randomIndex] = sourceArray[counter];

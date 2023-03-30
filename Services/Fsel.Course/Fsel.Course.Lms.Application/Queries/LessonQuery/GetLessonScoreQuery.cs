@@ -4,6 +4,7 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
 {
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base;
+    using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using MediatR;
@@ -67,6 +68,12 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
                                             TotalCount = g.Select(x => x.q).Sum(x => x.CorrectTotal),
                                             CorrectCount = g.Select(x => x.vtca).Sum(x => x.CorrectCount)
                                         };
+            var correctCount = lessonSkillScoreQuery.Select(x => x.CorrectCount).Sum();
+            var totalCount = lessonSkillScoreQuery.Select(x => x.TotalCount).Sum();
+            if (totalCount != 0)
+            {
+                lessonScore.Percent = (correctCount / totalCount) * 100;
+            }
 
             lessonScore.LessonSkillScores = await lessonSkillScoreQuery.ToListAsync(cancellationToken);
             methodResult.Result = lessonScore;

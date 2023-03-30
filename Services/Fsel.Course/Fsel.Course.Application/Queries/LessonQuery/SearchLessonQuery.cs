@@ -71,7 +71,7 @@ namespace Fsel.Course.Application.Queries.LessonQuery
                             CreatedDate = x.CreatedDate,
                             UpdatedDate = x.UpdatedDate,
                             UpdatedFullName = x.UpdatedFullName,
-                            IsActive = x.IsActive
+                            IsActive = x.LessonVideos.Any()
                         });
 
             //Keyword

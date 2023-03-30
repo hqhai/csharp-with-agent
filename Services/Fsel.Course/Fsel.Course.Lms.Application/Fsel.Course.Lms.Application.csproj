@@ -7,11 +7,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Fsel.Course.Infrastructure\Fsel.Course.Infrastructure.csproj" />
+    <Compile Remove="Queries\UnitQuery\**" />
+    <EmbeddedResource Remove="Queries\UnitQuery\**" />
+    <None Remove="Queries\UnitQuery\**" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Queries\UnitQuery\" />
+    <ProjectReference Include="..\Fsel.Course.Infrastructure\Fsel.Course.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>

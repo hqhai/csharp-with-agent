@@ -33,7 +33,9 @@ namespace Fsel.Common.Helpers
         public static string StreamToString(Stream stream)
         {
             if (stream == null)
+            {
                 return string.Empty;
+            }
 
             using (var streamReader = new StreamReader(stream))
             {

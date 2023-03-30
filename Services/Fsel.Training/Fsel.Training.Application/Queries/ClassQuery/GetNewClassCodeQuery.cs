@@ -32,7 +32,7 @@ namespace Fsel.Training.Application.Queries.ClassQuery
             int lastTwoDigitsOfYear = currentYear % 100;
             int lastDigitOfYear = lastTwoDigitsOfYear % 10;
             var stt = $"{_trainingRepository.Queryable.Count():000}";
-            var level = EnumHelper.GetClassCodeByEnumCourseLevel(request.CourseLevel);
+            var level = EnumHelper.GetCodeByEnumCourseLevel(request.CourseLevel);
 
             string codeTraining = $"{level}_{weekString}{lastDigitOfYear}{stt}S";
             methodResult.Result = codeTraining;

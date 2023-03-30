@@ -28,7 +28,7 @@ namespace Fsel.Core.Base
         public BaseIdentityDbContext(DbContextOptions options, IMediator mediator)
             : base(options)
         {
-            _mediator = mediator ?? throw new ArgumentNullException("mediator");
+            _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
             _trackEntities = new List<Entity>();
             Debug.WriteLine("BaseIdentityDbContext::ctor ->" + GetHashCode());
         }
@@ -101,7 +101,7 @@ namespace Fsel.Core.Base
         {
             if (transaction == null)
             {
-                throw new ArgumentNullException("transaction");
+                throw new ArgumentNullException(nameof(transaction));
             }
 
             if (transaction != _currentTransaction)

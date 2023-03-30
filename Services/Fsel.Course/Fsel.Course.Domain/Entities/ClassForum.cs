@@ -1,6 +1,5 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using DataAnnotationsExtensions;
 using Fsel.Common.Enums;
 using Fsel.Common.Enums.ErrorCodes;
 using Fsel.Core.Entities;
@@ -26,13 +25,13 @@ namespace Fsel.Course.Domain.Entities
         /// <summary>
         /// Số từ giới hạn
         /// </summary>
-        [Min(1, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
+        [Range(1, 10000_0000, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
         public long TaggetWordLimit { get; set; }
 
         /// <summary>
         /// Thời gian giới hạn
         /// </summary>
-        [Min(1, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
+        [Range(1, 10000_0000, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
         public long TaggetTimeLimit { get; set; }
 
         [NotMapped]

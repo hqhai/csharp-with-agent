@@ -1,7 +1,8 @@
 using System.ComponentModel.DataAnnotations;
-using DataAnnotationsExtensions;
+using System.ComponentModel.DataAnnotations.Schema;
 using Fsel.Common.Enums;
 using Fsel.Common.Enums.ErrorCodes;
+using Fsel.Common.Helpers;
 using Fsel.Core.Entities;
 using Fsel.Course.Domain.Enums;
 
@@ -19,13 +20,13 @@ namespace Fsel.Course.Domain.Entities
         /// <summary>
         /// Số lượng Unit
         /// </summary>
-        [Min(1, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
+        [Range(1, 10000_0000, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
         public int NumberOfUnits { get; set; }
 
         /// <summary>
         /// Số Lượng Lesson
         /// </summary>
-        [Min(1, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
+        [Range(1, 10000_0000, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
         public int NumberOfLessons { get; set; }
 
         /// <summary>
@@ -37,6 +38,18 @@ namespace Fsel.Course.Domain.Entities
         /// Trình độ Level
         /// </summary>
         public EnumCourseLevel CourseLevel { get; set; }
+
+        /// <summary>
+        /// Loại khóa học
+        /// </summary>
+        [NotMapped]
+        public EnumCourseType CourseType
+        {
+            get
+            {
+                return EnumHelper.GetEnumCourseType(CourseLevel);
+            }
+        }
 
         public ICollection<CourseUnitMockTest> CourseUnitMockTests { get; set; } = new List<CourseUnitMockTest>();
         public ICollection<CourseTeacher> CourseTeachers { get; set; } = new List<CourseTeacher>();

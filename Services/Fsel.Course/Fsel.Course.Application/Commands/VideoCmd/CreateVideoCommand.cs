@@ -52,13 +52,6 @@ namespace Fsel.Course.Application.Commands.VideoCmd
                 methodResult.AddErrorBadRequest(nameof(EnumVideoErrorCode.VideoNotCorrect), nameof(request.VideoTimeCodes));
                 return methodResult;
             }
-            //var isTeacher = await _userService.GetTeacherByIdAsync(request.TeacherId);
-            //var isCheck = isTeacher?.Content?.Result;
-            //if (isCheck == null)
-            //{
-            //    methodResult.AddErrorBadRequest(nameof(EnumVideoErrorCode.TeacherIdDoesNotExitst), nameof(request.TeacherId));
-            //    return methodResult;
-            //}
 
             Video video = _mapper.Map<Video>(request);
 

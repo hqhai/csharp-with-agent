@@ -1,5 +1,5 @@
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using DataAnnotationsExtensions;
 using Fsel.Common.Enums.ErrorCodes;
 using Fsel.Core.Entities;
 using Fsel.Course.Domain.Enums;
@@ -11,13 +11,13 @@ namespace Fsel.Course.Domain.Entities
         /// <summary>
         /// Thời gian bắt đầu xuất hiện TimeCode
         /// </summary>
-        [Min(1, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
+        [Range(1, 10000_0000, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
         public long DisplayTime { get; set; }
 
         /// <summary>
         /// Thời gian hiện làm bài
         /// </summary>
-        [Min(1, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
+        [Range(1, 10000_0000, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
         public long ExecutionTime { get; set; }
 
         /// <summary>

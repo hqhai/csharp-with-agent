@@ -22,11 +22,6 @@ namespace Fsel.Course.Domain.Entities
         public string? VideoFilePath { get; set; }
 
         /// <summary>
-        /// Trạng thái kích hoạt
-        /// </summary>
-        public bool IsActive { get; set; }
-
-        /// <summary>
         /// Loại Video
         /// </summary>
         public EnumVideoType Type { get; set; }
