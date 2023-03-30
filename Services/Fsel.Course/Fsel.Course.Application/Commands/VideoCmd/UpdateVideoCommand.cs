@@ -2,7 +2,6 @@
 
 using AutoMapper;
 using Fsel.Common.ActionResults;
-using Fsel.Course.Application.Services.UserServices;
 using Fsel.Course.Domain.Entities;
 using Fsel.Course.Domain.Enums.ErrorCodes;
 using Fsel.Course.Domain.IRepositories;
@@ -24,19 +23,17 @@ namespace Fsel.Course.Application.Commands.VideoCmd
         private readonly IMapper _mapper;
         private readonly QuestionTypeCountConverter _questionTypeCountConverter;
         private readonly QuestionTypeValidation _questionTypeValidation;
-        private readonly IUserService _userService;
 
         public UpdateVideoCommandHandler(IVideoRepository videoRepository
             , IMapper mapper
             , QuestionTypeCountConverter questionTypeCountConverter
             , QuestionTypeValidation questionTypeValidation
-            , IUserService userService)
+            )
         {
             _videoRepository = videoRepository;
             _mapper = mapper;
             _questionTypeCountConverter = questionTypeCountConverter;
             _questionTypeValidation = questionTypeValidation;
-            _userService = userService;
         }
 
         public async Task<MethodResult<VideoModel>> Handle(UpdateVideoCommand request, CancellationToken cancellationToken)
@@ -54,6 +51,7 @@ namespace Fsel.Course.Application.Commands.VideoCmd
             }
 
             #region Tạm thời không validate isTeacher
+
             //var isTeacher = await _userService.GetTeacherByIdAsync(request.TeacherId);
             //var isCheck = isTeacher?.Content?.Result;
             //if (isCheck == null)
@@ -61,9 +59,11 @@ namespace Fsel.Course.Application.Commands.VideoCmd
             //    methodResult.AddErrorBadRequest(nameof(EnumVideoErrorCode.TeacherIdDoesNotExitst), nameof(request.TeacherId));
             //    return methodResult;
             //}
-            #endregion
+
+            #endregion Tạm thời không validate isTeacher
 
             #region Tạm thời không validate VideoUsed
+
             //var isVideoUsed = await _videoRepository.IsVideoUsed(request.Id);
             //if (isVideoUsed)
             //{
@@ -72,7 +72,8 @@ namespace Fsel.Course.Application.Commands.VideoCmd
             //        nameof(request.Id), request.Id);
             //    return methodResult;
             //}
-            #endregion
+
+            #endregion Tạm thời không validate VideoUsed
 
             // Lưu dữ liệu Video
             var video = await _videoRepository.GetIncludeByIdAsync(request.Id);
