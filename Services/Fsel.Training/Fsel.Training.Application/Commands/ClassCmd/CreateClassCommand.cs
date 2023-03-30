@@ -90,7 +90,7 @@ namespace Fsel.Training.Application.Commands.ClassCmd
                 await _classRepository.UnitOfWork.SaveEntitiesAsync().ConfigureAwait(false);
                 return classToUpdate;
             }
-            catch
+            catch (Exception ex)
             {
                 throw new Exception("An error occurred while updating the class object.", ex);
             }
