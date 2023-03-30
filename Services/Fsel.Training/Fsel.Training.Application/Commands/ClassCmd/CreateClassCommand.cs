@@ -6,7 +6,6 @@ namespace Fsel.Training.Application.Commands.ClassCmd
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums;
-    using Fsel.Training.Application.Queries.ClassQuery;
     using Fsel.Training.Application.Services.UserServices;
     using Fsel.Training.Application.Services.UserServices.Models;
     using Fsel.Training.Doman.Entities;
@@ -48,9 +47,9 @@ namespace Fsel.Training.Application.Commands.ClassCmd
 
             if (classnew == null)
             {
-                classnew = await CreateClassAsync(request.Code, classnew);
+                classnew = await CreateClassAsync(request.Code);
             }
-            else if(studentsResult != null && studentsResult.IsSuccessStatusCode && students != null)
+            else if (studentsResult != null && studentsResult.IsSuccessStatusCode && students != null)
             {
                 if (students.Count == 11)
                 {
@@ -72,22 +71,29 @@ namespace Fsel.Training.Application.Commands.ClassCmd
             return methodResult;
         }
 
-        private async Task<Class> CreateClassAsync(string? code, Class? entityClass)
+        private async Task<Class> CreateClassAsync(string? code)
         {
-            entityClass = new Class();
-            entityClass.Code = code;
-            entityClass.Name = code;
-            _classRepository.Add(entityClass);
+            var newClass = new Class();
+            newClass.Code = code;
+            newClass.Name = code;
+            _classRepository.Add(newClass);
             await _classRepository.UnitOfWork.SaveEntitiesAsync().ConfigureAwait(false);
-            return entityClass;
+            return newClass;
         }
 
-        private async Task<Class> UpdateClassAsync(Class classnew)
+        private async Task<Class> UpdateClassAsync(Class classToUpdate)
         {
-            classnew.Status = EnumClassType.Active;
-            _classRepository.Update(classnew);
-            await _classRepository.UnitOfWork.SaveEntitiesAsync().ConfigureAwait(false);
-            return classnew;
+            try
+            {
+                classToUpdate.Status = EnumClassType.Active;
+                _classRepository.Update(classToUpdate);
+                await _classRepository.UnitOfWork.SaveEntitiesAsync().ConfigureAwait(false);
+                return classToUpdate;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("An error occurred while updating the class object.", ex);
+            }
         }
     }
 }

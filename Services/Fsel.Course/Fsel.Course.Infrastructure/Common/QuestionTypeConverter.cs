@@ -133,11 +133,11 @@ namespace Fsel.Course.Infrastructure.Common
         private static object? ClearAnswerTypeMaschingQuestion(object config)
         {
             var data = config.Deserialize<MatchingTypeQuestion>();
-            if (data != null && data.Links != null)
+            if (data != null && data.Link != null)
             {
-                for (int i = data.Links.Count - 1; i >= 0; i--)
+                for (int i = data.Link.Count - 1; i >= 0; i--)
                 {
-                    data.Links.RemoveAt(i);
+                    data.Link.RemoveAt(i);
                 }
                 return data;
             }

@@ -90,11 +90,11 @@ namespace Fsel.Course.Infrastructure.Common
             var dataAnswer = configAnswer.Deserialize<MatchingTypeAnswer>();
             var dataQuestion = configQuestion.Deserialize<MatchingTypeQuestion>();
             int number = 0;
-            if (dataAnswer != null && dataAnswer.Answers != null && dataQuestion != null && dataQuestion.From != null && dataQuestion.Tos != null && dataQuestion.Links != null)
+            if (dataAnswer != null && dataAnswer.Answers != null && dataQuestion != null && dataQuestion.From != null && dataQuestion.To != null && dataQuestion.Link != null)
             {
                 foreach (var item in dataAnswer.Answers)
                 {
-                    var isCheck = dataQuestion.Links.Any(x => x.FromId == item.FromId && x.Told == item.Told);
+                    var isCheck = dataQuestion.Link.Any(x => x.FromId == item.FromId && x.ToId == item.ToId);
                     if (isCheck)
                     {
                         number++;
