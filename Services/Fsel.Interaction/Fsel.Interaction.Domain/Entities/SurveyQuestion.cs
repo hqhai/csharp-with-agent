@@ -27,7 +27,6 @@ namespace Fsel.Interaction.Domain.Entities
         public EnumSurveyQuestion Type { get; set; }
 
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
-        [MaxLength(1000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? AnswerStr { get; set; }
 
         [NotMapped]

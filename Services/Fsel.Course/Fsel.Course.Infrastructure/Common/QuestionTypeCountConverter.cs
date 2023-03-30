@@ -34,9 +34,11 @@ namespace Fsel.Course.Infrastructure.Common
 
                 case EnumQuestionType.GapFillScoreByQuestion:
                 case EnumQuestionType.GapFillWordBankScoreByQuestion:
+                    return GetTotalCorrectTypeGapFillBySubQuestion(config);
+
                 case EnumQuestionType.GapFillWordBankScoreByGap:
                 case EnumQuestionType.GapFillScoreByGap:
-                    return GetTotalCorrectTypeGapFillQuestion(config);
+                    return GetTotalCorrectTypeGapFillByGap(config);
 
                 case EnumQuestionType.DragAndDropSentenceOrder:
                     return GetTotalCorrectTypeDragDropOrderQuestion(config);
@@ -58,20 +60,9 @@ namespace Fsel.Course.Infrastructure.Common
         private static int GetTotalCorrectTypeMultipleOptionQuestion(object config)
         {
             var data = config.Deserialize<MultipleOptionSentenceCompletionQuestion>();
-            int number = 0;
             if (data != null && data.Contents != null)
             {
-                foreach (var item in data.Contents)
-                {
-                    if (item != null)
-                    {
-                        item.Answers.ForEach(x =>
-                        {
-                            number++;
-                        });
-                    }
-                }
-                return number;
+                return data.Contents.Sum(x => x.Answers.Count);
             }
             return default;
         }
@@ -89,7 +80,7 @@ namespace Fsel.Course.Infrastructure.Common
                         number++;
                     }
                 }
-                return number;
+                return data.Contents.Where(x => x.IsCorrect == true).Count();
             }
             return default;
         }
@@ -102,32 +93,29 @@ namespace Fsel.Course.Infrastructure.Common
         private static int GetTotalCorrectTypeMaschingQuestion(object config)
         {
             var data = config.Deserialize<MatchingTypeQuestion>();
-            int number = 0;
-            if (data != null && data.Links != null)
+            if (data != null && data.Link != null)
             {
-                foreach (var item in data.Links)
-                {
-                    number++;
-                }
-                return number;
+                return data.Link.Count;
             }
             return default;
         }
 
-        private static int GetTotalCorrectTypeGapFillQuestion(object config)
+        private static int GetTotalCorrectTypeGapFillBySubQuestion(object config)
         {
             var data = config.Deserialize<GapFillQuestion>();
-            int number = 0;
             if (data != null && data.Contents != null)
             {
-                foreach (var item in data.Contents)
-                {
-                    item.Words.ForEach(x =>
-                    {
-                        number++;
-                    });
-                }
-                return number;
+                return data.Contents.Count;
+            }
+            return default;
+        }
+
+        private static int GetTotalCorrectTypeGapFillByGap(object config)
+        {
+            var data = config.Deserialize<GapFillQuestion>();
+            if (data != null && data.Contents != null)
+            {
+                return data.Contents.Sum(x => x.Words.Count);
             }
             return default;
         }
@@ -135,14 +123,9 @@ namespace Fsel.Course.Infrastructure.Common
         private static int GetTotalCorrectTypeDragDropOrderQuestion(object config)
         {
             var data = config.Deserialize<DragAndDropSentenceOrderQuestion>();
-            int number = 0;
             if (data != null && data.Contents != null)
             {
-                foreach (var item in data.Contents)
-                {
-                    number++;
-                }
-                return number;
+                return data.Contents.Count;
             }
             return default;
         }
@@ -150,17 +133,9 @@ namespace Fsel.Course.Infrastructure.Common
         private static int GetTotalCorrectTypeDragDropPictureQuestion(object config)
         {
             var data = config.Deserialize<DragAndDropPictureQuestion>();
-            int number = 0;
             if (data != null && data.Contents != null)
             {
-                foreach (var item in data.Contents)
-                {
-                    item.Images.ForEach(y =>
-                    {
-                        number++;
-                    });
-                }
-                return number;
+                return data.Contents.Sum(x => x.Images.Count);
             }
             return default;
         }

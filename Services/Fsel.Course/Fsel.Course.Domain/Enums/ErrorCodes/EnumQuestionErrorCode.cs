@@ -5,6 +5,11 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         /// <summary>
         /// Question not is correct
         /// </summary>
-        QuestionNotCorrect
+        QuestionNotCorrect,
+
+        /// <summary>
+        /// Question not is exist
+        /// </summary>
+        QuestionNotIsExist,
     }
 }

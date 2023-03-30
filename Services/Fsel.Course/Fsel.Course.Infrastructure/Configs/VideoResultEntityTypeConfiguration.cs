@@ -18,8 +18,8 @@ namespace Fsel.Course.Infrastructure.Configs
               .OnDelete(DeleteBehavior.Cascade);
 
             builder.HasOne(a => a.LessonResult)
-                .WithMany(b => b.VideoResults)
-                .HasForeignKey(b => b.LessonResultId)
+                .WithOne(b => b.VideoResult)
+                .HasForeignKey<VideoResult>(p => p.LessonResultId)
                 .OnDelete(DeleteBehavior.Cascade);
 
             builder.Property(e => e.Status)

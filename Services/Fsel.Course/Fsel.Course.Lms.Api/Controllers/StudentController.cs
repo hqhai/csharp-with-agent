@@ -39,9 +39,9 @@ namespace Fsel.Course.Lms.Api.Controllers
         }
 
         /// <summary>z
-        /// Get class in course
+        /// Get code class
         /// </summary>
-        [HttpGet("class-course")]
+        [HttpGet("get-class-code")]
         [ProducesResponseType(typeof(MethodResult<string>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetClassIncourse([FromQuery] GetClassCourseQuery query)

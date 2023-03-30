@@ -1,7 +1,6 @@
 using Fsel.Common.Enums;
 using Fsel.Common.Helpers;
 using Fsel.Course.Domain.Entities;
-using Fsel.Course.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 

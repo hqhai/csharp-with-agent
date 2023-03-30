@@ -14,15 +14,15 @@ namespace Fsel.Course.Domain.Entities.QuestionTypeConfigs.Questions
         public IList<MatchingTypeQuestionContent>? From { get; set; }
 
         [JsonRequired]
-        public IList<MatchingTypeQuestionContent>? Tos { get; set; }
+        public IList<MatchingTypeQuestionContent>? To { get; set; }
 
         [JsonRequired]
-        public IList<MatchingTypeQuestionLink>? Links { get; set; }
+        public IList<MatchingTypeQuestionLink>? Link { get; set; }
     }
 
     public class MatchingTypeQuestionContent
     {
-        public int Id { get; set; }
+        public long Id { get; set; }
 
         [JsonRequired]
         public string? Content { get; set; }
@@ -30,8 +30,8 @@ namespace Fsel.Course.Domain.Entities.QuestionTypeConfigs.Questions
 
     public class MatchingTypeQuestionLink
     {
-        public int FromId { get; set; }
+        public long FromId { get; set; }
 
-        public int Told { get; set; }
+        public long ToId { get; set; }
     }
 }
