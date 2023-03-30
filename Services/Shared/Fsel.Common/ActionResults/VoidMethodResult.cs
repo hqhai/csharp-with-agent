@@ -123,25 +123,25 @@ namespace Fsel.Common.ActionResults
 
         public void AddErrorBadRequest(IReadOnlyCollection<ErrorResult>? errorResults)
         {
-            AddError(StatusCodes.Status200OK, errorResults);
+            AddError(StatusCodes.Status400BadRequest, errorResults);
         }
 
         public void AddErrorBadRequest(string? errorCode, string? fieldName = null, params object[]? errorValues)
         {
-            AddError(StatusCodes.Status200OK, errorCode, fieldName, errorValues);
+            AddError(StatusCodes.Status400BadRequest, errorCode, fieldName, errorValues);
         }
 
         public void AddErrorBadRequest(string? errorCode, string? fieldName, object? errorValue)
         {
             if (errorValue != null)
             {
-                AddError(StatusCodes.Status200OK, errorCode, fieldName, errorValue);
+                AddError(StatusCodes.Status400BadRequest, errorCode, fieldName, errorValue);
             }
         }
 
         public void AddErrorBadRequest(string? errorCode, params Error[]? errors)
         {
-            AddError(StatusCodes.Status200OK, errorCode, errors);
+            AddError(StatusCodes.Status400BadRequest, errorCode, errors);
         }
 
         public virtual IActionResult GetActionResult()
@@ -153,7 +153,7 @@ namespace Fsel.Common.ActionResults
                 return objectResult;
             }
 
-            objectResult.StatusCode = StatusCode;
+            objectResult.StatusCode = StatusCodes.Status200OK;
             return objectResult;
         }
     }
