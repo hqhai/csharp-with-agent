@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Course.Domain.Models.CommandModels.Courses
+namespace Fsel.Course.Domain.Models.CommandModels.Classes
 {
     using System;
 
@@ -8,6 +8,5 @@ namespace Fsel.Course.Domain.Models.CommandModels.Courses
     {
         public string? Code { get; set; }
         public Guid CourseId { get; set; }
-        public Guid UserId { get; set; }
     }
 }

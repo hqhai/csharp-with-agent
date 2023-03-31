@@ -36,10 +36,13 @@ builder.Services.AddScoped<ICourseTeacherRepository, CourseTeacherRepository>();
 builder.Services.AddScoped<ICourseUnitMockTestRepository, CourseUnitMockTestRepository>();
 builder.Services.AddScoped<IMockTestRepository, MockTestRepository>();
 builder.Services.AddScoped<ICourseClassStudentRepository, CourseClassStudentRepository>();
+builder.Services.AddScoped<ICourseResultRepository, CourseResultRepository>();
 
 builder.Services.AddScoped<QuestionTypeConverter>();
 builder.Services.AddScoped<QuestionTypeCountConverter>();
 builder.Services.AddScoped<QuestionTypeValidation>();
+builder.Services.AddScoped<AnswerTypeCountConverter>();
+builder.Services.AddScoped<AnswerTypeValidatetion>();
 builder.AddRefitClients(typeof(IUserService), appSetting?.Services?.UserApiUrl);
 var app = builder.Build();
 

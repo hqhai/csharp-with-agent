@@ -66,18 +66,18 @@ namespace Fsel.Common.Helpers
             return new string(arr);
         }
 
-        public static string Serialize(this object? data, bool isCamelCase = false)
+        public static string Serialize(this object? data)
         {
-            var options = new JsonSerializerOptions { Converters = { new JsonStringEnumConverter() } };
-            if (isCamelCase)
+            var options = new JsonSerializerOptions
             {
-                options.PropertyNameCaseInsensitive = true;
-            }
+                Converters = { new JsonStringEnumConverter() },
+                PropertyNameCaseInsensitive = true
+            };
             string jsonString = JsonSerializer.Serialize(data, options);
             return jsonString;
         }
 
-        public static T? Deserialize<T>(this string? data, bool isCamelCase = false)
+        public static T? Deserialize<T>(this string? data)
         {
             try
             {
@@ -86,11 +86,11 @@ namespace Fsel.Common.Helpers
                     return default;
                 }
 
-                var options = new JsonSerializerOptions { Converters = { new JsonStringEnumConverter() } };
-                if (isCamelCase)
+                var options = new JsonSerializerOptions
                 {
-                    options.PropertyNameCaseInsensitive = true;
-                }
+                    Converters = { new JsonStringEnumConverter() },
+                    PropertyNameCaseInsensitive = true
+                };
                 T? obj = JsonSerializer.Deserialize<T>(data, options);
                 return obj;
             }
@@ -113,12 +113,12 @@ namespace Fsel.Common.Helpers
             }
         }
 
-        public static T? DeserializeFromFilePath<T>(string path, bool isCamelCase = false)
+        public static T? DeserializeFromFilePath<T>(string path)
         {
             using (StreamReader sr = new StreamReader(path))
             {
                 string jsonString = sr.ReadToEnd();
-                return Deserialize<T>(jsonString, isCamelCase);
+                return Deserialize<T>(jsonString);
             }
         }
 

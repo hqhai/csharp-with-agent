@@ -15,7 +15,5 @@ namespace Fsel.Course.Domain.Models.CommandModels.Units
         public EnumCourseLevel CourseLevel { get; set; }
 
         public Guid MockTestId { get; set; }
-
-        public EnumMockTestType MockTestType { get; set; }
     }
 }

@@ -10,16 +10,14 @@ namespace Fsel.Course.Domain.Entities.QuestionTypeConfigs.Answers
 
     public class DragAndDropPictureAnswer
     {
-        public int Scores { get; set; }
-
         public IList<DragAndDropPictureAnswers>? Answers { get; set; }
     }
 
     public class DragAndDropPictureAnswers
     {
-        public int ImageId { get; set; }
+        public long ImageId { get; set; }
 
-        public int WordId { get; set; }
+        public long WordId { get; set; }
 
         public bool IsExact { get; set; }
     }

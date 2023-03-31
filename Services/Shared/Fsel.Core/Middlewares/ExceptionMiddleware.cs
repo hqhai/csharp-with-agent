@@ -23,7 +23,7 @@ namespace Fsel.Core.Middlewares
                     {
                         VoidMethodResult errorResult = new VoidMethodResult();
                         errorResult.AddErrorServer();
-                        await context.Response.WriteAsync(errorResult.Serialize(true));
+                        await context.Response.WriteAsync(errorResult.Serialize());
                     }
                 });
             });

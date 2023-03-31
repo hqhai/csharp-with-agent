@@ -48,14 +48,14 @@ namespace Fsel.Course.Lms.Application.Queries.VideoQuery
                                 .ThenInclude(x => x.Question)
                                 .ThenInclude(x => (x ?? new()).VideoTimeCodeAnswer)
                                 .Where(x => x.Id == request.VideoId)
+                                .AsNoTracking()
                         select i;
 
             var video = await query.FirstOrDefaultAsync(cancellationToken);
 
             if (video == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumVideoErrorCode.VideoNotExist),
-                                                nameof(request.VideoId), request?.VideoId);
+                methodResult.AddErrorBadRequest(nameof(EnumVideoErrorCode.VideoNotExist), nameof(request.VideoId), request?.VideoId);
                 return methodResult;
             }
 

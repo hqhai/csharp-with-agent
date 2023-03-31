@@ -16,7 +16,6 @@ namespace Fsel.Course.Domain.Entities
         /// <summary>
         /// Media Post
         /// </summary>
-        [MaxLength(1000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? MediaPost { get; set; }
 
         /// <summary>

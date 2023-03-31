@@ -5,6 +5,7 @@ using Fsel.Common.Enums;
 using Fsel.Common.Helpers;
 using Fsel.Training.Doman.IRepositories;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 
 namespace Fsel.Training.Application.Queries.ClassQuery
 {
@@ -27,15 +28,14 @@ namespace Fsel.Training.Application.Queries.ClassQuery
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<string> methodResult = new MethodResult<string>();
 
-            var weekString = $"{DateTimeHelper.ConvertInt():00}";
-            int currentYear = DateTime.Now.Year;
-            int lastTwoDigitsOfYear = currentYear % 100;
-            int lastDigitOfYear = lastTwoDigitsOfYear % 10;
-            var stt = $"{_trainingRepository.Queryable.Count():000}";
+            var currentDate = DateTime.Now;
+            var weekNumber = (currentDate.DayOfYear - 1) / 7 + 1;
+            var lastDigitOfYear = currentDate.Year % 10;
             var level = EnumHelper.GetCodeByEnumCourseLevel(request.CourseLevel);
+            var stt = await _trainingRepository.Queryable.CountAsync(cancellationToken: cancellationToken);
 
-            string codeTraining = $"{level}_{weekString}{lastDigitOfYear}{stt}S";
-            methodResult.Result = codeTraining;
+            string codeClass = $"{level}_{weekNumber}{lastDigitOfYear}{stt}S";
+            methodResult.Result = codeClass;
             return methodResult;
         }
     }
