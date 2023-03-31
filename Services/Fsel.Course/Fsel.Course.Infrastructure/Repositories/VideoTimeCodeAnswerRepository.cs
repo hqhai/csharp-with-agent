@@ -19,7 +19,6 @@ namespace Fsel.Course.Infrastructure.Repositories
             {
                 return await Queryable.Where(x => x.QuestionId == questionId && x.ExerciseId == exerciseId)
                                       .Where(x => x.VideoTimeCodeId == videoTimeCodeId && x.VideoResultId == videoResultId)
-                                      .AsNoTracking()
                                       .FirstOrDefaultAsync();
             }
             catch (Exception)
