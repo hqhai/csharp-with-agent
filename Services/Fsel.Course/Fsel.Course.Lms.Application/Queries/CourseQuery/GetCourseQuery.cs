@@ -63,6 +63,9 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
 
             var course = await _courseRepository.Queryable
                              .Include(x => x.CourseUnitMockTests.Where(y => !y.IsDeleted))
+                             .ThenInclude(unit => unit.Unit)
+                             .Include(x => x.CourseUnitMockTests.Where(y => !y.IsDeleted))
+                             .ThenInclude(unit => unit.MockTest)
                              .Include(x => x.CourseTeachers.Where(y => !y.IsDeleted))
                              .Where(x => x.Id == courseClassStudent.CourseId)
                              .AsNoTracking()
