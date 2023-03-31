@@ -77,10 +77,10 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
                 return methodResult;
             }
 
-            var questionIds = request.Answers.Select(x => x.QuestionId).ToList();
+            var questionIds = request.Answers.Select(x => (x ?? new()).QuestionId).ToList();
             var questions = await _questionRepository.Queryable.Include(x => x.ExerciseQuestions)
                                                              .ThenInclude(x => x.Exercise)
-                                                             .ThenInclude(x => x.TimeCodeExercises)
+                                                             .ThenInclude(x => (x ?? new()).TimeCodeExercises)
                                                              .ThenInclude(x => x.VideoTimeCode)
                                                              .AsNoTracking()
                                                              .Where(x => questionIds.Contains(x.Id)).ToListAsync(cancellationToken: cancellationToken);

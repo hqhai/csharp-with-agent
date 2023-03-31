@@ -25,7 +25,7 @@ namespace Fsel.Core.Base
         public BaseDbContext(DbContextOptions options, IMediator mediator)
             : base(options)
         {
-            _mediator = mediator ?? throw new ArgumentNullException("mediator");
+            _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
             _trackEntities = new List<Entity>();
             Debug.WriteLine("BaseDbContext::ctor ->" + GetHashCode());
         }

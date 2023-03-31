@@ -204,6 +204,7 @@ namespace Fsel.Core.Base
             {
                 using IDbContextTransaction? transaction = await _dbBaseContext.BeginTransactionAsync().ConfigureAwait(continueOnCapturedContext: false);
                 if (transaction != null)
+                {
                     try
                     {
                         if ((await action().ConfigureAwait(continueOnCapturedContext: false))?.IsOK ?? false)
@@ -220,6 +221,7 @@ namespace Fsel.Core.Base
                         transaction.Rollback();
                         throw;
                     }
+                }
             }).ConfigureAwait(continueOnCapturedContext: false);
         }
     }

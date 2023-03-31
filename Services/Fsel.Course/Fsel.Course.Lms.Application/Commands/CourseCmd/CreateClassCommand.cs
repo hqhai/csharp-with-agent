@@ -67,9 +67,9 @@ namespace Fsel.Course.Lms.Application.Commands.CourseCmd
                                                        .Include(e => e.CourseClassStudents.Where(y => y.IsDeleted == false))
                                                        .Include(x => x.CourseUnitMockTests.Where(y => y.IsDeleted == false))
                                                        .ThenInclude(x => x.Unit)
-                                                       .ThenInclude(x => x.UnitLessons.Where(y => y.IsDeleted == false))
+                                                       .ThenInclude(x => (x ?? new()).UnitLessons.Where(y => y.IsDeleted == false))
                                                        .ThenInclude(x => x.Lesson)
-                                                       .ThenInclude(x => x.LessonVideos)
+                                                       .ThenInclude(x => (x ?? new()).LessonVideos)
                                                        .AsNoTracking()
                                                        .Where(x => x.Id == request.CourseId).FirstOrDefaultAsync(cancellationToken: cancellationToken);
             if (course == null)
@@ -102,12 +102,12 @@ namespace Fsel.Course.Lms.Application.Commands.CourseCmd
                         .Select(x => new UnitResult
                         {
                             StudentId = _authContext.CurrentUserId,
-                            UnitId = x.Id,
+                            UnitId = (x ?? new()).Id,
                         }).ToList();
 
             var lessonResults = units
                                 .GroupBy(x => x?.Id)
-                                .Select(x => new { x.Key, Lessons = x.SelectMany(n => n.UnitLessons).Select(x => x.Lesson) })
+                                .Select(x => new { x.Key, Lessons = x.SelectMany(n => (n ?? new()).UnitLessons).Select(x => x.Lesson) })
                                 .SelectMany(x => x.Lessons.Select(n => new LessonResult
                                 {
                                     StudentId = _authContext.CurrentUserId,
@@ -116,7 +116,7 @@ namespace Fsel.Course.Lms.Application.Commands.CourseCmd
                                     LessonId = n?.Id ?? default,
                                     VideoResult = new VideoResult
                                     {
-                                        VideoId = n.LessonVideos.FirstOrDefault()?.VideoId ?? default,
+                                        VideoId = (n ?? new()).LessonVideos.FirstOrDefault()?.VideoId ?? default,
                                         StudentId = _authContext.CurrentUserId
                                     }
                                 })).ToList();

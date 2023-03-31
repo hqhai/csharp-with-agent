@@ -2,7 +2,6 @@ using Fsel.Common.Constants;
 using Fsel.Core.Middlewares;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using Ocelot.Middleware;
 
 namespace Fsel.Core.Extensions
