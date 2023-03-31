@@ -60,6 +60,11 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         /// <summary>
         /// MocktestId and UnitId cannot have values at the same time.
         /// </summary>
-        MocktestIdAndUnitIdAreMutuallyExclusive
+        MocktestIdAndUnitIdAreMutuallyExclusive,
+
+        /// <summary>
+        /// Course must be in an active state
+        /// </summary>
+        CourseMustActiveState
     }
 }

@@ -16,11 +16,11 @@ namespace Fsel.Training.Application.Queries.ClassQuery
 
     public class GetNewClassCodeQueryHandler : IRequestHandler<GetNewClassCodeQuery, MethodResult<string>>
     {
-        private readonly IClassRepository _trainingRepository;
+        private readonly IClassRepository _classRepository;
 
-        public GetNewClassCodeQueryHandler(IClassRepository trainingRepository)
+        public GetNewClassCodeQueryHandler(IClassRepository classRepository)
         {
-            _trainingRepository = trainingRepository;
+            _classRepository = classRepository;
         }
 
         public async Task<MethodResult<string>> Handle(GetNewClassCodeQuery request, CancellationToken cancellationToken)
@@ -32,7 +32,7 @@ namespace Fsel.Training.Application.Queries.ClassQuery
             var weekNumber = (currentDate.DayOfYear - 1) / 7 + 1;
             var lastDigitOfYear = currentDate.Year % 10;
             var level = EnumHelper.GetCodeByEnumCourseLevel(request.CourseLevel);
-            var stt = await _trainingRepository.Queryable.CountAsync(cancellationToken: cancellationToken);
+            var stt = await _classRepository.Queryable.CountAsync(cancellationToken: cancellationToken);
 
             string codeClass = $"{level}_{weekNumber}{lastDigitOfYear}{stt}S";
             methodResult.Result = codeClass;

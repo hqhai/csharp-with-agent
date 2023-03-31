@@ -23,7 +23,27 @@ namespace Fsel.Course.Infrastructure.Repositories
             try
             {
                 return await Queryable
-                .Include(x => x.CourseUnitMockTests.Where(n => !n.IsDeleted)).Include(x => x.CourseTeachers.Where(c => !c.IsDeleted)).FirstOrDefaultAsync(x => x.Id == id);
+                .Include(x => x.CourseUnitMockTests.Where(n => !n.IsDeleted))
+                .Include(x => x.CourseTeachers.Where(c => !c.IsDeleted)).FirstOrDefaultAsync(x => x.Id == id);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<EntityCourse?> GetIncludeLessonVideoByIdAsync(Guid id)
+        {
+            try
+            {
+                return await Queryable.Include(x => x.CourseResult)
+                                        .Include(e => e.CourseClassStudents.Where(y => y.IsDeleted == false))
+                                        .Include(x => x.CourseUnitMockTests.Where(y => y.IsDeleted == false))
+                                        .ThenInclude(x => x.Unit)
+                                        .ThenInclude(x => x.UnitLessons.Where(y => y.IsDeleted == false))
+                                        .ThenInclude(x => x.Lesson)
+                                        .ThenInclude(x => x.LessonVideos)
+                                        .Where(x => x.Id == id).FirstOrDefaultAsync();
             }
             catch (Exception)
             {

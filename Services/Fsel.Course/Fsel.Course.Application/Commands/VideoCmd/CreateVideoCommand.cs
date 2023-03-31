@@ -2,7 +2,6 @@
 
 using AutoMapper;
 using Fsel.Common.ActionResults;
-using Fsel.Course.Application.Services.UserServices;
 using Fsel.Course.Domain.Entities;
 using Fsel.Course.Domain.Enums.ErrorCodes;
 using Fsel.Course.Domain.IRepositories;
@@ -24,29 +23,25 @@ namespace Fsel.Course.Application.Commands.VideoCmd
         private readonly QuestionTypeValidation _questionTypeValidation;
         private readonly QuestionTypeCountConverter _questionTypeCountConverter;
         private readonly IMapper _mapper;
-        private readonly IUserService _userService;
 
         public CreateVideoCommandHandler(IVideoRepository videoRepository
             , QuestionTypeValidation questionTypeValidation
             , QuestionTypeCountConverter questionTypeCountConverter
-            , IMapper mapper
-            , IUserService userService)
+            , IMapper mapper)
         {
             _videoRepository = videoRepository;
             _questionTypeValidation = questionTypeValidation;
             _questionTypeCountConverter = questionTypeCountConverter;
             _mapper = mapper;
-            _userService = userService;
         }
 
         public async Task<MethodResult<VideoModel>> Handle(CreateVideoCommand request, CancellationToken cancellationToken)
         {
-            MethodResult<VideoModel> methodResult = new MethodResult<VideoModel>();
             ArgumentNullException.ThrowIfNull(request);
+            MethodResult<VideoModel> methodResult = new MethodResult<VideoModel>();
 
             #region Validation
 
-            ArgumentNullException.ThrowIfNull(request);
             if (request.VideoTimeCodes == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumVideoErrorCode.VideoNotCorrect), nameof(request.VideoTimeCodes));
@@ -91,7 +86,7 @@ namespace Fsel.Course.Application.Commands.VideoCmd
                                     {
                                         methodResult.AddErrorBadRequest(nameof(EnumVideoErrorCode.ConfigIsInTheWrongFormat), nameof(question.Config));
                                     }
-                                    question.CorrectTotal = _questionTypeCountConverter.GetTotalCorrectByQuestionType(question.Config, question.QuestionType);
+                                    question.CorrectTotal = _questionTypeCountConverter.GetTotalCorrectByQuestionType(question.Config, question.QuestionType) ?? default;
                                     excercise.ExerciseQuestions.Add(new ExerciseQuestion
                                     {
                                         Question = question

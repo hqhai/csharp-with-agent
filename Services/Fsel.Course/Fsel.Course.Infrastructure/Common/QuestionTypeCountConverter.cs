@@ -8,7 +8,7 @@ namespace Fsel.Course.Infrastructure.Common
 
     public class QuestionTypeCountConverter
     {
-        public int GetTotalCorrectByQuestionType(object config, EnumQuestionType type)
+        public int? GetTotalCorrectByQuestionType(object? config, EnumQuestionType type)
         {
             switch (type)
             {
@@ -57,7 +57,7 @@ namespace Fsel.Course.Infrastructure.Common
             }
         }
 
-        private static int GetTotalCorrectTypeMultipleOptionQuestion(object config)
+        private static int? GetTotalCorrectTypeMultipleOptionQuestion(object? config)
         {
             var data = config.Deserialize<MultipleOptionSentenceCompletionQuestion>();
             if (data != null && data.Contents != null)
@@ -67,7 +67,7 @@ namespace Fsel.Course.Infrastructure.Common
             return default;
         }
 
-        private static int GetTotalCorrectTypeCheckListQuestion(object config)
+        private static int? GetTotalCorrectTypeCheckListQuestion(object? config)
         {
             var data = config.Deserialize<MutipleChoiceQuestion>();
             int number = 0;
@@ -85,12 +85,12 @@ namespace Fsel.Course.Infrastructure.Common
             return default;
         }
 
-        private static int GetTotalCorrectTypeDefaultQuestion()
+        private static int? GetTotalCorrectTypeDefaultQuestion()
         {
             return 1;
         }
 
-        private static int GetTotalCorrectTypeMaschingQuestion(object config)
+        private static int? GetTotalCorrectTypeMaschingQuestion(object? config)
         {
             var data = config.Deserialize<MatchingTypeQuestion>();
             if (data != null && data.Link != null)
@@ -100,7 +100,7 @@ namespace Fsel.Course.Infrastructure.Common
             return default;
         }
 
-        private static int GetTotalCorrectTypeGapFillBySubQuestion(object config)
+        private static int? GetTotalCorrectTypeGapFillBySubQuestion(object? config)
         {
             var data = config.Deserialize<GapFillQuestion>();
             if (data != null && data.Contents != null)
@@ -110,7 +110,7 @@ namespace Fsel.Course.Infrastructure.Common
             return default;
         }
 
-        private static int GetTotalCorrectTypeGapFillByGap(object config)
+        private static int? GetTotalCorrectTypeGapFillByGap(object? config)
         {
             var data = config.Deserialize<GapFillQuestion>();
             if (data != null && data.Contents != null)
@@ -120,7 +120,7 @@ namespace Fsel.Course.Infrastructure.Common
             return default;
         }
 
-        private static int GetTotalCorrectTypeDragDropOrderQuestion(object config)
+        private static int? GetTotalCorrectTypeDragDropOrderQuestion(object? config)
         {
             var data = config.Deserialize<DragAndDropSentenceOrderQuestion>();
             if (data != null && data.Contents != null)
@@ -130,7 +130,7 @@ namespace Fsel.Course.Infrastructure.Common
             return default;
         }
 
-        private static int GetTotalCorrectTypeDragDropPictureQuestion(object config)
+        private static int? GetTotalCorrectTypeDragDropPictureQuestion(object? config)
         {
             var data = config.Deserialize<DragAndDropPictureQuestion>();
             if (data != null && data.Contents != null)

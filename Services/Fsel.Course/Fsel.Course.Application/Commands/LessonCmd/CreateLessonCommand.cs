@@ -38,15 +38,10 @@ namespace Fsel.Course.Application.Commands.LessonCmd
 
         public async Task<MethodResult<LessonModel>> Handle(CreateLessonCommand request, CancellationToken cancellationToken)
         {
+            ArgumentNullException.ThrowIfNull(request);
             MethodResult<LessonModel> methodResult = new MethodResult<LessonModel>();
 
             #region Validation
-
-            if (request == null)
-            {
-                methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                return methodResult;
-            }
 
             if (request.HomeWorkIds == null)
             {

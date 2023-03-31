@@ -25,19 +25,18 @@ namespace Fsel.Course.Application.Commands.LessonCmd
 
         public async Task<MethodResult<bool>> Handle(DeleteLessonCommand request, CancellationToken cancellationToken)
         {
-            MethodResult<bool> methodResult = new MethodResult<bool>();
             ArgumentNullException.ThrowIfNull(request);
+            MethodResult<bool> methodResult = new MethodResult<bool>();
 
             #region Validation
 
-            var lesson = _lessonRepository.Queryable.Include(e => e.UnitLessons)
+            var lesson = await _lessonRepository.Queryable.Include(e => e.UnitLessons)
                                 .Include(e => e.ClassForum).Include(e => e.LessonHomeWorks)
                                 .Include(e => e.LessonVideos).Include(e => e.LessonExtraPractices)
-                                .FirstOrDefault(e => e.Id == request.Id);
+                                .FirstOrDefaultAsync(e => e.Id == request.Id, cancellationToken: cancellationToken);
             if (lesson == null)
             {
-                methodResult.AddErrorBadRequest(
-                    nameof(EnumLessonErrorCode.LessonNotExist), nameof(request.Id), request?.Id);
+                methodResult.AddErrorBadRequest(nameof(EnumLessonErrorCode.LessonNotExist), nameof(request.Id), request?.Id);
                 return methodResult;
             }
 
@@ -48,39 +47,7 @@ namespace Fsel.Course.Application.Commands.LessonCmd
                 return methodResult;
             }
 
-            if (lesson.ClassForum == null)
-            {
-                methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                methodResult.AddError(nameof(EnumClassForumErrorCode.ClassForumIsNotCorrect));
-                return methodResult;
-            }
-
-            if (lesson.LessonExtraPractices == null)
-            {
-                methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                methodResult.AddError(
-                    nameof(EnumLessonExtraPracticeErrorCode.LessonExtraPractiveNull));
-                return methodResult;
-            }
-
-            if (lesson.LessonHomeWorks == null)
-            {
-                methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                methodResult.AddError(
-                    nameof(EnumeLessonHomeWorkErrorCode.LessonHomeWorkNull));
-                return methodResult;
-            }
-
-            if (lesson.LessonVideos == null)
-            {
-                methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                methodResult.AddError(
-                    nameof(EnumLessonVideoErrorCode.LessonVideoNotCorrect));
-                return methodResult;
-            }
-
             var isLessonUsed = await _lessonRepository.IsLessonUsed(request.Id);
-
             if (isLessonUsed)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumLessonErrorCode.LessonUsed), nameof(request.Id), request.Id);

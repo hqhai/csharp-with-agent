@@ -7,6 +7,11 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         /// <summary>
         /// Answer is in the wrong format
         /// </summary>
-        AnswerIsInTheWrongFormat
+        AnswerIsInTheWrongFormat,
+
+        /// <summary>
+        /// Answers Not Empty
+        /// </summary>
+        AnswersNotEmpty
     }
 }

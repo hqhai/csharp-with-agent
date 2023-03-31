@@ -41,23 +41,15 @@ namespace Fsel.Course.Application.Commands.LessonCmd
 
         public async Task<MethodResult<LessonModel>> Handle(UpdateLessonCommand request, CancellationToken cancellationToken)
         {
-            MethodResult<LessonModel> methodResult = new MethodResult<LessonModel>();
             ArgumentNullException.ThrowIfNull(request);
+            MethodResult<LessonModel> methodResult = new MethodResult<LessonModel>();
 
             #region Validation
-
-            if (request == null)
-            {
-                methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                methodResult.AddError("Not Found");
-                return methodResult;
-            }
 
             var lesson = await _lessonRepository.GetByIdAsync(request.Id);
             if (lesson == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumLessonErrorCode.LessonNotExist),
-                                                nameof(request.Id), request.Id);
+                methodResult.AddErrorBadRequest(nameof(EnumLessonErrorCode.LessonNotExist), nameof(request.Id), request.Id);
                 return methodResult;
             }
 
@@ -70,8 +62,7 @@ namespace Fsel.Course.Application.Commands.LessonCmd
 
             if (request.HomeWorkIds == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumHomeWorkErrorCode.HomeWorkNull),
-                                                nameof(request.HomeWorkIds), request.HomeWorkIds);
+                methodResult.AddErrorBadRequest(nameof(EnumHomeWorkErrorCode.HomeWorkNull), nameof(request.HomeWorkIds), request.HomeWorkIds);
                 return methodResult;
             }
 
@@ -83,51 +74,40 @@ namespace Fsel.Course.Application.Commands.LessonCmd
 
             if (request.ExtraPracticeIds == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumExtraPractiveErrorCode.ExtraPractiveNull),
-                    nameof(request.ExtraPracticeIds), request.ExtraPracticeIds);
+                methodResult.AddErrorBadRequest(nameof(EnumExtraPractiveErrorCode.ExtraPractiveNull), nameof(request.ExtraPracticeIds), request.ExtraPracticeIds);
                 return methodResult;
             }
 
             var isLessonUsed = await _lessonRepository.IsLessonUsed(request.Id);
-
             if (isLessonUsed)
             {
-                methodResult.AddErrorBadRequest(
-                    nameof(EnumLessonErrorCode.LessonUsed), nameof(request.Id), request.Id);
+                methodResult.AddErrorBadRequest(nameof(EnumLessonErrorCode.LessonUsed), nameof(request.Id), request.Id);
                 return methodResult;
             }
 
             if (_extraPracticeRepository.IsIdsInValid(request.ExtraPracticeIds))
             {
-                methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                methodResult.AddError(
-                    nameof(EnumExtraPractiveErrorCode.ExtraPractiveNull));
+                methodResult.AddErrorBadRequest(nameof(EnumExtraPractiveErrorCode.ExtraPractiveNull));
 
                 return methodResult;
             }
 
             if (_videoRepository.IsIdsInValid(request.VideoIds))
             {
-                methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                methodResult.AddError(
-                    nameof(EnumVideoErrorCode.VideoNotCorrect));
+                methodResult.AddErrorBadRequest(nameof(EnumVideoErrorCode.VideoNotCorrect));
 
                 return methodResult;
             }
 
             if (_classForumRepository.IsIdsInValid(new List<Guid> { request.ClassForumId }))
             {
-                methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                methodResult.AddError(
-                    nameof(EnumClassForumErrorCode.ClassForumNull));
+                methodResult.AddErrorBadRequest(nameof(EnumClassForumErrorCode.ClassForumNull));
                 return methodResult;
             }
 
             if (_homeWorkRepository.IsIdsInValid(request.HomeWorkIds))
             {
-                methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                methodResult.AddError(
-                    nameof(EnumHomeWorkErrorCode.HomeWorkNull));
+                methodResult.AddErrorBadRequest(nameof(EnumHomeWorkErrorCode.HomeWorkNull));
 
                 return methodResult;
             }

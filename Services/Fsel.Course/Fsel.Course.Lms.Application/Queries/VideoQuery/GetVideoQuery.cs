@@ -39,7 +39,7 @@ namespace Fsel.Course.Lms.Application.Queries.VideoQuery
         {
             MethodResult<VideoModel> methodResult = new MethodResult<VideoModel>();
 
-            var query = from i in _videoRepository.Queryable
+            var video = await _videoRepository.Queryable
                                 .Include(x => x.LessonVideos.Where(y => !y.IsDeleted))
                                 .Include(i => i.VideoTimeCodes.Where(x => !x.IsDeleted))
                                 .ThenInclude(x => x.TimeCodeExercises.Where(x => !x.IsDeleted && x.Exercise != null))
@@ -49,9 +49,7 @@ namespace Fsel.Course.Lms.Application.Queries.VideoQuery
                                 .ThenInclude(x => x.VideoTimeCodeAnswer)
                                 .Where(x => x.Id == request.VideoId)
                                 .AsNoTracking()
-                        select i;
-
-            var video = await query.FirstOrDefaultAsync(cancellationToken: cancellationToken);
+                                .FirstOrDefaultAsync(cancellationToken: cancellationToken);
 
             if (video == null)
             {
@@ -85,7 +83,7 @@ namespace Fsel.Course.Lms.Application.Queries.VideoQuery
                             QuestionType = m.QuestionType,
                             IsSave = m.IsSave,
                             CorrectTotal = m.CorrectTotal,
-                            Config = _questionTypeConverter.QuestionTypeConverterObject(m.QuestionType, m.Config),
+                            Config = _questionTypeConverter.QuestionTypeConverterObject(m.QuestionType, m.Config) ?? default,
                             VideoTimeCodeAnswer = _mapper.Map<VideoTimeCodeAnswerModel>(m.VideoTimeCodeAnswer)
                         }).ToList()
                     }).ToList(),

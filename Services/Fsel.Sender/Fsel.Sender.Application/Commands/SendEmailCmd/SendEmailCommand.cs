@@ -1,6 +1,5 @@
 using Fsel.Common.ActionResults;
 using Fsel.Common.Helpers;
-using Fsel.Sender.Application.Services;
 using Fsel.Sender.Domain.Enums.ErrorCodes;
 using Fsel.Sender.Domain.Models.Commands;
 using Fsel.Sender.Domain.Models.Entities;
@@ -71,7 +70,9 @@ namespace Fsel.Sender.Application.Commands.SendEmailCmd
             var emailMessage = new MimeMessage();
             emailMessage.From.Add(new MailboxAddress("LMS -FSEL", _appSetting?.Smtp?.From ?? string.Empty));
             if (message.ToEmails == null)
+            {
                 return emailMessage;
+            }
 
             foreach (var item in message.ToEmails)
             {
