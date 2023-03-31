@@ -1,3 +1,5 @@
+// Copyright (c) Atlantic. All rights reserved.
+
 using System.Net;
 using Fsel.Common.ActionResults;
 using Fsel.Common.Constants;

@@ -1,3 +1,5 @@
+// Copyright (c) Atlantic. All rights reserved.
+
 using Fsel.Course.Domain.Enums;
 
 namespace Fsel.Course.Domain.Models.CommandModels.UnitSkillMockTests

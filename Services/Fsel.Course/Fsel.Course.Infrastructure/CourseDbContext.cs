@@ -1,3 +1,5 @@
+// Copyright (c) Atlantic. All rights reserved.
+
 using Fsel.Common.Constants;
 using Fsel.Core.Base;
 using Fsel.Course.Domain.Entities;

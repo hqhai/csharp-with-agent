@@ -1,3 +1,5 @@
+// Copyright (c) Atlantic. All rights reserved.
+
 using Fsel.Core.Extensions;
 using Fsel.Identity.Application.Services;
 using Fsel.Identity.Domain.Entities;

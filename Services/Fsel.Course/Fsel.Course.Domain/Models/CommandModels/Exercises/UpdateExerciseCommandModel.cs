@@ -1,5 +1,6 @@
+// Copyright (c) Atlantic. All rights reserved.
+
 using Fsel.Common.Enums;
-using Fsel.Course.Domain.Enums;
 using Fsel.Course.Domain.Models.CommandModels.Questions;
 
 namespace Fsel.Course.Domain.Models.CommandModels.Exercises

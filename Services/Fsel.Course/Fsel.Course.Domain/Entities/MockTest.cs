@@ -1,9 +1,10 @@
+// Copyright (c) Atlantic. All rights reserved.
+
 using System.ComponentModel.DataAnnotations;
 using Fsel.Common.Enums;
 using Fsel.Common.Enums.ErrorCodes;
 using Fsel.Core.Entities;
 using Fsel.Course.Domain.Enums;
-using Fsel.Course.Domain.Enums.ErrorCodes;
 
 namespace Fsel.Course.Domain.Entities
 {

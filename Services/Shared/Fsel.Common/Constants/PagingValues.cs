@@ -1,4 +1,6 @@
-﻿namespace Fsel.Common.Constants
+// Copyright (c) Atlantic. All rights reserved.
+
+namespace Fsel.Common.Constants
 {
     public static class PagingValues
     {

@@ -1,3 +1,5 @@
+// Copyright (c) Atlantic. All rights reserved.
+
 using System.Text.Json.Serialization;
 using Fsel.Common.Enums;
 using Fsel.Common.Helpers;

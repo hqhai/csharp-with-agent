@@ -1,3 +1,5 @@
+// Copyright (c) Atlantic. All rights reserved.
+
 using Fsel.Core.Base.BaseModels;
 using Fsel.Course.Domain.Enums;
 

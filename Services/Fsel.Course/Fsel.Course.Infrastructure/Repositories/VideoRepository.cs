@@ -1,3 +1,5 @@
+// Copyright (c) Atlantic. All rights reserved.
+
 using Fsel.Core.Base;
 using Fsel.Course.Domain.Entities;
 using Fsel.Course.Domain.IRepositories;
@@ -26,7 +28,7 @@ namespace Fsel.Course.Infrastructure.Repositories
                 .Include(x => x.VideoTimeCodes.Where(n => !n.IsDeleted))
                 .ThenInclude(x => x.TimeCodeExercises.Where(n => !n.IsDeleted))
                 .ThenInclude(x => x.Exercise)
-                .ThenInclude(x => x.ExerciseQuestions.Where(n => !n.IsDeleted))
+                .ThenInclude(x => (x ?? new()).ExerciseQuestions.Where(n => !n.IsDeleted))
                 .ThenInclude(x => x.Question)
                 .FirstOrDefaultAsync(x => x.Id == id);
             }

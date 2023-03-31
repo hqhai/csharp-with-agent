@@ -1,4 +1,5 @@
-using Fsel.Common.Enums;
+// Copyright (c) Atlantic. All rights reserved.
+
 using Fsel.Common.Helpers;
 using Fsel.Course.Domain.Entities;
 using Fsel.Course.Domain.Enums;

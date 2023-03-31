@@ -1,3 +1,5 @@
+// Copyright (c) Atlantic. All rights reserved.
+
 using Fsel.Common.ActionResults;
 using Fsel.Core.Applications.InternalEvents;
 using Fsel.Core.Base.Interfaces;

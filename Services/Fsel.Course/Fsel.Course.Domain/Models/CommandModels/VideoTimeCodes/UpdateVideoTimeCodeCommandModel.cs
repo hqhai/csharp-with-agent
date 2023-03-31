@@ -1,5 +1,5 @@
-using System.Text.Json.Serialization;
-using Fsel.Common.Helpers;
+// Copyright (c) Atlantic. All rights reserved.
+
 using Fsel.Course.Domain.Enums;
 using Fsel.Course.Domain.Models.CommandModels.Exercises;
 

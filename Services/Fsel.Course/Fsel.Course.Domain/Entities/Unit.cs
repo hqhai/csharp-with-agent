@@ -1,3 +1,5 @@
+// Copyright (c) Atlantic. All rights reserved.
+
 using System.ComponentModel.DataAnnotations;
 using Fsel.Common.Enums;
 using Fsel.Common.Enums.ErrorCodes;
@@ -34,6 +36,5 @@ namespace Fsel.Course.Domain.Entities
         public ICollection<UnitLesson> UnitLessons { get; set; } = new List<UnitLesson>();
         public ICollection<UnitResult> UnitResults { get; set; } = new List<UnitResult>();
         public ICollection<LessonResult> LessonResults { get; set; } = new List<LessonResult>();
-
     }
 }

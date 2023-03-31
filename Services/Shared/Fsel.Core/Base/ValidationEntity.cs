@@ -1,3 +1,5 @@
+// Copyright (c) Atlantic. All rights reserved.
+
 using System.ComponentModel.DataAnnotations;
 using System.Reflection;
 using System.Text.Json.Serialization;

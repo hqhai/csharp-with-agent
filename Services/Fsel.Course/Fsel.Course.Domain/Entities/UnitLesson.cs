@@ -1,3 +1,5 @@
+// Copyright (c) Atlantic. All rights reserved.
+
 using System.ComponentModel.DataAnnotations;
 using Fsel.Common.Enums.ErrorCodes;
 using Fsel.Core.Entities;
@@ -14,6 +16,7 @@ namespace Fsel.Course.Domain.Entities
 
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         public Guid UnitId { get; set; }
+
         public ICollection<LessonResult> UnitLessonResults { get; set; } = new List<LessonResult>();
     }
 }

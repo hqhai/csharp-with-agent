@@ -1,3 +1,5 @@
+// Copyright (c) Atlantic. All rights reserved.
+
 namespace Fsel.Training.Infrastructure
 {
     using Fsel.Common.Constants;

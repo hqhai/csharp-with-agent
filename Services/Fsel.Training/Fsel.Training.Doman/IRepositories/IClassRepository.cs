@@ -1,3 +1,5 @@
+// Copyright (c) Atlantic. All rights reserved.
+
 namespace Fsel.Training.Doman.IRepositories
 {
     using Fsel.Core.Base.Interfaces;

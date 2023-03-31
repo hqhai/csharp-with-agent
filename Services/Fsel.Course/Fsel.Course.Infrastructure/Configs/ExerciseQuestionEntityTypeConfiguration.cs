@@ -1,4 +1,6 @@
-﻿using Fsel.Course.Domain.Entities;
+// Copyright (c) Atlantic. All rights reserved.
+
+using Fsel.Course.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
