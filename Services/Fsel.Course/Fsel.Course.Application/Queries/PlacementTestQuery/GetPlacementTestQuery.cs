@@ -28,6 +28,7 @@ namespace Fsel.Course.Application.Queries.PlacementTestQuery
 
         public async Task<MethodResult<PlacementTestModel>> Handle(GetPlacementTestQuery request, CancellationToken cancellationToken)
         {
+            ArgumentNullException.ThrowIfNull(request);
             MethodResult<PlacementTestModel> methodResult = new MethodResult<PlacementTestModel>();
 
             var placementTest = await _placementTestRepository.GetByIdAsync(request.Id);

@@ -28,6 +28,8 @@ namespace Fsel.Course.Application.Commands.CourseCmd
 
         public async Task<MethodResult<bool>> Handle(ActiveCourseCommand request, CancellationToken cancellationToken)
         {
+            ArgumentNullException.ThrowIfNull(request);
+
             MethodResult<bool> methodResult = new MethodResult<bool>();
 
             #region Validation

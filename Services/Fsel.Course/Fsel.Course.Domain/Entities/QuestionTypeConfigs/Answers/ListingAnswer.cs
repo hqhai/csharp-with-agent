@@ -4,7 +4,7 @@ namespace Fsel.Course.Domain.Entities.QuestionTypeConfigs.Answers
 {
     public class ListingAnswer
     {
-        public string? Answers { get; set; }
+        public IList<string>? Answers { get; set; }
 
         public bool IsExact { get; set; }
     }

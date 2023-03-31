@@ -29,6 +29,7 @@ namespace Fsel.Identity.Application.Queries.TeacherQuery
 
         public async Task<MethodResult<PagingItemsModel<TeacherModel>>> Handle(SearchTeacherQuery request, CancellationToken cancellationToken)
         {
+            ArgumentNullException.ThrowIfNull(request);
             MethodResult<PagingItemsModel<TeacherModel>> methodResult = new MethodResult<PagingItemsModel<TeacherModel>>();
 
             if (request.PageSize > 100)
