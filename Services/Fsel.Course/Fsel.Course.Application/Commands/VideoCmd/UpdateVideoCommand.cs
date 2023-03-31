@@ -2,7 +2,6 @@
 
 using AutoMapper;
 using Fsel.Common.ActionResults;
-using Fsel.Course.Application.Services.UserServices;
 using Fsel.Course.Domain.Entities;
 using Fsel.Course.Domain.Enums.ErrorCodes;
 using Fsel.Course.Domain.IRepositories;
@@ -24,19 +23,16 @@ namespace Fsel.Course.Application.Commands.VideoCmd
         private readonly IMapper _mapper;
         private readonly QuestionTypeCountConverter _questionTypeCountConverter;
         private readonly QuestionTypeValidation _questionTypeValidation;
-        private readonly IUserService _userService;
 
         public UpdateVideoCommandHandler(IVideoRepository videoRepository
             , IMapper mapper
             , QuestionTypeCountConverter questionTypeCountConverter
-            , QuestionTypeValidation questionTypeValidation
-            , IUserService userService)
+            , QuestionTypeValidation questionTypeValidation)
         {
             _videoRepository = videoRepository;
             _mapper = mapper;
             _questionTypeCountConverter = questionTypeCountConverter;
             _questionTypeValidation = questionTypeValidation;
-            _userService = userService;
         }
 
         public async Task<MethodResult<VideoModel>> Handle(UpdateVideoCommand request, CancellationToken cancellationToken)
@@ -127,7 +123,7 @@ namespace Fsel.Course.Application.Commands.VideoCmd
                                     {
                                         methodResult.AddErrorBadRequest(nameof(EnumVideoErrorCode.ConfigIsInTheWrongFormat), nameof(question.Config));
                                     }
-                                    question.CorrectTotal = _questionTypeCountConverter.GetTotalCorrectByQuestionType(question.Config, question.QuestionType);
+                                    question.CorrectTotal = _questionTypeCountConverter.GetTotalCorrectByQuestionType(question.Config, question.QuestionType) ?? default;
                                     excercise.ExerciseQuestions.Add(new ExerciseQuestion
                                     {
                                         Question = question

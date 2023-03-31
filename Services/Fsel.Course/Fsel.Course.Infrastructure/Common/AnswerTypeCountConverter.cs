@@ -10,44 +10,44 @@ namespace Fsel.Course.Infrastructure.Common
 
     public class AnswerTypeCountConverter
     {
-        public int GetTotalCorrectByAsnwerType(object configAnswer, object configQuestion, EnumQuestionType type)
+        public int GetTotalCorrectByAsnwerType(ref object? configAnswer, object? configQuestion, EnumQuestionType type)
         {
             switch (type)
             {
                 case EnumQuestionType.Multichoice:
                 case EnumQuestionType.Dropdown:
                 case EnumQuestionType.Checklist:
-                    return GetTotalCorrectTypeCheckListAnswer(configAnswer, configQuestion);
+                    return GetTotalCorrectTypeCheckListAnswer(ref configAnswer, configQuestion);
 
                 case EnumQuestionType.Listing:
-                    return GetTotalCorrectTypeListingAnswer(configAnswer, configQuestion);
+                    return GetTotalCorrectTypeListingAnswer(ref configAnswer, configQuestion);
 
                 case EnumQuestionType.MatchingType1:
                 case EnumQuestionType.MatchingType2:
-                    return GetTotalCorrectTypeMaschingAnswer(configAnswer, configQuestion);
+                    return GetTotalCorrectTypeMaschingAnswer(ref configAnswer, configQuestion);
 
                 case EnumQuestionType.ShortAnswerWordBase:
-                    return GetTotalCorrectTypeShortAnswerWordBase(configAnswer, configQuestion);
+                    return GetTotalCorrectTypeShortAnswerWordBase(ref configAnswer, configQuestion);
 
                 case EnumQuestionType.ShortAnswerWordCount:
-                    return GetTotalCorrectTypeShortAnswerWordCount(configAnswer, configQuestion);
+                    return GetTotalCorrectTypeShortAnswerWordCount(ref configAnswer, configQuestion);
 
                 case EnumQuestionType.GapFillScoreByQuestion:
                 case EnumQuestionType.GapFillWordBankScoreByQuestion:
-                    return GetTotalCorrectTypeGapFillBySubAnswer(configAnswer, configQuestion);
+                    return GetTotalCorrectTypeGapFillBySubAnswer(ref configAnswer, configQuestion);
 
                 case EnumQuestionType.GapFillWordBankScoreByGap:
                 case EnumQuestionType.GapFillScoreByGap:
-                    return GetTotalCorrectTypeGapFillGapAnswer(configAnswer, configQuestion);
+                    return GetTotalCorrectTypeGapFillGapAnswer(ref configAnswer, configQuestion);
 
                 case EnumQuestionType.DragAndDropSentenceOrder:
-                    return GetTotalCorrectTypeDragDropOrderAnswer(configAnswer, configQuestion);
+                    return GetTotalCorrectTypeDragDropOrderAnswer(ref configAnswer, configQuestion);
 
                 case EnumQuestionType.DragAndDropPicture:
-                    return GetTotalCorrectTypeDragDropPictureAnswer(configAnswer, configQuestion);
+                    return GetTotalCorrectTypeDragDropPictureAnswer(ref configAnswer, configQuestion);
 
                 case EnumQuestionType.MultipleOptionSentenceCompletion:
-                    return GetTotalCorrectTypeMultipleSentenceAnswer(configAnswer, configQuestion);
+                    return GetTotalCorrectTypeMultipleOptionAnswer(ref configAnswer, configQuestion);
 
                 case EnumQuestionType.ExercisePreparation:
                     return default;
@@ -57,7 +57,7 @@ namespace Fsel.Course.Infrastructure.Common
             }
         }
 
-        private static int GetTotalCorrectTypeMultipleSentenceAnswer(object configAnswer, object configQuestion)
+        private static int GetTotalCorrectTypeMultipleOptionAnswer(ref object? configAnswer, object? configQuestion)
         {
             var dataAnswer = configAnswer.Deserialize<MultipleOptionSentenceCompletionAnswer>();
             var dataQuestion = configQuestion.Deserialize<MultipleOptionSentenceCompletionQuestion>();
@@ -77,7 +77,7 @@ namespace Fsel.Course.Infrastructure.Common
             return default;
         }
 
-        private static int GetTotalCorrectTypeMaschingAnswer(object configAnswer, object configQuestion)
+        private static int GetTotalCorrectTypeMaschingAnswer(ref object? configAnswer, object? configQuestion)
         {
             var dataAnswer = configAnswer.Deserialize<MatchingTypeAnswer>();
             var dataQuestion = configQuestion.Deserialize<MatchingTypeQuestion>();
@@ -92,12 +92,13 @@ namespace Fsel.Course.Infrastructure.Common
                         item.IsExact = true;
                     }
                 }
+                configAnswer = dataAnswer;
                 return number;
             }
             return default;
         }
 
-        private static int GetTotalCorrectTypeCheckListAnswer(object configAnswer, object configQuestion)
+        private static int GetTotalCorrectTypeCheckListAnswer(ref object? configAnswer, object? configQuestion)
         {
             var dataAnswer = configAnswer.Deserialize<MutipleChoiceAnswer>();
             var dataQuestion = configQuestion.Deserialize<MutipleChoiceQuestion>();
@@ -117,7 +118,7 @@ namespace Fsel.Course.Infrastructure.Common
             return default;
         }
 
-        private static int GetTotalCorrectTypeListingAnswer(object configAnswer, object configQuestion)
+        private static int GetTotalCorrectTypeListingAnswer(ref object? configAnswer, object? configQuestion)
         {
             var dataAnswer = configAnswer.Deserialize<ListingAnswer>();
             var dataQuestion = configQuestion.Deserialize<ListingQuestion>();
@@ -131,7 +132,7 @@ namespace Fsel.Course.Infrastructure.Common
             return default;
         }
 
-        private static int GetTotalCorrectTypeShortAnswerWordCount(object configAnswer, object configQuestion)
+        private static int GetTotalCorrectTypeShortAnswerWordCount(ref object? configAnswer, object? configQuestion)
         {
             var dataAnswer = configAnswer.Deserialize<ListingAnswer>();
             var dataQuestion = configQuestion.Deserialize<ListingQuestion>();
@@ -151,7 +152,7 @@ namespace Fsel.Course.Infrastructure.Common
             return default;
         }
 
-        private static int GetTotalCorrectTypeShortAnswerWordBase(object configAnswer, object configQuestion)
+        private static int GetTotalCorrectTypeShortAnswerWordBase(ref object? configAnswer, object? configQuestion)
         {
             var dataAnswer = configAnswer.Deserialize<ListingAnswer>();
             var dataQuestion = configQuestion.Deserialize<ListingQuestion>();
@@ -174,7 +175,7 @@ namespace Fsel.Course.Infrastructure.Common
         //Cách tính điển totalcourse ở Gap Fill (Score by sub question) 3 từ đều đúng điểm +1
         //Cách tính điển totalcourse ở Gap Fill (Score by gap) 3 từ nào đúng thì cộng thêm 1 điểm
 
-        private static int GetTotalCorrectTypeGapFillGapAnswer(object configAnswer, object configQuestion)
+        private static int GetTotalCorrectTypeGapFillGapAnswer(ref object? configAnswer, object? configQuestion)
         {
             var dataAnswer = configAnswer.Deserialize<GapFillAnswer>();
             var dataQuestion = configQuestion.Deserialize<GapFillQuestion>();
@@ -209,7 +210,7 @@ namespace Fsel.Course.Infrastructure.Common
             return default;
         }
 
-        private static int GetTotalCorrectTypeGapFillBySubAnswer(object configAnswer, object configQuestion)
+        private static int GetTotalCorrectTypeGapFillBySubAnswer(ref object? configAnswer, object? configQuestion)
         {
             var dataAnswer = configAnswer.Deserialize<GapFillAnswer>();
             var dataQuestion = configQuestion.Deserialize<GapFillQuestion>();
@@ -244,7 +245,7 @@ namespace Fsel.Course.Infrastructure.Common
             return default;
         }
 
-        private static int GetTotalCorrectTypeDragDropOrderAnswer(object configAnswer, object configQuestion)
+        private static int GetTotalCorrectTypeDragDropOrderAnswer(ref object? configAnswer, object? configQuestion)
         {
             //var data = config.Deserialize<DragAndDropSentenceOrderAnswer>();
             //int number = 0;
@@ -274,7 +275,7 @@ namespace Fsel.Course.Infrastructure.Common
             return default;
         }
 
-        private static int GetTotalCorrectTypeDragDropPictureAnswer(object configAnswer, object configQuestion)
+        private static int GetTotalCorrectTypeDragDropPictureAnswer(ref object? configAnswer, object? configQuestion)
         {
             //var data = config.Deserialize<DragAndDropPictureAnswer>();
             //int number = 0;

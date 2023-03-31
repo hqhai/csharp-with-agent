@@ -31,5 +31,20 @@ namespace Fsel.Course.Infrastructure.Repositories
                  .Include(x => x.UnitLessons.Where(n => !n.IsDeleted))
                  .AnyAsync(x => x.Id == id && x.UnitLessons.Count > 0);
         }
+
+        public async Task<Lesson?> GetIncludeVideoByIdAsync(Guid id)
+        {
+            try
+            {
+                return await Queryable.Include(x => x.LessonResults)
+                                      .Include(x => x.LessonVideos)
+                                      .ThenInclude(x => x.Video)
+                                      .FirstOrDefaultAsync(x => x.Id == id);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
     }
 }

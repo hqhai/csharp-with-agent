@@ -36,6 +36,7 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
             MethodResult<IList<LessonModel>> methodResult = new MethodResult<IList<LessonModel>>();
             var lessonQuery = await _lessonRepository.Queryable
                                 .Include(x => x.UnitLessons)
+                                .AsNoTracking()
                                 .Select(x => new LessonModel
                                 {
                                     Id = x.Id,
@@ -46,8 +47,7 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
 
             if (lessonQuery.Count == 0)
             {
-                methodResult.AddErrorBadRequest(
-                  nameof(EnumLessonErrorCode.ListLessonNotExist));
+                methodResult.AddErrorBadRequest(nameof(EnumLessonErrorCode.ListLessonNotExist));
                 return methodResult;
             }
             methodResult.Result = lessonQuery;

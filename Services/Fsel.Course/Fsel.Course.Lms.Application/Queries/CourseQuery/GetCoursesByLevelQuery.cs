@@ -35,7 +35,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<IList<CourseModel>> methodResult = new MethodResult<IList<CourseModel>>();
             var courseQuery = await _courseRepository.Queryable
-                              .Include(course => course.CourseTeachers)
+                              .Include(course => course.CourseTeachers.Where(y => !y.IsDeleted))
                               .Where(x => request.CourseLevel == null || x.CourseLevel == request.CourseLevel)
                               .Where(x => x.Status == EnumCourseStatus.Active)
                               .AsNoTracking()
@@ -57,8 +57,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
                               }).ToListAsync(cancellationToken: cancellationToken);
             if (courseQuery.Count == 0)
             {
-                methodResult.AddErrorBadRequest(
-                  nameof(EnumCourseErrorCode.ListCourseNotExist));
+                methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.ListCourseNotExist));
                 return methodResult;
             }
             methodResult.Result = courseQuery;

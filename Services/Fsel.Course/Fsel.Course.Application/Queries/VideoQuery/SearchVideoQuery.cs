@@ -3,7 +3,6 @@
 using AutoMapper;
 using Fsel.Common.ActionResults;
 using Fsel.Core.Base.BaseModels;
-using Fsel.Course.Domain.Enums;
 using Fsel.Course.Domain.IRepositories;
 using Fsel.Course.Domain.Models.EntityModels;
 using Fsel.Course.Domain.Models.QueryModels.Videos;
@@ -43,44 +42,16 @@ namespace Fsel.Course.Application.Queries.VideoQuery
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 return methodResult;
             }
-            var videoQuery = _videoRepository.Queryable
-                        .Include(x => x.LessonVideos.Where(y => !y.IsDeleted))
-                        .Include(video => video.VideoTimeCodes.Where(x => !x.IsDeleted))
-                        .ThenInclude(videoTimeCode => videoTimeCode.TimeCodeExercises.Where(x => !x.IsDeleted && x.Exercise != null))
-                        .ThenInclude(timeCodeExercise => timeCodeExercise.Exercise)
-                        .Where(x => x.Type == EnumVideoType.Lesson)
-                        .Where(x => !request.Level.HasValue || x.CourseLevel == request.Level.Value)
-                        .Where(x => !request.TeacherId.HasValue || x.TeacherId == request.TeacherId.Value)
-                        .Where(x => request.TimeCodeType == null || x.VideoTimeCodes.Select(n => n.TimeCodeType).Contains(request.TimeCodeType.Value))
-                        .Select(video => new VideoSearchModel
-                        {
-                            Id = video.Id,
-                            Name = video.Name,
-                            IsActive = video.LessonVideos.Any(),
-                            CourseLevel = video.CourseLevel,
-                            CreatedDate = video.CreatedDate,
-                            CreatedFullName = video.CreatedFullName,
-                            UpdatedDate = video.UpdatedDate,
-                            UpdatedFullName = video.UpdatedFullName,
-                            Exercises = video.VideoTimeCodes.SelectMany(videoTimeCode => videoTimeCode.TimeCodeExercises)
-                                                                     .Select(timeCodeExercise => timeCodeExercise.Exercise)
-                                                                     .GroupBy(excercise => excercise.CourseSkill)
-                                                                     .OrderByDescending(courseSkillGroup => courseSkillGroup.Count())
-                                                                     .Select(courseSkillGroup => new VideoExerciseSearchModel
-                                                                     {
-                                                                         CourseSkill = courseSkillGroup.Key,
-                                                                         Count = courseSkillGroup.Count()
-                                                                     }).ToList()
-                        });
+            var video = _videoRepository.SearchAsync(request.TimeCodeType, request.TeacherId, request.Level);
 
             //Keyword
             if (!string.IsNullOrEmpty(request.Keyword))
             {
-                videoQuery = videoQuery.Where(m => m.Id.ToString() == request.Keyword || (m.Name ?? string.Empty).Contains(request.Keyword));
+                video = video.Where(m => m.Id.ToString() == request.Keyword || (m.Name ?? string.Empty).Contains(request.Keyword));
             }
 
-            int totalItem = await videoQuery.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
-            var lists = await videoQuery.OrderByDescending(x => x.CreatedDate)
+            int totalItem = await video.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
+            var lists = await video.OrderByDescending(x => x.CreatedDate)
                     .Skip((request.Page - 1) * request.PageSize)
                     .Take(request.PageSize)
                     .AsNoTracking()

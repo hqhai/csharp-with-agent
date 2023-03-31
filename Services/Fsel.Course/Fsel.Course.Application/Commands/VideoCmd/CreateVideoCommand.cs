@@ -37,12 +37,11 @@ namespace Fsel.Course.Application.Commands.VideoCmd
 
         public async Task<MethodResult<VideoModel>> Handle(CreateVideoCommand request, CancellationToken cancellationToken)
         {
-            MethodResult<VideoModel> methodResult = new MethodResult<VideoModel>();
             ArgumentNullException.ThrowIfNull(request);
+            MethodResult<VideoModel> methodResult = new MethodResult<VideoModel>();
 
             #region Validation
 
-            ArgumentNullException.ThrowIfNull(request);
             if (request.VideoTimeCodes == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumVideoErrorCode.VideoNotCorrect), nameof(request.VideoTimeCodes));
@@ -87,7 +86,7 @@ namespace Fsel.Course.Application.Commands.VideoCmd
                                     {
                                         methodResult.AddErrorBadRequest(nameof(EnumVideoErrorCode.ConfigIsInTheWrongFormat), nameof(question.Config));
                                     }
-                                    question.CorrectTotal = _questionTypeCountConverter.GetTotalCorrectByQuestionType(question.Config, question.QuestionType);
+                                    question.CorrectTotal = _questionTypeCountConverter.GetTotalCorrectByQuestionType(question.Config, question.QuestionType) ?? default;
                                     excercise.ExerciseQuestions.Add(new ExerciseQuestion
                                     {
                                         Question = question

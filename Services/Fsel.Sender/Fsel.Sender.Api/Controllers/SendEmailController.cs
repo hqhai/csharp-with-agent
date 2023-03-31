@@ -1,7 +1,6 @@
 using System.Net;
 using Fsel.Common.ActionResults;
 using Fsel.Common.Constants;
-using Fsel.Common.Helpers;
 using Fsel.Sender.Application.Commands.SendEmailCmd;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;

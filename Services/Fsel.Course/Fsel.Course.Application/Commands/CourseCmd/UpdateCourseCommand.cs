@@ -49,16 +49,13 @@ namespace Fsel.Course.Application.Commands.CourseCmd
             var course = _courseRepository.Queryable.Where(e => e.Id == request.Id).Include(e => e.CourseUnitMockTests).Include(e => e.CourseTeachers).FirstOrDefault();
             if (course == null)
             {
-                methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                methodResult.AddError(
-                    nameof(EnumCourseErrorCode.CourseNotExist));
+                methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.CourseNotExist));
                 return methodResult;
             }
             _mapper.Map(request, course);
 
             if (!course.IsValid())
             {
-                methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 methodResult.AddResultFromErrorList(course.ErrorMessages);
                 return methodResult;
             }
@@ -71,42 +68,33 @@ namespace Fsel.Course.Application.Commands.CourseCmd
 
             if (request?.CourseUnitMockTests == null)
             {
-                methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                methodResult.AddError(
-                    nameof(EnumCourseUnitMockTestErrorCode.TestNull));
+                methodResult.AddErrorBadRequest(nameof(EnumCourseUnitMockTestErrorCode.TestNull));
                 return methodResult;
             }
 
             if (request.CourseTeachers == null)
             {
-                methodResult.AddErrorBadRequest(
-                    nameof(EnumCourseTeacherErrorCode.CourseTeacherNull));
+                methodResult.AddErrorBadRequest(nameof(EnumCourseTeacherErrorCode.CourseTeacherNull));
                 return methodResult;
             }
 
             if (request.CourseUnitMockTests.Any(x => x.MockTestId.HasValue && x.UnitId.HasValue))
             {
-                methodResult.AddErrorBadRequest(
-                    nameof(EnumCourseErrorCode.MocktestIdAndUnitIdAreMutuallyExclusive));
+                methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.MocktestIdAndUnitIdAreMutuallyExclusive));
                 return methodResult;
             }
 
             var units = request.CourseUnitMockTests.Where(e => e.UnitId != null).Select(x => x.UnitId).ToList();
             if (_unitRepository.IsIdsInValid(units.Where(e => e.HasValue).Select(e => e!.Value)))
             {
-                methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                methodResult.AddError(
-                    nameof(EnumUnitErrorCode.UnitIdNotCorrect));
-
+                methodResult.AddErrorBadRequest(nameof(EnumUnitErrorCode.UnitIdNotCorrect));
                 return methodResult;
             }
 
             var mocktestIds = request.CourseUnitMockTests.Where(e => e.MockTestId != null).Select(x => x.MockTestId);
             if (_mockTestRepository.IsIdsInValid(mocktestIds.Where(e => e.HasValue).Select(e => e!.Value)))
             {
-                methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                methodResult.AddError(
-                nameof(EnumMockTestErrorCode.TestNotCorrect));
+                methodResult.AddErrorBadRequest(nameof(EnumMockTestErrorCode.TestNotCorrect));
                 return methodResult;
             }
 
@@ -115,9 +103,7 @@ namespace Fsel.Course.Application.Commands.CourseCmd
             var checkMockTest = mocktests.All(x => x.MockTestType == EnumMockTestType.CourseMockTest);
             if (!checkMockTest)
             {
-                methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                methodResult.AddError(
-                nameof(EnumMockTestErrorCode.TestInValid));
+                methodResult.AddErrorBadRequest(nameof(EnumMockTestErrorCode.TestInValid));
                 return methodResult;
             }
 
@@ -127,6 +113,7 @@ namespace Fsel.Course.Application.Commands.CourseCmd
                 methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.ListTeacherCourseNotExist), nameof(request.CourseTeachers));
                 return methodResult;
             }
+
             var teacherNames = teachersResult?.Content?.Result?.Select(x => x.Human?.FullName).ToList();
             var nameTeacher = string.Join(", ", teacherNames ?? new List<string?>());
 
