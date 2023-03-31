@@ -25,27 +25,9 @@ builder.Services.AddScoped<ITeacherRepository, TeacherRepository>();
 builder.Services.AddScoped<IParentRepository, ParentRepository>();
 builder.Services.AddScoped<IStudentRepository, StudentRepository>();
 builder.Services.AddScoped<IParentStudentRepository, ParentStudentRepository>();
-builder.Services.AddCors(policy =>
-{
-    policy.AddPolicy("OpenCorsPolicy", opt => opt.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod());
-});
 builder.AddRefitClients(typeof(ISenderService), appSetting?.Services?.SenderApiUrl);
 
 //App config
 var app = builder.Build();
-
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
-//app configurations
-
-app.UseHttpsRedirection();
-app.UseCors("OpenCorsPolicy");
-app.UseAuthorization();
-
-app.MapControllers();
-
+app.UseServices();
 app.Run();
