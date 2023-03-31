@@ -12,6 +12,8 @@ namespace Fsel.Identity.Infrastructure.Configs
     {
         public void Configure(EntityTypeBuilder<Human> builder)
         {
+            ArgumentNullException.ThrowIfNull(builder);
+
             builder.HasOne(x => x.User).WithOne(b => b.Human)
                 .HasForeignKey<Human>(b => b.UserId)
                .OnDelete(DeleteBehavior.Cascade);

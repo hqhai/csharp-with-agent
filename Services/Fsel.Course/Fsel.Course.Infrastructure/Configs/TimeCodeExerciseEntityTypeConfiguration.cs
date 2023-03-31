@@ -10,6 +10,8 @@ namespace Fsel.Course.Infrastructure.Configs
     {
         public void Configure(EntityTypeBuilder<TimeCodeExercise> builder)
         {
+            ArgumentNullException.ThrowIfNull(builder);
+
             builder.HasOne(a => a.VideoTimeCode)
                 .WithMany(b => b.TimeCodeExercises)
                 .HasForeignKey(b => b.VideoTimeCodeId)

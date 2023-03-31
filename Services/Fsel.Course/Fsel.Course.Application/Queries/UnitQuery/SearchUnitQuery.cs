@@ -44,15 +44,11 @@ namespace Fsel.Course.Application.Queries.UnitQuery
 
             var unitQuery = _unitRepository.Queryable
                                     .Include(x => x.CourseUnitMockTests.Where(y => !y.IsDeleted))
-                                    .Where(x => request.CourseLevel == default || x.CourseLevel == request.CourseLevel)
                                     .Include(unit => unit.UnitLessons)
                                     .ThenInclude(unitLesson => unitLesson.Lesson)
                                     .ThenInclude(lesson => (lesson ?? new()).LessonVideos)
                                     .ThenInclude(lessonVideo => lessonVideo.Video)
-                                    .Where(x => request.TeacherId == null || x.UnitLessons.Select(l => l.Lesson)
-                                                                                   .SelectMany(lv => (lv ?? new()).LessonVideos)
-                                                                                   .Select(v => v.Video)
-                                                                                   .Select(n => (n ?? new()).TeacherId).Contains(request.TeacherId.Value))
+                                    .Where(x => x.CourseLevel == request.CourseLevel)
 
                             .Select(unit => new UnitSearchModel
                             {
@@ -75,6 +71,12 @@ namespace Fsel.Course.Application.Queries.UnitQuery
             if (!string.IsNullOrEmpty(request.Keyword))
             {
                 unitQuery = unitQuery.Where(m => m.Id.ToString() == request.Keyword || (m.Name ?? string.Empty).Contains(request.Keyword));
+            }
+
+            //Keyword
+            if (request.TeacherId.HasValue)
+            {
+                unitQuery = unitQuery.Where(m => m.TeacherId == request.TeacherId.Value);
             }
 
             int totalItem = await unitQuery.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);

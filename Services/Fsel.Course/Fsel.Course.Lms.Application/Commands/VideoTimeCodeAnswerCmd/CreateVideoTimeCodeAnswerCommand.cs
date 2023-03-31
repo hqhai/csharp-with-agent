@@ -1,7 +1,5 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-using Microsoft.EntityFrameworkCore;
-
 namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
 {
     using Fsel.Common.ActionResults;
@@ -53,12 +51,13 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
 
             #region Validation
 
-            var lesson = await _lessonRepository.Queryable.Include(x => x.LessonResults)
-                                                        .Include(x => x.LessonVideos)
-                                                        .ThenInclude(x => x.Video)
-                                                        .Where(x => x.Id == request.LessonId)
-                                                        .AsNoTracking()
-                                                        .FirstOrDefaultAsync(cancellationToken: cancellationToken);
+            if (request.Answers == null || request.Answers.Any(x => x.Answer == null))
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumVideoTimeCodeAnswerErrorCode.AnswersNotEmpty), nameof(request.Answers), request.Answers);
+                return methodResult;
+            }
+
+            var lesson = await _lessonRepository.GetIncludeVideoByIdAsync(request.LessonId);
             if (lesson == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumLessonErrorCode.LessonNotExist));
@@ -67,23 +66,16 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
             var videoId = lesson.LessonVideos.Select(x => x.VideoId).FirstOrDefault();
             var lessonResultId = lesson.LessonResults.Select(x => x.Id).FirstOrDefault();
 
-            var videoResult = await _videoResultRepository.Queryable.Include(x => x.VideoTimeCodeAnswers)
-                                                    .Where(x => x.VideoId == videoId && x.LessonResultId == lessonResultId && x.StudentId == _authContext.CurrentUserId)
-                                                    .AsNoTracking()
-                                                    .FirstOrDefaultAsync(cancellationToken: cancellationToken);
+            var videoResult = await _videoResultRepository.GetIncludeTimeCodeAnswerByIdAsync(videoId, lessonResultId, _authContext.CurrentUserId);
+
             if (videoResult == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumVideoResultErrorCode.VideoResultNotExist));
                 return methodResult;
             }
 
-            var questionIds = request.Answers.Select(x => (x ?? new()).QuestionId).ToList();
-            var questions = await _questionRepository.Queryable.Include(x => x.ExerciseQuestions)
-                                                             .ThenInclude(x => x.Exercise)
-                                                             .ThenInclude(x => (x ?? new()).TimeCodeExercises)
-                                                             .ThenInclude(x => x.VideoTimeCode)
-                                                             .AsNoTracking()
-                                                             .Where(x => questionIds.Contains(x.Id)).ToListAsync(cancellationToken: cancellationToken);
+            var questionIds = request.Answers.Select(x => x.QuestionId).ToList();
+            var questions = await _questionRepository.GetIncludeTimeCodeByIdAsync(questionIds);
             if (questions == null || questions.Count == 0)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumQuestionErrorCode.QuestionNotIsExist));
@@ -94,42 +86,52 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
             var videoTimeCodeAnswerUpdates = new List<VideoTimeCodeAnswer>();
             foreach (var item in request.Answers)
             {
-                var question = questions.FirstOrDefault(x => x.Id == item.QuestionId) ?? new Question();
+                var question = questions.FirstOrDefault(x => x.Id == item.QuestionId);
+                if (question == null)
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumQuestionErrorCode.QuestionNotIsExist));
+                    return methodResult;
+                }
+                else if (question.Config == null)
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumQuestionErrorCode.QuestionConfigNotIsExist));
+                    return methodResult;
+                }
+
                 var exercise = question.ExerciseQuestions.Select(x => x.Exercise).FirstOrDefault();
                 var exerciseId = exercise?.Id;
                 var videoTimeCodeId = exercise?.TimeCodeExercises.Select(x => x.VideoTimeCodeId).FirstOrDefault();
+                var videoTimeCodeAnswer = await _videoTimeCodeAnswerRepository.GetWhereByIdAsync(videoResult.Id, question.Id, exerciseId, videoTimeCodeId);
 
-                var videoTimeCodeAnswer = await _videoTimeCodeAnswerRepository.Queryable.Where(x => x.QuestionId == question.Id && x.ExerciseId == exerciseId)
-                                                                                        .Where(x => x.VideoTimeCodeId == videoTimeCodeId && x.VideoResultId == videoResult.Id)
-                                                                                        .AsNoTracking()
-                                                                                        .FirstOrDefaultAsync(cancellationToken: cancellationToken);
-
-                #endregion Validation
-
-                if (videoTimeCodeAnswer == null && item.Answer != null && question.Config != null)
+                if (!_answerTypeValidatetion.TryParseAnswerType(item.Answer, question.QuestionType))
                 {
-                    var isCheck = _answerTypeValidatetion.TryParseAnswerType(item.Answer, question.QuestionType);
-                    if (!isCheck)
-                    {
-                        methodResult.AddErrorBadRequest(nameof(EnumVideoTimeCodeAnswerErrorCode.AnswerIsInTheWrongFormat));
-                        return methodResult;
-                    }
+                    methodResult.AddErrorBadRequest(nameof(EnumVideoTimeCodeAnswerErrorCode.AnswerIsInTheWrongFormat));
+                    return methodResult;
+                }
+
+                var answer = item.Answer;
+                var correctCount = _answerTypeCountConverter.GetTotalCorrectByAsnwerType(ref answer, question.Config, question.QuestionType);
+                if (videoTimeCodeAnswer == null)
+                {
                     videoTimeCodeAnswerCreates.Add(new VideoTimeCodeAnswer
                     {
-                        Answer = item.Answer,
+                        Answer = answer,
                         VideoTimeCodeId = videoTimeCodeId ?? Guid.Empty,
                         ExerciseId = exerciseId ?? Guid.Empty,
                         QuestionId = question.Id,
                         VideoResultId = videoResult.Id,
-                        CorrectCount = _answerTypeCountConverter.GetTotalCorrectByAsnwerType(item.Answer, question.Config, question.QuestionType)
+                        CorrectCount = correctCount
                     });
                 }
-                else if (videoTimeCodeAnswer != null && item.Answer != null && question.Config != null)
+                else
                 {
-                    videoTimeCodeAnswer.CorrectCount = _answerTypeCountConverter.GetTotalCorrectByAsnwerType(item.Answer, question.Config, question.QuestionType);
+                    videoTimeCodeAnswer.Answer = answer;
+                    videoTimeCodeAnswer.CorrectCount = correctCount;
                     videoTimeCodeAnswerUpdates.Add(videoTimeCodeAnswer);
                 }
             }
+
+            #endregion Validation
 
             await _videoTimeCodeAnswerRepository.ExecuteTransactionAsync(async () =>
             {

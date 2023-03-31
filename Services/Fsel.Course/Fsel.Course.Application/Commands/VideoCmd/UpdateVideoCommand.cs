@@ -27,8 +27,7 @@ namespace Fsel.Course.Application.Commands.VideoCmd
         public UpdateVideoCommandHandler(IVideoRepository videoRepository
             , IMapper mapper
             , QuestionTypeCountConverter questionTypeCountConverter
-            , QuestionTypeValidation questionTypeValidation
-            )
+            , QuestionTypeValidation questionTypeValidation)
         {
             _videoRepository = videoRepository;
             _mapper = mapper;
@@ -124,7 +123,7 @@ namespace Fsel.Course.Application.Commands.VideoCmd
                                     {
                                         methodResult.AddErrorBadRequest(nameof(EnumVideoErrorCode.ConfigIsInTheWrongFormat), nameof(question.Config));
                                     }
-                                    question.CorrectTotal = _questionTypeCountConverter.GetTotalCorrectByQuestionType(question.Config, question.QuestionType);
+                                    question.CorrectTotal = _questionTypeCountConverter.GetTotalCorrectByQuestionType(question.Config, question.QuestionType) ?? default;
                                     excercise.ExerciseQuestions.Add(new ExerciseQuestion
                                     {
                                         Question = question

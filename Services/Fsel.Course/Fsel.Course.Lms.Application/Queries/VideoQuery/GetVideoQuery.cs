@@ -39,7 +39,7 @@ namespace Fsel.Course.Lms.Application.Queries.VideoQuery
         {
             MethodResult<VideoModel> methodResult = new MethodResult<VideoModel>();
 
-            var query = from i in _videoRepository.Queryable
+            var video = await _videoRepository.Queryable
                                 .Include(x => x.LessonVideos.Where(y => !y.IsDeleted))
                                 .Include(i => i.VideoTimeCodes.Where(x => !x.IsDeleted))
                                 .ThenInclude(x => x.TimeCodeExercises.Where(x => !x.IsDeleted && x.Exercise != null))
@@ -49,9 +49,7 @@ namespace Fsel.Course.Lms.Application.Queries.VideoQuery
                                 .ThenInclude(x => (x ?? new()).VideoTimeCodeAnswer)
                                 .Where(x => x.Id == request.VideoId)
                                 .AsNoTracking()
-                        select i;
-
-            var video = await query.FirstOrDefaultAsync(cancellationToken);
+                                .FirstOrDefaultAsync(cancellationToken: cancellationToken);
 
             if (video == null)
             {
@@ -74,18 +72,18 @@ namespace Fsel.Course.Lms.Application.Queries.VideoQuery
                     ExecutionTime = x.ExecutionTime,
                     TimeCodeType = x.TimeCodeType,
                     VideoId = x.VideoId,
-                    Exercises = x.TimeCodeExercises.Select(n => n.Exercise).Select(n => new ExerciseModel
+                    Exercises = x.TimeCodeExercises.Where(n => n.Exercise != null).Select(n => n.Exercise ?? new()).Select(n => new ExerciseModel
                     {
-                        Id = (n ?? new()).Id,
-                        MediaPost = (n ?? new()).MediaPost,
-                        CourseSkill = (n ?? new()).CourseSkill,
-                        Questions = (n ?? new()).ExerciseQuestions.Select(m => m.Question).Select(m => new QuestionModel()
+                        Id = n.Id,
+                        MediaPost = n.MediaPost,
+                        CourseSkill = n.CourseSkill,
+                        Questions = n.ExerciseQuestions.Where(m => m.Question != null).Select(m => m.Question ?? new()).Select(m => new QuestionModel()
                         {
-                            Id = (m ?? new()).Id,
-                            QuestionType = (m ?? new()).QuestionType,
-                            IsSave = (m ?? new()).IsSave,
-                            CorrectTotal = (m ?? new()).CorrectTotal,
-                            Config = _questionTypeConverter.QuestionTypeConverterObject((m ?? new()).QuestionType, m.Config),
+                            Id = m.Id,
+                            QuestionType = m.QuestionType,
+                            IsSave = m.IsSave,
+                            CorrectTotal = m.CorrectTotal,
+                            Config = _questionTypeConverter.QuestionTypeConverterObject(m.QuestionType, m.Config),
                             VideoTimeCodeAnswer = _mapper.Map<VideoTimeCodeAnswerModel>(m.VideoTimeCodeAnswer)
                         }).ToList()
                     }).ToList(),

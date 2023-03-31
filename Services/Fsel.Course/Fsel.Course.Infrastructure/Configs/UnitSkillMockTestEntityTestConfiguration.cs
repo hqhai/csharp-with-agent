@@ -10,6 +10,8 @@ namespace Fsel.Course.Infrastructure.Configs
     {
         public void Configure(EntityTypeBuilder<UnitSkillMockTest> builder)
         {
+            ArgumentNullException.ThrowIfNull(builder);
+
             builder.HasOne(a => a.Unit)
                 .WithMany(b => b.UnitSkillMockTests)
                 .HasForeignKey(b => b.UnitId)

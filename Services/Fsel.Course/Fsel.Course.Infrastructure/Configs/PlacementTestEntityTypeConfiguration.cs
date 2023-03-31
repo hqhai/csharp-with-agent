@@ -13,6 +13,8 @@ namespace Fsel.Course.Infrastructure.Configs
     {
         public void Configure(EntityTypeBuilder<PlacementTest> builder)
         {
+            ArgumentNullException.ThrowIfNull(builder);
+
             builder.Property(e => e.CourseLevel)
                 .HasMaxLength(100)
                 .HasConversion(

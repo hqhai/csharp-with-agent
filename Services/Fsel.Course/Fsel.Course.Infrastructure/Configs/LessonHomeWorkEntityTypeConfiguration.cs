@@ -10,6 +10,8 @@ namespace Fsel.Course.Infrastructure.Configs
     {
         public void Configure(EntityTypeBuilder<LessonHomeWork> builder)
         {
+            ArgumentNullException.ThrowIfNull(builder);
+
             builder.HasOne(a => a.Lesson)
                             .WithMany(b => b.LessonHomeWorks)
                             .HasForeignKey(b => b.LessonId)

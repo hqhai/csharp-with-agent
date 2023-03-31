@@ -6,7 +6,6 @@ namespace Fsel.Training.Api.Controllers
     using System.Net;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
-    using Fsel.Common.Enums;
     using Fsel.Training.Application.Commands.ClassCmd;
     using Fsel.Training.Application.Queries.ClassQuery;
     using Fsel.Training.Doman.Models.EntityModels;

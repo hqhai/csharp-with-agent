@@ -12,6 +12,8 @@ namespace Fsel.Training.Infrastructure.Configs
     {
         public void Configure(EntityTypeBuilder<Class> builder)
         {
+            ArgumentNullException.ThrowIfNull(builder);
+
             builder.Property(e => e.Status)
                 .HasMaxLength(100)
                 .HasConversion(
