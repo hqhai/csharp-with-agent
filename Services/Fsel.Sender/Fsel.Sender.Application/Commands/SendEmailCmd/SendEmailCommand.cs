@@ -56,11 +56,12 @@ namespace Fsel.Sender.Application.Commands.SendEmailCmd
                 sendEmail.Content = request.Content;
                 try
                 {
-                    var emailMessage = CreateEmailMessageAsync(sendEmail);
+                    var emailMessage = CreateEmailMessage(sendEmail);
                     await Send(emailMessage);
                 }
-                catch
+                catch (Exception)
                 {
+                    throw;
                 }
             }
 
@@ -71,7 +72,7 @@ namespace Fsel.Sender.Application.Commands.SendEmailCmd
             return methodResult;
         }
 
-        private MimeMessage CreateEmailMessageAsync(SendEmailModel message)
+        private MimeMessage CreateEmailMessage(SendEmailModel message)
         {
             using (var emailMessage = new MimeMessage())
             {

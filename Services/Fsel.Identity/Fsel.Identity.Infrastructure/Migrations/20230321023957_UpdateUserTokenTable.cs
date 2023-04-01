@@ -1,8 +1,4 @@
-// Copyright (c) Atlantic. All rights reserved.
-
 using Microsoft.EntityFrameworkCore.Migrations;
-
-#nullable disable
 
 namespace Fsel.Identity.Infrastructure.Migrations
 {
@@ -14,33 +10,33 @@ namespace Fsel.Identity.Infrastructure.Migrations
         {
             ArgumentNullException.ThrowIfNull(migrationBuilder);
             migrationBuilder.DeleteData(
-                table: "aspnetroles",
-                keyColumn: "id",
+                table: "AspNetRoles",
+                keyColumn: "Id",
                 keyValue: "069ae2a9-2729-4905-a8fa-c6c9f9172d1d");
 
             migrationBuilder.DeleteData(
-                table: "aspnetroles",
-                keyColumn: "id",
+                table: "AspNetRoles",
+                keyColumn: "Id",
                 keyValue: "1eeba88e-ed0c-48c4-8d7e-a17c5a2cc3fe");
 
             migrationBuilder.DeleteData(
-                table: "aspnetroles",
-                keyColumn: "id",
+                table: "AspNetRoles",
+                keyColumn: "Id",
                 keyValue: "24ce207d-8732-4a32-83ef-c5f05805f124");
 
             migrationBuilder.DeleteData(
-                table: "aspnetroles",
-                keyColumn: "id",
+                table: "AspNetRoles",
+                keyColumn: "Id",
                 keyValue: "69976022-5dbb-4292-bab6-e94b6701061e");
 
             migrationBuilder.DeleteData(
-                table: "aspnetroles",
-                keyColumn: "id",
+                table: "AspNetRoles",
+                keyColumn: "Id",
                 keyValue: "8d89a29a-b40a-4045-b0ed-679d7a5ff990");
 
             migrationBuilder.DeleteData(
-                table: "aspnetroles",
-                keyColumn: "id",
+                table: "AspNetRoles",
+                keyColumn: "Id",
                 keyValue: "c8c28631-0bc0-4166-b062-4aff0d38e70c");
 
             migrationBuilder.DropColumn(
@@ -71,18 +67,18 @@ namespace Fsel.Identity.Infrastructure.Migrations
                 type: "datetime2",
                 nullable: true);
 
-            //migrationBuilder.InsertData(
-            //    table: "AspNetRoles",
-            //    columns: new[] { "Id", "ConcurrencyStamp", "Discriminator", "Discription", "Name", "NormalizedName" },
-            //    values: new object[,]
-            //    {
-            //        { "0c7fee86-6d80-4b27-980a-282dc90fc9b7", null, "Role", null, "Student", "Student" },
-            //        { "b743dad9-7538-4b5e-bcbe-52997cda0a17", null, "Role", null, "Admin", "Admin" },
-            //        { "c2980f2a-1e8d-409e-bd18-a4f724a6f074", null, "Role", null, "CSO", "CSO" },
-            //        { "c9bd5d42-78f3-4e36-9c6e-55b0ac763f03", null, "Role", null, "MasterAdmin", "MasterAdmin" },
-            //        { "d119ed1b-6810-415d-a69f-8a1c0aac6ab6", null, "Role", null, "Teacher", "Teacher" },
-            //        { "f0d61936-5fb8-4ad2-8f05-35a247cb6c82", null, "Role", null, "Parent", "Parent" }
-            //    });
+            migrationBuilder.InsertData(
+                table: "AspNetRoles",
+                columns: new[] { "Id", "ConcurrencyStamp", "Discriminator", "Discription", "Name", "NormalizedName" },
+                values: new object[,]
+                {
+                    { "0c7fee86-6d80-4b27-980a-282dc90fc9b7", null, "Role", null, "Student", "Student" },
+                    { "b743dad9-7538-4b5e-bcbe-52997cda0a17", null, "Role", null, "Admin", "Admin" },
+                    { "c2980f2a-1e8d-409e-bd18-a4f724a6f074", null, "Role", null, "CSO", "CSO" },
+                    { "c9bd5d42-78f3-4e36-9c6e-55b0ac763f03", null, "Role", null, "MasterAdmin", "MasterAdmin" },
+                    { "d119ed1b-6810-415d-a69f-8a1c0aac6ab6", null, "Role", null, "Teacher", "Teacher" },
+                    { "f0d61936-5fb8-4ad2-8f05-35a247cb6c82", null, "Role", null, "Parent", "Parent" }
+                });
         }
 
         /// <inheritdoc />
