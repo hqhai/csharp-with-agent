@@ -1,3 +1,5 @@
+// Copyright (c) Atlantic. All rights reserved.
+
 using Fsel.Common.Enums;
 using Fsel.Course.Domain.Models.CommandModels.VideoTimeCodes;
 
@@ -12,6 +14,6 @@ namespace Fsel.Course.Domain.Models.CommandModels.Videos
         public Guid TeacherId { get; set; } = Guid.Empty;
 
         public EnumCourseLevel CourseLevel { get; set; }
-        public List<CreateVideoTimeCodeCommandModel>? VideoTimeCodes { get; set; } = new List<CreateVideoTimeCodeCommandModel>();
+        public IList<CreateVideoTimeCodeCommandModel>? VideoTimeCodes { get; set; }
     }
 }

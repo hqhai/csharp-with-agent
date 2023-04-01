@@ -1,3 +1,5 @@
+// Copyright (c) Atlantic. All rights reserved.
+
 using System.Diagnostics;
 using Fsel.Core.Base.Interfaces;
 using Fsel.Core.Entities;

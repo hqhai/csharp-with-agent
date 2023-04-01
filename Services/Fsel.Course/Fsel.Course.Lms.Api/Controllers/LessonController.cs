@@ -11,7 +11,6 @@ namespace Fsel.Course.Lms.Api.Controllers
     using MediatR;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
-    using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
     [ApiVersion(Settings.APIVersion)]
     [Route(Settings.APIDefaultRoute + "/lesson")]

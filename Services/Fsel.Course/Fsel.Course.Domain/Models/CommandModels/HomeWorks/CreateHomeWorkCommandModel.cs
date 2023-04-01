@@ -1,5 +1,6 @@
+// Copyright (c) Atlantic. All rights reserved.
+
 using Fsel.Common.Enums;
-using Fsel.Course.Domain.Enums;
 
 namespace Fsel.Course.Domain.Models.CommandModels.HomeWorks
 {

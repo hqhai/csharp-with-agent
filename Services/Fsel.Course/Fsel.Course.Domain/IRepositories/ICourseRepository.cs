@@ -1,3 +1,5 @@
+// Copyright (c) Atlantic. All rights reserved.
+
 using Fsel.Core.Base.Interfaces;
 using EntityCourse = Fsel.Course.Domain.Entities.Course;
 

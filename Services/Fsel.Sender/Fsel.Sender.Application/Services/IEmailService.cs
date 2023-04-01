@@ -23,9 +23,9 @@ namespace Fsel.Sender.Application.Services
 
         public async Task SendEmailAsync(SendEmailModel message)
         {
-            try
+            ArgumentNullException.ThrowIfNull(message);
+            using (var email = new MailMessage())
             {
-                var email = new MailMessage();
                 email.From = new MailAddress(_appSetting?.Smtp?.From ?? string.Empty);
                 email.Subject = message.Subject;
                 if (message.ToEmails == null)
@@ -62,10 +62,6 @@ namespace Fsel.Sender.Application.Services
                     client.EnableSsl = true;
                     await client.SendMailAsync(email);
                 }
-                return;
-            }
-            catch (Exception)
-            {
                 return;
             }
         }

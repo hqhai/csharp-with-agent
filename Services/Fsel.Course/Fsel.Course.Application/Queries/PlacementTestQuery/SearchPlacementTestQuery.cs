@@ -1,3 +1,5 @@
+// Copyright (c) Atlantic. All rights reserved.
+
 using AutoMapper;
 using Fsel.Common.ActionResults;
 using Fsel.Core.Base.BaseModels;
@@ -27,6 +29,7 @@ namespace Fsel.Course.Application.Queries.PlacementTestQuery
 
         public async Task<MethodResult<PagingItemsModel<PlacementTestModel>>> Handle(SearchPlacementTestQuery request, CancellationToken cancellationToken)
         {
+            ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<PagingItemsModel<PlacementTestModel>>();
 
             if (request.PageSize > 100)

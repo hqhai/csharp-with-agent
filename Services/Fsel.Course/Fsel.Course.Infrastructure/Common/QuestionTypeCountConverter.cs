@@ -62,7 +62,7 @@ namespace Fsel.Course.Infrastructure.Common
             var data = config.Deserialize<MultipleOptionSentenceCompletionQuestion>();
             if (data != null && data.Contents != null)
             {
-                return data.Contents.Sum(x => x.Answers.Count);
+                return data.Contents.Sum(x => x.Answers?.Count);
             }
             return default;
         }
@@ -115,7 +115,7 @@ namespace Fsel.Course.Infrastructure.Common
             var data = config.Deserialize<GapFillQuestion>();
             if (data != null && data.Contents != null)
             {
-                return data.Contents.Sum(x => x.Words.Count);
+                return data.Contents.Sum(x => x.Words?.Count);
             }
             return default;
         }
@@ -135,7 +135,7 @@ namespace Fsel.Course.Infrastructure.Common
             var data = config.Deserialize<DragAndDropPictureQuestion>();
             if (data != null && data.Contents != null)
             {
-                return data.Contents.Sum(x => x.Images.Count);
+                return data.Contents.Sum(x => x?.Images?.Count);
             }
             return default;
         }

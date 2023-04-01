@@ -10,6 +10,7 @@ namespace Fsel.Interaction.Infrastructure.Configs
     {
         public void Configure(EntityTypeBuilder<CustomerSurvey> builder)
         {
+            ArgumentNullException.ThrowIfNull(builder);
             builder.HasOne(a => a.SurveyQuestion)
                   .WithMany(b => b.CustomerSurveys)
                   .HasForeignKey(b => b.SurveyQuestionId)

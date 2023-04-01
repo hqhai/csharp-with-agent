@@ -44,9 +44,9 @@ namespace Fsel.Course.Lms.Application.Queries.VideoQuery
                                 .Include(i => i.VideoTimeCodes.Where(x => !x.IsDeleted))
                                 .ThenInclude(x => x.TimeCodeExercises.Where(x => !x.IsDeleted && x.Exercise != null))
                                 .ThenInclude(x => x.Exercise)
-                                .ThenInclude(x => x.ExerciseQuestions.Where(x => !x.IsDeleted))
+                                .ThenInclude(x => (x ?? new()).ExerciseQuestions.Where(x => !x.IsDeleted))
                                 .ThenInclude(x => x.Question)
-                                .ThenInclude(x => x.VideoTimeCodeAnswer)
+                                .ThenInclude(x => (x ?? new()).VideoTimeCodeAnswer)
                                 .Where(x => x.Id == request.VideoId)
                                 .AsNoTracking()
                                 .FirstOrDefaultAsync(cancellationToken: cancellationToken);
@@ -72,18 +72,18 @@ namespace Fsel.Course.Lms.Application.Queries.VideoQuery
                     ExecutionTime = x.ExecutionTime,
                     TimeCodeType = x.TimeCodeType,
                     VideoId = x.VideoId,
-                    Exercises = x.TimeCodeExercises.Select(n => n.Exercise).Select(n => new ExerciseModel
+                    Exercises = x.TimeCodeExercises.Where(n => n.Exercise != null).Select(n => n.Exercise ?? new()).Select(n => new ExerciseModel
                     {
                         Id = n.Id,
                         MediaPost = n.MediaPost,
                         CourseSkill = n.CourseSkill,
-                        Questions = n.ExerciseQuestions.Select(m => m.Question).Select(m => new QuestionModel()
+                        Questions = n.ExerciseQuestions.Where(m => m.Question != null).Select(m => m.Question ?? new()).Select(m => new QuestionModel()
                         {
                             Id = m.Id,
                             QuestionType = m.QuestionType,
                             IsSave = m.IsSave,
                             CorrectTotal = m.CorrectTotal,
-                            Config = _questionTypeConverter.QuestionTypeConverterObject(m.QuestionType, m.Config) ?? default,
+                            Config = _questionTypeConverter.QuestionTypeConverterObject(m.QuestionType, m.Config),
                             VideoTimeCodeAnswer = _mapper.Map<VideoTimeCodeAnswerModel>(m.VideoTimeCodeAnswer)
                         }).ToList()
                     }).ToList(),

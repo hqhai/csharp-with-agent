@@ -1,4 +1,5 @@
-using System.IdentityModel.Tokens.Jwt;
+// Copyright (c) Atlantic. All rights reserved.
+
 using System.Security.Claims;
 using System.Text;
 using System.Text.Json.Serialization;
@@ -9,8 +10,6 @@ using MediatR;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.WebAssembly.Authentication;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;

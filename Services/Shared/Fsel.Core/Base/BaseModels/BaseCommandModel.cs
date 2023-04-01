@@ -1,4 +1,6 @@
-﻿using System.Text.Json.Serialization;
+// Copyright (c) Atlantic. All rights reserved.
+
+using System.Text.Json.Serialization;
 
 namespace Fsel.Core.Base.BaseModels
 {

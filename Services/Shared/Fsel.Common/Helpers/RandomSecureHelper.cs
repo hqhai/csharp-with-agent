@@ -6,7 +6,12 @@ namespace Fsel.Common.Helpers
 {
     public class RandomSecureHelper
     {
-        private readonly RNGCryptoServiceProvider _rngProvider = new RNGCryptoServiceProvider();
+        private readonly RandomNumberGenerator _rngProvider;
+
+        public RandomSecureHelper()
+        {
+            _rngProvider = RandomNumberGenerator.Create();
+        }
 
         public int Next()
         {
@@ -31,7 +36,7 @@ namespace Fsel.Common.Helpers
         {
             var randomBytes = new byte[32];
             _rngProvider.GetBytes(randomBytes);
-            string secret = BitConverter.ToString(randomBytes).Replace("-", "");
+            string secret = BitConverter.ToString(randomBytes).Replace("-", "", StringComparison.OrdinalIgnoreCase);
             return secret;
         }
     }

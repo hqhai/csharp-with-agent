@@ -1,3 +1,5 @@
+// Copyright (c) Atlantic. All rights reserved.
+
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Fsel.Common.ActionResults

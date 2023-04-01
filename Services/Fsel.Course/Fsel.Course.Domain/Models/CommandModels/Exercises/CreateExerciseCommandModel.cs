@@ -1,5 +1,6 @@
+// Copyright (c) Atlantic. All rights reserved.
+
 using Fsel.Common.Enums;
-using Fsel.Course.Domain.Enums;
 using Fsel.Course.Domain.Models.CommandModels.Questions;
 
 namespace Fsel.Course.Domain.Models.CommandModels.Exercises
@@ -12,6 +13,6 @@ namespace Fsel.Course.Domain.Models.CommandModels.Exercises
 
         public EnumCourseSkill CourseSkill { get; set; }
 
-        public List<CreateQuestionCommandModel> Questions { get; set; } = new List<CreateQuestionCommandModel>();
+        public IList<CreateQuestionCommandModel>? Questions { get; set; }
     }
 }

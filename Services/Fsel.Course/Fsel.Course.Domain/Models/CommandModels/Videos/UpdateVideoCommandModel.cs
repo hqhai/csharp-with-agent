@@ -1,3 +1,5 @@
+// Copyright (c) Atlantic. All rights reserved.
+
 using Fsel.Common.Enums;
 using Fsel.Core.Base.BaseModels;
 using Fsel.Course.Domain.Models.CommandModels.VideoTimeCodes;
@@ -13,6 +15,6 @@ namespace Fsel.Course.Domain.Models.CommandModels.Videos
         public Guid TeacherId { get; set; }
 
         public EnumCourseLevel CourseLevel { get; set; }
-        public List<UpdateVideoTimeCodeCommandModel> VideoTimeCodes { get; set; } = new List<UpdateVideoTimeCodeCommandModel>();
+        public IList<UpdateVideoTimeCodeCommandModel>? VideoTimeCodes { get; set; }
     }
 }

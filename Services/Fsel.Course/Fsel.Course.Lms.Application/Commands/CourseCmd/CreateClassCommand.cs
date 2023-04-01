@@ -94,8 +94,8 @@ namespace Fsel.Course.Lms.Application.Commands.CourseCmd
             };
 
             var units = course.CourseUnitMockTests
-                        .Where(x => x.UnitId != null)
-                        .Select(x => x.Unit)
+                        .Where(x => x.UnitId != null && x.Unit != null)
+                        .Select(x => x.Unit ?? new())
                         .ToList();
 
             var unitResults = units.Select(x => new UnitResult
@@ -104,7 +104,7 @@ namespace Fsel.Course.Lms.Application.Commands.CourseCmd
                 UnitId = x.Id,
             }).ToList();
 
-            var lessonResults = units.GroupBy(x => x?.Id).Select(x => new { x.Key, Lessons = x.SelectMany(n => n.UnitLessons).Select(x => x.Lesson) })
+            var lessonResults = units.GroupBy(x => x?.Id).Select(x => new { x.Key, Lessons = x.SelectMany(n => n.UnitLessons).Select(x => x.Lesson ?? new()) })
                                      .SelectMany(x => x.Lessons.Select(n => new LessonResult
                                      {
                                          StudentId = _authContext.CurrentUserId,
@@ -113,7 +113,7 @@ namespace Fsel.Course.Lms.Application.Commands.CourseCmd
                                          LessonId = n?.Id ?? default,
                                          VideoResult = new VideoResult
                                          {
-                                             VideoId = n.LessonVideos.FirstOrDefault()?.VideoId ?? default,
+                                             VideoId = n?.LessonVideos.FirstOrDefault()?.VideoId ?? default,
                                              StudentId = _authContext.CurrentUserId
                                          }
                                      })).ToList();

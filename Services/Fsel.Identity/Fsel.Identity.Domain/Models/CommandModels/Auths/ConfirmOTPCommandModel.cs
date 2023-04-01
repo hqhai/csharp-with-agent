@@ -5,8 +5,6 @@ namespace Fsel.Identity.Domain.Models.CommandModels.Auths
     public class ConfirmOTPCommandModel
     {
         public string? Code { get; set; }
-
-        // public string? PhoneNumber { get; set; }
         public string? Email { get; set; }
     }
 }

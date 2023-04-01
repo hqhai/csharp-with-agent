@@ -81,7 +81,7 @@ namespace Fsel.Course.Application.Queries.CourseQuery
             {
                 foreach (var item in lists)
                 {
-                    item.TeacherName = teachers.Content?.Result?.FirstOrDefault(x => x.Id == item.TeacherId)?.Human.FullName;
+                    item.TeacherName = teachers.Content?.Result?.FirstOrDefault(x => x.Id == item.TeacherId)?.Human?.FullName;
                 }
             }
 

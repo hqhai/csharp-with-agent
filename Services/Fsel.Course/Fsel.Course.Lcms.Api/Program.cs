@@ -1,3 +1,5 @@
+// Copyright (c) Atlantic. All rights reserved.
+
 using Fsel.Common.ValueSettings;
 using Fsel.Core.Extensions;
 using Fsel.Course.Application.Services.UserServices;

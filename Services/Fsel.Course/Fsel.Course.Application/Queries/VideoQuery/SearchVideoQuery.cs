@@ -42,16 +42,16 @@ namespace Fsel.Course.Application.Queries.VideoQuery
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 return methodResult;
             }
-            var video = _videoRepository.SearchAsync(request.TimeCodeType, request.TeacherId, request.Level);
+            var videoQuery = _videoRepository.SearchAsync(request.TimeCodeType, request.TeacherId, request.Level);
 
             //Keyword
             if (!string.IsNullOrEmpty(request.Keyword))
             {
-                video = video.Where(m => m.Id.ToString() == request.Keyword || (m.Name ?? string.Empty).Contains(request.Keyword));
+                videoQuery = videoQuery.Where(m => m.Id.ToString() == request.Keyword || (m.Name ?? string.Empty).Contains(request.Keyword));
             }
 
-            int totalItem = await video.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
-            var lists = await video.OrderByDescending(x => x.CreatedDate)
+            int totalItem = await videoQuery.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
+            var lists = await videoQuery.OrderByDescending(x => x.CreatedDate)
                     .Skip((request.Page - 1) * request.PageSize)
                     .Take(request.PageSize)
                     .AsNoTracking()

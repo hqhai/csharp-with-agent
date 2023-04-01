@@ -4,16 +4,13 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Text;
 using Fsel.Common.ActionResults;
 using Fsel.Common.Helpers;
-using Fsel.Identity.Domain.Entities;
 using Fsel.Identity.Domain.Enums.ErrorCodes;
 using Fsel.Identity.Domain.IRepositories;
 using Fsel.Identity.Domain.Models.CommandModels.Auths;
 using Fsel.Identity.Domain.Models.EntityModels;
-using Fsel.Identity.Infrastructure;
 using Fsel.Identity.Infrastructure.ValueSettings;
 using MediatR;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 
 namespace Fsel.Identity.Application.Commands.AuthCmd
@@ -24,17 +21,15 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
 
     public class RefreshTokenCommandHandler : IRequestHandler<RefreshTokenCommand, MethodResult<TokenModel>>
     {
-        private readonly UserManager<User> _userManager;
         private readonly IUserTokenRepository _userTokenRepository;
         private readonly AppSetting _appSetting;
         private readonly IMediator _mediator;
 
-        public RefreshTokenCommandHandler(UserManager<User> userManager,
+        public RefreshTokenCommandHandler(
             IUserTokenRepository userTokenRepository,
             AppSetting appSetting,
             IMediator mediator)
         {
-            _userManager = userManager;
             _userTokenRepository = userTokenRepository;
             _mediator = mediator;
             _appSetting = appSetting;
@@ -48,18 +43,18 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             var secretKeyBytes = Encoding.ASCII.GetBytes(_appSetting.Jwt?.SecretKey ?? string.Empty);
             var tokenValidateParam = new TokenValidationParameters
             {
-                ValidateIssuer = false,
-                ValidateAudience = false,
+                ValidateIssuer = true,
+                ValidateAudience = true,
                 ValidateIssuerSigningKey = true,
                 IssuerSigningKey = new SymmetricSecurityKey(secretKeyBytes),
                 ClockSkew = TimeSpan.Zero,
-                ValidateLifetime = false
+                ValidateLifetime = true
             };
-            var tokenInVerification = jwtTokenHandler.ValidateToken(request.AccessToken, tokenValidateParam, out var validatedToken);
+            var tokenValidationResult = await jwtTokenHandler.ValidateTokenAsync(request.AccessToken, tokenValidateParam);
 
-            if (validatedToken is JwtSecurityToken jwtSecurityToken)
+            if (tokenValidationResult.SecurityToken is JwtSecurityToken jwtSecurityToken)
             {
-                var result = jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256, StringComparison.InvariantCultureIgnoreCase);
+                var result = jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256, StringComparison.OrdinalIgnoreCase);
                 if (!result)
                 {
                     methodResult.AddError(StatusCodes.Status401Unauthorized, nameof(EnumAuthErrorCode.InvalidToken));
@@ -67,10 +62,10 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                 }
             }
 
-            long.TryParse(tokenInVerification.Claims.FirstOrDefault(x => x.Type == JwtRegisteredClaimNames.Exp)?.Value, out long utcExpireDate);
+            var checkExpireDate = long.TryParse(tokenValidationResult.ClaimsIdentity.Claims.FirstOrDefault(x => x.Type == JwtRegisteredClaimNames.Exp)?.Value, out long utcExpireDate);
 
             var expireDate = utcExpireDate.ConvertUnixTimeStampToDateTime();
-            if (expireDate < DateTime.Now)
+            if (!checkExpireDate || expireDate < DateTime.Now)
             {
                 methodResult.AddError(StatusCodes.Status401Unauthorized, nameof(EnumAuthErrorCode.AccessTokenNotYetExpired));
                 return methodResult;

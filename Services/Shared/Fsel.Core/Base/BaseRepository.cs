@@ -1,3 +1,5 @@
+// Copyright (c) Atlantic. All rights reserved.
+
 using Fsel.Common.ActionResults;
 using Fsel.Core.Applications.InternalEvents;
 using Fsel.Core.Base.Interfaces;
@@ -68,6 +70,7 @@ namespace Fsel.Core.Base
 
         public virtual T Add(T newEntity)
         {
+            ArgumentNullException.ThrowIfNull(newEntity);
             try
             {
                 newEntity.CreatedDate = DateTime.Now;
@@ -86,6 +89,7 @@ namespace Fsel.Core.Base
 
         public virtual async Task AddList(IEnumerable<T> newEntities)
         {
+            ArgumentNullException.ThrowIfNull(newEntities);
             try
             {
                 foreach (var newEntity in newEntities)
@@ -136,6 +140,7 @@ namespace Fsel.Core.Base
 
         public virtual Task<bool> DeleteAsync(T deleteEntity)
         {
+            ArgumentNullException.ThrowIfNull(deleteEntity);
             try
             {
                 deleteEntity.IsDeleted = true;
@@ -154,6 +159,7 @@ namespace Fsel.Core.Base
 
         public virtual T Update(T updateEntity)
         {
+            ArgumentNullException.ThrowIfNull(updateEntity);
             try
             {
                 updateEntity.UpdatedDate = DateTime.Now;
@@ -171,6 +177,7 @@ namespace Fsel.Core.Base
 
         public virtual void UpdateList(IEnumerable<T> updateEntities)
         {
+            ArgumentNullException.ThrowIfNull(updateEntities);
             try
             {
                 foreach (var updateEntity in updateEntities)
@@ -191,6 +198,7 @@ namespace Fsel.Core.Base
 
         public virtual async Task ExecuteTransactionAsync(Func<Task<VoidMethodResult>> action)
         {
+            ArgumentNullException.ThrowIfNull(action);
             if (_dbBaseContext.Database.IsInMemory() || _dbBaseContext.HasActiveTransaction)
             {
                 await action().ConfigureAwait(continueOnCapturedContext: false);
@@ -202,6 +210,7 @@ namespace Fsel.Core.Base
             {
                 using IDbContextTransaction? transaction = await _dbBaseContext.BeginTransactionAsync().ConfigureAwait(continueOnCapturedContext: false);
                 if (transaction != null)
+                {
                     try
                     {
                         if ((await action().ConfigureAwait(continueOnCapturedContext: false))?.IsOK ?? false)
@@ -218,6 +227,9 @@ namespace Fsel.Core.Base
                         transaction.Rollback();
                         throw;
                     }
+                }
+                else
+                { }
             }).ConfigureAwait(continueOnCapturedContext: false);
         }
     }

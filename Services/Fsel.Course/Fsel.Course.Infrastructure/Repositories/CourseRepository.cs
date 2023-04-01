@@ -1,3 +1,5 @@
+// Copyright (c) Atlantic. All rights reserved.
+
 using Fsel.Core.Base;
 using Fsel.Course.Domain.IRepositories;
 using Microsoft.EntityFrameworkCore;
@@ -40,9 +42,9 @@ namespace Fsel.Course.Infrastructure.Repositories
                                         .Include(e => e.CourseClassStudents.Where(y => y.IsDeleted == false))
                                         .Include(x => x.CourseUnitMockTests.Where(y => y.IsDeleted == false))
                                         .ThenInclude(x => x.Unit)
-                                        .ThenInclude(x => x.UnitLessons.Where(y => y.IsDeleted == false))
+                                        .ThenInclude(x => (x ?? new()).UnitLessons.Where(y => y.IsDeleted == false))
                                         .ThenInclude(x => x.Lesson)
-                                        .ThenInclude(x => x.LessonVideos)
+                                        .ThenInclude(x => (x ?? new()).LessonVideos.Where(y => y.IsDeleted == false))
                                         .Where(x => x.Id == id).FirstOrDefaultAsync();
             }
             catch (Exception)

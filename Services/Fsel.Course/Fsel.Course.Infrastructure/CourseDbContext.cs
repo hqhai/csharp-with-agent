@@ -1,3 +1,5 @@
+// Copyright (c) Atlantic. All rights reserved.
+
 using Fsel.Common.Constants;
 using Fsel.Core.Base;
 using Fsel.Course.Domain.Entities;
@@ -46,6 +48,7 @@ namespace Fsel.Course.Infrastructure
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            ArgumentNullException.ThrowIfNull(modelBuilder);
             modelBuilder.ApplyConfiguration(new ClassForumEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new CourseEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new CourseTeacherEntityTypeConfiguration());
@@ -78,6 +81,7 @@ namespace Fsel.Course.Infrastructure
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
+            ArgumentNullException.ThrowIfNull(optionsBuilder);
             if (!optionsBuilder.IsConfigured)
             {
                 IConfigurationRoot configuration = new ConfigurationBuilder()
