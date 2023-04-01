@@ -13,6 +13,6 @@ namespace Fsel.Course.Domain.Models.CommandModels.Exercises
 
         public EnumCourseSkill CourseSkill { get; set; }
 
-        public List<UpdateQuestionCommandModel> Questions { get; set; } = new List<UpdateQuestionCommandModel>();
+        public IList<UpdateQuestionCommandModel>? Questions { get; set; }
     }
 }

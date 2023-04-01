@@ -15,6 +15,6 @@ namespace Fsel.Course.Domain.Models.CommandModels.Videos
         public Guid TeacherId { get; set; }
 
         public EnumCourseLevel CourseLevel { get; set; }
-        public List<UpdateVideoTimeCodeCommandModel> VideoTimeCodes { get; set; } = new List<UpdateVideoTimeCodeCommandModel>();
+        public IList<UpdateVideoTimeCodeCommandModel>? VideoTimeCodes { get; set; }
     }
 }

@@ -2,7 +2,7 @@
 
 namespace Fsel.Course.Infrastructure.Maps
 {
-    internal class CourseResultProfile
+    public class CourseResultProfile
     {
     }
 }

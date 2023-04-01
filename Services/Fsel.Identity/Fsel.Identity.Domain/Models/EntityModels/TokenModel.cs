@@ -8,6 +8,6 @@ namespace Fsel.Identity.Domain.Models.EntityModels
         public string? RefreshToken { get; set; }
         public string? FullName { get; set; }
         public DateTime? Expiration { get; set; }
-        public List<string>? Roles { get; set; }
+        public IList<string>? Roles { get; set; }
     }
 }

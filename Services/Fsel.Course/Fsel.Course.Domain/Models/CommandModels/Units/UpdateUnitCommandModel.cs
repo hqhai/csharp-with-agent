@@ -11,7 +11,7 @@ namespace Fsel.Course.Domain.Models.CommandModels.Units
 
         public string? DisplayName { get; set; }
 
-        public List<Guid>? LessonIds { get; set; }
+        public IList<Guid>? LessonIds { get; set; }
 
         public EnumCourseLevel CourseLevel { get; set; }
 
