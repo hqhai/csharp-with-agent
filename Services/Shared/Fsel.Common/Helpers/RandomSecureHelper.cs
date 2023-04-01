@@ -6,7 +6,12 @@ namespace Fsel.Common.Helpers
 {
     public class RandomSecureHelper
     {
-        private static readonly RNGCryptoServiceProvider _rngProvider = new RNGCryptoServiceProvider();
+        private readonly RandomNumberGenerator _rngProvider;
+
+        public RandomSecureHelper()
+        {
+            _rngProvider = RandomNumberGenerator.Create();
+        }
 
         public int Next()
         {

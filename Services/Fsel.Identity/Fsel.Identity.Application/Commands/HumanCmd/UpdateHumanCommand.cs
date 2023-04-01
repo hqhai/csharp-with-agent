@@ -2,7 +2,6 @@
 
 namespace Fsel.Identity.Application.Commands.HumanCmd
 {
-    using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
     using Fsel.Identity.Domain.Models.CommandModels.Humans;
     using Fsel.Identity.Domain.Models.EntityModels;
@@ -12,16 +11,16 @@ namespace Fsel.Identity.Application.Commands.HumanCmd
     {
     }
 
-    public class UpdateHumanCommandHandler : IRequestHandler<UpdateHumanCommand, MethodResult<HumanModel>>
-    {
-        public UpdateHumanCommandHandler()
-        {
-        }
+    //public class UpdateHumanCommandHandler : IRequestHandler<UpdateHumanCommand, MethodResult<HumanModel>>
+    //{
+    //    public UpdateHumanCommandHandler()
+    //    {
+    //    }
 
-        public async Task<MethodResult<HumanModel>> Handle(UpdateHumanCommand request, CancellationToken cancellationToken)
-        {
-            MethodResult<HumanModel> methodResult = new MethodResult<HumanModel>();
-            return methodResult;
-        }
-    }
+    //    public async Task<MethodResult<HumanModel>> Handle(UpdateHumanCommand request, CancellationToken cancellationToken)
+    //    {
+    //        MethodResult<HumanModel> methodResult = new MethodResult<HumanModel>();
+    //        return methodResult;
+    //    }
+    //}
 }

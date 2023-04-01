@@ -33,8 +33,7 @@ namespace Fsel.Sender.Application.Commands.SendEmailCmd
 
             if (request == null)
             {
-                methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                methodResult.AddError(nameof(EnumSendEmailErrorCode.SendEmailFail));
+                methodResult.AddErrorBadRequest(nameof(EnumSendEmailErrorCode.SendEmailFail));
                 return methodResult;
             }
             else
@@ -55,9 +54,14 @@ namespace Fsel.Sender.Application.Commands.SendEmailCmd
                 sendEmail.CcEmails = request.CcEmails;
                 sendEmail.BccEmails = request.BccEmails;
                 sendEmail.Content = request.Content;
-
-                var emailMessage = CreateEmailMessageAsync(sendEmail);
-                await Send(emailMessage);
+                try
+                {
+                    var emailMessage = CreateEmailMessageAsync(sendEmail);
+                    await Send(emailMessage);
+                }
+                catch
+                {
+                }
             }
 
             #endregion Validation
@@ -69,34 +73,36 @@ namespace Fsel.Sender.Application.Commands.SendEmailCmd
 
         private MimeMessage CreateEmailMessageAsync(SendEmailModel message)
         {
-            var emailMessage = new MimeMessage();
-            emailMessage.From.Add(new MailboxAddress("LMS -FSEL", _appSetting?.Smtp?.From ?? string.Empty));
-            if (message.ToEmails == null)
+            using (var emailMessage = new MimeMessage())
             {
+                emailMessage.From.Add(new MailboxAddress("LMS -FSEL", _appSetting?.Smtp?.From ?? string.Empty));
+                if (message.ToEmails == null)
+                {
+                    return emailMessage;
+                }
+
+                foreach (var item in message.ToEmails)
+                {
+                    emailMessage.To.Add(new MailboxAddress("LMS -FSEL", item));
+                }
+                if (message.BccEmails != null)
+                {
+                    foreach (var item in message.BccEmails)
+                    {
+                        emailMessage.Bcc.Add(new MailboxAddress("LMS -FSEL", item));
+                    }
+                }
+                if (message.CcEmails != null)
+                {
+                    foreach (var item in message.CcEmails)
+                    {
+                        emailMessage.Cc.Add(new MailboxAddress("LMS -FSEL", item));
+                    }
+                }
+                emailMessage.Subject = message.Subject;
+                emailMessage.Body = new TextPart(MimeKit.Text.TextFormat.Text) { Text = message.Content };
                 return emailMessage;
             }
-
-            foreach (var item in message.ToEmails)
-            {
-                emailMessage.To.Add(new MailboxAddress("LMS -FSEL", item));
-            }
-            if (message.BccEmails != null)
-            {
-                foreach (var item in message.BccEmails)
-                {
-                    emailMessage.Bcc.Add(new MailboxAddress("LMS -FSEL", item));
-                }
-            }
-            if (message.CcEmails != null)
-            {
-                foreach (var item in message.CcEmails)
-                {
-                    emailMessage.Cc.Add(new MailboxAddress("LMS -FSEL", item));
-                }
-            }
-            emailMessage.Subject = message.Subject;
-            emailMessage.Body = new TextPart(MimeKit.Text.TextFormat.Text) { Text = message.Content };
-            return emailMessage;
         }
 
         private async Task Send(MimeMessage mailmessage)
@@ -115,7 +121,7 @@ namespace Fsel.Sender.Application.Commands.SendEmailCmd
             }
             finally
             {
-                client.Disconnect(true);
+                await client.DisconnectAsync(true);
                 client.Dispose();
             }
         }

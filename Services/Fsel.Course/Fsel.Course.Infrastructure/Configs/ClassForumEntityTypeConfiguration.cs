@@ -13,6 +13,7 @@ namespace Fsel.Course.Infrastructure.Configs
     {
         public void Configure(EntityTypeBuilder<ClassForum> builder)
         {
+            ArgumentNullException.ThrowIfNull(builder);
             builder.Property(e => e.GradingStyle)
                 .HasMaxLength(100)
                 .HasConversion(

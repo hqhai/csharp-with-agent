@@ -17,19 +17,19 @@ namespace Fsel.Identity.Infrastructure
         {
         }
 
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        protected override void OnModelCreating(ModelBuilder builder)
         {
-            ArgumentNullException.ThrowIfNull(modelBuilder);
-            SeedRoles(modelBuilder);
+            ArgumentNullException.ThrowIfNull(builder);
+            SeedRoles(builder);
 
-            modelBuilder.ApplyConfiguration(new HumanEntityTypeConfiguration());
-            modelBuilder.ApplyConfiguration(new TeacherEntityTypeConfiguration());
-            modelBuilder.ApplyConfiguration(new ParentEntityTypeConfiguration());
-            modelBuilder.ApplyConfiguration(new ParentStudentEntityTypeConfiguration());
-            modelBuilder.ApplyConfiguration(new StudentEntityTypeConfiguration());
-            modelBuilder.ApplyConfiguration(new UserEntityTypeConfiguration());
+            builder.ApplyConfiguration(new HumanEntityTypeConfiguration());
+            builder.ApplyConfiguration(new TeacherEntityTypeConfiguration());
+            builder.ApplyConfiguration(new ParentEntityTypeConfiguration());
+            builder.ApplyConfiguration(new ParentStudentEntityTypeConfiguration());
+            builder.ApplyConfiguration(new StudentEntityTypeConfiguration());
+            builder.ApplyConfiguration(new UserEntityTypeConfiguration());
 
-            base.OnModelCreating(modelBuilder);
+            base.OnModelCreating(builder);
         }
 
         #region Db Set

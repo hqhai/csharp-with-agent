@@ -10,6 +10,7 @@ namespace Fsel.Identity.Infrastructure.Configs
     {
         public void Configure(EntityTypeBuilder<ParentStudent> builder)
         {
+            ArgumentNullException.ThrowIfNull(builder);
             builder.HasOne(a => a.Student)
                 .WithMany(b => b.ParentStudents)
                 .HasForeignKey(b => b.StudentId)

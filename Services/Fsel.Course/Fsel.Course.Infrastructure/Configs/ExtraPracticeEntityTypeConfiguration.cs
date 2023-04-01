@@ -13,6 +13,7 @@ namespace Fsel.Course.Infrastructure.Configs
     {
         public void Configure(EntityTypeBuilder<ExtraPractice> builder)
         {
+            ArgumentNullException.ThrowIfNull(builder);
             builder.Property(e => e.Type)
                 .HasMaxLength(100)
                 .HasConversion(

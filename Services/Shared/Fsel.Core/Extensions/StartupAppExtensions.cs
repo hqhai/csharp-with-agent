@@ -12,6 +12,7 @@ namespace Fsel.Core.Extensions
     {
         public static void UseServices(this WebApplication app)
         {
+            ArgumentNullException.ThrowIfNull(app);
             if (app.Environment.IsDevelopment() || app.Environment.IsEnvironment("Testing"))
             {
                 app.UseSwagger();
@@ -27,6 +28,8 @@ namespace Fsel.Core.Extensions
         public static void UseGatewayServices(this WebApplication app)
         {
             // Configure the HTTP request pipeline.
+
+            ArgumentNullException.ThrowIfNull(app);
             if (app.Environment.IsDevelopment() || app.Environment.IsEnvironment("Testing"))
             {
                 app.UseSwagger();

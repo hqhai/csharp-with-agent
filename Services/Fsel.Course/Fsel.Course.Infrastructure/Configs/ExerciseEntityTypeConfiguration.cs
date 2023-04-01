@@ -12,6 +12,7 @@ namespace Fsel.Course.Infrastructure.Configs
     {
         public void Configure(EntityTypeBuilder<Exercise> builder)
         {
+            ArgumentNullException.ThrowIfNull(builder);
             builder.Property(e => e.CourseSkill)
                .HasMaxLength(100)
                .HasConversion(

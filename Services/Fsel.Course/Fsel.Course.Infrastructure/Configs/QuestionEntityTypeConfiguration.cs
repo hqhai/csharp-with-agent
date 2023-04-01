@@ -12,6 +12,7 @@ namespace Fsel.Course.Infrastructure.Configs
     {
         public void Configure(EntityTypeBuilder<Question> builder)
         {
+            ArgumentNullException.ThrowIfNull(builder);
             builder.Property(e => e.QuestionType)
                  .HasMaxLength(100)
                  .HasConversion(

@@ -59,6 +59,7 @@ namespace Fsel.Course.Lcms.Api.Controllers
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> Update([FromRoute] Guid id, [FromBody] UpdateCourseCommand command)
         {
+            ArgumentNullException.ThrowIfNull(command);
             command.Id = id;
             MethodResult<CourseModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();
