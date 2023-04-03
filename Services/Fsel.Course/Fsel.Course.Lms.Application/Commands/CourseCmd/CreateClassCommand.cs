@@ -95,16 +95,16 @@ namespace Fsel.Course.Lms.Application.Commands.CourseCmd
 
             var units = course.CourseUnitMockTests
                         .Where(x => x.UnitId != null && x.Unit != null)
-                        .Select(x => x.Unit ?? new())
+                        .Select(x => x!.Unit)
                         .ToList();
 
             var unitResults = units.Select(x => new UnitResult
             {
                 StudentId = _authContext.CurrentUserId,
-                UnitId = x.Id,
+                UnitId = x!.Id,
             }).ToList();
 
-            var lessonResults = units.GroupBy(x => x?.Id).Select(x => new { x.Key, Lessons = x.SelectMany(n => n.UnitLessons).Select(x => x.Lesson ?? new()) })
+            var lessonResults = units.GroupBy(x => x?.Id).Select(x => new { x.Key, Lessons = x.SelectMany(n => n!.UnitLessons).Select(x => x!.Lesson) })
                                      .SelectMany(x => x.Lessons.Select(n => new LessonResult
                                      {
                                          StudentId = _authContext.CurrentUserId,

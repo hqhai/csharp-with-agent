@@ -44,9 +44,9 @@ namespace Fsel.Course.Lms.Application.Queries.VideoQuery
                                 .Include(i => i.VideoTimeCodes.Where(x => !x.IsDeleted))
                                 .ThenInclude(x => x.TimeCodeExercises.Where(x => !x.IsDeleted && x.Exercise != null))
                                 .ThenInclude(x => x.Exercise)
-                                .ThenInclude(x => (x ?? new()).ExerciseQuestions.Where(x => !x.IsDeleted))
+                                .ThenInclude(x => x!.ExerciseQuestions.Where(x => !x.IsDeleted))
                                 .ThenInclude(x => x.Question)
-                                .ThenInclude(x => (x ?? new()).VideoTimeCodeAnswer)
+                                .ThenInclude(x => x!.VideoTimeCodeAnswer)
                                 .Where(x => x.Id == request.VideoId)
                                 .AsNoTracking()
                                 .FirstOrDefaultAsync(cancellationToken: cancellationToken);
@@ -72,14 +72,14 @@ namespace Fsel.Course.Lms.Application.Queries.VideoQuery
                     ExecutionTime = x.ExecutionTime,
                     TimeCodeType = x.TimeCodeType,
                     VideoId = x.VideoId,
-                    Exercises = x.TimeCodeExercises.Where(n => n.Exercise != null).Select(n => n.Exercise ?? new()).Select(n => new ExerciseModel
+                    Exercises = x.TimeCodeExercises.Where(n => n.Exercise != null).Select(n => n.Exercise).Select(n => new ExerciseModel
                     {
-                        Id = n.Id,
+                        Id = n!.Id,
                         MediaPost = n.MediaPost,
                         CourseSkill = n.CourseSkill,
-                        Questions = n.ExerciseQuestions.Where(m => m.Question != null).Select(m => m.Question ?? new()).Select(m => new QuestionModel()
+                        Questions = n.ExerciseQuestions.Where(m => m.Question != null).Select(m => m.Question).Select(m => new QuestionModel()
                         {
-                            Id = m.Id,
+                            Id = m!.Id,
                             QuestionType = m.QuestionType,
                             CorrectTotal = m.CorrectTotal,
                             Explanation = m.Explanation,
