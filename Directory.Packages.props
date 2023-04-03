@@ -38,6 +38,8 @@
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.17.0" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Kubernetes.Tools.Targets" Version="1.1.0" />
     <PackageReference Include="Otp.NET" Version="1.3.0" />
+    
+    <!--<PackageReference Include="Fsel.Core" Version="1.0.0" />-->
   </ItemGroup>
   <!-- Tests -->
   <ItemGroup Label="Tests Packages" Condition="'$(IsTestProject)' == 'true'">
