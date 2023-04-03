@@ -42,7 +42,9 @@ namespace Fsel.Course.Application.Queries.QuestionFormQuery
                                         {
                                             Id = x.Id,
                                             Name = x.Name,
-                                            CreatedDate = x.CreatedDate
+                                            CreatedDate = x.CreatedDate,
+                                            Type = x.Type,
+                                            Config = x.Config
                                         });
 
             //Keyword
