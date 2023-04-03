@@ -38,6 +38,6 @@ namespace Fsel.Course.Domain.Entities
 
         public VideoResult? VideoResult { get; set; }
 
-        public LessonNote? LessonNote { get; set; }
+        public ICollection<LessonNote> LessonNotes { get; set; } = new List<LessonNote>();
     }
 }

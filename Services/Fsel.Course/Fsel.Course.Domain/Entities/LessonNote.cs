@@ -16,6 +16,6 @@ namespace Fsel.Course.Domain.Entities
         public string? Note { get; set; }
 
         public LessonResult? LessonResult { get; set; }
-        public Guid? LessonResultId { get; set; }
+        public Guid LessonResultId { get; set; }
     }
 }

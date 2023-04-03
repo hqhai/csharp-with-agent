@@ -35,7 +35,7 @@ namespace Fsel.Course.Infrastructure.Migrations
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(250)", maxLength: 250, nullable: false),
                     Note = table.Column<string>(type: "nvarchar(2000)", maxLength: 2000, nullable: true),
-                    LessonResultId = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
+                    LessonResultId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -44,15 +44,14 @@ namespace Fsel.Course.Infrastructure.Migrations
                         name: "FK_LessonNotes_LessonResults_LessonResultId",
                         column: x => x.LessonResultId,
                         principalTable: "LessonResults",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateIndex(
                 name: "IX_LessonNotes_LessonResultId",
                 table: "LessonNotes",
-                column: "LessonResultId",
-                unique: true,
-                filter: "[LessonResultId] IS NOT NULL");
+                column: "LessonResultId");
         }
 
         /// <inheritdoc />

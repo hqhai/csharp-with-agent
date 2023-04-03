@@ -12,8 +12,8 @@ namespace Fsel.Course.Infrastructure.Configs
         {
             ArgumentNullException.ThrowIfNull(builder);
             builder.HasOne(a => a.LessonResult)
-                 .WithOne(b => b.LessonNote)
-                 .HasForeignKey<LessonNote>(p => p.LessonResultId)
+                 .WithMany(b => b.LessonNotes)
+                 .HasForeignKey(p => p.LessonResultId)
                  .OnDelete(DeleteBehavior.Cascade);
         }
     }

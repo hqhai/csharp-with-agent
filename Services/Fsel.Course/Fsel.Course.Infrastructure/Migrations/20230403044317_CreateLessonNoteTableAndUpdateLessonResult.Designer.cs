@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fsel.Course.Infrastructure.Migrations
 {
     [DbContext(typeof(CourseDbContext))]
-    [Migration("20230403041539_CreateLessonNoteTableAndUpdateLessonResult")]
+    [Migration("20230403044317_CreateLessonNoteTableAndUpdateLessonResult")]
     partial class CreateLessonNoteTableAndUpdateLessonResult
     {
         /// <inheritdoc />
@@ -1026,7 +1026,7 @@ namespace Fsel.Course.Infrastructure.Migrations
                         .HasColumnType("bit")
                         .HasColumnOrder(110);
 
-                    b.Property<Guid?>("LessonResultId")
+                    b.Property<Guid>("LessonResultId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Name")
@@ -1053,9 +1053,7 @@ namespace Fsel.Course.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("LessonResultId")
-                        .IsUnique()
-                        .HasFilter("[LessonResultId] IS NOT NULL");
+                    b.HasIndex("LessonResultId");
 
                     b.ToTable("LessonNotes");
                 });
@@ -2230,8 +2228,10 @@ namespace Fsel.Course.Infrastructure.Migrations
             modelBuilder.Entity("Fsel.Course.Domain.Entities.LessonNote", b =>
                 {
                     b.HasOne("Fsel.Course.Domain.Entities.LessonResult", "LessonResult")
-                        .WithOne("LessonNote")
-                        .HasForeignKey("Fsel.Course.Domain.Entities.LessonNote", "LessonResultId");
+                        .WithMany("LessonNotes")
+                        .HasForeignKey("LessonResultId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("LessonResult");
                 });
@@ -2487,7 +2487,7 @@ namespace Fsel.Course.Infrastructure.Migrations
 
             modelBuilder.Entity("Fsel.Course.Domain.Entities.LessonResult", b =>
                 {
-                    b.Navigation("LessonNote");
+                    b.Navigation("LessonNotes");
 
                     b.Navigation("VideoResult");
                 });
