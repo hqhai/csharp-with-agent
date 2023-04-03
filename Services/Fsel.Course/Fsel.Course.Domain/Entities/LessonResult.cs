@@ -15,6 +15,9 @@ namespace Fsel.Course.Domain.Entities
 
         public EnumResultStatus Status { get; set; }
 
+        [MaxLength(2000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
+        public string? SummaryNote { get; set; }
+
         public Course? Course { get; set; }
 
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
@@ -34,5 +37,7 @@ namespace Fsel.Course.Domain.Entities
         public Guid StudentId { get; set; }
 
         public VideoResult? VideoResult { get; set; }
+
+        public LessonNote? LessonNote { get; set; }
     }
 }

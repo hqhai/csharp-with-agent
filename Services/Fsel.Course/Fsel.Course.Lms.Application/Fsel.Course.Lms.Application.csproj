@@ -16,4 +16,8 @@
     <ProjectReference Include="..\Fsel.Course.Infrastructure\Fsel.Course.Infrastructure.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Commands\LessonNoteCmd\" />
+  </ItemGroup>
+
 </Project>
