@@ -9,7 +9,8 @@ namespace Fsel.Course.Domain.Models.EntityModels
     {
         public EnumQuestionType QuestionType { get; set; }
         public int CorrectTotal { get; set; }
-        public bool IsSave { get; set; }
+        public bool Ungraded { get; set; }
+        public string? Explanation { get; set; }
         public object? Config { get; set; }
         public VideoTimeCodeAnswerModel? VideoTimeCodeAnswer { get; set; }
     }

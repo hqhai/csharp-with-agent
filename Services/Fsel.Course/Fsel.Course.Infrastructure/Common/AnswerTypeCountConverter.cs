@@ -3,6 +3,7 @@
 namespace Fsel.Course.Infrastructure.Common
 {
     using System;
+    using System.Linq;
     using Fsel.Common.Helpers;
     using Fsel.Course.Domain.Entities.QuestionTypeConfigs.Answers;
     using Fsel.Course.Domain.Entities.QuestionTypeConfigs.Questions;
@@ -22,6 +23,7 @@ namespace Fsel.Course.Infrastructure.Common
                 case EnumQuestionType.Listing:
                     return GetTotalCorrectTypeListingAnswer(ref configAnswer, configQuestion);
 
+                case EnumQuestionType.DragAndDropPicture:
                 case EnumQuestionType.MatchingType1:
                 case EnumQuestionType.MatchingType2:
                     return GetTotalCorrectTypeMaschingAnswer(ref configAnswer, configQuestion);
@@ -43,9 +45,6 @@ namespace Fsel.Course.Infrastructure.Common
                 case EnumQuestionType.DragAndDropSentenceOrder:
                     return GetTotalCorrectTypeDragDropOrderAnswer(ref configAnswer, configQuestion);
 
-                case EnumQuestionType.DragAndDropPicture:
-                    return GetTotalCorrectTypeDragDropPictureAnswer(ref configAnswer, configQuestion);
-
                 case EnumQuestionType.MultipleOptionSentenceCompletion:
                     return GetTotalCorrectTypeMultipleOptionAnswer(ref configAnswer, configQuestion);
 
@@ -53,7 +52,7 @@ namespace Fsel.Course.Infrastructure.Common
                     return default;
 
                 default:
-                    throw new ArgumentException("Invalid question type");
+                    throw new ArgumentException("Invalid answer type");
             }
         }
 
@@ -72,6 +71,7 @@ namespace Fsel.Course.Infrastructure.Common
                         item.IsExact = true;
                     }
                 }
+                configAnswer = dataAnswer;
                 return number;
             }
             return default;
@@ -113,6 +113,7 @@ namespace Fsel.Course.Infrastructure.Common
                         item.IsExact = true;
                     }
                 }
+                configAnswer = dataAnswer;
                 return number;
             }
             return default;
@@ -126,54 +127,44 @@ namespace Fsel.Course.Infrastructure.Common
             if (dataQuestion != null && dataAnswer != null && dataQuestion.ExactWordCount == dataAnswer.Answers?.Count)
             {
                 dataAnswer.IsExact = true;
+                configAnswer = dataAnswer;
                 return 1;
             }
-
             return default;
         }
 
         private static int GetTotalCorrectTypeShortAnswerWordCount(ref object? configAnswer, object? configQuestion)
         {
-            var dataAnswer = configAnswer.Deserialize<ListingAnswer>();
-            var dataQuestion = configQuestion.Deserialize<ListingQuestion>();
-            int number = 0;
+            var dataAnswer = configAnswer.Deserialize<ShortAnswerWordCountBaseAnswer>();
+            var dataQuestion = configQuestion.Deserialize<ShortAnswerQuestionWordCountBaseQuestion>();
             if (dataAnswer != null && dataAnswer.Answers != null && dataQuestion != null)
             {
-                var answerStrs = dataAnswer.Answers;
-                var numberAnswer = answerStrs.Sum(x => x.Length);
-                if (dataQuestion.ExactWordCount == numberAnswer)
+                var answerStrs = dataAnswer.Answers.Split(' ');
+                if (dataQuestion.ExactWordCount == answerStrs?.Length)
                 {
-                    number++;
                     dataAnswer.IsExact = true;
+                    configAnswer = dataAnswer;
+                    return 1;
                 }
-                dataAnswer.IsExact = false;
-                return number;
             }
             return default;
         }
 
         private static int GetTotalCorrectTypeShortAnswerWordBase(ref object? configAnswer, object? configQuestion)
         {
-            var dataAnswer = configAnswer.Deserialize<ListingAnswer>();
-            var dataQuestion = configQuestion.Deserialize<ListingQuestion>();
-            int number = 0;
-            if (dataAnswer != null && dataAnswer.Answers != null && dataQuestion != null)
+            var dataAnswer = configAnswer.Deserialize<ShortAnswerWordBaseAnswer>();
+            var dataQuestion = configQuestion.Deserialize<ShortAnswerQuestionWordBaseQuestion>();
+            if (dataAnswer != null && dataAnswer.Answers != null && dataQuestion != null && dataQuestion.Content != null)
             {
-                var answerStrs = dataAnswer.Answers;
-                var numberAnswer = answerStrs.Sum(x => x.Length);
-                if (dataQuestion.ExactWordCount == numberAnswer)
+                if (dataQuestion.Content.Equals(dataAnswer.Answers, StringComparison.Ordinal))
                 {
-                    number++;
                     dataAnswer.IsExact = true;
+                    configAnswer = dataAnswer;
+                    return 1;
                 }
-                dataAnswer.IsExact = false;
-                return number;
             }
             return default;
         }
-
-        //Cách tính điển totalcourse ở Gap Fill (Score by sub question) 3 từ đều đúng điểm +1
-        //Cách tính điển totalcourse ở Gap Fill (Score by gap) 3 từ nào đúng thì cộng thêm 1 điểm
 
         private static int GetTotalCorrectTypeGapFillGapAnswer(ref object? configAnswer, object? configQuestion)
         {
@@ -184,27 +175,18 @@ namespace Fsel.Course.Infrastructure.Common
             {
                 foreach (var item in dataAnswer.Answers)
                 {
-                    foreach (var item1 in dataQuestion.Contents)
+                    if (item.Answer != null)
                     {
-                        if (item.Answer != null)
+                        var isExact = item.Answer.Select(w => dataQuestion.Contents.All(c => c.Id == item.Id && c.Words != null && c.Words.Contains(w)))
+                                                  .ToList();
+                        item.IsExact = isExact;
+                        if (isExact.All(x => x))
                         {
-                            foreach (var item2 in item.Answer)
-                            {
-                                if (item1.Words != null)
-                                {
-                                    var isCheck = item1.Words.Any(x => x == item2);
-                                    if (isCheck)
-                                    {
-                                        number++;
-                                    }
-                                    else
-                                    {
-                                    }
-                                }
-                            }
+                            number++;
                         }
                     }
                 }
+                configAnswer = dataAnswer;
                 return number;
             }
             return default;
@@ -219,27 +201,15 @@ namespace Fsel.Course.Infrastructure.Common
             {
                 foreach (var item in dataAnswer.Answers)
                 {
-                    foreach (var item1 in dataQuestion.Contents)
+                    if (item.Answer != null)
                     {
-                        if (item.Answer != null)
-                        {
-                            foreach (var item2 in item.Answer)
-                            {
-                                if (item1.Words != null)
-                                {
-                                    var isCheck = item1.Words.Any(x => x == item2);
-                                    if (isCheck)
-                                    {
-                                        number++;
-                                    }
-                                    else
-                                    {
-                                    }
-                                }
-                            }
-                        }
+                        var isExact = item.Answer.Select(w => dataQuestion.Contents.All(c => c.Id == item.Id && c.Words != null && c.Words.Contains(w)))
+                                                  .ToList();
+                        item.IsExact = isExact;
+                        number = isExact.Count(x => x);
                     }
                 }
+                configAnswer = dataAnswer;
                 return number;
             }
             return default;
@@ -247,62 +217,25 @@ namespace Fsel.Course.Infrastructure.Common
 
         private static int GetTotalCorrectTypeDragDropOrderAnswer(ref object? configAnswer, object? configQuestion)
         {
-            //var data = config.Deserialize<DragAndDropSentenceOrderAnswer>();
-            //int number = 0;
-            //if (data != null && data.Contents != null)
-            //{
-            //    foreach (var item in data.Contents)
-            //    {
-            //        number++;
-            //    }
-            //    return number;
-            //}
-            var dataAnswer = configAnswer.Deserialize<ListingAnswer>();
-            var dataQuestion = configQuestion.Deserialize<ListingQuestion>();
+            var dataAnswer = configAnswer.Deserialize<DragAndDropSentenceOrderAnswer>();
+            var dataQuestion = configQuestion.Deserialize<DragAndDropSentenceOrderQuestion>();
             int number = 0;
-            if (dataAnswer != null && dataAnswer.Answers != null && dataQuestion != null)
+            if (dataAnswer != null && dataAnswer.Answers != null && dataQuestion != null && dataQuestion.Contents != null)
             {
-                var answerStrs = dataAnswer.Answers;
-                var numberAnswer = answerStrs.Sum(x => x.Length);
-                if (dataQuestion.ExactWordCount == numberAnswer)
+                foreach (var item in dataAnswer.Answers)
                 {
-                    number++;
-                    dataAnswer.IsExact = true;
+                    var content = dataQuestion.Contents.All(c => c.Id == item.Id && c.Words != null && item.Answer != null && c.Words.SequenceEqual(item.Answer));
+                    if (content)
+                    {
+                        item.IsExact = true;
+                        number++;
+                    }
+                    else
+                    {
+                        item.IsExact = false;
+                    }
                 }
-                dataAnswer.IsExact = false;
-                return number;
-            }
-            return default;
-        }
-
-        private static int GetTotalCorrectTypeDragDropPictureAnswer(ref object? configAnswer, object? configQuestion)
-        {
-            //var data = config.Deserialize<DragAndDropPictureAnswer>();
-            //int number = 0;
-            //if (data != null && data.Contents != null)
-            //{
-            //    foreach (var item in data.Contents)
-            //    {
-            //        item.Images.ForEach(y =>
-            //        {
-            //            number++;
-            //        });
-            //    }
-            //    return number;
-            //}
-            var dataAnswer = configAnswer.Deserialize<ListingAnswer>();
-            var dataQuestion = configQuestion.Deserialize<ListingQuestion>();
-            int number = 0;
-            if (dataAnswer != null && dataAnswer.Answers != null && dataQuestion != null)
-            {
-                var answerStrs = dataAnswer.Answers;
-                var numberAnswer = answerStrs.Sum(x => x.Length);
-                if (dataQuestion.ExactWordCount == numberAnswer)
-                {
-                    number++;
-                    dataAnswer.IsExact = true;
-                }
-                dataAnswer.IsExact = false;
+                configAnswer = dataAnswer;
                 return number;
             }
             return default;
