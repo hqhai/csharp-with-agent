@@ -42,9 +42,9 @@ namespace Fsel.Course.Infrastructure.Repositories
                                         .Include(e => e.CourseClassStudents.Where(y => y.IsDeleted == false))
                                         .Include(x => x.CourseUnitMockTests.Where(y => y.IsDeleted == false))
                                         .ThenInclude(x => x.Unit)
-                                        .ThenInclude(x => (x ?? new()).UnitLessons.Where(y => y.IsDeleted == false))
+                                        .ThenInclude(x => x!.UnitLessons.Where(y => y.IsDeleted == false))
                                         .ThenInclude(x => x.Lesson)
-                                        .ThenInclude(x => (x ?? new()).LessonVideos.Where(y => y.IsDeleted == false))
+                                        .ThenInclude(x => x!.LessonVideos.Where(y => y.IsDeleted == false))
                                         .Where(x => x.Id == id).FirstOrDefaultAsync();
             }
             catch (Exception)
