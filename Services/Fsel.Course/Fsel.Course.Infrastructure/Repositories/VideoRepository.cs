@@ -107,6 +107,7 @@ namespace Fsel.Course.Infrastructure.Repositories
                                         Id = video.Id,
                                         Name = video.Name,
                                         IsActive = video.LessonVideos.Any(),
+                                        VideoFilePath = video.VideoFilePath,
                                         CourseLevel = video.CourseLevel,
                                         CreatedDate = video.CreatedDate,
                                         CreatedFullName = video.CreatedFullName,
