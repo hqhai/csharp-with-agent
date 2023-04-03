@@ -31,7 +31,7 @@ namespace Fsel.Course.Infrastructure.Repositories
                 .Include(x => x.VideoTimeCodes.Where(n => !n.IsDeleted))
                 .ThenInclude(x => x.TimeCodeExercises.Where(n => !n.IsDeleted))
                 .ThenInclude(x => x.Exercise)
-                .ThenInclude(x => (x ?? new()).ExerciseQuestions.Where(n => !n.IsDeleted))
+                .ThenInclude(x => x!.ExerciseQuestions.Where(n => !n.IsDeleted))
                 .ThenInclude(x => x.Question)
                 .FirstOrDefaultAsync(x => x.Id == id);
             }
@@ -49,7 +49,7 @@ namespace Fsel.Course.Infrastructure.Repositories
                                 .Include(i => i.VideoTimeCodes.Where(x => !x.IsDeleted))
                                 .ThenInclude(x => x.TimeCodeExercises.Where(x => !x.IsDeleted && x.Exercise != null))
                                 .ThenInclude(x => x.Exercise)
-                                .ThenInclude(x => (x ?? new()).ExerciseQuestions.Where(x => !x.IsDeleted))
+                                .ThenInclude(x => x!.ExerciseQuestions.Where(x => !x.IsDeleted))
                                 .ThenInclude(x => x.Question)
                                 .Where(x => x.Id == id)
                                 .Select(i => new VideoModel
@@ -67,17 +67,18 @@ namespace Fsel.Course.Infrastructure.Repositories
                                         ExecutionTime = x.ExecutionTime,
                                         TimeCodeType = x.TimeCodeType,
                                         VideoId = x.VideoId,
-                                        Exercises = x.TimeCodeExercises.Where(n => n.Exercise != null).Select(n => n.Exercise ?? new()).Select(n => new ExerciseModel
+                                        Exercises = x.TimeCodeExercises.Where(n => n.Exercise != null).Select(n => n.Exercise).Select(n => new ExerciseModel
                                         {
-                                            Id = n.Id,
+                                            Id = n!.Id,
                                             MediaPost = n.MediaPost,
                                             CourseSkill = n.CourseSkill,
-                                            Questions = n.ExerciseQuestions.Where(m => m.Question != null).Select(m => m.Question ?? new()).Select(m => new QuestionModel()
+                                            Questions = n.ExerciseQuestions.Where(m => m.Question != null).Select(m => m.Question).Select(m => new QuestionModel()
                                             {
-                                                Id = m.Id,
+                                                Id = m!.Id,
                                                 QuestionType = m.QuestionType,
+                                                Explanation = m.Explanation,
+                                                Ungraded = m.Ungraded,
                                                 CorrectTotal = m.CorrectTotal,
-                                                IsSave = m.IsSave,
                                                 Config = m.Config
                                             }).ToList()
                                         }).ToList(),
@@ -115,8 +116,8 @@ namespace Fsel.Course.Infrastructure.Repositories
                                         UpdatedFullName = video.UpdatedFullName,
                                         Exercises = video.VideoTimeCodes.SelectMany(videoTimeCode => videoTimeCode.TimeCodeExercises)
                                                                                  .Where(timeCodeExercise => timeCodeExercise.Exercise != null)
-                                                                                 .Select(timeCodeExercise => timeCodeExercise.Exercise ?? new())
-                                                                                 .GroupBy(excercise => excercise.CourseSkill)
+                                                                                 .Select(timeCodeExercise => timeCodeExercise.Exercise)
+                                                                                 .GroupBy(excercise => excercise!.CourseSkill)
                                                                                  .OrderByDescending(courseSkillGroup => courseSkillGroup.Count())
                                                                                  .Select(courseSkillGroup => new VideoExerciseSearchModel
                                                                                  {

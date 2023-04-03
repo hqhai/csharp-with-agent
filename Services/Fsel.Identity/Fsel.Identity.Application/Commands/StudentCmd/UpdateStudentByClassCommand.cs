@@ -39,7 +39,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
             MethodResult<StudentModel> methodResult = new MethodResult<StudentModel>();
 
             var user = await _userManager.Users.Include(x => x.Human)
-                                                  .ThenInclude(x => (x ?? new()).Student)
+                                                  .ThenInclude(x => x!.Student)
                                                   .FirstOrDefaultAsync(x => x.Id == request.UserId.ToString(), cancellationToken: cancellationToken);
             if (user == null)
             {
