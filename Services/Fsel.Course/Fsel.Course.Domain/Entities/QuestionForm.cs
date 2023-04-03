@@ -14,6 +14,8 @@ namespace Fsel.Course.Domain.Entities
         /// <summary>
         /// Tên QuestionForm
         /// </summary>
+        [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
+        [MaxLength(250, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? Name { get; set; }
 
         /// <summary>
