@@ -22,6 +22,7 @@ namespace Fsel.Course.Infrastructure.Common
                 case EnumQuestionType.Listing:
                     return GetTotalCorrectTypeDefaultQuestion();
 
+                case EnumQuestionType.DragAndDropPicture:
                 case EnumQuestionType.MatchingType1:
                 case EnumQuestionType.MatchingType2:
                     return GetTotalCorrectTypeMaschingQuestion(config);
@@ -42,9 +43,6 @@ namespace Fsel.Course.Infrastructure.Common
 
                 case EnumQuestionType.DragAndDropSentenceOrder:
                     return GetTotalCorrectTypeDragDropOrderQuestion(config);
-
-                case EnumQuestionType.DragAndDropPicture:
-                    return GetTotalCorrectTypeDragDropPictureQuestion(config);
 
                 case EnumQuestionType.MultipleOptionSentenceCompletion:
                     return GetTotalCorrectTypeMultipleOptionQuestion(config);
@@ -126,16 +124,6 @@ namespace Fsel.Course.Infrastructure.Common
             if (data != null && data.Contents != null)
             {
                 return data.Contents.Count;
-            }
-            return default;
-        }
-
-        private static int? GetTotalCorrectTypeDragDropPictureQuestion(object? config)
-        {
-            var data = config.Deserialize<DragAndDropPictureQuestion>();
-            if (data != null && data.Contents != null)
-            {
-                return data.Contents.Sum(x => x?.Images?.Count);
             }
             return default;
         }

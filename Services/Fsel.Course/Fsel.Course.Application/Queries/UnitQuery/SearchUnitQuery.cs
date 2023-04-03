@@ -46,7 +46,7 @@ namespace Fsel.Course.Application.Queries.UnitQuery
                                     .Include(x => x.CourseUnitMockTests.Where(y => !y.IsDeleted))
                                     .Include(unit => unit.UnitLessons)
                                     .ThenInclude(unitLesson => unitLesson.Lesson)
-                                    .ThenInclude(lesson => (lesson ?? new()).LessonVideos)
+                                    .ThenInclude(lesson => lesson!.LessonVideos)
                                     .ThenInclude(lessonVideo => lessonVideo.Video)
                                     .Where(x => x.CourseLevel == request.CourseLevel)
 
@@ -62,9 +62,9 @@ namespace Fsel.Course.Application.Queries.UnitQuery
                                 UpdatedDate = unit.UpdatedDate,
                                 UpdatedUserId = unit.UpdatedUserId,
                                 TeacherId = unit.UnitLessons.Select(l => l.Lesson)
-                                                .SelectMany(lv => (lv ?? new()).LessonVideos)
+                                                .SelectMany(lv => lv!.LessonVideos)
                                                 .Select(v => v.Video)
-                                                .Select(n => (n ?? new()).TeacherId).FirstOrDefault(),
+                                                .Select(n => n!.TeacherId).FirstOrDefault(),
                             });
 
             //Keyword

@@ -123,7 +123,9 @@ namespace Fsel.Course.Application.Commands.VideoCmd
                                     {
                                         methodResult.AddErrorBadRequest(nameof(EnumVideoErrorCode.ConfigIsInTheWrongFormat), nameof(question.Config));
                                     }
-                                    question.CorrectTotal = _questionTypeCountConverter.GetTotalCorrectByQuestionType(question.Config, question.QuestionType) ?? default;
+
+                                    question.CorrectTotal = question.Ungraded ? default : _questionTypeCountConverter.GetTotalCorrectByQuestionType(question.Config, question.QuestionType) ?? default;
+
                                     excercise.ExerciseQuestions.Add(new ExerciseQuestion
                                     {
                                         Question = question
