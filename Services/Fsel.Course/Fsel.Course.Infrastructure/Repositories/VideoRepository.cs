@@ -76,8 +76,8 @@ namespace Fsel.Course.Infrastructure.Repositories
                                             {
                                                 Id = m.Id,
                                                 QuestionType = m.QuestionType,
+                                                Explanation = m.Explanation,
                                                 CorrectTotal = m.CorrectTotal,
-                                                IsSave = m.IsSave,
                                                 Config = m.Config
                                             }).ToList()
                                         }).ToList(),

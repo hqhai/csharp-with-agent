@@ -81,8 +81,8 @@ namespace Fsel.Course.Lms.Application.Queries.VideoQuery
                         {
                             Id = m.Id,
                             QuestionType = m.QuestionType,
-                            IsSave = m.IsSave,
                             CorrectTotal = m.CorrectTotal,
+                            Explanation = m.Explanation,
                             Config = _questionTypeConverter.QuestionTypeConverterObject(m.QuestionType, m.Config),
                             VideoTimeCodeAnswer = _mapper.Map<VideoTimeCodeAnswerModel>(m.VideoTimeCodeAnswer)
                         }).ToList()

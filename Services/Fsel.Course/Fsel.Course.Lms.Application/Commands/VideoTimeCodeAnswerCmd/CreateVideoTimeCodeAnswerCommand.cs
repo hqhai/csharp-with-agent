@@ -111,6 +111,10 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
 
                 var answer = item.Answer;
                 var correctCount = _answerTypeCountConverter.GetTotalCorrectByAsnwerType(ref answer, question.Config, question.QuestionType);
+                if (question.Ungraded)
+                {
+                    correctCount = 0;
+                }
                 if (videoTimeCodeAnswer == null)
                 {
                     videoTimeCodeAnswerCreates.Add(new VideoTimeCodeAnswer
