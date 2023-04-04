@@ -47,6 +47,7 @@ builder.Services.AddScoped<IVideoTimeCodeAnswerRepository, VideoTimeCodeAnswerRe
 builder.Services.AddScoped<ICourseResultRepository, CourseResultRepository>();
 builder.Services.AddScoped<ILessonNoteRepository, LessonNoteRepository>();
 builder.Services.AddScoped<IQuestionFormRepository, QuestionFormRepository>();
+builder.Services.AddScoped<ILessonInstructionRepository, LessonInstructionRepository>();
 
 builder.Services.AddScoped<QuestionTypeConverter>();
 builder.Services.AddScoped<QuestionTypeCountConverter>();

@@ -4,6 +4,7 @@ using Fsel.Course.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fsel.Course.Infrastructure.Migrations
 {
     [DbContext(typeof(CourseDbContext))]
-    partial class CourseDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230403091035_createLessonInstruction")]
+    partial class createLessonInstruction
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1110,10 +1113,6 @@ namespace Fsel.Course.Infrastructure.Migrations
 
                     b.Property<Guid>("StudentId")
                         .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("SummaryNote")
-                        .HasMaxLength(2000)
-                        .HasColumnType("nvarchar(2000)");
 
                     b.Property<Guid>("UnitId")
                         .HasColumnType("uniqueidentifier");
@@ -2297,6 +2296,17 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.Navigation("Lesson");
                 });
 
+            modelBuilder.Entity("Fsel.Course.Domain.Entities.LessonInstruction", b =>
+                {
+                    b.HasOne("Fsel.Course.Domain.Entities.Lesson", "Lesson")
+                        .WithMany("LessonInstructions")
+                        .HasForeignKey("LessonId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Lesson");
+                });
+
             modelBuilder.Entity("Fsel.Course.Domain.Entities.LessonResult", b =>
                 {
                     b.HasOne("Fsel.Course.Domain.Entities.Course", "Course")
@@ -2550,8 +2560,6 @@ namespace Fsel.Course.Infrastructure.Migrations
 
             modelBuilder.Entity("Fsel.Course.Domain.Entities.LessonResult", b =>
                 {
-                    b.Navigation("LessonNotes");
-
                     b.Navigation("VideoResult");
                 });
 

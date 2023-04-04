@@ -30,10 +30,7 @@ namespace Fsel.Course.Application.Commands.LessonCmd
 
             #region Validation
 
-            var lesson = await _lessonRepository.Queryable.Include(e => e.UnitLessons)
-                                .Include(e => e.ClassForum).Include(e => e.LessonHomeWorks)
-                                .Include(e => e.LessonVideos).Include(e => e.LessonExtraPractices)
-                                .FirstOrDefaultAsync(e => e.Id == request.Id, cancellationToken: cancellationToken);
+            var lesson = await _lessonRepository.GetIncludeByIdAsync(request.Id);
             if (lesson == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumLessonErrorCode.LessonNotExist), nameof(request.Id), request?.Id);

@@ -27,6 +27,11 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         /// <summary>
         /// Config is in the wrong format
         /// </summary>
-        ConfigIsInTheWrongFormat
+        ConfigIsInTheWrongFormat,
+
+        /// <summary>
+        /// Cannot have both UnitTest and SkillTest at the same time
+        /// </summary>
+        CanNotUnitTestAndSkillTestAtTheSameTime
     }
 }
