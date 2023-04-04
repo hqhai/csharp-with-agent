@@ -16,7 +16,7 @@ namespace Fsel.Course.Domain.Entities.QuestionTypeConfigs.Questions
 
     public class GapFillScoreBySubQuesionContent
     {
-        public int Id { get; set; }
+        public long Id { get; set; }
 
         [JsonRequired]
         public string? Content { get; set; }

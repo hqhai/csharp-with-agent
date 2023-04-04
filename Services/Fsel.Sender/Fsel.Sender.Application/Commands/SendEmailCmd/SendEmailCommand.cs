@@ -1,6 +1,7 @@
+// Copyright (c) Atlantic. All rights reserved.
+
 using Fsel.Common.ActionResults;
 using Fsel.Common.Helpers;
-using Fsel.Sender.Application.Services;
 using Fsel.Sender.Domain.Enums.ErrorCodes;
 using Fsel.Sender.Domain.Models.Commands;
 using Fsel.Sender.Domain.Models.Entities;
@@ -32,8 +33,7 @@ namespace Fsel.Sender.Application.Commands.SendEmailCmd
 
             if (request == null)
             {
-                methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                methodResult.AddError(nameof(EnumSendEmailErrorCode.SendEmailFail));
+                methodResult.AddErrorBadRequest(nameof(EnumSendEmailErrorCode.SendEmailFail));
                 return methodResult;
             }
             else
@@ -54,9 +54,15 @@ namespace Fsel.Sender.Application.Commands.SendEmailCmd
                 sendEmail.CcEmails = request.CcEmails;
                 sendEmail.BccEmails = request.BccEmails;
                 sendEmail.Content = request.Content;
-
-                var emailMessage = CreateEmailMessageAsync(sendEmail);
-                await Send(emailMessage);
+                try
+                {
+                    var emailMessage = CreateEmailMessage(sendEmail);
+                    await Send(emailMessage);
+                }
+                catch (Exception)
+                {
+                    throw;
+                }
             }
 
             #endregion Validation
@@ -66,37 +72,41 @@ namespace Fsel.Sender.Application.Commands.SendEmailCmd
             return methodResult;
         }
 
-        private MimeMessage CreateEmailMessageAsync(SendEmailModel message)
+        private MimeMessage CreateEmailMessage(SendEmailModel message)
         {
-            var emailMessage = new MimeMessage();
-            emailMessage.From.Add(new MailboxAddress("LMS -FSEL", _appSetting?.Smtp?.From ?? string.Empty));
-            if (message.ToEmails == null)
-                return emailMessage;
+            using (var emailMessage = new MimeMessage())
+            {
+                emailMessage.From.Add(new MailboxAddress("LMS -FSEL", _appSetting?.Smtp?.From ?? string.Empty));
+                if (message.ToEmails == null)
+                {
+                    return emailMessage;
+                }
 
-            foreach (var item in message.ToEmails)
-            {
-                emailMessage.To.Add(new MailboxAddress("LMS -FSEL", item));
-            }
-            if (message.BccEmails != null)
-            {
-                foreach (var item in message.BccEmails)
+                foreach (var item in message.ToEmails)
                 {
-                    emailMessage.Bcc.Add(new MailboxAddress("LMS -FSEL", item));
+                    emailMessage.To.Add(new MailboxAddress("LMS -FSEL", item));
                 }
-            }
-            if (message.CcEmails != null)
-            {
-                foreach (var item in message.CcEmails)
+                if (message.BccEmails != null)
                 {
-                    emailMessage.Cc.Add(new MailboxAddress("LMS -FSEL", item));
+                    foreach (var item in message.BccEmails)
+                    {
+                        emailMessage.Bcc.Add(new MailboxAddress("LMS -FSEL", item));
+                    }
                 }
+                if (message.CcEmails != null)
+                {
+                    foreach (var item in message.CcEmails)
+                    {
+                        emailMessage.Cc.Add(new MailboxAddress("LMS -FSEL", item));
+                    }
+                }
+                emailMessage.Subject = message.Subject;
+                emailMessage.Body = new TextPart(MimeKit.Text.TextFormat.Text) { Text = message.Content };
+                return emailMessage;
             }
-            emailMessage.Subject = message.Subject;
-            emailMessage.Body = new TextPart(MimeKit.Text.TextFormat.Text) { Text = message.Content };
-            return emailMessage;
         }
 
-        private async Task Send(MimeMessage Mailmessage)
+        private async Task Send(MimeMessage mailmessage)
         {
             using var client = new MailKit.Net.Smtp.SmtpClient();
             try
@@ -104,7 +114,7 @@ namespace Fsel.Sender.Application.Commands.SendEmailCmd
                 await client.ConnectAsync(_appSetting?.Smtp?.SmtpServer ?? string.Empty, _appSetting?.Smtp?.Port ?? 0, true);
                 client.AuthenticationMechanisms.Remove("XOAUTH2");
                 await client.AuthenticateAsync(_appSetting?.Smtp?.Username ?? string.Empty, _appSetting?.Smtp?.Password ?? string.Empty);
-                await client.SendAsync(Mailmessage);
+                await client.SendAsync(mailmessage);
             }
             catch (Exception)
             {
@@ -112,7 +122,7 @@ namespace Fsel.Sender.Application.Commands.SendEmailCmd
             }
             finally
             {
-                client.Disconnect(true);
+                await client.DisconnectAsync(true);
                 client.Dispose();
             }
         }

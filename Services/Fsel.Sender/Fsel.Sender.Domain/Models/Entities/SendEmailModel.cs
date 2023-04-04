@@ -1,3 +1,5 @@
+// Copyright (c) Atlantic. All rights reserved.
+
 namespace Fsel.Sender.Domain.Models.Entities
 {
     public class SendEmailModel

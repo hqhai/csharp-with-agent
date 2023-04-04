@@ -1,3 +1,5 @@
+// Copyright (c) Atlantic. All rights reserved.
+
 using Fsel.Common.ValueSettings;
 using Fsel.Core.Extensions;
 using Fsel.Course.Application.Services.UserServices;
@@ -37,6 +39,8 @@ builder.Services.AddScoped<ICourseUnitMockTestRepository, CourseUnitMockTestRepo
 builder.Services.AddScoped<IMockTestRepository, MockTestRepository>();
 builder.Services.AddScoped<ICourseClassStudentRepository, CourseClassStudentRepository>();
 builder.Services.AddScoped<ICourseResultRepository, CourseResultRepository>();
+builder.Services.AddScoped<IQuestionFormRepository, QuestionFormRepository>();
+builder.Services.AddScoped<ILessonInstructionRepository, LessonInstructionRepository>();
 
 builder.Services.AddScoped<QuestionTypeConverter>();
 builder.Services.AddScoped<QuestionTypeCountConverter>();

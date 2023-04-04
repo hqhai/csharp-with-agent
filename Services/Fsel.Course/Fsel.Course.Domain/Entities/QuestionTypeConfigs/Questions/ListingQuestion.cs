@@ -10,6 +10,6 @@ namespace Fsel.Course.Domain.Entities.QuestionTypeConfigs.Questions
         public string? Name { get; set; }
 
         [JsonRequired]
-        public int? ExactWordCount { get; set; }
+        public long? ExactWordCount { get; set; }
     }
 }

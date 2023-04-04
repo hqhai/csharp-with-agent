@@ -2,7 +2,6 @@
 
 namespace Fsel.Course.Infrastructure.Configs
 {
-    using System.Reflection.Emit;
     using Fsel.Common.Helpers;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums;
@@ -13,6 +12,7 @@ namespace Fsel.Course.Infrastructure.Configs
     {
         public void Configure(EntityTypeBuilder<CourseResult> builder)
         {
+            ArgumentNullException.ThrowIfNull(builder);
             builder.Property(e => e.Status)
                 .HasMaxLength(100)
                 .HasConversion(

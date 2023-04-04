@@ -1,9 +1,9 @@
+// Copyright (c) Atlantic. All rights reserved.
+
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
 using System.Reflection;
 using System.Text.Json.Serialization;
 using Fsel.Common.ActionResults;
-using Fsel.Common.Helpers;
 
 namespace Fsel.Core.Base
 {

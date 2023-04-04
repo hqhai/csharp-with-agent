@@ -1,3 +1,5 @@
+// Copyright (c) Atlantic. All rights reserved.
+
 using AutoMapper;
 using Fsel.Common.ActionResults;
 using Fsel.Course.Application.Services.UserServices;

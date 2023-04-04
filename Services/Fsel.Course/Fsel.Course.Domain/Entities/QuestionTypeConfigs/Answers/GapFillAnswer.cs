@@ -11,7 +11,7 @@ namespace Fsel.Course.Domain.Entities.QuestionTypeConfigs.Answers
 
     public class GapFillAnswers
     {
-        public int Id { get; set; }
+        public long Id { get; set; }
 
         public IList<string>? Answer { get; set; }
 

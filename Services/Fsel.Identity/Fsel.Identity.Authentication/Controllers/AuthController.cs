@@ -1,7 +1,8 @@
+// Copyright (c) Atlantic. All rights reserved.
+
 using System.Net;
 using Fsel.Common.ActionResults;
 using Fsel.Common.Constants;
-using Fsel.Common.Helpers;
 using Fsel.Identity.Application.Commands.AuthCmd;
 using Fsel.Identity.Domain.Models.EntityModels;
 using MediatR;

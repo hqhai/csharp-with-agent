@@ -16,7 +16,7 @@ namespace Fsel.Course.Domain.Entities.QuestionTypeConfigs.Questions
 
     public class DragAndDropSentenceOrderQuestionContent
     {
-        public int Id { get; set; }
+        public long Id { get; set; }
 
         [JsonRequired]
         public IList<string>? Words { get; set; }

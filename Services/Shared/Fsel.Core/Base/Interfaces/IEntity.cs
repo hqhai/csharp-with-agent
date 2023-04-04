@@ -1,4 +1,6 @@
-﻿using MediatR;
+// Copyright (c) Atlantic. All rights reserved.
+
+using MediatR;
 
 namespace Fsel.Core.Base.Interfaces
 {

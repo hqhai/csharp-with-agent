@@ -1,3 +1,5 @@
+// Copyright (c) Atlantic. All rights reserved.
+
 using System.ComponentModel.DataAnnotations;
 using Fsel.Common.Enums;
 using Fsel.Common.Enums.ErrorCodes;
@@ -27,11 +29,6 @@ namespace Fsel.Course.Domain.Entities
         public string? DisplayName { get; set; }
 
         /// <summary>
-        /// Giáo Viên ID
-        /// </summary>
-        public Guid? TeacherId { get; set; }
-
-        /// <summary>
         /// Trình độ khóa
         /// </summary>
         public EnumCourseLevel CourseLevel { get; set; }
@@ -42,5 +39,6 @@ namespace Fsel.Course.Domain.Entities
         public ICollection<LessonExtraPractice> LessonExtraPractices { get; set; } = new List<LessonExtraPractice>();
         public ICollection<UnitLesson> UnitLessons { get; set; } = new List<UnitLesson>();
         public ICollection<LessonResult> LessonResults { get; set; } = new List<LessonResult>();
+        public ICollection<LessonInstruction> LessonInstructions { get; set; } = new List<LessonInstruction>();
     }
 }

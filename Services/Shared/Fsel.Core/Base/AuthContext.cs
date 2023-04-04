@@ -1,4 +1,6 @@
-﻿namespace Fsel.Core.Base
+// Copyright (c) Atlantic. All rights reserved.
+
+namespace Fsel.Core.Base
 {
     public class AuthContext
     {

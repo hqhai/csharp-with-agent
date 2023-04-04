@@ -10,6 +10,7 @@ namespace Fsel.Course.Infrastructure.Configs
     {
         public void Configure(EntityTypeBuilder<CourseTeacher> builder)
         {
+            ArgumentNullException.ThrowIfNull(builder);
             builder.HasOne(a => a.Course)
                 .WithMany(b => b.CourseTeachers)
                 .HasForeignKey(b => b.CourseId)

@@ -44,15 +44,11 @@ namespace Fsel.Course.Application.Queries.UnitQuery
 
             var unitQuery = _unitRepository.Queryable
                                     .Include(x => x.CourseUnitMockTests.Where(y => !y.IsDeleted))
-                                    .Where(x => request.CourseLevel == null || x.CourseLevel == request.CourseLevel)
                                     .Include(unit => unit.UnitLessons)
                                     .ThenInclude(unitLesson => unitLesson.Lesson)
-                                    .ThenInclude(lesson => lesson.LessonVideos)
+                                    .ThenInclude(lesson => lesson!.LessonVideos)
                                     .ThenInclude(lessonVideo => lessonVideo.Video)
-                                    .Where(x => request.TeacherId == null || x.UnitLessons.Select(l => l.Lesson)
-                                                                                   .SelectMany(lv => lv.LessonVideos)
-                                                                                   .Select(v => v.Video)
-                                                                                   .Select(n => n.TeacherId).Contains(request.TeacherId.Value))
+                                    .Where(x => x.CourseLevel == request.CourseLevel)
 
                             .Select(unit => new UnitSearchModel
                             {
@@ -66,15 +62,21 @@ namespace Fsel.Course.Application.Queries.UnitQuery
                                 UpdatedDate = unit.UpdatedDate,
                                 UpdatedUserId = unit.UpdatedUserId,
                                 TeacherId = unit.UnitLessons.Select(l => l.Lesson)
-                                                .SelectMany(lv => lv.LessonVideos)
+                                                .SelectMany(lv => lv!.LessonVideos)
                                                 .Select(v => v.Video)
-                                                .Select(n => n.TeacherId).FirstOrDefault(),
+                                                .Select(n => n!.TeacherId).FirstOrDefault(),
                             });
 
             //Keyword
             if (!string.IsNullOrEmpty(request.Keyword))
             {
                 unitQuery = unitQuery.Where(m => m.Id.ToString() == request.Keyword || (m.Name ?? string.Empty).Contains(request.Keyword));
+            }
+
+            //Keyword
+            if (request.TeacherId.HasValue)
+            {
+                unitQuery = unitQuery.Where(m => m.TeacherId == request.TeacherId.Value);
             }
 
             int totalItem = await unitQuery.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);

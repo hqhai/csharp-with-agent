@@ -47,57 +47,46 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
 
             var user = _authContext.CurrentUserId.ToString();
             var studentResult = await _userService.GetStudentByUserIdAsync(user);
-            if (studentResult == null)
+            var student = studentResult?.Content?.Result;
+            if (studentResult == null || student == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.NotStudent));
                 return methodResult;
             }
-            var student = studentResult.Content?.Result;
-            if (student == null)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.StudentNull));
-                return methodResult;
-            }
 
             var courseClassStudent = await _courseClassStudentRepository.Queryable.FirstOrDefaultAsync(x => x.StudentId == student.Id, cancellationToken);
-
             if (courseClassStudent == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.StudentNotInClass));
                 return methodResult;
             }
 
-            var courseQuery = from i in _courseRepository.Queryable
-                             .Include(x => x.CourseUnitMockTests)
+            var course = await _courseRepository.Queryable
+                             .Include(x => x.CourseUnitMockTests.Where(y => !y.IsDeleted))
                              .ThenInclude(unit => unit.Unit)
-                             .Include(x => x.CourseUnitMockTests)
+                             .Include(x => x.CourseUnitMockTests.Where(y => !y.IsDeleted))
                              .ThenInclude(unit => unit.MockTest)
-                             .Include(x => x.CourseTeachers)
+                             .Include(x => x.CourseTeachers.Where(y => !y.IsDeleted))
                              .Where(x => x.Id == courseClassStudent.CourseId)
                              .AsNoTracking()
-                              select new CourseModel
-                              {
-                                  Id = i.Id,
-                                  Name = i.Name,
-                                  CourseLevel = i.CourseLevel,
-                                  CourseUnitMockTests = _mapper.Map<IList<CourseUnitMockTestModel>>(i.CourseUnitMockTests),
-                                  CourseTeachers = _mapper.Map<List<CourseTeacherModel>>(i.CourseTeachers),
-                              };
-
-            var course = await courseQuery.FirstOrDefaultAsync(cancellationToken);
+                             .Select(y => new CourseModel
+                             {
+                                 Id = y.Id,
+                                 Name = y.Name,
+                                 CourseLevel = y.CourseLevel,
+                                 CourseUnitMockTests = _mapper.Map<IList<CourseUnitMockTestModel>>(y.CourseUnitMockTests),
+                                 CourseTeachers = _mapper.Map<List<CourseTeacherModel>>(y.CourseTeachers),
+                             }).FirstOrDefaultAsync(cancellationToken);
 
             var teachersResult = await _userService.GetTeacherByIdsAsync(new GetTeacherByIdsQueryModel { Ids = course?.CourseTeachers?.Select(x => x.TeacherId).ToList() });
-            if (teachersResult.IsSuccessStatusCode)
+            var teachers = teachersResult?.Content?.Result;
+            if (teachersResult != null && teachersResult.IsSuccessStatusCode && teachers != null && course?.CourseTeachers != null)
             {
-                var teachers = teachersResult?.Content?.Result;
-                if (teachers != null && course?.CourseTeachers != null)
+                foreach (var item in course.CourseTeachers)
                 {
-                    foreach (var item in course.CourseTeachers)
-                    {
-                        var teacher = teachers.FirstOrDefault(x => x.Id == item.TeacherId);
-                        item.FullName = teacher?.Human?.FullName;
-                        item.AvatarPath = teacher?.Human?.AvatarPath;
-                    }
+                    var teacher = teachers.FirstOrDefault(x => x.Id == item.TeacherId);
+                    item.FullName = teacher?.Human?.FullName;
+                    item.AvatarPath = teacher?.Human?.AvatarPath;
                 }
             }
 

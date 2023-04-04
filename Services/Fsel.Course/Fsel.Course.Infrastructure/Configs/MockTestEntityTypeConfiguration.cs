@@ -1,3 +1,5 @@
+// Copyright (c) Atlantic. All rights reserved.
+
 using Fsel.Common.Enums;
 using Fsel.Common.Helpers;
 using Fsel.Course.Domain.Entities;
@@ -11,6 +13,8 @@ namespace Fsel.Course.Infrastructure.Configs
     {
         public void Configure(EntityTypeBuilder<MockTest> builder)
         {
+            ArgumentNullException.ThrowIfNull(builder);
+
             builder.Property(e => e.CourseType)
                 .HasMaxLength(100)
                 .HasConversion(

@@ -2,11 +2,7 @@
 
 namespace Fsel.Course.Domain.Entities.QuestionTypeConfigs.Answers
 {
-    using System;
     using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
-    using System.Threading.Tasks;
 
     public class DragAndDropPictureAnswer
     {
@@ -15,9 +11,9 @@ namespace Fsel.Course.Domain.Entities.QuestionTypeConfigs.Answers
 
     public class DragAndDropPictureAnswers
     {
-        public int ImageId { get; set; }
+        public long ImageId { get; set; }
 
-        public int WordId { get; set; }
+        public long WordId { get; set; }
 
         public bool IsExact { get; set; }
     }

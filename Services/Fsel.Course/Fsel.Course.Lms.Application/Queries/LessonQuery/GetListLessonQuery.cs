@@ -7,7 +7,6 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
-    using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
@@ -36,6 +35,7 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
             MethodResult<IList<LessonModel>> methodResult = new MethodResult<IList<LessonModel>>();
             var lessonQuery = await _lessonRepository.Queryable
                                 .Include(x => x.UnitLessons)
+                                .AsNoTracking()
                                 .Select(x => new LessonModel
                                 {
                                     Id = x.Id,
@@ -46,8 +46,7 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
 
             if (lessonQuery.Count == 0)
             {
-                methodResult.AddErrorBadRequest(
-                  nameof(EnumLessonErrorCode.ListLessonNotExist));
+                methodResult.AddErrorBadRequest(nameof(EnumLessonErrorCode.ListLessonNotExist));
                 return methodResult;
             }
             methodResult.Result = lessonQuery;

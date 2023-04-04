@@ -11,9 +11,9 @@ namespace Fsel.Course.Domain.Entities.QuestionTypeConfigs.Answers
 
     public class MultipleOptionSentenceCompletionAnswers
     {
-        public int Id { get; set; }
+        public long Id { get; set; }
 
-        public int AnswerId { get; set; }
+        public long AnswerId { get; set; }
 
         public bool IsExact { get; set; }
     }

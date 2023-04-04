@@ -1,3 +1,5 @@
+// Copyright (c) Atlantic. All rights reserved.
+
 using Fsel.Core.Base;
 using Fsel.Course.Domain.Entities;
 using Fsel.Course.Domain.IRepositories;
@@ -15,9 +17,31 @@ namespace Fsel.Course.Infrastructure.Repositories
         {
             try
             {
-                return await Queryable
-                .Include(x => x.UnitLessons.Where(n => !n.IsDeleted))
-                .FirstOrDefaultAsync(x => x.Id == id);
+                return await Queryable.Include(e => e.UnitLessons.Where(n => !n.IsDeleted))
+                                 .Include(e => e.ClassForum)
+                                 .Include(x => x.LessonResults.Where(n => !n.IsDeleted))
+                                 .Include(e => e.LessonHomeWorks.Where(n => !n.IsDeleted))
+                                 .Include(e => e.LessonExtraPractices.Where(n => !n.IsDeleted))
+                                 .Include(e => e.LessonInstructions.Where(n => !n.IsDeleted))
+                                 .Include(e => e.LessonVideos.Where(n => !n.IsDeleted))
+                                 .ThenInclude(x => x.Video)
+                                 .ThenInclude(x => x!.VideoTimeCodes.Where(n => !n.IsDeleted))
+                                 .FirstOrDefaultAsync(x => x.Id == id);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<Lesson?> GetIncludeVideoByIdAsync(Guid id)
+        {
+            try
+            {
+                return await Queryable.Include(x => x.LessonResults)
+                                      .Include(x => x.LessonVideos)
+                                      .ThenInclude(x => x.Video)
+                                      .FirstOrDefaultAsync(x => x.Id == id);
             }
             catch (Exception)
             {

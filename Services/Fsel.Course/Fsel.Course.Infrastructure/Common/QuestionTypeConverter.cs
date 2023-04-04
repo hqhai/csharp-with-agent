@@ -8,7 +8,7 @@ namespace Fsel.Course.Infrastructure.Common
 
     public class QuestionTypeConverter
     {
-        public object? QuestionTypeConverterObject(EnumQuestionType type, object config)
+        public object? QuestionTypeConverterObject(EnumQuestionType type, object? config)
         {
             switch (type)
             {
@@ -53,7 +53,7 @@ namespace Fsel.Course.Infrastructure.Common
             }
         }
 
-        private static object? ClearAnswerTypeExercisePreparationQuestion(object config)
+        private static object? ClearAnswerTypeExercisePreparationQuestion(object? config)
         {
             var data = config.Deserialize<ExercisePreparationQuestion>();
             if (data != null)
@@ -63,7 +63,7 @@ namespace Fsel.Course.Infrastructure.Common
             return null;
         }
 
-        private static object? ClearAnswerTypeMultipleOptionQuestion(object config)
+        private static object? ClearAnswerTypeMultipleOptionQuestion(object? config)
         {
             var data = config.Deserialize<MultipleOptionSentenceCompletionQuestion>();
             if (data != null && data.Contents != null)
@@ -83,7 +83,7 @@ namespace Fsel.Course.Infrastructure.Common
             return null;
         }
 
-        private static object? ClearAnswerTypeShortBaseQuestion(object config)
+        private static object? ClearAnswerTypeShortBaseQuestion(object? config)
         {
             var data = config.Deserialize<ShortAnswerQuestionWordBaseQuestion>();
             if (data != null)
@@ -94,7 +94,7 @@ namespace Fsel.Course.Infrastructure.Common
             return null;
         }
 
-        private static object? ClearAnswerTypeListingQuestion(object config)
+        private static object? ClearAnswerTypeListingQuestion(object? config)
         {
             var data = config.Deserialize<ListingQuestion>();
             if (data != null)
@@ -105,7 +105,7 @@ namespace Fsel.Course.Infrastructure.Common
             return null;
         }
 
-        private static object? ClearAnswerTypeMutipleChoiQuestion(object config)
+        private static object? ClearAnswerTypeMutipleChoiQuestion(object? config)
         {
             var data = config.Deserialize<MutipleChoiceQuestion>();
             if (data != null && data.Contents != null)
@@ -119,7 +119,7 @@ namespace Fsel.Course.Infrastructure.Common
             return null;
         }
 
-        private static object? ClearAnswerTypeShortCountQuestion(object config)
+        private static object? ClearAnswerTypeShortCountQuestion(object? config)
         {
             var data = config.Deserialize<ShortAnswerQuestionWordCountBaseQuestion>();
             if (data != null)
@@ -130,21 +130,21 @@ namespace Fsel.Course.Infrastructure.Common
             return null;
         }
 
-        private static object? ClearAnswerTypeMaschingQuestion(object config)
+        private static object? ClearAnswerTypeMaschingQuestion(object? config)
         {
             var data = config.Deserialize<MatchingTypeQuestion>();
-            if (data != null && data.Links != null)
+            if (data != null && data.Link != null)
             {
-                for (int i = data.Links.Count - 1; i >= 0; i--)
+                for (int i = data.Link.Count - 1; i >= 0; i--)
                 {
-                    data.Links.RemoveAt(i);
+                    data.Link.RemoveAt(i);
                 }
                 return data;
             }
             return null;
         }
 
-        private static object? ClearAnswerTypeGapFillQuestion(object config)
+        private static object? ClearAnswerTypeGapFillQuestion(object? config)
         {
             var data = config.Deserialize<GapFillQuestion>();
             if (data != null && data.Contents != null)
@@ -161,7 +161,7 @@ namespace Fsel.Course.Infrastructure.Common
             return null;
         }
 
-        private static object? ClearAnswerTypeDragDropOrderQuestion(object config)
+        private static object? ClearAnswerTypeDragDropOrderQuestion(object? config)
         {
             var data = config.Deserialize<DragAndDropSentenceOrderQuestion>();
             if (data != null && data.Contents != null)
@@ -178,7 +178,7 @@ namespace Fsel.Course.Infrastructure.Common
             return null;
         }
 
-        private static object? ClearAnswerTypeDragDropPictureQuestion(object config)
+        private static object? ClearAnswerTypeDragDropPictureQuestion(object? config)
         {
             var data = config.Deserialize<DragAndDropPictureQuestion>();
             if (data != null && data.Contents != null)

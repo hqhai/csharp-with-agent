@@ -1,4 +1,5 @@
-using Fsel.Common.Enums;
+// Copyright (c) Atlantic. All rights reserved.
+
 using Fsel.Common.Helpers;
 using Fsel.Course.Domain.Entities;
 using Fsel.Course.Domain.Enums;
@@ -11,6 +12,7 @@ namespace Fsel.Course.Infrastructure.Configs
     {
         public void Configure(EntityTypeBuilder<Question> builder)
         {
+            ArgumentNullException.ThrowIfNull(builder);
             builder.Property(e => e.QuestionType)
                  .HasMaxLength(100)
                  .HasConversion(

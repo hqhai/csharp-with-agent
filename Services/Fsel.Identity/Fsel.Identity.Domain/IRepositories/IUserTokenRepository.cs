@@ -1,3 +1,5 @@
+// Copyright (c) Atlantic. All rights reserved.
+
 namespace Fsel.Identity.Domain.IRepositories
 {
     using Fsel.Identity.Domain.Entities;

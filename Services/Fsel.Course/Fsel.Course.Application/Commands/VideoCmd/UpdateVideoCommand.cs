@@ -2,8 +2,8 @@
 
 using AutoMapper;
 using Fsel.Common.ActionResults;
-using Fsel.Course.Application.Services.UserServices;
 using Fsel.Course.Domain.Entities;
+using Fsel.Course.Domain.Enums;
 using Fsel.Course.Domain.Enums.ErrorCodes;
 using Fsel.Course.Domain.IRepositories;
 using Fsel.Course.Domain.Models.CommandModels.Videos;
@@ -24,19 +24,16 @@ namespace Fsel.Course.Application.Commands.VideoCmd
         private readonly IMapper _mapper;
         private readonly QuestionTypeCountConverter _questionTypeCountConverter;
         private readonly QuestionTypeValidation _questionTypeValidation;
-        private readonly IUserService _userService;
 
         public UpdateVideoCommandHandler(IVideoRepository videoRepository
             , IMapper mapper
             , QuestionTypeCountConverter questionTypeCountConverter
-            , QuestionTypeValidation questionTypeValidation
-            , IUserService userService)
+            , QuestionTypeValidation questionTypeValidation)
         {
             _videoRepository = videoRepository;
             _mapper = mapper;
             _questionTypeCountConverter = questionTypeCountConverter;
             _questionTypeValidation = questionTypeValidation;
-            _userService = userService;
         }
 
         public async Task<MethodResult<VideoModel>> Handle(UpdateVideoCommand request, CancellationToken cancellationToken)
@@ -54,6 +51,7 @@ namespace Fsel.Course.Application.Commands.VideoCmd
             }
 
             #region Tạm thời không validate isTeacher
+
             //var isTeacher = await _userService.GetTeacherByIdAsync(request.TeacherId);
             //var isCheck = isTeacher?.Content?.Result;
             //if (isCheck == null)
@@ -61,9 +59,11 @@ namespace Fsel.Course.Application.Commands.VideoCmd
             //    methodResult.AddErrorBadRequest(nameof(EnumVideoErrorCode.TeacherIdDoesNotExitst), nameof(request.TeacherId));
             //    return methodResult;
             //}
-            #endregion
+
+            #endregion Tạm thời không validate isTeacher
 
             #region Tạm thời không validate VideoUsed
+
             //var isVideoUsed = await _videoRepository.IsVideoUsed(request.Id);
             //if (isVideoUsed)
             //{
@@ -72,7 +72,16 @@ namespace Fsel.Course.Application.Commands.VideoCmd
             //        nameof(request.Id), request.Id);
             //    return methodResult;
             //}
-            #endregion
+
+            #endregion Tạm thời không validate VideoUsed
+
+            var listTimeCodeType = request.VideoTimeCodes.Select(x => x.TimeCodeType).ToList();
+
+            if (listTimeCodeType.Contains(EnumTimeCodeType.UnitTest) && listTimeCodeType.Contains(EnumTimeCodeType.SkillTest))
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumVideoErrorCode.CanNotUnitTestAndSkillTestAtTheSameTime), nameof(request.VideoTimeCodes));
+                return methodResult;
+            }
 
             // Lưu dữ liệu Video
             var video = await _videoRepository.GetIncludeByIdAsync(request.Id);
@@ -123,7 +132,9 @@ namespace Fsel.Course.Application.Commands.VideoCmd
                                     {
                                         methodResult.AddErrorBadRequest(nameof(EnumVideoErrorCode.ConfigIsInTheWrongFormat), nameof(question.Config));
                                     }
-                                    question.CorrectTotal = _questionTypeCountConverter.GetTotalCorrectByQuestionType(question.Config, question.QuestionType);
+
+                                    question.CorrectTotal = question.Ungraded ? default : _questionTypeCountConverter.GetTotalCorrectByQuestionType(question.Config, question.QuestionType) ?? default;
+
                                     excercise.ExerciseQuestions.Add(new ExerciseQuestion
                                     {
                                         Question = question

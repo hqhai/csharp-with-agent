@@ -2,20 +2,22 @@
 
 namespace Fsel.Course.Lms.Application.Commands.CourseCmd
 {
+    using System.Linq;
     using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base;
     using Fsel.Course.Domain.Entities;
+    using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.CommandModels.Classes;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Services.TrainingServices;
+    using Fsel.Course.Lms.Application.Services.TrainingServices.Models;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using MediatR;
     using Microsoft.AspNetCore.Http;
-    using Microsoft.EntityFrameworkCore;
 
     public class CreateClassCommand : CreateClassCommandModel, IRequest<MethodResult<CourseModel>>
     {
@@ -48,7 +50,19 @@ namespace Fsel.Course.Lms.Application.Commands.CourseCmd
 
             #region Validation
 
-            var classs = await _trainingService.CreateClassByCheckId(new Services.TrainingServices.Models.CreateClassStudentModel
+            var course = await _courseRepository.GetIncludeLessonVideoByIdAsync(request.CourseId);
+            if (course == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.CourseNotExist));
+                return methodResult;
+            }
+            else if (course.Status != EnumCourseStatus.Active)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.CourseMustActiveState));
+                return methodResult;
+            }
+
+            var classs = await _trainingService.CreateClassByCheckId(new CreateClassStudentModel
             {
                 Code = request.Code,
                 UserId = _authContext.CurrentUserId
@@ -58,27 +72,13 @@ namespace Fsel.Course.Lms.Application.Commands.CourseCmd
             var student = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId.ToString());
             if (!student.IsSuccessStatusCode)
             {
-                methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                methodResult.AddError(nameof(EnumCourseClassStudentErrorCode.UserIdNotExist));
+                methodResult.AddErrorBadRequest(nameof(EnumCourseClassStudentErrorCode.UserIdNotExist));
                 return methodResult;
             }
             var studentId = student?.Content?.Result?.Id;
-            var course = await _courseRepository.Queryable.Include(x => x.CourseResult)
-                                                       .Include(e => e.CourseClassStudents.Where(y => y.IsDeleted == false))
-                                                       .Include(x => x.CourseUnitMockTests.Where(y => y.IsDeleted == false))
-                                                       .ThenInclude(x => x.Unit)
-                                                       .ThenInclude(x => x.UnitLessons.Where(y => y.IsDeleted == false))
-                                                       .ThenInclude(x => x.Lesson)
-                                                       .ThenInclude(x => x.LessonVideos)
-                                                       .AsNoTracking()
-                                                       .Where(x => x.Id == request.CourseId).FirstOrDefaultAsync(cancellationToken: cancellationToken);
-            if (course == null)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.CourseNotExist));
-                return methodResult;
-            }
 
-            if (course.CourseClassStudents.Count == 0)
+            var courseClassStudents = course.CourseClassStudents.Where(x => x.StudentId == studentId && x.ClassId == classId).ToList();
+            if (courseClassStudents.Count == 0)
             {
                 course.CourseClassStudents.Add(new CourseClassStudent
                 {
@@ -94,32 +94,29 @@ namespace Fsel.Course.Lms.Application.Commands.CourseCmd
             };
 
             var units = course.CourseUnitMockTests
-                        .Where(x => x.UnitId != null)
-                        .Select(x => x.Unit)
+                        .Where(x => x.UnitId != null && x.Unit != null)
+                        .Select(x => x!.Unit)
                         .ToList();
 
-            var unitResults = units
-                        .Select(x => new UnitResult
-                        {
-                            StudentId = _authContext.CurrentUserId,
-                            UnitId = x.Id,
-                        }).ToList();
+            var unitResults = units.Select(x => new UnitResult
+            {
+                StudentId = _authContext.CurrentUserId,
+                UnitId = x!.Id,
+            }).ToList();
 
-            var lessonResults = units
-                                .GroupBy(x => x?.Id)
-                                .Select(x => new { x.Key, Lessons = x.SelectMany(n => n.UnitLessons).Select(x => x.Lesson) })
-                                .SelectMany(x => x.Lessons.Select(n => new LessonResult
-                                {
-                                    StudentId = _authContext.CurrentUserId,
-                                    CourseId = course.Id,
-                                    UnitId = x.Key ?? default,
-                                    LessonId = n?.Id ?? default,
-                                    VideoResult = new VideoResult
-                                    {
-                                        VideoId = n.LessonVideos.FirstOrDefault()?.VideoId ?? default,
-                                        StudentId = _authContext.CurrentUserId
-                                    }
-                                })).ToList();
+            var lessonResults = units.GroupBy(x => x?.Id).Select(x => new { x.Key, Lessons = x.SelectMany(n => n!.UnitLessons).Select(x => x!.Lesson) })
+                                     .SelectMany(x => x.Lessons.Select(n => new LessonResult
+                                     {
+                                         StudentId = _authContext.CurrentUserId,
+                                         CourseId = course.Id,
+                                         UnitId = x.Key ?? default,
+                                         LessonId = n?.Id ?? default,
+                                         VideoResult = new VideoResult
+                                         {
+                                             VideoId = n?.LessonVideos.FirstOrDefault()?.VideoId ?? default,
+                                             StudentId = _authContext.CurrentUserId
+                                         }
+                                     })).ToList();
 
             course.CourseResult = courseResult;
             course.UnitResults = unitResults;

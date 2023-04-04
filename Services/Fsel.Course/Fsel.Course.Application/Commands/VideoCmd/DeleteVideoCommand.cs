@@ -34,14 +34,12 @@ namespace Fsel.Course.Application.Commands.VideoCmd
                                            .Include(i => i.VideoTimeCodes.Where(x => !x.IsDeleted))
                                            .ThenInclude(x => x.TimeCodeExercises.Where(x => !x.IsDeleted && x.Exercise != null))
                                            .ThenInclude(x => x.Exercise)
-                                           .ThenInclude(x => x.ExerciseQuestions.Where(x => !x.IsDeleted))
+                                           .ThenInclude(x => x!.ExerciseQuestions.Where(x => !x.IsDeleted))
                                            .ThenInclude(x => x.Question)
                                            .FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken: cancellationToken);
             if (video == null)
             {
-                methodResult.AddErrorBadRequest(
-                    nameof(EnumVideoErrorCode.VideoNotExist),
-                    nameof(request.Id), request.Id);
+                methodResult.AddErrorBadRequest(nameof(EnumVideoErrorCode.VideoNotExist), nameof(request.Id), request.Id);
                 return methodResult;
             }
 
@@ -49,9 +47,7 @@ namespace Fsel.Course.Application.Commands.VideoCmd
 
             if (isVideoUsed)
             {
-                methodResult.AddErrorBadRequest(
-                    nameof(EnumVideoErrorCode.VideoUsed),
-                    nameof(request.Id), request.Id);
+                methodResult.AddErrorBadRequest(nameof(EnumVideoErrorCode.VideoUsed), nameof(request.Id), request.Id);
                 return methodResult;
             }
 

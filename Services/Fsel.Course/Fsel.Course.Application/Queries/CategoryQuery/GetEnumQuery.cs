@@ -7,7 +7,7 @@ using Fsel.Course.Domain.Enums;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 
-namespace Fsel.Course.Application.Queries.CategoryCmd
+namespace Fsel.Course.Application.Queries.CategoryQuery
 {
     public class GetEnumQuery : IRequest<MethodResult<IList<string>>>
     {

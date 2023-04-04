@@ -28,6 +28,8 @@ namespace Fsel.Course.Application.Commands.CourseCmd
 
         public async Task<MethodResult<bool>> Handle(ActiveCourseCommand request, CancellationToken cancellationToken)
         {
+            ArgumentNullException.ThrowIfNull(request);
+
             MethodResult<bool> methodResult = new MethodResult<bool>();
 
             #region Validation
@@ -48,9 +50,6 @@ namespace Fsel.Course.Application.Commands.CourseCmd
                 methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.CourseNotInNewState), nameof(course.Status), course.Status);
                 return methodResult;
             }
-
-            #endregion Validation
-
             var teacherIds = course.CourseTeachers.Select(x => x.TeacherId).ToList();
             var courses = await _courseRepository.Queryable
                                 .Include(e => e.CourseTeachers)
@@ -59,6 +58,8 @@ namespace Fsel.Course.Application.Commands.CourseCmd
                                             e.CourseTeachers.Count == teacherIds.Count &&
                                             e.CourseTeachers.All(x => teacherIds.Contains(x.TeacherId)))
                                 .ToListAsync(cancellationToken: cancellationToken);
+
+            #endregion Validation
 
             await _courseRepository.ExecuteTransactionAsync(async () =>
             {

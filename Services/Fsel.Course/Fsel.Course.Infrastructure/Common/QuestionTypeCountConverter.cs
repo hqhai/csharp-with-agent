@@ -8,7 +8,7 @@ namespace Fsel.Course.Infrastructure.Common
 
     public class QuestionTypeCountConverter
     {
-        public int GetTotalCorrectByQuestionType(object config, EnumQuestionType type)
+        public int? GetTotalCorrectByQuestionType(object? config, EnumQuestionType type)
         {
             switch (type)
             {
@@ -22,6 +22,7 @@ namespace Fsel.Course.Infrastructure.Common
                 case EnumQuestionType.Listing:
                     return GetTotalCorrectTypeDefaultQuestion();
 
+                case EnumQuestionType.DragAndDropPicture:
                 case EnumQuestionType.MatchingType1:
                 case EnumQuestionType.MatchingType2:
                     return GetTotalCorrectTypeMaschingQuestion(config);
@@ -43,9 +44,6 @@ namespace Fsel.Course.Infrastructure.Common
                 case EnumQuestionType.DragAndDropSentenceOrder:
                     return GetTotalCorrectTypeDragDropOrderQuestion(config);
 
-                case EnumQuestionType.DragAndDropPicture:
-                    return GetTotalCorrectTypeDragDropPictureQuestion(config);
-
                 case EnumQuestionType.MultipleOptionSentenceCompletion:
                     return GetTotalCorrectTypeMultipleOptionQuestion(config);
 
@@ -57,17 +55,17 @@ namespace Fsel.Course.Infrastructure.Common
             }
         }
 
-        private static int GetTotalCorrectTypeMultipleOptionQuestion(object config)
+        private static int? GetTotalCorrectTypeMultipleOptionQuestion(object? config)
         {
             var data = config.Deserialize<MultipleOptionSentenceCompletionQuestion>();
             if (data != null && data.Contents != null)
             {
-                return data.Contents.Sum(x => x.Answers.Count);
+                return data.Contents.Sum(x => x.Answers?.Count);
             }
             return default;
         }
 
-        private static int GetTotalCorrectTypeCheckListQuestion(object config)
+        private static int? GetTotalCorrectTypeCheckListQuestion(object? config)
         {
             var data = config.Deserialize<MutipleChoiceQuestion>();
             int number = 0;
@@ -85,22 +83,22 @@ namespace Fsel.Course.Infrastructure.Common
             return default;
         }
 
-        private static int GetTotalCorrectTypeDefaultQuestion()
+        private static int? GetTotalCorrectTypeDefaultQuestion()
         {
             return 1;
         }
 
-        private static int GetTotalCorrectTypeMaschingQuestion(object config)
+        private static int? GetTotalCorrectTypeMaschingQuestion(object? config)
         {
             var data = config.Deserialize<MatchingTypeQuestion>();
-            if (data != null && data.Links != null)
+            if (data != null && data.Link != null)
             {
-                return data.Links.Count;
+                return data.Link.Count;
             }
             return default;
         }
 
-        private static int GetTotalCorrectTypeGapFillBySubQuestion(object config)
+        private static int? GetTotalCorrectTypeGapFillBySubQuestion(object? config)
         {
             var data = config.Deserialize<GapFillQuestion>();
             if (data != null && data.Contents != null)
@@ -110,32 +108,22 @@ namespace Fsel.Course.Infrastructure.Common
             return default;
         }
 
-        private static int GetTotalCorrectTypeGapFillByGap(object config)
+        private static int? GetTotalCorrectTypeGapFillByGap(object? config)
         {
             var data = config.Deserialize<GapFillQuestion>();
             if (data != null && data.Contents != null)
             {
-                return data.Contents.Sum(x => x.Words.Count);
+                return data.Contents.Sum(x => x.Words?.Count);
             }
             return default;
         }
 
-        private static int GetTotalCorrectTypeDragDropOrderQuestion(object config)
+        private static int? GetTotalCorrectTypeDragDropOrderQuestion(object? config)
         {
             var data = config.Deserialize<DragAndDropSentenceOrderQuestion>();
             if (data != null && data.Contents != null)
             {
                 return data.Contents.Count;
-            }
-            return default;
-        }
-
-        private static int GetTotalCorrectTypeDragDropPictureQuestion(object config)
-        {
-            var data = config.Deserialize<DragAndDropPictureQuestion>();
-            if (data != null && data.Contents != null)
-            {
-                return data.Contents.Sum(x => x.Images.Count);
             }
             return default;
         }

@@ -1,3 +1,5 @@
+// Copyright (c) Atlantic. All rights reserved.
+
 using Fsel.Common.Enums;
 using Fsel.Common.Helpers;
 using Fsel.Course.Domain.Entities;
@@ -11,6 +13,7 @@ namespace Fsel.Course.Infrastructure.Configs
     {
         public void Configure(EntityTypeBuilder<ClassForum> builder)
         {
+            ArgumentNullException.ThrowIfNull(builder);
             builder.Property(e => e.GradingStyle)
                 .HasMaxLength(100)
                 .HasConversion(

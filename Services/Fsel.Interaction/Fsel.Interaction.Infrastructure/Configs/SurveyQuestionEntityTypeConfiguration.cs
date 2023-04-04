@@ -12,6 +12,7 @@ namespace Fsel.Interaction.Infrastructure.Configs
     {
         public void Configure(EntityTypeBuilder<SurveyQuestion> builder)
         {
+            ArgumentNullException.ThrowIfNull(builder);
             builder.Property(e => e.Type)
                 .HasMaxLength(100)
                 .HasConversion(

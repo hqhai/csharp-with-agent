@@ -40,37 +40,37 @@ namespace Fsel.Common.Helpers
             if (minimumLengthPassword < 1)
             {
                 throw new ArgumentException("The minimumlength is smaller than 1.",
-                    "minimumLengthPassword");
+                    nameof(minimumLengthPassword));
             }
 
             if (minimumLengthPassword > maximumLengthPassword)
             {
                 throw new ArgumentException("The minimumLength is bigger than the maximum length.",
-                    "minimumLengthPassword");
+                    nameof(minimumLengthPassword));
             }
 
             if (minimumLowerCaseChars < 0)
             {
                 throw new ArgumentException("The minimumLowerCase is smaller than 0.",
-                    "minimumLowerCaseChars");
+                    nameof(minimumLowerCaseChars));
             }
 
             if (minimumUpperCaseChars < 0)
             {
                 throw new ArgumentException("The minimumUpperCase is smaller than 0.",
-                    "minimumUpperCaseChars");
+                    nameof(minimumUpperCaseChars));
             }
 
             if (minimumNumericChars < 0)
             {
                 throw new ArgumentException("The minimumNumeric is smaller than 0.",
-                    "minimumNumericChars");
+                    nameof(minimumNumericChars));
             }
 
             if (minimumSpecialChars < 0)
             {
                 throw new ArgumentException("The minimumSpecial is smaller than 0.",
-                    "minimumSpecialChars");
+                    nameof(minimumSpecialChars));
             }
 
             _minimumNumberOfChars = minimumLowerCaseChars + minimumUpperCaseChars +
@@ -81,7 +81,7 @@ namespace Fsel.Common.Helpers
                 throw new ArgumentException(
                     "The minimum length ot the password is smaller than the sum " +
                     "of the minimum characters of all catagories.",
-                    "maximumLengthPassword");
+                    nameof(maximumLengthPassword));
             }
 
             MinimumLengthPassword = minimumLengthPassword;

@@ -10,6 +10,8 @@ namespace Fsel.Identity.Infrastructure.Configs
     {
         public void Configure(EntityTypeBuilder<Parent> builder)
         {
+            ArgumentNullException.ThrowIfNull(builder);
+
             builder.HasOne(a => a.Human)
                 .WithOne(b => b.Parent)
                 .OnDelete(DeleteBehavior.Cascade);

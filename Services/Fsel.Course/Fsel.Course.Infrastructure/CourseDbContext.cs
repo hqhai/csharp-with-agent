@@ -1,3 +1,5 @@
+// Copyright (c) Atlantic. All rights reserved.
+
 using Fsel.Common.Constants;
 using Fsel.Core.Base;
 using Fsel.Course.Domain.Entities;
@@ -43,9 +45,13 @@ namespace Fsel.Course.Infrastructure
         public DbSet<UnitResult> UnitResults { get; set; }
         public DbSet<CourseResult> CourseResults { get; set; }
         public DbSet<VideoTimeCodeAnswer> VideoTimeCodeAnswers { get; set; }
+        public DbSet<LessonNote> LessonNotes { get; set; }
+        public DbSet<QuestionForm> QuestionForms { get; set; }
+        public DbSet<LessonInstruction> LessonInstructions { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            ArgumentNullException.ThrowIfNull(modelBuilder);
             modelBuilder.ApplyConfiguration(new ClassForumEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new CourseEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new CourseTeacherEntityTypeConfiguration());
@@ -72,12 +78,15 @@ namespace Fsel.Course.Infrastructure
             modelBuilder.ApplyConfiguration(new VideoResultEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new CourseResultEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new VideoTimeCodeAnswerEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new QuestionFormEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new LessonInstructionEntityTypeConfiguration());
 
             base.OnModelCreating(modelBuilder);
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
+            ArgumentNullException.ThrowIfNull(optionsBuilder);
             if (!optionsBuilder.IsConfigured)
             {
                 IConfigurationRoot configuration = new ConfigurationBuilder()

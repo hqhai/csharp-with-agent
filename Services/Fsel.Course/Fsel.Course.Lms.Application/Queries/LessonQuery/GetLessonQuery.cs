@@ -32,15 +32,14 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
             MethodResult<LessonModel> methodResult = new MethodResult<LessonModel>();
             ArgumentNullException.ThrowIfNull(request);
             var lesson = await _lessonRepository.Queryable
+                            .Include(x => x.LessonInstructions.Where(y => !y.IsDeleted))
                             .Include(x => x.LessonVideos.Where(y => !y.IsDeleted))
                             .ThenInclude(x => x.Video)
                             .FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
 
             if (lesson == null)
             {
-                methodResult.AddErrorBadRequest(
-                    nameof(EnumLessonErrorCode.LessonNotExist),
-                    nameof(request.Id), request.Id);
+                methodResult.AddErrorBadRequest(nameof(EnumLessonErrorCode.LessonNotExist), nameof(request.Id), request.Id);
                 return methodResult;
             }
 

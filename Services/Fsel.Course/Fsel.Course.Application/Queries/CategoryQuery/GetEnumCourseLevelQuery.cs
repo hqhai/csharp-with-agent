@@ -6,7 +6,7 @@ using Fsel.Common.Helpers;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 
-namespace Fsel.Course.Application.Queries.CategoryCmd
+namespace Fsel.Course.Application.Queries.CategoryQuery
 {
     public class GetEnumCourseLevelQuery : IRequest<MethodResult<IList<EnumCourseLevel>>>
     {

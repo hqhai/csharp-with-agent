@@ -4,7 +4,6 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
 {
     using AutoMapper;
     using Fsel.Common.ActionResults;
-    using Fsel.Core.Base;
     using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.Enums.ErrorCodes;
     using Fsel.Identity.Domain.IRepositories;
@@ -22,17 +21,14 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
     public class UpdateStudentByClassCommandHandler : IRequestHandler<UpdateStudentByClassCommand, MethodResult<StudentModel>>
     {
         private readonly UserManager<User> _userManager;
-        private readonly AuthContext _authContext;
         private readonly IStudentRepository _studentRepository;
         private readonly IMapper _mapper;
 
         public UpdateStudentByClassCommandHandler(UserManager<User> userManager,
-            AuthContext authContext,
             IStudentRepository studentRepository,
             IMapper mapper)
         {
             _userManager = userManager;
-            _authContext = authContext;
             _studentRepository = studentRepository;
             _mapper = mapper;
         }
@@ -43,7 +39,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
             MethodResult<StudentModel> methodResult = new MethodResult<StudentModel>();
 
             var user = await _userManager.Users.Include(x => x.Human)
-                                                  .ThenInclude(x => x.Student)
+                                                  .ThenInclude(x => x!.Student)
                                                   .FirstOrDefaultAsync(x => x.Id == request.UserId.ToString(), cancellationToken: cancellationToken);
             if (user == null)
             {

@@ -1,3 +1,5 @@
+// Copyright (c) Atlantic. All rights reserved.
+
 namespace Fsel.Course.Domain.Enums.ErrorCodes
 {
     public enum EnumQuestionErrorCode
@@ -11,5 +13,10 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         /// Question not is exist
         /// </summary>
         QuestionNotIsExist,
+
+        /// <summary>
+        /// Question Config not is exist
+        /// </summary>
+        QuestionConfigNotIsExist,
     }
 }

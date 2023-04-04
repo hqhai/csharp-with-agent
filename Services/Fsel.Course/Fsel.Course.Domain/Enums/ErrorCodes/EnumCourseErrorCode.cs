@@ -1,3 +1,5 @@
+// Copyright (c) Atlantic. All rights reserved.
+
 namespace Fsel.Course.Domain.Enums.ErrorCodes
 {
     public enum EnumCourseErrorCode
@@ -60,6 +62,11 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         /// <summary>
         /// MocktestId and UnitId cannot have values at the same time.
         /// </summary>
-        MocktestIdAndUnitIdAreMutuallyExclusive
+        MocktestIdAndUnitIdAreMutuallyExclusive,
+
+        /// <summary>
+        /// Course must be in an active state
+        /// </summary>
+        CourseMustActiveState
     }
 }

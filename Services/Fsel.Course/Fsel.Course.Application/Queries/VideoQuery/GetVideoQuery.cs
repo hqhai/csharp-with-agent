@@ -6,7 +6,6 @@ using Fsel.Course.Domain.IRepositories;
 using Fsel.Course.Domain.Models.EntityModels;
 using MediatR;
 using Microsoft.AspNetCore.Http;
-using Microsoft.EntityFrameworkCore;
 
 namespace Fsel.Course.Application.Queries.VideoQuery
 {
@@ -29,51 +28,11 @@ namespace Fsel.Course.Application.Queries.VideoQuery
         {
             MethodResult<VideoModel> methodResult = new MethodResult<VideoModel>();
             ArgumentNullException.ThrowIfNull(request);
-            var query = from i in _videoRepository.Queryable
-                                .Include(x => x.LessonVideos.Where(y => !y.IsDeleted))
-                                .Include(i => i.VideoTimeCodes.Where(x => !x.IsDeleted))
-                                .ThenInclude(x => x.TimeCodeExercises.Where(x => !x.IsDeleted && x.Exercise != null))
-                                .ThenInclude(x => x.Exercise)
-                                .ThenInclude(x => x.ExerciseQuestions.Where(x => !x.IsDeleted))
-                                .ThenInclude(x => x.Question)
-                                .Where(x => x.Id == request.Id)
-                        select new VideoModel
-                        {
-                            Id = i.Id,
-                            Name = i.Name,
-                            VideoFilePath = i.VideoFilePath,
-                            IsActive = i.LessonVideos.Any(),
-                            TeacherId = i.TeacherId,
-                            CourseLevel = i.CourseLevel,
-                            VideoTimeCodes = i.VideoTimeCodes.Select(x => new VideoTimeCodeModel
-                            {
-                                Id = x.Id,
-                                DisplayTime = x.DisplayTime,
-                                ExecutionTime = x.ExecutionTime,
-                                TimeCodeType = x.TimeCodeType,
-                                VideoId = x.VideoId,
-                                Exercises = x.TimeCodeExercises.Select(n => n.Exercise).Select(n => new ExerciseModel
-                                {
-                                    Id = n.Id,
-                                    MediaPost = n.MediaPost,
-                                    CourseSkill = n.CourseSkill,
-                                    Questions = n.ExerciseQuestions.Select(m => m.Question).Select(m => new QuestionModel()
-                                    {
-                                        Id = m.Id,
-                                        QuestionType = m.QuestionType,
-                                        CorrectTotal = m.CorrectTotal,
-                                        IsSave = m.IsSave,
-                                        Config = m.Config
-                                    }).ToList()
-                                }).ToList(),
-                            }).ToList(),
-                        };
+            var video = await _videoRepository.GetIncludeAllAsync(request.Id);
 
-            var video = query.FirstOrDefault();
             if (video == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumVideoErrorCode.VideoNotExist),
-                                                nameof(request.Id), request.Id);
+                methodResult.AddErrorBadRequest(nameof(EnumVideoErrorCode.VideoNotExist), nameof(request.Id), request.Id);
                 return methodResult;
             }
 

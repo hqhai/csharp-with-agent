@@ -1,4 +1,6 @@
-﻿using Fsel.Core.Base.Interfaces;
+// Copyright (c) Atlantic. All rights reserved.
+
+using Fsel.Core.Base.Interfaces;
 using Unit = Fsel.Course.Domain.Entities.Unit;
 
 namespace Fsel.Course.Domain.IRepositories

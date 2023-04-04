@@ -7,5 +7,6 @@ namespace Fsel.Course.Domain.IRepositories
 
     public interface ICourseClassStudentRepository : IRepository<CourseClassStudent>
     {
+        Task<CourseClassStudent?> GetIncludeByIdsAsync(IEnumerable<Guid>? ids, Guid courseId);
     }
 }

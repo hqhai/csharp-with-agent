@@ -38,19 +38,20 @@ namespace Fsel.Course.Application.Commands.LessonCmd
 
         public async Task<MethodResult<LessonModel>> Handle(CreateLessonCommand request, CancellationToken cancellationToken)
         {
+            ArgumentNullException.ThrowIfNull(request);
             MethodResult<LessonModel> methodResult = new MethodResult<LessonModel>();
 
             #region Validation
 
-            if (request == null)
+            if (request.HomeWorkIds == null)
             {
-                methodResult.StatusCode = StatusCodes.Status400BadRequest;
+                methodResult.AddErrorBadRequest(nameof(EnumHomeWorkErrorCode.HomeWorksNull), nameof(request.HomeWorkIds));
                 return methodResult;
             }
 
-            if (request.HomeWorkIds == null)
+            if (request.LessonIntructions == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumHomeWorkErrorCode.HomeWorkNull), nameof(request.HomeWorkIds));
+                methodResult.AddErrorBadRequest(nameof(EnumLessonInstructionErrorCode.LessonInstructionsNull), nameof(request.HomeWorkIds));
                 return methodResult;
             }
 
@@ -77,7 +78,7 @@ namespace Fsel.Course.Application.Commands.LessonCmd
 
             if (_homeWorkRepository.IsIdsInValid(request.HomeWorkIds))
             {
-                methodResult.AddErrorBadRequest(nameof(EnumHomeWorkErrorCode.HomeWorkNull), nameof(request.HomeWorkIds), request.HomeWorkIds);
+                methodResult.AddErrorBadRequest(nameof(EnumHomeWorkErrorCode.HomeWorksNull), nameof(request.HomeWorkIds), request.HomeWorkIds);
                 return methodResult;
             }
 
@@ -118,6 +119,8 @@ namespace Fsel.Course.Application.Commands.LessonCmd
                 {
                     VideoId = x
                 }).ToList();
+
+                lesson.LessonInstructions = _mapper.Map<IList<LessonInstruction>>(request.LessonIntructions);
 
                 classForum.LessonId = lesson.Id;
                 lesson.ClassForum = classForum;
