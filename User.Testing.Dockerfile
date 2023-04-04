@@ -10,12 +10,12 @@ EXPOSE 443
 
 FROM mcr.microsoft.com/dotnet/sdk:7.0 AS build
 WORKDIR /src
-COPY ["../../Services/Fsel.Identity/Fsel.Identity.Api/Fsel.Identity.Api.csproj", "Services/Fsel.Identity/Fsel.Identity.Api/"]
-COPY ["../../Services/Fsel.Identity/Fsel.Identity.Application/Fsel.Identity.Application.csproj", "Services/Fsel.Identity/Fsel.Identity.Application/"]
-COPY ["../../Services/Fsel.Identity/Fsel.Identity.Infrastructure/Fsel.Identity.Infrastructure.csproj", "Services/Fsel.Identity/Fsel.Identity.Infrastructure/"]
-COPY ["../../Services/Fsel.Identity/Fsel.Identity.Domain/Fsel.Identity.Domain.csproj", "Services/Fsel.Identity/Fsel.Identity.Domain/"]
-COPY ["../../Services/Shared/Fsel.Core/Fsel.Core.csproj", "Services/Shared/Fsel.Core/"]
-COPY ["../../Services/Shared/Fsel.Common/Fsel.Common.csproj", "Services/Shared/Fsel.Common/"]
+COPY ["Services/Fsel.Identity/Fsel.Identity.Api/Fsel.Identity.Api.csproj", "Services/Fsel.Identity/Fsel.Identity.Api/"]
+COPY ["Services/Fsel.Identity/Fsel.Identity.Application/Fsel.Identity.Application.csproj", "Services/Fsel.Identity/Fsel.Identity.Application/"]
+COPY ["Services/Fsel.Identity/Fsel.Identity.Infrastructure/Fsel.Identity.Infrastructure.csproj", "Services/Fsel.Identity/Fsel.Identity.Infrastructure/"]
+COPY ["Services/Fsel.Identity/Fsel.Identity.Domain/Fsel.Identity.Domain.csproj", "Services/Fsel.Identity/Fsel.Identity.Domain/"]
+COPY ["Services/Shared/Fsel.Core/Fsel.Core.csproj", "Services/Shared/Fsel.Core/"]
+COPY ["Services/Shared/Fsel.Common/Fsel.Common.csproj", "Services/Shared/Fsel.Common/"]
 RUN dotnet restore "Services/Fsel.Identity/Fsel.Identity.Api/Fsel.Identity.Api.csproj"
 COPY . .
 WORKDIR "/src/Services/Fsel.Identity/Fsel.Identity.Api"
@@ -26,6 +26,6 @@ RUN dotnet publish "Fsel.Identity.Api.csproj" -c Release -o /app/publish /p:UseA
 
 FROM base AS final
 WORKDIR /app
-ENV ASPNETCORE_ENVIRONMENT=Development
+ENV ASPNETCORE_ENVIRONMENT=Testing
 COPY --from=publish /app/publish .
 ENTRYPOINT ["dotnet", "Fsel.Identity.Api.dll"]
