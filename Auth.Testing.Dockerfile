@@ -9,12 +9,12 @@ EXPOSE 80
 
 FROM mcr.microsoft.com/dotnet/sdk:7.0 AS build
 WORKDIR /src
-COPY ["../../Services/Fsel.Identity/Fsel.Identity.Authentication/Fsel.Identity.Authentication.csproj", "Services/Fsel.Identity/Fsel.Identity.Authentication/"]
-COPY ["../../Services/Fsel.Identity/Fsel.Identity.Application/Fsel.Identity.Application.csproj", "Services/Fsel.Identity/Fsel.Identity.Application/"]
-COPY ["../../Services/Fsel.Identity/Fsel.Identity.Infrastructure/Fsel.Identity.Infrastructure.csproj", "Services/Fsel.Identity/Fsel.Identity.Infrastructure/"]
-COPY ["../../Services/Fsel.Identity/Fsel.Identity.Domain/Fsel.Identity.Domain.csproj", "Services/Fsel.Identity/Fsel.Identity.Domain/"]
-COPY ["../../Services/Shared/Fsel.Core/Fsel.Core.csproj", "Services/Shared/Fsel.Core/"]
-COPY ["../../Services/Shared/Fsel.Common/Fsel.Common.csproj", "Services/Shared/Fsel.Common/"]
+COPY ["Services/Fsel.Identity/Fsel.Identity.Authentication/Fsel.Identity.Authentication.csproj", "Services/Fsel.Identity/Fsel.Identity.Authentication/"]
+COPY ["Services/Fsel.Identity/Fsel.Identity.Application/Fsel.Identity.Application.csproj", "Services/Fsel.Identity/Fsel.Identity.Application/"]
+COPY ["Services/Fsel.Identity/Fsel.Identity.Infrastructure/Fsel.Identity.Infrastructure.csproj", "Services/Fsel.Identity/Fsel.Identity.Infrastructure/"]
+COPY ["Services/Fsel.Identity/Fsel.Identity.Domain/Fsel.Identity.Domain.csproj", "Services/Fsel.Identity/Fsel.Identity.Domain/"]
+COPY ["Services/Shared/Fsel.Core/Fsel.Core.csproj", "Services/Shared/Fsel.Core/"]
+COPY ["Services/Shared/Fsel.Common/Fsel.Common.csproj", "Services/Shared/Fsel.Common/"]
 RUN dotnet restore "Services/Fsel.Identity/Fsel.Identity.Authentication/Fsel.Identity.Authentication.csproj"
 COPY . .
 WORKDIR "/src/Services/Fsel.Identity/Fsel.Identity.Authentication"
@@ -25,6 +25,6 @@ RUN dotnet publish "Fsel.Identity.Authentication.csproj" -c Release -o /app/publ
 
 FROM base AS final
 WORKDIR /app
-ENV ASPNETCORE_ENVIRONMENT=Development
+ENV ASPNETCORE_ENVIRONMENT=Testing
 COPY --from=publish /app/publish .
 ENTRYPOINT ["dotnet", "Fsel.Identity.Authentication.dll"]
