@@ -4,9 +4,6 @@ namespace Fsel.Course.Domain.Models.EntityModels
 {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
-    using System.Threading.Tasks;
     using Fsel.Course.Domain.Enums;
 
     public class LessonResultModel
@@ -14,6 +11,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public double Percent { get; set; }
 
         public EnumResultStatus Status { get; set; }
+        public string? SummaryNote { get; set; }
 
         public Guid CourseId { get; set; }
 
