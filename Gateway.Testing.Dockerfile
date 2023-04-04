@@ -10,9 +10,9 @@ EXPOSE 443
 
 FROM mcr.microsoft.com/dotnet/sdk:7.0 AS build
 WORKDIR /src
-COPY ["../../Services/Fsel.Gateway/Fsel.Gateway.Api/Fsel.Gateway.Api.csproj", "Services/Fsel.Gateway/Fsel.Gateway.Api/"]
-COPY ["../../Services/Shared/Fsel.Core/Fsel.Core.csproj", "Services/Shared/Fsel.Core/"]
-COPY ["../../Services/Shared/Fsel.Common/Fsel.Common.csproj", "Services/Shared/Fsel.Common/"]
+COPY ["Services/Fsel.Gateway/Fsel.Gateway.Api/Fsel.Gateway.Api.csproj", "Services/Fsel.Gateway/Fsel.Gateway.Api/"]
+COPY ["Services/Shared/Fsel.Core/Fsel.Core.csproj", "Services/Shared/Fsel.Core/"]
+COPY ["Services/Shared/Fsel.Common/Fsel.Common.csproj", "Services/Shared/Fsel.Common/"]
 RUN dotnet restore "Services/Fsel.Gateway/Fsel.Gateway.Api/Fsel.Gateway.Api.csproj"
 COPY . .
 WORKDIR "/src/Services/Fsel.Gateway/Fsel.Gateway.Api"
@@ -23,6 +23,6 @@ RUN dotnet publish "Fsel.Gateway.Api.csproj" -c Release -o /app/publish /p:UseAp
 
 FROM base AS final
 WORKDIR /app
-ENV ASPNETCORE_ENVIRONMENT=Development
+ENV ASPNETCORE_ENVIRONMENT=Testing
 COPY --from=publish /app/publish .
 ENTRYPOINT ["dotnet", "Fsel.Gateway.Api.dll"]
