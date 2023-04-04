@@ -15,7 +15,7 @@ namespace Fsel.Course.Domain.Models.CommandModels.Lessons
         public IList<Guid>? VideoIds { get; set; }
         public CreateClassForumCommandModel? ClassForum { get; set; }
         public IList<Guid>? ExtraPracticeIds { get; set; }
-        public IList<CreateLessonInstructionCommandModel>? LessonIntructions { get; set; }
+        public IList<CreateLessonInstructionCommandModel>? LessonInstructions { get; set; }
         public EnumCourseLevel CourseLevel { get; set; }
     }
 }
