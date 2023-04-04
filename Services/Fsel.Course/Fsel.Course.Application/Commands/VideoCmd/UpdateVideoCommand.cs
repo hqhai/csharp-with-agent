@@ -3,6 +3,7 @@
 using AutoMapper;
 using Fsel.Common.ActionResults;
 using Fsel.Course.Domain.Entities;
+using Fsel.Course.Domain.Enums;
 using Fsel.Course.Domain.Enums.ErrorCodes;
 using Fsel.Course.Domain.IRepositories;
 using Fsel.Course.Domain.Models.CommandModels.Videos;
@@ -73,6 +74,14 @@ namespace Fsel.Course.Application.Commands.VideoCmd
             //}
 
             #endregion Tạm thời không validate VideoUsed
+
+            var listTimeCodeType = request.VideoTimeCodes.Select(x => x.TimeCodeType).ToList();
+
+            if (listTimeCodeType.Contains(EnumTimeCodeType.UnitTest) && listTimeCodeType.Contains(EnumTimeCodeType.SkillTest))
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumVideoErrorCode.CanNotUnitTestAndSkillTestAtTheSameTime), nameof(request.VideoTimeCodes));
+                return methodResult;
+            }
 
             // Lưu dữ liệu Video
             var video = await _videoRepository.GetIncludeByIdAsync(request.Id);

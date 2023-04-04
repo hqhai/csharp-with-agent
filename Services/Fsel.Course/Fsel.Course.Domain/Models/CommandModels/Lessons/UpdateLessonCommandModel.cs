@@ -2,6 +2,7 @@
 
 using Fsel.Common.Enums;
 using Fsel.Core.Base.BaseModels;
+using Fsel.Course.Domain.Models.CommandModels.LessonInstructions;
 
 namespace Fsel.Course.Domain.Models.CommandModels.Lessons
 {
@@ -10,11 +11,11 @@ namespace Fsel.Course.Domain.Models.CommandModels.Lessons
         public string? Name { get; set; }
         public string? DisplayName { get; set; }
         public string? InstructionContent { get; set; }
-        public Guid? TeacherId { get; set; }
-        public ICollection<Guid>? HomeWorkIds { get; set; }
-        public ICollection<Guid>? VideoIds { get; set; }
+        public IList<Guid>? HomeWorkIds { get; set; }
+        public IList<Guid>? VideoIds { get; set; }
         public Guid ClassForumId { get; set; }
-        public ICollection<Guid>? ExtraPracticeIds { get; set; }
+        public IList<Guid>? ExtraPracticeIds { get; set; }
+        public IList<UpdateLessonInstructionCommandModel>? LessonIntructions { get; set; }
         public EnumCourseLevel CourseLevel { get; set; }
     }
 }
