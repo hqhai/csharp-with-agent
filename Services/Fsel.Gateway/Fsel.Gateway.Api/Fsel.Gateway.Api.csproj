@@ -10,10 +10,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" />
+    <!--<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" />
     <PackageReference Include="MMLib.SwaggerForOcelot" />
-    <PackageReference Include="Ocelot" />
+    <PackageReference Include="Ocelot" />-->
   </ItemGroup>
 
   <ItemGroup>
