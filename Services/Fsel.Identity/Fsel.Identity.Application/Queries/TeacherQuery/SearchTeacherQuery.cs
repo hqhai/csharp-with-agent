@@ -54,13 +54,22 @@ namespace Fsel.Identity.Application.Queries.TeacherQuery
                                   UpdatedDate = x.UpdatedDate,
                                   UpdatedUserId = x.UpdatedUserId,
                                   UpdatedFullName = x.UpdatedFullName,
-                                  Human = _mapper.Map<HumanModel>(x.Human),
+                                  Human = new HumanModel
+                                  {
+                                      Id = x!.Human!.Id,
+                                      FullName = x.Human.FullName,
+                                      AvatarPath = x.Human.AvatarPath,
+                                      Birthday = x.Human.Birthday,
+                                      PhoneNumber = x.Human.PhoneNumber,
+                                      Gender = x.Human.Gender,
+                                      Email = x.Human.Email,
+                                      Address = x.Human.Address
+                                  }
                               });
-
             //Keyword
             if (!string.IsNullOrEmpty(request.Keyword))
             {
-                teacherQuery = teacherQuery.Where(m => m.Id.ToString() == request.Keyword || (m.Human != null && (m.Human.FullName ?? string.Empty).Contains(request.Keyword)));
+                teacherQuery = teacherQuery.Where(m => m.Id.ToString() == request.Keyword || m.Human!.FullName!.Contains(request.Keyword));
             }
 
             int totalItem = await teacherQuery.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
