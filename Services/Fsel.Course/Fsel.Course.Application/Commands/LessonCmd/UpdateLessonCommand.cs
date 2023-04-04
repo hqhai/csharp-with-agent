@@ -63,7 +63,7 @@ namespace Fsel.Course.Application.Commands.LessonCmd
                 return methodResult;
             }
 
-            if (request.LessonIntructions == null)
+            if (request.LessonInstructions == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumLessonInstructionErrorCode.LessonInstructionsNull), nameof(request.HomeWorkIds));
                 return methodResult;
@@ -121,7 +121,7 @@ namespace Fsel.Course.Application.Commands.LessonCmd
                 return methodResult;
             }
 
-            if (_lessonInstructionRepository.IsIdsInValid(request.LessonIntructions.Select(x => x.Id).ToList()))
+            if (_lessonInstructionRepository.IsIdsInValid(request.LessonInstructions.Select(x => x.Id).ToList()))
             {
                 methodResult.AddErrorBadRequest(nameof(EnumHomeWorkErrorCode.HomeWorksNull));
 
@@ -152,7 +152,7 @@ namespace Fsel.Course.Application.Commands.LessonCmd
                     VideoId = x
                 }).ToList();
 
-                lesson.LessonInstructions = _mapper.Map<IList<LessonInstruction>>(request.LessonIntructions);
+                lesson.LessonInstructions = _mapper.Map<IList<LessonInstruction>>(request.LessonInstructions);
                 _mapper.Map(request, lesson);
 
                 lesson = _lessonRepository.Update(lesson);

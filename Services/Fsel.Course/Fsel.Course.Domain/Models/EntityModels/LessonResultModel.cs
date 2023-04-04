@@ -11,6 +11,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public double Percent { get; set; }
 
         public EnumResultStatus Status { get; set; }
+
         public string? SummaryNote { get; set; }
 
         public Guid CourseId { get; set; }
