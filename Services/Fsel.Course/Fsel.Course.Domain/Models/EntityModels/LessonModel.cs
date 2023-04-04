@@ -15,12 +15,11 @@ namespace Fsel.Course.Domain.Models.EntityModels
 
         public bool IsActive { get; set; }
 
-        public Guid? TeacherId { get; set; }
-
         public EnumCourseLevel CourseLevel { get; set; }
 
         public VideoModel? Video { get; set; }
 
         public IList<LessonResultModel>? LessonResults { get; set; }
+        public IList<LessonInstructionModel>? LessonInstructions { get; set; }
     }
 }

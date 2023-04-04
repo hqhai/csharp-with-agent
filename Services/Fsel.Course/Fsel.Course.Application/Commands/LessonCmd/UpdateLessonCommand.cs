@@ -24,12 +24,14 @@ namespace Fsel.Course.Application.Commands.LessonCmd
         private readonly IVideoRepository _videoRepository;
         private readonly IExtraPracticeRepository _extraPracticeRepository;
         private readonly IClassForumRepository _classForumRepository;
+        private readonly ILessonInstructionRepository _lessonInstructionRepository;
 
         public UpdateLessonCommandHandler(ILessonRepository lessonRepository
             , IMapper mapper, IHomeWorkRepository homeWorkRepository
             , IVideoRepository videoRepository
             , IExtraPracticeRepository extraPracticeRepository
-            , IClassForumRepository classForumRepository)
+            , IClassForumRepository classForumRepository
+            , ILessonInstructionRepository lessonInstructionRepository)
         {
             _lessonRepository = lessonRepository;
             _mapper = mapper;
@@ -37,6 +39,7 @@ namespace Fsel.Course.Application.Commands.LessonCmd
             _videoRepository = videoRepository;
             _extraPracticeRepository = extraPracticeRepository;
             _classForumRepository = classForumRepository;
+            _lessonInstructionRepository = lessonInstructionRepository;
         }
 
         public async Task<MethodResult<LessonModel>> Handle(UpdateLessonCommand request, CancellationToken cancellationToken)
@@ -60,9 +63,15 @@ namespace Fsel.Course.Application.Commands.LessonCmd
                 return methodResult;
             }
 
+            if (request.LessonIntructions == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumLessonInstructionErrorCode.LessonInstructionsNull), nameof(request.HomeWorkIds));
+                return methodResult;
+            }
+
             if (request.HomeWorkIds == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumHomeWorkErrorCode.HomeWorkNull), nameof(request.HomeWorkIds), request.HomeWorkIds);
+                methodResult.AddErrorBadRequest(nameof(EnumHomeWorkErrorCode.HomeWorksNull), nameof(request.HomeWorkIds), request.HomeWorkIds);
                 return methodResult;
             }
 
@@ -99,6 +108,20 @@ namespace Fsel.Course.Application.Commands.LessonCmd
                 return methodResult;
             }
 
+            if (_videoRepository.IsIdsInValid(request.VideoIds))
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumVideoErrorCode.VideoNotCorrect));
+
+                return methodResult;
+            }
+
+            if (_lessonInstructionRepository.IsIdsInValid(request.LessonIntructions.Select(x => x.Id).ToList()))
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumLessonInstructionErrorCode.LessonInstructionsNull));
+
+                return methodResult;
+            }
+
             if (_classForumRepository.IsIdsInValid(new List<Guid> { request.ClassForumId }))
             {
                 methodResult.AddErrorBadRequest(nameof(EnumClassForumErrorCode.ClassForumNull));
@@ -107,7 +130,7 @@ namespace Fsel.Course.Application.Commands.LessonCmd
 
             if (_homeWorkRepository.IsIdsInValid(request.HomeWorkIds))
             {
-                methodResult.AddErrorBadRequest(nameof(EnumHomeWorkErrorCode.HomeWorkNull));
+                methodResult.AddErrorBadRequest(nameof(EnumHomeWorkErrorCode.HomeWorksNull));
 
                 return methodResult;
             }
@@ -135,6 +158,8 @@ namespace Fsel.Course.Application.Commands.LessonCmd
                 {
                     VideoId = x
                 }).ToList();
+
+                lesson.LessonInstructions = _mapper.Map<IList<LessonInstruction>>(request.LessonIntructions);
                 _mapper.Map(request, lesson);
 
                 lesson = _lessonRepository.Update(lesson);
