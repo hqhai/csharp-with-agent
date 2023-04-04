@@ -34,6 +34,21 @@ namespace Fsel.Course.Infrastructure.Repositories
             }
         }
 
+        public async Task<Lesson?> GetIncludeVideoByIdAsync(Guid id)
+        {
+            try
+            {
+                return await Queryable.Include(x => x.LessonResults)
+                                      .Include(x => x.LessonVideos)
+                                      .ThenInclude(x => x.Video)
+                                      .FirstOrDefaultAsync(x => x.Id == id);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         public async Task<bool> IsLessonUsed(Guid id)
         {
             return await Queryable

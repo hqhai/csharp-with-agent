@@ -48,17 +48,6 @@ namespace Fsel.Course.Application.Queries.LessonQuery
                      .Include(x => x.LessonVideos.Where(y => !y.IsDeleted && y.Video != null))
                      .ThenInclude(x => x.Video)
                      .ThenInclude(x => x!.VideoTimeCodes.Where(y => !y.IsDeleted && y.Video != null))
-                     .Where(x => !request.CourseLevel.HasValue || x.CourseLevel == request.CourseLevel)
-                     .Where(x => !request.TeacherId.HasValue || x.LessonVideos.Where(y => y.Video != null)
-                                                                             .Select(y => y.Video)
-                                                                             .Select(x => x!.TeacherId)
-                                                                             .Contains(request.TeacherId))
-                     .Where(x => !request.TimeCodeType.HasValue || x.LessonVideos.Where(y => y.Video != null)
-                                                                                  .Select(y => y.Video)
-                                                                                  .SelectMany(y => y!.VideoTimeCodes)
-                                                                                  .Select(y => y.TimeCodeType)
-                                                                                  .Contains(request.TimeCodeType.Value))
-
                      .AsNoTracking()
                      .Select(x => new LessonSearchModel
                      {
@@ -86,6 +75,18 @@ namespace Fsel.Course.Application.Queries.LessonQuery
             if (!string.IsNullOrEmpty(request.Keyword))
             {
                 lessonQuery = lessonQuery.Where(m => m.Id.ToString() == request.Keyword || (m.Name ?? string.Empty).Contains(request.Keyword));
+            }
+            if (!string.IsNullOrEmpty(request.TeacherId.ToString()))
+            {
+                lessonQuery = lessonQuery.Where(m => m.TeacherId == request.TeacherId);
+            }
+            if (!string.IsNullOrEmpty(request.CourseLevel.ToString()))
+            {
+                lessonQuery = lessonQuery.Where(m => m.CourseLevel == request.CourseLevel);
+            }
+            if (!string.IsNullOrEmpty(request.TimeCodeType.ToString()))
+            {
+                lessonQuery = lessonQuery.Where(m => m.TimeCodeType == request.TimeCodeType);
             }
 
             int totalItem = await lessonQuery.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
