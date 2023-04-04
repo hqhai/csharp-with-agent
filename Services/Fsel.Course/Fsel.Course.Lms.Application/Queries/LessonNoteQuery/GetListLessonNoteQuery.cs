@@ -45,9 +45,9 @@ namespace Fsel.Course.Lms.Application.Queries.LessonNoteQuery
                                             Note = lessonResult.Note,
                                             LessonResultId = lessonResult.LessonResultId
                                         }).ToListAsync(cancellationToken: cancellationToken);
-            var lessonResult = await _lessonResultRepository.Queryable.Where(x => x.Id == request.LessonResultId).Select(x => x.SummaryNote).ToListAsync(cancellationToken: cancellationToken);
+            var lessonResult = await _lessonResultRepository.Queryable.Where(x => x.Id == request.LessonResultId).Select(x => x.SummaryNote).FirstOrDefaultAsync(cancellationToken: cancellationToken);
             lessonNoteListModel.LessonNotes = lessonNotes;
-            lessonNoteListModel.SummaryNote = lessonResult.FirstOrDefault();
+            lessonNoteListModel.SummaryNote = lessonResult;
             lessonNoteListModel.LessonResultId = request.LessonResultId;
 
             methodResult.Result = lessonNoteListModel;
