@@ -10,7 +10,6 @@ namespace Fsel.Course.Lms.Application.Commands.LessonNoteCmd
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.CommandModels.LessonNotes;
     using Fsel.Course.Domain.Models.EntityModels;
-    using Fsel.Course.Lms.Application.Services.UserServices;
     using MediatR;
     using Microsoft.AspNetCore.Http;
 
@@ -21,13 +20,11 @@ namespace Fsel.Course.Lms.Application.Commands.LessonNoteCmd
     public class CreateLessonNoteCommandHandler : IRequestHandler<CreateLessonNoteCommand, MethodResult<LessonNoteModel>>
     {
         private readonly ILessonNoteRepository _lessonNoteRepository;
-        private readonly IUserService _userService;
         private readonly IMapper _mapper;
 
-        public CreateLessonNoteCommandHandler(ILessonNoteRepository lessonNoteRepository, IUserService userService, IMapper mapper)
+        public CreateLessonNoteCommandHandler(ILessonNoteRepository lessonNoteRepository, IMapper mapper)
         {
             _lessonNoteRepository = lessonNoteRepository;
-            _userService = userService;
             _mapper = mapper;
         }
 

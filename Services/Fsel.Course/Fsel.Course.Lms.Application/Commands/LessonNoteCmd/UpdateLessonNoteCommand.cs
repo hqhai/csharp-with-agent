@@ -2,8 +2,6 @@
 
 namespace Fsel.Course.Lms.Application.Commands.LessonNoteCmd
 {
-    using System.Threading;
-    using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Course.Domain.Enums.ErrorCodes;
@@ -21,6 +19,12 @@ namespace Fsel.Course.Lms.Application.Commands.LessonNoteCmd
     {
         private readonly ILessonNoteRepository _lessonNoteRepository;
         private readonly IMapper _mapper;
+
+        public UpdateLessonNoteCommandHandler(ILessonNoteRepository lessonNoteRepository, IMapper mapper)
+        {
+            _lessonNoteRepository = lessonNoteRepository;
+            _mapper = mapper;
+        }
 
         public async Task<MethodResult<LessonNoteModel>> Handle(UpdateLessonNoteCommand request, CancellationToken cancellationToken)
         {

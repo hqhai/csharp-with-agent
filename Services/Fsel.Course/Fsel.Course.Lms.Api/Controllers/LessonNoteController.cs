@@ -29,12 +29,12 @@ namespace Fsel.Course.Lms.Api.Controllers
         /// <summary>
         /// Get List Lesson Note
         /// </summary>
-        [HttpGet("{id}")]
-        [ProducesResponseType(typeof(MethodResult<LessonNoteModel>), (int)HttpStatusCode.OK)]
+        [HttpGet("{lessonResultId}")]
+        [ProducesResponseType(typeof(MethodResult<LessonNoteListModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> Get([FromRoute] Guid id)
+        public async Task<IActionResult> Get([FromRoute] Guid lessonResultId)
         {
-            MethodResult<IList<LessonNoteModel>> queryResult = await _mediator.Send(new GetListLessonNoteQuery { Id = id }).ConfigureAwait(false);
+            MethodResult<LessonNoteListModel> queryResult = await _mediator.Send(new GetListLessonNoteQuery { LessonResultId = lessonResultId }).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
 
@@ -56,9 +56,11 @@ namespace Fsel.Course.Lms.Api.Controllers
         [HttpPut("{id}")]
         [ProducesResponseType(typeof(MethodResult<LessonNoteModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> Update([FromBody] UpdateLessonNoteCommand command)
+        public async Task<IActionResult> Update([FromRoute] Guid id, [FromBody] UpdateLessonNoteCommand command)
         {
             ArgumentNullException.ThrowIfNull(command);
+
+            command.Id = id;
             MethodResult<LessonNoteModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
