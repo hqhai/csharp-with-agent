@@ -14,7 +14,7 @@ namespace Fsel.Course.Domain.Entities
         /// </summary>
         private double _percent;
 
-        [Range(1, 10000_0000, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
+        [Range(1, 100, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
         public double Percent
         {
             get { return _percent; }
@@ -32,6 +32,18 @@ namespace Fsel.Course.Domain.Entities
         /// </summary>
         [Range(0, 10000_0000, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
         public int CorrectTotal { get; set; }
+
+        /// <summary>
+        /// Số sao
+        /// </summary>
+        [Range(0, 5, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
+        public double NumberOfStars { get; set; }
+
+        /// <summary>
+        /// Số sao
+        /// </summary>
+        [MaxLength(10000_0000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
+        public string? Feedback { get; set; }
 
         /// <summary>
         /// Thời gian hiện làm bài
