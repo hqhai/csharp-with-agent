@@ -49,7 +49,7 @@ namespace Fsel.Course.Application.Commands.LessonCmd
                 return methodResult;
             }
 
-            if (request.LessonIntructions == null)
+            if (request.LessonInstructions == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumLessonInstructionErrorCode.LessonInstructionsNull), nameof(request.HomeWorkIds));
                 return methodResult;
@@ -120,7 +120,7 @@ namespace Fsel.Course.Application.Commands.LessonCmd
                     VideoId = x
                 }).ToList();
 
-                lesson.LessonInstructions = _mapper.Map<IList<LessonInstruction>>(request.LessonIntructions);
+                lesson.LessonInstructions = _mapper.Map<IList<LessonInstruction>>(request.LessonInstructions);
 
                 classForum.LessonId = lesson.Id;
                 lesson.ClassForum = classForum;
