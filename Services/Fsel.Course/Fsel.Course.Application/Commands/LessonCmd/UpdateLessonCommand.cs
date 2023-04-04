@@ -49,7 +49,7 @@ namespace Fsel.Course.Application.Commands.LessonCmd
 
             #region Validation
 
-            var lesson = await _lessonRepository.GetByIdAsync(request.Id);
+            var lesson = await _lessonRepository.GetIncludeByIdAsync(request.Id);
             if (lesson == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumLessonErrorCode.LessonNotExist), nameof(request.Id), request.Id);
