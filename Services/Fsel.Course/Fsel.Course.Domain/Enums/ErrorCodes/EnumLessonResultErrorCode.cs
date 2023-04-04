@@ -8,5 +8,10 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         /// Lesson Results  does not exist
         /// </summary>
         LessonResultsDoesNotExist,
+
+        /// <summary>
+        /// Summary is null
+        /// </summary>
+        SummaryNull,
     }
 }

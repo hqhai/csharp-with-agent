@@ -13,7 +13,7 @@ namespace Fsel.Course.Lms.Application.Commands.LessonNoteCmd
 
     public class UpdateLessonSummaryNoteCommand : IRequest<MethodResult<bool>>
     {
-        public Guid Id { get; set; }
+        public Guid LessonResultId { get; set; }
 
         public string? SummaryNote { get; set; }
     }
@@ -32,18 +32,25 @@ namespace Fsel.Course.Lms.Application.Commands.LessonNoteCmd
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<bool> methodResult = new MethodResult<bool>();
 
-            var lessonResult = await _lessonResultRepository.Queryable
-                                    .Where(x => x.Id == request.Id)
-                                    .Where(x => x.SummaryNote == request.SummaryNote).FirstOrDefaultAsync(cancellationToken: cancellationToken);
-            if (lessonResult == null)
+            var lessonResult = await _lessonResultRepository.GetByIdAsync(request.LessonResultId);
+            var summany = await _lessonResultRepository.Queryable.Where(x => x.SummaryNote == request.SummaryNote).FirstOrDefaultAsync(cancellationToken: cancellationToken);
+
+            if (summany == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumLessonResultErrorCode.LessonResultsDoesNotExist),
-                                                nameof(request.Id), request.Id);
+                                                nameof(request.LessonResultId), request.LessonResultId);
+                return methodResult;
+            }
+            if (lessonResult == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumLessonResultErrorCode.SummaryNull),
+                                                nameof(request.LessonResultId), request.LessonResultId);
                 return methodResult;
             }
             await _lessonResultRepository.ExecuteTransactionAsync(async () =>
             {
                 var result = _lessonResultRepository.Update(lessonResult);
+                var summaryResult = _lessonResultRepository.Update(summany);
                 await _lessonResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 methodResult.Result = true;

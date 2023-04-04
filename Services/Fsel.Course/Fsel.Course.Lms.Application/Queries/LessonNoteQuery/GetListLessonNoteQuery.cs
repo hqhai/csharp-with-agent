@@ -13,23 +13,23 @@ namespace Fsel.Course.Lms.Application.Queries.LessonNoteQuery
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class GetLessonNoteQuery : IRequest<MethodResult<IList<LessonNoteModel>>>
+    public class GetListLessonNoteQuery : IRequest<MethodResult<IList<LessonNoteModel>>>
     {
         public Guid Id { get; set; }
     }
 
-    public class GetNoteQueryHandler : IRequestHandler<GetLessonNoteQuery, MethodResult<IList<LessonNoteModel>>>
+    public class GetListLessonNoteQueryHandler : IRequestHandler<GetListLessonNoteQuery, MethodResult<IList<LessonNoteModel>>>
     {
         private readonly ILessonNoteRepository _lessonNoteRepository;
         private readonly IMapper _mapper;
 
-        public GetNoteQueryHandler(ILessonNoteRepository lessonNoteRepository, IMapper mapper)
+        public GetListLessonNoteQueryHandler(ILessonNoteRepository lessonNoteRepository, IMapper mapper)
         {
             _lessonNoteRepository = lessonNoteRepository;
             _mapper = mapper;
         }
 
-        public async Task<MethodResult<IList<LessonNoteModel>>> Handle(GetLessonNoteQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<IList<LessonNoteModel>>> Handle(GetListLessonNoteQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<IList<LessonNoteModel>> methodResult = new MethodResult<IList<LessonNoteModel>>();
