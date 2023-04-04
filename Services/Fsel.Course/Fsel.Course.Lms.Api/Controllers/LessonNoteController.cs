@@ -5,14 +5,17 @@ namespace Fsel.Course.Lms.Api.Controllers
     using System.Net;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
+    using Fsel.Common.Enums;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Commands.LessonNoteCmd;
     using Fsel.Course.Lms.Application.Queries.LessonNoteQuery;
     using MediatR;
+    using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
 
     [ApiVersion(Settings.APIVersion)]
     [Route(Settings.APIDefaultRoute + "/lesson-note")]
+    [Authorize(Roles = nameof(EnumRole.Student))]
     [ApiController]
     public class LessonNoteController : ControllerBase
     {
@@ -76,12 +79,14 @@ namespace Fsel.Course.Lms.Api.Controllers
         /// <summary>
         /// Update a Lesson Summary  Note
         /// </summary>
-        [HttpPut("{lesson-result-id}")]
+        [HttpPut("{update-summary-note}")]
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> Update([FromRoute] Guid id, [FromBody] string summaryNote)
+        public async Task<IActionResult> Update([FromRoute] Guid id, [FromBody] UpdateLessonSummaryNoteCommand command)
         {
-            MethodResult<bool> commandResult = await _mediator.Send(new UpdateLessonSummaryNoteCommand { Id = id, SummaryNote = summaryNote }).ConfigureAwait(false);
+            ArgumentNullException.ThrowIfNull(command);
+            command.Id = id;
+            MethodResult<bool> commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
     }

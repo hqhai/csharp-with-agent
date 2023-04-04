@@ -4,12 +4,12 @@ namespace Fsel.Course.Lms.Application.Commands.LessonNoteCmd
 {
     using System.Threading;
     using System.Threading.Tasks;
-    using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
     using MediatR;
     using Microsoft.AspNetCore.Http;
+    using Microsoft.EntityFrameworkCore;
 
     public class UpdateLessonSummaryNoteCommand : IRequest<MethodResult<bool>>
     {
@@ -32,7 +32,9 @@ namespace Fsel.Course.Lms.Application.Commands.LessonNoteCmd
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<bool> methodResult = new MethodResult<bool>();
 
-            var lessonResult = await _lessonResultRepository.GetByIdAsync(request.Id);
+            var lessonResult = await _lessonResultRepository.Queryable
+                                    .Where(x => x.Id == request.Id)
+                                    .Where(x => x.SummaryNote == request.SummaryNote).FirstOrDefaultAsync(cancellationToken: cancellationToken);
             if (lessonResult == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumLessonResultErrorCode.LessonResultsDoesNotExist),
