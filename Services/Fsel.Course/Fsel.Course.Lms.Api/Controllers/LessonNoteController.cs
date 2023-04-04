@@ -81,10 +81,9 @@ namespace Fsel.Course.Lms.Api.Controllers
         [HttpPut("update-summary-note")]
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> Update([FromRoute] Guid id, [FromBody] UpdateLessonSummaryNoteCommand command)
+        public async Task<IActionResult> Update([FromBody] UpdateLessonSummaryNoteCommand command)
         {
             ArgumentNullException.ThrowIfNull(command);
-            command.Id = id;
             MethodResult<bool> commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }

@@ -33,14 +33,7 @@ namespace Fsel.Course.Lms.Application.Commands.LessonNoteCmd
             MethodResult<bool> methodResult = new MethodResult<bool>();
 
             var lessonResult = await _lessonResultRepository.GetByIdAsync(request.LessonResultId);
-            var summany = await _lessonResultRepository.Queryable.Where(x => x.SummaryNote == request.SummaryNote).FirstOrDefaultAsync(cancellationToken: cancellationToken);
 
-            if (summany == null)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumLessonResultErrorCode.LessonResultsDoesNotExist),
-                                                nameof(request.LessonResultId), request.LessonResultId);
-                return methodResult;
-            }
             if (lessonResult == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumLessonResultErrorCode.SummaryNull),
@@ -49,8 +42,8 @@ namespace Fsel.Course.Lms.Application.Commands.LessonNoteCmd
             }
             await _lessonResultRepository.ExecuteTransactionAsync(async () =>
             {
-                var result = _lessonResultRepository.Update(lessonResult);
-                var summaryResult = _lessonResultRepository.Update(summany);
+                lessonResult.SummaryNote = request.SummaryNote;
+                lessonResult = _lessonResultRepository.Update(lessonResult);
                 await _lessonResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 methodResult.Result = true;
