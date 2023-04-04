@@ -76,15 +76,15 @@ namespace Fsel.Course.Application.Queries.LessonQuery
             {
                 lessonQuery = lessonQuery.Where(m => m.Id.ToString() == request.Keyword || (m.Name ?? string.Empty).Contains(request.Keyword));
             }
-            if (!string.IsNullOrEmpty(request.TeacherId.ToString()))
+            if (request.TeacherId != null)
             {
                 lessonQuery = lessonQuery.Where(m => m.TeacherId == request.TeacherId);
             }
-            if (!string.IsNullOrEmpty(request.CourseLevel.ToString()))
+            if (request.CourseLevel != null)
             {
                 lessonQuery = lessonQuery.Where(m => m.CourseLevel == request.CourseLevel);
             }
-            if (!string.IsNullOrEmpty(request.TimeCodeType.ToString()))
+            if (request.TimeCodeType != null)
             {
                 lessonQuery = lessonQuery.Where(m => m.TimeCodeType == request.TimeCodeType);
             }
