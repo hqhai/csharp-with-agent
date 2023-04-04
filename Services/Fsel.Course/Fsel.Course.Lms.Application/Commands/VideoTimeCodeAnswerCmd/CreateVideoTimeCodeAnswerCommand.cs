@@ -130,7 +130,6 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
                 else
                 {
                     videoTimeCodeAnswer.Answer = answer;
-                    videoTimeCodeAnswer.CorrectCount = correctCount;
                     videoTimeCodeAnswerUpdates.Add(videoTimeCodeAnswer);
                 }
             }
