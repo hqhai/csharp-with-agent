@@ -126,7 +126,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
                 }
                 else if (videoTimeCodeAnswer != null && item.Answer != null && question.Config != null)
                 {
-                    videoTimeCodeAnswer.CorrectCount = _answerTypeCountConverter.GetTotalCorrectByAsnwerType(item.Answer, question.Config, question.QuestionType);
+                    videoTimeCodeAnswer.Answer = answer;
                     videoTimeCodeAnswerUpdates.Add(videoTimeCodeAnswer);
                 }
             }
