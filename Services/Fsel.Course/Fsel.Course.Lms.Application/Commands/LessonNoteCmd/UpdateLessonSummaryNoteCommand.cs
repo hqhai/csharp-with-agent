@@ -14,17 +14,17 @@ namespace Fsel.Course.Lms.Application.Commands.LessonNoteCmd
     public class UpdateLessonSummaryNoteCommand : IRequest<MethodResult<bool>>
     {
         public Guid Id { get; set; }
+
+        public string? SummaryNote { get; set; }
     }
 
     public class UpdateLessonSummaryNoteCommandHandel : IRequestHandler<UpdateLessonSummaryNoteCommand, MethodResult<bool>>
     {
         private readonly ILessonResultRepository _lessonResultRepository;
-        private readonly IMapper _mapper;
 
-        public UpdateLessonSummaryNoteCommandHandel(ILessonResultRepository lessonResultRepository, IMapper mapper)
+        public UpdateLessonSummaryNoteCommandHandel(ILessonResultRepository lessonResultRepository)
         {
             _lessonResultRepository = lessonResultRepository;
-            _mapper = mapper;
         }
 
         public async Task<MethodResult<bool>> Handle(UpdateLessonSummaryNoteCommand request, CancellationToken cancellationToken)
@@ -39,12 +39,6 @@ namespace Fsel.Course.Lms.Application.Commands.LessonNoteCmd
                                                 nameof(request.Id), request.Id);
                 return methodResult;
             }
-            /*if (!lessonResult.IsValid())
-            {
-                methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                methodResult.AddResultFromErrorList(lessonResult.ErrorMessages);
-                return methodResult;
-            }*/
             await _lessonResultRepository.ExecuteTransactionAsync(async () =>
             {
                 var result = _lessonResultRepository.Update(lessonResult);
