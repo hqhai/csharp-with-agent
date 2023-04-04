@@ -31,12 +31,7 @@ namespace Fsel.Course.Application.Queries.LessonQuery
         {
             MethodResult<LessonModel> methodResult = new MethodResult<LessonModel>();
             ArgumentNullException.ThrowIfNull(request);
-            var lesson = await _lessonRepository.Queryable
-                    .Include(x => x.UnitLessons.Where(n => !n.IsDeleted))
-                    .Include(x => x.LessonInstructions.Where(n => !n.IsDeleted))
-                    .Include(x => x.LessonVideos.Where(n => !n.IsDeleted))
-                    .ThenInclude(x => x.Video)
-                    .FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken: cancellationToken);
+            var lesson = await _lessonRepository.GetIncludeByIdAsync(request.Id);
 
             if (lesson == null)
             {
