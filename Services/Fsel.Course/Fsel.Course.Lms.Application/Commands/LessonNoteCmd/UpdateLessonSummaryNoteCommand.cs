@@ -9,7 +9,6 @@ namespace Fsel.Course.Lms.Application.Commands.LessonNoteCmd
     using Fsel.Course.Domain.IRepositories;
     using MediatR;
     using Microsoft.AspNetCore.Http;
-    using Microsoft.EntityFrameworkCore;
 
     public class UpdateLessonSummaryNoteCommand : IRequest<MethodResult<bool>>
     {
@@ -36,8 +35,7 @@ namespace Fsel.Course.Lms.Application.Commands.LessonNoteCmd
 
             if (lessonResult == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumLessonResultErrorCode.SummaryNull),
-                                                nameof(request.LessonResultId), request.LessonResultId);
+                methodResult.AddErrorBadRequest(nameof(EnumLessonResultErrorCode.LessonResultsDoesNotExist), nameof(request.LessonResultId), request.LessonResultId);
                 return methodResult;
             }
             await _lessonResultRepository.ExecuteTransactionAsync(async () =>

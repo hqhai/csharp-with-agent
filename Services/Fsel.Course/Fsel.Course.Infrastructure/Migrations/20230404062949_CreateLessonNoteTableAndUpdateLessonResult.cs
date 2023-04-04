@@ -11,6 +11,10 @@ namespace Fsel.Course.Infrastructure.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropColumn(
+                name: "TeacherId",
+                table: "Lessons");
+
             migrationBuilder.AddColumn<string>(
                 name: "SummaryNote",
                 table: "LessonResults",
@@ -63,6 +67,12 @@ namespace Fsel.Course.Infrastructure.Migrations
             migrationBuilder.DropColumn(
                 name: "SummaryNote",
                 table: "LessonResults");
+
+            migrationBuilder.AddColumn<Guid>(
+                name: "TeacherId",
+                table: "Lessons",
+                type: "uniqueidentifier",
+                nullable: true);
         }
     }
 }
