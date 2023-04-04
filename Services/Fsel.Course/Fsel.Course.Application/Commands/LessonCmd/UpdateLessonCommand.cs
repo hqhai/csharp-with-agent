@@ -108,20 +108,6 @@ namespace Fsel.Course.Application.Commands.LessonCmd
                 return methodResult;
             }
 
-            if (_videoRepository.IsIdsInValid(request.VideoIds))
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumVideoErrorCode.VideoNotCorrect));
-
-                return methodResult;
-            }
-
-            if (_lessonInstructionRepository.IsIdsInValid(request.LessonIntructions.Select(x => x.Id).ToList()))
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumLessonInstructionErrorCode.LessonInstructionsNull));
-
-                return methodResult;
-            }
-
             if (_classForumRepository.IsIdsInValid(new List<Guid> { request.ClassForumId }))
             {
                 methodResult.AddErrorBadRequest(nameof(EnumClassForumErrorCode.ClassForumNull));
@@ -129,6 +115,13 @@ namespace Fsel.Course.Application.Commands.LessonCmd
             }
 
             if (_homeWorkRepository.IsIdsInValid(request.HomeWorkIds))
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumHomeWorkErrorCode.HomeWorksNull));
+
+                return methodResult;
+            }
+
+            if (_lessonInstructionRepository.IsIdsInValid(request.LessonIntructions.Select(x => x.Id).ToList()))
             {
                 methodResult.AddErrorBadRequest(nameof(EnumHomeWorkErrorCode.HomeWorksNull));
 

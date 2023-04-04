@@ -57,7 +57,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
                 return methodResult;
             }
 
-            var lesson = await _lessonRepository.GetIncludeVideoByIdAsync(request.LessonId);
+            var lesson = await _lessonRepository.GetIncludeByIdAsync(request.LessonId);
             if (lesson == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumLessonErrorCode.LessonNotExist));

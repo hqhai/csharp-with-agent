@@ -49,6 +49,10 @@ namespace Fsel.Course.Application.Queries.LessonQuery
                      .ThenInclude(x => x.Video)
                      .ThenInclude(x => x!.VideoTimeCodes.Where(y => !y.IsDeleted && y.Video != null))
                      .Where(x => !request.CourseLevel.HasValue || x.CourseLevel == request.CourseLevel)
+                     .Where(x => !request.TeacherId.HasValue || x.LessonVideos.Where(y => y.Video != null)
+                                                                             .Select(y => y.Video)
+                                                                             .Select(x => x!.TeacherId)
+                                                                             .Contains(request.TeacherId))
                      .Where(x => !request.TimeCodeType.HasValue || x.LessonVideos.Where(y => y.Video != null)
                                                                                   .Select(y => y.Video)
                                                                                   .SelectMany(y => y!.VideoTimeCodes)
@@ -61,6 +65,8 @@ namespace Fsel.Course.Application.Queries.LessonQuery
                          Id = x.Id,
                          Name = x.Name,
                          CourseLevel = x.CourseLevel,
+                         TeacherId = x.LessonVideos.Where(y => y.Video != null)
+                                                      .Select(y => y.Video).Select(x => x!.TeacherId).FirstOrDefault(),
                          TimeCodeType = x.LessonVideos.Where(y => y.Video != null)
                                                       .Select(y => y.Video)
                                                       .SelectMany(y => y!.VideoTimeCodes)
@@ -73,7 +79,7 @@ namespace Fsel.Course.Application.Queries.LessonQuery
                          CreatedDate = x.CreatedDate,
                          UpdatedDate = x.UpdatedDate,
                          UpdatedFullName = x.UpdatedFullName,
-                         IsActive = !x.LessonVideos.Any()
+                         IsActive = x.LessonVideos.Any()
                      });
 
             //Keyword

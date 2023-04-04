@@ -8,9 +8,5 @@ namespace Fsel.Course.Domain.IRepositories
     public interface ILessonRepository : IRepository<Lesson>
     {
         Task<bool> IsLessonUsed(Guid id);
-
-        Task<Lesson?> GetIncludeVideoByIdAsync(Guid id);
-
-        Task<Lesson?> GetIncludeBysIdAsync(Guid id);
     }
 }
