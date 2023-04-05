@@ -46,7 +46,9 @@ namespace Fsel.Course.Application.Commands.HomeWorkCmd
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<HomeWorkModel> methodResult = new MethodResult<HomeWorkModel>();
-            var homeWork = await _homeWorkRepository.GetByIdAsync(request.Id);
+            var homeWork = await _homeWorkRepository.Queryable
+                            .Include(x => x.HomeWorkQuestions)
+                            .FirstOrDefaultAsync(e => e.Id == request.Id, cancellationToken: cancellationToken);
             if (homeWork == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumHomeWorkErrorCode.HomeWorksNull),
