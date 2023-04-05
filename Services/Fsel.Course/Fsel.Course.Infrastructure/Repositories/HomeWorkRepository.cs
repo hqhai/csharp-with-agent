@@ -34,7 +34,7 @@ namespace Fsel.Course.Infrastructure.Repositories
                         Name = x.Name,
                         Code = x.Code,
                         MediaPost = x.MediaPost,
-                        IsActive = x.IsActive,
+                        IsActive = x.LessonHomeWorks.Any(),
                         CourseLevel = x.CourseLevel,
                         CourseSkill = x.CourseSkill,
                         Questions = x.HomeWorkQuestions.Where(m => m.Question != null).Select(m => m.Question).Select(m => new QuestionModel()

@@ -29,8 +29,6 @@ namespace Fsel.Course.Domain.Entities
         /// </summary>
         public string? MediaPost { get; set; }
 
-        public bool IsActive { get; set; }
-
         /// <summary>
         /// Trình độ Level
         /// </summary>

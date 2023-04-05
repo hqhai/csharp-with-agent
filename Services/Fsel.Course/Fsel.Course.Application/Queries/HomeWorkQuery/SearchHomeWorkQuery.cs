@@ -43,6 +43,7 @@ namespace Fsel.Course.Application.Queries.HomeWorkQuery
                 Name = x.Name,
                 CreatedFullName = x.CreatedFullName,
                 CreatedDate = x.CreatedDate,
+                IsActive = x.LessonHomeWorks.Any()
             });
             //Keyword
             if (!string.IsNullOrEmpty(request.Keyword))
