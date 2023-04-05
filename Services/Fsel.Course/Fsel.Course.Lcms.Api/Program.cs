@@ -41,6 +41,8 @@ builder.Services.AddScoped<ICourseClassStudentRepository, CourseClassStudentRepo
 builder.Services.AddScoped<ICourseResultRepository, CourseResultRepository>();
 builder.Services.AddScoped<IQuestionFormRepository, QuestionFormRepository>();
 builder.Services.AddScoped<ILessonInstructionRepository, LessonInstructionRepository>();
+builder.Services.AddScoped<IHomeWorkRepository, HomeWorkRepository>();
+builder.Services.AddScoped<IHomeWorkQuestionRepository, HomeWorkQuestionRepository>();
 
 builder.Services.AddScoped<QuestionTypeConverter>();
 builder.Services.AddScoped<QuestionTypeCountConverter>();

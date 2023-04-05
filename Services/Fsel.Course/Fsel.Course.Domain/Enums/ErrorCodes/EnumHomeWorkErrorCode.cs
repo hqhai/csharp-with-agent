@@ -8,5 +8,10 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         /// HomeWorks null
         /// </summary>
         HomeWorksNull,
+
+        /// <summary>
+        /// Home work is Used
+        /// </summary>
+        HomeWorkUsed
     }
 }
