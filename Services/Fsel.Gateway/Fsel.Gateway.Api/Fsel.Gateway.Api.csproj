@@ -16,8 +16,4 @@
     <Folder Include="Controllers\" />
   </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\..\Shared\Fsel.Core\Fsel.Core.csproj" />
-  </ItemGroup>
-
 </Project>
