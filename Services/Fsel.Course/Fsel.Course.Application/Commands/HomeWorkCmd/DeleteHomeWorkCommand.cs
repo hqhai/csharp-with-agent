@@ -40,6 +40,13 @@ namespace Fsel.Course.Application.Commands.HomeWorkCmd
                                                nameof(request.Id), request.Id);
                 return methodResult;
             }
+            var isHomeWorkUsed = await _homeWorkRepository.IsHomeWorkUsed(request.Id);
+            if (isHomeWorkUsed)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumHomeWorkErrorCode.HomeWorkUsed), nameof(request.Id), request.Id);
+                return methodResult;
+            }
+
             await _homeWorkRepository.ExecuteTransactionAsync(async () =>
             {
                 var result = await _homeWorkRepository.DeleteAsync(homeWork);

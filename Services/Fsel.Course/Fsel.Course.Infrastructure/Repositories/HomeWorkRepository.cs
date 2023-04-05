@@ -14,6 +14,13 @@ namespace Fsel.Course.Infrastructure.Repositories
         {
         }
 
+        public async Task<bool> IsHomeWorkUsed(Guid? id)
+        {
+            return await Queryable
+                 .Include(x => x.HomeWorkQuestions.Where(n => !n.IsDeleted))
+                 .AnyAsync(x => x.Id == id && x.HomeWorkQuestions.Count > 0);
+        }
+
         public async Task<HomeWorkModel?> GetIncludeAllAsync(Guid? id)
         {
             try

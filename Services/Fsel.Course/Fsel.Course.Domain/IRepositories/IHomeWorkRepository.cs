@@ -8,6 +8,8 @@ namespace Fsel.Course.Domain.IRepositories
 {
     public interface IHomeWorkRepository : IRepository<HomeWork>
     {
+        Task<bool> IsHomeWorkUsed(Guid? id);
+
         Task<HomeWorkModel?> GetIncludeAllAsync(Guid? id);
     }
 }
