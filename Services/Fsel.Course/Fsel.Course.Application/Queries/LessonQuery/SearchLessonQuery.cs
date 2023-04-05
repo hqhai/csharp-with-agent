@@ -71,19 +71,21 @@ namespace Fsel.Course.Application.Queries.LessonQuery
                          IsActive = x.LessonVideos.Any()
                      });
 
-            //Keyword
             if (!string.IsNullOrEmpty(request.Keyword))
             {
                 lessonQuery = lessonQuery.Where(m => m.Id.ToString() == request.Keyword || (m.Name ?? string.Empty).Contains(request.Keyword));
             }
+
             if (request.TeacherId != null)
             {
                 lessonQuery = lessonQuery.Where(m => m.TeacherId == request.TeacherId);
             }
+
             if (request.CourseLevel != null)
             {
                 lessonQuery = lessonQuery.Where(m => m.CourseLevel == request.CourseLevel);
             }
+
             if (request.TimeCodeType != null)
             {
                 lessonQuery = lessonQuery.Where(m => m.TimeCodeType == request.TimeCodeType);
