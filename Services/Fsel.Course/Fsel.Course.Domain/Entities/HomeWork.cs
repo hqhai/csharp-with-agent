@@ -4,8 +4,6 @@ using System.ComponentModel.DataAnnotations;
 using Fsel.Common.Enums;
 using Fsel.Common.Enums.ErrorCodes;
 using Fsel.Core.Entities;
-using Fsel.Course.Domain.Enums;
-using Fsel.Course.Domain.Enums.ErrorCodes;
 
 namespace Fsel.Course.Domain.Entities
 {
@@ -19,9 +17,12 @@ namespace Fsel.Course.Domain.Entities
         public string? Name { get; set; }
 
         /// <summary>
-        ///  Nội dung bài tập
+        ///  Code
         /// </summary>
-        public string? InstructionContent { get; set; }
+        ///
+        [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
+        [MaxLength(250, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
+        public string? Code { get; set; }
 
         /// <summary>
         /// Media Post

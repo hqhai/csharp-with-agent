@@ -1,0 +1,53 @@
+// Copyright (c) Atlantic. All rights reserved.
+
+namespace Fsel.Course.Application.Commands.HomeWorkCmd
+{
+    using System.Threading;
+    using System.Threading.Tasks;
+    using Fsel.Common.ActionResults;
+    using Fsel.Course.Domain.Enums.ErrorCodes;
+    using Fsel.Course.Domain.IRepositories;
+    using Fsel.Course.Infrastructure.Repositories;
+    using MediatR;
+    using Microsoft.AspNetCore.Http;
+
+    public class DeleteHomeWorkCommand : IRequest<MethodResult<bool>>
+    {
+        public Guid Id { get; set; }
+    }
+
+    public class DeleteHomeWorkCommandHandler : IRequestHandler<DeleteHomeWorkCommand, MethodResult<bool>>
+    {
+        private readonly IHomeWorkRepository _homeWorkRepository;
+
+        public DeleteHomeWorkCommandHandler(IHomeWorkRepository homeWorkRepository)
+        {
+            _homeWorkRepository = homeWorkRepository;
+        }
+
+        public async Task<MethodResult<bool>> Handle(DeleteHomeWorkCommand request, CancellationToken cancellationToken)
+        {
+            ArgumentNullException.ThrowIfNull(request);
+            MethodResult<bool> methodResult = new MethodResult<bool>();
+
+            var homeWork = await _homeWorkRepository.GetByIdAsync(request.Id);
+            if (homeWork == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumHomeWorkErrorCode.HomeWorksNull),
+                                               nameof(request.Id), request.Id);
+                return methodResult;
+            }
+            await _homeWorkRepository.ExecuteTransactionAsync(async () =>
+            {
+                var result = await _homeWorkRepository.DeleteAsync(homeWork);
+                await _homeWorkRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+
+                methodResult.StatusCode = StatusCodes.Status200OK;
+                methodResult.Result = result;
+                return methodResult;
+            });
+
+            return methodResult;
+        }
+    }
+}

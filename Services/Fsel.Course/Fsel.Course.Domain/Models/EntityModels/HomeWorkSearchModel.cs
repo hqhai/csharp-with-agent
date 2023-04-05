@@ -1,14 +1,13 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-using Fsel.Common.Enums.ErrorCodes;
-using Fsel.Common.Enums;
-using System.ComponentModel.DataAnnotations;
-using Fsel.Core.Base.BaseModels;
-using Fsel.Course.Domain.Entities;
-
 namespace Fsel.Course.Domain.Models.EntityModels
 {
-    public class HomeWorkModel : BaseModel
+    using System.Collections.Generic;
+    using Fsel.Common.Enums;
+    using Fsel.Core.Base.BaseModels;
+    using Fsel.Course.Domain.Entities;
+
+    public class HomeWorkSearchModel : BaseModel
     {
         public string? Name { get; set; }
 
