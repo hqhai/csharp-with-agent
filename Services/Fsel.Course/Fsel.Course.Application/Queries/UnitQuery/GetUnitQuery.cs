@@ -28,6 +28,8 @@ namespace Fsel.Course.Application.Queries.UnitQuery
 
         public async Task<MethodResult<UnitModel>> Handle(GetUnitQuery request, CancellationToken cancellationToken)
         {
+            ArgumentNullException.ThrowIfNull(request);
+
             MethodResult<UnitModel> methodResult = new MethodResult<UnitModel>();
 
             var unit = await _unitRepository.GetIncludeByIdAsync(request.Id);
