@@ -8,64 +8,99 @@ namespace Fsel.Course.Infrastructure.Common
 
     public class QuestionTypeConverter
     {
-        public object? QuestionTypeConverterObject(EnumQuestionType type, object? config)
+        public object? QuestionTypeConverterObject(EnumQuestionType type, object? config, bool isShowOutcome = false)
         {
             switch (type)
             {
                 case EnumQuestionType.Multichoice:
                 case EnumQuestionType.Dropdown:
                 case EnumQuestionType.Checklist:
-                    return ClearAnswerTypeMutipleChoiQuestion(config);
+                    var multichoice = config.Deserialize<MutipleChoiceQuestion>();
+                    if (isShowOutcome)
+                    {
+                        return multichoice;
+                    }
+                    return ClearAnswerTypeMutipleChoiQuestion(multichoice);
 
                 case EnumQuestionType.Listing:
-                    return ClearAnswerTypeListingQuestion(config);
+                    var listingQuestion = config.Deserialize<ListingQuestion>();
+                    if (isShowOutcome)
+                    {
+                        return listingQuestion;
+                    }
+                    return ClearAnswerTypeListingQuestion(listingQuestion);
 
                 case EnumQuestionType.MatchingType1:
                 case EnumQuestionType.MatchingType2:
-                    return ClearAnswerTypeMaschingQuestion(config);
+                    var matchingTypeQuestion = config.Deserialize<MatchingTypeQuestion>();
+                    if (isShowOutcome)
+                    {
+                        return matchingTypeQuestion;
+                    }
+                    return ClearAnswerTypeMaschingQuestion(matchingTypeQuestion);
 
                 case EnumQuestionType.ShortAnswerWordBase:
-                    return ClearAnswerTypeShortBaseQuestion(config);
+                    var shortAnswerQuestionWordBaseQuestion = config.Deserialize<ShortAnswerQuestionWordBaseQuestion>();
+                    if (isShowOutcome)
+                    {
+                        return shortAnswerQuestionWordBaseQuestion;
+                    }
+                    return ClearAnswersShortAnswer(shortAnswerQuestionWordBaseQuestion);
 
                 case EnumQuestionType.ShortAnswerWordCount:
-                    return ClearAnswerTypeShortCountQuestion(config);
+                    var shortAnswerWordCount = config.Deserialize<ShortAnswerQuestionWordCountBaseQuestion>();
+                    if (isShowOutcome)
+                    {
+                        return shortAnswerWordCount;
+                    }
+                    return ClearAnswerTypeShortCountQuestion(shortAnswerWordCount);
 
                 case EnumQuestionType.GapFillScoreByQuestion:
                 case EnumQuestionType.GapFillWordBankScoreByQuestion:
                 case EnumQuestionType.GapFillWordBankScoreByGap:
                 case EnumQuestionType.GapFillScoreByGap:
-                    return ClearAnswerTypeGapFillQuestion(config);
+                    var gapFillQuestion = config.Deserialize<GapFillQuestion>();
+                    if (isShowOutcome)
+                    {
+                        return gapFillQuestion;
+                    }
+                    return ClearAnswerTypeGapFillQuestion(gapFillQuestion);
 
                 case EnumQuestionType.DragAndDropSentenceOrder:
-                    return ClearAnswerTypeDragDropOrderQuestion(config);
+                    var dragAndDropSentenceOrderQuestion = config.Deserialize<DragAndDropSentenceOrderQuestion>();
+                    if (isShowOutcome)
+                    {
+                        return dragAndDropSentenceOrderQuestion;
+                    }
+                    return ClearAnswerTypeDragDropOrderQuestion(dragAndDropSentenceOrderQuestion);
 
                 case EnumQuestionType.DragAndDropPicture:
-                    return ClearAnswerTypeDragDropPictureQuestion(config);
+                    var dragAndDropPictureQuestion = config.Deserialize<DragAndDropPictureQuestion>();
+                    if (isShowOutcome)
+                    {
+                        return dragAndDropPictureQuestion;
+                    }
+                    return ClearAnswerTypeDragDropPictureQuestion(dragAndDropPictureQuestion);
 
                 case EnumQuestionType.MultipleOptionSentenceCompletion:
-                    return ClearAnswerTypeMultipleOptionQuestion(config);
+                    var multipleOption = config.Deserialize<MultipleOptionSentenceCompletionQuestion>();
+                    if (isShowOutcome)
+                    {
+                        return multipleOption;
+                    }
+                    return ClearAnswers(multipleOption);
 
                 case EnumQuestionType.ExercisePreparation:
-                    return ClearAnswerTypeExercisePreparationQuestion(config);
+                    var data = config.Deserialize<ExercisePreparationQuestion>();
+                    return data;
 
                 default:
                     throw new ArgumentException("Invalid question type");
             }
         }
 
-        private static object? ClearAnswerTypeExercisePreparationQuestion(object? config)
+        private static object? ClearAnswers(MultipleOptionSentenceCompletionQuestion? data)
         {
-            var data = config.Deserialize<ExercisePreparationQuestion>();
-            if (data != null)
-            {
-                return data;
-            }
-            return null;
-        }
-
-        private static object? ClearAnswerTypeMultipleOptionQuestion(object? config)
-        {
-            var data = config.Deserialize<MultipleOptionSentenceCompletionQuestion>();
             if (data != null && data.Contents != null)
             {
                 foreach (var item in data.Contents)
@@ -78,75 +113,63 @@ namespace Fsel.Course.Infrastructure.Common
                         });
                     }
                 }
-                return data;
             }
-            return null;
+            return data;
         }
 
-        private static object? ClearAnswerTypeShortBaseQuestion(object? config)
+        private static object? ClearAnswersShortAnswer(ShortAnswerQuestionWordBaseQuestion? data)
         {
-            var data = config.Deserialize<ShortAnswerQuestionWordBaseQuestion>();
             if (data != null)
             {
                 data.Content = null;
-                return data;
             }
-            return null;
+            return data;
         }
 
-        private static object? ClearAnswerTypeListingQuestion(object? config)
+        private static object? ClearAnswerTypeListingQuestion(ListingQuestion? data)
         {
-            var data = config.Deserialize<ListingQuestion>();
             if (data != null)
             {
                 data.ExactWordCount = null;
-                return data;
             }
-            return null;
+            return data;
         }
 
-        private static object? ClearAnswerTypeMutipleChoiQuestion(object? config)
+        private static object? ClearAnswerTypeMutipleChoiQuestion(MutipleChoiceQuestion? data)
         {
-            var data = config.Deserialize<MutipleChoiceQuestion>();
             if (data != null && data.Contents != null)
             {
                 for (int i = data.Contents.Count - 1; i >= 0; i--)
                 {
                     data.Contents[i].IsCorrect = default;
                 }
-                return data;
             }
-            return null;
+            return data;
         }
 
-        private static object? ClearAnswerTypeShortCountQuestion(object? config)
+        private static object? ClearAnswerTypeShortCountQuestion(ShortAnswerQuestionWordCountBaseQuestion? data)
         {
-            var data = config.Deserialize<ShortAnswerQuestionWordCountBaseQuestion>();
             if (data != null)
             {
                 data.ExactWordCount = null;
-                return data;
             }
-            return null;
+            return data;
         }
 
-        private static object? ClearAnswerTypeMaschingQuestion(object? config)
+        private static object? ClearAnswerTypeMaschingQuestion(MatchingTypeQuestion? data)
         {
-            var data = config.Deserialize<MatchingTypeQuestion>();
             if (data != null && data.Link != null)
             {
                 for (int i = data.Link.Count - 1; i >= 0; i--)
                 {
                     data.Link.RemoveAt(i);
                 }
-                return data;
             }
-            return null;
+            return data;
         }
 
-        private static object? ClearAnswerTypeGapFillQuestion(object? config)
+        private static object? ClearAnswerTypeGapFillQuestion(GapFillQuestion? data)
         {
-            var data = config.Deserialize<GapFillQuestion>();
             if (data != null && data.Contents != null)
             {
                 foreach (var item in data.Contents)
@@ -156,14 +179,12 @@ namespace Fsel.Course.Infrastructure.Common
                         item?.Words?.Remove(y);
                     });
                 }
-                return data;
             }
-            return null;
+            return data;
         }
 
-        private static object? ClearAnswerTypeDragDropOrderQuestion(object? config)
+        private static object? ClearAnswerTypeDragDropOrderQuestion(DragAndDropSentenceOrderQuestion? data)
         {
-            var data = config.Deserialize<DragAndDropSentenceOrderQuestion>();
             if (data != null && data.Contents != null)
             {
                 foreach (var item in data.Contents)
@@ -173,14 +194,12 @@ namespace Fsel.Course.Infrastructure.Common
                         item?.Words?.Remove(y);
                     });
                 }
-                return data;
             }
-            return null;
+            return data;
         }
 
-        private static object? ClearAnswerTypeDragDropPictureQuestion(object? config)
+        private static object? ClearAnswerTypeDragDropPictureQuestion(DragAndDropPictureQuestion? data)
         {
-            var data = config.Deserialize<DragAndDropPictureQuestion>();
             if (data != null && data.Contents != null)
             {
                 foreach (var item in data.Contents)
@@ -190,9 +209,8 @@ namespace Fsel.Course.Infrastructure.Common
                         y.Content = null;
                     });
                 }
-                return data;
             }
-            return null;
+            return data;
         }
     }
 }
