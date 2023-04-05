@@ -93,6 +93,6 @@ namespace Fsel.Course.Application.Queries.CourseQuery
 
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
-        }
+        } 
     }
 }
