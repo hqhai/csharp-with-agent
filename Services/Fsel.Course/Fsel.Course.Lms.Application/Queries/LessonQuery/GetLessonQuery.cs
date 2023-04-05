@@ -4,6 +4,7 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
 {
     using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Core.Base;
     using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
@@ -13,18 +14,22 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
 
     public class GetLessonQuery : IRequest<MethodResult<LessonModel>>
     {
-        public Guid Id { get; set; }
+        public Guid LessonId { get; set; }
+        public Guid CourseId { get; set; }
+        public Guid UnitId { get; set; }
     }
 
     public class GetLessonQueryHandler : IRequestHandler<GetLessonQuery, MethodResult<LessonModel>>
     {
         private readonly IMapper _mapper;
         private readonly ILessonRepository _lessonRepository;
+        private readonly AuthContext _authContext;
 
-        public GetLessonQueryHandler(IMapper mapper, ILessonRepository lessonRepository)
+        public GetLessonQueryHandler(IMapper mapper, ILessonRepository lessonRepository, AuthContext authContext)
         {
             _mapper = mapper;
             _lessonRepository = lessonRepository;
+            _authContext = authContext;
         }
 
         public async Task<MethodResult<LessonModel>> Handle(GetLessonQuery request, CancellationToken cancellationToken)
@@ -36,13 +41,15 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
                             .Include(x => x.LessonInstructions.Where(y => !y.IsDeleted))
                             .Include(x => x.LessonVideos.Where(y => !y.IsDeleted))
                             .ThenInclude(x => x.Video)
-                            .FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
+                            .Include(x => x.LessonResults)
+                            .FirstOrDefaultAsync(cancellationToken: cancellationToken);
 
             if (lesson == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumLessonErrorCode.LessonNotExist), nameof(request.Id), request.Id);
+                methodResult.AddErrorBadRequest(nameof(EnumLessonErrorCode.LessonNotExist), nameof(request.LessonId), request.LessonId);
                 return methodResult;
             }
+            lesson.LessonResults = lesson.LessonResults.Where(y => y.LessonId == request.LessonId && y.CourseId == request.CourseId && y.UnitId == request.UnitId && y.StudentId == _authContext.CurrentUserId).ToList();
 
             var lessonModel = _mapper.Map<LessonModel>(lesson);
             lessonModel.Video = _mapper.Map<VideoModel>(lesson.LessonVideos.Select(x => x.Video).Where(x => x != null && !x.IsDeleted).FirstOrDefault());

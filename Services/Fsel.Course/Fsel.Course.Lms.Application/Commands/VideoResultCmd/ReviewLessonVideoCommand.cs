@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Course.Lms.Application.Commands.VideoAnswerCmd
+namespace Fsel.Course.Lms.Application.Commands.VideoResultCmd
 {
     using AutoMapper;
     using Fsel.Common.ActionResults;
@@ -12,7 +12,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoAnswerCmd
     using MediatR;
     using Microsoft.AspNetCore.Http;
 
-    public class ReviewLessonVideoCommand : UpdateVideoResultCommandModel, IRequest<MethodResult<VideoResultModel>>
+    public class ReviewLessonVideoCommand : ReviewLessonVideoCommandModel, IRequest<MethodResult<VideoResultModel>>
     {
     }
 
@@ -32,20 +32,21 @@ namespace Fsel.Course.Lms.Application.Commands.VideoAnswerCmd
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<VideoResultModel> methodResult = new MethodResult<VideoResultModel>();
 
-            var videoResult = await _videoResultRepository.GetByIdAsync(request.Id);
+            var videoResult = await _videoResultRepository.GetByIdAsync(request.VideoResultId);
             if (videoResult == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumVideoResultErrorCode.VideoResultNotExist), nameof(request.Id), request.Id);
+                methodResult.AddErrorBadRequest(nameof(EnumVideoResultErrorCode.VideoResultNotExist), nameof(request.VideoResultId), request.VideoResultId);
                 return methodResult;
             }
-            videoResult = _mapper.Map(request, videoResult);
+            _mapper.Map(request, videoResult);
             videoResult.Status = EnumResultStatus.Done;
-
-            if (videoResult.IsValid())
+            //videoResult.Percent = (double)videoResult.CorrectCount / videoResult.CorrectTotal * 100;
+            if (!videoResult.IsValid())
             {
                 methodResult.AddErrorBadRequest(nameof(EnumVideoResultErrorCode.VideoResultValueError), nameof(request), request);
                 return methodResult;
             }
+
             await _videoResultRepository.ExecuteTransactionAsync(async () =>
             {
                 videoResult = _videoResultRepository.Update(videoResult);

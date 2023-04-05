@@ -13,7 +13,7 @@ namespace Fsel.Course.Infrastructure.Maps
         public VideoResultProfile()
         {
             CreateMap<VideoResult, VideoResultModel>().IgnoreAllNonExisting();
-            CreateMap<UpdateVideoResultCommandModel, VideoResult>().IgnoreAllNonExisting();
+            CreateMap<ReviewLessonVideoCommandModel, VideoResult>().IgnoreAllNonExisting();
         }
     }
 }

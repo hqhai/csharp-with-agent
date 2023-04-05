@@ -17,8 +17,11 @@ namespace Fsel.Course.Domain.Entities
         [Range(1, 100, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
         public double Percent
         {
-            get { return _percent; }
-            set { _percent = CorrectTotal > 0 ? (CorrectCount / CorrectTotal) : value; }
+            get
+            {
+                return CorrectTotal > 0 ? ((double)CorrectCount / CorrectTotal * 100) : _percent;
+            }
+            set { _percent = CorrectTotal > 0 ? ((double)CorrectCount / CorrectTotal * 100) : value; }
         }
 
         /// <summary>
