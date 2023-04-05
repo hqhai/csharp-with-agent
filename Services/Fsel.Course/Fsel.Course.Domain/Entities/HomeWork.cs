@@ -42,5 +42,7 @@ namespace Fsel.Course.Domain.Entities
         public EnumCourseSkill CourseSkill { get; set; }
 
         public ICollection<LessonHomeWork> LessonHomeWorks { get; set; } = new List<LessonHomeWork>();
+
+        public ICollection<HomeWorkQuestion> HomeWorkQuestions { get; set; } = new List<HomeWorkQuestion>();
     }
 }

@@ -48,6 +48,7 @@ namespace Fsel.Course.Infrastructure
         public DbSet<LessonNote> LessonNotes { get; set; }
         public DbSet<QuestionForm> QuestionForms { get; set; }
         public DbSet<LessonInstruction> LessonInstructions { get; set; }
+        public DbSet<HomeWorkQuestion> HomeWorkQuestions { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
