@@ -47,7 +47,6 @@ namespace Fsel.Course.Application.Queries.QuestionFormQuery
                                             Config = x.Config
                                         });
 
-            //Keyword
             if (!string.IsNullOrEmpty(request.Keyword))
             {
                 questionFormQuery = questionFormQuery.Where(m => m.Id.ToString() == request.Keyword || (m.Name ?? string.Empty).Contains(request.Keyword));

@@ -48,7 +48,6 @@ namespace Fsel.Course.Application.Queries.UnitQuery
                                     .ThenInclude(unitLesson => unitLesson.Lesson)
                                     .ThenInclude(lesson => lesson!.LessonVideos)
                                     .ThenInclude(lessonVideo => lessonVideo.Video)
-                                    .Where(x => x.CourseLevel == request.CourseLevel)
 
                             .Select(unit => new UnitSearchModel
                             {
@@ -67,13 +66,16 @@ namespace Fsel.Course.Application.Queries.UnitQuery
                                                 .Select(n => n!.TeacherId).FirstOrDefault(),
                             });
 
-            //Keyword
             if (!string.IsNullOrEmpty(request.Keyword))
             {
                 unitQuery = unitQuery.Where(m => m.Id.ToString() == request.Keyword || (m.Name ?? string.Empty).Contains(request.Keyword));
             }
 
-            //Keyword
+            if (request.CourseLevel != null)
+            {
+                unitQuery = unitQuery.Where(m => m.CourseLevel == request.CourseLevel);
+            }
+
             if (request.TeacherId.HasValue)
             {
                 unitQuery = unitQuery.Where(m => m.TeacherId == request.TeacherId.Value);
