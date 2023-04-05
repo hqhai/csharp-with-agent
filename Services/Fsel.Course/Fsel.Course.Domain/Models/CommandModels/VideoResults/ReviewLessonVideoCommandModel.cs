@@ -6,7 +6,7 @@ namespace Fsel.Course.Domain.Models.CommandModels.VideoResults
 
     public class ReviewLessonVideoCommandModel
     {
-        public Guid VideoResultId { get; set; }
+        public Guid LessonResulttId { get; set; }
         public double NumberOfStars { get; set; }
         public string? Feedback { get; set; }
     }

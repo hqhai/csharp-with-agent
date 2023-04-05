@@ -11,6 +11,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoResultCmd
     using Fsel.Course.Domain.Models.EntityModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
+    using Microsoft.EntityFrameworkCore;
 
     public class ReviewLessonVideoCommand : ReviewLessonVideoCommandModel, IRequest<MethodResult<VideoResultModel>>
     {
@@ -32,15 +33,14 @@ namespace Fsel.Course.Lms.Application.Commands.VideoResultCmd
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<VideoResultModel> methodResult = new MethodResult<VideoResultModel>();
 
-            var videoResult = await _videoResultRepository.GetByIdAsync(request.VideoResultId);
+            var videoResult = await _videoResultRepository.Queryable.FirstOrDefaultAsync(x => x.LessonResultId == request.LessonResulttId, cancellationToken: cancellationToken);
             if (videoResult == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumVideoResultErrorCode.VideoResultNotExist), nameof(request.VideoResultId), request.VideoResultId);
+                methodResult.AddErrorBadRequest(nameof(EnumVideoResultErrorCode.VideoResultNotExist), nameof(request.LessonResulttId), request.LessonResulttId);
                 return methodResult;
             }
             _mapper.Map(request, videoResult);
             videoResult.Status = EnumResultStatus.Done;
-            //videoResult.Percent = (double)videoResult.CorrectCount / videoResult.CorrectTotal * 100;
             if (!videoResult.IsValid())
             {
                 methodResult.AddErrorBadRequest(nameof(EnumVideoResultErrorCode.VideoResultValueError), nameof(request), request);
