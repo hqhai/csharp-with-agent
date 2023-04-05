@@ -10,6 +10,7 @@ namespace Fsel.Course.Application.Commands.HomeWorkCmd
     using Fsel.Course.Infrastructure.Repositories;
     using MediatR;
     using Microsoft.AspNetCore.Http;
+    using Microsoft.EntityFrameworkCore;
 
     public class DeleteHomeWorkCommand : IRequest<MethodResult<bool>>
     {
@@ -30,7 +31,9 @@ namespace Fsel.Course.Application.Commands.HomeWorkCmd
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<bool> methodResult = new MethodResult<bool>();
 
-            var homeWork = await _homeWorkRepository.GetByIdAsync(request.Id);
+            var homeWork = await _homeWorkRepository.Queryable
+                            .Include(x => x.HomeWorkQuestions)
+                            .FirstOrDefaultAsync(e => e.Id == request.Id, cancellationToken: cancellationToken);
             if (homeWork == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumHomeWorkErrorCode.HomeWorksNull),

@@ -18,5 +18,10 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         /// Question Config not is exist
         /// </summary>
         QuestionConfigNotIsExist,
+
+        /// <summary>
+        /// Question not is correct
+        /// </summary>
+        QusetionIdNotCorrect
     }
 }

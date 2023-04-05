@@ -13,7 +13,14 @@ namespace Fsel.Course.Infrastructure.Configs
             ArgumentNullException.ThrowIfNull(builder);
 
             builder.HasOne(a => a.HomeWork)
-                .WithMany(b => b.hom)
+                .WithMany(b => b.HomeWorkQuestions)
+                .HasForeignKey(a => a.HomeWork)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.HasOne(a => a.Question)
+                .WithMany(b => b.HomeWorkQuestions)
+                .HasForeignKey(a => a.Question)
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }
