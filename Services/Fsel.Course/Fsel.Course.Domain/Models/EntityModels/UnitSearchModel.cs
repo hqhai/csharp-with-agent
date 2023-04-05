@@ -10,13 +10,13 @@ namespace Fsel.Course.Domain.Models.EntityModels
     {
         public string? Name { get; set; }
 
-        public string? DisplayName { get; set; }
+        public string? Code { get; set; }
 
         public bool IsActive { get; set; }
 
-        public Guid? TeacherId { get; set; }
+        public IList<Guid>? TeacherIds { get; set; }
 
-        public string? TeacherName { get; set; }
+        public IList<string>? TeacherNames { get; set; }
 
         public EnumCourseLevel CourseLevel { get; set; }
     }

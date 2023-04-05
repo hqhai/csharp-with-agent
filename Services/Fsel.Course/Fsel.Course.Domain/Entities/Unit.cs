@@ -12,18 +12,18 @@ namespace Fsel.Course.Domain.Entities
     public class Unit : Entity
     {
         /// <summary>
+        /// Mã Unit
+        /// </summary>
+        [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
+        [MaxLength(250, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
+        public string? Code { get; set; }
+
+        /// <summary>
         /// Tên Unit
         /// </summary>
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         [MaxLength(250, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? Name { get; set; }
-
-        /// <summary>
-        /// Tên hiển thị
-        /// </summary>
-        [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
-        [MaxLength(250, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
-        public string? DisplayName { get; set; }
 
         /// <summary>
         /// Trình dộ Level

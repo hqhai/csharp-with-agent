@@ -20,6 +20,8 @@ namespace Fsel.Course.Infrastructure.Repositories
                 return await Queryable
                 .Include(x => x.UnitSkillMockTests.Where(n => !n.IsDeleted))
                 .Include(x => x.UnitLessons.Where(n => !n.IsDeleted))
+                .ThenInclude(x => x.Lesson)
+                .ThenInclude(x => x!.LessonInstructions.Where(n => !n.IsDeleted))
                 .FirstOrDefaultAsync(x => x.Id == id);
             }
             catch (Exception)
