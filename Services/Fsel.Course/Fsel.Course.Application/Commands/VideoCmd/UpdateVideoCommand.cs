@@ -62,18 +62,14 @@ namespace Fsel.Course.Application.Commands.VideoCmd
 
             #endregion Tạm thời không validate isTeacher
 
-            #region Tạm thời không validate VideoUsed
-
-            //var isVideoUsed = await _videoRepository.IsVideoUsed(request.Id);
-            //if (isVideoUsed)
-            //{
-            //    methodResult.AddErrorBadRequest(
-            //        nameof(EnumVideoErrorCode.VideoUsed),
-            //        nameof(request.Id), request.Id);
-            //    return methodResult;
-            //}
-
-            #endregion Tạm thời không validate VideoUsed
+            var isVideoUsed = await _videoRepository.IsVideoUsed(request.Id);
+            if (isVideoUsed)
+            {
+                methodResult.AddErrorBadRequest(
+                    nameof(EnumVideoErrorCode.VideoUsed),
+                    nameof(request.Id), request.Id);
+                return methodResult;
+            }
 
             var listTimeCodeType = request.VideoTimeCodes.Select(x => x.TimeCodeType).ToList();
 

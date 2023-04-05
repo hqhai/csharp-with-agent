@@ -24,6 +24,11 @@ namespace Fsel.Course.Infrastructure.Configs
               .WithMany(b => b.VideoTimeCodeAnswers)
               .HasForeignKey(b => b.ExerciseId)
               .OnDelete(DeleteBehavior.NoAction);
+
+            builder.HasOne(a => a.Question)
+                   .WithMany(b => b.VideoTimeCodeAnswers)
+                   .HasForeignKey(b => b.QuestionId)
+                   .OnDelete(DeleteBehavior.NoAction);
         }
     }
 }
