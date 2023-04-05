@@ -43,8 +43,6 @@ namespace Fsel.Course.Application.Queries.CourseQuery
 
             var courseQuery = _courseRepository.Queryable
                               .Include(course => course.CourseTeachers)
-                              .Where(x => request.CourseLevel == null || x.CourseLevel == request.CourseLevel)
-                              .Where(x => request.TeacherId == null || x.CourseTeachers.Select(n => n.TeacherId).Contains(request.TeacherId.Value))
                               .Select(course => new CourseSearchModel
                               {
                                   Id = course.Id,
@@ -62,10 +60,19 @@ namespace Fsel.Course.Application.Queries.CourseQuery
                                   TeacherIds = course.CourseTeachers.Select(x => x.TeacherId).Distinct().ToList(),
                               });
 
-            //Keyword
             if (!string.IsNullOrEmpty(request.Keyword))
             {
                 courseQuery = courseQuery.Where(m => m.Id.ToString() == request.Keyword || (m.Name ?? string.Empty).Contains(request.Keyword));
+            }
+
+            if (request.CourseLevel != null)
+            {
+                courseQuery = courseQuery.Where(m => m.CourseLevel == request.CourseLevel);
+            }
+
+            if (request.TeacherId != null)
+            {
+                courseQuery = courseQuery.Where(m => m.TeacherId == request.TeacherId);
             }
 
             int totalItem = await courseQuery.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);

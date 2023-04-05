@@ -44,7 +44,6 @@ namespace Fsel.Course.Application.Queries.VideoQuery
             }
             var videoQuery = _videoRepository.SearchAsync(request.TimeCodeType, request.TeacherId, request.Level);
 
-            //Keyword
             if (!string.IsNullOrEmpty(request.Keyword))
             {
                 videoQuery = videoQuery.Where(m => m.Id.ToString() == request.Keyword || (m.Name ?? string.Empty).Contains(request.Keyword));
