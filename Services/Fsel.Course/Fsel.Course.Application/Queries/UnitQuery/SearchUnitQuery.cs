@@ -63,7 +63,7 @@ namespace Fsel.Course.Application.Queries.UnitQuery
                                 TeacherIds = unit.UnitLessons.Select(l => l.Lesson)
                                                 .SelectMany(lv => lv!.LessonVideos)
                                                 .Select(v => v.Video)
-                                                .Select(n => n!.TeacherId ?? Guid.Empty).Distinct().ToList(),
+                                                .Select(n => n!.TeacherId ?? Guid.Empty).ToList(),
                             });
 
             if (!string.IsNullOrEmpty(request.Keyword))
@@ -89,7 +89,7 @@ namespace Fsel.Course.Application.Queries.UnitQuery
                     .ToListAsync(cancellationToken: cancellationToken)
                     .ConfigureAwait(false);
 
-            var teachers = await _userService.GetTeacherByIdsAsync(new GetTeacherByIdsQueryModel { Ids = unitQuery.SelectMany(x => x.TeacherIds!).ToList() });
+            var teachers = await _userService.GetTeacherByIdsAsync(new GetTeacherByIdsQueryModel { Ids = unitQuery.SelectMany(x => x.TeacherIds!).Distinct().ToList() });
             if (teachers.IsSuccessStatusCode)
             {
                 foreach (var item in lists)

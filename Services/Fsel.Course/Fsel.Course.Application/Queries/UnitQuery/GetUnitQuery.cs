@@ -45,6 +45,7 @@ namespace Fsel.Course.Application.Queries.UnitQuery
 
             var unitModel = _mapper.Map<UnitModel>(unit);
             unitModel.IsActive = unit.CourseUnitMockTests.Any();
+            unitModel.Lessons = _mapper.Map<IList<LessonModel>>(unit.UnitLessons.Select(x => x.Lesson));
 
             methodResult.Result = unitModel;
             methodResult.StatusCode = StatusCodes.Status200OK;
