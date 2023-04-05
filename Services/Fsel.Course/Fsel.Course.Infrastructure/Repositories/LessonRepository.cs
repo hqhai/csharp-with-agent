@@ -18,6 +18,7 @@ namespace Fsel.Course.Infrastructure.Repositories
             try
             {
                 return await Queryable.Include(e => e.UnitLessons.Where(n => !n.IsDeleted))
+                                 .Include(e => e.UnitLessons)
                                  .Include(e => e.ClassForum)
                                  .Include(x => x.LessonResults.Where(n => !n.IsDeleted))
                                  .Include(e => e.LessonHomeWorks.Where(n => !n.IsDeleted))
