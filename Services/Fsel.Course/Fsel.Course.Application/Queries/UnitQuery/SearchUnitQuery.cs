@@ -53,17 +53,17 @@ namespace Fsel.Course.Application.Queries.UnitQuery
                             {
                                 Id = unit.Id,
                                 Name = unit.Name,
-                                DisplayName = unit.DisplayName,
+                                Code = unit.Code,
                                 IsActive = unit.CourseUnitMockTests.Any(),
                                 CourseLevel = unit.CourseLevel,
                                 CreatedDate = unit.CreatedDate,
                                 CreatedUserId = unit.CreatedUserId,
                                 UpdatedDate = unit.UpdatedDate,
                                 UpdatedUserId = unit.UpdatedUserId,
-                                TeacherId = unit.UnitLessons.Select(l => l.Lesson)
+                                TeacherIds = unit.UnitLessons.Select(l => l.Lesson)
                                                 .SelectMany(lv => lv!.LessonVideos)
                                                 .Select(v => v.Video)
-                                                .Select(n => n!.TeacherId).FirstOrDefault(),
+                                                .Select(n => n!.TeacherId ?? Guid.Empty).ToList(),
                             });
 
             if (!string.IsNullOrEmpty(request.Keyword))
@@ -78,7 +78,7 @@ namespace Fsel.Course.Application.Queries.UnitQuery
 
             if (request.TeacherId.HasValue)
             {
-                unitQuery = unitQuery.Where(m => m.TeacherId == request.TeacherId.Value);
+                unitQuery = unitQuery.Where(m => m.TeacherIds != null && m.TeacherIds.Contains(request.TeacherId.Value));
             }
 
             int totalItem = await unitQuery.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
@@ -89,12 +89,12 @@ namespace Fsel.Course.Application.Queries.UnitQuery
                     .ToListAsync(cancellationToken: cancellationToken)
                     .ConfigureAwait(false);
 
-            var teachers = await _userService.GetTeacherByIdsAsync(new GetTeacherByIdsQueryModel { Ids = unitQuery.Select(x => x.TeacherId ?? Guid.Empty).ToList() });
+            var teachers = await _userService.GetTeacherByIdsAsync(new GetTeacherByIdsQueryModel { Ids = unitQuery.SelectMany(x => x.TeacherIds!).Distinct().ToList() });
             if (teachers.IsSuccessStatusCode)
             {
                 foreach (var item in lists)
                 {
-                    item.TeacherName = teachers.Content?.Result?.FirstOrDefault(x => x.Id == item.TeacherId)?.Human?.FullName;
+                    item.TeacherNames = teachers.Content?.Result?.Where(x => item.TeacherIds!.Contains(x.Id)).Select(x => x.Human?.FullName ?? string.Empty).ToList();
                 }
             }
 

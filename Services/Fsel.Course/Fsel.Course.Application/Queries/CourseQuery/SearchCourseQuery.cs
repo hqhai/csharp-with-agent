@@ -57,7 +57,7 @@ namespace Fsel.Course.Application.Queries.CourseQuery
                                   UpdatedDate = course.UpdatedDate,
                                   UpdatedUserId = course.UpdatedUserId,
                                   UpdatedFullName = course.UpdatedFullName,
-                                  TeacherId = course.CourseTeachers.Select(x => x.TeacherId).FirstOrDefault(),
+                                  TeacherIds = course.CourseTeachers.Select(x => x.TeacherId).ToList(),
                               });
 
             if (!string.IsNullOrEmpty(request.Keyword))
@@ -72,7 +72,7 @@ namespace Fsel.Course.Application.Queries.CourseQuery
 
             if (request.TeacherId != null)
             {
-                courseQuery = courseQuery.Where(m => m.TeacherId == request.TeacherId);
+                courseQuery = courseQuery.Where(m => m.TeacherIds != null && m.TeacherIds.Contains(request.TeacherId.Value));
             }
 
             int totalItem = await courseQuery.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
@@ -83,12 +83,12 @@ namespace Fsel.Course.Application.Queries.CourseQuery
                     .ToListAsync(cancellationToken: cancellationToken)
                     .ConfigureAwait(false);
 
-            var teachers = await _userService.GetTeacherByIdsAsync(new GetTeacherByIdsQueryModel { Ids = courseQuery.Select(x => x.TeacherId ?? Guid.Empty).ToList() });
+            var teachers = await _userService.GetTeacherByIdsAsync(new GetTeacherByIdsQueryModel { Ids = courseQuery.SelectMany(x => x.TeacherIds!).Distinct().ToList() });
             if (teachers.IsSuccessStatusCode)
             {
                 foreach (var item in lists)
                 {
-                    item.TeacherName = teachers.Content?.Result?.FirstOrDefault(x => x.Id == item.TeacherId)?.Human?.FullName;
+                    item.TeacherNames = teachers.Content?.Result?.Where(x => item.TeacherIds!.Contains(x.Id)).Select(x => x.Human?.FullName ?? string.Empty).ToList();
                 }
             }
 
