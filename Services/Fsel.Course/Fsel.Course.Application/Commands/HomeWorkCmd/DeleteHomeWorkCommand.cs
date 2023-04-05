@@ -33,6 +33,7 @@ namespace Fsel.Course.Application.Commands.HomeWorkCmd
 
             var homeWork = await _homeWorkRepository.Queryable
                             .Include(x => x.HomeWorkQuestions)
+                            .ThenInclude(x => x.Question)
                             .FirstOrDefaultAsync(e => e.Id == request.Id, cancellationToken: cancellationToken);
             if (homeWork == null)
             {

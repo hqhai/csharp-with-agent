@@ -1,10 +1,9 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-using Fsel.Common.Enums.ErrorCodes;
 using Fsel.Common.Enums;
-using System.ComponentModel.DataAnnotations;
 using Fsel.Core.Base.BaseModels;
 using Fsel.Course.Domain.Entities;
+using Fsel.Course.Domain.Models.CommandModels.Questions;
 
 namespace Fsel.Course.Domain.Models.EntityModels
 {
@@ -15,6 +14,8 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public string? Code { get; set; }
 
         public string? MediaPost { get; set; }
+
+        public IList<QuestionModel>? Questions { get; set; }
 
         public bool IsActive { get; set; }
 

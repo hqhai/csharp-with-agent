@@ -32,7 +32,7 @@ namespace Fsel.Course.Application.Queries.HomeWorkQuery
         {
             MethodResult<HomeWorkModel> methodResult = new MethodResult<HomeWorkModel>();
             ArgumentNullException.ThrowIfNull(request);
-            var homeWork = await _homeWorkRepository.GetByIdAsync(request.Id);
+            var homeWork = await _homeWorkRepository.GetIncludeAllAsync(request.Id);
             if (homeWork == null)
             {
                 methodResult.AddErrorBadRequest(
