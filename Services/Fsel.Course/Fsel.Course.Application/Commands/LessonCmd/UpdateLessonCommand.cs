@@ -53,6 +53,13 @@ namespace Fsel.Course.Application.Commands.LessonCmd
                 return methodResult;
             }
 
+            if (!lesson.IsValid())
+            {
+                methodResult.StatusCode = StatusCodes.Status400BadRequest;
+                methodResult.AddResultFromErrorList(lesson.ErrorMessages);
+                return methodResult;
+            }
+
             if (request.LessonInstructions == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumLessonInstructionErrorCode.LessonInstructionsNull), nameof(request.LessonInstructions));
@@ -112,13 +119,6 @@ namespace Fsel.Course.Application.Commands.LessonCmd
                 return methodResult;
             }
 
-            if (!lesson.IsValid())
-            {
-                methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                methodResult.AddResultFromErrorList(lesson.ErrorMessages);
-                return methodResult;
-            }
-
             #endregion Validation
 
             await _lessonRepository.ExecuteTransactionAsync(async () =>
@@ -135,7 +135,7 @@ namespace Fsel.Course.Application.Commands.LessonCmd
                 {
                     VideoId = x
                 }).ToList();
-                lesson.ClassForum = _mapper.Map<ClassForum>(request.ClassForum);
+                _mapper.Map(request.ClassForum, lesson.ClassForum);
                 lesson.LessonInstructions = _mapper.Map<IList<LessonInstruction>>(request.LessonInstructions);
                 _mapper.Map(request, lesson);
 
