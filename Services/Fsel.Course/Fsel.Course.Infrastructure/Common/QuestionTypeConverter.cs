@@ -8,95 +8,87 @@ namespace Fsel.Course.Infrastructure.Common
 
     public class QuestionTypeConverter
     {
-        public object? QuestionTypeConverterObject(EnumQuestionType type, object? config, bool isShowOutcome = false)
+        public (object?, int) QuestionTypeConverterObject(object? config, EnumQuestionType type, bool isShowCorrectTotal = false, bool isDisableAnswers = false)
         {
+            int totalCorrect = default;
+            object? result;
             switch (type)
             {
                 case EnumQuestionType.Multichoice:
                 case EnumQuestionType.Dropdown:
-                case EnumQuestionType.Checklist:
                     var multichoice = config.Deserialize<MutipleChoiceQuestion>();
-                    if (isShowOutcome)
-                    {
-                        return multichoice;
-                    }
-                    return ClearAnswerTypeMutipleChoiQuestion(multichoice);
+                    result = isDisableAnswers ? ClearAnswers(multichoice) : multichoice;
+                    totalCorrect = isShowCorrectTotal ? GetTotalCorrect() : default;
+                    break;
+
+                case EnumQuestionType.Checklist:
+                    var checklist = config.Deserialize<MutipleChoiceQuestion>();
+                    result = isDisableAnswers ? ClearAnswers(checklist) : checklist;
+                    totalCorrect = isShowCorrectTotal ? GetTotalCorrect(checklist) : default;
+                    break;
 
                 case EnumQuestionType.Listing:
                     var listingQuestion = config.Deserialize<ListingQuestion>();
-                    if (isShowOutcome)
-                    {
-                        return listingQuestion;
-                    }
-                    return ClearAnswerTypeListingQuestion(listingQuestion);
+                    result = isDisableAnswers ? ClearAnswers(listingQuestion) : listingQuestion;
+                    totalCorrect = isShowCorrectTotal ? GetTotalCorrect() : default;
+                    break;
 
                 case EnumQuestionType.MatchingType1:
                 case EnumQuestionType.MatchingType2:
+                case EnumQuestionType.DragAndDropPicture:
                     var matchingTypeQuestion = config.Deserialize<MatchingTypeQuestion>();
-                    if (isShowOutcome)
-                    {
-                        return matchingTypeQuestion;
-                    }
-                    return ClearAnswerTypeMaschingQuestion(matchingTypeQuestion);
+                    result = isDisableAnswers ? ClearAnswers(matchingTypeQuestion) : matchingTypeQuestion;
+                    totalCorrect = isShowCorrectTotal ? GetTotalCorrect(matchingTypeQuestion) : default;
+                    break;
 
                 case EnumQuestionType.ShortAnswerWordBase:
                     var shortAnswerQuestionWordBaseQuestion = config.Deserialize<ShortAnswerQuestionWordBaseQuestion>();
-                    if (isShowOutcome)
-                    {
-                        return shortAnswerQuestionWordBaseQuestion;
-                    }
-                    return ClearAnswersShortAnswer(shortAnswerQuestionWordBaseQuestion);
+                    result = isDisableAnswers ? ClearAnswers(shortAnswerQuestionWordBaseQuestion) : shortAnswerQuestionWordBaseQuestion;
+                    totalCorrect = isShowCorrectTotal ? GetTotalCorrect() : default;
+                    break;
 
                 case EnumQuestionType.ShortAnswerWordCount:
                     var shortAnswerWordCount = config.Deserialize<ShortAnswerQuestionWordCountBaseQuestion>();
-                    if (isShowOutcome)
-                    {
-                        return shortAnswerWordCount;
-                    }
-                    return ClearAnswerTypeShortCountQuestion(shortAnswerWordCount);
+                    result = isDisableAnswers ? ClearAnswers(shortAnswerWordCount) : shortAnswerWordCount;
+                    totalCorrect = isShowCorrectTotal ? GetTotalCorrect() : default;
+                    break;
 
                 case EnumQuestionType.GapFillScoreByQuestion:
                 case EnumQuestionType.GapFillWordBankScoreByQuestion:
+                    var gapFillQuestion = config.Deserialize<GapFillQuestion>();
+                    result = isDisableAnswers ? ClearAnswers(gapFillQuestion) : gapFillQuestion;
+                    totalCorrect = isShowCorrectTotal ? GetTotalCorrectBySubQuestion(gapFillQuestion) : default;
+                    break;
+
                 case EnumQuestionType.GapFillWordBankScoreByGap:
                 case EnumQuestionType.GapFillScoreByGap:
-                    var gapFillQuestion = config.Deserialize<GapFillQuestion>();
-                    if (isShowOutcome)
-                    {
-                        return gapFillQuestion;
-                    }
-                    return ClearAnswerTypeGapFillQuestion(gapFillQuestion);
+                    var gapFillQuestionByGap = config.Deserialize<GapFillQuestion>();
+                    result = isDisableAnswers ? ClearAnswers(gapFillQuestionByGap) : gapFillQuestionByGap;
+                    totalCorrect = isShowCorrectTotal ? GetTotalCorrectByGap(gapFillQuestionByGap) : default;
+                    break;
 
                 case EnumQuestionType.DragAndDropSentenceOrder:
                     var dragAndDropSentenceOrderQuestion = config.Deserialize<DragAndDropSentenceOrderQuestion>();
-                    if (isShowOutcome)
-                    {
-                        return dragAndDropSentenceOrderQuestion;
-                    }
-                    return ClearAnswerTypeDragDropOrderQuestion(dragAndDropSentenceOrderQuestion);
-
-                case EnumQuestionType.DragAndDropPicture:
-                    var dragAndDropPictureQuestion = config.Deserialize<DragAndDropPictureQuestion>();
-                    if (isShowOutcome)
-                    {
-                        return dragAndDropPictureQuestion;
-                    }
-                    return ClearAnswerTypeDragDropPictureQuestion(dragAndDropPictureQuestion);
+                    result = isDisableAnswers ? ClearAnswers(dragAndDropSentenceOrderQuestion) : dragAndDropSentenceOrderQuestion;
+                    totalCorrect = isShowCorrectTotal ? GetTotalCorrect(dragAndDropSentenceOrderQuestion) : default;
+                    break;
 
                 case EnumQuestionType.MultipleOptionSentenceCompletion:
                     var multipleOption = config.Deserialize<MultipleOptionSentenceCompletionQuestion>();
-                    if (isShowOutcome)
-                    {
-                        return multipleOption;
-                    }
-                    return ClearAnswers(multipleOption);
+                    result = isDisableAnswers ? ClearAnswers(multipleOption) : multipleOption;
+                    totalCorrect = isShowCorrectTotal ? GetTotalCorrect(multipleOption) : default;
+                    break;
 
                 case EnumQuestionType.ExercisePreparation:
-                    var data = config.Deserialize<ExercisePreparationQuestion>();
-                    return data;
+                    var exercisePreparation = config.Deserialize<ExercisePreparationQuestion>();
+                    result = exercisePreparation;
+                    break;
 
                 default:
                     throw new ArgumentException("Invalid question type");
             }
+
+            return (result, totalCorrect);
         }
 
         private static object? ClearAnswers(MultipleOptionSentenceCompletionQuestion? data)
@@ -117,7 +109,7 @@ namespace Fsel.Course.Infrastructure.Common
             return data;
         }
 
-        private static object? ClearAnswersShortAnswer(ShortAnswerQuestionWordBaseQuestion? data)
+        private static object? ClearAnswers(ShortAnswerQuestionWordBaseQuestion? data)
         {
             if (data != null)
             {
@@ -126,7 +118,7 @@ namespace Fsel.Course.Infrastructure.Common
             return data;
         }
 
-        private static object? ClearAnswerTypeListingQuestion(ListingQuestion? data)
+        private static object? ClearAnswers(ListingQuestion? data)
         {
             if (data != null)
             {
@@ -135,7 +127,7 @@ namespace Fsel.Course.Infrastructure.Common
             return data;
         }
 
-        private static object? ClearAnswerTypeMutipleChoiQuestion(MutipleChoiceQuestion? data)
+        private static object? ClearAnswers(MutipleChoiceQuestion? data)
         {
             if (data != null && data.Contents != null)
             {
@@ -147,7 +139,7 @@ namespace Fsel.Course.Infrastructure.Common
             return data;
         }
 
-        private static object? ClearAnswerTypeShortCountQuestion(ShortAnswerQuestionWordCountBaseQuestion? data)
+        private static object? ClearAnswers(ShortAnswerQuestionWordCountBaseQuestion? data)
         {
             if (data != null)
             {
@@ -156,7 +148,7 @@ namespace Fsel.Course.Infrastructure.Common
             return data;
         }
 
-        private static object? ClearAnswerTypeMaschingQuestion(MatchingTypeQuestion? data)
+        private static object? ClearAnswers(MatchingTypeQuestion? data)
         {
             if (data != null && data.Link != null)
             {
@@ -168,7 +160,7 @@ namespace Fsel.Course.Infrastructure.Common
             return data;
         }
 
-        private static object? ClearAnswerTypeGapFillQuestion(GapFillQuestion? data)
+        private static object? ClearAnswers(GapFillQuestion? data)
         {
             if (data != null && data.Contents != null)
             {
@@ -183,7 +175,7 @@ namespace Fsel.Course.Infrastructure.Common
             return data;
         }
 
-        private static object? ClearAnswerTypeDragDropOrderQuestion(DragAndDropSentenceOrderQuestion? data)
+        private static object? ClearAnswers(DragAndDropSentenceOrderQuestion? data)
         {
             if (data != null && data.Contents != null)
             {
@@ -198,19 +190,71 @@ namespace Fsel.Course.Infrastructure.Common
             return data;
         }
 
-        private static object? ClearAnswerTypeDragDropPictureQuestion(DragAndDropPictureQuestion? data)
+        private static int GetTotalCorrect(MultipleOptionSentenceCompletionQuestion? data)
         {
+            if (data != null && data.Contents != null)
+            {
+                return data.Contents.Sum(x => x.Answers?.Count ?? default);
+            }
+            return default;
+        }
+
+        private static int GetTotalCorrect(MutipleChoiceQuestion? data)
+        {
+            int number = 0;
             if (data != null && data.Contents != null)
             {
                 foreach (var item in data.Contents)
                 {
-                    item.Words.ForEach(y =>
+                    if (item.IsCorrect == true)
                     {
-                        y.Content = null;
-                    });
+                        number++;
+                    }
                 }
+                return data.Contents.Where(x => x.IsCorrect == true).Count();
             }
-            return data;
+            return default;
+        }
+
+        private static int GetTotalCorrect()
+        {
+            return 1;
+        }
+
+        private static int GetTotalCorrect(MatchingTypeQuestion? data)
+        {
+            if (data != null && data.Link != null)
+            {
+                return data.Link.Count;
+            }
+            return default;
+        }
+
+        private static int GetTotalCorrectBySubQuestion(GapFillQuestion? data)
+        {
+            if (data != null && data.Contents != null)
+            {
+                return data.Contents.Count;
+            }
+            return default;
+        }
+
+        private static int GetTotalCorrectByGap(GapFillQuestion? data)
+        {
+            if (data != null && data.Contents != null)
+            {
+                return data.Contents.Sum(x => x.Words?.Count ?? default);
+            }
+            return default;
+        }
+
+        private static int GetTotalCorrect(DragAndDropSentenceOrderQuestion? data)
+        {
+            if (data != null && data.Contents != null)
+            {
+                return data.Contents.Count;
+            }
+            return default;
         }
     }
 }
