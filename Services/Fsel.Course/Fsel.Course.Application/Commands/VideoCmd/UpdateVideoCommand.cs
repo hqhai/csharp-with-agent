@@ -24,16 +24,25 @@ namespace Fsel.Course.Application.Commands.VideoCmd
         private readonly IMapper _mapper;
         private readonly QuestionTypeCountConverter _questionTypeCountConverter;
         private readonly QuestionTypeValidation _questionTypeValidation;
+        private readonly IVideoTimeCodeRepository _videoTimeCodeRepository;
+        private readonly IExerciseRepository _exerciseRepository;
+        private readonly IQuestionRepository _questionRepository;
 
         public UpdateVideoCommandHandler(IVideoRepository videoRepository
             , IMapper mapper
             , QuestionTypeCountConverter questionTypeCountConverter
-            , QuestionTypeValidation questionTypeValidation)
+            , QuestionTypeValidation questionTypeValidation
+            , IVideoTimeCodeRepository videoTimeCodeRepository
+            , IExerciseRepository exerciseRepository
+            , IQuestionRepository questionRepository)
         {
             _videoRepository = videoRepository;
             _mapper = mapper;
             _questionTypeCountConverter = questionTypeCountConverter;
             _questionTypeValidation = questionTypeValidation;
+            _videoTimeCodeRepository = videoTimeCodeRepository;
+            _exerciseRepository = exerciseRepository;
+            _questionRepository = questionRepository;
         }
 
         public async Task<MethodResult<VideoModel>> Handle(UpdateVideoCommand request, CancellationToken cancellationToken)
@@ -65,9 +74,7 @@ namespace Fsel.Course.Application.Commands.VideoCmd
             var isVideoUsed = await _videoRepository.IsVideoUsed(request.Id);
             if (isVideoUsed)
             {
-                methodResult.AddErrorBadRequest(
-                    nameof(EnumVideoErrorCode.VideoUsed),
-                    nameof(request.Id), request.Id);
+                methodResult.AddErrorBadRequest(nameof(EnumVideoErrorCode.VideoUsed), nameof(request.Id), request.Id);
                 return methodResult;
             }
 
@@ -87,7 +94,6 @@ namespace Fsel.Course.Application.Commands.VideoCmd
                 methodResult.AddError(nameof(EnumVideoErrorCode.VideoNotCorrect));
                 return methodResult;
             }
-            video = _mapper.Map(request, video);
 
             request.VideoTimeCodes.ForEach(x =>
             {
@@ -98,7 +104,7 @@ namespace Fsel.Course.Application.Commands.VideoCmd
                 }
                 else
                 {
-                    VideoTimeCode videoTimeCode = video.VideoTimeCodes.ElementAt(request.VideoTimeCodes.IndexOf(x));
+                    VideoTimeCode videoTimeCode = video.VideoTimeCodes.Where(x => !x.IsDeleted).ElementAt(request.VideoTimeCodes.IndexOf(x));
                     x.Exercises.ForEach(n =>
                     {
                         if (n == null)
@@ -108,7 +114,8 @@ namespace Fsel.Course.Application.Commands.VideoCmd
                         }
                         else
                         {
-                            Exercise excercise = _mapper.Map<Exercise>(n);
+                            Exercise excercise = videoTimeCode.TimeCodeExercises.Where(x => !x.IsDeleted).Select(x => x.Exercise!).ElementAt(x.Exercises!.IndexOf(n));
+                            //Exercise excercise = _mapper.Map<Exercise>(n);
                             videoTimeCode.TimeCodeExercises.Add(new TimeCodeExercise
                             {
                                 Exercise = excercise
@@ -122,7 +129,8 @@ namespace Fsel.Course.Application.Commands.VideoCmd
                                 }
                                 else
                                 {
-                                    Question question = _mapper.Map<Question>(q);
+                                    Question question = excercise.ExerciseQuestions.Where(x => !x.IsDeleted).Select(x => x.Question!).ElementAt(n.Questions!.IndexOf(q));
+                                    //Question question = _mapper.Map<Question>(q);
                                     var ischeck = _questionTypeValidation.TryParseQuestionType(question.Config, question.QuestionType);
                                     if (!ischeck)
                                     {
@@ -159,7 +167,7 @@ namespace Fsel.Course.Application.Commands.VideoCmd
                     }
                 }
             });
-
+            video = _mapper.Map(request, video);
             if (!video.IsValid())
             {
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
