@@ -17,11 +17,11 @@ namespace Fsel.Course.Application.Commands.CourseCmd
         public Guid Id { get; set; }
     }
 
-    public class UpdateActiveStatusCommandHandler : IRequestHandler<ActiveCourseCommand, MethodResult<bool>>
+    public class ActiveCourseCommandHandler : IRequestHandler<ActiveCourseCommand, MethodResult<bool>>
     {
         private readonly ICourseRepository _courseRepository;
 
-        public UpdateActiveStatusCommandHandler(ICourseRepository courseRepository)
+        public ActiveCourseCommandHandler(ICourseRepository courseRepository)
         {
             _courseRepository = courseRepository;
         }

@@ -5,8 +5,8 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
     public enum EnumCourseUnitMockTestErrorCode
     {
         /// <summary>
-        /// Course Unit MockTest null
+        /// Course Unit MockTest is null
         /// </summary>
-        TestNull,
+        CourseUnitMockTestIsNull,
     }
 }

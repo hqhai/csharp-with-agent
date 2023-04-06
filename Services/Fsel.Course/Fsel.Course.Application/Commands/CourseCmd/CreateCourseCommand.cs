@@ -43,6 +43,7 @@ namespace Fsel.Course.Application.Commands.CourseCmd
 
         public async Task<MethodResult<CourseModel>> Handle(CreateCourseCommand request, CancellationToken cancellationToken)
         {
+            ArgumentNullException.ThrowIfNull(request);
             MethodResult<CourseModel> methodResult = new MethodResult<CourseModel>();
 
             #region Validation
@@ -58,21 +59,19 @@ namespace Fsel.Course.Application.Commands.CourseCmd
 
             if (request.CourseUnitMockTests == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumCourseUnitMockTestErrorCode.TestNull), nameof(request.CourseUnitMockTests));
+                methodResult.AddErrorBadRequest(nameof(EnumCourseUnitMockTestErrorCode.CourseUnitMockTestIsNull), nameof(request.CourseUnitMockTests));
                 return methodResult;
             }
 
             if (request.CourseTeachers == null)
             {
-                methodResult.AddErrorBadRequest(
-                    nameof(EnumCourseTeacherErrorCode.CourseTeacherNull));
+                methodResult.AddErrorBadRequest(nameof(EnumCourseTeacherErrorCode.CourseTeacherIsNull), nameof(request.CourseTeachers));
                 return methodResult;
             }
 
             if (request.CourseUnitMockTests.Any(x => x.MockTestId.HasValue && x.UnitId.HasValue))
             {
-                methodResult.AddErrorBadRequest(
-                    nameof(EnumCourseErrorCode.MocktestIdAndUnitIdAreMutuallyExclusive));
+                methodResult.AddErrorBadRequest(nameof(EnumCourseUnitMockTestErrorCode.MocktestIdAndUnitIdAreMutuallyExclusive));
                 return methodResult;
             }
 

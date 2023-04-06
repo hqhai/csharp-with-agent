@@ -23,21 +23,18 @@ namespace Fsel.Course.Application.Commands.HomeWorkCmd
     {
         private readonly IMapper _mapper;
         private readonly IHomeWorkRepository _homeWorkRepository;
-        private readonly IQuestionRepository _questionRepository;
         private readonly QuestionTypeValidation _questionTypeValidation;
         private readonly QuestionTypeCountConverter _questionTypeCountConverter;
 
         public CreateHomeWorkCommandHandler(IMapper mapper
             , QuestionTypeValidation questionTypeValidation
             , QuestionTypeCountConverter questionTypeCountConverter
-            , IHomeWorkRepository homeWorkRepository
-            , IQuestionRepository questionRepository)
+            , IHomeWorkRepository homeWorkRepository)
         {
             _mapper = mapper;
             _questionTypeValidation = questionTypeValidation;
             _questionTypeCountConverter = questionTypeCountConverter;
             _homeWorkRepository = homeWorkRepository;
-            _questionRepository = questionRepository;
         }
 
         public async Task<MethodResult<HomeWorkModel>> Handle(CreateHomeWorkCommand request, CancellationToken cancellationToken)
