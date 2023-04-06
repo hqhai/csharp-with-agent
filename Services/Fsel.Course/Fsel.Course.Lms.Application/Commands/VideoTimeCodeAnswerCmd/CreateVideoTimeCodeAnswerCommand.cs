@@ -9,6 +9,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.CommandModels.VideoTimeCodeAnswers;
     using Fsel.Course.Infrastructure.Common;
+    using Fsel.Course.Lms.Application.Services.UserServices;
     using MediatR;
     using Microsoft.AspNetCore.Http;
 
@@ -23,6 +24,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
         private readonly AuthContext _authContext;
         private readonly ILessonRepository _lessonRepository;
         private readonly IQuestionRepository _questionRepository;
+        private readonly IUserService _userService;
         private readonly AnswerTypeConverter _answerTypeConverter;
 
         public CreateVideoTimeCodeAnswerCommandHandler(
@@ -31,6 +33,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
             , AuthContext authContext
             , ILessonRepository lessonRepository
             , IQuestionRepository questionRepository
+            , IUserService userService
             , AnswerTypeConverter answerTypeConverter)
         {
             _videoResultRepository = videoResultRepository;
@@ -39,6 +42,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
             _lessonRepository = lessonRepository;
             _questionRepository = questionRepository;
             _answerTypeConverter = answerTypeConverter;
+            _userService = userService;
         }
 
         public async Task<MethodResult<bool>> Handle(CreateVideoTimeCodeAnswerCommand request, CancellationToken cancellationToken)
@@ -63,7 +67,13 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
             var videoId = lesson.LessonVideos.Select(x => x.VideoId).FirstOrDefault();
             var lessonResultId = lesson.LessonResults.Select(x => x.Id).FirstOrDefault();
 
-            var videoResult = await _videoResultRepository.GetIncludeTimeCodeAnswerByIdAsync(videoId, lessonResultId, _authContext.CurrentUserId);
+            var student = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId.ToString());
+            if (!student.IsSuccessStatusCode)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumCourseClassStudentErrorCode.UserIdNotExist));
+                return methodResult;
+            }
+            var videoResult = await _videoResultRepository.GetIncludeTimeCodeAnswerByIdAsync(videoId, lessonResultId, student!.Content!.Result!.Id);
 
             if (videoResult == null)
             {
