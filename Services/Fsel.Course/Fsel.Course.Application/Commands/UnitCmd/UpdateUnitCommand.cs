@@ -2,6 +2,7 @@
 
 using AutoMapper;
 using Fsel.Common.ActionResults;
+using Fsel.Course.Domain.Entities;
 using Fsel.Course.Domain.Enums;
 using Fsel.Course.Domain.Enums.ErrorCodes;
 using Fsel.Course.Domain.IRepositories;
@@ -89,6 +90,11 @@ namespace Fsel.Course.Application.Commands.UnitCmd
 
             await _unitRepository.ExecuteTransactionAsync(async () =>
             {
+                unit.UnitLessons = request.LessonIds.Select((x) => new UnitLesson
+                {
+                    LessonId = x
+                }).ToList();
+
                 unit = _unitRepository.Update(unit);
                 await _unitRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
