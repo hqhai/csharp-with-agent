@@ -38,13 +38,17 @@ namespace Fsel.Course.Application.Queries.HomeWorkQuery
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 return methodResult;
             }
-            var homeWorkQuery = _homeWorkRepository.Queryable.Select(x => new HomeWorkSearchModel
-            {
-                Name = x.Name,
-                CreatedFullName = x.CreatedFullName,
-                CreatedDate = x.CreatedDate,
-                IsActive = x.LessonHomeWorks.Any()
-            });
+            var homeWorkQuery = _homeWorkRepository.Queryable
+                        .Include(x => x.LessonHomeWorks)
+                        .Select(x => new HomeWorkSearchModel
+                        {
+                            Name = x.Name,
+                            CreatedFullName = x.CreatedFullName,
+                            CreatedDate = x.CreatedDate,
+                            IsActive = x.LessonHomeWorks.Any(),
+                            CourseLevel = x.CourseLevel,
+                            CourseSkill = x.CourseSkill,
+                        });
             //Keyword
             if (!string.IsNullOrEmpty(request.Keyword))
             {
