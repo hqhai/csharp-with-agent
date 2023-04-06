@@ -22,18 +22,15 @@ namespace Fsel.Course.Application.Commands.VideoCmd
     public class CreateVideoCommandHandler : IRequestHandler<CreateVideoCommand, MethodResult<VideoModel>>
     {
         private readonly IVideoRepository _videoRepository;
-        private readonly QuestionTypeValidation _questionTypeValidation;
-        private readonly QuestionTypeCountConverter _questionTypeCountConverter;
+        private readonly QuestionTypeConverter _questionTypeConverter;
         private readonly IMapper _mapper;
 
         public CreateVideoCommandHandler(IVideoRepository videoRepository
-            , QuestionTypeValidation questionTypeValidation
-            , QuestionTypeCountConverter questionTypeCountConverter
+            , QuestionTypeConverter questionTypeConverter
             , IMapper mapper)
         {
             _videoRepository = videoRepository;
-            _questionTypeValidation = questionTypeValidation;
-            _questionTypeCountConverter = questionTypeCountConverter;
+            _questionTypeConverter = questionTypeConverter;
             _mapper = mapper;
         }
 
@@ -91,12 +88,12 @@ namespace Fsel.Course.Application.Commands.VideoCmd
                                 else
                                 {
                                     Question question = _mapper.Map<Question>(q);
-                                    var ischeck = _questionTypeValidation.TryParseQuestionType(question.Config, question.QuestionType);
-                                    if (!ischeck)
+                                    var (config, correctTotal) = _questionTypeConverter.QuestionTypeConverterObject(question.Config, question.QuestionType, isShowCorrectTotal: !question.Ungraded, false);
+                                    if (config == null)
                                     {
                                         methodResult.AddErrorBadRequest(nameof(EnumVideoErrorCode.ConfigIsInTheWrongFormat), nameof(question.Config));
                                     }
-                                    question.CorrectTotal = question.Ungraded ? default : _questionTypeCountConverter.GetTotalCorrectByQuestionType(question.Config, question.QuestionType) ?? default;
+                                    question.CorrectTotal = correctTotal;
 
                                     excercise.ExerciseQuestions.Add(new ExerciseQuestion
                                     {
