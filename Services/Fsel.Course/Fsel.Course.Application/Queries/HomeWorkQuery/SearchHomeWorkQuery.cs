@@ -55,10 +55,12 @@ namespace Fsel.Course.Application.Queries.HomeWorkQuery
             {
                 homeWorkQuery = homeWorkQuery.Where(m => m.Id.ToString() == request.Keyword || (m.Name ?? string.Empty).Contains(request.Keyword));
             }
+
             if (request.CourseLevel != null)
             {
                 homeWorkQuery = homeWorkQuery.Where(m => m.CourseLevel == request.CourseLevel);
             }
+
             if (request.CourseSkill != null)
             {
                 homeWorkQuery = homeWorkQuery.Where(m => m.CourseSkill == request.CourseSkill);
