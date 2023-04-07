@@ -18,7 +18,7 @@ namespace Fsel.Course.Infrastructure.Repositories
             try
             {
                 return await Queryable.Include(e => e.UnitLessons.Where(n => !n.IsDeleted))
-                                 .Include(e => e.UnitLessons)
+                                 .Include(e => e.UnitLessons.Where(n => !n.IsDeleted))
                                  .Include(e => e.ClassForum)
                                  .Include(x => x.LessonResults.Where(n => !n.IsDeleted))
                                  .Include(e => e.LessonHomeWorks.Where(n => !n.IsDeleted))
@@ -40,8 +40,8 @@ namespace Fsel.Course.Infrastructure.Repositories
         {
             try
             {
-                return await Queryable.Include(x => x.LessonResults)
-                                      .Include(x => x.LessonVideos)
+                return await Queryable.Include(x => x.LessonResults.Where(n => !n.IsDeleted))
+                                      .Include(x => x.LessonVideos.Where(n => !n.IsDeleted))
                                       .ThenInclude(x => x.Video)
                                       .FirstOrDefaultAsync(x => x.Id == id);
             }

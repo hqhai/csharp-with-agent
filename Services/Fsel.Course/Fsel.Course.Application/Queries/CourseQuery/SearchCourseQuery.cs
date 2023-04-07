@@ -42,7 +42,7 @@ namespace Fsel.Course.Application.Queries.CourseQuery
             }
 
             var courseQuery = _courseRepository.Queryable
-                              .Include(course => course.CourseTeachers)
+                              .Include(course => course.CourseTeachers.Where(n => !n.IsDeleted))
                               .Select(course => new CourseSearchModel
                               {
                                   Id = course.Id,

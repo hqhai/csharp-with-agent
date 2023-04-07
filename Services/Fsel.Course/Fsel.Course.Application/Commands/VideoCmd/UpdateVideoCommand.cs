@@ -41,8 +41,8 @@ namespace Fsel.Course.Application.Commands.VideoCmd
 
         public async Task<MethodResult<VideoModel>> Handle(UpdateVideoCommand request, CancellationToken cancellationToken)
         {
-            MethodResult<VideoModel> methodResult = new MethodResult<VideoModel>();
             ArgumentNullException.ThrowIfNull(request);
+            MethodResult<VideoModel> methodResult = new MethodResult<VideoModel>();
 
             #region Validation
 
