@@ -82,6 +82,10 @@ namespace Fsel.Course.Infrastructure.Common
                         number++;
                         item.IsExact = true;
                     }
+                    else
+                    {
+                        item.IsExact = false;
+                    }
                 }
             }
             configAnswer = dataAnswer;
@@ -101,6 +105,10 @@ namespace Fsel.Course.Infrastructure.Common
                     {
                         number++;
                         item.IsExact = true;
+                    }
+                    else
+                    {
+                        item.IsExact = false;
                     }
                 }
             }
@@ -122,6 +130,10 @@ namespace Fsel.Course.Infrastructure.Common
                         number++;
                         item.IsExact = true;
                     }
+                    else
+                    {
+                        item.IsExact = false;
+                    }
                 }
             }
             configAnswer = dataAnswer;
@@ -138,6 +150,10 @@ namespace Fsel.Course.Infrastructure.Common
             {
                 dataAnswer.IsExact = true;
                 number++;
+            }
+            else
+            {
+                dataAnswer!.IsExact = false;
             }
             configAnswer = dataAnswer;
             return number;
@@ -157,6 +173,10 @@ namespace Fsel.Course.Infrastructure.Common
                     dataAnswer.IsExact = true;
                     number++;
                 }
+                else
+                {
+                    dataAnswer.IsExact = false;
+                }
             }
             configAnswer = dataAnswer;
             return number;
@@ -174,6 +194,10 @@ namespace Fsel.Course.Infrastructure.Common
                 {
                     dataAnswer.IsExact = true;
                     number++;
+                }
+                else
+                {
+                    dataAnswer.IsExact = false;
                 }
             }
             configAnswer = dataAnswer;
