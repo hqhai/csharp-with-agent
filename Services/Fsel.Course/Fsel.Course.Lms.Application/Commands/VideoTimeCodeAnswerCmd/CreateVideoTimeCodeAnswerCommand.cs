@@ -24,9 +24,8 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
         private readonly AuthContext _authContext;
         private readonly ILessonRepository _lessonRepository;
         private readonly IQuestionRepository _questionRepository;
-        private readonly AnswerTypeCountConverter _answerTypeCountConverter;
-        private readonly AnswerTypeValidatetion _answerTypeValidatetion;
         private readonly IUserService _userService;
+        private readonly AnswerTypeConverter _answerTypeConverter;
 
         public CreateVideoTimeCodeAnswerCommandHandler(
             IVideoResultRepository videoResultRepository
@@ -34,17 +33,15 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
             , AuthContext authContext
             , ILessonRepository lessonRepository
             , IQuestionRepository questionRepository
-            , AnswerTypeCountConverter answerTypeCountConverter
-            , AnswerTypeValidatetion answerTypeValidatetion
-            , IUserService userService)
+            , IUserService userService
+            , AnswerTypeConverter answerTypeConverter)
         {
             _videoResultRepository = videoResultRepository;
             _videoTimeCodeAnswerRepository = videoTimeCodeAnswerRepository;
             _authContext = authContext;
             _lessonRepository = lessonRepository;
             _questionRepository = questionRepository;
-            _answerTypeCountConverter = answerTypeCountConverter;
-            _answerTypeValidatetion = answerTypeValidatetion;
+            _answerTypeConverter = answerTypeConverter;
             _userService = userService;
         }
 
@@ -113,33 +110,28 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
                 var videoTimeCodeId = exercise?.TimeCodeExercises.Select(x => x.VideoTimeCodeId).FirstOrDefault();
                 var videoTimeCodeAnswer = await _videoTimeCodeAnswerRepository.GetWhereByIdAsync(videoResult.Id, question.Id, exerciseId, videoTimeCodeId);
 
-                if (!_answerTypeValidatetion.TryParseAnswerType(item.Answer, question.QuestionType))
+                var (answerConfig, correctCount) = _answerTypeConverter.GetTotalCorrectByAsnwerType(item.Answer, question.Config, question.QuestionType);
+                if (answerConfig == null)
                 {
                     methodResult.AddErrorBadRequest(nameof(EnumVideoTimeCodeAnswerErrorCode.AnswerIsInTheWrongFormat));
                     return methodResult;
                 }
 
-                var answer = item.Answer;
-                var correctCount = _answerTypeCountConverter.GetTotalCorrectByAsnwerType(ref answer, question.Config, question.QuestionType);
-                if (question.Ungraded)
-                {
-                    correctCount = 0;
-                }
                 if (videoTimeCodeAnswer == null)
                 {
                     videoTimeCodeAnswerCreates.Add(new VideoTimeCodeAnswer
                     {
-                        Answer = answer,
+                        Answer = answerConfig,
                         VideoTimeCodeId = videoTimeCodeId ?? Guid.Empty,
                         ExerciseId = exerciseId ?? Guid.Empty,
                         QuestionId = question.Id,
                         VideoResultId = videoResult.Id,
-                        CorrectCount = correctCount
+                        CorrectCount = question.Ungraded ? default : correctCount
                     });
                 }
                 else
                 {
-                    videoTimeCodeAnswer.Answer = answer;
+                    videoTimeCodeAnswer.Answer = answerConfig;
                     videoTimeCodeAnswerUpdates.Add(videoTimeCodeAnswer);
                 }
             }

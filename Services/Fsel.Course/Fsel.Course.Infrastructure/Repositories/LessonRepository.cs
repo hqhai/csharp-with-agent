@@ -22,6 +22,7 @@ namespace Fsel.Course.Infrastructure.Repositories
                                  .Include(e => e.ClassForum)
                                  .Include(x => x.LessonResults.Where(n => !n.IsDeleted))
                                  .Include(e => e.LessonHomeWorks.Where(n => !n.IsDeleted))
+                                 .ThenInclude(e => e.HomeWork)
                                  .Include(e => e.LessonExtraPractices.Where(n => !n.IsDeleted))
                                  .Include(e => e.LessonInstructions.Where(n => !n.IsDeleted))
                                  .Include(e => e.LessonVideos.Where(n => !n.IsDeleted))

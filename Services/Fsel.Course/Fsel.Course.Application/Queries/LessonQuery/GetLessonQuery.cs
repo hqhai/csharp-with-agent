@@ -42,6 +42,7 @@ namespace Fsel.Course.Application.Queries.LessonQuery
 
             var lessonModel = _mapper.Map<LessonModel>(lesson);
             lessonModel.Video = _mapper.Map<VideoModel>(lesson.LessonVideos.Select(x => x.Video).FirstOrDefault());
+            lessonModel.HomeWorks = _mapper.Map<IList<HomeWorkModel>>(lesson.LessonHomeWorks.Select(x => x.HomeWork));
             lessonModel.IsActive = lesson.UnitLessons.Any();
 
             methodResult.Result = lessonModel;

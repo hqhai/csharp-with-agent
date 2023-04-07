@@ -9,51 +9,63 @@ namespace Fsel.Course.Infrastructure.Common
     using Fsel.Course.Domain.Entities.QuestionTypeConfigs.Questions;
     using Fsel.Course.Domain.Enums;
 
-    public class AnswerTypeCountConverter
+    public class AnswerTypeConverter
     {
-        public int GetTotalCorrectByAsnwerType(ref object? configAnswer, object? configQuestion, EnumQuestionType type)
+        public (object?, int) GetTotalCorrectByAsnwerType(object? configAnswer, object? configQuestion, EnumQuestionType type)
         {
+            int totalCorrect = default;
             switch (type)
             {
                 case EnumQuestionType.Multichoice:
                 case EnumQuestionType.Dropdown:
                 case EnumQuestionType.Checklist:
-                    return GetTotalCorrectTypeCheckListAnswer(ref configAnswer, configQuestion);
+                    totalCorrect = GetTotalCorrectTypeCheckListAnswer(ref configAnswer, configQuestion);
+                    break;
 
                 case EnumQuestionType.Listing:
-                    return GetTotalCorrectTypeListingAnswer(ref configAnswer, configQuestion);
+                    totalCorrect = GetTotalCorrectTypeListingAnswer(ref configAnswer, configQuestion);
+                    break;
 
                 case EnumQuestionType.DragAndDropPicture:
                 case EnumQuestionType.MatchingType1:
                 case EnumQuestionType.MatchingType2:
-                    return GetTotalCorrectTypeMaschingAnswer(ref configAnswer, configQuestion);
+                    totalCorrect = GetTotalCorrectTypeMaschingAnswer(ref configAnswer, configQuestion);
+                    break;
 
                 case EnumQuestionType.ShortAnswerWordBase:
-                    return GetTotalCorrectTypeShortAnswerWordBase(ref configAnswer, configQuestion);
+                    totalCorrect = GetTotalCorrectTypeShortAnswerWordBase(ref configAnswer, configQuestion);
+                    break;
 
                 case EnumQuestionType.ShortAnswerWordCount:
-                    return GetTotalCorrectTypeShortAnswerWordCount(ref configAnswer, configQuestion);
+                    totalCorrect = GetTotalCorrectTypeShortAnswerWordCount(ref configAnswer, configQuestion);
+                    break;
 
                 case EnumQuestionType.GapFillScoreByQuestion:
                 case EnumQuestionType.GapFillWordBankScoreByQuestion:
-                    return GetTotalCorrectTypeGapFillBySubAnswer(ref configAnswer, configQuestion);
+                    totalCorrect = GetTotalCorrectTypeGapFillBySubAnswer(ref configAnswer, configQuestion);
+                    break;
 
                 case EnumQuestionType.GapFillWordBankScoreByGap:
                 case EnumQuestionType.GapFillScoreByGap:
-                    return GetTotalCorrectTypeGapFillGapAnswer(ref configAnswer, configQuestion);
+                    totalCorrect = GetTotalCorrectTypeGapFillGapAnswer(ref configAnswer, configQuestion);
+                    break;
 
                 case EnumQuestionType.DragAndDropSentenceOrder:
-                    return GetTotalCorrectTypeDragDropOrderAnswer(ref configAnswer, configQuestion);
+                    totalCorrect = GetTotalCorrectTypeDragDropOrderAnswer(ref configAnswer, configQuestion);
+                    break;
 
                 case EnumQuestionType.MultipleOptionSentenceCompletion:
-                    return GetTotalCorrectTypeMultipleOptionAnswer(ref configAnswer, configQuestion);
+                    totalCorrect = GetTotalCorrectTypeMultipleOptionAnswer(ref configAnswer, configQuestion);
+                    break;
 
                 case EnumQuestionType.ExercisePreparation:
-                    return default;
+                    break;
 
                 default:
                     throw new ArgumentException("Invalid answer type");
             }
+
+            return (configAnswer, totalCorrect);
         }
 
         private static int GetTotalCorrectTypeMultipleOptionAnswer(ref object? configAnswer, object? configQuestion)
@@ -71,10 +83,9 @@ namespace Fsel.Course.Infrastructure.Common
                         item.IsExact = true;
                     }
                 }
-                configAnswer = dataAnswer;
-                return number;
             }
-            return default;
+            configAnswer = dataAnswer;
+            return number;
         }
 
         private static int GetTotalCorrectTypeMaschingAnswer(ref object? configAnswer, object? configQuestion)
@@ -92,10 +103,9 @@ namespace Fsel.Course.Infrastructure.Common
                         item.IsExact = true;
                     }
                 }
-                configAnswer = dataAnswer;
-                return number;
             }
-            return default;
+            configAnswer = dataAnswer;
+            return number;
         }
 
         private static int GetTotalCorrectTypeCheckListAnswer(ref object? configAnswer, object? configQuestion)
@@ -113,57 +123,61 @@ namespace Fsel.Course.Infrastructure.Common
                         item.IsExact = true;
                     }
                 }
-                configAnswer = dataAnswer;
-                return number;
             }
-            return default;
+            configAnswer = dataAnswer;
+            return number;
         }
 
         private static int GetTotalCorrectTypeListingAnswer(ref object? configAnswer, object? configQuestion)
         {
             var dataAnswer = configAnswer.Deserialize<ListingAnswer>();
             var dataQuestion = configQuestion.Deserialize<ListingQuestion>();
+            int number = 0;
 
             if (dataQuestion != null && dataAnswer != null && dataQuestion.ExactWordCount == dataAnswer.Answers?.Count)
             {
                 dataAnswer.IsExact = true;
-                configAnswer = dataAnswer;
-                return 1;
+                number++;
             }
-            return default;
+            configAnswer = dataAnswer;
+            return number;
         }
 
         private static int GetTotalCorrectTypeShortAnswerWordCount(ref object? configAnswer, object? configQuestion)
         {
             var dataAnswer = configAnswer.Deserialize<ShortAnswerWordCountBaseAnswer>();
             var dataQuestion = configQuestion.Deserialize<ShortAnswerQuestionWordCountBaseQuestion>();
+            int number = 0;
+
             if (dataAnswer != null && dataAnswer.Answers != null && dataQuestion != null)
             {
                 var answerStrs = dataAnswer.Answers.Split(' ');
                 if (dataQuestion.ExactWordCount == answerStrs?.Length)
                 {
                     dataAnswer.IsExact = true;
-                    configAnswer = dataAnswer;
-                    return 1;
+                    number++;
                 }
             }
-            return default;
+            configAnswer = dataAnswer;
+            return number;
         }
 
         private static int GetTotalCorrectTypeShortAnswerWordBase(ref object? configAnswer, object? configQuestion)
         {
             var dataAnswer = configAnswer.Deserialize<ShortAnswerWordBaseAnswer>();
             var dataQuestion = configQuestion.Deserialize<ShortAnswerQuestionWordBaseQuestion>();
+            int number = 0;
+
             if (dataAnswer != null && dataAnswer.Answers != null && dataQuestion != null && dataQuestion.Content != null)
             {
                 if (dataQuestion.Content.Equals(dataAnswer.Answers, StringComparison.Ordinal))
                 {
                     dataAnswer.IsExact = true;
-                    configAnswer = dataAnswer;
-                    return 1;
+                    number++;
                 }
             }
-            return default;
+            configAnswer = dataAnswer;
+            return number;
         }
 
         private static int GetTotalCorrectTypeGapFillGapAnswer(ref object? configAnswer, object? configQuestion)
@@ -186,10 +200,9 @@ namespace Fsel.Course.Infrastructure.Common
                         }
                     }
                 }
-                configAnswer = dataAnswer;
-                return number;
             }
-            return default;
+            configAnswer = dataAnswer;
+            return number;
         }
 
         private static int GetTotalCorrectTypeGapFillBySubAnswer(ref object? configAnswer, object? configQuestion)
@@ -209,10 +222,9 @@ namespace Fsel.Course.Infrastructure.Common
                         number = isExact.Count(x => x);
                     }
                 }
-                configAnswer = dataAnswer;
-                return number;
             }
-            return default;
+            configAnswer = dataAnswer;
+            return number;
         }
 
         private static int GetTotalCorrectTypeDragDropOrderAnswer(ref object? configAnswer, object? configQuestion)
@@ -235,10 +247,9 @@ namespace Fsel.Course.Infrastructure.Common
                         item.IsExact = false;
                     }
                 }
-                configAnswer = dataAnswer;
-                return number;
             }
-            return default;
+            configAnswer = dataAnswer;
+            return number;
         }
     }
 }
