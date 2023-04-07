@@ -29,11 +29,8 @@ namespace Fsel.Identity.Application.Commands.HumanCmd
 
         public async Task<MethodResult<HumanModel>> Handle(CreateHumanCommand request, CancellationToken cancellationToken)
         {
+            ArgumentNullException.ThrowIfNull(request);
             MethodResult<HumanModel> methodResult = new MethodResult<HumanModel>();
-
-            if (request == null)
-            {
-            }
 
             Human human = _mapper.Map<Human>(request);
 
@@ -47,7 +44,6 @@ namespace Fsel.Identity.Application.Commands.HumanCmd
             await _humanRepository.ExecuteTransactionAsync(async () =>
             {
                 human = _humanRepository.Add(human);
-
                 await _humanRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
                 methodResult.StatusCode = StatusCodes.Status201Created;

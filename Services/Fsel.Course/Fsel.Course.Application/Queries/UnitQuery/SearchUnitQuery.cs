@@ -44,9 +44,9 @@ namespace Fsel.Course.Application.Queries.UnitQuery
 
             var unitQuery = _unitRepository.Queryable
                                     .Include(x => x.CourseUnitMockTests.Where(y => !y.IsDeleted))
-                                    .Include(unit => unit.UnitLessons)
+                                    .Include(unit => unit.UnitLessons.Where(y => !y.IsDeleted))
                                     .ThenInclude(unitLesson => unitLesson.Lesson)
-                                    .ThenInclude(lesson => lesson!.LessonVideos)
+                                    .ThenInclude(lesson => lesson!.LessonVideos.Where(y => !y.IsDeleted))
                                     .ThenInclude(lessonVideo => lessonVideo.Video)
 
                             .Select(unit => new UnitSearchModel

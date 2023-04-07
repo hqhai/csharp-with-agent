@@ -114,16 +114,16 @@ namespace Fsel.Course.Infrastructure.Repositories
                                         CreatedFullName = video.CreatedFullName,
                                         UpdatedDate = video.UpdatedDate,
                                         UpdatedFullName = video.UpdatedFullName,
-                                        Exercises = video.VideoTimeCodes.SelectMany(videoTimeCode => videoTimeCode.TimeCodeExercises)
-                                                                                 .Where(timeCodeExercise => timeCodeExercise.Exercise != null)
-                                                                                 .Select(timeCodeExercise => timeCodeExercise.Exercise)
-                                                                                 .GroupBy(excercise => excercise!.CourseSkill)
-                                                                                 .OrderByDescending(courseSkillGroup => courseSkillGroup.Count())
-                                                                                 .Select(courseSkillGroup => new VideoExerciseSearchModel
-                                                                                 {
-                                                                                     CourseSkill = courseSkillGroup.Key,
-                                                                                     Count = courseSkillGroup.Count()
-                                                                                 }).ToList()
+                                        Exercises = video.VideoTimeCodes
+                                                    .SelectMany(videoTimeCode => videoTimeCode.TimeCodeExercises.Where(y => !y.IsDeleted && y.Exercise != null))
+                                                    .Select(timeCodeExercise => timeCodeExercise.Exercise)
+                                                    .GroupBy(excercise => excercise!.CourseSkill)
+                                                    .OrderByDescending(courseSkillGroup => courseSkillGroup.Count())
+                                                    .Select(courseSkillGroup => new VideoExerciseSearchModel
+                                                    {
+                                                        CourseSkill = courseSkillGroup.Key,
+                                                        Count = courseSkillGroup.Count()
+                                                    }).ToList()
                                     });
             }
             catch (Exception)

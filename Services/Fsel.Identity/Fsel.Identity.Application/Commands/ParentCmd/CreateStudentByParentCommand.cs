@@ -66,7 +66,7 @@ namespace Fsel.Identity.Application.Commands.ParentCmd
 
             var userparent = await _userManager.Users.Include(e => e.Human)
                                              .ThenInclude(e => e != null ? e.Parent : default)
-                                             .ThenInclude(e => e != null ? e.ParentStudents : default)
+                                             .ThenInclude(e => e != null ? e.ParentStudents.Where(n => !n.IsDeleted) : default)
                                              .Where(e => e.Id == _authContext.CurrentUserId.ToString())
                                              .FirstOrDefaultAsync(cancellationToken: cancellationToken);
 
@@ -88,8 +88,7 @@ namespace Fsel.Identity.Application.Commands.ParentCmd
             var user = await CreateUserStudentAsync(request, parent);
             if (user == null)
             {
-                methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                methodResult.AddError(nameof(EnumParentErrorCode.CreateStudentFail));
+                methodResult.AddErrorBadRequest(nameof(EnumParentErrorCode.CreateStudentFail));
                 return methodResult;
             }
 

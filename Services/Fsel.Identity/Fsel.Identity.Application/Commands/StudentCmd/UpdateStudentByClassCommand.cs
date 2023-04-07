@@ -43,9 +43,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                                                   .FirstOrDefaultAsync(x => x.Id == request.UserId.ToString(), cancellationToken: cancellationToken);
             if (user == null)
             {
-                methodResult.AddErrorBadRequest(
-                   nameof(EnumStudentErrorCode.StudentNull),
-                   nameof(request.UserId), request.UserId);
+                methodResult.AddErrorBadRequest(nameof(EnumStudentErrorCode.StudentNull), nameof(request.UserId), request.UserId);
                 return methodResult;
             }
             else

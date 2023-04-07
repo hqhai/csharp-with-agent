@@ -58,7 +58,7 @@ namespace Fsel.Course.Application.Queries.LessonQuery
                                                       .Select(y => y.Video).Select(x => x!.TeacherId).FirstOrDefault(),
                          TimeCodeType = x.LessonVideos.Where(y => y.Video != null)
                                                       .Select(y => y.Video)
-                                                      .SelectMany(y => y!.VideoTimeCodes)
+                                                      .SelectMany(y => y!.VideoTimeCodes.Where(y => !y.IsDeleted))
                                                       .OrderByDescending(x => x.TimeCodeType)
                                                       .Reverse()
                                                       .Select(y => y.TimeCodeType)

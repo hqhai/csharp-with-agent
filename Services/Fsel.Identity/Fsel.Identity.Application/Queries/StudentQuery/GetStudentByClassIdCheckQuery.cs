@@ -36,15 +36,13 @@ namespace Fsel.Identity.Application.Queries.StudentQuery
             if (student == null)
             {
                 methodResult.Result = false;
-                methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                methodResult.AddError(nameof(EnumStudentErrorCode.StudentsNotExist));
+                methodResult.AddErrorBadRequest(nameof(EnumStudentErrorCode.StudentsNotExist));
                 return methodResult;
             }
             else if (student.Count >= 12)
             {
                 methodResult.Result = false;
-                methodResult.AddError(nameof(EnumStudentErrorCode.ClassMoreThan12Students));
-                methodResult.StatusCode = StatusCodes.Status400BadRequest;
+                methodResult.AddErrorBadRequest(nameof(EnumStudentErrorCode.ClassMoreThan12Students));
             }
             else if (student.Count < 12)
             {
