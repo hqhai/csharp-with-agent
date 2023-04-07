@@ -15,5 +15,6 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public EnumCourseLevel CourseLevel { get; set; }
         public EnumTimeCodeType TimeCodeType { get; set; }
         public bool IsActive { get; set; }
+        public IList<HomeWorkModel>? HomeWorks { get; set; }
     }
 }

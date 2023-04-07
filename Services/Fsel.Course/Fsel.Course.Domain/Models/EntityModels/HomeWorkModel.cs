@@ -3,7 +3,6 @@
 using Fsel.Common.Enums;
 using Fsel.Core.Base.BaseModels;
 using Fsel.Course.Domain.Entities;
-using Fsel.Course.Domain.Models.CommandModels.Questions;
 
 namespace Fsel.Course.Domain.Models.EntityModels
 {
