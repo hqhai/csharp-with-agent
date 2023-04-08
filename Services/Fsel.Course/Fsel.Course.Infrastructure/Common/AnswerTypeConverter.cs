@@ -82,6 +82,10 @@ namespace Fsel.Course.Infrastructure.Common
                         number++;
                         item.IsExact = true;
                     }
+                    else
+                    {
+                        item.IsExact = false;
+                    }
                 }
             }
             configAnswer = dataAnswer;
@@ -101,6 +105,10 @@ namespace Fsel.Course.Infrastructure.Common
                     {
                         number++;
                         item.IsExact = true;
+                    }
+                    else
+                    {
+                        item.IsExact = false;
                     }
                 }
             }
@@ -122,6 +130,10 @@ namespace Fsel.Course.Infrastructure.Common
                         number++;
                         item.IsExact = true;
                     }
+                    else
+                    {
+                        item.IsExact = false;
+                    }
                 }
             }
             configAnswer = dataAnswer;
@@ -138,6 +150,10 @@ namespace Fsel.Course.Infrastructure.Common
             {
                 dataAnswer.IsExact = true;
                 number++;
+            }
+            else
+            {
+                dataAnswer!.IsExact = false;
             }
             configAnswer = dataAnswer;
             return number;
@@ -157,6 +173,10 @@ namespace Fsel.Course.Infrastructure.Common
                     dataAnswer.IsExact = true;
                     number++;
                 }
+                else
+                {
+                    dataAnswer.IsExact = false;
+                }
             }
             configAnswer = dataAnswer;
             return number;
@@ -175,12 +195,16 @@ namespace Fsel.Course.Infrastructure.Common
                     dataAnswer.IsExact = true;
                     number++;
                 }
+                else
+                {
+                    dataAnswer.IsExact = false;
+                }
             }
             configAnswer = dataAnswer;
             return number;
         }
 
-        private static int GetTotalCorrectTypeGapFillGapAnswer(ref object? configAnswer, object? configQuestion)
+        private static int GetTotalCorrectTypeGapFillBySubAnswer(ref object? configAnswer, object? configQuestion)
         {
             var dataAnswer = configAnswer.Deserialize<GapFillAnswer>();
             var dataQuestion = configQuestion.Deserialize<GapFillQuestion>();
@@ -205,7 +229,7 @@ namespace Fsel.Course.Infrastructure.Common
             return number;
         }
 
-        private static int GetTotalCorrectTypeGapFillBySubAnswer(ref object? configAnswer, object? configQuestion)
+        private static int GetTotalCorrectTypeGapFillGapAnswer(ref object? configAnswer, object? configQuestion)
         {
             var dataAnswer = configAnswer.Deserialize<GapFillAnswer>();
             var dataQuestion = configQuestion.Deserialize<GapFillQuestion>();
@@ -239,13 +263,9 @@ namespace Fsel.Course.Infrastructure.Common
                     var content = dataQuestion.Contents.All(c => c.Id == item.Id && c.Words != null && item.Answer != null && c.Words.SequenceEqual(item.Answer));
                     if (content)
                     {
-                        item.IsExact = true;
                         number++;
                     }
-                    else
-                    {
-                        item.IsExact = false;
-                    }
+                    item.IsExact = content;
                 }
             }
             configAnswer = dataAnswer;
