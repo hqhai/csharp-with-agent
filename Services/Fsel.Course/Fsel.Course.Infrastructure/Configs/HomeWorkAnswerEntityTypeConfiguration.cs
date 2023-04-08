@@ -12,10 +12,11 @@ namespace Fsel.Course.Infrastructure.Configs
         public void Configure(EntityTypeBuilder<HomeWorkAnswer> builder)
         {
             ArgumentNullException.ThrowIfNull(builder);
+
             builder.HasOne(a => a.HomeWorkResult)
               .WithMany(b => b.HomeWorkAnswers)
               .HasForeignKey(b => b.HomeWorkResultId)
-              .OnDelete(DeleteBehavior.Cascade);
+              .OnDelete(DeleteBehavior.NoAction);
 
             builder.HasOne(a => a.HomeWorkQuestion)
               .WithMany(b => b.HomeWorkAnswers)

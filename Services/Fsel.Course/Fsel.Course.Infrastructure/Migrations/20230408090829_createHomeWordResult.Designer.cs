@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fsel.Course.Infrastructure.Migrations
 {
     [DbContext(typeof(CourseDbContext))]
-    [Migration("20230408072524_createHomeWordResult")]
+    [Migration("20230408090829_createHomeWordResult")]
     partial class createHomeWordResult
     {
         /// <inheritdoc />
@@ -851,7 +851,7 @@ namespace Fsel.Course.Infrastructure.Migrations
 
                     b.HasIndex("HomeWorkResultId");
 
-                    b.ToTable("HomeWorkAnswer");
+                    b.ToTable("HomeWorkAnswers");
                 });
 
             modelBuilder.Entity("Fsel.Course.Domain.Entities.HomeWorkQuestion", b =>
@@ -973,8 +973,10 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.Property<double>("Percent")
                         .HasColumnType("float");
 
-                    b.Property<int>("Status")
-                        .HasColumnType("int");
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<Guid>("StudentId")
                         .HasColumnType("uniqueidentifier");
@@ -998,7 +1000,7 @@ namespace Fsel.Course.Infrastructure.Migrations
 
                     b.HasIndex("LessonResultId");
 
-                    b.ToTable("HomeWorkResult");
+                    b.ToTable("HomeWorkResults");
                 });
 
             modelBuilder.Entity("Fsel.Course.Domain.Entities.Lesson", b =>
@@ -2560,7 +2562,7 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.HasOne("Fsel.Course.Domain.Entities.HomeWorkResult", "HomeWorkResult")
                         .WithMany("HomeWorkAnswers")
                         .HasForeignKey("HomeWorkResultId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.Navigation("HomeWorkQuestion");
