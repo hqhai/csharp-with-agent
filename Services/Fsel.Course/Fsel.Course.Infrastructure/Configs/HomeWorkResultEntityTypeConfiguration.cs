@@ -1,0 +1,33 @@
+// Copyright (c) Atlantic. All rights reserved.
+
+namespace Fsel.Course.Infrastructure.Configs
+{
+    using System;
+    using Fsel.Common.Helpers;
+    using Fsel.Course.Domain.Entities;
+    using Fsel.Course.Domain.Enums;
+    using Microsoft.EntityFrameworkCore;
+    using Microsoft.EntityFrameworkCore.Metadata.Builders;
+
+    public class HomeWorkResultEntityTypeConfiguration : IEntityTypeConfiguration<HomeWorkResult>
+    {
+        public void Configure(EntityTypeBuilder<HomeWorkResult> builder)
+        {
+            ArgumentNullException.ThrowIfNull(builder);
+            builder.Property(e => e.Status)
+                .HasMaxLength(100)
+                .HasConversion(
+                    v => v.ToString(),
+                    v => v.EnumParse<EnumResultStatus>());
+            builder.HasOne(a => a.LessonResult)
+              .WithMany(b => b.HomeWorkResults)
+              .HasForeignKey(b => b.LessonResultId)
+              .OnDelete(DeleteBehavior.Cascade);
+
+            builder.HasOne(a => a.HomeWork)
+            .WithMany(b => b.HomeWorkResults)
+            .HasForeignKey(b => b.HomeWorkId)
+            .OnDelete(DeleteBehavior.Cascade);
+        }
+    }
+}
