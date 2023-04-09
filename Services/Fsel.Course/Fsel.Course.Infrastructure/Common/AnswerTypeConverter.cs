@@ -11,7 +11,7 @@ namespace Fsel.Course.Infrastructure.Common
 
     public class AnswerTypeConverter
     {
-        public (object?, int) GetTotalCorrectByAsnwerType(object? configAnswer, object? configQuestion, EnumQuestionType type)
+        public (object?, int) GetTotalCorrectByAsnwerType(ref object? configAnswer, object? configQuestion, EnumQuestionType type)
         {
             int totalCorrect = default;
             switch (type)
@@ -125,15 +125,12 @@ namespace Fsel.Course.Infrastructure.Common
             {
                 foreach (var item in dataAnswer.Answers)
                 {
-                    if (item.IsChecked && dataQuestion.Contents.Any(x => x.Id == item.Id && x.IsCorrect == item.IsChecked))
+                    var isCheck = item.IsChecked && dataQuestion.Contents.Any(x => x.Id == item.Id && x.IsCorrect == item.IsChecked);
+                    if (isCheck)
                     {
                         number++;
-                        item.IsExact = true;
                     }
-                    else
-                    {
-                        item.IsExact = false;
-                    }
+                    item.IsExact = isCheck;
                 }
             }
             configAnswer = dataAnswer;

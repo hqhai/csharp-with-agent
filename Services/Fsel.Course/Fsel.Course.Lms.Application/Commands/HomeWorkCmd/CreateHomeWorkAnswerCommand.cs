@@ -46,7 +46,7 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd
 
             #region Validation
 
-            if (request.Answers.All(x => x.Answer != null))
+            if (request.Answers.All(x => x.Answer == null))
             {
                 methodResult.AddErrorBadRequest(nameof(EnumHomeWorkAnswerErrorCode.AnswerNotEmpty), nameof(request.Answers), request.Answers);
                 return methodResult;
@@ -61,48 +61,43 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd
 
             var homeWorkAnswers = new List<HomeWorkAnswer>();
 
-            //foreach (var item in request.Answers)
-            //{
-            //    var homeWorkResult = await _homeWorkResultRepository.Queryable.FirstOrDefaultAsync(x => x.Id == item.HomeWorkResultId, cancellationToken: cancellationToken);
-            //    if (homeWorkResult == null)
-            //    {
-            //        methodResult.AddErrorBadRequest(nameof(EnumHomeWorkResultErrorCode.HomeWorkResultNotExist));
-            //        return methodResult;
-            //    }
+            foreach (var item in request.Answers)
+            {
+                var question = await _questionRepository.GetByIdAsync(item.QuestionId);
+                if (question == null)
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumQuestionErrorCode.QuestionNotIsExist));
+                    return methodResult;
+                }
+                else if (question.Config == null)
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumQuestionErrorCode.QuestionConfigNotIsExist));
+                    return methodResult;
+                }
 
-            //    var homeWorkQuestion = await _homeWorkQuestionRepository.Queryable.FirstOrDefaultAsync(x => x.Id == item.HomeWorkQuestionId, cancellationToken: cancellationToken);
-            //    if (homeWorkQuestion == null)
-            //    {
-            //        methodResult.AddErrorBadRequest(nameof(EnumHomeWorkQuestionErrorCode.HomeWorkQuestionNotExist));
-            //        return methodResult;
-            //    }
-            //    var question = await _questionRepository.GetByIdAsync(homeWorkQuestion.QuestionId);
-            //    if (question == null)
-            //    {
-            //        methodResult.AddErrorBadRequest(nameof(EnumQuestionErrorCode.QuestionNotIsExist));
-            //        return methodResult;
-            //    }
-            //    else if (question.Config == null)
-            //    {
-            //        methodResult.AddErrorBadRequest(nameof(EnumQuestionErrorCode.QuestionConfigNotIsExist));
-            //        return methodResult;
-            //    }
+                var homeWorkQuestion = await _homeWorkQuestionRepository.Queryable.Where(x => x.HomeWorkId == homeWorkResult.HomeWorkId && x.QuestionId == item.QuestionId)
+                                                                    .FirstOrDefaultAsync(cancellationToken: cancellationToken);
+                if (homeWorkQuestion == null)
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumHomeWorkQuestionErrorCode.HomeWorkQuestionNotExist));
+                    return methodResult;
+                }
+                var answer = item.Answer;
+                var (answerConfig, correctCount) = _answerTypeConverter.GetTotalCorrectByAsnwerType(ref answer, question.Config, question.QuestionType);
+                if (answerConfig == null)
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumVideoTimeCodeAnswerErrorCode.AnswerIsInTheWrongFormat));
+                    return methodResult;
+                }
 
-            //    var (answerConfig, correctCount) = _answerTypeConverter.GetTotalCorrectByAsnwerType(item.Answer, question.Config, question.QuestionType);
-            //    if (answerConfig == null)
-            //    {
-            //        methodResult.AddErrorBadRequest(nameof(EnumVideoTimeCodeAnswerErrorCode.AnswerIsInTheWrongFormat));
-            //        return methodResult;
-            //    }
-
-            //    //homeWorkAnswers.Add(new HomeWorkAnswer
-            //    //{
-            //    //    Answer = item.Answer,
-            //    //    CorrectCount = correctCount,
-            //    //    HomeWorkQuestionId = item.HomeWorkQuestionId,
-            //    //    HomeWorkResultId = item.HomeWorkResultId
-            //    //});
-            //}
+                homeWorkAnswers.Add(new HomeWorkAnswer
+                {
+                    Answer = answerConfig,
+                    CorrectCount = correctCount,
+                    HomeWorkQuestionId = homeWorkQuestion.Id,
+                    HomeWorkResultId = homeWorkResult.Id
+                });
+            }
 
             #endregion Validation
 
