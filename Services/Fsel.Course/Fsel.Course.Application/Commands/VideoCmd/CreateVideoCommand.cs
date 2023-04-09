@@ -1,6 +1,5 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-using System.Linq;
 using AutoMapper;
 using Fsel.Common.ActionResults;
 using Fsel.Course.Domain.Entities;

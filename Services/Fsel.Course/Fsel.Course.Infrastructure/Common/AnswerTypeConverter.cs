@@ -11,7 +11,7 @@ namespace Fsel.Course.Infrastructure.Common
 
     public class AnswerTypeConverter
     {
-        public (object?, int) GetTotalCorrectByAsnwerType(object? configAnswer, object? configQuestion, EnumQuestionType type)
+        public (object?, int) GetTotalCorrectByAsnwerType(ref object? configAnswer, object? configQuestion, EnumQuestionType type)
         {
             int totalCorrect = default;
             switch (type)
@@ -82,6 +82,10 @@ namespace Fsel.Course.Infrastructure.Common
                         number++;
                         item.IsExact = true;
                     }
+                    else
+                    {
+                        item.IsExact = false;
+                    }
                 }
             }
             configAnswer = dataAnswer;
@@ -102,6 +106,10 @@ namespace Fsel.Course.Infrastructure.Common
                         number++;
                         item.IsExact = true;
                     }
+                    else
+                    {
+                        item.IsExact = false;
+                    }
                 }
             }
             configAnswer = dataAnswer;
@@ -117,11 +125,12 @@ namespace Fsel.Course.Infrastructure.Common
             {
                 foreach (var item in dataAnswer.Answers)
                 {
-                    if (item.IsChecked && dataQuestion.Contents.Any(x => x.Id == item.Id && x.IsCorrect == item.IsChecked))
+                    var isCheck = item.IsChecked && dataQuestion.Contents.Any(x => x.Id == item.Id && x.IsCorrect == item.IsChecked);
+                    if (isCheck)
                     {
                         number++;
-                        item.IsExact = true;
                     }
+                    item.IsExact = isCheck;
                 }
             }
             configAnswer = dataAnswer;
@@ -138,6 +147,10 @@ namespace Fsel.Course.Infrastructure.Common
             {
                 dataAnswer.IsExact = true;
                 number++;
+            }
+            else
+            {
+                dataAnswer!.IsExact = false;
             }
             configAnswer = dataAnswer;
             return number;
@@ -157,6 +170,10 @@ namespace Fsel.Course.Infrastructure.Common
                     dataAnswer.IsExact = true;
                     number++;
                 }
+                else
+                {
+                    dataAnswer.IsExact = false;
+                }
             }
             configAnswer = dataAnswer;
             return number;
@@ -175,12 +192,16 @@ namespace Fsel.Course.Infrastructure.Common
                     dataAnswer.IsExact = true;
                     number++;
                 }
+                else
+                {
+                    dataAnswer.IsExact = false;
+                }
             }
             configAnswer = dataAnswer;
             return number;
         }
 
-        private static int GetTotalCorrectTypeGapFillGapAnswer(ref object? configAnswer, object? configQuestion)
+        private static int GetTotalCorrectTypeGapFillBySubAnswer(ref object? configAnswer, object? configQuestion)
         {
             var dataAnswer = configAnswer.Deserialize<GapFillAnswer>();
             var dataQuestion = configQuestion.Deserialize<GapFillQuestion>();
@@ -205,7 +226,7 @@ namespace Fsel.Course.Infrastructure.Common
             return number;
         }
 
-        private static int GetTotalCorrectTypeGapFillBySubAnswer(ref object? configAnswer, object? configQuestion)
+        private static int GetTotalCorrectTypeGapFillGapAnswer(ref object? configAnswer, object? configQuestion)
         {
             var dataAnswer = configAnswer.Deserialize<GapFillAnswer>();
             var dataQuestion = configQuestion.Deserialize<GapFillQuestion>();
@@ -239,13 +260,9 @@ namespace Fsel.Course.Infrastructure.Common
                     var content = dataQuestion.Contents.All(c => c.Id == item.Id && c.Words != null && item.Answer != null && c.Words.SequenceEqual(item.Answer));
                     if (content)
                     {
-                        item.IsExact = true;
                         number++;
                     }
-                    else
-                    {
-                        item.IsExact = false;
-                    }
+                    item.IsExact = content;
                 }
             }
             configAnswer = dataAnswer;

@@ -25,10 +25,11 @@ namespace Fsel.Course.Application.Commands.UnitCmd
 
         public async Task<MethodResult<bool>> Handle(DeleteUnitCommand request, CancellationToken cancellationToken)
         {
+            ArgumentNullException.ThrowIfNull(request);
             MethodResult<bool> methodResult = new MethodResult<bool>();
 
             var unit = await _unitRepository.Queryable
-                                    .Include(e => e.UnitLessons)
+                                    .Include(e => e.UnitLessons.Where(n => !n.IsDeleted))
                                     .FirstOrDefaultAsync(e => e.Id == request.Id, cancellationToken: cancellationToken);
             if (unit == null)
             {

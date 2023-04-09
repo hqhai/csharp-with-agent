@@ -7,9 +7,9 @@ namespace Fsel.Course.Infrastructure.Repositories
     using Fsel.Course.Domain.IRepositories;
     using Microsoft.EntityFrameworkCore;
 
-    public class HomeWorkQuestionRepository : BaseRepository<HomeWorkQuestion>, IHomeWorkQuestionRepository
+    public class HomeWorkResultRepository : BaseRepository<HomeWorkResult>, IHomeWorkResultRepository
     {
-        public HomeWorkQuestionRepository(CourseDbContext dbContext, AuthContext authContext) : base(dbContext, authContext)
+        public HomeWorkResultRepository(CourseDbContext dbContext, AuthContext authContext) : base(dbContext, authContext)
         {
         }
 
