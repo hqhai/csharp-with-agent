@@ -86,7 +86,7 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd
                 var (answerConfig, correctCount) = _answerTypeConverter.GetTotalCorrectByAsnwerType(ref answer, question.Config, question.QuestionType);
                 if (answerConfig == null)
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumVideoTimeCodeAnswerErrorCode.AnswerIsInTheWrongFormat));
+                    methodResult.AddErrorBadRequest(nameof(EnumHomeWorkAnswerErrorCode.AnswerIsInTheWrongFormat));
                     return methodResult;
                 }
 
