@@ -42,9 +42,7 @@ namespace Fsel.Course.Application.Queries.CourseQuery
             }
 
             var courseQuery = _courseRepository.Queryable
-                              .Include(course => course.CourseTeachers)
-                              .Where(x => request.CourseLevel == null || x.CourseLevel == request.CourseLevel)
-                              .Where(x => request.TeacherId == null || x.CourseTeachers.Select(n => n.TeacherId).Contains(request.TeacherId.Value))
+                              .Include(course => course.CourseTeachers.Where(n => !n.IsDeleted))
                               .Select(course => new CourseSearchModel
                               {
                                   Id = course.Id,
@@ -59,13 +57,22 @@ namespace Fsel.Course.Application.Queries.CourseQuery
                                   UpdatedDate = course.UpdatedDate,
                                   UpdatedUserId = course.UpdatedUserId,
                                   UpdatedFullName = course.UpdatedFullName,
-                                  TeacherId = course.CourseTeachers.Select(x => x.TeacherId).FirstOrDefault(),
+                                  TeacherIds = course.CourseTeachers.Where(n => !n.IsDeleted).Select(x => x.TeacherId).Distinct().ToList(),
                               });
 
-            //Keyword
             if (!string.IsNullOrEmpty(request.Keyword))
             {
                 courseQuery = courseQuery.Where(m => m.Id.ToString() == request.Keyword || (m.Name ?? string.Empty).Contains(request.Keyword));
+            }
+
+            if (request.CourseLevel != null)
+            {
+                courseQuery = courseQuery.Where(m => m.CourseLevel == request.CourseLevel);
+            }
+
+            if (request.TeacherId != null)
+            {
+                courseQuery = courseQuery.Where(m => m!.TeacherIds!.Any(x => x == request.TeacherId));
             }
 
             int totalItem = await courseQuery.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
@@ -76,12 +83,12 @@ namespace Fsel.Course.Application.Queries.CourseQuery
                     .ToListAsync(cancellationToken: cancellationToken)
                     .ConfigureAwait(false);
 
-            var teachers = await _userService.GetTeacherByIdsAsync(new GetTeacherByIdsQueryModel { Ids = courseQuery.Select(x => x.TeacherId ?? Guid.Empty).ToList() });
+            var teachers = await _userService.GetTeacherByIdsAsync(new GetTeacherByIdsQueryModel { Ids = courseQuery.SelectMany(x => x.TeacherIds!).Distinct().ToList() });
             if (teachers.IsSuccessStatusCode)
             {
                 foreach (var item in lists)
                 {
-                    item.TeacherName = teachers.Content?.Result?.FirstOrDefault(x => x.Id == item.TeacherId)?.Human?.FullName;
+                    item.TeacherNames = teachers.Content?.Result?.Where(x => item.TeacherIds!.Contains(x.Id)).Select(x => x.Human?.FullName ?? string.Empty).ToList();
                 }
             }
 

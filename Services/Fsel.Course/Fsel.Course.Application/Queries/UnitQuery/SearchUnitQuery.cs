@@ -44,39 +44,41 @@ namespace Fsel.Course.Application.Queries.UnitQuery
 
             var unitQuery = _unitRepository.Queryable
                                     .Include(x => x.CourseUnitMockTests.Where(y => !y.IsDeleted))
-                                    .Include(unit => unit.UnitLessons)
+                                    .Include(unit => unit.UnitLessons.Where(n => !n.IsDeleted))
                                     .ThenInclude(unitLesson => unitLesson.Lesson)
-                                    .ThenInclude(lesson => lesson!.LessonVideos)
+                                    .ThenInclude(lesson => lesson!.LessonVideos.Where(n => !n.IsDeleted))
                                     .ThenInclude(lessonVideo => lessonVideo.Video)
-                                    .Where(x => x.CourseLevel == request.CourseLevel)
 
                             .Select(unit => new UnitSearchModel
                             {
                                 Id = unit.Id,
                                 Name = unit.Name,
-                                DisplayName = unit.DisplayName,
-                                IsActive = unit.CourseUnitMockTests.Any(),
+                                Code = unit.Code,
+                                IsActive = unit.CourseUnitMockTests.Where(n => !n.IsDeleted).Any(),
                                 CourseLevel = unit.CourseLevel,
                                 CreatedDate = unit.CreatedDate,
                                 CreatedUserId = unit.CreatedUserId,
                                 UpdatedDate = unit.UpdatedDate,
                                 UpdatedUserId = unit.UpdatedUserId,
-                                TeacherId = unit.UnitLessons.Select(l => l.Lesson)
-                                                .SelectMany(lv => lv!.LessonVideos)
+                                TeacherIds = unit.UnitLessons.Select(l => l.Lesson)
+                                                .SelectMany(lv => lv!.LessonVideos.Where(n => !n.IsDeleted))
                                                 .Select(v => v.Video)
-                                                .Select(n => n!.TeacherId).FirstOrDefault(),
+                                                .Select(n => n!.TeacherId ?? Guid.Empty).ToList()
                             });
 
-            //Keyword
             if (!string.IsNullOrEmpty(request.Keyword))
             {
-                unitQuery = unitQuery.Where(m => m.Id.ToString() == request.Keyword || (m.Name ?? string.Empty).Contains(request.Keyword));
+                unitQuery = unitQuery.Where(m => m.Id.ToString() == request.Keyword || (m.Name ?? string.Empty).Contains(request.Keyword) || (m.Code ?? string.Empty).Contains(request.Keyword));
             }
 
-            //Keyword
+            if (request.CourseLevel != null)
+            {
+                unitQuery = unitQuery.Where(m => m.CourseLevel == request.CourseLevel);
+            }
+
             if (request.TeacherId.HasValue)
             {
-                unitQuery = unitQuery.Where(m => m.TeacherId == request.TeacherId.Value);
+                unitQuery = unitQuery.Where(m => m!.TeacherIds!.Any(x => x == request.TeacherId));
             }
 
             int totalItem = await unitQuery.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
@@ -87,12 +89,12 @@ namespace Fsel.Course.Application.Queries.UnitQuery
                     .ToListAsync(cancellationToken: cancellationToken)
                     .ConfigureAwait(false);
 
-            var teachers = await _userService.GetTeacherByIdsAsync(new GetTeacherByIdsQueryModel { Ids = unitQuery.Select(x => x.TeacherId ?? Guid.Empty).ToList() });
+            var teachers = await _userService.GetTeacherByIdsAsync(new GetTeacherByIdsQueryModel { Ids = unitQuery.SelectMany(x => x.TeacherIds!).Distinct().ToList() });
             if (teachers.IsSuccessStatusCode)
             {
                 foreach (var item in lists)
                 {
-                    item.TeacherName = teachers.Content?.Result?.FirstOrDefault(x => x.Id == item.TeacherId)?.Human?.FullName;
+                    item.TeacherNames = teachers.Content?.Result?.Where(x => item.TeacherIds!.Contains(x.Id)).Select(x => x.Human?.FullName ?? string.Empty).ToList();
                 }
             }
 

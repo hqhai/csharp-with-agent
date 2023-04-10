@@ -4,8 +4,10 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
 {
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base;
+    using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Course.Lms.Application.Services.UserServices;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -26,6 +28,7 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
         private readonly IVideoTimeCodeAnswerRepository _videoTimeCodeAnswerRepository;
         private readonly IExerciseRepository _exerciseRepository;
         private readonly IQuestionRepository _questionRepository;
+        private readonly IUserService _userService;
         private readonly AuthContext _authContext;
 
         public GetLessonScoreQueryHandler(
@@ -34,7 +37,8 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
             IVideoResultRepository videoResultRepository,
             IVideoTimeCodeAnswerRepository videoTimeCodeAnswerRepository,
             IExerciseRepository exerciseRepository,
-            IQuestionRepository questionRepository
+            IQuestionRepository questionRepository,
+            IUserService userService
             )
         {
             _authContext = authContext;
@@ -43,13 +47,21 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
             _videoTimeCodeAnswerRepository = videoTimeCodeAnswerRepository;
             _exerciseRepository = exerciseRepository;
             _questionRepository = questionRepository;
+            _userService = userService;
         }
 
         public async Task<MethodResult<LessonScoreModel>> Handle(GetLessonScoreQuery request, CancellationToken cancellationToken)
         {
             var methodResult = new MethodResult<LessonScoreModel>();
-
             var lessonScore = new LessonScoreModel();
+
+            var student = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId.ToString());
+            if (!student.IsSuccessStatusCode)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumCourseClassStudentErrorCode.UserIdNotExist));
+                return methodResult;
+            }
+            var studentId = student?.Content?.Result?.Id;
 
             var lessonSkillScoreQuery = from lr in _lessonResultRepository.Queryable
                                         join vr in _videoResultRepository.Queryable on lr.Id equals vr.LessonResultId
@@ -59,7 +71,7 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
                                         where lr.CourseId == request.CourseId &&
                                               lr.UnitId == request.UnitId &&
                                               lr.LessonId == request.LessonId &&
-                                              lr.StudentId == _authContext.CurrentUserId
+                                              lr.StudentId == studentId
                                         group new { q, vtca } by e.CourseSkill into g
                                         select new LessonSkillScoreModel
                                         {

@@ -53,6 +53,7 @@ namespace Fsel.Course.Domain.Entities
         }
 
         public ICollection<ExerciseQuestion> ExerciseQuestions { get; set; } = new List<ExerciseQuestion>();
-        public VideoTimeCodeAnswer? VideoTimeCodeAnswer { get; set; }
+        public ICollection<VideoTimeCodeAnswer> VideoTimeCodeAnswers { get; set; } = new List<VideoTimeCodeAnswer>();
+        public ICollection<HomeWorkQuestion> HomeWorkQuestions { get; set; } = new List<HomeWorkQuestion>();
     }
 }

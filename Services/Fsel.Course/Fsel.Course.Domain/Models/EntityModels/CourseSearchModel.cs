@@ -21,7 +21,9 @@ namespace Fsel.Course.Domain.Models.EntityModels
 
         public EnumCourseType CourseType { get; set; }
 
-        public Guid? TeacherId { get; set; }
+        public IList<Guid>? TeacherIds { get; set; }
+
+        public IList<string>? TeacherNames { get; set; }
 
         public string? TeacherName { get; set; }
     }

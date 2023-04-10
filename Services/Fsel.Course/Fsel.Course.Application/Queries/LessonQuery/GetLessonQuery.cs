@@ -7,7 +7,6 @@ using Fsel.Course.Domain.IRepositories;
 using Fsel.Course.Domain.Models.EntityModels;
 using MediatR;
 using Microsoft.AspNetCore.Http;
-using Microsoft.EntityFrameworkCore;
 
 namespace Fsel.Course.Application.Queries.LessonQuery
 {
@@ -43,6 +42,7 @@ namespace Fsel.Course.Application.Queries.LessonQuery
 
             var lessonModel = _mapper.Map<LessonModel>(lesson);
             lessonModel.Video = _mapper.Map<VideoModel>(lesson.LessonVideos.Select(x => x.Video).FirstOrDefault());
+            lessonModel.HomeWorks = _mapper.Map<IList<HomeWorkModel>>(lesson.LessonHomeWorks.Select(x => x.HomeWork));
             lessonModel.IsActive = lesson.UnitLessons.Any();
 
             methodResult.Result = lessonModel;

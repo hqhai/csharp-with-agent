@@ -43,10 +43,7 @@ builder.Services.AddScoped<IQuestionFormRepository, QuestionFormRepository>();
 builder.Services.AddScoped<ILessonInstructionRepository, LessonInstructionRepository>();
 
 builder.Services.AddScoped<QuestionTypeConverter>();
-builder.Services.AddScoped<QuestionTypeCountConverter>();
-builder.Services.AddScoped<QuestionTypeValidation>();
-builder.Services.AddScoped<AnswerTypeCountConverter>();
-builder.Services.AddScoped<AnswerTypeValidatetion>();
+builder.Services.AddScoped<AnswerTypeConverter>();
 builder.AddRefitClients(typeof(IUserService), appSetting?.Services?.UserApiUrl);
 var app = builder.Build();
 

@@ -22,18 +22,15 @@ namespace Fsel.Course.Application.Commands.VideoCmd
     {
         private readonly IVideoRepository _videoRepository;
         private readonly IMapper _mapper;
-        private readonly QuestionTypeCountConverter _questionTypeCountConverter;
-        private readonly QuestionTypeValidation _questionTypeValidation;
+        private readonly QuestionTypeConverter _questionTypeConverter;
 
         public UpdateVideoCommandHandler(IVideoRepository videoRepository
             , IMapper mapper
-            , QuestionTypeCountConverter questionTypeCountConverter
-            , QuestionTypeValidation questionTypeValidation)
+            , QuestionTypeConverter questionTypeConverter)
         {
             _videoRepository = videoRepository;
             _mapper = mapper;
-            _questionTypeCountConverter = questionTypeCountConverter;
-            _questionTypeValidation = questionTypeValidation;
+            _questionTypeConverter = questionTypeConverter;
         }
 
         public async Task<MethodResult<VideoModel>> Handle(UpdateVideoCommand request, CancellationToken cancellationToken)
@@ -62,18 +59,14 @@ namespace Fsel.Course.Application.Commands.VideoCmd
 
             #endregion Tạm thời không validate isTeacher
 
-            #region Tạm thời không validate VideoUsed
-
-            //var isVideoUsed = await _videoRepository.IsVideoUsed(request.Id);
-            //if (isVideoUsed)
-            //{
-            //    methodResult.AddErrorBadRequest(
-            //        nameof(EnumVideoErrorCode.VideoUsed),
-            //        nameof(request.Id), request.Id);
-            //    return methodResult;
-            //}
-
-            #endregion Tạm thời không validate VideoUsed
+            var isVideoUsed = await _videoRepository.IsVideoUsed(request.Id);
+            if (isVideoUsed)
+            {
+                methodResult.AddErrorBadRequest(
+                    nameof(EnumVideoErrorCode.VideoUsed),
+                    nameof(request.Id), request.Id);
+                return methodResult;
+            }
 
             var listTimeCodeType = request.VideoTimeCodes.Select(x => x.TimeCodeType).ToList();
 
@@ -127,13 +120,13 @@ namespace Fsel.Course.Application.Commands.VideoCmd
                                 else
                                 {
                                     Question question = _mapper.Map<Question>(q);
-                                    var ischeck = _questionTypeValidation.TryParseQuestionType(question.Config, question.QuestionType);
-                                    if (!ischeck)
+                                    var (config, correctTotal) = _questionTypeConverter.QuestionTypeConverterObject(question.Config, question.QuestionType, isShowCorrectTotal: !question.Ungraded, false);
+                                    if (config == null)
                                     {
                                         methodResult.AddErrorBadRequest(nameof(EnumVideoErrorCode.ConfigIsInTheWrongFormat), nameof(question.Config));
                                     }
+                                    question.CorrectTotal = correctTotal;
 
-                                    question.CorrectTotal = question.Ungraded ? default : _questionTypeCountConverter.GetTotalCorrectByQuestionType(question.Config, question.QuestionType) ?? default;
 
                                     excercise.ExerciseQuestions.Add(new ExerciseQuestion
                                     {

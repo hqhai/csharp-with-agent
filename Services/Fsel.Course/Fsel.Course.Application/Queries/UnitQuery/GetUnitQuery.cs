@@ -28,6 +28,8 @@ namespace Fsel.Course.Application.Queries.UnitQuery
 
         public async Task<MethodResult<UnitModel>> Handle(GetUnitQuery request, CancellationToken cancellationToken)
         {
+            ArgumentNullException.ThrowIfNull(request);
+
             MethodResult<UnitModel> methodResult = new MethodResult<UnitModel>();
 
             var unit = await _unitRepository.GetIncludeByIdAsync(request.Id);
@@ -43,6 +45,7 @@ namespace Fsel.Course.Application.Queries.UnitQuery
 
             var unitModel = _mapper.Map<UnitModel>(unit);
             unitModel.IsActive = unit.CourseUnitMockTests.Any();
+            unitModel.Lessons = _mapper.Map<IList<LessonModel>>(unit.UnitLessons.Select(x => x.Lesson));
 
             methodResult.Result = unitModel;
             methodResult.StatusCode = StatusCodes.Status200OK;
