@@ -3,15 +3,14 @@
 namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
 {
     using Fsel.Common.ActionResults;
-    using Fsel.Core.Base;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.CommandModels.VideoTimeCodeAnswers;
     using Fsel.Course.Infrastructure.Common;
-    using Fsel.Course.Lms.Application.Services.UserServices;
     using MediatR;
     using Microsoft.AspNetCore.Http;
+    using Microsoft.EntityFrameworkCore;
 
     public class CreateVideoTimeCodeAnswerCommand : CreateVideoTimeCodeAnswerCommandModel, IRequest<MethodResult<bool>>
     {
@@ -19,30 +18,20 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
 
     public class CreateVideoTimeCodeAnswerCommandHandler : IRequestHandler<CreateVideoTimeCodeAnswerCommand, MethodResult<bool>>
     {
-        private readonly IVideoResultRepository _videoResultRepository;
         private readonly IVideoTimeCodeAnswerRepository _videoTimeCodeAnswerRepository;
-        private readonly AuthContext _authContext;
-        private readonly ILessonRepository _lessonRepository;
         private readonly IQuestionRepository _questionRepository;
-        private readonly IUserService _userService;
         private readonly AnswerTypeConverter _answerTypeConverter;
+        private readonly ILessonResultRepository _lessonResultRepository;
 
-        public CreateVideoTimeCodeAnswerCommandHandler(
-            IVideoResultRepository videoResultRepository
-            , IVideoTimeCodeAnswerRepository videoTimeCodeAnswerRepository
-            , AuthContext authContext
-            , ILessonRepository lessonRepository
+        public CreateVideoTimeCodeAnswerCommandHandler(IVideoTimeCodeAnswerRepository videoTimeCodeAnswerRepository
             , IQuestionRepository questionRepository
-            , IUserService userService
-            , AnswerTypeConverter answerTypeConverter)
+            , AnswerTypeConverter answerTypeConverter
+            , ILessonResultRepository lessonResultRepository)
         {
-            _videoResultRepository = videoResultRepository;
             _videoTimeCodeAnswerRepository = videoTimeCodeAnswerRepository;
-            _authContext = authContext;
-            _lessonRepository = lessonRepository;
             _questionRepository = questionRepository;
             _answerTypeConverter = answerTypeConverter;
-            _userService = userService;
+            _lessonResultRepository = lessonResultRepository;
         }
 
         public async Task<MethodResult<bool>> Handle(CreateVideoTimeCodeAnswerCommand request, CancellationToken cancellationToken)
@@ -58,23 +47,13 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
                 return methodResult;
             }
 
-            var lesson = await _lessonRepository.GetIncludeVideoByIdAsync(request.LessonId);
-            if (lesson == null)
+            var lessonResult = await _lessonResultRepository.Queryable.Include(x => x.VideoResult).FirstOrDefaultAsync(x => x.Id == request.LessonResultId, cancellationToken);
+            if (lessonResult == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumLessonErrorCode.LessonNotExist));
                 return methodResult;
             }
-            var videoId = lesson.LessonVideos.Select(x => x.VideoId).FirstOrDefault();
-            var lessonResultId = lesson.LessonResults.Select(x => x.Id).FirstOrDefault();
-
-            var student = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId.ToString());
-            if (!student.IsSuccessStatusCode)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumCourseClassStudentErrorCode.UserIdNotExist));
-                return methodResult;
-            }
-            var videoResult = await _videoResultRepository.GetIncludeTimeCodeAnswerByIdAsync(videoId, lessonResultId, student!.Content!.Result!.Id);
-
+            var videoResult = lessonResult.VideoResult;
             if (videoResult == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumVideoResultErrorCode.VideoResultNotExist));
