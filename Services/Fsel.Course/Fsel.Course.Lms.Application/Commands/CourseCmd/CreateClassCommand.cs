@@ -104,23 +104,8 @@ namespace Fsel.Course.Lms.Application.Commands.CourseCmd
                 UnitId = x!.Id,
             }).ToList();
 
-            var lessonResults = units.GroupBy(x => x?.Id).Select(x => new { x.Key, Lessons = x.SelectMany(n => n!.UnitLessons).Select(x => x!.Lesson) })
-                                     .SelectMany(x => x.Lessons.Select(n => new LessonResult
-                                     {
-                                         StudentId = studentId ?? default,
-                                         CourseId = course.Id,
-                                         UnitId = x.Key ?? default,
-                                         LessonId = n?.Id ?? default,
-                                         VideoResult = new VideoResult
-                                         {
-                                             VideoId = n?.LessonVideos.FirstOrDefault()?.VideoId ?? default,
-                                             StudentId = studentId ?? default
-                                         }
-                                     })).ToList();
-
             course.CourseResult = courseResult;
             course.UnitResults = unitResults;
-            course.LessonResults = lessonResults;
             student = await _userService.UpdateStudentByClassAsync(classId ?? Guid.Empty);
 
             #endregion Validation
