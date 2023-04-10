@@ -34,7 +34,8 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<IList<LessonModel>> methodResult = new MethodResult<IList<LessonModel>>();
             var lessonQuery = await _lessonRepository.Queryable
-                                .Include(x => x.UnitLessons)
+                                .Include(x => x.UnitLessons.Where(x => !x.IsDeleted))
+                                .Where(x => x.UnitLessons.Select(x => x.UnitId).Contains(request.UnitId))
                                 .AsNoTracking()
                                 .Select(x => new LessonModel
                                 {
