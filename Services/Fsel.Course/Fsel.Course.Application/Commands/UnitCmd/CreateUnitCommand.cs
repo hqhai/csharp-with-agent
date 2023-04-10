@@ -47,8 +47,6 @@ namespace Fsel.Course.Application.Commands.UnitCmd
 
             #region Validation
 
-            var courseUnitMockTest = await _courseUnitMockTestRepository.Queryable.Where(x => x.CourseId == _courseId && x.UnitId != null).ToListAsync(cancellationToken);
-
             Unit unit = _mapper.Map<Unit>(request);
 
             if (!unit.IsValid())
@@ -79,6 +77,8 @@ namespace Fsel.Course.Application.Commands.UnitCmd
 
             #endregion Validation
 
+            var courseUnitMockTest = await _courseUnitMockTestRepository.Queryable.Where(x => x.CourseId == _courseId).OrderByDescending(x => x.DisplayOrder).FirstOrDefaultAsync(cancellationToken);
+
             await _unitRepository.ExecuteTransactionAsync(async () =>
             {
                 unit.UnitLessons = request.LessonIds.Select(x => new UnitLesson
@@ -94,7 +94,7 @@ namespace Fsel.Course.Application.Commands.UnitCmd
                      }
                  };
 
-                unit.CourseUnitMockTests = new List<CourseUnitMockTest>() { new CourseUnitMockTest { CourseId = _courseId, DisplayOrder = courseUnitMockTest.Count + 1 } };
+                unit.CourseUnitMockTests = new List<CourseUnitMockTest>() { new CourseUnitMockTest { CourseId = _courseId, DisplayOrder = (courseUnitMockTest?.DisplayOrder ?? default) + 1 } };
 
                 unit = _unitRepository.Add(unit);
                 await _unitRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
