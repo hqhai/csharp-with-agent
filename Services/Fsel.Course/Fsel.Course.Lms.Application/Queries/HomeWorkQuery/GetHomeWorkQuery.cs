@@ -80,7 +80,7 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkQuery
                     CorrectTotal = n!.CorrectTotal,
                     Ungraded = n!.Ungraded,
                     Explanation = n!.Explanation,
-                    Config = _questionTypeConverter.QuestionTypeConverterObject(n.Config, n.QuestionType).Item1,
+                    Config = _questionTypeConverter.QuestionTypeConverterObject(n.Config, n.QuestionType, isDisableAnswers: true).Item1,
                     QuestionType = n!.QuestionType,
                 }).ToList(),
             };
