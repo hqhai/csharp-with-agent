@@ -32,6 +32,8 @@ namespace Fsel.Course.Lms.Application.Commands.LessonCmd
         private readonly AuthContext _authContext;
         private readonly ILessonRepository _lessonRepository;
         private readonly ILessonResultRepository _lessonResultRepository;
+        private readonly IUnitResultRepository _unitResultRepository;
+        private readonly ICourseResultRepository _courseResultRepository;
 
         public StartLessonCommandHandler(ICourseRepository courseRepository
             , IUnitRepository unitRepository
@@ -39,7 +41,9 @@ namespace Fsel.Course.Lms.Application.Commands.LessonCmd
             , IMapper mapper
             , AuthContext authContext
             , ILessonRepository lessonRepository
-            , ILessonResultRepository lessonResultRepository)
+            , ILessonResultRepository lessonResultRepository
+            , IUnitResultRepository unitResultRepository
+            , ICourseResultRepository courseResultRepository)
         {
             _courseRepository = courseRepository;
             _unitRepository = unitRepository;
@@ -48,6 +52,8 @@ namespace Fsel.Course.Lms.Application.Commands.LessonCmd
             _authContext = authContext;
             _lessonRepository = lessonRepository;
             _lessonResultRepository = lessonResultRepository;
+            _unitResultRepository = unitResultRepository;
+            _courseResultRepository = courseResultRepository;
         }
 
         public async Task<MethodResult<LessonResultModel>> Handle(StartLessonCommand request, CancellationToken cancellationToken)
@@ -94,10 +100,34 @@ namespace Fsel.Course.Lms.Application.Commands.LessonCmd
 
             var studentId = student?.Content?.Result?.Id;
 
-            var lessonResult = _lessonResultRepository.Queryable
-                                    .Where(x => x!.LessonId == request.LessonId && x.StudentId == studentId)
-                                    .FirstOrDefault();
+            var courseResult = _courseResultRepository.Queryable.Where(x => x!.CourseId == request.CourseId && x.StudentId == studentId).FirstOrDefault();
+            if (courseResult == null)
+            {
+                courseResult = new CourseResult
+                {
+                    StudentId = studentId ?? default,
+                    CourseId = course.Id
+                };
 
+                _courseResultRepository.Add(courseResult);
+                await _courseResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+            }
+
+            var unitResult = _unitResultRepository.Queryable.Where(x => x!.CourseId == request.CourseId && x!.UnitId == request.UnitId && x.StudentId == studentId).FirstOrDefault();
+            if (unitResult == null)
+            {
+                unitResult = new UnitResult
+                {
+                    StudentId = studentId ?? default,
+                    CourseId = course.Id,
+                    UnitId = unit.Id,
+                };
+
+                _unitResultRepository.Add(unitResult);
+                await _unitResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+            }
+
+            var lessonResult = _lessonResultRepository.Queryable.Where(x => x!.LessonId == request.LessonId && x.StudentId == studentId).FirstOrDefault();
             if (lessonResult == null)
             {
                 lessonResult = new LessonResult
@@ -109,7 +139,7 @@ namespace Fsel.Course.Lms.Application.Commands.LessonCmd
                     VideoResult = new VideoResult
                     {
                         VideoId = lesson.LessonVideos.FirstOrDefault()!.VideoId,
-                        StudentId = studentId ?? default
+                        StudentId = studentId ?? default,
                     }
                 };
                 _lessonResultRepository.Add(lessonResult);

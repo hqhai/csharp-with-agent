@@ -9,7 +9,6 @@ namespace Fsel.Course.Domain.Models.CommandModels.Lessons
     public class CreateLessonCommandModel
     {
         public string? Name { get; set; }
-        public string? DisplayName { get; set; }
         public string? InstructionContent { get; set; }
         public IList<Guid>? HomeWorkIds { get; set; }
         public IList<Guid>? VideoIds { get; set; }

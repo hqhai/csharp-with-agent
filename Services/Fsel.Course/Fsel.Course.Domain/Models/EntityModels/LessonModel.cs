@@ -11,8 +11,6 @@ namespace Fsel.Course.Domain.Models.EntityModels
 
         public string? Name { get; set; }
 
-        public string? DisplayName { get; set; }
-
         public bool IsActive { get; set; }
 
         public EnumCourseLevel CourseLevel { get; set; }

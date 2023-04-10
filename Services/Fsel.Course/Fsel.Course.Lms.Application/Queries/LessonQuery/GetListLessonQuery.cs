@@ -42,7 +42,6 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
                                     Id = x.Id,
                                     Name = x.Name,
                                     InstructionContent = x.InstructionContent,
-                                    DisplayName = x.DisplayName,
                                 }).ToListAsync(cancellationToken: cancellationToken);
 
             if (lessonQuery.Count == 0)

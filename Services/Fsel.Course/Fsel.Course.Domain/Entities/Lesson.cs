@@ -23,12 +23,6 @@ namespace Fsel.Course.Domain.Entities
         public string? InstructionContent { get; set; }
 
         /// <summary>
-        /// Tên hiển thị
-        /// </summary>
-        [MaxLength(250, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
-        public string? DisplayName { get; set; }
-
-        /// <summary>
         /// Trình độ khóa
         /// </summary>
         public EnumCourseLevel CourseLevel { get; set; }
