@@ -52,12 +52,24 @@ namespace Fsel.Course.Lms.Api.Controllers
         /// <summary>
         /// Get List Unit
         /// </summary>
-        [HttpGet]
+        [HttpGet("get-list-lesson-unit")]
         [ProducesResponseType(typeof(MethodResult<IList<LessonModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetListLessonByUnitId([FromQuery] GetListLessonQuery query)
         {
             MethodResult<IList<LessonModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Get lesson homework score
+        /// </summary>
+        [HttpGet("get-lesson-homework-score")]
+        [ProducesResponseType(typeof(MethodResult<IList<LessonHomeworkSearchModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetLessonHomeWorkScore([FromQuery] GetLessonHomeworkQuery query)
+        {
+            MethodResult<IList<LessonHomeworkSearchModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
     }
