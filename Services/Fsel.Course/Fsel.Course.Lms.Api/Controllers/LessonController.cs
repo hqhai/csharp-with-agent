@@ -53,7 +53,7 @@ namespace Fsel.Course.Lms.Api.Controllers
         /// <summary>
         /// Get List Unit
         /// </summary>
-        [HttpGet]
+        [HttpGet("get-list-lesson")]
         [ProducesResponseType(typeof(MethodResult<IList<LessonModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetListLessonByUnitId([FromQuery] GetListLessonQuery query)
