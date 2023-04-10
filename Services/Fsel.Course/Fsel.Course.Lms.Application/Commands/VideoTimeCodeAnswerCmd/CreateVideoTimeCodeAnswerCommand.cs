@@ -67,15 +67,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
                 return methodResult;
             }
             var lessonResultId = lessonResult.Id;
-            var videoId = lessonResult.VideoResult!.VideoId;
-
-            var student = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId.ToString());
-            if (!student.IsSuccessStatusCode)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumCourseClassStudentErrorCode.UserIdNotExist));
-                return methodResult;
-            }
-            var videoResult = await _videoResultRepository.GetIncludeTimeCodeAnswerByIdAsync(videoId, lessonResultId, student!.Content!.Result!.Id);
+            var videoResult = lessonResult.VideoResult;
 
             if (videoResult == null)
             {
