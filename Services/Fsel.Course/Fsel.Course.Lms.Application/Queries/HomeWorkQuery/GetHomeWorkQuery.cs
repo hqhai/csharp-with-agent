@@ -3,13 +3,13 @@
 namespace Fsel.Course.Lms.Application.Queries.HomeWorkQuery
 {
     using System;
-    using System.Collections.Generic;
     using System.Linq;
-    using System.Text;
     using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base;
+    using Fsel.Course.Domain.Entities;
+    using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
@@ -37,7 +37,6 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkQuery
             , IHomeWorkRepository homeWorkRepository
             , QuestionTypeConverter questionTypeConverter
             , AuthContext authContext
-
             , IUserService userService)
         {
             _mapper = mapper;
@@ -68,6 +67,7 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkQuery
                 methodResult.AddErrorBadRequest(nameof(EnumHomeWorkErrorCode.HomeWorkNotExist), nameof(request.HomeWorkId), request?.HomeWorkId);
                 return methodResult;
             }
+
             var homeWorkModel = new HomeWorkModel
             {
                 Id = homeWork.Id,
@@ -80,7 +80,7 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkQuery
                     CorrectTotal = n!.CorrectTotal,
                     Ungraded = n!.Ungraded,
                     Explanation = n!.Explanation,
-                    Config = n!.Config,
+                    Config = _questionTypeConverter.QuestionTypeConverterObject(n.Config, n.QuestionType).Item1,
                     QuestionType = n!.QuestionType,
                 }).ToList(),
             };
