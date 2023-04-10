@@ -10,7 +10,7 @@ using Fsel.Course.Domain.Models.CommandModels.Units;
 using Fsel.Course.Domain.Models.EntityModels;
 using MediatR;
 using Microsoft.AspNetCore.Http;
-
+using Microsoft.EntityFrameworkCore;
 using Unit = Fsel.Course.Domain.Entities.Unit;
 
 namespace Fsel.Course.Application.Commands.UnitCmd
@@ -25,14 +25,20 @@ namespace Fsel.Course.Application.Commands.UnitCmd
         private readonly IMapper _mapper;
         private readonly ILessonRepository _lessonRepository;
         private readonly IMockTestRepository _mockTestRepository;
+        private readonly Guid _courseId = new Guid("8B11384D-F28E-48EA-96F2-0C7B703ACC5F");
+        private readonly ICourseUnitMockTestRepository _courseUnitMockTestRepository;
 
-        public CreateUnitCommandHandler(IUnitRepository unitRepository, ILessonRepository lessonRepository, IMockTestRepository mockTestRepository,
-            IMapper mapper)
+        public CreateUnitCommandHandler(IUnitRepository unitRepository
+            , ILessonRepository lessonRepository
+            , IMockTestRepository mockTestRepository
+            , IMapper mapper
+            , ICourseUnitMockTestRepository courseUnitMockTestRepository)
         {
             _lessonRepository = lessonRepository;
             _unitRepository = unitRepository;
             _mockTestRepository = mockTestRepository;
             _mapper = mapper;
+            _courseUnitMockTestRepository = courseUnitMockTestRepository;
         }
 
         public async Task<MethodResult<UnitModel>> Handle(CreateUnitCommand request, CancellationToken cancellationToken)
@@ -71,6 +77,8 @@ namespace Fsel.Course.Application.Commands.UnitCmd
 
             #endregion Validation
 
+            var courseUnitMockTest = await _courseUnitMockTestRepository.Queryable.Where(x => x.CourseId == _courseId).OrderByDescending(x => x.DisplayOrder).FirstOrDefaultAsync(cancellationToken);
+
             await _unitRepository.ExecuteTransactionAsync(async () =>
             {
                 unit.UnitLessons = request.LessonIds.Select(x => new UnitLesson
@@ -85,6 +93,8 @@ namespace Fsel.Course.Application.Commands.UnitCmd
                          MockTestId = request.MockTestId,
                      }
                  };
+
+                unit.CourseUnitMockTests = new List<CourseUnitMockTest>() { new CourseUnitMockTest { CourseId = _courseId, DisplayOrder = (courseUnitMockTest?.DisplayOrder ?? default) + 1 } };
 
                 unit = _unitRepository.Add(unit);
                 await _unitRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
