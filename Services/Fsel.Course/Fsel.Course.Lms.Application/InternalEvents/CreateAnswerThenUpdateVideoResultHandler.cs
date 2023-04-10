@@ -11,53 +11,57 @@ namespace Fsel.Course.Lms.Application.InternalEvents
 
     public class CreateAnswerThenUpdateVideoResultHandler : INotificationHandler<EntityCreatedEvent<VideoTimeCodeAnswer>>
     {
+        private readonly IVideoRepository _videoRepository;
         private readonly IVideoResultRepository _videoResultRepository;
-        private readonly IVideoTimeCodeAnswerRepository _videoTimeCodeAnswerRepository;
 
         public CreateAnswerThenUpdateVideoResultHandler(IVideoResultRepository videoResultRepository
-            , IVideoTimeCodeAnswerRepository videoTimeCodeAnswerRepository)
+            , IVideoRepository videoRepository)
         {
             _videoResultRepository = videoResultRepository;
-            _videoTimeCodeAnswerRepository = videoTimeCodeAnswerRepository;
+            _videoRepository = videoRepository;
         }
 
         public async Task Handle(EntityCreatedEvent<VideoTimeCodeAnswer> notification, CancellationToken cancellationToken)
         {
-            //ArgumentNullException.ThrowIfNull(notification);
+            ArgumentNullException.ThrowIfNull(notification);
 
-            //var videoTimeCodeAnswer = notification.Data;
-            //var videoTimeCodeAnswers = await _videoTimeCodeAnswerRepository.Queryable.Include(x => x.Question).Where(x => x.VideoResultId == videoTimeCodeAnswer.VideoResultId).ToListAsync(cancellationToken: cancellationToken);
-            //var videoResult = await _videoResultRepository.Queryable.FirstOrDefaultAsync(x => x.Id == videoTimeCodeAnswer.VideoResultId, cancellationToken: cancellationToken);
-            //if (videoResult != null && videoResult.Status != EnumResultStatus.Done)
-            //{
-            //    videoResult.CorrectCount = videoTimeCodeAnswers.Sum(x => x.CorrectCount);
-            //    videoResult.CorrectTotal = videoTimeCodeAnswers.Sum(x => x.Question!.CorrectTotal);
+            var videoTimeCodeAnswer = notification.Data;
+            var videoResult = videoTimeCodeAnswer.VideoResult;
+            var question = videoTimeCodeAnswer.Question;
 
-            //    if (await CheckStatusVideoResult(videoResult.Id))
-            //    {
-            //        videoResult.Status = EnumResultStatus.Done;
-            //    }
-            //    _videoResultRepository.Update(videoResult);
-            //    await _videoTimeCodeAnswerRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-            //}
+            if (videoResult != null)
+            {
+                videoResult.CorrectCount += videoTimeCodeAnswer.CorrectCount;
+                videoResult.CorrectTotal += question?.CorrectTotal ?? default;
+
+                if (await IsVideoResultDone(videoResult))
+                {
+                    videoResult.Status = EnumResultStatus.Done;
+                }
+
+                _videoResultRepository.Update(videoResult);
+                await _videoResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken);
+            }
         }
 
-        public async Task<bool> CheckStatusVideoResult(Guid id)
+        public async Task<bool> IsVideoResultDone(VideoResult videoResult)
         {
-            var videoResult = await _videoResultRepository.Queryable.Include(x => x.VideoTimeCodeAnswers)
-                                                        .Include(x => x.Video)
-                                                        .ThenInclude(x => x!.VideoTimeCodes.Where(y => !y.IsDeleted))
-                                                        .ThenInclude(x => x.TimeCodeExercises.Where(y => !y.IsDeleted))
-                                                        .ThenInclude(x => x.Exercise)
-                                                        .ThenInclude(x => x!.ExerciseQuestions.Where(y => !y.IsDeleted))
-                                                        .ThenInclude(x => x.Question)
-                                                        .FirstOrDefaultAsync(x => x.Id == id);
-            var countTotalQuestion = videoResult!.Video!.VideoTimeCodes.SelectMany(x => x.TimeCodeExercises.Where(y => !y.IsDeleted))
-                                                                    .Select(x => x.Exercise)
-                                                                    .SelectMany(x => x!.ExerciseQuestions.Where(y => !y.IsDeleted))
-                                                                    .Select(x => x.Question).Count();
+            var answerCount = await _videoResultRepository.Queryable
+                                                .Include(x => x.VideoTimeCodeAnswers)
+                                                .Where(x => x.Id == videoResult.Id && x.VideoTimeCodeAnswers != null)
+                                                .SumAsync(x => x.VideoTimeCodeAnswers.Count);
 
-            return countTotalQuestion == videoResult.VideoTimeCodeAnswers.Count;
+            var questionCount = await _videoRepository.Queryable
+                                                .Include(x => x.VideoTimeCodes.Where(n => !n.IsDeleted))
+                                                .ThenInclude(x => x.TimeCodeExercises.Where(n => !n.IsDeleted))
+                                                .ThenInclude(x => x.Exercise)
+                                                .ThenInclude(x => x!.ExerciseQuestions.Where(n => !n.IsDeleted))
+                                                .Where(x => x.Id == videoResult.VideoId)
+                                                .SumAsync(x => x.VideoTimeCodes.SelectMany(n => n.TimeCodeExercises)
+                                                                                .Select(n => n.Exercise)
+                                                                                .SelectMany(n => n!.ExerciseQuestions).Count());
+
+            return answerCount == questionCount;
         }
     }
 }
