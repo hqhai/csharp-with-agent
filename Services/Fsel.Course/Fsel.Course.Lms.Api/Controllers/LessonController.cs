@@ -65,7 +65,7 @@ namespace Fsel.Course.Lms.Api.Controllers
         /// <summary>
         /// Start Lesson
         /// </summary>
-        [HttpPut("start-lesson")]
+        [HttpPost("start-lesson")]
         [ProducesResponseType(typeof(MethodResult<LessonResultModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> StartLesson([FromQuery] StartLessonCommand query)

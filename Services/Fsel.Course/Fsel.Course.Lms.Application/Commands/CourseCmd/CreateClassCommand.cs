@@ -87,25 +87,6 @@ namespace Fsel.Course.Lms.Application.Commands.CourseCmd
                     StudentId = studentId ?? default
                 });
             }
-
-            var courseResult = new CourseResult
-            {
-                StudentId = studentId ?? default
-            };
-
-            var units = course.CourseUnitMockTests
-                        .Where(x => x.UnitId != null && x.Unit != null)
-                        .Select(x => x!.Unit)
-                        .ToList();
-
-            var unitResults = units.Select(x => new UnitResult
-            {
-                StudentId = studentId ?? default,
-                UnitId = x!.Id,
-            }).ToList();
-
-            course.CourseResult = courseResult;
-            course.UnitResults = unitResults;
             student = await _userService.UpdateStudentByClassAsync(classId ?? Guid.Empty);
 
             #endregion Validation
