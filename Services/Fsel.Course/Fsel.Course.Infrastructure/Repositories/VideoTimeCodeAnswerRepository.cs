@@ -13,7 +13,7 @@ namespace Fsel.Course.Infrastructure.Repositories
         {
         }
 
-        public async Task<VideoTimeCodeAnswer?> GetWhereByIdAsync(Guid videoResultId, Guid questionId, Guid? exerciseId, Guid? videoTimeCodeId)
+        public async Task<VideoTimeCodeAnswer?> GetAsync(Guid videoResultId, Guid questionId, Guid? exerciseId, Guid? videoTimeCodeId)
         {
             try
             {
