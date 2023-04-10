@@ -5,8 +5,8 @@
   <ItemGroup>
     <PackageReference Include="MMLib.SwaggerForOcelot" Version="6.2.0" />
     <PackageReference Include="Ocelot" Version="18.0.0" />
-    
-    <PackageReference Include="Fsel.Core" Version="1.0.8" />
+
+    <PackageReference Include="Fsel.Core" Version="1.0.9" />
   </ItemGroup>
   <!-- Tests -->
   <ItemGroup Label="Tests Packages" Condition="'$(IsTestProject)' == 'true'">
