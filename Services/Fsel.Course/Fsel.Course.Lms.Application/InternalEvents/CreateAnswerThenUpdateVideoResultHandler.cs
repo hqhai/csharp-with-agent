@@ -24,6 +24,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
         public async Task Handle(EntityCreatedEvent<VideoTimeCodeAnswer> notification, CancellationToken cancellationToken)
         {
             //ArgumentNullException.ThrowIfNull(notification);
+
             //var videoTimeCodeAnswer = notification.Data;
             //var videoTimeCodeAnswers = await _videoTimeCodeAnswerRepository.Queryable.Include(x => x.Question).Where(x => x.VideoResultId == videoTimeCodeAnswer.VideoResultId).ToListAsync(cancellationToken: cancellationToken);
             //var videoResult = await _videoResultRepository.Queryable.FirstOrDefaultAsync(x => x.Id == videoTimeCodeAnswer.VideoResultId, cancellationToken: cancellationToken);
