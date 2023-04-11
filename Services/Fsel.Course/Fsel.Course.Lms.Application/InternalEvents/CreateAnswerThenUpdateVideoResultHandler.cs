@@ -6,13 +6,19 @@ namespace Fsel.Course.Lms.Application.InternalEvents
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
+    using Fsel.Course.Infrastructure.Repositories;
     using MediatR;
     using Microsoft.EntityFrameworkCore;
 
     public class CreateAnswerThenUpdateVideoResultHandler : INotificationHandler<EntityCreatedEvent<VideoTimeCodeAnswer>>
     {
         private readonly IVideoRepository _videoRepository;
+        private readonly IVideoTimeCodeRepository _videoTimeCodeRepository;
+        private readonly ITimeCodeExerciseRepository _timeCodeExerciseRepository;
+        private readonly IExerciseRepository _exerciseRepository;
+        private readonly IExerciseQuestionRepository _exerciseQuestionRepository;
         private readonly IVideoResultRepository _videoResultRepository;
+        private readonly IVideoTimeCodeAnswerRepository _videoTimeCodeAnswerRepository;
 
         public CreateAnswerThenUpdateVideoResultHandler(IVideoResultRepository videoResultRepository
             , IVideoRepository videoRepository)
@@ -46,20 +52,20 @@ namespace Fsel.Course.Lms.Application.InternalEvents
 
         public async Task<bool> IsVideoResultDone(VideoResult videoResult)
         {
-            var answerCount = await _videoResultRepository.Queryable
-                                                .Include(x => x.VideoTimeCodeAnswers)
-                                                .Where(x => x.Id == videoResult.Id && x.VideoTimeCodeAnswers != null)
-                                                .SumAsync(x => x.VideoTimeCodeAnswers.Count);
+            var answerQuery = from vtca in _videoTimeCodeAnswerRepository.Queryable
+                              where vtca.VideoResultId == videoResult.Id
+                              select 1;
 
-            var questionCount = await _videoRepository.Queryable
-                                                .Include(x => x.VideoTimeCodes.Where(n => !n.IsDeleted))
-                                                .ThenInclude(x => x.TimeCodeExercises.Where(n => !n.IsDeleted))
-                                                .ThenInclude(x => x.Exercise)
-                                                .ThenInclude(x => x!.ExerciseQuestions.Where(n => !n.IsDeleted))
-                                                .Where(x => x.Id == videoResult.VideoId)
-                                                .SumAsync(x => x.VideoTimeCodes.SelectMany(n => n.TimeCodeExercises)
-                                                                                .Select(n => n.Exercise)
-                                                                                .SelectMany(n => n!.ExerciseQuestions).Count());
+            var questionQuery = from v in _videoRepository.Queryable
+                                join vt in _videoTimeCodeRepository.Queryable on v.Id equals vt.VideoId
+                                join te in _timeCodeExerciseRepository.Queryable on vt.Id equals te.VideoTimeCodeId
+                                join e in _exerciseRepository.Queryable on te.ExerciseId equals e.Id
+                                join eq in _exerciseQuestionRepository.Queryable on e.Id equals eq.ExerciseId
+                                where v.Id == videoResult.VideoId
+                                select 1;
+
+            var answerCount = await answerQuery.CountAsync();
+            var questionCount = await questionQuery.CountAsync();
 
             return answerCount == questionCount;
         }

@@ -3,6 +3,7 @@
 namespace Fsel.Course.Lms.Application.Queries.LessonQuery
 {
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Enums;
     using Fsel.Core.Base;
     using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
@@ -80,7 +81,7 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
                                     lr.UnitId == request.UnitId &&
                                     lr.LessonId == request.LessonId &&
                                     lr.StudentId == studentId
-                            select vr ;
+                            select vr;
 
             var answerQuery = from baseQ in baseQuery
                               join vtca in _videoTimeCodeAnswerRepository.Queryable on baseQ.Id equals vtca.VideoResultId
@@ -91,6 +92,7 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
                                   Skill = g.Key,
                                   CorrectCount = g.Sum(x => x.CorrectCount)
                               };
+            var answers = await answerQuery.ToListAsync(cancellationToken);
 
             var questionQuery = from baseQ in baseQuery
                                 join v in _videoRepository.Queryable on baseQ.VideoId equals v.Id
@@ -105,14 +107,19 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
                                     Skill = g.Key,
                                     TotalCount = g.Sum(x => x.CorrectTotal),
                                 };
+            var questions = await questionQuery.ToListAsync(cancellationToken);
 
-            var scoreQuery = from questionQ in questionQuery
-                             join answerQ in answerQuery on questionQ.Skill equals answerQ.Skill
+            var skills = Enum.GetValues(typeof(EnumCourseSkill)).Cast<EnumCourseSkill>();
+            var scoreQuery = from skill in skills
+                             join questionQ in questions on skill equals questionQ.Skill into questionQ_jointable
+                             from questionQJ in questionQ_jointable.DefaultIfEmpty()
+                             join answerQ in answerQuery on skill equals answerQ.Skill into answerQ_jointable
+                             from answerQJ in answerQ_jointable.DefaultIfEmpty()
                              select new LessonSkillScoreModel
                              {
-                                 Skill = questionQ.Skill,
-                                 TotalCount = questionQ.TotalCount,
-                                 CorrectCount = answerQ.CorrectCount,
+                                 Skill = skill,
+                                 TotalCount = questionQJ != null ? questionQJ.TotalCount : default,
+                                 CorrectCount = answerQJ != null ? answerQJ.CorrectCount : default,
                              };
 
             var correctCount = scoreQuery.Select(x => x.CorrectCount).Sum();
@@ -122,7 +129,7 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
                 lessonScore.Percent = (correctCount / (double)totalCount) * 100;
             }
 
-            lessonScore.LessonSkillScores = await scoreQuery.ToListAsync(cancellationToken);
+            lessonScore.LessonSkillScores = scoreQuery.ToList();
             methodResult.Result = lessonScore;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
