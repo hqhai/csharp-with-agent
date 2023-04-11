@@ -24,6 +24,10 @@ namespace Fsel.Course.Infrastructure.Configs
                 .HasConversion(
                     v => v.ToString(),
                     v => v.EnumParse<EnumCourseSkill>());
+            builder.HasOne(a => a.Lesson)
+                .WithOne(b => b.ClassForum)
+                .HasForeignKey<ClassForum>(p => p.LessonId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }
