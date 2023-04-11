@@ -6,7 +6,6 @@ namespace Fsel.Course.Lms.Application.InternalEvents
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
-    using Fsel.Course.Infrastructure.Repositories;
     using MediatR;
     using Microsoft.EntityFrameworkCore;
 
@@ -20,11 +19,22 @@ namespace Fsel.Course.Lms.Application.InternalEvents
         private readonly IVideoResultRepository _videoResultRepository;
         private readonly IVideoTimeCodeAnswerRepository _videoTimeCodeAnswerRepository;
 
-        public CreateAnswerThenUpdateVideoResultHandler(IVideoResultRepository videoResultRepository
-            , IVideoRepository videoRepository)
+        public CreateAnswerThenUpdateVideoResultHandler(
+            IVideoTimeCodeRepository videoTimeCodeRepository,
+            ITimeCodeExerciseRepository timeCodeExerciseRepository,
+            IExerciseRepository exerciseRepository,
+            IExerciseQuestionRepository exerciseQuestionRepository,
+            IVideoResultRepository videoResultRepository,
+            IVideoTimeCodeAnswerRepository videoTimeCodeAnswerRepository,
+            IVideoRepository videoRepository)
         {
-            _videoResultRepository = videoResultRepository;
             _videoRepository = videoRepository;
+            _videoTimeCodeRepository = videoTimeCodeRepository;
+            _timeCodeExerciseRepository = timeCodeExerciseRepository;
+            _exerciseRepository = exerciseRepository;
+            _exerciseQuestionRepository = exerciseQuestionRepository;
+            _videoTimeCodeAnswerRepository = videoTimeCodeAnswerRepository;
+            _videoResultRepository = videoResultRepository;
         }
 
         public async Task Handle(EntityCreatedEvent<VideoTimeCodeAnswer> notification, CancellationToken cancellationToken)

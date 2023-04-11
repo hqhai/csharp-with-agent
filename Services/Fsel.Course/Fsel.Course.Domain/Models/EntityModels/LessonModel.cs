@@ -13,6 +13,8 @@ namespace Fsel.Course.Domain.Models.EntityModels
 
         public bool IsActive { get; set; }
 
+        public int? DisplayOrder { get; set; }
+
         public EnumCourseLevel CourseLevel { get; set; }
 
         public VideoModel? Video { get; set; }
