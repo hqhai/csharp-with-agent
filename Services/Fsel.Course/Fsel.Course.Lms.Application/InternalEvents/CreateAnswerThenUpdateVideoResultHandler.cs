@@ -23,25 +23,25 @@ namespace Fsel.Course.Lms.Application.InternalEvents
 
         public async Task Handle(EntityCreatedEvent<VideoTimeCodeAnswer> notification, CancellationToken cancellationToken)
         {
-            //ArgumentNullException.ThrowIfNull(notification);
+            ArgumentNullException.ThrowIfNull(notification);
 
-            //var videoTimeCodeAnswer = notification.Data;
-            //var videoResult = videoTimeCodeAnswer.VideoResult;
-            //var question = videoTimeCodeAnswer.Question;
+            var videoTimeCodeAnswer = notification.Data;
+            var videoResult = videoTimeCodeAnswer.VideoResult;
+            var question = videoTimeCodeAnswer.Question;
 
-            //if (videoResult != null)
-            //{
-            //    videoResult.CorrectCount += videoTimeCodeAnswer.CorrectCount;
-            //    videoResult.CorrectTotal += question?.CorrectTotal ?? default;
+            if (videoResult != null)
+            {
+                videoResult.CorrectCount += videoTimeCodeAnswer.CorrectCount;
+                videoResult.CorrectTotal += question?.CorrectTotal ?? default;
 
-            //    if (await IsVideoResultDone(videoResult))
-            //    {
-            //        videoResult.Status = EnumResultStatus.Done;
-            //    }
+                if (await IsVideoResultDone(videoResult))
+                {
+                    videoResult.Status = EnumResultStatus.Done;
+                }
 
-            //    _videoResultRepository.Update(videoResult);
-            //    await _videoResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken);
-            //}
+                _videoResultRepository.Update(videoResult);
+                await _videoResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken);
+            }
         }
 
         public async Task<bool> IsVideoResultDone(VideoResult videoResult)

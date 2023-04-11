@@ -14,12 +14,12 @@ namespace Fsel.Course.Infrastructure.Configs
 
             builder.HasOne(a => a.HomeWork)
                 .WithMany(b => b.HomeWorkQuestions)
-                .HasForeignKey(a => a.HomeWork)
+                .HasForeignKey(a => a.HomeWorkId)
                 .OnDelete(DeleteBehavior.Cascade);
 
             builder.HasOne(a => a.Question)
                 .WithMany(b => b.HomeWorkQuestions)
-                .HasForeignKey(a => a.Question)
+                .HasForeignKey(a => a.QuestionId)
                 .OnDelete(DeleteBehavior.Cascade);
         }
     }
