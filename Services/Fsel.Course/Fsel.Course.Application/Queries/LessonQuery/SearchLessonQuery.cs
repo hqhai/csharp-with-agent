@@ -45,6 +45,7 @@ namespace Fsel.Course.Application.Queries.LessonQuery
             }
 
             var lessonQuery = _lessonRepository.Queryable
+                     .Include(x => x.UnitLessons.Where(y => !y.IsDeleted))
                      .Include(x => x.LessonVideos.Where(y => !y.IsDeleted && y.Video != null))
                      .ThenInclude(x => x.Video)
                      .ThenInclude(x => x!.VideoTimeCodes.Where(y => !y.IsDeleted && y.Video != null))
@@ -68,7 +69,7 @@ namespace Fsel.Course.Application.Queries.LessonQuery
                          CreatedDate = x.CreatedDate,
                          UpdatedDate = x.UpdatedDate,
                          UpdatedFullName = x.UpdatedFullName,
-                         IsActive = x.LessonVideos.Any()
+                         IsActive = x.UnitLessons.Any()
                      });
 
             if (!string.IsNullOrEmpty(request.Keyword))

@@ -12,7 +12,7 @@ namespace Fsel.Course.Domain.Entities
         /// <summary>
         /// Số thứ tự
         /// </summary>
-        [Range(1, 10000_0000, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
+        [Range(0, 10000_0000, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
         public int DisplayOrder { get; set; }
 
         [JsonIgnore]

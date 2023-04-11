@@ -52,7 +52,7 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
             var studentId = studentsResult.Content!.Result!.Id;
 
             var lesson = await _lessonRepository.Queryable
-                            .Include(x => x.UnitLessons.Where(y => !y.IsDeleted))
+                            .Include(x => x.UnitLessons.Where(y => !y.IsDeleted && y.UnitId == request.UnitId))
                             .Include(x => x.LessonInstructions.Where(y => !y.IsDeleted))
                             .Include(x => x.LessonVideos.Where(y => !y.IsDeleted))
                             .ThenInclude(x => x.Video)
@@ -68,6 +68,7 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
             var lessonModel = _mapper.Map<LessonModel>(lesson);
             lessonModel.Video = _mapper.Map<VideoModel>(lesson.LessonVideos.Select(x => x.Video).Where(x => x != null && !x.IsDeleted).FirstOrDefault());
             lessonModel.LessonResult = _mapper.Map<LessonResultModel>(lesson.LessonResults.FirstOrDefault());
+            lessonModel.DisplayOrder = lesson.UnitLessons.Where(x => x.LessonId == lesson.Id).Select(x => x.DisplayOrder).FirstOrDefault();
             lessonModel.IsActive = lesson.UnitLessons.Any();
 
             methodResult.Result = lessonModel;

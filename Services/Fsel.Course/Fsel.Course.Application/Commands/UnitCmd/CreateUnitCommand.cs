@@ -81,8 +81,9 @@ namespace Fsel.Course.Application.Commands.UnitCmd
 
             await _unitRepository.ExecuteTransactionAsync(async () =>
             {
-                unit.UnitLessons = request.LessonIds.Select(x => new UnitLesson
+                unit.UnitLessons = request.LessonIds.Select((x, index) => new UnitLesson
                 {
+                    DisplayOrder = index,
                     LessonId = x
                 }).ToList();
 

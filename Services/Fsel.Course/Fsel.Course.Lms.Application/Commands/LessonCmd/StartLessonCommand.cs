@@ -127,7 +127,7 @@ namespace Fsel.Course.Lms.Application.Commands.LessonCmd
                 await _unitResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
             }
 
-            var lessonResult = _lessonResultRepository.Queryable.Where(x => x!.LessonId == request.LessonId && x.StudentId == studentId).FirstOrDefault();
+            var lessonResult = _lessonResultRepository.Queryable.Where(x => x!.LessonId == request.LessonId && x!.UnitId == request.UnitId && x!.CourseId == request.CourseId && x.StudentId == studentId).FirstOrDefault();
             if (lessonResult == null)
             {
                 lessonResult = new LessonResult
