@@ -52,11 +52,24 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
             var studentId = studentsResult.Content!.Result!.Id;
 
             var lesson = await _lessonRepository.Queryable
-                            .Include(x => x.UnitLessons.Where(y => !y.IsDeleted && y.UnitId == request.UnitId))
+                            .Include(x => x.UnitLessons.Where(y => !y.IsDeleted))
                             .Include(x => x.LessonInstructions.Where(y => !y.IsDeleted))
                             .Include(x => x.LessonVideos.Where(y => !y.IsDeleted))
                             .ThenInclude(x => x.Video)
                             .Include(x => x.LessonResults.Where(y => !y.IsDeleted && y.UnitId == request.UnitId && y.CourseId == request.CourseId && y.StudentId == studentId))
+                            .Select(x => new LessonModel
+                            {
+                                Id = x.Id,
+                                CreatedFullName = x.CreatedFullName,
+                                CreatedDate = x.CreatedDate,
+                                InstructionContent = x.InstructionContent,
+                                Name = x.Name,
+                                CourseLevel = x.CourseLevel,
+                                Video = _mapper.Map<VideoModel?>(x.LessonVideos.FirstOrDefault()!.Video),
+                                LessonResult = _mapper.Map<LessonResultModel>(x.LessonResults.FirstOrDefault()),
+                                DisplayOrder = x.UnitLessons.Where(x => x.UnitId == request.UnitId).Select(x => x.DisplayOrder).FirstOrDefault(),
+                                IsActive = x.UnitLessons.Any()
+                            })
                             .FirstOrDefaultAsync(x => x.Id == request.LessonId, cancellationToken);
 
             if (lesson == null)
@@ -65,13 +78,7 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
                 return methodResult;
             }
 
-            var lessonModel = _mapper.Map<LessonModel>(lesson);
-            lessonModel.Video = _mapper.Map<VideoModel>(lesson.LessonVideos.Select(x => x.Video).Where(x => x != null && !x.IsDeleted).FirstOrDefault());
-            lessonModel.LessonResult = _mapper.Map<LessonResultModel>(lesson.LessonResults.FirstOrDefault());
-            lessonModel.DisplayOrder = lesson.UnitLessons.Where(x => x.LessonId == lesson.Id).Select(x => x.DisplayOrder).FirstOrDefault();
-            lessonModel.IsActive = lesson.UnitLessons.Any();
-
-            methodResult.Result = lessonModel;
+            methodResult.Result = lesson;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }
