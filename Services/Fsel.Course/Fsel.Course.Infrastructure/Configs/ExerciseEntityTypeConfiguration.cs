@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-using Fsel.Common.Enums;
+using Fsel.Shared.Enums;
 using Fsel.Common.Helpers;
 using Fsel.Course.Domain.Entities;
 using Microsoft.EntityFrameworkCore;

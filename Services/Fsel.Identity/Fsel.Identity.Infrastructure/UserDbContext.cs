@@ -1,7 +1,7 @@
 // Copyright (c) Atlantic. All rights reserved.
 
 using Fsel.Common.Constants;
-using Fsel.Common.Enums;
+using Fsel.Shared.Enums;
 using Fsel.Core.Base;
 using Fsel.Identity.Domain.Entities;
 using Fsel.Identity.Infrastructure.Configs;

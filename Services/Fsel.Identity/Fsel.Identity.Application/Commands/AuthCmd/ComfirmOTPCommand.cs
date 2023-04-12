@@ -6,7 +6,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
     using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Common.ActionResults;
-    using Fsel.Common.Enums;
+    using Fsel.Shared.Enums;
     using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.Enums;
     using Fsel.Identity.Domain.Enums.ErrorCodes;

@@ -11,7 +11,7 @@ namespace Fsel.Course.Lcms.Api.Controllers
     using Microsoft.AspNetCore.Mvc;
     using Fsel.Course.Application.Queries.HomeWorkQuery;
     using Fsel.Course.Application.Commands.HomeWorkCmd;
-    using Fsel.Common.Enums;
+    using Fsel.Shared.Enums;
     using Microsoft.AspNetCore.Authorization;
 
     [ApiVersion(Settings.APIVersion)]
