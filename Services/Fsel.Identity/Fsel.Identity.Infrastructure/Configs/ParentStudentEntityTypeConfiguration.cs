@@ -15,13 +15,13 @@ namespace Fsel.Identity.Infrastructure.Configs
                 .WithMany(b => b.ParentStudents)
                 .HasForeignKey(b => b.StudentId)
                 .OnDelete(DeleteBehavior.ClientSetNull);
-            builder.HasIndex(x => x.StudentId).IsUnique(true);
+            builder.HasIndex(x => x.StudentId).IsUnique(false);
 
             builder.HasOne(a => a.Parent)
                 .WithMany(b => b.ParentStudents)
                 .HasForeignKey(b => b.ParentId)
                 .OnDelete(DeleteBehavior.ClientSetNull);
-            builder.HasIndex(x => x.ParentId).IsUnique(true);
+            builder.HasIndex(x => x.ParentId).IsUnique(false);
         }
     }
 }

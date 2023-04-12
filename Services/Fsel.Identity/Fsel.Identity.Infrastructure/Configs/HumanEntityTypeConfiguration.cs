@@ -19,7 +19,7 @@ namespace Fsel.Identity.Infrastructure.Configs
                 .HasForeignKey<Human>(b => b.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            builder.HasIndex(x => x.UserId).IsUnique(true);
+            builder.HasIndex(x => x.UserId).IsUnique(false);
 
             builder.Property(e => e.Gender)
                  .HasMaxLength(100)

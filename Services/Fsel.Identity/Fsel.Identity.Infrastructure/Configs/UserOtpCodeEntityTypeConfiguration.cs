@@ -17,7 +17,7 @@ namespace Fsel.Identity.Infrastructure.Configs
                         .HasForeignKey<UserOtpCode>(b => b.UserId)
                         .OnDelete(DeleteBehavior.Cascade);
 
-            builder.HasIndex(x => x.UserId).IsUnique(true);
+            builder.HasIndex(x => x.UserId).IsUnique(false);
 
             builder.Property(e => e.Status)
                    .HasMaxLength(100)
