@@ -6,7 +6,7 @@ namespace Fsel.Interaction.Domain.Models.EntityModels
 
     public class CustomerSurveyModel : BaseCommandModel
     {
-        public object? Answers { get; set; }
+        public object? Answer { get; set; }
         public Guid UserId { get; set; }
         public Guid SurveyQuestionId { get; set; }
     }
