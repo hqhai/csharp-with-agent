@@ -5,7 +5,7 @@ namespace Fsel.Training.Application.Commands.ClassCmd
     using System.Threading;
     using AutoMapper;
     using Fsel.Common.ActionResults;
-    using Fsel.Common.Enums;
+    using Fsel.Shared.Enums;
     using Fsel.Training.Application.Services.UserServices;
     using Fsel.Training.Application.Services.UserServices.Models;
     using Fsel.Training.Doman.Entities;

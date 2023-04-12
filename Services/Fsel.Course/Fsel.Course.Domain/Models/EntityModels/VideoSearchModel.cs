@@ -3,7 +3,7 @@
 namespace Fsel.Course.Domain.Models.EntityModels
 {
     using System.Collections.Generic;
-    using Fsel.Common.Enums;
+    using Fsel.Shared.Enums;
     using Fsel.Core.Base.BaseModels;
 
     public class VideoSearchModel : BaseModel

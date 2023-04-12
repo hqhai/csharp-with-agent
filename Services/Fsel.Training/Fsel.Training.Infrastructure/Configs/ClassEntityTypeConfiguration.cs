@@ -2,7 +2,7 @@
 
 namespace Fsel.Training.Infrastructure.Configs
 {
-    using Fsel.Common.Enums;
+    using Fsel.Shared.Enums;
     using Fsel.Common.Helpers;
     using Fsel.Training.Doman.Entities;
     using Microsoft.EntityFrameworkCore;

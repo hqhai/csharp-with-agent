@@ -2,7 +2,7 @@
 
 namespace Fsel.Identity.Domain.Models.CommandModels.Auths
 {
-    using Fsel.Common.Enums;
+    using Fsel.Shared.Enums;
     using Fsel.Identity.Domain.Enums;
     using System.ComponentModel.DataAnnotations;
 

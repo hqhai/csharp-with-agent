@@ -3,7 +3,7 @@
 namespace Fsel.Shared.Helpers
 {
     using System.ComponentModel;
-    using Fsel.Common.Enums;
+    using Fsel.Shared.Enums;
 
     public static class EnumCourseLevelHelper
     {

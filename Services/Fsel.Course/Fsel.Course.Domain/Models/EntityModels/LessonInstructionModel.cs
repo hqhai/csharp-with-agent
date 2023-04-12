@@ -2,7 +2,7 @@
 
 namespace Fsel.Course.Domain.Models.EntityModels
 {
-    using Fsel.Common.Enums;
+    using Fsel.Shared.Enums;
     using Fsel.Core.Base.BaseModels;
 
     public class LessonInstructionModel : BaseModel
