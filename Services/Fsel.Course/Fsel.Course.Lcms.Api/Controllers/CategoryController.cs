@@ -31,7 +31,7 @@ namespace Fsel.Course.Lcms.Api.Controllers
         [HttpGet("course-level")]
         [ProducesResponseType(typeof(MethodResult<IList<EnumCourseLevel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetEnumCourseLevelsAsync([FromQuery] EnumCourseType courseType)
+        public async Task<IActionResult> GetEnumCourseLevelsAsync([FromQuery] EnumCourseType? courseType)
         {
             var queryResult = await _mediator.Send(new GetEnumCourseLevelQuery { CourseType = courseType }).ConfigureAwait(false);
             return queryResult.GetActionResult();

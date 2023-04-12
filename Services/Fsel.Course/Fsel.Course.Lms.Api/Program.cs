@@ -42,18 +42,16 @@ builder.Services.AddScoped<ICourseClassStudentRepository, CourseClassStudentRepo
 builder.Services.AddScoped<ILessonRepository, LessonRepository>();
 builder.Services.AddScoped<IMockTestRepository, MockTestRepository>();
 builder.Services.AddScoped<IVideoResultRepository, VideoResultRepository>();
-builder.Services.AddScoped<ILessonResultRepository, LessonResultRepository>();
 builder.Services.AddScoped<IVideoTimeCodeAnswerRepository, VideoTimeCodeAnswerRepository>();
 builder.Services.AddScoped<ICourseResultRepository, CourseResultRepository>();
+builder.Services.AddScoped<IUnitResultRepository, UnitResultRepository>();
+builder.Services.AddScoped<ILessonResultRepository, LessonResultRepository>();
 builder.Services.AddScoped<ILessonNoteRepository, LessonNoteRepository>();
 builder.Services.AddScoped<IQuestionFormRepository, QuestionFormRepository>();
 builder.Services.AddScoped<ILessonInstructionRepository, LessonInstructionRepository>();
 
 builder.Services.AddScoped<QuestionTypeConverter>();
-builder.Services.AddScoped<QuestionTypeCountConverter>();
-builder.Services.AddScoped<QuestionTypeValidation>();
-builder.Services.AddScoped<AnswerTypeCountConverter>();
-builder.Services.AddScoped<AnswerTypeValidatetion>();
+builder.Services.AddScoped<AnswerTypeConverter>();
 
 builder.AddRefitClients(typeof(IUserService), appSetting?.Services?.UserApiUrl);
 builder.AddRefitClients(typeof(ITrainingService), appSetting?.Services?.ClassApiUrl);

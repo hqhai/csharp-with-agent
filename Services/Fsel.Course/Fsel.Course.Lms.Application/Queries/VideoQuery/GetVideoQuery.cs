@@ -110,7 +110,7 @@ namespace Fsel.Course.Lms.Application.Queries.VideoQuery
                             CorrectTotal = m.CorrectTotal,
                             Explanation = m.Explanation,
                             Ungraded = m.Ungraded,
-                            Config = _questionTypeConverter.QuestionTypeConverterObject(m.QuestionType, m.Config, checkDone),
+                            Config = _questionTypeConverter.QuestionTypeConverterObject(m.Config, m.QuestionType, isDisableAnswers: false).Item1,
                             VideoTimeCodeAnswer = _mapper.Map<VideoTimeCodeAnswerModel>(m.VideoTimeCodeAnswers!.FirstOrDefault())
                         }).ToList()
                     }).ToList(),

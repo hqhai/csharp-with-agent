@@ -23,17 +23,16 @@ namespace Fsel.Course.Application.Commands.HomeWorkCmd
     {
         private readonly IMapper _mapper;
         private readonly IHomeWorkRepository _homeWorkRepository;
-        private readonly QuestionTypeValidation _questionTypeValidation;
-        private readonly QuestionTypeCountConverter _questionTypeCountConverter;
+        private readonly IQuestionRepository _questionRepository;
+        private readonly QuestionTypeConverter _questionTypeConverter;
 
         public CreateHomeWorkCommandHandler(IMapper mapper
-            , QuestionTypeValidation questionTypeValidation
-            , QuestionTypeCountConverter questionTypeCountConverter
-            , IHomeWorkRepository homeWorkRepository)
+            , QuestionTypeConverter questionTypeConverter
+            , IHomeWorkRepository homeWorkRepository
+            , IQuestionRepository questionRepository)
         {
             _mapper = mapper;
-            _questionTypeValidation = questionTypeValidation;
-            _questionTypeCountConverter = questionTypeCountConverter;
+            _questionTypeConverter = questionTypeConverter;
             _homeWorkRepository = homeWorkRepository;
         }
 
@@ -59,22 +58,21 @@ namespace Fsel.Course.Application.Commands.HomeWorkCmd
                 else
                 {
                     Question question = _mapper.Map<Question>(q);
-                    var ischeck = _questionTypeValidation.TryParseQuestionType(question.Config, question.QuestionType);
-                    if (!ischeck)
+                    var (config, correctTotal) = _questionTypeConverter.QuestionTypeConverterObject(question.Config, question.QuestionType, isShowCorrectTotal: !question.Ungraded, false);
+                    if (config == null)
                     {
                         methodResult.AddErrorBadRequest(nameof(EnumVideoErrorCode.ConfigIsInTheWrongFormat), nameof(question.Config));
                     }
-                    question.CorrectTotal = question.Ungraded ? default : _questionTypeCountConverter.GetTotalCorrectByQuestionType(question.Config, question.QuestionType) ?? default;
+                    question.CorrectTotal = correctTotal;
+                    if (!question.IsValid())
+                    {
+                        methodResult.AddErrorBadRequest(question.ErrorMessages);
+                    }
 
                     homeWork.HomeWorkQuestions.Add(new HomeWorkQuestion
                     {
                         Question = question
                     });
-
-                    if (!question.IsValid())
-                    {
-                        methodResult.AddErrorBadRequest(question.ErrorMessages);
-                    }
                 }
             });
 
