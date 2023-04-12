@@ -2,13 +2,13 @@
 
 namespace Fsel.Identity.Application.Commands.AuthCmd
 {
-    using System.Text;
     using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums;
     using Fsel.Common.Helpers;
     using Fsel.Identity.Domain.Entities;
+    using Fsel.Identity.Domain.Enums;
     using Fsel.Identity.Domain.Enums.ErrorCodes;
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Domain.Models.CommandModels.Auths;
@@ -17,7 +17,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Identity;
-    using OtpNet;
+    using Microsoft.EntityFrameworkCore;
 
     public class ComfirmOTPCommand : ConfirmOTPCommandModel, IRequest<MethodResult<TokenModel>>
     {
@@ -27,24 +27,30 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
     {
         private readonly UserManager<User> _userManager;
         private readonly IMediator _mediator;
-        private readonly IMapper _mapper;
-        private readonly SignInManager<User> _signInManager;
-        private readonly IHumanRepository _humanRepository;
+        private readonly IUserOtpCodeRepository _userOtpCodeRepository;
         private readonly AppSetting _appSetting;
+        private readonly IHumanRepository _humanRepository;
+        private readonly IMapper _mapper;
+        private readonly IStudentRepository _studentRepository;
+        private readonly IParentRepository _parentRepository;
 
         public ComfirmOTPCommandHandler(UserManager<User> userManager
             , IMediator mediator
-            , IMapper mapper
-            , SignInManager<User> signInManager
+            , IUserOtpCodeRepository userOtpCodeRepository
+            , AppSetting appSetting
             , IHumanRepository humanRepository
-            , AppSetting appSetting)
+            , IMapper mapper
+            , IStudentRepository studentRepository
+            , IParentRepository parentRepository)
         {
             _userManager = userManager;
             _mediator = mediator;
-            _mapper = mapper;
-            _signInManager = signInManager;
-            _humanRepository = humanRepository;
+            _userOtpCodeRepository = userOtpCodeRepository;
             _appSetting = appSetting;
+            _humanRepository = humanRepository;
+            _mapper = mapper;
+            _studentRepository = studentRepository;
+            _parentRepository = parentRepository;
         }
 
         public async Task<MethodResult<TokenModel>> Handle(ComfirmOTPCommand request, CancellationToken cancellationToken)
@@ -66,61 +72,63 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                     new[] { MethodHelper.GenerateErrorResult(nameof(request.Email), request.Email) });
                 return methodResult;
             }
-            bool signInResult = false;
-
-            if (request.Email != null && request.Code != null)
-            {
-                signInResult = await _userManager.VerifyTwoFactorTokenAsync(user, "Email", request.Code);
-            }
-            if (!signInResult)
+            var userOtpCode = await _userOtpCodeRepository.Queryable
+                        .FirstOrDefaultAsync(x => x.UserId == user.Id && x.Status == EnumStatusUser.New && !x.IsDeleted && x.OTPCode == request.OTP, cancellationToken);
+            if (userOtpCode == null)
             {
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                methodResult.AddError(
-                    nameof(EnumAuthErrorCode.InvalidOTP),
-                    new[] { MethodHelper.GenerateErrorResult(nameof(request.Email), request.Email) });
+                methodResult.AddError(nameof(EnumAuthErrorCode.InvalidOTP), new[] { MethodHelper.GenerateErrorResult(nameof(request.Email), request.Email) });
                 return methodResult;
             }
-            else if (signInResult)
+
+            if (DateTime.Compare(DateTime.Now, userOtpCode.ExpiredTime) > 0)
             {
-                RandomSecureHelper randomSecure = new RandomSecureHelper();
-                var totp = new Totp(Encoding.UTF8.GetBytes(randomSecure.Secretstrings()), step: _appSetting.Otp.StepTime);
-                bool isCodeValid = totp.VerifyTotp(request.Code, out long timeStepMatched, new VerificationWindow(_appSetting.Otp.StepTime));
-                if (!isCodeValid)
-                {
-                    methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                    methodResult.AddError(nameof(EnumAuthErrorCode.OTPExpired));
-                    return methodResult;
-                }
+                methodResult.AddErrorBadRequest(nameof(EnumAuthErrorCode.OTPExpired));
+                return methodResult;
             }
+
+            userOtpCode.Status = EnumStatusUser.Verified;
+            _userOtpCodeRepository.Update(userOtpCode);
+            await _userOtpCodeRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
             var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
             await _userManager.ConfirmEmailAsync(user, token);
-            await _userManager.SetTwoFactorEnabledAsync(user, false);
-            await _signInManager.SignInAsync(user, false);
-
             var roles = await _userManager.GetRolesAsync(user);
-            Human human = _mapper.Map<Human>(user);
+            Human human = _mapper.Map<Human>(request);
             human.UserId = user.Id;
+
+            #region sinh code
+
+            var currentDate = DateTime.Now;
+            var weekNumber = (currentDate.DayOfYear - 1) / 7 + 1;
+            var lastDigitOfYear = currentDate.Year % 10;
+            var lastOfYear = human.Birthday!.Value.Year % 100;
+            var number = request.Gender == EnumGender.Male ? 0 : request.Gender == EnumGender.Female ? 1 : 2;
+
+            #endregion sinh code
 
             if (roles.Contains(EnumRoleRegister.Student.ToString()))
             {
+                var stt = await _studentRepository.Queryable.CountAsync(cancellationToken: cancellationToken);
                 human.Student = new Student
                 {
                     HumanId = human.Id,
                 };
+                human.Code = $"HN_{weekNumber}{lastDigitOfYear}{number}{lastOfYear}{stt}";
             }
             else if (roles.Contains(EnumRoleRegister.Parent.ToString()))
             {
+                var stt = await _parentRepository.Queryable.CountAsync(cancellationToken: cancellationToken);
                 human.Parent = new Parent
                 {
                     HumanId = human.Id,
                 };
+                human.Code = $"PH_{weekNumber}{stt}";
             }
 
             await _humanRepository.ExecuteTransactionAsync(async () =>
             {
                 human = _humanRepository.Add(human);
-
                 await _humanRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
                 return methodResult;
             });

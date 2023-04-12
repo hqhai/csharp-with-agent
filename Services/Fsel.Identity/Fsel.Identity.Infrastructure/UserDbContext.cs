@@ -28,7 +28,7 @@ namespace Fsel.Identity.Infrastructure
             builder.ApplyConfiguration(new ParentStudentEntityTypeConfiguration());
             builder.ApplyConfiguration(new StudentEntityTypeConfiguration());
             builder.ApplyConfiguration(new UserEntityTypeConfiguration());
-
+            builder.ApplyConfiguration(new UserOtpCodeEntityTypeConfiguration());
             base.OnModelCreating(builder);
         }
 
@@ -42,6 +42,7 @@ namespace Fsel.Identity.Infrastructure
         public DbSet<Student> Students { get; set; }
         public DbSet<Parent> Parents { get; set; }
         public DbSet<ParentStudent> ParentStudents { get; set; }
+        public DbSet<UserOtpCode> UserOtpCodes { get; set; }
 
         #endregion Db Set
 

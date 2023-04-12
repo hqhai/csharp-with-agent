@@ -13,5 +13,6 @@ namespace Fsel.Identity.Domain.Entities
         public string? FullName { get; set; }
 
         public virtual Human? Human { get; set; }
+        public virtual UserOtpCode? UserOtpCode { get; set; }
     }
 }
