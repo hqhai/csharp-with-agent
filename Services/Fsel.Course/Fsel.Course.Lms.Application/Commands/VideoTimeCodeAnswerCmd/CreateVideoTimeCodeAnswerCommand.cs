@@ -83,8 +83,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
                 return methodResult;
             }
 
-            var videoTimeCodeAnswerCreates = new List<VideoTimeCodeAnswer>();
-            var videoTimeCodeAnswerUpdates = new List<VideoTimeCodeAnswer>();
+            var videoTimeCodeAnswers = new List<VideoTimeCodeAnswer>();
             foreach (var item in request.Answers)
             {
                 var question = questions.FirstOrDefault(x => x.Id == item.QuestionId);
@@ -104,16 +103,16 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
                 var videoTimeCodeId = exercise?.TimeCodeExercises.Select(x => x.VideoTimeCodeId).FirstOrDefault();
                 var videoTimeCodeAnswer = await _videoTimeCodeAnswerRepository.GetAsync(videoResult.Id, question.Id, exerciseId, videoTimeCodeId);
 
-                var (answerConfig, correctCount) = _answerTypeConverter.GetTotalCorrectByAsnwerType(item.Answer, question.Config, question.QuestionType);
-                if (answerConfig == null)
-                {
-                    methodResult.AddErrorBadRequest(nameof(EnumVideoTimeCodeAnswerErrorCode.AnswerIsInTheWrongFormat));
-                    return methodResult;
-                }
-
                 if (videoTimeCodeAnswer == null)
                 {
-                    videoTimeCodeAnswerCreates.Add(new VideoTimeCodeAnswer
+                    var (answerConfig, correctCount) = _answerTypeConverter.GetTotalCorrectByAsnwerType(item.Answer, question.Config, question.QuestionType);
+                    if (answerConfig == null)
+                    {
+                        methodResult.AddErrorBadRequest(nameof(EnumVideoTimeCodeAnswerErrorCode.AnswerIsInTheWrongFormat));
+                        return methodResult;
+                    }
+
+                    videoTimeCodeAnswer = new VideoTimeCodeAnswer
                     {
                         Answer = answerConfig,
                         VideoTimeCodeId = videoTimeCodeId ?? Guid.Empty,
@@ -121,12 +120,9 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
                         QuestionId = question.Id,
                         VideoResultId = videoResult.Id,
                         CorrectCount = question.Ungraded ? default : correctCount
-                    });
-                }
-                else
-                {
-                    videoTimeCodeAnswer.Answer = answerConfig;
-                    videoTimeCodeAnswerUpdates.Add(videoTimeCodeAnswer);
+                    };
+
+                    videoTimeCodeAnswers.Add(videoTimeCodeAnswer);
                 }
             }
 
@@ -134,9 +130,11 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
 
             await _videoTimeCodeAnswerRepository.ExecuteTransactionAsync(async () =>
             {
-                await _videoTimeCodeAnswerRepository.AddList(videoTimeCodeAnswerCreates);
-                _videoTimeCodeAnswerRepository.UpdateList(videoTimeCodeAnswerUpdates);
-                await _videoTimeCodeAnswerRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+                if (videoTimeCodeAnswers.Count > 0)
+                {
+                    await _videoTimeCodeAnswerRepository.AddList(videoTimeCodeAnswers);
+                    await _videoTimeCodeAnswerRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+                }
 
                 methodResult.StatusCode = StatusCodes.Status201Created;
                 methodResult.Result = true;
