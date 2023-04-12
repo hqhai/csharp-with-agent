@@ -6,7 +6,7 @@ namespace Fsel.Course.Lcms.Api.Controllers
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
-    using Fsel.Common.Enums;
+    using Fsel.Shared.Enums;
     using Fsel.Course.Application.Queries.CategoryQuery;
     using MediatR;
     using Microsoft.AspNetCore.Authorization;
@@ -31,7 +31,7 @@ namespace Fsel.Course.Lcms.Api.Controllers
         [HttpGet("course-level")]
         [ProducesResponseType(typeof(MethodResult<IList<EnumCourseLevel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetEnumCourseLevelsAsync([FromQuery] EnumCourseType courseType)
+        public async Task<IActionResult> GetEnumCourseLevelsAsync([FromQuery] EnumCourseType? courseType)
         {
             var queryResult = await _mediator.Send(new GetEnumCourseLevelQuery { CourseType = courseType }).ConfigureAwait(false);
             return queryResult.GetActionResult();

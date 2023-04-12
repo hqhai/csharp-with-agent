@@ -2,11 +2,10 @@
 
 namespace Fsel.Course.Domain.Models.CommandModels.LessonInstructions
 {
-    using Fsel.Common.Enums;
+    using Fsel.Shared.Enums;
 
     public class UpdateLessonInstructionCommandModel
     {
-        public Guid Id { get; set; }
         public string? Instruction { get; set; }
         public EnumCourseSkill CourseSkill { get; set; }
     }

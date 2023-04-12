@@ -7,10 +7,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Folder Include="Models\QueryModels\" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Models\QueryModels\" />
+    <ProjectReference Include="..\..\Shared\Fsel.Shared\Fsel.Shared.csproj" />
   </ItemGroup>
 
 </Project>

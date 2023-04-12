@@ -881,12 +881,8 @@ namespace Fsel.Course.Infrastructure.Migrations
                     .HasColumnType("uniqueidentifier")
                     .HasColumnOrder(103);
 
-                b.Property<string>("DisplayName")
-                    .HasMaxLength(250)
-                    .HasColumnType("nvarchar(250)");
-
-                b.Property<string>("InstructionContent")
-                    .HasColumnType("nvarchar(max)");
+                    b.Property<string>("InstructionContent")
+                        .HasColumnType("nvarchar(max)");
 
                 b.Property<bool>("IsDeleted")
                     .HasColumnType("bit")
@@ -1736,9 +1732,12 @@ namespace Fsel.Course.Infrastructure.Migrations
                     .HasColumnType("uniqueidentifier")
                     .HasColumnOrder(103);
 
-                b.Property<bool>("IsDeleted")
-                    .HasColumnType("bit")
-                    .HasColumnOrder(110);
+                    b.Property<int>("DisplayOrder")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit")
+                        .HasColumnOrder(110);
 
                 b.Property<Guid>("LessonId")
                     .HasColumnType("uniqueidentifier");

@@ -1,7 +1,7 @@
 // Copyright (c) Atlantic. All rights reserved.
 
 using System.ComponentModel.DataAnnotations;
-using Fsel.Common.Enums;
+using Fsel.Shared.Enums;
 using Fsel.Common.Enums.ErrorCodes;
 using Fsel.Core.Entities;
 using Fsel.Course.Domain.Enums.ErrorCodes;
@@ -21,12 +21,6 @@ namespace Fsel.Course.Domain.Entities
         /// Nội dung hướng dẫn bài test
         /// </summary>
         public string? InstructionContent { get; set; }
-
-        /// <summary>
-        /// Tên hiển thị
-        /// </summary>
-        [MaxLength(250, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
-        public string? DisplayName { get; set; }
 
         /// <summary>
         /// Trình độ khóa

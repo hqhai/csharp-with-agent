@@ -5,7 +5,7 @@ namespace Fsel.Course.Lms.Api.Controllers
     using Fsel.Common.ActionResults;
     using System.Net;
     using Fsel.Common.Constants;
-    using Fsel.Common.Enums;
+    using Fsel.Shared.Enums;
     using Fsel.Course.Domain.Models.EntityModels;
     using MediatR;
     using Microsoft.AspNetCore.Authorization;

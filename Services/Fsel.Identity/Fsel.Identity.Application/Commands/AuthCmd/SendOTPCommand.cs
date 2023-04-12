@@ -7,28 +7,23 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
-    using Fsel.Common.Helpers;
     using Fsel.Identity.Application.Services;
-    using Fsel.Identity.Domain.Entities;
-    using Fsel.Identity.Domain.Enums.ErrorCodes;
     using MediatR;
-    using Microsoft.AspNetCore.Http;
-    using Microsoft.AspNetCore.Identity;
 
     public class SendOTPCommand : IRequest<MethodResult<bool>>
     {
         public string? Email { get; set; }
+        public string? PhoneNumber { get; set; }
+        public string? Otp { get; set; }
+        public string? FullName { get; set; }
     }
 
     public class SendOTPCommandHandler : IRequestHandler<SendOTPCommand, MethodResult<bool>>
     {
-        private readonly UserManager<User> _userManager;
         private readonly ISenderService _senderService;
 
-        public SendOTPCommandHandler(UserManager<User> userManager,
-            ISenderService senderService)
+        public SendOTPCommandHandler(ISenderService senderService)
         {
-            _userManager = userManager;
             _senderService = senderService;
         }
 
@@ -36,31 +31,13 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<bool> methodResult = new MethodResult<bool>();
-            var user = await _userManager.FindByEmailAsync(request.Email ?? string.Empty);
-            if (user == null)
-            {
-                methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                methodResult.AddError(
-                    nameof(EnumAuthErrorCode.UserNameAndPasswordNotEmpty),
-                    new[] { MethodHelper.GenerateErrorResult(nameof(request.Email), request.Email) });
-                return methodResult;
-            }
-            else if (user.EmailConfirmed)
-            {
-                methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                methodResult.AddError(
-                    nameof(EnumAuthErrorCode.UserActive),
-                    new[] { MethodHelper.GenerateErrorResult(nameof(request.Email), request.Email) });
-                return methodResult;
-            }
 
-            if (request.Email != null)
+            if (!string.IsNullOrEmpty(request.Email))
             {
-                var otp = await _userManager.GenerateTwoFactorTokenAsync(user, nameof(request.Email));
                 var senderCommandModel = new SendEmailCommandModel
                 {
-                    Content = string.Format(CultureInfo.InvariantCulture, StringValues.SendOtpContent, user.FullName, otp),
-                    Subject = StringValues.SendOtpSubject,
+                    Content = string.Format(CultureInfo.InvariantCulture, StringValues.SendOtpContent, request.FullName, request.Otp!),
+                    Subject = StringValues.SendOtpSubject + $"{request.Otp!}",
                     ToEmails = new List<string> { $"{request.Email}" }
                 };
                 var sendResult1 = await _senderService.SendEmailAsync(senderCommandModel);
@@ -71,7 +48,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                     return methodResult;
                 }
             }
-            else
+            else if (!string.IsNullOrEmpty(request.PhoneNumber))
             {
                 //Send PhoneNumber
             }

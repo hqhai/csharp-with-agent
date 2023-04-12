@@ -42,6 +42,7 @@ namespace Fsel.Course.Application.Queries.HomeWorkQuery
                         .Include(x => x.LessonHomeWorks)
                         .Select(x => new HomeWorkSearchModel
                         {
+                            Id = x.Id,
                             Name = x.Name,
                             CreatedFullName = x.CreatedFullName,
                             CreatedDate = x.CreatedDate,

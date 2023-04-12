@@ -292,19 +292,6 @@ namespace Fsel.Identity.Infrastructure.Migrations
                         principalColumn: "Id");
                 });
 
-            migrationBuilder.InsertData(
-                table: "AspNetRoles",
-                columns: new[] { "Id", "ConcurrencyStamp", "Discriminator", "Discription", "Name", "NormalizedName" },
-                values: new object[,]
-                {
-                    { "1e63ac94-5e95-4fe1-a534-548bb972eabf", null, "Role", null, "Admin", "Admin" },
-                    { "3a715a55-6a0a-47a9-b810-f8f1108514b4", null, "Role", null, "MasterAdmin", "MasterAdmin" },
-                    { "755c38e5-3f70-4458-83c6-b85f486aeeb1", null, "Role", null, "CSO", "Parent" },
-                    { "97f5de28-9a99-415d-8932-f2918d36e6fa", null, "Role", null, "CSO", "Teacher" },
-                    { "bab858f3-f52a-47cd-a9fc-af5d02bebd79", null, "Role", null, "CSO", "CSO" },
-                    { "d206fb0d-86af-4c16-9fc4-502efad2dbf2", null, "Role", null, "CSO", "Student" }
-                });
-
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetRoleClaims_RoleId",
                 table: "AspNetRoleClaims",

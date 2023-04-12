@@ -5,7 +5,7 @@ namespace Fsel.Course.Lcms.Api.Controllers
     using System.Net;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
-    using Fsel.Common.Enums;
+    using Fsel.Shared.Enums;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Course.Application.Commands.QuestionFormCmd;
     using Fsel.Course.Application.Queries.QuestionFormQuery;

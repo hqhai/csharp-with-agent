@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-using Fsel.Common.Enums;
+using Fsel.Shared.Enums;
 using Fsel.Common.Helpers;
 using Fsel.Course.Domain.Entities;
 using Fsel.Course.Domain.Enums;
@@ -24,6 +24,10 @@ namespace Fsel.Course.Infrastructure.Configs
                 .HasConversion(
                     v => v.ToString(),
                     v => v.EnumParse<EnumCourseSkill>());
+            builder.HasOne(a => a.Lesson)
+                .WithOne(b => b.ClassForum)
+                .HasForeignKey<ClassForum>(p => p.LessonId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

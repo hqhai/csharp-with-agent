@@ -1,7 +1,7 @@
 // Copyright (c) Atlantic. All rights reserved.
 
 using Fsel.Common.Constants;
-using Fsel.Common.Enums;
+using Fsel.Shared.Enums;
 using Fsel.Core.Base;
 using Fsel.Identity.Domain.Entities;
 using Fsel.Identity.Infrastructure.Configs;
@@ -20,7 +20,7 @@ namespace Fsel.Identity.Infrastructure
         protected override void OnModelCreating(ModelBuilder builder)
         {
             ArgumentNullException.ThrowIfNull(builder);
-            SeedRoles(builder);
+            //SeedRoles(builder);
 
             builder.ApplyConfiguration(new HumanEntityTypeConfiguration());
             builder.ApplyConfiguration(new TeacherEntityTypeConfiguration());
@@ -28,7 +28,7 @@ namespace Fsel.Identity.Infrastructure
             builder.ApplyConfiguration(new ParentStudentEntityTypeConfiguration());
             builder.ApplyConfiguration(new StudentEntityTypeConfiguration());
             builder.ApplyConfiguration(new UserEntityTypeConfiguration());
-
+            builder.ApplyConfiguration(new UserOtpCodeEntityTypeConfiguration());
             base.OnModelCreating(builder);
         }
 
@@ -42,6 +42,7 @@ namespace Fsel.Identity.Infrastructure
         public DbSet<Student> Students { get; set; }
         public DbSet<Parent> Parents { get; set; }
         public DbSet<ParentStudent> ParentStudents { get; set; }
+        public DbSet<UserOtpCode> UserOtpCodes { get; set; }
 
         #endregion Db Set
 
@@ -61,17 +62,17 @@ namespace Fsel.Identity.Infrastructure
             }
         }
 
-        private static void SeedRoles(ModelBuilder builder)
-        {
-            builder.Entity<Role>().HasData
-                (
-                    new Role() { Name = EnumRole.MasterAdmin.ToString(), NormalizedName = EnumRole.MasterAdmin.ToString() },
-                    new Role() { Name = EnumRole.Admin.ToString(), NormalizedName = EnumRole.Admin.ToString() },
-                    new Role() { Name = EnumRole.CSO.ToString(), NormalizedName = EnumRole.CSO.ToString() },
-                    new Role() { Name = EnumRole.Teacher.ToString(), NormalizedName = EnumRole.Teacher.ToString() },
-                    new Role() { Name = EnumRole.Parent.ToString(), NormalizedName = EnumRole.Parent.ToString() },
-                    new Role() { Name = EnumRole.Student.ToString(), NormalizedName = EnumRole.Student.ToString() }
-                );
-        }
+        //private static void SeedRoles(ModelBuilder builder)
+        //{
+        //    builder.Entity<Role>().HasData
+        //        (
+        //            new Role() { Name = EnumRole.MasterAdmin.ToString(), NormalizedName = EnumRole.MasterAdmin.ToString() },
+        //            new Role() { Name = EnumRole.Admin.ToString(), NormalizedName = EnumRole.Admin.ToString() },
+        //            new Role() { Name = EnumRole.CSO.ToString(), NormalizedName = EnumRole.CSO.ToString() },
+        //            new Role() { Name = EnumRole.Teacher.ToString(), NormalizedName = EnumRole.Teacher.ToString() },
+        //            new Role() { Name = EnumRole.Parent.ToString(), NormalizedName = EnumRole.Parent.ToString() },
+        //            new Role() { Name = EnumRole.Student.ToString(), NormalizedName = EnumRole.Student.ToString() }
+        //        );
+        //}
     }
 }
