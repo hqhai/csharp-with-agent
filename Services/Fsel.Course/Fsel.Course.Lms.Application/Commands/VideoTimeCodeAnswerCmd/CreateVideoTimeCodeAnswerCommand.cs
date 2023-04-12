@@ -1,5 +1,7 @@
 // Copyright (c) Atlantic. All rights reserved.
 
+using Microsoft.EntityFrameworkCore;
+
 namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
 {
     using Fsel.Common.ActionResults;
@@ -22,7 +24,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
         private readonly IVideoResultRepository _videoResultRepository;
         private readonly IVideoTimeCodeAnswerRepository _videoTimeCodeAnswerRepository;
         private readonly AuthContext _authContext;
-        private readonly ILessonRepository _lessonRepository;
+        private readonly ILessonResultRepository _lessonResultRepository;
         private readonly IQuestionRepository _questionRepository;
         private readonly IUserService _userService;
         private readonly AnswerTypeConverter _answerTypeConverter;
@@ -31,7 +33,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
             IVideoResultRepository videoResultRepository
             , IVideoTimeCodeAnswerRepository videoTimeCodeAnswerRepository
             , AuthContext authContext
-            , ILessonRepository lessonRepository
+            , ILessonResultRepository lessonResultRepository
             , IQuestionRepository questionRepository
             , IUserService userService
             , AnswerTypeConverter answerTypeConverter)
@@ -39,7 +41,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
             _videoResultRepository = videoResultRepository;
             _videoTimeCodeAnswerRepository = videoTimeCodeAnswerRepository;
             _authContext = authContext;
-            _lessonRepository = lessonRepository;
+            _lessonResultRepository = lessonResultRepository;
             _questionRepository = questionRepository;
             _answerTypeConverter = answerTypeConverter;
             _userService = userService;
@@ -58,22 +60,14 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
                 return methodResult;
             }
 
-            var lesson = await _lessonRepository.GetIncludeVideoByIdAsync(request.LessonId);
-            if (lesson == null)
+            var lessonResult = await _lessonResultRepository.Queryable.Include(x => x.VideoResult).FirstOrDefaultAsync(x => x.Id == request.LessonResultId, cancellationToken);
+            if (lessonResult == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumLessonErrorCode.LessonNotExist));
                 return methodResult;
             }
-            var videoId = lesson.LessonVideos.Select(x => x.VideoId).FirstOrDefault();
-            var lessonResultId = lesson.LessonResults.Select(x => x.Id).FirstOrDefault();
-
-            var student = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId.ToString());
-            if (!student.IsSuccessStatusCode)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumCourseClassStudentErrorCode.UserIdNotExist));
-                return methodResult;
-            }
-            var videoResult = await _videoResultRepository.GetIncludeTimeCodeAnswerByIdAsync(videoId, lessonResultId, student!.Content!.Result!.Id);
+            var lessonResultId = lessonResult.Id;
+            var videoResult = lessonResult.VideoResult;
 
             if (videoResult == null)
             {
@@ -108,7 +102,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
                 var exercise = question.ExerciseQuestions.Select(x => x.Exercise).FirstOrDefault();
                 var exerciseId = exercise?.Id;
                 var videoTimeCodeId = exercise?.TimeCodeExercises.Select(x => x.VideoTimeCodeId).FirstOrDefault();
-                var videoTimeCodeAnswer = await _videoTimeCodeAnswerRepository.GetWhereByIdAsync(videoResult.Id, question.Id, exerciseId, videoTimeCodeId);
+                var videoTimeCodeAnswer = await _videoTimeCodeAnswerRepository.GetAsync(videoResult.Id, question.Id, exerciseId, videoTimeCodeId);
 
                 var (answerConfig, correctCount) = _answerTypeConverter.GetTotalCorrectByAsnwerType(item.Answer, question.Config, question.QuestionType);
                 if (answerConfig == null)

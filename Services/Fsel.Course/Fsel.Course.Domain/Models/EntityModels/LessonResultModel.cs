@@ -4,9 +4,10 @@ namespace Fsel.Course.Domain.Models.EntityModels
 {
     using System;
     using System.Collections.Generic;
+    using Fsel.Core.Base.BaseModels;
     using Fsel.Course.Domain.Enums;
 
-    public class LessonResultModel
+    public class LessonResultModel : BaseModel
     {
         public double Percent { get; set; }
 

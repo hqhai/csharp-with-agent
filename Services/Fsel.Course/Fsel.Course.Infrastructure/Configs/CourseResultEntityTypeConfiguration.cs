@@ -19,9 +19,9 @@ namespace Fsel.Course.Infrastructure.Configs
                     v => v.ToString(),
                     v => v.EnumParse<EnumCourseStatus>());
             builder.HasOne(a => a.Course)
-             .WithOne(b => b.CourseResult)
-             .HasForeignKey<CourseResult>(p => p.CourseId)
-             .OnDelete(DeleteBehavior.Cascade);
+                 .WithOne(b => b.CourseResult)
+                 .HasForeignKey<CourseResult>(p => p.CourseId)
+                 .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

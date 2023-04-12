@@ -8,6 +8,7 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
+    using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
@@ -42,8 +43,9 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
                                     Id = x.Id,
                                     Name = x.Name,
                                     InstructionContent = x.InstructionContent,
-                                    DisplayName = x.DisplayName,
-                                }).ToListAsync(cancellationToken: cancellationToken);
+                                    IsActive = x.UnitLessons.Any(),
+                                    DisplayOrder = x.UnitLessons.Where(n => n.UnitId == request.UnitId).Select(x => x.DisplayOrder).FirstOrDefault(),
+                                }).OrderBy(x => x.DisplayOrder).ToListAsync(cancellationToken: cancellationToken);
 
             if (lessonQuery.Count == 0)
             {

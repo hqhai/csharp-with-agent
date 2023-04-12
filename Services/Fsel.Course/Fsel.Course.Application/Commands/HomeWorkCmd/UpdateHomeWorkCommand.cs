@@ -60,6 +60,8 @@ namespace Fsel.Course.Application.Commands.HomeWorkCmd
                 return methodResult;
             }
 
+            homeWork.HomeWorkQuestions.Clear();
+
             request.Questions.ForEach(q =>
             {
                 if (q == null)

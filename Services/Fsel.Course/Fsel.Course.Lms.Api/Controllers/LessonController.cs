@@ -29,12 +29,12 @@ namespace Fsel.Course.Lms.Api.Controllers
         /// <summary>
         /// Get List Unit
         /// </summary>
-        [HttpGet("{id}")]
+        [HttpGet]
         [ProducesResponseType(typeof(MethodResult<LessonModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> Get([FromRoute] Guid id)
+        public async Task<IActionResult> Get([FromQuery] GetLessonQuery query)
         {
-            MethodResult<LessonModel> queryResult = await _mediator.Send(new GetLessonQuery { Id = id }).ConfigureAwait(false);
+            MethodResult<LessonModel> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
 
@@ -53,7 +53,7 @@ namespace Fsel.Course.Lms.Api.Controllers
         /// <summary>
         /// Get List Unit
         /// </summary>
-        [HttpGet]
+        [HttpGet("get-list-lesson")]
         [ProducesResponseType(typeof(MethodResult<IList<LessonModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetListLessonByUnitId([FromQuery] GetListLessonQuery query)
@@ -65,10 +65,10 @@ namespace Fsel.Course.Lms.Api.Controllers
         /// <summary>
         /// Start Lesson
         /// </summary>
-        [HttpPut("start-lesson")]
+        [HttpPost("start-lesson")]
         [ProducesResponseType(typeof(MethodResult<LessonResultModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> StartLesson([FromQuery] StartLessonCommand query)
+        public async Task<IActionResult> StartLesson([FromBody] StartLessonCommand query)
         {
             MethodResult<LessonResultModel> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
