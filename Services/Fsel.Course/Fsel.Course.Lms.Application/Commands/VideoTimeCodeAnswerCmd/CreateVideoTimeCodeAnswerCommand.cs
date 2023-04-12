@@ -101,9 +101,9 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
                 var exercise = question.ExerciseQuestions.Select(x => x.Exercise).FirstOrDefault();
                 var exerciseId = exercise?.Id;
                 var videoTimeCodeId = exercise?.TimeCodeExercises.Select(x => x.VideoTimeCodeId).FirstOrDefault();
-                var videoTimeCodeAnswer = await _videoTimeCodeAnswerRepository.GetAsync(videoResult.Id, question.Id, exerciseId, videoTimeCodeId);
+                var isExistAnswer = await _videoTimeCodeAnswerRepository.AnyAsync(videoResult.Id, question.Id, exerciseId, videoTimeCodeId);
 
-                if (videoTimeCodeAnswer == null)
+                if (!isExistAnswer)
                 {
                     var (answerConfig, correctCount) = _answerTypeConverter.GetTotalCorrectByAsnwerType(item.Answer, question.Config, question.QuestionType);
                     if (answerConfig == null)
@@ -112,7 +112,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
                         return methodResult;
                     }
 
-                    videoTimeCodeAnswer = new VideoTimeCodeAnswer
+                    videoTimeCodeAnswers.Add(new VideoTimeCodeAnswer
                     {
                         Answer = answerConfig,
                         VideoTimeCodeId = videoTimeCodeId ?? Guid.Empty,
@@ -120,9 +120,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
                         QuestionId = question.Id,
                         VideoResultId = videoResult.Id,
                         CorrectCount = question.Ungraded ? default : correctCount
-                    };
-
-                    videoTimeCodeAnswers.Add(videoTimeCodeAnswer);
+                    });
                 }
             }
 
