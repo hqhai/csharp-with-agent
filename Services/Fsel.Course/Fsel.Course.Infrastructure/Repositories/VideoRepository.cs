@@ -1,11 +1,11 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-using Fsel.Shared.Enums;
 using Fsel.Core.Base;
 using Fsel.Course.Domain.Entities;
 using Fsel.Course.Domain.Enums;
 using Fsel.Course.Domain.IRepositories;
 using Fsel.Course.Domain.Models.EntityModels;
+using Fsel.Shared.Enums;
 using Microsoft.EntityFrameworkCore;
 
 namespace Fsel.Course.Infrastructure.Repositories
@@ -91,7 +91,7 @@ namespace Fsel.Course.Infrastructure.Repositories
             }
         }
 
-        public IQueryable<VideoSearchModel> SearchAsync(EnumTimeCodeType? codeType, Guid? teacherId, EnumCourseLevel? level)
+        public IQueryable<VideoSearchModel> SearchAsync(EnumTimeCodeType? codeType, Guid? teacherId, EnumCourseLevel? courseLevel)
         {
             try
             {
@@ -100,9 +100,9 @@ namespace Fsel.Course.Infrastructure.Repositories
                                     .ThenInclude(videoTimeCode => videoTimeCode.TimeCodeExercises.Where(x => !x.IsDeleted && x.Exercise != null))
                                     .ThenInclude(timeCodeExercise => timeCodeExercise.Exercise)
                                     .Where(x => x.Type == EnumVideoType.Lesson)
-                                    .Where(x => !level.HasValue || x.CourseLevel == level.Value)
+                                    .Where(x => !courseLevel.HasValue || x.CourseLevel == courseLevel.Value)
                                     .Where(x => !teacherId.HasValue || x.TeacherId == teacherId.Value)
-                                    .Where(x => codeType == null || x.VideoTimeCodes.Select(n => n.TimeCodeType).Contains(codeType.Value))
+                                    .Where(x => !codeType.HasValue || x.VideoTimeCodes.Select(n => n.TimeCodeType).Contains(codeType.Value))
                                     .Select(video => new VideoSearchModel
                                     {
                                         Id = video.Id,

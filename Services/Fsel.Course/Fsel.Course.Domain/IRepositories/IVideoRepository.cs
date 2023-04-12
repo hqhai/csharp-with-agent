@@ -14,6 +14,6 @@ namespace Fsel.Course.Domain.IRepositories
 
         Task<VideoModel?> GetIncludeAllAsync(Guid? id);
 
-        IQueryable<VideoSearchModel> SearchAsync(EnumTimeCodeType? codeType, Guid? teacherId, EnumCourseLevel? level);
+        IQueryable<VideoSearchModel> SearchAsync(EnumTimeCodeType? codeType, Guid? teacherId, EnumCourseLevel? courseLevel);
     }
 }
