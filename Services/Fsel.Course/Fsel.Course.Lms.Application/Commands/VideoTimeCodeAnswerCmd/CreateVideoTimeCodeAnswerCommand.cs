@@ -1,7 +1,5 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-using Microsoft.EntityFrameworkCore;
-
 namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
 {
     using Fsel.Common.ActionResults;
@@ -21,27 +19,20 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
     public class CreateVideoTimeCodeAnswerCommandHandler : IRequestHandler<CreateVideoTimeCodeAnswerCommand, MethodResult<bool>>
     {
         private readonly IVideoTimeCodeAnswerRepository _videoTimeCodeAnswerRepository;
-        private readonly AuthContext _authContext;
         private readonly ILessonResultRepository _lessonResultRepository;
         private readonly IQuestionRepository _questionRepository;
         private readonly AnswerTypeConverter _answerTypeConverter;
-        private readonly ILessonResultRepository _lessonResultRepository;
 
         public CreateVideoTimeCodeAnswerCommandHandler(
-            IVideoResultRepository videoResultRepository
-            , IVideoTimeCodeAnswerRepository videoTimeCodeAnswerRepository
-            , AuthContext authContext
+             IVideoTimeCodeAnswerRepository videoTimeCodeAnswerRepository
             , ILessonResultRepository lessonResultRepository
             , IQuestionRepository questionRepository
-            , AnswerTypeConverter answerTypeConverter
-            , ILessonResultRepository lessonResultRepository)
+            , AnswerTypeConverter answerTypeConverter)
         {
             _videoTimeCodeAnswerRepository = videoTimeCodeAnswerRepository;
-            _authContext = authContext;
             _lessonResultRepository = lessonResultRepository;
             _questionRepository = questionRepository;
             _answerTypeConverter = answerTypeConverter;
-            _lessonResultRepository = lessonResultRepository;
         }
 
         public async Task<MethodResult<bool>> Handle(CreateVideoTimeCodeAnswerCommand request, CancellationToken cancellationToken)

@@ -77,7 +77,6 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
                 methodResult.AddErrorBadRequest(nameof(EnumLessonErrorCode.LessonNotExist), nameof(request.LessonId), request.LessonId);
                 return methodResult;
             }
-            lesson.LessonResults = lesson.LessonResults.Where(y => y.LessonId == request.LessonId && y.CourseId == request.CourseId && y.UnitId == request.UnitId && y.StudentId == _authContext.CurrentUserId).ToList();
 
             methodResult.Result = lesson;
             methodResult.StatusCode = StatusCodes.Status200OK;
