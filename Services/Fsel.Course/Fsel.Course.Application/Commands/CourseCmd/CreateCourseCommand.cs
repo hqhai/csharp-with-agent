@@ -59,52 +59,51 @@ namespace Fsel.Course.Application.Commands.CourseCmd
 
             if (request.CourseUnitMockTests == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumCourseUnitMockTestErrorCode.CourseUnitMockTestIsNull), nameof(request.CourseUnitMockTests));
+                methodResult.AddErrorBadRequest(nameof(EnumCourseUnitMockTestErrorCode.CourseUnitMockTestsNull), nameof(request.CourseUnitMockTests), request.CourseUnitMockTests);
                 return methodResult;
             }
 
             if (request.CourseTeachers == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumCourseTeacherErrorCode.CourseTeacherIsNull), nameof(request.CourseTeachers));
+                methodResult.AddErrorBadRequest(nameof(EnumCourseTeacherErrorCode.CourseTeachersNull), nameof(request.CourseTeachers), request.CourseTeachers);
                 return methodResult;
             }
 
             if (request.CourseUnitMockTests.Any(x => x.MockTestId.HasValue && x.UnitId.HasValue))
             {
-                methodResult.AddErrorBadRequest(nameof(EnumCourseUnitMockTestErrorCode.MocktestIdAndUnitIdAreMutuallyExclusive));
+                methodResult.AddErrorBadRequest(nameof(EnumCourseUnitMockTestErrorCode.MocktestIdAndUnitIdCannotCoexist), nameof(request.CourseUnitMockTests), request.CourseUnitMockTests);
                 return methodResult;
             }
 
             var units = request.CourseUnitMockTests.Where(e => e.UnitId != null).Select(x => x.UnitId).ToList();
             if (_unitRepository.IsIdsInValid(units.Where(e => e.HasValue).Select(e => e!.Value)))
             {
-                methodResult.AddErrorBadRequest(nameof(EnumUnitErrorCode.UnitIdNotCorrect), nameof(request.CourseUnitMockTests));
+                methodResult.AddErrorBadRequest(nameof(EnumUnitErrorCode.UnitIdsNotExist), nameof(units), units);
                 return methodResult;
             }
 
             var mocktestIds = request.CourseUnitMockTests.Where(e => e.MockTestId != null).Select(x => x.MockTestId);
             if (_mockTestRepository.IsIdsInValid(mocktestIds.Where(e => e.HasValue).Select(e => e!.Value)))
             {
-                methodResult.AddErrorBadRequest(nameof(EnumMockTestErrorCode.TestNotCorrect), nameof(request.CourseUnitMockTests));
+                methodResult.AddErrorBadRequest(nameof(EnumMockTestErrorCode.MockTestIdsNotExist), nameof(mocktestIds), mocktestIds);
                 return methodResult;
             }
 
             var mocktests = await _mockTestRepository.GetByIdsAsync(mocktestIds.Where(e => e.HasValue).Select(e => e!.Value));
-
             var checkMockTest = mocktests.All(x => x.MockTestType == EnumMockTestType.CourseMockTest);
             if (!checkMockTest)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumMockTestErrorCode.TestInValid), nameof(request.CourseUnitMockTests), mocktests.Select(x => x.Id));
+                methodResult.AddErrorBadRequest(nameof(EnumMockTestErrorCode.MockTestExistsOtherThanTypeCourseMocktest), nameof(mocktests), mocktests);
                 return methodResult;
             }
 
-            var teachersResult = await _userService.GetTeacherByIdsAsync(new GetTeacherByIdsQueryModel { Ids = course.CourseTeachers.Select(x => x.TeacherId).ToList() });
-            if (!teachersResult.IsSuccessStatusCode)
+            var teachers = await _userService.GetTeacherByIdsAsync(new GetTeacherByIdsQueryModel { Ids = course.CourseTeachers.Select(x => x.TeacherId).ToList() });
+            if (!teachers.IsSuccessStatusCode)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.ListTeacherCourseNotExist), nameof(request.CourseTeachers));
+                methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.TeacherIdExistsOtherThanNotExist), nameof(teachers), course.CourseTeachers.Select(x => x.TeacherId).ToList());
                 return methodResult;
             }
-            var teacherNames = teachersResult?.Content?.Result?.Select(x => x.Human?.FullName).ToList();
+            var teacherNames = teachers?.Content?.Result?.Select(x => x.Human?.FullName).ToList();
             var nameTeacher = string.Join(", ", teacherNames ?? new List<string?>());
 
             course.Name = $"{course.CourseLevel}-" + nameTeacher;

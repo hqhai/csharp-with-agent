@@ -10,6 +10,11 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         LessonNotExist,
 
         /// <summary>
+        /// LessonId not exist
+        /// </summary>
+        LessonIdNotExist,
+
+        /// <summary>
         /// Lesson was used
         /// </summary>
         LessonUsed,
@@ -30,13 +35,18 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         StudentNotInClass,
 
         /// <summary>
-        /// Student is null
+        /// Student null
         /// </summary>
         StudentNull,
 
         /// <summary>
-        /// List Lesson does not exist
+        /// LessonIds null
         /// </summary>
-        ListLessonNotExist,
+        LessonIdsNull,
+
+        /// <summary>
+        /// Lesson does not exist
+        /// </summary>
+        LessonIdsNotExist
     }
 }

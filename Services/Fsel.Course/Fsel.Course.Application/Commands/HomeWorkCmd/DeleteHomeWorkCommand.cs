@@ -34,9 +34,10 @@ namespace Fsel.Course.Application.Commands.HomeWorkCmd
             var homeWork = await _homeWorkRepository.Queryable
                             .Include(x => x.HomeWorkQuestions)
                             .FirstOrDefaultAsync(e => e.Id == request.Id, cancellationToken: cancellationToken);
+
             if (homeWork == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumHomeWorkErrorCode.HomeWorksNull), nameof(request.Id), request.Id);
+                methodResult.AddErrorBadRequest(nameof(EnumHomeWorkErrorCode.HomeworkIdNotExist), nameof(request.Id), request.Id);
                 return methodResult;
             }
             var isHomeWorkUsed = await _homeWorkRepository.IsHomeWorkUsed(request.Id);

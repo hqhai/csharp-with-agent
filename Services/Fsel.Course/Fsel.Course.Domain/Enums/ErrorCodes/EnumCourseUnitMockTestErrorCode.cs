@@ -5,8 +5,13 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
     public enum EnumCourseUnitMockTestErrorCode
     {
         /// <summary>
-        /// Course Unit MockTest is null
+        /// Course Unit MockTests is null
         /// </summary>
-        CourseUnitMockTestIsNull,
+        CourseUnitMockTestsNull,
+
+        /// <summary>
+        /// MocktestId and UnitId cannot coexist
+        /// </summary>
+        MocktestIdAndUnitIdCannotCoexist
     }
 }

@@ -60,10 +60,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
 
             if (user == null)
             {
-                methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                methodResult.AddError(
-                    nameof(EnumAuthErrorCode.EmailNotExist),
-                    new[] { MethodHelper.GenerateErrorResult(nameof(request.Email), request.Email) });
+                methodResult.AddErrorBadRequest(nameof(EnumAuthErrorCode.EmailNotExist), nameof(request.Email), request.Email);
                 return methodResult;
             }
             bool signInResult = false;
@@ -75,9 +72,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             if (!signInResult)
             {
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                methodResult.AddError(
-                    nameof(EnumAuthErrorCode.InvalidOTP),
-                    new[] { MethodHelper.GenerateErrorResult(nameof(request.Email), request.Email) });
+                methodResult.AddErrorBadRequest(nameof(EnumAuthErrorCode.InvalidOTP), nameof(request.Email), request.Email);
                 return methodResult;
             }
             else if (signInResult)
@@ -87,8 +82,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                 bool isCodeValid = totp.VerifyTotp(request.Code, out long timeStepMatched, new VerificationWindow(_appSetting.Otp.StepTime));
                 if (!isCodeValid)
                 {
-                    methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                    methodResult.AddError(nameof(EnumAuthErrorCode.OTPExpired));
+                    methodResult.AddErrorBadRequest(nameof(EnumAuthErrorCode.OTPExpired), nameof(request.Code), request.Code);
                     return methodResult;
                 }
             }
@@ -102,7 +96,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             Human human = _mapper.Map<Human>(user);
             human.UserId = user.Id;
 
-            if (roles.Contains(EnumRoleRegister.Student.ToString()))
+            if (roles.Contains(EnumRoleRegister.Student.ToString()))`
             {
                 human.Student = new Student
                 {

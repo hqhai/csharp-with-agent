@@ -10,13 +10,23 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         UnitNotExist,
 
         /// <summary>
+        /// UnitId does not exist
+        /// </summary>
+        UnitIdNotExist,
+
+        /// <summary>
         /// Unit have been use
         /// </summary>
         UnitHaveUsed,
 
         /// <summary>
-        /// UnitId is not correct
+        /// UnitIds is not correct
         /// </summary>
-        UnitIdNotCorrect
+        UnitIdsNotExist,
+
+        /// <summary>
+        /// UnitId Null
+        /// </summary>
+        UnitIdNull
     }
 }

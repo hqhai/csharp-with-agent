@@ -10,6 +10,11 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         VideoNotExist,
 
         /// <summary>
+        /// Video does not exist
+        /// </summary>
+        VideoIdsNotExist,
+
+        /// <summary>
         /// Video was used
         /// </summary>
         VideoUsed,
@@ -18,6 +23,11 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         /// Video not is correct
         /// </summary>
         VideoNotCorrect,
+
+        /// <summary>
+        /// VideoIds Null
+        /// </summary>
+        VideoIdsNull,
 
         /// <summary>
         /// TeacherId does not exist
