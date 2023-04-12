@@ -13,9 +13,11 @@ namespace Fsel.Identity.Infrastructure.Configs
         public void Configure(EntityTypeBuilder<UserOtpCode> builder)
         {
             ArgumentNullException.ThrowIfNull(builder);
-            builder.HasOne(x => x.User).WithOne(b => b.UserOtpCode)
-                        .HasForeignKey<UserOtpCode>(b => b.UserId)
-                        .OnDelete(DeleteBehavior.Cascade);
+
+            builder.HasOne(a => a.User)
+                 .WithMany(b => b.UserOtpCodes)
+                 .HasForeignKey(p => p.UserId)
+                 .OnDelete(DeleteBehavior.Cascade);
 
             builder.HasIndex(x => x.UserId).IsUnique(false);
 

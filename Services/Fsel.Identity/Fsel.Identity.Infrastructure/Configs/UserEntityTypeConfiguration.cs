@@ -15,11 +15,6 @@ namespace Fsel.Identity.Infrastructure.Configs
                 .WithOne(b => b.User)
                 .HasForeignKey<Human>(b => b.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
-
-            builder.HasOne(x => x.UserOtpCode)
-                .WithOne(b => b.User)
-               .HasForeignKey<UserOtpCode>(b => b.UserId)
-               .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

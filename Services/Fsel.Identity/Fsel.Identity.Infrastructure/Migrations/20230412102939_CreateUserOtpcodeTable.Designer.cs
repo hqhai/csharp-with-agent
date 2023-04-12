@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fsel.Identity.Infrastructure.Migrations
 {
     [DbContext(typeof(UserDbContext))]
-    [Migration("20230412100758_CreateUserOtpcodeTable")]
+    [Migration("20230412102939_CreateUserOtpcodeTable")]
     partial class CreateUserOtpcodeTable
     {
         /// <inheritdoc />
@@ -783,8 +783,8 @@ namespace Fsel.Identity.Infrastructure.Migrations
             modelBuilder.Entity("Fsel.Identity.Domain.Entities.UserOtpCode", b =>
                 {
                     b.HasOne("Fsel.Identity.Domain.Entities.User", "User")
-                        .WithOne("UserOtpCode")
-                        .HasForeignKey("Fsel.Identity.Domain.Entities.UserOtpCode", "UserId")
+                        .WithMany("UserOtpCodes")
+                        .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade);
 
                     b.Navigation("User");
@@ -864,7 +864,7 @@ namespace Fsel.Identity.Infrastructure.Migrations
                 {
                     b.Navigation("Human");
 
-                    b.Navigation("UserOtpCode");
+                    b.Navigation("UserOtpCodes");
                 });
 #pragma warning restore 612, 618
         }
