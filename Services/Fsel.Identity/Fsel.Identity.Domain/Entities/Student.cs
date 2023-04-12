@@ -5,7 +5,7 @@ namespace Fsel.Identity.Domain.Entities
     using System;
     using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations;
-    using Fsel.Common.Enums;
+    using Fsel.Shared.Enums;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Entities;
 

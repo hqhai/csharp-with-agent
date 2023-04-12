@@ -40,6 +40,11 @@ namespace Fsel.Identity.Infrastructure.Migrations
                     b.Property<DateTime?>("Birthday")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
+
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2")
                         .HasColumnOrder(107);
@@ -104,9 +109,7 @@ namespace Fsel.Identity.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("UserId")
-                        .IsUnique()
-                        .HasFilter("[UserId] IS NOT NULL");
+                    b.HasIndex("UserId");
 
                     b.ToTable("Humans");
                 });
@@ -171,8 +174,7 @@ namespace Fsel.Identity.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("HumanId")
-                        .IsUnique();
+                    b.HasIndex("HumanId");
 
                     b.ToTable("Parents");
                 });
@@ -319,8 +321,7 @@ namespace Fsel.Identity.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("HumanId")
-                        .IsUnique();
+                    b.HasIndex("HumanId");
 
                     b.ToTable("Students");
                 });
@@ -397,8 +398,7 @@ namespace Fsel.Identity.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("HumanId")
-                        .IsUnique();
+                    b.HasIndex("HumanId");
 
                     b.ToTable("Teachers");
                 });
@@ -471,6 +471,78 @@ namespace Fsel.Identity.Infrastructure.Migrations
                         .HasFilter("[NormalizedUserName] IS NOT NULL");
 
                     b.ToTable("AspNetUsers", (string)null);
+                });
+
+            modelBuilder.Entity("Fsel.Identity.Domain.Entities.UserOtpCode", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(0);
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(107);
+
+                    b.Property<string>("CreatedFullName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(104);
+
+                    b.Property<Guid>("CreatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(101);
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(109);
+
+                    b.Property<string>("DeletedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(106);
+
+                    b.Property<Guid?>("DeletedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(103);
+
+                    b.Property<DateTime>("ExpiredTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit")
+                        .HasColumnOrder(110);
+
+                    b.Property<string>("OTPCode")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(108);
+
+                    b.Property<string>("UpdatedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(105);
+
+                    b.Property<Guid?>("UpdatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(102);
+
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("UserOtpCodes");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -631,44 +703,6 @@ namespace Fsel.Identity.Infrastructure.Migrations
                         .HasColumnType("nvarchar(250)");
 
                     b.HasDiscriminator().HasValue("Role");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = "c9bd5d42-78f3-4e36-9c6e-55b0ac763f03",
-                            Name = "MasterAdmin",
-                            NormalizedName = "MasterAdmin"
-                        },
-                        new
-                        {
-                            Id = "b743dad9-7538-4b5e-bcbe-52997cda0a17",
-                            Name = "Admin",
-                            NormalizedName = "Admin"
-                        },
-                        new
-                        {
-                            Id = "c2980f2a-1e8d-409e-bd18-a4f724a6f074",
-                            Name = "CSO",
-                            NormalizedName = "CSO"
-                        },
-                        new
-                        {
-                            Id = "d119ed1b-6810-415d-a69f-8a1c0aac6ab6",
-                            Name = "Teacher",
-                            NormalizedName = "Teacher"
-                        },
-                        new
-                        {
-                            Id = "f0d61936-5fb8-4ad2-8f05-35a247cb6c82",
-                            Name = "Parent",
-                            NormalizedName = "Parent"
-                        },
-                        new
-                        {
-                            Id = "0c7fee86-6d80-4b27-980a-282dc90fc9b7",
-                            Name = "Student",
-                            NormalizedName = "Student"
-                        });
                 });
 
             modelBuilder.Entity("Fsel.Identity.Domain.Entities.UserToken", b =>
@@ -741,6 +775,16 @@ namespace Fsel.Identity.Infrastructure.Migrations
                         .IsRequired();
 
                     b.Navigation("Human");
+                });
+
+            modelBuilder.Entity("Fsel.Identity.Domain.Entities.UserOtpCode", b =>
+                {
+                    b.HasOne("Fsel.Identity.Domain.Entities.User", "User")
+                        .WithMany("UserOtpCodes")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -816,6 +860,8 @@ namespace Fsel.Identity.Infrastructure.Migrations
             modelBuilder.Entity("Fsel.Identity.Domain.Entities.User", b =>
                 {
                     b.Navigation("Human");
+
+                    b.Navigation("UserOtpCodes");
                 });
 #pragma warning restore 612, 618
         }

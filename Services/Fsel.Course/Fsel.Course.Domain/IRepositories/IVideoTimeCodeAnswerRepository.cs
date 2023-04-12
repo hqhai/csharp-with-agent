@@ -7,6 +7,6 @@ namespace Fsel.Course.Domain.IRepositories
 {
     public interface IVideoTimeCodeAnswerRepository : IRepository<VideoTimeCodeAnswer>
     {
-        Task<VideoTimeCodeAnswer?> GetAsync(Guid videoResultId, Guid questionId, Guid? exerciseId, Guid? videoTimeCodeId);
+        Task<bool> AnyAsync(Guid videoResultId, Guid questionId, Guid? exerciseId, Guid? videoTimeCodeId);
     }
 }

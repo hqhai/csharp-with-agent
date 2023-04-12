@@ -3,7 +3,7 @@
 namespace Fsel.Identity.Domain.Models.CommandModels.Students
 {
     using System;
-    using Fsel.Common.Enums;
+    using Fsel.Shared.Enums;
 
     public class UpdateStudentCommandModel
     {

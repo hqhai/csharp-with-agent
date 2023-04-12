@@ -3,7 +3,7 @@
 namespace Fsel.Identity.Domain.Models.EntityModels
 {
     using System;
-    using Fsel.Common.Enums;
+    using Fsel.Shared.Enums;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Identity.Domain.Entities;
 

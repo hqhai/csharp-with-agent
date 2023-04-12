@@ -3,7 +3,7 @@
 namespace Fsel.Identity.Infrastructure.Configs
 {
     using System;
-    using Fsel.Common.Enums;
+    using Fsel.Shared.Enums;
     using Fsel.Common.Helpers;
     using Fsel.Identity.Domain.Entities;
     using Microsoft.EntityFrameworkCore;
@@ -21,7 +21,9 @@ namespace Fsel.Identity.Infrastructure.Configs
                      v => v.EnumParse<EnumCourseLevel>());
             builder.HasOne(a => a.Human)
                     .WithOne(b => b.Student)
+                    .HasForeignKey<Student>(b => b.HumanId)
                     .OnDelete(DeleteBehavior.Cascade);
+            builder.HasIndex(x => x.HumanId).IsUnique(false);
         }
     }
 }
