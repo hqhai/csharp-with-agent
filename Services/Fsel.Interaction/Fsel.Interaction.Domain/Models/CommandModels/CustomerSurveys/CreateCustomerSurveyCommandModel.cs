@@ -4,7 +4,7 @@ namespace Fsel.Interaction.Domain.Models.CommandModels.CustomerSurveys
 {
     public class CreateCustomerSurveyCommandModel
     {
-        public Guid UserId { get; set; }
+        public string? UserId { get; set; }
         public IList<CreateSurveyCommandModel>? Answers { get; set; }
     }
 

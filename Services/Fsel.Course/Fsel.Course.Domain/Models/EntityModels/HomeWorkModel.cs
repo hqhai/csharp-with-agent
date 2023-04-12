@@ -2,8 +2,6 @@
 
 using Fsel.Common.Enums;
 using Fsel.Core.Base.BaseModels;
-using Fsel.Course.Domain.Entities;
-using Fsel.Course.Domain.Models.CommandModels.Questions;
 
 namespace Fsel.Course.Domain.Models.EntityModels
 {
@@ -22,7 +20,5 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public EnumCourseLevel CourseLevel { get; set; }
 
         public EnumCourseSkill CourseSkill { get; set; }
-
-        public IList<LessonHomeWork>? LessonHomeWorks { get; set; }
     }
 }
