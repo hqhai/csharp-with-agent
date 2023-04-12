@@ -56,8 +56,10 @@ namespace Fsel.Sender.Application.Commands.SendEmailCmd
                 sendEmail.Content = request.Content;
                 try
                 {
-                    var emailMessage = CreateEmailMessage(sendEmail);
-                    await Send(emailMessage);
+                    using (var emailMessage = CreateEmailMessage(sendEmail))
+                    {
+                        await Send(emailMessage);
+                    }
                 }
                 catch (Exception)
                 {
@@ -74,56 +76,59 @@ namespace Fsel.Sender.Application.Commands.SendEmailCmd
 
         private MimeMessage CreateEmailMessage(SendEmailModel message)
         {
-            using (var emailMessage = new MimeMessage())
-            {
-                emailMessage.From.Add(new MailboxAddress("LMS -FSEL", _appSetting?.Smtp?.From ?? string.Empty));
-                if (message.ToEmails == null)
-                {
-                    return emailMessage;
-                }
+            var emailMessage = new MimeMessage();
+            emailMessage.From.Add(new MailboxAddress("LMS -FSEL", _appSetting?.Smtp?.From ?? string.Empty));
 
+            if (message.ToEmails != null && message.ToEmails.IsValidEmail())
+            {
                 foreach (var item in message.ToEmails)
                 {
                     emailMessage.To.Add(new MailboxAddress("LMS -FSEL", item));
                 }
-                if (message.BccEmails != null)
-                {
-                    foreach (var item in message.BccEmails)
-                    {
-                        emailMessage.Bcc.Add(new MailboxAddress("LMS -FSEL", item));
-                    }
-                }
-                if (message.CcEmails != null)
-                {
-                    foreach (var item in message.CcEmails)
-                    {
-                        emailMessage.Cc.Add(new MailboxAddress("LMS -FSEL", item));
-                    }
-                }
-                emailMessage.Subject = message.Subject;
-                emailMessage.Body = new TextPart(MimeKit.Text.TextFormat.Text) { Text = message.Content };
-                return emailMessage;
             }
+
+            if (message.BccEmails != null && message.BccEmails.IsValidEmail())
+            {
+                foreach (var item in message.BccEmails)
+                {
+                    emailMessage.Bcc.Add(new MailboxAddress("LMS -FSEL", item));
+                }
+            }
+
+            if (message.CcEmails != null && message.CcEmails.IsValidEmail())
+            {
+                foreach (var item in message.CcEmails)
+                {
+                    emailMessage.Cc.Add(new MailboxAddress("LMS -FSEL", item));
+                }
+            }
+
+            emailMessage.Subject = message.Subject;
+            emailMessage.Body = new TextPart(MimeKit.Text.TextFormat.Text) { Text = message.Content };
+
+            return emailMessage;
         }
 
         private async Task Send(MimeMessage mailmessage)
         {
-            using var client = new MailKit.Net.Smtp.SmtpClient();
-            try
+            using (var client = new MailKit.Net.Smtp.SmtpClient())
             {
-                await client.ConnectAsync(_appSetting?.Smtp?.SmtpServer ?? string.Empty, _appSetting?.Smtp?.Port ?? 0, true);
-                client.AuthenticationMechanisms.Remove("XOAUTH2");
-                await client.AuthenticateAsync(_appSetting?.Smtp?.Username ?? string.Empty, _appSetting?.Smtp?.Password ?? string.Empty);
-                await client.SendAsync(mailmessage);
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-            finally
-            {
-                await client.DisconnectAsync(true);
-                client.Dispose();
+                try
+                {
+                    await client.ConnectAsync(_appSetting?.Smtp?.SmtpServer ?? string.Empty, _appSetting?.Smtp?.Port ?? 0, true);
+                    client.AuthenticationMechanisms.Remove("XOAUTH2");
+                    await client.AuthenticateAsync(_appSetting?.Smtp?.Username ?? string.Empty, _appSetting?.Smtp?.Password ?? string.Empty);
+                    await client.SendAsync(mailmessage);
+                }
+                catch (Exception)
+                {
+                    throw;
+                }
+                finally
+                {
+                    await client.DisconnectAsync(true);
+                    client.Dispose();
+                }
             }
         }
     }
