@@ -102,7 +102,7 @@ namespace Fsel.Course.Infrastructure.Repositories
                                     .Where(x => x.Type == EnumVideoType.Lesson)
                                     .Where(x => !level.HasValue || x.CourseLevel == level.Value)
                                     .Where(x => !teacherId.HasValue || x.TeacherId == teacherId.Value)
-                                    .Where(x => codeType == null || x.VideoTimeCodes.Select(n => n.TimeCodeType).Contains(codeType.Value))
+                                    .Where(x => !codeType.HasValue || x.VideoTimeCodes.Select(n => n.TimeCodeType).Contains(codeType.Value))
                                     .Select(video => new VideoSearchModel
                                     {
                                         Id = video.Id,
