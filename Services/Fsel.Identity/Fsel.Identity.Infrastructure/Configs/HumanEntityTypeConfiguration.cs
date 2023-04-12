@@ -14,7 +14,8 @@ namespace Fsel.Identity.Infrastructure.Configs
         {
             ArgumentNullException.ThrowIfNull(builder);
 
-            builder.HasOne(x => x.User).WithOne(b => b.Human)
+            builder.HasOne(x => x.User)
+                .WithOne(b => b.Human)
                 .HasForeignKey<Human>(b => b.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
 

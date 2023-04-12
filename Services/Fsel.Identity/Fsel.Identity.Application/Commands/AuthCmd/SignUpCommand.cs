@@ -99,7 +99,6 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                                 return methodResult;
                             }
                             await _userManager.AddToRoleAsync(user, request?.Role.ToString() ?? string.Empty);
-                            //await _userManager..SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
                             #region Send Code OTP
 

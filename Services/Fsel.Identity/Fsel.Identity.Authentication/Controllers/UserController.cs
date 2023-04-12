@@ -38,11 +38,11 @@ namespace Fsel.Identity.Userentication.Controllers
         /// Confirm OTP
         /// </summary>
         [HttpPost("confirm-otp")]
-        [ProducesResponseType(typeof(MethodResult<TokenModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(MethodResult<ConfirmOtpModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> ConfirmOTP([FromBody] ComfirmOTPCommand command)
         {
-            MethodResult<TokenModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            MethodResult<ConfirmOtpModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
 
