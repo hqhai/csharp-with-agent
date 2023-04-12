@@ -7,7 +7,6 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums;
-    using Fsel.Common.Helpers;
     using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.Enums;
     using Fsel.Identity.Domain.Enums.ErrorCodes;
@@ -16,7 +15,6 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
     using Fsel.Identity.Domain.Models.EntityModels;
     using Fsel.Identity.Infrastructure.ValueSettings;
     using MediatR;
-    using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Identity;
     using Microsoft.EntityFrameworkCore;
 
@@ -67,24 +65,20 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
 
             if (user == null)
             {
-                methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                methodResult.AddError(
-                    nameof(EnumAuthErrorCode.EmailNotExist),
-                    new[] { MethodHelper.GenerateErrorResult(nameof(request.Email), request.Email) });
+                methodResult.AddErrorBadRequest(nameof(EnumAuthErrorCode.EmailNotExist), nameof(request.Email), request.Email);
                 return methodResult;
             }
             var userOtpCode = await _userOtpCodeRepository.Queryable
                         .FirstOrDefaultAsync(x => x.UserId == user.Id && x.Status == EnumStatusUser.New && !x.IsDeleted && x.OTPCode == request.OTP, cancellationToken);
             if (userOtpCode == null)
             {
-                methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                methodResult.AddError(nameof(EnumAuthErrorCode.InvalidOTP), new[] { MethodHelper.GenerateErrorResult(nameof(request.Email), request.Email) });
+                methodResult.AddErrorBadRequest(nameof(EnumAuthErrorCode.InvalidOTP), nameof(request.Email), request.Email);
                 return methodResult;
             }
 
             if (DateTime.Compare(DateTime.Now, userOtpCode.ExpiredTime) > 0)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumAuthErrorCode.OTPExpired));
+                methodResult.AddErrorBadRequest(nameof(EnumAuthErrorCode.OTPExpired), nameof(request.OTP), request.OTP);
                 return methodResult;
             }
 
