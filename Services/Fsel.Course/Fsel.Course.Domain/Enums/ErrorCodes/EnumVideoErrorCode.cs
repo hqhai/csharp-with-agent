@@ -4,13 +4,8 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
 {
     public enum EnumVideoErrorCode
     {
-        //    /// <summary>
-        //    /// Video does not exist
-        //    /// </summary>
-        //    VideoNotExist,
-
         /// <summary>
-        /// VideoIds not exist
+        /// VideoIds does not exist
         /// </summary>
         VideoIdsNotExist,
 
@@ -20,19 +15,14 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         VideoUsed,
 
         /// <summary>
-        /// VideoId Not Exist
+        /// VideoId does not exist
         /// </summary>
         VideoIdNotExist,
 
         /// <summary>
-        /// VideoIds Null
+        /// VideoIds is null
         /// </summary>
         VideoIdsNull,
-
-        //    /// <summary>
-        //    /// TeacherId does not exist
-        //    /// </summary>
-        //    TeacherIdDoesNotExitst,
 
         /// <summary>
         /// Config is in the wrong format

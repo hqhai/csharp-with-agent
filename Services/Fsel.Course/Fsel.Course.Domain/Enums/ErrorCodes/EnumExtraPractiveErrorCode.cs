@@ -5,12 +5,12 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
     public enum EnumExtraPractiveErrorCode
     {
         /// <summary>
-        /// ExtraPracticeIds null
+        /// ExtraPracticeIds is null
         /// </summary>
         ExtraPracticeIdsNull,
 
         /// <summary>
-        /// ExtraPracticeIds Not Exist
+        /// ExtraPracticeIds does not exist
         /// </summary>
         ExtraPracticeIdsNotExist
     }

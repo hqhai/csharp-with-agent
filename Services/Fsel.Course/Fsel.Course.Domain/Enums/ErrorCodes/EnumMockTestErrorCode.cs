@@ -5,7 +5,7 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
     public enum EnumMockTestErrorCode
     {
         /// <summary>
-        /// Mock Test not Exist
+        /// Mock Test does not exist
         /// </summary>
         MockTestIdsNotExist,
 

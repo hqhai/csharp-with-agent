@@ -5,7 +5,7 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
     public enum EnumCourseErrorCode
     {
         /// <summary>
-        /// Courses not exist
+        /// Courses does not exist
         /// </summary>
         CoursesNotExist,
 
@@ -14,20 +14,10 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         /// </summary>
         CourseIdNotExist,
 
-        ///// <summary>
-        ///// List Course does not exist
-        ///// </summary>
-        //ListCourseNotExist,
-
         /// <summary>
         /// Course is not in a new state
         /// </summary>
         CourseNotInNewState,
-
-        ///// <summary>
-        ///// User Not Student
-        ///// </summary>
-        //NotStudent,
 
         /// <summary>
         /// Student not in class
@@ -35,37 +25,22 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         StudentNotInClass,
 
         /// <summary>
-        /// TeacherIds Not Exist
+        /// TeacherIds does not exist
         /// </summary>
         TeacherIdsNotExist,
 
-        ///// <summary>
-        ///// Course not in Class
-        ///// </summary>
-        //CourseNotInClass,
-
-        ///// <summary>
-        ///// Classes new not exist
-        ///// </summary>
-        //ClassesNewNotExitst,
-
-        ///// <summary>
-        ///// Students not exist
-        ///// </summary>
-        //StudentsNotExist,
-
         /// <summary>
-        /// Classe Id not exist
+        /// Classe Id does not exist
         /// </summary>
         ClasseIdNotExist,
 
         /// <summary>
-        /// Classe Code not exist
+        /// Classe Code does not exist
         /// </summary>
         ClasseCodeNotExist,
 
         /// <summary>
-        /// Student null
+        /// Student is null
         /// </summary>
         StudentNull,
 

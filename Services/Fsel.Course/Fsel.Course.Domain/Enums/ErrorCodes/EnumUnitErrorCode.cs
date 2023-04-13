@@ -4,13 +4,8 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
 {
     public enum EnumUnitErrorCode
     {
-        ///// <summary>
-        ///// Unit does not exist
-        ///// </summary>
-        //UnitNotExist,
-
         /// <summary>
-        /// UnitId not exist
+        /// UnitId does not exist
         /// </summary>
         UnitIdNotExist,
 
@@ -20,13 +15,8 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         UnitUsed,
 
         /// <summary>
-        /// UnitIds is not Exist
+        /// UnitIds is does not exist
         /// </summary>
         UnitIdsNotExist,
-
-        ///// <summary>
-        ///// UnitId Null
-        ///// </summary>
-        //UnitIdNull
     }
 }
