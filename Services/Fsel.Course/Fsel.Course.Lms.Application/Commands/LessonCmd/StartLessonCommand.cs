@@ -9,7 +9,6 @@ namespace Fsel.Course.Lms.Application.Commands.LessonCmd
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base;
     using Fsel.Course.Domain.Entities;
-    using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.CommandModels.Lessons;
@@ -67,11 +66,6 @@ namespace Fsel.Course.Lms.Application.Commands.LessonCmd
             if (course == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.CourseNotExist));
-                return methodResult;
-            }
-            else if (course.Status != EnumCourseStatus.Active)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.CourseMustActiveState));
                 return methodResult;
             }
 

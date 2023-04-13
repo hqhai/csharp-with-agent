@@ -67,6 +67,11 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         /// <summary>
         /// Course must be in an active state
         /// </summary>
-        CourseMustActiveState
+        CourseMustActiveState,
+
+        /// <summary>
+        /// Course is in active state
+        /// </summary>
+        CourseIsActiveState
     }
 }
