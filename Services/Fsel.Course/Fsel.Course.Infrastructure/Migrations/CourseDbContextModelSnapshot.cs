@@ -118,6 +118,11 @@ namespace Fsel.Course.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(0);
 
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
+
                     b.Property<string>("CourseLevel")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -776,6 +781,81 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.ToTable("HomeWorks");
                 });
 
+            modelBuilder.Entity("Fsel.Course.Domain.Entities.HomeWorkAnswer", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(0);
+
+                    b.Property<string>("AnswerStr")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("CorrectCount")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(107);
+
+                    b.Property<string>("CreatedFullName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(104);
+
+                    b.Property<Guid>("CreatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(101);
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(109);
+
+                    b.Property<string>("DeletedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(106);
+
+                    b.Property<Guid?>("DeletedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(103);
+
+                    b.Property<Guid?>("HomeWorkQuestionId")
+                        .IsRequired()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("HomeWorkResultId")
+                        .IsRequired()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit")
+                        .HasColumnOrder(110);
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(108);
+
+                    b.Property<string>("UpdatedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(105);
+
+                    b.Property<Guid?>("UpdatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(102);
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("HomeWorkQuestionId");
+
+                    b.HasIndex("HomeWorkResultId");
+
+                    b.ToTable("HomeWorkAnswers");
+                });
+
             modelBuilder.Entity("Fsel.Course.Domain.Entities.HomeWorkQuestion", b =>
                 {
                     b.Property<Guid>("Id")
@@ -840,6 +920,89 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.HasIndex("QuestionId");
 
                     b.ToTable("HomeWorkQuestions");
+                });
+
+            modelBuilder.Entity("Fsel.Course.Domain.Entities.HomeWorkResult", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(0);
+
+                    b.Property<int>("CorrectCount")
+                        .HasColumnType("int");
+
+                    b.Property<int>("CorrectTotal")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(107);
+
+                    b.Property<string>("CreatedFullName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(104);
+
+                    b.Property<Guid>("CreatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(101);
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(109);
+
+                    b.Property<string>("DeletedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(106);
+
+                    b.Property<Guid?>("DeletedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(103);
+
+                    b.Property<Guid>("HomeWorkId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit")
+                        .HasColumnOrder(110);
+
+                    b.Property<Guid>("LessonResultId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<double>("Percent")
+                        .HasColumnType("float");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<Guid>("StudentId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(108);
+
+                    b.Property<string>("UpdatedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(105);
+
+                    b.Property<Guid?>("UpdatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(102);
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("HomeWorkId");
+
+                    b.HasIndex("LessonResultId");
+
+                    b.ToTable("HomeWorkResults");
                 });
 
             modelBuilder.Entity("Fsel.Course.Domain.Entities.Lesson", b =>
@@ -2102,12 +2265,19 @@ namespace Fsel.Course.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(103);
 
+                    b.Property<string>("Feedback")
+                        .HasMaxLength(100000000)
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit")
                         .HasColumnOrder(110);
 
                     b.Property<Guid>("LessonResultId")
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<double>("NumberOfStars")
+                        .HasColumnType("float");
 
                     b.Property<double>("Percent")
                         .HasColumnType("float");
@@ -2389,6 +2559,25 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.Navigation("Question");
                 });
 
+            modelBuilder.Entity("Fsel.Course.Domain.Entities.HomeWorkAnswer", b =>
+                {
+                    b.HasOne("Fsel.Course.Domain.Entities.HomeWorkQuestion", "HomeWorkQuestion")
+                        .WithMany("HomeWorkAnswers")
+                        .HasForeignKey("HomeWorkQuestionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Fsel.Course.Domain.Entities.HomeWorkResult", "HomeWorkResult")
+                        .WithMany("HomeWorkAnswers")
+                        .HasForeignKey("HomeWorkResultId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("HomeWorkQuestion");
+
+                    b.Navigation("HomeWorkResult");
+                });
+
             modelBuilder.Entity("Fsel.Course.Domain.Entities.HomeWorkQuestion", b =>
                 {
                     b.HasOne("Fsel.Course.Domain.Entities.HomeWork", "HomeWork")
@@ -2406,6 +2595,25 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.Navigation("HomeWork");
 
                     b.Navigation("Question");
+                });
+
+            modelBuilder.Entity("Fsel.Course.Domain.Entities.HomeWorkResult", b =>
+                {
+                    b.HasOne("Fsel.Course.Domain.Entities.HomeWork", "HomeWork")
+                        .WithMany("HomeWorkResults")
+                        .HasForeignKey("HomeWorkId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Fsel.Course.Domain.Entities.LessonResult", "LessonResult")
+                        .WithMany("HomeWorkResults")
+                        .HasForeignKey("LessonResultId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("HomeWork");
+
+                    b.Navigation("LessonResult");
                 });
 
             modelBuilder.Entity("Fsel.Course.Domain.Entities.LessonExtraPractice", b =>
@@ -2701,7 +2909,19 @@ namespace Fsel.Course.Infrastructure.Migrations
                 {
                     b.Navigation("HomeWorkQuestions");
 
+                    b.Navigation("HomeWorkResults");
+
                     b.Navigation("LessonHomeWorks");
+                });
+
+            modelBuilder.Entity("Fsel.Course.Domain.Entities.HomeWorkQuestion", b =>
+                {
+                    b.Navigation("HomeWorkAnswers");
+                });
+
+            modelBuilder.Entity("Fsel.Course.Domain.Entities.HomeWorkResult", b =>
+                {
+                    b.Navigation("HomeWorkAnswers");
                 });
 
             modelBuilder.Entity("Fsel.Course.Domain.Entities.Lesson", b =>
@@ -2723,6 +2943,8 @@ namespace Fsel.Course.Infrastructure.Migrations
 
             modelBuilder.Entity("Fsel.Course.Domain.Entities.LessonResult", b =>
                 {
+                    b.Navigation("HomeWorkResults");
+
                     b.Navigation("LessonNotes");
 
                     b.Navigation("VideoResult");

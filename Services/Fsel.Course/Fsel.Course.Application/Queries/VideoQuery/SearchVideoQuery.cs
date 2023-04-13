@@ -42,7 +42,7 @@ namespace Fsel.Course.Application.Queries.VideoQuery
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 return methodResult;
             }
-            var videoQuery = _videoRepository.SearchAsync(request.TimeCodeType, request.TeacherId, request.Level);
+            var videoQuery = _videoRepository.SearchAsync(request.TimeCodeType, request.TeacherId, request.CourseLevel);
 
             if (!string.IsNullOrEmpty(request.Keyword))
             {

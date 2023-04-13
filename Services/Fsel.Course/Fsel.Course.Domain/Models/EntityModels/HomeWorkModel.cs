@@ -20,5 +20,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public EnumCourseLevel CourseLevel { get; set; }
 
         public EnumCourseSkill CourseSkill { get; set; }
+
+        public IList<HomeWorkResultModel>? HomeWorkResults { get; set; }
     }
 }

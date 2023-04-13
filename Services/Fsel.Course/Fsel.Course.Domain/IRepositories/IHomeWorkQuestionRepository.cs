@@ -7,5 +7,6 @@ namespace Fsel.Course.Domain.IRepositories
 
     public interface IHomeWorkQuestionRepository : IRepository<HomeWorkQuestion>
     {
+        Task<bool> GetCheckByIdsAsync(IEnumerable<Guid>? ids);
     }
 }

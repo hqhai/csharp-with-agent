@@ -61,7 +61,7 @@ namespace Fsel.Identity.Application.Commands.ParentCmd
 
             var userparent = await _userManager.Users.Include(e => e.Human)
                                              .ThenInclude(e => e != null ? e.Parent : default)
-                                             .ThenInclude(e => e != null ? e.ParentStudents : default)
+                                             .ThenInclude(e => e != null ? e.ParentStudents.Where(n => !n.IsDeleted) : default)
                                              .Where(e => e.Id == _authContext.CurrentUserId.ToString())
                                              .FirstOrDefaultAsync(cancellationToken: cancellationToken);
 

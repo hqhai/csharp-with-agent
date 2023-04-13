@@ -35,7 +35,7 @@ namespace Fsel.Course.Application.Commands.CourseCmd
             #region Validation
 
             var course = await _courseRepository.Queryable
-                            .Include(e => e.CourseTeachers)
+                            .Include(e => e.CourseTeachers.Where(n => !n.IsDeleted))
                             .Where(e => e.Id == request.Id)
                             .FirstOrDefaultAsync(cancellationToken: cancellationToken);
 
@@ -52,7 +52,7 @@ namespace Fsel.Course.Application.Commands.CourseCmd
             }
             var teacherIds = course.CourseTeachers.Select(x => x.TeacherId).ToList();
             var courses = await _courseRepository.Queryable
-                                .Include(e => e.CourseTeachers)
+                                .Include(e => e.CourseTeachers.Where(n => !n.IsDeleted))
                                 .Where(e => e.CourseLevel == course.CourseLevel &&
                                             e.Status == EnumCourseStatus.Active &&
                                             e.CourseTeachers.Count == teacherIds.Count &&

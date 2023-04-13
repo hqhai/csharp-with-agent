@@ -8,8 +8,6 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 
-/*using Course = Fsel.Course.Domain.Entities.Course;*/
-
 namespace Fsel.Course.Infrastructure
 {
     public class CourseDbContext : BaseDbContext
@@ -49,6 +47,8 @@ namespace Fsel.Course.Infrastructure
         public DbSet<QuestionForm> QuestionForms { get; set; }
         public DbSet<LessonInstruction> LessonInstructions { get; set; }
         public DbSet<HomeWorkQuestion> HomeWorkQuestions { get; set; }
+        public DbSet<HomeWorkAnswer> HomeWorkAnswers { get; set; }
+        public DbSet<HomeWorkResult> HomeWorkResults { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -81,6 +81,9 @@ namespace Fsel.Course.Infrastructure
             modelBuilder.ApplyConfiguration(new VideoTimeCodeAnswerEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new QuestionFormEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new LessonInstructionEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new HomeWorkAnswerEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new HomeWorkResultEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new HomeWorkQuestionEntityTypeConfiguration());
 
             base.OnModelCreating(modelBuilder);
         }

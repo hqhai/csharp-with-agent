@@ -12,6 +12,7 @@ namespace Fsel.Course.Lms.Api.Controllers
     using MediatR;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
+    using Fsel.Course.Lms.Application.Queries.HomeWorkQuery;
 
     [ApiVersion(Settings.APIVersion)]
     [Route(Settings.APIDefaultRoute + "/lesson")]
@@ -27,7 +28,7 @@ namespace Fsel.Course.Lms.Api.Controllers
         }
 
         /// <summary>
-        /// Get List Unit
+        /// Get List lesson
         /// </summary>
         [HttpGet]
         [ProducesResponseType(typeof(MethodResult<LessonModel>), (int)HttpStatusCode.OK)]
@@ -51,14 +52,26 @@ namespace Fsel.Course.Lms.Api.Controllers
         }
 
         /// <summary>
-        /// Get List Unit
+        /// Get List lesson by unit
         /// </summary>
-        [HttpGet("get-list-lesson")]
+        [HttpGet("get-list-lesson-by-unit")]
         [ProducesResponseType(typeof(MethodResult<IList<LessonModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetListLessonByUnitId([FromQuery] GetListLessonQuery query)
         {
             MethodResult<IList<LessonModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Get lesson homework score
+        /// </summary>
+        [HttpGet("get-lesson-homework-score")]
+        [ProducesResponseType(typeof(MethodResult<IList<LessonHomeworkSearchModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetLessonHomeWorkScore([FromQuery] GetListHomeworkQuery query)
+        {
+            MethodResult<IList<LessonHomeworkSearchModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
 

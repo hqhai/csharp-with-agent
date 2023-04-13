@@ -40,8 +40,7 @@ namespace Fsel.Identity.Application.Queries.StudentQuery
 
             if (student == null)
             {
-                methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                methodResult.AddError(nameof(EnumStudentErrorCode.StudentNull));
+                methodResult.AddErrorBadRequest(nameof(EnumStudentErrorCode.StudentNull));
                 return methodResult;
             }
             methodResult.Result = _mapper.Map<StudentModel>(student);

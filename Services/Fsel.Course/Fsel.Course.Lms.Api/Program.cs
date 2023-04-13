@@ -40,7 +40,6 @@ builder.Services.AddScoped<ICourseUnitMockTestRepository, CourseUnitMockTestRepo
 builder.Services.AddScoped<IMockTestRepository, MockTestRepository>();
 builder.Services.AddScoped<ICourseClassStudentRepository, CourseClassStudentRepository>();
 builder.Services.AddScoped<ILessonRepository, LessonRepository>();
-builder.Services.AddScoped<IMockTestRepository, MockTestRepository>();
 builder.Services.AddScoped<IVideoResultRepository, VideoResultRepository>();
 builder.Services.AddScoped<IVideoTimeCodeAnswerRepository, VideoTimeCodeAnswerRepository>();
 builder.Services.AddScoped<ICourseResultRepository, CourseResultRepository>();
@@ -49,6 +48,9 @@ builder.Services.AddScoped<ILessonResultRepository, LessonResultRepository>();
 builder.Services.AddScoped<ILessonNoteRepository, LessonNoteRepository>();
 builder.Services.AddScoped<IQuestionFormRepository, QuestionFormRepository>();
 builder.Services.AddScoped<ILessonInstructionRepository, LessonInstructionRepository>();
+builder.Services.AddScoped<IHomeWorkAnswerRepository, HomeWorkAnswerRepository>();
+builder.Services.AddScoped<IHomeWorkQuestionRepository, HomeWorkQuestionRepository>();
+builder.Services.AddScoped<IHomeWorkResultRepository, HomeWorkResultRepository>();
 
 builder.Services.AddScoped<QuestionTypeConverter>();
 builder.Services.AddScoped<AnswerTypeConverter>();

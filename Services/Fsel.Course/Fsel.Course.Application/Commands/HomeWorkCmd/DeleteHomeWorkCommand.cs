@@ -32,7 +32,7 @@ namespace Fsel.Course.Application.Commands.HomeWorkCmd
             MethodResult<bool> methodResult = new MethodResult<bool>();
 
             var homeWork = await _homeWorkRepository.Queryable
-                            .Include(x => x.HomeWorkQuestions)
+                            .Include(x => x.HomeWorkQuestions.Where(n => !n.IsDeleted))
                             .FirstOrDefaultAsync(e => e.Id == request.Id, cancellationToken: cancellationToken);
 
             if (homeWork == null)

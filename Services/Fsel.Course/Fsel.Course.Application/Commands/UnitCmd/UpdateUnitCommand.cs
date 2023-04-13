@@ -36,14 +36,14 @@ namespace Fsel.Course.Application.Commands.UnitCmd
 
         public async Task<MethodResult<UnitModel>> Handle(UpdateUnitCommand request, CancellationToken cancellationToken)
         {
-            MethodResult<UnitModel> methodResult = new MethodResult<UnitModel>();
             ArgumentNullException.ThrowIfNull(request);
+            MethodResult<UnitModel> methodResult = new MethodResult<UnitModel>();
 
             #region Validation
 
             var unit = await _unitRepository.Queryable
-                                    .Include(e => e.UnitLessons)
-                                    .Include(e => e.UnitSkillMockTests)
+                                    .Include(e => e.UnitLessons.Where(n => !n.IsDeleted))
+                                    .Include(e => e.UnitSkillMockTests.Where(n => !n.IsDeleted))
                                     .FirstOrDefaultAsync(e => e.Id == request.Id, cancellationToken: cancellationToken);
             if (unit == null)
             {

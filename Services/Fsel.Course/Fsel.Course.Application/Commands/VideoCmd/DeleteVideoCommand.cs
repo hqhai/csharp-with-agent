@@ -25,8 +25,8 @@ namespace Fsel.Course.Application.Commands.VideoCmd
 
         public async Task<MethodResult<bool>> Handle(DeleteVideoCommand request, CancellationToken cancellationToken)
         {
-            MethodResult<bool> methodResult = new MethodResult<bool>();
             ArgumentNullException.ThrowIfNull(request);
+            MethodResult<bool> methodResult = new MethodResult<bool>();
 
             #region Validation
 

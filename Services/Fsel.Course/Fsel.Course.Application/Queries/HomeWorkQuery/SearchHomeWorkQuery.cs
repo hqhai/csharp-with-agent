@@ -39,14 +39,14 @@ namespace Fsel.Course.Application.Queries.HomeWorkQuery
                 return methodResult;
             }
             var homeWorkQuery = _homeWorkRepository.Queryable
-                        .Include(x => x.LessonHomeWorks)
+                        .Include(x => x.LessonHomeWorks.Where(n => !n.IsDeleted))
                         .Select(x => new HomeWorkSearchModel
                         {
                             Id = x.Id,
                             Name = x.Name,
                             CreatedFullName = x.CreatedFullName,
                             CreatedDate = x.CreatedDate,
-                            IsActive = x.LessonHomeWorks.Any(),
+                            IsActive = x.LessonHomeWorks.Where(n => !n.IsDeleted).Any(),
                             CourseLevel = x.CourseLevel,
                             CourseSkill = x.CourseSkill,
                         });
@@ -55,10 +55,12 @@ namespace Fsel.Course.Application.Queries.HomeWorkQuery
             {
                 homeWorkQuery = homeWorkQuery.Where(m => m.Id.ToString() == request.Keyword || (m.Name ?? string.Empty).Contains(request.Keyword));
             }
+
             if (request.CourseLevel != null)
             {
                 homeWorkQuery = homeWorkQuery.Where(m => m.CourseLevel == request.CourseLevel);
             }
+
             if (request.CourseSkill != null)
             {
                 homeWorkQuery = homeWorkQuery.Where(m => m.CourseSkill == request.CourseSkill);
