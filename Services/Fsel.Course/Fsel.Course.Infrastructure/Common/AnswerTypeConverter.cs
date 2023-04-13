@@ -11,7 +11,7 @@ namespace Fsel.Course.Infrastructure.Common
 
     public class AnswerTypeConverter
     {
-        public (object?, int) GetTotalCorrectByAsnwerType(ref object? configAnswer, object? configQuestion, EnumQuestionType type)
+        public (object?, int) GetTotalCorrectByAsnwerType(object? configAnswer, object? configQuestion, EnumQuestionType type)
         {
             int totalCorrect = default;
             switch (type)

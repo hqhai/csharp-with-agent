@@ -83,7 +83,7 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd
                     return methodResult;
                 }
                 var answer = item.Answer;
-                var (answerConfig, correctCount) = _answerTypeConverter.GetTotalCorrectByAsnwerType(ref answer, question.Config, question.QuestionType);
+                var (answerConfig, correctCount) = _answerTypeConverter.GetTotalCorrectByAsnwerType(answer, question.Config, question.QuestionType);
                 if (answerConfig == null)
                 {
                     methodResult.AddErrorBadRequest(nameof(EnumHomeWorkAnswerErrorCode.AnswerIsInTheWrongFormat));
