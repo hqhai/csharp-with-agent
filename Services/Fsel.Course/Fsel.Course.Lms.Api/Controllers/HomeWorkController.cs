@@ -4,7 +4,9 @@ namespace Fsel.Course.Lms.Api.Controllers
 {
     using Fsel.Common.ActionResults;
     using System.Net;
+
     using Fsel.Common.ActionResults;
+
     using Fsel.Common.Constants;
     using Fsel.Shared.Enums;
     using Fsel.Course.Domain.Models.EntityModels;
@@ -30,12 +32,12 @@ namespace Fsel.Course.Lms.Api.Controllers
         /// <summary>
         /// Get Home Work
         /// </summary>
-        [HttpGet("{id}")]
+        [HttpGet]
         [ProducesResponseType(typeof(MethodResult<HomeWorkModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> Get([FromRoute] Guid id)
+        public async Task<IActionResult> Get([FromQuery] GetHomeWorkQuery query)
         {
-            MethodResult<HomeWorkModel> queryResult = await _mediator.Send(new GetHomeWorkQuery { HomeWorkId = id }).ConfigureAwait(false);
+            MethodResult<HomeWorkModel> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
 
