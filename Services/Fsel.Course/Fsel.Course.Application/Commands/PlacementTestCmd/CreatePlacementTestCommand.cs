@@ -37,8 +37,7 @@ namespace Fsel.Course.Application.Commands.PlacementTestCmd
 
             if (!placementTest.IsValid())
             {
-                methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                methodResult.AddResultFromErrorList(placementTest.ErrorMessages);
+                methodResult.AddErrorBadRequest(placementTest.ErrorMessages);
                 return methodResult;
             }
 

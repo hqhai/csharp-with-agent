@@ -17,11 +17,11 @@ namespace Fsel.Course.Application.Commands.CourseCmd
         public Guid Id { get; set; }
     }
 
-    public class UpdateActiveStatusCommandHandler : IRequestHandler<ActiveCourseCommand, MethodResult<bool>>
+    public class ActiveCourseCommandHandler : IRequestHandler<ActiveCourseCommand, MethodResult<bool>>
     {
         private readonly ICourseRepository _courseRepository;
 
-        public UpdateActiveStatusCommandHandler(ICourseRepository courseRepository)
+        public ActiveCourseCommandHandler(ICourseRepository courseRepository)
         {
             _courseRepository = courseRepository;
         }
@@ -41,7 +41,7 @@ namespace Fsel.Course.Application.Commands.CourseCmd
 
             if (course == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.CourseNotExist), nameof(request.Id), request.Id);
+                methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.CourseIdNotExist), nameof(request.Id), request.Id);
                 return methodResult;
             }
 

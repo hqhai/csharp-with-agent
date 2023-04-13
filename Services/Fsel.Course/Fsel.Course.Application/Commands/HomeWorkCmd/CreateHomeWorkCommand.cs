@@ -23,18 +23,15 @@ namespace Fsel.Course.Application.Commands.HomeWorkCmd
     {
         private readonly IMapper _mapper;
         private readonly IHomeWorkRepository _homeWorkRepository;
-        private readonly IQuestionRepository _questionRepository;
         private readonly QuestionTypeConverter _questionTypeConverter;
 
         public CreateHomeWorkCommandHandler(IMapper mapper
             , QuestionTypeConverter questionTypeConverter
-            , IHomeWorkRepository homeWorkRepository
-            , IQuestionRepository questionRepository)
+            , IHomeWorkRepository homeWorkRepository)
         {
             _mapper = mapper;
             _questionTypeConverter = questionTypeConverter;
             _homeWorkRepository = homeWorkRepository;
-            _questionRepository = questionRepository;
         }
 
         public async Task<MethodResult<HomeWorkModel>> Handle(CreateHomeWorkCommand request, CancellationToken cancellationToken)
@@ -46,7 +43,7 @@ namespace Fsel.Course.Application.Commands.HomeWorkCmd
 
             if (request.Questions == null || request.Questions.Count == 0)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumQuestionErrorCode.QusetionIdNotCorrect), nameof(request.Questions), request.Questions);
+                methodResult.AddErrorBadRequest(nameof(EnumQuestionErrorCode.QuestionsNull), nameof(request.Questions), request.Questions);
                 return methodResult;
             }
 
@@ -54,7 +51,7 @@ namespace Fsel.Course.Application.Commands.HomeWorkCmd
             {
                 if (q == null)
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumQuestionErrorCode.QuestionNotCorrect), nameof(request.Questions));
+                    methodResult.AddErrorBadRequest(nameof(EnumQuestionErrorCode.QuestionNull), nameof(request.Questions), q);
                 }
                 else
                 {
@@ -62,7 +59,7 @@ namespace Fsel.Course.Application.Commands.HomeWorkCmd
                     var (config, correctTotal) = _questionTypeConverter.QuestionTypeConverterObject(question.Config, question.QuestionType, isShowCorrectTotal: !question.Ungraded, false);
                     if (config == null)
                     {
-                        methodResult.AddErrorBadRequest(nameof(EnumVideoErrorCode.ConfigIsInTheWrongFormat), nameof(question.Config));
+                        methodResult.AddErrorBadRequest(nameof(EnumVideoErrorCode.ConfigIsInTheWrongFormat), nameof(question.Config), question.Config);
                     }
                     question.CorrectTotal = correctTotal;
                     if (!question.IsValid())

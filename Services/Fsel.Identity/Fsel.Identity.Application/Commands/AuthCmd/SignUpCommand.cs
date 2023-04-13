@@ -136,8 +136,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                             if (!sendResult.IsOK)
                             {
                                 scope.Dispose();
-                                methodResult.StatusCode = sendResult?.StatusCode ?? default;
-                                methodResult.AddResultFromErrorList(sendResult?.ErrorMessages);
+                                methodResult.AddErrorBadRequest(sendResult?.ErrorMessages);
                                 return methodResult;
                             }
                             scope.Complete();
@@ -146,8 +145,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                         }
                         catch
                         {
-                            methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                            methodResult.AddError(nameof(EnumAuthErrorCode.SendAuthErorr));
+                            methodResult.AddErrorBadRequest(nameof(EnumAuthErrorCode.SendAuthErorr));
                             scope.Dispose();
                         }
                     }

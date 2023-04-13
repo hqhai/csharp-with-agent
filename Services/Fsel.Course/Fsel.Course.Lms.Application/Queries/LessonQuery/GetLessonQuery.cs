@@ -79,7 +79,7 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
 
             if (lessonQuery.Count == 0)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumLessonErrorCode.ListLessonNotExist));
+                methodResult.AddErrorBadRequest(nameof(EnumLessonErrorCode.LessonIdNotExist), nameof(request.LessonId), request.LessonId);
                 return methodResult;
             }
             methodResult.Result = lessonQuery;

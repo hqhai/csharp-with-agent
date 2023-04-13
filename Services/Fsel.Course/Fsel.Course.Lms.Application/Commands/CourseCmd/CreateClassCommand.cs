@@ -31,7 +31,8 @@ namespace Fsel.Course.Lms.Application.Commands.CourseCmd
         private readonly ITrainingService _trainingService;
         private readonly AuthContext _authContext;
 
-        public CreateClassCommandHandler(ICourseRepository courseRepository, IUserService userService
+        public CreateClassCommandHandler(ICourseRepository courseRepository
+            , IUserService userService
             , IMapper mapper
             , ITrainingService trainingService
             , AuthContext authContext)
@@ -53,12 +54,12 @@ namespace Fsel.Course.Lms.Application.Commands.CourseCmd
             var course = await _courseRepository.GetIncludeLessonVideoByIdAsync(request.CourseId);
             if (course == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.CourseNotExist));
+                methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.CourseIdNotExist), nameof(request.CourseId), request.CourseId);
                 return methodResult;
             }
             else if (course.Status != EnumCourseStatus.Active)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.CourseMustActiveState));
+                methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.CourseMustActiveState), nameof(course.Status), course.Status);
                 return methodResult;
             }
 
@@ -72,7 +73,7 @@ namespace Fsel.Course.Lms.Application.Commands.CourseCmd
             var student = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId.ToString());
             if (!student.IsSuccessStatusCode)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumCourseClassStudentErrorCode.UserIdNotExist));
+                methodResult.AddErrorBadRequest(nameof(EnumCourseClassStudentErrorCode.UserIdNotExist), nameof(student), _authContext.CurrentUserId.ToString());
                 return methodResult;
             }
             var studentId = student?.Content?.Result?.Id;

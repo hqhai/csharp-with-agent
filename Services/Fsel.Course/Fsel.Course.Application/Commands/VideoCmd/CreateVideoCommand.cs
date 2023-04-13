@@ -42,7 +42,7 @@ namespace Fsel.Course.Application.Commands.VideoCmd
 
             if (request.VideoTimeCodes == null || request.VideoTimeCodes.Count == 0)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumVideoErrorCode.VideoNotCorrect), nameof(request.VideoTimeCodes));
+                methodResult.AddErrorBadRequest(nameof(EnumVideoTimeCodeErrorCode.VideoTimeCodesNull), nameof(request.VideoTimeCodes), request.VideoTimeCodes);
                 return methodResult;
             }
 
@@ -50,7 +50,7 @@ namespace Fsel.Course.Application.Commands.VideoCmd
 
             if (listTimeCodeType.Contains(EnumTimeCodeType.UnitTest) && listTimeCodeType.Contains(EnumTimeCodeType.SkillTest))
             {
-                methodResult.AddErrorBadRequest(nameof(EnumVideoErrorCode.CanNotUnitTestAndSkillTestAtTheSameTime), nameof(request.VideoTimeCodes));
+                methodResult.AddErrorBadRequest(nameof(EnumVideoErrorCode.CanNotUnitTestAndSkillTestAtTheSameTime), nameof(listTimeCodeType), listTimeCodeType);
                 return methodResult;
             }
 
@@ -60,7 +60,7 @@ namespace Fsel.Course.Application.Commands.VideoCmd
             {
                 if (x == null)
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumVideoTimeCodeErrorCode.VideoTimeCodeNotCorrect), nameof(request.VideoTimeCodes));
+                    methodResult.AddErrorBadRequest(nameof(EnumVideoTimeCodeErrorCode.VideoTimeCodeNull), nameof(request.VideoTimeCodes), x);
                 }
                 else
                 {
@@ -74,7 +74,7 @@ namespace Fsel.Course.Application.Commands.VideoCmd
                     {
                         if (n == null)
                         {
-                            methodResult.AddErrorBadRequest(nameof(EnumExerciseErrorCode.ExerciseNull), nameof(x.Exercises));
+                            methodResult.AddErrorBadRequest(nameof(EnumExerciseErrorCode.ExerciseNull), nameof(x.Exercises), x.Exercises);
                         }
                         else
                         {
@@ -91,7 +91,7 @@ namespace Fsel.Course.Application.Commands.VideoCmd
                             {
                                 if (q == null)
                                 {
-                                    methodResult.AddErrorBadRequest(nameof(EnumQuestionErrorCode.QuestionNotCorrect), nameof(n.Questions));
+                                    methodResult.AddErrorBadRequest(nameof(EnumQuestionErrorCode.QuestionNull), nameof(n.Questions), q);
                                 }
                                 else
                                 {
@@ -99,7 +99,7 @@ namespace Fsel.Course.Application.Commands.VideoCmd
                                     var (config, correctTotal) = _questionTypeConverter.QuestionTypeConverterObject(question.Config, question.QuestionType, isShowCorrectTotal: !question.Ungraded, false);
                                     if (config == null)
                                     {
-                                        methodResult.AddErrorBadRequest(nameof(EnumVideoErrorCode.ConfigIsInTheWrongFormat), nameof(question.Config));
+                                        methodResult.AddErrorBadRequest(nameof(EnumVideoErrorCode.ConfigIsInTheWrongFormat), nameof(question.Config), question.Config);
                                     }
                                     question.CorrectTotal = correctTotal;
 

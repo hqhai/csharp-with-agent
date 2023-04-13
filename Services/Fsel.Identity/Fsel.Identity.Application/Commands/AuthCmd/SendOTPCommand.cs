@@ -40,11 +40,10 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                     Subject = StringValues.SendOtpSubject + $"{request.Otp!}",
                     ToEmails = new List<string> { $"{request.Email}" }
                 };
-                var sendResult1 = await _senderService.SendEmailAsync(senderCommandModel);
-                if (!sendResult1.IsSuccessStatusCode)
+                var sendResult = await _senderService.SendEmailAsync(senderCommandModel);
+                if (!sendResult.IsSuccessStatusCode)
                 {
-                    methodResult.StatusCode = (int)sendResult1.StatusCode;
-                    methodResult.AddError(sendResult1.Content?.ErrorMessages);
+                    methodResult.AddErrorBadRequest(sendResult.Content?.ErrorMessages);
                     return methodResult;
                 }
             }

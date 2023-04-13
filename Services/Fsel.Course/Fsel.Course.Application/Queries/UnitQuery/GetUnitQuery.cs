@@ -36,21 +36,18 @@ namespace Fsel.Course.Application.Queries.UnitQuery
 
             if (unit == null)
             {
-                methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                methodResult.AddErrorBadRequest(
-                    nameof(EnumUnitErrorCode.UnitNotExist),
-                    nameof(request.Id), request.Id);
+                methodResult.AddErrorBadRequest(nameof(EnumUnitErrorCode.UnitIdNotExist), nameof(request.Id), request.Id);
                 return methodResult;
             }
 
             var unitModel = _mapper.Map<UnitModel>(unit);
             unitModel.IsActive = unit.CourseUnitMockTests.Any();
             unitModel.Lessons = unit.UnitLessons.Select(x =>
-            {
-                var model = _mapper.Map<LessonModel>(x.Lesson);
-                model.DisplayOrder = x.DisplayOrder;
-                return model;
-            }).OrderBy(x => x.DisplayOrder).ToList();
+                                {
+                                    var model = _mapper.Map<LessonModel>(x.Lesson);
+                                    model.DisplayOrder = x.DisplayOrder;
+                                    return model;
+                                }).OrderBy(x => x.DisplayOrder).ToList();
 
             methodResult.Result = unitModel;
             methodResult.StatusCode = StatusCodes.Status200OK;

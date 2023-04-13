@@ -5,8 +5,8 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
     public enum EnumLessonNoteErrorCode
     {
         /// <summary>
-        /// Lesson Notes  does not exist
+        /// Lesson Notes Id does not exist
         /// </summary>
-        LessonNotesDoesNotExist,
+        LessonNotesIdNotExist,
     }
 }

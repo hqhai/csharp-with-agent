@@ -9,15 +9,27 @@ namespace Fsel.Course.Domain.Entities
 
     public class HomeWorkResult : Entity
     {
+        /// <summary>
+        /// Phần trăm
+        /// </summary>
         [Range(1, 10000_0000, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
         public double Percent { get; set; }
 
+        /// <summary>
+        /// Tổng số câu trả lời đúng
+        /// </summary>
         [Range(0, 10000_0000, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
         public int CorrectCount { get; set; }
 
+        /// <summary>
+        /// Tổng số câu đúng
+        /// </summary>
         [Range(1, 10000_0000, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
         public int CorrectTotal { get; set; }
 
+        /// <summary>
+        /// Trạng thái
+        /// </summary>
         public EnumResultStatus Status { get; set; }
 
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]

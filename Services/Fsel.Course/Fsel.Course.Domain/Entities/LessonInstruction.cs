@@ -9,11 +9,18 @@ namespace Fsel.Course.Domain.Entities
 
     public class LessonInstruction : Entity
     {
+        /// <summary>
+        /// Chỉ dẫn
+        /// </summary>
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         [MaxLength(2000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? Instruction { get; set; }
 
+        /// <summary>
+        /// Skill
+        /// </summary>
         public EnumCourseSkill CourseSkill { get; set; }
+
         public Lesson? Lesson { get; set; }
         public Guid LessonId { get; set; }
     }

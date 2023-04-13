@@ -8,10 +8,16 @@ namespace Fsel.Course.Domain.Entities
 
     public class LessonNote : Entity
     {
+        /// <summary>
+        /// Name
+        /// </summary>
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         [MaxLength(250, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? Name { get; set; }
 
+        /// <summary>
+        /// Chú thích
+        /// </summary>
         [MaxLength(2000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? Note { get; set; }
 

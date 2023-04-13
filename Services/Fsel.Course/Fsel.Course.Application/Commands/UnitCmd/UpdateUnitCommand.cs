@@ -47,33 +47,33 @@ namespace Fsel.Course.Application.Commands.UnitCmd
                                     .FirstOrDefaultAsync(e => e.Id == request.Id, cancellationToken: cancellationToken);
             if (unit == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumUnitErrorCode.UnitNotExist), nameof(request.Id), request?.Id);
+                methodResult.AddErrorBadRequest(nameof(EnumUnitErrorCode.UnitIdNotExist), nameof(request.Id), request?.Id);
                 return methodResult;
             }
 
             var isUnitUsed = await _unitRepository.IsUnitUsed(request.Id);
             if (isUnitUsed)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumUnitErrorCode.UnitHaveUsed), nameof(request.Id), request.Id);
+                methodResult.AddErrorBadRequest(nameof(EnumUnitErrorCode.UnitUsed), nameof(request.Id), request.Id);
                 return methodResult;
             }
 
             if (request.LessonIds == null || request.LessonIds.Count == 0)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumUnitErrorCode.UnitIdNotCorrect), nameof(request.LessonIds), request.LessonIds);
+                methodResult.AddErrorBadRequest(nameof(EnumLessonErrorCode.LessonIdsNull), nameof(request.LessonIds), request.LessonIds);
                 return methodResult;
             }
 
             if (_lessonRepository.IsIdsInValid(request.LessonIds))
             {
-                methodResult.AddErrorBadRequest(nameof(EnumLessonErrorCode.LessonNotCorrect), nameof(request.LessonIds), request.LessonIds);
+                methodResult.AddErrorBadRequest(nameof(EnumLessonErrorCode.LessonIdsNotExist), nameof(request.LessonIds), request.LessonIds);
                 return methodResult;
             }
 
             var checkMockTest = _mockTestRepository.Queryable.Any(x => x.MockTestType == EnumMockTestType.UnitMockTest && x.Id == request.MockTestId);
             if (!checkMockTest)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumMockTestErrorCode.MockTestInValid));
+                methodResult.AddErrorBadRequest(nameof(EnumMockTestErrorCode.MockTestExistsOtherThanTypeUnitMockTest), nameof(request.MockTestId), request.MockTestId);
                 return methodResult;
             }
 
@@ -81,8 +81,7 @@ namespace Fsel.Course.Application.Commands.UnitCmd
 
             if (!unit.IsValid())
             {
-                methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                methodResult.AddResultFromErrorList(unit.ErrorMessages);
+                methodResult.AddErrorBadRequest(unit.ErrorMessages);
                 return methodResult;
             }
 
