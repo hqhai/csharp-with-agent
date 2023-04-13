@@ -3,7 +3,7 @@
 namespace Fsel.Course.Lms.Application.Services.TrainingServices.Models
 {
     using System;
-    using Fsel.Common.Enums;
+    using Fsel.Shared.Enums;
     using Fsel.Core.Base.BaseModels;
 
     public class ClassModel : BaseModel

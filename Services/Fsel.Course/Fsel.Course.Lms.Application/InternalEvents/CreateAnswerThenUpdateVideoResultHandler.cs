@@ -11,53 +11,73 @@ namespace Fsel.Course.Lms.Application.InternalEvents
 
     public class CreateAnswerThenUpdateVideoResultHandler : INotificationHandler<EntityCreatedEvent<VideoTimeCodeAnswer>>
     {
+        private readonly IVideoRepository _videoRepository;
+        private readonly IVideoTimeCodeRepository _videoTimeCodeRepository;
+        private readonly ITimeCodeExerciseRepository _timeCodeExerciseRepository;
+        private readonly IExerciseRepository _exerciseRepository;
+        private readonly IExerciseQuestionRepository _exerciseQuestionRepository;
         private readonly IVideoResultRepository _videoResultRepository;
         private readonly IVideoTimeCodeAnswerRepository _videoTimeCodeAnswerRepository;
 
-        public CreateAnswerThenUpdateVideoResultHandler(IVideoResultRepository videoResultRepository
-            , IVideoTimeCodeAnswerRepository videoTimeCodeAnswerRepository)
+        public CreateAnswerThenUpdateVideoResultHandler(
+            IVideoTimeCodeRepository videoTimeCodeRepository,
+            ITimeCodeExerciseRepository timeCodeExerciseRepository,
+            IExerciseRepository exerciseRepository,
+            IExerciseQuestionRepository exerciseQuestionRepository,
+            IVideoResultRepository videoResultRepository,
+            IVideoTimeCodeAnswerRepository videoTimeCodeAnswerRepository,
+            IVideoRepository videoRepository)
         {
-            _videoResultRepository = videoResultRepository;
+            _videoRepository = videoRepository;
+            _videoTimeCodeRepository = videoTimeCodeRepository;
+            _timeCodeExerciseRepository = timeCodeExerciseRepository;
+            _exerciseRepository = exerciseRepository;
+            _exerciseQuestionRepository = exerciseQuestionRepository;
             _videoTimeCodeAnswerRepository = videoTimeCodeAnswerRepository;
+            _videoResultRepository = videoResultRepository;
         }
 
         public async Task Handle(EntityCreatedEvent<VideoTimeCodeAnswer> notification, CancellationToken cancellationToken)
         {
-            ArgumentNullException.ThrowIfNull(notification);
-            var videoTimeCodeAnswer = notification.Data;
-            var videoTimeCodeAnswers = await _videoTimeCodeAnswerRepository.Queryable.Include(x => x.Question).Where(x => x.VideoResultId == videoTimeCodeAnswer.VideoResultId).ToListAsync(cancellationToken: cancellationToken);
-            var videoResult = await _videoResultRepository.Queryable.FirstOrDefaultAsync(x => x.Id == videoTimeCodeAnswer.VideoResultId, cancellationToken: cancellationToken);
-            if (videoResult != null && videoResult.Status != EnumResultStatus.Done)
-            {
-                videoResult.CorrectCount = videoTimeCodeAnswers.Sum(x => x.CorrectCount);
-                videoResult.CorrectTotal = videoTimeCodeAnswers.Sum(x => x.Question!.CorrectTotal);
+            //ArgumentNullException.ThrowIfNull(notification);
 
-                if (await CheckStatusVideoResult(videoResult.Id))
-                {
-                    videoResult.Status = EnumResultStatus.Done;
-                }
-                _videoResultRepository.Update(videoResult);
-                await _videoTimeCodeAnswerRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-            }
+            //var videoTimeCodeAnswer = notification.Data;
+            //var videoResult = videoTimeCodeAnswer.VideoResult;
+            //var question = videoTimeCodeAnswer.Question;
+
+            //if (videoResult != null)
+            //{
+            //    videoResult.CorrectCount += videoTimeCodeAnswer.CorrectCount;
+            //    videoResult.CorrectTotal += question?.CorrectTotal ?? default;
+
+            //    if (await IsVideoResultDone(videoResult))
+            //    {
+            //        videoResult.Status = EnumResultStatus.Done;
+            //    }
+
+            //    _videoResultRepository.Update(videoResult);
+            //    await _videoResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken);
+            //}
         }
 
-        public async Task<bool> CheckStatusVideoResult(Guid id)
+        public async Task<bool> IsVideoResultDone(VideoResult videoResult)
         {
-            var videoResult = await _videoResultRepository.Queryable.Include(x => x.VideoTimeCodeAnswers)
-                                                        .Include(x => x.Video)
-                                                        .ThenInclude(x => x!.VideoTimeCodes.Where(y => !y.IsDeleted))
-                                                        .ThenInclude(x => x.TimeCodeExercises.Where(y => !y.IsDeleted))
-                                                        .ThenInclude(x => x.Exercise)
-                                                        .ThenInclude(x => x!.ExerciseQuestions.Where(y => !y.IsDeleted))
-                                                        .ThenInclude(x => x.Question)
-                                                        .AsNoTracking()
-                                                        .FirstOrDefaultAsync(x => x.Id == id);
-            var countTotalQuestion = videoResult!.Video!.VideoTimeCodes.SelectMany(x => x.TimeCodeExercises.Where(y => !y.IsDeleted))
-                                                                    .Select(x => x.Exercise)
-                                                                    .SelectMany(x => x!.ExerciseQuestions.Where(y => !y.IsDeleted))
-                                                                    .Select(x => x.Question).Count();
+            var answerQuery = from vtca in _videoTimeCodeAnswerRepository.Queryable
+                              where vtca.VideoResultId == videoResult.Id
+                              select 1;
 
-            return countTotalQuestion == videoResult.VideoTimeCodeAnswers.Count;
+            var questionQuery = from v in _videoRepository.Queryable
+                                join vt in _videoTimeCodeRepository.Queryable on v.Id equals vt.VideoId
+                                join te in _timeCodeExerciseRepository.Queryable on vt.Id equals te.VideoTimeCodeId
+                                join e in _exerciseRepository.Queryable on te.ExerciseId equals e.Id
+                                join eq in _exerciseQuestionRepository.Queryable on e.Id equals eq.ExerciseId
+                                where v.Id == videoResult.VideoId
+                                select 1;
+
+            var answerCount = await answerQuery.CountAsync();
+            var questionCount = await questionQuery.CountAsync();
+
+            return answerCount == questionCount;
         }
     }
 }

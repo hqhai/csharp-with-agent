@@ -5,8 +5,7 @@ namespace Fsel.Identity.Application.Commands.ParentCmd
     using System.Threading;
     using AutoMapper;
     using Fsel.Common.ActionResults;
-    using Fsel.Common.Enums;
-    using Fsel.Common.Helpers;
+    using Fsel.Shared.Enums;
     using Fsel.Core.Base;
     using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.Enums.ErrorCodes;
@@ -14,7 +13,6 @@ namespace Fsel.Identity.Application.Commands.ParentCmd
     using Fsel.Identity.Domain.Models.CommandModels.Parents;
     using Fsel.Identity.Domain.Models.EntityModels;
     using MediatR;
-    using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Identity;
     using Microsoft.EntityFrameworkCore;
 
@@ -53,10 +51,7 @@ namespace Fsel.Identity.Application.Commands.ParentCmd
             var isUsernameExist = await _userManager.Users.AnyAsync(e => e.UserName == request.UserName, cancellationToken: cancellationToken);
             if (isUsernameExist)
             {
-                methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                methodResult.AddError(
-                    nameof(EnumAuthErrorCode.OldPasswordIncorrect),
-                    new[] { MethodHelper.GenerateErrorResult(nameof(request.UserName), request.UserName) });
+                methodResult.AddErrorBadRequest(nameof(EnumAuthErrorCode.OldPasswordIncorrect), nameof(request.UserName), request.UserName);
                 return methodResult;
             }
 

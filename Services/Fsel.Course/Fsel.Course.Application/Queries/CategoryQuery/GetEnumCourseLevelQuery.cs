@@ -1,10 +1,10 @@
 // Copyright (c) Atlantic. All rights reserved.
 
 using Fsel.Common.ActionResults;
-using Fsel.Common.Enums;
-using Fsel.Common.Helpers;
+using Fsel.Shared.Enums;
 using MediatR;
 using Microsoft.AspNetCore.Http;
+using Fsel.Shared.Helpers;
 
 namespace Fsel.Course.Application.Queries.CategoryQuery
 {

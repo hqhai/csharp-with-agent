@@ -1,7 +1,7 @@
 // Copyright (c) Atlantic. All rights reserved.
 
 using Fsel.Common.ActionResults;
-using Fsel.Common.Enums;
+using Fsel.Shared.Enums;
 using Fsel.Common.Helpers;
 using Fsel.Course.Domain.Enums;
 using MediatR;
