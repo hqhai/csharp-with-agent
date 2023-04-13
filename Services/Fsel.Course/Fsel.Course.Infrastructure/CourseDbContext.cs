@@ -4,12 +4,9 @@ using Fsel.Common.Constants;
 using Fsel.Core.Base;
 using Fsel.Course.Domain.Entities;
 using Fsel.Course.Infrastructure.Configs;
-using Fsel.Course.Infrastructure.Migrations;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
-
-/*using Course = Fsel.Course.Domain.Entities.Course;*/
 
 namespace Fsel.Course.Infrastructure
 {

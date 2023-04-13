@@ -43,6 +43,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
                               {
                                   Id = course.Id,
                                   Name = course.Name,
+                                  Code = course.Code,
                                   NumberOfLessons = course.NumberOfLessons,
                                   NumberOfUnits = course.NumberOfUnits,
                                   Status = course.Status,

@@ -72,7 +72,7 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkQuery
                                         join ha in _homeWorkAnswerRepository.Queryable on hr.Id equals ha.HomeWorkResultId
                                         join hq in _homeWorkQuestionRepository.Queryable on ha.HomeWorkQuestionId equals hq.Id
                                         join q in _questionRepository.Queryable on hq.QuestionId equals q.Id
-                                        where lr.StudentId == studentId
+                                        where lr.StudentId == studentId && lr.Id == request.LessonResultId
                                         group new { q, ha, h } by h.CourseSkill into g
                                         select new LessonHomeworkSearchModel
                                         {

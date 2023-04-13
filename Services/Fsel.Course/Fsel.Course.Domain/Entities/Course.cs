@@ -21,6 +21,13 @@ namespace Fsel.Course.Domain.Entities
         public string? Name { get; set; }
 
         /// <summary>
+        /// Mã khóa học
+        /// </summary>
+        [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
+        [MaxLength(250, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
+        public string? Code { get; set; }
+
+        /// <summary>
         /// Số lượng Unit
         /// </summary>
         [Range(1, 10000_0000, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
