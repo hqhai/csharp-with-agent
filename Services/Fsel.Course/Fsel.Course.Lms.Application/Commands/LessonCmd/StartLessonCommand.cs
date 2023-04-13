@@ -96,6 +96,8 @@ namespace Fsel.Course.Lms.Application.Commands.LessonCmd
                 return methodResult;
             }
 
+            #endregion Validation
+
             var studentId = student?.Content?.Result?.Id;
 
             var courseResult = _courseResultRepository.Queryable.Where(x => x!.CourseId == request.CourseId && x.StudentId == studentId).FirstOrDefault();
@@ -143,8 +145,6 @@ namespace Fsel.Course.Lms.Application.Commands.LessonCmd
                 _lessonResultRepository.Add(lessonResult);
                 await _lessonResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
             }
-
-            #endregion Validation
 
             methodResult.StatusCode = StatusCodes.Status201Created;
             methodResult.Result = _mapper.Map<LessonResultModel>(lessonResult);

@@ -75,9 +75,9 @@ namespace Fsel.Course.Application.Commands.UnitCmd
                 return methodResult;
             }
 
-            var courseUnitMockTest = await _courseUnitMockTestRepository.Queryable.Where(x => x.CourseId == _courseId).OrderByDescending(x => x.DisplayOrder).FirstOrDefaultAsync(cancellationToken);
-
             #endregion Validation
+
+            var courseUnitMockTest = await _courseUnitMockTestRepository.Queryable.Where(x => x.CourseId == _courseId).OrderByDescending(x => x.DisplayOrder).FirstOrDefaultAsync(cancellationToken);
 
             await _unitRepository.ExecuteTransactionAsync(async () =>
             {

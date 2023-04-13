@@ -7,11 +7,6 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         /// <summary>
         /// Lesson Instructions is null
         /// </summary>
-        LessonInstructionsNull,
-
-        ///// <summary>
-        ///// Lesson InstructionIds does not exist
-        ///// </summary>
-        //LessonInstructionIdsNotExist
+        LessonInstructionsNull
     }
 }
