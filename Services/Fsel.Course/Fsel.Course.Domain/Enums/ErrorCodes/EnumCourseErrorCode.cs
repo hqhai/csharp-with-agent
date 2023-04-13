@@ -15,6 +15,11 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         CourseIdNotExist,
 
         /// <summary>
+        /// CourseId already exists
+        /// </summary>
+        CourseCodeIsExist,
+
+        /// <summary>
         /// Course is not in a new state
         /// </summary>
         CourseNotInNewState,
