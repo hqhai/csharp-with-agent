@@ -62,7 +62,7 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkQuery
                                     .Where(x => x.Id == request.HomeWorkId).FirstOrDefaultAsync(cancellationToken: cancellationToken);
             if (homeWork == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumHomeWorkErrorCode.HomeWorkNotExist), nameof(request.HomeWorkId), request?.HomeWorkId);
+                methodResult.AddErrorBadRequest(nameof(EnumHomeWorkErrorCode.HomeWorkIdNotExist), nameof(request.HomeWorkId), request?.HomeWorkId);
                 return methodResult;
             }
 

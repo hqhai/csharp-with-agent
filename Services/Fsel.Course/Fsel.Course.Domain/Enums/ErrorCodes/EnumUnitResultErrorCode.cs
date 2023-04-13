@@ -7,6 +7,6 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         /// <summary>
         /// Unit Results  does not exist
         /// </summary>
-        UnitResultsDoesNotExist,
+        UnitResultsNotExist,
     }
 }

@@ -50,6 +50,7 @@ namespace Fsel.Course.Lms.Application.Queries.VideoQuery
 
         public async Task<MethodResult<VideoModel>> Handle(GetVideoQuery request, CancellationToken cancellationToken)
         {
+            ArgumentNullException.ThrowIfNull(request);
             MethodResult<VideoModel> methodResult = new MethodResult<VideoModel>();
 
             var studentsResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId.ToString());
@@ -78,7 +79,7 @@ namespace Fsel.Course.Lms.Application.Queries.VideoQuery
 
             if (video == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumVideoErrorCode.VideoNotExist), nameof(request.VideoId), request?.VideoId);
+                methodResult.AddErrorBadRequest(nameof(EnumVideoErrorCode.VideoIdNotExist), nameof(request.VideoId), request.VideoId);
                 return methodResult;
             }
 

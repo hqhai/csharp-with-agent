@@ -10,9 +10,15 @@ namespace Fsel.Course.Domain.Entities
 
     public class UnitResult : Entity
     {
+        /// <summary>
+        /// Phần trăm câu trả lời đúng
+        /// </summary>
         [Range(1, 10000_0000, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
         public double? Percent { get; set; }
 
+        /// <summary>
+        /// Trạng thái
+        /// </summary>
         public EnumResultStatus Status { get; set; }
 
         public Course? Course { get; set; }

@@ -36,8 +36,7 @@ namespace Fsel.Identity.Application.Commands.HumanCmd
 
             if (!human.IsValid())
             {
-                methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                methodResult.AddResultFromErrorList(human.ErrorMessages);
+                methodResult.AddErrorBadRequest(human.ErrorMessages);
                 return methodResult;
             }
 

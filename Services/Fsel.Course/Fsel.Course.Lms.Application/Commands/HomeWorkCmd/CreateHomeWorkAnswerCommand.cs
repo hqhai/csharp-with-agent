@@ -55,7 +55,7 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd
             var homeWorkResult = await _homeWorkResultRepository.GetByIdAsync(request.HomeWorkResultId);
             if (homeWorkResult == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumHomeWorkResultErrorCode.HomeWorkResultNotExist));
+                methodResult.AddErrorBadRequest(nameof(EnumHomeWorkResultErrorCode.HomeWorkResultIdNotExist));
                 return methodResult;
             }
 
@@ -66,12 +66,12 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd
                 var question = await _questionRepository.GetByIdAsync(item.QuestionId);
                 if (question == null)
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumQuestionErrorCode.QuestionNotIsExist));
+                    methodResult.AddErrorBadRequest(nameof(EnumQuestionErrorCode.QuestionIdNotExist), nameof(item.QuestionId), item.QuestionId);
                     return methodResult;
                 }
                 else if (question.Config == null)
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumQuestionErrorCode.QuestionConfigNotIsExist));
+                    methodResult.AddErrorBadRequest(nameof(EnumQuestionErrorCode.QuestionConfigNull), nameof(question), question);
                     return methodResult;
                 }
 
@@ -79,14 +79,14 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd
                                                                     .FirstOrDefaultAsync(cancellationToken: cancellationToken);
                 if (homeWorkQuestion == null)
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumHomeWorkQuestionErrorCode.HomeWorkQuestionNotExist));
+                    methodResult.AddErrorBadRequest(nameof(EnumHomeWorkQuestionErrorCode.HomeWorkQuestionNotExist), nameof(homeWorkQuestion), homeWorkResult.HomeWorkId, item.QuestionId);
                     return methodResult;
                 }
 
                 var (answerConfig, correctCount) = _answerTypeConverter.GetTotalCorrectByAsnwerType(item.Answer, question.Config, question.QuestionType);
                 if (answerConfig == null)
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumHomeWorkAnswerErrorCode.AnswerIsInTheWrongFormat));
+                    methodResult.AddErrorBadRequest(nameof(EnumHomeWorkAnswerErrorCode.AnswerIsInTheWrongFormat), nameof(answerConfig), answerConfig);
                     return methodResult;
                 }
 

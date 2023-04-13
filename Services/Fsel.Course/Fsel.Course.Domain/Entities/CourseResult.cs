@@ -9,10 +9,17 @@ namespace Fsel.Course.Domain.Entities
 
     public class CourseResult : Entity
     {
+        /// <summary>
+        /// Lưu kết quả của Couse
+        /// </summary>
         [MinLength(0, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
         public int Result { get; set; }
 
+        /// <summary>
+        /// Trạng thái của Couse
+        /// </summary>
         public EnumCourseStatus Status { get; set; }
+
         public Course? Course { get; set; }
         public Guid CourseId { get; set; }
 

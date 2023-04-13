@@ -33,7 +33,14 @@ namespace Fsel.Course.Application.Commands.UnitCmd
                                     .FirstOrDefaultAsync(e => e.Id == request.Id, cancellationToken: cancellationToken);
             if (unit == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumUnitErrorCode.UnitNotExist), nameof(request.Id), request?.Id);
+                methodResult.AddErrorBadRequest(nameof(EnumUnitErrorCode.UnitIdNotExist), nameof(request.Id), request?.Id);
+                return methodResult;
+            }
+
+            var isUnitUsed = await _unitRepository.IsUnitUsed(request.Id);
+            if (isUnitUsed)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumUnitErrorCode.UnitUsed), nameof(request.Id), request.Id);
                 return methodResult;
             }
 

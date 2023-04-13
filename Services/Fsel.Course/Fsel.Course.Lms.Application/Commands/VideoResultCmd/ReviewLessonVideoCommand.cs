@@ -36,14 +36,15 @@ namespace Fsel.Course.Lms.Application.Commands.VideoResultCmd
             var videoResult = await _videoResultRepository.Queryable.FirstOrDefaultAsync(x => x.LessonResultId == request.LessonResulttId, cancellationToken: cancellationToken);
             if (videoResult == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumVideoResultErrorCode.VideoResultNotExist), nameof(request.LessonResulttId), request.LessonResulttId);
+                methodResult.AddErrorBadRequest(nameof(EnumVideoResultErrorCode.VideoResultIdNotExist), nameof(request.LessonResulttId), request.LessonResulttId);
                 return methodResult;
             }
+
             _mapper.Map(request, videoResult);
             videoResult.Status = EnumResultStatus.Done;
             if (!videoResult.IsValid())
             {
-                methodResult.AddErrorBadRequest(nameof(EnumVideoResultErrorCode.VideoResultValueError), nameof(request), request);
+                methodResult.AddErrorBadRequest(videoResult.ErrorMessages);
                 return methodResult;
             }
 

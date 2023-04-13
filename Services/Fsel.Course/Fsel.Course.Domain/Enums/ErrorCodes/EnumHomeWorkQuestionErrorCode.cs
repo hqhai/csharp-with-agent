@@ -5,7 +5,7 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
     public enum EnumHomeWorkQuestionErrorCode
     {
         /// <summary>
-        /// HomeWork Question Not Exist
+        /// HomeWork Question does not exist
         /// </summary>
         HomeWorkQuestionNotExist
     }

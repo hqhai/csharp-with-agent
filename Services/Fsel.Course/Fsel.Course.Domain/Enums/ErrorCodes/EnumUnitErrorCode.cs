@@ -5,18 +5,18 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
     public enum EnumUnitErrorCode
     {
         /// <summary>
-        /// Unit does not exist
+        /// UnitId does not exist
         /// </summary>
-        UnitNotExist,
+        UnitIdNotExist,
 
         /// <summary>
         /// Unit have been use
         /// </summary>
-        UnitHaveUsed,
+        UnitUsed,
 
         /// <summary>
-        /// UnitId is not correct
+        /// UnitIds is does not exist
         /// </summary>
-        UnitIdNotCorrect
+        UnitIdsNotExist,
     }
 }

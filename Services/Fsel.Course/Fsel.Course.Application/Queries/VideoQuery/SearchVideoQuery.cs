@@ -30,18 +30,15 @@ namespace Fsel.Course.Application.Queries.VideoQuery
 
         public async Task<MethodResult<PagingItemsModel<VideoSearchModel>>> Handle(SearchVideoQuery request, CancellationToken cancellationToken)
         {
+            ArgumentNullException.ThrowIfNull(request);
             MethodResult<PagingItemsModel<VideoSearchModel>> methodResult = new MethodResult<PagingItemsModel<VideoSearchModel>>();
 
-            if (request == null)
+            if (request.PageSize > 100)
             {
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 return methodResult;
             }
-            else if (request.PageSize > 100)
-            {
-                methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                return methodResult;
-            }
+
             var videoQuery = _videoRepository.SearchAsync(request.TimeCodeType, request.TeacherId, request.CourseLevel);
 
             if (!string.IsNullOrEmpty(request.Keyword))

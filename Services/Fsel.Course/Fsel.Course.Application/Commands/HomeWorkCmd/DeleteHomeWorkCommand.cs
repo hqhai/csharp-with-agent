@@ -7,7 +7,6 @@ namespace Fsel.Course.Application.Commands.HomeWorkCmd
     using Fsel.Common.ActionResults;
     using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
-    using Fsel.Course.Infrastructure.Repositories;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -34,11 +33,13 @@ namespace Fsel.Course.Application.Commands.HomeWorkCmd
             var homeWork = await _homeWorkRepository.Queryable
                             .Include(x => x.HomeWorkQuestions.Where(n => !n.IsDeleted))
                             .FirstOrDefaultAsync(e => e.Id == request.Id, cancellationToken: cancellationToken);
+
             if (homeWork == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumHomeWorkErrorCode.HomeWorksNull), nameof(request.Id), request.Id);
+                methodResult.AddErrorBadRequest(nameof(EnumHomeWorkErrorCode.HomeWorkIdNotExist), nameof(request.Id), request.Id);
                 return methodResult;
             }
+
             var isHomeWorkUsed = await _homeWorkRepository.IsHomeWorkUsed(request.Id);
             if (isHomeWorkUsed)
             {
