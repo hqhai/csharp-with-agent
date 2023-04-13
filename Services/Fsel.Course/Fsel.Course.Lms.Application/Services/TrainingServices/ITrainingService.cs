@@ -4,7 +4,7 @@ namespace Fsel.Course.Lms.Application.Services.TrainingServices
 {
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
-    using Fsel.Common.Enums;
+    using Fsel.Shared.Enums;
     using Fsel.Course.Lms.Application.Services.TrainingServices.Models;
     using Refit;
 

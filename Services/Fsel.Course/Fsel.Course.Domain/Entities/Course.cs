@@ -2,11 +2,12 @@
 
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using Fsel.Common.Enums;
+using Fsel.Shared.Enums;
 using Fsel.Common.Enums.ErrorCodes;
 using Fsel.Common.Helpers;
 using Fsel.Core.Entities;
 using Fsel.Course.Domain.Enums;
+using Fsel.Shared.Helpers;
 
 namespace Fsel.Course.Domain.Entities
 {
@@ -49,7 +50,7 @@ namespace Fsel.Course.Domain.Entities
         {
             get
             {
-                return EnumHelper.GetEnumCourseType(CourseLevel);
+                return CourseLevel.GetEnumCourseType();
             }
         }
 

@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-using Fsel.Common.Enums;
+using Fsel.Shared.Enums;
 using Fsel.Core.Base.Interfaces;
 using Fsel.Course.Domain.Entities;
 using Fsel.Course.Domain.Enums;
@@ -14,6 +14,6 @@ namespace Fsel.Course.Domain.IRepositories
 
         Task<VideoModel?> GetIncludeAllAsync(Guid? id);
 
-        IQueryable<VideoSearchModel> SearchAsync(EnumTimeCodeType? codeType, Guid? teacherId, EnumCourseLevel? level);
+        IQueryable<VideoSearchModel> SearchAsync(EnumTimeCodeType? codeType, Guid? teacherId, EnumCourseLevel? courseLevel);
     }
 }

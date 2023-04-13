@@ -75,6 +75,7 @@ namespace Fsel.Interaction.Application.Commands.CustomerSurveyCmd
                     var customerSurveyModel = _mapper.Map<CustomerSurveyModel>(item);
                     customerSurveyModels.Add(customerSurveyModel);
                 }
+
                 await _customerSurveyRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
                 methodResult.StatusCode = StatusCodes.Status201Created;

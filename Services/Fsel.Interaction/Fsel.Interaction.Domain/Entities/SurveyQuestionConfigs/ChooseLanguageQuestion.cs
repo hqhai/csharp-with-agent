@@ -16,6 +16,6 @@ namespace Fsel.Interaction.Domain.Entities.SurveyQuestionConfigs
 
     public class ChooseLanguageAnswer
     {
-        public IList<ChooseLanguageQuestionAnswers>? ChooseLanguageAnswers { get; set; }
+        public ChooseLanguageQuestionAnswers? ChooseLanguageAnswers { get; set; }
     }
 }

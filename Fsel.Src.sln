@@ -80,6 +80,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Fsel.Course.Application", "
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Fsel.Course.Lms.Application", "Services\Fsel.Course\Fsel.Course.Lms.Application\Fsel.Course.Lms.Application.csproj", "{BD89DDE2-0EBA-4482-AD96-66F1E379B67F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Fsel.Shared", "Services\Shared\Fsel.Shared\Fsel.Shared.csproj", "{9BF4073C-F46A-407B-B809-27250E4CDA2C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -182,6 +184,10 @@ Global
 		{BD89DDE2-0EBA-4482-AD96-66F1E379B67F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BD89DDE2-0EBA-4482-AD96-66F1E379B67F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BD89DDE2-0EBA-4482-AD96-66F1E379B67F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9BF4073C-F46A-407B-B809-27250E4CDA2C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9BF4073C-F46A-407B-B809-27250E4CDA2C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9BF4073C-F46A-407B-B809-27250E4CDA2C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9BF4073C-F46A-407B-B809-27250E4CDA2C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -218,6 +224,7 @@ Global
 		{B95CC77B-F9FC-4087-9C10-24996B56FC0F} = {104C3440-61F6-4010-86B3-8175815BA92C}
 		{DBE9FFC8-79EB-470D-8A8C-3E5F233CE0BE} = {7FDF6C08-1B24-4D79-BC5D-63213C874C90}
 		{BD89DDE2-0EBA-4482-AD96-66F1E379B67F} = {7FDF6C08-1B24-4D79-BC5D-63213C874C90}
+		{9BF4073C-F46A-407B-B809-27250E4CDA2C} = {A7851FD8-7E61-4116-BBDB-8224C4A2C463}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {C3F5014D-C4B6-471E-9F07-3E7AE3B37304}

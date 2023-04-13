@@ -15,6 +15,11 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         HomeWorkUsed,
 
         /// <summary>
+        /// Home Work does not exist
+        /// </summary>
+        HomeWorkNotExist,
+
+        /// <summary>
         /// User Id Not Exist
         /// </summary>
         UserIdNotExist

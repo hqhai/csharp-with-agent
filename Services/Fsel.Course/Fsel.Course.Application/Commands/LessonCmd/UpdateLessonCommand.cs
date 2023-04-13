@@ -23,20 +23,17 @@ namespace Fsel.Course.Application.Commands.LessonCmd
         private readonly IHomeWorkRepository _homeWorkRepository;
         private readonly IVideoRepository _videoRepository;
         private readonly IExtraPracticeRepository _extraPracticeRepository;
-        private readonly ILessonInstructionRepository _lessonInstructionRepository;
 
         public UpdateLessonCommandHandler(ILessonRepository lessonRepository
             , IMapper mapper, IHomeWorkRepository homeWorkRepository
             , IVideoRepository videoRepository
-            , IExtraPracticeRepository extraPracticeRepository
-            , ILessonInstructionRepository lessonInstructionRepository)
+            , IExtraPracticeRepository extraPracticeRepository)
         {
             _lessonRepository = lessonRepository;
             _mapper = mapper;
             _homeWorkRepository = homeWorkRepository;
             _videoRepository = videoRepository;
             _extraPracticeRepository = extraPracticeRepository;
-            _lessonInstructionRepository = lessonInstructionRepository;
         }
 
         public async Task<MethodResult<LessonModel>> Handle(UpdateLessonCommand request, CancellationToken cancellationToken)
@@ -52,7 +49,6 @@ namespace Fsel.Course.Application.Commands.LessonCmd
                 methodResult.AddErrorBadRequest(nameof(EnumLessonErrorCode.LessonNotExist), nameof(request.Id), request.Id);
                 return methodResult;
             }
-
             if (!lesson.IsValid())
             {
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
@@ -112,13 +108,6 @@ namespace Fsel.Course.Application.Commands.LessonCmd
                 return methodResult;
             }
 
-            if (_lessonInstructionRepository.IsIdsInValid(request.LessonInstructions.Select(x => x.Id).ToList()))
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumLessonInstructionErrorCode.LessonInstructionsNull));
-
-                return methodResult;
-            }
-
             #endregion Validation
 
             await _lessonRepository.ExecuteTransactionAsync(async () =>
@@ -135,6 +124,7 @@ namespace Fsel.Course.Application.Commands.LessonCmd
                 {
                     VideoId = x
                 }).ToList();
+
                 _mapper.Map(request.ClassForum, lesson.ClassForum);
                 lesson.LessonInstructions = _mapper.Map<IList<LessonInstruction>>(request.LessonInstructions);
                 _mapper.Map(request, lesson);

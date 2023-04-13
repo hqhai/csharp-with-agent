@@ -14,6 +14,7 @@ COPY ["Services/Fsel.Identity/Fsel.Identity.Api/Fsel.Identity.Api.csproj", "Serv
 COPY ["Services/Fsel.Identity/Fsel.Identity.Application/Fsel.Identity.Application.csproj", "Services/Fsel.Identity/Fsel.Identity.Application/"]
 COPY ["Services/Fsel.Identity/Fsel.Identity.Infrastructure/Fsel.Identity.Infrastructure.csproj", "Services/Fsel.Identity/Fsel.Identity.Infrastructure/"]
 COPY ["Services/Fsel.Identity/Fsel.Identity.Domain/Fsel.Identity.Domain.csproj", "Services/Fsel.Identity/Fsel.Identity.Domain/"]
+COPY ["Services/Shared/Fsel.Shared/Fsel.Shared.csproj", "Services/Shared/Fsel.Shared/"]
 COPY ["Services/Shared/Fsel.Core/Fsel.Core.csproj", "Services/Shared/Fsel.Core/"]
 COPY ["Services/Shared/Fsel.Common/Fsel.Common.csproj", "Services/Shared/Fsel.Common/"]
 RUN dotnet restore "Services/Fsel.Identity/Fsel.Identity.Api/Fsel.Identity.Api.csproj"
