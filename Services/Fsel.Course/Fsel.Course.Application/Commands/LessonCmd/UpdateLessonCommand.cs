@@ -53,6 +53,7 @@ namespace Fsel.Course.Application.Commands.LessonCmd
             {
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 methodResult.AddResultFromErrorList(lesson.ErrorMessages);
+                return methodResult;
             }
 
             if (request.LessonInstructions == null)
