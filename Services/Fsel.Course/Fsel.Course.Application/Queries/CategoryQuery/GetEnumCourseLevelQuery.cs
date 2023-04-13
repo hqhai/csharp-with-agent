@@ -13,9 +13,9 @@ namespace Fsel.Course.Application.Queries.CategoryQuery
         public EnumCourseType? CourseType { get; set; }
     }
 
-    public class GetEnumLevelQueryHandler : IRequestHandler<GetEnumCourseLevelQuery, MethodResult<IList<EnumCourseLevel>>>
+    public class GetEnumCourseLevelQueryHandler : IRequestHandler<GetEnumCourseLevelQuery, MethodResult<IList<EnumCourseLevel>>>
     {
-        public GetEnumLevelQueryHandler()
+        public GetEnumCourseLevelQueryHandler()
         {
         }
 
