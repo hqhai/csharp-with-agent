@@ -38,6 +38,18 @@ namespace Fsel.Course.Lcms.Api.Controllers
         }
 
         /// <summary>
+        /// Get All Course type and Course level
+        /// </summary>
+        [HttpGet("all-course-level")]
+        [ProducesResponseType(typeof(MethodResult<object>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetEnumCourseLevelsAsync()
+        {
+            var queryResult = await _mediator.Send(new GetAllEnumCourseLevelQuery()).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
         /// Search Course Source Data
         /// </summary>
         [HttpGet]
