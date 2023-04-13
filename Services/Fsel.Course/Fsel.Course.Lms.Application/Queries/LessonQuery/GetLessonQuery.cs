@@ -53,6 +53,7 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
 
             var lesson = await _lessonRepository.Queryable
                             .Include(x => x.UnitLessons.Where(y => !y.IsDeleted))
+                            .Include(x => x.LessonHomeWorks.Where(y => !y.IsDeleted)).ThenInclude(x => x.HomeWork)
                             .Include(x => x.LessonInstructions.Where(y => !y.IsDeleted))
                             .Include(x => x.LessonVideos.Where(y => !y.IsDeleted))
                             .ThenInclude(x => x.Video)

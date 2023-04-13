@@ -82,8 +82,8 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd
                     methodResult.AddErrorBadRequest(nameof(EnumHomeWorkQuestionErrorCode.HomeWorkQuestionNotExist));
                     return methodResult;
                 }
-                var answer = item.Answer;
-                var (answerConfig, correctCount) = _answerTypeConverter.GetTotalCorrectByAsnwerType(answer, question.Config, question.QuestionType);
+
+                var (answerConfig, correctCount) = _answerTypeConverter.GetTotalCorrectByAsnwerType(item.Answer, question.Config, question.QuestionType);
                 if (answerConfig == null)
                 {
                     methodResult.AddErrorBadRequest(nameof(EnumHomeWorkAnswerErrorCode.AnswerIsInTheWrongFormat));
