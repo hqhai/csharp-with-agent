@@ -43,25 +43,25 @@ namespace Fsel.Course.Application.Commands.LessonCmd
 
             #region Validation
 
-            if (request.HomeWorkIds == null)
+            if (request.HomeWorkIds == null || request.HomeWorkIds.Count == 0)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumHomeWorkErrorCode.HomeWorksNull), nameof(request.HomeWorkIds));
                 return methodResult;
             }
 
-            if (request.LessonInstructions == null)
+            if (request.LessonInstructions == null || request.LessonInstructions.Count == 0)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumLessonInstructionErrorCode.LessonInstructionsNull), nameof(request.HomeWorkIds));
                 return methodResult;
             }
 
-            if (request.ExtraPracticeIds == null)
+            if (request.ExtraPracticeIds == null || request.ExtraPracticeIds.Count == 0)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumExtraPractiveErrorCode.ExtraPractiveNull), nameof(request.ExtraPracticeIds));
                 return methodResult;
             }
 
-            if (request.VideoIds == null)
+            if (request.VideoIds == null || request.VideoIds.Count == 0)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumVideoErrorCode.VideoNotCorrect), nameof(request.VideoIds));
                 return methodResult;
