@@ -46,7 +46,7 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd
 
             #region Validation
 
-            if (request.Answers.All(x => x.Answer == null))
+            if (request.Answers.All(x => x.Answer == null) || request.Answers.Count == 0 || request.Answers == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumHomeWorkAnswerErrorCode.AnswerNotEmpty), nameof(request.Answers), request.Answers);
                 return methodResult;
