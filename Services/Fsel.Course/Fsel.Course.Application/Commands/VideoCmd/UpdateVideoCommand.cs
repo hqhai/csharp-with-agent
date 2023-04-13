@@ -48,8 +48,7 @@ namespace Fsel.Course.Application.Commands.VideoCmd
 
             if (request.VideoTimeCodes == null)
             {
-                methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                methodResult.AddError(nameof(EnumVideoTimeCodeErrorCode.DisplayTimeGreaterThan1));
+                methodResult.AddErrorBadRequest(nameof(EnumVideoTimeCodeErrorCode.VideoTimeCodesNull), nameof(request.VideoTimeCodes), request.VideoTimeCodes);
                 return methodResult;
             }
 
@@ -84,8 +83,7 @@ namespace Fsel.Course.Application.Commands.VideoCmd
             var video = await _videoRepository.GetIncludeByIdAsync(request.Id);
             if (video == null)
             {
-                methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                methodResult.AddError(nameof(EnumVideoErrorCode.VideoNotCorrect));
+                methodResult.AddErrorBadRequest(nameof(EnumVideoErrorCode.VideoIdNotExist), nameof(request.Id), request.Id);
                 return methodResult;
             }
 
@@ -98,7 +96,7 @@ namespace Fsel.Course.Application.Commands.VideoCmd
             {
                 if (timeCode == null)
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumVideoTimeCodeErrorCode.VideoTimeCodeNotCorrect));
+                    methodResult.AddErrorBadRequest(nameof(EnumVideoTimeCodeErrorCode.VideoTimeCodeNull), nameof(timeCode), timeCode);
                 }
                 var newTimeCode = _mapper.Map<VideoTimeCode>(timeCode);
                 newTimeCode.TimeCodeExercises = new List<TimeCodeExercise>();
@@ -106,7 +104,7 @@ namespace Fsel.Course.Application.Commands.VideoCmd
                 {
                     if (exercise == null)
                     {
-                        methodResult.AddErrorBadRequest(nameof(EnumExerciseErrorCode.ExerciseNull));
+                        methodResult.AddErrorBadRequest(nameof(EnumExerciseErrorCode.ExerciseNull), nameof(exercise), exercise);
                     }
                     var newExercise = _mapper.Map<Exercise>(exercise);
                     newExercise.ExerciseQuestions = new List<ExerciseQuestion>();
@@ -114,7 +112,7 @@ namespace Fsel.Course.Application.Commands.VideoCmd
                     {
                         if (question == null)
                         {
-                            methodResult.AddErrorBadRequest(nameof(EnumQuestionErrorCode.QuestionNotCorrect));
+                            methodResult.AddErrorBadRequest(nameof(EnumQuestionErrorCode.QuestionNull), nameof(question), question);
                         }
                         var newQuestion = _mapper.Map<Question>(question);
                         newExercise.ExerciseQuestions.Add(new ExerciseQuestion
@@ -125,13 +123,12 @@ namespace Fsel.Course.Application.Commands.VideoCmd
                         var (config, correctTotal) = _questionTypeConverter.QuestionTypeConverterObject(question!.Config, question.QuestionType, isShowCorrectTotal: !question.Ungraded, false);
                         if (config == null)
                         {
-                            methodResult.AddErrorBadRequest(nameof(EnumVideoErrorCode.ConfigIsInTheWrongFormat), nameof(question.Config));
+                            methodResult.AddErrorBadRequest(nameof(EnumVideoErrorCode.ConfigIsInTheWrongFormat), nameof(question.Config), question.Config);
                         }
                         newQuestion.CorrectTotal = correctTotal;
                         if (!newQuestion.IsValid())
                         {
-                            methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                            methodResult.AddResultFromErrorList(newQuestion.ErrorMessages);
+                            methodResult.AddErrorBadRequest(newQuestion.ErrorMessages);
                         }
                     }
                     newTimeCode.TimeCodeExercises.Add(new TimeCodeExercise
@@ -140,21 +137,18 @@ namespace Fsel.Course.Application.Commands.VideoCmd
                     });
                     if (!newExercise.IsValid())
                     {
-                        methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                        methodResult.AddResultFromErrorList(newExercise.ErrorMessages);
+                        methodResult.AddErrorBadRequest(newExercise.ErrorMessages);
                     }
                 }
                 video.VideoTimeCodes.Add(newTimeCode);
                 if (!newTimeCode.IsValid())
                 {
-                    methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                    methodResult.AddResultFromErrorList(newTimeCode.ErrorMessages);
+                    methodResult.AddErrorBadRequest(newTimeCode.ErrorMessages);
                 }
             }
             if (!video.IsValid())
             {
-                methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                methodResult.AddResultFromErrorList(video.ErrorMessages);
+                methodResult.AddErrorBadRequest(video.ErrorMessages);
                 return methodResult;
             }
             else if (!methodResult.IsOK)

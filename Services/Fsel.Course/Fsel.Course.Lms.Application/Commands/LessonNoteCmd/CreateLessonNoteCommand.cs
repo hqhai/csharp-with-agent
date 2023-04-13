@@ -32,13 +32,14 @@ namespace Fsel.Course.Lms.Application.Commands.LessonNoteCmd
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<LessonNoteModel> methodResult = new MethodResult<LessonNoteModel>();
+
             LessonNote lessonNote = _mapper.Map<LessonNote>(request);
             if (!lessonNote.IsValid())
             {
-                methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                methodResult.AddResultFromErrorList(lessonNote.ErrorMessages);
+                methodResult.AddErrorBadRequest(lessonNote.ErrorMessages);
                 return methodResult;
             }
+
             await _lessonNoteRepository.ExecuteTransactionAsync(async () =>
             {
                 lessonNote = _lessonNoteRepository.Add(lessonNote);

@@ -45,19 +45,19 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
         {
             var methodResult = new MethodResult<CourseModel>();
 
-            var user = _authContext.CurrentUserId.ToString();
-            var studentResult = await _userService.GetStudentByUserIdAsync(user);
+            var userId = _authContext.CurrentUserId.ToString();
+            var studentResult = await _userService.GetStudentByUserIdAsync(userId);
             var student = studentResult?.Content?.Result;
             if (studentResult == null || student == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.NotStudent));
+                methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.StudentNull));
                 return methodResult;
             }
 
             var courseClassStudent = await _courseClassStudentRepository.Queryable.FirstOrDefaultAsync(x => x.StudentId == student.Id, cancellationToken);
             if (courseClassStudent == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.StudentNotInClass));
+                methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.StudentNotInClass), nameof(student), student);
                 return methodResult;
             }
 

@@ -66,7 +66,7 @@ namespace Fsel.Identity.Application.Queries.TeacherQuery
                                       Address = x.Human.Address
                                   }
                               });
-            //Keyword
+
             if (!string.IsNullOrEmpty(request.Keyword))
             {
                 teacherQuery = teacherQuery.Where(m => m.Id.ToString() == request.Keyword || m.Human!.FullName!.Contains(request.Keyword));

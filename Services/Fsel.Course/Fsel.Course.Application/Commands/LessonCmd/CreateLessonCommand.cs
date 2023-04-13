@@ -98,8 +98,7 @@ namespace Fsel.Course.Application.Commands.LessonCmd
 
             if (!lesson.IsValid())
             {
-                methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                methodResult.AddResultFromErrorList(lesson.ErrorMessages);
+                methodResult.AddErrorBadRequest(lesson.ErrorMessages);
                 return methodResult;
             }
 

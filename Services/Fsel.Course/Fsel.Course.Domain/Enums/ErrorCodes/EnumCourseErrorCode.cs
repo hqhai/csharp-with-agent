@@ -5,29 +5,29 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
     public enum EnumCourseErrorCode
     {
         /// <summary>
-        /// Course does not exist
+        /// Courses not exist
         /// </summary>
-        CourseNotExist,
+        CoursesNotExist,
 
         /// <summary>
         /// CourseId does not exist
         /// </summary>
         CourseIdNotExist,
 
-        /// <summary>
-        /// List Course does not exist
-        /// </summary>
-        ListCourseNotExist,
+        ///// <summary>
+        ///// List Course does not exist
+        ///// </summary>
+        //ListCourseNotExist,
 
         /// <summary>
         /// Course is not in a new state
         /// </summary>
         CourseNotInNewState,
 
-        /// <summary>
-        /// User Not Student
-        /// </summary>
-        NotStudent,
+        ///// <summary>
+        ///// User Not Student
+        ///// </summary>
+        //NotStudent,
 
         /// <summary>
         /// Student not in class
@@ -35,32 +35,37 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         StudentNotInClass,
 
         /// <summary>
-        /// TeacherId Exists Other Than Not Exist
+        /// TeacherIds Not Exist
         /// </summary>
-        TeacherIdExistsOtherThanNotExist,
+        TeacherIdsNotExist,
+
+        ///// <summary>
+        ///// Course not in Class
+        ///// </summary>
+        //CourseNotInClass,
+
+        ///// <summary>
+        ///// Classes new not exist
+        ///// </summary>
+        //ClassesNewNotExitst,
+
+        ///// <summary>
+        ///// Students not exist
+        ///// </summary>
+        //StudentsNotExist,
 
         /// <summary>
-        /// Course not in Class
+        /// Classe Id not exist
         /// </summary>
-        CourseNotInClass,
+        ClasseIdNotExist,
 
         /// <summary>
-        /// Classes new not exist
+        /// Classe Code not exist
         /// </summary>
-        ClassesNewNotExitst,
+        ClasseCodeNotExist,
 
         /// <summary>
-        /// Students not exist
-        /// </summary>
-        StudentsNotExist,
-
-        /// <summary>
-        /// Classes not exist
-        /// </summary>
-        ClassesNotExitst,
-
-        /// <summary>
-        /// Student is null
+        /// Student null
         /// </summary>
         StudentNull,
 

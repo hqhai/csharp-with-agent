@@ -75,7 +75,7 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
 
             if (lesson == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumLessonErrorCode.LessonNotExist), nameof(request.LessonId), request.LessonId);
+                methodResult.AddErrorBadRequest(nameof(EnumLessonErrorCode.LessonIdNotExist), nameof(request.LessonId), request.LessonId);
                 return methodResult;
             }
 

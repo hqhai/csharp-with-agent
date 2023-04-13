@@ -52,8 +52,7 @@ namespace Fsel.Course.Application.Commands.UnitCmd
 
             if (!unit.IsValid())
             {
-                methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                methodResult.AddResultFromErrorList(unit.ErrorMessages);
+                methodResult.AddErrorBadRequest(unit.ErrorMessages);
                 return methodResult;
             }
 
@@ -72,13 +71,13 @@ namespace Fsel.Course.Application.Commands.UnitCmd
             var checkMockTest = _mockTestRepository.Queryable.Any(x => x.MockTestType == EnumMockTestType.UnitMockTest && x.Id == request.MockTestId);
             if (!checkMockTest)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumMockTestErrorCode.MockTestInValid), nameof(request.MockTestId), request.MockTestId);
+                methodResult.AddErrorBadRequest(nameof(EnumMockTestErrorCode.MockTestExistsOtherThanTypeUnitMockTest), nameof(request.MockTestId), request.MockTestId);
                 return methodResult;
             }
 
-            #endregion Validation
-
             var courseUnitMockTest = await _courseUnitMockTestRepository.Queryable.Where(x => x.CourseId == _courseId).OrderByDescending(x => x.DisplayOrder).FirstOrDefaultAsync(cancellationToken);
+
+            #endregion Validation
 
             await _unitRepository.ExecuteTransactionAsync(async () =>
             {

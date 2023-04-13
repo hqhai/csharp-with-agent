@@ -10,8 +10,23 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         DisplayTimeGreaterThan1,
 
         /// <summary>
-        /// Video Time Code not is correct
+        /// Video Time Code not Exist
         /// </summary>
-        VideoTimeCodeNotCorrect
+        VideoTimeCodeNotExist,
+
+        /// <summary>
+        /// Video Time Code Id not Exist
+        /// </summary>
+        VideoTimeCodeIdNotExist,
+
+        /// <summary>
+        /// Video Time Codes Null
+        /// </summary>
+        VideoTimeCodesNull,
+
+        /// <summary>
+        /// Video Time Code Null
+        /// </summary>
+        VideoTimeCodeNull
     }
 }

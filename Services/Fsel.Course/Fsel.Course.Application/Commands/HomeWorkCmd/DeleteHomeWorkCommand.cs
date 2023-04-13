@@ -7,7 +7,6 @@ namespace Fsel.Course.Application.Commands.HomeWorkCmd
     using Fsel.Common.ActionResults;
     using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
-    using Fsel.Course.Infrastructure.Repositories;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -37,9 +36,10 @@ namespace Fsel.Course.Application.Commands.HomeWorkCmd
 
             if (homeWork == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumHomeWorkErrorCode.HomeworkIdNotExist), nameof(request.Id), request.Id);
+                methodResult.AddErrorBadRequest(nameof(EnumHomeWorkErrorCode.HomeWorkIdNotExist), nameof(request.Id), request.Id);
                 return methodResult;
             }
+
             var isHomeWorkUsed = await _homeWorkRepository.IsHomeWorkUsed(request.Id);
             if (isHomeWorkUsed)
             {

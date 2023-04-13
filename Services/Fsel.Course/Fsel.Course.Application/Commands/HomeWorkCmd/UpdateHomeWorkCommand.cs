@@ -48,7 +48,7 @@ namespace Fsel.Course.Application.Commands.HomeWorkCmd
                             .FirstOrDefaultAsync(e => e.Id == request.Id, cancellationToken: cancellationToken);
             if (homeWork == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumHomeWorkErrorCode.HomeworkIdNotExist), nameof(request.Id), request.Id);
+                methodResult.AddErrorBadRequest(nameof(EnumHomeWorkErrorCode.HomeWorkIdNotExist), nameof(request.Id), request.Id);
                 return methodResult;
             }
             var questionDeletes = homeWork.HomeWorkQuestions.Where(x => x.Question != null && !x.IsDeleted).Select(x => x.Question!);
@@ -65,7 +65,7 @@ namespace Fsel.Course.Application.Commands.HomeWorkCmd
             {
                 if (q == null)
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumQuestionErrorCode.QuestionsNull), nameof(request.Questions), q);
+                    methodResult.AddErrorBadRequest(nameof(EnumQuestionErrorCode.QuestionNull), nameof(request.Questions), q);
                 }
                 else
                 {

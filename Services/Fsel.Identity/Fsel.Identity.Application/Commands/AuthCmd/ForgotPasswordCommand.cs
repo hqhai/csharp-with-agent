@@ -34,9 +34,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             var user = await _userManager.FindByEmailAsync(request.Email ?? string.Empty);
             if (user == null)
             {
-                methodResult.AddErrorBadRequest(
-                    nameof(EnumAuthErrorCode.EmailNotExist),
-                    nameof(request.Email), request.Email);
+                methodResult.AddErrorBadRequest(nameof(EnumAuthErrorCode.EmailNotExist), nameof(request.Email), request.Email);
                 return methodResult;
             }
 

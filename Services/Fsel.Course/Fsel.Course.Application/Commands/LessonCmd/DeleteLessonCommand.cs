@@ -30,6 +30,7 @@ namespace Fsel.Course.Application.Commands.LessonCmd
             #region Validation
 
             var lesson = await _lessonRepository.GetIncludeByIdAsync(request.Id);
+
             if (lesson == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumLessonErrorCode.LessonIdNotExist), nameof(request.Id), request.Id);
@@ -38,8 +39,7 @@ namespace Fsel.Course.Application.Commands.LessonCmd
 
             if (!lesson.IsValid())
             {
-                methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                methodResult.AddResultFromErrorList(lesson.ErrorMessages);
+                methodResult.AddErrorBadRequest(lesson.ErrorMessages);
                 return methodResult;
             }
 

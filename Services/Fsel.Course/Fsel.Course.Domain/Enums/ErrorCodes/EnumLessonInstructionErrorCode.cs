@@ -9,9 +9,9 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         /// </summary>
         LessonInstructionsNull,
 
-        /// <summary>
-        /// Lesson InstructionIds Not Exist
-        /// </summary>
-        LessonInstructionIdsNotExist
+        ///// <summary>
+        ///// Lesson InstructionIds Not Exist
+        ///// </summary>
+        //LessonInstructionIdsNotExist
     }
 }

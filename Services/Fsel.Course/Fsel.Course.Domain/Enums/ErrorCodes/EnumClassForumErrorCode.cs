@@ -9,9 +9,9 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         /// </summary>
         ClassForumNull,
 
-        /// <summary>
-        /// ClassForum is not correct
-        /// </summary>
-        ClassForumIsNotCorrect,
+        ///// <summary>
+        ///// ClassForum is not correct
+        ///// </summary>
+        //ClassForumIsNotCorrect,
     }
 }

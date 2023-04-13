@@ -58,7 +58,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
                               }).ToListAsync(cancellationToken: cancellationToken);
             if (courseQuery.Count == 0)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.ListCourseNotExist));
+                methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.CoursesNotExist));
                 return methodResult;
             }
             methodResult.Result = courseQuery;

@@ -43,8 +43,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                 var sendResult1 = await _senderService.SendEmailAsync(senderCommandModel);
                 if (!sendResult1.IsSuccessStatusCode)
                 {
-                    methodResult.StatusCode = (int)sendResult1.StatusCode;
-                    methodResult.AddError(sendResult1.Content?.ErrorMessages);
+                    methodResult.AddErrorBadRequest(sendResult1.Content?.ErrorMessages);
                     return methodResult;
                 }
             }

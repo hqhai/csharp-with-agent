@@ -1,7 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
 using Fsel.Common.ActionResults;
-using Fsel.Common.Helpers;
 using Fsel.Core.Base;
 using Fsel.Identity.Domain.Entities;
 using Fsel.Identity.Domain.Enums.ErrorCodes;
@@ -38,23 +37,17 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             MethodResult<bool> methodResult = new MethodResult<bool>();
             if (request.OldPassword == null)
             {
-                methodResult.AddErrorBadRequest(
-                    nameof(EnumAuthErrorCode.OldPassWordNotEmpty),
-                    nameof(request.OldPassword), request.OldPassword);
+                methodResult.AddErrorBadRequest(nameof(EnumAuthErrorCode.OldPassWordNotEmpty), nameof(request.OldPassword), request.OldPassword);
                 return methodResult;
             }
             if (request.Password == null)
             {
-                methodResult.AddErrorBadRequest(
-                    nameof(EnumAuthErrorCode.PasswordNotEmpty),
-                    nameof(request.Password), request.Password);
+                methodResult.AddErrorBadRequest(nameof(EnumAuthErrorCode.PasswordNotEmpty), nameof(request.Password), request.Password);
                 return methodResult;
             }
             if (request.ConfirmPassword == null)
             {
-                methodResult.AddErrorBadRequest(
-                    nameof(EnumAuthErrorCode.ConfirmPasswordNotEmpty),
-                    nameof(request.ConfirmPassword), request.ConfirmPassword);
+                methodResult.AddErrorBadRequest(nameof(EnumAuthErrorCode.ConfirmPasswordNotEmpty), nameof(request.ConfirmPassword), request.ConfirmPassword);
                 return methodResult;
             }
 
@@ -70,18 +63,14 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
 
             if (user == null)
             {
-                methodResult.AddErrorBadRequest(
-                    nameof(EnumAuthErrorCode.EmailNotExist),
-                    nameof(request.Email), request.Email);
+                methodResult.AddErrorBadRequest(nameof(EnumAuthErrorCode.EmailNotExist), nameof(request.Email), request.Email);
                 return methodResult;
             }
 
             var checkOldPassword = await _signInManager.PasswordSignInAsync(user.UserName ?? string.Empty, request.OldPassword, false, false);
             if (!checkOldPassword.Succeeded)
             {
-                methodResult.AddErrorBadRequest(
-                    nameof(EnumAuthErrorCode.OldPasswordIncorrect),
-                    nameof(request.OldPassword), request.OldPassword);
+                methodResult.AddErrorBadRequest(nameof(EnumAuthErrorCode.OldPasswordIncorrect), nameof(request.OldPassword), request.OldPassword);
                 return methodResult;
             }
 

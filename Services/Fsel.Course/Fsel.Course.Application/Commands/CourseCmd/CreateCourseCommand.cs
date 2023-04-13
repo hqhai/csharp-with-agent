@@ -52,8 +52,7 @@ namespace Fsel.Course.Application.Commands.CourseCmd
 
             if (!course.IsValid())
             {
-                methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                methodResult.AddResultFromErrorList(course.ErrorMessages);
+                methodResult.AddErrorBadRequest(course.ErrorMessages);
                 return methodResult;
             }
 
@@ -100,7 +99,7 @@ namespace Fsel.Course.Application.Commands.CourseCmd
             var teachers = await _userService.GetTeacherByIdsAsync(new GetTeacherByIdsQueryModel { Ids = course.CourseTeachers.Select(x => x.TeacherId).ToList() });
             if (!teachers.IsSuccessStatusCode)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.TeacherIdExistsOtherThanNotExist), nameof(teachers), course.CourseTeachers.Select(x => x.TeacherId).ToList());
+                methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.TeacherIdsNotExist), nameof(teachers), course.CourseTeachers.Select(x => x.TeacherId).ToList());
                 return methodResult;
             }
             var teacherNames = teachers?.Content?.Result?.Select(x => x.Human?.FullName).ToList();

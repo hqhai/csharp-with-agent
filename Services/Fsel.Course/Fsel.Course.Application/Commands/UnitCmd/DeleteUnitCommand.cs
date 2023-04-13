@@ -37,6 +37,13 @@ namespace Fsel.Course.Application.Commands.UnitCmd
                 return methodResult;
             }
 
+            var isUnitUsed = await _unitRepository.IsUnitUsed(request.Id);
+            if (isUnitUsed)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumUnitErrorCode.UnitUsed), nameof(request.Id), request.Id);
+                return methodResult;
+            }
+
             await _unitRepository.ExecuteTransactionAsync(async () =>
             {
                 var result = await _unitRepository.DeleteAsync(unit);

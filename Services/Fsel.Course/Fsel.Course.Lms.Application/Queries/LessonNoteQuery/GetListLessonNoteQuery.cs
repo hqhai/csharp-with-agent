@@ -4,9 +4,7 @@ namespace Fsel.Course.Lms.Application.Queries.LessonNoteQuery
 {
     using System.Threading;
     using System.Threading.Tasks;
-    using AutoMapper;
     using Fsel.Common.ActionResults;
-    using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using MediatR;
@@ -22,12 +20,10 @@ namespace Fsel.Course.Lms.Application.Queries.LessonNoteQuery
     {
         private readonly ILessonNoteRepository _lessonNoteRepository;
         private readonly ILessonResultRepository _lessonResultRepository;
-        private readonly IMapper _mapper;
 
-        public GetListLessonNoteQueryHandler(ILessonNoteRepository lessonNoteRepository, IMapper mapper, ILessonResultRepository lessonResultRepository)
+        public GetListLessonNoteQueryHandler(ILessonNoteRepository lessonNoteRepository, ILessonResultRepository lessonResultRepository)
         {
             _lessonNoteRepository = lessonNoteRepository;
-            _mapper = mapper;
             _lessonResultRepository = lessonResultRepository;
         }
 

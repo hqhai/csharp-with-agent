@@ -66,37 +66,35 @@ namespace Fsel.Course.Lms.Application.Commands.LessonCmd
             var course = await _courseRepository.GetByIdAsync(request.CourseId);
             if (course == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.CourseNotExist));
+                methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.CourseIdNotExist), nameof(request.CourseId), request.CourseId);
                 return methodResult;
             }
             else if (course.Status != EnumCourseStatus.Active)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.CourseMustActiveState));
+                methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.CourseMustActiveState), nameof(course.Status), course.Status);
                 return methodResult;
             }
 
             var unit = await _unitRepository.GetByIdAsync(request.UnitId);
             if (unit == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumUnitErrorCode.UnitNotExist));
+                methodResult.AddErrorBadRequest(nameof(EnumUnitErrorCode.UnitIdNotExist), nameof(request.UnitId), request.UnitId);
                 return methodResult;
             }
 
             var lesson = await _lessonRepository.Queryable.Include(x => x.LessonVideos).FirstOrDefaultAsync(x => x.Id == request.LessonId, cancellationToken);
             if (lesson == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumLessonErrorCode.LessonNotExist));
+                methodResult.AddErrorBadRequest(nameof(EnumLessonErrorCode.LessonIdNotExist));
                 return methodResult;
             }
 
             var student = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId.ToString());
             if (!student.IsSuccessStatusCode)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumCourseClassStudentErrorCode.UserIdNotExist));
+                methodResult.AddErrorBadRequest(nameof(EnumCourseClassStudentErrorCode.UserIdNotExist), nameof(student), _authContext.CurrentUserId.ToString());
                 return methodResult;
             }
-
-            #endregion Validation
 
             var studentId = student?.Content?.Result?.Id;
 
@@ -145,6 +143,8 @@ namespace Fsel.Course.Lms.Application.Commands.LessonCmd
                 _lessonResultRepository.Add(lessonResult);
                 await _lessonResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
             }
+
+            #endregion Validation
 
             methodResult.StatusCode = StatusCodes.Status201Created;
             methodResult.Result = _mapper.Map<LessonResultModel>(lessonResult);

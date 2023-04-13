@@ -4,29 +4,29 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
 {
     public enum EnumUnitErrorCode
     {
-        /// <summary>
-        /// Unit does not exist
-        /// </summary>
-        UnitNotExist,
+        ///// <summary>
+        ///// Unit does not exist
+        ///// </summary>
+        //UnitNotExist,
 
         /// <summary>
-        /// UnitId does not exist
+        /// UnitId not exist
         /// </summary>
         UnitIdNotExist,
 
         /// <summary>
         /// Unit have been use
         /// </summary>
-        UnitHaveUsed,
+        UnitUsed,
 
         /// <summary>
-        /// UnitIds is not correct
+        /// UnitIds is not Exist
         /// </summary>
         UnitIdsNotExist,
 
-        /// <summary>
-        /// UnitId Null
-        /// </summary>
-        UnitIdNull
+        ///// <summary>
+        ///// UnitId Null
+        ///// </summary>
+        //UnitIdNull
     }
 }

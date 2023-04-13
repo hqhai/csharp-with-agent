@@ -121,7 +121,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             var lastOfYear = human.Birthday!.Value.Year % 100;
             var number = request.Gender == EnumGender.Male ? 0 : request.Gender == EnumGender.Female ? 1 : 2;
 
-            if (roles.Contains(EnumRoleRegister.Student.ToString()))`
+            if (roles.Contains(EnumRoleRegister.Student.ToString()))
             {
                 var stt = await _studentRepository.Queryable.CountAsync();
                 human.Student = new Student

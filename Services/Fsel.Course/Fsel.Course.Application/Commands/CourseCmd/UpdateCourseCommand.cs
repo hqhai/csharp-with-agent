@@ -57,7 +57,7 @@ namespace Fsel.Course.Application.Commands.CourseCmd
 
             if (!course.IsValid())
             {
-                methodResult.AddResultFromErrorList(course.ErrorMessages);
+                methodResult.AddErrorBadRequest(course.ErrorMessages);
                 return methodResult;
             }
 
@@ -81,7 +81,7 @@ namespace Fsel.Course.Application.Commands.CourseCmd
 
             if (request.CourseUnitMockTests.Any(x => x.MockTestId.HasValue && x.UnitId.HasValue))
             {
-                methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.MocktestIdAndUnitIdAreMutuallyExclusive));
+                methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.MocktestIdAndUnitIdAreMutuallyExclusive), nameof(request.CourseUnitMockTests), request.CourseUnitMockTests);
                 return methodResult;
             }
 
@@ -111,7 +111,7 @@ namespace Fsel.Course.Application.Commands.CourseCmd
             var teachers = await _userService.GetTeacherByIdsAsync(new GetTeacherByIdsQueryModel { Ids = course.CourseTeachers.Select(x => x.TeacherId).ToList() });
             if (!teachers.IsSuccessStatusCode)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.TeacherIdExistsOtherThanNotExist), nameof(teachers), course.CourseTeachers.Select(x => x.TeacherId).ToList());
+                methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.TeacherIdsNotExist), nameof(teachers), course.CourseTeachers.Select(x => x.TeacherId).ToList());
                 return methodResult;
             }
 

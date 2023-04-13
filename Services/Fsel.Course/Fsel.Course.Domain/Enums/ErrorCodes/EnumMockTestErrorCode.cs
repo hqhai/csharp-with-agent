@@ -10,9 +10,9 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         MockTestIdsNotExist,
 
         /// <summary>
-        /// Mock Type = UnitMockTest
+        /// MockTest Exists Other Than TypeUnitMockTest
         /// </summary>
-        MockTestInValid,
+        MockTestExistsOtherThanTypeUnitMockTest,
 
         /// <summary>
         /// MockTest Exists Other Than TypeCourseMocktest

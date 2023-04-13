@@ -43,7 +43,7 @@ namespace Fsel.Course.Application.Commands.HomeWorkCmd
 
             if (request.Questions == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumQuestionErrorCode.QusetionsIsNull), nameof(request.Questions), request.Questions);
+                methodResult.AddErrorBadRequest(nameof(EnumQuestionErrorCode.QuestionsNull), nameof(request.Questions), request.Questions);
                 return methodResult;
             }
 
@@ -51,7 +51,7 @@ namespace Fsel.Course.Application.Commands.HomeWorkCmd
             {
                 if (q == null)
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumQuestionErrorCode.QusetionIsNull), nameof(q), q);
+                    methodResult.AddErrorBadRequest(nameof(EnumQuestionErrorCode.QuestionNull), nameof(request.Questions), q);
                 }
                 else
                 {

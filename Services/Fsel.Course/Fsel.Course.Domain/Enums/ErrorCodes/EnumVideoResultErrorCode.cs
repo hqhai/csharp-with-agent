@@ -5,13 +5,13 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
     public enum EnumVideoResultErrorCode
     {
         /// <summary>
-        /// VideoResult does not exist
+        /// VideoResult Id not exist
         /// </summary>
-        VideoResultNotExist,
+        VideoResultIdNotExist,
 
         /// <summary>
-        /// VideoResult Value error
+        /// VideoResult Null
         /// </summary>
-        VideoResultValueError,
+        VideoResultNull
     }
 }
