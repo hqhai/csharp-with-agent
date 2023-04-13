@@ -58,7 +58,7 @@ namespace Fsel.Course.Application.Commands.UnitCmd
                 return methodResult;
             }
 
-            if (request.LessonIds == null)
+            if (request.LessonIds == null || request.LessonIds.Count == 0)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumUnitErrorCode.UnitIdNotCorrect), nameof(request.LessonIds), request.LessonIds);
                 return methodResult;

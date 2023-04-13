@@ -22,6 +22,11 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         /// <summary>
         /// Question not is correct
         /// </summary>
-        QusetionIdNotCorrect
+        QusetionIdNotCorrect,
+
+        /// <summary>
+        /// Question is null
+        /// </summary>
+        QuestionNull,
     }
 }

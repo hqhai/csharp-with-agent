@@ -55,7 +55,7 @@ namespace Fsel.Course.Application.Commands.HomeWorkCmd
 
             homeWork = _mapper.Map(request, homeWork);
 
-            if (request.Questions == null)
+            if (request.Questions == null || request.Questions.Count == 0)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumQuestionErrorCode.QusetionIdNotCorrect), nameof(request.Questions), request.Questions);
                 return methodResult;

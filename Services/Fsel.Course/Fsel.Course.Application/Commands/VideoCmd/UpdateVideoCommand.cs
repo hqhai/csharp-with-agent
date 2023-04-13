@@ -102,7 +102,11 @@ namespace Fsel.Course.Application.Commands.VideoCmd
                 }
                 var newTimeCode = _mapper.Map<VideoTimeCode>(timeCode);
                 newTimeCode.TimeCodeExercises = new List<TimeCodeExercise>();
-                foreach (var exercise in timeCode!.Exercises!)
+                if (timeCode!.Exercises == null || timeCode.Exercises.Count == 0)
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumExerciseErrorCode.ExercisesNull), nameof(timeCode.Exercises), timeCode.Exercises);
+                }
+                foreach (var exercise in timeCode.Exercises!)
                 {
                     if (exercise == null)
                     {
@@ -110,7 +114,11 @@ namespace Fsel.Course.Application.Commands.VideoCmd
                     }
                     var newExercise = _mapper.Map<Exercise>(exercise);
                     newExercise.ExerciseQuestions = new List<ExerciseQuestion>();
-                    foreach (var question in exercise!.Questions!)
+                    if (exercise!.Questions == null || exercise.Questions.Count == 0)
+                    {
+                        methodResult.AddErrorBadRequest(nameof(EnumQuestionErrorCode.QuestionNull), nameof(exercise.Questions), exercise.Questions);
+                    }
+                    foreach (var question in exercise.Questions!)
                     {
                         if (question == null)
                         {
