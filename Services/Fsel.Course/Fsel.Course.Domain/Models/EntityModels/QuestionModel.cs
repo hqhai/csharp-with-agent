@@ -13,5 +13,6 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public string? Explanation { get; set; }
         public object? Config { get; set; }
         public VideoTimeCodeAnswerModel? VideoTimeCodeAnswer { get; set; }
+        public object? Answer { get; set; }
     }
 }
