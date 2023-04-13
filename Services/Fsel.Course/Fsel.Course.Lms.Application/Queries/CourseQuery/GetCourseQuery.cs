@@ -73,6 +73,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
                              {
                                  Id = y.Id,
                                  Name = y.Name,
+                                 Code = y.Code,
                                  CourseLevel = y.CourseLevel,
                                  CourseUnitMockTests = _mapper.Map<IList<CourseUnitMockTestModel>>(y.CourseUnitMockTests),
                                  CourseTeachers = _mapper.Map<List<CourseTeacherModel>>(y.CourseTeachers),
