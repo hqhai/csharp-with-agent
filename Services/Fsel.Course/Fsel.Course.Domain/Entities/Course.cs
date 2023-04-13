@@ -28,6 +28,11 @@ namespace Fsel.Course.Domain.Entities
         public string? Code { get; set; }
 
         /// <summary>
+        /// Nội dung hướng dẫn khóa học
+        /// </summary>
+        public string? InstructionContent { get; set; }
+
+        /// <summary>
         /// Loại trạng thái
         /// </summary>
         public EnumCourseStatus Status { get; set; }
