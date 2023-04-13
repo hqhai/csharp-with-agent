@@ -27,7 +27,7 @@ namespace Fsel.Course.Lms.Api.Controllers
         }
 
         /// <summary>
-        /// Get List Unit
+        /// Get List lesson
         /// </summary>
         [HttpGet]
         [ProducesResponseType(typeof(MethodResult<LessonModel>), (int)HttpStatusCode.OK)]
@@ -51,9 +51,9 @@ namespace Fsel.Course.Lms.Api.Controllers
         }
 
         /// <summary>
-        /// Get List Unit
+        /// Get List lesson by unit
         /// </summary>
-        [HttpGet("get-list-lesson")]
+        [HttpGet("get-list-lesson-by-unit")]
         [ProducesResponseType(typeof(MethodResult<IList<LessonModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetListLessonByUnitId([FromQuery] GetListLessonQuery query)

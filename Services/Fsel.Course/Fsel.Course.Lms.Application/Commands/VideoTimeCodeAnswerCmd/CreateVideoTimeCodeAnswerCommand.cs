@@ -1,19 +1,16 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-using Microsoft.EntityFrameworkCore;
-
 namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
 {
     using Fsel.Common.ActionResults;
-    using Fsel.Core.Base;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.CommandModels.VideoTimeCodeAnswers;
     using Fsel.Course.Infrastructure.Common;
-    using Fsel.Course.Lms.Application.Services.UserServices;
     using MediatR;
     using Microsoft.AspNetCore.Http;
+    using Microsoft.EntityFrameworkCore;
 
     public class CreateVideoTimeCodeAnswerCommand : CreateVideoTimeCodeAnswerCommandModel, IRequest<MethodResult<bool>>
     {
@@ -21,30 +18,21 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
 
     public class CreateVideoTimeCodeAnswerCommandHandler : IRequestHandler<CreateVideoTimeCodeAnswerCommand, MethodResult<bool>>
     {
-        private readonly IVideoResultRepository _videoResultRepository;
         private readonly IVideoTimeCodeAnswerRepository _videoTimeCodeAnswerRepository;
-        private readonly AuthContext _authContext;
         private readonly ILessonResultRepository _lessonResultRepository;
         private readonly IQuestionRepository _questionRepository;
-        private readonly IUserService _userService;
         private readonly AnswerTypeConverter _answerTypeConverter;
 
         public CreateVideoTimeCodeAnswerCommandHandler(
-            IVideoResultRepository videoResultRepository
-            , IVideoTimeCodeAnswerRepository videoTimeCodeAnswerRepository
-            , AuthContext authContext
+             IVideoTimeCodeAnswerRepository videoTimeCodeAnswerRepository
             , ILessonResultRepository lessonResultRepository
             , IQuestionRepository questionRepository
-            , IUserService userService
             , AnswerTypeConverter answerTypeConverter)
         {
-            _videoResultRepository = videoResultRepository;
             _videoTimeCodeAnswerRepository = videoTimeCodeAnswerRepository;
-            _authContext = authContext;
             _lessonResultRepository = lessonResultRepository;
             _questionRepository = questionRepository;
             _answerTypeConverter = answerTypeConverter;
-            _userService = userService;
         }
 
         public async Task<MethodResult<bool>> Handle(CreateVideoTimeCodeAnswerCommand request, CancellationToken cancellationToken)
