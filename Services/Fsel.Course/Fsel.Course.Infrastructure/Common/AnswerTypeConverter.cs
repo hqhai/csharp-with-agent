@@ -125,15 +125,12 @@ namespace Fsel.Course.Infrastructure.Common
             {
                 foreach (var item in dataAnswer.Answers)
                 {
-                    if (item.IsChecked && dataQuestion.Contents.Any(x => x.Id == item.Id && x.IsCorrect == item.IsChecked))
+                    var isCheck = item.IsChecked && dataQuestion.Contents.Any(x => x.Id == item.Id && x.IsCorrect == item.IsChecked);
+                    if (isCheck)
                     {
                         number++;
-                        item.IsExact = true;
                     }
-                    else
-                    {
-                        item.IsExact = false;
-                    }
+                    item.IsExact = isCheck;
                 }
             }
             configAnswer = dataAnswer;

@@ -36,8 +36,7 @@ namespace Fsel.Identity.Application.Queries.StudentQuery
             var student = await _studentRepository.Queryable.Where(x => x.ClassId.ToString() == request.Id).ToListAsync(cancellationToken: cancellationToken);
             if (student == null || student.Count == 0)
             {
-                methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                methodResult.AddError(nameof(EnumStudentErrorCode.StudentNull));
+                methodResult.AddErrorBadRequest(nameof(EnumStudentErrorCode.StudentNull));
                 return methodResult;
             }
             methodResult.Result = _mapper.Map<IList<StudentModel>>(student);

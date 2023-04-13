@@ -5,8 +5,7 @@ namespace Fsel.Course.Domain.IRepositories
     using Fsel.Core.Base.Interfaces;
     using Fsel.Course.Domain.Entities;
 
-    public interface IHomeWorkQuestionRepository : IRepository<HomeWorkQuestion>
+    public interface IHomeWorkAnswerRepository : IRepository<HomeWorkAnswer>
     {
-        Task<bool> GetCheckByIdsAsync(IEnumerable<Guid>? ids);
     }
 }
