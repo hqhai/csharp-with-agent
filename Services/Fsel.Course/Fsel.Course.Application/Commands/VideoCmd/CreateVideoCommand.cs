@@ -40,7 +40,7 @@ namespace Fsel.Course.Application.Commands.VideoCmd
 
             #region Validation
 
-            if (request.VideoTimeCodes == null)
+            if (request.VideoTimeCodes == null || request.VideoTimeCodes.Count == 0)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumVideoTimeCodeErrorCode.VideoTimeCodesNull), nameof(request.VideoTimeCodes), request.VideoTimeCodes);
                 return methodResult;
@@ -65,6 +65,11 @@ namespace Fsel.Course.Application.Commands.VideoCmd
                 else
                 {
                     VideoTimeCode videoTimeCode = video.VideoTimeCodes.ElementAt(request.VideoTimeCodes.IndexOf(x));
+                    if (x.Exercises == null || x.Exercises.Count == 0)
+                    {
+                        methodResult.AddErrorBadRequest(nameof(EnumExerciseErrorCode.ExercisesNull), nameof(x.Exercises), x.Exercises);
+                    }
+
                     x.Exercises.ForEach(n =>
                     {
                         if (n == null)
@@ -78,6 +83,10 @@ namespace Fsel.Course.Application.Commands.VideoCmd
                             {
                                 Exercise = excercise
                             });
+                            if (n.Questions == null || n.Questions.Count == 0)
+                            {
+                                methodResult.AddErrorBadRequest(nameof(EnumQuestionErrorCode.QuestionNull), nameof(n.Questions), n.Questions);
+                            }
                             n.Questions.ForEach(q =>
                             {
                                 if (q == null)

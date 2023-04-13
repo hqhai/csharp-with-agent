@@ -55,25 +55,25 @@ namespace Fsel.Course.Application.Commands.LessonCmd
                 return methodResult;
             }
 
-            if (request.LessonInstructions == null)
+            if (request.LessonInstructions == null || request.LessonInstructions.Count == 0)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumLessonInstructionErrorCode.LessonInstructionsNull), nameof(request.LessonInstructions), request.LessonInstructions);
                 return methodResult;
             }
 
-            if (request.HomeWorkIds == null)
+            if (request.HomeWorkIds == null || request.HomeWorkIds.Count == 0)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumHomeWorkErrorCode.HomeWorkIdsNull), nameof(request.HomeWorkIds), request.HomeWorkIds);
                 return methodResult;
             }
 
-            if (request.VideoIds == null)
+            if (request.VideoIds == null || request.VideoIds.Count == 0)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumVideoErrorCode.VideoIdsNull), nameof(request.VideoIds), request.VideoIds);
                 return methodResult;
             }
 
-            if (request.ExtraPracticeIds == null)
+            if (request.ExtraPracticeIds == null || request.ExtraPracticeIds.Count == 0)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumExtraPractiveErrorCode.ExtraPracticeIdsNull), nameof(request.ExtraPracticeIds), request.ExtraPracticeIds);
                 return methodResult;

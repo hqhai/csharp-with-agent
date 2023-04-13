@@ -48,6 +48,7 @@ namespace Fsel.Course.Application.Queries.CourseQuery
                                   Id = course.Id,
                                   Name = course.Name,
                                   Code = course.Code,
+                                  InstructionContent = course.InstructionContent,
                                   Status = course.Status,
                                   CourseLevel = course.CourseLevel,
                                   CreatedDate = course.CreatedDate,

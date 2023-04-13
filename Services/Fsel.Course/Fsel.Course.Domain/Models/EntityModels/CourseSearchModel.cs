@@ -13,9 +13,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
 
         public string? Code { get; set; }
 
-        public int NumberOfUnits { get; set; }
-
-        public int NumberOfLessons { get; set; }
+        public string? InstructionContent { get; set; }
 
         public EnumCourseStatus Status { get; set; }
 
@@ -26,7 +24,5 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public IList<Guid>? TeacherIds { get; set; }
 
         public IList<string>? TeacherNames { get; set; }
-
-        public string? TeacherName { get; set; }
     }
 }

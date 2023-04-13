@@ -67,13 +67,13 @@ namespace Fsel.Course.Application.Commands.CourseCmd
                 return methodResult;
             }
 
-            if (request.CourseUnitMockTests == null)
+            if (request.CourseUnitMockTests == null || request.CourseUnitMockTests.Count == 0)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumCourseUnitMockTestErrorCode.CourseUnitMockTestsNull), nameof(request.CourseUnitMockTests), request.CourseUnitMockTests);
                 return methodResult;
             }
 
-            if (request.CourseTeachers == null)
+            if (request.CourseTeachers == null || request.CourseTeachers.Count == 0)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumCourseTeacherErrorCode.CourseTeachersNull), nameof(request.CourseTeachers), request.CourseTeachers);
                 return methodResult;

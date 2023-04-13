@@ -8,5 +8,10 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         /// Exercise is null
         /// </summary>
         ExerciseNull,
+
+        /// <summary>
+        /// Exercises is null
+        /// </summary>
+        ExercisesNull,
     }
 }
