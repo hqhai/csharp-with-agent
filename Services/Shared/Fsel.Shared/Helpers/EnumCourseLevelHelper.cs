@@ -2,7 +2,6 @@
 
 namespace Fsel.Shared.Helpers
 {
-    using System.ComponentModel;
     using Fsel.Shared.Enums;
 
     public static class EnumCourseLevelHelper
@@ -23,6 +22,15 @@ namespace Fsel.Shared.Helpers
         public static EnumCourseType GetEnumCourseType(this EnumCourseLevel courseLevel)
         {
             return s_courseTypeLevel.FirstOrDefault(x => x.Value == courseLevel).Key;
+        }
+
+        public static object GetEnumCourseLevels()
+        {
+            return s_courseTypeLevel.GroupBy(x => x.Key).Select(x => new
+            {
+                CourseType = x.Key,
+                CourseLevels = x.Select(n => n.Value).ToArray()
+            });
         }
 
         public static IList<EnumCourseLevel> GetEnumCourseLevels(this EnumCourseType? courseType)

@@ -28,18 +28,6 @@ namespace Fsel.Course.Domain.Entities
         public string? Code { get; set; }
 
         /// <summary>
-        /// Số lượng Unit
-        /// </summary>
-        [Range(1, 10000_0000, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
-        public int NumberOfUnits { get; set; }
-
-        /// <summary>
-        /// Số Lượng Lesson
-        /// </summary>
-        [Range(1, 10000_0000, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
-        public int NumberOfLessons { get; set; }
-
-        /// <summary>
         /// Loại trạng thái
         /// </summary>
         public EnumCourseStatus Status { get; set; }

@@ -28,14 +28,14 @@ namespace Fsel.Course.Lms.Api.Controllers
         }
 
         /// <summary>
-        /// Get List lesson
+        /// Get List lesson by unit
         /// </summary>
         [HttpGet]
-        [ProducesResponseType(typeof(MethodResult<LessonModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(MethodResult<IList<LessonModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> Get([FromQuery] GetLessonQuery query)
+        public async Task<IActionResult> GetListLessonByUnitId([FromQuery] GetLessonQuery query)
         {
-            MethodResult<LessonModel> queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            MethodResult<IList<LessonModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
 
@@ -48,30 +48,6 @@ namespace Fsel.Course.Lms.Api.Controllers
         public async Task<IActionResult> GetLessonScore([FromQuery] GetLessonScoreQuery query)
         {
             MethodResult<LessonScoreModel> queryResult = await _mediator.Send(query).ConfigureAwait(false);
-            return queryResult.GetActionResult();
-        }
-
-        /// <summary>
-        /// Get List lesson by unit
-        /// </summary>
-        [HttpGet("get-list-lesson-by-unit")]
-        [ProducesResponseType(typeof(MethodResult<IList<LessonModel>>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetListLessonByUnitId([FromQuery] GetListLessonQuery query)
-        {
-            MethodResult<IList<LessonModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
-            return queryResult.GetActionResult();
-        }
-
-        /// <summary>
-        /// Get lesson homework score
-        /// </summary>
-        [HttpGet("get-lesson-homework-score")]
-        [ProducesResponseType(typeof(MethodResult<IList<LessonHomeworkSearchModel>>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetLessonHomeWorkScore([FromQuery] GetListHomeworkQuery query)
-        {
-            MethodResult<IList<LessonHomeworkSearchModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
 

@@ -38,8 +38,10 @@ namespace Fsel.Course.Application.Queries.LessonQuery
                 return methodResult;
             }
 
+            var video = lesson.LessonVideos.Select(x => x.Video).FirstOrDefault();
             var lessonModel = _mapper.Map<LessonModel>(lesson);
-            lessonModel.Video = _mapper.Map<VideoModel>(lesson.LessonVideos.Select(x => x.Video).FirstOrDefault());
+            lessonModel.Video = _mapper.Map<VideoModel>(video);
+            lessonModel.VideoId = video?.Id;
             lessonModel.HomeWorks = _mapper.Map<IList<HomeWorkModel>>(lesson.LessonHomeWorks.Select(x => x.HomeWork));
             lessonModel.IsActive = lesson.UnitLessons.Any();
 

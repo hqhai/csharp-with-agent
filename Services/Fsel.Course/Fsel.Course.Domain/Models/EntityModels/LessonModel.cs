@@ -19,6 +19,8 @@ namespace Fsel.Course.Domain.Models.EntityModels
 
         public VideoModel? Video { get; set; }
 
+        public Guid? VideoId { get; set; }
+
         public LessonResultModel? LessonResult { get; set; }
 
         public IList<HomeWorkModel>? HomeWorks { get; set; }
