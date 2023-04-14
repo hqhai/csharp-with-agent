@@ -8,19 +8,15 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkQuery
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base;
-    using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Infrastructure.Common;
-    using Fsel.Course.Infrastructure.Repositories;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using MediatR;
     using Microsoft.AspNetCore.Http;
-    using Microsoft.AspNetCore.Mvc;
     using Microsoft.EntityFrameworkCore;
-    using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
     public class GetHomeWorkQuery : IRequest<MethodResult<HomeWorkModel>>
     {
@@ -71,6 +67,8 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkQuery
                         .Include(x => x.LessonHomeWorks.Where(n => !n.IsDeleted))
                         .Include(x => x.HomeWorkQuestions.Where(n => !n.IsDeleted))
                         .ThenInclude(x => x.HomeWorkAnswers.Where(n => !n.IsDeleted && homeWorkResult != null && n.HomeWorkResultId == homeWorkResult.Id))
+                        .Include(x => x.HomeWorkQuestions.Where(n => !n.IsDeleted))
+                        .ThenInclude(x => x.Question)
                         .Where(x => x.Id == request.HomeWorkId)
                         .AsNoTracking()
                         .FirstOrDefaultAsync(cancellationToken: cancellationToken);
@@ -91,7 +89,7 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkQuery
                 CourseLevel = homeWork.CourseLevel,
                 CourseSkill = homeWork.CourseSkill,
                 IsActive = homeWork.LessonHomeWorks.Any(),
-                Questions = homeWork.HomeWorkQuestions.Select(n => new QuestionModel
+                Questions = homeWork.HomeWorkQuestions.Where(x => x.Question != null).Select(n => new QuestionModel
                 {
                     Id = n.Question!.Id,
                     CorrectTotal = n.Question!.CorrectTotal,
