@@ -8,19 +8,24 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkQuery
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base;
+    using Fsel.Course.Domain.Entities;
+    using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Infrastructure.Common;
+    using Fsel.Course.Infrastructure.Repositories;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using MediatR;
     using Microsoft.AspNetCore.Http;
+    using Microsoft.AspNetCore.Mvc;
     using Microsoft.EntityFrameworkCore;
+    using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
     public class GetHomeWorkQuery : IRequest<MethodResult<HomeWorkModel>>
     {
         public Guid HomeWorkId { get; set; }
-        /*        public Guid? LessonResultId { get; set; }*/
+        public Guid? LessonResultId { get; set; }
     }
 
     public class GetHomeWorkQueryHandler : IRequestHandler<GetHomeWorkQuery, MethodResult<HomeWorkModel>>
@@ -30,11 +35,13 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkQuery
         private readonly QuestionTypeConverter _questionTypeConverter;
         private readonly AuthContext _authContext;
         private readonly IUserService _userService;
+        private readonly IHomeWorkResultRepository _homeWorkResultRepository;
 
         public GetHomeWorkQueryHandler(IMapper mapper
             , IHomeWorkRepository homeWorkRepository
             , QuestionTypeConverter questionTypeConverter
             , AuthContext authContext
+            , IHomeWorkResultRepository homeWorkResult
             , IUserService userService)
         {
             _mapper = mapper;
@@ -42,6 +49,7 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkQuery
             _questionTypeConverter = questionTypeConverter;
             _authContext = authContext;
             _userService = userService;
+            _homeWorkResultRepository = homeWorkResult;
         }
 
         public async Task<MethodResult<HomeWorkModel>> Handle(GetHomeWorkQuery request, CancellationToken cancellationToken)
@@ -56,32 +64,45 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkQuery
             }
             var studentId = studentsResult.Content!.Result!.Id;
 
+            var homeWorkResult = await _homeWorkResultRepository.Queryable
+                .FirstOrDefaultAsync(x => x.LessonResultId == request.LessonResultId && x.HomeWorkId == request.HomeWorkId && x.StudentId == studentId, cancellationToken);
+
             var homeWork = await _homeWorkRepository.Queryable
-                                    .Include(x => x.HomeWorkQuestions)
-                                    .ThenInclude(x => x.Question)
-                                    .Where(x => x.Id == request.HomeWorkId).FirstOrDefaultAsync(cancellationToken: cancellationToken);
+                        .Include(x => x.LessonHomeWorks.Where(n => !n.IsDeleted))
+                        .Include(x => x.HomeWorkQuestions.Where(n => !n.IsDeleted))
+                        .ThenInclude(x => x.HomeWorkAnswers.Where(n => !n.IsDeleted && homeWorkResult != null && n.HomeWorkResultId == homeWorkResult.Id))
+                        .Where(x => x.Id == request.HomeWorkId)
+                        .AsNoTracking()
+                        .FirstOrDefaultAsync(cancellationToken: cancellationToken);
+
             if (homeWork == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumHomeWorkErrorCode.HomeWorkIdNotExist), nameof(request.HomeWorkId), request?.HomeWorkId);
                 return methodResult;
             }
 
-            var homeWorkModel = new HomeWorkModel
+            var checkDone = homeWorkResult != null && homeWorkResult.Status == EnumResultStatus.Done;
+            var homeWorkModel = new HomeWorkModel()
             {
                 Id = homeWork.Id,
                 Name = homeWork.Name,
-                MediaPost = homeWork.MediaPost,
                 Code = homeWork.Code,
-                Questions = homeWork.HomeWorkQuestions.Where(x => x.Question != null).Select(x => x.Question).Select(n => new QuestionModel
+                MediaPost = homeWork.MediaPost,
+                CourseLevel = homeWork.CourseLevel,
+                CourseSkill = homeWork.CourseSkill,
+                IsActive = homeWork.LessonHomeWorks.Any(),
+                Questions = homeWork.HomeWorkQuestions.Select(n => new QuestionModel
                 {
-                    Id = n!.Id,
-                    CorrectTotal = n!.CorrectTotal,
-                    Ungraded = n!.Ungraded,
-                    Explanation = n!.Explanation,
-                    Config = _questionTypeConverter.QuestionTypeConverterObject(n.Config, n.QuestionType, isDisableAnswers: true).Item1,
-                    QuestionType = n!.QuestionType,
+                    Id = n.Question!.Id,
+                    CorrectTotal = n.Question!.CorrectTotal,
+                    Ungraded = n.Question!.Ungraded,
+                    Explanation = n.Question!.Explanation,
+                    QuestionType = n.Question!.QuestionType,
+                    Config = _questionTypeConverter.QuestionTypeConverterObject(n.Question.Config, n.Question.QuestionType, isDisableAnswers: !checkDone).Item1,
+                    Answer = _mapper.Map<HomeWorkAnswerModel>(n.HomeWorkAnswers.FirstOrDefault())
                 }).ToList(),
             };
+
             methodResult.Result = homeWorkModel;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
