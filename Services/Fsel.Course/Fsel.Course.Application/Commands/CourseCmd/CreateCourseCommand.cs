@@ -11,6 +11,7 @@ using Fsel.Course.Domain.Models.CommandModels.Courses;
 using Fsel.Course.Domain.Models.EntityModels;
 using MediatR;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 using EntityCourse = Fsel.Course.Domain.Entities.Course;
 
 namespace Fsel.Course.Application.Commands.CourseCmd
@@ -74,6 +75,13 @@ namespace Fsel.Course.Application.Commands.CourseCmd
                 return methodResult;
             }
 
+            var isExistCode = await _courseRepository.Queryable.AnyAsync(x => x.Code == request.Code, cancellationToken);
+            if (isExistCode)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.CourseCodeIsExist), nameof(request.Code), request.Code);
+                return methodResult;
+            }
+
             var units = request.CourseUnitMockTests.Where(e => e.UnitId != null).Select(x => x.UnitId).ToList();
             if (_unitRepository.IsIdsInValid(units.Where(e => e.HasValue).Select(e => e!.Value)))
             {
@@ -104,8 +112,6 @@ namespace Fsel.Course.Application.Commands.CourseCmd
             }
             var teacherNames = teachers?.Content?.Result?.Select(x => x.Human?.FullName).ToList();
             var nameTeacher = string.Join(", ", teacherNames ?? new List<string?>());
-
-            course.Name = $"{course.CourseLevel}-" + nameTeacher;
 
             #endregion Validation
 

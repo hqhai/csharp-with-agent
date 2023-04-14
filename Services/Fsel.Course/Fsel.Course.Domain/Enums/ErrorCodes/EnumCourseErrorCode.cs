@@ -15,6 +15,11 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         CourseIdNotExist,
 
         /// <summary>
+        /// CourseId already exists
+        /// </summary>
+        CourseCodeIsExist,
+
+        /// <summary>
         /// Course is not in a new state
         /// </summary>
         CourseNotInNewState,
@@ -50,8 +55,18 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         MocktestIdAndUnitIdAreMutuallyExclusive,
 
         /// <summary>
-        /// Course must be in an active state
+        /// Course must be in an Active state
         /// </summary>
-        CourseMustActiveState
+        CourseMustActiveState,
+
+        /// <summary>
+        /// Course is in Active state
+        /// </summary>
+        CourseIsActiveState,
+
+        /// <summary>
+        /// Course is in New state, can't start Lesson
+        /// </summary>
+        CourseIsNewStateCantStartLesson,
     }
 }

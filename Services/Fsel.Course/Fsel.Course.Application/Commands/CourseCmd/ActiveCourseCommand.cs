@@ -45,9 +45,9 @@ namespace Fsel.Course.Application.Commands.CourseCmd
                 return methodResult;
             }
 
-            if (course.Status != EnumCourseStatus.New)
+            if (course.Status == EnumCourseStatus.Active)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.CourseNotInNewState), nameof(course.Status), course.Status);
+                methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.CourseIsActiveState), nameof(course.Status), course.Status);
                 return methodResult;
             }
             var teacherIds = course.CourseTeachers.Select(x => x.TeacherId).ToList();

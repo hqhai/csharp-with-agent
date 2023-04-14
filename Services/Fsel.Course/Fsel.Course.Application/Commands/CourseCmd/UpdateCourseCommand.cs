@@ -79,6 +79,13 @@ namespace Fsel.Course.Application.Commands.CourseCmd
                 return methodResult;
             }
 
+            var isExistCode = await _courseRepository.Queryable.AnyAsync(x => x.Code == request.Code && x.Id != request.Id, cancellationToken);
+            if (isExistCode)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.CourseCodeIsExist), nameof(request.Code), request.Code);
+                return methodResult;
+            }
+
             if (request.CourseUnitMockTests.Any(x => x.MockTestId.HasValue && x.UnitId.HasValue))
             {
                 methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.MocktestIdAndUnitIdAreMutuallyExclusive), nameof(request.CourseUnitMockTests), request.CourseUnitMockTests);

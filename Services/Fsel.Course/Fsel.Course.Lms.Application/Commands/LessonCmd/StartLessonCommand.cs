@@ -69,9 +69,9 @@ namespace Fsel.Course.Lms.Application.Commands.LessonCmd
                 methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.CourseIdNotExist), nameof(request.CourseId), request.CourseId);
                 return methodResult;
             }
-            else if (course.Status != EnumCourseStatus.Active)
+            else if (course.Status == EnumCourseStatus.New)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.CourseMustActiveState), nameof(course.Status), course.Status);
+                methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.CourseIsNewStateCantStartLesson), nameof(course.Status), course.Status);
                 return methodResult;
             }
 
