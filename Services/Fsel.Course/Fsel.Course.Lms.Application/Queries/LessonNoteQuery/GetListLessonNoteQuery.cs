@@ -37,6 +37,7 @@ namespace Fsel.Course.Lms.Application.Queries.LessonNoteQuery
                                         .Where(x => x.LessonResultId == request.LessonResultId)
                                         .Select(lessonResult => new LessonNoteModel
                                         {
+                                            Id = lessonResult.Id,
                                             Name = lessonResult.Name,
                                             Note = lessonResult.Note,
                                             LessonResultId = lessonResult.LessonResultId
