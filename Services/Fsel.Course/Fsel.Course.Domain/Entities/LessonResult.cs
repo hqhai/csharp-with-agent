@@ -10,11 +10,20 @@ namespace Fsel.Course.Domain.Entities
 
     public class LessonResult : Entity
     {
+        /// <summary>
+        /// Phần trăm cẩu trả lời đúng
+        /// </summary>
         [Range(1, 10000_0000, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
         public double Percent { get; set; }
 
+        /// <summary>
+        /// Trạng thái
+        /// </summary>
         public EnumResultStatus Status { get; set; }
 
+        /// <summary>
+        /// Lưu ý tóm tắt
+        /// </summary>
         [MaxLength(2000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? SummaryNote { get; set; }
 

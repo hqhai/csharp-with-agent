@@ -30,18 +30,18 @@ namespace Fsel.Course.Lms.Application.Commands.LessonNoteCmd
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<LessonNoteModel> methodResult = new MethodResult<LessonNoteModel>();
+
             var lessonNote = await _lessonNoteRepository.GetByIdAsync(request.Id);
             if (lessonNote == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumLessonNoteErrorCode.LessonNotesDoesNotExist),
-                                                nameof(request.Id), request.Id);
+                methodResult.AddErrorBadRequest(nameof(EnumLessonNoteErrorCode.LessonNotesIdNotExist), nameof(request.Id), request.Id);
                 return methodResult;
             }
+
             _mapper.Map(request, lessonNote);
             if (!lessonNote.IsValid())
             {
-                methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                methodResult.AddResultFromErrorList(lessonNote.ErrorMessages);
+                methodResult.AddErrorBadRequest(lessonNote.ErrorMessages);
                 return methodResult;
             }
             await _lessonNoteRepository.ExecuteTransactionAsync(async () =>

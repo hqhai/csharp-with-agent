@@ -38,11 +38,11 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
             var course = await _courseRepository.GetByIdAsync(request.CourseId);
             if (course == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.CourseNotExist), nameof(request.CourseId), request.CourseId);
+                methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.CourseIdNotExist), nameof(request.CourseId), request.CourseId);
                 return methodResult;
             }
-            var classContents = await _trainingService.GetClassByStatusNewAsync();
 
+            var classContents = await _trainingService.GetClassByStatusNewAsync();
             var classNews = classContents?.Content?.Result;
             var classIds = classNews?.Select(x => x.Id).ToList();
             var courseClassStudent = await _courseClassStudentRepository.GetIncludeByIdsAsync(classIds, course.Id);
@@ -53,7 +53,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
                 var classcode = code?.Content?.Result;
                 if (classcode == null)
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.CourseNotInClass), nameof(request.CourseId), request.CourseId);
+                    methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.ClasseCodeNotExist), nameof(request.CourseId), request.CourseId);
                     return methodResult;
                 }
                 methodResult.Result = classcode;
@@ -63,7 +63,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
             var classes = classNews.FirstOrDefault(e => e.Id == courseClassStudent.ClassId);
             if (classes == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.ClassesNotExitst), nameof(request.CourseId), request.CourseId);
+                methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.ClasseIdNotExist), nameof(courseClassStudent.ClassId), courseClassStudent.ClassId);
                 return methodResult;
             }
             methodResult.Result = classes.Code;

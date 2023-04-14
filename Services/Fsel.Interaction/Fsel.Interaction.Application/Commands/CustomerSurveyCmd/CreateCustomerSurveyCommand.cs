@@ -58,8 +58,7 @@ namespace Fsel.Interaction.Application.Commands.CustomerSurveyCmd
                 };
                 if (!customerSurvey.IsValid())
                 {
-                    methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                    methodResult.AddResultFromErrorList(customerSurvey.ErrorMessages);
+                    methodResult.AddErrorBadRequest(customerSurvey.ErrorMessages);
                     return methodResult;
                 }
 

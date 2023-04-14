@@ -30,10 +30,10 @@ namespace Fsel.Course.Lms.Application.Commands.LessonNoteCmd
             MethodResult<bool> methodResult = new MethodResult<bool>();
 
             var lessonNote = await _lessonNoteRepository.GetByIdAsync(request.Id);
+
             if (lessonNote == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumLessonNoteErrorCode.LessonNotesDoesNotExist),
-                                                nameof(request.Id), request.Id);
+                methodResult.AddErrorBadRequest(nameof(EnumLessonNoteErrorCode.LessonNotesIdNotExist), nameof(request.Id), request.Id);
                 return methodResult;
             }
 

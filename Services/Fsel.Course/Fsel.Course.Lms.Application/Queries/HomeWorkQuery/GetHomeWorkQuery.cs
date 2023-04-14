@@ -77,7 +77,7 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkQuery
 
             if (homeWork == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumHomeWorkErrorCode.HomeWorkNotExist), nameof(request.HomeWorkId), request?.HomeWorkId);
+                methodResult.AddErrorBadRequest(nameof(EnumHomeWorkErrorCode.HomeWorkIdNotExist), nameof(request.HomeWorkId), request?.HomeWorkId);
                 return methodResult;
             }
 

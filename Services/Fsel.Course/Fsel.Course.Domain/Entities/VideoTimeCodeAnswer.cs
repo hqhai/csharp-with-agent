@@ -10,6 +10,9 @@ namespace Fsel.Course.Domain.Entities
 
     public class VideoTimeCodeAnswer : Entity
     {
+        /// <summary>
+        /// Câu trả lời
+        /// </summary>
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         public string? AnswerStr { get; set; }
 
@@ -20,6 +23,9 @@ namespace Fsel.Course.Domain.Entities
             set { AnswerStr = ConvertHelper.Serialize(value); }
         }
 
+        /// <summary>
+        /// Câu trả lời đúng
+        /// </summary>
         [Range(0, 10000_0000, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
         public int CorrectCount { get; set; }
 

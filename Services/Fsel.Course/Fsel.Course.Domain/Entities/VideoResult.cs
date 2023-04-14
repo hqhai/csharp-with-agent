@@ -10,7 +10,7 @@ namespace Fsel.Course.Domain.Entities
     public class VideoResult : Entity
     {
         /// <summary>
-        /// Phần trăm câu trả lời
+        /// Phần trăm câu trả lời đúng
         /// </summary>
         private double _percent;
 

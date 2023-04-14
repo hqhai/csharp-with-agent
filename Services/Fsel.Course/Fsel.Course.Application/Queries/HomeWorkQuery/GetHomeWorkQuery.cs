@@ -30,18 +30,18 @@ namespace Fsel.Course.Application.Queries.HomeWorkQuery
 
         public async Task<MethodResult<HomeWorkModel>> Handle(GetHomeWorkQuery request, CancellationToken cancellationToken)
         {
-            MethodResult<HomeWorkModel> methodResult = new MethodResult<HomeWorkModel>();
             ArgumentNullException.ThrowIfNull(request);
+            MethodResult<HomeWorkModel> methodResult = new MethodResult<HomeWorkModel>();
+
             var homeWork = await _homeWorkRepository.GetIncludeAllAsync(request.Id);
+
             if (homeWork == null)
             {
-                methodResult.AddErrorBadRequest(
-                    nameof(EnumHomeWorkErrorCode.HomeWorksNull),
-                    nameof(request.Id), request.Id);
+                methodResult.AddErrorBadRequest(nameof(EnumHomeWorkErrorCode.HomeWorkIdNotExist), nameof(request.Id), request.Id);
                 return methodResult;
             }
-            var homeWorkModel = _mapper.Map<HomeWorkModel>(homeWork);
-            methodResult.Result = homeWorkModel;
+
+            methodResult.Result = _mapper.Map<HomeWorkModel>(homeWork);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }

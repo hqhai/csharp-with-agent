@@ -31,26 +31,28 @@ namespace Fsel.Course.Application.Queries.HomeWorkQuery
 
         public async Task<MethodResult<PagingItemsModel<HomeWorkSearchModel>>> Handle(SearchHomeWorkQuery request, CancellationToken cancellationToken)
         {
-            MethodResult<PagingItemsModel<HomeWorkSearchModel>> methodResult = new MethodResult<PagingItemsModel<HomeWorkSearchModel>>();
             ArgumentNullException.ThrowIfNull(request);
+            MethodResult<PagingItemsModel<HomeWorkSearchModel>> methodResult = new MethodResult<PagingItemsModel<HomeWorkSearchModel>>();
+
             if (request.PageSize > 100)
             {
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 return methodResult;
             }
+
             var homeWorkQuery = _homeWorkRepository.Queryable
-                        .Include(x => x.LessonHomeWorks.Where(n => !n.IsDeleted))
-                        .Select(x => new HomeWorkSearchModel
-                        {
-                            Id = x.Id,
-                            Name = x.Name,
-                            CreatedFullName = x.CreatedFullName,
-                            CreatedDate = x.CreatedDate,
-                            IsActive = x.LessonHomeWorks.Where(n => !n.IsDeleted).Any(),
-                            CourseLevel = x.CourseLevel,
-                            CourseSkill = x.CourseSkill,
-                        });
-            //Keyword
+                                    .Include(x => x.LessonHomeWorks.Where(n => !n.IsDeleted))
+                                    .Select(x => new HomeWorkSearchModel
+                                    {
+                                        Id = x.Id,
+                                        Name = x.Name,
+                                        CreatedFullName = x.CreatedFullName,
+                                        CreatedDate = x.CreatedDate,
+                                        IsActive = x.LessonHomeWorks.Where(n => !n.IsDeleted).Any(),
+                                        CourseLevel = x.CourseLevel,
+                                        CourseSkill = x.CourseSkill,
+                                    });
+
             if (!string.IsNullOrEmpty(request.Keyword))
             {
                 homeWorkQuery = homeWorkQuery.Where(m => m.Id.ToString() == request.Keyword || (m.Name ?? string.Empty).Contains(request.Keyword));
