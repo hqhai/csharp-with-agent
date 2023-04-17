@@ -13,7 +13,7 @@ namespace Fsel.Identity.Application.Queries.StudentQuery
 
     public class GetStudentByClassIdQuery : IRequest<MethodResult<IList<StudentModel>>>
     {
-        public string? Id { get; set; }
+        public Guid ClassId { get; set; }
     }
 
     public class GetStudentByClassIdQueryHandler : IRequestHandler<GetStudentByClassIdQuery, MethodResult<IList<StudentModel>>>
@@ -33,7 +33,7 @@ namespace Fsel.Identity.Application.Queries.StudentQuery
 
             MethodResult<IList<StudentModel>> methodResult = new MethodResult<IList<StudentModel>>();
 
-            var student = await _studentRepository.Queryable.Where(x => x.ClassId.ToString() == request.Id).ToListAsync(cancellationToken: cancellationToken);
+            var student = await _studentRepository.Queryable.Where(x => x.ClassId == request.ClassId).ToListAsync(cancellationToken: cancellationToken);
             if (student == null || student.Count == 0)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumStudentErrorCode.StudentNull));

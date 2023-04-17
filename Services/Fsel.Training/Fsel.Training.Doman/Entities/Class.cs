@@ -4,9 +4,9 @@ namespace Fsel.Training.Doman.Entities
 {
     using System;
     using System.ComponentModel.DataAnnotations;
-    using Fsel.Shared.Enums;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Entities;
+    using Fsel.Shared.Enums;
 
     public class Class : Entity
     {
@@ -38,5 +38,9 @@ namespace Fsel.Training.Doman.Entities
         /// Status
         /// </summary>
         public EnumClassType Status { get; set; }
+
+        public Guid CourseId { get; set; }
+
+        public ICollection<ClassStudent> ClassStudents { get; set; } = new List<ClassStudent>();
     }
 }

@@ -37,7 +37,6 @@ builder.Services.AddScoped<ICourseRepository, CourseRepository>();
 builder.Services.AddScoped<ICourseTeacherRepository, CourseTeacherRepository>();
 builder.Services.AddScoped<ICourseUnitMockTestRepository, CourseUnitMockTestRepository>();
 builder.Services.AddScoped<IMockTestRepository, MockTestRepository>();
-builder.Services.AddScoped<ICourseClassStudentRepository, CourseClassStudentRepository>();
 builder.Services.AddScoped<ICourseResultRepository, CourseResultRepository>();
 builder.Services.AddScoped<IQuestionFormRepository, QuestionFormRepository>();
 builder.Services.AddScoped<ILessonInstructionRepository, LessonInstructionRepository>();

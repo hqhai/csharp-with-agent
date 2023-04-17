@@ -40,6 +40,11 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         ClasseIdNotExist,
 
         /// <summary>
+        /// Classes does not exist
+        /// </summary>
+        ClassesNotExist,
+
+        /// <summary>
         /// Classe Code does not exist
         /// </summary>
         ClasseCodeNotExist,

@@ -8,11 +8,15 @@ namespace Fsel.Training.Doman.Models.EntityModels
     public class ClassModel : BaseModel
     {
         public string? Code { get; set; }
-        public string? Name { get; set; }
-        public DateTime TimeStart { get; set; }
 
-        public DateTime TimeEnd { get; set; }
+        public string? Name { get; set; }
+
+        public DateTime StartTime { get; set; }
+
+        public DateTime EndTime { get; set; }
 
         public EnumClassType Status { get; set; }
+
+        public Guid CourseId { get; set; }
     }
 }

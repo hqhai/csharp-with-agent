@@ -27,6 +27,11 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         /// <summary>
         /// Lessons does not exist
         /// </summary>
-        LessonsNotExist
+        LessonsNotExist,
+
+        /// <summary>
+        /// UserId does not exist
+        /// </summary>
+        UserIdNotExist
     }
 }

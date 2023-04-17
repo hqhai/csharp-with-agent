@@ -32,6 +32,11 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         /// <summary>
         /// Cannot have both UnitTest and SkillTest at the same time
         /// </summary>
-        CanNotUnitTestAndSkillTestAtTheSameTime
+        CanNotUnitTestAndSkillTestAtTheSameTime,
+
+        /// <summary>
+        /// UserId Not Exist
+        /// </summary>
+        UserIdNotExist
     }
 }

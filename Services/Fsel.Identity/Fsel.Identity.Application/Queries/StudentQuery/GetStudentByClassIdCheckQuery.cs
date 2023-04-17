@@ -14,7 +14,7 @@ namespace Fsel.Identity.Application.Queries.StudentQuery
 
     public class GetStudentByClassIdCheckQuery : IRequest<MethodResult<bool>>
     {
-        public string? Id { get; set; }
+        public Guid ClassId { get; set; }
     }
 
     public class GetStudentByClassIdCheckQueryHandler : IRequestHandler<GetStudentByClassIdCheckQuery, MethodResult<bool>>
@@ -32,7 +32,7 @@ namespace Fsel.Identity.Application.Queries.StudentQuery
 
             MethodResult<bool> methodResult = new MethodResult<bool>();
 
-            var student = await _studentRepository.Queryable.Where(x => x.ClassId.ToString() == request.Id).ToListAsync(cancellationToken: cancellationToken);
+            var student = await _studentRepository.Queryable.Where(x => x.ClassId == request.ClassId).ToListAsync(cancellationToken: cancellationToken);
             if (student == null)
             {
                 methodResult.Result = false;

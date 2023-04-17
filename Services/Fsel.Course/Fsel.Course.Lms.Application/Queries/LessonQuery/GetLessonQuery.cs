@@ -47,10 +47,10 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<IList<LessonModel>> methodResult = new MethodResult<IList<LessonModel>>();
-            var studentsResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId.ToString());
+            var studentsResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
             if (studentsResult == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumCourseClassStudentErrorCode.UserIdNotExist));
+                methodResult.AddErrorBadRequest(nameof(EnumLessonErrorCode.UserIdNotExist));
                 return methodResult;
             }
             var studentId = studentsResult.Content!.Result!.Id;
