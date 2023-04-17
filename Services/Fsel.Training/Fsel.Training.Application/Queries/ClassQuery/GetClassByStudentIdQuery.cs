@@ -1,0 +1,52 @@
+// Copyright (c) Atlantic. All rights reserved.
+
+namespace Fsel.Training.Application.Queries.ClassQuery
+{
+    using System;
+    using System.Linq;
+    using System.Threading.Tasks;
+    using AutoMapper;
+    using Fsel.Common.ActionResults;
+    using Fsel.Shared.Enums;
+    using Fsel.Training.Doman.IRepositories;
+    using Fsel.Training.Doman.Models.EntityModels;
+    using MediatR;
+    using Microsoft.AspNetCore.Http;
+    using Microsoft.EntityFrameworkCore;
+
+    public class GetClassByStudentIdQuery : IRequest<MethodResult<ClassModel>>
+    {
+        public Guid StudentId { get; set; }
+    }
+
+
+    public class GetClassByStudentIdQueryHandler : IRequestHandler<GetClassByStudentIdQuery, MethodResult<ClassModel>>
+    {
+        private readonly IMapper _mapper;
+        private readonly IClassRepository _classRepository;
+        private readonly IMediator _mediator;
+
+        public GetClassByStudentIdQueryHandler(IMapper mapper, IClassRepository classRepository, IMediator mediator)
+        {
+            _mapper = mapper;
+            _classRepository = classRepository;
+            _mediator = mediator;
+        }
+
+        public async Task<MethodResult<ClassModel>> Handle(GetClassByStudentIdQuery request, CancellationToken cancellationToken)
+        {
+            ArgumentNullException.ThrowIfNull(request);
+
+            MethodResult<ClassModel> methodResult = new MethodResult<ClassModel>();
+
+            var @class = await _classRepository.Queryable
+                                            .Include(x => x.ClassStudents.Where(n => !n.IsDeleted))
+                                            .Where(e => e.Status == EnumClassType.Active && e.ClassStudents.Select(n => n.StudentId).Contains(request.StudentId))
+                                                            .FirstOrDefaultAsync(cancellationToken: cancellationToken);
+
+            methodResult.Result = _mapper.Map<ClassModel>(@class);
+            methodResult.StatusCode = StatusCodes.Status200OK;
+            return methodResult;
+        }
+    }
+}

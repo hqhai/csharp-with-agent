@@ -36,7 +36,7 @@ namespace Fsel.Course.Domain.Entities
         /// <summary>
         /// Tổng số câu trả lời đúng
         /// </summary>
-        [Range(1, 10000_0000, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
+        [Range(0, 10000_0000, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
         public int CorrectTotal { get; set; }
 
         /// <summary>

@@ -7,6 +7,7 @@ namespace Fsel.Course.Lms.Application.Services.TrainingServices
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Services.TrainingServices.Models;
     using Fsel.Shared.Enums;
+    using Microsoft.AspNetCore.Mvc;
     using Refit;
 
     public interface ITrainingService
@@ -19,5 +20,8 @@ namespace Fsel.Course.Lms.Application.Services.TrainingServices
 
         [Post("/class/register-class")]
         Task<IApiResponse<MethodResult<ClassModel>>> RegisterClass([Body] CreateClassStudentModel command);
+
+        [Post("/class/get-class-by-student/{studentId}")]
+        Task<IApiResponse<MethodResult<ClassModel>>> GetClassByStudentId([FromRoute] Guid studentId);
     }
 }

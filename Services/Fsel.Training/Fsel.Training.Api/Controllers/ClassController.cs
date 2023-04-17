@@ -39,6 +39,18 @@ namespace Fsel.Training.Api.Controllers
         }
 
         /// <summary>
+        /// get class list status new
+        /// </summary>
+        [HttpGet("get-class-by-student/{studentId}")]
+        [ProducesResponseType(typeof(MethodResult<ClassModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.BadRequest)]
+        public async Task<IActionResult> GetClassByStudentId([FromRoute] Guid studentId)
+        {
+            MethodResult<ClassModel> commandResult = await _mediator.Send(new GetClassByStudentIdQuery { StudentId = studentId }).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
         /// get new class code
         /// </summary>
         [HttpGet("get-new-class-code")]

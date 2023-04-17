@@ -54,12 +54,26 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
                 return methodResult;
             }
 
+            var classResult = await _trainingService.GetClassByStudentId(student.Id);
+            if (!classResult.IsSuccessStatusCode)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.StudentNotInClass));
+                return methodResult;
+            }
+            var @class = classResult?.Content?.Result;
+            if (@class == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.ClassesNotExist));
+                return methodResult;
+            }
+
             var course = await _courseRepository.Queryable
                              .Include(x => x.CourseUnitMockTests.Where(y => !y.IsDeleted))
                              .ThenInclude(unit => unit.Unit)
                              .Include(x => x.CourseUnitMockTests.Where(y => !y.IsDeleted))
                              .ThenInclude(unit => unit.MockTest)
                              .Include(x => x.CourseTeachers.Where(y => !y.IsDeleted))
+                             .Where(x => x.Id == @class.CourseId)
                              .AsNoTracking()
                              .Select(y => new CourseModel
                              {
