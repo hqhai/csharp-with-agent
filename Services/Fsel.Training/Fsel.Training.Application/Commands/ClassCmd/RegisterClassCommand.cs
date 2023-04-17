@@ -52,56 +52,52 @@ namespace Fsel.Training.Application.Commands.ClassCmd
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<ClassModel> methodResult = new MethodResult<ClassModel>();
 
-            var classnew = await _classRepository.Queryable.Include(x => x.ClassStudents)
-                           .FirstOrDefaultAsync(x => x.Code == request.Code && x.CourseId == request.CourseId && x.Status == EnumClassType.New, cancellationToken);
-            if (classnew == null)
+            await _classRepository.ExecuteTransactionAsync(async () =>
             {
-                var classActive = await _classRepository.Queryable.Include(x => x.ClassStudents)
-                               .FirstOrDefaultAsync(x => x.Code == request.Code && x.CourseId == request.CourseId, cancellationToken);
-                if (classActive != null)
-                {
-                    var code = await _mediator.Send(new GetNewClassCodeQuery { CourseLevel = request.CourseLevel }, cancellationToken).ConfigureAwait(false);
-                    classnew = await CreateClassAsync(code.Result, request.CourseId);
-                }
-                else
+                var classnew = await _classRepository.Queryable.Include(x => x.ClassStudents)
+                           .FirstOrDefaultAsync(x => x.Code == request.Code && x.CourseId == request.CourseId, cancellationToken);
+
+                if (classnew == null)
                 {
                     classnew = await CreateClassAsync(request.Code, request.CourseId);
                 }
-            }
-            else if (classnew.ClassStudents.Count == 11)
-            {
-                classnew = await UpdateClassStatusAsync(classnew);
-            }
-            else if (classnew.ClassStudents.Count > 11)
-            {
-                var code = await _mediator.Send(new GetNewClassCodeQuery { CourseLevel = request.CourseLevel }, cancellationToken).ConfigureAwait(false);
-                methodResult.Result = new ClassModel { Code = code.Result };
-                methodResult.AddErrorBadRequest(nameof(EnumClassErrorCode.ClassHasTooManyStudents));
+                else if (classnew.ClassStudents.Count == 11)
+                {
+                    classnew = await UpdateClassStatusAsync(classnew);
+                }
+                else if (classnew.ClassStudents.Count > 11 || classnew.Status == EnumClassType.Active)
+                {
+                    var code = await _mediator.Send(new GetNewClassCodeQuery { CourseLevel = request.CourseLevel }, cancellationToken).ConfigureAwait(false);
+                    methodResult.Result = new ClassModel { Code = code.Result };
+                    methodResult.AddErrorBadRequest(nameof(EnumClassErrorCode.ClassHasTooManyStudents));
+                    return methodResult;
+                }
+
+                var userId = _authContext.CurrentUserId;
+                var student = await _userService.GetStudentByUserIdAsync(userId);
+                if (student == null)
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumClassErrorCode.UserIdNotExits));
+                    return methodResult;
+                }
+                var studentId = student!.Content!.Result!.Id;
+
+                var classStudent = await _classStudentRepository.Queryable.FirstOrDefaultAsync(x => x.StudentId == studentId && x.ClassId == classnew.Id, cancellationToken);
+                if (classStudent != null)
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumClassErrorCode.ClassStudentAlreadyExist), nameof(studentId), studentId);
+                    return methodResult;
+                }
+
+                await UpdateClassAsync(classnew, studentId);
+
+                student = await _userService.UpdateStudentByClassAsync(new UpdateStudentByClassIdModel { ClassId = classnew.Id, StudentId = studentId });
+
+                methodResult.StatusCode = StatusCodes.Status201Created;
+                methodResult.Result = _mapper.Map<ClassModel>(classnew);
                 return methodResult;
-            }
+            });
 
-            var userId = _authContext.CurrentUserId;
-            var student = await _userService.GetStudentByUserIdAsync(userId);
-            if (student == null)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumClassErrorCode.UserIdNotExits));
-                return methodResult;
-            }
-            var studentId = student!.Content!.Result!.Id;
-
-            var classStudent = await _classStudentRepository.Queryable.FirstOrDefaultAsync(x => x.StudentId == studentId && x.ClassId == classnew.Id, cancellationToken);
-            if (classStudent != null)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumClassErrorCode.ClassStudentAlreadyExist), nameof(studentId), studentId);
-                return methodResult;
-            }
-
-            await UpdateClassAsync(classnew, studentId);
-
-            student = await _userService.UpdateStudentByClassAsync(new UpdateStudentByClassIdModel { ClassId = classnew.Id, StudentId = studentId });
-
-            methodResult.StatusCode = StatusCodes.Status201Created;
-            methodResult.Result = _mapper.Map<ClassModel>(classnew);
             return methodResult;
         }
 
@@ -112,7 +108,7 @@ namespace Fsel.Training.Application.Commands.ClassCmd
             newClass.Name = code;
             newClass.CourseId = courseId;
             _classRepository.Add(newClass);
-            await _classRepository.UnitOfWork.SaveEntitiesAsync().ConfigureAwait(false);
+            await _classRepository.UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
             return newClass;
         }
 
@@ -122,7 +118,7 @@ namespace Fsel.Training.Application.Commands.ClassCmd
             {
                 classToUpdate.Status = EnumClassType.Active;
                 _classRepository.Update(classToUpdate);
-                await _classRepository.UnitOfWork.SaveEntitiesAsync().ConfigureAwait(false);
+                await _classRepository.UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
                 return classToUpdate;
             }
             catch (Exception ex)
