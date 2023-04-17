@@ -97,7 +97,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
             var classes = classcourses!.Content!.Result;
             foreach (var item in courses)
             {
-                item.ClassCourses = classes!.Where(x => x.CourseId == item.Id).ToList();
+                item.CourseClass = classes!.FirstOrDefault(x => x.CourseId == item.Id);
             }
 
             methodResult.Result = courses;
