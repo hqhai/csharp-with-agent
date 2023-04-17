@@ -3,8 +3,8 @@
 namespace Fsel.Training.Infrastructure.Repositories
 {
     using Fsel.Core.Base;
-    using Fsel.Training.Doman.Entities;
-    using Fsel.Training.Doman.IRepositories;
+    using Fsel.Training.Domain.Entities;
+    using Fsel.Training.Domain.IRepositories;
 
     public class ClassStudentRepository : BaseRepository<ClassStudent>, IClassStudentRepository
     {

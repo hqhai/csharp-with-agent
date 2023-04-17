@@ -9,7 +9,7 @@ namespace Fsel.Training.Api.Controllers
     using Fsel.Shared.Enums;
     using Fsel.Training.Application.Commands.ClassCmd;
     using Fsel.Training.Application.Queries.ClassQuery;
-    using Fsel.Training.Doman.Models.EntityModels;
+    using Fsel.Training.Domain.Models.EntityModels;
     using MediatR;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;

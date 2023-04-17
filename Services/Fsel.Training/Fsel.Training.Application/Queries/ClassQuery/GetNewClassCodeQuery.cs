@@ -3,7 +3,7 @@
 using Fsel.Common.ActionResults;
 using Fsel.Shared.Enums;
 using Fsel.Shared.Helpers;
-using Fsel.Training.Doman.IRepositories;
+using Fsel.Training.Domain.IRepositories;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 

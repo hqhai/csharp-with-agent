@@ -1,9 +1,9 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Training.Doman.IRepositories
+namespace Fsel.Training.Domain.IRepositories
 {
     using Fsel.Core.Base.Interfaces;
-    using Fsel.Training.Doman.Entities;
+    using Fsel.Training.Domain.Entities;
 
     public interface IClassStudentRepository : IRepository<ClassStudent>
     {

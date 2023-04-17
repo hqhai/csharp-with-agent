@@ -25,7 +25,7 @@ namespace Fsel.Training.Infrastructure.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("Fsel.Training.Doman.Entities.Class", b =>
+            modelBuilder.Entity("Fsel.Training.Domain.Entities.Class", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()

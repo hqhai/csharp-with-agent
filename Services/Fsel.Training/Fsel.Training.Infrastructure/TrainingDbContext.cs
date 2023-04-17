@@ -8,7 +8,7 @@ namespace Fsel.Training.Infrastructure
     using MediatR;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Configuration;
-    using Fsel.Training.Doman.Entities;
+    using Fsel.Training.Domain.Entities;
 
     public class TrainingDbContext : BaseDbContext
     {

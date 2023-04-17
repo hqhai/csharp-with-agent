@@ -10,11 +10,11 @@ namespace Fsel.Training.Application.Commands.ClassCmd
     using Fsel.Training.Application.Queries.ClassQuery;
     using Fsel.Training.Application.Services.UserServices;
     using Fsel.Training.Application.Services.UserServices.Models;
-    using Fsel.Training.Doman.Entities;
-    using Fsel.Training.Doman.Enums.ErrorCodes;
-    using Fsel.Training.Doman.IRepositories;
-    using Fsel.Training.Doman.Models.CommandModels.Classes;
-    using Fsel.Training.Doman.Models.EntityModels;
+    using Fsel.Training.Domain.Entities;
+    using Fsel.Training.Domain.Enums.ErrorCodes;
+    using Fsel.Training.Domain.IRepositories;
+    using Fsel.Training.Domain.Models.CommandModels.Classes;
+    using Fsel.Training.Domain.Models.EntityModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
