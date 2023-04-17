@@ -6,10 +6,12 @@ namespace Fsel.Training.Api.Controllers
     using System.Net;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
+    using Fsel.Shared.Enums;
     using Fsel.Training.Application.Commands.ClassCmd;
     using Fsel.Training.Application.Queries.ClassQuery;
     using Fsel.Training.Doman.Models.EntityModels;
     using MediatR;
+    using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
 
     [ApiVersion(Settings.APIVersion)]
@@ -25,14 +27,14 @@ namespace Fsel.Training.Api.Controllers
         }
 
         /// <summary>
-        /// get class in status new
+        /// get class list status new
         /// </summary>
-        [HttpGet("get-class-new")]
-        [ProducesResponseType(typeof(MethodResult<IList<ClassModel>>), (int)HttpStatusCode.OK)]
+        [HttpGet("get-class-list-status-new")]
+        [ProducesResponseType(typeof(MethodResult<IList<CourseClassModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.BadRequest)]
-        public async Task<IActionResult> GetClassNew()
+        public async Task<IActionResult> GetClassListStatusNew([FromBody] GetClassByStatusNewQuery query)
         {
-            MethodResult<IList<ClassModel>> commandResult = await _mediator.Send(new GetClassByStatusNewQuery()).ConfigureAwait(false);
+            MethodResult<IList<CourseClassModel>> commandResult = await _mediator.Send(query).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
 
@@ -51,10 +53,11 @@ namespace Fsel.Training.Api.Controllers
         /// <summary>
         /// Create a class
         /// </summary>
-        [HttpPost("create-class")]
+        [HttpPost("register-class")]
         [ProducesResponseType(typeof(MethodResult<ClassModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> Create([FromBody] CreateClassCommand command)
+        [Authorize(Roles = nameof(EnumRole.Student))]
+        public async Task<IActionResult> RegisterClass([FromBody] RegisterClassCommand command)
         {
             MethodResult<ClassModel> queryResult = await _mediator.Send(command).ConfigureAwait(false);
             return queryResult.GetActionResult();

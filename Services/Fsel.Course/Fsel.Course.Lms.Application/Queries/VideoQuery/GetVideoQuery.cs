@@ -53,10 +53,10 @@ namespace Fsel.Course.Lms.Application.Queries.VideoQuery
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<VideoModel> methodResult = new MethodResult<VideoModel>();
 
-            var studentsResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId.ToString());
+            var studentsResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
             if (studentsResult == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumCourseClassStudentErrorCode.UserIdNotExist));
+                methodResult.AddErrorBadRequest(nameof(EnumVideoErrorCode.UserIdNotExist));
                 return methodResult;
             }
             var studentId = studentsResult.Content!.Result!.Id;

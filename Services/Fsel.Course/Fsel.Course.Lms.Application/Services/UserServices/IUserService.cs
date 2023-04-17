@@ -13,16 +13,13 @@ namespace Fsel.Course.Lms.Application.Services.UserServices
     public interface IUserService
     {
         [Get("/student/get-by-user-id/{id}")]
-        Task<IApiResponse<MethodResult<StudentModel>>> GetStudentByUserIdAsync([FromRoute] string id);
+        Task<IApiResponse<MethodResult<StudentModel>>> GetStudentByUserIdAsync([FromRoute] Guid id);
 
         [Get("/student/get-student-by-class-id/{id}")]
         Task<IApiResponse<MethodResult<IList<StudentModel>>>> GetStudentByClassIdAsync([Body] Guid id);
 
-        [Put("/student/update-student-class")]
-        Task<IApiResponse<MethodResult<StudentModel>>> UpdateStudentByClassAsync([Body] Guid id);
-
         [Get("/student/get-class-has-too-many-students/{id}")]
-        Task<IApiResponse<MethodResult<bool>>> GetStudentByClassIdCheckAsync([FromRoute] string id);
+        Task<IApiResponse<MethodResult<bool>>> GetStudentByClassIdCheckAsync([FromRoute] Guid id);
 
         [Post("/teacher/get-by-ids")]
         Task<IApiResponse<MethodResult<IList<TeacherModel>>>> GetTeacherByIdsAsync([Body] GetTeacherByIdsQueryModel command);

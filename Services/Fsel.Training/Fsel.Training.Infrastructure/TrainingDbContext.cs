@@ -21,10 +21,12 @@ namespace Fsel.Training.Infrastructure
             ArgumentNullException.ThrowIfNull(modelBuilder);
 
             modelBuilder.ApplyConfiguration(new ClassEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new ClassStudentEntityTypeConfiguration());
             base.OnModelCreating(modelBuilder);
         }
 
         public DbSet<Class> Classes { get; set; }
+        public DbSet<ClassStudent> ClassStudents { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {

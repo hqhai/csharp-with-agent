@@ -15,6 +15,11 @@ namespace Fsel.Training.Doman.Enums.ErrorCodes
         StudentsNotExits,
 
         /// <summary>
+        /// UserId not exits
+        /// </summary>
+        UserIdNotExits,
+
+        /// <summary>
         /// Class has too many students
         /// </summary>
         ClassHasTooManyStudents,
@@ -23,5 +28,10 @@ namespace Fsel.Training.Doman.Enums.ErrorCodes
         /// Class null
         /// </summary>
         ClassNull,
+
+        /// <summary>
+        /// Class Student already exist
+        /// </summary>
+        ClassStudentAlreadyExist,
     }
 }

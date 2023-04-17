@@ -19,12 +19,9 @@ namespace Fsel.Course.Application.Services.UserServices
         Task<IApiResponse<MethodResult<TeacherModel>>> GetTeacherByIdAsync([FromRoute] Guid id);
 
         [Get("/student/get-by-user-id/{id}")]
-        Task<IApiResponse<MethodResult<StudentModel>>> GetStudentByUserIdAsync([FromRoute] string id);
+        Task<IApiResponse<MethodResult<StudentModel>>> GetStudentByUserIdAsync([FromRoute] Guid id);
 
         [Get("/user/get-student-by-class-id/{id}")]
         Task<IApiResponse<MethodResult<IList<StudentModel>>>> GetStudentByClassIdAsync([Body] Guid id);
-
-        [Put("/user/update-student-class")]
-        Task<IApiResponse<MethodResult<StudentModel>>> UpdateStudentByClassAsync([Body] Guid id);
     }
 }

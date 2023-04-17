@@ -58,7 +58,7 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkQuery
         {
             var methodResult = new MethodResult<IList<LessonHomeworkSearchModel>>();
 
-            var student = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId.ToString());
+            var student = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
             if (!student.IsSuccessStatusCode)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumHomeWorkErrorCode.UserIdNotExist));

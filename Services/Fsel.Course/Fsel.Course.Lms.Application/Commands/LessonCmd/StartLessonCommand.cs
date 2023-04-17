@@ -89,10 +89,10 @@ namespace Fsel.Course.Lms.Application.Commands.LessonCmd
                 return methodResult;
             }
 
-            var student = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId.ToString());
+            var student = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
             if (!student.IsSuccessStatusCode)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumCourseClassStudentErrorCode.UserIdNotExist), nameof(student), _authContext.CurrentUserId.ToString());
+                methodResult.AddErrorBadRequest(nameof(EnumLessonErrorCode.UserIdNotExist), nameof(student), _authContext.CurrentUserId.ToString());
                 return methodResult;
             }
 

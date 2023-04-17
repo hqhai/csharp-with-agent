@@ -4,19 +4,20 @@ namespace Fsel.Course.Lms.Application.Services.TrainingServices
 {
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
-    using Fsel.Shared.Enums;
+    using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Services.TrainingServices.Models;
+    using Fsel.Shared.Enums;
     using Refit;
 
     public interface ITrainingService
     {
-        [Get("/class/get-class-new")]
-        Task<IApiResponse<MethodResult<IList<ClassModel>>>> GetClassByStatusNewAsync();
+        [Get("/class/get-class-list-status-new")]
+        Task<IApiResponse<MethodResult<IList<CourseClassModel>>>> GetClassListStatusNewAsync([Body] GetClassListStatusNewModel command);
 
         [Get("/class/get-new-class-code")]
         Task<IApiResponse<MethodResult<string>>> GetNewClassCodeAsync([Query] EnumCourseLevel courseLevel);
 
-        [Post("/class/create-class")]
-        Task<IApiResponse<MethodResult<ClassModel>>> CreateClassByCheckId([Body] CreateClassStudentModel command);
+        [Post("/class/register-class")]
+        Task<IApiResponse<MethodResult<ClassModel>>> RegisterClass([Body] CreateClassStudentModel command);
     }
 }

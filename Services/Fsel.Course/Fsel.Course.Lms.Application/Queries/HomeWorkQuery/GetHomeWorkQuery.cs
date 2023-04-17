@@ -52,10 +52,10 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkQuery
         {
             MethodResult<HomeWorkModel> methodResult = new MethodResult<HomeWorkModel>();
 
-            var studentsResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId.ToString());
+            var studentsResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
             if (studentsResult == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumCourseClassStudentErrorCode.UserIdNotExist));
+                methodResult.AddErrorBadRequest(nameof(EnumHomeWorkErrorCode.UserIdNotExist));
                 return methodResult;
             }
             var studentId = studentsResult.Content!.Result!.Id;

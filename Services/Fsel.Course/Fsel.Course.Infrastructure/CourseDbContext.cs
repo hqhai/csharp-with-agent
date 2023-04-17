@@ -37,7 +37,6 @@ namespace Fsel.Course.Infrastructure
         public DbSet<ExerciseQuestion> ExerciseQuestions { get; set; }
         public DbSet<Question> Questions { get; set; }
         public DbSet<CourseTeacher> CourseTeachers { get; set; }
-        public DbSet<CourseClassStudent> CourseClassStudents { get; set; }
         public DbSet<VideoResult> VideoResults { get; set; }
         public DbSet<LessonResult> LessonResults { get; set; }
         public DbSet<UnitResult> UnitResults { get; set; }
@@ -75,7 +74,6 @@ namespace Fsel.Course.Infrastructure
             modelBuilder.ApplyConfiguration(new VideoEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new VideoTimeCodeEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new LessonResultEntityTypeConfiguraion());
-            modelBuilder.ApplyConfiguration(new CourseClassStudentEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new VideoResultEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new CourseResultEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new VideoTimeCodeAnswerEntityTypeConfiguration());

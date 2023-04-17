@@ -67,10 +67,10 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
             var methodResult = new MethodResult<LessonScoreModel>();
             var lessonScore = new LessonScoreModel();
 
-            var student = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId.ToString());
+            var student = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
             if (!student.IsSuccessStatusCode)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumCourseClassStudentErrorCode.UserIdNotExist));
+                methodResult.AddErrorBadRequest(nameof(EnumLessonErrorCode.UserIdNotExist));
                 return methodResult;
             }
             var studentId = student?.Content?.Result?.Id;

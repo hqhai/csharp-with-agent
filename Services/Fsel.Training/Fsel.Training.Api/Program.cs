@@ -1,11 +1,11 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-using Fsel.Training.Doman.IRepositories;
-using Fsel.Training.Infrastructure;
-using Fsel.Training.Infrastructure.Repositories;
 using Fsel.Common.ValueSettings;
 using Fsel.Core.Extensions;
 using Fsel.Training.Application.Services.UserServices;
+using Fsel.Training.Doman.IRepositories;
+using Fsel.Training.Infrastructure;
+using Fsel.Training.Infrastructure.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -22,6 +22,7 @@ builder.AddSwaggerGens(appSetting);
 builder.AddAuthenticationJwtBearers(appSetting);
 builder.AddDbContexts<TrainingDbContext>();
 builder.Services.AddScoped<IClassRepository, ClassRepository>();
+builder.Services.AddScoped<IClassStudentRepository, ClassStudentRepository>();
 builder.AddRefitClients(typeof(IUserService), appSetting?.Services?.UserApiUrl);
 
 var app = builder.Build();
