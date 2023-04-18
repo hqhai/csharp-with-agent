@@ -19,7 +19,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
 
     public class GetListCourseTeacherQuery : IRequest<MethodResult<IList<CourseModel>>>
     {
-        public EnumCourseLevel CourseLevel { get; set; }
+        public EnumCourseLevel? CourseLevel { get; set; }
     }
 
     public class GetListCourseTeacherQueryHandler : IRequestHandler<GetListCourseTeacherQuery, MethodResult<IList<CourseModel>>>
@@ -46,7 +46,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
             MethodResult<IList<CourseModel>> methodResult = new MethodResult<IList<CourseModel>>();
             var courses = await _courseRepository.Queryable
                               .Include(course => course.CourseTeachers.Where(y => !y.IsDeleted))
-                              .Where(x => request.CourseLevel == null || x.CourseLevel == request.CourseLevel)
+                              .Where(x => request.CourseLevel != null && x.CourseLevel == request.CourseLevel)
                               .Where(x => x.Status == EnumCourseStatus.Active)
                               .AsNoTracking()
                               .Select(course => new CourseModel
