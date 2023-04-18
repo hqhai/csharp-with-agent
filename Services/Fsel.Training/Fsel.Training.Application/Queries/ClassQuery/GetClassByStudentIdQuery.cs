@@ -19,7 +19,6 @@ namespace Fsel.Training.Application.Queries.ClassQuery
         public Guid StudentId { get; set; }
     }
 
-
     public class GetClassByStudentIdQueryHandler : IRequestHandler<GetClassByStudentIdQuery, MethodResult<ClassModel>>
     {
         private readonly IMapper _mapper;
@@ -41,8 +40,8 @@ namespace Fsel.Training.Application.Queries.ClassQuery
 
             var @class = await _classRepository.Queryable
                                             .Include(x => x.ClassStudents.Where(n => !n.IsDeleted))
-                                            .Where(e => e.Status == EnumClassType.Active && e.ClassStudents.Select(n => n.StudentId).Contains(request.StudentId))
-                                                            .FirstOrDefaultAsync(cancellationToken: cancellationToken);
+                                            .Where(e => e.Status != EnumClassType.Done && e.ClassStudents.Select(n => n.StudentId).Contains(request.StudentId))
+                                            .FirstOrDefaultAsync(cancellationToken: cancellationToken);
 
             methodResult.Result = _mapper.Map<ClassModel>(@class);
             methodResult.StatusCode = StatusCodes.Status200OK;

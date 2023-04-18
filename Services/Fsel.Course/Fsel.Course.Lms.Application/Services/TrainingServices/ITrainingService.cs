@@ -21,7 +21,7 @@ namespace Fsel.Course.Lms.Application.Services.TrainingServices
         [Post("/class/register-class")]
         Task<IApiResponse<MethodResult<ClassModel>>> RegisterClass([Body] CreateClassStudentModel command);
 
-        [Post("/class/get-class-by-student/{studentId}")]
+        [Get("/class/get-class-by-student/{studentId}")]
         Task<IApiResponse<MethodResult<ClassModel>>> GetClassByStudentId([FromRoute] Guid studentId);
     }
 }
