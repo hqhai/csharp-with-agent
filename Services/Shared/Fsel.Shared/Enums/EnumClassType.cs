@@ -5,6 +5,7 @@ namespace Fsel.Shared.Enums
     public enum EnumClassType
     {
         New,
-        Active
+        Active,
+        Done
     }
 }
