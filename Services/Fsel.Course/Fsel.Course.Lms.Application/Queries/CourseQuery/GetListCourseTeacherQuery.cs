@@ -19,7 +19,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
 
     public class GetListCourseTeacherQuery : IRequest<MethodResult<IList<CourseModel>>>
     {
-        public EnumCourseLevel? CourseLevel { get; set; }
+        public EnumCourseLevel CourseLevel { get; set; }
     }
 
     public class GetListCourseTeacherQueryHandler : IRequestHandler<GetListCourseTeacherQuery, MethodResult<IList<CourseModel>>>
