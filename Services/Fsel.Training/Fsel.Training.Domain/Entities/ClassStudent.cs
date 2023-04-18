@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Training.Doman.Entities
+namespace Fsel.Training.Domain.Entities
 {
     using Fsel.Core.Entities;
 

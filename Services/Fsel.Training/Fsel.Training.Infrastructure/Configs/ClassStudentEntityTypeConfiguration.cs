@@ -2,7 +2,7 @@
 
 namespace Fsel.Training.Infrastructure.Configs
 {
-    using Fsel.Training.Doman.Entities;
+    using Fsel.Training.Domain.Entities;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.Metadata.Builders;
 

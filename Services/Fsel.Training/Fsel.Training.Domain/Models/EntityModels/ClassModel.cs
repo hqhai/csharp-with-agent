@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Training.Doman.Models.EntityModels
+namespace Fsel.Training.Domain.Models.EntityModels
 {
     using Fsel.Shared.Enums;
     using Fsel.Core.Base.BaseModels;

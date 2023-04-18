@@ -72,7 +72,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Fsel.Training.Api", "Servic
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Fsel.Training.Application", "Services\Fsel.Training\Fsel.Training.Application\Fsel.Training.Application.csproj", "{29CB9AFE-D97D-43CD-B5FB-5BBAADAC6257}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Fsel.Training.Doman", "Services\Fsel.Training\Fsel.Training.Doman\Fsel.Training.Doman.csproj", "{64BB8E38-DC56-4F80-87B5-1C8F42694627}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Fsel.Training.Domain", "Services\Fsel.Training\Fsel.Training.Domain\Fsel.Training.Domain.csproj", "{64BB8E38-DC56-4F80-87B5-1C8F42694627}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Fsel.Training.Infrastructure", "Services\Fsel.Training\Fsel.Training.Infrastructure\Fsel.Training.Infrastructure.csproj", "{B95CC77B-F9FC-4087-9C10-24996B56FC0F}"
 EndProject
@@ -80,7 +80,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Fsel.Course.Application", "
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Fsel.Course.Lms.Application", "Services\Fsel.Course\Fsel.Course.Lms.Application\Fsel.Course.Lms.Application.csproj", "{BD89DDE2-0EBA-4482-AD96-66F1E379B67F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Fsel.Shared", "Services\Shared\Fsel.Shared\Fsel.Shared.csproj", "{9BF4073C-F46A-407B-B809-27250E4CDA2C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Fsel.Shared", "Services\Shared\Fsel.Shared\Fsel.Shared.csproj", "{9BF4073C-F46A-407B-B809-27250E4CDA2C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

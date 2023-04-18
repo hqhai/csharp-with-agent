@@ -6,9 +6,9 @@ namespace Fsel.Training.Application.Queries.ClassQuery
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Shared.Enums;
-    using Fsel.Training.Doman.Entities;
-    using Fsel.Training.Doman.IRepositories;
-    using Fsel.Training.Doman.Models.EntityModels;
+    using Fsel.Training.Domain.Entities;
+    using Fsel.Training.Domain.IRepositories;
+    using Fsel.Training.Domain.Models.EntityModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;

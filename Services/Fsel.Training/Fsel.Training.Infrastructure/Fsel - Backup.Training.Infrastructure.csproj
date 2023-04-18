@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Fsel.Training.Domain\Fsel.Training.Domain.csproj" />
+    <ProjectReference Include="..\Fsel.Training.DomainDomain\Fsel.Training.Domain.csproj" />
   </ItemGroup>
 
   <ItemGroup>

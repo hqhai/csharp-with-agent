@@ -25,7 +25,7 @@ namespace Fsel.Training.Infrastructure.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("Fsel.Training.Doman.Entities.Class", b =>
+            modelBuilder.Entity("Fsel.Training.Domain.Entities.Class", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -105,7 +105,7 @@ namespace Fsel.Training.Infrastructure.Migrations
                     b.ToTable("Classes");
                 });
 
-            modelBuilder.Entity("Fsel.Training.Doman.Entities.ClassStudent", b =>
+            modelBuilder.Entity("Fsel.Training.Domain.Entities.ClassStudent", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -169,9 +169,9 @@ namespace Fsel.Training.Infrastructure.Migrations
                     b.ToTable("ClassStudents");
                 });
 
-            modelBuilder.Entity("Fsel.Training.Doman.Entities.ClassStudent", b =>
+            modelBuilder.Entity("Fsel.Training.Domain.Entities.ClassStudent", b =>
                 {
-                    b.HasOne("Fsel.Training.Doman.Entities.Class", "Class")
+                    b.HasOne("Fsel.Training.Domain.Entities.Class", "Class")
                         .WithMany("ClassStudents")
                         .HasForeignKey("ClassId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -180,7 +180,7 @@ namespace Fsel.Training.Infrastructure.Migrations
                     b.Navigation("Class");
                 });
 
-            modelBuilder.Entity("Fsel.Training.Doman.Entities.Class", b =>
+            modelBuilder.Entity("Fsel.Training.Domain.Entities.Class", b =>
                 {
                     b.Navigation("ClassStudents");
                 });

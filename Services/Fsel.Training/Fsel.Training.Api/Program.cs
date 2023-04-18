@@ -3,7 +3,7 @@
 using Fsel.Common.ValueSettings;
 using Fsel.Core.Extensions;
 using Fsel.Training.Application.Services.UserServices;
-using Fsel.Training.Doman.IRepositories;
+using Fsel.Training.Domain.IRepositories;
 using Fsel.Training.Infrastructure;
 using Fsel.Training.Infrastructure.Repositories;
 
