@@ -13,7 +13,7 @@ namespace Fsel.Course.Domain.Entities
         /// <summary>
         /// Phần trăm cẩu trả lời đúng
         /// </summary>
-        [Range(1, 10000_0000, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
+        [Range(0, 10000_0000, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
         public double Percent { get; set; }
 
         /// <summary>
