@@ -7,6 +7,7 @@ namespace Fsel.Identity.Domain.Models.EntityModels
         public string? AccessToken { get; set; }
         public string? RefreshToken { get; set; }
         public string? FullName { get; set; }
+        public Guid? ClassId { get; set; }
         public DateTime? Expiration { get; set; }
         public IList<string>? Roles { get; set; }
     }

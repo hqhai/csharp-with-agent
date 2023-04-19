@@ -34,6 +34,7 @@ namespace Fsel.Course.Lms.Application.Commands.LessonCmd
         private readonly ILessonResultRepository _lessonResultRepository;
         private readonly IUnitResultRepository _unitResultRepository;
         private readonly ICourseResultRepository _courseResultRepository;
+        private readonly IHomeWorkRepository _homeWorkRepository;
 
         public StartLessonCommandHandler(ICourseRepository courseRepository
             , IUnitRepository unitRepository
@@ -43,6 +44,7 @@ namespace Fsel.Course.Lms.Application.Commands.LessonCmd
             , ILessonRepository lessonRepository
             , ILessonResultRepository lessonResultRepository
             , IUnitResultRepository unitResultRepository
+            , IHomeWorkRepository homeWorkRepository
             , ICourseResultRepository courseResultRepository)
         {
             _courseRepository = courseRepository;
@@ -54,6 +56,7 @@ namespace Fsel.Course.Lms.Application.Commands.LessonCmd
             _lessonResultRepository = lessonResultRepository;
             _unitResultRepository = unitResultRepository;
             _courseResultRepository = courseResultRepository;
+            _homeWorkRepository = homeWorkRepository;
         }
 
         public async Task<MethodResult<LessonResultModel>> Handle(StartLessonCommand request, CancellationToken cancellationToken)
@@ -127,6 +130,10 @@ namespace Fsel.Course.Lms.Application.Commands.LessonCmd
                 await _unitResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
             }
 
+            var homeWorks = await _homeWorkRepository.Queryable.Include(x => x.LessonHomeWorks.Where(n => !n.IsDeleted))
+                                                .Where(x => x.LessonHomeWorks.Select(n => n.LessonId).Contains(request.LessonId))
+                                                .ToListAsync(cancellationToken);
+
             var lessonResult = _lessonResultRepository.Queryable.Where(x => x!.LessonId == request.LessonId && x!.UnitId == request.UnitId && x!.CourseId == request.CourseId && x.StudentId == studentId).FirstOrDefault();
             if (lessonResult == null)
             {
@@ -140,7 +147,12 @@ namespace Fsel.Course.Lms.Application.Commands.LessonCmd
                     {
                         VideoId = lesson.LessonVideos.FirstOrDefault()!.VideoId,
                         StudentId = studentId ?? default,
-                    }
+                    },
+                    HomeWorkResults = homeWorks.Select(x => new HomeWorkResult
+                    {
+                        HomeWorkId = x.Id,
+                        StudentId = studentId ?? default,
+                    }).ToList()
                 };
                 _lessonResultRepository.Add(lessonResult);
                 await _lessonResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);

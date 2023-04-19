@@ -56,11 +56,7 @@ builder.Services.AddScoped<AnswerTypeConverter>();
 
 builder.AddRefitClients(typeof(IUserService), appSetting?.Services?.UserApiUrl);
 builder.AddRefitClients(typeof(ITrainingService), appSetting?.Services?.ClassApiUrl);
-builder.Services.AddCors(policy =>
-{
-    policy.AddPolicy("OpenCorsPolicy", opt => opt.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod());
-});
+
 var app = builder.Build();
-app.UseCors("OpenCorsPolicy");
 app.UseServices();
 app.Run();
