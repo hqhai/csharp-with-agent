@@ -5,7 +5,6 @@ namespace Fsel.Identity.Domain.Models.EntityModels
     using System;
     using Fsel.Shared.Enums;
     using Fsel.Core.Base.BaseModels;
-    using Fsel.Identity.Domain.Entities;
 
     public class StudentModel : BaseModel
     {
@@ -17,7 +16,7 @@ namespace Fsel.Identity.Domain.Models.EntityModels
 
         public EnumCourseLevel CourseLevel { get; set; }
 
-        public Guid ClassId { get; set; }
+        public Guid? ClassId { get; set; }
 
         public Guid HumanId { get; set; }
     }
