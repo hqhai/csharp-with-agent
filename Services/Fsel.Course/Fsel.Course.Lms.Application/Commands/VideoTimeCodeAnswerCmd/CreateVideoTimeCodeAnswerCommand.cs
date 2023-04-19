@@ -2,43 +2,48 @@
 
 namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
 {
+    using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.CommandModels.VideoTimeCodeAnswers;
+    using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Infrastructure.Common;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class CreateVideoTimeCodeAnswerCommand : CreateVideoTimeCodeAnswerCommandModel, IRequest<MethodResult<bool>>
+    public class CreateVideoTimeCodeAnswerCommand : CreateVideoTimeCodeAnswerCommandModel, IRequest<MethodResult<IList<QuestionModel>>>
     {
     }
 
-    public class CreateVideoTimeCodeAnswerCommandHandler : IRequestHandler<CreateVideoTimeCodeAnswerCommand, MethodResult<bool>>
+    public class CreateVideoTimeCodeAnswerCommandHandler : IRequestHandler<CreateVideoTimeCodeAnswerCommand, MethodResult<IList<QuestionModel>>>
     {
         private readonly IVideoTimeCodeAnswerRepository _videoTimeCodeAnswerRepository;
         private readonly ILessonResultRepository _lessonResultRepository;
         private readonly IQuestionRepository _questionRepository;
+        private readonly IMapper _mapper;
         private readonly AnswerTypeConverter _answerTypeConverter;
 
         public CreateVideoTimeCodeAnswerCommandHandler(
              IVideoTimeCodeAnswerRepository videoTimeCodeAnswerRepository
             , ILessonResultRepository lessonResultRepository
             , IQuestionRepository questionRepository
+            , IMapper mapper
             , AnswerTypeConverter answerTypeConverter)
         {
             _videoTimeCodeAnswerRepository = videoTimeCodeAnswerRepository;
             _lessonResultRepository = lessonResultRepository;
             _questionRepository = questionRepository;
+            _mapper = mapper;
             _answerTypeConverter = answerTypeConverter;
         }
 
-        public async Task<MethodResult<bool>> Handle(CreateVideoTimeCodeAnswerCommand request, CancellationToken cancellationToken)
+        public async Task<MethodResult<IList<QuestionModel>>> Handle(CreateVideoTimeCodeAnswerCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            MethodResult<bool> methodResult = new MethodResult<bool>();
+            MethodResult<IList<QuestionModel>> methodResult = new MethodResult<IList<QuestionModel>>();
 
             #region Validation
 
@@ -72,6 +77,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
             }
 
             var videoTimeCodeAnswers = new List<VideoTimeCodeAnswer>();
+            var questionModels = new List<QuestionModel>();
             foreach (var item in request.Answers)
             {
                 var question = questions.FirstOrDefault(x => x.Id == item.QuestionId);
@@ -89,9 +95,9 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
                 var exercise = question.ExerciseQuestions.Select(x => x.Exercise).FirstOrDefault();
                 var exerciseId = exercise?.Id;
                 var videoTimeCodeId = exercise?.TimeCodeExercises.Select(x => x.VideoTimeCodeId).FirstOrDefault();
-                var isExistAnswer = await _videoTimeCodeAnswerRepository.AnyAsync(videoResult.Id, question.Id, exerciseId, videoTimeCodeId);
+                var answer = await _videoTimeCodeAnswerRepository.GetAsync(videoResult.Id, question.Id, exerciseId, videoTimeCodeId);
 
-                if (!isExistAnswer)
+                if (answer == null)
                 {
                     var (answerConfig, correctCount) = _answerTypeConverter.GetTotalCorrectByAsnwerType(item.Answer, question.Config, question.QuestionType);
                     if (answerConfig == null)
@@ -100,7 +106,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
                         return methodResult;
                     }
 
-                    videoTimeCodeAnswers.Add(new VideoTimeCodeAnswer
+                    answer = new VideoTimeCodeAnswer
                     {
                         Answer = answerConfig,
                         VideoTimeCodeId = videoTimeCodeId ?? Guid.Empty,
@@ -108,8 +114,13 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
                         QuestionId = question.Id,
                         VideoResultId = videoResult.Id,
                         CorrectCount = question.Ungraded ? default : correctCount
-                    });
+                    };
+                    videoTimeCodeAnswers.Add(answer);
                 }
+
+                var questionModel = _mapper.Map<QuestionModel>(question);
+                questionModel.Answer = _mapper.Map<VideoTimeCodeAnswerModel>(answer);
+                questionModels.Add(questionModel);
             }
 
             #endregion Validation
@@ -119,11 +130,11 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
                 if (videoTimeCodeAnswers.Count > 0)
                 {
                     await _videoTimeCodeAnswerRepository.AddList(videoTimeCodeAnswers);
-                    await _videoTimeCodeAnswerRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+                    await _videoTimeCodeAnswerRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
                 }
 
                 methodResult.StatusCode = StatusCodes.Status201Created;
-                methodResult.Result = true;
+                methodResult.Result = questionModels;
                 return methodResult;
             });
 

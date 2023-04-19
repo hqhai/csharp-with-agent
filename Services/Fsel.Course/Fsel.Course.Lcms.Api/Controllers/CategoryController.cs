@@ -11,6 +11,7 @@ namespace Fsel.Course.Lcms.Api.Controllers
     using MediatR;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
+    using Fsel.Common.Models;
 
     [ApiVersion(Settings.APIVersion)]
     [Route(Settings.APIDefaultRoute + "/category")]
@@ -53,7 +54,7 @@ namespace Fsel.Course.Lcms.Api.Controllers
         /// Search Course Source Data
         /// </summary>
         [HttpGet]
-        [ProducesResponseType(typeof(MethodResult<IList<string>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(MethodResult<IList<EnumModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetEnumCourseSourceDatasAsync([FromQuery] EnumCourseSourceData courseSource)
         {

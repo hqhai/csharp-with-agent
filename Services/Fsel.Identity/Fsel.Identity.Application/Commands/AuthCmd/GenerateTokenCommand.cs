@@ -10,10 +10,12 @@ using Fsel.Identity.Domain.IRepositories;
 using Fsel.Identity.Domain.Models.EntityModels;
 using Fsel.Identity.Infrastructure;
 using Fsel.Identity.Infrastructure.ValueSettings;
+using Fsel.Shared.Enums;
 using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 
 namespace Fsel.Identity.Application.Commands.AuthCmd
@@ -27,14 +29,17 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
     {
         private readonly UserManager<User> _userManager;
         private readonly IUserTokenRepository _userTokenRepository;
+        private readonly IHumanRepository _humanRepository;
         private readonly AppSetting _appSetting;
 
         public GenerateTokenCommandHandler(UserManager<User> userManager,
             IUserTokenRepository userTokenRepository,
+            IHumanRepository humanRepository,
             AppSetting appSetting)
         {
             _userManager = userManager;
             _userTokenRepository = userTokenRepository;
+            _humanRepository = humanRepository;
             _appSetting = appSetting;
         }
 
@@ -89,18 +94,26 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                 RefreshTokenExpiryTime = DateTime.Now.AddDays(_appSetting.Jwt?.RefreshTokenValidityInDays ?? default)
             });
 
+            Guid? classId = userRoles.Contains(EnumRole.Student.ToString()) ? await GetClassId(user.Id) : null;
             var tokenLogin = new TokenModel
             {
                 AccessToken = accessToken,
                 RefreshToken = refreshToken,
                 Expiration = token.ValidTo.ConvertTimeFromUtc(TimeZoneInfo.Local),
                 FullName = user.FullName,
+                ClassId = classId,
                 Roles = userRoles.ToList()
             };
 
             methodResult.Result = tokenLogin;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
+        }
+
+        private async Task<Guid?> GetClassId(string? userId)
+        {
+            var human = await _humanRepository.Queryable.Include(x => x.Student).FirstOrDefaultAsync(x => x.UserId == userId);
+            return human?.Student?.ClassId;
         }
     }
 }
