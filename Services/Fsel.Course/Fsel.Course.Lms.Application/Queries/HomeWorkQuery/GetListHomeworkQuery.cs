@@ -69,15 +69,16 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkQuery
             var lessonSkillScoreQuery = from lr in _lessonResultRepository.Queryable
                                         join hr in _homeWorkResultRepository.Queryable on lr.Id equals hr.LessonResultId
                                         join h in _homeWorkRepository.Queryable on hr.HomeWorkId equals h.Id
-                                        join ha in _homeWorkAnswerRepository.Queryable on hr.Id equals ha.HomeWorkResultId
-                                        join hq in _homeWorkQuestionRepository.Queryable on ha.HomeWorkQuestionId equals hq.Id
+                                        join hq in _homeWorkQuestionRepository.Queryable on h.Id equals hq.HomeWorkId
                                         join q in _questionRepository.Queryable on hq.QuestionId equals q.Id
+                                        join ha in _homeWorkAnswerRepository.Queryable on hr.Id equals ha.HomeWorkResultId into gha
+                                        from subha in gha.DefaultIfEmpty()
                                         where lr.StudentId == studentId && lr.Id == request.LessonResultId
-                                        group new { q, ha, h } by h.CourseSkill into g
+                                        group new { q, subha, h } by h.CourseSkill into g
                                         select new LessonHomeworkSearchModel
                                         {
                                             TotalCount = g.Select(x => x.q).Sum(x => x.CorrectTotal),
-                                            CompletedCount = g.Select(x => x.ha).Sum(x => x.CorrectCount),
+                                            CompletedCount = g.Select(x => x.subha).Sum(x => x.CorrectCount),
                                             HomeWork = _mapper.Map<HomeWorkModel>(g.Select(x => x.h).FirstOrDefault())
                                         };
 
