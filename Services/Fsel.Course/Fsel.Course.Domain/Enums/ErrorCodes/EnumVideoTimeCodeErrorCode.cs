@@ -15,9 +15,9 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         VideoTimeCodeNotExist,
 
         /// <summary>
-        /// Video Time Code Id does not exist
+        /// Video Time Codes does not exist
         /// </summary>
-        VideoTimeCodeIdNotExist,
+        VideoTimeCodesNotExist,
 
         /// <summary>
         /// Video Time Codes is null

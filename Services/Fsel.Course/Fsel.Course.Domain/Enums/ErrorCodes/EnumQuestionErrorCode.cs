@@ -12,12 +12,12 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         /// <summary>
         /// Question does not exist
         /// </summary>
-        QuestionIdNotExist,
+        QuestionNotExist,
 
         /// <summary>
-        /// QuestionIds does not exist
+        /// Questions does not exist
         /// </summary>
-        QuestionIdsNotExist,
+        QuestionsNotExist,
 
         /// <summary>
         /// Question is null

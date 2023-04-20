@@ -5,9 +5,9 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
     public enum EnumVideoErrorCode
     {
         /// <summary>
-        /// VideoIds does not exist
+        /// Videos does not exist
         /// </summary>
-        VideoIdsNotExist,
+        VideosNotExist,
 
         /// <summary>
         /// Video was used
@@ -15,9 +15,9 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         VideoUsed,
 
         /// <summary>
-        /// VideoId does not exist
+        /// Video does not exist
         /// </summary>
-        VideoIdNotExist,
+        VideoNotExist,
 
         /// <summary>
         /// VideoIds is null
@@ -35,8 +35,8 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         CanNotUnitTestAndSkillTestAtTheSameTime,
 
         /// <summary>
-        /// UserId Not Exist
+        /// User Not Exist
         /// </summary>
-        UserIdNotExist
+        UserNotExist
     }
 }

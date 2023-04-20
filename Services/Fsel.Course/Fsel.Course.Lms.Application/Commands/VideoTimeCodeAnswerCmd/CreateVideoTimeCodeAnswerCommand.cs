@@ -56,7 +56,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
             var lessonResult = await _lessonResultRepository.Queryable.Include(x => x.VideoResult).FirstOrDefaultAsync(x => x.Id == request.LessonResultId, cancellationToken);
             if (lessonResult == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumLessonResultErrorCode.LessonResultIdNotExist), nameof(request.LessonResultId), request.LessonResultId);
+                methodResult.AddErrorBadRequest(nameof(EnumLessonResultErrorCode.LessonResultNotExist), nameof(request.LessonResultId), request.LessonResultId);
                 return methodResult;
             }
             var lessonResultId = lessonResult.Id;
@@ -72,7 +72,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
             var questions = await _questionRepository.GetIncludeTimeCodeByIdAsync(questionIds);
             if (questions == null || questions.Count == 0)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumQuestionErrorCode.QuestionIdsNotExist), nameof(questionIds), questionIds);
+                methodResult.AddErrorBadRequest(nameof(EnumQuestionErrorCode.QuestionsNotExist), nameof(questionIds), questionIds);
                 return methodResult;
             }
 

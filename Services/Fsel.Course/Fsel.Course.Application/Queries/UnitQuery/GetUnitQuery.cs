@@ -36,7 +36,7 @@ namespace Fsel.Course.Application.Queries.UnitQuery
 
             if (unit == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumUnitErrorCode.UnitIdNotExist), nameof(request.Id), request.Id);
+                methodResult.AddErrorBadRequest(nameof(EnumUnitErrorCode.UnitNotExist), nameof(request.Id), request.Id);
                 return methodResult;
             }
 

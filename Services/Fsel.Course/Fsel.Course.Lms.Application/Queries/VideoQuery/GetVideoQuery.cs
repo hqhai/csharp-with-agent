@@ -56,7 +56,7 @@ namespace Fsel.Course.Lms.Application.Queries.VideoQuery
             var studentsResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
             if (studentsResult == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumVideoErrorCode.UserIdNotExist));
+                methodResult.AddErrorBadRequest(nameof(EnumVideoErrorCode.UserNotExist));
                 return methodResult;
             }
             var studentId = studentsResult.Content!.Result!.Id;
@@ -79,7 +79,7 @@ namespace Fsel.Course.Lms.Application.Queries.VideoQuery
 
             if (video == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumVideoErrorCode.VideoIdNotExist), nameof(request.VideoId), request.VideoId);
+                methodResult.AddErrorBadRequest(nameof(EnumVideoErrorCode.VideoNotExist), nameof(request.VideoId), request.VideoId);
                 return methodResult;
             }
 

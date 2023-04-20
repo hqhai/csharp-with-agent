@@ -5,8 +5,8 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
     public enum EnumHomeWorkResultErrorCode
     {
         /// <summary>
-        /// HomeWork Result Id does not exist
+        /// HomeWork Result does not exist
         /// </summary>
-        HomeWorkResultIdNotExist
+        HomeWorkResultNotExist
     }
 }

@@ -34,7 +34,7 @@ namespace Fsel.Course.Application.Queries.QuestionFormQuery
 
             if (questionForm == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumQuestionFormErrorCode.QuestionFormIdNotExist), nameof(request.Id), request.Id);
+                methodResult.AddErrorBadRequest(nameof(EnumQuestionFormErrorCode.QuestionFormNotExist), nameof(request.Id), request.Id);
                 return methodResult;
             }
 

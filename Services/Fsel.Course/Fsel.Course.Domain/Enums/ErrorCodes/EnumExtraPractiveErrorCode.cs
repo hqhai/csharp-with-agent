@@ -10,8 +10,8 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         ExtraPracticeIdsNull,
 
         /// <summary>
-        /// ExtraPracticeIds does not exist
+        /// ExtraPractices does not exist
         /// </summary>
-        ExtraPracticeIdsNotExist
+        ExtraPracticesNotExist
     }
 }

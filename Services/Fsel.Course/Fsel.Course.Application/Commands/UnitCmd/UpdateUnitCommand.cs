@@ -47,7 +47,7 @@ namespace Fsel.Course.Application.Commands.UnitCmd
                                     .FirstOrDefaultAsync(e => e.Id == request.Id, cancellationToken: cancellationToken);
             if (unit == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumUnitErrorCode.UnitIdNotExist), nameof(request.Id), request?.Id);
+                methodResult.AddErrorBadRequest(nameof(EnumUnitErrorCode.UnitNotExist), nameof(request.Id), request?.Id);
                 return methodResult;
             }
 
@@ -66,7 +66,7 @@ namespace Fsel.Course.Application.Commands.UnitCmd
 
             if (_lessonRepository.IsIdsInValid(request.LessonIds))
             {
-                methodResult.AddErrorBadRequest(nameof(EnumLessonErrorCode.LessonIdsNotExist), nameof(request.LessonIds), request.LessonIds);
+                methodResult.AddErrorBadRequest(nameof(EnumLessonErrorCode.LessonsNotExist), nameof(request.LessonIds), request.LessonIds);
                 return methodResult;
             }
 

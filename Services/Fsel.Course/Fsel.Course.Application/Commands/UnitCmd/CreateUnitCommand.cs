@@ -60,7 +60,7 @@ namespace Fsel.Course.Application.Commands.UnitCmd
 
             if (_lessonRepository.IsIdsInValid(request.LessonIds))
             {
-                methodResult.AddErrorBadRequest(nameof(EnumLessonErrorCode.LessonIdsNotExist), nameof(request.LessonIds), request.LessonIds);
+                methodResult.AddErrorBadRequest(nameof(EnumLessonErrorCode.LessonsNotExist), nameof(request.LessonIds), request.LessonIds);
                 return methodResult;
             }
 

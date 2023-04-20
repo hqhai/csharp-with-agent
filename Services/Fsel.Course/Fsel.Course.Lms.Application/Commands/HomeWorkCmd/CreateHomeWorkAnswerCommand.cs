@@ -55,7 +55,7 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd
             var homeWorkResult = await _homeWorkResultRepository.GetByIdAsync(request.HomeWorkResultId);
             if (homeWorkResult == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumHomeWorkResultErrorCode.HomeWorkResultIdNotExist));
+                methodResult.AddErrorBadRequest(nameof(EnumHomeWorkResultErrorCode.HomeWorkResultNotExist));
                 return methodResult;
             }
 
@@ -66,7 +66,7 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd
                 var question = await _questionRepository.GetByIdAsync(item.QuestionId);
                 if (question == null)
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumQuestionErrorCode.QuestionIdNotExist), nameof(item.QuestionId), item.QuestionId);
+                    methodResult.AddErrorBadRequest(nameof(EnumQuestionErrorCode.QuestionNotExist), nameof(item.QuestionId), item.QuestionId);
                     return methodResult;
                 }
                 else if (question.Config == null)

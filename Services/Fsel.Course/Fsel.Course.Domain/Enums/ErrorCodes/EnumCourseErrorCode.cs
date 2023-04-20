@@ -10,12 +10,12 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         CoursesNotExist,
 
         /// <summary>
-        /// CourseId does not exist
+        /// Course does not exist
         /// </summary>
-        CourseIdNotExist,
+        CourseNotExist,
 
         /// <summary>
-        /// CourseId already exists
+        /// Course already exists
         /// </summary>
         CourseCodeIsExist,
 
@@ -30,14 +30,14 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         StudentNotInClass,
 
         /// <summary>
-        /// TeacherIds does not exist
+        /// Teachers does not exist
         /// </summary>
-        TeacherIdsNotExist,
+        TeachersNotExist,
 
         /// <summary>
-        /// Classe Id does not exist
+        /// Classe does not exist
         /// </summary>
-        ClasseIdNotExist,
+        ClasseNotExist,
 
         /// <summary>
         /// Classes does not exist
