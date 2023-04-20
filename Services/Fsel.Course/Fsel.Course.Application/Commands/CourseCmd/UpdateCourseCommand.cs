@@ -122,11 +122,6 @@ namespace Fsel.Course.Application.Commands.CourseCmd
                 return methodResult;
             }
 
-            var teacherNames = teachers?.Content?.Result?.Select(x => x.Human?.FullName).ToList();
-            var nameTeacher = string.Join(", ", teacherNames ?? new List<string?>());
-
-            course.Name = $"{course.CourseLevel}-" + nameTeacher;
-
             #endregion Validation
 
             await _courseRepository.ExecuteTransactionAsync(async () =>

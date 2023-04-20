@@ -4,14 +4,14 @@ using Amazon.S3.Transfer;
 using Amazon.S3;
 using Microsoft.AspNetCore.Http;
 using Fsel.Storage.Infrastructure.ValueSettings;
-using Fsel.Shared.Helpers;
 using Fsel.Storage.Domain.Enums;
 using Fsel.Common.ActionResults;
 using Fsel.Common.Helpers;
+using Amazon.S3.Model;
 
 namespace Fsel.Storage.Application.Services.AmazonS3Services
 {
-    public class AmazonS3Service : IAmazonS3Service
+    public class AmazonS3Service : IAmazonS3Service, IDisposable
     {
         private readonly AppSetting _appSetting;
         private readonly AmazonS3Client _amazonS3Client;
@@ -43,27 +43,76 @@ namespace Fsel.Storage.Application.Services.AmazonS3Services
                 }
 
                 var folder = _appSetting.StorageConfig.Folders!.GetPropValue<string>(folderType.ToString());
-                var key = PathHelper.Combine(folder, file.FileName.AddSuffix());
+                var key = PathHelper.Combine(folder, file.FileName.ReplaceSpecialChars().AddSuffix());
 
-                using (var newMemoryStream = new MemoryStream())
+                var initiateRequest = new InitiateMultipartUploadRequest
                 {
-                    file.CopyTo(newMemoryStream);
+                    BucketName = _appSetting.StorageConfig!.BucketName,
+                    Key = key,
+                };
+                var initiateResponse = await _amazonS3Client.InitiateMultipartUploadAsync(initiateRequest);
 
-                    var uploadRequest = new TransferUtilityUploadRequest
+                // Calculate the size of each part
+                var partSize = 100 * 1024 * 1024; // Size of each part (100 MB)
+
+                // Create a list of parts to upload
+                var parts = new List<UploadPartResponse>();
+
+                using (var sourceStream = file.OpenReadStream())
+                {
+                    var buffer = new byte[partSize];
+                    int bytesRead;
+                    int partNumber = 1;
+
+                    var partUploadTasks = new List<Task>();
+
+                    while ((bytesRead = await sourceStream.ReadAsync(buffer.AsMemory(0, buffer.Length))) > 0)
                     {
-                        InputStream = newMemoryStream,
-                        Key = key,
+                        var partBuffer = new byte[bytesRead];
+                        Array.Copy(buffer, 0, partBuffer, 0, bytesRead);
+
+                        var uploadPartRequest = new UploadPartRequest
+                        {
+                            BucketName = _appSetting.StorageConfig!.BucketName,
+                            Key = key,
+                            UploadId = initiateResponse.UploadId,
+                            PartNumber = partNumber,
+                            PartSize = bytesRead,
+                            InputStream = new MemoryStream(partBuffer)
+                        };
+
+                        partUploadTasks.Add(Task.Run(async () =>
+                        {
+                            var uploadPartResponse = await _amazonS3Client.UploadPartAsync(uploadPartRequest);
+                            parts.Add(uploadPartResponse);
+                        }));
+
+                        partNumber++;
+                    }
+
+                    await Task.WhenAll(partUploadTasks).ConfigureAwait(false);
+
+                    // Complete the upload process
+                    var completeMultipartUploadRequest = new CompleteMultipartUploadRequest
+                    {
                         BucketName = _appSetting.StorageConfig!.BucketName,
-                        ContentType = file.ContentType,
+                        Key = key,
+                        UploadId = initiateResponse.UploadId,
+                        PartETags = parts.Select(p => new PartETag { PartNumber = p.PartNumber, ETag = p.ETag }).ToList()
                     };
 
-                    await _transferUtility.UploadAsync(uploadRequest);
+                    var complete = await _amazonS3Client.CompleteMultipartUploadAsync(completeMultipartUploadRequest);
+                    if (complete.HttpStatusCode != System.Net.HttpStatusCode.OK)
+                    {
+                        result.AddErrorServer();
+                        return result;
+                    }
 
                     result.Result = GenerateAwsFileUrl(_appSetting.StorageConfig.BucketName, _appSetting.StorageConfig.AwsS3BaseUrl, key);
                     return result;
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 result.AddErrorServer();
                 return result;
@@ -74,6 +123,21 @@ namespace Fsel.Storage.Application.Services.AmazonS3Services
         {
             var url = $"{bucketName}.{baseUrl}/{fileName}";
             return PathHelper.AddScheme(url);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                _amazonS3Client.Dispose();
+                _transferUtility.Dispose();
+            }
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
         }
     }
 }
