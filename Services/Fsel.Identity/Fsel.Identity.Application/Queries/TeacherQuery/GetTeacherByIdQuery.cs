@@ -37,7 +37,7 @@ namespace Fsel.Identity.Application.Queries.TeacherQuery
             var teacher = await _teacherRepository.GetByIdAsync(request.Id);
             if (teacher == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumTeacherErrorCode.TeacherIdDoesNotExitst));
+                methodResult.AddErrorBadRequest(nameof(EnumTeacherErrorCode.TeacherNotExitst));
                 return methodResult;
             }
             methodResult.Result = _mapper.Map<TeacherModel>(teacher);

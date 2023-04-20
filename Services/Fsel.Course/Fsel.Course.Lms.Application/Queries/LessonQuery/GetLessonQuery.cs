@@ -50,7 +50,7 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
             var studentsResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
             if (studentsResult == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumLessonErrorCode.UserIdNotExist));
+                methodResult.AddErrorBadRequest(nameof(EnumLessonErrorCode.UserNotExist));
                 return methodResult;
             }
             var studentId = studentsResult.Content!.Result!.Id;
@@ -79,7 +79,7 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
 
             if (lessonQuery.Count == 0)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumLessonErrorCode.LessonIdNotExist), nameof(request.LessonId), request.LessonId);
+                methodResult.AddErrorBadRequest(nameof(EnumLessonErrorCode.LessonNotExist), nameof(request.LessonId), request.LessonId);
                 return methodResult;
             }
             methodResult.Result = lessonQuery;

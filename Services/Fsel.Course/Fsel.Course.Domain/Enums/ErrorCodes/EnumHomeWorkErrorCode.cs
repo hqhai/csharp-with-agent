@@ -5,9 +5,9 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
     public enum EnumHomeWorkErrorCode
     {
         /// <summary>
-        /// HomeWorkIds is null
+        /// HomeWorks Is Null
         /// </summary>
-        HomeWorkIdsNull,
+        HomeWorksNull,
 
         /// <summary>
         /// Home work is Used
@@ -15,18 +15,18 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         HomeWorkUsed,
 
         /// <summary>
-        /// HomeworkIds does not exist
+        /// Homeworks does not exist
         /// </summary>
-        HomeworkIdsNotExist,
+        HomeworksNotExist,
 
         /// <summary>
-        /// HomeWorkId does not exist
+        /// HomeWork does not exist
         /// </summary>
-        HomeWorkIdNotExist,
+        HomeWorkNotExist,
 
         /// <summary>
-        /// User Id does not exist
+        /// User does not exist
         /// </summary>
-        UserIdNotExist
+        UserNotExist
     }
 }

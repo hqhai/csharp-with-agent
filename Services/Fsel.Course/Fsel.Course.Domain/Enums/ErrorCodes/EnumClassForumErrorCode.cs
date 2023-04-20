@@ -5,7 +5,7 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
     public enum EnumClassForumErrorCode
     {
         /// <summary>
-        /// ClassForum is null
+        /// ClassForum Is Null
         /// </summary>
         ClassForumNull
     }

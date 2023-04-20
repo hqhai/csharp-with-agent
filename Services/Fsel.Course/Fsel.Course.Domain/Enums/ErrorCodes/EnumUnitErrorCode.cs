@@ -5,9 +5,9 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
     public enum EnumUnitErrorCode
     {
         /// <summary>
-        /// UnitId does not exist
+        /// Unit does not exist
         /// </summary>
-        UnitIdNotExist,
+        UnitNotExist,
 
         /// <summary>
         /// Unit have been use
@@ -15,8 +15,8 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         UnitUsed,
 
         /// <summary>
-        /// UnitIds is does not exist
+        /// Units is does not exist
         /// </summary>
-        UnitIdsNotExist,
+        UnitsNotExist,
     }
 }

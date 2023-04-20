@@ -55,7 +55,7 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkQuery
             var studentsResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
             if (studentsResult == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumHomeWorkErrorCode.UserIdNotExist));
+                methodResult.AddErrorBadRequest(nameof(EnumHomeWorkErrorCode.UserNotExist));
                 return methodResult;
             }
             var studentId = studentsResult.Content!.Result!.Id;
@@ -76,7 +76,7 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkQuery
 
             if (homeWork == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumHomeWorkErrorCode.HomeWorkIdNotExist), nameof(request.HomeWorkId), request?.HomeWorkId);
+                methodResult.AddErrorBadRequest(nameof(EnumHomeWorkErrorCode.HomeWorkNotExist), nameof(request.HomeWorkId), request?.HomeWorkId);
                 return methodResult;
             }
 

@@ -77,7 +77,7 @@ namespace Fsel.Training.Application.Commands.ClassCmd
                 var student = await _userService.GetStudentByUserIdAsync(userId);
                 if (student == null)
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumClassErrorCode.UserIdNotExits));
+                    methodResult.AddErrorBadRequest(nameof(EnumClassErrorCode.UserNotExits));
                     return methodResult;
                 }
                 var studentId = student!.Content!.Result!.Id;

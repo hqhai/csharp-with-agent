@@ -5,9 +5,9 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
     public enum EnumHomeWorkAnswerErrorCode
     {
         /// <summary>
-        /// Answer Not Empty
+        /// Answer Is Null
         /// </summary>
-        AnswerNotEmpty,
+        AnswerNull,
 
         /// <summary>
         /// Answer Is In The Wrong Format

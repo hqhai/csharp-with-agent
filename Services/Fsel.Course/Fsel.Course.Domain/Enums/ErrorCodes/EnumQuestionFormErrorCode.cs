@@ -5,8 +5,8 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
     public enum EnumQuestionFormErrorCode
     {
         /// <summary>
-        /// Question Form Id does not exist
+        /// Question Form does not exist
         /// </summary>
-        QuestionFormIdNotExist,
+        QuestionFormNotExist,
     }
 }

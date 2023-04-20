@@ -70,7 +70,7 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
             var student = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
             if (!student.IsSuccessStatusCode)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumLessonErrorCode.UserIdNotExist));
+                methodResult.AddErrorBadRequest(nameof(EnumLessonErrorCode.UserNotExist));
                 return methodResult;
             }
             var studentId = student?.Content?.Result?.Id;

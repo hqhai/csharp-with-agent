@@ -33,7 +33,7 @@ namespace Fsel.Course.Lms.Application.Commands.LessonNoteCmd
 
             if (lessonNote == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumLessonNoteErrorCode.LessonNotesIdNotExist), nameof(request.Id), request.Id);
+                methodResult.AddErrorBadRequest(nameof(EnumLessonNoteErrorCode.LessonNotesNotExist), nameof(request.Id), request.Id);
                 return methodResult;
             }
 

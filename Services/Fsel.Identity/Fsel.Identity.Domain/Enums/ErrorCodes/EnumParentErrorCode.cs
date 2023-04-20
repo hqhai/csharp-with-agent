@@ -5,12 +5,12 @@ namespace Fsel.Identity.Domain.Enums.ErrorCodes
     public enum EnumParentErrorCode
     {
         /// <summary>
-        /// Parent does does not exist
+        /// Parent does not exist
         /// </summary>
         ParentNotExist,
 
         /// <summary>
-        /// Parent null
+        /// Parent is null
         /// </summary>
         ParentNull,
 
