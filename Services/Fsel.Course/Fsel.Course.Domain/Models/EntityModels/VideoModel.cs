@@ -20,6 +20,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
 
         public EnumCourseLevel CourseLevel { get; set; }
 
-        public ICollection<VideoTimeCodeModel>? VideoTimeCodes { get; set; }
+        public IList<VideoTimeCodeModel>? VideoTimeCodes { get; set; }
+        public VideoResultModel? VideoResult { get; set; }
     }
 }

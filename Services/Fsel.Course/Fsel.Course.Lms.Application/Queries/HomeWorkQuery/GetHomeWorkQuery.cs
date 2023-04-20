@@ -69,6 +69,7 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkQuery
                         .ThenInclude(x => x.HomeWorkAnswers.Where(n => !n.IsDeleted && homeWorkResult != null && n.HomeWorkResultId == homeWorkResult.Id))
                         .Include(x => x.HomeWorkQuestions.Where(n => !n.IsDeleted))
                         .ThenInclude(x => x.Question)
+                        .Include(x => x.HomeWorkResults.Where(n => !n.IsDeleted))
                         .Where(x => x.Id == request.HomeWorkId)
                         .AsNoTracking()
                         .FirstOrDefaultAsync(cancellationToken: cancellationToken);
@@ -99,6 +100,17 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkQuery
                     Config = _questionTypeConverter.QuestionTypeConverterObject(n.Question.Config, n.Question.QuestionType, isDisableAnswers: !checkDone).Item1,
                     ResultAnswer = _mapper.Map<HomeWorkAnswerModel>(n.HomeWorkAnswers.FirstOrDefault())
                 }).ToList(),
+                HomeWorkResult = homeWork.HomeWorkResults.Where(x => x.StudentId == studentId).Select(x => new HomeWorkResultModel
+                {
+                    Id = x.Id,
+                    HomeWorkId = x.HomeWorkId,
+                    LessonResultId = x.LessonResultId,
+                    CorrectCount = x.CorrectCount,
+                    CorrectTotal = x.CorrectTotal,
+                    Percent = x.Percent,
+                    Status = x.Status,
+                    StudentId = x.StudentId,
+                }).FirstOrDefault()
             };
 
             methodResult.Result = homeWorkModel;
