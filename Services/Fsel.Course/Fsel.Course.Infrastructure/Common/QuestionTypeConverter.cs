@@ -152,10 +152,7 @@ namespace Fsel.Course.Infrastructure.Common
         {
             if (data != null && data.Link != null)
             {
-                for (int i = data.Link.Count - 1; i >= 0; i--)
-                {
-                    data.Link.RemoveAt(i);
-                }
+                data.Link.Clear();
             }
             return data;
         }
@@ -166,10 +163,7 @@ namespace Fsel.Course.Infrastructure.Common
             {
                 foreach (var item in data.Contents)
                 {
-                    item.Words.ForEach(y =>
-                    {
-                        item?.Words?.Remove(y);
-                    });
+                    item.Words!.Clear();
                 }
             }
             return data;
@@ -181,7 +175,7 @@ namespace Fsel.Course.Infrastructure.Common
             {
                 foreach (var item in data.Contents)
                 {
-                    item.Words.Clear();
+                    item.Words!.Clear();
                 }
             }
             return data;
