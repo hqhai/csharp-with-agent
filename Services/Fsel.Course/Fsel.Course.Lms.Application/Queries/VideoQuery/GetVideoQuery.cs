@@ -116,7 +116,7 @@ namespace Fsel.Course.Lms.Application.Queries.VideoQuery
                         }).ToList()
                     }).ToList(),
                 }).ToList(),
-                VideoResult = video.VideoResults.Select(x => new VideoResultModel
+                VideoResult = video.VideoResults.Where(x => x.StudentId == studentId).Select(x => new VideoResultModel
                 {
                     Id = x.Id,
                     CorrectCount = x.CorrectCount,
@@ -128,7 +128,7 @@ namespace Fsel.Course.Lms.Application.Queries.VideoQuery
                     LessonResultId = x.LessonResultId,
                     StudentId = x.StudentId,
                     VideoId = x.VideoId,
-                }).FirstOrDefault(x => x.StudentId == studentId),
+                }).FirstOrDefault(),
             };
             methodResult.Result = videoModel;
             methodResult.StatusCode = StatusCodes.Status200OK;

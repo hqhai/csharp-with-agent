@@ -100,7 +100,7 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkQuery
                     Config = _questionTypeConverter.QuestionTypeConverterObject(n.Question.Config, n.Question.QuestionType, isDisableAnswers: !checkDone).Item1,
                     ResultAnswer = _mapper.Map<HomeWorkAnswerModel>(n.HomeWorkAnswers.FirstOrDefault())
                 }).ToList(),
-                HomeWorkResult = homeWork.HomeWorkResults.Select(x => new HomeWorkResultModel
+                HomeWorkResult = homeWork.HomeWorkResults.Where(x => x.StudentId == studentId).Select(x => new HomeWorkResultModel
                 {
                     Id = x.Id,
                     HomeWorkId = x.HomeWorkId,
@@ -110,7 +110,7 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkQuery
                     Percent = x.Percent,
                     Status = x.Status,
                     StudentId = x.StudentId,
-                }).FirstOrDefault(x => x.StudentId == studentId)
+                }).FirstOrDefault()
             };
 
             methodResult.Result = homeWorkModel;
