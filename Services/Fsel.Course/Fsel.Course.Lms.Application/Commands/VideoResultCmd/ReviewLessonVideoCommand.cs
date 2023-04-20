@@ -9,7 +9,6 @@ namespace Fsel.Course.Lms.Application.Commands.VideoResultCmd
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.CommandModels.VideoResults;
     using Fsel.Course.Domain.Models.EntityModels;
-    using Fsel.Course.Infrastructure.Repositories;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -30,8 +29,23 @@ namespace Fsel.Course.Lms.Application.Commands.VideoResultCmd
         private readonly IQuestionRepository _questionRepository;
         private readonly IMapper _mapper;
 
-        public ReviewLessonVideoCommandHandler(IVideoResultRepository videoResultRepository, IMapper mapper)
+        public ReviewLessonVideoCommandHandler(IVideoResultRepository videoResultRepository,
+            IMapper mapper,
+            IVideoTimeCodeAnswerRepository videoTimeCodeAnswerRepository,
+            ITimeCodeExerciseRepository timeCodeExerciseRepository,
+            IExerciseRepository exerciseRepository,
+            IVideoRepository videoRepository,
+            IVideoTimeCodeRepository videoTimeCodeRepository,
+            IExerciseQuestionRepository exerciseQuestionRepository,
+            IQuestionRepository questionRepository)
         {
+            _videoTimeCodeAnswerRepository = videoTimeCodeAnswerRepository;
+            _timeCodeExerciseRepository = timeCodeExerciseRepository;
+            _exerciseRepository = exerciseRepository;
+            _videoRepository = videoRepository;
+            _videoTimeCodeRepository = videoTimeCodeRepository;
+            _exerciseQuestionRepository = exerciseQuestionRepository;
+            _questionRepository = questionRepository;
             _videoResultRepository = videoResultRepository;
             _mapper = mapper;
         }
