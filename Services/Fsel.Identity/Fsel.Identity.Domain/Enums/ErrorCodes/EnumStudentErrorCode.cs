@@ -5,22 +5,22 @@ namespace Fsel.Identity.Domain.Enums.ErrorCodes
     public enum EnumStudentErrorCode
     {
         /// <summary>
-        /// Student does does not exist
+        /// Student does not exist
         /// </summary>
         StudentNotExist,
 
         /// <summary>
-        /// Student null
+        /// Student is null
         /// </summary>
         StudentNull,
 
         /// <summary>
-        /// User null
+        /// User is null
         /// </summary>
         UserNull,
 
         /// <summary>
-        /// Students does does not exist
+        /// Students does not exist
         /// </summary>
         StudentsNotExist,
 

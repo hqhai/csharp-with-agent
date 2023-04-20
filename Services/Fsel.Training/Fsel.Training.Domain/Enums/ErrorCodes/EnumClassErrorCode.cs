@@ -5,19 +5,19 @@ namespace Fsel.Training.Domain.Enums.ErrorCodes
     public enum EnumClassErrorCode
     {
         /// <summary>
-        /// Trainings not exits
+        /// Classes Does Not Exits
         /// </summary>
-        ClasssNotExits,
+        ClassesNotExits,
 
         /// <summary>
-        /// Students not exits
+        /// Students Does not exits
         /// </summary>
         StudentsNotExits,
 
         /// <summary>
-        /// UserId not exits
+        /// User Does not exits
         /// </summary>
-        UserIdNotExits,
+        UserNotExits,
 
         /// <summary>
         /// Class has too many students
@@ -25,7 +25,7 @@ namespace Fsel.Training.Domain.Enums.ErrorCodes
         ClassHasTooManyStudents,
 
         /// <summary>
-        /// Class null
+        /// Class is null
         /// </summary>
         ClassNull,
 

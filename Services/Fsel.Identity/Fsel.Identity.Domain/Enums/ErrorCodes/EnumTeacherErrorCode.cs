@@ -5,13 +5,13 @@ namespace Fsel.Identity.Domain.Enums.ErrorCodes
     public enum EnumTeacherErrorCode
     {
         /// <summary>
-        /// teacher does does not exist
+        /// teacher does not exist
         /// </summary>
-        TeacherIdDoesNotExitst,
+        TeacherNotExitst,
 
         /// <summary>
-        /// teachers does does not exist
+        /// teachers does not exist
         /// </summary>
-        TeachersDoesNotExitst,
+        TeachersNotExitst,
     }
 }
