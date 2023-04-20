@@ -22,6 +22,8 @@ namespace Fsel.Course.Infrastructure.Configs
                  .WithOne(b => b.CourseResult)
                  .HasForeignKey<CourseResult>(p => p.CourseId)
                  .OnDelete(DeleteBehavior.Cascade);
+
+            builder.HasIndex(x => x.CourseId).IsUnique(false);
         }
     }
 }

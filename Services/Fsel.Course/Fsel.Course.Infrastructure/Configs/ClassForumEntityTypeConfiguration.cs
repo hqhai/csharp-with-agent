@@ -28,6 +28,8 @@ namespace Fsel.Course.Infrastructure.Configs
                 .WithOne(b => b.ClassForum)
                 .HasForeignKey<ClassForum>(p => p.LessonId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            builder.HasIndex(x => x.LessonId).IsUnique(false);
         }
     }
 }
