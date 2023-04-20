@@ -181,10 +181,7 @@ namespace Fsel.Course.Infrastructure.Common
             {
                 foreach (var item in data.Contents)
                 {
-                    item.Words.ForEach(y =>
-                    {
-                        item?.Words?.Remove(y);
-                    });
+                    item.Words.Clear();
                 }
             }
             return data;
