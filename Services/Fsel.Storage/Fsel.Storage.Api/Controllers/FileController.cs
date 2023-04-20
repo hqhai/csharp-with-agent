@@ -8,6 +8,7 @@ namespace Fsel.Storage.Api.Controllers
     using Microsoft.AspNetCore.Mvc;
     using Fsel.Storage.Application.Services.AmazonS3Services;
     using Fsel.Storage.Domain.Enums;
+    using Fsel.Shared.Attributes;
 
     [ApiVersion(Settings.APIVersion)]
     [Route(Settings.APIDefaultRoute + "/file")]
@@ -24,6 +25,9 @@ namespace Fsel.Storage.Api.Controllers
         /// <summary>
         /// Upload file
         /// </summary>
+        [DisableFormValueModelBinding]
+        [DisableRequestSizeLimit]
+        [RequestFormLimits(ValueLengthLimit = int.MaxValue, MultipartBodyLengthLimit = long.MaxValue)]
         [ProducesResponseType(typeof(MethodResult<string>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         [HttpPost("{type}")]

@@ -24,10 +24,10 @@ namespace Fsel.Course.Domain.Enums
         [Description("Matching (type 2)")]
         MatchingType2,
 
-        [Description("Short answer")]
+        [Description("Short answer (Word base)")]
         ShortAnswerWordBase,
 
-        [Description("Short answer")]
+        [Description("Short answer (Word count)")]
         ShortAnswerWordCount,
 
         [Description("Gap fill (score by sub question)")]

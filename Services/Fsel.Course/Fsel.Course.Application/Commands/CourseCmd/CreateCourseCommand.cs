@@ -110,8 +110,6 @@ namespace Fsel.Course.Application.Commands.CourseCmd
                 methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.TeachersNotExist), nameof(teachers), course.CourseTeachers.Select(x => x.TeacherId).ToList());
                 return methodResult;
             }
-            var teacherNames = teachers?.Content?.Result?.Select(x => x.Human?.FullName).ToList();
-            var nameTeacher = string.Join(", ", teacherNames ?? new List<string?>());
 
             #endregion Validation
 
