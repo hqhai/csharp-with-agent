@@ -48,7 +48,7 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd
 
             if (request.Answers.All(x => x.Answer == null) || request.Answers.Count == 0 || request.Answers == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumHomeWorkAnswerErrorCode.AnswerNotEmpty), nameof(request.Answers), request.Answers);
+                methodResult.AddErrorBadRequest(nameof(EnumHomeWorkAnswerErrorCode.AnswerNull), nameof(request.Answers), request.Answers);
                 return methodResult;
             }
 
