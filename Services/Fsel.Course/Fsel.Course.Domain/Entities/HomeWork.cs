@@ -39,7 +39,7 @@ namespace Fsel.Course.Domain.Entities
         /// </summary>
         public EnumCourseSkill CourseSkill { get; set; }
 
-        public ICollection<HomeWorkResult>? HomeWorkResults { get; set; } = new List<HomeWorkResult>();
+        public ICollection<HomeWorkResult> HomeWorkResults { get; set; } = new List<HomeWorkResult>();
         public ICollection<LessonHomeWork> LessonHomeWorks { get; set; } = new List<LessonHomeWork>();
 
         public ICollection<HomeWorkQuestion> HomeWorkQuestions { get; set; } = new List<HomeWorkQuestion>();

@@ -66,13 +66,13 @@ namespace Fsel.Course.Lms.Application.Queries.VideoQuery
 
             var video = await _videoRepository.Queryable
                                 .Include(x => x.LessonVideos.Where(y => !y.IsDeleted))
-                                .Include(i => i.VideoResults.Where(x => !x.IsDeleted))
                                 .Include(i => i.VideoTimeCodes.Where(x => !x.IsDeleted))
                                     .ThenInclude(x => x.TimeCodeExercises.Where(x => !x.IsDeleted && x.Exercise != null))
                                     .ThenInclude(x => x.Exercise)
                                     .ThenInclude(x => x!.ExerciseQuestions.Where(x => !x.IsDeleted))
                                     .ThenInclude(x => x.Question)
                                     .ThenInclude(x => x!.VideoTimeCodeAnswers!.Where(x => videoResult != null && x.VideoResultId == videoResult.Id))
+                                .Include(i => i.VideoResults.Where(x => !x.IsDeleted))
                                 .Where(x => x.Id == request.VideoId)
                                 .AsNoTracking()
                                 .FirstOrDefaultAsync(cancellationToken: cancellationToken);
@@ -116,6 +116,19 @@ namespace Fsel.Course.Lms.Application.Queries.VideoQuery
                         }).ToList()
                     }).ToList(),
                 }).ToList(),
+                VideoResult = video.VideoResults.Select(x => new VideoResultModel
+                {
+                    Id = x.Id,
+                    CorrectCount = x.CorrectCount,
+                    CorrectTotal = x.CorrectTotal,
+                    Feedback = x.Feedback,
+                    NumberOfStars = x.NumberOfStars,
+                    Percent = x.Percent,
+                    Status = x.Status,
+                    LessonResultId = x.LessonResultId,
+                    StudentId = x.StudentId,
+                    VideoId = x.VideoId,
+                }).FirstOrDefault(),
             };
             methodResult.Result = videoModel;
             methodResult.StatusCode = StatusCodes.Status200OK;
