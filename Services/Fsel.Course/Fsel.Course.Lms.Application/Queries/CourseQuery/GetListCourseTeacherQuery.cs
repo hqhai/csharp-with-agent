@@ -84,9 +84,9 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
                     item.AvatarPath = teacher?.Human?.AvatarPath;
                 }
             }
-            var couseIds = courses.Select(x => x.Id).ToList();
+            var couseClasses = courses.Select(x => new CourseClassModel { CourseId = x.Id, Code = x.Code }).ToList();
 
-            var classcourses = await _trainingService.GetClassListStatusNewAsync(new GetClassListStatusNewModel { CourseIds = couseIds, CourseLevel = request.CourseLevel });
+            var classcourses = await _trainingService.GetClassListStatusNewAsync(new GetClassListStatusNewModel { Courses = couseClasses, CourseLevel = request.CourseLevel });
 
             if (!classcourses.IsSuccessStatusCode || classcourses == null)
             {

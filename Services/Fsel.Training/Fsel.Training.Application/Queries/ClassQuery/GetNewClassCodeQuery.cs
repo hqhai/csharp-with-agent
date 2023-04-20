@@ -12,6 +12,7 @@ namespace Fsel.Training.Application.Queries.ClassQuery
     public class GetNewClassCodeQuery : IRequest<MethodResult<string>>
     {
         public EnumCourseLevel? CourseLevel { get; set; }
+        public string? Code { get; set; }
     }
 
     public class GetNewClassCodeQueryHandler : IRequestHandler<GetNewClassCodeQuery, MethodResult<string>>
@@ -33,7 +34,7 @@ namespace Fsel.Training.Application.Queries.ClassQuery
             var lastDigitOfYear = currentDate.Year % 10;
             var level = request.CourseLevel.GetCodeByEnumCourseLevel();
             var stt = await _classRepository.Queryable.CountAsync(cancellationToken: cancellationToken);
-            string codeClass = $"{level}_{weekNumber}{lastDigitOfYear}{stt:000}S";
+            string codeClass = $"{level}_{request.Code}_{weekNumber}{lastDigitOfYear}{stt:000}S";
             methodResult.Result = codeClass;
             return methodResult;
         }

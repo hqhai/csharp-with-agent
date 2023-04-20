@@ -7,6 +7,7 @@ namespace Fsel.Training.Application.Queries.ClassQuery
     using Fsel.Common.ActionResults;
     using Fsel.Shared.Enums;
     using Fsel.Training.Domain.Entities;
+    using Fsel.Training.Domain.Enums.ErrorCodes;
     using Fsel.Training.Domain.IRepositories;
     using Fsel.Training.Domain.Models.EntityModels;
     using MediatR;
@@ -15,7 +16,7 @@ namespace Fsel.Training.Application.Queries.ClassQuery
 
     public class GetClassByStatusNewQuery : IRequest<MethodResult<IList<CourseClassModel>>>
     {
-        public IList<Guid>? CourseIds { get; set; }
+        public IList<CourseClassModel>? Courses { get; set; }
         public EnumCourseLevel? CourseLevel { get; set; }
     }
 
@@ -35,20 +36,24 @@ namespace Fsel.Training.Application.Queries.ClassQuery
         public async Task<MethodResult<IList<CourseClassModel>>> Handle(GetClassByStatusNewQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            ArgumentNullException.ThrowIfNull(request.CourseIds);
             MethodResult<IList<CourseClassModel>> methodResult = new MethodResult<IList<CourseClassModel>>();
+            if (request.Courses == null || request.Courses.Count == 0)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumClassErrorCode.CoursesNull), nameof(request.Courses), request.Courses);
+                return methodResult;
+            }
 
-            List<Class> classes = await _classRepository.Queryable.Where(e => e.Status == EnumClassType.New && request.CourseIds.Contains(e.CourseId))
+            List<Class> classes = await _classRepository.Queryable.Where(e => e.Status == EnumClassType.New && request.Courses.Select(x => x.CourseId).Contains(e.CourseId))
                                                             .ToListAsync(cancellationToken: cancellationToken);
 
             IList<CourseClassModel>? courseClassModels;
             if (classes == null || classes.Count == 0)
             {
                 courseClassModels = new List<CourseClassModel>();
-                foreach (var item in request.CourseIds)
+                foreach (var item in request.Courses)
                 {
-                    var code = await _mediator.Send(new GetNewClassCodeQuery { CourseLevel = request.CourseLevel }, cancellationToken).ConfigureAwait(false);
-                    var courseClass = new CourseClassModel { CourseId = item, Code = code.Result };
+                    var code = await _mediator.Send(new GetNewClassCodeQuery { CourseLevel = request.CourseLevel, Code = item.Code }, cancellationToken).ConfigureAwait(false);
+                    var courseClass = new CourseClassModel { CourseId = item.CourseId, Code = code.Result };
                     courseClassModels.Add(courseClass);
                 }
                 methodResult.Result = courseClassModels;

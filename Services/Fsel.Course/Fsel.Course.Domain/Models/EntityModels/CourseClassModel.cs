@@ -1,11 +1,12 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Course.Domain.Models.EntityModels;
-
-using System;
-
-public class CourseClassModel
+namespace Fsel.Course.Domain.Models.EntityModels
 {
-    public string? Code { get; set; }
-    public Guid CourseId { get; set; }
+    using System;
+
+    public class CourseClassModel
+    {
+        public string? Code { get; set; }
+        public Guid CourseId { get; set; }
+    }
 }
