@@ -128,7 +128,7 @@ namespace Fsel.Course.Lms.Application.Queries.VideoQuery
                     LessonResultId = x.LessonResultId,
                     StudentId = x.StudentId,
                     VideoId = x.VideoId,
-                }).FirstOrDefault(),
+                }).FirstOrDefault(x => x.StudentId == studentId),
             };
             methodResult.Result = videoModel;
             methodResult.StatusCode = StatusCodes.Status200OK;

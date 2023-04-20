@@ -110,7 +110,7 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkQuery
                     Percent = x.Percent,
                     Status = x.Status,
                     StudentId = x.StudentId,
-                }).FirstOrDefault()
+                }).FirstOrDefault(x => x.StudentId == studentId)
             };
 
             methodResult.Result = homeWorkModel;
