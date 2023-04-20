@@ -49,7 +49,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
 
             if (request.Answers == null || request.Answers.Any(x => x.Answer == null) || request.Answers.Count == 0)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumVideoTimeCodeAnswerErrorCode.AnswersNotEmpty), nameof(request.Answers), request.Answers);
+                methodResult.AddErrorBadRequest(nameof(EnumVideoTimeCodeAnswerErrorCode.AnswersNull), nameof(request.Answers), request.Answers);
                 return methodResult;
             }
 

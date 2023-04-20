@@ -15,7 +15,7 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         UnitUsed,
 
         /// <summary>
-        /// UnitIds is does not exist
+        /// Units is does not exist
         /// </summary>
         UnitsNotExist,
     }

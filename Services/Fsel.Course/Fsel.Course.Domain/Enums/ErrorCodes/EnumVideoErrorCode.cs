@@ -20,9 +20,9 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         VideoNotExist,
 
         /// <summary>
-        /// VideoIds is null
+        /// Videos Is Null
         /// </summary>
-        VideoIdsNull,
+        VideosNull,
 
         /// <summary>
         /// Config is in the wrong format
@@ -35,7 +35,7 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         CanNotUnitTestAndSkillTestAtTheSameTime,
 
         /// <summary>
-        /// User Not Exist
+        /// User Does Not Exist
         /// </summary>
         UserNotExist
     }

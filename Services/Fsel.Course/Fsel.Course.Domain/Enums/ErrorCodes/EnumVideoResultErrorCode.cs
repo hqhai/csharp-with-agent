@@ -10,7 +10,7 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         VideoResultNotExist,
 
         /// <summary>
-        /// VideoResult is null
+        /// VideoResult Is Null
         /// </summary>
         VideoResultNull
     }

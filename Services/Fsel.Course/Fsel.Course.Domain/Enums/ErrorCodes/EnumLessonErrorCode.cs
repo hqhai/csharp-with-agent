@@ -20,9 +20,9 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         LessonUsed,
 
         /// <summary>
-        /// LessonIds is null
+        /// Lessons Is Null
         /// </summary>
-        LessonIdsNull,
+        LessonsNull,
 
         /// <summary>
         /// User does not exist

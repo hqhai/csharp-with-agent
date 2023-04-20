@@ -5,9 +5,9 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
     public enum EnumHomeWorkErrorCode
     {
         /// <summary>
-        /// HomeWorkIds is null
+        /// HomeWorks Is Null
         /// </summary>
-        HomeWorkIdsNull,
+        HomeWorksNull,
 
         /// <summary>
         /// Home work is Used

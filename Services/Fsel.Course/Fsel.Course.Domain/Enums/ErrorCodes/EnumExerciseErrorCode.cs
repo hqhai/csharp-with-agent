@@ -5,12 +5,12 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
     public enum EnumExerciseErrorCode
     {
         /// <summary>
-        /// Exercise is null
+        /// Exercise Is Null
         /// </summary>
         ExerciseNull,
 
         /// <summary>
-        /// Exercises is null
+        /// Exercises Is Null
         /// </summary>
         ExercisesNull,
     }

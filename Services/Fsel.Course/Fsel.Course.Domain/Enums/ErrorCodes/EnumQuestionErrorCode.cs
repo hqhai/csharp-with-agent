@@ -5,7 +5,7 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
     public enum EnumQuestionErrorCode
     {
         /// <summary>
-        /// Question Config is null
+        /// Question Config Is Null
         /// </summary>
         QuestionConfigNull,
 
@@ -20,12 +20,12 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         QuestionsNotExist,
 
         /// <summary>
-        /// Question is null
+        /// Question Is Null
         /// </summary>
         QuestionNull,
 
         /// <summary>
-        /// Questions is null
+        /// Questions Is Null
         /// </summary>
         QuestionsNull
     }

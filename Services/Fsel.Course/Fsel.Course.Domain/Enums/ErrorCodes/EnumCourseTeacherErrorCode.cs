@@ -5,7 +5,7 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
     public enum EnumCourseTeacherErrorCode
     {
         /// <summary>
-        /// Course Teachers is null
+        /// Course Teachers Is Null
         /// </summary>
         CourseTeachersNull
     }

@@ -5,7 +5,7 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
     public enum EnumeLessonHomeWorkErrorCode
     {
         /// <summary>
-        /// Lesson HomeWork is null
+        /// Lesson HomeWork Is Null
         /// </summary>
         LessonHomeWorkNull
     }

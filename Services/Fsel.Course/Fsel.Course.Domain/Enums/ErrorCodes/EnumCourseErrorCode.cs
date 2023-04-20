@@ -35,9 +35,9 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         TeachersNotExist,
 
         /// <summary>
-        /// Classe does not exist
+        /// Class does not exist
         /// </summary>
-        ClasseNotExist,
+        ClassNotExist,
 
         /// <summary>
         /// Classes does not exist
@@ -50,7 +50,7 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         ClasseCodeNotExist,
 
         /// <summary>
-        /// Student is null
+        /// Student Is Null
         /// </summary>
         StudentNull,
 

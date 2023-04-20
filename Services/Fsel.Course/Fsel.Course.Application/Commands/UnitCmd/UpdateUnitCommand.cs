@@ -60,7 +60,7 @@ namespace Fsel.Course.Application.Commands.UnitCmd
 
             if (request.LessonIds == null || request.LessonIds.Count == 0)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumLessonErrorCode.LessonIdsNull), nameof(request.LessonIds), request.LessonIds);
+                methodResult.AddErrorBadRequest(nameof(EnumLessonErrorCode.LessonsNull), nameof(request.LessonIds), request.LessonIds);
                 return methodResult;
             }
 

@@ -45,7 +45,7 @@ namespace Fsel.Course.Application.Commands.LessonCmd
 
             if (request.HomeWorkIds == null || request.HomeWorkIds.Count == 0)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumHomeWorkErrorCode.HomeWorkIdsNull), nameof(request.HomeWorkIds), request.HomeWorkIds);
+                methodResult.AddErrorBadRequest(nameof(EnumHomeWorkErrorCode.HomeWorksNull), nameof(request.HomeWorkIds), request.HomeWorkIds);
                 return methodResult;
             }
 
@@ -57,13 +57,13 @@ namespace Fsel.Course.Application.Commands.LessonCmd
 
             if (request.ExtraPracticeIds == null || request.ExtraPracticeIds.Count == 0)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumExtraPractiveErrorCode.ExtraPracticeIdsNull), nameof(request.ExtraPracticeIds), request.ExtraPracticeIds);
+                methodResult.AddErrorBadRequest(nameof(EnumExtraPractiveErrorCode.ExtraPracticesNull), nameof(request.ExtraPracticeIds), request.ExtraPracticeIds);
                 return methodResult;
             }
 
             if (request.VideoIds == null || request.VideoIds.Count == 0)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumVideoErrorCode.VideoIdsNull), nameof(request.VideoIds), request.VideoIds);
+                methodResult.AddErrorBadRequest(nameof(EnumVideoErrorCode.VideosNull), nameof(request.VideoIds), request.VideoIds);
                 return methodResult;
             }
 
