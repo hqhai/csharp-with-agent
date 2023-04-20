@@ -22,6 +22,8 @@ namespace Fsel.Course.Infrastructure.Configs
                 .HasForeignKey<VideoResult>(p => p.LessonResultId)
                 .OnDelete(DeleteBehavior.Cascade);
 
+            builder.HasIndex(x => x.LessonResultId).IsUnique(false);
+
             builder.Property(e => e.Status)
                 .HasMaxLength(100)
                 .HasConversion(
