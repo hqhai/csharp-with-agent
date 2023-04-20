@@ -34,7 +34,7 @@ namespace Fsel.Training.Application.Queries.ClassQuery
             var lastDigitOfYear = currentDate.Year % 10;
             var level = request.CourseLevel.GetCodeByEnumCourseLevel();
             var stt = await _classRepository.Queryable.CountAsync(cancellationToken: cancellationToken);
-            string codeClass = $"{level}{request.Code}_{weekNumber}{lastDigitOfYear}{stt:000}S";
+            string codeClass = $"{level}_{request.Code}_{weekNumber}{lastDigitOfYear}{stt:000}S";
             methodResult.Result = codeClass;
             return methodResult;
         }
