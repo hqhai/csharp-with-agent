@@ -8,6 +8,8 @@ using Fsel.Storage.Domain.Enums;
 using Fsel.Common.ActionResults;
 using Fsel.Common.Helpers;
 using Amazon.S3.Model;
+using Humanizer.Bytes;
+using Fsel.Storage.Domain.Enums.ErrorCodes;
 
 namespace Fsel.Storage.Application.Services.AmazonS3Services
 {
@@ -16,6 +18,13 @@ namespace Fsel.Storage.Application.Services.AmazonS3Services
         private readonly AppSetting _appSetting;
         private readonly AmazonS3Client _amazonS3Client;
         private readonly TransferUtility _transferUtility;
+        private readonly double _partSize = ByteSize.FromMegabytes(100).Bytes; // Size of each part (100 MB)
+        private readonly Dictionary<EnumFolderType, double> _maximumCapacity = new Dictionary<EnumFolderType, double>
+        {
+            { EnumFolderType.Videos, ByteSize.FromGigabytes(5).Bytes }, //maximum video size (5 GB)
+            { EnumFolderType.Files, ByteSize.FromMegabytes(6).Bytes }, //maximum file size (6 MB)
+            { EnumFolderType.Questions, ByteSize.FromMegabytes(2).Bytes } //maximum question size (2 MB)
+        };
 
         public AmazonS3Service(AppSetting appSetting)
         {
@@ -31,18 +40,17 @@ namespace Fsel.Storage.Application.Services.AmazonS3Services
             _transferUtility = new TransferUtility(_amazonS3Client);
         }
 
-        public async Task<MethodResult<string?>> UploadFileAsync(IFormFile file, EnumFolderType folderType)
+        public async Task<MethodResult<string?>> UploadFileAsync(IFormFile? file, EnumFolderType folderType)
         {
-            MethodResult<string?> result = new MethodResult<string?>();
+            MethodResult<string?> result = IsValidFile(file, folderType);
             try
             {
-                if (file == null || !_appSetting.StorageConfig!.IsValid())
+                if (file == null || !result.IsOK)
                 {
-                    result.StatusCode = StatusCodes.Status400BadRequest;
                     return result;
                 }
 
-                var folder = _appSetting.StorageConfig.Folders!.GetPropValue<string>(folderType.ToString());
+                var folder = _appSetting.StorageConfig!.Folders!.GetPropValue<string>(folderType.ToString());
                 var key = PathHelper.Combine(folder, file.FileName.ReplaceSpecialChars().AddSuffix());
 
                 var initiateRequest = new InitiateMultipartUploadRequest
@@ -53,14 +61,14 @@ namespace Fsel.Storage.Application.Services.AmazonS3Services
                 var initiateResponse = await _amazonS3Client.InitiateMultipartUploadAsync(initiateRequest);
 
                 // Calculate the size of each part
-                var partSize = 100 * 1024 * 1024; // Size of each part (100 MB)
+                var partSize = _partSize;
 
                 // Create a list of parts to upload
                 var parts = new List<UploadPartResponse>();
 
                 using (var sourceStream = file.OpenReadStream())
                 {
-                    var buffer = new byte[partSize];
+                    var buffer = new byte[(long)partSize];
                     int bytesRead;
                     int partNumber = 1;
 
@@ -119,7 +127,26 @@ namespace Fsel.Storage.Application.Services.AmazonS3Services
             }
         }
 
-        public static string? GenerateAwsFileUrl(string? bucketName, string? baseUrl, string? fileName)
+        private MethodResult<string?> IsValidFile(IFormFile? file, EnumFolderType folderType)
+        {
+            var result = new MethodResult<string?>();
+            if (file == null || !_appSetting.StorageConfig!.IsValid())
+            {
+                result.AddErrorBadRequest(nameof(EnumFileErrorCode.FileCannotEmpty), nameof(file));
+                return result;
+            }
+
+            var capacity = _maximumCapacity.FirstOrDefault(x => x.Key == folderType).Value;
+            if (file.Length > capacity)
+            {
+                result.AddErrorBadRequest(nameof(EnumFileErrorCode.FileIsLargerThanAllowedSize), nameof(file), file.Length);
+                return result;
+            }
+
+            return result;
+        }
+
+        private static string? GenerateAwsFileUrl(string? bucketName, string? baseUrl, string? fileName)
         {
             var url = $"{bucketName}.{baseUrl}/{fileName}";
             return PathHelper.AddScheme(url);
