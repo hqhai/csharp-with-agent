@@ -54,13 +54,23 @@ namespace Fsel.Course.Infrastructure.Common
                     break;
 
                 case EnumQuestionType.GapFillScoreByQuestion:
-                case EnumQuestionType.GapFillWordBankScoreByQuestion:
                     var gapFillQuestion = config.Deserialize<GapFillQuestion>();
                     result = isDisableAnswers ? ClearAnswers(gapFillQuestion) : gapFillQuestion;
                     totalCorrect = isShowCorrectTotal ? GetTotalCorrectBySubQuestion(gapFillQuestion) : default;
                     break;
 
+                case EnumQuestionType.GapFillWordBankScoreByQuestion:
+                    var gapFillWordBankScoreQuestion = config.Deserialize<GapFillQuestion>();
+                    result = gapFillWordBankScoreQuestion;
+                    totalCorrect = isShowCorrectTotal ? GetTotalCorrectBySubQuestion(gapFillWordBankScoreQuestion) : default;
+                    break;
+
                 case EnumQuestionType.GapFillWordBankScoreByGap:
+                    var gapFillWordBankScoreByGap = config.Deserialize<GapFillQuestion>();
+                    result = gapFillWordBankScoreByGap;
+                    totalCorrect = isShowCorrectTotal ? GetTotalCorrectByGap(gapFillWordBankScoreByGap) : default;
+                    break;
+
                 case EnumQuestionType.GapFillScoreByGap:
                     var gapFillQuestionByGap = config.Deserialize<GapFillQuestion>();
                     result = isDisableAnswers ? ClearAnswers(gapFillQuestionByGap) : gapFillQuestionByGap;
