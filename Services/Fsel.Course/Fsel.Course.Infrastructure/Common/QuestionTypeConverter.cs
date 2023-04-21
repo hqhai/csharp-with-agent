@@ -79,7 +79,7 @@ namespace Fsel.Course.Infrastructure.Common
 
                 case EnumQuestionType.DragAndDropSentenceOrder:
                     var dragAndDropSentenceOrderQuestion = config.Deserialize<DragAndDropSentenceOrderQuestion>();
-                    result = isDisableAnswers ? ClearAnswers(dragAndDropSentenceOrderQuestion) : dragAndDropSentenceOrderQuestion;
+                    result = dragAndDropSentenceOrderQuestion;
                     totalCorrect = isShowCorrectTotal ? GetTotalCorrect(dragAndDropSentenceOrderQuestion) : default;
                     break;
 
@@ -168,18 +168,6 @@ namespace Fsel.Course.Infrastructure.Common
         }
 
         private static object? ClearAnswers(GapFillQuestion? data)
-        {
-            if (data != null && data.Contents != null)
-            {
-                foreach (var item in data.Contents)
-                {
-                    item.Words!.Clear();
-                }
-            }
-            return data;
-        }
-
-        private static object? ClearAnswers(DragAndDropSentenceOrderQuestion? data)
         {
             if (data != null && data.Contents != null)
             {
