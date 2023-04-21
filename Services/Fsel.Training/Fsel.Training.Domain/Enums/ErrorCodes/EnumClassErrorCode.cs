@@ -33,5 +33,10 @@ namespace Fsel.Training.Domain.Enums.ErrorCodes
         /// Class Student already exist
         /// </summary>
         ClassStudentAlreadyExist,
+
+        /// <summary>
+        /// Courses is null
+        /// </summary>
+        CoursesNull,
     }
 }
