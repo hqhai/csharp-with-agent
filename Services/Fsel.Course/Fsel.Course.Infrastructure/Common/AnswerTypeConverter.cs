@@ -212,10 +212,10 @@ namespace Fsel.Course.Infrastructure.Common
                 {
                     if (item.Answer != null)
                     {
-                        var isExact = item.Answer.Select(w => dataQuestion.Contents.All(c => c.Id == item.Id && c.Words != null && c.Words.Contains(w)))
+                        var isExacts = item.Answer.Select(w => dataQuestion.Contents.All(c => c.Id == item.Id && c.Words != null && c.Words.Contains(w)))
                                                   .ToList();
-                        item.IsExact = isExact;
-                        if (isExact.All(x => x))
+                        item.IsExacts = isExacts;
+                        if (isExacts.All(x => x))
                         {
                             number++;
                         }
@@ -237,10 +237,10 @@ namespace Fsel.Course.Infrastructure.Common
                 {
                     if (item.Answer != null)
                     {
-                        var isExact = item.Answer.Select(w => dataQuestion.Contents.All(c => c.Id == item.Id && c.Words != null && c.Words.Contains(w)))
+                        var isExacts = item.Answer.Select(w => dataQuestion.Contents.All(c => c.Id == item.Id && c.Words != null && c.Words.Contains(w)))
                                                   .ToList();
-                        item.IsExact = isExact;
-                        number = isExact.Count(x => x);
+                        item.IsExacts = isExacts;
+                        number = isExacts.Count(x => x);
                     }
                 }
             }
