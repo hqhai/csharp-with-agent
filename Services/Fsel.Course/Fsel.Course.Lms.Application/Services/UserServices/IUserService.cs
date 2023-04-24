@@ -6,6 +6,8 @@ namespace Fsel.Course.Lms.Application.Services.UserServices
     using System.Collections.Generic;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
+    using Fsel.Course.Domain.Models.CommandModels.Users;
+    using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Services.UserServices.Models;
     using Microsoft.AspNetCore.Mvc;
     using Refit;
@@ -26,5 +28,14 @@ namespace Fsel.Course.Lms.Application.Services.UserServices
 
         [Post("/teacher/get-by-id/{id}")]
         Task<IApiResponse<MethodResult<TeacherModel>>> GetTeacherByIdAsync([Body] Guid id);
+
+        [Post("/user/create-user")]
+        Task<IApiResponse<MethodResult<UserModel>>> CreateUserAsync([Body] CreateUserCommandModel command);
+
+        [Put("/user")]
+        Task<IApiResponse<MethodResult<UserModel>>> UpdateUserAsync([Body] UpdateUserCommandModel command);
+
+        [Delete("/user/{id}")]
+        Task<IApiResponse<MethodResult<bool>>> DeleteUserAsync([FromRoute] Guid id);
     }
 }

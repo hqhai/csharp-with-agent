@@ -1,5 +1,4 @@
 // Copyright (c) Atlantic. All rights reserved.
-
 using System.Globalization;
 using System.Text;
 using System.Transactions;
@@ -7,26 +6,28 @@ using AutoMapper;
 using Fsel.Common.ActionResults;
 using Fsel.Common.Constants;
 using Fsel.Common.Helpers;
+using Fsel.Identity.Application.Commands.AuthCmd;
 using Fsel.Identity.Domain.Entities;
 using Fsel.Identity.Domain.Enums;
 using Fsel.Identity.Domain.Enums.ErrorCodes;
 using Fsel.Identity.Domain.IRepositories;
-using Fsel.Identity.Domain.Models.CommandModels.Auths;
+using Fsel.Identity.Domain.Models.CommandModels.Users;
 using Fsel.Identity.Domain.Models.EntityModels;
 using Fsel.Identity.Infrastructure.ValueSettings;
+using Fsel.Shared.Helpers;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using OtpNet;
 
-namespace Fsel.Identity.Application.Commands.AuthCmd
+namespace Fsel.Identity.Application.Commands.UserCmd
 {
-    public class SignUpCommand : SignUpCommandModel, IRequest<MethodResult<UserModel>>
+    public class CreateUserCommand : CreateUserCommandModel, IRequest<MethodResult<UserModel>>
     {
     }
 
-    public class SignUpCommandHandler : IRequestHandler<SignUpCommand, MethodResult<UserModel>>
+    public class CreateUserCommandHandler : IRequestHandler<CreateUserCommand, MethodResult<UserModel>>
     {
         private readonly UserManager<User> _userManager;
         private readonly RoleManager<Role> _roleManager;
@@ -35,7 +36,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
         private readonly IUserOtpCodeRepository _userOtpCodeRepository;
         private readonly AppSetting _appSetting;
 
-        public SignUpCommandHandler(UserManager<User> userManager,
+        public CreateUserCommandHandler(UserManager<User> userManager,
             RoleManager<Role> roleManager,
             IMapper mapper,
             IMediator mediator,
@@ -50,10 +51,10 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             _appSetting = appSetting;
         }
 
-        public async Task<MethodResult<UserModel>> Handle(SignUpCommand request, CancellationToken cancellationToken)
+        public async Task<MethodResult<UserModel>> Handle(CreateUserCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            MethodResult<UserModel> methodResult = new MethodResult<UserModel>();
+            var methodResult = new MethodResult<UserModel>();
             User? user = null;
             if (!string.IsNullOrEmpty(request.Email))
             {
@@ -70,34 +71,25 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                         try
                         {
                             var role = await _roleManager.FindByNameAsync(request?.Role.ToString() ?? string.Empty);
-                            if (role == null)
-                            {
-                                role = new Role
-                                {
-                                    Name = request?.Role.ToString(),
-                                    NormalizedName = request?.Role.ToString(),
-                                };
-                                await _roleManager.CreateAsync(role);
-                            }
-
+                            var newPassword = new PasswordGeneratorHelper(8, 10).Generate();
                             IdentityResult result;
                             if (user != null)
                             {
-                                var hashPassword = _userManager.PasswordHasher.HashPassword(user, request?.Password ?? string.Empty);
+                                var hashPassword = _userManager.PasswordHasher.HashPassword(user, newPassword);
                                 user.PasswordHash = hashPassword;
-                                GetUser(user, request ?? new SignUpCommand());
+                                GetUser(user, request ?? new CreateUserCommand());
                                 result = await _userManager.UpdateAsync(user);
                             }
                             else
                             {
                                 user = new();
-                                GetUser(user, request ?? new SignUpCommand());
-                                result = await _userManager.CreateAsync(user, request?.Password ?? string.Empty);
+                                GetUser(user, request ?? new CreateUserCommand());
+                                result = await _userManager.CreateAsync(user, newPassword);
                             }
 
                             if (!result.Succeeded)
                             {
-                                methodResult.AddErrorBadRequest(nameof(EnumAuthErrorCode.UserFailToCreate), nameof(request.Password), request?.Password);
+                                methodResult.AddErrorBadRequest(nameof(EnumAuthErrorCode.UserFailToCreate), nameof(newPassword), newPassword);
                                 return methodResult;
                             }
                             await _userManager.AddToRoleAsync(user, request?.Role.ToString() ?? string.Empty);
@@ -107,7 +99,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                             var userOtpCode = await _userOtpCodeRepository.Queryable
                                     .FirstOrDefaultAsync(x => x.UserId == user.Id && x.Status == EnumStatusUser.New && !x.IsDeleted, cancellationToken);
 
-                            RandomSecureHelper randomSecure = new RandomSecureHelper();
+                            var randomSecure = new RandomSecureHelper();
                             var totp = new Totp(Encoding.UTF8.GetBytes(randomSecure.Secretstrings()));
                             var otp = totp.ComputeTotp();
                             if (userOtpCode == null)
@@ -117,7 +109,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                                     UserId = user.Id,
                                     OTPCode = otp,
                                     Status = EnumStatusUser.New,
-                                    ExpiredTime = DateTime.Now.AddSeconds(_appSetting!.Otp!.StepTime)
+                                    ExpiredTime = DateTime.Now.AddHours(_appSetting!.Otp!.StepTimeWithAdmin)
                                 };
                                 _userOtpCodeRepository.Add(userOtpCode);
                                 await _userOtpCodeRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
@@ -125,14 +117,14 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                             else
                             {
                                 userOtpCode.OTPCode = otp;
-                                userOtpCode.ExpiredTime = DateTime.Now.AddSeconds(_appSetting!.Otp!.StepTime);
+                                userOtpCode.ExpiredTime = DateTime.Now.AddHours(_appSetting!.Otp!.StepTimeWithAdmin);
                                 _userOtpCodeRepository.Update(userOtpCode);
                                 await _userOtpCodeRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
                             }
-                            var content = string.Format(CultureInfo.InvariantCulture, StringValues.SendOtpContent, user.FullName, otp);
-                            var subject = StringValues.SendOtpSubject + $"{otp}";
+                            var content = string.Format(CultureInfo.InvariantCulture, StringValuesContent.Url, otp);
+                            var subject = StringValues.SendOtpSubject + user.FullName;
 
-                            MethodResult<bool> sendResult = new MethodResult<bool>();
+                            var sendResult = new MethodResult<bool>();
                             if (request != null && request.Email != null)
                             {
                                 sendResult = await _mediator.Send(new SendOTPCommand { Email = user.Email, Content = content, Subject = subject }, cancellationToken).ConfigureAwait(false);
@@ -156,22 +148,13 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                     }
                 }
             }
-            else if (!string.IsNullOrEmpty(request.PhoneNumber))
-            {
-                user = await _userManager.Users.FirstOrDefaultAsync(e => e.PhoneNumber == request.PhoneNumber, cancellationToken: cancellationToken);
-                if (user != null && user.EmailConfirmed)
-                {
-                    methodResult.AddErrorBadRequest(nameof(EnumAuthErrorCode.DuplicatePhoneNumber), nameof(request.PhoneNumber), request.PhoneNumber);
-                    return methodResult;
-                }
-            }
 
             methodResult.StatusCode = StatusCodes.Status200OK;
             methodResult.Result = _mapper.Map<UserModel>(user);
             return methodResult;
         }
 
-        private static void GetUser(User user, SignUpCommandModel request)
+        private static void GetUser(User user, CreateUserCommand request)
         {
             user.FullName = request.FullName;
             user.Email = request.Email;

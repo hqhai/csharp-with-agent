@@ -13,6 +13,7 @@ namespace Fsel.Identity.Infrastructure.ValueSettings
     public class Otp
     {
         public int StepTime { get; set; }
+        public int StepTimeWithAdmin { get; set; }
     }
 
     public class Smtp

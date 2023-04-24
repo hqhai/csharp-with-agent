@@ -43,6 +43,8 @@ namespace Fsel.Identity.Application.Queries.TeacherQuery
                               .Select(x => new TeacherModel
                               {
                                   Id = x.Id,
+                                  CourseLevels = x.CourseLevels,
+                                  CourseTypes = x.CourseTypes,
                                   PassportPath = x.PassportPath,
                                   UniversityDegreePath = x.UniversityDegreePath,
                                   CertificationPath = x.CertificationPath,

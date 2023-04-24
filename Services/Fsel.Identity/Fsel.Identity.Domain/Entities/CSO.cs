@@ -2,12 +2,11 @@
 
 namespace Fsel.Identity.Domain.Entities
 {
-    using System;
     using System.ComponentModel.DataAnnotations;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Entities;
 
-    public class Teacher : Entity
+    public class CSO : Entity
     {
         public object? CourseTypes { get; set; }
         public object? CourseLevels { get; set; }

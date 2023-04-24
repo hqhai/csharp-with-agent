@@ -1,16 +1,17 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Identity.Application.Commands.AuthCmd
+namespace Fsel.Identity.Application.Commands.UserCmd
 {
     using System.Threading;
     using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Identity.Application.Commands.AuthCmd;
     using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.Enums;
     using Fsel.Identity.Domain.Enums.ErrorCodes;
     using Fsel.Identity.Domain.IRepositories;
-    using Fsel.Identity.Domain.Models.CommandModels.Auths;
+    using Fsel.Identity.Domain.Models.CommandModels.Users;
     using Fsel.Identity.Domain.Models.EntityModels;
     using Fsel.Identity.Infrastructure.ValueSettings;
     using Fsel.Shared.Enums;
@@ -19,11 +20,11 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
     using Microsoft.AspNetCore.Identity;
     using Microsoft.EntityFrameworkCore;
 
-    public class ComfirmOTPCommand : ConfirmOTPCommandModel, IRequest<MethodResult<ConfirmOtpModel>>
+    public class ComfirmOTPWithAdminCommand : ConfirmOTPWithAdminCommandModel, IRequest<MethodResult<ConfirmOtpModel>>
     {
     }
 
-    public class ComfirmOTPCommandHandler : IRequestHandler<ComfirmOTPCommand, MethodResult<ConfirmOtpModel>>
+    public class ComfirmOTPWithAdminCommandHandler : IRequestHandler<ComfirmOTPWithAdminCommand, MethodResult<ConfirmOtpModel>>
     {
         private readonly UserManager<User> _userManager;
         private readonly IMediator _mediator;
@@ -31,17 +32,17 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
         private readonly AppSetting _appSetting;
         private readonly IHumanRepository _humanRepository;
         private readonly IMapper _mapper;
-        private readonly IStudentRepository _studentRepository;
-        private readonly IParentRepository _parentRepository;
+        private readonly ICSORepository _cSORepository;
+        private readonly ITeacherRepository _teacherRepository;
 
-        public ComfirmOTPCommandHandler(UserManager<User> userManager
+        public ComfirmOTPWithAdminCommandHandler(UserManager<User> userManager
             , IMediator mediator
             , IUserOtpCodeRepository userOtpCodeRepository
             , AppSetting appSetting
             , IHumanRepository humanRepository
             , IMapper mapper
-            , IStudentRepository studentRepository
-            , IParentRepository parentRepository)
+            , ICSORepository cSORepository
+            , ITeacherRepository teacherRepository)
         {
             _userManager = userManager;
             _mediator = mediator;
@@ -49,16 +50,16 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             _appSetting = appSetting;
             _humanRepository = humanRepository;
             _mapper = mapper;
-            _studentRepository = studentRepository;
-            _parentRepository = parentRepository;
+            _cSORepository = cSORepository;
+            _teacherRepository = teacherRepository;
         }
 
-        public async Task<MethodResult<ConfirmOtpModel>> Handle(ComfirmOTPCommand request, CancellationToken cancellationToken)
+        public async Task<MethodResult<ConfirmOtpModel>> Handle(ComfirmOTPWithAdminCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             ArgumentNullException.ThrowIfNull(_appSetting.Otp);
-            MethodResult<ConfirmOtpModel> methodResult = new MethodResult<ConfirmOtpModel>();
-            User? user = new User();
+            var methodResult = new MethodResult<ConfirmOtpModel>();
+            var user = new User();
             if (request.Email != null)
             {
                 user = await _userManager.FindByEmailAsync(request.Email);
@@ -91,13 +92,17 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             await _userManager.ConfirmEmailAsync(user, token);
             var roles = await _userManager.GetRolesAsync(user);
 
-            var human = await CreateHuman(request, user);
-            await _humanRepository.ExecuteTransactionAsync(async () =>
+            if (request.Role == EnumRoleRegisterWithAdmin.Teacher || request.Role == EnumRoleRegisterWithAdmin.CSO)
             {
-                human = _humanRepository.Add(human);
-                await _humanRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
-                return methodResult;
-            });
+                var human = await CreateHuman(request, user);
+                await _humanRepository.ExecuteTransactionAsync(async () =>
+                {
+                    human = _humanRepository.Add(human);
+                    await _humanRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+                    return methodResult;
+                });
+            }
+
             var generateToken = await _mediator.Send(new GenerateTokenCommand { Id = user.Id }, cancellationToken).ConfigureAwait(false);
             var confirmOtp = new ConfirmOtpModel
             {
@@ -113,33 +118,31 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             return methodResult;
         }
 
-        private async Task<Human> CreateHuman(ComfirmOTPCommand request, User user)
+        private async Task<Human> CreateHuman(ComfirmOTPWithAdminCommand request, User user)
         {
-            Human human = _mapper.Map<Human>(request);
+            var human = _mapper.Map<Human>(request);
             human.UserId = user.Id;
-            var currentDate = DateTime.Now;
-            var weekNumber = (currentDate.DayOfYear - 1) / 7 + 1;
-            var lastDigitOfYear = currentDate.Year % 10;
-            var lastOfYear = human.Birthday!.Value.Year % 100;
-            var number = request.Gender == EnumGender.Male ? 0 : request.Gender == EnumGender.Female ? 1 : 2;
-
-            if (request.Role == EnumRoleRegister.Student)
+            if (request.Role == EnumRoleRegisterWithAdmin.Teacher)
             {
-                var stt = await _studentRepository.Queryable.CountAsync();
-                human.Student = new Student
+                var stt = await _teacherRepository.Queryable.CountAsync();
+                human.Teacher = new Teacher
                 {
                     HumanId = human.Id,
+                    CourseLevels = request.CourseLevels,
+                    CourseTypes = request.CourseTypes
                 };
-                human.Code = $"HN_{weekNumber}{lastDigitOfYear}{number}{lastOfYear}{stt:000}";
+                human.Code = $"TC_{stt:0000}";
             }
-            else if (request.Role == EnumRoleRegister.Parent)
+            else if (request.Role == EnumRoleRegisterWithAdmin.CSO)
             {
-                var stt = await _parentRepository.Queryable.CountAsync();
-                human.Parent = new Parent
+                var stt = await _cSORepository.Queryable.CountAsync();
+                human.CSO = new CSO
                 {
                     HumanId = human.Id,
+                    CourseLevels = request.CourseLevels,
+                    CourseTypes = request.CourseTypes
                 };
-                human.Code = $"PH_{weekNumber}{stt:0000}";
+                human.Code = $"CSO_{stt:0000}";
             }
             return human;
         }

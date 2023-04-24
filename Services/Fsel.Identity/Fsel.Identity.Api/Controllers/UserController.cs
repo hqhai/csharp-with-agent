@@ -3,8 +3,10 @@
 using System.Net;
 using Fsel.Common.ActionResults;
 using Fsel.Common.Constants;
-using Fsel.Shared.Enums;
 using Fsel.Identity.Application.Commands.AuthCmd;
+using Fsel.Identity.Application.Commands.UserCmd;
+using Fsel.Identity.Domain.Models.EntityModels;
+using Fsel.Shared.Enums;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -36,6 +38,54 @@ namespace Fsel.Identity.Api.Controllers
         public async Task<IActionResult> ChangePassword([FromBody] ResetPasswordCommand command)
         {
             MethodResult<bool> commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Create User
+        /// </summary>
+        [HttpPost("create-user")]
+        [ProducesResponseType(typeof(MethodResult<UserModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> Create([FromBody] CreateUserCommand command)
+        {
+            MethodResult<UserModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Update User
+        /// </summary>
+        [HttpPut("user")]
+        [ProducesResponseType(typeof(MethodResult<UserModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> Update([FromBody] UpdateUserCommand command)
+        {
+            MethodResult<UserModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Delete User
+        /// </summary>
+        [HttpDelete("user/{id}")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> Delete([FromRoute] Guid id)
+        {
+            MethodResult<bool> commandResult = await _mediator.Send(new DeleteUserCommand { Id = id }).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Confirm User Otp
+        /// </summary>
+        [HttpPost("confirm-user-otp")]
+        [ProducesResponseType(typeof(MethodResult<ConfirmOtpModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> ConfirmOTPUserByAdmin([FromBody] ComfirmOTPWithAdminCommand command)
+        {
+            MethodResult<ConfirmOtpModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
     }
