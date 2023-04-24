@@ -77,7 +77,8 @@ namespace Fsel.Course.Infrastructure.Common
             {
                 foreach (var item in dataAnswer.Answers)
                 {
-                    if (dataQuestion.Contents.All(x => x.Id == item.Id && x.Answers != null && x.Answers.All(n => n.Id == item.AnswerId && (n.IsCorrect ?? default))))
+                    var question = dataQuestion.Contents.FirstOrDefault(x => x.Id == item.Id);
+                    if (question!.Answers!.Any(n => n.Id == item.AnswerId && n.IsCorrect == true))
                     {
                         number++;
                         item.IsExact = true;
@@ -237,8 +238,8 @@ namespace Fsel.Course.Infrastructure.Common
                 {
                     if (item.Answer != null)
                     {
-                        var dataQuestion1 = dataQuestion.Contents.FirstOrDefault(x => x.Id == item.Id);
-                        var isExacts = item.Answer.Select(w => dataQuestion1!.Words != null && dataQuestion1.Words.Contains(w))
+                        var question = dataQuestion.Contents.FirstOrDefault(x => x.Id == item.Id);
+                        var isExacts = item.Answer.Select(w => question!.Words != null && question.Words.Contains(w))
                                                   .ToList();
                         item.IsExacts = isExacts;
                         number += isExacts.Count(x => x);
