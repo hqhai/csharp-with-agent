@@ -237,10 +237,11 @@ namespace Fsel.Course.Infrastructure.Common
                 {
                     if (item.Answer != null)
                     {
-                        var isExacts = item.Answer.Select(w => dataQuestion.Contents.All(c => c.Id == item.Id && c.Words != null && c.Words.Contains(w)))
+                        var dataQuestion1 = dataQuestion.Contents.FirstOrDefault(x => x.Id == item.Id);
+                        var isExacts = item.Answer.Select(w => dataQuestion1!.Words != null && dataQuestion1.Words.Contains(w))
                                                   .ToList();
                         item.IsExacts = isExacts;
-                        number = isExacts.Count(x => x);
+                        number += isExacts.Count(x => x);
                     }
                 }
             }
