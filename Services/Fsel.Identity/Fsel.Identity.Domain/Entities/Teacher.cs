@@ -44,7 +44,7 @@ namespace Fsel.Identity.Domain.Entities
         public string? PoliceClearancePath { get; set; }
 
         public Human? Human { get; set; }
-
+        public TeacherBankAccount? TeacherBankAccount { get; set; }
         public Guid HumanId { get; set; }
     }
 }
