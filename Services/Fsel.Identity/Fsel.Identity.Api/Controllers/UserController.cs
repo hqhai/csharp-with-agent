@@ -3,8 +3,10 @@
 using System.Net;
 using Fsel.Common.ActionResults;
 using Fsel.Common.Constants;
+using Fsel.Core.Base.BaseModels;
 using Fsel.Identity.Application.Commands.AuthCmd;
 using Fsel.Identity.Application.Commands.UserCmd;
+using Fsel.Identity.Application.Queries.UserQuery;
 using Fsel.Identity.Domain.Models.EntityModels;
 using Fsel.Shared.Enums;
 using MediatR;
@@ -74,6 +76,18 @@ namespace Fsel.Identity.Api.Controllers
         public async Task<IActionResult> Delete([FromRoute] Guid id)
         {
             MethodResult<bool> commandResult = await _mediator.Send(new DeleteUserCommand { Id = id }).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Search User
+        /// </summary>
+        [HttpGet("search-user")]
+        [ProducesResponseType(typeof(MethodResult<PagingItemsModel<UserSearchModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> SearchUser([FromQuery] SearchUserQuery query)
+        {
+            MethodResult<PagingItemsModel<UserSearchModel>> commandResult = await _mediator.Send(query).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
 
