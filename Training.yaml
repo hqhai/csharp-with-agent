@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: training
-        image: trainingfselacr.azurecr.io/fsel_src
+        image: fselacr.azurecr.io/trainingapi
         imagePullPolicy: Always
         ports:
         - containerPort: 80

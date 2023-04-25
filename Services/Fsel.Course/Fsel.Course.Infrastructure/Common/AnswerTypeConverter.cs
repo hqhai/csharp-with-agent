@@ -77,7 +77,8 @@ namespace Fsel.Course.Infrastructure.Common
             {
                 foreach (var item in dataAnswer.Answers)
                 {
-                    if (dataQuestion.Contents.All(x => x.Id == item.Id && x.Answers != null && x.Answers.All(n => n.Id == item.AnswerId && (n.IsCorrect ?? default))))
+                    var question = dataQuestion.Contents.FirstOrDefault(x => x.Id == item.Id);
+                    if (question!.Answers!.Any(n => n.Id == item.AnswerId && n.IsCorrect == true))
                     {
                         number++;
                         item.IsExact = true;
@@ -212,10 +213,10 @@ namespace Fsel.Course.Infrastructure.Common
                 {
                     if (item.Answer != null)
                     {
-                        var isExact = item.Answer.Select(w => dataQuestion.Contents.All(c => c.Id == item.Id && c.Words != null && c.Words.Contains(w)))
+                        var isExacts = item.Answer.Select(w => dataQuestion.Contents.All(c => c.Id == item.Id && c.Words != null && c.Words.Contains(w)))
                                                   .ToList();
-                        item.IsExact = isExact;
-                        if (isExact.All(x => x))
+                        item.IsExacts = isExacts;
+                        if (isExacts.All(x => x))
                         {
                             number++;
                         }
@@ -237,10 +238,11 @@ namespace Fsel.Course.Infrastructure.Common
                 {
                     if (item.Answer != null)
                     {
-                        var isExact = item.Answer.Select(w => dataQuestion.Contents.All(c => c.Id == item.Id && c.Words != null && c.Words.Contains(w)))
+                        var question = dataQuestion.Contents.FirstOrDefault(x => x.Id == item.Id);
+                        var isExacts = item.Answer.Select(w => question!.Words != null && question.Words.Contains(w))
                                                   .ToList();
-                        item.IsExact = isExact;
-                        number = isExact.Count(x => x);
+                        item.IsExacts = isExacts;
+                        number += isExacts.Count(x => x);
                     }
                 }
             }
