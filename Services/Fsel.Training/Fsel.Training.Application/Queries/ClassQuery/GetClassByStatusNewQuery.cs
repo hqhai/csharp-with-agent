@@ -3,7 +3,6 @@
 namespace Fsel.Training.Application.Queries.ClassQuery
 {
     using System.Collections.Generic;
-    using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Shared.Enums;
     using Fsel.Training.Domain.Entities;
@@ -22,13 +21,11 @@ namespace Fsel.Training.Application.Queries.ClassQuery
 
     public class GetClassByStatusNewQueryHandler : IRequestHandler<GetClassByStatusNewQuery, MethodResult<IList<CourseClassModel>>>
     {
-        private readonly IMapper _mapper;
         private readonly IClassRepository _classRepository;
         private readonly IMediator _mediator;
 
-        public GetClassByStatusNewQueryHandler(IMapper mapper, IClassRepository classRepository, IMediator mediator)
+        public GetClassByStatusNewQueryHandler(IClassRepository classRepository, IMediator mediator)
         {
-            _mapper = mapper;
             _classRepository = classRepository;
             _mediator = mediator;
         }
@@ -46,22 +43,19 @@ namespace Fsel.Training.Application.Queries.ClassQuery
             List<Class> classes = await _classRepository.Queryable.Where(e => e.Status == EnumClassType.New && request.Courses.Select(x => x.CourseId).Contains(e.CourseId))
                                                             .ToListAsync(cancellationToken: cancellationToken);
 
-            IList<CourseClassModel>? courseClassModels;
-            if (classes == null || classes.Count == 0)
+            IList<CourseClassModel>? courseClassModels = new List<CourseClassModel>();
+            foreach (var item in request.Courses)
             {
-                courseClassModels = new List<CourseClassModel>();
-                foreach (var item in request.Courses)
+                var code = await _mediator.Send(new GetNewClassCodeQuery { CourseLevel = request.CourseLevel, Code = item.Code }, cancellationToken).ConfigureAwait(false);
+                var courseClass = new CourseClassModel { CourseId = item.CourseId, Code = code.Result };
+                if (classes.Any(x => x.CourseId == item.CourseId))
                 {
-                    var code = await _mediator.Send(new GetNewClassCodeQuery { CourseLevel = request.CourseLevel, Code = item.Code }, cancellationToken).ConfigureAwait(false);
-                    var courseClass = new CourseClassModel { CourseId = item.CourseId, Code = code.Result };
-                    courseClassModels.Add(courseClass);
+                    courseClass.Code = classes.FirstOrDefault(x => x.CourseId == item.CourseId)!.Code;
                 }
-                methodResult.Result = courseClassModels;
-                methodResult.StatusCode = StatusCodes.Status200OK;
-                return methodResult;
-            }
 
-            methodResult.Result = _mapper.Map<IList<CourseClassModel>>(classes);
+                courseClassModels.Add(courseClass);
+            }
+            methodResult.Result = courseClassModels;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }
