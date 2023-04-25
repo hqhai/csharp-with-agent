@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: sender
-        image: senderfselacr.azurecr.io/fsel_src
+        image: fselacr.azurecr.io/senderapi
         imagePullPolicy: Always
         ports:
         - containerPort: 80
