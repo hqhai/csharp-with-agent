@@ -46,17 +46,15 @@ namespace Fsel.Training.Application.Queries.ClassQuery
             IList<CourseClassModel>? courseClassModels = new List<CourseClassModel>();
             foreach (var item in request.Courses)
             {
-                var courseClass = new CourseClassModel();
+                var courseClass = new CourseClassModel { CourseId = item.CourseId };
                 if (classes.Any(x => x.CourseId == item.CourseId))
                 {
                     courseClass.Code = classes.FirstOrDefault(x => x.CourseId == item.CourseId)!.Code;
-                    courseClass.CourseId = item.CourseId;
                 }
                 else
                 {
                     var code = await _mediator.Send(new GetNewClassCodeQuery { CourseLevel = request.CourseLevel, Code = item.Code }, cancellationToken).ConfigureAwait(false);
                     courseClass.Code = code.Result;
-                    courseClass.CourseId = item.CourseId;
                 }
                 courseClassModels.Add(courseClass);
             }
