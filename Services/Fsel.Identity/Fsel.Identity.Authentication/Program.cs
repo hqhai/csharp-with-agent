@@ -13,7 +13,7 @@ var builder = WebApplication.CreateBuilder(args);
 var appSetting = builder.AddAppSettings<AppSetting>();
 builder.AddServices();
 builder.AddSwaggerGens(appSetting);
-builder.AddAuthentication();
+builder.AddAuthenticationIdentity(appSetting);
 builder.AddDbContexts<UserDbContext>();
 
 builder.Services.AddIdentity<User, Role>()

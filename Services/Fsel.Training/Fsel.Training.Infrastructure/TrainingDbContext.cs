@@ -12,7 +12,7 @@ namespace Fsel.Training.Infrastructure
 
     public class TrainingDbContext : BaseDbContext
     {
-        public TrainingDbContext(DbContextOptions<TrainingDbContext> options, IMediator mediator) : base(options, mediator)
+        public TrainingDbContext(DbContextOptions<TrainingDbContext> options, IMediator mediator, AuthContext authContext) : base(options, mediator, authContext)
         {
         }
 
