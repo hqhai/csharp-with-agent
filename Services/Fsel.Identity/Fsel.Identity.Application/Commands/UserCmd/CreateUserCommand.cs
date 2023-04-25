@@ -1,7 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 using System.Globalization;
 using System.Text;
-using System.Transactions;
 using AutoMapper;
 using Fsel.Common.ActionResults;
 using Fsel.Common.Constants;
@@ -14,7 +13,7 @@ using Fsel.Identity.Domain.IRepositories;
 using Fsel.Identity.Domain.Models.CommandModels.Users;
 using Fsel.Identity.Domain.Models.EntityModels;
 using Fsel.Identity.Infrastructure.ValueSettings;
-using Fsel.Shared.Helpers;
+using Fsel.Shared.Enums;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -35,13 +34,19 @@ namespace Fsel.Identity.Application.Commands.UserCmd
         private readonly IMediator _mediator;
         private readonly IUserOtpCodeRepository _userOtpCodeRepository;
         private readonly AppSetting _appSetting;
+        private readonly ITeacherRepository _teacherRepository;
+        private readonly ICSORepository _cSORepository;
+        private readonly IHumanRepository _humanRepository;
 
         public CreateUserCommandHandler(UserManager<User> userManager,
             RoleManager<Role> roleManager,
             IMapper mapper,
             IMediator mediator,
             IUserOtpCodeRepository userOtpCodeRepository,
-            AppSetting appSetting)
+            AppSetting appSetting,
+            ITeacherRepository teacherRepository,
+            ICSORepository cSORepository,
+            IHumanRepository humanRepository)
         {
             _userManager = userManager;
             _roleManager = roleManager;
@@ -49,6 +54,9 @@ namespace Fsel.Identity.Application.Commands.UserCmd
             _mediator = mediator;
             _userOtpCodeRepository = userOtpCodeRepository;
             _appSetting = appSetting;
+            _teacherRepository = teacherRepository;
+            _cSORepository = cSORepository;
+            _humanRepository = humanRepository;
         }
 
         public async Task<MethodResult<UserModel>> Handle(CreateUserCommand request, CancellationToken cancellationToken)
@@ -63,86 +71,59 @@ namespace Fsel.Identity.Application.Commands.UserCmd
             }
             else
             {
-                using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+                var role = await _roleManager.FindByNameAsync(request?.Role.ToString() ?? string.Empty);
+                var newPassword = new PasswordGeneratorHelper(8, 10).Generate();
+                IdentityResult result;
+                user = new();
+                GetUser(user, request ?? new CreateUserCommand());
+                result = await _userManager.CreateAsync(user, newPassword);
+
+                var human = await CreateHuman(request!, user);
+                human = _humanRepository.Add(human);
+                await _humanRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+
+                if (!result.Succeeded)
                 {
-                    try
-                    {
-                        var role = await _roleManager.FindByNameAsync(request?.Role.ToString() ?? string.Empty);
-                        var newPassword = new PasswordGeneratorHelper(8, 10).Generate();
-                        IdentityResult result;
-                        if (user != null)
-                        {
-                            var hashPassword = _userManager.PasswordHasher.HashPassword(user, newPassword);
-                            user.PasswordHash = hashPassword;
-                            GetUser(user, request ?? new CreateUserCommand());
-                            result = await _userManager.UpdateAsync(user);
-                        }
-                        else
-                        {
-                            user = new();
-                            GetUser(user, request ?? new CreateUserCommand());
-                            result = await _userManager.CreateAsync(user, newPassword);
-                        }
-
-                        if (!result.Succeeded)
-                        {
-                            methodResult.AddErrorBadRequest(nameof(EnumAuthErrorCode.UserFailToCreate), nameof(newPassword), newPassword);
-                            return methodResult;
-                        }
-                        await _userManager.AddToRoleAsync(user, request?.Role.ToString() ?? string.Empty);
-
-                        #region Send Code OTP
-
-                        var userOtpCode = await _userOtpCodeRepository.Queryable
-                                .FirstOrDefaultAsync(x => x.UserId == user.Id && x.Status == EnumStatusUser.New && !x.IsDeleted, cancellationToken);
-
-                        var randomSecure = new RandomSecureHelper();
-                        var totp = new Totp(Encoding.UTF8.GetBytes(randomSecure.Secretstrings()));
-                        var otp = totp.ComputeTotp();
-                        if (userOtpCode == null)
-                        {
-                            userOtpCode = new UserOtpCode
-                            {
-                                UserId = user.Id,
-                                OTPCode = otp,
-                                Status = EnumStatusUser.New,
-                                ExpiredTime = DateTime.Now.AddDays(_appSetting!.Otp!.StepTimeWithAdmin)
-                            };
-                            _userOtpCodeRepository.Add(userOtpCode);
-                            await _userOtpCodeRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-                        }
-                        else
-                        {
-                            userOtpCode.OTPCode = otp;
-                            userOtpCode.ExpiredTime = DateTime.Now.AddDays(_appSetting!.Otp!.StepTimeWithAdmin);
-                            _userOtpCodeRepository.Update(userOtpCode);
-                            await _userOtpCodeRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-                        }
-                        var content = string.Format(CultureInfo.InvariantCulture, StringValuesContent.Url, otp);
-                        var subject = StringValues.SendOtpSubject + user.FullName;
-
-                        var sendResult = new MethodResult<bool>();
-                        if (request != null && request.Email != null)
-                        {
-                            sendResult = await _mediator.Send(new SendOTPCommand { Email = user.Email, Content = content, Subject = subject }, cancellationToken).ConfigureAwait(false);
-                        }
-
-                        if (!sendResult.IsOK)
-                        {
-                            scope.Dispose();
-                            methodResult.AddErrorBadRequest(sendResult?.ErrorMessages);
-                            return methodResult;
-                        }
-                        scope.Complete();
-
-                        #endregion Send Code OTP
-                    }
-                    catch
-                    {
-                        methodResult.AddErrorBadRequest(nameof(EnumAuthErrorCode.SendAuthErorr));
-                        scope.Dispose();
-                    }
+                    methodResult.AddErrorBadRequest(nameof(EnumAuthErrorCode.UserFailToCreate), nameof(newPassword), newPassword);
+                    return methodResult;
                 }
+                await _userManager.AddToRoleAsync(user, request!.Role.ToString());
+
+                #region Send Code OTP
+
+                var userOtpCode = await _userOtpCodeRepository.Queryable
+                        .FirstOrDefaultAsync(x => x.UserId == user.Id && x.Status == EnumStatusUser.New && !x.IsDeleted, cancellationToken);
+
+                var randomSecure = new RandomSecureHelper();
+                var totp = new Totp(Encoding.UTF8.GetBytes(randomSecure.Secretstrings()));
+                var otp = totp.ComputeTotp();
+                if (userOtpCode == null)
+                {
+                    userOtpCode = new UserOtpCode
+                    {
+                        UserId = user.Id,
+                        OTPCode = otp,
+                        Status = EnumStatusUser.New,
+                        ExpiredTime = DateTime.Now.AddDays(_appSetting!.Otp!.StepTimeWithAdmin)
+                    };
+                    _userOtpCodeRepository.Add(userOtpCode);
+                    await _userOtpCodeRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                }
+                var content = string.Format(CultureInfo.InvariantCulture, _appSetting.ConstantUrl!.ActiveUserUrl!, user.Id, otp);
+                var subject = StringValues.SendOtpSubject + user.FullName;
+                var sendResult = new MethodResult<bool>();
+                if (request != null && request.Email != null)
+                {
+                    sendResult = await _mediator.Send(new SendOTPCommand { Email = user.Email, Content = content, Subject = subject }, cancellationToken).ConfigureAwait(false);
+                }
+
+                if (!sendResult.IsOK)
+                {
+                    methodResult.AddErrorBadRequest(sendResult?.ErrorMessages);
+                    return methodResult;
+                }
+
+                #endregion Send Code OTP
             }
 
             methodResult.StatusCode = StatusCodes.Status200OK;
@@ -156,6 +137,42 @@ namespace Fsel.Identity.Application.Commands.UserCmd
             user.Email = request.Email;
             user.UserName = request.Email;
             user.PhoneNumber = request.PhoneNumber;
+        }
+
+        private async Task<Human> CreateHuman(CreateUserCommand request, User user)
+        {
+            var human = _mapper.Map<Human>(request);
+            human.UserId = user.Id;
+            if (request.Role == EnumRoleRegisterWithAdmin.Teacher)
+            {
+                var stt = await _teacherRepository.Queryable.CountAsync();
+                human.Teacher = new Teacher
+                {
+                    HumanId = human.Id,
+                    CourseLevels = request.CourseLevels,
+                    CourseTypes = request.CourseTypes,
+                    TeacherBankAccount = new TeacherBankAccount
+                    {
+                        BankAccountName = request.BankAccountName,
+                        BankAccountNumber = request.BankAccountNumber,
+                        BankName = request.BankName,
+                        BankBranch = request.BankBranch,
+                    }
+                };
+                human.Code = $"TC_{stt:0000}";
+            }
+            else if (request.Role == EnumRoleRegisterWithAdmin.CSO)
+            {
+                var stt = await _cSORepository.Queryable.CountAsync();
+                human.CSO = new CSO
+                {
+                    HumanId = human.Id,
+                    CourseLevels = request.CourseLevels,
+                    CourseTypes = request.CourseTypes
+                };
+                human.Code = $"CSO_{stt:0000}";
+            }
+            return human;
         }
     }
 }

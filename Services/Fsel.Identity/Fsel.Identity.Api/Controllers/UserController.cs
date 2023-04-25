@@ -58,11 +58,13 @@ namespace Fsel.Identity.Api.Controllers
         /// <summary>
         /// Update User
         /// </summary>
-        [HttpPut("user")]
+        [HttpPut("user/{id}")]
         [ProducesResponseType(typeof(MethodResult<UserModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> Update([FromBody] UpdateUserCommand command)
+        public async Task<IActionResult> Update([FromRoute] Guid id, [FromBody] UpdateUserCommand command)
         {
+            ArgumentNullException.ThrowIfNull(command);
+            command.Id = id;
             MethodResult<UserModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
@@ -92,14 +94,26 @@ namespace Fsel.Identity.Api.Controllers
         }
 
         /// <summary>
-        /// Confirm User Otp
+        /// confirm-otp-user
         /// </summary>
-        [HttpPost("confirm-user-otp")]
+        [HttpPost("confirm-otp-user")]
         [ProducesResponseType(typeof(MethodResult<ConfirmOtpModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> ConfirmOTPUserByAdmin([FromBody] ComfirmOTPWithAdminCommand command)
         {
             MethodResult<ConfirmOtpModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Active user
+        /// </summary>
+        [HttpPost("active-user")]
+        [ProducesResponseType(typeof(MethodResult<UserModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> ActiveUser([FromBody] UpdateStatusUserCommand command)
+        {
+            MethodResult<UserModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
     }

@@ -14,7 +14,7 @@ namespace Fsel.Identity.Application.Commands.UserCmd
 
     public class UpdateStatusUserCommand : IRequest<MethodResult<UserModel>>
     {
-        public string? Email { get; set; }
+        public Guid Id { get; set; }
         public bool Status { get; set; }
     }
 
@@ -34,16 +34,16 @@ namespace Fsel.Identity.Application.Commands.UserCmd
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<UserModel>();
-            var user = await _userManager.Users.FirstOrDefaultAsync(x => x.Email == request.Email, cancellationToken);
+            var user = await _userManager.Users.FirstOrDefaultAsync(x => x.Id == request.Id.ToString(), cancellationToken);
             if (user == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumUserErrorCode.UserNotExist), nameof(request.Email), request.Email);
+                methodResult.AddErrorBadRequest(nameof(EnumUserErrorCode.UserNotExist), nameof(request.Id), request.Id);
                 return methodResult;
             }
 
-            _mapper.Map(user, request);
             user.LockoutEnabled = request.Status;
             await _userManager.UpdateAsync(user);
+
             methodResult.StatusCode = StatusCodes.Status200OK;
             methodResult.Result = _mapper.Map<UserModel>(user);
             return methodResult;

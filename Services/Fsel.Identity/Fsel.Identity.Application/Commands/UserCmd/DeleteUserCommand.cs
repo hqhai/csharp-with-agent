@@ -39,7 +39,6 @@ namespace Fsel.Identity.Application.Commands.UserCmd
                 return methodResult;
             }
 
-            _mapper.Map(user, request);
             await _userManager.DeleteAsync(user);
             methodResult.StatusCode = StatusCodes.Status200OK;
             methodResult.Result = true;

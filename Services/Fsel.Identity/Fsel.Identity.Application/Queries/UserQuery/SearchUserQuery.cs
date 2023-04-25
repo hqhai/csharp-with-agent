@@ -2,6 +2,7 @@
 
 namespace Fsel.Identity.Application.Queries.UserQuery
 {
+    using System;
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base.BaseModels;
@@ -49,70 +50,91 @@ namespace Fsel.Identity.Application.Queries.UserQuery
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 return methodResult;
             }
-            IQueryable<UserSearchModel>? humanQuery = default;
+            IQueryable<UserSearchModel>? userQuery = default;
             if (request.Role == EnumRoleRegisterWithAdmin.Teacher)
             {
-                humanQuery = from i in _humanRepository.Queryable
-                             join u in _userManager.Users on i.UserId equals u.Id
-                             join t in _teacherRepository.Queryable on i.Id equals t.HumanId
-                             select new UserSearchModel
-                             {
-                                 Id = i.Id,
-                                 CreatedDate = i.CreatedDate,
-                                 Status = u.LockoutEnabled,
-                                 Human = new HumanSearchModel
-                                 {
-                                     FullName = i.FullName,
-                                     Birthday = i.Birthday,
-                                     Email = i.Email,
-                                     Teacher = _mapper.Map<TeacherModel>(t)
-                                 }
-                             };
+                userQuery = from u in _userManager.Users
+                            join i in _humanRepository.Queryable on u.Id equals i.UserId
+                            join t in _teacherRepository.Queryable on i.Id equals t.HumanId
+                            select new UserSearchModel
+                            {
+                                Id = u.Id,
+                                Status = u.LockoutEnabled,
+                                FullName = u.FullName,
+                                CreatedDate = i.CreatedDate,
+                                Human = new HumanSearchModel
+                                {
+                                    Id = i.Id,
+                                    Birthday = i.Birthday,
+                                    Email = i.Email,
+                                    Teacher = new TeacherModel
+                                    {
+                                        Id = i.Id,
+                                        CertificationPath = t.CertificationPath,
+                                        CourseLevels = t.CourseLevels,
+                                        CourseTypes = t.CourseTypes,
+                                        PassportPath = t.PassportPath,
+                                        PoliceClearancePath = t.PoliceClearancePath,
+                                        UniversityDegreePath = t.UniversityDegreePath
+                                    }
+                                }
+                            };
             }
             else if (request.Role == EnumRoleRegisterWithAdmin.CSO)
             {
-                humanQuery = from i in _humanRepository.Queryable
-                             join u in _userManager.Users on i.UserId equals u.Id
-                             join cso in _cSORepository.Queryable on i.Id equals cso.HumanId
-                             select new UserSearchModel
-                             {
-                                 Id = i.Id,
-                                 CreatedDate = i.CreatedDate,
-                                 Status = u.LockoutEnabled,
-                                 Human = new HumanSearchModel
-                                 {
-                                     FullName = i.FullName,
-                                     Birthday = i.Birthday,
-                                     Email = i.Email,
-                                     CSO = _mapper.Map<CSOModel>(cso)
-                                 }
-                             };
+                userQuery = from u in _userManager.Users
+                            join i in _humanRepository.Queryable on u.Id equals i.UserId
+                            join cso in _cSORepository.Queryable on i.Id equals cso.HumanId
+                            select new UserSearchModel
+                            {
+                                Id = u.Id,
+                                Status = u.LockoutEnabled,
+                                FullName = u.FullName,
+                                CreatedDate = i.CreatedDate,
+                                Human = new HumanSearchModel
+                                {
+                                    Id = i.Id,
+                                    Birthday = i.Birthday,
+                                    Email = i.Email,
+                                    CSO = new CSOModel
+                                    {
+                                        Id = i.Id,
+                                        CertificationPath = cso.CertificationPath,
+                                        CourseLevels = cso.CourseLevels,
+                                        CourseTypes = cso.CourseTypes,
+                                        PassportPath = cso.PassportPath,
+                                        PoliceClearancePath = cso.PoliceClearancePath,
+                                        UniversityDegreePath = cso.UniversityDegreePath,
+                                    }
+                                }
+                            };
             }
             else if (request.Role == EnumRoleRegisterWithAdmin.Moderator)
             {
-                humanQuery = from i in _humanRepository.Queryable
-                             join u in _userManager.Users on i.UserId equals u.Id
-                             select new UserSearchModel
-                             {
-                                 Id = i.Id,
-                                 CreatedDate = i.CreatedDate,
-                                 Status = u.LockoutEnabled,
-                                 Human = new HumanSearchModel
-                                 {
-                                     FullName = i.FullName,
-                                     Birthday = i.Birthday,
-                                     Email = i.Email
-                                 }
-                             };
+                userQuery = from u in _userManager.Users
+                            join i in _humanRepository.Queryable on u.Id equals i.UserId
+                            select new UserSearchModel
+                            {
+                                Id = u.Id,
+                                Status = u.LockoutEnabled,
+                                FullName = u.FullName,
+                                CreatedDate = i.CreatedDate,
+                                Human = new HumanSearchModel
+                                {
+                                    Id = i.Id,
+                                    Birthday = i.Birthday,
+                                    Email = i.Email
+                                }
+                            };
             }
 
             if (!string.IsNullOrEmpty(request.Keyword))
             {
-                humanQuery = humanQuery!.Where(m => m!.Id!.ToString() == request.Keyword || m.Human != null && m.Human.FullName == request.Keyword);
+                userQuery = userQuery!.Where(m => m.Id == request.Keyword || m.FullName!.Contains(request.Keyword));
             }
 
-            int totalItem = await humanQuery!.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
-            var lists = await humanQuery!.OrderByDescending(x => x.CreatedDate)
+            int totalItem = await userQuery!.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
+            var lists = await userQuery!.OrderByDescending(x => x.CreatedDate)
                     .Skip((request.Page - 1) * request.PageSize)
                     .Take(request.PageSize)
                     .AsNoTracking()

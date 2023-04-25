@@ -8,6 +8,12 @@ namespace Fsel.Identity.Infrastructure.ValueSettings
     {
         public Smtp? Smtp { get; set; }
         public Otp? Otp { get; set; }
+        public ConstantUrl? ConstantUrl { get; set; }
+    }
+
+    public class ConstantUrl
+    {
+        public string? ActiveUserUrl { get; set; }
     }
 
     public class Otp

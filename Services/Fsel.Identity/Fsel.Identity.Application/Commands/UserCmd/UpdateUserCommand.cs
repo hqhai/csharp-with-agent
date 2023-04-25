@@ -8,6 +8,7 @@ namespace Fsel.Identity.Application.Commands.UserCmd
     using Fsel.Identity.Domain.Enums.ErrorCodes;
     using Fsel.Identity.Domain.Models.CommandModels.Users;
     using Fsel.Identity.Domain.Models.EntityModels;
+    using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Identity;
@@ -33,14 +34,44 @@ namespace Fsel.Identity.Application.Commands.UserCmd
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<UserModel>();
-            var user = await _userManager.Users.FirstOrDefaultAsync(x => x.Email == request.Email, cancellationToken);
-            if (user == null)
+
+            User? user = new();
+            if (request.Role == EnumRoleRegisterWithAdmin.Teacher)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumUserErrorCode.UserNotExist), nameof(request.Email), request.Email);
-                return methodResult;
+                user = await _userManager.Users.Include(x => x.Human).ThenInclude(x => x!.Teacher).FirstOrDefaultAsync(x => x.Id == request.Id.ToString(), cancellationToken);
+                if (user == null)
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumUserErrorCode.UserNotExist), nameof(request.Email), request.Email);
+                    return methodResult;
+                }
+                _mapper.Map(request, user!.Human!.Teacher);
+            }
+            else if (request.Role == EnumRoleRegisterWithAdmin.CSO)
+            {
+                user = await _userManager.Users.Include(x => x.Human).ThenInclude(x => x!.CSO).FirstOrDefaultAsync(x => x.Email == request.Email, cancellationToken);
+                if (user == null)
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumUserErrorCode.UserNotExist), nameof(request.Email), request.Email);
+                    return methodResult;
+                }
+                _mapper.Map(request, user!.Human!.CSO);
+            }
+            else if (request.Role == EnumRoleRegisterWithAdmin.Moderator)
+            {
+                user = await _userManager.Users.FirstOrDefaultAsync(x => x.Email == request.Email, cancellationToken);
+                if (user == null)
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumUserErrorCode.UserNotExist), nameof(request.Email), request.Email);
+                    return methodResult;
+                }
             }
 
-            _mapper.Map(user, request);
+            _mapper.Map(request, user);
+            if (user.Human != null)
+            {
+                _mapper.Map(request, user.Human);
+            }
+
             await _userManager.UpdateAsync(user);
             methodResult.StatusCode = StatusCodes.Status200OK;
             methodResult.Result = _mapper.Map<UserModel>(user);

@@ -23,6 +23,7 @@ namespace Fsel.Identity.Infrastructure
 
             builder.ApplyConfiguration(new HumanEntityTypeConfiguration());
             builder.ApplyConfiguration(new TeacherEntityTypeConfiguration());
+            builder.ApplyConfiguration(new TeacherBankAccountEntityTypeConfiguration());
             builder.ApplyConfiguration(new CSOEntityTypeConfiguration());
             builder.ApplyConfiguration(new ParentEntityTypeConfiguration());
             builder.ApplyConfiguration(new ParentStudentEntityTypeConfiguration());
@@ -42,6 +43,7 @@ namespace Fsel.Identity.Infrastructure
         public DbSet<Student> Students { get; set; }
         public DbSet<Parent> Parents { get; set; }
         public DbSet<CSO> CSOs { get; set; }
+        public DbSet<TeacherBankAccount> TeacherBankAccounts { get; set; }
         public DbSet<ParentStudent> ParentStudents { get; set; }
         public DbSet<UserOtpCode> UserOtpCodes { get; set; }
 

@@ -13,8 +13,9 @@ namespace Fsel.Identity.Domain.Models.CommandModels.Users
         [EmailAddress]
         public string? Email { get; set; }
 
+        public DateTime Birthday { get; set; }
         public string? PhoneNumber { get; set; }
-        public IList<EnumCourseType>? Types { get; set; }
+        public IList<EnumCourseType>? CourseTypes { get; set; }
         public IList<EnumCourseLevel>? CourseLevels { get; set; }
 
         [Required]
@@ -23,5 +24,6 @@ namespace Fsel.Identity.Domain.Models.CommandModels.Users
         public string? BankAccountName { get; set; }
         public string? BankAccountNumber { get; set; }
         public string? BankName { get; set; }
+        public string? BankBranch { get; set; }
     }
 }

@@ -19,7 +19,7 @@ namespace Fsel.Identity.Application.Commands.UserCmd
 
     public class ComfirmOTPWithAdminCommand : IRequest<MethodResult<ConfirmOtpModel>>
     {
-        public string? Email { get; set; }
+        public string? UserId { get; set; }
         public string? OTP { get; set; }
     }
 
@@ -47,21 +47,21 @@ namespace Fsel.Identity.Application.Commands.UserCmd
             ArgumentNullException.ThrowIfNull(_appSetting.Otp);
             var methodResult = new MethodResult<ConfirmOtpModel>();
             var user = new User();
-            if (request.Email != null)
+            if (request.UserId != null)
             {
-                user = await _userManager.FindByEmailAsync(request.Email);
+                user = await _userManager.FindByIdAsync(request.UserId);
             }
 
             if (user == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumAuthErrorCode.EmailNotExist), nameof(request.Email), request.Email);
+                methodResult.AddErrorBadRequest(nameof(EnumAuthErrorCode.UserNotExist), nameof(request.UserId), request.UserId);
                 return methodResult;
             }
             var userOtpCode = await _userOtpCodeRepository.Queryable
                         .FirstOrDefaultAsync(x => x.UserId == user.Id && x.Status == EnumStatusUser.New && !x.IsDeleted && x.OTPCode == request.OTP, cancellationToken);
             if (userOtpCode == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumAuthErrorCode.InvalidOTP), nameof(request.Email), request.Email);
+                methodResult.AddErrorBadRequest(nameof(EnumAuthErrorCode.InvalidOTP), nameof(request.OTP), request.OTP);
                 return methodResult;
             }
 
