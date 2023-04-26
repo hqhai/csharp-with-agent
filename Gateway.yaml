@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: gateway
-        image: gatewayfselacr.azurecr.io/fsel_src
+        image: fselacr.azurecr.io/gatewayapi
         imagePullPolicy: Always
         ports:
         - containerPort: 80

@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: lms
-        image: lmsfselacr.azurecr.io/fsel_src
+        image: fselacr.azurecr.io/lmsapi
         imagePullPolicy: Always
         ports:
         - containerPort: 80

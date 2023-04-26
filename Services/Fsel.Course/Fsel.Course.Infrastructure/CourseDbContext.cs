@@ -12,7 +12,7 @@ namespace Fsel.Course.Infrastructure
 {
     public class CourseDbContext : BaseDbContext
     {
-        public CourseDbContext(DbContextOptions<CourseDbContext> options, IMediator mediator) : base(options, mediator)
+        public CourseDbContext(DbContextOptions<CourseDbContext> options, IMediator mediator, AuthContext authContext) : base(options, mediator, authContext)
         {
         }
 

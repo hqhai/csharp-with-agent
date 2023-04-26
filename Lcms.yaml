@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: lcms
-        image: lcmswebacr.azurecr.io/fsel_src
+        image: fselacr.azurecr.io/lcmsapi
         imagePullPolicy: Always
         ports:
         - containerPort: 80

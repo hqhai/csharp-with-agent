@@ -11,7 +11,7 @@ namespace Fsel.Interaction.Infrastructure
 {
     public class InteractionDbContext : BaseDbContext
     {
-        public InteractionDbContext(DbContextOptions<InteractionDbContext> options, IMediator mediator) : base(options, mediator)
+        public InteractionDbContext(DbContextOptions<InteractionDbContext> options, IMediator mediator, AuthContext authContext) : base(options, mediator, authContext)
         {
         }
 
