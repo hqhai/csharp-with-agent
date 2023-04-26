@@ -7,13 +7,9 @@ namespace Fsel.Identity.Domain.Models.EntityModels
 
     public class UserModel : BaseModel
     {
-        public string? Id { get; set; }
-
         public string? FullName { get; set; }
-
         public Guid StudentId { get; set; }
         public Guid HumanId { get; set; }
-
         public Human? Human { get; set; }
     }
 }

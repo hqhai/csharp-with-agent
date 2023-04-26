@@ -46,6 +46,8 @@ namespace Fsel.Identity.Api.Controllers
         /// <summary>
         /// Create User
         /// </summary>
+
+        [Authorize(Roles = nameof(EnumRole.Admin))]
         [HttpPost("create-user")]
         [ProducesResponseType(typeof(MethodResult<UserModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
@@ -58,6 +60,7 @@ namespace Fsel.Identity.Api.Controllers
         /// <summary>
         /// Update User
         /// </summary>
+        [Authorize(Roles = nameof(EnumRole.Admin))]
         [HttpPut("user/{id}")]
         [ProducesResponseType(typeof(MethodResult<UserModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
@@ -72,6 +75,7 @@ namespace Fsel.Identity.Api.Controllers
         /// <summary>
         /// Delete User
         /// </summary>
+        [Authorize(Roles = nameof(EnumRole.Admin))]
         [HttpDelete("user/{id}")]
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
@@ -84,6 +88,7 @@ namespace Fsel.Identity.Api.Controllers
         /// <summary>
         /// Search User
         /// </summary>
+        [Authorize(Roles = nameof(EnumRole.Admin))]
         [HttpGet("search-user")]
         [ProducesResponseType(typeof(MethodResult<PagingItemsModel<UserSearchModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
@@ -108,6 +113,7 @@ namespace Fsel.Identity.Api.Controllers
         /// <summary>
         /// Active user
         /// </summary>
+        [Authorize(Roles = nameof(EnumRole.Admin))]
         [HttpPost("active-user")]
         [ProducesResponseType(typeof(MethodResult<UserModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]

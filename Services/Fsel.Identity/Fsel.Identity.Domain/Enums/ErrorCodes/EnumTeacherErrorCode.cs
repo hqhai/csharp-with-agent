@@ -7,11 +7,11 @@ namespace Fsel.Identity.Domain.Enums.ErrorCodes
         /// <summary>
         /// teacher does not exist
         /// </summary>
-        TeacherNotExitst,
+        TeacherNotExist,
 
         /// <summary>
         /// teachers does not exist
         /// </summary>
-        TeachersNotExitst,
+        TeachersNotExist,
     }
 }
