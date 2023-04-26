@@ -77,16 +77,16 @@ namespace Fsel.Identity.Application.Commands.UserCmd
                 user = new();
                 GetUser(user, request ?? new CreateUserCommand());
                 result = await _userManager.CreateAsync(user, newPassword);
-
-                var human = await CreateHuman(request!, user);
-                human = _humanRepository.Add(human);
-                await _humanRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-
                 if (!result.Succeeded)
                 {
                     methodResult.AddErrorBadRequest(nameof(EnumAuthErrorCode.UserFailToCreate), nameof(newPassword), newPassword);
                     return methodResult;
                 }
+
+                var human = await CreateHuman(request!, user);
+                human = _humanRepository.Add(human);
+                await _humanRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+
                 await _userManager.AddToRoleAsync(user, request!.Role.ToString());
 
                 #region Send Code OTP
@@ -171,6 +171,10 @@ namespace Fsel.Identity.Application.Commands.UserCmd
                     CourseTypes = request.CourseTypes
                 };
                 human.Code = $"CSO_{stt:0000}";
+            }
+            else if (request.Role == EnumRoleRegisterWithAdmin.Moderator)
+            {
+                human.Code = "Moderator";
             }
             return human;
         }
