@@ -64,7 +64,7 @@ namespace Fsel.Identity.Application.Commands.UserCmd
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<UserModel>();
             User? user = await _userManager.FindByEmailAsync(request.Email!);
-            if (user != null && user.EmailConfirmed)
+            if (user != null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumAuthErrorCode.DuplicateEmail), nameof(request.Email), request.Email);
                 return methodResult;
