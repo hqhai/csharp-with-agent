@@ -14,5 +14,9 @@ namespace Fsel.Identity.Domain.Models.EntityModels
         public EnumGender? Gender { get; set; }
         public string? Email { get; set; }
         public string? AvatarPath { get; set; }
+        public TeacherModel? Teacher { get; set; }
+        public CSOModel? CSO { get; set; }
+        public StudentModel? Student { get; set; }
+        public ParentModel? Parent { get; set; }
     }
 }

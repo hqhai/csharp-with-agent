@@ -58,7 +58,7 @@ namespace Fsel.Identity.Application.Commands.UserCmd
             }
             else if (request.Role == EnumRoleRegisterWithAdmin.Moderator)
             {
-                user = await _userManager.Users.FirstOrDefaultAsync(x => x.Email == request.Email, cancellationToken);
+                user = await _userManager.Users.Include(x => x.Human).FirstOrDefaultAsync(x => x.Email == request.Email, cancellationToken);
                 if (user == null)
                 {
                     methodResult.AddErrorBadRequest(nameof(EnumUserErrorCode.UserNotExist), nameof(request.Email), request.Email);
@@ -67,10 +67,7 @@ namespace Fsel.Identity.Application.Commands.UserCmd
             }
 
             _mapper.Map(request, user);
-            if (user.Human != null)
-            {
-                _mapper.Map(request, user.Human);
-            }
+            _mapper.Map(request, user.Human);
 
             await _userManager.UpdateAsync(user);
             methodResult.StatusCode = StatusCodes.Status200OK;

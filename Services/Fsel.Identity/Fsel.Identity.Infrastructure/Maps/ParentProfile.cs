@@ -6,6 +6,7 @@ namespace Fsel.Identity.Infrastructure.Maps
     using Fsel.Core.Extensions;
     using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.Models.CommandModels.Parents;
+    using Fsel.Identity.Domain.Models.CommandModels.Users;
     using Fsel.Identity.Domain.Models.EntityModels;
 
     public class ParentProfile : Profile
@@ -14,6 +15,7 @@ namespace Fsel.Identity.Infrastructure.Maps
         {
             CreateMap<Parent, ParentModel>().IgnoreAllNonExisting();
             CreateMap<UpdateParentCommandModel, Parent>().IgnoreAllNonExisting();
+            CreateMap<UpdateUserProfileCommandModel, Parent>().IgnoreAllNonExisting();
         }
     }
 }

@@ -58,6 +58,34 @@ namespace Fsel.Identity.Api.Controllers
         }
 
         /// <summary>
+        /// Create User
+        /// </summary>
+
+        [Authorize]
+        [HttpPut("update-profile-user")]
+        [ProducesResponseType(typeof(MethodResult<UserModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> UpdateProfileUser([FromBody] UpdateUserProfileCommand command)
+        {
+            MethodResult<UserModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Create User
+        /// </summary>
+
+        [Authorize]
+        [HttpPut("update-phone-user")]
+        [ProducesResponseType(typeof(MethodResult<UserModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> UpdatePhoneUser([FromBody] UpdatePhoneNumberUserCommand command)
+        {
+            MethodResult<UserModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
         /// Update User
         /// </summary>
         [Authorize(Roles = nameof(EnumRole.Admin))]
@@ -95,6 +123,19 @@ namespace Fsel.Identity.Api.Controllers
         public async Task<IActionResult> SearchUser([FromQuery] SearchUserQuery query)
         {
             MethodResult<PagingItemsModel<UserSearchModel>> commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Search User
+        /// </summary>
+        [Authorize]
+        [HttpGet("get-user")]
+        [ProducesResponseType(typeof(MethodResult<UserModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetProfileUser()
+        {
+            MethodResult<UserModel> commandResult = await _mediator.Send(new GetUserQuery()).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
 

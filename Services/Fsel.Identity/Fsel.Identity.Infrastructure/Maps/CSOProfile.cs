@@ -15,6 +15,8 @@ namespace Fsel.Identity.Infrastructure.Maps
             CreateMap<CSO, CSOModel>().IgnoreAllNonExisting();
             CreateMap<CreateUserCommandModel, CSO>().IgnoreAllNonExisting();
             CreateMap<UpdateUserCommandModel, CSO>().ForMember(m => m.Id, opt => opt.Ignore()).IgnoreAllNonExisting();
+
+            CreateMap<UpdateUserProfileCommandModel, CSO>().IgnoreAllNonExisting();
         }
     }
 }
