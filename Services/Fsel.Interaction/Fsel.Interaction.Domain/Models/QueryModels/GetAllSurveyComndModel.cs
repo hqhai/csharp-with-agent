@@ -4,7 +4,7 @@ namespace Fsel.Interaction.Domain.Models.QueryModels
 {
     using Fsel.Core.Base.BaseModels;
 
-    public class GetAllSurveyComndModel : BaseQueyModel
+    public class GetAllSurveyComndModel : BaseQueryModel
     {
     }
 }
