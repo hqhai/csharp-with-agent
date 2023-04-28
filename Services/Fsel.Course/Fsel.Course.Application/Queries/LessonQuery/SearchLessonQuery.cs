@@ -95,7 +95,7 @@ namespace Fsel.Course.Application.Queries.LessonQuery
 
             int totalItem = await lessonQuery.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
             var lists = await lessonQuery
-                    .ApplySortAndPaging(request, nameof(LessonSearchModel.Name))
+                    .ApplySortAndPaging(request)
                     .AsNoTracking()
                     .ToListAsync(cancellationToken: cancellationToken)
                     .ConfigureAwait(false);

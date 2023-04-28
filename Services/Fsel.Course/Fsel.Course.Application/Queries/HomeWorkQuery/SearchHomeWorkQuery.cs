@@ -71,7 +71,7 @@ namespace Fsel.Course.Application.Queries.HomeWorkQuery
 
             int totalItem = await homeWorkQuery.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
             var lists = await homeWorkQuery
-                    .ApplySortAndPaging(request, nameof(HomeWorkSearchModel.Name))
+                    .ApplySortAndPaging(request)
                     .AsNoTracking()
                     .ToListAsync(cancellationToken: cancellationToken)
                     .ConfigureAwait(false);

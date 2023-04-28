@@ -60,7 +60,7 @@ namespace Fsel.Course.Application.Queries.PlacementTestQuery
 
             int totalItem = await placementTestQuery.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
             var lists = await placementTestQuery
-                    .ApplySortAndPaging(request, nameof(PlacementTestModel.Name))
+                    .ApplySortAndPaging(request)
                     .AsNoTracking()
                     .ToListAsync(cancellationToken: cancellationToken)
                     .ConfigureAwait(false);
