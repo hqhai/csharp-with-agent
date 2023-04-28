@@ -49,7 +49,7 @@ namespace Fsel.Course.Application.Queries.VideoQuery
 
             int totalItem = await videoQuery.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
             var lists = await videoQuery
-                    .ApplySortAndPaging(request, nameof(VideoSearchModel.Name))
+                    .ApplySortAndPaging(request)
                     .AsNoTracking()
                     .ToListAsync(cancellationToken: cancellationToken)
                     .ConfigureAwait(false);

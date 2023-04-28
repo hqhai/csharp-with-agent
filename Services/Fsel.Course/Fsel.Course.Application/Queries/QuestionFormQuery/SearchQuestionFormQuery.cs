@@ -55,7 +55,7 @@ namespace Fsel.Course.Application.Queries.QuestionFormQuery
 
             int totalItem = await questionFormQuery.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
             var lists = await questionFormQuery
-                    .ApplySortAndPaging(request, nameof(QuestionFormModel.Name))
+                    .ApplySortAndPaging(request)
                     .AsNoTracking()
                     .ToListAsync(cancellationToken: cancellationToken)
                     .ConfigureAwait(false);
