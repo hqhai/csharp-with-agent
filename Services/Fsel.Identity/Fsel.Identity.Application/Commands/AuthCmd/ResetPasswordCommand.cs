@@ -58,7 +58,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             }
             else
             {
-                user = await _userManager.FindByEmailAsync(request.Email!);
+                user = await _userManager.FindByEmailAsync(request.Email);
             }
 
             if (user == null)
