@@ -85,7 +85,6 @@ namespace Fsel.Course.Lms.Application.Commands.VideoResultCmd
             videoResult.CorrectCount = await answerQuery.SumAsync(cancellationToken);
             videoResult.CorrectTotal = await questionQuery.SumAsync(cancellationToken);
             videoResult.Status = EnumResultStatus.Done;
-            videoResult.Percent = (double)videoResult.CorrectCount / videoResult.CorrectTotal * 100;
 
             await _videoResultRepository.ExecuteTransactionAsync(async () =>
             {

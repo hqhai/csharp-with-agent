@@ -66,7 +66,6 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkResultCmd
             homeWorkResult.CorrectCount = await answerQuery.SumAsync(cancellationToken);
             homeWorkResult.CorrectTotal = await questionQuery.SumAsync(cancellationToken);
             homeWorkResult.Status = EnumResultStatus.Done;
-            homeWorkResult.Percent = (double)homeWorkResult.CorrectCount / homeWorkResult.CorrectTotal * 100;
             await _homeWorkResultRepository.ExecuteTransactionAsync(async () =>
             {
                 homeWorkResult = _homeWorkResultRepository.Update(homeWorkResult);

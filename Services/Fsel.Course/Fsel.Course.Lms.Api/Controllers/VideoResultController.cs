@@ -26,7 +26,7 @@ namespace Fsel.Course.Lms.Api.Controllers
         }
 
         /// <summary>
-        /// review lesson video
+        /// Review lesson video
         /// </summary>
         [HttpPost]
         [ProducesResponseType(typeof(MethodResult<VideoResultModel>), (int)HttpStatusCode.OK)]

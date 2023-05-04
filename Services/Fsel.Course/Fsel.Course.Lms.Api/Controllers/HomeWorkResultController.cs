@@ -28,12 +28,12 @@ namespace Fsel.Course.Lms.Api.Controllers
         /// <summary>
         /// Save lesson HomeWork
         /// </summary>
-        [HttpGet]
+        [HttpPost]
         [ProducesResponseType(typeof(MethodResult<HomeWorkResultModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> SaveLessonHomeWork([FromQuery] LessonHomeWorkCommand query)
+        public async Task<IActionResult> SaveLessonHomeWork([FromQuery] LessonHomeWorkCommand command)
         {
-            MethodResult<HomeWorkResultModel> commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            MethodResult<HomeWorkResultModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
     }
