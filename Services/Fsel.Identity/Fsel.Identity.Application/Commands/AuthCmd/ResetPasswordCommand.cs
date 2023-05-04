@@ -52,7 +52,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             }
 
             User? user;
-            if (!string.IsNullOrEmpty(request.Email))
+            if (string.IsNullOrEmpty(request.Email))
             {
                 user = await _userManager.FindByIdAsync(_authContext.CurrentUserId.ToString());
             }
