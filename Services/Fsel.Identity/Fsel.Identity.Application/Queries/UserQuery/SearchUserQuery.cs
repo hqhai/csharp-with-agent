@@ -3,9 +3,9 @@
 namespace Fsel.Identity.Application.Queries.UserQuery
 {
     using System;
-    using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base.BaseModels;
+    using Fsel.Core.Extensions;
     using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Domain.Models.EntityModels;
@@ -22,18 +22,16 @@ namespace Fsel.Identity.Application.Queries.UserQuery
 
     public class SearchUserQueryHandler : IRequestHandler<SearchUserQuery, MethodResult<PagingItemsModel<UserSearchModel>>>
     {
-        private readonly IMapper _mapper;
         private readonly IHumanRepository _humanRepository;
         private readonly UserManager<User> _userManager;
         private readonly ITeacherRepository _teacherRepository;
         private readonly ICSORepository _cSORepository;
 
-        public SearchUserQueryHandler(IMapper mapper, IHumanRepository humanRepository
+        public SearchUserQueryHandler(IHumanRepository humanRepository
             , UserManager<User> userManager
             , ITeacherRepository teacherRepository
             , ICSORepository cSORepository)
         {
-            _mapper = mapper;
             _humanRepository = humanRepository;
             _userManager = userManager;
             _teacherRepository = teacherRepository;
@@ -134,19 +132,12 @@ namespace Fsel.Identity.Application.Queries.UserQuery
             }
 
             int totalItem = await userQuery!.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
-            var lists = await userQuery!.OrderByDescending(x => x.CreatedDate)
-                    .Skip((request.Page - 1) * request.PageSize)
-                    .Take(request.PageSize)
+            var lists = await userQuery!
+                    .ApplySortAndPaging(request)
                     .AsNoTracking()
                     .ToListAsync(cancellationToken: cancellationToken)
                     .ConfigureAwait(false);
-
-            methodResult.Result = new PagingItemsModel<UserSearchModel>
-            {
-                Items = _mapper.Map<IEnumerable<UserSearchModel>>(lists),
-                PagingInfo = new PagingInfoModel { Page = request.Page, PageSize = request.PageSize, TotalItems = totalItem }
-            };
-
+            methodResult.Result = new PagingItemsModel<UserSearchModel>(lists, request, totalItem);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }

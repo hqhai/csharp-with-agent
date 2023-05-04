@@ -5,7 +5,7 @@ namespace Fsel.Identity.Domain.Models.QueryModels.Users
     using Fsel.Core.Base.BaseModels;
     using Fsel.Shared.Enums;
 
-    public class SearchUserQueryModel : BaseQueyModel
+    public class SearchUserQueryModel : BaseQueryModel
     {
         public EnumRoleRegisterWithAdmin Role { get; set; }
         public EnumTeacherRole? TeacherRole { get; set; }
