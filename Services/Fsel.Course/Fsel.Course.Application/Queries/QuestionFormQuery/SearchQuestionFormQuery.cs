@@ -5,6 +5,7 @@ namespace Fsel.Course.Application.Queries.QuestionFormQuery
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base.BaseModels;
+    using Fsel.Core.Extensions;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Domain.Models.QueryModels.QuestionForms;
@@ -53,24 +54,13 @@ namespace Fsel.Course.Application.Queries.QuestionFormQuery
             }
 
             int totalItem = await questionFormQuery.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
-            var lists = await questionFormQuery.OrderByDescending(x => x.CreatedDate)
-                    .Skip((request.Page - 1) * request.PageSize)
-                    .Take(request.PageSize)
+            var lists = await questionFormQuery
+                    .ApplySortAndPaging(request)
                     .AsNoTracking()
                     .ToListAsync(cancellationToken: cancellationToken)
                     .ConfigureAwait(false);
 
-            methodResult.Result = new PagingItemsModel<QuestionFormModel>
-            {
-                Items = _mapper.Map<IEnumerable<QuestionFormModel>>(lists),
-                PagingInfo = new PagingInfoModel
-                {
-                    Page = request.Page,
-                    PageSize = request.PageSize,
-                    TotalItems = totalItem
-                }
-            };
-
+            methodResult.Result = new PagingItemsModel<QuestionFormModel>(lists, request, totalItem);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }

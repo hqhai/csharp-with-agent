@@ -3,6 +3,7 @@
 using AutoMapper;
 using Fsel.Common.ActionResults;
 using Fsel.Core.Base.BaseModels;
+using Fsel.Core.Extensions;
 using Fsel.Course.Application.Services.UserServices;
 using Fsel.Course.Application.Services.UserServices.Models;
 using Fsel.Course.Domain.IRepositories;
@@ -93,9 +94,8 @@ namespace Fsel.Course.Application.Queries.LessonQuery
             }
 
             int totalItem = await lessonQuery.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
-            var lists = await lessonQuery.OrderByDescending(x => x.CreatedDate)
-                    .Skip((request.Page - 1) * request.PageSize)
-                    .Take(request.PageSize)
+            var lists = await lessonQuery
+                    .ApplySortAndPaging(request)
                     .AsNoTracking()
                     .ToListAsync(cancellationToken: cancellationToken)
                     .ConfigureAwait(false);
@@ -109,12 +109,7 @@ namespace Fsel.Course.Application.Queries.LessonQuery
                 }
             }
 
-            methodResult.Result = new PagingItemsModel<LessonSearchModel>
-            {
-                Items = _mapper.Map<IEnumerable<LessonSearchModel>>(lists),
-                PagingInfo = new PagingInfoModel { Page = request.Page, PageSize = request.PageSize, TotalItems = totalItem }
-            };
-
+            methodResult.Result = new PagingItemsModel<LessonSearchModel>(lists, request, totalItem);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }

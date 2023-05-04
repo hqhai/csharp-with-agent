@@ -3,6 +3,7 @@
 using AutoMapper;
 using Fsel.Common.ActionResults;
 using Fsel.Core.Base.BaseModels;
+using Fsel.Core.Extensions;
 using Fsel.Course.Domain.IRepositories;
 using Fsel.Course.Domain.Models.EntityModels;
 using Fsel.Course.Domain.Models.QueryModels.Videos;
@@ -47,24 +48,13 @@ namespace Fsel.Course.Application.Queries.VideoQuery
             }
 
             int totalItem = await videoQuery.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
-            var lists = await videoQuery.OrderByDescending(x => x.CreatedDate)
-                    .Skip((request.Page - 1) * request.PageSize)
-                    .Take(request.PageSize)
+            var lists = await videoQuery
+                    .ApplySortAndPaging(request)
                     .AsNoTracking()
                     .ToListAsync(cancellationToken: cancellationToken)
                     .ConfigureAwait(false);
 
-            methodResult.Result = new PagingItemsModel<VideoSearchModel>
-            {
-                Items = _mapper.Map<IEnumerable<VideoSearchModel>>(lists),
-                PagingInfo = new PagingInfoModel
-                {
-                    Page = request.Page,
-                    PageSize = request.PageSize,
-                    TotalItems = totalItem
-                }
-            };
-
+            methodResult.Result = new PagingItemsModel<VideoSearchModel>(lists, request, totalItem);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }
