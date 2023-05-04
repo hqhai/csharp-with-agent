@@ -4,7 +4,7 @@ namespace Fsel.Course.Domain.Models.QueryModels.QuestionForms
 {
     using Fsel.Core.Base.BaseModels;
 
-    public class SearchQuestionFormQueryModel : BaseQueyModel
+    public class SearchQuestionFormQueryModel : BaseQueryModel
     {
     }
 }

@@ -142,12 +142,12 @@ namespace Fsel.Identity.Api.Controllers
         /// <summary>
         /// confirm-otp-user
         /// </summary>
-        [HttpPost("confirm-otp-user")]
+        [HttpGet("confirm-otp-user")]
         [ProducesResponseType(typeof(MethodResult<ConfirmOtpModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> ConfirmOTPUserByAdmin([FromBody] ComfirmOTPWithAdminCommand command)
+        public async Task<IActionResult> ConfirmOTPUserByAdmin([FromQuery] ComfirmOTPWithAdminCommand query)
         {
-            MethodResult<ConfirmOtpModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            MethodResult<ConfirmOtpModel> commandResult = await _mediator.Send(query).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
 

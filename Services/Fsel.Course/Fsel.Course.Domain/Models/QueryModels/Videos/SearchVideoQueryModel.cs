@@ -6,7 +6,7 @@ using Fsel.Course.Domain.Enums;
 
 namespace Fsel.Course.Domain.Models.QueryModels.Videos
 {
-    public class SearchVideoQueryModel : BaseQueyModel
+    public class SearchVideoQueryModel : BaseQueryModel
     {
         public Guid? TeacherId { get; set; }
         public EnumCourseLevel? CourseLevel { get; set; }

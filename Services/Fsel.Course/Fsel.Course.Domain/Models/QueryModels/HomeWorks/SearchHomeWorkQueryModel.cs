@@ -5,7 +5,7 @@ namespace Fsel.Course.Domain.Models.QueryModels.HomeWorks
     using Fsel.Shared.Enums;
     using Fsel.Core.Base.BaseModels;
 
-    public class SearchHomeWorkQueryModel : BaseQueyModel
+    public class SearchHomeWorkQueryModel : BaseQueryModel
     {
         public EnumCourseLevel? CourseLevel { get; set; }
 
