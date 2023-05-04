@@ -64,7 +64,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
 
             var isSendMail = await _senderService.SendEmailAsync(sendCommandModel);
 
-            if (isSendMail.IsSuccessStatusCode)
+            if (!isSendMail.IsSuccessStatusCode)
             {
                 methodResult.StatusCode = StatusCodes.Status500InternalServerError;
                 methodResult.AddError(nameof(EnumAuthErrorCode.ErrorSendEmail));
