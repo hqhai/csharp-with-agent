@@ -23,7 +23,7 @@ namespace Fsel.Storage.Application.Services.AmazonS3Services
         {
             { EnumFolderType.Videos, ByteSize.FromGigabytes(5).Bytes }, //maximum video size (5 GB)
             { EnumFolderType.Files, ByteSize.FromMegabytes(6).Bytes }, //maximum file size (6 MB)
-            { EnumFolderType.Questions, ByteSize.FromMegabytes(2).Bytes } //maximum question size (2 MB)
+            { EnumFolderType.Questions, ByteSize.FromMegabytes(6).Bytes } //maximum question size (6 MB)
         };
 
         public AmazonS3Service(AppSetting appSetting)
