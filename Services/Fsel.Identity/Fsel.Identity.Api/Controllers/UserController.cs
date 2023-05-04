@@ -58,7 +58,7 @@ namespace Fsel.Identity.Api.Controllers
         }
 
         /// <summary>
-        /// Create User
+        /// Update profile user
         /// </summary>
 
         [Authorize]
@@ -72,7 +72,7 @@ namespace Fsel.Identity.Api.Controllers
         }
 
         /// <summary>
-        /// Create User
+        /// Update phone user
         /// </summary>
 
         [Authorize]
@@ -127,7 +127,7 @@ namespace Fsel.Identity.Api.Controllers
         }
 
         /// <summary>
-        /// Search User
+        /// Get User
         /// </summary>
         [Authorize]
         [HttpGet("get-user")]
