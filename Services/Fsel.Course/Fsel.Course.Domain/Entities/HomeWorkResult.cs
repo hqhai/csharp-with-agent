@@ -12,8 +12,17 @@ namespace Fsel.Course.Domain.Entities
         /// <summary>
         /// Phần trăm
         /// </summary>
-        [Range(0, 10000_0000, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
-        public double Percent { get; set; }
+        private double _percent;
+
+        [Range(0, 100, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
+        public double Percent
+        {
+            get
+            {
+                return CorrectTotal > 0 ? ((double)CorrectCount / CorrectTotal * 100) : _percent;
+            }
+            set { _percent = CorrectTotal > 0 ? ((double)CorrectCount / CorrectTotal * 100) : value; }
+        }
 
         /// <summary>
         /// Tổng số câu trả lời đúng
