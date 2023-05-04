@@ -1,9 +1,11 @@
 // Copyright (c) Atlantic. All rights reserved.
 
+using System.Globalization;
 using System.Text;
 using System.Transactions;
 using AutoMapper;
 using Fsel.Common.ActionResults;
+using Fsel.Common.Constants;
 using Fsel.Common.Helpers;
 using Fsel.Identity.Domain.Entities;
 using Fsel.Identity.Domain.Enums;
@@ -127,10 +129,14 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                                 _userOtpCodeRepository.Update(userOtpCode);
                                 await _userOtpCodeRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
                             }
+
+                            var content = string.Format(CultureInfo.InvariantCulture, StringValues.SendOtpContent, user.FullName, otp);
+                            var subject = StringValues.SendOtpSubject + $"{otp}";
+
                             var sendResult = new MethodResult<bool>();
                             if (request != null && request.Email != null)
                             {
-                                sendResult = await _mediator.Send(new SendOTPCommand { Email = user.Email, FullName = user.FullName, Otp = otp }, cancellationToken).ConfigureAwait(false);
+                                sendResult = await _mediator.Send(new SendOTPCommand { Email = user.Email, Content = content, Subject = subject }, cancellationToken).ConfigureAwait(false);
                             }
 
                             if (!sendResult.IsOK)

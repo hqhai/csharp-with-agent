@@ -26,12 +26,12 @@ namespace Fsel.Course.Lms.Api.Controllers
         }
 
         /// <summary>
-        /// Create review lession video
+        /// review lesson video
         /// </summary>
         [HttpPost]
         [ProducesResponseType(typeof(MethodResult<VideoResultModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> ReviewLessionVideo([FromBody] ReviewLessonVideoCommand command)
+        public async Task<IActionResult> ReviewLessonVideo([FromBody] ReviewLessonVideoCommand command)
         {
             MethodResult<VideoResultModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();

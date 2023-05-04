@@ -7,17 +7,17 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkResultCmd
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
-    using Fsel.Course.Domain.Models.CommandModels.HomeWorkResults;
     using Fsel.Course.Domain.Models.EntityModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class ReviewLessonHomeWorkCommand : ReviewLessonHomeWorkCommandModel, IRequest<MethodResult<HomeWorkResultModel>>
+    public class LessonHomeWorkCommand : IRequest<MethodResult<HomeWorkResultModel>>
     {
+        public Guid LessonResulttId { get; set; }
     }
 
-    public class ReviewLessonHomeWorkCommandHandler : IRequestHandler<ReviewLessonHomeWorkCommand, MethodResult<HomeWorkResultModel>>
+    public class LessonHomeWorkCommandHandler : IRequestHandler<LessonHomeWorkCommand, MethodResult<HomeWorkResultModel>>
     {
         private readonly IHomeWorkResultRepository _homeWorkResultRepository;
         private readonly IMapper _mapper;
@@ -26,7 +26,7 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkResultCmd
         private readonly IHomeWorkRepository _homeWorkRepository;
         private readonly IHomeWorkQuestionRepository _homeWorkQuestionRepository;
 
-        public ReviewLessonHomeWorkCommandHandler(IHomeWorkResultRepository homeWorkResultRepository,
+        public LessonHomeWorkCommandHandler(IHomeWorkResultRepository homeWorkResultRepository,
             IMapper mapper,
             IQuestionRepository questionRepository,
             IHomeWorkAnswerRepository homeWorkAnswerRepository,
@@ -41,7 +41,7 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkResultCmd
             _homeWorkQuestionRepository = homeWorkQuestionRepository;
         }
 
-        public async Task<MethodResult<HomeWorkResultModel>> Handle(ReviewLessonHomeWorkCommand request, CancellationToken cancellationToken)
+        public async Task<MethodResult<HomeWorkResultModel>> Handle(LessonHomeWorkCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<HomeWorkResultModel> methodResult = new MethodResult<HomeWorkResultModel>();
@@ -66,7 +66,7 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkResultCmd
             homeWorkResult.CorrectCount = await answerQuery.SumAsync(cancellationToken);
             homeWorkResult.CorrectTotal = await questionQuery.SumAsync(cancellationToken);
             homeWorkResult.Status = EnumResultStatus.Done;
-
+            homeWorkResult.Percent = (double)homeWorkResult.CorrectCount / homeWorkResult.CorrectTotal * 100;
             await _homeWorkResultRepository.ExecuteTransactionAsync(async () =>
             {
                 homeWorkResult = _homeWorkResultRepository.Update(homeWorkResult);

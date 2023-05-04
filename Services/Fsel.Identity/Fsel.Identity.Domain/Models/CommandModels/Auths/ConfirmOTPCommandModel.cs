@@ -30,6 +30,7 @@ namespace Fsel.Identity.Domain.Models.CommandModels.Auths
         public EnumRoleRegister Role { get; set; }
 
         public DateTime? Birthday { get; set; }
+        [Required]
         public string? OTP { get; set; }
     }
 }

@@ -112,6 +112,11 @@ namespace Fsel.Identity.Domain.Enums.ErrorCodes
         /// <summary>
         /// OTP has expired, please click on the Resend code button below to receive a new OTP
         /// </summary>
-        OTPExpired
+        OTPExpired,
+
+        /// <summary>
+        /// Email is Null
+        /// </summary>
+        EmailNull
     }
 }
