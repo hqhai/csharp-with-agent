@@ -211,10 +211,10 @@ namespace Fsel.Course.Infrastructure.Common
             {
                 foreach (var item in dataAnswer.Answers)
                 {
-                    if (item.Answer != null)
+                    if (item.Answer != null && item.Answer.Count > 0)
                     {
-                        var isExacts = item.Answer.Select(w => dataQuestion.Contents.All(c => c.Id == item.Id && c.Words != null && c.Words.Contains(w)))
-                                                  .ToList();
+                        var question = dataQuestion.Contents.FirstOrDefault(c => c.Id == item.Id);
+                        var isExacts = item.Answer.Select(w => question!.Words!.Contains(w)).ToList();
                         item.IsExacts = isExacts;
                         if (isExacts.All(x => x))
                         {
@@ -236,11 +236,10 @@ namespace Fsel.Course.Infrastructure.Common
             {
                 foreach (var item in dataAnswer.Answers)
                 {
-                    if (item.Answer != null)
+                    if (item.Answer != null && item.Answer.Count > 0)
                     {
-                        var question = dataQuestion.Contents.FirstOrDefault(x => x.Id == item.Id);
-                        var isExacts = item.Answer.Select(w => question!.Words != null && question.Words.Contains(w))
-                                                  .ToList();
+                        var question = dataQuestion.Contents.FirstOrDefault(c => c.Id == item.Id);
+                        var isExacts = item.Answer.Select(w => question!.Words!.Contains(w)).ToList();
                         item.IsExacts = isExacts;
                         number += isExacts.Count(x => x);
                     }
@@ -259,12 +258,16 @@ namespace Fsel.Course.Infrastructure.Common
             {
                 foreach (var item in dataAnswer.Answers)
                 {
-                    var content = dataQuestion.Contents.All(c => c.Id == item.Id && c.Words != null && item.Answer != null && c.Words.SequenceEqual(item.Answer));
-                    if (content)
+                    var question = dataQuestion.Contents.FirstOrDefault(c => c.Id == item.Id);
+                    if (question != null && item.Answer != null && question.Words != null && question.Words.Count > 0)
                     {
-                        number++;
+                        var content = question.Words.SequenceEqual(item.Answer);
+                        if (content)
+                        {
+                            number++;
+                        }
+                        item.IsExact = content;
                     }
-                    item.IsExact = content;
                 }
             }
             configAnswer = dataAnswer;
