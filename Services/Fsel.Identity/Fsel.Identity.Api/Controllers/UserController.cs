@@ -157,8 +157,7 @@ namespace Fsel.Identity.Api.Controllers
         [Authorize(Roles = nameof(EnumRole.Admin))]
         [HttpPost("active-user")]
         [ProducesResponseType(typeof(MethodResult<UserModel>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> ActiveUser([FromBody] UpdateStatusUserCommand command)
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]        public async Task<IActionResult> ActiveUser([FromBody] UpdateStatusUserCommand command)
         {
             MethodResult<UserModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();

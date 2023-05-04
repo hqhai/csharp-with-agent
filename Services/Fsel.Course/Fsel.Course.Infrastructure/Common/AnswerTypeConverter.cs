@@ -259,12 +259,16 @@ namespace Fsel.Course.Infrastructure.Common
             {
                 foreach (var item in dataAnswer.Answers)
                 {
-                    var content = dataQuestion.Contents.All(c => c.Id == item.Id && c.Words != null && item.Answer != null && c.Words.SequenceEqual(item.Answer));
-                    if (content)
+                    var question = dataQuestion.Contents.FirstOrDefault(c => c.Id == item.Id);
+                    if (question != null && item.Answer != null && question.Words != null && question.Words.Count > 0)
                     {
-                        number++;
+                        var content = question.Words.SequenceEqual(item.Answer);
+                        if (content)
+                        {
+                            number++;
+                        }
+                        item.IsExact = content;
                     }
-                    item.IsExact = content;
                 }
             }
             configAnswer = dataAnswer;
