@@ -8,6 +8,7 @@ namespace Fsel.Identity.Domain.Entities
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Common.Helpers;
     using Fsel.Core.Entities;
+    using Fsel.Shared.Enums;
 
     public class Teacher : Entity
     {
@@ -15,9 +16,9 @@ namespace Fsel.Identity.Domain.Entities
         public string? CourseTypesStr { get; set; }
 
         [NotMapped]
-        public object? CourseTypes
+        public IList<EnumCourseType>? CourseTypes
         {
-            get { return ConvertHelper.Deserialize<object>(CourseTypesStr); }
+            get { return ConvertHelper.Deserialize<IList<EnumCourseType>>(CourseTypesStr); }
             set { CourseTypesStr = ConvertHelper.Serialize(value); }
         }
 
@@ -25,9 +26,9 @@ namespace Fsel.Identity.Domain.Entities
         public string? CourseLevelsStr { get; set; }
 
         [NotMapped]
-        public object? CourseLevels
+        public IList<EnumCourseLevel>? CourseLevels
         {
-            get { return ConvertHelper.Deserialize<object>(CourseLevelsStr); }
+            get { return ConvertHelper.Deserialize<IList<EnumCourseLevel>>(CourseLevelsStr); }
             set { CourseLevelsStr = ConvertHelper.Serialize(value); }
         }
 
