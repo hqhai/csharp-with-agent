@@ -135,7 +135,7 @@ namespace Fsel.Identity.Api.Controllers
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetProfileUser()
         {
-            MethodResult<UserModel> commandResult = await _mediator.Send(new GetUserQuery()).ConfigureAwait(false);
+            MethodResult<UserModel> commandResult = await _mediator.Send(new GetUserProfileQuery()).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
 

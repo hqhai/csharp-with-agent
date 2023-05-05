@@ -10,7 +10,6 @@ namespace Fsel.Identity.Application.Commands.UserCmd
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Identity;
-    using Microsoft.EntityFrameworkCore;
 
     public class UpdateStatusUserCommand : IRequest<MethodResult<UserModel>>
     {
@@ -34,7 +33,7 @@ namespace Fsel.Identity.Application.Commands.UserCmd
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<UserModel>();
-            var user = await _userManager.Users.FirstOrDefaultAsync(x => x.Id == request.Id.ToString(), cancellationToken);
+            var user = await _userManager.FindByIdAsync(request.Id.ToString());
             if (user == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumUserErrorCode.UserNotExist), nameof(request.Id), request.Id);

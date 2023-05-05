@@ -1,15 +1,15 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-using Amazon.S3.Transfer;
 using Amazon.S3;
-using Microsoft.AspNetCore.Http;
-using Fsel.Storage.Infrastructure.ValueSettings;
-using Fsel.Storage.Domain.Enums;
+using Amazon.S3.Model;
+using Amazon.S3.Transfer;
 using Fsel.Common.ActionResults;
 using Fsel.Common.Helpers;
-using Amazon.S3.Model;
-using Humanizer.Bytes;
+using Fsel.Storage.Domain.Enums;
 using Fsel.Storage.Domain.Enums.ErrorCodes;
+using Fsel.Storage.Infrastructure.ValueSettings;
+using Humanizer.Bytes;
+using Microsoft.AspNetCore.Http;
 
 namespace Fsel.Storage.Application.Services.AmazonS3Services
 {

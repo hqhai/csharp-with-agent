@@ -13,7 +13,6 @@ namespace Fsel.Identity.Application.Commands.UserCmd
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Identity;
-    using Microsoft.EntityFrameworkCore;
 
     public class UpdatePhoneNumberUserCommand : IRequest<MethodResult<UserModel>>
     {
@@ -38,7 +37,7 @@ namespace Fsel.Identity.Application.Commands.UserCmd
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<UserModel>();
-            var user = await _userManager.Users.FirstOrDefaultAsync(x => x.Id == _authContext.CurrentUserId.ToString(), cancellationToken);
+            var user = await _userManager.FindByIdAsync(_authContext.CurrentUserId.ToString());
             if (user == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumUserErrorCode.UserNotExist));

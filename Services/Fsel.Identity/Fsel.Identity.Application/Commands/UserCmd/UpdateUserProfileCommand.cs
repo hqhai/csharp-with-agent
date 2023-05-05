@@ -146,7 +146,7 @@ namespace Fsel.Identity.Application.Commands.UserCmd
             }
             else if (role == EnumRole.Moderator.ToString() || role == EnumRole.MasterAdmin.ToString() || role == EnumRole.Admin.ToString())
             {
-                userView = await _userManager.Users.FirstOrDefaultAsync(x => x.Email == request.Email, cancellationToken);
+                userView = await _userManager.FindByEmailAsync(request.Email!);
                 if (userView == null)
                 {
                     methodResult.AddErrorBadRequest(nameof(EnumUserErrorCode.UserNotExist), nameof(request.Email), request.Email);

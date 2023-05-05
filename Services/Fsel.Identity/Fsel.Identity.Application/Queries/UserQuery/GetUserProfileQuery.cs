@@ -14,24 +14,24 @@ namespace Fsel.Identity.Application.Queries.UserQuery
     using Microsoft.AspNetCore.Identity;
     using Microsoft.EntityFrameworkCore;
 
-    public class GetUserQuery : IRequest<MethodResult<UserModel>>
+    public class GetUserProfileQuery : IRequest<MethodResult<UserModel>>
     {
     }
 
-    public class GetCourseQueryHandler : IRequestHandler<GetUserQuery, MethodResult<UserModel>>
+    public class GetUserProfileQueryHandler : IRequestHandler<GetUserProfileQuery, MethodResult<UserModel>>
     {
         private readonly IMapper _mapper;
         private readonly AuthContext _authContext;
         private readonly UserManager<User> _userManager;
 
-        public GetCourseQueryHandler(IMapper mapper, AuthContext authContext, UserManager<User> userManager)
+        public GetUserProfileQueryHandler(IMapper mapper, AuthContext authContext, UserManager<User> userManager)
         {
             _mapper = mapper;
             _authContext = authContext;
             _userManager = userManager;
         }
 
-        public async Task<MethodResult<UserModel>> Handle(GetUserQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<UserModel>> Handle(GetUserProfileQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<UserModel> methodResult = new MethodResult<UserModel>();
