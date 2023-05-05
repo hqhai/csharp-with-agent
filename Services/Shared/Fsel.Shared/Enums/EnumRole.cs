@@ -9,6 +9,7 @@ namespace Fsel.Shared.Enums
         CSO,
         Teacher,
         Parent,
-        Student
+        Student,
+        Moderator
     }
 }

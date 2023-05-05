@@ -17,18 +17,7 @@ namespace Fsel.Identity.Domain.Models.CommandModels.Auths
         public string? Email { get; set; }
 
         [Required]
-        [Compare(nameof(ConfirmPassword))]
-        public string? Password { get; set; }
-
-        [Required]
-        public string? ConfirmPassword { get; set; }
-
-        [Required]
         public EnumGender? Gender { get; set; }
-
-        [Required]
-        public EnumRoleRegister Role { get; set; }
-
         public DateTime? Birthday { get; set; }
         [Required]
         public string? OTP { get; set; }

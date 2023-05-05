@@ -20,9 +20,14 @@ namespace Fsel.Identity.Domain.Enums.ErrorCodes
         ConfirmPasswordNotEmpty,
 
         /// <summary>
-        /// Email does does not exist
+        /// Email does not exist
         /// </summary>
         EmailNotExist,
+
+        /// <summary>
+        /// User does not exist
+        /// </summary>
+        UserNotExist,
 
         /// <summary>
         /// Old password is incorrect

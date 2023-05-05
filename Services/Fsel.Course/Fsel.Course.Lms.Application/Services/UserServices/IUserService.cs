@@ -26,5 +26,6 @@ namespace Fsel.Course.Lms.Application.Services.UserServices
 
         [Post("/teacher/get-by-id/{id}")]
         Task<IApiResponse<MethodResult<TeacherModel>>> GetTeacherByIdAsync([Body] Guid id);
+
     }
 }

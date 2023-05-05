@@ -85,13 +85,15 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                             {
                                 var hashPassword = _userManager.PasswordHasher.HashPassword(user, request?.Password ?? string.Empty);
                                 user.PasswordHash = hashPassword;
-                                GetUser(user, request ?? new SignUpCommand());
+                                _mapper.Map(request, user);
+                                user.UserName = request?.Email;
                                 result = await _userManager.UpdateAsync(user);
                             }
                             else
                             {
                                 user = new();
-                                GetUser(user, request ?? new SignUpCommand());
+                                _mapper.Map(request, user);
+                                user.UserName = request?.Email;
                                 result = await _userManager.CreateAsync(user, request?.Password ?? string.Empty);
                             }
 
@@ -129,11 +131,10 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                                 _userOtpCodeRepository.Update(userOtpCode);
                                 await _userOtpCodeRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
                             }
-
                             var content = string.Format(CultureInfo.InvariantCulture, StringValues.SendOtpContent, user.FullName, otp);
                             var subject = StringValues.SendOtpSubject + $"{otp}";
 
-                            var sendResult = new MethodResult<bool>();
+                            MethodResult<bool> sendResult = new MethodResult<bool>();
                             if (request != null && request.Email != null)
                             {
                                 sendResult = await _mediator.Send(new SendOTPCommand { Email = user.Email, Content = content, Subject = subject }, cancellationToken).ConfigureAwait(false);
@@ -170,14 +171,6 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             methodResult.StatusCode = StatusCodes.Status200OK;
             methodResult.Result = _mapper.Map<UserModel>(user);
             return methodResult;
-        }
-
-        private static void GetUser(User user, SignUpCommandModel request)
-        {
-            user.FullName = request.FullName;
-            user.Email = request.Email;
-            user.UserName = request.Email;
-            user.PhoneNumber = request.PhoneNumber;
         }
     }
 }

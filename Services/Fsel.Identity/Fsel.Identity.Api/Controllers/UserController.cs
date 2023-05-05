@@ -3,8 +3,12 @@
 using System.Net;
 using Fsel.Common.ActionResults;
 using Fsel.Common.Constants;
-using Fsel.Shared.Enums;
+using Fsel.Core.Base.BaseModels;
 using Fsel.Identity.Application.Commands.AuthCmd;
+using Fsel.Identity.Application.Commands.UserCmd;
+using Fsel.Identity.Application.Queries.UserQuery;
+using Fsel.Identity.Domain.Models.EntityModels;
+using Fsel.Shared.Enums;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -36,6 +40,127 @@ namespace Fsel.Identity.Api.Controllers
         public async Task<IActionResult> ChangePassword([FromBody] ResetPasswordCommand command)
         {
             MethodResult<bool> commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Create User
+        /// </summary>
+
+        [Authorize(Roles = nameof(EnumRole.Admin))]
+        [HttpPost("create-user")]
+        [ProducesResponseType(typeof(MethodResult<UserModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> Create([FromBody] CreateUserCommand command)
+        {
+            MethodResult<UserModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Update profile user
+        /// </summary>
+
+        [Authorize]
+        [HttpPut("update-profile-user")]
+        [ProducesResponseType(typeof(MethodResult<UserModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> UpdateProfileUser([FromBody] UpdateUserProfileCommand command)
+        {
+            MethodResult<UserModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Update phone user
+        /// </summary>
+
+        [Authorize]
+        [HttpPut("update-phone-user")]
+        [ProducesResponseType(typeof(MethodResult<UserModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> UpdatePhoneUser([FromBody] UpdatePhoneNumberUserCommand command)
+        {
+            MethodResult<UserModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Update User
+        /// </summary>
+        [Authorize(Roles = nameof(EnumRole.Admin))]
+        [HttpPut("{id}")]
+        [ProducesResponseType(typeof(MethodResult<UserModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> Update([FromRoute] Guid id, [FromBody] UpdateUserCommand command)
+        {
+            ArgumentNullException.ThrowIfNull(command);
+            command.Id = id;
+            MethodResult<UserModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Delete User
+        /// </summary>
+        [Authorize(Roles = nameof(EnumRole.Admin))]
+        [HttpDelete("{id}")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> Delete([FromRoute] Guid id)
+        {
+            MethodResult<bool> commandResult = await _mediator.Send(new DeleteUserCommand { Id = id }).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Search User
+        /// </summary>
+        [Authorize(Roles = nameof(EnumRole.Admin))]
+        [HttpGet("search-user")]
+        [ProducesResponseType(typeof(MethodResult<PagingItemsModel<UserSearchModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> SearchUser([FromQuery] SearchUserQuery query)
+        {
+            MethodResult<PagingItemsModel<UserSearchModel>> commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Get User
+        /// </summary>
+        [Authorize]
+        [HttpGet("get-user")]
+        [ProducesResponseType(typeof(MethodResult<UserModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetProfileUser()
+        {
+            MethodResult<UserModel> commandResult = await _mediator.Send(new GetUserProfileQuery()).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// confirm-otp-user
+        /// </summary>
+        [HttpGet("confirm-otp-user")]
+        [ProducesResponseType(typeof(MethodResult<ConfirmOtpModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> ConfirmOTPUserByAdmin([FromQuery] ComfirmOTPWithAdminCommand query)
+        {
+            MethodResult<ConfirmOtpModel> commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Active user
+        /// </summary>
+        [Authorize(Roles = nameof(EnumRole.Admin))]
+        [HttpPost("active-user")]
+        [ProducesResponseType(typeof(MethodResult<UserModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> ActiveUser([FromBody] UpdateStatusUserCommand command)
+        {
+            MethodResult<UserModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
     }

@@ -7,6 +7,9 @@ namespace Fsel.Identity.Domain.Models.EntityModels
 
     public class TeacherModel : BaseModel
     {
+        public object? CourseTypes { get; set; }
+        public object? CourseLevels { get; set; }
+
         public string? PassportPath { get; set; }
 
         public string? UniversityDegreePath { get; set; }
