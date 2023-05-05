@@ -89,7 +89,7 @@ namespace Fsel.Identity.Api.Controllers
         /// Update User
         /// </summary>
         [Authorize(Roles = nameof(EnumRole.Admin))]
-        [HttpPut("user/{id}")]
+        [HttpPut("{id}")]
         [ProducesResponseType(typeof(MethodResult<UserModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> Update([FromRoute] Guid id, [FromBody] UpdateUserCommand command)
@@ -104,7 +104,7 @@ namespace Fsel.Identity.Api.Controllers
         /// Delete User
         /// </summary>
         [Authorize(Roles = nameof(EnumRole.Admin))]
-        [HttpDelete("user/{id}")]
+        [HttpDelete("{id}")]
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> Delete([FromRoute] Guid id)
