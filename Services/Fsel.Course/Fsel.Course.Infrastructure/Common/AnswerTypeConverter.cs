@@ -78,7 +78,7 @@ namespace Fsel.Course.Infrastructure.Common
                 foreach (var item in dataAnswer.Answers)
                 {
                     var question = dataQuestion.Contents.FirstOrDefault(x => x.Id == item.Id);
-                    if (question!.Answers!.Any(n => n.Id == item.AnswerId && n.IsCorrect == true))
+                    if (question?.Answers != null && question.Answers.Count > 0 && question.Answers.Any(n => n.Id == item.AnswerId && n.IsCorrect == true))
                     {
                         number++;
                         item.IsExact = true;
@@ -144,14 +144,14 @@ namespace Fsel.Course.Infrastructure.Common
             var dataQuestion = configQuestion.Deserialize<ListingQuestion>();
             int number = 0;
 
-            if (dataQuestion != null && dataAnswer != null && dataQuestion.ExactWordCount == dataAnswer.Answers?.Count)
+            if (dataQuestion != null && dataAnswer != null && dataAnswer.Answers != null && dataAnswer.Answers.Count > 0 && dataQuestion.ExactWordCount == dataAnswer.Answers.Count)
             {
                 dataAnswer.IsExact = true;
                 number++;
             }
-            else
+            else if (dataAnswer != null)
             {
-                dataAnswer!.IsExact = false;
+                dataAnswer.IsExact = false;
             }
             configAnswer = dataAnswer;
             return number;
@@ -166,7 +166,7 @@ namespace Fsel.Course.Infrastructure.Common
             if (dataAnswer != null && dataAnswer.Answers != null && dataQuestion != null)
             {
                 var answerStrs = dataAnswer.Answers.Split(' ');
-                if (dataQuestion.ExactWordCount == answerStrs?.Length)
+                if (answerStrs != null && dataQuestion.ExactWordCount == answerStrs.Length)
                 {
                     dataAnswer.IsExact = true;
                     number++;
@@ -211,15 +211,19 @@ namespace Fsel.Course.Infrastructure.Common
             {
                 foreach (var item in dataAnswer.Answers)
                 {
-                    if (item.Answer != null)
+                    var question = dataQuestion.Contents.FirstOrDefault(c => c.Id == item.Id);
+                    if (question != null && question.Words != null && question.Words.Count > 0 && item.Answer != null && item.Answer.Count > 0)
                     {
-                        var isExacts = item.Answer.Select(w => dataQuestion.Contents.All(c => c.Id == item.Id && c.Words != null && c.Words.Contains(w)))
-                                                  .ToList();
+                        var isExacts = item.Answer.Select(w => question.Words.Contains(w)).ToList();
                         item.IsExacts = isExacts;
                         if (isExacts.All(x => x))
                         {
                             number++;
                         }
+                    }
+                    else
+                    {
+                        item.IsExacts = new List<bool>();
                     }
                 }
             }
@@ -236,13 +240,16 @@ namespace Fsel.Course.Infrastructure.Common
             {
                 foreach (var item in dataAnswer.Answers)
                 {
-                    if (item.Answer != null)
+                    var question = dataQuestion.Contents.FirstOrDefault(c => c.Id == item.Id);
+                    if (question != null && question.Words != null && question.Words.Count > 0 && item.Answer != null && item.Answer.Count > 0)
                     {
-                        var question = dataQuestion.Contents.FirstOrDefault(x => x.Id == item.Id);
-                        var isExacts = item.Answer.Select(w => question!.Words != null && question.Words.Contains(w))
-                                                  .ToList();
+                        var isExacts = item.Answer.Select(w => question.Words.Contains(w)).ToList();
                         item.IsExacts = isExacts;
                         number += isExacts.Count(x => x);
+                    }
+                    else
+                    {
+                        item.IsExacts = new List<bool>();
                     }
                 }
             }
@@ -259,12 +266,20 @@ namespace Fsel.Course.Infrastructure.Common
             {
                 foreach (var item in dataAnswer.Answers)
                 {
-                    var content = dataQuestion.Contents.All(c => c.Id == item.Id && c.Words != null && item.Answer != null && c.Words.SequenceEqual(item.Answer));
-                    if (content)
+                    var question = dataQuestion.Contents.FirstOrDefault(c => c.Id == item.Id);
+                    if (question != null && item.Answer != null && question.Words != null && question.Words.Count > 0)
                     {
-                        number++;
+                        var content = question.Words.SequenceEqual(item.Answer);
+                        if (content)
+                        {
+                            number++;
+                        }
+                        item.IsExact = content;
                     }
-                    item.IsExact = content;
+                    else
+                    {
+                        item.IsExact = false;
+                    }
                 }
             }
             configAnswer = dataAnswer;
