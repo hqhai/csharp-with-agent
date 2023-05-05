@@ -223,7 +223,7 @@ namespace Fsel.Course.Infrastructure.Common
                     }
                     else
                     {
-                        item.IsExacts = new List<bool> { false };
+                        item.IsExacts = new List<bool>();
                     }
                 }
             }
@@ -249,7 +249,7 @@ namespace Fsel.Course.Infrastructure.Common
                     }
                     else
                     {
-                        item.IsExacts = new List<bool> { false };
+                        item.IsExacts = new List<bool>();
                     }
                 }
             }
