@@ -18,10 +18,6 @@ namespace Fsel.Identity.Domain.Models.CommandModels.Auths
 
         [Required]
         public EnumGender? Gender { get; set; }
-
-        [Required]
-        public EnumRoleRegister Role { get; set; }
-
         public DateTime? Birthday { get; set; }
         public string? OTP { get; set; }
     }

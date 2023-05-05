@@ -8,16 +8,15 @@ namespace Fsel.Identity.Domain.Models.CommandModels.Users
 
     public class UpdateUserCommandModel : BaseCommandModel
     {
-        [Required]
+        public string? AvatarPath { get; set; }
         public string? FullName { get; set; }
-
         public string? Address { get; set; }
         public string? PhoneNumber { get; set; }
 
         [EmailAddress]
         public string? Email { get; set; }
 
-        public IList<EnumCourseType>? Types { get; set; }
+        public IList<EnumCourseType>? CourseTypes { get; set; }
 
         public IList<EnumCourseLevel>? CourseLevels { get; set; }
 
@@ -25,8 +24,5 @@ namespace Fsel.Identity.Domain.Models.CommandModels.Users
         public string? UniversityDegreePath { get; set; }
         public string? CertificationPath { get; set; }
         public string? PoliceClearancePath { get; set; }
-
-        [Required]
-        public EnumRoleRegisterWithAdmin Role { get; set; }
     }
 }

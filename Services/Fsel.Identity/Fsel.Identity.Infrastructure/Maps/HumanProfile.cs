@@ -8,6 +8,7 @@ namespace Fsel.Identity.Infrastructure.Maps
     using Fsel.Identity.Domain.Models.CommandModels.Auths;
     using Fsel.Identity.Domain.Models.CommandModels.Humans;
     using Fsel.Identity.Domain.Models.CommandModels.Parents;
+    using Fsel.Identity.Domain.Models.CommandModels.Students;
     using Fsel.Identity.Domain.Models.CommandModels.Users;
     using Fsel.Identity.Domain.Models.EntityModels;
 
@@ -28,6 +29,7 @@ namespace Fsel.Identity.Infrastructure.Maps
             CreateMap<UpdateUserCommandModel, Human>().ForMember(m => m.Id, opt => opt.Ignore()).IgnoreAllNonExisting();
 
             CreateMap<UpdateUserProfileCommandModel, Human>().IgnoreAllNonExisting();
+            CreateMap<UpdateStudentProfileCommandModel, Human>().IgnoreAllNonExisting();
         }
     }
 }

@@ -75,7 +75,8 @@ namespace Fsel.Identity.Application.Commands.UserCmd
                 var newPassword = new PasswordGeneratorHelper(8, 10).Generate();
                 IdentityResult result;
                 user = new();
-                GetUser(user, request ?? new CreateUserCommand());
+                _mapper.Map(request, user);
+                user.UserName = request?.Email;
                 result = await _userManager.CreateAsync(user, newPassword);
                 if (!result.Succeeded)
                 {
@@ -104,7 +105,7 @@ namespace Fsel.Identity.Application.Commands.UserCmd
                         UserId = user.Id,
                         OTPCode = otp,
                         Status = EnumStatusUser.New,
-                        ExpiredTime = DateTime.Now.AddDays(_appSetting!.Otp!.StepTimeWithAdmin)
+                        ExpiredTime = DateTime.Now.AddDays(_appSetting!.Otp!.StepDayWithAdmin)
                     };
                     _userOtpCodeRepository.Add(userOtpCode);
                     await _userOtpCodeRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
@@ -129,14 +130,6 @@ namespace Fsel.Identity.Application.Commands.UserCmd
             methodResult.StatusCode = StatusCodes.Status200OK;
             methodResult.Result = _mapper.Map<UserModel>(user);
             return methodResult;
-        }
-
-        private static void GetUser(User user, CreateUserCommand request)
-        {
-            user.FullName = request.FullName;
-            user.Email = request.Email;
-            user.UserName = request.Email;
-            user.PhoneNumber = request.PhoneNumber;
         }
 
         private async Task<Human> CreateHuman(CreateUserCommand request, User user)

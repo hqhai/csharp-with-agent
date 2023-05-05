@@ -34,9 +34,17 @@ namespace Fsel.Identity.Application.Commands.UserCmd
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<UserModel>();
+            var user = await _userManager.FindByIdAsync(request.Id.ToString());
 
-            User? user = new();
-            if (request.Role == EnumRoleRegisterWithAdmin.Teacher)
+            if (user == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumUserErrorCode.UserNotExist));
+                return methodResult;
+            }
+
+            var userRoles = await _userManager.GetRolesAsync(user);
+            var role = userRoles.FirstOrDefault();
+            if (role == EnumRoleRegisterWithAdmin.Teacher.ToString())
             {
                 user = await _userManager.Users.Include(x => x.Human).ThenInclude(x => x!.Teacher).FirstOrDefaultAsync(x => x.Id == request.Id.ToString(), cancellationToken);
                 if (user == null)
@@ -46,7 +54,7 @@ namespace Fsel.Identity.Application.Commands.UserCmd
                 }
                 _mapper.Map(request, user!.Human!.Teacher);
             }
-            else if (request.Role == EnumRoleRegisterWithAdmin.CSO)
+            else if (role == EnumRoleRegisterWithAdmin.CSO.ToString())
             {
                 user = await _userManager.Users.Include(x => x.Human).ThenInclude(x => x!.CSO).FirstOrDefaultAsync(x => x.Email == request.Email, cancellationToken);
                 if (user == null)
@@ -56,7 +64,7 @@ namespace Fsel.Identity.Application.Commands.UserCmd
                 }
                 _mapper.Map(request, user!.Human!.CSO);
             }
-            else if (request.Role == EnumRoleRegisterWithAdmin.Moderator)
+            else if (role == EnumRoleRegisterWithAdmin.Moderator.ToString())
             {
                 user = await _userManager.Users.Include(x => x.Human).FirstOrDefaultAsync(x => x.Email == request.Email, cancellationToken);
                 if (user == null)

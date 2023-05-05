@@ -4,6 +4,14 @@ namespace Fsel.Identity.Domain.Enums.ErrorCodes
 {
     public enum EnumUserErrorCode
     {
-        UserNotExist
+        /// <summary>
+        /// User Does Not Exist
+        /// </summary>
+        UserNotExist,
+
+        /// <summary>
+        /// Email Already Exists
+        /// </summary>
+        EmailAlreadyExists
     }
 }

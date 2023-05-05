@@ -15,7 +15,6 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
     using Fsel.Identity.Infrastructure.ValueSettings;
     using Fsel.Shared.Enums;
     using MediatR;
-    using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Identity;
     using Microsoft.EntityFrameworkCore;
 
@@ -91,7 +90,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             await _userManager.ConfirmEmailAsync(user, token);
             var roles = await _userManager.GetRolesAsync(user);
 
-            var human = await CreateHuman(request, user);
+            var human = await CreateHuman(request, roles, user);
             await _humanRepository.ExecuteTransactionAsync(async () =>
             {
                 human = _humanRepository.Add(human);
@@ -109,11 +108,10 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                 UserId = user.Id
             };
             methodResult.Result = confirmOtp;
-            methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }
 
-        private async Task<Human> CreateHuman(ComfirmOTPCommand request, User user)
+        private async Task<Human> CreateHuman(ComfirmOTPCommand request, IList<string> roles, User user)
         {
             Human human = _mapper.Map<Human>(request);
             human.UserId = user.Id;
@@ -123,7 +121,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             var lastOfYear = human.Birthday!.Value.Year % 100;
             var number = request.Gender == EnumGender.Male ? 0 : request.Gender == EnumGender.Female ? 1 : 2;
 
-            if (request.Role == EnumRoleRegister.Student)
+            if (roles.Contains(EnumRoleRegister.Student.ToString()))
             {
                 var stt = await _studentRepository.Queryable.CountAsync();
                 human.Student = new Student
@@ -132,7 +130,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                 };
                 human.Code = $"HN_{weekNumber}{lastDigitOfYear}{number}{lastOfYear}{stt:000}";
             }
-            else if (request.Role == EnumRoleRegister.Parent)
+            else if (roles.Contains(EnumRoleRegister.Parent.ToString()))
             {
                 var stt = await _parentRepository.Queryable.CountAsync();
                 human.Parent = new Parent

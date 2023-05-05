@@ -127,7 +127,7 @@ namespace Fsel.Identity.Api.Controllers
         }
 
         /// <summary>
-        /// G User
+        /// Get User
         /// </summary>
         [Authorize]
         [HttpGet("get-user")]

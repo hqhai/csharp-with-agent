@@ -1,0 +1,17 @@
+// Copyright (c) Atlantic. All rights reserved.
+
+namespace Fsel.Identity.Infrastructure.Maps
+{
+    using AutoMapper;
+    using Fsel.Core.Extensions;
+    using Fsel.Identity.Domain.Entities;
+    using Fsel.Identity.Domain.Models.EntityModels;
+
+    public class ParentStudentProfile : Profile
+    {
+        public ParentStudentProfile()
+        {
+            CreateMap<ParentStudent, ParentStudentModel>().IgnoreAllNonExisting();
+        }
+    }
+}

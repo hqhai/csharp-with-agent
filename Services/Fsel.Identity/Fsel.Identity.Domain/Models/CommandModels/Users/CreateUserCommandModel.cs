@@ -7,6 +7,7 @@ namespace Fsel.Identity.Domain.Models.CommandModels.Users
 {
     public class CreateUserCommandModel
     {
+        public string? AvatarPath { get; set; }
         [Required]
         public string? FullName { get; set; }
 

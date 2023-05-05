@@ -18,6 +18,7 @@ namespace Fsel.Identity.Infrastructure.Maps
             CreateMap<CreateStudentCommandModel, Student>().IgnoreAllNonExisting();
             CreateMap<CreateStudentByParentCommandModel, Student>().IgnoreAllNonExisting();
             CreateMap<UpdateUserProfileCommandModel, Student>().IgnoreAllNonExisting();
+            CreateMap<UpdateStudentProfileCommandModel, Student>().IgnoreAllNonExisting();
         }
     }
 }
