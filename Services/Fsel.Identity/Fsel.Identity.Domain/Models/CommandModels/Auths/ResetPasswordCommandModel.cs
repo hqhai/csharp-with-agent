@@ -6,7 +6,6 @@ namespace Fsel.Identity.Domain.Models.CommandModels.Auths
 {
     public class ResetPasswordCommandModel
     {
-        [Required]
         public string? Email { get; set; }
 
         [Required]
