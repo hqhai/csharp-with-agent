@@ -149,7 +149,7 @@ namespace Fsel.Course.Infrastructure.Common
                 dataAnswer.IsExact = true;
                 number++;
             }
-            else if (dataAnswer != null && dataAnswer.Answers != null)
+            else if (dataAnswer != null)
             {
                 dataAnswer.IsExact = false;
             }
