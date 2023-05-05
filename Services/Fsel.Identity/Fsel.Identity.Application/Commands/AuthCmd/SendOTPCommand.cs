@@ -3,10 +3,8 @@
 namespace Fsel.Identity.Application.Commands.AuthCmd
 {
     using System.Collections.Generic;
-    using System.Globalization;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
-    using Fsel.Common.Constants;
     using Fsel.Identity.Application.Services;
     using MediatR;
 
@@ -14,8 +12,8 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
     {
         public string? Email { get; set; }
         public string? PhoneNumber { get; set; }
-        public string? Otp { get; set; }
-        public string? FullName { get; set; }
+        public string? Content { get; set; }
+        public string? Subject { get; set; }
     }
 
     public class SendOTPCommandHandler : IRequestHandler<SendOTPCommand, MethodResult<bool>>
@@ -36,8 +34,8 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             {
                 var senderCommandModel = new SendEmailCommandModel
                 {
-                    Content = string.Format(CultureInfo.InvariantCulture, StringValues.SendOtpContent, request.FullName, request.Otp!),
-                    Subject = StringValues.SendOtpSubject + $"{request.Otp!}",
+                    Content = request.Content,
+                    Subject = request.Subject,
                     ToEmails = new List<string> { $"{request.Email}" }
                 };
                 var sendResult = await _senderService.SendEmailAsync(senderCommandModel);

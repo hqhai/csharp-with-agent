@@ -15,6 +15,7 @@ namespace Fsel.Identity.Application.Commands.ParentCmd
     using MediatR;
     using Microsoft.AspNetCore.Identity;
     using Microsoft.EntityFrameworkCore;
+    using Fsel.Identity.Domain.Enums;
 
     public class CreateStudentByParentCommand : CreateStudentByParentCommandModel, IRequest<MethodResult<UserModel>>
     {
@@ -25,18 +26,21 @@ namespace Fsel.Identity.Application.Commands.ParentCmd
         private readonly UserManager<User> _userManager;
         private readonly IMapper _mapper;
         private readonly AuthContext _authContext;
+        private readonly IStudentRepository _studentRepository;
         private readonly IHumanRepository _humanRepository;
         private readonly IParentRepository _parentRepository;
 
         public CreateStudentByParentCommandHandler(UserManager<User> userManager,
             IMapper mapper,
             AuthContext authContext,
+            IStudentRepository studentRepository,
             IParentRepository parentRepository,
             IHumanRepository humanRepository)
         {
             _userManager = userManager;
             _mapper = mapper;
             _authContext = authContext;
+            _studentRepository = studentRepository;
             _parentRepository = parentRepository;
             _humanRepository = humanRepository;
         }
@@ -57,13 +61,7 @@ namespace Fsel.Identity.Application.Commands.ParentCmd
 
             var parent = await _parentRepository.Queryable.Include(x => x.Human)
                                                 .Include(x => x.ParentStudents.Where(n => !n.IsDeleted))
-                                                .FirstOrDefaultAsync(x => x.Human != null && x.Human.UserId == _authContext.CurrentUserId.ToString(), cancellationToken);
-
-            var userparent = await _userManager.Users.Include(e => e.Human)
-                                             .ThenInclude(e => e != null ? e.Parent : default)
-                                             .ThenInclude(e => e != null ? e.ParentStudents.Where(n => !n.IsDeleted) : default)
-                                             .Where(e => e.Id == _authContext.CurrentUserId.ToString())
-                                             .FirstOrDefaultAsync(cancellationToken: cancellationToken);
+                                                .FirstOrDefaultAsync(x => x.Human!.UserId == _authContext.CurrentUserId.ToString(), cancellationToken);
 
             if (parent == null)
             {
@@ -94,29 +92,37 @@ namespace Fsel.Identity.Application.Commands.ParentCmd
         private async Task<User?> CreateUserStudentAsync(CreateStudentByParentCommandModel request, Parent parent)
         {
             var user = _mapper.Map<User>(request);
-            user.FullName = request.Name;
-            user.EmailConfirmed = true;
-            await _userManager.AddToRoleAsync(user, EnumRoleRegister.Student.ToString());
-
-            var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-            await _userManager.ConfirmEmailAsync(user, token);
 
             var identityResult = await _userManager.CreateAsync(user, request.Password ?? string.Empty);
-            await CreateHumanAsync(request, user, parent);
 
             if (!identityResult.Succeeded)
             {
                 return null;
             }
+
+            await _userManager.AddToRoleAsync(user, EnumRoleRegister.Student.ToString());
+
+            var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+            await _userManager.ConfirmEmailAsync(user, token);
+
+            await CreateHumanAsync(request, user, parent);
+
             return user;
         }
 
         private async Task CreateHumanAsync(CreateStudentByParentCommandModel request, User user, Parent parent)
         {
+            var stt = await _studentRepository.Queryable.CountAsync();
+            var currentDate = DateTime.Now;
+            var weekNumber = (currentDate.DayOfYear - 1) / 7 + 1;
+            var lastDigitOfYear = currentDate.Year % 10;
+            var lastOfYear = request.Birthday!.Value.Year % 100;
+            var number = request.Gender == EnumGender.Male ? 0 : request.Gender == EnumGender.Female ? 1 : 2;
             var human = new Human
             {
                 UserId = user.Id,
-                FullName = request.Name,
+                FullName = request.FullName,
+                Code = $"HN_{weekNumber}{lastDigitOfYear}{number}{lastOfYear}{stt:000}",
                 Gender = request.Gender,
                 Birthday = request.Birthday,
                 AvatarPath = request.AvatarPath,

@@ -9,7 +9,7 @@ namespace Fsel.Identity.Domain.Models.CommandModels.Parents
     public class CreateStudentByParentCommandModel
     {
         [Required]
-        public string? Name { get; set; }
+        public string? FullName { get; set; }
 
         [Required]
         public string? UserName { get; set; }

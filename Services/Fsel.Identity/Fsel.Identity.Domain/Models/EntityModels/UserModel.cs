@@ -2,17 +2,13 @@
 
 namespace Fsel.Identity.Domain.Models.EntityModels
 {
-    using Fsel.Identity.Domain.Entities;
+    using Fsel.Core.Base.BaseModels;
 
-    public class UserModel
+    public class UserModel : BaseModel
     {
-        public string? Id { get; set; }
-
         public string? FullName { get; set; }
-
         public Guid StudentId { get; set; }
         public Guid HumanId { get; set; }
-
-        public Human? Human { get; set; }
+        public HumanModel? Human { get; set; }
     }
 }

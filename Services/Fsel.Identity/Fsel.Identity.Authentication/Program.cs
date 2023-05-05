@@ -28,6 +28,8 @@ builder.Services.AddScoped<IParentRepository, ParentRepository>();
 builder.Services.AddScoped<IStudentRepository, StudentRepository>();
 builder.Services.AddScoped<IUserOtpCodeRepository, UserOtpCodeRepository>();
 builder.Services.AddScoped<IParentStudentRepository, ParentStudentRepository>();
+builder.Services.AddScoped<ICSORepository, CSORepository>();
+
 builder.AddRefitClients(typeof(ISenderService), appSetting?.Services?.SenderApiUrl);
 
 //App config

@@ -6,7 +6,6 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
     using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Common.ActionResults;
-    using Fsel.Shared.Enums;
     using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.Enums;
     using Fsel.Identity.Domain.Enums.ErrorCodes;
@@ -14,6 +13,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
     using Fsel.Identity.Domain.Models.CommandModels.Auths;
     using Fsel.Identity.Domain.Models.EntityModels;
     using Fsel.Identity.Infrastructure.ValueSettings;
+    using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Identity;
     using Microsoft.EntityFrameworkCore;
