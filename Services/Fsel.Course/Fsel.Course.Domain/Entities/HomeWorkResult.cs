@@ -2,8 +2,8 @@
 
 namespace Fsel.Course.Domain.Entities
 {
-    using Fsel.Common.Enums.ErrorCodes;
     using System.ComponentModel.DataAnnotations;
+    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Entities;
     using Fsel.Course.Domain.Enums;
 
@@ -12,17 +12,9 @@ namespace Fsel.Course.Domain.Entities
         /// <summary>
         /// Phần trăm
         /// </summary>
-        private double _percent;
 
         [Range(0, 100, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
-        public double Percent
-        {
-            get
-            {
-                return CorrectTotal > 0 ? ((double)CorrectCount / CorrectTotal * 100) : _percent;
-            }
-            set { _percent = CorrectTotal > 0 ? ((double)CorrectCount / CorrectTotal * 100) : value; }
-        }
+        public double Percent { get; set; }
 
         /// <summary>
         /// Tổng số câu trả lời đúng
