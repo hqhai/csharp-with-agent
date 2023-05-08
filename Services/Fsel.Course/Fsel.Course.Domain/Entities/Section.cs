@@ -1,0 +1,30 @@
+// Copyright (c) Atlantic. All rights reserved.
+
+namespace Fsel.Course.Domain.Entities
+{
+    using System.ComponentModel.DataAnnotations;
+    using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Core.Entities;
+
+    public class Section : Entity
+    {
+        /// <summary>
+        /// Tên Section
+        /// </summary>
+        [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
+        [MaxLength(250, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
+        public string? Name { get; set; }
+
+        /// <summary>
+        /// Media Post
+        /// </summary>
+        public string? MediaPost { get; set; }
+
+        [Range(0, 10000_0000, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
+        public int TargetWord { get; set; }
+
+        public SectionGroup? SectionGroup { get; set; }
+        public Guid SectionGroupId { get; set; }
+        public ICollection<SectionPartQuestion> SectionPartQuestions { get; set; } = new List<SectionPartQuestion>();
+    }
+}

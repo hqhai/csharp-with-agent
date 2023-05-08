@@ -30,5 +30,6 @@ namespace Fsel.Course.Domain.Entities
         /// Trình độ khóa
         /// </summary>
         public EnumCourseLevel CourseLevel { get; set; }
+        public ICollection<PlacementTestSection> PlacementTestSections { get; set; } = new List<PlacementTestSection>();
     }
 }
