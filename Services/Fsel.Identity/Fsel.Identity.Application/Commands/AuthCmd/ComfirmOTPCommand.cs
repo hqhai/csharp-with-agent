@@ -58,9 +58,14 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             ArgumentNullException.ThrowIfNull(_appSetting.Otp);
             MethodResult<ConfirmOtpModel> methodResult = new MethodResult<ConfirmOtpModel>();
             User? user = new User();
-            if (request.Email != null)
+            if (!string.IsNullOrEmpty(request.Email))
             {
                 user = await _userManager.FindByEmailAsync(request.Email);
+            }
+            else
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumAuthErrorCode.EmailNull), nameof(request.Email), request.Email);
+                return methodResult;
             }
 
             if (user == null)

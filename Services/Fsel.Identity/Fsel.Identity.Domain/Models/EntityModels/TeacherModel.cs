@@ -4,11 +4,12 @@ namespace Fsel.Identity.Domain.Models.EntityModels
 {
     using System;
     using Fsel.Core.Base.BaseModels;
+    using Fsel.Shared.Enums;
 
     public class TeacherModel : BaseModel
     {
-        public object? CourseTypes { get; set; }
-        public object? CourseLevels { get; set; }
+        public IList<EnumCourseType>? CourseTypes { get; set; }
+        public IList<EnumCourseLevel>? CourseLevels { get; set; }
 
         public string? PassportPath { get; set; }
 

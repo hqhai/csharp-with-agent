@@ -1,8 +1,8 @@
 // Copyright (c) Atlantic. All rights reserved.
 
 using Fsel.Common.ActionResults;
+using Fsel.Common.Constants;
 using Fsel.Common.Helpers;
-using Fsel.Sender.Domain.Enums.ErrorCodes;
 using Fsel.Sender.Domain.Models.Commands;
 using Fsel.Sender.Domain.Models.Entities;
 using Fsel.Sender.Domain.ValueSettings;
@@ -27,44 +27,27 @@ namespace Fsel.Sender.Application.Commands.SendEmailCmd
 
         public async Task<MethodResult<bool>> Handle(SendEmailCommand request, CancellationToken cancellationToken)
         {
+            ArgumentNullException.ThrowIfNull(request);
             MethodResult<bool> methodResult = new MethodResult<bool>();
 
             #region Validation
 
-            if (request == null)
+            SendEmailModel sendEmail = new SendEmailModel();
+            sendEmail.Subject = request.Subject;
+            sendEmail.ToEmails = request.ToEmails;
+            sendEmail.CcEmails = request.CcEmails;
+            sendEmail.BccEmails = request.BccEmails;
+            sendEmail.Content = request.Content;
+            try
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSendEmailErrorCode.SendEmailFail));
-                return methodResult;
+                using (var emailMessage = CreateEmailMessage(sendEmail))
+                {
+                    await Send(emailMessage);
+                }
             }
-            else
+            catch (Exception)
             {
-                SendEmailModel sendEmail = new SendEmailModel();
-                sendEmail.Subject = request.Subject;
-                if (request.ToEmails == null || !request.ToEmails.IsValidEmail())
-                {
-                }
-                else if (request.CcEmails != null || !request.CcEmails.IsValidEmail())
-                {
-                }
-                else if (request.BccEmails != null || !request.BccEmails.IsValidEmail())
-                {
-                }
-
-                sendEmail.ToEmails = request.ToEmails;
-                sendEmail.CcEmails = request.CcEmails;
-                sendEmail.BccEmails = request.BccEmails;
-                sendEmail.Content = request.Content;
-                try
-                {
-                    using (var emailMessage = CreateEmailMessage(sendEmail))
-                    {
-                        await Send(emailMessage);
-                    }
-                }
-                catch (Exception)
-                {
-                    throw;
-                }
+                throw;
             }
 
             #endregion Validation
@@ -77,13 +60,13 @@ namespace Fsel.Sender.Application.Commands.SendEmailCmd
         private MimeMessage CreateEmailMessage(SendEmailModel message)
         {
             var emailMessage = new MimeMessage();
-            emailMessage.From.Add(new MailboxAddress("LMS -FSEL", _appSetting?.Smtp?.From ?? string.Empty));
+            emailMessage.From.Add(new MailboxAddress(StringValues.SendOtpSubject, _appSetting?.Smtp?.From ?? string.Empty));
 
             if (message.ToEmails != null && message.ToEmails.IsValidEmail())
             {
                 foreach (var item in message.ToEmails)
                 {
-                    emailMessage.To.Add(new MailboxAddress("LMS -FSEL", item));
+                    emailMessage.To.Add(new MailboxAddress(StringValues.SendOtpSubject, item));
                 }
             }
 
@@ -91,7 +74,7 @@ namespace Fsel.Sender.Application.Commands.SendEmailCmd
             {
                 foreach (var item in message.BccEmails)
                 {
-                    emailMessage.Bcc.Add(new MailboxAddress("LMS -FSEL", item));
+                    emailMessage.Bcc.Add(new MailboxAddress(StringValues.SendOtpSubject, item));
                 }
             }
 
@@ -99,7 +82,7 @@ namespace Fsel.Sender.Application.Commands.SendEmailCmd
             {
                 foreach (var item in message.CcEmails)
                 {
-                    emailMessage.Cc.Add(new MailboxAddress("LMS -FSEL", item));
+                    emailMessage.Cc.Add(new MailboxAddress(StringValues.SendOtpSubject, item));
                 }
             }
 
