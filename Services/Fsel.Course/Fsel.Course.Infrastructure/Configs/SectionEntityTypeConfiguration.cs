@@ -17,6 +17,7 @@ namespace Fsel.Course.Infrastructure.Configs
                 .WithMany(b => b.Sections)
                 .HasForeignKey(b => b.SectionGroupId)
                 .OnDelete(DeleteBehavior.Cascade);
+
         }
     }
 }

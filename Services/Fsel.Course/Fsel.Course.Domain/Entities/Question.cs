@@ -55,6 +55,6 @@ namespace Fsel.Course.Domain.Entities
         public ICollection<ExerciseQuestion> ExerciseQuestions { get; set; } = new List<ExerciseQuestion>();
         public ICollection<VideoTimeCodeAnswer> VideoTimeCodeAnswers { get; set; } = new List<VideoTimeCodeAnswer>();
         public ICollection<HomeWorkQuestion> HomeWorkQuestions { get; set; } = new List<HomeWorkQuestion>();
-        public ICollection<SectionPartQuestion> SectionPartQuestions { get; set; } = new List<SectionPartQuestion>();
+        public ICollection<SectionQuestion> SectionQuestions { get; set; } = new List<SectionQuestion>();
     }
 }

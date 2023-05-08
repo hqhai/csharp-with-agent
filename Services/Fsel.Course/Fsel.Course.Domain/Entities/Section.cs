@@ -23,8 +23,16 @@ namespace Fsel.Course.Domain.Entities
         [Range(0, 10000_0000, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
         public int TargetWord { get; set; }
 
+        /// <summary>
+        /// Video File Path
+        /// </summary>
+        [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
+        [MaxLength(250, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
+        public string? VideoFilePath { get; set; }
+
         public SectionGroup? SectionGroup { get; set; }
         public Guid SectionGroupId { get; set; }
-        public ICollection<SectionPartQuestion> SectionPartQuestions { get; set; } = new List<SectionPartQuestion>();
+        public ICollection<SectionPart> SectionParts { get; set; } = new List<SectionPart>();
+        public ICollection<SectionQuestion> SectionQuestions { get; set; } = new List<SectionQuestion>();
     }
 }

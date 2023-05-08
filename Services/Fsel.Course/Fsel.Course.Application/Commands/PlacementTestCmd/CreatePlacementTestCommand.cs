@@ -3,6 +3,7 @@
 using AutoMapper;
 using Fsel.Common.ActionResults;
 using Fsel.Course.Domain.Entities;
+using Fsel.Course.Domain.Enums.ErrorCodes;
 using Fsel.Course.Domain.IRepositories;
 using Fsel.Course.Domain.Models.CommandModels.PlacementTests;
 using Fsel.Course.Domain.Models.EntityModels;
@@ -29,10 +30,16 @@ namespace Fsel.Course.Application.Commands.PlacementTestCmd
 
         public async Task<MethodResult<PlacementTestModel>> Handle(CreatePlacementTestCommand request, CancellationToken cancellationToken)
         {
+            ArgumentNullException.ThrowIfNull(request);
             MethodResult<PlacementTestModel> methodResult = new MethodResult<PlacementTestModel>();
 
             #region Validation
 
+            if (request.PlacementTestSections == null || request.PlacementTestSections.Count == 0)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumPlacementTestErrorCode.PlacementTestNotExist), nameof(request.PlacementTestSections), request.PlacementTestSections);
+                return methodResult;
+            }
             PlacementTest placementTest = _mapper.Map<PlacementTest>(request);
 
             if (!placementTest.IsValid())

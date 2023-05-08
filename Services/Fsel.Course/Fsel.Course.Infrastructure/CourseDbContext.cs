@@ -52,7 +52,8 @@ namespace Fsel.Course.Infrastructure
         public DbSet<PlacementTestSection> PlacementTestSections { get; set; }
         public DbSet<Section> Sections { get; set; }
         public DbSet<SectionGroup> SectionGroups { get; set; }
-        public DbSet<SectionPartQuestion> SectionPartQuestions { get; set; }
+        public DbSet<SectionPart> SectionParts { get; set; }
+        public DbSet<SectionQuestion> SectionQuestions { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -90,7 +91,8 @@ namespace Fsel.Course.Infrastructure
             modelBuilder.ApplyConfiguration(new PlacementTestSectionEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new SectionEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new SectionGroupEntityTypeConfiguration());
-            modelBuilder.ApplyConfiguration(new SectionPartQuestionEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new SectionPartEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new SectionQuestionEntityTypeConfiguration());
 
             base.OnModelCreating(modelBuilder);
         }
