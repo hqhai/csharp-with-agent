@@ -183,7 +183,7 @@ namespace Fsel.Course.Infrastructure.Common
         {
             if (data != null && data.Contents != null)
             {
-                return data.Contents.Sum(x => x.Answers?.Count ?? default);
+                return data.Contents.Count;
             }
             return default;
         }

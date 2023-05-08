@@ -122,6 +122,11 @@ namespace Fsel.Identity.Domain.Enums.ErrorCodes
         /// <summary>
         /// Email is Null
         /// </summary>
-        EmailNull
+        EmailNull,
+
+        /// <summary>
+        /// UserName already exist
+        /// </summary>
+        UserNameAlreadyExist
     }
 }

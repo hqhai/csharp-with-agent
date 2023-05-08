@@ -55,7 +55,7 @@ namespace Fsel.Identity.Application.Commands.ParentCmd
             var isUsernameExist = await _userManager.Users.AnyAsync(e => e.UserName == request.UserName, cancellationToken: cancellationToken);
             if (isUsernameExist)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumAuthErrorCode.OldPasswordIncorrect), nameof(request.UserName), request.UserName);
+                methodResult.AddErrorBadRequest(nameof(EnumAuthErrorCode.UserNameAlreadyExist), nameof(request.UserName), request.UserName);
                 return methodResult;
             }
 
