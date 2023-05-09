@@ -7,6 +7,7 @@ using Fsel.Course.Domain.Enums.ErrorCodes;
 using Fsel.Course.Domain.IRepositories;
 using Fsel.Course.Domain.Models.CommandModels.PlacementTests;
 using Fsel.Course.Domain.Models.EntityModels;
+using Fsel.Course.Infrastructure.Common;
 using Fsel.Shared.Enums;
 using MediatR;
 using Microsoft.AspNetCore.Http;
@@ -21,6 +22,7 @@ namespace Fsel.Course.Application.Commands.PlacementTestCmd
     {
         private readonly IPlacementTestRepository _placementTestRepository;
         private readonly ISectionRepository _sectionRepository;
+        private readonly QuestionTypeConverter _questionTypeConverter;
         private readonly ISectionPartRepository _sectionPartRepository;
         private readonly IQuestionRepository _questionRepository;
         private readonly ISectionGroupRepository _sectionGroupRepository;
@@ -29,6 +31,7 @@ namespace Fsel.Course.Application.Commands.PlacementTestCmd
 
         public UpdatePlacementTestCommandHandler(IPlacementTestRepository placementTestRepository,
             ISectionRepository sectionRepository,
+            QuestionTypeConverter questionTypeConverter,
             ISectionPartRepository sectionPartRepository,
             IQuestionRepository questionRepository,
             ISectionGroupRepository sectionGroupRepository,
@@ -37,6 +40,7 @@ namespace Fsel.Course.Application.Commands.PlacementTestCmd
         {
             _placementTestRepository = placementTestRepository;
             _sectionRepository = sectionRepository;
+            _questionTypeConverter = questionTypeConverter;
             _sectionPartRepository = sectionPartRepository;
             _questionRepository = questionRepository;
             _sectionGroupRepository = sectionGroupRepository;
@@ -153,6 +157,11 @@ namespace Fsel.Course.Application.Commands.PlacementTestCmd
                                     else
                                     {
                                         var newQuestion = _mapper.Map<Question>(question);
+                                        var (config, correctTotal) = _questionTypeConverter.QuestionTypeConverterObject(question.Config, newQuestion.QuestionType, isShowCorrectTotal: !question.Ungraded, false);
+                                        if (config == null)
+                                        {
+                                            methodResult.AddErrorBadRequest(nameof(EnumVideoErrorCode.ConfigIsInTheWrongFormat), nameof(question.Config), question.Config);
+                                        }
                                         newSectionPart.SectionQuestions.Add(new SectionQuestion
                                         {
                                             Question = newQuestion,
@@ -188,15 +197,23 @@ namespace Fsel.Course.Application.Commands.PlacementTestCmd
                             {
                                 methodResult.AddErrorBadRequest(nameof(EnumQuestionErrorCode.QuestionNull), nameof(question), question);
                             }
-                            var newQuestion = _mapper.Map<Question>(question);
-                            newSection.SectionQuestions.Add(new SectionQuestion
+                            else
                             {
-                                Question = newQuestion,
-                                Section = newSection,
-                            });
-                            if (!newQuestion.IsValid())
-                            {
-                                methodResult.AddErrorBadRequest(newQuestion.ErrorMessages);
+                                var newQuestion = _mapper.Map<Question>(question);
+                                var (config, correctTotal) = _questionTypeConverter.QuestionTypeConverterObject(question.Config, newQuestion.QuestionType, isShowCorrectTotal: !question.Ungraded, false);
+                                if (config == null)
+                                {
+                                    methodResult.AddErrorBadRequest(nameof(EnumVideoErrorCode.ConfigIsInTheWrongFormat), nameof(question.Config), question.Config);
+                                }
+                                newSection.SectionQuestions.Add(new SectionQuestion
+                                {
+                                    Question = newQuestion,
+                                    Section = newSection,
+                                });
+                                if (!newQuestion.IsValid())
+                                {
+                                    methodResult.AddErrorBadRequest(newQuestion.ErrorMessages);
+                                }
                             }
                         }
                     }
