@@ -14,7 +14,7 @@ namespace Fsel.Course.Infrastructure.Migrations
             migrationBuilder.RenameColumn(
                 name: "CourseLevel",
                 table: "PlacementTests",
-                newName: "PlacementTestLevel");
+                newName: "Level");
 
             migrationBuilder.CreateTable(
                 name: "SectionGroups",
@@ -314,7 +314,7 @@ namespace Fsel.Course.Infrastructure.Migrations
                 name: "SectionGroups");
 
             migrationBuilder.RenameColumn(
-                name: "PlacementTestLevel",
+                name: "Level",
                 table: "PlacementTests",
                 newName: "CourseLevel");
         }
