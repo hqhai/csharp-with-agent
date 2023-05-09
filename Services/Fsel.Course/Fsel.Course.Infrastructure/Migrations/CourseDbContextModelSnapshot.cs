@@ -2102,11 +2102,9 @@ namespace Fsel.Course.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid?>("SectionId")
-                        .IsRequired()
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid?>("SectionPartId")
-                        .IsRequired()
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime?>("UpdatedDate")
@@ -3193,13 +3191,11 @@ namespace Fsel.Course.Infrastructure.Migrations
 
                     b.HasOne("Fsel.Course.Domain.Entities.Section", "Section")
                         .WithMany("SectionQuestions")
-                        .HasForeignKey("SectionId")
-                        .IsRequired();
+                        .HasForeignKey("SectionId");
 
                     b.HasOne("Fsel.Course.Domain.Entities.SectionPart", "SectionPart")
                         .WithMany("SectionQuestions")
-                        .HasForeignKey("SectionPartId")
-                        .IsRequired();
+                        .HasForeignKey("SectionPartId");
 
                     b.Navigation("Question");
 

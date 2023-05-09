@@ -3,6 +3,7 @@
 using Fsel.Core.Base;
 using Fsel.Course.Domain.Entities;
 using Fsel.Course.Domain.IRepositories;
+using Fsel.Shared.Enums;
 using Microsoft.EntityFrameworkCore;
 
 namespace Fsel.Course.Infrastructure.Repositories
@@ -17,14 +18,30 @@ namespace Fsel.Course.Infrastructure.Repositories
         {
             try
             {
-                return await Queryable
-                .Include(x => x.PlacementTestSections.Where(n => !n.IsDeleted && n.SectionGroup != null))
-                .ThenInclude(x => x.SectionGroup)
-                .ThenInclude(x => x.Sections.Where(n => !n.IsDeleted))
-                .ThenInclude(x => x.SectionParts.Where(n => !n.IsDeleted))
-                .ThenInclude(x => x.SectionQuestions.Where(n => !n.IsDeleted && n.Question != null))
-                .ThenInclude(x => x.Question)
-                .FirstOrDefaultAsync(x => x.Id == id);
+                var query = await Queryable.FirstOrDefaultAsync(x => x.Id == id);
+
+                if (query != null && query.Level == EnumPlacementTestLevel.IELTS)
+                {
+                    query = await Queryable.Include(x => x.PlacementTestSections.Where(n => n.SectionGroup != null))
+                                .ThenInclude(x => x.SectionGroup)
+                                .ThenInclude(x => x!.Sections)
+                                .ThenInclude(x => x.SectionParts)
+                                .ThenInclude(x => x.SectionQuestions.Where(n => n.Question != null))
+                                .ThenInclude(x => x.Question)
+                                .FirstOrDefaultAsync(x => x.Id == id);
+                }
+                else
+                {
+                    query = await Queryable
+                                .Include(x => x.PlacementTestSections.Where(n => n.SectionGroup != null))
+                                .ThenInclude(x => x.SectionGroup)
+                                .ThenInclude(x => x!.Sections)
+                                .ThenInclude(x => x.SectionQuestions.Where(n => n.Question != null))
+                                .ThenInclude(x => x.Question)
+                                .FirstOrDefaultAsync(x => x.Id == id);
+                }
+
+                return query;
             }
             catch (Exception)
             {

@@ -37,6 +37,11 @@ namespace Fsel.Course.Application.Commands.PlacementTestCmd
                 return methodResult;
             }
 
+            if (placementTest.IsActive)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumPlacementTestErrorCode.PlacementTestInActiveState), nameof(placementTest.IsActive), placementTest.IsActive);
+                return methodResult;
+            }
             #endregion Validation
 
             await _placementTestRepository.ExecuteTransactionAsync(async () =>

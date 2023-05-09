@@ -62,6 +62,7 @@ namespace Fsel.Course.Application.Commands.PlacementTestCmd
                 else
                 {
                     SectionGroup newSectionGroup = _mapper.Map<SectionGroup>(sectionGroup);
+                    newSectionGroup.Sections = new List<Section>();
                     placementTest.PlacementTestSections.Add(new PlacementTestSection
                     {
                         SectionGroup = newSectionGroup
@@ -81,6 +82,7 @@ namespace Fsel.Course.Application.Commands.PlacementTestCmd
                         else
                         {
                             Section newSection = _mapper.Map<Section>(section);
+                            newSection.SectionParts = new List<SectionPart>();
                             newSectionGroup.Sections.Add(newSection);
                             if (isType)
                             {
@@ -99,6 +101,7 @@ namespace Fsel.Course.Application.Commands.PlacementTestCmd
                                     else
                                     {
                                         SectionPart newSectionPart = _mapper.Map<SectionPart>(sectionPart);
+                                        newSectionPart.SectionQuestions = new List<SectionQuestion>();
                                         newSection.SectionParts.Add(newSectionPart);
                                         if (sectionPart.Questions == null || sectionPart.Questions.Count == 0)
                                         {
@@ -119,7 +122,7 @@ namespace Fsel.Course.Application.Commands.PlacementTestCmd
                                                 {
                                                     Question = newQuestion,
                                                     SectionPart = newSectionPart,
-                                                    SectionId = Guid.Empty,
+                                                    Section = null
                                                 });
                                                 if (!newQuestion.IsValid())
                                                 {
@@ -157,7 +160,7 @@ namespace Fsel.Course.Application.Commands.PlacementTestCmd
                                         {
                                             Question = newQuestion,
                                             Section = newSection,
-                                            SectionPartId = Guid.Empty,
+                                            SectionPart = null
                                         });
                                         if (!newQuestion.IsValid())
                                         {

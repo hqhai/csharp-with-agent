@@ -13,5 +13,12 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         /// Placement Test is null
         /// </summary>
         PlacementTestNull,
+
+        /// <summary>
+        /// Placement Test  is in active state
+        /// </summary>
+        PlacementTestInActiveState,
+
+
     }
 }

@@ -22,19 +22,25 @@ namespace Fsel.Course.Application.Commands.PlacementTestCmd
         private readonly IPlacementTestRepository _placementTestRepository;
         private readonly ISectionRepository _sectionRepository;
         private readonly ISectionPartRepository _sectionPartRepository;
+        private readonly IQuestionRepository _questionRepository;
         private readonly ISectionGroupRepository _sectionGroupRepository;
+        private readonly ISectionQuestionRepository _sectionQuestionRepository;
         private readonly IMapper _mapper;
 
         public UpdatePlacementTestCommandHandler(IPlacementTestRepository placementTestRepository,
             ISectionRepository sectionRepository,
             ISectionPartRepository sectionPartRepository,
+            IQuestionRepository questionRepository,
             ISectionGroupRepository sectionGroupRepository,
+            ISectionQuestionRepository sectionQuestionRepository,
             IMapper mapper)
         {
             _placementTestRepository = placementTestRepository;
             _sectionRepository = sectionRepository;
             _sectionPartRepository = sectionPartRepository;
+            _questionRepository = questionRepository;
             _sectionGroupRepository = sectionGroupRepository;
+            _sectionQuestionRepository = sectionQuestionRepository;
             _mapper = mapper;
         }
 
@@ -58,22 +64,32 @@ namespace Fsel.Course.Application.Commands.PlacementTestCmd
                 return methodResult;
             }
 
-            var isType = placementTest.Level == EnumPlacementTestLevel.IELTS;
+            if (placementTest.IsActive)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumPlacementTestErrorCode.PlacementTestInActiveState), nameof(placementTest.IsActive), placementTest.IsActive);
+                return methodResult;
+            }
+
+            var isType = request.Level == EnumPlacementTestLevel.IELTS;
             List<SectionGroup> sectionGroups = placementTest.PlacementTestSections.Select(x => x.SectionGroup ?? new SectionGroup()).ToList();
             List<Section> sections = sectionGroups.SelectMany(x => x.Sections).ToList();
             List<SectionPart> sectionParts = sections.SelectMany(x => x.SectionParts).ToList();
             List<Question>? questions = null;
-            if (isType)
+            List<SectionQuestion>? sectionQuestions = null;
+            if (placementTest.Level == EnumPlacementTestLevel.IELTS)
             {
-                questions = sectionParts.SelectMany(x => x.SectionQuestions).Select(x => x.Question ?? new Question()).ToList();
+                sectionQuestions = sectionParts.SelectMany(x => x.SectionQuestions).ToList();
+                questions = sectionQuestions.Select(x => x.Question ?? new Question()).ToList();
             }
             else
             {
+                sectionQuestions = sections.SelectMany(x => x.SectionQuestions).ToList();
                 questions = sections.SelectMany(x => x.SectionQuestions).Select(x => x.Question ?? new Question()).ToList();
             }
 
             _mapper.Map(request, placementTest);
-            placementTest.PlacementTestSections = new List<PlacementTestSection>();
+            placementTest.PlacementTestSections.Clear();
+
             foreach (var sectionGroup in request.SectionGroups)
             {
                 if (sectionGroup == null)
@@ -82,6 +98,7 @@ namespace Fsel.Course.Application.Commands.PlacementTestCmd
                     return methodResult;
                 }
                 var newSectionGroup = _mapper.Map<SectionGroup>(sectionGroup);
+                newSectionGroup.Sections.Clear();
                 if (sectionGroup.Sections == null || sectionGroup.Sections.Count == 0)
                 {
                     methodResult.AddErrorBadRequest(nameof(EnumSectionErrorCode.SectionsNull), nameof(sectionGroup.Sections));
@@ -96,6 +113,7 @@ namespace Fsel.Course.Application.Commands.PlacementTestCmd
                     }
 
                     var newSection = _mapper.Map<Section>(section);
+                    newSection.SectionParts.Clear();
                     if (isType)
                     {
                         if (section.SectionParts == null || section.SectionParts.Count == 0)
@@ -113,6 +131,7 @@ namespace Fsel.Course.Application.Commands.PlacementTestCmd
                             else
                             {
                                 var newSectionPart = _mapper.Map<SectionPart>(sectionPart);
+                                newSectionPart.SectionQuestions.Clear();
                                 if (sectionPart.Questions == null || sectionPart.Questions.Count == 0)
                                 {
                                     methodResult.AddErrorBadRequest(nameof(EnumQuestionErrorCode.QuestionsNull), nameof(sectionPart.Questions));
@@ -215,11 +234,26 @@ namespace Fsel.Course.Application.Commands.PlacementTestCmd
                 }
                 await _sectionRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
-                foreach (var item in sectionParts)
+                if (sectionParts.Count > 0)
                 {
-                    await _sectionPartRepository.DeleteAsync(item);
+                    foreach (var item in sectionParts)
+                    {
+                        await _sectionPartRepository.DeleteAsync(item);
+                    }
+                    await _sectionPartRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
                 }
-                await _sectionPartRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+
+                foreach (var item in sectionQuestions)
+                {
+                    await _sectionQuestionRepository.DeleteAsync(item);
+                }
+                await _sectionQuestionRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+
+                foreach (var item in questions)
+                {
+                    await _questionRepository.DeleteAsync(item);
+                }
+                await _questionRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
                 placementTest = _placementTestRepository.Update(placementTest);
                 await _placementTestRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);

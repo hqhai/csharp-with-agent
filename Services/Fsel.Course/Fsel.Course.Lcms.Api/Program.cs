@@ -48,6 +48,7 @@ builder.Services.AddScoped<ISectionGroupRepository, SectionGroupRepository>();
 builder.Services.AddScoped<ISectionPartRepository, SectionPartRepository>();
 builder.Services.AddScoped<ISectionRepository, SectionRepository>();
 builder.Services.AddScoped<ISectionTimeCodeRepository, SectionTimeCodeRepository>();
+builder.Services.AddScoped<ISectionQuestionRepository, SectionQuestionRepository>();
 
 builder.Services.AddScoped<QuestionTypeConverter>();
 builder.Services.AddScoped<AnswerTypeConverter>();
