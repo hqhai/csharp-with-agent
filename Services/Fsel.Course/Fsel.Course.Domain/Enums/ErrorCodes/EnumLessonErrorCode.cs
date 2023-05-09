@@ -10,6 +10,11 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         LessonsNotExist,
 
         /// <summary>
+        /// Lessons name is exist
+        /// </summary>
+        LessonNameIsExist,
+
+        /// <summary>
         /// Lesson does not exist
         /// </summary>
         LessonNotExist,
