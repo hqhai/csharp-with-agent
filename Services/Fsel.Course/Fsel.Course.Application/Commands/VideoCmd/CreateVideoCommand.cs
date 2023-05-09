@@ -11,6 +11,7 @@ using Fsel.Course.Domain.Models.EntityModels;
 using Fsel.Course.Infrastructure.Common;
 using MediatR;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 
 namespace Fsel.Course.Application.Commands.VideoCmd
 {
@@ -47,10 +48,16 @@ namespace Fsel.Course.Application.Commands.VideoCmd
             }
 
             var listTimeCodeType = request.VideoTimeCodes.Select(x => x.TimeCodeType).ToList();
-
             if (listTimeCodeType.Contains(EnumTimeCodeType.UnitTest) && listTimeCodeType.Contains(EnumTimeCodeType.SkillTest))
             {
                 methodResult.AddErrorBadRequest(nameof(EnumVideoErrorCode.CanNotUnitTestAndSkillTestAtTheSameTime), nameof(listTimeCodeType), listTimeCodeType);
+                return methodResult;
+            }
+
+            var isExistName = await _videoRepository.Queryable.AnyAsync(x => x.Name == request.Name, cancellationToken);
+            if (isExistName)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumVideoErrorCode.VideoNameIsExist), nameof(request.Name), request.Name);
                 return methodResult;
             }
 

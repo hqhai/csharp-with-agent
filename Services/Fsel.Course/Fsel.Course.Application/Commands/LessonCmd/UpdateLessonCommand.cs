@@ -7,8 +7,10 @@ using Fsel.Course.Domain.Enums.ErrorCodes;
 using Fsel.Course.Domain.IRepositories;
 using Fsel.Course.Domain.Models.CommandModels.Lessons;
 using Fsel.Course.Domain.Models.EntityModels;
+using Fsel.Course.Infrastructure.Repositories;
 using MediatR;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 
 namespace Fsel.Course.Application.Commands.LessonCmd
 {
@@ -107,6 +109,12 @@ namespace Fsel.Course.Application.Commands.LessonCmd
                 return methodResult;
             }
 
+            var isExistName = await _lessonRepository.Queryable.AnyAsync(x => x.Name == request.Name && x.Id != request.Id, cancellationToken);
+            if (isExistName)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumLessonErrorCode.LessonNameIsExist), nameof(request.Name), request.Name);
+                return methodResult;
+            }
             #endregion Validation
 
             await _lessonRepository.ExecuteTransactionAsync(async () =>

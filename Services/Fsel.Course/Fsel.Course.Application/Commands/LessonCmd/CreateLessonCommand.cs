@@ -7,8 +7,10 @@ using Fsel.Course.Domain.Enums.ErrorCodes;
 using Fsel.Course.Domain.IRepositories;
 using Fsel.Course.Domain.Models.CommandModels.Lessons;
 using Fsel.Course.Domain.Models.EntityModels;
+using Fsel.Course.Infrastructure.Repositories;
 using MediatR;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 
 namespace Fsel.Course.Application.Commands.LessonCmd
 {
@@ -91,6 +93,13 @@ namespace Fsel.Course.Application.Commands.LessonCmd
             if (_videoRepository.IsIdsInValid(request.VideoIds))
             {
                 methodResult.AddErrorBadRequest(nameof(EnumVideoErrorCode.VideosNotExist), nameof(request.VideoIds), request.VideoIds);
+                return methodResult;
+            }
+
+            var isExistName = await _lessonRepository.Queryable.AnyAsync(x => x.Name == request.Name, cancellationToken);
+            if (isExistName)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumLessonErrorCode.LessonNameIsExist), nameof(request.Name), request.Name);
                 return methodResult;
             }
 

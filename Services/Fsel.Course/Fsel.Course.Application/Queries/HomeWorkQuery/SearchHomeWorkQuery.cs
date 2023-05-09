@@ -46,6 +46,7 @@ namespace Fsel.Course.Application.Queries.HomeWorkQuery
                                     .Select(x => new HomeWorkSearchModel
                                     {
                                         Id = x.Id,
+                                        Code = x.Code,
                                         Name = x.Name,
                                         CreatedFullName = x.CreatedFullName,
                                         CreatedDate = x.CreatedDate,
