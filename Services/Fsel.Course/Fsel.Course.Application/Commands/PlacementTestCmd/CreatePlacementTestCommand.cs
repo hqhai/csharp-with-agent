@@ -84,6 +84,11 @@ namespace Fsel.Course.Application.Commands.PlacementTestCmd
                             Section newSection = _mapper.Map<Section>(section);
                             newSection.SectionParts = new List<SectionPart>();
                             newSectionGroup.Sections.Add(newSection);
+                            if (section.SectionParts != null && section.Questions != null && section.SectionParts.Count > 0 && section.Questions.Count > 0)
+                            {
+                                methodResult.AddErrorBadRequest(nameof(EnumSectionErrorCode.OnlyOneOfTwoSectionPartsOrQuestions), nameof(section.SectionParts), nameof(section.Questions));
+                                return methodResult;
+                            }
                             if (isType)
                             {
                                 if (section.SectionParts == null || section.SectionParts.Count == 0)

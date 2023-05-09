@@ -111,8 +111,14 @@ namespace Fsel.Course.Application.Commands.PlacementTestCmd
                         methodResult.AddErrorBadRequest(nameof(EnumSectionErrorCode.SectionNull), nameof(section));
                         return methodResult;
                     }
-
                     var newSection = _mapper.Map<Section>(section);
+
+                    if (section.SectionParts != null && section.Questions != null && section.SectionParts.Count > 0 && section.Questions.Count > 0)
+                    {
+                        methodResult.AddErrorBadRequest(nameof(EnumSectionErrorCode.OnlyOneOfTwoSectionPartsOrQuestions));
+                        return methodResult;
+                    }
+
                     newSection.SectionParts.Clear();
                     if (isType)
                     {

@@ -13,5 +13,10 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         /// Section is null
         /// </summary>
         SectionNull,
+
+        /// <summary>
+        /// Only one of two SectionParts or Questions
+        /// </summary>
+        OnlyOneOfTwoSectionPartsOrQuestions,
     }
 }
