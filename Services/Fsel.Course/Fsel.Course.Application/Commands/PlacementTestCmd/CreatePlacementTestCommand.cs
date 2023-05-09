@@ -119,6 +119,7 @@ namespace Fsel.Course.Application.Commands.PlacementTestCmd
                                                 {
                                                     Question = newQuestion,
                                                     SectionPart = newSectionPart,
+                                                    SectionId = Guid.Empty,
                                                 });
                                                 if (!newQuestion.IsValid())
                                                 {
@@ -156,6 +157,7 @@ namespace Fsel.Course.Application.Commands.PlacementTestCmd
                                         {
                                             Question = newQuestion,
                                             Section = newSection,
+                                            SectionPartId = Guid.Empty,
                                         });
                                         if (!newQuestion.IsValid())
                                         {

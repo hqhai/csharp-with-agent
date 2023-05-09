@@ -15,17 +15,17 @@ namespace Fsel.Course.Infrastructure.Configs
             builder.HasOne(a => a.Question)
                 .WithMany(b => b.SectionQuestions)
                 .HasForeignKey(b => b.QuestionId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.ClientSetNull);
 
             builder.HasOne(a => a.Section)
                 .WithMany(b => b.SectionQuestions)
                 .HasForeignKey(b => b.SectionId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.ClientSetNull);
 
             builder.HasOne(a => a.SectionPart)
                .WithMany(b => b.SectionQuestions)
                .HasForeignKey(b => b.SectionPartId)
-               .OnDelete(DeleteBehavior.Cascade);
+               .OnDelete(DeleteBehavior.ClientSetNull);
         }
     }
 }

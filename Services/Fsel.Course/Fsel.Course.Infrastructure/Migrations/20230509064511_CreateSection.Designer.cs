@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fsel.Course.Infrastructure.Migrations
 {
     [DbContext(typeof(CourseDbContext))]
-    [Migration("20230509044641_CreateSection")]
+    [Migration("20230509064511_CreateSection")]
     partial class CreateSection
     {
         /// <inheritdoc />
@@ -2104,10 +2104,12 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.Property<Guid>("QuestionId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("SectionId")
+                    b.Property<Guid?>("SectionId")
+                        .IsRequired()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("SectionPartId")
+                    b.Property<Guid?>("SectionPartId")
+                        .IsRequired()
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime?>("UpdatedDate")
@@ -3190,19 +3192,16 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.HasOne("Fsel.Course.Domain.Entities.Question", "Question")
                         .WithMany("SectionQuestions")
                         .HasForeignKey("QuestionId")
-                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("Fsel.Course.Domain.Entities.Section", "Section")
                         .WithMany("SectionQuestions")
                         .HasForeignKey("SectionId")
-                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("Fsel.Course.Domain.Entities.SectionPart", "SectionPart")
                         .WithMany("SectionQuestions")
                         .HasForeignKey("SectionPartId")
-                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Question");
