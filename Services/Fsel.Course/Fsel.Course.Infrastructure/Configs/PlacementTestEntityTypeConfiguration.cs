@@ -15,11 +15,11 @@ namespace Fsel.Course.Infrastructure.Configs
         {
             ArgumentNullException.ThrowIfNull(builder);
 
-            builder.Property(e => e.CourseLevel)
+            builder.Property(e => e.Type)
                 .HasMaxLength(100)
                 .HasConversion(
                     v => v.ToString(),
-                    v => v.EnumParse<EnumCourseLevel>());
+                    v => v.EnumParse<EnumPlacementTestType>());
         }
     }
 }

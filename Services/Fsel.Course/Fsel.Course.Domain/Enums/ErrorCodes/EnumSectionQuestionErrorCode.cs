@@ -4,5 +4,14 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
 {
     public enum EnumSectionQuestionErrorCode
     {
+        /// <summary>
+        /// SectionQuestions is null
+        /// </summary>
+        SectionQuestionsNull,
+
+        /// <summary>
+        /// SectionQuestion is null
+        /// </summary>
+        SectionQuestionNull,
     }
 }

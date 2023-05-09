@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-using Fsel.Course.Domain.Models.CommandModels.PlacementTestSections;
+using Fsel.Course.Domain.Models.CommandModels.SectionGroups;
 using Fsel.Shared.Enums;
 
 namespace Fsel.Course.Domain.Models.CommandModels.PlacementTests
@@ -13,7 +13,7 @@ namespace Fsel.Course.Domain.Models.CommandModels.PlacementTests
 
         public bool IsActive { get; set; }
 
-        public EnumCourseLevel CourseLevel { get; set; }
-        public IList<CreatePlacementTestSectionCommandModel>? PlacementTestSections { get; set; }
+        public EnumPlacementTestType Type { get; set; }
+        public IList<CreateSectionGroupCommandModel>? SectionGroups { get; set; }
     }
 }

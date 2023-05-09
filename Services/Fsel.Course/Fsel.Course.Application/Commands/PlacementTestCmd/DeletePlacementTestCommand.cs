@@ -30,7 +30,7 @@ namespace Fsel.Course.Application.Commands.PlacementTestCmd
 
             #region Validation
 
-            var placementTest = await _placementTestRepository.GetByIdAsync(request.Id);
+            var placementTest = await _placementTestRepository.GetIncludeByIdAsync(request.Id);
             if (placementTest == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumPlacementTestErrorCode.PlacementTestNotExist), nameof(request.Id), request.Id);

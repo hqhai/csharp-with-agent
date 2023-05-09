@@ -7,6 +7,7 @@ using Fsel.Course.Domain.Enums.ErrorCodes;
 using Fsel.Course.Domain.IRepositories;
 using Fsel.Course.Domain.Models.CommandModels.PlacementTests;
 using Fsel.Course.Domain.Models.EntityModels;
+using Fsel.Shared.Enums;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 
@@ -35,17 +36,149 @@ namespace Fsel.Course.Application.Commands.PlacementTestCmd
 
             #region Validation
 
-            if (request.PlacementTestSections == null || request.PlacementTestSections.Count == 0)
+            if (request.SectionGroups == null || request.SectionGroups.Count == 0)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumPlacementTestErrorCode.PlacementTestNotExist), nameof(request.PlacementTestSections), request.PlacementTestSections);
+                methodResult.AddErrorBadRequest(nameof(EnumSectionGroupErrorCode.SectionGroupsNull), nameof(request.SectionGroups));
                 return methodResult;
             }
+
             PlacementTest placementTest = _mapper.Map<PlacementTest>(request);
 
             if (!placementTest.IsValid())
             {
                 methodResult.AddErrorBadRequest(placementTest.ErrorMessages);
                 return methodResult;
+            }
+
+            var isType = placementTest.Type == EnumPlacementTestType.IELTS;
+
+            foreach (var sectionGroup in request.SectionGroups)
+            {
+                if (sectionGroup == null)
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumSectionGroupErrorCode.SectionGroupNull), nameof(sectionGroup));
+                    return methodResult;
+                }
+                else
+                {
+                    SectionGroup newSectionGroup = _mapper.Map<SectionGroup>(sectionGroup);
+                    placementTest.PlacementTestSections.Add(new PlacementTestSection
+                    {
+                        SectionGroup = newSectionGroup
+                    });
+                    if (sectionGroup.Sections == null || sectionGroup.Sections.Count == 0)
+                    {
+                        methodResult.AddErrorBadRequest(nameof(EnumSectionErrorCode.SectionsNull), nameof(sectionGroup.Sections));
+                        return methodResult;
+                    }
+                    foreach (var section in sectionGroup.Sections)
+                    {
+                        if (section == null)
+                        {
+                            methodResult.AddErrorBadRequest(nameof(EnumSectionErrorCode.SectionNull), nameof(section), section);
+                            return methodResult;
+                        }
+                        else
+                        {
+                            Section newSection = _mapper.Map<Section>(section);
+                            newSectionGroup.Sections.Add(newSection);
+                            if (isType)
+                            {
+                                if (section.SectionParts == null || section.SectionParts.Count == 0)
+                                {
+                                    methodResult.AddErrorBadRequest(nameof(EnumSectionPartErrorCode.SectionPartsNull), nameof(section.SectionParts));
+                                    return methodResult;
+                                }
+                                foreach (var sectionPart in section.SectionParts)
+                                {
+                                    if (sectionPart == null)
+                                    {
+                                        methodResult.AddErrorBadRequest(nameof(EnumSectionPartErrorCode.SectionPartNull), nameof(sectionPart), sectionPart);
+                                        return methodResult;
+                                    }
+                                    else
+                                    {
+                                        SectionPart newSectionPart = _mapper.Map<SectionPart>(sectionPart);
+                                        newSection.SectionParts.Add(newSectionPart);
+                                        if (sectionPart.Questions == null || sectionPart.Questions.Count == 0)
+                                        {
+                                            methodResult.AddErrorBadRequest(nameof(EnumQuestionErrorCode.QuestionsNull), nameof(sectionPart.Questions));
+                                            return methodResult;
+                                        }
+                                        foreach (var question in sectionPart.Questions)
+                                        {
+                                            if (question == null)
+                                            {
+                                                methodResult.AddErrorBadRequest(nameof(EnumQuestionErrorCode.QuestionNull), nameof(question));
+                                                return methodResult;
+                                            }
+                                            else
+                                            {
+                                                Question newQuestion = _mapper.Map<Question>(question);
+                                                newSectionPart.SectionQuestions.Add(new SectionQuestion
+                                                {
+                                                    Question = newQuestion,
+                                                    SectionPart = newSectionPart,
+                                                });
+                                                if (!newQuestion.IsValid())
+                                                {
+                                                    methodResult.AddErrorBadRequest(newQuestion.ErrorMessages);
+                                                    return methodResult;
+                                                }
+                                            }
+                                        }
+                                        if (!newSectionPart.IsValid())
+                                        {
+                                            methodResult.AddErrorBadRequest(newSectionPart.ErrorMessages);
+                                            return methodResult;
+                                        }
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                if (section.Questions == null || section.Questions.Count == 0)
+                                {
+                                    methodResult.AddErrorBadRequest(nameof(EnumQuestionErrorCode.QuestionsNull), nameof(section.Questions));
+                                    return methodResult;
+                                }
+                                foreach (var question in section.Questions)
+                                {
+                                    if (question == null)
+                                    {
+                                        methodResult.AddErrorBadRequest(nameof(EnumQuestionErrorCode.QuestionNull), nameof(question));
+                                        return methodResult;
+                                    }
+                                    else
+                                    {
+                                        Question newQuestion = _mapper.Map<Question>(question);
+                                        newSection.SectionQuestions.Add(new SectionQuestion
+                                        {
+                                            Question = newQuestion,
+                                            Section = newSection,
+                                        });
+                                        if (!newQuestion.IsValid())
+                                        {
+                                            methodResult.AddErrorBadRequest(newQuestion.ErrorMessages);
+                                            return methodResult;
+                                        }
+                                    }
+                                }
+                            }
+
+                            if (!newSection.IsValid())
+                            {
+                                methodResult.AddErrorBadRequest(newSection.ErrorMessages);
+                                return methodResult;
+                            }
+                        }
+                    }
+                    if (!newSectionGroup.IsValid())
+                    {
+                        methodResult.AddErrorBadRequest(newSectionGroup.ErrorMessages);
+                        return methodResult;
+                    }
+                }
             }
 
             #endregion Validation

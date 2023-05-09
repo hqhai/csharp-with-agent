@@ -3,9 +3,10 @@
 namespace Fsel.Course.Domain.Entities
 {
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Core.Entities;
     using System.ComponentModel.DataAnnotations;
 
-    public class SectionPart
+    public class SectionPart : Entity
     {
         /// <summary>
         /// Tên Part

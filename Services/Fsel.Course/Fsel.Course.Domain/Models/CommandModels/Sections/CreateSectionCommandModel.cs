@@ -2,8 +2,8 @@
 
 namespace Fsel.Course.Domain.Models.CommandModels.Sections
 {
-    using Fsel.Course.Domain.Models.CommandModels.SectionPartQuestions;
-    using Fsel.Course.Domain.Models.CommandModels.SectionQuestions;
+    using Fsel.Course.Domain.Models.CommandModels.Questions;
+    using Fsel.Course.Domain.Models.CommandModels.SectionParts;
 
     public class CreateSectionCommandModel
     {
@@ -12,6 +12,6 @@ namespace Fsel.Course.Domain.Models.CommandModels.Sections
         public int TargetWord { get; set; }
         public string? VideoFilePath { get; set; }
         public IList<CreateSectionPartCommandModel>? SectionParts { get; set; }
-        public IList<CreateSectionQuestionCommandModel>? SectionQuestions { get; set; }
+        public IList<CreateQuestionCommandModel>? Questions { get; set; }
     }
 }

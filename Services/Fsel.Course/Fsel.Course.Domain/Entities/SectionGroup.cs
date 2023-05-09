@@ -25,6 +25,7 @@ namespace Fsel.Course.Domain.Entities
         public EnumCourseSkill CourseSkill { get; set; }
 
         public ICollection<Section> Sections { get; set; } = new List<Section>();
+        public ICollection<MockTestSection> MockTestSections { get; set; } = new List<MockTestSection>();
 
         public ICollection<PlacementTestSection> PlacementTestSections { get; set; } = new List<PlacementTestSection>();
     }

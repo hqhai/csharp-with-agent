@@ -2,13 +2,16 @@
 
 namespace Fsel.Course.Domain.Enums.ErrorCodes
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
-    using System.Threading.Tasks;
-
     public enum EnumSectionGroupErrorCode
     {
+        /// <summary>
+        /// SectionGroups is null
+        /// </summary>
+        SectionGroupsNull,
+
+        /// <summary>
+        /// SectionGroup is null
+        /// </summary>
+        SectionGroupNull,
     }
 }
