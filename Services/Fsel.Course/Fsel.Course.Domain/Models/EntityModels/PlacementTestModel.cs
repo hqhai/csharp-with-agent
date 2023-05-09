@@ -13,6 +13,6 @@ namespace Fsel.Course.Domain.Models.EntityModels
 
         public bool IsActive { get; set; }
 
-        public EnumPlacementTestType Type { get; set; }
+        public EnumPlacementTestLevel PlacementTestLevel { get; set; }
     }
 }

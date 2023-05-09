@@ -29,7 +29,7 @@ namespace Fsel.Course.Domain.Entities
         /// <summary>
         /// Trình độ khóa
         /// </summary>
-        public EnumPlacementTestType Type { get; set; }
+        public EnumPlacementTestLevel PlacementTestLevel { get; set; }
         public ICollection<PlacementTestSection> PlacementTestSections { get; set; } = new List<PlacementTestSection>();
     }
 }

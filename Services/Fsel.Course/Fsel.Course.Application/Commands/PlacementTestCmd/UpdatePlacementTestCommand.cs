@@ -58,7 +58,7 @@ namespace Fsel.Course.Application.Commands.PlacementTestCmd
                 return methodResult;
             }
 
-            var isType = placementTest.Type == EnumPlacementTestType.IELTS;
+            var isType = placementTest.PlacementTestLevel == EnumPlacementTestLevel.IELTS;
             List<SectionGroup> sectionGroups = placementTest.PlacementTestSections.Select(x => x.SectionGroup ?? new SectionGroup()).ToList();
             List<Section> sections = sectionGroups.SelectMany(x => x.Sections).ToList();
             List<SectionPart> sectionParts = sections.SelectMany(x => x.SectionParts).ToList();

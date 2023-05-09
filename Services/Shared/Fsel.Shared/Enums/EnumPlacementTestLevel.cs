@@ -4,7 +4,7 @@ namespace Fsel.Shared.Enums
 {
     using System.ComponentModel;
 
-    public enum EnumPlacementTestType
+    public enum EnumPlacementTestLevel
     {
         [Description("Think Starter")]
         A1,

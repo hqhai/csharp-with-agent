@@ -13,7 +13,7 @@ namespace Fsel.Course.Domain.Models.CommandModels.PlacementTests
 
         public bool IsActive { get; set; }
 
-        public EnumPlacementTestType Type { get; set; }
+        public EnumPlacementTestLevel Type { get; set; }
         public IList<CreateSectionGroupCommandModel>? SectionGroups { get; set; }
     }
 }

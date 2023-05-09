@@ -50,7 +50,7 @@ namespace Fsel.Course.Application.Commands.PlacementTestCmd
                 return methodResult;
             }
 
-            var isType = placementTest.Type == EnumPlacementTestType.IELTS;
+            var isType = placementTest.PlacementTestLevel == EnumPlacementTestLevel.IELTS;
 
             foreach (var sectionGroup in request.SectionGroups)
             {

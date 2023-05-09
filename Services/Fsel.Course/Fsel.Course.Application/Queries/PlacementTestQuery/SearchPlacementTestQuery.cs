@@ -43,7 +43,7 @@ namespace Fsel.Course.Application.Queries.PlacementTestQuery
                                          Name = i.Name,
                                          InstructionContent = i.InstructionContent,
                                          IsActive = i.IsActive,
-                                         Type = i.Type,
+                                         PlacementTestLevel = i.PlacementTestLevel,
                                          CreatedDate = i.CreatedDate,
                                          CreatedUserId = i.CreatedUserId,
                                          UpdatedDate = i.UpdatedDate,
