@@ -54,8 +54,6 @@ namespace Fsel.Course.Application.Commands.PlacementTestCmd
                 return methodResult;
             }
 
-            var isType = placementTest.Level == EnumPlacementTestLevel.IELTS;
-
             foreach (var sectionGroup in request.SectionGroups)
             {
                 if (sectionGroup == null)
@@ -66,11 +64,7 @@ namespace Fsel.Course.Application.Commands.PlacementTestCmd
                 else
                 {
                     SectionGroup newSectionGroup = _mapper.Map<SectionGroup>(sectionGroup);
-                    newSectionGroup.Sections = new List<Section>();
-                    placementTest.PlacementTestSections.Add(new PlacementTestSection
-                    {
-                        SectionGroup = newSectionGroup
-                    });
+                    newSectionGroup.Sections.Clear();
                     if (sectionGroup.Sections == null || sectionGroup.Sections.Count == 0)
                     {
                         methodResult.AddErrorBadRequest(nameof(EnumSectionErrorCode.SectionsNull), nameof(sectionGroup.Sections));
@@ -86,14 +80,14 @@ namespace Fsel.Course.Application.Commands.PlacementTestCmd
                         else
                         {
                             Section newSection = _mapper.Map<Section>(section);
-                            newSection.SectionParts = new List<SectionPart>();
-                            newSectionGroup.Sections.Add(newSection);
+                            newSection.SectionParts.Clear();
+
                             if (section.SectionParts != null && section.Questions != null && section.SectionParts.Count > 0 && section.Questions.Count > 0)
                             {
                                 methodResult.AddErrorBadRequest(nameof(EnumSectionErrorCode.OnlyOneOfTwoSectionPartsOrQuestions), nameof(section.SectionParts), nameof(section.Questions));
                                 return methodResult;
                             }
-                            if (isType)
+                            if (placementTest.Level == EnumPlacementTestLevel.IELTS)
                             {
                                 if (section.SectionParts == null || section.SectionParts.Count == 0)
                                 {
@@ -110,8 +104,7 @@ namespace Fsel.Course.Application.Commands.PlacementTestCmd
                                     else
                                     {
                                         SectionPart newSectionPart = _mapper.Map<SectionPart>(sectionPart);
-                                        newSectionPart.SectionQuestions = new List<SectionQuestion>();
-                                        newSection.SectionParts.Add(newSectionPart);
+                                        newSectionPart.SectionQuestions.Clear();
                                         if (sectionPart.Questions == null || sectionPart.Questions.Count == 0)
                                         {
                                             methodResult.AddErrorBadRequest(nameof(EnumQuestionErrorCode.QuestionsNull), nameof(sectionPart.Questions));
@@ -135,8 +128,7 @@ namespace Fsel.Course.Application.Commands.PlacementTestCmd
                                                 newSectionPart.SectionQuestions.Add(new SectionQuestion
                                                 {
                                                     Question = newQuestion,
-                                                    SectionPart = newSectionPart,
-                                                    Section = null
+                                                    SectionPart = newSectionPart
                                                 });
                                                 if (!newQuestion.IsValid())
                                                 {
@@ -145,6 +137,7 @@ namespace Fsel.Course.Application.Commands.PlacementTestCmd
                                                 }
                                             }
                                         }
+                                        newSection.SectionParts.Add(newSectionPart);
                                         if (!newSectionPart.IsValid())
                                         {
                                             methodResult.AddErrorBadRequest(newSectionPart.ErrorMessages);
@@ -178,8 +171,7 @@ namespace Fsel.Course.Application.Commands.PlacementTestCmd
                                         newSection.SectionQuestions.Add(new SectionQuestion
                                         {
                                             Question = newQuestion,
-                                            Section = newSection,
-                                            SectionPart = null
+                                            Section = newSection
                                         });
                                         if (!newQuestion.IsValid())
                                         {
@@ -189,7 +181,7 @@ namespace Fsel.Course.Application.Commands.PlacementTestCmd
                                     }
                                 }
                             }
-
+                            newSectionGroup.Sections.Add(newSection);
                             if (!newSection.IsValid())
                             {
                                 methodResult.AddErrorBadRequest(newSection.ErrorMessages);
@@ -197,6 +189,10 @@ namespace Fsel.Course.Application.Commands.PlacementTestCmd
                             }
                         }
                     }
+                    placementTest.PlacementTestSections.Add(new PlacementTestSection
+                    {
+                        SectionGroup = newSectionGroup
+                    });
                     if (!newSectionGroup.IsValid())
                     {
                         methodResult.AddErrorBadRequest(newSectionGroup.ErrorMessages);
