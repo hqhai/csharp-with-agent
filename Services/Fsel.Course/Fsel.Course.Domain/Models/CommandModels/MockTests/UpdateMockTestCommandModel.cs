@@ -6,8 +6,9 @@ namespace Fsel.Course.Domain.Models.CommandModels.MockTests
     using Fsel.Shared.Enums;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums;
+    using Fsel.Core.Base.BaseModels;
 
-    public class UpdateMockTestCommandModel
+    public class UpdateMockTestCommandModel : BaseCommandModel
     {
         public string? Name { get; set; }
 

@@ -16,11 +16,18 @@ namespace Fsel.Course.Infrastructure.Repositories
         {
         }
 
-        public async Task<bool> IsUnitSkillMockTest(Guid Id)
+        public async Task<bool> IsUnitSkillMockTest(Guid id)
         {
             return await Queryable
                 .Include(x => x.UnitSkillMockTests.Where(n => !n.IsDeleted))
-                .AnyAsync(x => x.Id == Id && x.UnitSkillMockTests.Count > 0);
+                .AnyAsync(x => x.Id == id && x.UnitSkillMockTests.Count > 0);
+        }
+
+        public async Task<bool> IsCourseUnitMockTest(Guid id)
+        {
+            return await Queryable
+                .Include(x => x.CourseUnitMockTests.Where(n => !n.IsDeleted))
+                .AnyAsync(x => x.Id == id && x.UnitSkillMockTests.Count > 0);
         }
     }
 }

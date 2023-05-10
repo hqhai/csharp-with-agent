@@ -9,6 +9,8 @@ namespace Fsel.Course.Domain.IRepositories
 
     public interface IMockTestRepository : IRepository<MockTest>
     {
-        Task<bool> IsUnitSkillMockTest(Guid Id);
+        Task<bool> IsUnitSkillMockTest(Guid id);
+
+        Task<bool> IsCourseUnitMockTest(Guid id);
     }
 }
