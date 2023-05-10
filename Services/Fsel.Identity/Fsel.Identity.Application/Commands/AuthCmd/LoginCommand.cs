@@ -1,6 +1,7 @@
 // Copyright (c) Atlantic. All rights reserved.
 
 using Fsel.Common.ActionResults;
+using Fsel.Identity.Application.Services.InteractionService;
 using Fsel.Identity.Domain.Entities;
 using Fsel.Identity.Domain.Enums.ErrorCodes;
 using Fsel.Identity.Domain.Models.CommandModels.Auths;
@@ -19,14 +20,17 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
     public class LoginCommandHandler : IRequestHandler<LoginCommand, MethodResult<TokenModel>>
     {
         private readonly UserManager<User> _userManager;
+        private readonly IInteractionService _interactionService;
         private readonly SignInManager<User> _signInManager;
         private readonly IMediator _mediator;
 
         public LoginCommandHandler(UserManager<User> userManager,
+            IInteractionService interactionService,
             SignInManager<User> signInManager,
             IMediator mediator)
         {
             _userManager = userManager;
+            _interactionService = interactionService;
             _signInManager = signInManager;
             _mediator = mediator;
         }
@@ -57,7 +61,13 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                     StatusCodes.Status401Unauthorized, nameof(EnumAuthErrorCode.UserNameAndPasswordIncorrect), new Error(nameof(request.Username), request.Username), new Error(nameof(request.Password), request.Password));
                 return methodResult;
             }
-            methodResult = await _mediator.Send(new GenerateTokenCommand { Id = user.Id }, cancellationToken).ConfigureAwait(false);
+            var isSurvey = await _interactionService.IsStudentByIdAsync(Guid.Parse(user.Id));
+            if (!isSurvey.IsSuccessStatusCode)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumAuthErrorCode.SurveyCalledError));
+                return methodResult;
+            }
+            methodResult = await _mediator.Send(new GenerateTokenCommand { Id = user.Id, IsSurvey = isSurvey!.Content!.Result }, cancellationToken).ConfigureAwait(false);
             return methodResult;
         }
     }

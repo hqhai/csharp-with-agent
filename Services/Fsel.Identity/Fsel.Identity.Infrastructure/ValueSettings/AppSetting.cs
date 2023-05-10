@@ -14,6 +14,7 @@ namespace Fsel.Identity.Infrastructure.ValueSettings
     public class ConstantUrl
     {
         public string? ActiveUserUrl { get; set; }
+        public string? InteractionApiUrl { get; set; }
     }
 
     public class Otp

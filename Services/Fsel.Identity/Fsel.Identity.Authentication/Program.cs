@@ -2,6 +2,7 @@
 
 using Fsel.Core.Extensions;
 using Fsel.Identity.Application.Services;
+using Fsel.Identity.Application.Services.InteractionService;
 using Fsel.Identity.Domain.Entities;
 using Fsel.Identity.Domain.IRepositories;
 using Fsel.Identity.Infrastructure;
@@ -32,6 +33,7 @@ builder.Services.AddScoped<ICSORepository, CSORepository>();
 
 builder.AddRefitClients(typeof(ISenderService), appSetting?.Services?.SenderApiUrl);
 
+builder.AddRefitClients(typeof(IInteractionService), appSetting?.ConstantUrl?.InteractionApiUrl);
 //App config
 var app = builder.Build();
 app.UseServices();

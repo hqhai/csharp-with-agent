@@ -8,7 +8,6 @@ using Fsel.Common.Helpers;
 using Fsel.Identity.Domain.Entities;
 using Fsel.Identity.Domain.IRepositories;
 using Fsel.Identity.Domain.Models.EntityModels;
-using Fsel.Identity.Infrastructure;
 using Fsel.Identity.Infrastructure.ValueSettings;
 using Fsel.Shared.Enums;
 using MediatR;
@@ -23,6 +22,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
     public class GenerateTokenCommand : IRequest<MethodResult<TokenModel>>
     {
         public string? Id { get; set; }
+        public bool IsSurvey { get; set; }
     }
 
     public class GenerateTokenCommandHandler : IRequestHandler<GenerateTokenCommand, MethodResult<TokenModel>>
@@ -102,7 +102,8 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                 Expiration = token.ValidTo.ConvertTimeFromUtc(TimeZoneInfo.Local),
                 FullName = user.FullName,
                 ClassId = classId,
-                Roles = userRoles.ToList()
+                Roles = userRoles.ToList(),
+                IsSurvey = request.IsSurvey
             };
 
             methodResult.Result = tokenLogin;
