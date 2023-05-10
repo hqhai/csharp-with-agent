@@ -153,14 +153,38 @@ namespace Fsel.Identity.Api.Controllers
         }
 
         /// <summary>
-        /// confirm-otp-user
+        /// Confirm otp user
         /// </summary>
         [HttpGet("confirm-otp-user")]
         [ProducesResponseType(typeof(MethodResult<ConfirmOtpModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> ConfirmOTPUserByAdmin([FromQuery] ComfirmOTPWithAdminCommand query)
+        public async Task<IActionResult> ConfirmOTPUserByAdmin([FromQuery] ComfirmOTPWithAdminCommand command)
         {
-            MethodResult<ConfirmOtpModel> commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            MethodResult<ConfirmOtpModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Send otp email user
+        /// </summary>
+        [HttpGet("send-otp-email-user")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> SendOTPEmailUser([FromQuery] SendOTpEmailUserCommand command)
+        {
+            MethodResult<bool> commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Confirm otp email user
+        /// </summary>
+        [HttpGet("confirm-otp-email-user")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> ConfirmOTPEmailUser([FromQuery] ComfirmOTPEmailProfileCommand command)
+        {
+            MethodResult<bool> commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
 

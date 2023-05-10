@@ -24,12 +24,12 @@ namespace Fsel.Identity.Application.Commands.UserCmd
     using Microsoft.EntityFrameworkCore;
     using OtpNet;
 
-    public class UpdateEmailUserCommand : IRequest<MethodResult<bool>>
+    public class SendOTpEmailUserCommand : IRequest<MethodResult<bool>>
     {
         public string? Email { get; set; }
     }
 
-    public class UpdateEmailUserCommandHandler : IRequestHandler<UpdateEmailUserCommand, MethodResult<bool>>
+    public class SendOTpEmailUserCommandHandler : IRequestHandler<SendOTpEmailUserCommand, MethodResult<bool>>
     {
         private readonly UserManager<User> _userManager;
         private readonly AuthContext _authContext;
@@ -38,7 +38,7 @@ namespace Fsel.Identity.Application.Commands.UserCmd
         private readonly AppSetting _appSetting;
         private readonly IMapper _mapper;
 
-        public UpdateEmailUserCommandHandler(UserManager<User> userManager,
+        public SendOTpEmailUserCommandHandler(UserManager<User> userManager,
             AuthContext authContext,
             IUserOtpCodeRepository userOtpCodeRepository,
             IMediator mediator,
@@ -53,7 +53,7 @@ namespace Fsel.Identity.Application.Commands.UserCmd
             _mapper = mapper;
         }
 
-        public async Task<MethodResult<bool>> Handle(UpdateEmailUserCommand request, CancellationToken cancellationToken)
+        public async Task<MethodResult<bool>> Handle(SendOTpEmailUserCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<bool>();
@@ -81,12 +81,12 @@ namespace Fsel.Identity.Application.Commands.UserCmd
                 _userOtpCodeRepository.Add(userOtpCode);
                 await _userOtpCodeRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             }
-            var content = string.Format(CultureInfo.InvariantCulture, _appSetting.ConstantUrl!.ActiveUserUrl!, user.Id, otp);
-            var subject = StringValues.SendOtpSubject + user.FullName;
+            var content = string.Format(CultureInfo.InvariantCulture, StringValues.SendOtpContent, user.FullName, otp);
+            var subject = StringValues.SendOtpSubject + $"{otp}";
             var sendResult = new MethodResult<bool>();
             if (request != null && request.Email != null)
             {
-                sendResult = await _mediator.Send(new SendOTPCommand { Email = user.Email, Content = content, Subject = subject }, cancellationToken).ConfigureAwait(false);
+                sendResult = await _mediator.Send(new SendOTPCommand { Email = request.Email, Content = content, Subject = subject }, cancellationToken).ConfigureAwait(false);
             }
 
             if (!sendResult.IsOK)
