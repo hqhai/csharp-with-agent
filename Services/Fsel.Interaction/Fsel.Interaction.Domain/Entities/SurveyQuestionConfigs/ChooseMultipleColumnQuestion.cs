@@ -2,7 +2,7 @@
 
 namespace Fsel.Interaction.Domain.Entities.SurveyQuestionConfigs
 {
-    public class ChooseDirectionQuestion
+    public class ChooseMultipleColumnQuestion
     {
         public IList<ChooseDirectionQuestionAnswers>? ChooseDirectionQuestions { get; set; }
     }
