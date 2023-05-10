@@ -2,6 +2,7 @@
 
 using Fsel.Shared.Enums;
 using Fsel.Core.Base.BaseModels;
+using Fsel.Course.Domain.Models.CommandModels.SectionGroups;
 
 namespace Fsel.Course.Domain.Models.CommandModels.PlacementTests
 {
@@ -13,6 +14,7 @@ namespace Fsel.Course.Domain.Models.CommandModels.PlacementTests
 
         public bool IsActive { get; set; }
 
-        public EnumCourseLevel CourseLevel { get; set; }
+        public EnumPlacementTestLevel Level { get; set; }
+        public IList<UpdateSectionGroupCommandModel>? SectionGroups { get; set; }
     }
 }

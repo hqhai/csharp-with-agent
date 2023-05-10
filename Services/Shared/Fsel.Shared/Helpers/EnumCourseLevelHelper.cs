@@ -8,6 +8,7 @@ namespace Fsel.Shared.Helpers
     {
         private static IList<KeyValuePair<EnumCourseType, EnumCourseLevel>> s_courseTypeLevel = new List<KeyValuePair<EnumCourseType, EnumCourseLevel>>
         {
+            new KeyValuePair<EnumCourseType, EnumCourseLevel>(EnumCourseType.Academy, EnumCourseLevel.A1),
             new KeyValuePair<EnumCourseType, EnumCourseLevel>(EnumCourseType.Academy, EnumCourseLevel.A2),
             new KeyValuePair<EnumCourseType, EnumCourseLevel>(EnumCourseType.Academy, EnumCourseLevel.B1),
             new KeyValuePair<EnumCourseType, EnumCourseLevel>(EnumCourseType.Academy, EnumCourseLevel.B1Plus),
