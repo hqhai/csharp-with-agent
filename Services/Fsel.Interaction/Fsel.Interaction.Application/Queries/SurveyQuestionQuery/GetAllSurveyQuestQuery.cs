@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Interaction.Application.Queries
+namespace Fsel.Interaction.Application.Queries.SurveyQuestionQuery
 {
     using System.Linq;
     using System.Threading.Tasks;
@@ -26,7 +26,7 @@ namespace Fsel.Interaction.Application.Queries
 
         public async Task<MethodResult<IList<SurveyQuestionModel>>> Handle(GetAllSurveyQuestQuery request, CancellationToken cancellationToken)
         {
-            MethodResult<IList<SurveyQuestionModel>> methodResult = new MethodResult<IList<SurveyQuestionModel>>();
+            var methodResult = new MethodResult<IList<SurveyQuestionModel>>();
 
             var surveyQuestionquery = await _surveyQuestionRepository.Queryable.Select(x => new SurveyQuestionModel
             {

@@ -5,10 +5,11 @@ using System.Security.Claims;
 using System.Text;
 using Fsel.Common.ActionResults;
 using Fsel.Common.Helpers;
+using Fsel.Identity.Application.Services.InteractionService;
 using Fsel.Identity.Domain.Entities;
+using Fsel.Identity.Domain.Enums.ErrorCodes;
 using Fsel.Identity.Domain.IRepositories;
 using Fsel.Identity.Domain.Models.EntityModels;
-using Fsel.Identity.Infrastructure;
 using Fsel.Identity.Infrastructure.ValueSettings;
 using Fsel.Shared.Enums;
 using MediatR;
@@ -28,16 +29,19 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
     public class GenerateTokenCommandHandler : IRequestHandler<GenerateTokenCommand, MethodResult<TokenModel>>
     {
         private readonly UserManager<User> _userManager;
+        private readonly IInteractionService _interactionService;
         private readonly IUserTokenRepository _userTokenRepository;
         private readonly IHumanRepository _humanRepository;
         private readonly AppSetting _appSetting;
 
         public GenerateTokenCommandHandler(UserManager<User> userManager,
+            IInteractionService interactionService,
             IUserTokenRepository userTokenRepository,
             IHumanRepository humanRepository,
             AppSetting appSetting)
         {
             _userManager = userManager;
+            _interactionService = interactionService;
             _userTokenRepository = userTokenRepository;
             _humanRepository = humanRepository;
             _appSetting = appSetting;
@@ -95,6 +99,14 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             });
 
             Guid? classId = userRoles.Contains(EnumRole.Student.ToString()) ? await GetClassId(user.Id) : null;
+
+            var isSurvey = await _interactionService.IsStudentByIdAsync(Guid.Parse(request.Id ?? string.Empty));
+            if (!isSurvey.IsSuccessStatusCode)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumAuthErrorCode.SurveyCalledError));
+                return methodResult;
+            }
+
             var tokenLogin = new TokenModel
             {
                 AccessToken = accessToken,
@@ -102,7 +114,8 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                 Expiration = token.ValidTo.ConvertTimeFromUtc(TimeZoneInfo.Local),
                 FullName = user.FullName,
                 ClassId = classId,
-                Roles = userRoles.ToList()
+                Roles = userRoles.ToList(),
+                IsSurvey = isSurvey!.Content!.Result
             };
 
             methodResult.Result = tokenLogin;
