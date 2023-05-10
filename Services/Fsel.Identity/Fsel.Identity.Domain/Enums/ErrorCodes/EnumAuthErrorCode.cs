@@ -127,6 +127,11 @@ namespace Fsel.Identity.Domain.Enums.ErrorCodes
         /// <summary>
         /// UserName already exist
         /// </summary>
-        UserNameAlreadyExist
+        UserNameAlreadyExist,
+
+        /// <summary>
+        /// Survey Called Error
+        /// </summary>
+        SurveyCalledError
     }
 }
