@@ -13,6 +13,8 @@ namespace Fsel.Course.Domain.IRepositories
     {
         Task<bool> IsUnitSkillMockTest(Guid id);
 
-        Task<bool> IsCourseUnitMockTest(Guid id);
+        Task<bool> IsCourseFullMockTest(Guid id);
+
+        Task<MockTestModel?> GetIncludeAllAsync(Guid? id);
     }
 }

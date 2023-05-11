@@ -2,11 +2,16 @@
 
 namespace Fsel.Course.Domain.Models.EntityModels
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Text;
+    using System.Threading.Tasks;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Course.Domain.Enums;
     using Fsel.Shared.Enums;
 
-    public class MockTestModel : BaseModel
+    public class MockTestSearchModel : BaseModel
     {
         public string? Name { get; set; }
 
@@ -16,8 +21,6 @@ namespace Fsel.Course.Domain.Models.EntityModels
 
         public EnumMockTestType MockTestType { get; set; }
 
-        public IList<MockTestSectionModel>? MockTestSections { get; set; }
-
-        public IList<SectionGroupModel>? SectionGroups { get; set; }
+        public IList<EnumCourseSkill>? Skills { get; set; }
     }
 }

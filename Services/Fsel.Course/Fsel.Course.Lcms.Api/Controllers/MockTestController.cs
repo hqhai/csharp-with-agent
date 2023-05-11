@@ -31,7 +31,7 @@ namespace Fsel.Course.Lcms.Api.Controllers
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> Search([FromQuery] SearchMockTestQuery query)
         {
-            MethodResult<PagingItemsModel<MockTestModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            MethodResult<PagingItemsModel<MockTestSearchModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
 

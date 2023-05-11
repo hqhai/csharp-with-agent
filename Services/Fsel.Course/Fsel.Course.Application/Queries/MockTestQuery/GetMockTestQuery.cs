@@ -34,7 +34,7 @@ namespace Fsel.Course.Application.Queries.MockTestQuery
         {
             MethodResult<MockTestModel> methodResult = new MethodResult<MockTestModel>();
             ArgumentNullException.ThrowIfNull(request);
-            var mockTest = await _mockTestRepository.GetIncludeByIdAsync(request.Id);
+            var mockTest = await _mockTestRepository.GetIncludeAllAsync(request.Id);
 
             if (mockTest == null)
             {
@@ -42,7 +42,7 @@ namespace Fsel.Course.Application.Queries.MockTestQuery
                 return methodResult;
             }
 
-            methodResult.Result = _mapper.Map<MockTestModel>(mockTest);
+            methodResult.Result = mockTest;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }

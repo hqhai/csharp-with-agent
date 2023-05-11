@@ -9,18 +9,20 @@ namespace Fsel.Course.Application.Queries.MockTestQuery
     using Fsel.Core.Base.BaseModels;
     using Fsel.Core.Extensions;
     using Fsel.Course.Application.Queries.PlacementTestQuery;
+    using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Domain.Models.QueryModels.MockTests;
+    using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class SearchMockTestQuery : SearchMockTestQueryModel, IRequest<MethodResult<PagingItemsModel<MockTestModel>>>
+    public class SearchMockTestQuery : SearchMockTestQueryModel, IRequest<MethodResult<PagingItemsModel<MockTestSearchModel>>>
     {
     }
 
-    public class SearchMockTestQueryHandler : IRequestHandler<SearchMockTestQuery, MethodResult<PagingItemsModel<MockTestModel>>>
+    public class SearchMockTestQueryHandler : IRequestHandler<SearchMockTestQuery, MethodResult<PagingItemsModel<MockTestSearchModel>>>
     {
         private readonly IMapper _mapper;
         private readonly IMockTestRepository _mockTestRepository;
@@ -31,10 +33,10 @@ namespace Fsel.Course.Application.Queries.MockTestQuery
             _mockTestRepository = mockTestRepository;
         }
 
-        public async Task<MethodResult<PagingItemsModel<MockTestModel>>> Handle(SearchMockTestQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<PagingItemsModel<MockTestSearchModel>>> Handle(SearchMockTestQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            MethodResult<PagingItemsModel<MockTestModel>> methodResult = new MethodResult<PagingItemsModel<MockTestModel>>();
+            MethodResult<PagingItemsModel<MockTestSearchModel>> methodResult = new MethodResult<PagingItemsModel<MockTestSearchModel>>();
 
             if (request.PageSize > 100)
             {
@@ -44,7 +46,7 @@ namespace Fsel.Course.Application.Queries.MockTestQuery
             var mockTestQuery = _mockTestRepository.Queryable
                                       .Include(x => x.MockTestSections.Where(y => !y.IsDeleted))
                                       .ThenInclude(x => x.SectionGroup)
-                                      .Select(x => new MockTestModel
+                                      .Select(x => new MockTestSearchModel
                                       {
                                           Id = x.Id,
                                           Name = x.Name,
@@ -52,13 +54,7 @@ namespace Fsel.Course.Application.Queries.MockTestQuery
                                           CreatedDate = x.CreatedDate,
                                           IsActive = x.IsActive,
                                           MockTestType = x.MockTestType,
-                                          MockTestSections = x.MockTestSections.Where(x => !x.IsDeleted).Select(x => new MockTestSectionModel
-                                          {
-                                              SectionGroups = x.SectionGroup!.Sections.Select(x => x.SectionGroup).Select(x => new SectionGroupModel
-                                              {
-                                                  CourseSkill = x!.CourseSkill
-                                              }).ToList(),
-                                          }).ToList(),
+                                          Skills = x.MockTestSections.Select(x => x.SectionGroup).Select(n => n!.CourseSkill).ToList(),
                                       });
             if (!string.IsNullOrEmpty(request.Keyword))
             {
@@ -70,13 +66,18 @@ namespace Fsel.Course.Application.Queries.MockTestQuery
                 mockTestQuery = mockTestQuery.Where(m => m.MockTestType == request.MockTestType);
             }
 
+            if (request.CourseSkill != null)
+            {
+                mockTestQuery = mockTestQuery.Where(x => x.Skills!.Contains(request.CourseSkill ?? default));
+            }
+
             int totalItem = await mockTestQuery.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
             var lists = await mockTestQuery
                     .ApplySortAndPaging(request)
                     .AsNoTracking()
                     .ToListAsync(cancellationToken: cancellationToken)
                     .ConfigureAwait(false);
-            methodResult.Result = new PagingItemsModel<MockTestModel>(lists, request, totalItem);
+            methodResult.Result = new PagingItemsModel<MockTestSearchModel>(lists, request, totalItem);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }

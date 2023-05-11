@@ -83,9 +83,7 @@ namespace Fsel.Course.Application.Commands.MockTestCmd
             List<Section> sections = sectionGroups.SelectMany(x => x.Sections).ToList();
             List<SectionPart> sectionParts = sections.SelectMany(x => x.SectionParts).ToList();
             List<Question>? questions = null;
-            List<SectionQuestion>? sectionQuestions = null;
-
-            sectionQuestions = sectionParts.SelectMany(x => x.SectionQuestions).ToList();
+            List<SectionQuestion>? sectionQuestions = sectionParts.SelectMany(x => x.SectionQuestions).ToList();
             questions = sectionQuestions.Select(x => x.Question ?? new Question()).ToList();
 
             _mapper.Map(request, mockTest);

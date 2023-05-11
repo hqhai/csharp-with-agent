@@ -8,6 +8,7 @@ namespace Fsel.Course.Infrastructure.Repositories
     using Fsel.Core.Base;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.IRepositories;
+    using Fsel.Course.Domain.Models.EntityModels;
     using Microsoft.EntityFrameworkCore;
 
     public class MockTestRepository : BaseRepository<MockTest>, IMockTestRepository
@@ -23,7 +24,7 @@ namespace Fsel.Course.Infrastructure.Repositories
                 .AnyAsync(x => x.Id == id && x.UnitSkillMockTests.Count > 0);
         }
 
-        public async Task<bool> IsCourseUnitMockTest(Guid id)
+        public async Task<bool> IsCourseFullMockTest(Guid id)
         {
             return await Queryable
                 .Include(x => x.CourseUnitMockTests.Where(n => !n.IsDeleted))
@@ -41,6 +42,66 @@ namespace Fsel.Course.Infrastructure.Repositories
                                        .ThenInclude(x => x.SectionQuestions.Where(n => n.Question != null))
                                        .ThenInclude(x => x.Question)
                                        .FirstOrDefaultAsync(x => x.Id == id);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<MockTestModel?> GetIncludeAllAsync(Guid? id)
+        {
+            try
+            {
+                return await Queryable.Include(x => x.MockTestSections.Where(y => !y.IsDeleted))
+                                      .ThenInclude(x => x.SectionGroup)
+                                      .ThenInclude(x => x.Sections)
+                                      .ThenInclude(x => x.SectionParts)
+                                      .ThenInclude(x => x.SectionQuestions)
+                                      .Where(x => x.Id == id)
+                                      .Select(x => new MockTestModel
+                                      {
+                                          Id = x.Id,
+                                          Name = x.Name,
+                                          CourseType = x.CourseType,
+                                          CreatedDate = x.CreatedDate,
+                                          IsActive = x.IsActive,
+                                          MockTestType = x.MockTestType,
+                                          SectionGroups = x.MockTestSections.Select(x => x.SectionGroup).Select(x => new SectionGroupModel
+                                          {
+                                              ExecutionTime = x.ExecutionTime,
+                                              CourseSkill = x.CourseSkill,
+                                              Sections = x.Sections.Select(x => new SectionModel
+                                              {
+                                                  Id = x.Id,
+                                                  Name = x.Name,
+                                                  MediaPost = x.MediaPost,
+                                                  TargetWord = x.TargetWord,
+                                                  CreatedDate = x.CreatedDate,
+                                                  CreatedUserId = x.CreatedUserId,
+                                                  SectionParts = x.SectionParts.Select(x => new SectionPartModel
+                                                  {
+                                                      Id = x.Id,
+                                                      CreatedDate = x.CreatedDate,
+                                                      PartName = x.PartName,
+                                                      SectionId = x.SectionId,
+                                                      CreatedFullName = x.CreatedFullName,
+                                                      SectionQuestions = x.SectionQuestions.Select(x => new SectionQuestionModel
+                                                      {
+                                                          Question = x.Question!.SectionQuestions.Select(x => x.Question).Select(x => new QuestionModel
+                                                          {
+                                                              Id = x.Id,
+                                                              QuestionType = x.QuestionType,
+                                                              Explanation = x.Explanation,
+                                                              Ungraded = x.Ungraded,
+                                                              CorrectTotal = x.CorrectTotal,
+                                                              Config = x.Config
+                                                          }).FirstOrDefault()
+                                                      }).ToList(),
+                                                  }).ToList(),
+                                              }).ToList(),
+                                          }).ToList(),
+                                      }).FirstOrDefaultAsync();
             }
             catch (Exception)
             {
