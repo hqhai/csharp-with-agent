@@ -1,6 +1,5 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-using AutoMapper;
 using Fsel.Common.ActionResults;
 using Fsel.Core.Base.BaseModels;
 using Fsel.Core.Extensions;
@@ -22,14 +21,12 @@ namespace Fsel.Course.Application.Queries.CourseQuery
     public class SearchCourseQueryHandler : IRequestHandler<SearchCourseQuery, MethodResult<PagingItemsModel<CourseSearchModel>>>
     {
         private readonly ICourseRepository _courseRepository;
-        private readonly IMapper _mapper;
         private readonly IUserService _userService;
 
-        public SearchCourseQueryHandler(IMapper mapper, ICourseRepository courseRepository, IUserService userService)
+        public SearchCourseQueryHandler(ICourseRepository courseRepository, IUserService userService)
         {
             _courseRepository = courseRepository;
             _userService = userService;
-            _mapper = mapper;
         }
 
         public async Task<MethodResult<PagingItemsModel<CourseSearchModel>>> Handle(SearchCourseQuery request, CancellationToken cancellationToken)

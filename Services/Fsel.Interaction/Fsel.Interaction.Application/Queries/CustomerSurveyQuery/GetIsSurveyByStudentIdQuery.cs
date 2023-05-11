@@ -9,21 +9,21 @@ namespace Fsel.Interaction.Application.Queries.CustomerSurveyQuery
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class GetStudentByIdQuery : IRequest<MethodResult<bool>>
+    public class GetIsSurveyByStudentIdQuery : IRequest<MethodResult<bool>>
     {
         public Guid? Id { get; set; }
     }
 
-    public class GetAllSurveyQuestQueryHandler : IRequestHandler<GetStudentByIdQuery, MethodResult<bool>>
+    public class GetIsSurveyByStudentIdQueryHandler : IRequestHandler<GetIsSurveyByStudentIdQuery, MethodResult<bool>>
     {
         private readonly ICustomerSurveyRepository _customerSurveyRepository;
 
-        public GetAllSurveyQuestQueryHandler(ICustomerSurveyRepository customerSurveyRepository)
+        public GetIsSurveyByStudentIdQueryHandler(ICustomerSurveyRepository customerSurveyRepository)
         {
             _customerSurveyRepository = customerSurveyRepository;
         }
 
-        public async Task<MethodResult<bool>> Handle(GetStudentByIdQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<bool>> Handle(GetIsSurveyByStudentIdQuery request, CancellationToken cancellationToken)
         {
             var methodResult = new MethodResult<bool>();
 

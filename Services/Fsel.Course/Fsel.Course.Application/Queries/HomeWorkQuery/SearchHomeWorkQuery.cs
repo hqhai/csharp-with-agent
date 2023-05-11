@@ -4,7 +4,6 @@ namespace Fsel.Course.Application.Queries.HomeWorkQuery
 {
     using System.Threading;
     using System.Threading.Tasks;
-    using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Core.Extensions;
@@ -19,14 +18,12 @@ namespace Fsel.Course.Application.Queries.HomeWorkQuery
     {
     }
 
-    public class SearchLessonQueryHandler : IRequestHandler<SearchHomeWorkQuery, MethodResult<PagingItemsModel<HomeWorkSearchModel>>>
+    public class SearchHomeWorkQueryHandler : IRequestHandler<SearchHomeWorkQuery, MethodResult<PagingItemsModel<HomeWorkSearchModel>>>
     {
-        private readonly IMapper _mapper;
         private readonly IHomeWorkRepository _homeWorkRepository;
 
-        public SearchLessonQueryHandler(IMapper mapper, IHomeWorkRepository homeWorkRepository)
+        public SearchHomeWorkQueryHandler(IHomeWorkRepository homeWorkRepository)
         {
-            _mapper = mapper;
             _homeWorkRepository = homeWorkRepository;
         }
 

@@ -51,6 +51,10 @@ namespace Fsel.Course.Application.Queries.CategoryQuery
                 case EnumCourseSourceData.TimeCodeType:
                     methodResult.Result = ConvertHelper.EnumToListModel<EnumTimeCodeType>();
                     break;
+
+                case EnumCourseSourceData.PlacementTestLevel:
+                    methodResult.Result = ConvertHelper.EnumToListModel<EnumPlacementTestLevel>();
+                    break;
             }
 
             methodResult.StatusCode = StatusCodes.Status200OK;
