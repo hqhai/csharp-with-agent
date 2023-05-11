@@ -6,6 +6,7 @@ using Fsel.Course.Domain.Entities;
 using Fsel.Course.Domain.Enums.ErrorCodes;
 using Fsel.Course.Domain.IRepositories;
 using Fsel.Course.Domain.Models.CommandModels.PlacementTests;
+using Fsel.Course.Domain.Models.CommandModels.Questions;
 using Fsel.Course.Domain.Models.EntityModels;
 using Fsel.Course.Infrastructure.Common;
 using Fsel.Shared.Enums;
@@ -155,22 +156,7 @@ namespace Fsel.Course.Application.Commands.PlacementTestCmd
                                     }
                                     else
                                     {
-                                        var newQuestion = _mapper.Map<Question>(question);
-                                        var (config, correctTotal) = _questionTypeConverter.QuestionTypeConverterObject(question.Config, newQuestion.QuestionType, isShowCorrectTotal: !question.Ungraded, false);
-                                        if (config == null)
-                                        {
-                                            methodResult.AddErrorBadRequest(nameof(EnumVideoErrorCode.ConfigIsInTheWrongFormat), nameof(question.Config), question.Config);
-                                        }
-                                        newSectionPart.SectionQuestions.Add(new SectionQuestion
-                                        {
-                                            Question = newQuestion,
-                                            SectionPart = newSectionPart,
-                                        });
-                                        if (!newQuestion.IsValid())
-                                        {
-                                            methodResult.AddErrorBadRequest(newQuestion.ErrorMessages);
-                                            return methodResult;
-                                        }
+                                        GetSectionQuestion(methodResult, question, null, newSectionPart);
                                     }
                                 }
                                 newSection.SectionParts.Add(newSectionPart);
@@ -192,28 +178,7 @@ namespace Fsel.Course.Application.Commands.PlacementTestCmd
 
                         foreach (var question in section.Questions)
                         {
-                            if (question == null)
-                            {
-                                methodResult.AddErrorBadRequest(nameof(EnumQuestionErrorCode.QuestionNull), nameof(question), question);
-                            }
-                            else
-                            {
-                                var newQuestion = _mapper.Map<Question>(question);
-                                var (config, correctTotal) = _questionTypeConverter.QuestionTypeConverterObject(question.Config, newQuestion.QuestionType, isShowCorrectTotal: !question.Ungraded, false);
-                                if (config == null)
-                                {
-                                    methodResult.AddErrorBadRequest(nameof(EnumVideoErrorCode.ConfigIsInTheWrongFormat), nameof(question.Config), question.Config);
-                                }
-                                newSection.SectionQuestions.Add(new SectionQuestion
-                                {
-                                    Question = newQuestion,
-                                    Section = newSection,
-                                });
-                                if (!newQuestion.IsValid())
-                                {
-                                    methodResult.AddErrorBadRequest(newQuestion.ErrorMessages);
-                                }
-                            }
+                            GetSectionQuestion(methodResult, question, newSection, null);
                         }
                     }
 
@@ -286,6 +251,42 @@ namespace Fsel.Course.Application.Commands.PlacementTestCmd
             });
 
             return methodResult;
+        }
+        private void GetSectionQuestion(MethodResult<PlacementTestModel> methodResult, UpdateQuestionCommandModel question, Section? section, SectionPart? sectionPart)
+        {
+            if (question == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumQuestionErrorCode.QuestionNull), nameof(question));
+            }
+            else
+            {
+                Question newQuestion = _mapper.Map<Question>(question);
+                var (config, correctTotal) = _questionTypeConverter.QuestionTypeConverterObject(question.Config, newQuestion.QuestionType, isShowCorrectTotal: !question.Ungraded, false);
+                if (config == null)
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumVideoErrorCode.ConfigIsInTheWrongFormat), nameof(question.Config), question.Config);
+                }
+                if (!newQuestion.IsValid())
+                {
+                    methodResult.AddErrorBadRequest(newQuestion.ErrorMessages);
+                }
+                newQuestion.CorrectTotal = correctTotal;
+
+                if (section != null)
+                {
+                    section.SectionQuestions.Add(new SectionQuestion
+                    {
+                        Question = newQuestion,
+                    });
+                }
+                else if (sectionPart != null)
+                {
+                    sectionPart.SectionQuestions.Add(new SectionQuestion
+                    {
+                        Question = newQuestion,
+                    });
+                }
+            }
         }
     }
 }

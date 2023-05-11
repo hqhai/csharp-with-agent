@@ -102,7 +102,12 @@ namespace Fsel.Course.Application.Commands.PlacementTestCmd
                                     }
                                     foreach (var question in sectionPart.Questions)
                                     {
-                                        GetSectionQuestion(methodResult, newSection, question);
+                                        GetSectionQuestion(methodResult, question, null, newSectionPart);
+                                    }
+                                    if (!newSectionPart.IsValid())
+                                    {
+                                        methodResult.AddErrorBadRequest(newSectionPart.ErrorMessages);
+                                        return methodResult;
                                     }
                                 }
                             }
@@ -116,8 +121,13 @@ namespace Fsel.Course.Application.Commands.PlacementTestCmd
                             }
                             foreach (var question in section.Questions)
                             {
-                                GetSectionQuestion(methodResult, newSection, question);
+                                GetSectionQuestion(methodResult, question, newSection, null);
                             }
+                        }
+                        if (!newSection.IsValid())
+                        {
+                            methodResult.AddErrorBadRequest(newSection.ErrorMessages);
+                            return methodResult;
                         }
                     }
 
@@ -153,7 +163,7 @@ namespace Fsel.Course.Application.Commands.PlacementTestCmd
             return methodResult;
         }
 
-        private void GetSectionQuestion(MethodResult<PlacementTestModel> methodResult, Section section, CreateQuestionCommandModel question)
+        private void GetSectionQuestion(MethodResult<PlacementTestModel> methodResult, CreateQuestionCommandModel question, Section? section, SectionPart? sectionPart)
         {
             if (question == null)
             {
@@ -172,10 +182,21 @@ namespace Fsel.Course.Application.Commands.PlacementTestCmd
                     methodResult.AddErrorBadRequest(newQuestion.ErrorMessages);
                 }
                 newQuestion.CorrectTotal = correctTotal;
-                section.SectionQuestions.Add(new SectionQuestion
+
+                if (section != null)
                 {
-                    Question = newQuestion,
-                });
+                    section.SectionQuestions.Add(new SectionQuestion
+                    {
+                        Question = newQuestion,
+                    });
+                }
+                else if (sectionPart != null)
+                {
+                    sectionPart.SectionQuestions.Add(new SectionQuestion
+                    {
+                        Question = newQuestion,
+                    });
+                }
             }
         }
     }
