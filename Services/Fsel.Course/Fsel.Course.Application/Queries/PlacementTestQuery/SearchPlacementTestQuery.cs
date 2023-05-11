@@ -55,6 +55,11 @@ namespace Fsel.Course.Application.Queries.PlacementTestQuery
                 placementTestQuery = placementTestQuery.Where(m => m.Id.ToString() == request.Keyword || (m.Name ?? string.Empty).Contains(request.Keyword));
             }
 
+            if (request.Level != null)
+            {
+                placementTestQuery = placementTestQuery.Where(m => m.Level == request.Level);
+            }
+
             int totalItem = await placementTestQuery.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
             var lists = await placementTestQuery
                     .ApplySortAndPaging(request)
