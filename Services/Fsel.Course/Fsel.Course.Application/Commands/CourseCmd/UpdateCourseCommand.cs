@@ -111,7 +111,7 @@ namespace Fsel.Course.Application.Commands.CourseCmd
             var checkMockTest = mocktests.All(x => x.MockTestType == EnumMockTestType.FullMockTest);
             if (!checkMockTest)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumMockTestErrorCode.MockTestExistsOtherThanTypeCourseMocktest), nameof(mocktests), mocktests);
+                methodResult.AddErrorBadRequest(nameof(EnumMockTestErrorCode.MockTestExistsOtherThanTypeFullMockTest), nameof(mocktests), mocktests);
                 return methodResult;
             }
 

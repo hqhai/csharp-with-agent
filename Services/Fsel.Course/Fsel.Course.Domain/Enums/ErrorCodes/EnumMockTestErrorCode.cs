@@ -10,14 +10,14 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         MockTestsNotExist,
 
         /// <summary>
-        /// MockTest Exists Other Than TypeUnitMockTest
+        /// MockTest Exists Other Than TypeSkillMockTest
         /// </summary>
-        MockTestExistsOtherThanTypeUnitMockTest,
+        MockTestExistsOtherThanTypeSkillMockTest,
 
         /// <summary>
-        /// MockTest Exists Other Than TypeCourseMocktest
+        /// MockTest Exists Other Than TypeFullMockTest
         /// </summary>
-        MockTestExistsOtherThanTypeCourseMocktest,
+        MockTestExistsOtherThanTypeFullMockTest,
 
         /// <summary>
         /// MockTest  is in active state
