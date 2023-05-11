@@ -1,6 +1,5 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-using AutoMapper;
 using Fsel.Common.ActionResults;
 using Fsel.Core.Base.BaseModels;
 using Fsel.Core.Extensions;
@@ -22,13 +21,11 @@ namespace Fsel.Course.Application.Queries.UnitQuery
     public class SearchUnitQueryHandler : IRequestHandler<SearchUnitQuery, MethodResult<PagingItemsModel<UnitSearchModel>>>
     {
         private readonly IUnitRepository _unitRepository;
-        private readonly IMapper _mapper;
         private readonly IUserService _userService;
 
-        public SearchUnitQueryHandler(IMapper mapper, IUnitRepository unitRepository, IUserService userService)
+        public SearchUnitQueryHandler(IUnitRepository unitRepository, IUserService userService)
         {
             _unitRepository = unitRepository;
-            _mapper = mapper;
             _userService = userService;
         }
 

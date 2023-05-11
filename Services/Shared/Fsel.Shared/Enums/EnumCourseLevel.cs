@@ -6,19 +6,22 @@ namespace Fsel.Shared.Enums
 
     public enum EnumCourseLevel
     {
-        [Description("Module A2")]
+        [Description("Think Starter")]
+        A1,
+
+        [Description("Think A2")]
         A2,
 
-        [Description("Module B1")]
+        [Description("Think B1")]
         B1,
 
-        [Description("Module B1+")]
+        [Description("Think B1+")]
         B1Plus,
 
-        [Description("Module B2")]
+        [Description("Think B2")]
         B2,
 
-        [Description("Module C1")]
+        [Description("Think C1")]
         C1,
 
         [Description("Foundation")]

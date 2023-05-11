@@ -2,7 +2,6 @@
 
 namespace Fsel.Course.Application.Queries.QuestionFormQuery
 {
-    using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Core.Extensions;
@@ -20,12 +19,10 @@ namespace Fsel.Course.Application.Queries.QuestionFormQuery
     public class SearchQuestionFormQueryHandler : IRequestHandler<SearchQuestionFormQuery, MethodResult<PagingItemsModel<QuestionFormModel>>>
     {
         private readonly IQuestionFormRepository _questionFormRepository;
-        private readonly IMapper _mapper;
 
-        public SearchQuestionFormQueryHandler(IQuestionFormRepository questionFormRepository, IMapper mapper)
+        public SearchQuestionFormQueryHandler(IQuestionFormRepository questionFormRepository)
         {
             _questionFormRepository = questionFormRepository;
-            _mapper = mapper;
         }
 
         public async Task<MethodResult<PagingItemsModel<QuestionFormModel>>> Handle(SearchQuestionFormQuery request, CancellationToken cancellationToken)

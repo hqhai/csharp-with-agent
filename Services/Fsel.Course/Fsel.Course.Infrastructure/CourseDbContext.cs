@@ -49,6 +49,14 @@ namespace Fsel.Course.Infrastructure
         public DbSet<HomeWorkAnswer> HomeWorkAnswers { get; set; }
         public DbSet<HomeWorkResult> HomeWorkResults { get; set; }
 
+        public DbSet<PlacementTestSection> PlacementTestSections { get; set; }
+        public DbSet<Section> Sections { get; set; }
+        public DbSet<SectionGroup> SectionGroups { get; set; }
+        public DbSet<SectionPart> SectionParts { get; set; }
+        public DbSet<SectionQuestion> SectionQuestions { get; set; }
+        public DbSet<SectionTimeCode> SectionTimeCodes { get; set; }
+        public DbSet<MockTestSection> MockTestSections { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             ArgumentNullException.ThrowIfNull(modelBuilder);
@@ -82,6 +90,13 @@ namespace Fsel.Course.Infrastructure
             modelBuilder.ApplyConfiguration(new HomeWorkAnswerEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new HomeWorkResultEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new HomeWorkQuestionEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new PlacementTestSectionEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new SectionEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new SectionGroupEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new SectionPartEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new SectionQuestionEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new SectionTimeCodeEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new MockTestSectionEntityTypeConfiguration());
 
             base.OnModelCreating(modelBuilder);
         }

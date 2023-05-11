@@ -30,10 +30,16 @@ namespace Fsel.Course.Application.Commands.PlacementTestCmd
 
             #region Validation
 
-            var placementTest = await _placementTestRepository.GetByIdAsync(request.Id);
+            var placementTest = await _placementTestRepository.GetIncludeByIdAsync(request.Id);
             if (placementTest == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumPlacementTestErrorCode.PlacementTestNotExist), nameof(request.Id), request.Id);
+                return methodResult;
+            }
+
+            if (placementTest.IsActive)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumPlacementTestErrorCode.PlacementTestInActiveState), nameof(placementTest.IsActive), placementTest.IsActive);
                 return methodResult;
             }
 
@@ -41,11 +47,11 @@ namespace Fsel.Course.Application.Commands.PlacementTestCmd
 
             await _placementTestRepository.ExecuteTransactionAsync(async () =>
             {
-                var result = await _placementTestRepository.DeleteAsync(placementTest);
+                await _placementTestRepository.DeleteAsync(placementTest);
                 await _placementTestRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
                 methodResult.StatusCode = StatusCodes.Status200OK;
-                methodResult.Result = result;
+                methodResult.Result = true;
                 return methodResult;
             });
 

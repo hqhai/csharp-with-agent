@@ -7,7 +7,6 @@ using Fsel.Common.ActionResults;
 using Fsel.Common.Helpers;
 using Fsel.Identity.Application.Services.InteractionService;
 using Fsel.Identity.Domain.Entities;
-using Fsel.Identity.Domain.Enums.ErrorCodes;
 using Fsel.Identity.Domain.IRepositories;
 using Fsel.Identity.Domain.Models.EntityModels;
 using Fsel.Identity.Infrastructure.ValueSettings;
@@ -98,25 +97,24 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                 RefreshTokenExpiryTime = DateTime.Now.AddDays(_appSetting.Jwt?.RefreshTokenValidityInDays ?? default)
             });
 
-            Guid? classId = userRoles.Contains(EnumRole.Student.ToString()) ? await GetClassId(user.Id) : null;
-
-            var isSurvey = await _interactionService.IsStudentByIdAsync(Guid.Parse(request.Id ?? string.Empty));
-            if (!isSurvey.IsSuccessStatusCode)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumAuthErrorCode.SurveyCalledError));
-                return methodResult;
-            }
-
             var tokenLogin = new TokenModel
             {
                 AccessToken = accessToken,
                 RefreshToken = refreshToken,
                 Expiration = token.ValidTo.ConvertTimeFromUtc(TimeZoneInfo.Local),
                 FullName = user.FullName,
-                ClassId = classId,
                 Roles = userRoles.ToList(),
-                IsSurvey = isSurvey!.Content!.Result
             };
+
+            if (userRoles.Contains(EnumRole.Student.ToString()))
+            {
+                tokenLogin.ClassId = await GetClassId(user.Id);
+                var isSurvey = await _interactionService.IsSurveyCompleted(Guid.Parse(request.Id ?? string.Empty));
+                if (isSurvey.IsSuccessStatusCode)
+                {
+                    tokenLogin.IsSurvey = isSurvey?.Content?.Result;
+                }
+            }
 
             methodResult.Result = tokenLogin;
             methodResult.StatusCode = StatusCodes.Status200OK;
