@@ -10,15 +10,12 @@ namespace Fsel.Course.Application.Commands.MockTestCmd
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Course.Domain.Entities;
-    using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.CommandModels.MockTests;
     using Fsel.Course.Domain.Models.CommandModels.Questions;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Infrastructure.Common;
-    using Fsel.Course.Infrastructure.Repositories;
-    using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Http;
 
@@ -72,13 +69,13 @@ namespace Fsel.Course.Application.Commands.MockTestCmd
             var mockTest = await _mockTestRepository.GetIncludeByIdAsync(request.Id);
             if (mockTest == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumMockTestErrorCode.MockTestsNotExist), nameof(request.Id), request.Id);
+                methodResult.AddErrorBadRequest(nameof(EnumPlacementTestErrorCode.PlacementTestNotExist), nameof(request.Id), request.Id);
                 return methodResult;
             }
 
             if (mockTest.IsActive)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumMockTestErrorCode.MockTestInActiveState), nameof(mockTest.IsActive), mockTest.IsActive);
+                methodResult.AddErrorBadRequest(nameof(EnumPlacementTestErrorCode.PlacementTestInActiveState), nameof(mockTest.IsActive), mockTest.IsActive);
                 return methodResult;
             }
 
@@ -87,16 +84,9 @@ namespace Fsel.Course.Application.Commands.MockTestCmd
             List<SectionPart> sectionParts = sections.SelectMany(x => x.SectionParts).ToList();
             List<Question>? questions = null;
             List<SectionQuestion>? sectionQuestions = null;
-            if (mockTest.MockTestType == EnumMockTestType.SkillMockTest)
-            {
-                sectionQuestions = sectionParts.SelectMany(x => x.SectionQuestions).ToList();
-                questions = sectionQuestions.Select(x => x.Question ?? new Question()).ToList();
-            }
-            else
-            {
-                sectionQuestions = sections.SelectMany(x => x.SectionQuestions).ToList();
-                questions = sections.SelectMany(x => x.SectionQuestions).Select(x => x.Question ?? new Question()).ToList();
-            }
+
+            sectionQuestions = sectionParts.SelectMany(x => x.SectionQuestions).ToList();
+            questions = sectionQuestions.Select(x => x.Question ?? new Question()).ToList();
 
             _mapper.Map(request, mockTest);
             mockTest.MockTestSections.Clear();
@@ -109,7 +99,6 @@ namespace Fsel.Course.Application.Commands.MockTestCmd
                     return methodResult;
                 }
                 var newSectionGroup = _mapper.Map<SectionGroup>(sectionGroup);
-                newSectionGroup.Sections.Clear();
                 if (sectionGroup.Sections == null || sectionGroup.Sections.Count == 0)
                 {
                     methodResult.AddErrorBadRequest(nameof(EnumSectionErrorCode.SectionsNull), nameof(sectionGroup.Sections));
@@ -122,15 +111,12 @@ namespace Fsel.Course.Application.Commands.MockTestCmd
                         methodResult.AddErrorBadRequest(nameof(EnumSectionErrorCode.SectionNull), nameof(section));
                         return methodResult;
                     }
-                    var newSection = _mapper.Map<Section>(section);
-
+                    Section newSection = newSectionGroup.Sections.ElementAt(sectionGroup.Sections.IndexOf(section));
                     if (section.SectionParts != null && section.Questions != null && section.SectionParts.Count > 0 && section.Questions.Count > 0)
                     {
                         methodResult.AddErrorBadRequest(nameof(EnumSectionErrorCode.OnlyOneOfTwoSectionPartsOrQuestions));
                         return methodResult;
                     }
-
-                    newSection.SectionParts.Clear();
 
                     if (section.SectionParts == null || section.SectionParts.Count == 0)
                     {
@@ -146,8 +132,7 @@ namespace Fsel.Course.Application.Commands.MockTestCmd
                         }
                         else
                         {
-                            var newSectionPart = _mapper.Map<SectionPart>(sectionPart);
-                            newSectionPart.SectionQuestions.Clear();
+                            SectionPart newSectionPart = newSection.SectionParts.ElementAt(section.SectionParts.IndexOf(sectionPart));
                             if (sectionPart.Questions == null || sectionPart.Questions.Count == 0)
                             {
                                 methodResult.AddErrorBadRequest(nameof(EnumQuestionErrorCode.QuestionsNull), nameof(sectionPart.Questions));
@@ -155,17 +140,8 @@ namespace Fsel.Course.Application.Commands.MockTestCmd
                             }
                             foreach (var question in sectionPart.Questions)
                             {
-                                if (question == null)
-                                {
-                                    methodResult.AddErrorBadRequest(nameof(EnumQuestionErrorCode.QuestionNull), nameof(question));
-                                    return methodResult;
-                                }
-                                else
-                                {
-                                    GetSectionQuestion(methodResult, question, null, newSectionPart);
-                                }
+                                GetSectionQuestion(methodResult, question, null, newSectionPart);
                             }
-                            newSection.SectionParts.Add(newSectionPart);
                             if (!newSectionPart.IsValid())
                             {
                                 methodResult.AddErrorBadRequest(newSectionPart.ErrorMessages);
@@ -173,8 +149,6 @@ namespace Fsel.Course.Application.Commands.MockTestCmd
                             }
                         }
                     }
-
-                    newSectionGroup.Sections.Add(newSection);
 
                     if (!newSection.IsValid())
                     {
