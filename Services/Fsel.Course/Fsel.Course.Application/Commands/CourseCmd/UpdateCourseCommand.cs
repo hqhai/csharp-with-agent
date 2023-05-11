@@ -108,7 +108,7 @@ namespace Fsel.Course.Application.Commands.CourseCmd
 
             var mocktests = await _mockTestRepository.GetByIdsAsync(mocktestIds.Where(e => e.HasValue).Select(e => e!.Value));
 
-            var checkMockTest = mocktests.All(x => x.MockTestType == EnumMockTestType.CourseMockTest);
+            var checkMockTest = mocktests.All(x => x.MockTestType == EnumMockTestType.FullMockTest);
             if (!checkMockTest)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumMockTestErrorCode.MockTestExistsOtherThanTypeCourseMocktest), nameof(mocktests), mocktests);

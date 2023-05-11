@@ -17,6 +17,11 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         /// <summary>
         /// MockTest Exists Other Than TypeCourseMocktest
         /// </summary>
-        MockTestExistsOtherThanTypeCourseMocktest
+        MockTestExistsOtherThanTypeCourseMocktest,
+
+        /// <summary>
+        /// MockTest  is in active state
+        /// </summary>
+        MockTestInActiveState,
     }
 }
