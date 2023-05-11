@@ -46,7 +46,7 @@ namespace Fsel.Interaction.Api.Controllers
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> IsSurveyCompletedByIdStudent([FromRoute] Guid id)
         {
-            MethodResult<bool> queryResult = await _mediator.Send(new GetStudentByIdQuery { Id = id }).ConfigureAwait(false);
+            MethodResult<bool> queryResult = await _mediator.Send(new GetIsSurveyByUserIdQuery { Id = id }).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
     }
