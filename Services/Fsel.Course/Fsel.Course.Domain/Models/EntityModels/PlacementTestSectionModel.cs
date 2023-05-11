@@ -2,12 +2,10 @@
 
 namespace Fsel.Course.Domain.Models.EntityModels
 {
-    using Fsel.Common.Enums.ErrorCodes;
-    using System.ComponentModel.DataAnnotations;
-
     public class PlacementTestSectionModel
     {
         public Guid PlacementTestId { get; set; }
         public Guid SectionGroupId { get; set; }
+        public SectionGroupModel? SectionGroup { get; set; }
     }
 }

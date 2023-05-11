@@ -14,5 +14,6 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public bool IsActive { get; set; }
 
         public EnumPlacementTestLevel Level { get; set; }
+        public IList<PlacementTestSectionModel>? PlacementTestSections { get; set; }
     }
 }
