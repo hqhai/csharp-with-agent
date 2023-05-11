@@ -22,6 +22,6 @@ namespace Fsel.Course.Domain.Models.CommandModels.ClassForums
 
         public EnumCourseSkill CourseSkill { get; set; }
 
-        public Guid LessonId { get; set; }
+        public Guid? LessonId { get; set; }
     }
 }
