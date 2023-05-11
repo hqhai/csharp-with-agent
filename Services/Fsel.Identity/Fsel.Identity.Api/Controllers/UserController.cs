@@ -131,11 +131,11 @@ namespace Fsel.Identity.Api.Controllers
         /// </summary>
         [Authorize]
         [HttpGet("get-user-profile")]
-        [ProducesResponseType(typeof(MethodResult<UserModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(MethodResult<UserProfileModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetProfileUser()
         {
-            MethodResult<UserModel> commandResult = await _mediator.Send(new GetUserProfileQuery()).ConfigureAwait(false);
+            MethodResult<UserProfileModel> commandResult = await _mediator.Send(new GetUserProfileQuery()).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
 
@@ -144,11 +144,11 @@ namespace Fsel.Identity.Api.Controllers
         /// </summary>
         [Authorize(Roles = nameof(EnumRole.Admin))]
         [HttpGet("get-user/{id}")]
-        [ProducesResponseType(typeof(MethodResult<UserModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(MethodResult<UserProfileModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> Get([FromRoute] Guid id)
         {
-            MethodResult<UserModel> commandResult = await _mediator.Send(new GetUserQuery { UserId = id }).ConfigureAwait(false);
+            MethodResult<UserProfileModel> commandResult = await _mediator.Send(new GetUserQuery { UserId = id }).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
 
