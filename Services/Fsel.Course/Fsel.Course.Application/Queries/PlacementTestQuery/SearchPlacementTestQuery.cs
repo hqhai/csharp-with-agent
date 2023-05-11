@@ -1,6 +1,5 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-using AutoMapper;
 using Fsel.Common.ActionResults;
 using Fsel.Core.Base.BaseModels;
 using Fsel.Core.Extensions;
@@ -20,12 +19,10 @@ namespace Fsel.Course.Application.Queries.PlacementTestQuery
     public class SearchPlacementTestQueryHandler : IRequestHandler<SearchPlacementTestQuery, MethodResult<PagingItemsModel<PlacementTestModel>>>
     {
         private readonly IPlacementTestRepository _placementTestRepository;
-        private readonly IMapper _mapper;
 
-        public SearchPlacementTestQueryHandler(IMapper mapper, IPlacementTestRepository placementTestRepository)
+        public SearchPlacementTestQueryHandler(IPlacementTestRepository placementTestRepository)
         {
             _placementTestRepository = placementTestRepository;
-            _mapper = mapper;
         }
 
         public async Task<MethodResult<PagingItemsModel<PlacementTestModel>>> Handle(SearchPlacementTestQuery request, CancellationToken cancellationToken)
@@ -46,7 +43,7 @@ namespace Fsel.Course.Application.Queries.PlacementTestQuery
                                          Name = i.Name,
                                          InstructionContent = i.InstructionContent,
                                          IsActive = i.IsActive,
-                                         CourseLevel = i.CourseLevel,
+                                         Level = i.Level,
                                          CreatedDate = i.CreatedDate,
                                          CreatedUserId = i.CreatedUserId,
                                          UpdatedDate = i.UpdatedDate,
@@ -56,6 +53,11 @@ namespace Fsel.Course.Application.Queries.PlacementTestQuery
             if (!string.IsNullOrEmpty(request.Keyword))
             {
                 placementTestQuery = placementTestQuery.Where(m => m.Id.ToString() == request.Keyword || (m.Name ?? string.Empty).Contains(request.Keyword));
+            }
+
+            if (request.Level != null)
+            {
+                placementTestQuery = placementTestQuery.Where(m => m.Level == request.Level);
             }
 
             int totalItem = await placementTestQuery.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
