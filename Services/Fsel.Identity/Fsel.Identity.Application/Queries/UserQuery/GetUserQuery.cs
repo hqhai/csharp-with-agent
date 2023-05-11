@@ -7,6 +7,7 @@ namespace Fsel.Identity.Application.Queries.UserQuery
     using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Core.Base;
     using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.Enums.ErrorCodes;
     using Fsel.Identity.Domain.Models.EntityModels;
@@ -64,6 +65,15 @@ namespace Fsel.Identity.Application.Queries.UserQuery
                 userView = await _userManager.Users.Include(x => x.Human)
                                                    .ThenInclude(x => x!.Student)
                                                    .FirstOrDefaultAsync(x => x.Id == request.UserId.ToString(), cancellationToken);
+                if (userView!.Human!.Student!.CreatedByParent == false)
+                {
+                    userView = await _userManager.Users.Include(x => x.Human)
+                                                  .ThenInclude(x => x!.Student)
+                                                  .ThenInclude(x => x!.ParentStudents)
+                                                  .ThenInclude(x => x!.Parent)
+                                                  .ThenInclude(x => x!.Human)
+                                                  .FirstOrDefaultAsync(x => x.Id == request.UserId.ToString(), cancellationToken);
+                }
             }
             else if (userRoles.FirstOrDefault() == EnumRole.Parent.ToString())
             {

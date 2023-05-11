@@ -12,7 +12,6 @@ namespace Fsel.Identity.Domain.Models.CommandModels.Users
         public DateTime Birthday { get; set; }
         public string? School { get; set; }
         public string? Address { get; set; }
-        public string? Email { get; set; }
         public string? Occupation { get; set; }
         public string? PassportPath { get; set; }
         public string? UniversityDegreePath { get; set; }

@@ -132,6 +132,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                 human.Student = new Student
                 {
                     HumanId = human.Id,
+                    CreatedByParent = false,
                 };
                 human.Code = $"HN_{weekNumber}{lastDigitOfYear}{number}{lastOfYear}{stt:000}";
             }

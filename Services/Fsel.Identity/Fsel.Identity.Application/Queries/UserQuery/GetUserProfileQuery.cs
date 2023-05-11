@@ -63,6 +63,16 @@ namespace Fsel.Identity.Application.Queries.UserQuery
                 userView = await _userManager.Users.Include(x => x.Human)
                                                    .ThenInclude(x => x!.Student)
                                                    .FirstOrDefaultAsync(x => x.Id == _authContext.CurrentUserId.ToString(), cancellationToken);
+
+                if (userView!.Human!.Student!.CreatedByParent == false)
+                {
+                    userView = await _userManager.Users.Include(x => x.Human)
+                                                  .ThenInclude(x => x!.Student)
+                                                  .ThenInclude(x => x!.ParentStudents)
+                                                  .ThenInclude(x => x!.Parent)
+                                                  .ThenInclude(x => x!.Human)
+                                                  .FirstOrDefaultAsync(x => x.Id == _authContext.CurrentUserId.ToString(), cancellationToken);
+                }
             }
             else if (userRoles.FirstOrDefault() == EnumRole.Parent.ToString())
             {
