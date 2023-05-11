@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fsel.Course.Infrastructure.Migrations
 {
     [DbContext(typeof(CourseDbContext))]
-    [Migration("20230510064832_FixMockTestSectionTable")]
-    partial class FixMockTestSectionTable
+    [Migration("20230511065231_Update_MockTestSectionTable")]
+    partial class Update_MockTestSectionTable
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

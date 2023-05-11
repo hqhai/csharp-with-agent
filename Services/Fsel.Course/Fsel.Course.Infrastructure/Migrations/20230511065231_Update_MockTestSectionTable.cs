@@ -5,7 +5,7 @@
 namespace Fsel.Course.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class FixMockTestSectionTable : Migration
+    public partial class Update_MockTestSectionTable : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
