@@ -8,23 +8,23 @@ namespace Fsel.Course.Application.Commands.PlacementTestCmd
     using MediatR;
     using Microsoft.AspNetCore.Http;
 
-    public class ActivePlacementTestCommand : IRequest<MethodResult<bool>>
+    public class UpdateStatusPlacementTestCommand : IRequest<MethodResult<bool>>
     {
         public Guid Id { get; set; }
         public bool IsActive { get; set; }
     }
 
-    public class ActivePlacementTestCommandHandler : IRequestHandler<ActivePlacementTestCommand, MethodResult<bool>>
+    public class UpdateStatusPlacementTestCommandHandler : IRequestHandler<UpdateStatusPlacementTestCommand, MethodResult<bool>>
     {
         private readonly IPlacementTestRepository _placementTestRepository;
 
-        public ActivePlacementTestCommandHandler(IPlacementTestRepository placementTestRepository
+        public UpdateStatusPlacementTestCommandHandler(IPlacementTestRepository placementTestRepository
             )
         {
             _placementTestRepository = placementTestRepository;
         }
 
-        public async Task<MethodResult<bool>> Handle(ActivePlacementTestCommand request, CancellationToken cancellationToken)
+        public async Task<MethodResult<bool>> Handle(UpdateStatusPlacementTestCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<bool> methodResult = new MethodResult<bool>();
