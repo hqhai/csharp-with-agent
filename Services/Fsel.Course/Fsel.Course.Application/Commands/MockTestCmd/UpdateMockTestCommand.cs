@@ -14,8 +14,10 @@ namespace Fsel.Course.Application.Commands.MockTestCmd
     using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.CommandModels.MockTests;
+    using Fsel.Course.Domain.Models.CommandModels.Questions;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Infrastructure.Common;
+    using Fsel.Course.Infrastructure.Repositories;
     using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Http;
@@ -58,23 +60,28 @@ namespace Fsel.Course.Application.Commands.MockTestCmd
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<MockTestModel> methodResult = new MethodResult<MockTestModel>();
+
+            #region Validation
+
             if (request.SectionGroups == null || request.SectionGroups.Count == 0)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSectionGroupErrorCode.SectionGroupsNull), nameof(request.SectionGroups));
                 return methodResult;
             }
+
             var mockTest = await _mockTestRepository.GetIncludeByIdAsync(request.Id);
             if (mockTest == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumMockTestErrorCode.MockTestsNotExist), nameof(request.Id), request?.Id);
+                methodResult.AddErrorBadRequest(nameof(EnumMockTestErrorCode.MockTestsNotExist), nameof(request.Id), request.Id);
                 return methodResult;
             }
+
             if (mockTest.IsActive)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumMockTestErrorCode.MockTestInActiveState), nameof(mockTest.IsActive), mockTest.IsActive);
                 return methodResult;
             }
-            var isType = mockTest.MockTestType == EnumMockTestType.SkillMockTest;
+
             List<SectionGroup> sectionGroups = mockTest.MockTestSections.Select(x => x.SectionGroup ?? new SectionGroup()).ToList();
             List<Section> sections = sectionGroups.SelectMany(x => x.Sections).ToList();
             List<SectionPart> sectionParts = sections.SelectMany(x => x.SectionParts).ToList();
@@ -90,6 +97,7 @@ namespace Fsel.Course.Application.Commands.MockTestCmd
                 sectionQuestions = sections.SelectMany(x => x.SectionQuestions).ToList();
                 questions = sections.SelectMany(x => x.SectionQuestions).Select(x => x.Question ?? new Question()).ToList();
             }
+
             _mapper.Map(request, mockTest);
             mockTest.MockTestSections.Clear();
 
@@ -123,96 +131,45 @@ namespace Fsel.Course.Application.Commands.MockTestCmd
                     }
 
                     newSection.SectionParts.Clear();
-                    if (isType)
+
+                    if (section.SectionParts == null || section.SectionParts.Count == 0)
                     {
-                        if (section.SectionParts == null || section.SectionParts.Count == 0)
+                        methodResult.AddErrorBadRequest(nameof(EnumSectionPartErrorCode.SectionPartsNull), nameof(section.SectionParts));
+                        return methodResult;
+                    }
+                    foreach (var sectionPart in section.SectionParts)
+                    {
+                        if (sectionPart == null)
                         {
-                            methodResult.AddErrorBadRequest(nameof(EnumSectionPartErrorCode.SectionPartsNull), nameof(section.SectionParts));
+                            methodResult.AddErrorBadRequest(nameof(EnumSectionPartErrorCode.SectionPartNull), nameof(sectionPart), sectionPart);
                             return methodResult;
                         }
-                        foreach (var sectionPart in section.SectionParts)
+                        else
                         {
-                            if (sectionPart == null)
+                            var newSectionPart = _mapper.Map<SectionPart>(sectionPart);
+                            newSectionPart.SectionQuestions.Clear();
+                            if (sectionPart.Questions == null || sectionPart.Questions.Count == 0)
                             {
-                                methodResult.AddErrorBadRequest(nameof(EnumSectionPartErrorCode.SectionPartNull), nameof(sectionPart), sectionPart);
+                                methodResult.AddErrorBadRequest(nameof(EnumQuestionErrorCode.QuestionsNull), nameof(sectionPart.Questions));
                                 return methodResult;
                             }
-                            else
+                            foreach (var question in sectionPart.Questions)
                             {
-                                var newSectionPart = _mapper.Map<SectionPart>(sectionPart);
-                                newSectionPart.SectionQuestions.Clear();
-                                if (sectionPart.Questions == null || sectionPart.Questions.Count == 0)
+                                if (question == null)
                                 {
-                                    methodResult.AddErrorBadRequest(nameof(EnumQuestionErrorCode.QuestionsNull), nameof(sectionPart.Questions));
+                                    methodResult.AddErrorBadRequest(nameof(EnumQuestionErrorCode.QuestionNull), nameof(question));
                                     return methodResult;
                                 }
-                                foreach (var question in sectionPart.Questions)
+                                else
                                 {
-                                    if (question == null)
-                                    {
-                                        methodResult.AddErrorBadRequest(nameof(EnumQuestionErrorCode.QuestionNull), nameof(question));
-                                        return methodResult;
-                                    }
-                                    else
-                                    {
-                                        var newQuestion = _mapper.Map<Question>(question);
-                                        var (config, correctTotal) = _questionTypeConverter.QuestionTypeConverterObject(question.Config, newQuestion.QuestionType, isShowCorrectTotal: !question.Ungraded, false);
-                                        if (config == null)
-                                        {
-                                            methodResult.AddErrorBadRequest(nameof(EnumVideoErrorCode.ConfigIsInTheWrongFormat), nameof(question.Config), question.Config);
-                                        }
-                                        newSectionPart.SectionQuestions.Add(new SectionQuestion
-                                        {
-                                            Question = newQuestion,
-                                            SectionPart = newSectionPart,
-                                        });
-                                        if (!newQuestion.IsValid())
-                                        {
-                                            methodResult.AddErrorBadRequest(newQuestion.ErrorMessages);
-                                            return methodResult;
-                                        }
-                                    }
-                                }
-                                newSection.SectionParts.Add(newSectionPart);
-                                if (!newSectionPart.IsValid())
-                                {
-                                    methodResult.AddErrorBadRequest(newSectionPart.ErrorMessages);
-                                    return methodResult;
+                                    GetSectionQuestion(methodResult, question, null, newSectionPart);
                                 }
                             }
-                        }
-                    }
-                    else
-                    {
-                        if (section.Questions == null || section.Questions.Count == 0)
-                        {
-                            methodResult.AddErrorBadRequest(nameof(EnumQuestionErrorCode.QuestionNull), nameof(section.Questions));
-                            return methodResult;
-                        }
-
-                        foreach (var question in section.Questions)
-                        {
-                            if (question == null)
+                            newSection.SectionParts.Add(newSectionPart);
+                            if (!newSectionPart.IsValid())
                             {
-                                methodResult.AddErrorBadRequest(nameof(EnumQuestionErrorCode.QuestionNull), nameof(question), question);
-                            }
-                            else
-                            {
-                                var newQuestion = _mapper.Map<Question>(question);
-                                var (config, correctTotal) = _questionTypeConverter.QuestionTypeConverterObject(question.Config, newQuestion.QuestionType, isShowCorrectTotal: !question.Ungraded, false);
-                                if (config == null)
-                                {
-                                    methodResult.AddErrorBadRequest(nameof(EnumVideoErrorCode.ConfigIsInTheWrongFormat), nameof(question.Config), question.Config);
-                                }
-                                newSection.SectionQuestions.Add(new SectionQuestion
-                                {
-                                    Question = newQuestion,
-                                    Section = newSection,
-                                });
-                                if (!newQuestion.IsValid())
-                                {
-                                    methodResult.AddErrorBadRequest(newQuestion.ErrorMessages);
-                                }
+                                methodResult.AddErrorBadRequest(newSectionPart.ErrorMessages);
+                                return methodResult;
                             }
                         }
                     }
@@ -239,6 +196,8 @@ namespace Fsel.Course.Application.Commands.MockTestCmd
             {
                 return methodResult;
             }
+
+            #endregion Validation
 
             await _mockTestRepository.ExecuteTransactionAsync(async () =>
             {
@@ -278,12 +237,49 @@ namespace Fsel.Course.Application.Commands.MockTestCmd
                 mockTest = _mockTestRepository.Update(mockTest);
                 await _mockTestRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
-                methodResult.StatusCode = StatusCodes.Status201Created;
+                methodResult.StatusCode = StatusCodes.Status200OK;
                 methodResult.Result = _mapper.Map<MockTestModel>(mockTest);
                 return methodResult;
             });
 
             return methodResult;
+        }
+
+        private void GetSectionQuestion(MethodResult<MockTestModel> methodResult, UpdateQuestionCommandModel question, Section? section, SectionPart? sectionPart)
+        {
+            if (question == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumQuestionErrorCode.QuestionNull), nameof(question));
+            }
+            else
+            {
+                Question newQuestion = _mapper.Map<Question>(question);
+                var (config, correctTotal) = _questionTypeConverter.QuestionTypeConverterObject(question.Config, newQuestion.QuestionType, isShowCorrectTotal: !question.Ungraded, false);
+                if (config == null)
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumVideoErrorCode.ConfigIsInTheWrongFormat), nameof(question.Config), question.Config);
+                }
+                if (!newQuestion.IsValid())
+                {
+                    methodResult.AddErrorBadRequest(newQuestion.ErrorMessages);
+                }
+                newQuestion.CorrectTotal = correctTotal;
+
+                if (section != null)
+                {
+                    section.SectionQuestions.Add(new SectionQuestion
+                    {
+                        Question = newQuestion,
+                    });
+                }
+                else if (sectionPart != null)
+                {
+                    sectionPart.SectionQuestions.Add(new SectionQuestion
+                    {
+                        Question = newQuestion,
+                    });
+                }
+            }
         }
     }
 }

@@ -7,6 +7,6 @@ namespace Fsel.Course.Domain.Models.QueryModels.MockTests
 
     public class SearchMockTestQueryModel : BaseQueryModel
     {
-        public EnumMockTestType MockTestType { get; set; }
+        public EnumMockTestType? MockTestType { get; set; }
     }
 }

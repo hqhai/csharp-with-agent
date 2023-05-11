@@ -14,9 +14,5 @@ namespace Fsel.Course.Domain.IRepositories
         Task<bool> IsUnitSkillMockTest(Guid id);
 
         Task<bool> IsCourseUnitMockTest(Guid id);
-
-        Task<MockTestModel?> GetIncludeAllAsync(Guid? id);
-
-        IQueryable<MockTestModel> SearchAsync(EnumMockTestType? mockTestType);
     }
 }

@@ -7,6 +7,7 @@ namespace Fsel.Course.Application.Queries.MockTestQuery
     using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
@@ -33,7 +34,7 @@ namespace Fsel.Course.Application.Queries.MockTestQuery
         {
             MethodResult<MockTestModel> methodResult = new MethodResult<MockTestModel>();
             ArgumentNullException.ThrowIfNull(request);
-            var mockTest = await _mockTestRepository.GetIncludeAllAsync(request.Id);
+            var mockTest = await _mockTestRepository.GetIncludeByIdAsync(request.Id);
 
             if (mockTest == null)
             {
@@ -41,7 +42,7 @@ namespace Fsel.Course.Application.Queries.MockTestQuery
                 return methodResult;
             }
 
-            methodResult.Result = mockTest;
+            methodResult.Result = _mapper.Map<MockTestModel>(mockTest);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }
