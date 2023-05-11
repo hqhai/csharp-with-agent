@@ -10,6 +10,6 @@ namespace Fsel.Identity.Application.Services.InteractionService
     public interface IInteractionService
     {
         [Get("/customerSurvey/Student/{id}")]
-        Task<IApiResponse<MethodResult<bool>>> IsStudentByIdAsync([FromRoute] Guid id);
+        Task<IApiResponse<MethodResult<bool>>> IsSurveyCompleted([FromRoute] Guid id);
     }
 }

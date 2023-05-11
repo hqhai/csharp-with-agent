@@ -100,7 +100,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
 
             Guid? classId = userRoles.Contains(EnumRole.Student.ToString()) ? await GetClassId(user.Id) : null;
 
-            var isSurvey = await _interactionService.IsStudentByIdAsync(Guid.Parse(request.Id ?? string.Empty));
+            var isSurvey = await _interactionService.IsSurveyCompleted(Guid.Parse(request.Id ?? string.Empty));
             if (!isSurvey.IsSuccessStatusCode)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumAuthErrorCode.SurveyCalledError));
@@ -115,7 +115,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                 FullName = user.FullName,
                 ClassId = classId,
                 Roles = userRoles.ToList(),
-                IsSurvey = isSurvey!.Content!.Result
+                IsSurvey = userRoles.FirstOrDefault() != EnumRole.Student.ToString() || isSurvey!.Content!.Result
             };
 
             methodResult.Result = tokenLogin;
