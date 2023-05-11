@@ -86,18 +86,15 @@ namespace Fsel.Course.Infrastructure.Repositories
                                                       PartName = x.PartName,
                                                       SectionId = x.SectionId,
                                                       CreatedFullName = x.CreatedFullName,
-                                                      SectionQuestions = x.SectionQuestions.Select(x => new SectionQuestionModel
+                                                      Question = x.SectionQuestions.Select(x => x.Question).Select(x => new QuestionModel
                                                       {
-                                                          Question = x.Question!.SectionQuestions.Select(x => x.Question).Select(x => new QuestionModel
-                                                          {
-                                                              Id = x.Id,
-                                                              QuestionType = x.QuestionType,
-                                                              Explanation = x.Explanation,
-                                                              Ungraded = x.Ungraded,
-                                                              CorrectTotal = x.CorrectTotal,
-                                                              Config = x.Config
-                                                          }).FirstOrDefault()
-                                                      }).ToList(),
+                                                          Id = x!.Id,
+                                                          QuestionType = x.QuestionType,
+                                                          Explanation = x.Explanation,
+                                                          Ungraded = x.Ungraded,
+                                                          CorrectTotal = x.CorrectTotal,
+                                                          Config = x.Config
+                                                      }).ToList()
                                                   }).ToList(),
                                               }).ToList(),
                                           }).ToList(),
