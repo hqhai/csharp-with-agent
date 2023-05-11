@@ -18,11 +18,11 @@ namespace Fsel.Course.Application.Queries.HomeWorkQuery
     {
     }
 
-    public class SearchLessonQueryHandler : IRequestHandler<SearchHomeWorkQuery, MethodResult<PagingItemsModel<HomeWorkSearchModel>>>
+    public class SearchHomeWorkQueryHandler : IRequestHandler<SearchHomeWorkQuery, MethodResult<PagingItemsModel<HomeWorkSearchModel>>>
     {
         private readonly IHomeWorkRepository _homeWorkRepository;
 
-        public SearchLessonQueryHandler(IHomeWorkRepository homeWorkRepository)
+        public SearchHomeWorkQueryHandler(IHomeWorkRepository homeWorkRepository)
         {
             _homeWorkRepository = homeWorkRepository;
         }
