@@ -42,15 +42,16 @@ namespace Fsel.Course.Application.Commands.PlacementTestCmd
                 methodResult.AddErrorBadRequest(nameof(EnumPlacementTestErrorCode.PlacementTestInActiveState), nameof(placementTest.IsActive), placementTest.IsActive);
                 return methodResult;
             }
+
             #endregion Validation
 
             await _placementTestRepository.ExecuteTransactionAsync(async () =>
             {
-                var result = await _placementTestRepository.DeleteAsync(placementTest);
+                await _placementTestRepository.DeleteAsync(placementTest);
                 await _placementTestRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
                 methodResult.StatusCode = StatusCodes.Status200OK;
-                methodResult.Result = result;
+                methodResult.Result = true;
                 return methodResult;
             });
 

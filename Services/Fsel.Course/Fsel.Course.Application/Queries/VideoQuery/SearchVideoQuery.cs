@@ -1,6 +1,5 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-using AutoMapper;
 using Fsel.Common.ActionResults;
 using Fsel.Core.Base.BaseModels;
 using Fsel.Core.Extensions;
@@ -19,13 +18,10 @@ namespace Fsel.Course.Application.Queries.VideoQuery
 
     public class SearchVideoQueryHandler : IRequestHandler<SearchVideoQuery, MethodResult<PagingItemsModel<VideoSearchModel>>>
     {
-        private readonly IMapper _mapper;
         private readonly IVideoRepository _videoRepository;
 
-        public SearchVideoQueryHandler(IMapper mapper
-            , IVideoRepository videoRepository)
+        public SearchVideoQueryHandler(IVideoRepository videoRepository)
         {
-            _mapper = mapper;
             _videoRepository = videoRepository;
         }
 

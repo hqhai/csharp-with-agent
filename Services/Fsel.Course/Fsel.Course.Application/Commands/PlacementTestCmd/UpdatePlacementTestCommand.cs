@@ -102,7 +102,6 @@ namespace Fsel.Course.Application.Commands.PlacementTestCmd
                     return methodResult;
                 }
                 var newSectionGroup = _mapper.Map<SectionGroup>(sectionGroup);
-                newSectionGroup.Sections.Clear();
                 if (sectionGroup.Sections == null || sectionGroup.Sections.Count == 0)
                 {
                     methodResult.AddErrorBadRequest(nameof(EnumSectionErrorCode.SectionsNull), nameof(sectionGroup.Sections));
@@ -115,15 +114,13 @@ namespace Fsel.Course.Application.Commands.PlacementTestCmd
                         methodResult.AddErrorBadRequest(nameof(EnumSectionErrorCode.SectionNull), nameof(section));
                         return methodResult;
                     }
-                    var newSection = _mapper.Map<Section>(section);
-
+                    Section newSection = newSectionGroup.Sections.ElementAt(sectionGroup.Sections.IndexOf(section));
                     if (section.SectionParts != null && section.Questions != null && section.SectionParts.Count > 0 && section.Questions.Count > 0)
                     {
                         methodResult.AddErrorBadRequest(nameof(EnumSectionErrorCode.OnlyOneOfTwoSectionPartsOrQuestions));
                         return methodResult;
                     }
 
-                    newSection.SectionParts.Clear();
                     if (request.Level == EnumPlacementTestLevel.IELTS)
                     {
                         if (section.SectionParts == null || section.SectionParts.Count == 0)
@@ -140,8 +137,7 @@ namespace Fsel.Course.Application.Commands.PlacementTestCmd
                             }
                             else
                             {
-                                var newSectionPart = _mapper.Map<SectionPart>(sectionPart);
-                                newSectionPart.SectionQuestions.Clear();
+                                SectionPart newSectionPart = newSection.SectionParts.ElementAt(section.SectionParts.IndexOf(sectionPart));
                                 if (sectionPart.Questions == null || sectionPart.Questions.Count == 0)
                                 {
                                     methodResult.AddErrorBadRequest(nameof(EnumQuestionErrorCode.QuestionsNull), nameof(sectionPart.Questions));
@@ -149,17 +145,8 @@ namespace Fsel.Course.Application.Commands.PlacementTestCmd
                                 }
                                 foreach (var question in sectionPart.Questions)
                                 {
-                                    if (question == null)
-                                    {
-                                        methodResult.AddErrorBadRequest(nameof(EnumQuestionErrorCode.QuestionNull), nameof(question));
-                                        return methodResult;
-                                    }
-                                    else
-                                    {
-                                        GetSectionQuestion(methodResult, question, null, newSectionPart);
-                                    }
+                                    GetSectionQuestion(methodResult, question, null, newSectionPart);
                                 }
-                                newSection.SectionParts.Add(newSectionPart);
                                 if (!newSectionPart.IsValid())
                                 {
                                     methodResult.AddErrorBadRequest(newSectionPart.ErrorMessages);
@@ -181,8 +168,6 @@ namespace Fsel.Course.Application.Commands.PlacementTestCmd
                             GetSectionQuestion(methodResult, question, newSection, null);
                         }
                     }
-
-                    newSectionGroup.Sections.Add(newSection);
 
                     if (!newSection.IsValid())
                     {
@@ -252,6 +237,7 @@ namespace Fsel.Course.Application.Commands.PlacementTestCmd
 
             return methodResult;
         }
+
         private void GetSectionQuestion(MethodResult<PlacementTestModel> methodResult, UpdateQuestionCommandModel question, Section? section, SectionPart? sectionPart)
         {
             if (question == null)
