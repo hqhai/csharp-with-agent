@@ -41,12 +41,12 @@ namespace Fsel.Interaction.Api.Controllers
         /// <summary>
         /// Check Student by id
         /// </summary>
-        [HttpGet("Student/{id}")]
+        [HttpGet("IsCompleted/{id}")]
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> IsSurveyCompletedByIdStudent([FromRoute] Guid id)
+        public async Task<IActionResult> IsSurveyCompletedByStudentId([FromRoute] Guid id)
         {
-            MethodResult<bool> queryResult = await _mediator.Send(new GetIsSurveyByUserIdQuery { Id = id }).ConfigureAwait(false);
+            MethodResult<bool> queryResult = await _mediator.Send(new GetIsSurveyByStudentIdQuery { Id = id }).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
     }

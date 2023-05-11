@@ -9,7 +9,7 @@ namespace Fsel.Identity.Application.Services.InteractionService
 
     public interface IInteractionService
     {
-        [Get("/customerSurvey/Student/{id}")]
+        [Get("/customerSurvey/IsCompleted/{id}")]
         Task<IApiResponse<MethodResult<bool>>> IsSurveyCompleted([FromRoute] Guid id);
     }
 }
