@@ -70,7 +70,7 @@ namespace Fsel.Course.Application.Commands.UnitCmd
                 return methodResult;
             }
 
-            var checkMockTest = _mockTestRepository.Queryable.Any(x => x.MockTestType == EnumMockTestType.UnitMockTest && x.Id == request.MockTestId);
+            var checkMockTest = _mockTestRepository.Queryable.Any(x => x.MockTestType == EnumMockTestType.SkillMockTest && x.Id == request.MockTestId);
             if (!checkMockTest)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumMockTestErrorCode.MockTestExistsOtherThanTypeUnitMockTest), nameof(request.MockTestId), request.MockTestId);

@@ -8,5 +8,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
     {
         public string? PartName { get; set; }
         public Guid SectionId { get; set; }
+
+        public IList<SectionQuestionModel>? SectionQuestions { get; set; }
     }
 }

@@ -6,6 +6,7 @@ namespace Fsel.Course.Domain.Models.CommandModels.MockTests
     using Fsel.Shared.Enums;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums;
+    using Fsel.Course.Domain.Models.CommandModels.SectionGroups;
 
     public class CreateMockTestCommandModel
     {
@@ -17,8 +18,6 @@ namespace Fsel.Course.Domain.Models.CommandModels.MockTests
 
         public EnumMockTestType MockTestType { get; set; }
 
-        public IList<CourseUnitMockTest>? CourseUnitMockTests { get; set; }
-
-        public IList<UnitSkillMockTest>? UnitSkillMockTests { get; set; }
+        public IList<CreateSectionGroupCommandModel>? SectionGroups { get; set; }
     }
 }

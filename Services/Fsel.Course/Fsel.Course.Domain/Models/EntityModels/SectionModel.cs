@@ -10,5 +10,8 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public string? MediaPost { get; set; }
         public int TargetWord { get; set; }
         public Guid SectionGroupId { get; set; }
+
+        public IList<SectionPartModel>? SectionParts { get; set; }
+        public IList<SectionGroupModel>? SectionsGroups { get; set; }
     }
 }

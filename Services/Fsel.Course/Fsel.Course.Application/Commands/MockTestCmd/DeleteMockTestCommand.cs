@@ -41,25 +41,18 @@ namespace Fsel.Course.Application.Commands.MockTestCmd
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<bool> methodResult = new MethodResult<bool>();
-            var mockTest = await _mockTestRepository.Queryable
-                                                    .FirstOrDefaultAsync(e => e.Id == request.Id, cancellationToken: cancellationToken);
+            var mockTest = await _mockTestRepository.GetIncludeByIdAsync(request.Id);
             if (mockTest == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumMockTestErrorCode.MockTestsNotExist), nameof(request.Id), request?.Id);
                 return methodResult;
             }
-            var isUnitUsed = await _mockTestRepository.IsUnitSkillMockTest(request.Id);
-            if (isUnitUsed)
+            if (mockTest.IsActive)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumMockTestErrorCode.UnitUsed), nameof(request.Id), request.Id);
+                methodResult.AddErrorBadRequest(nameof(EnumMockTestErrorCode.MockTestInActiveState), nameof(mockTest.IsActive), mockTest.IsActive);
                 return methodResult;
             }
-            var isCourseUsed = await _mockTestRepository.IsCourseUnitMockTest(request.Id);
-            if (isCourseUsed)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumMockTestErrorCode.CourseUsed), nameof(request.Id), request.Id);
-                return methodResult;
-            }
+
             await _mockTestRepository.ExecuteTransactionAsync(async () =>
             {
                 var result = await _mockTestRepository.DeleteAsync(mockTest);

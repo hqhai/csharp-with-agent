@@ -41,18 +41,7 @@ namespace Fsel.Course.Application.Queries.MockTestQuery
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 return methodResult;
             }
-            var mockTestQuery = _mockTestRepository.Queryable
-                                              .Select(x => new MockTestModel
-                                              {
-                                                  Id = x.Id,
-                                                  Name = x.Name,
-                                                  CourseType = x.CourseType,
-                                                  CreatedFullName = x.CreatedFullName,
-                                                  CreatedDate = x.CreatedDate,
-                                                  CreatedUserId = x.CreatedUserId,
-                                                  IsActive = x.IsActive,
-                                                  MockTestType = x.MockTestType,
-                                              });
+            var mockTestQuery = _mockTestRepository.SearchAsync(request.MockTestType);
             if (!string.IsNullOrEmpty(request.Keyword))
             {
                 mockTestQuery = mockTestQuery.Where(m => m.Id.ToString() == request.Keyword || (m.Name ?? string.Empty).Contains(request.Keyword));

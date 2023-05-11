@@ -1,20 +1,18 @@
 // Copyright (c) Atlantic. All rights reserved.
-using Fsel.Common.ActionResults;
 using System.Net;
+using Fsel.Common.ActionResults;
 using Fsel.Common.Constants;
 using Fsel.Core.Base.BaseModels;
-using Fsel.Course.Application.Commands.LessonCmd;
-using Fsel.Course.Application.Queries.LessonQuery;
+using Fsel.Course.Application.Commands.MockTestCmd;
+using Fsel.Course.Application.Queries.MockTestQuery;
 using Fsel.Course.Domain.Models.EntityModels;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using Fsel.Course.Application.Queries.MockTestQuery;
-using Fsel.Course.Application.Commands.MockTestCmd;
 
 namespace Fsel.Course.Lcms.Api.Controllers
 {
     [ApiVersion(Settings.APIVersion)]
-    [Route(Settings.APIDefaultRoute + "/lesson")]
+    [Route(Settings.APIDefaultRoute + "/mock-test")]
     [ApiController]
     public class MockTestController : ControllerBase
     {

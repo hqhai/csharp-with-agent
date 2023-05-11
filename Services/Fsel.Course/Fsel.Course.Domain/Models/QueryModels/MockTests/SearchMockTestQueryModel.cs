@@ -3,8 +3,10 @@
 namespace Fsel.Course.Domain.Models.QueryModels.MockTests
 {
     using Fsel.Core.Base.BaseModels;
+    using Fsel.Course.Domain.Enums;
 
     public class SearchMockTestQueryModel : BaseQueryModel
     {
+        public EnumMockTestType MockTestType { get; set; }
     }
 }

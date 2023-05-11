@@ -20,13 +20,8 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         MockTestExistsOtherThanTypeCourseMocktest,
 
         /// <summary>
-        /// Unit have been use
+        /// MockTest  is in active state
         /// </summary>
-        UnitUsed,
-
-        /// <summary>
-        /// Course have been use
-        /// </summary>
-        CourseUsed,
+        MockTestInActiveState,
     }
 }

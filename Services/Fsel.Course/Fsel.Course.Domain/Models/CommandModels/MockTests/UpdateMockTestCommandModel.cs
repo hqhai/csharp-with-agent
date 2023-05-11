@@ -3,10 +3,10 @@
 namespace Fsel.Course.Domain.Models.CommandModels.MockTests
 {
     using System.Collections.Generic;
-    using Fsel.Shared.Enums;
-    using Fsel.Course.Domain.Entities;
-    using Fsel.Course.Domain.Enums;
     using Fsel.Core.Base.BaseModels;
+    using Fsel.Course.Domain.Enums;
+    using Fsel.Course.Domain.Models.CommandModels.SectionGroups;
+    using Fsel.Shared.Enums;
 
     public class UpdateMockTestCommandModel : BaseCommandModel
     {
@@ -18,8 +18,6 @@ namespace Fsel.Course.Domain.Models.CommandModels.MockTests
 
         public EnumMockTestType MockTestType { get; set; }
 
-        public IList<CourseUnitMockTest>? CourseUnitMockTests { get; set; }
-
-        public IList<UnitSkillMockTest>? UnitSkillMockTests { get; set; }
+        public IList<UpdateSectionGroupCommandModel>? SectionGroups { get; set; }
     }
 }
