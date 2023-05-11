@@ -4,11 +4,9 @@ namespace Fsel.Shared.Enums
 {
     public enum EnumSurveyQuestion
     {
-        FselSource,
-        ChooseDirection,
-        ChooseLanguage,
-        YourPlace,
         AgeGender,
-        StudyTime
+        ChooseMultipleColumn,
+        YourDirection,
+        YourPlace,
     }
 }
