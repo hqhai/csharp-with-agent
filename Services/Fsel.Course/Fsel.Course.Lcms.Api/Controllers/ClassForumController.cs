@@ -7,6 +7,7 @@ using Fsel.Course.Domain.Models.EntityModels;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Fsel.Course.Application.Commands.ClassForumCmd;
+using Fsel.Course.Application.Commands.LessonCmd;
 
 namespace Fsel.Course.Lcms.Api.Controllers
 {
@@ -32,6 +33,20 @@ namespace Fsel.Course.Lcms.Api.Controllers
         {
             MethodResult<ClassForumModel> queryResult = await _mediator.Send(command).ConfigureAwait(false);
             return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Update a Class Forum
+        /// </summary>
+        [HttpPut("{id}")]
+        [ProducesResponseType(typeof(MethodResult<ClassForumModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> Update([FromRoute] Guid id, [FromBody] UpdateClassForumCommand command)
+        {
+            ArgumentNullException.ThrowIfNull(command);
+            command.Id = id;
+            MethodResult<ClassForumModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
         }
     }
 }

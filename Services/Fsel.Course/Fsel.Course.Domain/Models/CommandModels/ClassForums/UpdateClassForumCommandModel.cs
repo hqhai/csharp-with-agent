@@ -2,10 +2,11 @@
 
 using Fsel.Shared.Enums;
 using Fsel.Course.Domain.Enums;
+using Fsel.Core.Base.BaseModels;
 
 namespace Fsel.Course.Domain.Models.CommandModels.ClassForums
 {
-    public class UpdateClassForumCommandModel
+    public class UpdateClassForumCommandModel : BaseCommandModel
     {
         public string? Title { get; set; }
 
@@ -20,5 +21,7 @@ namespace Fsel.Course.Domain.Models.CommandModels.ClassForums
         public bool IsActive { get; set; }
 
         public EnumCourseSkill CourseSkill { get; set; }
+
+        public Guid LessonId { get; set; }
     }
 }
