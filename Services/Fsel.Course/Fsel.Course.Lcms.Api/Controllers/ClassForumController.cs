@@ -1,19 +1,20 @@
 // Copyright (c) Atlantic. All rights reserved.
-using Fsel.Common.ActionResults;
 using System.Net;
+using Fsel.Common.ActionResults;
 using Fsel.Common.Constants;
-using Fsel.Course.Application.Commands.CourseCmd;
-using Fsel.Course.Domain.Models.EntityModels;
-using MediatR;
-using Microsoft.AspNetCore.Mvc;
 using Fsel.Course.Application.Commands.ClassForumCmd;
-using Fsel.Course.Application.Commands.LessonCmd;
+using Fsel.Course.Domain.Models.EntityModels;
+using Fsel.Shared.Enums;
+using MediatR;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Fsel.Course.Lcms.Api.Controllers
 {
     [ApiVersion(Settings.APIVersion)]
     [Route(Settings.APIDefaultRoute + "/class-forum")]
     [ApiController]
+    [Authorize(Roles = nameof(EnumRole.MasterAdmin))]
     public class ClassForumController : ControllerBase
     {
         private readonly IMediator _mediator;
@@ -24,7 +25,7 @@ namespace Fsel.Course.Lcms.Api.Controllers
         }
 
         /// <summary>
-        /// Create a Class Forum
+        /// Create/Update a Class Forum
         /// </summary>
         [HttpPost]
         [ProducesResponseType(typeof(MethodResult<ClassForumModel>), (int)HttpStatusCode.OK)]

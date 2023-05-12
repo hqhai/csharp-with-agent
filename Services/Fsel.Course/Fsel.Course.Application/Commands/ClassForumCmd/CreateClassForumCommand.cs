@@ -57,12 +57,17 @@ namespace Fsel.Course.Application.Commands.ClassForumCmd
 
             await _classForumRepository.ExecuteTransactionAsync(async () =>
             {
-                var isExistLessonId = await _lessonRepository.Queryable.AnyAsync(x => x.Id == request.LessonId, cancellationToken);
-                if (isExistLessonId)
+                var isExistClassForum = await _classForumRepository.Queryable.FirstOrDefaultAsync(x => x.Id == request.LessonId);
+                if (isExistClassForum != null)
                 {
+                    _mapper.Map(request, classForum);
                     classForum = _classForumRepository.Update(classForum);
                 }
-                classForum = _classForumRepository.Add(classForum);
+                if (isExistClassForum == null)
+                {
+                    classForum = _classForumRepository.Add(classForum);
+                }
+
                 await _classForumRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
                 methodResult.StatusCode = StatusCodes.Status201Created;
