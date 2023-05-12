@@ -13,7 +13,7 @@ namespace Fsel.Identity.Infrastructure
 {
     public class UserDbContext : BaseIdentityDbContext<User>
     {
-        public UserDbContext(DbContextOptions<UserDbContext> options, IMediator mediator) : base(options, mediator)
+        public UserDbContext(DbContextOptions<UserDbContext> options, IMediator mediator, AuthContext authContext) : base(options, mediator, authContext)
         {
         }
 

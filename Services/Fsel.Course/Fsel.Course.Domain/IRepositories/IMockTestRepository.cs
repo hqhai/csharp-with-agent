@@ -6,9 +6,14 @@ namespace Fsel.Course.Domain.IRepositories
     using System.Threading.Tasks;
     using Fsel.Core.Base.Interfaces;
     using Fsel.Course.Domain.Entities;
+    using Fsel.Course.Domain.Models.EntityModels;
 
     public interface IMockTestRepository : IRepository<MockTest>
     {
-        Task<bool> IsUnitSkillMockTest(Guid Id);
+        Task<bool> IsUnitSkillMockTest(Guid id);
+
+        Task<bool> IsCourseFullMockTest(Guid id);
+
+        Task<MockTestModel?> GetIncludeAllAsync(Guid? id);
     }
 }
