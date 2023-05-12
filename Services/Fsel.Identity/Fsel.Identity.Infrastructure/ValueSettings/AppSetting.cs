@@ -15,6 +15,7 @@ namespace Fsel.Identity.Infrastructure.ValueSettings
     public class ConstantUrl
     {
         public string? ActiveUserUrl { get; set; }
+        public string? FogotPassWordUserUrl { get; set; }
     }
     public class Services : BaseServices
     {

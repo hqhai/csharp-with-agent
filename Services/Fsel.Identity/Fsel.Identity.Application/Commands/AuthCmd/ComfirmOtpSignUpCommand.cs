@@ -18,11 +18,11 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
     using Microsoft.AspNetCore.Identity;
     using Microsoft.EntityFrameworkCore;
 
-    public class ComfirmOTPCommand : ConfirmOTPCommandModel, IRequest<MethodResult<ConfirmOtpModel>>
+    public class ComfirmOTPSignUpCommand : ConfirmOTPCommandModel, IRequest<MethodResult<ConfirmOtpModel>>
     {
     }
 
-    public class ComfirmOTPCommandHandler : IRequestHandler<ComfirmOTPCommand, MethodResult<ConfirmOtpModel>>
+    public class ComfirmOTPSignUpCommandHandler : IRequestHandler<ComfirmOTPSignUpCommand, MethodResult<ConfirmOtpModel>>
     {
         private readonly UserManager<User> _userManager;
         private readonly IMediator _mediator;
@@ -30,16 +30,14 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
         private readonly AppSetting _appSetting;
         private readonly IHumanRepository _humanRepository;
         private readonly IMapper _mapper;
-        private readonly IStudentRepository _studentRepository;
         private readonly IParentRepository _parentRepository;
 
-        public ComfirmOTPCommandHandler(UserManager<User> userManager
+        public ComfirmOTPSignUpCommandHandler(UserManager<User> userManager
             , IMediator mediator
             , IUserOtpCodeRepository userOtpCodeRepository
             , AppSetting appSetting
             , IHumanRepository humanRepository
             , IMapper mapper
-            , IStudentRepository studentRepository
             , IParentRepository parentRepository)
         {
             _userManager = userManager;
@@ -48,11 +46,10 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             _appSetting = appSetting;
             _humanRepository = humanRepository;
             _mapper = mapper;
-            _studentRepository = studentRepository;
             _parentRepository = parentRepository;
         }
 
-        public async Task<MethodResult<ConfirmOtpModel>> Handle(ComfirmOTPCommand request, CancellationToken cancellationToken)
+        public async Task<MethodResult<ConfirmOtpModel>> Handle(ComfirmOTPSignUpCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             ArgumentNullException.ThrowIfNull(_appSetting.Otp);
@@ -116,7 +113,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             return methodResult;
         }
 
-        private async Task<Human> CreateHuman(ComfirmOTPCommand request, IList<string> roles, User user)
+        private async Task<Human> CreateHuman(ComfirmOTPSignUpCommand request, IList<string> roles, User user)
         {
             Human human = _mapper.Map<Human>(request);
             human.UserId = user.Id;
@@ -125,7 +122,6 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
 
             if (roles.Contains(EnumRoleRegister.Student.ToString()))
             {
-                
                 human.Student = new Student
                 {
                     HumanId = human.Id,

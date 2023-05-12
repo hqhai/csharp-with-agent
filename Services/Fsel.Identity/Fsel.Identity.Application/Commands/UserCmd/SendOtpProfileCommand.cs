@@ -16,7 +16,6 @@ namespace Fsel.Identity.Application.Commands.UserCmd
     using Fsel.Identity.Domain.Enums;
     using Fsel.Identity.Domain.Enums.ErrorCodes;
     using Fsel.Identity.Domain.IRepositories;
-    using Fsel.Identity.Domain.Models.EntityModels;
     using Fsel.Identity.Infrastructure.ValueSettings;
     using MediatR;
     using Microsoft.AspNetCore.Http;
@@ -24,12 +23,13 @@ namespace Fsel.Identity.Application.Commands.UserCmd
     using Microsoft.EntityFrameworkCore;
     using OtpNet;
 
-    public class SendOTpEmailUserCommand : IRequest<MethodResult<bool>>
+    public class SendOtpProfileCommand : IRequest<MethodResult<bool>>
     {
         public string? Email { get; set; }
+        public string? PhoneNumber { get; set; }
     }
 
-    public class SendOTpEmailUserCommandHandler : IRequestHandler<SendOTpEmailUserCommand, MethodResult<bool>>
+    public class SendOTpEmailUserCommandHandler : IRequestHandler<SendOtpProfileCommand, MethodResult<bool>>
     {
         private readonly UserManager<User> _userManager;
         private readonly AuthContext _authContext;
@@ -53,7 +53,7 @@ namespace Fsel.Identity.Application.Commands.UserCmd
             _mapper = mapper;
         }
 
-        public async Task<MethodResult<bool>> Handle(SendOTpEmailUserCommand request, CancellationToken cancellationToken)
+        public async Task<MethodResult<bool>> Handle(SendOtpProfileCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<bool>();

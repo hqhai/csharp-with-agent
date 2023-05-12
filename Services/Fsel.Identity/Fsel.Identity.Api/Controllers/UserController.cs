@@ -37,7 +37,7 @@ namespace Fsel.Identity.Api.Controllers
         [Authorize(Roles = nameof(EnumRole.Teacher))]
         [Authorize(Roles = nameof(EnumRole.Parent))]
         [Authorize(Roles = nameof(EnumRole.Student))]
-        public async Task<IActionResult> ChangePassword([FromBody] ResetPasswordCommand command)
+        public async Task<IActionResult> ChangePassword([FromBody] ComfirmOTPResetPasswordCommand command)
         {
             MethodResult<bool> commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();
@@ -114,7 +114,7 @@ namespace Fsel.Identity.Api.Controllers
         [HttpGet("send-otp-email-user")]
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> SendOTPEmailUser([FromQuery] SendOTpEmailUserCommand command)
+        public async Task<IActionResult> SendOTPEmailUser([FromQuery] SendOtpProfileCommand command)
         {
             MethodResult<bool> commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();
@@ -126,7 +126,7 @@ namespace Fsel.Identity.Api.Controllers
         [HttpGet("confirm-otp-email-user")]
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> ConfirmOTPEmailUser([FromQuery] ComfirmOTPEmailProfileCommand command)
+        public async Task<IActionResult> ConfirmOTPEmailUser([FromQuery] ComfirmOtpProfileCommand command)
         {
             MethodResult<bool> commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();

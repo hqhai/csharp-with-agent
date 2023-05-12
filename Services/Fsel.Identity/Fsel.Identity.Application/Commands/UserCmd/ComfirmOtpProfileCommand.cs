@@ -16,20 +16,21 @@ namespace Fsel.Identity.Application.Commands.UserCmd
     using Microsoft.AspNetCore.Identity;
     using Microsoft.EntityFrameworkCore;
 
-    public class ComfirmOTPEmailProfileCommand : IRequest<MethodResult<bool>>
+    public class ComfirmOtpProfileCommand : IRequest<MethodResult<bool>>
     {
         public string? Email { get; set; }
+        public string? PhoneNumber { get; set; }
         public string? OTP { get; set; }
     }
 
-    public class ComfirmOTPEmailProfileCommandHandler : IRequestHandler<ComfirmOTPEmailProfileCommand, MethodResult<bool>>
+    public class ComfirmOtpProfileCommandHandler : IRequestHandler<ComfirmOtpProfileCommand, MethodResult<bool>>
     {
         private readonly UserManager<User> _userManager;
         private readonly AuthContext _authContext;
         private readonly IUserOtpCodeRepository _userOtpCodeRepository;
         private readonly AppSetting _appSetting;
 
-        public ComfirmOTPEmailProfileCommandHandler(UserManager<User> userManager
+        public ComfirmOtpProfileCommandHandler(UserManager<User> userManager
             , AuthContext authContext
             , IUserOtpCodeRepository userOtpCodeRepository
             , AppSetting appSetting)
@@ -40,7 +41,7 @@ namespace Fsel.Identity.Application.Commands.UserCmd
             _appSetting = appSetting;
         }
 
-        public async Task<MethodResult<bool>> Handle(ComfirmOTPEmailProfileCommand request, CancellationToken cancellationToken)
+        public async Task<MethodResult<bool>> Handle(ComfirmOtpProfileCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             ArgumentNullException.ThrowIfNull(_appSetting.Otp);
@@ -65,9 +66,16 @@ namespace Fsel.Identity.Application.Commands.UserCmd
             _userOtpCodeRepository.Update(userOtpCode);
             await _userOtpCodeRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
-
-            user!.Email = request.Email;
-            await _userManager.UpdateAsync(user);
+            if (string.IsNullOrEmpty(request.Email))
+            {
+                user!.Email = request.Email;
+                await _userManager.UpdateAsync(user);
+            }
+            else if (string.IsNullOrEmpty(request.PhoneNumber))
+            {
+                user!.PhoneNumber = request.PhoneNumber;
+                await _userManager.UpdateAsync(user);
+            }
 
             methodResult.Result = true;
             methodResult.StatusCode = StatusCodes.Status200OK;
