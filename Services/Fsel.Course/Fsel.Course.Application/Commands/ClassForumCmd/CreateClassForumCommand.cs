@@ -15,6 +15,7 @@ namespace Fsel.Course.Application.Commands.ClassForumCmd
     using Fsel.Course.Infrastructure.Repositories;
     using MediatR;
     using Microsoft.AspNetCore.Http;
+    using Microsoft.EntityFrameworkCore;
 
     public class CreateClassForumCommand : CreateClassForumCommandModel, IRequest<MethodResult<ClassForumModel>>
     {
@@ -53,8 +54,14 @@ namespace Fsel.Course.Application.Commands.ClassForumCmd
                 methodResult.AddErrorBadRequest(nameof(EnumLessonErrorCode.LessonsNotExist));
                 return methodResult;
             }
+
             await _classForumRepository.ExecuteTransactionAsync(async () =>
             {
+                var isExistLessonId = await _lessonRepository.Queryable.AnyAsync(x => x.Id == request.LessonId, cancellationToken);
+                if (isExistLessonId)
+                {
+                    classForum = _classForumRepository.Update(classForum);
+                }
                 classForum = _classForumRepository.Add(classForum);
                 await _classForumRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
