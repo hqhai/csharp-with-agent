@@ -40,7 +40,7 @@ namespace Fsel.Identity.Application.Commands.UserCmd
                 return methodResult;
             }
 
-            user.LockoutEnabled = request.Status;
+            user.EmailConfirmed = request.Status;
             await _userManager.UpdateAsync(user);
 
             methodResult.StatusCode = StatusCodes.Status200OK;

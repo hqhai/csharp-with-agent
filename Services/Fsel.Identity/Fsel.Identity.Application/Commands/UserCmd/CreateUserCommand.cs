@@ -87,10 +87,13 @@ namespace Fsel.Identity.Application.Commands.UserCmd
                 var human = await CreateHuman(request!, user);
                 human = _humanRepository.Add(human);
                 await _humanRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-                var roleLives = human!.Teacher!.RoleLives;
-                if (roleLives != null && roleLives.Count > 0)
+                if (request!.Role == EnumRoleRegisterWithAdmin.Teacher)
                 {
-                    await _userManager.AddToRoleAsync(user, EnumRole.TeacherLive.ToString());
+                    var roleLives = human!.Teacher!.RoleLives;
+                    if (roleLives != null && roleLives.Count > 0)
+                    {
+                        await _userManager.AddToRoleAsync(user, EnumRole.TeacherLive.ToString());
+                    }
                 }
                 await _userManager.AddToRoleAsync(user, request!.Role.ToString());
 
@@ -114,8 +117,8 @@ namespace Fsel.Identity.Application.Commands.UserCmd
                     _userOtpCodeRepository.Add(userOtpCode);
                     await _userOtpCodeRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
                 }
-                var content = string.Format(CultureInfo.InvariantCulture, _appSetting.ConstantUrl!.ActiveUserUrl!, user.Id, otp);
-                var subject = StringValues.SendOtpSubject + user.FullName + newPassword;
+                var content = string.Format(CultureInfo.InvariantCulture, _appSetting.ConstantUrl!.ActiveUserUrl!, user.Id, otp) + " Mật khẩu của bạn là :" + newPassword;
+                var subject = StringValues.SendOtpSubject + user.FullName;
                 var sendResult = new MethodResult<bool>();
                 if (request != null && request.Email != null)
                 {
