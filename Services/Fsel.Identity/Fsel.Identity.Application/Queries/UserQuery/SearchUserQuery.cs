@@ -25,18 +25,15 @@ namespace Fsel.Identity.Application.Queries.UserQuery
     {
         private readonly IHumanRepository _humanRepository;
         private readonly UserManager<User> _userManager;
-        private readonly RoleManager<Role> _roleManager;
         private readonly ITeacherRepository _teacherRepository;
         private readonly ICSORepository _cSORepository;
 
         public SearchUserQueryHandler(IHumanRepository humanRepository
-            , RoleManager<Role> roleManager
             , UserManager<User> userManager
             , ITeacherRepository teacherRepository
             , ICSORepository cSORepository)
         {
             _humanRepository = humanRepository;
-            _roleManager = roleManager;
             _userManager = userManager;
             _teacherRepository = teacherRepository;
             _cSORepository = cSORepository;
@@ -76,7 +73,7 @@ namespace Fsel.Identity.Application.Queries.UserQuery
             {
                 userQuery = from u in _userManager.Users
                             join i in _humanRepository.Queryable on u.Id equals i.UserId
-                            join cso in _cSORepository.Queryable on i.Id equals cso.HumanId
+                            join t in _teacherRepository.Queryable on i.Id equals t.HumanId
                             select new UserSearchModel
                             {
                                 Id = u.Id,
@@ -123,6 +120,7 @@ namespace Fsel.Identity.Application.Queries.UserQuery
                             };
             }
 
+            userQuery = userQuery!.Where(m => usersByRole.Select(x => x.Id).Contains(m.Id));
 
             if (!string.IsNullOrEmpty(request.Keyword))
             {
@@ -135,6 +133,7 @@ namespace Fsel.Identity.Application.Queries.UserQuery
                     .AsNoTracking()
                     .ToListAsync(cancellationToken: cancellationToken)
                     .ConfigureAwait(false);
+
             methodResult.Result = new PagingItemsModel<UserSearchModel>(lists, request, totalItem);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;

@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fsel.Identity.Infrastructure.Migrations
 {
     [DbContext(typeof(UserDbContext))]
-    [Migration("20230512024316_UpdateTeacher")]
-    partial class UpdateTeacher
+    [Migration("20230512081746_UpdateStudentAndHuman")]
+    partial class UpdateStudentAndHuman
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -133,7 +133,6 @@ namespace Fsel.Identity.Infrastructure.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Code")
-                        .IsRequired()
                         .HasMaxLength(250)
                         .HasColumnType("nvarchar(250)");
 

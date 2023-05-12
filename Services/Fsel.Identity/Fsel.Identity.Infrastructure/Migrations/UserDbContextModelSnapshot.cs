@@ -130,7 +130,6 @@ namespace Fsel.Identity.Infrastructure.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Code")
-                        .IsRequired()
                         .HasMaxLength(250)
                         .HasColumnType("nvarchar(250)");
 
