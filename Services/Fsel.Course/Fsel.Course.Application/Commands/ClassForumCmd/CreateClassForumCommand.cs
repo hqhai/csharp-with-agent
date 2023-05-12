@@ -47,9 +47,10 @@ namespace Fsel.Course.Application.Commands.ClassForumCmd
                 return methodResult;
             }
 
-            if (_lessonRepository.IsIdsInValid(request.LessonId))
+            var isLesson = await _lessonRepository.AnyAsync(request.LessonId ?? default);
+            if (!isLesson)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumLessonErrorCode.LessonsNotExist), nameof(request.LessonIds), request.LessonIds);
+                methodResult.AddErrorBadRequest(nameof(EnumLessonErrorCode.LessonsNotExist));
                 return methodResult;
             }
             await _classForumRepository.ExecuteTransactionAsync(async () =>
