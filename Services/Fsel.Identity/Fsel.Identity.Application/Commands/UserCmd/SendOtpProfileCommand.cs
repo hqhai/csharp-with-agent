@@ -6,7 +6,6 @@ namespace Fsel.Identity.Application.Commands.UserCmd
     using System.Globalization;
     using System.Text;
     using System.Threading.Tasks;
-    using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
     using Fsel.Common.Helpers;
@@ -36,21 +35,18 @@ namespace Fsel.Identity.Application.Commands.UserCmd
         private readonly IUserOtpCodeRepository _userOtpCodeRepository;
         private readonly IMediator _mediator;
         private readonly AppSetting _appSetting;
-        private readonly IMapper _mapper;
 
         public SendOTpEmailUserCommandHandler(UserManager<User> userManager,
             AuthContext authContext,
             IUserOtpCodeRepository userOtpCodeRepository,
             IMediator mediator,
-            AppSetting appSetting,
-            IMapper mapper)
+            AppSetting appSetting)
         {
             _userManager = userManager;
             _authContext = authContext;
             _userOtpCodeRepository = userOtpCodeRepository;
             _mediator = mediator;
             _appSetting = appSetting;
-            _mapper = mapper;
         }
 
         public async Task<MethodResult<bool>> Handle(SendOtpProfileCommand request, CancellationToken cancellationToken)
@@ -86,7 +82,7 @@ namespace Fsel.Identity.Application.Commands.UserCmd
             var sendResult = new MethodResult<bool>();
             if (request != null && request.Email != null)
             {
-                sendResult = await _mediator.Send(new SendOTPCommand { Email = request.Email, Content = content, Subject = subject }, cancellationToken).ConfigureAwait(false);
+                sendResult = await _mediator.Send(new SenderCommand { Email = request.Email, Content = content, Subject = subject }, cancellationToken).ConfigureAwait(false);
             }
 
             if (!sendResult.IsOK)

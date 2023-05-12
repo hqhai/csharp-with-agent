@@ -3,7 +3,6 @@
 using System.Net;
 using Fsel.Common.ActionResults;
 using Fsel.Common.Constants;
-using Fsel.Core.Base.BaseModels;
 using Fsel.Identity.Application.Commands.AuthCmd;
 using Fsel.Identity.Application.Commands.UserCmd;
 using Fsel.Identity.Application.Queries.UserQuery;
@@ -57,21 +56,7 @@ namespace Fsel.Identity.Api.Controllers
         }
 
         /// <summary>
-        /// Update phone user
-        /// </summary>
-        [Authorize]
-        [HttpPut("update-phone-user")]
-        [ProducesResponseType(typeof(MethodResult<UserModel>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> UpdatePhoneUser([FromBody] UpdatePhoneNumberUserCommand command)
-        {
-            MethodResult<UserModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
-            return commandResult.GetActionResult();
-        }
-
-
-        /// <summary>
-        /// Update User
+        /// Update Code Student
         /// </summary>
         [Authorize(Roles = nameof(EnumRole.Student))]
         [HttpPut("update-code-student")]
@@ -97,36 +82,24 @@ namespace Fsel.Identity.Api.Controllers
         }
 
         /// <summary>
-        /// Confirm otp user
-        /// </summary>
-        [HttpGet("confirm-otp-user")]
-        [ProducesResponseType(typeof(MethodResult<ConfirmOtpModel>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> ConfirmOTPUserByAdmin([FromQuery] ComfirmOTPWithAdminCommand command)
-        {
-            MethodResult<ConfirmOtpModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
-            return commandResult.GetActionResult();
-        }
-
-        /// <summary>
         /// Send otp email user
         /// </summary>
-        [HttpGet("send-otp-email-user")]
+        [HttpGet("send-otp-profile")]
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> SendOTPEmailUser([FromQuery] SendOtpProfileCommand command)
+        public async Task<IActionResult> SendOtpProfile([FromQuery] SendOtpProfileCommand command)
         {
             MethodResult<bool> commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
 
         /// <summary>
-        /// Confirm otp email user
+        /// Comfirm Otp Profile
         /// </summary>
-        [HttpGet("confirm-otp-email-user")]
+        [HttpGet("comfirm-otp-profile")]
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> ConfirmOTPEmailUser([FromQuery] ComfirmOtpProfileCommand command)
+        public async Task<IActionResult> ComfirmOtpProfile([FromQuery] ComfirmOtpProfileCommand command)
         {
             MethodResult<bool> commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();

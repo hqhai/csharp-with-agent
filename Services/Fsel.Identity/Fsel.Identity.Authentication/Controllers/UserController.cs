@@ -23,7 +23,7 @@ namespace Fsel.Identity.Userentication.Controllers
         }
 
         /// <summary>
-        /// Refresh Token
+        /// Sign Up
         /// </summary>
         [HttpPost("sign-up")]
         [ProducesResponseType(typeof(MethodResult<UserModel>), (int)HttpStatusCode.OK)]
@@ -35,12 +35,12 @@ namespace Fsel.Identity.Userentication.Controllers
         }
 
         /// <summary>
-        /// Confirm OTP
+        /// Confirm OTP SignUp
         /// </summary>
-        [HttpPost("confirm-otp")]
+        [HttpPost("confirm-otp-signup")]
         [ProducesResponseType(typeof(MethodResult<ConfirmOtpModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> ConfirmOTP([FromBody] ComfirmOTPSignUpCommand command)
+        public async Task<IActionResult> ConfirmOTPSignUp([FromBody] ComfirmOTPSignUpCommand command)
         {
             MethodResult<ConfirmOtpModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();
@@ -59,12 +59,12 @@ namespace Fsel.Identity.Userentication.Controllers
         }
 
         /// <summary>
-        /// Reset Password
+        /// Comfirm OTP Reset Password
         /// </summary>
-        [HttpPost("reset-password")]
+        [HttpPost("comfirm-otp-reset-password")]
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> ResetPassword([FromBody] ComfirmOTPResetPasswordCommand command)
+        public async Task<IActionResult> ComfirmOTPResetPassword([FromBody] ComfirmOTPResetPasswordCommand command)
         {
             MethodResult<bool> commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();

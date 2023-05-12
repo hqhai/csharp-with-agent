@@ -8,7 +8,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
     using Fsel.Identity.Application.Services;
     using MediatR;
 
-    public class SendOTPCommand : IRequest<MethodResult<bool>>
+    public class SenderCommand : IRequest<MethodResult<bool>>
     {
         public string? Email { get; set; }
         public string? PhoneNumber { get; set; }
@@ -16,7 +16,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
         public string? Subject { get; set; }
     }
 
-    public class SendOTPCommandHandler : IRequestHandler<SendOTPCommand, MethodResult<bool>>
+    public class SendOTPCommandHandler : IRequestHandler<SenderCommand, MethodResult<bool>>
     {
         private readonly ISenderService _senderService;
 
@@ -25,7 +25,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             _senderService = senderService;
         }
 
-        public async Task<MethodResult<bool>> Handle(SendOTPCommand request, CancellationToken cancellationToken)
+        public async Task<MethodResult<bool>> Handle(SenderCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<bool> methodResult = new MethodResult<bool>();

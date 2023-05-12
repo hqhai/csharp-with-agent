@@ -122,7 +122,7 @@ namespace Fsel.Identity.Application.Commands.UserCmd
                 var sendResult = new MethodResult<bool>();
                 if (request != null && request.Email != null)
                 {
-                    sendResult = await _mediator.Send(new SendOTPCommand { Email = user.Email, Content = content, Subject = subject }, cancellationToken).ConfigureAwait(false);
+                    sendResult = await _mediator.Send(new SenderCommand { Email = user.Email, Content = content, Subject = subject }, cancellationToken).ConfigureAwait(false);
                 }
 
                 if (!sendResult.IsOK)
