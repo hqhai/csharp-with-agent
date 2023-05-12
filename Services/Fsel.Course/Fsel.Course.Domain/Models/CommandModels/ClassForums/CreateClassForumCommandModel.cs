@@ -9,8 +9,6 @@ namespace Fsel.Course.Domain.Models.CommandModels.ClassForums
 {
     public class CreateClassForumCommandModel
     {
-        public string? Title { get; set; }
-
         public EnumGradingStyle GradingStyle { get; set; }
 
         public long TaggetWordLimit { get; set; }

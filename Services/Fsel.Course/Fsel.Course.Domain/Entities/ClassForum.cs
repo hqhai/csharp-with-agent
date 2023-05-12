@@ -12,13 +12,6 @@ namespace Fsel.Course.Domain.Entities
     public class ClassForum : Entity
     {
         /// <summary>
-        /// Nội dung
-        /// </summary>
-        [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
-        [MaxLength(250, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
-        public string? Title { get; set; }
-
-        /// <summary>
         /// Cách chấm điểm
         /// </summary>
         public EnumGradingStyle GradingStyle { get; set; }

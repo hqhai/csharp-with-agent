@@ -8,8 +8,6 @@ namespace Fsel.Course.Domain.Models.CommandModels.ClassForums
 {
     public class UpdateClassForumCommandModel : BaseCommandModel
     {
-        public string? Title { get; set; }
-
         public EnumGradingStyle GradingStyle { get; set; }
 
         public long TaggetWordLimit { get; set; }

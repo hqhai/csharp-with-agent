@@ -8,8 +8,6 @@ namespace Fsel.Course.Domain.Models.EntityModels
 {
     public class ClassForumModel : BaseModel
     {
-        public string? Title { get; set; }
-
         public EnumGradingStyle GradingStyle { get; set; }
 
         public long TaggetWordLimit { get; set; }
