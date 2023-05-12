@@ -65,6 +65,7 @@ namespace Fsel.Course.Application.Commands.ClassForumCmd
                 }
                 if (isExistClassForum == null)
                 {
+                    ClassForum classForum = _mapper.Map<ClassForum>(request);
                     classForum = _classForumRepository.Add(classForum);
                 }
 
