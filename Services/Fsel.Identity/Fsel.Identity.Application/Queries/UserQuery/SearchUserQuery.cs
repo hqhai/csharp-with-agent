@@ -3,6 +3,7 @@
 namespace Fsel.Identity.Application.Queries.UserQuery
 {
     using System;
+    using System.Linq;
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Core.Extensions;
@@ -24,15 +25,18 @@ namespace Fsel.Identity.Application.Queries.UserQuery
     {
         private readonly IHumanRepository _humanRepository;
         private readonly UserManager<User> _userManager;
+        private readonly RoleManager<Role> _roleManager;
         private readonly ITeacherRepository _teacherRepository;
         private readonly ICSORepository _cSORepository;
 
         public SearchUserQueryHandler(IHumanRepository humanRepository
+            , RoleManager<Role> roleManager
             , UserManager<User> userManager
             , ITeacherRepository teacherRepository
             , ICSORepository cSORepository)
         {
             _humanRepository = humanRepository;
+            _roleManager = roleManager;
             _userManager = userManager;
             _teacherRepository = teacherRepository;
             _cSORepository = cSORepository;
@@ -48,7 +52,9 @@ namespace Fsel.Identity.Application.Queries.UserQuery
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 return methodResult;
             }
-            IQueryable<UserSearchModel>? userQuery = default;
+            var usersByRole = await _userManager.GetUsersInRoleAsync(request.Role.ToString() ?? string.Empty);
+            IQueryable<UserSearchModel>? userQuery = null;
+
             if (request.Role == EnumRoleRegisterWithAdmin.Teacher)
             {
                 userQuery = from u in _userManager.Users
@@ -57,25 +63,30 @@ namespace Fsel.Identity.Application.Queries.UserQuery
                             select new UserSearchModel
                             {
                                 Id = u.Id,
-                                Status = u.LockoutEnabled,
                                 FullName = u.FullName,
+                                PhoneNumber = u.PhoneNumber,
+                                Email = u.Email,
+                                Role = request.Role.ToString(),
+                                NumberClass = 0,
                                 CreatedDate = i.CreatedDate,
-                                Human = new HumanSearchModel
-                                {
-                                    Id = i.Id,
-                                    Birthday = i.Birthday,
-                                    Email = i.Email,
-                                    Teacher = new TeacherModel
-                                    {
-                                        Id = i.Id,
-                                        CertificationPath = t.CertificationPath,
-                                        CourseLevels = t.CourseLevels,
-                                        CourseTypes = t.CourseTypes,
-                                        PassportPath = t.PassportPath,
-                                        PoliceClearancePath = t.PoliceClearancePath,
-                                        UniversityDegreePath = t.UniversityDegreePath
-                                    }
-                                }
+                                Status = u.LockoutEnabled,
+                            };
+            }
+            else if (request.Role == EnumRoleRegisterWithAdmin.TeacherLive)
+            {
+                userQuery = from u in _userManager.Users
+                            join i in _humanRepository.Queryable on u.Id equals i.UserId
+                            join cso in _cSORepository.Queryable on i.Id equals cso.HumanId
+                            select new UserSearchModel
+                            {
+                                Id = u.Id,
+                                FullName = u.FullName,
+                                PhoneNumber = u.PhoneNumber,
+                                Email = u.Email,
+                                Role = request.Role.ToString(),
+                                NumberClass = 0,
+                                CreatedDate = i.CreatedDate,
+                                Status = u.LockoutEnabled,
                             };
             }
             else if (request.Role == EnumRoleRegisterWithAdmin.CSO)
@@ -86,25 +97,13 @@ namespace Fsel.Identity.Application.Queries.UserQuery
                             select new UserSearchModel
                             {
                                 Id = u.Id,
-                                Status = u.LockoutEnabled,
                                 FullName = u.FullName,
+                                PhoneNumber = u.PhoneNumber,
+                                Email = u.Email,
+                                Role = request.Role.ToString(),
+                                NumberClass = 0,
                                 CreatedDate = i.CreatedDate,
-                                Human = new HumanSearchModel
-                                {
-                                    Id = i.Id,
-                                    Birthday = i.Birthday,
-                                    Email = i.Email,
-                                    CSO = new CSOModel
-                                    {
-                                        Id = i.Id,
-                                        CertificationPath = cso.CertificationPath,
-                                        CourseLevels = cso.CourseLevels,
-                                        CourseTypes = cso.CourseTypes,
-                                        PassportPath = cso.PassportPath,
-                                        PoliceClearancePath = cso.PoliceClearancePath,
-                                        UniversityDegreePath = cso.UniversityDegreePath,
-                                    }
-                                }
+                                Status = u.LockoutEnabled,
                             };
             }
             else if (request.Role == EnumRoleRegisterWithAdmin.Moderator)
@@ -114,17 +113,16 @@ namespace Fsel.Identity.Application.Queries.UserQuery
                             select new UserSearchModel
                             {
                                 Id = u.Id,
-                                Status = u.LockoutEnabled,
                                 FullName = u.FullName,
+                                PhoneNumber = u.PhoneNumber,
+                                Email = u.Email,
+                                Role = request.Role.ToString(),
+                                NumberClass = 0,
                                 CreatedDate = i.CreatedDate,
-                                Human = new HumanSearchModel
-                                {
-                                    Id = i.Id,
-                                    Birthday = i.Birthday,
-                                    Email = i.Email
-                                }
+                                Status = u.LockoutEnabled,
                             };
             }
+
 
             if (!string.IsNullOrEmpty(request.Keyword))
             {

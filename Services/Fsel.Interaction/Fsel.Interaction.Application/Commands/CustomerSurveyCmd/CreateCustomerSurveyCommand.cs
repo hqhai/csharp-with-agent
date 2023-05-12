@@ -71,18 +71,11 @@ namespace Fsel.Interaction.Application.Commands.CustomerSurveyCmd
 
             await _customerSurveyRepository.ExecuteTransactionAsync(async () =>
             {
-                IList<CustomerSurveyModel> customerSurveyModels = new List<CustomerSurveyModel>();
-                foreach (var item in customerSurveys)
-                {
-                    _customerSurveyRepository.Add(item);
-                    var customerSurveyModel = _mapper.Map<CustomerSurveyModel>(item);
-                    customerSurveyModels.Add(customerSurveyModel);
-                }
-
+                await _customerSurveyRepository.AddList(customerSurveys);
                 await _customerSurveyRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
-
                 methodResult.StatusCode = StatusCodes.Status201Created;
-                methodResult.Result = customerSurveyModels;
+                methodResult.Result = _mapper.Map<IList<CustomerSurveyModel>>(customerSurveys);
+
                 return methodResult;
             });
 

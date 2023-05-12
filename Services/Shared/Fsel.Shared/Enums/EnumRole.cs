@@ -10,6 +10,7 @@ namespace Fsel.Shared.Enums
         Teacher,
         Parent,
         Student,
-        Moderator
+        Moderator,
+        TeacherLive
     }
 }

@@ -2,7 +2,6 @@
 
 namespace Fsel.Identity.Domain.Models.CommandModels.Users
 {
-    using System.ComponentModel.DataAnnotations;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Shared.Enums;
 
@@ -12,12 +11,8 @@ namespace Fsel.Identity.Domain.Models.CommandModels.Users
         public string? FullName { get; set; }
         public string? Address { get; set; }
         public string? PhoneNumber { get; set; }
-
-        [EmailAddress]
-        public string? Email { get; set; }
-
+        public IList<EnumRoleLive>? RoleLives { get; set; }
         public IList<EnumCourseType>? CourseTypes { get; set; }
-
         public IList<EnumCourseLevel>? CourseLevels { get; set; }
 
         public string? PassportPath { get; set; }

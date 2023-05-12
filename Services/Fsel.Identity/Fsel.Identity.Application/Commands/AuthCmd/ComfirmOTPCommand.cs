@@ -122,19 +122,15 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             human.UserId = user.Id;
             var currentDate = DateTime.Now;
             var weekNumber = (currentDate.DayOfYear - 1) / 7 + 1;
-            var lastDigitOfYear = currentDate.Year % 10;
-            var lastOfYear = human.Birthday!.Value.Year % 100;
-            var number = request.Gender == EnumGender.Male ? 0 : request.Gender == EnumGender.Female ? 1 : 2;
 
             if (roles.Contains(EnumRoleRegister.Student.ToString()))
             {
-                var stt = await _studentRepository.Queryable.CountAsync();
+                
                 human.Student = new Student
                 {
                     HumanId = human.Id,
                     CreatedByParent = false,
                 };
-                human.Code = $"HN_{weekNumber}{lastDigitOfYear}{number}{lastOfYear}{stt:000}";
             }
             else if (roles.Contains(EnumRoleRegister.Parent.ToString()))
             {

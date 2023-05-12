@@ -8,7 +8,5 @@ namespace Fsel.Identity.Domain.Models.QueryModels.Users
     public class SearchUserQueryModel : BaseQueryModel
     {
         public EnumRoleRegisterWithAdmin Role { get; set; }
-        public EnumTeacherRole? TeacherRole { get; set; }
-        public EnumCSORole? CSORole { get; set; }
     }
 }
