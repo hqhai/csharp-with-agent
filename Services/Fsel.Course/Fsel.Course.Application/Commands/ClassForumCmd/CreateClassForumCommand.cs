@@ -40,13 +40,6 @@ namespace Fsel.Course.Application.Commands.ClassForumCmd
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<ClassForumModel> methodResult = new MethodResult<ClassForumModel>();
-            ClassForum classForum = _mapper.Map<ClassForum>(request);
-
-            if (!classForum.IsValid())
-            {
-                methodResult.AddErrorBadRequest(classForum.ErrorMessages);
-                return methodResult;
-            }
 
             var isLesson = await _lessonRepository.AnyAsync(request.LessonId);
             if (!isLesson)
@@ -57,16 +50,22 @@ namespace Fsel.Course.Application.Commands.ClassForumCmd
 
             await _classForumRepository.ExecuteTransactionAsync(async () =>
             {
-                var isExistClassForum = await _classForumRepository.Queryable.FirstOrDefaultAsync(x => x.Id == request.LessonId);
-                if (isExistClassForum != null)
+                var classForum = await _classForumRepository.Queryable.FirstOrDefaultAsync(x => x.Id == request.LessonId);
+                if (classForum != null)
                 {
                     _mapper.Map(request, classForum);
                     classForum = _classForumRepository.Update(classForum);
                 }
-                if (isExistClassForum == null)
+                if (classForum == null)
                 {
-                    ClassForum classForum = _mapper.Map<ClassForum>(request);
+                    classForum = _mapper.Map<ClassForum>(request);
                     classForum = _classForumRepository.Add(classForum);
+                }
+
+                if (!classForum.IsValid())
+                {
+                    methodResult.AddErrorBadRequest(classForum.ErrorMessages);
+                    return methodResult;
                 }
 
                 await _classForumRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
