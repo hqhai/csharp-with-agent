@@ -1,0 +1,15 @@
+// Copyright (c) Atlantic. All rights reserved.
+
+namespace Fsel.Course.Domain.Models.QueryModels.FinalTests
+{
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Text;
+    using System.Threading.Tasks;
+    using Fsel.Core.Base.BaseModels;
+
+    public class SearchFinalTestQueryModel : BaseQueryModel
+    {
+    }
+}

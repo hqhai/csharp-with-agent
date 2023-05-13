@@ -56,6 +56,7 @@ namespace Fsel.Course.Infrastructure
         public DbSet<SectionQuestion> SectionQuestions { get; set; }
         public DbSet<SectionTimeCode> SectionTimeCodes { get; set; }
         public DbSet<MockTestSection> MockTestSections { get; set; }
+        public DbSet<FinalTest> FinalTests { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -97,6 +98,7 @@ namespace Fsel.Course.Infrastructure
             modelBuilder.ApplyConfiguration(new SectionQuestionEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new SectionTimeCodeEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new MockTestSectionEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new FinalTestEntityTypeConfiguration());
 
             base.OnModelCreating(modelBuilder);
         }
