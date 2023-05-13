@@ -23,10 +23,14 @@ namespace Fsel.Course.Domain.Entities
             set { AnswerStr = ConvertHelper.Serialize(value); }
         }
 
-        /// <summary>
-        /// Câu trả lời đúng
-        /// </summary>
-        [Range(0, 10000_0000, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
-        public int CorrectCount { get; set; }
+        public PlacementTestResult? PlacementTestResult { get; set; }
+
+        [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
+        public Guid PlacementTestResultId { get; set; }
+
+        public SectionQuestion? SectionQuestion { get; set; }
+
+        [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
+        public Guid SectionQuestionId { get; set; }
     }
 }
