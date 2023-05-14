@@ -4,6 +4,7 @@ namespace Fsel.Course.Domain.Models.CommandModels.Sections
 {
     using Fsel.Course.Domain.Models.CommandModels.Questions;
     using Fsel.Course.Domain.Models.CommandModels.SectionParts;
+    using Fsel.Course.Domain.Models.CommandModels.SectionTimeCodes;
 
     public class UpdateSectionCommandModel
     {
@@ -13,5 +14,7 @@ namespace Fsel.Course.Domain.Models.CommandModels.Sections
         public string? VideoFilePath { get; set; }
         public IList<UpdateSectionPartCommandModel>? SectionParts { get; set; }
         public IList<UpdateQuestionCommandModel>? Questions { get; set; }
+
+        public IList<UpdateSectionTimeCodeCommandModel>? SectionTimeCodes { get; set; }
     }
 }

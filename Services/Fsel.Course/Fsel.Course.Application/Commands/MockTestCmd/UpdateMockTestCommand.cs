@@ -69,18 +69,19 @@ namespace Fsel.Course.Application.Commands.MockTestCmd
             var mockTest = await _mockTestRepository.GetIncludeByIdAsync(request.Id);
             if (mockTest == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumPlacementTestErrorCode.PlacementTestNotExist), nameof(request.Id), request.Id);
+                methodResult.AddErrorBadRequest(nameof(EnumMockTestErrorCode.MockTestsNotExist), nameof(request.Id), request.Id);
                 return methodResult;
             }
 
             if (mockTest.IsActive)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumPlacementTestErrorCode.PlacementTestInActiveState), nameof(mockTest.IsActive), mockTest.IsActive);
+                methodResult.AddErrorBadRequest(nameof(EnumMockTestErrorCode.MockTestInActiveState), nameof(mockTest.IsActive), mockTest.IsActive);
                 return methodResult;
             }
 
             List<SectionGroup> sectionGroups = mockTest.MockTestSections.Select(x => x.SectionGroup ?? new SectionGroup()).ToList();
             List<Section> sections = sectionGroups.SelectMany(x => x.Sections).ToList();
+            List<SectionTimeCode> sectionTimeCodes = sections.SelectMany(x => x.SectionTimeCodes).ToList();
             List<SectionPart> sectionParts = sections.SelectMany(x => x.SectionParts).ToList();
             List<SectionQuestion>? sectionQuestions = sectionParts.SelectMany(x => x.SectionQuestions).ToList();
             List<Question>? questions = sectionQuestions.Select(x => x.Question ?? new Question()).ToList();
@@ -144,6 +145,23 @@ namespace Fsel.Course.Application.Commands.MockTestCmd
                                 methodResult.AddErrorBadRequest(newSectionPart.ErrorMessages);
                                 return methodResult;
                             }
+                        }
+                    }
+                    if (section.SectionTimeCodes == null || section.SectionTimeCodes.Count == 0)
+                    {
+                        methodResult.AddErrorBadRequest(nameof(EnumSectionTimeCodeErrorCode.SectionTimeCodesNull), nameof(section.SectionTimeCodes));
+                        return methodResult;
+                    }
+                    foreach (var sectionTimeCode in section.SectionTimeCodes)
+                    {
+                        if (sectionTimeCode == null)
+                        {
+                            methodResult.AddErrorBadRequest(nameof(EnumSectionTimeCodeErrorCode.SectionTimeCodesNull), nameof(sectionTimeCode), sectionTimeCode);
+                            return methodResult;
+                        }
+                        else
+                        {
+                            SectionTimeCode newSectionTimeCode = newSection.SectionTimeCodes.ElementAt(section.SectionTimeCodes.IndexOf(sectionTimeCode));
                         }
                     }
 

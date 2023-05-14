@@ -14,6 +14,7 @@ namespace Fsel.Course.Application.Commands.MockTestCmd
     using Fsel.Course.Domain.Models.CommandModels.Questions;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Infrastructure.Common;
+    using Fsel.Course.Infrastructure.Repositories;
     using MediatR;
     using Microsoft.AspNetCore.Http;
 
@@ -108,6 +109,23 @@ namespace Fsel.Course.Application.Commands.MockTestCmd
                                     methodResult.AddErrorBadRequest(newSectionPart.ErrorMessages);
                                     return methodResult;
                                 }
+                            }
+                        }
+                        if (section.SectionTimeCodes == null || section.SectionTimeCodes.Count == 0)
+                        {
+                            methodResult.AddErrorBadRequest(nameof(EnumSectionTimeCodeErrorCode.SectionTimeCodesNull), nameof(section.SectionTimeCodes));
+                            return methodResult;
+                        }
+                        foreach (var sectionTimeCode in section.SectionTimeCodes)
+                        {
+                            if (sectionTimeCode == null)
+                            {
+                                methodResult.AddErrorBadRequest(nameof(EnumSectionTimeCodeErrorCode.SectionTimeCodesNull), nameof(sectionTimeCode), sectionTimeCode);
+                                return methodResult;
+                            }
+                            else
+                            {
+                                SectionTimeCode newSectionTimeCode = newSection.SectionTimeCodes.ElementAt(section.SectionTimeCodes.IndexOf(sectionTimeCode));
                             }
                         }
 
