@@ -47,7 +47,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
                 return methodResult;
             }
 
-            if (placementTest.IsActive)
+            if (!placementTest.IsActive)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumPlacementTestErrorCode.PlacementTestInActiveState), nameof(placementTest.IsActive), placementTest.IsActive);
                 return methodResult;
