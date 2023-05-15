@@ -15,17 +15,18 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
     public class StartPlacementTestCommand : IRequest<MethodResult<bool>>
     {
         public Guid PlacementTestId { get; set; }
+        public Guid SectionGroupId { get; set; }
     }
 
     public class StartPlacementTestCommandHandler : IRequestHandler<StartPlacementTestCommand, MethodResult<bool>>
     {
         private readonly AuthContext _authContext;
-        private readonly IPlacementTestResultRepository _placementTestResultRepository;
+        private readonly IPlacementTestSectionResultRepository _placementTestResultRepository;
         private readonly IUserService _userService;
         private readonly IPlacementTestRepository _placementTestRepository;
 
         public StartPlacementTestCommandHandler(AuthContext authContext
-            , IPlacementTestResultRepository placementTestResultRepository
+            , IPlacementTestSectionResultRepository placementTestResultRepository
             , IUserService userService
             , IPlacementTestRepository placementTestRepository)
         {
@@ -40,7 +41,8 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<bool> methodResult = new MethodResult<bool>();
 
-            var placementTest = await _placementTestRepository.Queryable.FirstOrDefaultAsync(x => x.Id == request.PlacementTestId, cancellationToken);
+            var placementTest = await _placementTestRepository.Queryable.Include(x => x.PlacementTestSections)
+                                                    .FirstOrDefaultAsync(x => x.Id == request.PlacementTestId && x.PlacementTestSections.Select(x => x.SectionGroupId).Contains(request.SectionGroupId), cancellationToken);
             if (placementTest == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumPlacementTestErrorCode.PlacementTestNotExist), nameof(request.PlacementTestId), request.PlacementTestId);
@@ -61,10 +63,11 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
             }
 
             var studentId = student?.Content?.Result?.Id;
-            var placementTestResult = await _placementTestResultRepository.Queryable.FirstOrDefaultAsync(x => x.PlacementTestId == request.PlacementTestId && x.StudentId == studentId, cancellationToken);
+            var placementTestSectionId = placementTest.PlacementTestSections.FirstOrDefault()!.Id;
+            var placementTestResult = await _placementTestResultRepository.Queryable.FirstOrDefaultAsync(x => x.PlacementTestSectionId == placementTestSectionId && x.StudentId == studentId, cancellationToken);
             if (placementTestResult == null)
             {
-                _placementTestResultRepository.Add(new PlacementTestResult { StudentId = studentId ?? default, PlacementTestId = request.PlacementTestId });
+                _placementTestResultRepository.Add(new PlacementTestSectionResult { StudentId = studentId ?? default, PlacementTestSectionId = placementTestSectionId });
                 await _placementTestResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
             }
             methodResult.StatusCode = StatusCodes.Status200OK;

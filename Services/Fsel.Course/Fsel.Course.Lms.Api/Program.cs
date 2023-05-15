@@ -50,7 +50,7 @@ builder.Services.AddScoped<ILessonInstructionRepository, LessonInstructionReposi
 builder.Services.AddScoped<IHomeWorkAnswerRepository, HomeWorkAnswerRepository>();
 builder.Services.AddScoped<IHomeWorkQuestionRepository, HomeWorkQuestionRepository>();
 builder.Services.AddScoped<IHomeWorkResultRepository, HomeWorkResultRepository>();
-builder.Services.AddScoped<IPlacementTestResultRepository, PlacementTestResultRepository>();
+builder.Services.AddScoped<IPlacementTestSectionResultRepository, PlacementTestSectionResultRepository>();
 builder.Services.AddScoped<IPlacementTestAnswerRepository, PlacementTestAnswerRepository>();
 
 builder.Services.AddScoped<QuestionTypeConverter>();

@@ -16,5 +16,7 @@ namespace Fsel.Course.Domain.Entities
 
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         public Guid SectionGroupId { get; set; }
+
+        public ICollection<PlacementTestSectionResult> PlacementTestSectionResults { get; set; } = new List<PlacementTestSectionResult>();
     }
 }

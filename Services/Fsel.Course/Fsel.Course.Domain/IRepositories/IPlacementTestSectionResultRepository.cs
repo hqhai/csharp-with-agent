@@ -5,7 +5,7 @@ namespace Fsel.Course.Domain.IRepositories
     using Fsel.Core.Base.Interfaces;
     using Fsel.Course.Domain.Entities;
 
-    public interface IPlacementTestResultRepository : IRepository<PlacementTestResult>
+    public interface IPlacementTestSectionResultRepository : IRepository<PlacementTestSectionResult>
     {
     }
 }
