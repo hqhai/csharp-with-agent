@@ -83,7 +83,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                 _userOtpCodeRepository.Update(userOtpCode);
                 await _userOtpCodeRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             }
-            var content = string.Format(CultureInfo.InvariantCulture, _appSetting.ConstantUrl!.FogotPassWordUserUrl!, otp);
+            var content = string.Format(CultureInfo.InvariantCulture, _appSetting.ConstantUrl!.ConfirmOtpUrl!, otp);
             var subject = StringValues.SendOtpSubject + user.FullName;
 
             MethodResult<bool> sendResult = new MethodResult<bool>();
