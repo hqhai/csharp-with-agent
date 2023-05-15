@@ -74,50 +74,54 @@ namespace Fsel.Course.Application.Commands.MockTestCmd
                     foreach (var section in sectionGroup.Sections)
                     {
                         Section newSection = newSectionGroup.Sections.ElementAt(sectionGroup.Sections.IndexOf(section));
-                        if (section.SectionParts != null && section.Questions != null && section.SectionParts.Count > 0 && section.Questions.Count > 0)
-                        {
-                            methodResult.AddErrorBadRequest(nameof(EnumSectionErrorCode.OnlyOneOfTwoSectionPartsOrQuestions), nameof(section.SectionParts), nameof(section.Questions));
-                            return methodResult;
-                        }
 
-                        if (section.SectionParts == null || section.SectionParts.Count == 0)
+                        if (sectionGroup.CourseSkill != Shared.Enums.EnumCourseSkill.Speaking)
                         {
-                            methodResult.AddErrorBadRequest(nameof(EnumSectionPartErrorCode.SectionPartsNull), nameof(section.SectionParts));
-                            return methodResult;
-                        }
-                        foreach (var sectionPart in section.SectionParts)
-                        {
-                            if (sectionPart == null)
+                            if (section.SectionParts != null && section.Questions != null && section.SectionParts.Count > 0 && section.Questions.Count > 0)
                             {
-                                methodResult.AddErrorBadRequest(nameof(EnumSectionPartErrorCode.SectionPartNull), nameof(sectionPart), sectionPart);
+                                methodResult.AddErrorBadRequest(nameof(EnumSectionErrorCode.OnlyOneOfTwoSectionPartsOrQuestions), nameof(section.SectionParts), nameof(section.Questions));
                                 return methodResult;
                             }
-                            else
+
+                            if (section.SectionParts == null || section.SectionParts.Count == 0)
                             {
-                                SectionPart newSectionPart = newSection.SectionParts.ElementAt(section.SectionParts.IndexOf(sectionPart));
-                                if (sectionPart.Questions == null || sectionPart.Questions.Count == 0)
+                                methodResult.AddErrorBadRequest(nameof(EnumSectionPartErrorCode.SectionPartsNull), nameof(section.SectionParts));
+                                return methodResult;
+                            }
+                            foreach (var sectionPart in section.SectionParts)
+                            {
+                                if (sectionPart == null)
                                 {
-                                    methodResult.AddErrorBadRequest(nameof(EnumQuestionErrorCode.QuestionsNull), nameof(sectionPart.Questions));
+                                    methodResult.AddErrorBadRequest(nameof(EnumSectionPartErrorCode.SectionPartNull), nameof(sectionPart), sectionPart);
                                     return methodResult;
                                 }
-                                foreach (var question in sectionPart.Questions)
+                                else
                                 {
-                                    GetSectionQuestion(methodResult, question, null, newSectionPart);
-                                }
-                                if (!newSectionPart.IsValid())
-                                {
-                                    methodResult.AddErrorBadRequest(newSectionPart.ErrorMessages);
-                                    return methodResult;
+                                    SectionPart newSectionPart = newSection.SectionParts.ElementAt(section.SectionParts.IndexOf(sectionPart));
+                                    if (sectionPart.Questions == null || sectionPart.Questions.Count == 0)
+                                    {
+                                        methodResult.AddErrorBadRequest(nameof(EnumQuestionErrorCode.QuestionsNull), nameof(sectionPart.Questions));
+                                        return methodResult;
+                                    }
+                                    foreach (var question in sectionPart.Questions)
+                                    {
+                                        GetSectionQuestion(methodResult, question, null, newSectionPart);
+                                    }
+                                    if (!newSectionPart.IsValid())
+                                    {
+                                        methodResult.AddErrorBadRequest(newSectionPart.ErrorMessages);
+                                        return methodResult;
+                                    }
                                 }
                             }
-                        }
-                        if (sectionGroup.CourseSkill == Shared.Enums.EnumCourseSkill.Speaking && section.SectionTimeCodes == null || section.SectionTimeCodes!.Count == 0)
-                        {
-                            methodResult.AddErrorBadRequest(nameof(EnumSectionTimeCodeErrorCode.TimeCodeCanNotNull), nameof(sectionGroup.CourseSkill));
-                            return methodResult;
                         }
                         else
                         {
+                            if (section.SectionTimeCodes == null || section.SectionTimeCodes!.Count == 0)
+                            {
+                                methodResult.AddErrorBadRequest(nameof(EnumSectionTimeCodeErrorCode.TimeCodeCanNotNull), nameof(sectionGroup.CourseSkill));
+                                return methodResult;
+                            }
                             foreach (var sectionTimeCode in section.SectionTimeCodes)
                             {
                                 if (sectionTimeCode == null)

@@ -37,7 +37,11 @@ namespace Fsel.Course.Infrastructure.Repositories
             {
                 return await Queryable.Include(x => x.MockTestSections.Where(n => n.SectionGroup != null))
                                        .ThenInclude(x => x.SectionGroup)
-                                       .ThenInclude(x => x.Sections)
+                                       .ThenInclude(x => x!.Sections)
+                                       .ThenInclude(x => x.SectionTimeCodes)
+                                       .Include(x => x.MockTestSections.Where(n => n.SectionGroup != null))
+                                       .ThenInclude(x => x.SectionGroup)
+                                       .ThenInclude(x => x!.Sections)
                                        .ThenInclude(x => x.SectionParts)
                                        .ThenInclude(x => x.SectionQuestions.Where(n => n.Question != null))
                                        .ThenInclude(x => x.Question)
