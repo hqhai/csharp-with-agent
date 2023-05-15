@@ -21,8 +21,8 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         SectionTimeCodeNull,
 
         /// <summary>
-        /// Skill Not Speaking
+        /// Time code can not null
         /// </summary>
-        SkillNotSpeaking,
+        TimeCodeCanNotNull,
     }
 }

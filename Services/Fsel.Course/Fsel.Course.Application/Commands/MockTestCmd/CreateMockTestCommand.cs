@@ -111,26 +111,23 @@ namespace Fsel.Course.Application.Commands.MockTestCmd
                                 }
                             }
                         }
-                        if (sectionGroup.CourseSkill == Shared.Enums.EnumCourseSkill.Speaking)
+                        if (sectionGroup.CourseSkill == Shared.Enums.EnumCourseSkill.Speaking && section.SectionTimeCodes == null || section.SectionTimeCodes!.Count == 0)
                         {
-                            methodResult.AddErrorBadRequest(nameof(EnumSectionTimeCodeErrorCode.SkillNotSpeaking), nameof(sectionGroup.CourseSkill));
+                            methodResult.AddErrorBadRequest(nameof(EnumSectionTimeCodeErrorCode.TimeCodeCanNotNull), nameof(sectionGroup.CourseSkill));
                             return methodResult;
                         }
                         else
                         {
-                            if (section.SectionTimeCodes != null)
+                            foreach (var sectionTimeCode in section.SectionTimeCodes)
                             {
-                                foreach (var sectionTimeCode in section.SectionTimeCodes)
+                                if (sectionTimeCode == null)
                                 {
-                                    if (sectionTimeCode == null)
-                                    {
-                                        methodResult.AddErrorBadRequest(nameof(EnumSectionTimeCodeErrorCode.SectionTimeCodesNull), nameof(sectionTimeCode), sectionTimeCode);
-                                        return methodResult;
-                                    }
-                                    else
-                                    {
-                                        SectionTimeCode newSectionTimeCode = newSection.SectionTimeCodes.ElementAt(section.SectionTimeCodes.IndexOf(sectionTimeCode));
-                                    }
+                                    methodResult.AddErrorBadRequest(nameof(EnumSectionTimeCodeErrorCode.SectionTimeCodesNull), nameof(sectionTimeCode), sectionTimeCode);
+                                    return methodResult;
+                                }
+                                else
+                                {
+                                    SectionTimeCode newSectionTimeCode = newSection.SectionTimeCodes.ElementAt(section.SectionTimeCodes.IndexOf(sectionTimeCode));
                                 }
                             }
                         }
