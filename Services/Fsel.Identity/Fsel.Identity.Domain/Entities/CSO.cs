@@ -7,6 +7,7 @@ namespace Fsel.Identity.Domain.Entities
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Common.Helpers;
     using Fsel.Core.Entities;
+    using Fsel.Shared.Enums;
 
     public class CSO : Entity
     {
@@ -18,6 +19,16 @@ namespace Fsel.Identity.Domain.Entities
         {
             get { return ConvertHelper.Deserialize<object>(CourseTypesStr); }
             set { CourseTypesStr = ConvertHelper.Serialize(value); }
+        }
+
+        [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
+        public string? RoleLivesStr { get; set; }
+
+        [NotMapped]
+        public IList<EnumRoleLive>? RoleLives
+        {
+            get { return ConvertHelper.Deserialize<IList<EnumRoleLive>>(RoleLivesStr); }
+            set { RoleLivesStr = ConvertHelper.Serialize(value); }
         }
 
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]

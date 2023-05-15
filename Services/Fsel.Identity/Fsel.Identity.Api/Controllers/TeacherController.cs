@@ -49,13 +49,13 @@ namespace Fsel.Identity.Api.Controllers
         }
 
         /// <summary>
-        /// Search Course
+        /// Search Teacher
         /// </summary>
         [HttpGet]
         [ProducesResponseType(typeof(MethodResult<PagingItemsModel<TeacherModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         [Authorize]
-        public async Task<IActionResult> Search([FromQuery] SearchTeacherQuery query)
+        public async Task<IActionResult> SearchTeacher([FromQuery] SearchTeacherQuery query)
         {
             MethodResult<PagingItemsModel<TeacherModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();

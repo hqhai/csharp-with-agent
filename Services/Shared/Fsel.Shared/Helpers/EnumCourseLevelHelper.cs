@@ -8,12 +8,12 @@ namespace Fsel.Shared.Helpers
     {
         private static IList<KeyValuePair<EnumCourseType, EnumCourseLevel>> s_courseTypeLevel = new List<KeyValuePair<EnumCourseType, EnumCourseLevel>>
         {
-            new KeyValuePair<EnumCourseType, EnumCourseLevel>(EnumCourseType.Academy, EnumCourseLevel.A1),
-            new KeyValuePair<EnumCourseType, EnumCourseLevel>(EnumCourseType.Academy, EnumCourseLevel.A2),
-            new KeyValuePair<EnumCourseType, EnumCourseLevel>(EnumCourseType.Academy, EnumCourseLevel.B1),
-            new KeyValuePair<EnumCourseType, EnumCourseLevel>(EnumCourseType.Academy, EnumCourseLevel.B1Plus),
-            new KeyValuePair<EnumCourseType, EnumCourseLevel>(EnumCourseType.Academy, EnumCourseLevel.B2),
-            new KeyValuePair<EnumCourseType, EnumCourseLevel>(EnumCourseType.Academy, EnumCourseLevel.C1),
+            new KeyValuePair<EnumCourseType, EnumCourseLevel>(EnumCourseType.Academic, EnumCourseLevel.A1),
+            new KeyValuePair<EnumCourseType, EnumCourseLevel>(EnumCourseType.Academic, EnumCourseLevel.A2),
+            new KeyValuePair<EnumCourseType, EnumCourseLevel>(EnumCourseType.Academic, EnumCourseLevel.B1),
+            new KeyValuePair<EnumCourseType, EnumCourseLevel>(EnumCourseType.Academic, EnumCourseLevel.B1Plus),
+            new KeyValuePair<EnumCourseType, EnumCourseLevel>(EnumCourseType.Academic, EnumCourseLevel.B2),
+            new KeyValuePair<EnumCourseType, EnumCourseLevel>(EnumCourseType.Academic, EnumCourseLevel.C1),
             new KeyValuePair<EnumCourseType, EnumCourseLevel>(EnumCourseType.Ielts, EnumCourseLevel.RFE),
             new KeyValuePair<EnumCourseType, EnumCourseLevel>(EnumCourseType.Ielts, EnumCourseLevel.MS1),
             new KeyValuePair<EnumCourseType, EnumCourseLevel>(EnumCourseType.Ielts, EnumCourseLevel.MS2),

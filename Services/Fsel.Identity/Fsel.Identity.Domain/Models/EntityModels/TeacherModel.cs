@@ -11,6 +11,7 @@ namespace Fsel.Identity.Domain.Models.EntityModels
         public IList<EnumCourseType>? CourseTypes { get; set; }
         public IList<EnumCourseLevel>? CourseLevels { get; set; }
 
+        public int NumberClass { get; set; }
         public string? PassportPath { get; set; }
 
         public string? UniversityDegreePath { get; set; }
@@ -21,6 +22,7 @@ namespace Fsel.Identity.Domain.Models.EntityModels
 
         public Guid HumanId { get; set; }
 
+        public TeacherBankAccountModel? TeacherBankAccount { get; set; }
         public HumanModel? Human { get; set; }
     }
 }

@@ -22,12 +22,14 @@ namespace Fsel.Identity.Domain.Entities
 
         public EnumCourseLevel CourseLevel { get; set; }
 
+        public bool CreatedByParent { get; set; }
+
         public Guid? ClassId { get; set; }
 
         public Human? Human { get; set; }
 
         public Guid HumanId { get; set; }
 
-        public IList<ParentStudent> ParentStudents { get; set; } = new List<ParentStudent>();
+        public ICollection<ParentStudent> ParentStudents { get; set; } = new List<ParentStudent>();
     }
 }

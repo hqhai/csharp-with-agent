@@ -83,6 +83,10 @@ namespace Fsel.Identity.Infrastructure.Migrations
                         .HasMaxLength(1000)
                         .HasColumnType("nvarchar(1000)");
 
+                    b.Property<string>("RoleLivesStr")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("UniversityDegreePath")
                         .HasMaxLength(1000)
                         .HasColumnType("nvarchar(1000)");
@@ -126,7 +130,6 @@ namespace Fsel.Identity.Infrastructure.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Code")
-                        .IsRequired()
                         .HasMaxLength(250)
                         .HasColumnType("nvarchar(250)");
 
@@ -345,6 +348,9 @@ namespace Fsel.Identity.Infrastructure.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
+                    b.Property<bool>("CreatedByParent")
+                        .HasColumnType("bit");
+
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2")
                         .HasColumnOrder(107);
@@ -471,6 +477,10 @@ namespace Fsel.Identity.Infrastructure.Migrations
                     b.Property<string>("PoliceClearancePath")
                         .HasMaxLength(1000)
                         .HasColumnType("nvarchar(1000)");
+
+                    b.Property<string>("RoleLivesStr")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("UniversityDegreePath")
                         .HasMaxLength(1000)

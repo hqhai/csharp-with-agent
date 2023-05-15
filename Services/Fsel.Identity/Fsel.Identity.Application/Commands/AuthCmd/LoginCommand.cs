@@ -1,7 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
 using Fsel.Common.ActionResults;
-using Fsel.Identity.Application.Services.InteractionService;
 using Fsel.Identity.Domain.Entities;
 using Fsel.Identity.Domain.Enums.ErrorCodes;
 using Fsel.Identity.Domain.Models.CommandModels.Auths;
@@ -48,6 +47,12 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             if (user == null)
             {
                 methodResult.AddError(StatusCodes.Status401Unauthorized, nameof(EnumAuthErrorCode.UserNameAndPasswordIncorrect), new Error(nameof(request.Username), request.Username), new Error(nameof(request.Password), request.Password));
+                return methodResult;
+            }
+
+            if (!user.LockoutEnabled)
+            {
+                methodResult.AddError(StatusCodes.Status401Unauthorized, nameof(EnumAuthErrorCode.AccountHasBeenLocked), new Error(nameof(request.Username), request.Username));
                 return methodResult;
             }
 

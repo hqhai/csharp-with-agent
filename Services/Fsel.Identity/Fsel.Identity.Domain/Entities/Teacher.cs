@@ -22,6 +22,17 @@ namespace Fsel.Identity.Domain.Entities
             set { CourseTypesStr = ConvertHelper.Serialize(value); }
         }
 
+
+        [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
+        public string? RoleLivesStr { get; set; }
+
+        [NotMapped]
+        public IList<EnumRoleLive>? RoleLives
+        {
+            get { return ConvertHelper.Deserialize<IList<EnumRoleLive>>(RoleLivesStr); }
+            set { RoleLivesStr = ConvertHelper.Serialize(value); }
+        }
+
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         public string? CourseLevelsStr { get; set; }
 
