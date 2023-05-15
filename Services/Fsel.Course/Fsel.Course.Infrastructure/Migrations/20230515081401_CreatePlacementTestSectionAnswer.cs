@@ -32,8 +32,7 @@ namespace Fsel.Course.Infrastructure.Migrations
                     EndTime = table.Column<long>(type: "bigint", nullable: false),
                     Status = table.Column<int>(type: "int", nullable: false),
                     PlacementTestSectionId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    StudentId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    SectionGroupId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                    StudentId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -43,12 +42,6 @@ namespace Fsel.Course.Infrastructure.Migrations
                         column: x => x.PlacementTestSectionId,
                         principalTable: "PlacementTestSections",
                         principalColumn: "Id");
-                    table.ForeignKey(
-                        name: "FK_PlacementTestSectionResults_SectionGroups_SectionGroupId",
-                        column: x => x.SectionGroupId,
-                        principalTable: "SectionGroups",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -101,11 +94,6 @@ namespace Fsel.Course.Infrastructure.Migrations
                 name: "IX_PlacementTestSectionResults_PlacementTestSectionId",
                 table: "PlacementTestSectionResults",
                 column: "PlacementTestSectionId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_PlacementTestSectionResults_SectionGroupId",
-                table: "PlacementTestSectionResults",
-                column: "SectionGroupId");
         }
 
         /// <inheritdoc />

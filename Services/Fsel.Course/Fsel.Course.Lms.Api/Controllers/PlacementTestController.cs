@@ -32,9 +32,9 @@ namespace Fsel.Course.Lms.Api.Controllers
         [HttpGet("start-placement-test")]
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> StartPlacementTest([FromQuery] Guid placmentTestId)
+        public async Task<IActionResult> StartPlacementTest([FromQuery] StartPlacementTestCommand command)
         {
-            MethodResult<bool> queryResult = await _mediator.Send(new StartPlacementTestCommand { PlacementTestId = placmentTestId }).ConfigureAwait(false);
+            MethodResult<bool> queryResult = await _mediator.Send(command).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
     }

@@ -1828,9 +1828,6 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.Property<Guid>("PlacementTestSectionId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("SectionGroupId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<int>("Status")
                         .HasColumnType("int");
 
@@ -1853,8 +1850,6 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("PlacementTestSectionId");
-
-                    b.HasIndex("SectionGroupId");
 
                     b.ToTable("PlacementTestSectionResults");
                 });
@@ -3337,15 +3332,7 @@ namespace Fsel.Course.Infrastructure.Migrations
                         .HasForeignKey("PlacementTestSectionId")
                         .IsRequired();
 
-                    b.HasOne("Fsel.Course.Domain.Entities.SectionGroup", "SectionGroup")
-                        .WithMany()
-                        .HasForeignKey("SectionGroupId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.Navigation("PlacementTestSection");
-
-                    b.Navigation("SectionGroup");
                 });
 
             modelBuilder.Entity("Fsel.Course.Domain.Entities.Section", b =>
