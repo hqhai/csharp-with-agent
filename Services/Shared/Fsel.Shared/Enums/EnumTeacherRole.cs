@@ -4,7 +4,7 @@ namespace Fsel.Shared.Enums
 {
     public enum EnumTeacherRole
     {
-        TeacherLive,
-        TeacherClass
+        Teacher,
+        TeacherLive
     }
 }

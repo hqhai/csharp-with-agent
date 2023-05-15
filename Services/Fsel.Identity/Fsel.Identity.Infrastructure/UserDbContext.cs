@@ -5,6 +5,7 @@ using Fsel.Core.Base;
 using Fsel.Identity.Domain.Entities;
 using Fsel.Identity.Infrastructure.Configs;
 using MediatR;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 

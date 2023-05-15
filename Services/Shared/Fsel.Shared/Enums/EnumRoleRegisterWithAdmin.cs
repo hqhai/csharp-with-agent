@@ -6,6 +6,7 @@ namespace Fsel.Shared.Enums
     {
         CSO,
         Teacher,
-        Moderator
+        Moderator,
+        TeacherLive,
     }
 }
