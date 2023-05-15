@@ -27,6 +27,19 @@ namespace Fsel.Identity.Api.Controllers
         }
 
         /// <summary>
+        /// Comfirm otp reset password
+        /// </summary>
+        [HttpPost("comfirm-otp-reset-password")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Authorize]
+        public async Task<IActionResult> ComfirmOTPResetPassword([FromBody] ComfirmOTPResetPasswordCommand command)
+        {
+            MethodResult<bool> commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
         /// Change Password
         /// </summary>
         [HttpPost("change-password")]
@@ -36,7 +49,7 @@ namespace Fsel.Identity.Api.Controllers
         [Authorize(Roles = nameof(EnumRole.Teacher))]
         [Authorize(Roles = nameof(EnumRole.Parent))]
         [Authorize(Roles = nameof(EnumRole.Student))]
-        public async Task<IActionResult> ChangePassword([FromBody] ComfirmOTPResetPasswordCommand command)
+        public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordCommand command)
         {
             MethodResult<bool> commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();
