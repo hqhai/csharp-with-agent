@@ -2,14 +2,11 @@
 
 namespace Fsel.Course.Domain.Models.QueryModels.FinalTests
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
-    using System.Threading.Tasks;
     using Fsel.Core.Base.BaseModels;
+    using Fsel.Shared.Enums;
 
     public class SearchFinalTestQueryModel : BaseQueryModel
     {
+        public EnumFinalTestLevel? FinalTestLevel { get; set; }
     }
 }

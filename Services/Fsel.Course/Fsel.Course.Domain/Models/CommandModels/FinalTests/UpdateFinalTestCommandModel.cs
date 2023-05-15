@@ -21,7 +21,7 @@ namespace Fsel.Course.Domain.Models.CommandModels.FinalTests
         [Range(0, 10000_0000, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
         public int ExecutionTime { get; set; }
 
-        public EnumCourseType CourseType { get; set; }
+        public EnumFinalTestLevel FinalTestLevel { get; set; }
 
         public IList<UpdateExerciseCommandModel>? Exercises { get; set; }
     }

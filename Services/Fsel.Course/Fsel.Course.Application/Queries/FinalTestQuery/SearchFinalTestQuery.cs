@@ -48,17 +48,19 @@ namespace Fsel.Course.Application.Queries.FinalTestQuery
                                                 {
                                                     Id = x.Id,
                                                     Name = x.Name,
-                                                    CourseType = x.CourseType,
+                                                    FinalTestLevel = x.FinalTestLevel,
                                                     CreatedDate = x.CreatedDate,
                                                     CreatedFullName = x.CreatedFullName,
                                                     ExecutionTime = x.ExecutionTime,
                                                     IsActive = x.IsActive,
-
-                                                    /*Exercises = x.FinalTestExercises.Select(x => x.Exercise).Select(n =>n.)*/
                                                 });
             if (!string.IsNullOrEmpty(request.Keyword))
             {
                 finalTestQuery = finalTestQuery.Where(m => m.Id.ToString() == request.Keyword || (m.Name ?? string.Empty).Contains(request.Keyword));
+            }
+            if (request.FinalTestLevel != null)
+            {
+                finalTestQuery = finalTestQuery.Where(m => m.FinalTestLevel == request.FinalTestLevel);
             }
             int totalItem = await finalTestQuery.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
             var lists = await finalTestQuery

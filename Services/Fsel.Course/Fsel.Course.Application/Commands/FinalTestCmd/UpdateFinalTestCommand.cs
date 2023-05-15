@@ -92,7 +92,6 @@ namespace Fsel.Course.Application.Commands.FinalTestCmd
                     var newQuestion = _mapper.Map<Question>(question);
                     newExercise.ExerciseQuestions.Add(new ExerciseQuestion
                     {
-                        Exercise = newExercise,
                         Question = newQuestion
                     });
                     var (config, correctTotal) = _questionTypeConverter.QuestionTypeConverterObject(question!.Config, question.QuestionType, isShowCorrectTotal: !question.Ungraded, false);

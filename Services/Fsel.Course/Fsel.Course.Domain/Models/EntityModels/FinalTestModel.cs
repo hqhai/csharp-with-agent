@@ -22,7 +22,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
 
         public int ExecutionTime { get; set; }
 
-        public EnumCourseType CourseType { get; set; }
+        public EnumFinalTestLevel FinalTestLevel { get; set; }
 
         public IList<ExerciseModel>? Exercises { get; set; }
     }

@@ -2,11 +2,7 @@
 
 namespace Fsel.Course.Domain.Models.EntityModels
 {
-    using System;
     using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
-    using System.Threading.Tasks;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Shared.Enums;
 
@@ -18,7 +14,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
 
         public int ExecutionTime { get; set; }
 
-        public EnumCourseType CourseType { get; set; }
+        public EnumFinalTestLevel FinalTestLevel { get; set; }
 
         public IList<ExerciseModel>? Exercises { get; set; }
     }

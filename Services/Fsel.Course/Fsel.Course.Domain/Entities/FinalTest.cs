@@ -30,9 +30,9 @@ namespace Fsel.Course.Domain.Entities
         public int ExecutionTime { get; set; }
 
         /// <summary>
-        /// Loại Course
+        /// Loại FinalTest
         /// </summary>
-        public EnumCourseType CourseType { get; set; }
+        public EnumFinalTestLevel FinalTestLevel { get; set; }
 
         public ICollection<FinalTestExercise> FinalTestExercises { get; set; } = new List<FinalTestExercise>();
     }

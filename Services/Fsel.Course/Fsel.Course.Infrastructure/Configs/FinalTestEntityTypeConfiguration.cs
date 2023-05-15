@@ -14,11 +14,11 @@ namespace Fsel.Course.Infrastructure.Configs
         public void Configure(EntityTypeBuilder<FinalTest> builder)
         {
             ArgumentNullException.ThrowIfNull(builder);
-            builder.Property(e => e.CourseType)
+            builder.Property(e => e.FinalTestLevel)
                 .HasMaxLength(100)
                 .HasConversion(
                     v => v.ToString(),
-                    v => v.EnumParse<EnumCourseType>());
+                    v => v.EnumParse<EnumFinalTestLevel>());
         }
     }
 }

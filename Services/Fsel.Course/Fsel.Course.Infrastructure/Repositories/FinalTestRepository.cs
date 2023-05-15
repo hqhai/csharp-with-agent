@@ -33,7 +33,7 @@ namespace Fsel.Course.Infrastructure.Repositories
                                           Id = x.Id,
                                           Name = x.Name,
                                           IsActive = x.IsActive,
-                                          CourseType = x.CourseType,
+                                          FinalTestLevel = x.FinalTestLevel,
                                           CreatedDate = x.CreatedDate,
                                           CreatedFullName = x.CreatedFullName,
                                           ExecutionTime = x.ExecutionTime,
