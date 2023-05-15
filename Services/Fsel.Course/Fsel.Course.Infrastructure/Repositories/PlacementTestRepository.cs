@@ -64,6 +64,7 @@ namespace Fsel.Course.Infrastructure.Repositories
                                     .ThenInclude(x => x!.Sections)
                                     .ThenInclude(x => x.SectionParts)
                                     .ThenInclude(x => x.SectionQuestions)
+                                    .ThenInclude(x => x.Question)
                                     .Where(x => x.Id == id)
                                     .Select(x => new PlacementTestModel
                                     {
@@ -113,6 +114,7 @@ namespace Fsel.Course.Infrastructure.Repositories
                                    .ThenInclude(x => x!.Sections)
                                    .ThenInclude(x => x.SectionParts)
                                    .ThenInclude(x => x.SectionQuestions)
+                                   .ThenInclude(x => x.Question)
                                    .Where(x => x.Id == id)
                                    .Select(x => new PlacementTestModel
                                    {
