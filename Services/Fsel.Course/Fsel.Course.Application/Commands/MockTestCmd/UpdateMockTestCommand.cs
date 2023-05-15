@@ -82,14 +82,13 @@ namespace Fsel.Course.Application.Commands.MockTestCmd
                 return methodResult;
             }
 
-            List<SectionGroup> sectionGroups = mockTest.MockTestSections.Select(x => x.SectionGroup ?? new SectionGroup()).ToList();
-            List<Section> sections = sectionGroups.SelectMany(x => x.Sections).ToList();
-            List<SectionTimeCode> sectionTimeCodes = sections.SelectMany(x => x.SectionTimeCodes).ToList();
-            List<SectionPart> sectionParts = sections.SelectMany(x => x.SectionParts).ToList();
-            List<SectionQuestion>? sectionQuestions = sectionParts.SelectMany(x => x.SectionQuestions).ToList();
-            List<Question>? questions = sectionQuestions.Select(x => x.Question ?? new Question()).ToList();
+            var sectionGroups = mockTest.MockTestSections.Select(x => x.SectionGroup ?? new SectionGroup()).ToList();
 
             _mapper.Map(request, mockTest);
+            sectionGroups.ForEach(x =>
+            {
+                x.MockTestSections.Clear();
+            });
             mockTest.MockTestSections.Clear();
 
             foreach (var sectionGroup in request.SectionGroups)
@@ -200,39 +199,6 @@ namespace Fsel.Course.Application.Commands.MockTestCmd
 
             await _mockTestRepository.ExecuteTransactionAsync(async () =>
             {
-                foreach (var item in questions)
-                {
-                    await _questionRepository.DeleteAsync(item);
-                }
-                await _questionRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
-
-                foreach (var item in sectionQuestions)
-                {
-                    await _sectionQuestionRepository.DeleteAsync(item);
-                }
-                await _sectionQuestionRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
-
-                foreach (var item in sectionTimeCodes)
-                {
-                    await _sectionTimeCodeRepository.DeleteAsync(item);
-                }
-                await _sectionTimeCodeRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
-
-                if (sectionParts.Count > 0)
-                {
-                    foreach (var item in sectionParts)
-                    {
-                        await _sectionPartRepository.DeleteAsync(item);
-                    }
-                    await _sectionPartRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
-                }
-
-                foreach (var item in sections)
-                {
-                    await _sectionRepository.DeleteAsync(item);
-                }
-                await _sectionRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
-
                 foreach (var item in sectionGroups)
                 {
                     await _sectionGroupRepository.DeleteAsync(item);
