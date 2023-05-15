@@ -33,6 +33,7 @@ namespace Fsel.Course.Application.Commands.MockTestCmd
         private readonly IQuestionRepository _questionRepository;
         private readonly ISectionGroupRepository _sectionGroupRepository;
         private readonly ISectionQuestionRepository _sectionQuestionRepository;
+        private readonly ISectionTimeCodeRepository _sectionTimeCodeRepository;
 
         public UpdateMockTestCommandHandler(IMapper mapper
             , IMockTestRepository mockTestRepository
@@ -41,7 +42,8 @@ namespace Fsel.Course.Application.Commands.MockTestCmd
             , ISectionPartRepository sectionPartRepository
             , IQuestionRepository questionRepository
             , ISectionGroupRepository sectionGroupRepository
-            , ISectionQuestionRepository sectionQuestionRepository)
+            , ISectionQuestionRepository sectionQuestionRepository
+            , ISectionTimeCodeRepository sectionTimeCodeRepository)
         {
             _mapper = mapper;
             _mockTestRepository = mockTestRepository;
@@ -51,6 +53,7 @@ namespace Fsel.Course.Application.Commands.MockTestCmd
             _questionRepository = questionRepository;
             _sectionGroupRepository = sectionGroupRepository;
             _sectionQuestionRepository = sectionQuestionRepository;
+            _sectionTimeCodeRepository = sectionTimeCodeRepository;
         }
 
         public async Task<MethodResult<MockTestModel>> Handle(UpdateMockTestCommand request, CancellationToken cancellationToken)
@@ -69,23 +72,23 @@ namespace Fsel.Course.Application.Commands.MockTestCmd
             var mockTest = await _mockTestRepository.GetIncludeByIdAsync(request.Id);
             if (mockTest == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumPlacementTestErrorCode.PlacementTestNotExist), nameof(request.Id), request.Id);
+                methodResult.AddErrorBadRequest(nameof(EnumMockTestErrorCode.MockTestsNotExist), nameof(request.Id), request.Id);
                 return methodResult;
             }
 
             if (mockTest.IsActive)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumPlacementTestErrorCode.PlacementTestInActiveState), nameof(mockTest.IsActive), mockTest.IsActive);
+                methodResult.AddErrorBadRequest(nameof(EnumMockTestErrorCode.MockTestInActiveState), nameof(mockTest.IsActive), mockTest.IsActive);
                 return methodResult;
             }
 
-            List<SectionGroup> sectionGroups = mockTest.MockTestSections.Select(x => x.SectionGroup ?? new SectionGroup()).ToList();
-            List<Section> sections = sectionGroups.SelectMany(x => x.Sections).ToList();
-            List<SectionPart> sectionParts = sections.SelectMany(x => x.SectionParts).ToList();
-            List<SectionQuestion>? sectionQuestions = sectionParts.SelectMany(x => x.SectionQuestions).ToList();
-            List<Question>? questions = sectionQuestions.Select(x => x.Question ?? new Question()).ToList();
+            var sectionGroups = mockTest.MockTestSections.Select(x => x.SectionGroup ?? new SectionGroup()).ToList();
 
             _mapper.Map(request, mockTest);
+            sectionGroups.ForEach(x =>
+            {
+                x.MockTestSections.Clear();
+            });
             mockTest.MockTestSections.Clear();
 
             foreach (var sectionGroup in request.SectionGroups)
@@ -109,40 +112,64 @@ namespace Fsel.Course.Application.Commands.MockTestCmd
                         return methodResult;
                     }
                     Section newSection = newSectionGroup.Sections.ElementAt(sectionGroup.Sections.IndexOf(section));
-                    if (section.SectionParts != null && section.Questions != null && section.SectionParts.Count > 0 && section.Questions.Count > 0)
-                    {
-                        methodResult.AddErrorBadRequest(nameof(EnumSectionErrorCode.OnlyOneOfTwoSectionPartsOrQuestions));
-                        return methodResult;
-                    }
 
-                    if (section.SectionParts == null || section.SectionParts.Count == 0)
+                    if (sectionGroup.CourseSkill != Shared.Enums.EnumCourseSkill.Speaking)
                     {
-                        methodResult.AddErrorBadRequest(nameof(EnumSectionPartErrorCode.SectionPartsNull), nameof(section.SectionParts));
-                        return methodResult;
-                    }
-                    foreach (var sectionPart in section.SectionParts)
-                    {
-                        if (sectionPart == null)
+                        if (section.SectionParts != null && section.Questions != null && section.SectionParts.Count > 0 && section.Questions.Count > 0)
                         {
-                            methodResult.AddErrorBadRequest(nameof(EnumSectionPartErrorCode.SectionPartNull), nameof(sectionPart), sectionPart);
+                            methodResult.AddErrorBadRequest(nameof(EnumSectionErrorCode.OnlyOneOfTwoSectionPartsOrQuestions));
                             return methodResult;
                         }
-                        else
+
+                        if (section.SectionParts == null || section.SectionParts.Count == 0)
                         {
-                            SectionPart newSectionPart = newSection.SectionParts.ElementAt(section.SectionParts.IndexOf(sectionPart));
-                            if (sectionPart.Questions == null || sectionPart.Questions.Count == 0)
+                            methodResult.AddErrorBadRequest(nameof(EnumSectionPartErrorCode.SectionPartsNull), nameof(section.SectionParts));
+                            return methodResult;
+                        }
+                        foreach (var sectionPart in section.SectionParts)
+                        {
+                            if (sectionPart == null)
                             {
-                                methodResult.AddErrorBadRequest(nameof(EnumQuestionErrorCode.QuestionsNull), nameof(sectionPart.Questions));
+                                methodResult.AddErrorBadRequest(nameof(EnumSectionPartErrorCode.SectionPartNull), nameof(sectionPart), sectionPart);
                                 return methodResult;
                             }
-                            foreach (var question in sectionPart.Questions)
+                            else
                             {
-                                GetSectionQuestion(methodResult, question, null, newSectionPart);
+                                SectionPart newSectionPart = newSection.SectionParts.ElementAt(section.SectionParts.IndexOf(sectionPart));
+                                if (sectionPart.Questions == null || sectionPart.Questions.Count == 0)
+                                {
+                                    methodResult.AddErrorBadRequest(nameof(EnumQuestionErrorCode.QuestionsNull), nameof(sectionPart.Questions));
+                                    return methodResult;
+                                }
+                                foreach (var question in sectionPart.Questions)
+                                {
+                                    GetSectionQuestion(methodResult, question, null, newSectionPart);
+                                }
+                                if (!newSectionPart.IsValid())
+                                {
+                                    methodResult.AddErrorBadRequest(newSectionPart.ErrorMessages);
+                                    return methodResult;
+                                }
                             }
-                            if (!newSectionPart.IsValid())
+                        }
+                    }
+                    else
+                    {
+                        if (section.SectionTimeCodes == null || section.SectionTimeCodes!.Count == 0)
+                        {
+                            methodResult.AddErrorBadRequest(nameof(EnumSectionTimeCodeErrorCode.TimeCodeCanNotNull), nameof(sectionGroup.CourseSkill));
+                            return methodResult;
+                        }
+                        foreach (var sectionTimeCode in section.SectionTimeCodes)
+                        {
+                            if (sectionTimeCode == null)
                             {
-                                methodResult.AddErrorBadRequest(newSectionPart.ErrorMessages);
+                                methodResult.AddErrorBadRequest(nameof(EnumSectionTimeCodeErrorCode.SectionTimeCodesNull), nameof(sectionTimeCode), sectionTimeCode);
                                 return methodResult;
+                            }
+                            else
+                            {
+                                SectionTimeCode newSectionTimeCode = newSection.SectionTimeCodes.ElementAt(section.SectionTimeCodes.IndexOf(sectionTimeCode));
                             }
                         }
                     }
@@ -176,34 +203,7 @@ namespace Fsel.Course.Application.Commands.MockTestCmd
                 {
                     await _sectionGroupRepository.DeleteAsync(item);
                 }
-                await _sectionGroupRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-
-                foreach (var item in sections)
-                {
-                    await _sectionRepository.DeleteAsync(item);
-                }
-                await _sectionRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-
-                if (sectionParts.Count > 0)
-                {
-                    foreach (var item in sectionParts)
-                    {
-                        await _sectionPartRepository.DeleteAsync(item);
-                    }
-                    await _sectionPartRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-                }
-
-                foreach (var item in sectionQuestions)
-                {
-                    await _sectionQuestionRepository.DeleteAsync(item);
-                }
-                await _sectionQuestionRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-
-                foreach (var item in questions)
-                {
-                    await _questionRepository.DeleteAsync(item);
-                }
-                await _questionRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                await _sectionGroupRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
                 mockTest = _mockTestRepository.Update(mockTest);
                 await _mockTestRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
