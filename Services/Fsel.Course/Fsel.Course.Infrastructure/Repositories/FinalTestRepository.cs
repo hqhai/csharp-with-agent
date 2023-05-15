@@ -15,8 +15,24 @@ namespace Fsel.Course.Infrastructure.Repositories
 
     public class FinalTestRepository : BaseRepository<FinalTest>, IFinalTestRepository
     {
-        public FinalTestRepository(BaseDbContext dbContext, AuthContext authContext) : base(dbContext, authContext)
+        public FinalTestRepository(CourseDbContext dbContext, AuthContext authContext) : base(dbContext, authContext)
         {
+        }
+
+        public override async Task<FinalTest?> GetIncludeByIdAsync(Guid id, int? siteId = null)
+        {
+            try
+            {
+                return await Queryable.Include(x => x.FinalTestExercises)
+                                    .ThenInclude(x => x.Exercise)
+                                    .ThenInclude(x => x!.ExerciseQuestions.Where(n => !n.IsDeleted))
+                                    .ThenInclude(x => x.Question)
+                                    .FirstOrDefaultAsync(x => x.Id == id);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
 
         public async Task<FinalTestModel?> GetIncludeAllAsync(Guid? id)
