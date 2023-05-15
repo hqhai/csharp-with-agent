@@ -111,24 +111,29 @@ namespace Fsel.Course.Application.Commands.MockTestCmd
                                 }
                             }
                         }
-                        if (section.SectionTimeCodes == null || section.SectionTimeCodes.Count == 0)
+                        if (sectionGroup.CourseSkill == Shared.Enums.EnumCourseSkill.Speaking)
                         {
-                            methodResult.AddErrorBadRequest(nameof(EnumSectionTimeCodeErrorCode.SectionTimeCodesNull), nameof(section.SectionTimeCodes));
+                            methodResult.AddErrorBadRequest(nameof(EnumSectionTimeCodeErrorCode.SkillNotSpeaking), nameof(sectionGroup.CourseSkill));
                             return methodResult;
                         }
-                        foreach (var sectionTimeCode in section.SectionTimeCodes)
+                        else
                         {
-                            if (sectionTimeCode == null)
+                            if (section.SectionTimeCodes != null)
                             {
-                                methodResult.AddErrorBadRequest(nameof(EnumSectionTimeCodeErrorCode.SectionTimeCodesNull), nameof(sectionTimeCode), sectionTimeCode);
-                                return methodResult;
-                            }
-                            else
-                            {
-                                SectionTimeCode newSectionTimeCode = newSection.SectionTimeCodes.ElementAt(section.SectionTimeCodes.IndexOf(sectionTimeCode));
+                                foreach (var sectionTimeCode in section.SectionTimeCodes)
+                                {
+                                    if (sectionTimeCode == null)
+                                    {
+                                        methodResult.AddErrorBadRequest(nameof(EnumSectionTimeCodeErrorCode.SectionTimeCodesNull), nameof(sectionTimeCode), sectionTimeCode);
+                                        return methodResult;
+                                    }
+                                    else
+                                    {
+                                        SectionTimeCode newSectionTimeCode = newSection.SectionTimeCodes.ElementAt(section.SectionTimeCodes.IndexOf(sectionTimeCode));
+                                    }
+                                }
                             }
                         }
-
                         if (!newSection.IsValid())
                         {
                             methodResult.AddErrorBadRequest(newSection.ErrorMessages);
