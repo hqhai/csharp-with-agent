@@ -31,7 +31,7 @@ namespace Fsel.Course.Application.Queries.PlacementTestQuery
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<PlacementTestModel> methodResult = new MethodResult<PlacementTestModel>();
 
-            var placementTest = await _placementTestRepository.GetIncludeByIdAsync(request.Id);
+            var placementTest = await _placementTestRepository.GetIncludePlacementTestById(request.Id);
 
             if (placementTest == null)
             {
