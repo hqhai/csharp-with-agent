@@ -45,25 +45,12 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                 methodResult.AddErrorBadRequest(nameof(EnumAuthErrorCode.PasswordNotEmpty), nameof(request.Password), request.Password);
                 return methodResult;
             }
-            if (request.ConfirmPassword == null)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumAuthErrorCode.ConfirmPasswordNotEmpty), nameof(request.ConfirmPassword), request.ConfirmPassword);
-                return methodResult;
-            }
 
-            User? user;
-            if (string.IsNullOrEmpty(request.Email))
-            {
-                user = await _userManager.FindByIdAsync(_authContext.CurrentUserId.ToString());
-            }
-            else
-            {
-                user = await _userManager.FindByEmailAsync(request.Email);
-            }
+            var user = await _userManager.FindByIdAsync(_authContext.CurrentUserId.ToString());
 
             if (user == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumAuthErrorCode.EmailNotExist), nameof(request.Email), request.Email);
+                methodResult.AddErrorBadRequest(nameof(EnumAuthErrorCode.EmailNotExist));
                 return methodResult;
             }
 

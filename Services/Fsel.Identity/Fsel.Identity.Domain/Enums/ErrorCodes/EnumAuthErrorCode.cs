@@ -143,5 +143,10 @@ namespace Fsel.Identity.Domain.Enums.ErrorCodes
         /// Otp does not exist
         /// </summary>
         OtpNotExist,
+
+        /// <summary>
+        /// Account has been locked
+        /// </summary>
+        AccountHasBeenLocked,
     }
 }

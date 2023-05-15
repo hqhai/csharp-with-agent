@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Fsel.Identity.Application.Commands.AuthCmd
 {
-    public class ComfirmOTPResetPasswordCommand : ResetPasswordCommandModel, IRequest<MethodResult<bool>>
+    public class ComfirmOTPResetPasswordCommand : ComfirmOTPResetPasswordCommandModel, IRequest<MethodResult<bool>>
     {
     }
 
