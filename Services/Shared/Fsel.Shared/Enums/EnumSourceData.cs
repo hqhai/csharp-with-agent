@@ -10,6 +10,7 @@ namespace Fsel.Shared.Enums
         ExtraPracticeType,
         QuestionType,
         TimeCodeType,
-        PlacementTestLevel
+        PlacementTestLevel,
+        FinalTestLevel
     }
 }
