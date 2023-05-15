@@ -9,6 +9,7 @@ namespace Fsel.Identity.Domain.Models.EntityModels
     {
         public string? FullName { get; set; }
         public DateTime? Birthday { get; set; }
+        public string? Code { get; set; }
         public string? PhoneNumber { get; set; }
         public string? Address { get; set; }
         public EnumGender? Gender { get; set; }

@@ -66,12 +66,12 @@ namespace Fsel.Identity.Application.Commands.UserCmd
             _userOtpCodeRepository.Update(userOtpCode);
             await _userOtpCodeRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
-            if (string.IsNullOrEmpty(request.Email))
+            if (!string.IsNullOrEmpty(request.Email))
             {
                 user!.Email = request.Email;
                 await _userManager.UpdateAsync(user);
             }
-            else if (string.IsNullOrEmpty(request.PhoneNumber))
+            else if (!string.IsNullOrEmpty(request.PhoneNumber))
             {
                 user!.PhoneNumber = request.PhoneNumber;
                 await _userManager.UpdateAsync(user);

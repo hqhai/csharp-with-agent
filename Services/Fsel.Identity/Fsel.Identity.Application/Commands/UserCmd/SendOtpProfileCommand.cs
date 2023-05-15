@@ -61,12 +61,12 @@ namespace Fsel.Identity.Application.Commands.UserCmd
             }
             var userOtpCode = await _userOtpCodeRepository.Queryable
                                   .FirstOrDefaultAsync(x => x.UserId == user.Id && x.Status == EnumStatusUser.New && !x.IsDeleted, cancellationToken);
-
-            var randomSecure = new RandomSecureHelper();
-            var totp = new Totp(Encoding.UTF8.GetBytes(randomSecure.Secretstrings()));
-            var otp = totp.ComputeTotp();
             if (userOtpCode == null)
             {
+                var randomSecure = new RandomSecureHelper();
+                var totp = new Totp(Encoding.UTF8.GetBytes(randomSecure.Secretstrings()));
+                var otp = totp.ComputeTotp();
+
                 userOtpCode = new UserOtpCode
                 {
                     UserId = user.Id,
@@ -77,12 +77,16 @@ namespace Fsel.Identity.Application.Commands.UserCmd
                 _userOtpCodeRepository.Add(userOtpCode);
                 await _userOtpCodeRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             }
-            var content = string.Format(CultureInfo.InvariantCulture, StringValues.SendOtpContent, user.FullName, otp);
-            var subject = StringValues.SendOtpSubject + $"{otp}";
+            var content = string.Format(CultureInfo.InvariantCulture, StringValues.SendOtpContent, user.FullName, userOtpCode.OTPCode);
+            var subject = StringValues.SendOtpSubject + $"{userOtpCode.OTPCode}";
             var sendResult = new MethodResult<bool>();
-            if (request != null && request.Email != null)
+            if (!string.IsNullOrEmpty(request.Email))
             {
                 sendResult = await _mediator.Send(new SenderCommand { Email = request.Email, Content = content, Subject = subject }, cancellationToken).ConfigureAwait(false);
+            }
+            else if (!string.IsNullOrEmpty(request.PhoneNumber))
+            {
+                sendResult = await _mediator.Send(new SenderCommand { Email = user.Email, Content = content, Subject = subject }, cancellationToken).ConfigureAwait(false);
             }
 
             if (!sendResult.IsOK)

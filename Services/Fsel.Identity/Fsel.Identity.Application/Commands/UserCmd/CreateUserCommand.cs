@@ -117,7 +117,7 @@ namespace Fsel.Identity.Application.Commands.UserCmd
                     _userOtpCodeRepository.Add(userOtpCode);
                     await _userOtpCodeRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
                 }
-                var content = string.Format(CultureInfo.InvariantCulture, _appSetting.ConstantUrl!.ActiveUserUrl!, user.Id, otp);
+                var content = string.Format(CultureInfo.InvariantCulture, _appSetting.ConstantUrl!.FogotPassWordUserUrl!, otp);
                 var subject = StringValues.SendOtpSubject + user.FullName;
                 var sendResult = new MethodResult<bool>();
                 if (request != null && request.Email != null)
