@@ -9,31 +9,19 @@ namespace Fsel.Shared.Enums
         [Description("Think Starter")]
         A1,
 
-        [Description("Think A2")]
+        [Description("Think 1")]
         A2,
 
-        [Description("Think B1")]
+        [Description("Think 2")]
         B1,
 
-        [Description("Think B1+")]
+        [Description("Think 3")]
         B1Plus,
 
-        [Description("Think B2")]
+        [Description("Think 4")]
         B2,
 
-        [Description("Think C1")]
-        C1,
-
-        [Description("Foundation")]
-        RFE,
-
-        [Description("Mindset 1")]
-        MS1,
-
-        [Description("Mindset 2")]
-        MS2,
-
-        [Description("Mindset 3")]
-        MS3
+        [Description("Think 5")]
+        C1
     }
 }
