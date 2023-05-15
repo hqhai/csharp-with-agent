@@ -33,6 +33,7 @@ namespace Fsel.Course.Application.Commands.MockTestCmd
         private readonly IQuestionRepository _questionRepository;
         private readonly ISectionGroupRepository _sectionGroupRepository;
         private readonly ISectionQuestionRepository _sectionQuestionRepository;
+        private readonly ISectionTimeCodeRepository _sectionTimeCodeRepository;
 
         public UpdateMockTestCommandHandler(IMapper mapper
             , IMockTestRepository mockTestRepository
@@ -41,7 +42,8 @@ namespace Fsel.Course.Application.Commands.MockTestCmd
             , ISectionPartRepository sectionPartRepository
             , IQuestionRepository questionRepository
             , ISectionGroupRepository sectionGroupRepository
-            , ISectionQuestionRepository sectionQuestionRepository)
+            , ISectionQuestionRepository sectionQuestionRepository
+            , ISectionTimeCodeRepository sectionTimeCodeRepository)
         {
             _mapper = mapper;
             _mockTestRepository = mockTestRepository;
@@ -51,6 +53,7 @@ namespace Fsel.Course.Application.Commands.MockTestCmd
             _questionRepository = questionRepository;
             _sectionGroupRepository = sectionGroupRepository;
             _sectionQuestionRepository = sectionQuestionRepository;
+            _sectionTimeCodeRepository = sectionTimeCodeRepository;
         }
 
         public async Task<MethodResult<MockTestModel>> Handle(UpdateMockTestCommand request, CancellationToken cancellationToken)
@@ -197,17 +200,23 @@ namespace Fsel.Course.Application.Commands.MockTestCmd
 
             await _mockTestRepository.ExecuteTransactionAsync(async () =>
             {
-                foreach (var item in sectionGroups)
+                foreach (var item in questions)
                 {
-                    await _sectionGroupRepository.DeleteAsync(item);
+                    await _questionRepository.DeleteAsync(item);
                 }
-                await _sectionGroupRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                await _questionRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
-                foreach (var item in sections)
+                foreach (var item in sectionQuestions)
                 {
-                    await _sectionRepository.DeleteAsync(item);
+                    await _sectionQuestionRepository.DeleteAsync(item);
                 }
-                await _sectionRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                await _sectionQuestionRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+
+                foreach (var item in sectionTimeCodes)
+                {
+                    await _sectionTimeCodeRepository.DeleteAsync(item);
+                }
+                await _sectionTimeCodeRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
                 if (sectionParts.Count > 0)
                 {
@@ -215,20 +224,20 @@ namespace Fsel.Course.Application.Commands.MockTestCmd
                     {
                         await _sectionPartRepository.DeleteAsync(item);
                     }
-                    await _sectionPartRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                    await _sectionPartRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
                 }
 
-                foreach (var item in sectionQuestions)
+                foreach (var item in sections)
                 {
-                    await _sectionQuestionRepository.DeleteAsync(item);
+                    await _sectionRepository.DeleteAsync(item);
                 }
-                await _sectionQuestionRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                await _sectionRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
-                foreach (var item in questions)
+                foreach (var item in sectionGroups)
                 {
-                    await _questionRepository.DeleteAsync(item);
+                    await _sectionGroupRepository.DeleteAsync(item);
                 }
-                await _questionRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                await _sectionGroupRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
                 mockTest = _mockTestRepository.Update(mockTest);
                 await _mockTestRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
