@@ -2,9 +2,9 @@
 
 namespace Fsel.Shared.Enums
 {
-    public enum EnumCSORole
+    public enum EnumRoleLive
     {
-        CSO,
-        CSOTong
+        LiveIELTS,
+        LiveAcademic
     }
 }

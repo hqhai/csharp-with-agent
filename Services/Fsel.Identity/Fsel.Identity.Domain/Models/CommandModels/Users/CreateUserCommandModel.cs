@@ -16,6 +16,7 @@ namespace Fsel.Identity.Domain.Models.CommandModels.Users
         public string? Address { get; set; }
         public DateTime Birthday { get; set; }
         public string? PhoneNumber { get; set; }
+        public IList<EnumRoleLive>? RoleLives { get; set; }
         public IList<EnumCourseType>? CourseTypes { get; set; }
         public IList<EnumCourseLevel>? CourseLevels { get; set; }
 

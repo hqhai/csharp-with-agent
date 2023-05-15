@@ -7,9 +7,8 @@ namespace Fsel.Identity.Domain.Models.EntityModels
 
     public class ParentModel : BaseModel
     {
-        public string? Gender { get; set; }
         public string? Occupation { get; set; }
         public Guid HumanId { get; set; }
-        public IList<ParentStudentModel>? ParentStudents { get; set; }
+        public HumanProfileModel? Human { get; set; }
     }
 }

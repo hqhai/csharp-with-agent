@@ -44,32 +44,32 @@ namespace Fsel.Identity.Application.Commands.UserCmd
 
             var userRoles = await _userManager.GetRolesAsync(user);
             var role = userRoles.FirstOrDefault();
-            if (role == EnumRoleRegisterWithAdmin.Teacher.ToString())
+            if (userRoles.Contains(EnumRoleRegisterWithAdmin.Teacher.ToString()))
             {
                 user = await _userManager.Users.Include(x => x.Human).ThenInclude(x => x!.Teacher).FirstOrDefaultAsync(x => x.Id == request.Id.ToString(), cancellationToken);
                 if (user == null)
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumUserErrorCode.UserNotExist), nameof(request.Email), request.Email);
+                    methodResult.AddErrorBadRequest(nameof(EnumUserErrorCode.UserNotExist));
                     return methodResult;
                 }
                 _mapper.Map(request, user!.Human!.Teacher);
             }
             else if (role == EnumRoleRegisterWithAdmin.CSO.ToString())
             {
-                user = await _userManager.Users.Include(x => x.Human).ThenInclude(x => x!.CSO).FirstOrDefaultAsync(x => x.Email == request.Email, cancellationToken);
+                user = await _userManager.Users.Include(x => x.Human).ThenInclude(x => x!.CSO).FirstOrDefaultAsync(x => x.Id == request.Id.ToString(), cancellationToken);
                 if (user == null)
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumUserErrorCode.UserNotExist), nameof(request.Email), request.Email);
+                    methodResult.AddErrorBadRequest(nameof(EnumUserErrorCode.UserNotExist));
                     return methodResult;
                 }
                 _mapper.Map(request, user!.Human!.CSO);
             }
             else if (role == EnumRoleRegisterWithAdmin.Moderator.ToString())
             {
-                user = await _userManager.Users.Include(x => x.Human).FirstOrDefaultAsync(x => x.Email == request.Email, cancellationToken);
+                user = await _userManager.Users.Include(x => x.Human).FirstOrDefaultAsync(x => x.Id == request.Id.ToString(), cancellationToken);
                 if (user == null)
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumUserErrorCode.UserNotExist), nameof(request.Email), request.Email);
+                    methodResult.AddErrorBadRequest(nameof(EnumUserErrorCode.UserNotExist));
                     return methodResult;
                 }
             }

@@ -132,6 +132,21 @@ namespace Fsel.Identity.Domain.Enums.ErrorCodes
         /// <summary>
         /// Survey Called Error
         /// </summary>
-        SurveyCalledError
+        SurveyCalledError,
+
+        /// <summary>
+        /// Otp is null
+        /// </summary>
+        OtpNull,
+
+        /// <summary>
+        /// Otp does not exist
+        /// </summary>
+        OtpNotExist,
+
+        /// <summary>
+        /// Account has been locked
+        /// </summary>
+        AccountHasBeenLocked,
     }
 }

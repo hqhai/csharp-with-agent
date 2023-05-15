@@ -87,7 +87,14 @@ namespace Fsel.Identity.Application.Commands.UserCmd
                 var human = await CreateHuman(request!, user);
                 human = _humanRepository.Add(human);
                 await _humanRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-
+                if (request!.Role == EnumRoleRegisterWithAdmin.Teacher)
+                {
+                    var roleLives = human!.Teacher!.RoleLives;
+                    if (roleLives != null && roleLives.Count > 0)
+                    {
+                        await _userManager.AddToRoleAsync(user, EnumRole.TeacherLive.ToString());
+                    }
+                }
                 await _userManager.AddToRoleAsync(user, request!.Role.ToString());
 
                 #region Send Code OTP
@@ -110,12 +117,12 @@ namespace Fsel.Identity.Application.Commands.UserCmd
                     _userOtpCodeRepository.Add(userOtpCode);
                     await _userOtpCodeRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
                 }
-                var content = string.Format(CultureInfo.InvariantCulture, _appSetting.ConstantUrl!.ActiveUserUrl!, user.Id, otp);
+                var content = string.Format(CultureInfo.InvariantCulture, _appSetting.ConstantUrl!.ConfirmOtpUrl!, otp);
                 var subject = StringValues.SendOtpSubject + user.FullName;
                 var sendResult = new MethodResult<bool>();
                 if (request != null && request.Email != null)
                 {
-                    sendResult = await _mediator.Send(new SendOTPCommand { Email = user.Email, Content = content, Subject = subject }, cancellationToken).ConfigureAwait(false);
+                    sendResult = await _mediator.Send(new SenderCommand { Email = user.Email, Content = content, Subject = subject }, cancellationToken).ConfigureAwait(false);
                 }
 
                 if (!sendResult.IsOK)
@@ -143,6 +150,7 @@ namespace Fsel.Identity.Application.Commands.UserCmd
                 {
                     HumanId = human.Id,
                     CourseLevels = request.CourseLevels,
+                    RoleLives = request.RoleLives,
                     CourseTypes = request.CourseTypes,
                     TeacherBankAccount = new TeacherBankAccount
                     {
@@ -160,6 +168,7 @@ namespace Fsel.Identity.Application.Commands.UserCmd
                 human.CSO = new CSO
                 {
                     HumanId = human.Id,
+                    RoleLives = request.RoleLives,
                     CourseLevels = request.CourseLevels,
                     CourseTypes = request.CourseTypes
                 };
