@@ -26,7 +26,7 @@ namespace Fsel.Course.Lms.Api.Controllers
         }
 
         /// <summary>
-        /// Get List lesson by unit
+        /// Get List Unit Result
         /// </summary>
         [HttpGet]
         [ProducesResponseType(typeof(MethodResult<IList<UnitResultModel>>), (int)HttpStatusCode.OK)]
