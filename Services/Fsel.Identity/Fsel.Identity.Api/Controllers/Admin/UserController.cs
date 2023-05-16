@@ -4,7 +4,7 @@ using System.Net;
 using Fsel.Common.ActionResults;
 using Fsel.Common.Constants;
 using Fsel.Core.Base.BaseModels;
-using Fsel.Identity.Application.Commands.UserCmd;
+using Fsel.Identity.Application.Commands.AdminCmd;
 using Fsel.Identity.Application.Queries.UserQuery;
 using Fsel.Identity.Domain.Models.EntityModels;
 using Fsel.Shared.Enums;
@@ -17,6 +17,7 @@ namespace Fsel.Identity.Api.Controllers.Admin
     [ApiVersion(Settings.APIVersion)]
     [Route(Settings.APIDefaultRoute + "/admin/user")]
     [ApiController]
+    [Authorize(Roles = nameof(EnumRole.Admin))]
     public class UserController : ControllerBase
     {
         private readonly IMediator _mediator;
@@ -30,7 +31,6 @@ namespace Fsel.Identity.Api.Controllers.Admin
         /// Create User
         /// </summary>
 
-        [Authorize(Roles = nameof(EnumRole.Admin))]
         [HttpPost("create-user")]
         [ProducesResponseType(typeof(MethodResult<UserModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
@@ -43,7 +43,6 @@ namespace Fsel.Identity.Api.Controllers.Admin
         /// <summary>
         /// Update User
         /// </summary>
-        [Authorize(Roles = nameof(EnumRole.Admin))]
         [HttpPut("{id}")]
         [ProducesResponseType(typeof(MethodResult<UserModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
@@ -58,7 +57,6 @@ namespace Fsel.Identity.Api.Controllers.Admin
         /// <summary>
         /// Delete User
         /// </summary>
-        [Authorize(Roles = nameof(EnumRole.Admin))]
         [HttpDelete("{id}")]
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
@@ -71,7 +69,6 @@ namespace Fsel.Identity.Api.Controllers.Admin
         /// <summary>
         /// Search User
         /// </summary>
-        [Authorize(Roles = nameof(EnumRole.Admin))]
         [HttpGet("search-user")]
         [ProducesResponseType(typeof(MethodResult<PagingItemsModel<UserSearchModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
@@ -84,7 +81,6 @@ namespace Fsel.Identity.Api.Controllers.Admin
         /// <summary>
         /// Get User
         /// </summary>
-        [Authorize(Roles = nameof(EnumRole.Admin))]
         [HttpGet("get-user/{id}")]
         [ProducesResponseType(typeof(MethodResult<UserProfileModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
@@ -97,11 +93,22 @@ namespace Fsel.Identity.Api.Controllers.Admin
         /// <summary>
         /// Active user
         /// </summary>
-        [Authorize(Roles = nameof(EnumRole.Admin))]
         [HttpPost("active-user")]
         [ProducesResponseType(typeof(MethodResult<UserModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> ActiveUser([FromBody] UpdateStatusUserCommand command)
+        {
+            MethodResult<UserModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Request teacher bank
+        /// </summary>
+        [HttpGet("request-teacher-bank")]
+        [ProducesResponseType(typeof(MethodResult<UserModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> RequestUpdateTeacherBank([FromQuery] ApproveTeacherBankCommand command)
         {
             MethodResult<UserModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();

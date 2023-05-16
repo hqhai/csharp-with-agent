@@ -22,7 +22,7 @@ namespace Fsel.Identity.Domain.Models.EntityModels
 
         public Guid HumanId { get; set; }
 
-        public TeacherBankAccountModel? TeacherBankAccount { get; set; }
+        public IList<TeacherBankAccountModel>? TeacherBankAccounts { get; set; }
         public HumanModel? Human { get; set; }
     }
 }
