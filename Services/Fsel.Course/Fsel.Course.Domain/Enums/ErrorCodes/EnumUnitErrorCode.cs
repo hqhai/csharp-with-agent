@@ -18,5 +18,10 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         /// Units is does not exist
         /// </summary>
         UnitsNotExist,
+
+        /// <summary>
+        /// User does not exist
+        /// </summary>
+        UserNotExist
     }
 }

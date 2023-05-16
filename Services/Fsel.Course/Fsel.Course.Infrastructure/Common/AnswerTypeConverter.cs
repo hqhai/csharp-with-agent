@@ -3,6 +3,7 @@
 namespace Fsel.Course.Infrastructure.Common
 {
     using System;
+    using System.Globalization;
     using System.Linq;
     using Fsel.Common.Helpers;
     using Fsel.Course.Domain.Entities.QuestionTypeConfigs.Answers;
@@ -186,9 +187,9 @@ namespace Fsel.Course.Infrastructure.Common
             var dataQuestion = configQuestion.Deserialize<ShortAnswerQuestionWordBaseQuestion>();
             int number = 0;
 
-            if (dataAnswer != null && dataAnswer.Answers != null && dataQuestion != null && dataQuestion.Content != null)
+            if (dataAnswer != null && dataAnswer.Answers != null && dataQuestion != null && dataQuestion.Contents != null && dataQuestion.Contents.Count > 0)
             {
-                if (dataQuestion.Content.Equals(dataAnswer.Answers, StringComparison.Ordinal))
+                if (dataAnswer.Answers.All(x => dataQuestion.Contents.Any(y => y.ToLower(CultureInfo.CurrentCulture) == x.ToLower(CultureInfo.CurrentCulture))))
                 {
                     dataAnswer.IsExact = true;
                     number++;
@@ -207,7 +208,7 @@ namespace Fsel.Course.Infrastructure.Common
             var dataAnswer = configAnswer.Deserialize<GapFillAnswer>();
             var dataQuestion = configQuestion.Deserialize<GapFillQuestion>();
             int number = 0;
-            if (dataAnswer != null && dataAnswer.Answers != null && dataQuestion != null && dataQuestion.Contents != null)
+            if (dataAnswer != null && dataAnswer.Answers != null && dataAnswer.Answers.Count > 0 && dataQuestion != null && dataQuestion.Contents != null)
             {
                 foreach (var item in dataAnswer.Answers)
                 {
