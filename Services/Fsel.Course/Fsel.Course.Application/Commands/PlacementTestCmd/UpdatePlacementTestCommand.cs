@@ -215,18 +215,6 @@ namespace Fsel.Course.Application.Commands.PlacementTestCmd
                     await _sectionPartRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
                 }
 
-                foreach (var item in sectionQuestions)
-                {
-                    await _sectionQuestionRepository.DeleteAsync(item);
-                }
-                await _sectionQuestionRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-
-                foreach (var item in questions)
-                {
-                    await _questionRepository.DeleteAsync(item);
-                }
-                await _questionRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-
                 placementTest = _placementTestRepository.Update(placementTest);
                 await _placementTestRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
