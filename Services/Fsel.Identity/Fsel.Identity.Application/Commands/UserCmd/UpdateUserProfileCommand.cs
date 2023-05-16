@@ -58,13 +58,26 @@ namespace Fsel.Identity.Application.Commands.UserCmd
             {
                 userView = await _userManager.Users.Include(x => x.Human)
                                                    .ThenInclude(x => x!.Teacher)
+                                                   .ThenInclude(x => x!.TeacherBankAccounts)
                                                    .FirstOrDefaultAsync(x => x.Id == _authContext.CurrentUserId.ToString(), cancellationToken);
                 if (userView == null)
                 {
                     methodResult.AddErrorBadRequest(nameof(EnumUserErrorCode.UserNotExist));
                     return methodResult;
                 }
-                _mapper.Map(request, userView!.Human!.Teacher);
+                var teacherBankAccountNew = userView.Human?.Teacher?.TeacherBankAccounts?.FirstOrDefault(x => x.Status == EnumStatusBank.New);
+                if (teacherBankAccountNew != null)
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumTeacherErrorCode.TeacherBankAccountAlreadyExist));
+                    return methodResult;
+                }
+                if (request.TeacherBankAccount != null)
+                {
+                    var teacherBankAccount = _mapper.Map<TeacherBankAccount>(request.TeacherBankAccount);
+                    teacherBankAccount.Status = EnumStatusBank.New;
+                    userView.Human?.Teacher?.TeacherBankAccounts?.Add(teacherBankAccount);
+                }
+                _mapper.Map(request, userView.Human?.Teacher);
             }
             else if (role == EnumRole.CSO.ToString())
             {

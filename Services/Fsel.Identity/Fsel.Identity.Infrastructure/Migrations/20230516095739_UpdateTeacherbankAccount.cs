@@ -6,11 +6,42 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Fsel.Identity.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class CreateTeacherBank : Migration
+    public partial class UpdateTeacherbankAccount : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.AddColumn<string>(
+                name: "RoleLivesStr",
+                table: "Teachers",
+                type: "nvarchar(max)",
+                nullable: false,
+                defaultValue: "");
+
+            migrationBuilder.AddColumn<bool>(
+                name: "CreatedByParent",
+                table: "Students",
+                type: "bit",
+                nullable: false,
+                defaultValue: false);
+
+            migrationBuilder.AlterColumn<string>(
+                name: "Code",
+                table: "Humans",
+                type: "nvarchar(250)",
+                maxLength: 250,
+                nullable: true,
+                oldClrType: typeof(string),
+                oldType: "nvarchar(250)",
+                oldMaxLength: 250);
+
+            migrationBuilder.AddColumn<string>(
+                name: "RoleLivesStr",
+                table: "CSOs",
+                type: "nvarchar(max)",
+                nullable: false,
+                defaultValue: "");
+
             migrationBuilder.CreateTable(
                 name: "TeacherBankAccounts",
                 columns: table => new
@@ -29,7 +60,7 @@ namespace Fsel.Identity.Infrastructure.Migrations
                     BankAccountName = table.Column<string>(type: "nvarchar(250)", maxLength: 250, nullable: true),
                     BankAccountNumber = table.Column<string>(type: "nvarchar(250)", maxLength: 250, nullable: true),
                     BankName = table.Column<string>(type: "nvarchar(250)", maxLength: 250, nullable: true),
-                    BankBranch = table.Column<string>(type: "nvarchar(250)", maxLength: 250, nullable: true),
+                    Status = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     TeacherId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
@@ -54,6 +85,30 @@ namespace Fsel.Identity.Infrastructure.Migrations
         {
             migrationBuilder.DropTable(
                 name: "TeacherBankAccounts");
+
+            migrationBuilder.DropColumn(
+                name: "RoleLivesStr",
+                table: "Teachers");
+
+            migrationBuilder.DropColumn(
+                name: "CreatedByParent",
+                table: "Students");
+
+            migrationBuilder.DropColumn(
+                name: "RoleLivesStr",
+                table: "CSOs");
+
+            migrationBuilder.AlterColumn<string>(
+                name: "Code",
+                table: "Humans",
+                type: "nvarchar(250)",
+                maxLength: 250,
+                nullable: false,
+                defaultValue: "",
+                oldClrType: typeof(string),
+                oldType: "nvarchar(250)",
+                oldMaxLength: 250,
+                oldNullable: true);
         }
     }
 }

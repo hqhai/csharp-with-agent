@@ -57,7 +57,7 @@ namespace Fsel.Identity.Application.Queries.UserQuery
             {
                 userView = await _userManager.Users.Include(x => x.Human)
                                                    .ThenInclude(x => x!.Teacher)
-                                                   .ThenInclude(x => x!.TeacherBankAccount)
+                                                   .ThenInclude(x => x!.TeacherBankAccounts)
                                                    .FirstOrDefaultAsync(x => x.Id == request.UserId.ToString(), cancellationToken);
             }
             else if (userRoles.FirstOrDefault() == EnumRole.Student.ToString())
@@ -107,7 +107,7 @@ namespace Fsel.Identity.Application.Queries.UserQuery
 
                 if (userRoles.FirstOrDefault() == EnumRole.Teacher.ToString() && userView.Human?.Teacher != null)
                 {
-                    userModel!.TeacherBankAccount = _mapper.Map<TeacherBankAccountModel>(userView!.Human!.Teacher!.TeacherBankAccount);
+                    userModel!.TeacherBankAccounts = _mapper.Map<IList<TeacherBankAccountModel>>(userView!.Human!.Teacher!.TeacherBankAccounts?.Where(x => x.Status == EnumStatusBank.Approve).ToList());
                     _mapper.Map(userView!.Human!.Teacher, userModel);
                 }
 

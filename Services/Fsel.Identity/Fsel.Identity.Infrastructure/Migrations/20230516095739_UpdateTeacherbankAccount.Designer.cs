@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fsel.Identity.Infrastructure.Migrations
 {
     [DbContext(typeof(UserDbContext))]
-    [Migration("20230425080844_CreateTeacherBank")]
-    partial class CreateTeacherBank
+    [Migration("20230516095739_UpdateTeacherbankAccount")]
+    partial class UpdateTeacherbankAccount
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -86,6 +86,10 @@ namespace Fsel.Identity.Infrastructure.Migrations
                         .HasMaxLength(1000)
                         .HasColumnType("nvarchar(1000)");
 
+                    b.Property<string>("RoleLivesStr")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("UniversityDegreePath")
                         .HasMaxLength(1000)
                         .HasColumnType("nvarchar(1000)");
@@ -129,7 +133,6 @@ namespace Fsel.Identity.Infrastructure.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Code")
-                        .IsRequired()
                         .HasMaxLength(250)
                         .HasColumnType("nvarchar(250)");
 
@@ -348,6 +351,9 @@ namespace Fsel.Identity.Infrastructure.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
+                    b.Property<bool>("CreatedByParent")
+                        .HasColumnType("bit");
+
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2")
                         .HasColumnOrder(107);
@@ -475,6 +481,10 @@ namespace Fsel.Identity.Infrastructure.Migrations
                         .HasMaxLength(1000)
                         .HasColumnType("nvarchar(1000)");
 
+                    b.Property<string>("RoleLivesStr")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("UniversityDegreePath")
                         .HasMaxLength(1000)
                         .HasColumnType("nvarchar(1000)");
@@ -514,10 +524,6 @@ namespace Fsel.Identity.Infrastructure.Migrations
                         .HasMaxLength(250)
                         .HasColumnType("nvarchar(250)");
 
-                    b.Property<string>("BankBranch")
-                        .HasMaxLength(250)
-                        .HasColumnType("nvarchar(250)");
-
                     b.Property<string>("BankName")
                         .HasMaxLength(250)
                         .HasColumnType("nvarchar(250)");
@@ -552,6 +558,11 @@ namespace Fsel.Identity.Infrastructure.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit")
                         .HasColumnOrder(110);
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<Guid>("TeacherId")
                         .HasColumnType("uniqueidentifier");
@@ -964,8 +975,8 @@ namespace Fsel.Identity.Infrastructure.Migrations
             modelBuilder.Entity("Fsel.Identity.Domain.Entities.TeacherBankAccount", b =>
                 {
                     b.HasOne("Fsel.Identity.Domain.Entities.Teacher", "Teacher")
-                        .WithOne("TeacherBankAccount")
-                        .HasForeignKey("Fsel.Identity.Domain.Entities.TeacherBankAccount", "TeacherId")
+                        .WithMany("TeacherBankAccounts")
+                        .HasForeignKey("TeacherId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -1056,7 +1067,7 @@ namespace Fsel.Identity.Infrastructure.Migrations
 
             modelBuilder.Entity("Fsel.Identity.Domain.Entities.Teacher", b =>
                 {
-                    b.Navigation("TeacherBankAccount");
+                    b.Navigation("TeacherBankAccounts");
                 });
 
             modelBuilder.Entity("Fsel.Identity.Domain.Entities.User", b =>

@@ -3,7 +3,9 @@
 namespace Fsel.Identity.Infrastructure.Configs
 {
     using System;
+    using Fsel.Common.Helpers;
     using Fsel.Identity.Domain.Entities;
+    using Fsel.Shared.Enums;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -12,11 +14,17 @@ namespace Fsel.Identity.Infrastructure.Configs
         public void Configure(EntityTypeBuilder<TeacherBankAccount> builder)
         {
             ArgumentNullException.ThrowIfNull(builder);
+
             builder.HasOne(a => a.Teacher)
-                    .WithOne(b => b.TeacherBankAccount)
-                    .HasForeignKey<TeacherBankAccount>(b => b.TeacherId)
+                    .WithMany(b => b.TeacherBankAccounts)
+                    .HasForeignKey(b => b.TeacherId)
                     .OnDelete(DeleteBehavior.Cascade);
-            builder.HasIndex(x => x.TeacherId).IsUnique(false);
+
+            builder.Property(e => e.Status)
+                   .HasMaxLength(100)
+                   .HasConversion(
+                        v => v.ToString(),
+                        v => v.EnumParse<EnumStatusBank>());
         }
     }
 }

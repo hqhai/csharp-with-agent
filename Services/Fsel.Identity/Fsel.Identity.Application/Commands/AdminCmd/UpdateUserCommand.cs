@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Identity.Application.Commands.UserCmd
+namespace Fsel.Identity.Application.Commands.AdminCmd
 {
     using AutoMapper;
     using Fsel.Common.ActionResults;
@@ -46,13 +46,19 @@ namespace Fsel.Identity.Application.Commands.UserCmd
             var role = userRoles.FirstOrDefault();
             if (userRoles.Contains(EnumRoleRegisterWithAdmin.Teacher.ToString()))
             {
-                user = await _userManager.Users.Include(x => x.Human).ThenInclude(x => x!.Teacher).FirstOrDefaultAsync(x => x.Id == request.Id.ToString(), cancellationToken);
+                user = await _userManager.Users.Include(x => x.Human).ThenInclude(x => x!.Teacher).ThenInclude(x => x!.TeacherBankAccounts)
+                                                        .FirstOrDefaultAsync(x => x.Id == request.Id.ToString(), cancellationToken);
                 if (user == null)
                 {
                     methodResult.AddErrorBadRequest(nameof(EnumUserErrorCode.UserNotExist));
                     return methodResult;
                 }
-                _mapper.Map(request, user!.Human!.Teacher);
+                _mapper.Map(request, user.Human?.Teacher);
+                if (request.TeacherBankAccount != null)
+                {
+                    _mapper.Map(request.TeacherBankAccount, user.Human?.Teacher?.TeacherBankAccounts?.FirstOrDefault(x => x.Status == EnumStatusBank.Approve));
+                }
+                
             }
             else if (role == EnumRoleRegisterWithAdmin.CSO.ToString())
             {
@@ -62,7 +68,7 @@ namespace Fsel.Identity.Application.Commands.UserCmd
                     methodResult.AddErrorBadRequest(nameof(EnumUserErrorCode.UserNotExist));
                     return methodResult;
                 }
-                _mapper.Map(request, user!.Human!.CSO);
+                _mapper.Map(request, user.Human?.CSO);
             }
             else if (role == EnumRoleRegisterWithAdmin.Moderator.ToString())
             {

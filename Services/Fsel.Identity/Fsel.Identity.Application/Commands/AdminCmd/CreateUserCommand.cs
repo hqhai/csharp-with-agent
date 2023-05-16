@@ -20,7 +20,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using OtpNet;
 
-namespace Fsel.Identity.Application.Commands.UserCmd
+namespace Fsel.Identity.Application.Commands.AdminCmd
 {
     public class CreateUserCommand : CreateUserCommandModel, IRequest<MethodResult<UserModel>>
     {
@@ -63,7 +63,7 @@ namespace Fsel.Identity.Application.Commands.UserCmd
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<UserModel>();
-            User? user = await _userManager.FindByEmailAsync(request.Email!);
+            var user = await _userManager.FindByEmailAsync(request.Email!);
             if (user != null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumAuthErrorCode.DuplicateEmail), nameof(request.Email), request.Email);
@@ -117,7 +117,7 @@ namespace Fsel.Identity.Application.Commands.UserCmd
                     _userOtpCodeRepository.Add(userOtpCode);
                     await _userOtpCodeRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
                 }
-                var content = string.Format(CultureInfo.InvariantCulture, _appSetting.ConstantUrl!.ConfirmOtpUrl!, otp);
+                var content = string.Format(CultureInfo.InvariantCulture, _appSetting.ConstantUrl!.ConfirmOtpUrl!, otp) + "  " + "Mã OTP là : " + otp;
                 var subject = StringValues.SendOtpSubject + user.FullName;
                 var sendResult = new MethodResult<bool>();
                 if (request != null && request.Email != null)
@@ -151,15 +151,15 @@ namespace Fsel.Identity.Application.Commands.UserCmd
                     HumanId = human.Id,
                     CourseLevels = request.CourseLevels,
                     RoleLives = request.RoleLives,
-                    CourseTypes = request.CourseTypes,
-                    TeacherBankAccount = new TeacherBankAccount
-                    {
-                        BankAccountName = request.BankAccountName,
-                        BankAccountNumber = request.BankAccountNumber,
-                        BankName = request.BankName,
-                        BankBranch = request.BankBranch,
-                    }
+                    CourseTypes = request.CourseTypes
                 };
+                human.Teacher.TeacherBankAccounts?.Add(new TeacherBankAccount
+                {
+                    BankAccountName = request.BankAccountName,
+                    BankAccountNumber = request.BankAccountNumber,
+                    BankName = request.BankName,
+                    Status = EnumStatusBank.Approve
+                });
                 human.Code = $"TC_{stt:0000}";
             }
             else if (request.Role == EnumRoleRegisterWithAdmin.CSO)
