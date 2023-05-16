@@ -16,8 +16,6 @@ namespace Fsel.Identity.Domain.Models.CommandModels.Users
         public string? UniversityDegreePath { get; set; }
         public string? CertificationPath { get; set; }
         public string? PoliceClearancePath { get; set; }
-        public string? BankAccountName { get; set; }
-        public string? BankAccountNumber { get; set; }
-        public string? BankName { get; set; }
+        public UpdateTeacherBankAccountCommandModel? TeacherBankAccount { get; set; }
     }
 }

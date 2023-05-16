@@ -54,7 +54,11 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
                     return methodResult;
                 }
                 _mapper.Map(request, user.Human?.Teacher);
-                _mapper.Map(request, user.Human?.Teacher?.TeacherBankAccounts?.FirstOrDefault(x => x.Status == EnumStatusBank.Approve));
+                if (request.TeacherBankAccount != null)
+                {
+                    _mapper.Map(request.TeacherBankAccount, user.Human?.Teacher?.TeacherBankAccounts?.FirstOrDefault(x => x.Status == EnumStatusBank.Approve));
+                }
+                
             }
             else if (role == EnumRoleRegisterWithAdmin.CSO.ToString())
             {
