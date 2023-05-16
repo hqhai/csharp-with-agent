@@ -9,6 +9,7 @@ namespace Fsel.Course.Domain.Entities
     using Fsel.Course.Domain.Enums;
     using Fsel.Common.Helpers;
     using System.ComponentModel.DataAnnotations.Schema;
+    using Fsel.Course.Domain.Entities.SkillScoresConfigs;
 
     public class UnitResult : Entity
     {
@@ -32,13 +33,13 @@ namespace Fsel.Course.Domain.Entities
         /// </summary>
         public EnumResultStatus Status { get; set; }
 
-        public string? Score { get; set; }
+        public string? SkillScoresStr { get; set; }
 
         [NotMapped]
-        public object? SkillScore
+        public IList<SkillScores>? SkillScores
         {
-            get { return ConvertHelper.Deserialize<object>(Score); }
-            set { Score = ConvertHelper.Serialize(value); }
+            get { return ConvertHelper.Deserialize<IList<SkillScores>>(SkillScoresStr); }
+            set { SkillScoresStr = ConvertHelper.Serialize(value); }
         }
 
         /// <summary>
