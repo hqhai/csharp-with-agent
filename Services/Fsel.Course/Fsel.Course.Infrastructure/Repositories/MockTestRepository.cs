@@ -37,7 +37,11 @@ namespace Fsel.Course.Infrastructure.Repositories
             {
                 return await Queryable.Include(x => x.MockTestSections.Where(n => n.SectionGroup != null))
                                        .ThenInclude(x => x.SectionGroup)
-                                       .ThenInclude(x => x.Sections)
+                                       .ThenInclude(x => x!.Sections)
+                                       .ThenInclude(x => x.SectionTimeCodes)
+                                       .Include(x => x.MockTestSections.Where(n => n.SectionGroup != null))
+                                       .ThenInclude(x => x.SectionGroup)
+                                       .ThenInclude(x => x!.Sections)
                                        .ThenInclude(x => x.SectionParts)
                                        .ThenInclude(x => x.SectionQuestions.Where(n => n.Question != null))
                                        .ThenInclude(x => x.Question)
@@ -55,7 +59,7 @@ namespace Fsel.Course.Infrastructure.Repositories
             {
                 return await Queryable.Include(x => x.MockTestSections.Where(y => !y.IsDeleted))
                                       .ThenInclude(x => x.SectionGroup)
-                                      .ThenInclude(x => x.Sections)
+                                      .ThenInclude(x => x!.Sections)
                                       .ThenInclude(x => x.SectionParts)
                                       .ThenInclude(x => x.SectionQuestions)
                                       .Where(x => x.Id == id)
@@ -69,6 +73,7 @@ namespace Fsel.Course.Infrastructure.Repositories
                                           MockTestType = x.MockTestType,
                                           SectionGroups = x.MockTestSections.Select(x => x.SectionGroup).Select(x => new SectionGroupModel
                                           {
+                                              Id = x!.Id,
                                               ExecutionTime = x.ExecutionTime,
                                               CourseSkill = x.CourseSkill,
                                               Sections = x.Sections.Select(x => new SectionModel
@@ -79,6 +84,15 @@ namespace Fsel.Course.Infrastructure.Repositories
                                                   TargetWord = x.TargetWord,
                                                   CreatedDate = x.CreatedDate,
                                                   CreatedUserId = x.CreatedUserId,
+                                                  SectionTimeCodes = x.SectionTimeCodes.Select(x => new SectionTimeCodeModel
+                                                  {
+                                                      Id = x.Id,
+                                                      Name = x.Name,
+                                                      CreatedDate = x.CreatedDate,
+                                                      DisplayTime = x.DisplayTime,
+                                                      ExecutionTime = x.ExecutionTime,
+                                                      SectionId = x.SectionId,
+                                                  }).ToList(),
                                                   SectionParts = x.SectionParts.Select(x => new SectionPartModel
                                                   {
                                                       Id = x.Id,

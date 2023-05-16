@@ -11,6 +11,8 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public int TargetWord { get; set; }
         public Guid SectionGroupId { get; set; }
         public IList<SectionPartModel>? SectionParts { get; set; }
+        public IList<SectionQuestionModel>? SectionQuestions { get; set; }
+        public IList<SectionTimeCodeModel>? SectionTimeCodes { get; set; }
         public IList<QuestionModel>? Questions { get; set; }
     }
 }
