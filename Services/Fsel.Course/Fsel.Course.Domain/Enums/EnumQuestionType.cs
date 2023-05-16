@@ -24,7 +24,7 @@ namespace Fsel.Course.Domain.Enums
         [Description("Matching (type 2)")]
         MatchingType2,
 
-        [Description("Short answer (Word base)")]
+        [Description("Short answer (Answer base)")]
         ShortAnswerWordBase,
 
         [Description("Short answer (Word count)")]
