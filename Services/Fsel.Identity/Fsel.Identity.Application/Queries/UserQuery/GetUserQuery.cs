@@ -81,7 +81,7 @@ namespace Fsel.Identity.Application.Queries.UserQuery
                                                    .ThenInclude(x => x!.Parent)
                                                    .ThenInclude(x => x!.ParentStudents.Where(y => !y.IsDeleted))
                                                    .ThenInclude(x => x.Student)
-                                                   .FirstOrDefaultAsync(x => x.Id == request.UserId.ToString(), cancellationToken);
+                                                   .FirstOrDefaultAsync(x => x.Id == request.UserId.ToString() && x.EmailConfirmed, cancellationToken);
             }
             else if (userRoles.FirstOrDefault() == EnumRole.Moderator.ToString() || userRoles.FirstOrDefault() == EnumRole.MasterAdmin.ToString() || userRoles.FirstOrDefault() == EnumRole.Admin.ToString())
             {
