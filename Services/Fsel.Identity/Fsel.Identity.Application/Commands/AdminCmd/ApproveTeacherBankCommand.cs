@@ -20,13 +20,13 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
         public bool Status { get; set; }
     }
 
-    public class RequestUpdateTeacherBankCommandHandler : IRequestHandler<ApproveTeacherBankCommand, MethodResult<UserModel>>
+    public class ApproveTeacherBankCommandHandler : IRequestHandler<ApproveTeacherBankCommand, MethodResult<UserModel>>
     {
         private readonly UserManager<User> _userManager;
         private readonly ITeacherBankAccountRepository _teacherBankAccountRepository;
         private readonly IMapper _mapper;
 
-        public RequestUpdateTeacherBankCommandHandler(UserManager<User> userManager,
+        public ApproveTeacherBankCommandHandler(UserManager<User> userManager,
             ITeacherBankAccountRepository teacherBankAccountRepository,
             IMapper mapper)
         {
