@@ -123,6 +123,7 @@ namespace Fsel.Identity.Application.Queries.UserQuery
             {
                 _mapper.Map(userView!.Human!.CSO, userModel);
             }
+            userModel.Roles = userRoles;
             methodResult.Result = userModel;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
