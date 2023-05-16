@@ -3,6 +3,7 @@
 namespace Fsel.Course.Domain.Models.EntityModels
 {
     using Fsel.Core.Base.BaseModels;
+    using Fsel.Course.Domain.Entities.SkillScoresConfigs;
     using Fsel.Course.Domain.Enums;
 
     public class UnitResultModel : BaseModel
@@ -11,6 +12,9 @@ namespace Fsel.Course.Domain.Models.EntityModels
 
         public EnumResultStatus Status { get; set; }
 
+        public IList<SkillScores>? SkillScores { get; set; }
+        public int CorrectCount { get; set; }
+        public int CorrectTotal { get; set; }
         public Guid CourseId { get; set; }
 
         public Guid UnitId { get; set; }
