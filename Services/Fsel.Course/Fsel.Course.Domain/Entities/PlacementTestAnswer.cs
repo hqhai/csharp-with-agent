@@ -23,10 +23,10 @@ namespace Fsel.Course.Domain.Entities
             set { AnswerStr = ConvertHelper.Serialize(value); }
         }
 
-        public PlacementTestSectionResult? PlacementTestSectionResult { get; set; }
+        public PlacementTestResult? PlacementTestResult { get; set; }
 
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
-        public Guid PlacementTestSectionResultId { get; set; }
+        public Guid PlacementTestResultId { get; set; }
 
         public SectionQuestion? SectionQuestion { get; set; }
 

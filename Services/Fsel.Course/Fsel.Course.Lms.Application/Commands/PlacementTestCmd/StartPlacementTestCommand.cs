@@ -21,12 +21,12 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
     public class StartPlacementTestCommandHandler : IRequestHandler<StartPlacementTestCommand, MethodResult<bool>>
     {
         private readonly AuthContext _authContext;
-        private readonly IPlacementTestSectionResultRepository _placementTestResultRepository;
+        private readonly IPlacementTestResultRepository _placementTestResultRepository;
         private readonly IUserService _userService;
         private readonly IPlacementTestRepository _placementTestRepository;
 
         public StartPlacementTestCommandHandler(AuthContext authContext
-            , IPlacementTestSectionResultRepository placementTestResultRepository
+            , IPlacementTestResultRepository placementTestResultRepository
             , IUserService userService
             , IPlacementTestRepository placementTestRepository)
         {
@@ -63,11 +63,11 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
             }
 
             var studentId = student?.Content?.Result?.Id;
-            var placementTestSectionId = placementTest.PlacementTestSections.FirstOrDefault()!.Id;
-            var placementTestResult = await _placementTestResultRepository.Queryable.FirstOrDefaultAsync(x => x.PlacementTestSectionId == placementTestSectionId && x.StudentId == studentId, cancellationToken);
+            var placementTestId = placementTest.PlacementTestSections.FirstOrDefault()!.Id;
+            var placementTestResult = await _placementTestResultRepository.Queryable.FirstOrDefaultAsync(x => x.PlacementTestId == placementTestId && x.StudentId == studentId, cancellationToken);
             if (placementTestResult == null)
             {
-                _placementTestResultRepository.Add(new PlacementTestSectionResult { StudentId = studentId ?? default, PlacementTestSectionId = placementTestSectionId });
+                _placementTestResultRepository.Add(new PlacementTestResult { StudentId = studentId ?? default, PlacementTestId = placementTestId });
                 await _placementTestResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
             }
             methodResult.StatusCode = StatusCodes.Status200OK;

@@ -7,15 +7,15 @@ namespace Fsel.Course.Infrastructure.Configs
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-    public class PlacementTestSectionAnswerEntityTypeConfiguration : IEntityTypeConfiguration<PlacementTestAnswer>
+    public class PlacementTestAnswerEntityTypeConfiguration : IEntityTypeConfiguration<PlacementTestAnswer>
     {
         public void Configure(EntityTypeBuilder<PlacementTestAnswer> builder)
         {
             ArgumentNullException.ThrowIfNull(builder);
 
-            builder.HasOne(a => a.PlacementTestSectionResult)
+            builder.HasOne(a => a.PlacementTestResult)
                 .WithMany(b => b.PlacementTestAnswers)
-                .HasForeignKey(b => b.PlacementTestSectionResultId)
+                .HasForeignKey(b => b.PlacementTestResultId)
                 .OnDelete(DeleteBehavior.Cascade);
 
             builder.HasOne(a => a.SectionQuestion)

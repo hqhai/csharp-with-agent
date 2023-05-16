@@ -7,7 +7,7 @@ namespace Fsel.Course.Domain.Entities
     using Fsel.Core.Entities;
     using Fsel.Course.Domain.Enums;
 
-    public class PlacementTestSectionResult : Entity
+    public class PlacementTestResult : Entity
     {
         /// <summary>
         /// Phần trăm câu trả lời đúng
@@ -36,22 +36,15 @@ namespace Fsel.Course.Domain.Entities
         [Range(0, 10000_0000, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
         public int CorrectTotal { get; set; }
 
-
-        /// <summary>
-        /// Thời gian kết thúc làm bài
-        /// </summary>
-        [Range(0, 10000_0000, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
-        public long EndTime { get; set; }
-
         /// <summary>
         /// Trạng thái
         /// </summary>
         public EnumResultStatus Status { get; set; }
 
-        public PlacementTestSection? PlacementTestSection { get; set; }
+        public PlacementTest? PlacementTest { get; set; }
 
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
-        public Guid PlacementTestSectionId { get; set; }
+        public Guid PlacementTestId { get; set; }
 
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         public Guid StudentId { get; set; }
