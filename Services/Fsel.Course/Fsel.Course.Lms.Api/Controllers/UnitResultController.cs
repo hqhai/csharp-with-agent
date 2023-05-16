@@ -13,14 +13,14 @@ namespace Fsel.Course.Lms.Api.Controllers
     using Fsel.Course.Lms.Application.Queries.UnitQuery;
 
     [ApiVersion(Settings.APIVersion)]
-    [Route(Settings.APIDefaultRoute + "/unit")]
+    [Route(Settings.APIDefaultRoute + "/unit-result")]
     [Authorize(Roles = nameof(EnumRole.Student))]
     [ApiController]
-    public class UnitController : ControllerBase
+    public class UnitResultController : ControllerBase
     {
         private readonly IMediator _mediator;
 
-        public UnitController(IMediator mediator)
+        public UnitResultController(IMediator mediator)
         {
             _mediator = mediator;
         }

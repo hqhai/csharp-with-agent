@@ -47,7 +47,7 @@ namespace Fsel.Course.Lms.Application.Queries.UnitQuery
             }
             var studentId = studentsResult.Content!.Result!.Id;
 
-            var unitQuery = await _unitResultRepository
+            var unitQuery = _unitResultRepository
                                 .Queryable.Where(x => x.CourseId == request.CourseId)
                                 .Select(x => new UnitResultModel
                                 {
@@ -61,9 +61,9 @@ namespace Fsel.Course.Lms.Application.Queries.UnitQuery
                                     UnitId = x.UnitId,
                                     CourseId = request.CourseId,
                                     CreatedDate = x.CreatedDate,
-                                }).ToListAsync(cancellationToken: cancellationToken);
+                                });
 
-            methodResult.Result = unitQuery;
+            methodResult.Result = await unitQuery.ToListAsync(cancellationToken: cancellationToken);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }
