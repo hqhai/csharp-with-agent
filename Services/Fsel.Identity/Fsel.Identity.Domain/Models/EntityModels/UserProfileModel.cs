@@ -17,6 +17,7 @@ namespace Fsel.Identity.Domain.Models.EntityModels
         public string? Email { get; set; }
         public string? AvatarPath { get; set; }
         public Guid? ClassId { get; set; }
+        public IList<string>? Roles { get; set; }
         public EnumCourseLevel CourseLevel { get; set; }
         public string? Membership { get; set; }
         public string? Occupation { get; set; }
