@@ -43,7 +43,7 @@ namespace Fsel.Course.Infrastructure.Common
 
                 case EnumQuestionType.ShortAnswerWordBase:
                     var shortAnswerQuestionWordBaseQuestion = config.Deserialize<ShortAnswerQuestionWordBaseQuestion>();
-                    result = shortAnswerQuestionWordBaseQuestion;
+                    result = isDisableAnswers ? ClearAnswers(shortAnswerQuestionWordBaseQuestion) : shortAnswerQuestionWordBaseQuestion;
                     totalCorrect = isShowCorrectTotal ? GetTotalCorrect() : default;
                     break;
 
@@ -115,6 +115,15 @@ namespace Fsel.Course.Infrastructure.Common
                         });
                     }
                 }
+            }
+            return data;
+        }
+
+        private static object? ClearAnswers(ShortAnswerQuestionWordBaseQuestion? data)
+        {
+            if (data != null && data.Contents != null && data.Contents.Count > 0)
+            {
+                data.Contents.Clear();
             }
             return data;
         }
