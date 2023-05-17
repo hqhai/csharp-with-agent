@@ -50,6 +50,9 @@ builder.Services.AddScoped<ILessonInstructionRepository, LessonInstructionReposi
 builder.Services.AddScoped<IHomeWorkAnswerRepository, HomeWorkAnswerRepository>();
 builder.Services.AddScoped<IHomeWorkQuestionRepository, HomeWorkQuestionRepository>();
 builder.Services.AddScoped<IHomeWorkResultRepository, HomeWorkResultRepository>();
+builder.Services.AddScoped<IMockTestResultRepository, MockTestResultRepository>();
+builder.Services.AddScoped<IMockTestAnswerRepository, MockTestAnswerRepository>();
+builder.Services.AddScoped<IMockTestSectionRepository, MockTestSectionRepository>();
 
 builder.Services.AddScoped<QuestionTypeConverter>();
 builder.Services.AddScoped<AnswerTypeConverter>();

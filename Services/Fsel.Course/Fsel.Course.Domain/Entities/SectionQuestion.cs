@@ -14,7 +14,10 @@ namespace Fsel.Course.Domain.Entities
 
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         public Guid QuestionId { get; set; }
+
         public Guid? SectionId { get; set; }
         public Guid? SectionPartId { get; set; }
+
+        public ICollection<MockTestAnswer> MockTestAnswers { get; set; } = new List<MockTestAnswer>();
     }
 }

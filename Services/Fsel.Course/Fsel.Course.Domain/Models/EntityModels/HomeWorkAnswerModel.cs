@@ -3,16 +3,8 @@
 namespace Fsel.Course.Domain.Models.EntityModels
 {
     using System;
-    using System.Collections.Generic;
-    using System.ComponentModel.DataAnnotations.Schema;
-    using System.ComponentModel.DataAnnotations;
-    using System.Linq;
-    using System.Text;
-    using System.Threading.Tasks;
-    using Fsel.Common.Enums.ErrorCodes;
-    using Fsel.Common.Helpers;
-    using Fsel.Course.Domain.Entities;
     using Fsel.Core.Base.BaseModels;
+    using Fsel.Course.Domain.Entities;
 
     public class HomeWorkAnswerModel : BaseModel
     {
