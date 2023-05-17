@@ -53,6 +53,7 @@ builder.Services.AddScoped<IHomeWorkResultRepository, HomeWorkResultRepository>(
 builder.Services.AddScoped<IMockTestResultRepository, MockTestResultRepository>();
 builder.Services.AddScoped<IMockTestAnswerRepository, MockTestAnswerRepository>();
 builder.Services.AddScoped<IMockTestSectionRepository, MockTestSectionRepository>();
+builder.Services.AddScoped<IUnitSkillMockTestRepository, UnitSkillMockTestRepository>();
 
 builder.Services.AddScoped<QuestionTypeConverter>();
 builder.Services.AddScoped<AnswerTypeConverter>();

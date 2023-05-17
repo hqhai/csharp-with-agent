@@ -13,6 +13,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.CommandModels.MockTests;
     using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Course.Infrastructure.Repositories;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using MediatR;
     using Microsoft.AspNetCore.Http;
@@ -31,6 +32,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
         private readonly AuthContext _authContext;
         private readonly IMockTestRepository _mockTestRepository;
         private readonly IMockTestResultRepository _mockTestResultRepository;
+        private readonly IUnitSkillMockTestRepository _unitSkillMockTestRepository;
 
         public StartMockTestCommandHandler(ICourseRepository courseRepository
             , IUnitRepository unitRepository
@@ -39,6 +41,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
             , AuthContext authContext
             , IMockTestRepository mockTestRepository
             , IMockTestResultRepository mockTestResultRepository
+            , IUnitSkillMockTestRepository unitSkillMockTestRepository
             )
         {
             _courseRepository = courseRepository;
@@ -48,6 +51,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
             _authContext = authContext;
             _mockTestRepository = mockTestRepository;
             _mockTestResultRepository = mockTestResultRepository;
+            _unitSkillMockTestRepository = unitSkillMockTestRepository;
         }
 
         public async Task<MethodResult<MockTestResultModel>> Handle(StartMockTestCommand request, CancellationToken cancellationToken)
@@ -94,7 +98,18 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
                 return methodResult;
             }
             var studentId = student?.Content?.Result?.Id;
+            var unitSkillMockTest = _unitSkillMockTestRepository.Queryable.Where(x => x!.UnitId == request.UnitId).FirstOrDefault();
+            if (unitSkillMockTest == null)
+            {
+                unitSkillMockTest = new UnitSkillMockTest
+                {
+                    MockTestId = request.MockTestId,
+                    UnitId = unit.Id,
+                };
 
+                _unitSkillMockTestRepository.Add(unitSkillMockTest);
+                await _unitSkillMockTestRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+            }
             var mockTestResult = _mockTestResultRepository.Queryable.Where(x => x!.MockTestId == request.MockTestId && x!.UnitId == request.UnitId && x!.CourseId == request.CourseId && x.StudentId == studentId).FirstOrDefault();
             if (mockTestResult == null)
             {
