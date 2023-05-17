@@ -125,6 +125,13 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestQuery
                                 ResultAnswer = _mapper.Map<MockTestAnswerModel>(x.SectionQuestions.Select(x => x.MockTestAnswers).FirstOrDefault())
                             }).ToList(),
                         }).ToList(),
+                        SectionTimeCodes = x.SectionTimeCodes.Select(x => new SectionTimeCodeModel
+                        {
+                            Id = x.Id,
+                            DisplayTime = x.DisplayTime,
+                            ExecutionTime = x.ExecutionTime,
+                            Name = x.Name,
+                        }).ToList(),
                     }).ToList(),
                 }).ToList(),
                 MockTestResults = mockTest.MockTestResults.Where(x => x.StudentId == studentId).Select(x => new MockTestResultModel

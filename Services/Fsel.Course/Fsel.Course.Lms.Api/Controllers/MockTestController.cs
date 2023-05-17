@@ -53,11 +53,11 @@ namespace Fsel.Course.Lms.Api.Controllers
         /// Start MockTest
         /// </summary>
         [HttpGet("start-mock-test")]
-        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(MethodResult<MockTestResultModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> StartPlacementTest([FromQuery] StartMockTestCommand command)
         {
-            MethodResult<bool> queryResult = await _mediator.Send(command).ConfigureAwait(false);
+            MethodResult<MockTestResultModel> queryResult = await _mediator.Send(command).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
     }

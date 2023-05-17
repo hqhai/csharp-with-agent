@@ -8,20 +8,21 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base;
     using Fsel.Course.Domain.Entities;
+    using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
+    using Fsel.Course.Domain.Models.CommandModels.MockTests;
+    using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class StartMockTestCommand : IRequest<MethodResult<bool>>
+    public class StartMockTestCommand : StartMockTestCommandModel, IRequest<MethodResult<MockTestResultModel>>
     {
-        public Guid MockTestId { get; set; }
-        public Guid SectionGroupId { get; set; }
     }
 
-    public class StartMockTestCommandHandler : IRequestHandler<StartMockTestCommand, MethodResult<bool>>
+    public class StartMockTestCommandHandler : IRequestHandler<StartMockTestCommand, MethodResult<MockTestResultModel>>
     {
         private readonly ICourseRepository _courseRepository;
         private readonly IUnitRepository _unitRepository;
@@ -37,7 +38,8 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
             , IMapper mapper
             , AuthContext authContext
             , IMockTestRepository mockTestRepository
-            , IMockTestResultRepository mockTestResultRepository)
+            , IMockTestResultRepository mockTestResultRepository
+            )
         {
             _courseRepository = courseRepository;
             _unitRepository = unitRepository;
@@ -48,13 +50,13 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
             _mockTestResultRepository = mockTestResultRepository;
         }
 
-        public async Task<MethodResult<bool>> Handle(StartMockTestCommand request, CancellationToken cancellationToken)
+        public async Task<MethodResult<MockTestResultModel>> Handle(StartMockTestCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            MethodResult<bool> methodResult = new MethodResult<bool>();
+            MethodResult<MockTestResultModel> methodResult = new MethodResult<MockTestResultModel>();
 
-            var mockTest = await _mockTestRepository.Queryable.Include(x => x.MockTestSections)
-                                                    .FirstOrDefaultAsync(x => x.Id == request.MockTestId && x.MockTestSections.Select(x => x.SectionGroupId).Contains(request.SectionGroupId), cancellationToken);
+            var mockTest = await _mockTestRepository.Queryable
+                                                    .FirstOrDefaultAsync(x => x.Id == request.MockTestId, cancellationToken);
             if (mockTest == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumMockTestErrorCode.MockTestsNotExist), nameof(request.MockTestId), request.MockTestId);
@@ -66,6 +68,24 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
                 methodResult.AddErrorBadRequest(nameof(EnumMockTestErrorCode.MockTestInActiveState), nameof(mockTest.IsActive), mockTest.IsActive);
                 return methodResult;
             }
+            var course = await _courseRepository.GetByIdAsync(request.CourseId);
+            if (course == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.CourseNotExist), nameof(request.CourseId), request.CourseId);
+                return methodResult;
+            }
+            else if (course.Status == EnumCourseStatus.New)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.CourseIsNewStateCantStartLesson), nameof(course.Status), course.Status);
+                return methodResult;
+            }
+
+            var unit = await _unitRepository.GetByIdAsync(request.UnitId);
+            if (unit == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumUnitErrorCode.UnitNotExist), nameof(request.UnitId), request.UnitId);
+                return methodResult;
+            }
 
             var student = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
             if (!student.IsSuccessStatusCode)
@@ -73,17 +93,24 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
                 methodResult.AddErrorBadRequest(nameof(EnumMockTestErrorCode.UserNotExist), nameof(student), _authContext.CurrentUserId.ToString());
                 return methodResult;
             }
-
             var studentId = student?.Content?.Result?.Id;
-            var mockTestSectionId = mockTest.MockTestSections.FirstOrDefault()!.Id;
-            var mockTestResult = await _mockTestResultRepository.Queryable.FirstOrDefaultAsync(x => x.MockTestId == mockTestSectionId && x.StudentId == studentId, cancellationToken);
+
+            var mockTestResult = _mockTestResultRepository.Queryable.Where(x => x!.MockTestId == request.MockTestId && x!.UnitId == request.UnitId && x!.CourseId == request.CourseId && x.StudentId == studentId).FirstOrDefault();
             if (mockTestResult == null)
             {
-                _mockTestResultRepository.Add(new MockTestResult { StudentId = studentId ?? default, MockTestId = mockTestSectionId });
+                mockTestResult = new MockTestResult
+                {
+                    StudentId = studentId ?? default,
+                    MockTestId = request.MockTestId,
+                    CourseId = course.Id,
+                    UnitId = unit.Id
+                };
+
+                _mockTestResultRepository.Add(mockTestResult);
                 await _mockTestResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
             }
-            methodResult.StatusCode = StatusCodes.Status200OK;
-            methodResult.Result = true;
+            methodResult.StatusCode = StatusCodes.Status201Created;
+            methodResult.Result = _mapper.Map<MockTestResultModel>(mockTestResult);
             return methodResult;
         }
     }
