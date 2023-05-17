@@ -14,9 +14,11 @@ namespace Fsel.Identity.Domain.Models.EntityModels
         public string? PhoneNumber { get; set; }
         public string? Address { get; set; }
         public EnumGender? Gender { get; set; }
+        public bool? PhoneNumberConfirmed { get; set; }
         public string? Email { get; set; }
         public string? AvatarPath { get; set; }
         public Guid? ClassId { get; set; }
+        public IList<string>? Roles { get; set; }
         public EnumCourseLevel CourseLevel { get; set; }
         public string? Membership { get; set; }
         public string? Occupation { get; set; }
@@ -24,7 +26,7 @@ namespace Fsel.Identity.Domain.Models.EntityModels
         public string? UniversityDegreePath { get; set; }
         public string? CertificationPath { get; set; }
         public string? PoliceClearancePath { get; set; }
-        public TeacherBankAccountModel? TeacherBankAccount { get; set; }
+        public IList<TeacherBankAccountModel>? TeacherBankAccounts { get; set; }
         public IList<StudentModel>? Students { get; set; }
         public ParentModel? Parent { get; set; }
     }

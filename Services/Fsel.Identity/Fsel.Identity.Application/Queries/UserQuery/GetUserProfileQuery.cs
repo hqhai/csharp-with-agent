@@ -56,7 +56,7 @@ namespace Fsel.Identity.Application.Queries.UserQuery
             {
                 userView = await _userManager.Users.Include(x => x.Human)
                                                    .ThenInclude(x => x!.Teacher)
-                                                   .ThenInclude(x => x!.TeacherBankAccount)
+                                                   .ThenInclude(x => x!.TeacherBankAccounts)
                                                    .FirstOrDefaultAsync(x => x.Id == _authContext.CurrentUserId.ToString(), cancellationToken);
             }
             else if (userRoles.FirstOrDefault() == EnumRole.Student.ToString())
@@ -115,7 +115,7 @@ namespace Fsel.Identity.Application.Queries.UserQuery
 
             if (userRoles.FirstOrDefault() == EnumRole.Teacher.ToString())
             {
-                userModel!.TeacherBankAccount = _mapper.Map<TeacherBankAccountModel>(userView!.Human!.Teacher!.TeacherBankAccount);
+                userModel!.TeacherBankAccounts = _mapper.Map<IList<TeacherBankAccountModel>>(userView!.Human!.Teacher!.TeacherBankAccounts);
                 _mapper.Map(userView!.Human!.Teacher, userModel);
             }
 
@@ -123,6 +123,7 @@ namespace Fsel.Identity.Application.Queries.UserQuery
             {
                 _mapper.Map(userView!.Human!.CSO, userModel);
             }
+            userModel.Roles = userRoles;
             methodResult.Result = userModel;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;

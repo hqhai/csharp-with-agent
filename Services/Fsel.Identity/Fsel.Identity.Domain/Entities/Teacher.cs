@@ -22,7 +22,6 @@ namespace Fsel.Identity.Domain.Entities
             set { CourseTypesStr = ConvertHelper.Serialize(value); }
         }
 
-
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         public string? RoleLivesStr { get; set; }
 
@@ -54,9 +53,8 @@ namespace Fsel.Identity.Domain.Entities
 
         [MaxLength(1000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? PoliceClearancePath { get; set; }
-
         public Human? Human { get; set; }
-        public TeacherBankAccount? TeacherBankAccount { get; set; }
+        public ICollection<TeacherBankAccount>? TeacherBankAccounts { get; set; } = new List<TeacherBankAccount>();
         public Guid HumanId { get; set; }
     }
 }

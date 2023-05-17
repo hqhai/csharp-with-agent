@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Identity.Application.Commands.UserCmd
+namespace Fsel.Identity.Application.Commands.AdminCmd
 {
     using AutoMapper;
     using Fsel.Common.ActionResults;

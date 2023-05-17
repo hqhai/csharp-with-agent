@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Identity.Application.Commands.UserCmd
+namespace Fsel.Identity.Application.Commands.AuthCmd
 {
     using System;
     using System.Globalization;
@@ -10,7 +10,6 @@ namespace Fsel.Identity.Application.Commands.UserCmd
     using Fsel.Common.Constants;
     using Fsel.Common.Helpers;
     using Fsel.Core.Base;
-    using Fsel.Identity.Application.Commands.AuthCmd;
     using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.Enums;
     using Fsel.Identity.Domain.Enums.ErrorCodes;

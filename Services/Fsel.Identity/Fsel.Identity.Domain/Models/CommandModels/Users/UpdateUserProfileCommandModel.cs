@@ -4,6 +4,7 @@ namespace Fsel.Identity.Domain.Models.CommandModels.Users
 {
     using Fsel.Identity.Domain.Models.CommandModels.Parents;
     using Fsel.Identity.Domain.Models.CommandModels.Students;
+    using Fsel.Identity.Domain.Models.CommandModels.TeacherBankAccount;
 
     public class UpdateUserProfileCommandModel
     {
@@ -19,5 +20,6 @@ namespace Fsel.Identity.Domain.Models.CommandModels.Users
         public string? PoliceClearancePath { get; set; }
         public IList<UpdateStudentProfileCommandModel>? Students { get; set; }
         public UpdateParentCommandModel? Parent { get; set; }
+        public UpdateTeacherBankAccountCommandModel? TeacherBankAccount { get; set; }
     }
 }
