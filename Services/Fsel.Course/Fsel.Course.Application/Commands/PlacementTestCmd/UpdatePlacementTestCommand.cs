@@ -25,27 +25,21 @@ namespace Fsel.Course.Application.Commands.PlacementTestCmd
         private readonly ISectionRepository _sectionRepository;
         private readonly QuestionTypeConverter _questionTypeConverter;
         private readonly ISectionPartRepository _sectionPartRepository;
-        private readonly IQuestionRepository _questionRepository;
         private readonly ISectionGroupRepository _sectionGroupRepository;
-        private readonly ISectionQuestionRepository _sectionQuestionRepository;
         private readonly IMapper _mapper;
 
         public UpdatePlacementTestCommandHandler(IPlacementTestRepository placementTestRepository,
             ISectionRepository sectionRepository,
             QuestionTypeConverter questionTypeConverter,
             ISectionPartRepository sectionPartRepository,
-            IQuestionRepository questionRepository,
             ISectionGroupRepository sectionGroupRepository,
-            ISectionQuestionRepository sectionQuestionRepository,
             IMapper mapper)
         {
             _placementTestRepository = placementTestRepository;
             _sectionRepository = sectionRepository;
             _questionTypeConverter = questionTypeConverter;
             _sectionPartRepository = sectionPartRepository;
-            _questionRepository = questionRepository;
             _sectionGroupRepository = sectionGroupRepository;
-            _sectionQuestionRepository = sectionQuestionRepository;
             _mapper = mapper;
         }
 
@@ -154,6 +148,13 @@ namespace Fsel.Course.Application.Commands.PlacementTestCmd
                                 }
                             }
                         }
+                        var correctCount = newSection.SectionParts.SelectMany(x => x.SectionQuestions).Select(x => x.Question).Sum(x => x!.CorrectTotal);
+                        var index = sectionGroup.Sections.IndexOf(section);
+                        if (!IsCheckSection(newSectionGroup.CourseSkill, index, correctCount))
+                        {
+                            methodResult.AddErrorBadRequest(nameof(EnumPlacementTestErrorCode.PlacementTestMustCorrectScore), nameof(index), index);
+                            return methodResult;
+                        }
                     }
                     else
                     {
@@ -261,6 +262,34 @@ namespace Fsel.Course.Application.Commands.PlacementTestCmd
                     });
                 }
             }
+        }
+
+        private static bool IsCheckSection(EnumCourseSkill courseSkill, int index, int correctTotal)
+        {
+            if (courseSkill == EnumCourseSkill.Reading)
+            {
+                if (index == 0 && correctTotal == 13)
+                {
+                    return true;
+                }
+                else if (index == 1 && correctTotal == 14)
+                {
+                    return true;
+                }
+                else if (index == 2 && correctTotal == 13)
+                {
+                    return true;
+                }
+            }
+            else if (courseSkill == EnumCourseSkill.Listening)
+            {
+                if (correctTotal == 10)
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
     }
 }

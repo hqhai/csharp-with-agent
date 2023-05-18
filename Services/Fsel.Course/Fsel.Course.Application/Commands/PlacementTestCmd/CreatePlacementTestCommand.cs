@@ -111,6 +111,13 @@ namespace Fsel.Course.Application.Commands.PlacementTestCmd
                                     }
                                 }
                             }
+                            var correctCount = newSection.SectionParts.SelectMany(x => x.SectionQuestions).Select(x => x.Question).Sum(x => x!.CorrectTotal);
+                            var index = sectionGroup.Sections.IndexOf(section);
+                            if (!IsCheckSection(newSectionGroup.CourseSkill, index, correctCount))
+                            {
+                                methodResult.AddErrorBadRequest(nameof(EnumPlacementTestErrorCode.PlacementTestMustCorrectScore), nameof(index), index);
+                                return methodResult;
+                            }
                         }
                         else
                         {
@@ -124,6 +131,7 @@ namespace Fsel.Course.Application.Commands.PlacementTestCmd
                                 GetSectionQuestion(methodResult, question, newSection, null);
                             }
                         }
+
                         if (!newSection.IsValid())
                         {
                             methodResult.AddErrorBadRequest(newSection.ErrorMessages);
@@ -198,6 +206,34 @@ namespace Fsel.Course.Application.Commands.PlacementTestCmd
                     });
                 }
             }
+        }
+
+        private static bool IsCheckSection(EnumCourseSkill courseSkill, int index, int correctTotal)
+        {
+            if (courseSkill == EnumCourseSkill.Reading)
+            {
+                if (index == 0 && correctTotal == 13)
+                {
+                    return true;
+                }
+                else if (index == 1 && correctTotal == 14)
+                {
+                    return true;
+                }
+                else if (index == 2 && correctTotal == 13)
+                {
+                    return true;
+                }
+            }
+            else if (courseSkill == EnumCourseSkill.Listening)
+            {
+                if (correctTotal == 10)
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
     }
 }

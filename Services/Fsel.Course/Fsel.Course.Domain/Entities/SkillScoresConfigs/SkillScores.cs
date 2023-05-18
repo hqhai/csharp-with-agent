@@ -11,9 +11,12 @@ namespace Fsel.Course.Domain.Entities.SkillScoresConfigs
         public EnumCourseSkill Skill { get; set; }
 
         [JsonRequired]
-        public long Scores { get; set; }
+        public double Scores { get; set; }
 
         [JsonRequired]
-        public long Total { get; set; }
+        public double Total { get; set; }
+
+        [JsonRequired]
+        public double Number { get; set; }
     }
 }

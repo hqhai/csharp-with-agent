@@ -19,6 +19,14 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         /// </summary>
         PlacementTestInActiveState,
 
+        /// <summary>
+        /// PlacementTest must have the correct score
+        /// </summary>
+        PlacementTestMustCorrectScore,
 
+        /// <summary>
+        /// Call to service UserService error
+        /// </summary>
+        CallUserServiceError
     }
 }

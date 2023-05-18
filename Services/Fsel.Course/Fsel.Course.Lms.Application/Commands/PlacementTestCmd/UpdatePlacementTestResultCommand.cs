@@ -8,22 +8,25 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
     using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Core.Base;
     using Fsel.Course.Domain.Entities.SkillScoresConfigs;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.CommandModels.PlacementTestResults;
     using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Shared.Enums;
+    using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class UpdatePlacementTestResultCommand : UpdatePlacementTestResultCommandModel, IRequest<MethodResult<PlacementTestResultModel>>
+    public class UpdatePlacementTestResultCommand : UpdatePlacementTestResultCommandModel, IRequest<MethodResult<List<PlacementTestResultModel>>>
     {
     }
 
-    public class UpdatePlacementTestResultCommandHandler : IRequestHandler<UpdatePlacementTestResultCommand, MethodResult<PlacementTestResultModel>>
+    public class UpdatePlacementTestResultCommandHandler : IRequestHandler<UpdatePlacementTestResultCommand, MethodResult<List<PlacementTestResultModel>>>
     {
         private readonly IQuestionRepository _questionRepository;
         private readonly IMapper _mapper;
@@ -31,6 +34,8 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
         private readonly IPlacementTestResultRepository _placementTestResultRepository;
         private readonly ISectionGroupRepository _sectionGroupRepository;
         private readonly ISectionPartRepository _sectionPartRepository;
+        private readonly AuthContext _authContext;
+        private readonly IUserService _userService;
         private readonly ISectionRepository _sectionRepository;
         private readonly ISectionQuestionRepository _sectionQuestionRepository;
 
@@ -40,6 +45,8 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
             IPlacementTestResultRepository placementTestResultRepository,
             ISectionGroupRepository sectionGroupRepository,
             ISectionPartRepository sectionPartRepository,
+            AuthContext authContext,
+            IUserService userService,
             ISectionRepository sectionRepository,
             ISectionQuestionRepository sectionQuestionRepository,
             IQuestionRepository questionRepository)
@@ -50,14 +57,16 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
             _placementTestResultRepository = placementTestResultRepository;
             _sectionGroupRepository = sectionGroupRepository;
             _sectionPartRepository = sectionPartRepository;
+            _authContext = authContext;
+            _userService = userService;
             _sectionRepository = sectionRepository;
             _sectionQuestionRepository = sectionQuestionRepository;
         }
 
-        public async Task<MethodResult<PlacementTestResultModel>> Handle(UpdatePlacementTestResultCommand request, CancellationToken cancellationToken)
+        public async Task<MethodResult<List<PlacementTestResultModel>>> Handle(UpdatePlacementTestResultCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            MethodResult<PlacementTestResultModel> methodResult = new MethodResult<PlacementTestResultModel>();
+            MethodResult<List<PlacementTestResultModel>> methodResult = new MethodResult<List<PlacementTestResultModel>>();
 
             var placementTestResult = await _placementTestResultRepository.Queryable.FirstOrDefaultAsync(x => x.Id == request.PlacementTestResultId, cancellationToken: cancellationToken);
             if (placementTestResult == null)
@@ -124,21 +133,40 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
             var skillScoreScores = await answerQuery.ToListAsync(cancellationToken);
             foreach (var skillScore in skillScoreTotals)
             {
-                skillScore.Scores = skillScoreScores.FirstOrDefault(x => x.Skill == skillScore.Skill)!.Scores;
+                var number = skillScoreScores.FirstOrDefault(x => x.Skill == skillScore.Skill)!.Scores;
+                skillScore.Scores = number;
+                if (placementTestResult.Level == EnumPlacementTestLevel.IELTS)
+                {
+                    if (skillScore.Skill == EnumCourseSkill.Reading)
+                    {
+                        skillScore.Number = number.GetReadingCountIelts();
+                    }
+                    else if (skillScore.Skill == EnumCourseSkill.Listening)
+                    {
+                        skillScore.Number = number.GetListeningCountIelts();
+                    }
+                }
             }
             placementTestResult.CorrectCount = Convert.ToInt32(skillScoreTotals.Sum(x => x.Scores));
             placementTestResult.CorrectTotal = Convert.ToInt32(skillScoreTotals.Sum(x => x.Total));
             placementTestResult.Status = EnumResultStatus.Done;
             placementTestResult.SkillScores = skillScoreTotals;
             placementTestResult.Percent = (double)placementTestResult.CorrectCount / placementTestResult.CorrectTotal * 100;
-            await _placementTestResultRepository.ExecuteTransactionAsync(async () =>
+            placementTestResult = _placementTestResultRepository.Update(placementTestResult);
+            await _placementTestResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+
+            var student = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
+            if (!student.IsSuccessStatusCode)
             {
-                placementTestResult = _placementTestResultRepository.Update(placementTestResult);
-                await _placementTestResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
-                methodResult.StatusCode = StatusCodes.Status200OK;
-                methodResult.Result = _mapper.Map<PlacementTestResultModel>(placementTestResult);
+                methodResult.AddErrorBadRequest(nameof(EnumLessonErrorCode.UserNotExist), nameof(student), _authContext.CurrentUserId.ToString());
                 return methodResult;
-            });
+            }
+
+            var studentId = student?.Content?.Result?.Id;
+            var placementTestResults = _placementTestResultRepository.Queryable.Where(x => x.Status == EnumResultStatus.Done && x.StudentId == studentId);
+
+            methodResult.StatusCode = StatusCodes.Status200OK;
+            methodResult.Result = _mapper.Map<List<PlacementTestResultModel>>(placementTestResults);
             return methodResult;
         }
     }
