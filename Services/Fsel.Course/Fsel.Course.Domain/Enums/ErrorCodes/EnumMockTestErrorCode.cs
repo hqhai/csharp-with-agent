@@ -23,5 +23,10 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         /// MockTest  is in active state
         /// </summary>
         MockTestInActiveState,
+
+        /// <summary>
+        /// MockTest must correct score
+        /// </summary>
+        MockTestMustCorrectScore
     }
 }
