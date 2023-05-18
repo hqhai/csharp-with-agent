@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fsel.Course.Infrastructure.Migrations
 {
     [DbContext(typeof(CourseDbContext))]
-    [Migration("20230517103401_UpdatePlacementTestResult")]
-    partial class UpdatePlacementTestResult
+    [Migration("20230518054118_UpdatePlacementTestLevel")]
+    partial class UpdatePlacementTestLevel
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -1897,14 +1897,21 @@ namespace Fsel.Course.Infrastructure.Migrations
                         .HasColumnType("bit")
                         .HasColumnOrder(110);
 
+                    b.Property<string>("Level")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
                     b.Property<double>("Percent")
                         .HasColumnType("float");
 
                     b.Property<string>("SkillScoresStr")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("Status")
-                        .HasColumnType("int");
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<Guid>("StudentId")
                         .HasColumnType("uniqueidentifier");
@@ -2207,7 +2214,6 @@ namespace Fsel.Course.Infrastructure.Migrations
                         .HasColumnOrder(102);
 
                     b.Property<string>("VideoFilePath")
-                        .IsRequired()
                         .HasMaxLength(250)
                         .HasColumnType("nvarchar(250)");
 

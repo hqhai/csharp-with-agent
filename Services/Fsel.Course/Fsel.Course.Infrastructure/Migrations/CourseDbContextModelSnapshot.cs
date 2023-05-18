@@ -1905,8 +1905,10 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.Property<string>("SkillScoresStr")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("Status")
-                        .HasColumnType("int");
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<Guid>("StudentId")
                         .HasColumnType("uniqueidentifier");
