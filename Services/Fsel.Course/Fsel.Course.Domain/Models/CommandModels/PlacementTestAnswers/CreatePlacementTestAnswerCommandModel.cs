@@ -2,9 +2,11 @@
 
 namespace Fsel.Course.Domain.Models.CommandModels.PlacementTestAnswers
 {
+    using Fsel.Shared.Enums;
+
     public class CreatePlacementTestAnswerCommandModel
     {
-        public Guid PlacementTestResultId { get; set; }
+        public EnumPlacementTestLevel Level { get; set; }
         public IList<PlacementTestAnswerQuestionModel>? Answers { get; set; }
     }
 

@@ -20,6 +20,37 @@ namespace Fsel.Shared.Helpers
             new KeyValuePair<EnumCourseType, EnumCourseLevel>(EnumCourseType.Ielts, EnumCourseLevel.MS3),
         };
 
+        private static IList<KeyValuePair<EnumPlacementTestLevel, EnumCourseSkill>> s_placementTestTypeLevel = new List<KeyValuePair<EnumPlacementTestLevel, EnumCourseSkill>>
+        {
+            new KeyValuePair<EnumPlacementTestLevel, EnumCourseSkill>(EnumPlacementTestLevel.A1, EnumCourseSkill.Reading),
+            new KeyValuePair<EnumPlacementTestLevel, EnumCourseSkill>(EnumPlacementTestLevel.A1, EnumCourseSkill.Listening),
+            new KeyValuePair<EnumPlacementTestLevel, EnumCourseSkill>(EnumPlacementTestLevel.A1, EnumCourseSkill.Vocabulary),
+            new KeyValuePair<EnumPlacementTestLevel, EnumCourseSkill>(EnumPlacementTestLevel.A1, EnumCourseSkill.Grammar),
+            new KeyValuePair<EnumPlacementTestLevel, EnumCourseSkill>(EnumPlacementTestLevel.A2, EnumCourseSkill.Reading),
+            new KeyValuePair<EnumPlacementTestLevel, EnumCourseSkill>(EnumPlacementTestLevel.A2, EnumCourseSkill.Listening),
+            new KeyValuePair<EnumPlacementTestLevel, EnumCourseSkill>(EnumPlacementTestLevel.A2, EnumCourseSkill.Vocabulary),
+            new KeyValuePair<EnumPlacementTestLevel, EnumCourseSkill>(EnumPlacementTestLevel.A2, EnumCourseSkill.Grammar),
+            new KeyValuePair<EnumPlacementTestLevel, EnumCourseSkill>(EnumPlacementTestLevel.B1, EnumCourseSkill.Reading),
+            new KeyValuePair<EnumPlacementTestLevel, EnumCourseSkill>(EnumPlacementTestLevel.B1, EnumCourseSkill.Listening),
+            new KeyValuePair<EnumPlacementTestLevel, EnumCourseSkill>(EnumPlacementTestLevel.B1, EnumCourseSkill.Vocabulary),
+            new KeyValuePair<EnumPlacementTestLevel, EnumCourseSkill>(EnumPlacementTestLevel.B1, EnumCourseSkill.Grammar),
+            new KeyValuePair<EnumPlacementTestLevel, EnumCourseSkill>(EnumPlacementTestLevel.B1Plus, EnumCourseSkill.Reading),
+            new KeyValuePair<EnumPlacementTestLevel, EnumCourseSkill>(EnumPlacementTestLevel.B1Plus, EnumCourseSkill.Listening),
+            new KeyValuePair<EnumPlacementTestLevel, EnumCourseSkill>(EnumPlacementTestLevel.B1Plus, EnumCourseSkill.Vocabulary),
+            new KeyValuePair<EnumPlacementTestLevel, EnumCourseSkill>(EnumPlacementTestLevel.B1Plus, EnumCourseSkill.Grammar),
+            new KeyValuePair<EnumPlacementTestLevel, EnumCourseSkill>(EnumPlacementTestLevel.B2, EnumCourseSkill.Reading),
+            new KeyValuePair<EnumPlacementTestLevel, EnumCourseSkill>(EnumPlacementTestLevel.B2, EnumCourseSkill.Listening),
+            new KeyValuePair<EnumPlacementTestLevel, EnumCourseSkill>(EnumPlacementTestLevel.B2, EnumCourseSkill.Vocabulary),
+            new KeyValuePair<EnumPlacementTestLevel, EnumCourseSkill>(EnumPlacementTestLevel.B2, EnumCourseSkill.Grammar),
+            new KeyValuePair<EnumPlacementTestLevel, EnumCourseSkill>(EnumPlacementTestLevel.C1, EnumCourseSkill.Reading),
+            new KeyValuePair<EnumPlacementTestLevel, EnumCourseSkill>(EnumPlacementTestLevel.C1, EnumCourseSkill.Listening),
+            new KeyValuePair<EnumPlacementTestLevel, EnumCourseSkill>(EnumPlacementTestLevel.C1, EnumCourseSkill.Vocabulary),
+            new KeyValuePair<EnumPlacementTestLevel, EnumCourseSkill>(EnumPlacementTestLevel.C1, EnumCourseSkill.Grammar),
+            new KeyValuePair<EnumPlacementTestLevel, EnumCourseSkill>(EnumPlacementTestLevel.IELTS, EnumCourseSkill.Reading),
+            new KeyValuePair<EnumPlacementTestLevel, EnumCourseSkill>(EnumPlacementTestLevel.IELTS, EnumCourseSkill.Listening),
+
+        };
+
         public static EnumCourseType GetEnumCourseType(this EnumCourseLevel courseLevel)
         {
             return s_courseTypeLevel.FirstOrDefault(x => x.Value == courseLevel).Key;
@@ -27,12 +58,22 @@ namespace Fsel.Shared.Helpers
 
         public static object GetEnumCourseLevels()
         {
+            return s_placementTestTypeLevel.GroupBy(x => x.Key).Select(x => new
+            {
+                CourseType = x.Key,
+                CourseSkills = x.Select(n => n.Value).ToArray()
+            });
+        }
+
+        public static object GetEnumCourseSkills()
+        {
             return s_courseTypeLevel.GroupBy(x => x.Key).Select(x => new
             {
                 CourseType = x.Key,
                 CourseLevels = x.Select(n => n.Value).ToArray()
             });
         }
+
 
         public static IList<EnumCourseLevel> GetEnumCourseLevels(this EnumCourseType? courseType)
         {
@@ -47,6 +88,21 @@ namespace Fsel.Shared.Helpers
             }
 
             return courseLevels;
+        }
+
+        public static IList<EnumCourseSkill> GetEnumPlacementTestSkills(this EnumPlacementTestLevel? placementTestLevel)
+        {
+            var courseSkills = new List<EnumCourseSkill>();
+            if (placementTestLevel == null)
+            {
+                courseSkills = s_placementTestTypeLevel.Select(x => x.Value).ToList();
+            }
+            else
+            {
+                courseSkills = s_placementTestTypeLevel.Where(x => x.Key == placementTestLevel).Select(x => x.Value).ToList();
+            }
+
+            return courseSkills;
         }
 
         public static string? GetCodeByEnumCourseLevel(this EnumCourseLevel? enumCourseLevel)
@@ -68,6 +124,11 @@ namespace Fsel.Shared.Helpers
         public static IList<string> GetListCourseLevels(this EnumCourseType? courseType)
         {
             return GetEnumCourseLevels(courseType).Select(x => x.ToString()).ToList();
+        }
+
+        public static IList<string> GetListPlacementTestSkills(this EnumPlacementTestLevel? placementTestLevel)
+        {
+            return GetEnumPlacementTestSkills(placementTestLevel).Select(x => x.ToString()).ToList();
         }
     }
 }

@@ -7,7 +7,7 @@ namespace Fsel.Course.Lms.Api.Controllers
     using Fsel.Common.Constants;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Commands.PlacementTestCmd;
-    using Fsel.Course.Lms.Application.Queries.CourseQuery;
+    using Fsel.Course.Lms.Application.Queries.PlacementTestQuery;
     using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Authorization;
@@ -27,14 +27,38 @@ namespace Fsel.Course.Lms.Api.Controllers
         }
 
         /// <summary>
-        /// Start PlacementTest
+        /// get PlacementTest
         /// </summary>
-        [HttpGet("start-placement-test")]
-        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [HttpGet("placement-test")]
+        [ProducesResponseType(typeof(MethodResult<PlacementTestBankModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> StartPlacementTest([FromQuery] StartPlacementTestCommand command)
+        public async Task<IActionResult> Get([FromQuery] GetPlacementTestQuery command)
         {
-            MethodResult<bool> queryResult = await _mediator.Send(command).ConfigureAwait(false);
+            MethodResult<PlacementTestBankModel> queryResult = await _mediator.Send(command).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Create PlacementTest Answer
+        /// </summary>
+        [HttpPost("placement-test-answer")]
+        [ProducesResponseType(typeof(MethodResult<PlacementTestResultModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> CreateAnswer([FromBody] CreatePlacementTestAnswerCommand command)
+        {
+            MethodResult<PlacementTestResultModel> queryResult = await _mediator.Send(command).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Update PlacementTest Result
+        /// </summary>
+        [HttpPost("placement-test-result")]
+        [ProducesResponseType(typeof(MethodResult<PlacementTestResultModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> UpdateResult([FromQuery] UpdatePlacementTestResultCommand command)
+        {
+            MethodResult<PlacementTestResultModel> queryResult = await _mediator.Send(command).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
     }

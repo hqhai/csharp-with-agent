@@ -2,7 +2,9 @@
 
 namespace Fsel.Course.Infrastructure.Configs
 {
+    using Fsel.Common.Helpers;
     using Fsel.Course.Domain.Entities;
+    using Fsel.Shared.Enums;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -11,11 +13,11 @@ namespace Fsel.Course.Infrastructure.Configs
         public void Configure(EntityTypeBuilder<PlacementTestResult> builder)
         {
             ArgumentNullException.ThrowIfNull(builder);
-
-            builder.HasOne(a => a.PlacementTest)
-                .WithMany(b => b.PlacementTestResults)
-                .HasForeignKey(b => b.PlacementTestId)
-                .OnDelete(DeleteBehavior.ClientSetNull);
+            builder.Property(e => e.Level)
+                .HasMaxLength(100)
+                .HasConversion(
+                    v => v.ToString(),
+                    v => v.EnumParse<EnumPlacementTestLevel>());
         }
     }
 }

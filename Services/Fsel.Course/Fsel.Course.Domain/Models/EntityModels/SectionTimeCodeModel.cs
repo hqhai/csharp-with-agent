@@ -3,10 +3,10 @@
 namespace Fsel.Course.Domain.Models.EntityModels
 {
     using System;
-    using Fsel.Core.Base.BaseModels;
 
-    public class SectionTimeCodeModel : BaseModel
+    public class SectionTimeCodeModel
     {
+        public Guid Id { get; set; }
         public string? Name { get; set; }
         public long DisplayTime { get; set; }
         public long ExecutionTime { get; set; }

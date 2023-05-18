@@ -3,9 +3,13 @@
 namespace Fsel.Course.Domain.Entities
 {
     using System.ComponentModel.DataAnnotations;
+    using System.ComponentModel.DataAnnotations.Schema;
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Common.Helpers;
     using Fsel.Core.Entities;
+    using Fsel.Course.Domain.Entities.SkillScoresConfigs;
     using Fsel.Course.Domain.Enums;
+    using Fsel.Shared.Enums;
 
     public class PlacementTestResult : Entity
     {
@@ -41,10 +45,16 @@ namespace Fsel.Course.Domain.Entities
         /// </summary>
         public EnumResultStatus Status { get; set; }
 
-        public PlacementTest? PlacementTest { get; set; }
+        public EnumPlacementTestLevel Level { get; set; }
 
-        [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
-        public Guid PlacementTestId { get; set; }
+        public string? SkillScoresStr { get; set; }
+
+        [NotMapped]
+        public IList<SkillScores>? SkillScores
+        {
+            get { return ConvertHelper.Deserialize<IList<SkillScores>>(SkillScoresStr); }
+            set { SkillScoresStr = ConvertHelper.Serialize(value); }
+        }
 
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         public Guid StudentId { get; set; }
