@@ -24,7 +24,7 @@ namespace Fsel.Course.Application.Queries.CategoryQuery
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<object> methodResult = new MethodResult<object>();
 
-            methodResult.Result = EnumCourseLevelHelper.GetEnumCourseSkills();
+            methodResult.Result = EnumCourseLevelHelper.GetEnumPlacementTestSkills();
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }

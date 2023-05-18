@@ -56,7 +56,7 @@ namespace Fsel.Shared.Helpers
             return s_courseTypeLevel.FirstOrDefault(x => x.Value == courseLevel).Key;
         }
 
-        public static object GetEnumCourseLevels()
+        public static object GetEnumPlacementTestSkills()
         {
             return s_placementTestTypeLevel.GroupBy(x => x.Key).Select(x => new
             {
@@ -65,7 +65,7 @@ namespace Fsel.Shared.Helpers
             });
         }
 
-        public static object GetEnumCourseSkills()
+        public static object GetEnumCourseLevels()
         {
             return s_courseTypeLevel.GroupBy(x => x.Key).Select(x => new
             {
