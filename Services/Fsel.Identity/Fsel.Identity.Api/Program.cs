@@ -37,6 +37,7 @@ builder.Services.AddScoped<ITeacherBankAccountRepository, TeacherBankAccountRepo
 builder.AddRefitClients(typeof(ISenderService), appSetting?.Services?.SenderApiUrl);
 
 builder.AddRefitClients(typeof(IInteractionService), appSetting?.Services?.InteractionApiUrl);
+builder.AddRefitClients(typeof(IInteractionService), appSetting?.Services?.InteractionApiUrl);
 var app = builder.Build();
 app.UseServices();
 app.Run();

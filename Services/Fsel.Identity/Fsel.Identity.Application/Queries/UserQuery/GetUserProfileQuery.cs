@@ -24,7 +24,7 @@ namespace Fsel.Identity.Application.Queries.UserQuery
         private readonly AuthContext _authContext;
         private readonly UserManager<User> _userManager;
 
-        public GetUserProfileQueryHandler(IMapper mapper, AuthContext authContext, UserManager<User> userManager)
+        public GetUserProfileQueryHandler(IMapper mapper, AuthContext authContext, UserManager<User> userManager,ITraining)
         {
             _mapper = mapper;
             _authContext = authContext;
@@ -61,6 +61,7 @@ namespace Fsel.Identity.Application.Queries.UserQuery
             }
             else if (userRoles.FirstOrDefault() == EnumRole.Student.ToString())
             {
+
                 userView = await _userManager.Users.Include(x => x.Human)
                                                    .ThenInclude(x => x!.Student)
                                                    .ThenInclude(x => x!.ParentStudents)
@@ -123,6 +124,7 @@ namespace Fsel.Identity.Application.Queries.UserQuery
             {
                 _mapper.Map(userView!.Human!.CSO, userModel);
             }
+
             userModel.Roles = userRoles;
             methodResult.Result = userModel;
             methodResult.StatusCode = StatusCodes.Status200OK;

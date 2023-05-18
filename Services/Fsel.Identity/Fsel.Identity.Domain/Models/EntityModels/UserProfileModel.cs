@@ -13,11 +13,13 @@ namespace Fsel.Identity.Domain.Models.EntityModels
         public DateTime? Birthday { get; set; }
         public string? PhoneNumber { get; set; }
         public string? Address { get; set; }
+        public string? School { get; set; }
         public EnumGender? Gender { get; set; }
         public bool? PhoneNumberConfirmed { get; set; }
         public string? Email { get; set; }
         public string? AvatarPath { get; set; }
         public Guid? ClassId { get; set; }
+        public string? NameClass { get; set; }
         public IList<string>? Roles { get; set; }
         public EnumCourseLevel CourseLevel { get; set; }
         public string? Membership { get; set; }
