@@ -90,21 +90,6 @@ namespace Fsel.Shared.Helpers
             return courseLevels;
         }
 
-        public static IList<EnumCourseSkill> GetEnumPlacementTestSkills(this EnumPlacementTestLevel? placementTestLevel)
-        {
-            var courseSkills = new List<EnumCourseSkill>();
-            if (placementTestLevel == null)
-            {
-                courseSkills = s_placementTestTypeLevel.Select(x => x.Value).ToList();
-            }
-            else
-            {
-                courseSkills = s_placementTestTypeLevel.Where(x => x.Key == placementTestLevel).Select(x => x.Value).ToList();
-            }
-
-            return courseSkills;
-        }
-
         public static string? GetCodeByEnumCourseLevel(this EnumCourseLevel? enumCourseLevel)
         {
             string? classCode;
@@ -124,11 +109,6 @@ namespace Fsel.Shared.Helpers
         public static IList<string> GetListCourseLevels(this EnumCourseType? courseType)
         {
             return GetEnumCourseLevels(courseType).Select(x => x.ToString()).ToList();
-        }
-
-        public static IList<string> GetListPlacementTestSkills(this EnumPlacementTestLevel? placementTestLevel)
-        {
-            return GetEnumPlacementTestSkills(placementTestLevel).Select(x => x.ToString()).ToList();
         }
     }
 }

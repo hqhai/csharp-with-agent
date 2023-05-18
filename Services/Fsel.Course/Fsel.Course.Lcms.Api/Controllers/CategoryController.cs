@@ -39,18 +39,6 @@ namespace Fsel.Course.Lcms.Api.Controllers
         }
 
         /// <summary>
-        /// Search Course Skill
-        /// </summary>
-        [HttpGet("course-skill")]
-        [ProducesResponseType(typeof(MethodResult<IList<EnumCourseSkill>>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetEnumCourseSkillsAsync([FromQuery] EnumPlacementTestLevel? placementTestLevel)
-        {
-            var queryResult = await _mediator.Send(new GetEnumCourseSkillQuery { PlacementTestLevel = placementTestLevel }).ConfigureAwait(false);
-            return queryResult.GetActionResult();
-        }
-
-        /// <summary>
         /// Get All PlacementTest type and Course level
         /// </summary>
         [HttpGet("all-course-skill")]

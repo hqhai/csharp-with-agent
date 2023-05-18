@@ -1,16 +1,14 @@
 // Copyright (c) Atlantic. All rights reserved.
 
 using Fsel.Common.ActionResults;
-using Fsel.Shared.Enums;
+using Fsel.Shared.Helpers;
 using MediatR;
 using Microsoft.AspNetCore.Http;
-using Fsel.Shared.Helpers;
 
 namespace Fsel.Course.Application.Queries.CategoryQuery
 {
     public class GetAllEnumCourseSkillQuery : IRequest<MethodResult<object>>
     {
-        public EnumPlacementTestLevel? PlacementTestLevel { get; set; }
     }
 
     public class GetAllEnumCourseSkillQueryHandler : IRequestHandler<GetAllEnumCourseSkillQuery, MethodResult<object>>
