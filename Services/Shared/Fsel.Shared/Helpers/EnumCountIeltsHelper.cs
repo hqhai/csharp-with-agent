@@ -106,10 +106,10 @@ namespace Fsel.Shared.Helpers
             return s_keyValueListenings.FirstOrDefault(x => x.Value == number).Key;
         }
 
-        public static EnumCourseLevel GetLevelInPoint(EnumPlacementTestLevel? enumPlacementTestLevel, double correctCount)
+        public static EnumCourseLevel GetLevelInPoint(EnumPlacementTestLevel? enumPlacementTestLevel, double? correctCount = 0)
         {
             EnumCourseLevel courseLevel;
-            double roundedNumber = Math.Ceiling(correctCount);
+            double roundedNumber = Math.Ceiling(correctCount ?? default);
             if (enumPlacementTestLevel == EnumPlacementTestLevel.IELTS && roundedNumber >= 3 && roundedNumber <= 3.5)
             {
                 courseLevel = EnumCourseLevel.RFE;

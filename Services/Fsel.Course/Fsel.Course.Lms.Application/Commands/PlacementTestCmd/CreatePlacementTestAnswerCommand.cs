@@ -61,9 +61,9 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
 
             #region Validation
 
-            if (request.AnswerSkills == null || request.AnswerSkills.Any(x => x.Answers == null || x.Answers.Count == 0))
+            if (request.Skills == null || request.Skills.Any(x => x.Answers == null || x.Answers.Count == 0))
             {
-                methodResult.AddErrorBadRequest(nameof(EnumPlacementTestAnswerErrorCode.AnswerSkillsNull), nameof(request.AnswerSkills), request.AnswerSkills);
+                methodResult.AddErrorBadRequest(nameof(EnumPlacementTestAnswerErrorCode.AnswerSkillsNull), nameof(request.Skills), request.Skills);
                 return methodResult;
             }
             var student = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
@@ -87,14 +87,13 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
             }
 
             var placementTestAnswers = new List<PlacementTestAnswer>();
-            var skillScoreCorrects = new List<SkillScores>();
-            var skillScoreTotals = new List<SkillScores>();
+            var skillScores = new List<SkillScores>();
             List<PlacementTestResultModel> placementTestResultModels = new List<PlacementTestResultModel>();
-            foreach (var item in request.AnswerSkills)
+            foreach (var item in request.Skills)
             {
                 if (item.Answers == null || item.Answers.Count == 0)
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumPlacementTestAnswerErrorCode.AnswersNull), nameof(request.AnswerSkills), request.AnswerSkills);
+                    methodResult.AddErrorBadRequest(nameof(EnumPlacementTestAnswerErrorCode.AnswersNull), nameof(request.Skills), request.Skills);
                     return methodResult;
                 }
                 var questionIds = item.Answers.Select(x => x.QuestionId).ToList();
@@ -145,34 +144,29 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
                         placementTestAnswers.Add(placementTestAnswer);
                     }
                 }
-                skillScoreCorrects.Add(new SkillScores { Skill = item.Skill, CorrectCount = count });
-                skillScoreTotals.Add(new SkillScores { Skill = item.Skill, TotalCount = questions.Sum(x => x.CorrectTotal) });
+                var skillScore = new SkillScores { Skill = item.Skill, TotalCount = questions.Sum(x => x.CorrectTotal), CorrectCount = count };
+                if (placementTestResult.Level == EnumPlacementTestLevel.IELTS)
+                {
+                    if (skillScore.Skill == EnumCourseSkill.Reading)
+                    {
+                        skillScore.Scores = skillScore.CorrectCount.GetReadingCountIelts();
+                    }
+                    else if (skillScore.Skill == EnumCourseSkill.Listening)
+                    {
+                        skillScore.Scores = skillScore.CorrectCount.GetListeningCountIelts();
+                    }
+                }
+                skillScores.Add(skillScore);
             }
 
             #endregion Validation
 
             #region Update placementTestResult
 
-            foreach (var skillScore in skillScoreTotals)
-            {
-                var number = skillScoreCorrects.FirstOrDefault(x => x.Skill == skillScore.Skill)!.CorrectCount;
-                skillScore.CorrectCount = number;
-                if (placementTestResult.Level == EnumPlacementTestLevel.IELTS)
-                {
-                    if (skillScore.Skill == EnumCourseSkill.Reading)
-                    {
-                        skillScore.Scores = number.GetReadingCountIelts();
-                    }
-                    else if (skillScore.Skill == EnumCourseSkill.Listening)
-                    {
-                        skillScore.Scores = number.GetListeningCountIelts();
-                    }
-                }
-            }
-            placementTestResult.CorrectCount = Convert.ToInt32(skillScoreTotals.Sum(x => x.CorrectCount));
-            placementTestResult.CorrectTotal = Convert.ToInt32(skillScoreTotals.Sum(x => x.TotalCount));
+            placementTestResult.CorrectCount = Convert.ToInt32(skillScores.Sum(x => x.CorrectCount));
+            placementTestResult.CorrectTotal = Convert.ToInt32(skillScores.Sum(x => x.TotalCount));
             placementTestResult.Status = EnumResultStatus.Done;
-            placementTestResult.SkillScores = skillScoreTotals;
+            placementTestResult.SkillScores = skillScores;
             placementTestResult.Percent = (double)placementTestResult.CorrectCount / placementTestResult.CorrectTotal * 100;
 
             _placementTestResultRepository.Add(placementTestResult);
@@ -180,9 +174,10 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
 
             #endregion Update placementTestResult
 
+            PlacementTestResultModel placementTestResultModel = new PlacementTestResultModel();
             if (request.Level == EnumPlacementTestLevel.IELTS)
             {
-                var count = skillScoreTotals.Select(x => x.Scores).Sum() / 2;
+                var count = skillScores.Select(x => x.Scores).Sum() / 2;
                 var updateStudent = new UpdateStudentByLevelModel
                 {
                     Id = _authContext.CurrentUserId,
@@ -194,9 +189,10 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
                     methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError));
                     return methodResult;
                 }
-                PlacementTestResultModel placementTestResultModel = new PlacementTestResultModel();
+
+                _mapper.Map(placementTestResult, placementTestResultModel);
                 placementTestResultModel.OverallScore = EnumConvertNumberHelper.RoundNumberDouble(count);
-                placementTestResultModel.SkillScores = skillScoreTotals;
+                placementTestResultModel.SkillScores = skillScores;
                 placementTestResultModels.Add(placementTestResultModel);
             }
             else
@@ -204,7 +200,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
                 var updateStudent = new UpdateStudentByLevelModel
                 {
                     Id = _authContext.CurrentUserId,
-                    Level = EnumCountIeltsHelper.GetLevelInPoint(request.Level, 0)
+                    Level = EnumCountIeltsHelper.GetLevelInPoint(request.Level)
                 };
                 var isCheckResult = await _userService.UpdateStudentByLevelAsync(updateStudent);
                 if (!isCheckResult.IsSuccessStatusCode)
@@ -212,9 +208,14 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
                     methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError));
                     return methodResult;
                 }
+                _mapper.Map(placementTestResult, placementTestResultModel);
+                placementTestResultModel.SkillScores = skillScores;
+
                 var placementTestResults = await _placementTestResultRepository.Queryable.Where(x => x.Status == EnumResultStatus.Done && x.StudentId == studentId && x.Level == request.Level)
                                        .ToListAsync(cancellationToken);
+
                 placementTestResultModels = _mapper.Map<List<PlacementTestResultModel>>(placementTestResults);
+                placementTestResultModels.Add(placementTestResultModel);
             }
 
             await _placementTestAnswerRepository.ExecuteTransactionAsync(async () =>

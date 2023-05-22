@@ -164,7 +164,7 @@ namespace Fsel.Course.Infrastructure.Common
             var dataQuestion = configQuestion.Deserialize<ShortAnswerQuestionWordCountBaseQuestion>();
             int number = 0;
 
-            if (dataAnswer != null && dataAnswer.Answers != null && dataQuestion != null && dataQuestion.Name != null)
+            if (dataAnswer != null && dataAnswer.Answers != null && dataQuestion != null)
             {
                 var answerStrs = dataAnswer.Answers.Split(' ');
                 if (answerStrs != null && dataQuestion.ExactWordCount == answerStrs.Length)
