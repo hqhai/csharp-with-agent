@@ -9,7 +9,6 @@ using Fsel.Course.Domain.IRepositories;
 using Fsel.Course.Domain.Models.CommandModels.Videos;
 using Fsel.Course.Domain.Models.EntityModels;
 using Fsel.Course.Infrastructure.Common;
-using Fsel.Course.Infrastructure.Repositories;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;

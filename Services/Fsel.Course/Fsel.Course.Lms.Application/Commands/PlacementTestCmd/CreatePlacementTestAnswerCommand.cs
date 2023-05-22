@@ -175,25 +175,10 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
             #endregion Update placementTestResult
 
             PlacementTestResultModel placementTestResultModel = new PlacementTestResultModel();
+            _mapper.Map(placementTestResult, placementTestResultModel);
             if (request.Level == EnumPlacementTestLevel.IELTS)
             {
                 var count = skillScores.Select(x => x.Scores).Sum() / 2;
-                var updateStudent = new UpdateStudentByLevelModel
-                {
-                    Id = _authContext.CurrentUserId,
-                    Level = EnumCountIeltsHelper.GetLevelInPoint(request.Level, count)
-                };
-                var isCheckResult = await _userService.UpdateStudentByLevelAsync(updateStudent);
-                if (!isCheckResult.IsSuccessStatusCode)
-                {
-                    methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError));
-                    return methodResult;
-                }
-
-                _mapper.Map(placementTestResult, placementTestResultModel);
-                placementTestResultModel.OverallScore = EnumConvertNumberHelper.RoundNumberDouble(count);
-                placementTestResultModel.SkillScores = skillScores;
-                placementTestResultModels.Add(placementTestResultModel);
             }
             else
             {
@@ -208,15 +193,15 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
                     methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError));
                     return methodResult;
                 }
-                _mapper.Map(placementTestResult, placementTestResultModel);
-                placementTestResultModel.SkillScores = skillScores;
 
                 var placementTestResults = await _placementTestResultRepository.Queryable.Where(x => x.Status == EnumResultStatus.Done && x.StudentId == studentId && x.Level == request.Level)
                                        .ToListAsync(cancellationToken);
 
                 placementTestResultModels = _mapper.Map<List<PlacementTestResultModel>>(placementTestResults);
-                placementTestResultModels.Add(placementTestResultModel);
             }
+
+            placementTestResultModel.SkillScores = skillScores;
+            placementTestResultModels.Add(placementTestResultModel);
 
             await _placementTestAnswerRepository.ExecuteTransactionAsync(async () =>
             {
@@ -232,6 +217,22 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
             });
 
             return methodResult;
+        }
+
+        public async Task<PlacementTestResultModel> GetListPlacementTestResult(MethodResult<PlacementTestResultModel>? methodResult, EnumPlacementTestLevel level, double? count, PlacementTestResultModel? placementTestResultModel)
+        {
+            var updateStudent = new UpdateStudentByLevelModel
+            {
+                Id = _authContext.CurrentUserId,
+                Level = EnumCountIeltsHelper.GetLevelInPoint(level, count ?? null)
+            };
+            var isCheckResult = await _userService.UpdateStudentByLevelAsync(updateStudent);
+            if (!isCheckResult.IsSuccessStatusCode)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError));
+            }
+            placementTestResultModel.OverallScore = EnumConvertNumberHelper.RoundNumberDouble(count ?? default);
+            return placementTestResultModel;
         }
     }
 }
