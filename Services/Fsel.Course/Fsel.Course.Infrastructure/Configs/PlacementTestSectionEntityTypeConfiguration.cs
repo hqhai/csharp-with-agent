@@ -17,6 +17,7 @@ namespace Fsel.Course.Infrastructure.Configs
                 .WithMany(b => b.PlacementTestSections)
                 .HasForeignKey(b => b.SectionGroupId)
                 .OnDelete(DeleteBehavior.Cascade);
+
             builder.HasOne(a => a.PlacementTest)
                 .WithMany(b => b.PlacementTestSections)
                 .HasForeignKey(b => b.PlacementTestId)

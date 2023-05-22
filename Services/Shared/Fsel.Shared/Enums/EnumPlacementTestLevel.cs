@@ -6,22 +6,22 @@ namespace Fsel.Shared.Enums
 
     public enum EnumPlacementTestLevel
     {
-        [Description("Think Starter")]
+        [Description("A1 - Think Starter")]
         A1,
 
-        [Description("Think 1")]
+        [Description("A2 - Think 1")]
         A2,
 
-        [Description("Think 2")]
+        [Description("B1 - Think 2")]
         B1,
 
-        [Description("Think 3")]
+        [Description("B1+ - Think 3")]
         B1Plus,
 
-        [Description("Think 4")]
+        [Description("B2 - Think 4")]
         B2,
 
-        [Description("Think 5")]
+        [Description("C1 - Think 5")]
         C1,
 
         [Description("IELTS")]

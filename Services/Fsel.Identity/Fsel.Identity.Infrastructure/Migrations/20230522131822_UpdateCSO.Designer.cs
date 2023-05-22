@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fsel.Identity.Infrastructure.Migrations
 {
     [DbContext(typeof(UserDbContext))]
-    [Migration("20230522021529_UpdateCSO")]
+    [Migration("20230522131822_UpdateCSO")]
     partial class UpdateCSO
     {
         /// <inheritdoc />
@@ -37,10 +37,6 @@ namespace Fsel.Identity.Infrastructure.Migrations
                         .HasColumnType("nvarchar(1000)");
 
                     b.Property<string>("CourseLevelsStr")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("CourseTypesStr")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
