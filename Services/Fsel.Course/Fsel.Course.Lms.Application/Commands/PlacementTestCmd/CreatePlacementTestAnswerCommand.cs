@@ -179,6 +179,17 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
             if (request.Level == EnumPlacementTestLevel.IELTS)
             {
                 var count = skillScores.Select(x => x.Scores).Sum() / 2;
+                var updateStudent = new UpdateStudentByLevelModel
+                {
+                    Id = _authContext.CurrentUserId,
+                    Level = EnumCountIeltsHelper.GetLevelInPoint(request.Level, count)
+                };
+                var isCheckResult = await _userService.UpdateStudentByLevelAsync(updateStudent);
+                if (!isCheckResult.IsSuccessStatusCode)
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError));
+                }
+                placementTestResultModel.OverallScore = EnumConvertNumberHelper.RoundNumberDouble(count);
             }
             else
             {
@@ -217,22 +228,6 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
             });
 
             return methodResult;
-        }
-
-        public async Task<PlacementTestResultModel> GetListPlacementTestResult(MethodResult<PlacementTestResultModel>? methodResult, EnumPlacementTestLevel level, double? count, PlacementTestResultModel? placementTestResultModel)
-        {
-            var updateStudent = new UpdateStudentByLevelModel
-            {
-                Id = _authContext.CurrentUserId,
-                Level = EnumCountIeltsHelper.GetLevelInPoint(level, count ?? null)
-            };
-            var isCheckResult = await _userService.UpdateStudentByLevelAsync(updateStudent);
-            if (!isCheckResult.IsSuccessStatusCode)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError));
-            }
-            placementTestResultModel.OverallScore = EnumConvertNumberHelper.RoundNumberDouble(count ?? default);
-            return placementTestResultModel;
         }
     }
 }
