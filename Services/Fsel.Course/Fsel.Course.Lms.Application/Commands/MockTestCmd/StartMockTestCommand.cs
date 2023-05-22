@@ -62,7 +62,21 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
             MethodResult<MockTestModel> methodResult = new MethodResult<MockTestModel>();
 
             var mockTest = await _mockTestRepository.Queryable
-                                                    .FirstOrDefaultAsync(x => x.Id == request.MockTestId, cancellationToken);
+                                                .Include(x => x.MockTestSections)
+                                                .ThenInclude(x => x.SectionGroup)
+                                                .ThenInclude(x => x!.Sections)
+                                                .ThenInclude(x => x.SectionParts)
+                                                .ThenInclude(x => x.SectionQuestions)
+                                                .ThenInclude(x => x.Question)
+                                                .Include(x => x.MockTestSections)
+                                                .ThenInclude(x => x.SectionGroup)
+                                                .ThenInclude(x => x!.Sections)
+                                                .ThenInclude(x => x.SectionTimeCodes)
+                                                .Include(x => x.MockTestResults)
+                                                .ThenInclude(x => x.MockTestAnswers)
+                                                .Where(x => x.Id == request.MockTestId)
+                                                .AsNoTracking()
+                                                .FirstOrDefaultAsync(cancellationToken: cancellationToken);
             if (mockTest == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumMockTestErrorCode.MockTestsNotExist), nameof(request.MockTestId), request.MockTestId);
@@ -114,27 +128,6 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
             }
             var mockTestResult = _mockTestResultRepository.Queryable.Where(x => x!.MockTestId == request.MockTestId && x!.UnitId == request.UnitId && x!.CourseId == request.CourseId && x.StudentId == studentId).FirstOrDefault();
 
-            var mockTestDetail = await _mockTestRepository.Queryable
-                                                .Include(x => x.MockTestSections)
-                                                .ThenInclude(x => x.SectionGroup)
-                                                .ThenInclude(x => x!.Sections)
-                                                .ThenInclude(x => x.SectionParts)
-                                                .ThenInclude(x => x.SectionQuestions)
-                                                .ThenInclude(x => x.Question)
-                                                .Include(x => x.MockTestSections)
-                                                .ThenInclude(x => x.SectionGroup)
-                                                .ThenInclude(x => x!.Sections)
-                                                .ThenInclude(x => x.SectionTimeCodes)
-                                                .Include(x => x.MockTestResults)
-                                                .ThenInclude(x => x.MockTestAnswers)
-                                                .Where(x => x.Id == request.MockTestId)
-                                                .AsNoTracking()
-                                                .FirstOrDefaultAsync(cancellationToken: cancellationToken);
-            if (mockTestDetail == null)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumMockTestErrorCode.MockTestsNotExist), nameof(request.MockTestId), request?.MockTestId);
-                return methodResult;
-            }
             var checkDone = mockTestResult != null && mockTestResult.Status == EnumResultStatus.Done;
 
             var mockTestModel = new MockTestModel()

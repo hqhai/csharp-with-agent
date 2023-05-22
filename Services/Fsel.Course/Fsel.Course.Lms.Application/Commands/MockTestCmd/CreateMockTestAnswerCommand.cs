@@ -145,19 +145,17 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
             }
             IQueryable<int>? questionQuery = null;
 
-            if (mockTest.MockTestType == EnumMockTestType.FullMockTest)
-            {
-                questionQuery = from p in _mockTestRepository.Queryable
-                                join ps in _mockTestSectionRepository.Queryable on p.Id equals ps.MockTestId
-                                join sg in _sectionGroupRepository.Queryable on ps.SectionGroupId equals sg.Id
-                                join s in _sectionRepository.Queryable on sg.Id equals s.SectionGroupId
-                                join sp in _sectionPartRepository.Queryable on s.Id equals sp.SectionId
-                                join sq in _sectionQuestionRepository.Queryable on s.Id equals sq.SectionId
-                                join q in _questionRepository.Queryable on sq.QuestionId equals q.Id
-                                join tc in _sectionTimeCodeRepository.Queryable on sg.Id equals tc.Id
-                                where p.Id == mockTest.Id
-                                select q.CorrectTotal;
-            }
+            questionQuery = from p in _mockTestRepository.Queryable
+                            join ps in _mockTestSectionRepository.Queryable on p.Id equals ps.MockTestId
+                            join sg in _sectionGroupRepository.Queryable on ps.SectionGroupId equals sg.Id
+                            join s in _sectionRepository.Queryable on sg.Id equals s.SectionGroupId
+                            join sp in _sectionPartRepository.Queryable on s.Id equals sp.SectionId
+                            join sq in _sectionQuestionRepository.Queryable on s.Id equals sq.SectionId
+                            join q in _questionRepository.Queryable on sq.QuestionId equals q.Id
+                            join tc in _sectionTimeCodeRepository.Queryable on sg.Id equals tc.Id
+                            where p.Id == mockTest.Id
+                            select q.CorrectTotal;
+
             mockTestResult.CorrectCount = correctCountStudent;
             mockTestResult.CorrectTotal = await questionQuery!.SumAsync(cancellationToken);
             mockTestResult.Percent = (double)mockTestResult.CorrectCount / mockTestResult.CorrectTotal * 100;
