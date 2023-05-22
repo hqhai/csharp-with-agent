@@ -12,6 +12,7 @@ namespace Fsel.Shared.Enums
         TimeCodeType,
         PlacementTestLevel,
         FinalTestLevel,
-        SubscriptionClass
+        SubscriptionClass,
+        RoleLive
     }
 }
