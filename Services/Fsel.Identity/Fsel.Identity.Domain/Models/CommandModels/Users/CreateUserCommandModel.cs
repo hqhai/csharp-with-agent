@@ -1,7 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
 using System.ComponentModel.DataAnnotations;
-using Fsel.Identity.Domain.Models.CommandModels.TeacherBankAccount;
 using Fsel.Shared.Enums;
 
 namespace Fsel.Identity.Domain.Models.CommandModels.Users
@@ -17,6 +16,7 @@ namespace Fsel.Identity.Domain.Models.CommandModels.Users
         public string? Email { get; set; }
 
         public string? Address { get; set; }
+        [Required]
         public DateTime Birthday { get; set; }
         public string? PhoneNumber { get; set; }
         public IList<EnumRoleLive>? RoleLives { get; set; }

@@ -12,16 +12,6 @@ namespace Fsel.Identity.Domain.Entities
     public class CSO : Entity
     {
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
-        public string? CourseTypesStr { get; set; }
-
-        [NotMapped]
-        public object? CourseTypes
-        {
-            get { return ConvertHelper.Deserialize<object>(CourseTypesStr); }
-            set { CourseTypesStr = ConvertHelper.Serialize(value); }
-        }
-
-        [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         public string? RoleLivesStr { get; set; }
 
         [NotMapped]

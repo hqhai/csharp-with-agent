@@ -10,20 +10,19 @@ namespace Fsel.Identity.Infrastructure.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AddColumn<string>(
-                name: "SubscriptionClassesStr",
+            migrationBuilder.RenameColumn(
+                name: "CourseTypesStr",
                 table: "CSOs",
-                type: "nvarchar(max)",
-                nullable: false,
-                defaultValue: "");
+                newName: "SubscriptionClassesStr");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropColumn(
+            migrationBuilder.RenameColumn(
                 name: "SubscriptionClassesStr",
-                table: "CSOs");
+                table: "CSOs",
+                newName: "CourseTypesStr");
         }
     }
 }
