@@ -28,7 +28,6 @@ namespace Fsel.Course.Infrastructure.Repositories
                 throw;
             }
         }
-
         public async Task<List<Question>?> GetIncludeSectionByIdAsync(IEnumerable<Guid> ids)
         {
             try

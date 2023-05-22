@@ -2,6 +2,7 @@
 
 namespace Fsel.Shared.Helpers
 {
+    using Fsel.Common.Helpers;
     using Fsel.Shared.Enums;
 
     public static class EnumCourseLevelHelper
@@ -23,6 +24,29 @@ namespace Fsel.Shared.Helpers
         public static EnumCourseType GetEnumCourseType(this EnumCourseLevel courseLevel)
         {
             return s_courseTypeLevel.FirstOrDefault(x => x.Value == courseLevel).Key;
+        }
+
+        public static object GetEnumPlacementTestSkills()
+        {
+            var results = new List<object>();
+            foreach (var item in ConvertHelper.EnumToList<EnumPlacementTestLevel>())
+            {
+                var result = new
+                {
+                    LevelValue = item,
+                    LevelName = item.GetDescription(),
+                    Skills = new List<EnumCourseSkill> { EnumCourseSkill.Reading, EnumCourseSkill.Listening }
+                };
+
+                if (item != EnumPlacementTestLevel.IELTS)
+                {
+                    result.Skills.Add(EnumCourseSkill.Vocabulary);
+                    result.Skills.Add(EnumCourseSkill.Grammar);
+                }
+                results.Add(result);
+            }
+
+            return results;
         }
 
         public static object GetEnumCourseLevels()

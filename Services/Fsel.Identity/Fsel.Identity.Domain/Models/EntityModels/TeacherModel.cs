@@ -10,7 +10,7 @@ namespace Fsel.Identity.Domain.Models.EntityModels
     {
         public IList<EnumCourseType>? CourseTypes { get; set; }
         public IList<EnumCourseLevel>? CourseLevels { get; set; }
-
+        public IList<EnumRoleLive>? RoleLives { get; set; }
         public int NumberClass { get; set; }
         public string? PassportPath { get; set; }
 

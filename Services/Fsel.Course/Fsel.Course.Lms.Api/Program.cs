@@ -60,6 +60,17 @@ builder.Services.AddScoped<ISectionPartRepository, SectionPartRepository>();
 builder.Services.AddScoped<ISectionRepository, SectionRepository>();
 builder.Services.AddScoped<ISectionTimeCodeRepository, SectionTimeCodeRepository>();
 
+builder.Services.AddScoped<IPlacementTestResultRepository, PlacementTestResultRepository>();
+builder.Services.AddScoped<IPlacementTestRepository, PlacementTestRepository>();
+builder.Services.AddScoped<IPlacementTestSectionRepository, PlacementTestSectionRepository>();
+builder.Services.AddScoped<IPlacementTestAnswerRepository, PlacementTestAnswerRepository>();
+
+builder.Services.AddScoped<ISectionGroupRepository, SectionGroupRepository>();
+builder.Services.AddScoped<ISectionPartRepository, SectionPartRepository>();
+builder.Services.AddScoped<ISectionRepository, SectionRepository>();
+builder.Services.AddScoped<ISectionTimeCodeRepository, SectionTimeCodeRepository>();
+builder.Services.AddScoped<ISectionQuestionRepository, SectionQuestionRepository>();
+builder.Services.AddScoped<IFinalTestRepository, FinalTestRepository>();
 builder.Services.AddScoped<QuestionTypeConverter>();
 builder.Services.AddScoped<AnswerTypeConverter>();
 

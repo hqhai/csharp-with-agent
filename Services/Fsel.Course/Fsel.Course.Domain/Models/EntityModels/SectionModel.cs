@@ -2,13 +2,14 @@
 
 namespace Fsel.Course.Domain.Models.EntityModels
 {
-    using Fsel.Core.Base.BaseModels;
-
-    public class SectionModel : BaseModel
+    public class SectionModel
     {
+        public Guid Id { get; set; }
         public string? Name { get; set; }
         public string? MediaPost { get; set; }
         public int TargetWord { get; set; }
+        public string? VideoFilePath { get; set; }
+        public int DisplayOrder { get; set; }
         public Guid SectionGroupId { get; set; }
         public string? VideoFilePath { get; set; }
         public IList<SectionPartModel>? SectionParts { get; set; }

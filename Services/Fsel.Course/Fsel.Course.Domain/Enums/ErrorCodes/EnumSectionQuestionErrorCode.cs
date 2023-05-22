@@ -18,5 +18,10 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         /// SectionQuestion not exist
         /// </summary>
         SectionQuestionsNotExist
+
+        /// <summary>
+        /// SectionQuestions Does Not Exist
+        /// </summary>
+        SectionQuestionsNotExist,
     }
 }
