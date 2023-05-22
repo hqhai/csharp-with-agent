@@ -155,8 +155,8 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
 
             foreach (var skillScore in skillScoreTotals)
             {
-                var number = skillScoreCorrects.FirstOrDefault(x => x.Skill == skillScore.Skill)!.Scores;
-                skillScore.Scores = number;
+                var number = skillScoreCorrects.FirstOrDefault(x => x.Skill == skillScore.Skill)!.CorrectCount;
+                skillScore.CorrectCount = number;
                 if (placementTestResult.Level == EnumPlacementTestLevel.IELTS)
                 {
                     if (skillScore.Skill == EnumCourseSkill.Reading)
