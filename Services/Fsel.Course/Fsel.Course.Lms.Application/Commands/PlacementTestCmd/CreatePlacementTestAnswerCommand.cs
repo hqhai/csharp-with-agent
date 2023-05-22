@@ -145,8 +145,8 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
                         placementTestAnswers.Add(placementTestAnswer);
                     }
                 }
-                skillScoreCorrects.Add(new SkillScores { Skill = item.Skill, Scores = count });
-                skillScoreTotals.Add(new SkillScores { Skill = item.Skill, Total = questions.Sum(x => x.CorrectTotal) });
+                skillScoreCorrects.Add(new SkillScores { Skill = item.Skill, CorrectCount = count });
+                skillScoreTotals.Add(new SkillScores { Skill = item.Skill, TotalCount = questions.Sum(x => x.CorrectTotal) });
             }
 
             #endregion Validation
@@ -161,16 +161,16 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
                 {
                     if (skillScore.Skill == EnumCourseSkill.Reading)
                     {
-                        skillScore.Number = number.GetReadingCountIelts();
+                        skillScore.Scores = number.GetReadingCountIelts();
                     }
                     else if (skillScore.Skill == EnumCourseSkill.Listening)
                     {
-                        skillScore.Number = number.GetListeningCountIelts();
+                        skillScore.Scores = number.GetListeningCountIelts();
                     }
                 }
             }
-            placementTestResult.CorrectCount = Convert.ToInt32(skillScoreTotals.Sum(x => x.Scores));
-            placementTestResult.CorrectTotal = Convert.ToInt32(skillScoreTotals.Sum(x => x.Total));
+            placementTestResult.CorrectCount = Convert.ToInt32(skillScoreTotals.Sum(x => x.CorrectCount));
+            placementTestResult.CorrectTotal = Convert.ToInt32(skillScoreTotals.Sum(x => x.TotalCount));
             placementTestResult.Status = EnumResultStatus.Done;
             placementTestResult.SkillScores = skillScoreTotals;
             placementTestResult.Percent = (double)placementTestResult.CorrectCount / placementTestResult.CorrectTotal * 100;
@@ -182,7 +182,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
 
             if (request.Level == EnumPlacementTestLevel.IELTS)
             {
-                var count = skillScoreTotals.Select(x => x.Number).Sum() / 2;
+                var count = skillScoreTotals.Select(x => x.Scores).Sum() / 2;
                 var updateStudent = new UpdateStudentByLevelModel
                 {
                     Id = _authContext.CurrentUserId,
@@ -195,7 +195,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
                     return methodResult;
                 }
                 PlacementTestResultModel placementTestResultModel = new PlacementTestResultModel();
-                placementTestResultModel.OverallScore = EnumConvertNumberHelper.RoundNumberDouble(skillScoreTotals.Select(x => x.Number).Sum() / 2);
+                placementTestResultModel.OverallScore = EnumConvertNumberHelper.RoundNumberDouble(count);
                 placementTestResultModel.SkillScores = skillScoreTotals;
                 placementTestResultModels.Add(placementTestResultModel);
             }

@@ -14,9 +14,9 @@ namespace Fsel.Course.Domain.Entities.SkillScoresConfigs
         public double Scores { get; set; }
 
         [JsonRequired]
-        public double Total { get; set; }
+        public double TotalCount { get; set; }
 
         [JsonRequired]
-        public double Number { get; set; }
+        public double CorrectCount { get; set; }
     }
 }
