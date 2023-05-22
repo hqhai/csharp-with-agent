@@ -7,6 +7,7 @@ namespace Fsel.Identity.Application.Queries.UserQuery
     using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Identity.Application.Services.ITrainingService;
     using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.Enums.ErrorCodes;
     using Fsel.Identity.Domain.Models.EntityModels;
@@ -25,11 +26,13 @@ namespace Fsel.Identity.Application.Queries.UserQuery
     {
         private readonly IMapper _mapper;
         private readonly UserManager<User> _userManager;
+        private readonly ITrainingService _trainingService;
 
-        public GetUserQueryHandler(IMapper mapper, UserManager<User> userManager)
+        public GetUserQueryHandler(IMapper mapper, UserManager<User> userManager, ITrainingService trainingService)
         {
             _mapper = mapper;
             _userManager = userManager;
+            _trainingService = trainingService;
         }
 
         public async Task<MethodResult<UserProfileModel>> Handle(GetUserQuery request, CancellationToken cancellationToken)
@@ -95,14 +98,30 @@ namespace Fsel.Identity.Application.Queries.UserQuery
 
                 if (userRoles.FirstOrDefault() == EnumRole.Student.ToString() && userView.Human?.Student?.CreatedByParent == false && userView.Human?.Student?.ParentStudents.Count > 0)
                 {
-                    userModel!.Parent = _mapper.Map<ParentModel>(userView!.Human!.Student!.ParentStudents!.FirstOrDefault()!.Parent);
+                    var classStudent = await _trainingService.GetClassByStudentId(userView!.Human!.Student.Id);
+                    userModel!.Parent = _mapper.Map<ParentProfileModel>(userView!.Human!.Student!.ParentStudents!.FirstOrDefault()!.Parent);
                     _mapper.Map(userView!.Human!.Student, userModel);
+                    if (classStudent.Content?.Result != null)
+                    {
+                        userModel.CodeClass = classStudent!.Content!.Result!.Code;
+                    }
                 }
 
                 if (userRoles.FirstOrDefault() == EnumRole.Parent.ToString() && userView.Human?.Parent?.ParentStudents != null && userView.Human?.Parent?.ParentStudents.Count > 0)
                 {
-                    userModel!.Students = _mapper.Map<List<StudentModel>>(userView!.Human!.Parent!.ParentStudents.Select(x => x.Student).ToList());
+                    userModel!.Students = _mapper.Map<List<StudentProfileModel>>(userView!.Human!.Parent!.ParentStudents.Select(x => x.Student).ToList());
                     _mapper.Map(userView!.Human!.Parent, userModel);
+
+                    foreach (var student in userModel!.Students)
+                    {
+                        var classStudent = await _trainingService.GetClassByStudentId(student!.Id);
+                        if (classStudent.Content?.Result != null)
+                        {
+                            student.CodeClass = classStudent!.Content!.Result!.Code;
+                        }
+                        var userName = userView!.Human!.Parent!.ParentStudents.Select(x => x.Student).FirstOrDefault(x => x!.Id == student.Id)!.Human!.User!.UserName;
+                        student.UserName = userName;
+                    }
                 }
 
                 if (userRoles.FirstOrDefault() == EnumRole.Teacher.ToString() && userView.Human?.Teacher != null)

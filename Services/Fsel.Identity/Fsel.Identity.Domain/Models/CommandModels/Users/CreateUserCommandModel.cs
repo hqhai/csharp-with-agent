@@ -22,6 +22,7 @@ namespace Fsel.Identity.Domain.Models.CommandModels.Users
         public IList<EnumRoleLive>? RoleLives { get; set; }
         public IList<EnumCourseType>? CourseTypes { get; set; }
         public IList<EnumCourseLevel>? CourseLevels { get; set; }
+        public IList<EnumSubscriptionClass>? SubscriptionClasses { get; set; }
 
         [Required]
         public EnumRoleRegisterWithAdmin Role { get; set; }

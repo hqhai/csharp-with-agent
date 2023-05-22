@@ -41,6 +41,17 @@ namespace Fsel.Identity.Domain.Entities
             set { CourseLevelsStr = ConvertHelper.Serialize(value); }
         }
 
+
+        [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
+        public string? SubscriptionClassesStr { get; set; }
+
+        [NotMapped]
+        public IList<EnumSubscriptionClass>? SubscriptionClasses
+        {
+            get { return ConvertHelper.Deserialize<IList<EnumSubscriptionClass>>(SubscriptionClassesStr); }
+            set { SubscriptionClassesStr = ConvertHelper.Serialize(value); }
+        }
+
         [MaxLength(1000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? PassportPath { get; set; }
 
