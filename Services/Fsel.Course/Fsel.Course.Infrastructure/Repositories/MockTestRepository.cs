@@ -84,6 +84,7 @@ namespace Fsel.Course.Infrastructure.Repositories
                                                   TargetWord = x.TargetWord,
                                                   CreatedDate = x.CreatedDate,
                                                   CreatedUserId = x.CreatedUserId,
+                                                  VideoFilePath = x.VideoFilePath,
                                                   SectionTimeCodes = x.SectionTimeCodes.Select(x => new SectionTimeCodeModel
                                                   {
                                                       Id = x.Id,
