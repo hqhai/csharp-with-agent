@@ -36,5 +36,6 @@ namespace Fsel.Course.Domain.Entities
         public ICollection<UnitLesson> UnitLessons { get; set; } = new List<UnitLesson>();
         public ICollection<UnitResult> UnitResults { get; set; } = new List<UnitResult>();
         public ICollection<LessonResult> LessonResults { get; set; } = new List<LessonResult>();
+        public ICollection<MockTestResult> MockTestResults { get; set; } = new List<MockTestResult>();
     }
 }
