@@ -21,7 +21,5 @@ namespace Fsel.Course.Domain.Models.EntityModels
 
         public IList<SectionGroupModel>? SectionGroups { get; set; }
         public MockTestResultModel? MockTestResults { get; set; }
-
-        public IList<QuestionModel>? Questions { get; set; }
     }
 }

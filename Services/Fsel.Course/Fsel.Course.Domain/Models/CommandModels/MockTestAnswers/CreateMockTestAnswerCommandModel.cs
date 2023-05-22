@@ -9,9 +9,6 @@ namespace Fsel.Course.Domain.Models.CommandModels.MockTestAnswers
     {
         public Guid MockTestResultId { get; set; }
 
-        public Guid CourseId { get; set; }
-
-        public Guid UnitId { get; set; }
         public IList<MockTestAnswerQuestionModel>? Answers { get; set; }
     }
 

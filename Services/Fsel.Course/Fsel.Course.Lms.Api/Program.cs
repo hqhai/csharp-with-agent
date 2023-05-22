@@ -62,6 +62,7 @@ builder.Services.AddScoped<ISectionTimeCodeRepository, SectionTimeCodeRepository
 
 builder.Services.AddScoped<QuestionTypeConverter>();
 builder.Services.AddScoped<AnswerTypeConverter>();
+builder.Services.AddScoped<ValidateSection>();
 
 builder.AddRefitClients(typeof(IUserService), appSetting?.Services?.UserApiUrl);
 builder.AddRefitClients(typeof(ITrainingService), appSetting?.Services?.ClassApiUrl);

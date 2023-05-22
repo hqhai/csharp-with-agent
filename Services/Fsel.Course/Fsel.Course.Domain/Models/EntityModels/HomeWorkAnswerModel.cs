@@ -8,7 +8,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
 
     public class HomeWorkAnswerModel : BaseModel
     {
-        public string? AnswerStr { get; set; }
+        public object? Answer { get; set; }
 
         public int CorrectCount { get; set; }
 

@@ -12,7 +12,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public Guid SectionGroupId { get; set; }
         public string? VideoFilePath { get; set; }
         public IList<SectionPartModel>? SectionParts { get; set; }
-        public IList<SectionQuestionModel>? SectionQuestions { get; set; }
+
         public IList<SectionTimeCodeModel>? SectionTimeCodes { get; set; }
         public IList<QuestionModel>? Questions { get; set; }
     }

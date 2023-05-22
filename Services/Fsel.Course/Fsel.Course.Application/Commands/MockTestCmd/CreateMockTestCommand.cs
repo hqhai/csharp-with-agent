@@ -29,7 +29,10 @@ namespace Fsel.Course.Application.Commands.MockTestCmd
         private readonly IMockTestRepository _mockTestRepository;
         private readonly QuestionTypeConverter _questionTypeConverter;
 
-        public CreateMockTestCommandHandler(IMapper mapper, IMockTestRepository mockTestRepository, QuestionTypeConverter questionTypeConverter)
+        public CreateMockTestCommandHandler(IMapper mapper
+            , IMockTestRepository mockTestRepository
+            , QuestionTypeConverter questionTypeConverter
+            )
         {
             _mapper = mapper;
             _mockTestRepository = mockTestRepository;
@@ -117,7 +120,7 @@ namespace Fsel.Course.Application.Commands.MockTestCmd
                             }
                             var correctCount = newSection.SectionParts.SelectMany(x => x.SectionQuestions).Select(x => x.Question).Sum(x => x!.CorrectTotal);
                             var index = sectionGroup.Sections.IndexOf(section);
-                            if (!IsCheckSection(newSectionGroup.CourseSkill, index, correctCount))
+                            if (ValidateSection.IsCheckSection(newSectionGroup.CourseSkill, index, correctCount))
                             {
                                 methodResult.AddErrorBadRequest(nameof(EnumMockTestErrorCode.MockTestMustCorrectScore), nameof(index), index);
                                 return methodResult;
@@ -217,34 +220,6 @@ namespace Fsel.Course.Application.Commands.MockTestCmd
                     });
                 }
             }
-        }
-
-        private static bool IsCheckSection(EnumCourseSkill courseSkill, int index, int correctTotal)
-        {
-            if (courseSkill == EnumCourseSkill.Reading)
-            {
-                if (index == 0 && correctTotal == 13)
-                {
-                    return true;
-                }
-                else if (index == 1 && correctTotal == 14)
-                {
-                    return true;
-                }
-                else if (index == 2 && correctTotal == 13)
-                {
-                    return true;
-                }
-            }
-            else if (courseSkill == EnumCourseSkill.Listening)
-            {
-                if (correctTotal == 10)
-                {
-                    return true;
-                }
-            }
-
-            return false;
         }
     }
 }
