@@ -170,7 +170,8 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
                     HumanId = human.Id,
                     RoleLives = request.RoleLives,
                     CourseLevels = request.CourseLevels,
-                    CourseTypes = request.CourseTypes
+                    CourseTypes = request.CourseTypes,
+                    SubscriptionClasses = request.SubscriptionClasses
                 };
                 human.Code = $"CSO_{stt:0000}";
             }

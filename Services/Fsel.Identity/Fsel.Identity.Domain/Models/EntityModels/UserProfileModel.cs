@@ -6,8 +6,9 @@ namespace Fsel.Identity.Domain.Models.EntityModels
     using Fsel.Identity.Domain.Enums;
     using Fsel.Shared.Enums;
 
-    public class UserProfileModel : BaseModel
+    public class UserProfileModel
     {
+        public Guid Id { get; set; }
         public string? Code { get; set; }
         public string? FullName { get; set; }
         public DateTime? Birthday { get; set; }
@@ -19,7 +20,7 @@ namespace Fsel.Identity.Domain.Models.EntityModels
         public string? Email { get; set; }
         public string? AvatarPath { get; set; }
         public Guid? ClassId { get; set; }
-        public string? NameClass { get; set; }
+        public string? CodeClass { get; set; }
         public IList<string>? Roles { get; set; }
         public EnumCourseLevel CourseLevel { get; set; }
         public string? Membership { get; set; }
@@ -29,7 +30,7 @@ namespace Fsel.Identity.Domain.Models.EntityModels
         public string? CertificationPath { get; set; }
         public string? PoliceClearancePath { get; set; }
         public IList<TeacherBankAccountModel>? TeacherBankAccounts { get; set; }
-        public IList<StudentModel>? Students { get; set; }
-        public ParentModel? Parent { get; set; }
+        public IList<StudentProfileModel>? Students { get; set; }
+        public ParentProfileModel? Parent { get; set; }
     }
 }

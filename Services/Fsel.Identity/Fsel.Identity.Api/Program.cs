@@ -3,6 +3,7 @@
 using Fsel.Core.Extensions;
 using Fsel.Identity.Application.Services;
 using Fsel.Identity.Application.Services.InteractionService;
+using Fsel.Identity.Application.Services.ITrainingService;
 using Fsel.Identity.Domain.Entities;
 using Fsel.Identity.Domain.IRepositories;
 using Fsel.Identity.Infrastructure;
@@ -37,7 +38,7 @@ builder.Services.AddScoped<ITeacherBankAccountRepository, TeacherBankAccountRepo
 builder.AddRefitClients(typeof(ISenderService), appSetting?.Services?.SenderApiUrl);
 
 builder.AddRefitClients(typeof(IInteractionService), appSetting?.Services?.InteractionApiUrl);
-builder.AddRefitClients(typeof(IInteractionService), appSetting?.Services?.InteractionApiUrl);
+builder.AddRefitClients(typeof(ITrainingService), appSetting?.Services?.ClassApiUrl);
 var app = builder.Build();
 app.UseServices();
 app.Run();
