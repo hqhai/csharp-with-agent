@@ -25,9 +25,9 @@ namespace Fsel.Identity.Domain.Entities
         public string? CourseLevelsStr { get; set; }
 
         [NotMapped]
-        public object? CourseLevels
+        public IList<EnumCourseLevel>? CourseLevels
         {
-            get { return ConvertHelper.Deserialize<object>(CourseLevelsStr); }
+            get { return ConvertHelper.Deserialize<IList<EnumCourseLevel>>(CourseLevelsStr); }
             set { CourseLevelsStr = ConvertHelper.Serialize(value); }
         }
 
