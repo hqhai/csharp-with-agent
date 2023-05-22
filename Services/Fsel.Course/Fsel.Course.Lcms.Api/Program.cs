@@ -45,7 +45,7 @@ builder.Services.AddScoped<IHomeWorkQuestionRepository, HomeWorkQuestionReposito
 builder.Services.AddScoped<IHomeWorkResultRepository, HomeWorkResultRepository>();
 
 builder.Services.AddScoped<IPlacementTestResultRepository, PlacementTestResultRepository>();
-builder.Services.AddScoped<IPlacementTestRepository, PlacementTestRepository>();
+builder.Services.AddScoped<IPlacementTestAnswerRepository, PlacementTestAnswerRepository>();
 builder.Services.AddScoped<IPlacementTestRepository, PlacementTestRepository>();
 
 builder.Services.AddScoped<ISectionGroupRepository, SectionGroupRepository>();

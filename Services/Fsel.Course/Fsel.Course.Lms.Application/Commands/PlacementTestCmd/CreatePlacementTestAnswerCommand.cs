@@ -6,6 +6,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base;
     using Fsel.Course.Domain.Entities;
+    using Fsel.Course.Domain.Entities.SkillScoresConfigs;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
@@ -13,6 +14,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Infrastructure.Common;
     using Fsel.Course.Lms.Application.Services.UserServices;
+    using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -28,6 +30,10 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
         private readonly IUserService _userService;
         private readonly IQuestionRepository _questionRepository;
         private readonly IMapper _mapper;
+        private readonly ISectionGroupRepository _sectionGroupRepository;
+        private readonly ISectionPartRepository _sectionPartRepository;
+        private readonly ISectionQuestionRepository _sectionQuestionRepository;
+        private readonly ISectionRepository _sectionRepository;
         private readonly AuthContext _authContext;
         private readonly AnswerTypeConverter _answerTypeConverter;
 
@@ -37,6 +43,10 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
             , IUserService userService
             , IQuestionRepository questionRepository
             , IMapper mapper
+            , ISectionGroupRepository sectionGroupRepository
+            , ISectionPartRepository sectionPartRepository
+            , ISectionQuestionRepository sectionQuestionRepository
+            , ISectionRepository sectionRepository
             , AuthContext authContext
             , AnswerTypeConverter answerTypeConverter)
         {
@@ -45,6 +55,10 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
             _userService = userService;
             _questionRepository = questionRepository;
             _mapper = mapper;
+            _sectionGroupRepository = sectionGroupRepository;
+            _sectionPartRepository = sectionPartRepository;
+            _sectionQuestionRepository = sectionQuestionRepository;
+            _sectionRepository = sectionRepository;
             _authContext = authContext;
             _answerTypeConverter = answerTypeConverter;
         }
@@ -79,8 +93,6 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
                     Level = request.Level,
                     StudentId = studentId ?? default
                 };
-                placementTestResult = _placementTestResultRepository.Add(placementTestResult);
-                await _placementTestResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
             }
 
             var questionIds = request.Answers.Select(x => x.QuestionId).ToList();
@@ -92,6 +104,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
             }
 
             var placementTestAnswers = new List<PlacementTestAnswer>();
+            int correctCountStudent = 0;
             foreach (var item in request.Answers)
             {
                 var question = questions.FirstOrDefault(x => x.Id == item.QuestionId);
@@ -121,6 +134,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
                         methodResult.AddErrorBadRequest(nameof(EnumPlacementTestAnswerErrorCode.AnswerIsInTheWrongFormat), nameof(item.Answer), item.Answer);
                         return methodResult;
                     }
+                    correctCountStudent += correctCount;
                     placementTestAnswer = new PlacementTestAnswer
                     {
                         CorrectCount = correctCount,
@@ -133,6 +147,73 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
             }
 
             #endregion Validation
+
+            #region Update placementTestResult
+
+            IQueryable<SkillScores>? skillScoresQuery = null;
+            if (placementTestResult.Level != EnumPlacementTestLevel.IELTS)
+            {
+                skillScoresQuery = from pr in _placementTestResultRepository.Queryable
+                                   join pa in _placementTestAnswerRepository.Queryable on pr.Id equals pa.PlacementTestResultId
+                                   join sq in _sectionQuestionRepository.Queryable on pa.SectionQuestionId equals sq.Id
+                                   join s in _sectionRepository.Queryable on sq.SectionId equals s.Id
+                                   join sg in _sectionGroupRepository.Queryable on s.SectionGroupId equals sg.Id
+                                   join q in _questionRepository.Queryable on sq.QuestionId equals q.Id
+                                   where pr.Id == placementTestResult.Id
+                                   group q by sg.CourseSkill into g
+                                   select new SkillScores
+                                   {
+                                       Skill = g.Key,
+                                       Total = g.Sum(x => x.CorrectTotal),
+                                   };
+            }
+            else
+            {
+                skillScoresQuery = from pr in _placementTestResultRepository.Queryable
+                                   join pa in _placementTestAnswerRepository.Queryable on pr.Id equals pa.PlacementTestResultId
+                                   join sq in _sectionQuestionRepository.Queryable on pa.SectionQuestionId equals sq.Id
+                                   join sp in _sectionPartRepository.Queryable on sq.SectionPartId equals sp.Id
+                                   join s in _sectionRepository.Queryable on sp.SectionId equals s.Id
+                                   join sg in _sectionGroupRepository.Queryable on s.SectionGroupId equals sg.Id
+                                   join q in _questionRepository.Queryable on sq.QuestionId equals q.Id
+                                   where pr.Id == placementTestResult.Id
+                                   group q by sg.CourseSkill into g
+                                   select new SkillScores
+                                   {
+                                       Skill = g.Key,
+                                       Total = g.Sum(x => x.CorrectTotal),
+                                   };
+            }
+
+            var skillScoreTotals = await skillScoresQuery.ToListAsync(cancellationToken);
+            //var skillScoreScores = await answerQuery.ToListAsync(cancellationToken);
+            //foreach (var skillScore in skillScoreTotals)
+            //{
+            //    var number = skillScoreScores.FirstOrDefault(x => x.Skill == skillScore.Skill)!.Scores;
+            //    skillScore.Scores = number;
+            //    if (placementTestResult.Level == EnumPlacementTestLevel.IELTS)
+            //    {
+            //        if (skillScore.Skill == EnumCourseSkill.Reading)
+            //        {
+            //            skillScore.Number = number.GetReadingCountIelts();
+            //        }
+            //        else if (skillScore.Skill == EnumCourseSkill.Listening)
+            //        {
+            //            skillScore.Number = number.GetListeningCountIelts();
+            //        }
+            //    }
+            //}
+            placementTestResult.CorrectCount = correctCountStudent;
+            placementTestResult.CorrectTotal = Convert.ToInt32(skillScoreTotals.Sum(x => x.Total));
+            placementTestResult.Status = EnumResultStatus.Done;
+            placementTestResult.SkillScores = skillScoreTotals;
+            placementTestResult.Percent = (double)placementTestResult.CorrectCount / placementTestResult.CorrectTotal * 100;
+            placementTestResult = _placementTestResultRepository.Update(placementTestResult);
+            await _placementTestResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+            placementTestResult = _placementTestResultRepository.Add(placementTestResult);
+            await _placementTestResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+
+            #endregion Update placementTestResult
 
             await _placementTestAnswerRepository.ExecuteTransactionAsync(async () =>
             {
