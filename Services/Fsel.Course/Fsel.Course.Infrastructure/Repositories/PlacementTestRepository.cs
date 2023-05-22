@@ -84,15 +84,13 @@ namespace Fsel.Course.Infrastructure.Repositories
                                                 Name = x.Name,
                                                 MediaPost = x.MediaPost,
                                                 TargetWord = x.TargetWord,
-                                                CreatedDate = x.CreatedDate,
-                                                CreatedUserId = x.CreatedUserId,
+                                                DisplayOrder = x.DisplayOrder,
+                                                VideoFilePath = x.VideoFilePath,
                                                 SectionParts = x.SectionParts.Select(x => new SectionPartModel
                                                 {
                                                     Id = x.Id,
-                                                    CreatedDate = x.CreatedDate,
                                                     PartName = x.PartName,
                                                     SectionId = x.SectionId,
-                                                    CreatedFullName = x.CreatedFullName,
                                                     Question = x.SectionQuestions.Select(x => x.Question).Select(x => new QuestionModel
                                                     {
                                                         Id = x!.Id,
@@ -133,9 +131,9 @@ namespace Fsel.Course.Infrastructure.Repositories
                                                Id = x.Id,
                                                Name = x.Name,
                                                MediaPost = x.MediaPost,
+                                               VideoFilePath = x.VideoFilePath,
+                                               DisplayOrder = x.DisplayOrder,
                                                TargetWord = x.TargetWord,
-                                               CreatedDate = x.CreatedDate,
-                                               CreatedUserId = x.CreatedUserId,
                                                Questions = x.SectionQuestions.Select(x => x.Question).Select(x => new QuestionModel
                                                {
                                                    Id = x!.Id,

@@ -81,14 +81,13 @@ namespace Fsel.Course.Infrastructure.Repositories
                                                   Id = x.Id,
                                                   Name = x.Name,
                                                   MediaPost = x.MediaPost,
+                                                  VideoFilePath = x.VideoFilePath,
+                                                  DisplayOrder = x.DisplayOrder,
                                                   TargetWord = x.TargetWord,
-                                                  CreatedDate = x.CreatedDate,
-                                                  CreatedUserId = x.CreatedUserId,
                                                   SectionTimeCodes = x.SectionTimeCodes.Select(x => new SectionTimeCodeModel
                                                   {
                                                       Id = x.Id,
                                                       Name = x.Name,
-                                                      CreatedDate = x.CreatedDate,
                                                       DisplayTime = x.DisplayTime,
                                                       ExecutionTime = x.ExecutionTime,
                                                       SectionId = x.SectionId,
@@ -96,10 +95,8 @@ namespace Fsel.Course.Infrastructure.Repositories
                                                   SectionParts = x.SectionParts.Select(x => new SectionPartModel
                                                   {
                                                       Id = x.Id,
-                                                      CreatedDate = x.CreatedDate,
                                                       PartName = x.PartName,
                                                       SectionId = x.SectionId,
-                                                      CreatedFullName = x.CreatedFullName,
                                                       Question = x.SectionQuestions.Select(x => x.Question).Select(x => new QuestionModel
                                                       {
                                                           Id = x!.Id,

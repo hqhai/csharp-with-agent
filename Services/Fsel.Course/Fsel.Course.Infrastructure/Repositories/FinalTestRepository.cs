@@ -58,8 +58,6 @@ namespace Fsel.Course.Infrastructure.Repositories
                                               Id = x!.Id,
                                               Name = x.Name,
                                               CourseSkill = x.CourseSkill,
-                                              CreatedDate = x.CreatedDate,
-                                              CreatedFullName = x.CreatedFullName,
                                               MediaPost = x.MediaPost,
                                               Questions = x.ExerciseQuestions.Select(x => x.Question).Select(x => new QuestionModel
                                               {
@@ -67,8 +65,6 @@ namespace Fsel.Course.Infrastructure.Repositories
                                                   QuestionType = x.QuestionType,
                                                   Config = x.Config,
                                                   CorrectTotal = x.CorrectTotal,
-                                                  CreatedDate = x.CreatedDate,
-                                                  CreatedFullName = x.CreatedFullName,
                                                   Explanation = x.Explanation,
                                                   Ungraded = x.Ungraded,
                                               }).ToList(),
