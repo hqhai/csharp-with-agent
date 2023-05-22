@@ -39,38 +39,14 @@ namespace Fsel.Course.Lms.Api.Controllers
         }
 
         /// <summary>
-        /// Create PlacementTest Answer
+        /// Create PlacementTest Answers
         /// </summary>
-        [HttpPost("placement-test-answer")]
-        [ProducesResponseType(typeof(MethodResult<PlacementTestResultModel>), (int)HttpStatusCode.OK)]
+        [HttpPost("placement-test-answers")]
+        [ProducesResponseType(typeof(MethodResult<List<PlacementTestResultModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> CreateAnswer([FromBody] CreatePlacementTestAnswerCommand command)
         {
-            MethodResult<PlacementTestResultModel> queryResult = await _mediator.Send(command).ConfigureAwait(false);
-            return queryResult.GetActionResult();
-        }
-
-        /// <summary>
-        /// Update PlacementTest Result
-        /// </summary>
-        [HttpPost("placement-test-result")]
-        [ProducesResponseType(typeof(MethodResult<List<PlacementTestResultModel>>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> UpdateResult([FromQuery] UpdatePlacementTestResultCommand command)
-        {
             MethodResult<List<PlacementTestResultModel>> queryResult = await _mediator.Send(command).ConfigureAwait(false);
-            return queryResult.GetActionResult();
-        }
-
-        /// <summary>
-        /// Update Student in Level
-        /// </summary>
-        [HttpPost("student-by-level")]
-        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> UpdateStudentByLevel([FromQuery] UpdateCourseLevelStudentCommand command)
-        {
-            MethodResult<bool> queryResult = await _mediator.Send(command).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
     }

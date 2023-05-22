@@ -2,6 +2,8 @@
 
 namespace Fsel.Shared.Helpers
 {
+    using Fsel.Shared.Enums;
+
     public static class EnumCountIeltsHelper
     {
         private static IList<KeyValuePair<double, double>> s_keyValueReadings = new List<KeyValuePair<double, double>>
@@ -48,6 +50,7 @@ namespace Fsel.Shared.Helpers
             new KeyValuePair<double, double>(39, 9),
             new KeyValuePair<double, double>(40, 9),
         };
+
         private static IList<KeyValuePair<double, double>> s_keyValueListenings = new List<KeyValuePair<double, double>>
         {
             new KeyValuePair<double, double>(0, 0),
@@ -92,13 +95,72 @@ namespace Fsel.Shared.Helpers
             new KeyValuePair<double, double>(39, 9),
             new KeyValuePair<double, double>(40, 9),
         };
+
         public static double GetReadingCountIelts(this double number)
         {
             return s_keyValueReadings.FirstOrDefault(x => x.Value == number).Key;
         }
+
         public static double GetListeningCountIelts(this double number)
         {
             return s_keyValueListenings.FirstOrDefault(x => x.Value == number).Key;
+        }
+
+        public static EnumCourseLevel GetLevelInPoint(EnumPlacementTestLevel? enumPlacementTestLevel, double correctCount)
+        {
+            EnumCourseLevel courseLevel;
+            double roundedNumber = Math.Ceiling(correctCount);
+            if (enumPlacementTestLevel == EnumPlacementTestLevel.IELTS && roundedNumber >= 3 && roundedNumber <= 3.5)
+            {
+                courseLevel = EnumCourseLevel.RFE;
+            }
+            else if (enumPlacementTestLevel == EnumPlacementTestLevel.IELTS && roundedNumber >= 4 && roundedNumber <= 4.5)
+            {
+                courseLevel = EnumCourseLevel.MS1;
+            }
+            else if (enumPlacementTestLevel == EnumPlacementTestLevel.IELTS && roundedNumber >= 5 && roundedNumber <= 5.5)
+            {
+                courseLevel = EnumCourseLevel.MS2;
+            }
+            else if (enumPlacementTestLevel == EnumPlacementTestLevel.IELTS && roundedNumber >= 6 && roundedNumber <= 6.5)
+            {
+                courseLevel = EnumCourseLevel.MS3;
+            }
+            else
+            {
+                switch (enumPlacementTestLevel)
+                {
+                    case EnumPlacementTestLevel.A1:
+                        courseLevel = EnumCourseLevel.A1;
+                        break;
+
+                    case EnumPlacementTestLevel.A2:
+                        courseLevel = EnumCourseLevel.A2;
+                        break;
+
+                    case EnumPlacementTestLevel.B1:
+                        courseLevel = EnumCourseLevel.B1;
+                        break;
+
+                    case EnumPlacementTestLevel.B1Plus:
+                        courseLevel = EnumCourseLevel.B1Plus;
+                        break;
+
+                    case EnumPlacementTestLevel.B2:
+                        courseLevel = EnumCourseLevel.B2;
+                        break;
+
+                    case EnumPlacementTestLevel.C1:
+                        courseLevel = EnumCourseLevel.C1;
+                        break;
+
+                    default:
+                        courseLevel = EnumCourseLevel.A1;
+                        break;
+                }
+            }
+
+            return courseLevel;
         }
     }
 }

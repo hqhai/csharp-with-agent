@@ -12,6 +12,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
     {
         public double Percent { get; set; }
         public int CorrectCount { get; set; }
+        public double? OverallScore { get; set; }
         public int CorrectTotal { get; set; }
         public IList<SkillScores>? SkillScores { get; set; }
         public EnumPlacementTestLevel Level { get; set; }
