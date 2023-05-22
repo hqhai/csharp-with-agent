@@ -54,6 +54,11 @@ builder.Services.AddScoped<IMockTestResultRepository, MockTestResultRepository>(
 builder.Services.AddScoped<IMockTestAnswerRepository, MockTestAnswerRepository>();
 builder.Services.AddScoped<IMockTestSectionRepository, MockTestSectionRepository>();
 builder.Services.AddScoped<IUnitSkillMockTestRepository, UnitSkillMockTestRepository>();
+builder.Services.AddScoped<ISectionQuestionRepository, SectionQuestionRepository>();
+builder.Services.AddScoped<ISectionGroupRepository, SectionGroupRepository>();
+builder.Services.AddScoped<ISectionPartRepository, SectionPartRepository>();
+builder.Services.AddScoped<ISectionRepository, SectionRepository>();
+builder.Services.AddScoped<ISectionTimeCodeRepository, SectionTimeCodeRepository>();
 
 builder.Services.AddScoped<QuestionTypeConverter>();
 builder.Services.AddScoped<AnswerTypeConverter>();
