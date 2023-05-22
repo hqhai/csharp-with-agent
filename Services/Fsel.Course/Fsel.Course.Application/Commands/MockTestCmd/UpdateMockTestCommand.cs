@@ -155,10 +155,10 @@ namespace Fsel.Course.Application.Commands.MockTestCmd
                         }
                     }
                     var correctCount = newSection.SectionParts.SelectMany(x => x.SectionQuestions).Select(x => x.Question).Sum(x => x!.CorrectTotal);
-                    var index = sectionGroup.Sections.IndexOf(section);
-                    if (ValidateSection.IsCheckSection(newSectionGroup.CourseSkill, index, correctCount))
+                    section.DisplayOrder = sectionGroup.Sections.IndexOf(section);
+                    if (ValidateSection.IsCheckSection(newSectionGroup.CourseSkill, section.DisplayOrder, correctCount))
                     {
-                        methodResult.AddErrorBadRequest(nameof(EnumMockTestErrorCode.MockTestMustCorrectScore), nameof(index), index);
+                        methodResult.AddErrorBadRequest(nameof(EnumMockTestErrorCode.MockTestMustCorrectScore), nameof(section.DisplayOrder), section.DisplayOrder);
                         return methodResult;
                     }
                     else

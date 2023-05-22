@@ -109,7 +109,7 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestQuery
                         MediaPost = x.MediaPost,
                         TargetWord = x.TargetWord,
                         VideoFilePath = x.VideoFilePath,
-                        CreatedDate = x.CreatedDate,
+
                         SectionParts = x.SectionParts.Select(x => new SectionPartModel
                         {
                             Id = x.Id,
@@ -118,7 +118,7 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestQuery
                             {
                                 Id = x!.Id,
                                 CorrectTotal = x.CorrectTotal,
-                                CreatedDate = x.CreatedDate,
+
                                 Explanation = x.Explanation,
                                 QuestionType = x.QuestionType,
                                 Config = _questionTypeConverter.QuestionTypeConverterObject(x.Config, x.QuestionType, isDisableAnswers: !checkDone).Item1,

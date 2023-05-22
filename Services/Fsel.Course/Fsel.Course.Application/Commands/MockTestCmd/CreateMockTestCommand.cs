@@ -14,8 +14,6 @@ namespace Fsel.Course.Application.Commands.MockTestCmd
     using Fsel.Course.Domain.Models.CommandModels.Questions;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Infrastructure.Common;
-    using Fsel.Course.Infrastructure.Repositories;
-    using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Http;
 
@@ -119,10 +117,10 @@ namespace Fsel.Course.Application.Commands.MockTestCmd
                                 }
                             }
                             var correctCount = newSection.SectionParts.SelectMany(x => x.SectionQuestions).Select(x => x.Question).Sum(x => x!.CorrectTotal);
-                            var index = sectionGroup.Sections.IndexOf(section);
-                            if (ValidateSection.IsCheckSection(newSectionGroup.CourseSkill, index, correctCount))
+                            section.DisplayOrder = sectionGroup.Sections.IndexOf(section);
+                            if (ValidateSection.IsCheckSection(newSectionGroup.CourseSkill, section.DisplayOrder, correctCount))
                             {
-                                methodResult.AddErrorBadRequest(nameof(EnumMockTestErrorCode.MockTestMustCorrectScore), nameof(index), index);
+                                methodResult.AddErrorBadRequest(nameof(EnumMockTestErrorCode.MockTestMustCorrectScore), nameof(section.DisplayOrder), section.DisplayOrder);
                                 return methodResult;
                             }
                         }
