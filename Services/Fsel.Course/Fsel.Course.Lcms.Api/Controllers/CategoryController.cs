@@ -46,7 +46,7 @@ namespace Fsel.Course.Lcms.Api.Controllers
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetEnumCourseSkillsAsync()
         {
-            var queryResult = await _mediator.Send(new GetAllEnumCourseSkillQuery()).ConfigureAwait(false);
+            var queryResult = await _mediator.Send(new GetAllEnumPlacementTestSkillsQuery()).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
 

@@ -23,10 +23,5 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         /// PlacementTest must have the correct score
         /// </summary>
         PlacementTestMustCorrectScore,
-
-        /// <summary>
-        /// Call to service UserService error
-        /// </summary>
-        CallUserServiceError
     }
 }

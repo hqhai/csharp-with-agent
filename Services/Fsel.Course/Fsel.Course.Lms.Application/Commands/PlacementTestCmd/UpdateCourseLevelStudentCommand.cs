@@ -10,6 +10,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Course.Lms.Application.Services.UserServices.Models;
     using Fsel.Shared.Enums;
+    using Fsel.Shared.Enums.ErrorCodes;
     using MediatR;
     using Microsoft.AspNetCore.Http;
 
@@ -39,7 +40,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
             var isCheck = await _userService.UpdateStudentByLevelAsync(new UpdateStudentByLevelModel { Id = _authContext.CurrentUserId, Level = request.CourseLevel });
             if (!isCheck.IsSuccessStatusCode)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumPlacementTestErrorCode.CallUserServiceError));
+                methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError));
                 return methodResult;
             }
             methodResult.StatusCode = StatusCodes.Status200OK;

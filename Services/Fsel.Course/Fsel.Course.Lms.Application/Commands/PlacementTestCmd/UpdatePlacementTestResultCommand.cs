@@ -13,7 +13,6 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
-    using Fsel.Course.Domain.Models.CommandModels.PlacementTestResults;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Shared.Enums;
@@ -22,8 +21,9 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class UpdatePlacementTestResultCommand : UpdatePlacementTestResultCommandModel, IRequest<MethodResult<List<PlacementTestResultModel>>>
+    public class UpdatePlacementTestResultCommand : IRequest<MethodResult<List<PlacementTestResultModel>>>
     {
+        public Guid PlacementTestResultId { get; set; }
     }
 
     public class UpdatePlacementTestResultCommandHandler : IRequestHandler<UpdatePlacementTestResultCommand, MethodResult<List<PlacementTestResultModel>>>
@@ -72,13 +72,6 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
             if (placementTestResult == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumPlacementTestResultErrorCode.PlacementTestResultNotExist), nameof(request.PlacementTestResultId), request.PlacementTestResultId);
-                return methodResult;
-            }
-
-            _mapper.Map(request, placementTestResult);
-            if (!placementTestResult.IsValid())
-            {
-                methodResult.AddErrorBadRequest(placementTestResult.ErrorMessages);
                 return methodResult;
             }
 

@@ -7,17 +7,17 @@ using Microsoft.AspNetCore.Http;
 
 namespace Fsel.Course.Application.Queries.CategoryQuery
 {
-    public class GetAllEnumCourseSkillQuery : IRequest<MethodResult<object>>
+    public class GetAllEnumPlacementTestSkillsQuery : IRequest<MethodResult<object>>
     {
     }
 
-    public class GetAllEnumCourseSkillQueryHandler : IRequestHandler<GetAllEnumCourseSkillQuery, MethodResult<object>>
+    public class GetAllEnumPlacementTestSkillsQueryHandler : IRequestHandler<GetAllEnumPlacementTestSkillsQuery, MethodResult<object>>
     {
-        public GetAllEnumCourseSkillQueryHandler()
+        public GetAllEnumPlacementTestSkillsQueryHandler()
         {
         }
 
-        public async Task<MethodResult<object>> Handle(GetAllEnumCourseSkillQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<object>> Handle(GetAllEnumPlacementTestSkillsQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<object> methodResult = new MethodResult<object>();

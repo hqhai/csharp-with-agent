@@ -2,8 +2,6 @@
 
 namespace Fsel.Shared.Helpers
 {
-    using Fsel.Shared.Enums;
-
     public static class EnumCountIeltsHelper
     {
         private static IList<KeyValuePair<double, double>> s_keyValueReadings = new List<KeyValuePair<double, double>>
