@@ -7,7 +7,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
 
     public class MockTestAnswerModel : BaseModel
     {
-        public object? AnswerStr { get; set; }
+        public object? Answer { get; set; }
 
         public int CorrectCount { get; set; }
 
