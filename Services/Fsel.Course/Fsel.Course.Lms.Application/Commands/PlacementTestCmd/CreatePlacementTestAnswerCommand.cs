@@ -22,11 +22,11 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class CreatePlacementTestAnswerCommand : CreatePlacementTestAnswerCommandModel, IRequest<MethodResult<List<PlacementTestResultModel>>>
+    public class CreatePlacementTestAnswerCommand : CreatePlacementTestAnswerCommandModel, IRequest<MethodResult<IList<PlacementTestResultModel>>>
     {
     }
 
-    public class CreatePlacementTestAnswerCommandHandler : IRequestHandler<CreatePlacementTestAnswerCommand, MethodResult<List<PlacementTestResultModel>>>
+    public class CreatePlacementTestAnswerCommandHandler : IRequestHandler<CreatePlacementTestAnswerCommand, MethodResult<IList<PlacementTestResultModel>>>
     {
         private readonly IPlacementTestAnswerRepository _placementTestAnswerRepository;
         private readonly IPlacementTestResultRepository _placementTestResultRepository;
@@ -54,10 +54,10 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
             _answerTypeConverter = answerTypeConverter;
         }
 
-        public async Task<MethodResult<List<PlacementTestResultModel>>> Handle(CreatePlacementTestAnswerCommand request, CancellationToken cancellationToken)
+        public async Task<MethodResult<IList<PlacementTestResultModel>>> Handle(CreatePlacementTestAnswerCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            MethodResult<List<PlacementTestResultModel>> methodResult = new MethodResult<List<PlacementTestResultModel>>();
+            MethodResult<IList<PlacementTestResultModel>> methodResult = new MethodResult<IList<PlacementTestResultModel>>();
 
             #region Validation
 
@@ -88,7 +88,6 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
 
             var placementTestAnswers = new List<PlacementTestAnswer>();
             var skillScores = new List<SkillScores>();
-            List<PlacementTestResultModel> placementTestResultModels = new List<PlacementTestResultModel>();
             foreach (var item in request.Skills)
             {
                 if (item.Answers == null || item.Answers.Count == 0)
@@ -138,7 +137,6 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
                         {
                             CorrectCount = correctCount,
                             Answer = answerConfig,
-                            PlacementTestResultId = placementTestResult.Id,
                             SectionQuestionId = sectionQuestionId
                         };
                         placementTestAnswers.Add(placementTestAnswer);
@@ -147,83 +145,47 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
                 var skillScore = new SkillScores { Skill = item.Skill, TotalCount = questions.Sum(x => x.CorrectTotal), CorrectCount = count };
                 if (placementTestResult.Level == EnumPlacementTestLevel.IELTS)
                 {
-                    if (skillScore.Skill == EnumCourseSkill.Reading)
-                    {
-                        skillScore.Scores = skillScore.CorrectCount.GetReadingCountIelts();
-                    }
-                    else if (skillScore.Skill == EnumCourseSkill.Listening)
-                    {
-                        skillScore.Scores = skillScore.CorrectCount.GetListeningCountIelts();
-                    }
+                    skillScore.Scores = skillScore.CorrectCount.GetIeltsScore(skillScore.Skill);
+                    skillScores.Add(skillScore);
                 }
-                skillScores.Add(skillScore);
             }
 
             #endregion Validation
-
-            #region Update placementTestResult
 
             placementTestResult.CorrectCount = Convert.ToInt32(skillScores.Sum(x => x.CorrectCount));
             placementTestResult.CorrectTotal = Convert.ToInt32(skillScores.Sum(x => x.TotalCount));
             placementTestResult.Status = EnumResultStatus.Done;
             placementTestResult.SkillScores = skillScores;
-            placementTestResult.Percent = (double)placementTestResult.CorrectCount / placementTestResult.CorrectTotal * 100;
+            placementTestResult.Percent = placementTestResult.CorrectTotal > 0 ? ((double)placementTestResult.CorrectCount / placementTestResult.CorrectTotal * 100) : default;
+            placementTestResult.PlacementTestAnswers = placementTestAnswers;
 
-            _placementTestResultRepository.Add(placementTestResult);
-            await _placementTestResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+            var overallScore = NumberHelper.RoundNumberDouble(skillScores.Select(x => x.Scores).Average());
+            var currentLevel = request.Level.GetLevelInScore(placementTestResult.Level == EnumPlacementTestLevel.IELTS ? overallScore : placementTestResult.Percent);
 
-            #endregion Update placementTestResult
-
-            PlacementTestResultModel placementTestResultModel = new PlacementTestResultModel();
-            _mapper.Map(placementTestResult, placementTestResultModel);
-            if (request.Level == EnumPlacementTestLevel.IELTS)
+            if (currentLevel.HasValue)
             {
-                var count = skillScores.Select(x => x.Scores).Sum() / 2;
                 var updateStudent = new UpdateStudentByLevelModel
                 {
                     Id = _authContext.CurrentUserId,
-                    Level = EnumCountIeltsHelper.GetLevelInPoint(request.Level, count)
+                    Level = currentLevel.Value
                 };
                 var isCheckResult = await _userService.UpdateStudentByLevelAsync(updateStudent);
                 if (!isCheckResult.IsSuccessStatusCode)
                 {
                     methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError));
                 }
-                placementTestResultModel.OverallScore = EnumConvertNumberHelper.RoundNumberDouble(count);
-            }
-            else
-            {
-                var updateStudent = new UpdateStudentByLevelModel
-                {
-                    Id = _authContext.CurrentUserId,
-                    Level = EnumCountIeltsHelper.GetLevelInPoint(request.Level)
-                };
-                var isCheckResult = await _userService.UpdateStudentByLevelAsync(updateStudent);
-                if (!isCheckResult.IsSuccessStatusCode)
-                {
-                    methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError));
-                    return methodResult;
-                }
-
-                var placementTestResults = await _placementTestResultRepository.Queryable.Where(x => x.Status == EnumResultStatus.Done && x.StudentId == studentId && x.Level == request.Level)
-                                       .ToListAsync(cancellationToken);
-
-                placementTestResultModels = _mapper.Map<List<PlacementTestResultModel>>(placementTestResults);
             }
 
-            placementTestResultModel.SkillScores = skillScores;
-            placementTestResultModels.Add(placementTestResultModel);
+            var placementTestResults = await _placementTestResultRepository.Queryable.Where(x => x.Status == EnumResultStatus.Done && x.StudentId == studentId).ToListAsync(cancellationToken);
 
             await _placementTestAnswerRepository.ExecuteTransactionAsync(async () =>
             {
-                if (placementTestAnswers.Count > 0)
-                {
-                    await _placementTestAnswerRepository.AddList(placementTestAnswers);
-                    await _placementTestAnswerRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-                }
+                placementTestResult = _placementTestResultRepository.Add(placementTestResult);
+                await _placementTestResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
+                placementTestResults.Add(placementTestResult);
                 methodResult.StatusCode = StatusCodes.Status201Created;
-                methodResult.Result = placementTestResultModels;
+                methodResult.Result = _mapper.Map<IList<PlacementTestResultModel>>(placementTestResults);
                 return methodResult;
             });
 

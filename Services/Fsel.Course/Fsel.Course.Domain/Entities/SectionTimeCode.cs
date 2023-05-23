@@ -32,13 +32,13 @@ namespace Fsel.Course.Domain.Entities
         [NotMapped]
         public TimeSpan DisplayTimeSpan
         {
-            get { return TimeSpan.FromTicks(DisplayTime); }
+            get { return TimeSpan.FromSeconds(DisplayTime); }
         }
 
         [NotMapped]
         public TimeSpan ExecutionTimeSpan
         {
-            get { return TimeSpan.FromTicks(ExecutionTime); }
+            get { return TimeSpan.FromSeconds(ExecutionTime); }
         }
 
         public Section? Section { get; set; }

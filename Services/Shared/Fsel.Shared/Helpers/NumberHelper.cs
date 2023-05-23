@@ -2,7 +2,7 @@
 
 namespace Fsel.Shared.Helpers
 {
-    public static class EnumConvertNumberHelper
+    public static class NumberHelper
     {
         public static double RoundNumberDouble(double number)
         {

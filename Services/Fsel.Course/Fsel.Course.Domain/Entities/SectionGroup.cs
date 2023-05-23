@@ -19,7 +19,7 @@ namespace Fsel.Course.Domain.Entities
         [NotMapped]
         public TimeSpan ExecutionTimeSpan
         {
-            get { return TimeSpan.FromTicks(ExecutionTime); }
+            get { return TimeSpan.FromSeconds(ExecutionTime); }
         }
 
         public EnumCourseSkill CourseSkill { get; set; }
