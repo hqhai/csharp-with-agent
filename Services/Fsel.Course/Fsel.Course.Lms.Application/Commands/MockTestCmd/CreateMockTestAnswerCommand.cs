@@ -80,20 +80,6 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
                 return methodResult;
             }
 
-            var mockTestSection = await _mockTestSectionRepository.Queryable.FirstOrDefaultAsync(x => x.MockTestId == mockTestResult.MockTestId, cancellationToken);
-            if (mockTestSection == null)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumMockTestErrorCode.MockTestsNotExist), nameof(mockTestResult.MockTestId), mockTestResult.MockTestId);
-                return methodResult;
-            }
-
-            var mockTest = await _mockTestRepository.GetByIdAsync(mockTestSection.MockTestId);
-            if (mockTest == null)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumMockTestErrorCode.MockTestsNotExist), nameof(mockTestSection.MockTestId), mockTestSection.MockTestId);
-                return methodResult;
-            }
-
             var questionIds = request.Answers.Select(x => x.QuestionId).ToList();
             var questions = await _questionRepository.GetIncludeSectionByIdAsync(questionIds);
             if (questions == null || questions.Count == 0)
@@ -150,15 +136,13 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
                             join sg in _sectionGroupRepository.Queryable on ps.SectionGroupId equals sg.Id
                             join s in _sectionRepository.Queryable on sg.Id equals s.SectionGroupId
                             join sp in _sectionPartRepository.Queryable on s.Id equals sp.SectionId
-                            join sq in _sectionQuestionRepository.Queryable on s.Id equals sq.SectionId
+                            join sq in _sectionQuestionRepository.Queryable on sp.Id equals sq.SectionPartId
                             join q in _questionRepository.Queryable on sq.QuestionId equals q.Id
-                            join tc in _sectionTimeCodeRepository.Queryable on sg.Id equals tc.Id
-                            where p.Id == mockTest.Id
-
+                            where p.Id == mockTestResult.MockTestId
                             select q.CorrectTotal;
 
             mockTestResult.CorrectCount = correctCountStudent;
-            mockTestResult.CorrectTotal = await questionQuery!.SumAsync(cancellationToken);
+            mockTestResult.CorrectTotal = await questionQuery.SumAsync(cancellationToken);
             mockTestResult.Percent = (double)mockTestResult.CorrectCount / mockTestResult.CorrectTotal * 100;
             mockTestResult.Status = EnumResultStatus.Done;
             await _mockTestAnswerRepository.ExecuteTransactionAsync(async () =>
