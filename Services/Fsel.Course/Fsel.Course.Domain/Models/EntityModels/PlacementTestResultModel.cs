@@ -7,12 +7,13 @@ namespace Fsel.Course.Domain.Models.EntityModels
     using Fsel.Course.Domain.Entities.SkillScoresConfigs;
     using Fsel.Course.Domain.Enums;
     using Fsel.Shared.Enums;
+    using Fsel.Shared.Helpers;
 
     public class PlacementTestResultModel : BaseModel
     {
         public double Percent { get; set; }
         public int CorrectCount { get; set; }
-        public double? OverallScore { get; set; }
+        public double? OverallScore { get { return SkillScores != null ? NumberHelper.RoundNumberDouble(SkillScores.Select(x => x.Scores).Average()) : default; } }
         public int CorrectTotal { get; set; }
         public IList<SkillScores>? SkillScores { get; set; }
         public EnumPlacementTestLevel Level { get; set; }

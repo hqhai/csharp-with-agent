@@ -64,6 +64,7 @@ builder.Services.AddScoped<ISectionQuestionRepository, SectionQuestionRepository
 builder.Services.AddScoped<IFinalTestRepository, FinalTestRepository>();
 builder.Services.AddScoped<QuestionTypeConverter>();
 builder.Services.AddScoped<AnswerTypeConverter>();
+builder.Services.AddScoped<SectionConverter>();
 
 builder.AddRefitClients(typeof(IUserService), appSetting?.Services?.UserApiUrl);
 builder.AddRefitClients(typeof(ITrainingService), appSetting?.Services?.ClassApiUrl);
