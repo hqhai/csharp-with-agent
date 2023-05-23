@@ -162,7 +162,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
                         {
                             Id = x.Id,
                             PartName = x.PartName,
-                            Question = x.SectionQuestions.Select(x => x.Question).Select(x => new QuestionModel
+                            Questions = x.SectionQuestions.Select(x => x.Question).Select(x => new QuestionModel
                             {
                                 Id = x!.Id,
                                 CorrectTotal = x.CorrectTotal,
@@ -170,7 +170,6 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
                                 Explanation = x.Explanation,
                                 QuestionType = x.QuestionType,
                                 Config = _questionTypeConverter.QuestionTypeConverterObject(x.Config, x.QuestionType, isDisableAnswers: !checkDone).Item1,
-                                
                             }).ToList(),
                         }).ToList(),
                         SectionTimeCodes = x.SectionTimeCodes.Select(x => new SectionTimeCodeModel
@@ -182,7 +181,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
                         }).ToList(),
                     }).ToList(),
                 }).ToList(),
-                MockTestResults = mockTest.MockTestResults.Where(x => x.StudentId == studentId).Select(x => new MockTestResultModel
+                MockTestResult = mockTest.MockTestResults.Where(x => x.StudentId == studentId).Select(x => new MockTestResultModel
                 {
                     Id = x.Id,
                     CorrectCount = x.CorrectCount,
@@ -194,7 +193,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
                     StudentId = x.StudentId,
                     CourseId = course.Id,
                     UnitId = unit.Id
-                }).ToList()
+                }).FirstOrDefault()
             };
 
             methodResult.StatusCode = StatusCodes.Status201Created;

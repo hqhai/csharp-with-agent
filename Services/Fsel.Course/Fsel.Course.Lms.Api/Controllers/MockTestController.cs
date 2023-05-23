@@ -7,7 +7,6 @@ using Fsel.Shared.Enums;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Fsel.Course.Lms.Application.Queries.MockTestQuery;
 using Fsel.Course.Lms.Application.Commands.MockTestCmd;
 
 namespace Fsel.Course.Lms.Api.Controllers
@@ -23,18 +22,6 @@ namespace Fsel.Course.Lms.Api.Controllers
         public MockTestController(IMediator mediator)
         {
             _mediator = mediator;
-        }
-
-        /// <summary>
-        /// Get Mock test
-        /// </summary>
-        [HttpGet]
-        [ProducesResponseType(typeof(MethodResult<MockTestModel>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> Get([FromQuery] GetMockTestQuery query)
-        {
-            MethodResult<MockTestModel> queryResult = await _mediator.Send(query).ConfigureAwait(false);
-            return queryResult.GetActionResult();
         }
 
         /// <summary>
