@@ -19,12 +19,12 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestQuery
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class GetPlacementTestQuery : IRequest<MethodResult<PlacementTestBankModel>>
+    public class GetFinalTestQuery : IRequest<MethodResult<PlacementTestBankModel>>
     {
         public EnumPlacementTestLevel Level { get; set; }
     }
 
-    public class StartPlacementTestCommandHandler : IRequestHandler<GetPlacementTestQuery, MethodResult<PlacementTestBankModel>>
+    public class StartPlacementTestCommandHandler : IRequestHandler<GetFinalTestQuery, MethodResult<PlacementTestBankModel>>
     {
         private readonly AuthContext _authContext;
         private readonly SectionConverter _sectionConverter;
@@ -42,7 +42,7 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestQuery
             _placementTestRepository = placementTestRepository;
         }
 
-        public async Task<MethodResult<PlacementTestBankModel>> Handle(GetPlacementTestQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<PlacementTestBankModel>> Handle(GetFinalTestQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<PlacementTestBankModel> methodResult = new MethodResult<PlacementTestBankModel>();

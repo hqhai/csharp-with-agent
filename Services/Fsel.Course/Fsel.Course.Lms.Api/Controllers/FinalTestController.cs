@@ -6,47 +6,48 @@ namespace Fsel.Course.Lms.Api.Controllers
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
     using Fsel.Course.Domain.Models.EntityModels;
-    using Fsel.Course.Lms.Application.Commands.PlacementTestCmd;
-    using Fsel.Course.Lms.Application.Queries.PlacementTestQuery;
+    using Fsel.Course.Lms.Application.Commands.FinalTestCmd;
+    using Fsel.Course.Lms.Application.Queries.FinalTestQuery;
     using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
 
+
     [ApiVersion(Settings.APIVersion)]
-    [Route(Settings.APIDefaultRoute + "/placement-test")]
+    [Route(Settings.APIDefaultRoute + "/final-test")]
     [ApiController]
     [Authorize(Roles = nameof(EnumRole.Student))]
-    public class PlacmentTestController : ControllerBase
+    public class FinalTestController : ControllerBase
     {
         private readonly IMediator _mediator;
 
-        public PlacmentTestController(IMediator mediator)
+        public FinalTestController(IMediator mediator)
         {
             _mediator = mediator;
         }
 
         /// <summary>
-        /// get PlacementTest
+        /// get FinalTest
         /// </summary>
-        [HttpGet("placement-test")]
-        [ProducesResponseType(typeof(MethodResult<PlacementTestBankModel>), (int)HttpStatusCode.OK)]
+        [HttpGet("final-test")]
+        [ProducesResponseType(typeof(MethodResult<FinalTestModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> Get([FromQuery] GetFinalTestQuery command)
         {
-            MethodResult<PlacementTestBankModel> queryResult = await _mediator.Send(command).ConfigureAwait(false);
+            MethodResult<FinalTestModel> queryResult = await _mediator.Send(command).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
 
         /// <summary>
-        /// Create PlacementTest Answers
+        /// Create FinalTest Answers
         /// </summary>
-        [HttpPost("placement-test-answers")]
-        [ProducesResponseType(typeof(MethodResult<IList<PlacementTestResultModel>>), (int)HttpStatusCode.OK)]
+        [HttpPost("final-test-answers")]
+        [ProducesResponseType(typeof(MethodResult<FinalTestResultModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> CreateAnswer([FromBody] CreatePlacementTestAnswerCommand command)
+        public async Task<IActionResult> CreateAnswer([FromBody] CreateFinalTestExerciseAnswerCommand command)
         {
-            MethodResult<IList<PlacementTestResultModel>> queryResult = await _mediator.Send(command).ConfigureAwait(false);
+            MethodResult<FinalTestResultModel> queryResult = await _mediator.Send(command).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
     }

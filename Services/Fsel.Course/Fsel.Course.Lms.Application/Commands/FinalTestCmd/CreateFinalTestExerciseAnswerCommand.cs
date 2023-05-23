@@ -82,7 +82,6 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd
                     CourseId = request.CourseId,
                 };
             }
-            var finalTestExerciseAnswers = new List<FinalTestExerciseAnswer>();
             var skillScores = new List<SkillScores>();
             foreach (var item in request.Skills)
             {
@@ -92,7 +91,7 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd
                     return methodResult;
                 }
                 var questionIds = item.Answers.Select(x => x.QuestionId).ToList();
-                var questions = await _questionRepository.GetIncludeSectionByIdAsync(questionIds);
+                var questions = await _questionRepository.GetIncludeExerciseByIdAsync(questionIds);
                 if (questions == null || questions.Count == 0)
                 {
                     methodResult.AddErrorBadRequest(nameof(EnumQuestionErrorCode.QuestionsNotExist), nameof(questionIds), questionIds);
@@ -130,37 +129,29 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd
                             return methodResult;
                         }
                         count += correctCount;
-                        finalTestExerciseAnswer = new FinalTestExerciseAnswer
+                        finalTestResult.FinalTestExerciseAnswers.Add(new FinalTestExerciseAnswer
                         {
                             CorrectCount = correctCount,
                             Answer = answerConfig,
-                            FinalTestResultId = finalTestResult.Id,
                             ExerciseQuestionId = exerciseQuestionId
-                        };
-                        finalTestExerciseAnswers.Add(finalTestExerciseAnswer);
+                        });
                     }
                 }
                 var skillScore = new SkillScores { Skill = item.Skill, TotalCount = questions.Sum(x => x.CorrectTotal), CorrectCount = count };
                 skillScores.Add(skillScore);
             }
-        
 
             #endregion Validation
 
             await _finalTestExerciseAnswerRepository.ExecuteTransactionAsync(async () =>
             {
-                if (finalTestExerciseAnswers.Count > 0)
-                {
-                    await _finalTestExerciseAnswerRepository.AddList(finalTestExerciseAnswers);
-                    await _finalTestExerciseAnswerRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-                }
                 finalTestResult.CorrectCount = Convert.ToInt32(skillScores.Sum(x => x.CorrectCount));
                 finalTestResult.CorrectTotal = Convert.ToInt32(skillScores.Sum(x => x.TotalCount));
                 finalTestResult.Status = EnumResultStatus.Done;
                 finalTestResult.SkillScores = skillScores;
                 finalTestResult.Percent = finalTestResult.CorrectTotal > 0 ? ((double)finalTestResult.CorrectCount / finalTestResult.CorrectTotal * 100) : 0;
 
-                _finalTestResultRepository.Add(finalTestResult);
+                finalTestResult = _finalTestResultRepository.Add(finalTestResult);
                 await _finalTestResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
                 methodResult.StatusCode = StatusCodes.Status201Created;
