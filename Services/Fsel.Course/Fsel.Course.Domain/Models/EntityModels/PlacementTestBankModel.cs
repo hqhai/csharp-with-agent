@@ -8,12 +8,5 @@ namespace Fsel.Course.Domain.Models.EntityModels
     {
         public EnumPlacementTestLevel Level { get; set; }
         public IList<SectionGroupModel>? SectionGroups { get; set; }
-        public IList<PlacementTestBankSkillModel>? PlacementSkills { get; set; }
     }
-    public class PlacementTestBankSkillModel
-    {
-        public EnumCourseSkill CourseSkill { get; set; }
-        public IList<SectionModel>? Sections { get; set; }
-    }
-
 }

@@ -31,7 +31,7 @@ namespace Fsel.Course.Domain.Entities
         [NotMapped]
         public TimeSpan TaggetTimeSpanLimit
         {
-            get { return TimeSpan.FromTicks(TaggetTimeLimit); }
+            get { return TimeSpan.FromSeconds(TaggetTimeLimit); }
         }
 
         /// <summary>

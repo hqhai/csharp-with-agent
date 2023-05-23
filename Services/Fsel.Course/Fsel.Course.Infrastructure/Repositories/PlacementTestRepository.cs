@@ -91,7 +91,7 @@ namespace Fsel.Course.Infrastructure.Repositories
                                                     Id = x.Id,
                                                     PartName = x.PartName,
                                                     SectionId = x.SectionId,
-                                                    Question = x.SectionQuestions.Select(x => x.Question).Select(x => new QuestionModel
+                                                    Questions = x.SectionQuestions.Select(x => x.Question).Select(x => new QuestionModel
                                                     {
                                                         Id = x!.Id,
                                                         QuestionType = x.QuestionType,
