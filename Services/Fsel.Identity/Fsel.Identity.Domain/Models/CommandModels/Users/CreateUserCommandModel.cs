@@ -19,7 +19,7 @@ namespace Fsel.Identity.Domain.Models.CommandModels.Users
         [Required]
         public DateTime Birthday { get; set; }
         public string? PhoneNumber { get; set; }
-        public IList<EnumRoleLive>? RoleLives { get; set; }
+        public IList<EnumCourseType>? RoleLives { get; set; }
         public IList<EnumCourseType>? CourseTypes { get; set; }
         public IList<EnumCourseLevel>? CourseLevels { get; set; }
         public IList<EnumSubscriptionClass>? SubscriptionClasses { get; set; }

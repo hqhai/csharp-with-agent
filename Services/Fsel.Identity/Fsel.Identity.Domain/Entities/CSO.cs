@@ -15,9 +15,9 @@ namespace Fsel.Identity.Domain.Entities
         public string? RoleLivesStr { get; set; }
 
         [NotMapped]
-        public IList<EnumRoleLive>? RoleLives
+        public IList<EnumCourseType>? RoleLives
         {
-            get { return ConvertHelper.Deserialize<IList<EnumRoleLive>>(RoleLivesStr); }
+            get { return ConvertHelper.Deserialize<IList<EnumCourseType>>(RoleLivesStr); }
             set { RoleLivesStr = ConvertHelper.Serialize(value); }
         }
 

@@ -5,17 +5,16 @@ namespace Fsel.Identity.Application.Commands.ParentCmd
     using System.Threading;
     using AutoMapper;
     using Fsel.Common.ActionResults;
-    using Fsel.Shared.Enums;
     using Fsel.Core.Base;
     using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.Enums.ErrorCodes;
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Domain.Models.CommandModels.Parents;
     using Fsel.Identity.Domain.Models.EntityModels;
+    using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Identity;
     using Microsoft.EntityFrameworkCore;
-    using Fsel.Identity.Domain.Enums;
 
     public class CreateStudentByParentCommand : CreateStudentByParentCommandModel, IRequest<MethodResult<UserModel>>
     {
@@ -26,21 +25,18 @@ namespace Fsel.Identity.Application.Commands.ParentCmd
         private readonly UserManager<User> _userManager;
         private readonly IMapper _mapper;
         private readonly AuthContext _authContext;
-        private readonly IStudentRepository _studentRepository;
         private readonly IHumanRepository _humanRepository;
         private readonly IParentRepository _parentRepository;
 
         public CreateStudentByParentCommandHandler(UserManager<User> userManager,
             IMapper mapper,
             AuthContext authContext,
-            IStudentRepository studentRepository,
             IParentRepository parentRepository,
             IHumanRepository humanRepository)
         {
             _userManager = userManager;
             _mapper = mapper;
             _authContext = authContext;
-            _studentRepository = studentRepository;
             _parentRepository = parentRepository;
             _humanRepository = humanRepository;
         }
@@ -112,19 +108,10 @@ namespace Fsel.Identity.Application.Commands.ParentCmd
 
         private async Task CreateHumanAsync(CreateStudentByParentCommandModel request, User user, Parent parent)
         {
-            var stt = await _studentRepository.Queryable.CountAsync();
-            var currentDate = DateTime.Now;
-            var weekNumber = (currentDate.DayOfYear - 1) / 7 + 1;
-            var lastDigitOfYear = currentDate.Year % 10;
-            var lastOfYear = request.Birthday!.Value.Year % 100;
-            var number = request.Gender == EnumGender.Male ? 0 : request.Gender == EnumGender.Female ? 1 : 2;
             var human = new Human
             {
                 UserId = user.Id,
                 FullName = request.FullName,
-                Code = $"HN_{weekNumber}{lastDigitOfYear}{number}{lastOfYear}{stt:000}",
-                Gender = request.Gender,
-                Birthday = request.Birthday,
                 AvatarPath = request.AvatarPath,
                 Student = new Student
                 {
