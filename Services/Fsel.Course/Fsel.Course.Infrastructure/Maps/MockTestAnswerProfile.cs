@@ -7,11 +7,11 @@ namespace Fsel.Course.Infrastructure.Maps
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Models.EntityModels;
 
-    public class MockTestSectionProfile : Profile
+    public class MockTestAnswerProfile : Profile
     {
-        public MockTestSectionProfile()
+        public MockTestAnswerProfile()
         {
-            CreateMap<MockTestSection, MockTestSectionModel>().IgnoreAllNonExisting();
+            CreateMap<MockTestAnswer, MockTestAnswerModel>().IgnoreAllNonExisting();
         }
     }
 }

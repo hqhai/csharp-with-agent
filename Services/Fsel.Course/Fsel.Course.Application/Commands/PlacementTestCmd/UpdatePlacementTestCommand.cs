@@ -149,8 +149,7 @@ namespace Fsel.Course.Application.Commands.PlacementTestCmd
                             }
                         }
                         var correctCount = newSection.SectionParts.SelectMany(x => x.SectionQuestions).Select(x => x.Question).Sum(x => x!.CorrectTotal);
-                        section.DisplayOrder = sectionGroup.Sections.IndexOf(section);
-                        if (ValidateSection.IsCheckSection(newSectionGroup.CourseSkill, section.DisplayOrder, correctCount))
+                        if (!ValidateSection.IsCheckSection(newSectionGroup.CourseSkill, section.DisplayOrder, correctCount))
                         {
                             methodResult.AddErrorBadRequest(nameof(EnumPlacementTestErrorCode.PlacementTestMustCorrectScore), nameof(section.DisplayOrder), section.DisplayOrder);
                             return methodResult;

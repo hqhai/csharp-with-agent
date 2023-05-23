@@ -108,6 +108,7 @@ namespace Fsel.Course.Infrastructure
             modelBuilder.ApplyConfiguration(new FinalTestEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new MockTestEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new MockTestAnswerEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new MockTestResultEntityTypeConfiguration());
             base.OnModelCreating(modelBuilder);
         }
 

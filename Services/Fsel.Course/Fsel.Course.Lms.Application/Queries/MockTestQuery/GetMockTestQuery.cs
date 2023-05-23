@@ -144,7 +144,7 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestQuery
                     CreatedDate = x.CreatedDate,
                     MockTestId = x.MockTestId,
                     StudentId = x.StudentId,
-                }).FirstOrDefault()
+                }).ToList()
             };
             methodResult.Result = mockTestModel;
             methodResult.StatusCode = StatusCodes.Status200OK;

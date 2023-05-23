@@ -154,6 +154,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
                             join q in _questionRepository.Queryable on sq.QuestionId equals q.Id
                             join tc in _sectionTimeCodeRepository.Queryable on sg.Id equals tc.Id
                             where p.Id == mockTest.Id
+
                             select q.CorrectTotal;
 
             mockTestResult.CorrectCount = correctCountStudent;

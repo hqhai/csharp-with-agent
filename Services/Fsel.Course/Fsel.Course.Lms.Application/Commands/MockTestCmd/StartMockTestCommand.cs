@@ -73,6 +73,11 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
                                                 .ThenInclude(x => x!.Sections)
                                                 .ThenInclude(x => x.SectionTimeCodes)
                                                 .Include(x => x.MockTestResults)
+                                                .Include(x => x.MockTestSections)
+                                                .ThenInclude(x => x.SectionGroup)
+                                                .ThenInclude(x => x!.Sections)
+                                                .ThenInclude(x => x.SectionParts)
+                                                .ThenInclude(x => x.SectionQuestions)
                                                 .ThenInclude(x => x.MockTestAnswers)
                                                 .Where(x => x.Id == request.MockTestId)
                                                 .AsNoTracking()
@@ -83,7 +88,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
                 return methodResult;
             }
 
-            if (mockTest.IsActive)
+            if (!mockTest.IsActive)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumMockTestErrorCode.MockTestInActiveState), nameof(mockTest.IsActive), mockTest.IsActive);
                 return methodResult;
@@ -165,7 +170,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
                                 Explanation = x.Explanation,
                                 QuestionType = x.QuestionType,
                                 Config = _questionTypeConverter.QuestionTypeConverterObject(x.Config, x.QuestionType, isDisableAnswers: !checkDone).Item1,
-                                ResultAnswer = _mapper.Map<MockTestAnswerModel>(x.SectionQuestions.Select(x => x.MockTestAnswers).FirstOrDefault())
+                                
                             }).ToList(),
                         }).ToList(),
                         SectionTimeCodes = x.SectionTimeCodes.Select(x => new SectionTimeCodeModel
@@ -189,7 +194,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
                     StudentId = x.StudentId,
                     CourseId = course.Id,
                     UnitId = unit.Id
-                }).FirstOrDefault()
+                }).ToList()
             };
 
             methodResult.StatusCode = StatusCodes.Status201Created;

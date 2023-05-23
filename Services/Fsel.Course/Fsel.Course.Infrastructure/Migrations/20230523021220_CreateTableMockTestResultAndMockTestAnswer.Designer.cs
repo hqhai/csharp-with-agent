@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fsel.Course.Infrastructure.Migrations
 {
     [DbContext(typeof(CourseDbContext))]
-    [Migration("20230522140730_CreateTableMockTestResultAndMockTestAnswer")]
+    [Migration("20230523021220_CreateTableMockTestResultAndMockTestAnswer")]
     partial class CreateTableMockTestResultAndMockTestAnswer
     {
         /// <inheritdoc />
@@ -1768,8 +1768,10 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.Property<double>("Percent")
                         .HasColumnType("float");
 
-                    b.Property<int>("Status")
-                        .HasColumnType("int");
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<Guid>("StudentId")
                         .HasColumnType("uniqueidentifier");

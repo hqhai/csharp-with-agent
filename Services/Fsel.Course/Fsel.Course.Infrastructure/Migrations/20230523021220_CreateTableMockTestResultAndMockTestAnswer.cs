@@ -29,7 +29,7 @@ namespace Fsel.Course.Infrastructure.Migrations
                     Percent = table.Column<double>(type: "float", nullable: false),
                     CorrectCount = table.Column<int>(type: "int", nullable: false),
                     CorrectTotal = table.Column<int>(type: "int", nullable: false),
-                    Status = table.Column<int>(type: "int", nullable: false),
+                    Status = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     CourseId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     UnitId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     MockTestId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),

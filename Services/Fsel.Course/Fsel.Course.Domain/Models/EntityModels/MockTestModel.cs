@@ -3,7 +3,6 @@
 namespace Fsel.Course.Domain.Models.EntityModels
 {
     using Fsel.Core.Base.BaseModels;
-    using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums;
     using Fsel.Shared.Enums;
 
@@ -20,6 +19,6 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public IList<MockTestSectionModel>? MockTestSections { get; set; }
 
         public IList<SectionGroupModel>? SectionGroups { get; set; }
-        public MockTestResultModel? MockTestResults { get; set; }
+        public IList<MockTestResultModel>? MockTestResults { get; set; }
     }
 }
