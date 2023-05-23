@@ -42,11 +42,11 @@ namespace Fsel.Course.Lms.Api.Controllers
         /// Create PlacementTest Answers
         /// </summary>
         [HttpPost("placement-test-answers")]
-        [ProducesResponseType(typeof(MethodResult<List<PlacementTestResultModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(MethodResult<IList<PlacementTestResultModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> CreateAnswer([FromBody] CreatePlacementTestAnswerCommand command)
         {
-            MethodResult<List<PlacementTestResultModel>> queryResult = await _mediator.Send(command).ConfigureAwait(false);
+            MethodResult<IList<PlacementTestResultModel>> queryResult = await _mediator.Send(command).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
     }
