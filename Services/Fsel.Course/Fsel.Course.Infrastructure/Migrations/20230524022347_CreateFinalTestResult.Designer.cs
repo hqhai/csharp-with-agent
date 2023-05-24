@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fsel.Course.Infrastructure.Migrations
 {
     [DbContext(typeof(CourseDbContext))]
-    [Migration("20230523112236_CreateFinalTestResult")]
+    [Migration("20230524022347_CreateFinalTestResult")]
     partial class CreateFinalTestResult
     {
         /// <inheritdoc />
