@@ -145,10 +145,9 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
                 CreatedFullName = mockTest.CreatedFullName,
                 CreatedUserId = mockTest.CreatedUserId,
                 IsActive = mockTest.IsActive,
-                SectionGroups = mockTest!.MockTestSections.Where(x => x.SectionGroup != null).Select(x => x.SectionGroup).Select(x =>
-                {
-                    return _sectionConverter.GetSectionGroupModel(x);
-                }).ToList(),
+                SectionGroups = mockTest!.MockTestSections.Where(x => x.SectionGroup != null)
+                        .Select(x => x.SectionGroup)
+                        .Select(x => _sectionConverter.GetSectionGroupModel(x, !checkDone)).ToList(),
                 /*SectionGroups = mockTest.MockTestSections.Select(x => x.SectionGroup).Select(x => new SectionGroupModel
                 {
                     Id = x!.Id,

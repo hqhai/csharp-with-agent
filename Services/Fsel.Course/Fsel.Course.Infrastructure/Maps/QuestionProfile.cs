@@ -14,7 +14,6 @@ namespace Fsel.Course.Infrastructure.Maps
         {
             CreateMap<Question, QuestionModel>().IgnoreAllNonExisting();
             CreateMap<CreateQuestionCommandModel, Question>().IgnoreAllNonExisting();
-            CreateMap<UpdateQuestionCommandModel, Question>().IgnoreAllNonExisting();
         }
     }
 }
