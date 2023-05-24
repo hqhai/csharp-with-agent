@@ -25,12 +25,14 @@ namespace Fsel.Course.Application.Commands.CourseCmd
         private readonly ICourseRepository _courseRepository;
         private readonly IUnitRepository _unitRepository;
         private readonly IMapper _mapper;
+        private readonly IFinalTestRepository _finalTestRepository;
         private readonly IMockTestRepository _mockTestRepository;
         private readonly IUserService _userService;
 
         public CreateCourseCommandHandler(ICourseRepository courseRepository
             , IUnitRepository unitRepository
             , IMapper mapper
+            , IFinalTestRepository finalTestRepository
             , IMockTestRepository mockTestRepository
             , IUserService userService
             )
@@ -38,6 +40,7 @@ namespace Fsel.Course.Application.Commands.CourseCmd
             _unitRepository = unitRepository;
             _courseRepository = courseRepository;
             _mapper = mapper;
+            _finalTestRepository = finalTestRepository;
             _mockTestRepository = mockTestRepository;
             _userService = userService;
         }
@@ -69,7 +72,7 @@ namespace Fsel.Course.Application.Commands.CourseCmd
                 return methodResult;
             }
 
-            if (request.CourseUnitMockTests.Any(x => x.MockTestId.HasValue && x.UnitId.HasValue))
+            if (request.CourseUnitMockTests.Any(x => x.MockTestId.HasValue && x.UnitId.HasValue && x.FinalTestId.HasValue))
             {
                 methodResult.AddErrorBadRequest(nameof(EnumCourseUnitMockTestErrorCode.MocktestIdAndUnitIdCannotCoexist), nameof(request.CourseUnitMockTests), request.CourseUnitMockTests);
                 return methodResult;
@@ -96,6 +99,13 @@ namespace Fsel.Course.Application.Commands.CourseCmd
                 return methodResult;
             }
 
+            var finalTestIds = request.CourseUnitMockTests.Where(e => e.FinalTestId != null).Select(x => x.FinalTestId);
+            if (_finalTestRepository.IsIdsInValid(finalTestIds.Where(e => e.HasValue).Select(e => e!.Value)))
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumFinalTestErrorCode.FinalTestsNotExist), nameof(finalTestIds), finalTestIds);
+                return methodResult;
+            }
+
             var mocktests = await _mockTestRepository.GetByIdsAsync(mocktestIds.Where(e => e.HasValue).Select(e => e!.Value));
             var checkMockTest = mocktests.All(x => x.MockTestType == EnumMockTestType.FullMockTest);
             if (!checkMockTest)
@@ -116,7 +126,6 @@ namespace Fsel.Course.Application.Commands.CourseCmd
             await _courseRepository.ExecuteTransactionAsync(async () =>
             {
                 course = _courseRepository.Add(course);
-
                 await _courseRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
                 methodResult.StatusCode = StatusCodes.Status201Created;

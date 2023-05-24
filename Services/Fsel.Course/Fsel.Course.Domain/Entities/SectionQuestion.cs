@@ -17,7 +17,6 @@ namespace Fsel.Course.Domain.Entities
 
         public Guid? SectionId { get; set; }
         public Guid? SectionPartId { get; set; }
-
         public ICollection<PlacementTestAnswer> PlacementTestAnswers { get; set; } = new List<PlacementTestAnswer>();
 
         public ICollection<MockTestAnswer> MockTestAnswers { get; set; } = new List<MockTestAnswer>();

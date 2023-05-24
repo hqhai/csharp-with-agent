@@ -60,13 +60,17 @@ namespace Fsel.Course.Infrastructure
         public DbSet<MockTestSection> MockTestSections { get; set; }
         public DbSet<FinalTest> FinalTests { get; set; }
         public DbSet<MockTestResult> MockTestResults { get; set; }
-        public DbSet<MockTestAnswer> MockTestAnswer { get; set; }
+        public DbSet<MockTestAnswer> MockTestAnswers { get; set; }
+        public DbSet<FinalTestExercise> FinalTestExercises { get; set; }
+        public DbSet<FinalTestExerciseAnswer> FinalTestExerciseAnswers { get; set; }
+        public DbSet<FinalTestResult> FinalTestResults { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             ArgumentNullException.ThrowIfNull(modelBuilder);
             modelBuilder.ApplyConfiguration(new ClassForumEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new CourseEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new CourseResultEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new CourseTeacherEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new CourseUnitMockTestEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new ExerciseEntityTypeConfiguration());
@@ -109,6 +113,10 @@ namespace Fsel.Course.Infrastructure
             modelBuilder.ApplyConfiguration(new MockTestEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new MockTestAnswerEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new MockTestResultEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new FinalTestExerciseAnswerEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new FinalTestExerciseEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new FinalTestResultEntityTypeConfiguration());
+
             base.OnModelCreating(modelBuilder);
         }
 

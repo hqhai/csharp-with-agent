@@ -15,6 +15,9 @@ namespace Fsel.Course.Infrastructure.Maps
             CreateMap<FinalTest, FinalTestModel>().IgnoreAllNonExisting();
             CreateMap<CreateFinalTestCommandModel, FinalTest>().IgnoreAllNonExisting();
             CreateMap<UpdateFinalTestCommandModel, FinalTest>().IgnoreAllNonExisting();
+
+            CreateMap<FinalTestResult, FinalTestResultModel>().IgnoreAllNonExisting();
+            CreateMap<FinalTestExerciseAnswer, FinalTestExerciseAnswerModel>().IgnoreAllNonExisting();
         }
     }
 }
