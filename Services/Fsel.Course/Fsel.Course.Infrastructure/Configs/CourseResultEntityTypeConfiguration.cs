@@ -18,9 +18,10 @@ namespace Fsel.Course.Infrastructure.Configs
                 .HasConversion(
                     v => v.ToString(),
                     v => v.EnumParse<EnumCourseStatus>());
+
             builder.HasOne(a => a.Course)
-                 .WithOne(b => b.CourseResult)
-                 .HasForeignKey<CourseResult>(p => p.CourseId)
+                 .WithMany(b => b.CourseResults)
+                 .HasForeignKey(p => p.CourseId)
                  .OnDelete(DeleteBehavior.Cascade);
 
             builder.HasIndex(x => x.CourseId).IsUnique(false);

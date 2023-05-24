@@ -15,20 +15,14 @@ namespace Fsel.Course.Domain.Entities
         [Range(0, 10000_0000, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
         public int DisplayOrder { get; set; }
 
-        [JsonIgnore]
         public Unit? Unit { get; set; }
-
-        [JsonIgnore]
         public Course? Course { get; set; }
-
-        [JsonIgnore]
         public MockTest? MockTest { get; set; }
+        public FinalTest? FinalTest { get; set; }
 
         public Guid? UnitId { get; set; }
-
-        [JsonIgnore]
+        public Guid? FinalTestId { get; set; }
         public Guid CourseId { get; set; }
-
         public Guid? MockTestId { get; set; }
 
         public ICollection<UnitResult> UnitResults { get; set; } = new List<UnitResult>();

@@ -62,6 +62,9 @@ builder.Services.AddScoped<ISectionRepository, SectionRepository>();
 builder.Services.AddScoped<ISectionTimeCodeRepository, SectionTimeCodeRepository>();
 builder.Services.AddScoped<ISectionQuestionRepository, SectionQuestionRepository>();
 builder.Services.AddScoped<IFinalTestRepository, FinalTestRepository>();
+builder.Services.AddScoped<IFinalTestExerciseAnswerRepository, FinalTestExerciseAnswerRepository>();
+builder.Services.AddScoped<IFinalTestResultRepository, FinalTestResultRepository>();
+
 builder.Services.AddScoped<QuestionTypeConverter>();
 builder.Services.AddScoped<AnswerTypeConverter>();
 builder.Services.AddScoped<SectionConverter>();

@@ -41,7 +41,7 @@ namespace Fsel.Course.Domain.Entities
             get { return TimeSpan.FromSeconds(ExecutionTime); }
         }
 
-        public Section Section { get; set; }
+        public Section? Section { get; set; }
         public Guid SectionId { get; set; }
     }
 }

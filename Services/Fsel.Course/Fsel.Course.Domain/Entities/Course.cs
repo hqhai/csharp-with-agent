@@ -2,11 +2,10 @@
 
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using Fsel.Shared.Enums;
 using Fsel.Common.Enums.ErrorCodes;
-using Fsel.Common.Helpers;
 using Fsel.Core.Entities;
 using Fsel.Course.Domain.Enums;
+using Fsel.Shared.Enums;
 using Fsel.Shared.Helpers;
 
 namespace Fsel.Course.Domain.Entities
@@ -57,7 +56,8 @@ namespace Fsel.Course.Domain.Entities
         public ICollection<CourseUnitMockTest> CourseUnitMockTests { get; set; } = new List<CourseUnitMockTest>();
         public ICollection<CourseTeacher> CourseTeachers { get; set; } = new List<CourseTeacher>();
         public ICollection<UnitResult> UnitResults { get; set; } = new List<UnitResult>();
-        public CourseResult? CourseResult { get; set; }
+        public ICollection<CourseResult>? CourseResults { get; set; } = new List<CourseResult>();
         public ICollection<LessonResult> LessonResults { get; set; } = new List<LessonResult>();
+        public ICollection<FinalTestResult> FinalTestResults { get; set; } = new List<FinalTestResult>();
     }
 }

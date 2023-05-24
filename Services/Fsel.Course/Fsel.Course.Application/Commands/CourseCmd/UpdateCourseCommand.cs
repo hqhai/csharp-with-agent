@@ -9,6 +9,7 @@ using Fsel.Course.Domain.Enums.ErrorCodes;
 using Fsel.Course.Domain.IRepositories;
 using Fsel.Course.Domain.Models.CommandModels.Courses;
 using Fsel.Course.Domain.Models.EntityModels;
+using Fsel.Course.Infrastructure.Repositories;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
@@ -24,18 +25,21 @@ namespace Fsel.Course.Application.Commands.CourseCmd
         private readonly ICourseRepository _courseRepository;
         private readonly IMapper _mapper;
         private readonly IUnitRepository _unitRepository;
+        private readonly IFinalTestRepository _finalTestRepository;
         private readonly IUserService _userService;
         private readonly IMockTestRepository _mockTestRepository;
 
         public UpdateCourseTestCommandHandler(ICourseRepository courseRepository
             , IMapper mapper
             , IUnitRepository unitRepository
+            , IFinalTestRepository finalTestRepository
             , IUserService userService
             , IMockTestRepository mockTestRepository)
         {
             _courseRepository = courseRepository;
             _mapper = mapper;
             _unitRepository = unitRepository;
+            _finalTestRepository = finalTestRepository;
             _userService = userService;
             _mockTestRepository = mockTestRepository;
         }
@@ -86,7 +90,7 @@ namespace Fsel.Course.Application.Commands.CourseCmd
                 return methodResult;
             }
 
-            if (request.CourseUnitMockTests.Any(x => x.MockTestId.HasValue && x.UnitId.HasValue))
+            if (request.CourseUnitMockTests.Any(x => x.MockTestId.HasValue && x.UnitId.HasValue && x.FinalTestId.HasValue))
             {
                 methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.MocktestIdAndUnitIdAreMutuallyExclusive), nameof(request.CourseUnitMockTests), request.CourseUnitMockTests);
                 return methodResult;
@@ -96,6 +100,13 @@ namespace Fsel.Course.Application.Commands.CourseCmd
             if (_unitRepository.IsIdsInValid(units.Where(e => e.HasValue).Select(e => e!.Value)))
             {
                 methodResult.AddErrorBadRequest(nameof(EnumUnitErrorCode.UnitsNotExist), nameof(units), units);
+                return methodResult;
+            }
+
+            var finalTestIds = request.CourseUnitMockTests.Where(e => e.FinalTestId != null).Select(x => x.FinalTestId);
+            if (_finalTestRepository.IsIdsInValid(finalTestIds.Where(e => e.HasValue).Select(e => e!.Value)))
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumFinalTestErrorCode.FinalTestsNotExist), nameof(finalTestIds), finalTestIds);
                 return methodResult;
             }
 

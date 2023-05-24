@@ -8,7 +8,7 @@ namespace Fsel.Course.Domain.Models.CommandModels.CourseUnitMockTests
     {
         public int DisplayOrder { get; set; }
         public Guid? UnitId { get; set; }
-
+        public Guid? FinalTestId { get; set; }
         public Guid? MockTestId { get; set; }
     }
 }

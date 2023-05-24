@@ -41,7 +41,7 @@ namespace Fsel.Course.Infrastructure.Repositories
         {
             try
             {
-                return await Queryable.Include(x => x.CourseResult)
+                return await Queryable.Include(x => x.CourseResults)
                                         .Include(x => x.CourseUnitMockTests.Where(y => y.IsDeleted == false))
                                         .ThenInclude(x => x.Unit)
                                         .ThenInclude(x => x!.UnitLessons.Where(y => y.IsDeleted == false))

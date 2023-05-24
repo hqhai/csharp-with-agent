@@ -24,14 +24,14 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestQuery
         public EnumPlacementTestLevel Level { get; set; }
     }
 
-    public class StartPlacementTestCommandHandler : IRequestHandler<GetPlacementTestQuery, MethodResult<PlacementTestBankModel>>
+    public class GetPlacementTestQueryHandler : IRequestHandler<GetPlacementTestQuery, MethodResult<PlacementTestBankModel>>
     {
         private readonly AuthContext _authContext;
         private readonly SectionConverter _sectionConverter;
         private readonly IUserService _userService;
         private readonly IPlacementTestRepository _placementTestRepository;
 
-        public StartPlacementTestCommandHandler(AuthContext authContext
+        public GetPlacementTestQueryHandler(AuthContext authContext
             , SectionConverter sectionConverter
             , IUserService userService
             , IPlacementTestRepository placementTestRepository)
