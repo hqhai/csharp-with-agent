@@ -75,7 +75,7 @@ namespace Fsel.Course.Application.Commands.MockTestCmd
                 return methodResult;
             }
 
-            if (!mockTest.IsActive)
+            if (mockTest.IsActive)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumMockTestErrorCode.MockTestInActiveState), nameof(mockTest.IsActive), mockTest.IsActive);
                 return methodResult;

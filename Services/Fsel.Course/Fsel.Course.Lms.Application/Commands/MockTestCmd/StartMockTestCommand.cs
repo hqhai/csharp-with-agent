@@ -33,7 +33,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
         private readonly IMockTestRepository _mockTestRepository;
         private readonly IMockTestResultRepository _mockTestResultRepository;
         private readonly IUnitSkillMockTestRepository _unitSkillMockTestRepository;
-        private readonly QuestionTypeConverter _questionTypeConverter;
+        private readonly SectionConverter _sectionConverter;
 
         public StartMockTestCommandHandler(ICourseRepository courseRepository
             , IUnitRepository unitRepository
@@ -43,7 +43,8 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
             , IMockTestRepository mockTestRepository
             , IMockTestResultRepository mockTestResultRepository
             , IUnitSkillMockTestRepository unitSkillMockTestRepository
-            , QuestionTypeConverter questionTypeConverter)
+            , SectionConverter sectionConverter)
+
         {
             _courseRepository = courseRepository;
             _unitRepository = unitRepository;
@@ -53,7 +54,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
             _mockTestRepository = mockTestRepository;
             _mockTestResultRepository = mockTestResultRepository;
             _unitSkillMockTestRepository = unitSkillMockTestRepository;
-            _questionTypeConverter = questionTypeConverter;
+            _sectionConverter = sectionConverter;
         }
 
         public async Task<MethodResult<MockTestModel>> Handle(StartMockTestCommand request, CancellationToken cancellationToken)
@@ -144,7 +145,11 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
                 CreatedFullName = mockTest.CreatedFullName,
                 CreatedUserId = mockTest.CreatedUserId,
                 IsActive = mockTest.IsActive,
-                SectionGroups = mockTest.MockTestSections.Select(x => x.SectionGroup).Select(x => new SectionGroupModel
+                SectionGroups = mockTest!.MockTestSections.Where(x => x.SectionGroup != null).Select(x => x.SectionGroup).Select(x =>
+                {
+                    return _sectionConverter.GetSectionGroupModel(x);
+                }).ToList(),
+                /*SectionGroups = mockTest.MockTestSections.Select(x => x.SectionGroup).Select(x => new SectionGroupModel
                 {
                     Id = x!.Id,
                     ExecutionTime = x.ExecutionTime,
@@ -180,7 +185,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
                             Name = x.Name,
                         }).ToList(),
                     }).ToList(),
-                }).ToList(),
+                }).ToList(),*/
                 MockTestResult = mockTest.MockTestResults.Where(x => x.StudentId == studentId).Select(x => new MockTestResultModel
                 {
                     Id = x.Id,

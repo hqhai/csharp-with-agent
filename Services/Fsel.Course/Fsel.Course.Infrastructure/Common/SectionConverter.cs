@@ -3,23 +3,25 @@
 namespace Fsel.Course.Infrastructure.Common
 {
     using AutoMapper;
+    using Fsel.Common.ActionResults;
     using Fsel.Course.Domain.Entities;
+    using Fsel.Course.Domain.Enums.ErrorCodes;
+    using Fsel.Course.Domain.Models.CommandModels.Questions;
     using Fsel.Course.Domain.Models.EntityModels;
 
     public class SectionConverter
     {
         private readonly IMapper _mapper;
-        public SectionConverter(IMapper mapper)
+        private readonly QuestionTypeConverter _questionTypeConverter;
+
+        public SectionConverter(IMapper mapper, QuestionTypeConverter questionTypeConverter)
         {
             _mapper = mapper;
+            _questionTypeConverter = questionTypeConverter;
         }
 
-        public SectionGroupModel? GetSectionGroupModel(SectionGroup? sectionGroup)
+        public SectionGroupModel GetSectionGroupModel(SectionGroup? sectionGroup)
         {
-            if (sectionGroup == null)
-            {
-                return null;
-            }
             var sectionGroupModel = _mapper.Map<SectionGroupModel>(sectionGroup);
             sectionGroupModel.Sections = GetSectionModels(sectionGroup.Sections.ToList());
 
@@ -61,6 +63,43 @@ namespace Fsel.Course.Infrastructure.Common
                 CorrectTotal = x.CorrectTotal,
                 Config = x.Config
             }).ToList();
+        }
+
+        public void GetSectionQuestion(MethodResult<PlacementTestModel> methodResult, CreateQuestionCommandModel question, Section? section, SectionPart? sectionPart)
+        {
+            if (question == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumQuestionErrorCode.QuestionNull), nameof(question));
+            }
+            else
+            {
+                Question newQuestion = _mapper.Map<Question>(question);
+                var (config, correctTotal) = _questionTypeConverter.QuestionTypeConverterObject(question.Config, newQuestion.QuestionType, isShowCorrectTotal: !question.Ungraded, false);
+                if (config == null)
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumVideoErrorCode.ConfigIsInTheWrongFormat), nameof(question.Config), question.Config);
+                }
+                if (!newQuestion.IsValid())
+                {
+                    methodResult.AddErrorBadRequest(newQuestion.ErrorMessages);
+                }
+                newQuestion.CorrectTotal = correctTotal;
+
+                if (section != null)
+                {
+                    section.SectionQuestions.Add(new SectionQuestion
+                    {
+                        Question = newQuestion,
+                    });
+                }
+                else if (sectionPart != null)
+                {
+                    sectionPart.SectionQuestions.Add(new SectionQuestion
+                    {
+                        Question = newQuestion,
+                    });
+                }
+            }
         }
     }
 }
