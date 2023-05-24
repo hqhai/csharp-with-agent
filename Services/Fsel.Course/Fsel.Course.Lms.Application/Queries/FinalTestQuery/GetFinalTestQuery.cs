@@ -10,7 +10,6 @@ namespace Fsel.Course.Lms.Application.Queries.FinalTestQuery
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
-    using Fsel.Course.Domain.Models.CommandModels.FinalTestExerciseAnswers;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Infrastructure.Common;
     using Fsel.Course.Lms.Application.Services.UserServices;
@@ -97,7 +96,7 @@ namespace Fsel.Course.Lms.Application.Queries.FinalTestQuery
                         Explanation = m.Explanation,
                         Ungraded = m.Ungraded,
                         Config = _questionTypeConverter.QuestionTypeConverterObject(m.Config, m.QuestionType, false, true).Item1,
-                        ResultAnswer = finalTestResult == null ? null : _mapper.Map<FinalTestExerciseAnswerModel>(m.ExerciseQuestions!.FirstOrDefault()!.FinalTestExerciseAnswers.FirstOrDefault(x => x.FinalTestResultId == finalTestResult.Id))
+                        ResultAnswer = finalTestResult == null ? null : _mapper.Map<FinalTestExerciseAnswerModel>(m.ExerciseQuestions.SelectMany(x => x.FinalTestExerciseAnswers).FirstOrDefault(x => x.FinalTestResultId == finalTestResult.Id))
                     }).ToList()
                 }).ToList(),
                 FinalTestResult = finalTestResult == null ? null : new FinalTestResultModel
