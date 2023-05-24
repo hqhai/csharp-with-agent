@@ -16,6 +16,5 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public Guid StudentId { get; set; }
         public Guid FinalTestId { get; set; }
         public Guid CourseId { get; set; }
-        public IList<FinalTestExerciseAnswerModel>? FinalTestExerciseAnswers { get; set; } 
     }
 }

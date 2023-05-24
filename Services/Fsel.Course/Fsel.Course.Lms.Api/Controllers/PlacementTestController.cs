@@ -32,7 +32,7 @@ namespace Fsel.Course.Lms.Api.Controllers
         [HttpGet("placement-test")]
         [ProducesResponseType(typeof(MethodResult<PlacementTestBankModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> Get([FromQuery] GetFinalTestQuery command)
+        public async Task<IActionResult> Get([FromQuery] GetPlacementTestQuery command)
         {
             MethodResult<PlacementTestBankModel> queryResult = await _mediator.Send(command).ConfigureAwait(false);
             return queryResult.GetActionResult();

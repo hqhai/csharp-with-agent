@@ -57,9 +57,9 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd
 
             #region Validation
 
-            if (request.Skills == null || request.Skills.Any(x => x.Answers == null || x.Answers.Count == 0))
+            if (request.Exercises == null || request.Exercises.Any(x => x.Answers == null || x.Answers.Count == 0))
             {
-                methodResult.AddErrorBadRequest(nameof(EnumFinalTestExerciseAnswerErrorCode.AnswerSkillsNull), nameof(request.Skills), request.Skills);
+                methodResult.AddErrorBadRequest(nameof(EnumFinalTestExerciseAnswerErrorCode.ExerciseAnswersNull), nameof(request.Exercises), request.Exercises);
                 return methodResult;
             }
             var student = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
@@ -83,11 +83,11 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd
                 };
             }
             var skillScores = new List<SkillScores>();
-            foreach (var item in request.Skills)
+            foreach (var item in request.Exercises)
             {
                 if (item.Answers == null || item.Answers.Count == 0)
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumFinalTestExerciseAnswerErrorCode.AnswersNull), nameof(request.Skills), request.Skills);
+                    methodResult.AddErrorBadRequest(nameof(EnumFinalTestExerciseAnswerErrorCode.AnswersNull), nameof(request.Exercises), request.Exercises);
                     return methodResult;
                 }
                 var questionIds = item.Answers.Select(x => x.QuestionId).ToList();
@@ -137,7 +137,8 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd
                         });
                     }
                 }
-                var skillScore = new SkillScores { Skill = item.Skill, TotalCount = questions.Sum(x => x.CorrectTotal), CorrectCount = count };
+                var exercise = questions.SelectMany(x => x.ExerciseQuestions).Select(x => x.Exercise).FirstOrDefault(x => x!.Id == item.ExerciseId);
+                var skillScore = new SkillScores { Skill = exercise!.CourseSkill, TotalCount = questions.Sum(x => x.CorrectTotal), CorrectCount = count };
                 skillScores.Add(skillScore);
             }
 

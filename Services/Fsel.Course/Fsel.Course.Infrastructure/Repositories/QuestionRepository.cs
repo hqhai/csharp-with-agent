@@ -28,6 +28,7 @@ namespace Fsel.Course.Infrastructure.Repositories
                 throw;
             }
         }
+
         public async Task<List<Question>?> GetIncludeSectionByIdAsync(IEnumerable<Guid> ids)
         {
             try
@@ -40,11 +41,12 @@ namespace Fsel.Course.Infrastructure.Repositories
                 throw;
             }
         }
+
         public async Task<List<Question>?> GetIncludeExerciseByIdAsync(IEnumerable<Guid> ids)
         {
             try
             {
-                return await Queryable.Include(x => x.ExerciseQuestions)
+                return await Queryable.Include(x => x.ExerciseQuestions).ThenInclude(x => x.Exercise)
                                     .Where(x => ids.Contains(x.Id)).ToListAsync();
             }
             catch (Exception)
