@@ -4,11 +4,13 @@ namespace Fsel.Course.Lms.Application.Queries.FinalTestQuery
 {
     using System;
     using System.Threading;
+    using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
+    using Fsel.Course.Domain.Models.CommandModels.FinalTestExerciseAnswers;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Infrastructure.Common;
     using Fsel.Course.Lms.Application.Services.UserServices;
@@ -25,6 +27,7 @@ namespace Fsel.Course.Lms.Application.Queries.FinalTestQuery
     {
         private readonly QuestionTypeConverter _questionTypeConverter;
         private readonly IUserService _userService;
+        private readonly IMapper _mapper;
         private readonly AuthContext _authContext;
         private readonly IFinalTestResultRepository _finalTestResultRepository;
         private readonly IFinalTestRepository _finalTestRepository;
@@ -32,12 +35,14 @@ namespace Fsel.Course.Lms.Application.Queries.FinalTestQuery
         public GetFinalTestQueryHandler(
             QuestionTypeConverter questionTypeConverter
             , IUserService userService
+            , IMapper mapper
             , AuthContext authContext
             , IFinalTestResultRepository finalTestResultRepository
             , IFinalTestRepository finalTestRepository)
         {
             _questionTypeConverter = questionTypeConverter;
             _userService = userService;
+            _mapper = mapper;
             _authContext = authContext;
             _finalTestResultRepository = finalTestResultRepository;
             _finalTestRepository = finalTestRepository;
@@ -62,6 +67,8 @@ namespace Fsel.Course.Lms.Application.Queries.FinalTestQuery
                                                         .ThenInclude(x => x.Exercise)
                                                         .ThenInclude(x => x!.ExerciseQuestions)
                                                         .ThenInclude(x => x!.Question)
+                                                        .ThenInclude(x => x!.ExerciseQuestions)
+                                                        .ThenInclude(x => x!.FinalTestExerciseAnswers)
                                                         .FirstOrDefaultAsync(x => x.Id == request.FinalTestId, cancellationToken);
 
             if (finalTest == null)
@@ -90,6 +97,7 @@ namespace Fsel.Course.Lms.Application.Queries.FinalTestQuery
                         Explanation = m.Explanation,
                         Ungraded = m.Ungraded,
                         Config = _questionTypeConverter.QuestionTypeConverterObject(m.Config, m.QuestionType, false, true).Item1,
+                        ResultAnswer = finalTestResult == null ? null : _mapper.Map<FinalTestExerciseAnswerModel>(m.ExerciseQuestions!.FirstOrDefault()!.FinalTestExerciseAnswers.FirstOrDefault(x => x.FinalTestResultId == finalTestResult.Id))
                     }).ToList()
                 }).ToList(),
                 FinalTestResult = finalTestResult == null ? null : new FinalTestResultModel

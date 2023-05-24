@@ -6,7 +6,7 @@ namespace Fsel.Course.Domain.Models.CommandModels.FinalTestExerciseAnswers
     {
         public Guid CourseId { get; set; }
         public Guid FinalTestId { get; set; }
-        public IList<FinalTestExerciseAnswerModel>? Exercises { get; set; }
+        public IList<FinalTestExerciseAnswersModel>? Exercises { get; set; }
     }
 
     public class FinalTestQuestionAnswerModel
@@ -14,7 +14,7 @@ namespace Fsel.Course.Domain.Models.CommandModels.FinalTestExerciseAnswers
         public Guid QuestionId { get; set; }
         public object? Answer { get; set; }
     }
-    public class FinalTestExerciseAnswerModel
+    public class FinalTestExerciseAnswersModel
     {
         public Guid ExerciseId { get; set; }
         public IList<FinalTestQuestionAnswerModel>? Answers { get; set; }
