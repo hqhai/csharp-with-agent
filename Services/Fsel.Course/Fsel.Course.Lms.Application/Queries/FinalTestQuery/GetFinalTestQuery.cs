@@ -99,6 +99,7 @@ namespace Fsel.Course.Lms.Application.Queries.FinalTestQuery
                     CorrectTotal = finalTestResult.CorrectTotal,
                     Percent = finalTestResult.Percent,
                     Status = finalTestResult.Status,
+                    SkillScores = finalTestResult.SkillScores,
                     FinalTestId = finalTestResult.FinalTestId,
                     StudentId = finalTestResult.StudentId,
                     CourseId = finalTestResult.CourseId,
