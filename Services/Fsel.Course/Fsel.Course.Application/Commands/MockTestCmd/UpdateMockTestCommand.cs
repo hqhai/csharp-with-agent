@@ -3,7 +3,6 @@
 namespace Fsel.Course.Application.Commands.MockTestCmd
 {
     using System;
-    using System.Collections.Generic;
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
@@ -34,6 +33,7 @@ namespace Fsel.Course.Application.Commands.MockTestCmd
         private readonly ISectionGroupRepository _sectionGroupRepository;
         private readonly ISectionQuestionRepository _sectionQuestionRepository;
         private readonly ISectionTimeCodeRepository _sectionTimeCodeRepository;
+        private readonly SectionConverter _sectionConverter;
 
         public UpdateMockTestCommandHandler(IMapper mapper
             , IMockTestRepository mockTestRepository
@@ -43,7 +43,9 @@ namespace Fsel.Course.Application.Commands.MockTestCmd
             , IQuestionRepository questionRepository
             , ISectionGroupRepository sectionGroupRepository
             , ISectionQuestionRepository sectionQuestionRepository
-            , ISectionTimeCodeRepository sectionTimeCodeRepository)
+            , ISectionTimeCodeRepository sectionTimeCodeRepository
+            , SectionConverter sectionConverter)
+
         {
             _mapper = mapper;
             _mockTestRepository = mockTestRepository;
@@ -54,6 +56,8 @@ namespace Fsel.Course.Application.Commands.MockTestCmd
             _sectionGroupRepository = sectionGroupRepository;
             _sectionQuestionRepository = sectionQuestionRepository;
             _sectionTimeCodeRepository = sectionTimeCodeRepository;
+            _sectionConverter = sectionConverter;
+            _sectionConverter = sectionConverter;
         }
 
         public async Task<MethodResult<MockTestModel>> Handle(UpdateMockTestCommand request, CancellationToken cancellationToken)
@@ -76,7 +80,7 @@ namespace Fsel.Course.Application.Commands.MockTestCmd
                 return methodResult;
             }
 
-            if (mockTest.IsActive)
+            if (!mockTest.IsActive)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumMockTestErrorCode.MockTestInActiveState), nameof(mockTest.IsActive), mockTest.IsActive);
                 return methodResult;
@@ -136,22 +140,29 @@ namespace Fsel.Course.Application.Commands.MockTestCmd
                             else
                             {
                                 SectionPart newSectionPart = newSection.SectionParts.ElementAt(section.SectionParts.IndexOf(sectionPart));
-                                if (sectionPart.Questions == null || sectionPart.Questions.Count == 0)
+                                //if (sectionPart.Questions == null || sectionPart.Questions.Count == 0)
+                                //{
+                                //    methodResult.AddErrorBadRequest(nameof(EnumQuestionErrorCode.QuestionsNull), nameof(sectionPart.Questions));
+                                //    return methodResult;
+                                //}
+                                //foreach (var question in sectionPart.Questions)
+                                //{
+                                //    GetSectionQuestion(methodResult, question, null, newSectionPart);
+                                //}
+
+                                var method = _sectionConverter.AddQuestionToSession(newSectionPart, sectionPart.Questions);
+                                if (!method.IsOK)
                                 {
-                                    methodResult.AddErrorBadRequest(nameof(EnumQuestionErrorCode.QuestionsNull), nameof(sectionPart.Questions));
-                                    return methodResult;
-                                }
-                                foreach (var question in sectionPart.Questions)
-                                {
-                                    GetSectionQuestion(methodResult, question, null, newSectionPart);
-                                }
-                                if (!newSectionPart.IsValid())
-                                {
-                                    methodResult.AddErrorBadRequest(newSectionPart.ErrorMessages);
-                                    return methodResult;
+                                    methodResult.AddError(method.ErrorMessages);
                                 }
                             }
                         }
+                    }
+                    var correctCount = newSection.SectionParts.SelectMany(x => x.SectionQuestions).Select(x => x.Question).Sum(x => x!.CorrectTotal);
+                    if (!SectionValidation.IsCheckSection(newSectionGroup.CourseSkill, section.DisplayOrder, correctCount))
+                    {
+                        methodResult.AddErrorBadRequest(nameof(EnumMockTestErrorCode.MockTestMustCorrectScore), nameof(section.DisplayOrder), section.DisplayOrder);
+                        return methodResult;
                     }
                     else
                     {
@@ -214,43 +225,6 @@ namespace Fsel.Course.Application.Commands.MockTestCmd
             });
 
             return methodResult;
-        }
-
-        private void GetSectionQuestion(MethodResult<MockTestModel> methodResult, UpdateQuestionCommandModel question, Section? section, SectionPart? sectionPart)
-        {
-            if (question == null)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumQuestionErrorCode.QuestionNull), nameof(question));
-            }
-            else
-            {
-                Question newQuestion = _mapper.Map<Question>(question);
-                var (config, correctTotal) = _questionTypeConverter.QuestionTypeConverterObject(question.Config, newQuestion.QuestionType, isShowCorrectTotal: !question.Ungraded, false);
-                if (config == null)
-                {
-                    methodResult.AddErrorBadRequest(nameof(EnumVideoErrorCode.ConfigIsInTheWrongFormat), nameof(question.Config), question.Config);
-                }
-                if (!newQuestion.IsValid())
-                {
-                    methodResult.AddErrorBadRequest(newQuestion.ErrorMessages);
-                }
-                newQuestion.CorrectTotal = correctTotal;
-
-                if (section != null)
-                {
-                    section.SectionQuestions.Add(new SectionQuestion
-                    {
-                        Question = newQuestion,
-                    });
-                }
-                else if (sectionPart != null)
-                {
-                    sectionPart.SectionQuestions.Add(new SectionQuestion
-                    {
-                        Question = newQuestion,
-                    });
-                }
-            }
         }
     }
 }

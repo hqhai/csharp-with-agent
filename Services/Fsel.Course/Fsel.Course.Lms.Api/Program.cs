@@ -50,6 +50,15 @@ builder.Services.AddScoped<ILessonInstructionRepository, LessonInstructionReposi
 builder.Services.AddScoped<IHomeWorkAnswerRepository, HomeWorkAnswerRepository>();
 builder.Services.AddScoped<IHomeWorkQuestionRepository, HomeWorkQuestionRepository>();
 builder.Services.AddScoped<IHomeWorkResultRepository, HomeWorkResultRepository>();
+builder.Services.AddScoped<IMockTestResultRepository, MockTestResultRepository>();
+builder.Services.AddScoped<IMockTestAnswerRepository, MockTestAnswerRepository>();
+builder.Services.AddScoped<IMockTestSectionRepository, MockTestSectionRepository>();
+builder.Services.AddScoped<IUnitSkillMockTestRepository, UnitSkillMockTestRepository>();
+builder.Services.AddScoped<ISectionQuestionRepository, SectionQuestionRepository>();
+builder.Services.AddScoped<ISectionGroupRepository, SectionGroupRepository>();
+builder.Services.AddScoped<ISectionPartRepository, SectionPartRepository>();
+builder.Services.AddScoped<ISectionRepository, SectionRepository>();
+builder.Services.AddScoped<ISectionTimeCodeRepository, SectionTimeCodeRepository>();
 
 builder.Services.AddScoped<IPlacementTestResultRepository, PlacementTestResultRepository>();
 builder.Services.AddScoped<IPlacementTestRepository, PlacementTestRepository>();

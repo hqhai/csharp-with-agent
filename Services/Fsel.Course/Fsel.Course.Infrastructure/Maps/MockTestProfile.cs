@@ -5,7 +5,9 @@ namespace Fsel.Course.Infrastructure.Maps
     using AutoMapper;
     using Fsel.Core.Extensions;
     using Fsel.Course.Domain.Entities;
+    using Fsel.Course.Domain.Models.CommandModels.MockTestAnswers;
     using Fsel.Course.Domain.Models.CommandModels.MockTests;
+    using Fsel.Course.Domain.Models.CommandModels.PlacementTestAnswers;
     using Fsel.Course.Domain.Models.EntityModels;
 
     public class MockTestProfile : Profile
@@ -15,6 +17,8 @@ namespace Fsel.Course.Infrastructure.Maps
             CreateMap<MockTest, MockTestModel>().IgnoreAllNonExisting();
             CreateMap<CreateMockTestCommandModel, MockTest>().IgnoreAllNonExisting();
             CreateMap<UpdateMockTestCommandModel, MockTest>().IgnoreAllNonExisting();
+
+            CreateMap<CreateMockTestAnswerCommandModel, MockTestAnswer>().IgnoreAllNonExisting();
         }
     }
 }

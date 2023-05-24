@@ -14,7 +14,6 @@ namespace Fsel.Course.Application.Commands.MockTestCmd
     using Fsel.Course.Domain.Models.CommandModels.Questions;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Infrastructure.Common;
-    using Fsel.Course.Infrastructure.Repositories;
     using MediatR;
     using Microsoft.AspNetCore.Http;
 
@@ -27,12 +26,18 @@ namespace Fsel.Course.Application.Commands.MockTestCmd
         private readonly IMapper _mapper;
         private readonly IMockTestRepository _mockTestRepository;
         private readonly QuestionTypeConverter _questionTypeConverter;
+        private readonly SectionConverter _sectionConverter;
 
-        public CreateMockTestCommandHandler(IMapper mapper, IMockTestRepository mockTestRepository, QuestionTypeConverter questionTypeConverter)
+        public CreateMockTestCommandHandler(IMapper mapper
+            , IMockTestRepository mockTestRepository
+            , QuestionTypeConverter questionTypeConverter
+            , SectionConverter sectionConverter
+            )
         {
             _mapper = mapper;
             _mockTestRepository = mockTestRepository;
             _questionTypeConverter = questionTypeConverter;
+            _sectionConverter = sectionConverter;
         }
 
         public async Task<MethodResult<MockTestModel>> Handle(CreateMockTestCommand request, CancellationToken cancellationToken)
@@ -98,21 +103,28 @@ namespace Fsel.Course.Application.Commands.MockTestCmd
                                 else
                                 {
                                     SectionPart newSectionPart = newSection.SectionParts.ElementAt(section.SectionParts.IndexOf(sectionPart));
-                                    if (sectionPart.Questions == null || sectionPart.Questions.Count == 0)
+                                    //if (sectionPart.Questions == null || sectionPart.Questions.Count == 0)
+                                    //{
+                                    //    methodResult.AddErrorBadRequest(nameof(EnumQuestionErrorCode.QuestionsNull), nameof(sectionPart.Questions));
+                                    //    return methodResult;
+                                    //}
+                                    //foreach (var question in sectionPart.Questions)
+                                    //{
+                                    //    GetSectionQuestion(methodResult, question, null, newSectionPart);
+                                    //}
+
+                                    var method = _sectionConverter.AddQuestionToSession(newSectionPart, sectionPart.Questions);
+                                    if (!method.IsOK)
                                     {
-                                        methodResult.AddErrorBadRequest(nameof(EnumQuestionErrorCode.QuestionsNull), nameof(sectionPart.Questions));
-                                        return methodResult;
-                                    }
-                                    foreach (var question in sectionPart.Questions)
-                                    {
-                                        GetSectionQuestion(methodResult, question, null, newSectionPart);
-                                    }
-                                    if (!newSectionPart.IsValid())
-                                    {
-                                        methodResult.AddErrorBadRequest(newSectionPart.ErrorMessages);
-                                        return methodResult;
+                                        methodResult.AddError(method.ErrorMessages);
                                     }
                                 }
+                            }
+                            var correctCount = newSection.SectionParts.SelectMany(x => x.SectionQuestions).Select(x => x.Question).Sum(x => x!.CorrectTotal);
+                            if (!SectionValidation.IsCheckSection(newSectionGroup.CourseSkill, section.DisplayOrder, correctCount))
+                            {
+                                methodResult.AddErrorBadRequest(nameof(EnumMockTestErrorCode.MockTestMustCorrectScore), nameof(section.DisplayOrder), section.DisplayOrder);
+                                return methodResult;
                             }
                         }
                         else
@@ -172,43 +184,6 @@ namespace Fsel.Course.Application.Commands.MockTestCmd
             });
 
             return methodResult;
-        }
-
-        private void GetSectionQuestion(MethodResult<MockTestModel> methodResult, CreateQuestionCommandModel question, Section? section, SectionPart? sectionPart)
-        {
-            if (question == null)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumQuestionErrorCode.QuestionNull), nameof(question));
-            }
-            else
-            {
-                Question newQuestion = _mapper.Map<Question>(question);
-                var (config, correctTotal) = _questionTypeConverter.QuestionTypeConverterObject(question.Config, newQuestion.QuestionType, isShowCorrectTotal: !question.Ungraded, false);
-                if (config == null)
-                {
-                    methodResult.AddErrorBadRequest(nameof(EnumVideoErrorCode.ConfigIsInTheWrongFormat), nameof(question.Config), question.Config);
-                }
-                if (!newQuestion.IsValid())
-                {
-                    methodResult.AddErrorBadRequest(newQuestion.ErrorMessages);
-                }
-                newQuestion.CorrectTotal = correctTotal;
-
-                if (section != null)
-                {
-                    section.SectionQuestions.Add(new SectionQuestion
-                    {
-                        Question = newQuestion,
-                    });
-                }
-                else if (sectionPart != null)
-                {
-                    sectionPart.SectionQuestions.Add(new SectionQuestion
-                    {
-                        Question = newQuestion,
-                    });
-                }
-            }
         }
     }
 }
