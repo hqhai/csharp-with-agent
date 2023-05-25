@@ -7,6 +7,7 @@ namespace Fsel.Course.Domain.Enums
         Pending,
         Denied,
         PendingForGrading,
-        Graded
+        Graded,
+        Draft
     }
 }

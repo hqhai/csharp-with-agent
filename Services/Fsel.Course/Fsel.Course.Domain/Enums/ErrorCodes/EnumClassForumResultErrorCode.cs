@@ -2,16 +2,16 @@
 
 namespace Fsel.Course.Domain.Enums.ErrorCodes
 {
-    public enum EnumClassForumErrorCode
+    public enum EnumClassForumResultErrorCode
     {
         /// <summary>
         /// ClassForum Is Null
         /// </summary>
-        ClassForumNull,
+        ClassForumResultNull,
 
         /// <summary>
         /// Class Forum File Is Null
         /// </summary>
-        ClassForumFileNull
+        ClassForumResultFileNull
     }
 }

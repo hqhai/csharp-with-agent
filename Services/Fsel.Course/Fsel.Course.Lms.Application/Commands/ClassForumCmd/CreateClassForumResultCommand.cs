@@ -28,13 +28,15 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
         private readonly AuthContext _authContext;
         private readonly IUserService _userService;
         private readonly IClassForumResultRepository _classForumResultRepository;
+        private readonly IClassForumFileRepository _classForumFileRepository;
 
-        public CreateClassForumResultCommandHandler(IMapper mapper, AuthContext authContext, IUserService userService, IClassForumResultRepository classForumResultRepository)
+        public CreateClassForumResultCommandHandler(IMapper mapper, AuthContext authContext, IUserService userService, IClassForumResultRepository classForumResultRepository, IClassForumFileRepository classForumFileRepository)
         {
             _mapper = mapper;
             _authContext = authContext;
             _userService = userService;
             _classForumResultRepository = classForumResultRepository;
+            _classForumFileRepository = classForumFileRepository;
         }
 
         public async Task<MethodResult<ClassForumResultModel>> Handle(CreateClassForumResultCommand request, CancellationToken cancellationToken)
@@ -48,7 +50,11 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
                 methodResult.AddErrorBadRequest(nameof(EnumLessonErrorCode.UserNotExist), nameof(student), _authContext.CurrentUserId.ToString());
                 return methodResult;
             }
-
+            if (request.ClassForumResultFiles == null || request.ClassForumResultFiles.Count == 0)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumClassForumResultErrorCode.ClassForumResultFileNull), nameof(request.ClassForumResultFiles));
+                return methodResult;
+            }
             var studentId = student?.Content?.Result?.Id;
             var classForumResult = await _classForumResultRepository.Queryable
                     .FirstOrDefaultAsync(x => x.ClassForumId == request.ClassForumId && x.StudentId == studentId && x.LessonResultId == request.LessonResultId && x.Status == EnumClassForumStatus.Pending, cancellationToken);

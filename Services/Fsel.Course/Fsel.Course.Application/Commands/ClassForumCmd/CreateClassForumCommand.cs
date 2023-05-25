@@ -6,13 +6,11 @@ namespace Fsel.Course.Application.Commands.ClassForumCmd
     using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Common.ActionResults;
-    using Fsel.Course.Application.Commands.CourseCmd;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.CommandModels.ClassForums;
     using Fsel.Course.Domain.Models.EntityModels;
-    using Fsel.Course.Infrastructure.Repositories;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -48,32 +46,45 @@ namespace Fsel.Course.Application.Commands.ClassForumCmd
                 return methodResult;
             }
 
-            await _classForumRepository.ExecuteTransactionAsync(async () =>
+            if (request.ClassForumFiles == null || request.ClassForumFiles.Count == 0)
             {
-                var classForum = await _classForumRepository.Queryable.FirstOrDefaultAsync(x => x.Id == request.LessonId);
-                if (classForum != null)
-                {
-                    _mapper.Map(request, classForum);
-                    classForum = _classForumRepository.Update(classForum);
-                }
-                if (classForum == null)
-                {
-                    classForum = _mapper.Map<ClassForum>(request);
-                    classForum = _classForumRepository.Add(classForum);
-                }
-
-                if (!classForum.IsValid())
-                {
-                    methodResult.AddErrorBadRequest(classForum.ErrorMessages);
-                    return methodResult;
-                }
-
-                await _classForumRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
-
-                methodResult.StatusCode = StatusCodes.Status201Created;
-                methodResult.Result = _mapper.Map<ClassForumModel>(classForum);
+                methodResult.AddErrorBadRequest(nameof(EnumClassForumErrorCode.ClassForumFileNull), nameof(request.ClassForumFiles));
                 return methodResult;
-            });
+            }
+
+            ClassForum classForum = _mapper.Map<ClassForum>(request);
+            if (!classForum.IsValid())
+            {
+                methodResult.AddErrorBadRequest(classForum.ErrorMessages);
+                return methodResult;
+            }
+
+            await _classForumRepository.ExecuteTransactionAsync(async () =>
+        {
+            var classForum = await _classForumRepository.Queryable.FirstOrDefaultAsync(x => x.Id == request.LessonId);
+            if (classForum != null)
+            {
+                _mapper.Map(request, classForum);
+                classForum = _classForumRepository.Update(classForum);
+            }
+            if (classForum == null)
+            {
+                classForum = _mapper.Map<ClassForum>(request);
+                classForum = _classForumRepository.Add(classForum);
+            }
+
+            if (!classForum.IsValid())
+            {
+                methodResult.AddErrorBadRequest(classForum.ErrorMessages);
+                return methodResult;
+            }
+
+            await _classForumRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+
+            methodResult.StatusCode = StatusCodes.Status201Created;
+            methodResult.Result = _mapper.Map<ClassForumModel>(classForum);
+            return methodResult;
+        });
 
             return methodResult;
         }
