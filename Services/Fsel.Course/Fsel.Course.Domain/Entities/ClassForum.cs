@@ -48,5 +48,7 @@ namespace Fsel.Course.Domain.Entities
 
         public Guid LessonId { get; set; }
         public Lesson? Lesson { get; set; }
+
+        public ClassForumResult? ClassForumResult { get; set; }
     }
 }

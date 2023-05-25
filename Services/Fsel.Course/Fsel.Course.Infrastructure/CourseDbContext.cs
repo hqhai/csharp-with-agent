@@ -64,6 +64,8 @@ namespace Fsel.Course.Infrastructure
         public DbSet<FinalTestExercise> FinalTestExercises { get; set; }
         public DbSet<FinalTestExerciseAnswer> FinalTestExerciseAnswers { get; set; }
         public DbSet<FinalTestResult> FinalTestResults { get; set; }
+        public DbSet<ClassForumResult> ClassForumResults { get; set; }
+        public DbSet<ClassForumScore> ClassForumScores { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -116,6 +118,8 @@ namespace Fsel.Course.Infrastructure
             modelBuilder.ApplyConfiguration(new FinalTestExerciseAnswerEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new FinalTestExerciseEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new FinalTestResultEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new ClassForumResultEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new CLassForumScoreEntityTypeConfiguration());
 
             base.OnModelCreating(modelBuilder);
         }
