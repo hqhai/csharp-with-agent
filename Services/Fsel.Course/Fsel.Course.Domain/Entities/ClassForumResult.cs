@@ -19,7 +19,7 @@ namespace Fsel.Course.Domain.Entities
         /// <summary>
         /// Trạng thái
         /// </summary>
-        public EnumClassForumStatus Status { get; set; }
+        public EnumClassForumResultStatus Status { get; set; }
 
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         public Guid LessonResultId { get; set; }

@@ -13,6 +13,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.CommandModels.ClassForumResults;
     using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Course.Infrastructure.Repositories;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using MediatR;
     using Microsoft.AspNetCore.Http;
@@ -29,45 +30,63 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
         private readonly IUserService _userService;
         private readonly IClassForumResultRepository _classForumResultRepository;
         private readonly IClassForumFileRepository _classForumFileRepository;
+        private readonly IClassForumRepository _classForumRepository;
+        private readonly ILessonResultRepository _lessonResultRepository;
 
-        public CreateClassForumResultCommandHandler(IMapper mapper, AuthContext authContext, IUserService userService, IClassForumResultRepository classForumResultRepository, IClassForumFileRepository classForumFileRepository)
+        public CreateClassForumResultCommandHandler(IMapper mapper, AuthContext authContext, IUserService userService, IClassForumResultRepository classForumResultRepository, IClassForumFileRepository classForumFileRepository, IClassForumRepository classForumRepository, ILessonResultRepository lessonResultRepository)
         {
             _mapper = mapper;
             _authContext = authContext;
             _userService = userService;
             _classForumResultRepository = classForumResultRepository;
             _classForumFileRepository = classForumFileRepository;
+            _classForumRepository = classForumRepository;
+            _lessonResultRepository = lessonResultRepository;
         }
 
         public async Task<MethodResult<ClassForumResultModel>> Handle(CreateClassForumResultCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<ClassForumResultModel> methodResult = new MethodResult<ClassForumResultModel>();
-
+            var isLessonResult = await _lessonResultRepository.AnyAsync(request.LessonResultId);
+            if (!isLessonResult)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumLessonResultErrorCode.LessonResultNotExist));
+                return methodResult;
+            }
             var student = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
             if (!student.IsSuccessStatusCode)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumLessonErrorCode.UserNotExist), nameof(student), _authContext.CurrentUserId.ToString());
                 return methodResult;
             }
-            if (request.ClassForumResultFiles == null || request.ClassForumResultFiles.Count == 0)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumClassForumResultErrorCode.ClassForumResultFileNull), nameof(request.ClassForumResultFiles));
-                return methodResult;
-            }
+
             var studentId = student?.Content?.Result?.Id;
             var classForumResult = await _classForumResultRepository.Queryable
-                    .FirstOrDefaultAsync(x => x.ClassForumId == request.ClassForumId && x.StudentId == studentId && x.LessonResultId == request.LessonResultId && x.Status == EnumClassForumStatus.Pending, cancellationToken);
+                    .FirstOrDefaultAsync(x => x.StudentId == studentId && x.LessonResultId == request.LessonResultId, cancellationToken);
             if (classForumResult == null)
             {
                 classForumResult = new ClassForumResult
                 {
-                    ClassForumId = request.ClassForumId,
+                    Content = request.Content,
                     StudentId = studentId ?? default,
                     LessonResultId = request.LessonResultId,
+                    Status = request.IsSubmit ? EnumClassForumResultStatus.Pending : EnumClassForumResultStatus.Draft
                 };
             }
+            else if (classForumResult.Status != EnumClassForumResultStatus.Draft)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumClassForumErrorCode.ClassForumHasNotSubmit));
+                return methodResult;
+            }
 
+            if (request.FilePaths != null)
+            {
+                classForumResult.ClassForumResultFiles = request.FilePaths.Select(x => new ClassForumResultFile
+                {
+                    FilePath = x,
+                }).ToList();
+            }
             await _classForumResultRepository.ExecuteTransactionAsync(async () =>
             {
                 _classForumResultRepository.Add(classForumResult);

@@ -22,7 +22,7 @@ namespace Fsel.Course.Infrastructure.Configs
                 .HasMaxLength(100)
                 .HasConversion(
                     v => v.ToString(),
-                    v => v.EnumParse<EnumClassForumStatus>());
+                    v => v.EnumParse<EnumClassForumResultStatus>());
 
             builder.HasOne(a => a.ClassForum)
                  .WithMany(b => b.ClassForumResults)

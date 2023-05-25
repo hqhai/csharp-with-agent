@@ -2,7 +2,7 @@
 
 namespace Fsel.Course.Domain.Enums
 {
-    public enum EnumClassForumStatus
+    public enum EnumClassForumResultStatus
     {
         Pending,
         Denied,

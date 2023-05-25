@@ -23,6 +23,6 @@ namespace Fsel.Course.Domain.Models.CommandModels.ClassForums
 
         public Guid LessonId { get; set; }
 
-        public IList<ClassForumFileModel>? ClassForumFiles { get; set; }
+        public IList<string>? FilePaths { get; set; }
     }
 }

@@ -2,7 +2,7 @@
 
 namespace Fsel.Course.Domain.Enums
 {
-    public enum EnumClassForumCriteria
+    public enum EnumClassForumScoreCriteria
     {
         Content, Achievement, Organisation, Language
     }

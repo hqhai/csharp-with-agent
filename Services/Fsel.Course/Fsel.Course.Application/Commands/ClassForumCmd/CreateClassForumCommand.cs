@@ -46,45 +46,41 @@ namespace Fsel.Course.Application.Commands.ClassForumCmd
                 return methodResult;
             }
 
-            if (request.ClassForumFiles == null || request.ClassForumFiles.Count == 0)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumClassForumErrorCode.ClassForumFileNull), nameof(request.ClassForumFiles));
-                return methodResult;
-            }
+            var classForum = await _classForumRepository.Queryable.FirstOrDefaultAsync(x => x.Id == request.LessonId, cancellationToken);
 
-            ClassForum classForum = _mapper.Map<ClassForum>(request);
-            if (!classForum.IsValid())
+            if (request.FilePaths != null && classForum != null)
             {
-                methodResult.AddErrorBadRequest(classForum.ErrorMessages);
-                return methodResult;
+                classForum.ClassForumFiles = request.FilePaths.Select(x => new ClassForumFile
+                {
+                    FilePath = x,
+                }).ToList();
             }
 
             await _classForumRepository.ExecuteTransactionAsync(async () =>
-        {
-            var classForum = await _classForumRepository.Queryable.FirstOrDefaultAsync(x => x.Id == request.LessonId);
-            if (classForum != null)
             {
-                _mapper.Map(request, classForum);
-                classForum = _classForumRepository.Update(classForum);
-            }
-            if (classForum == null)
-            {
-                classForum = _mapper.Map<ClassForum>(request);
-                classForum = _classForumRepository.Add(classForum);
-            }
+                if (classForum != null)
+                {
+                    _mapper.Map(request, classForum);
+                    classForum = _classForumRepository.Update(classForum);
+                }
+                if (classForum == null)
+                {
+                    classForum = _mapper.Map<ClassForum>(request);
+                    classForum = _classForumRepository.Add(classForum);
+                }
 
-            if (!classForum.IsValid())
-            {
-                methodResult.AddErrorBadRequest(classForum.ErrorMessages);
+                if (!classForum.IsValid())
+                {
+                    methodResult.AddErrorBadRequest(classForum.ErrorMessages);
+                    return methodResult;
+                }
+
+                await _classForumRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+
+                methodResult.StatusCode = StatusCodes.Status201Created;
+                methodResult.Result = _mapper.Map<ClassForumModel>(classForum);
                 return methodResult;
-            }
-
-            await _classForumRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
-
-            methodResult.StatusCode = StatusCodes.Status201Created;
-            methodResult.Result = _mapper.Map<ClassForumModel>(classForum);
-            return methodResult;
-        });
+            });
 
             return methodResult;
         }

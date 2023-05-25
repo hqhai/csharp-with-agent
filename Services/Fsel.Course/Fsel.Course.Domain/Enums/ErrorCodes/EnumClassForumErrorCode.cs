@@ -12,6 +12,16 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         /// <summary>
         /// Class Forum File Is Null
         /// </summary>
-        ClassForumFileNull
+        ClassForumFileNull,
+
+        /// <summary>
+        /// Class Forum not exist
+        /// </summary>
+        ClassForumNotExist,
+
+        /// <summary>
+        /// ClassForumHasNotSubmit
+        /// </summary>
+        ClassForumHasNotSubmit
     }
 }
