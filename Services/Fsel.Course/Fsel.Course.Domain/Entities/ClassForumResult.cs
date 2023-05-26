@@ -14,7 +14,7 @@ namespace Fsel.Course.Domain.Entities
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         public string? Content { get; set; }
 
-        public Guid GradingTeacherId { get; set; }
+        public Guid? GradingTeacherId { get; set; }
 
         /// <summary>
         /// Trạng thái
