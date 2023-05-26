@@ -86,7 +86,11 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
                     ClassForumId = classForum.Id
                 };
             }
-            else if (classForumResult.Status != EnumClassForumResultStatus.Draft)
+            else if (classForumResult.Status == EnumClassForumResultStatus.Draft || classForumResult.Status == EnumClassForumResultStatus.Denied)
+            {
+                classForumResult.Status = EnumClassForumResultStatus.Pending;
+            }
+            else
             {
                 methodResult.AddErrorBadRequest(nameof(EnumClassForumErrorCode.ClassForumHasNotSubmit));
                 return methodResult;
