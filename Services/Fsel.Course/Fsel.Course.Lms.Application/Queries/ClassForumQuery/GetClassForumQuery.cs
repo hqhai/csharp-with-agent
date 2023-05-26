@@ -52,8 +52,13 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumQuery
             }
             var classForum = await _classForumRepository.Queryable
                 .Include(x => x.ClassForumResults)
-                .FirstOrDefaultAsync(x => x.Id == request.LessonResultId, cancellationToken);
-
+                .Include(x => x.ClassForumFiles)
+                .FirstOrDefaultAsync(x => x.ClassForumResults.Select(x => x.LessonResultId).Contains(request.LessonResultId), cancellationToken);
+            if (classForum == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumClassForumErrorCode.ClassForumNull));
+                return methodResult;
+            }
             var classForumModel = new ClassForumModel
             {
                 Id = classForum!.Id,

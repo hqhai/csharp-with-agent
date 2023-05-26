@@ -15,7 +15,7 @@ namespace Fsel.Course.Lms.Api.Controllers
     [ApiVersion(Settings.APIVersion)]
     [Route(Settings.APIDefaultRoute + "/class-forum-result")]
     [ApiController]
-    [Authorize(Roles = nameof(EnumRole.MasterAdmin))]
+    [Authorize(Roles = nameof(EnumRole.Student))]
     public class ClassForumResultController : ControllerBase
     {
         private readonly IMediator _mediator;

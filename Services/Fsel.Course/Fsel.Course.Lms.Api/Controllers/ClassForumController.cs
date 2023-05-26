@@ -15,7 +15,7 @@ namespace Fsel.Course.Lms.Api.Controllers
     [ApiVersion(Settings.APIVersion)]
     [Route(Settings.APIDefaultRoute + "/class-forum")]
     [ApiController]
-    [Authorize(Roles = nameof(EnumRole.MasterAdmin))]
+    [Authorize(Roles = nameof(EnumRole.Student))]
     public class ClassForumController : ControllerBase
     {
         private readonly IMediator _mediator;
@@ -28,7 +28,7 @@ namespace Fsel.Course.Lms.Api.Controllers
         /// <summary>
         /// get Class forum
         /// </summary>
-        [HttpGet("final-test")]
+        [HttpGet]
         [ProducesResponseType(typeof(MethodResult<ClassForumModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> Get([FromQuery] GetClassForumQuery command)

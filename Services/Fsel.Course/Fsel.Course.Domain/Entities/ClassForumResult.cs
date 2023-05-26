@@ -32,6 +32,8 @@ namespace Fsel.Course.Domain.Entities
 
         public ClassForum? ClassForum { get; set; }
 
+        public LessonResult? LessonResult { get; set; }
+
         public IList<ClassForumScore> ClassForumScores { get; set; } = new List<ClassForumScore>();
 
         public IList<ClassForumResultFile>? ClassForumResultFiles { get; set; } = new List<ClassForumResultFile>();

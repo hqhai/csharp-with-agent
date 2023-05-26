@@ -50,5 +50,7 @@ namespace Fsel.Course.Domain.Entities
         public ICollection<LessonNote> LessonNotes { get; set; } = new List<LessonNote>();
 
         public ICollection<HomeWorkResult> HomeWorkResults { get; set; } = new List<HomeWorkResult>();
+
+        public ICollection<ClassForumResult> ClassForumResults { get; set; } = new List<ClassForumResult>();
     }
 }
