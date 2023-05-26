@@ -6,13 +6,11 @@ namespace Fsel.Course.Application.Commands.ClassForumCmd
     using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Common.ActionResults;
-    using Fsel.Course.Application.Commands.CourseCmd;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.CommandModels.ClassForums;
     using Fsel.Course.Domain.Models.EntityModels;
-    using Fsel.Course.Infrastructure.Repositories;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -29,7 +27,8 @@ namespace Fsel.Course.Application.Commands.ClassForumCmd
 
         public CreateClassForumCommandHandler(IMapper mapper
             , IClassForumRepository classForumRepository
-            , ILessonRepository lessonRepository)
+            , ILessonRepository lessonRepository
+            )
         {
             _mapper = mapper;
             _classForumRepository = classForumRepository;
@@ -50,12 +49,13 @@ namespace Fsel.Course.Application.Commands.ClassForumCmd
 
             await _classForumRepository.ExecuteTransactionAsync(async () =>
             {
-                var classForum = await _classForumRepository.Queryable.FirstOrDefaultAsync(x => x.Id == request.LessonId);
+                var classForum = await _classForumRepository.Queryable.Include(x => x.ClassForumFiles).FirstOrDefaultAsync(x => x.LessonId == request.LessonId, cancellationToken);
                 if (classForum != null)
                 {
                     _mapper.Map(request, classForum);
                     classForum = _classForumRepository.Update(classForum);
                 }
+
                 if (classForum == null)
                 {
                     classForum = _mapper.Map<ClassForum>(request);
@@ -66,6 +66,13 @@ namespace Fsel.Course.Application.Commands.ClassForumCmd
                 {
                     methodResult.AddErrorBadRequest(classForum.ErrorMessages);
                     return methodResult;
+                }
+                if (request.FilePaths != null)
+                {
+                    classForum.ClassForumFiles = request.FilePaths.Select(x => new ClassForumFile
+                    {
+                        FilePath = x,
+                    }).ToList();
                 }
 
                 await _classForumRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);

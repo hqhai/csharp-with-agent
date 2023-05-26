@@ -73,6 +73,9 @@ builder.Services.AddScoped<ISectionQuestionRepository, SectionQuestionRepository
 builder.Services.AddScoped<IFinalTestRepository, FinalTestRepository>();
 builder.Services.AddScoped<IFinalTestExerciseAnswerRepository, FinalTestExerciseAnswerRepository>();
 builder.Services.AddScoped<IFinalTestResultRepository, FinalTestResultRepository>();
+builder.Services.AddScoped<IClassForumFileRepository, ClassForumFileRepository>();
+builder.Services.AddScoped<IClassForumResultRepository, ClassForumResultRepository>();
+builder.Services.AddScoped<IClassForumResultFileRepository, ClassForumResultFileRepository>();
 
 builder.Services.AddScoped<QuestionTypeConverter>();
 builder.Services.AddScoped<AnswerTypeConverter>();

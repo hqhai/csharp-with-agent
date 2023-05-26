@@ -4,6 +4,7 @@ using System.Text.Json.Serialization;
 using Fsel.Shared.Enums;
 using Fsel.Common.Helpers;
 using Fsel.Course.Domain.Enums;
+using Fsel.Course.Domain.Models.EntityModels;
 
 namespace Fsel.Course.Domain.Models.CommandModels.ClassForums
 {
@@ -21,5 +22,7 @@ namespace Fsel.Course.Domain.Models.CommandModels.ClassForums
         public EnumCourseSkill CourseSkill { get; set; }
 
         public Guid LessonId { get; set; }
+
+        public IList<string>? FilePaths { get; set; }
     }
 }
