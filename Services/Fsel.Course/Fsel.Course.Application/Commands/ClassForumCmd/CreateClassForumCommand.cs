@@ -46,18 +46,9 @@ namespace Fsel.Course.Application.Commands.ClassForumCmd
                 return methodResult;
             }
 
-            var classForum = await _classForumRepository.Queryable.FirstOrDefaultAsync(x => x.Id == request.LessonId, cancellationToken);
-
-            if (request.FilePaths != null && classForum != null)
-            {
-                classForum.ClassForumFiles = request.FilePaths.Select(x => new ClassForumFile
-                {
-                    FilePath = x,
-                }).ToList();
-            }
-
             await _classForumRepository.ExecuteTransactionAsync(async () =>
             {
+                var classForum = await _classForumRepository.Queryable.FirstOrDefaultAsync(x => x.Id == request.LessonId, cancellationToken);
                 if (classForum != null)
                 {
                     _mapper.Map(request, classForum);
@@ -73,6 +64,14 @@ namespace Fsel.Course.Application.Commands.ClassForumCmd
                 {
                     methodResult.AddErrorBadRequest(classForum.ErrorMessages);
                     return methodResult;
+                }
+
+                if (request.FilePaths != null)
+                {
+                    classForum.ClassForumFiles = request.FilePaths.Select(x => new ClassForumFile
+                    {
+                        FilePath = x,
+                    }).ToList();
                 }
 
                 await _classForumRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);

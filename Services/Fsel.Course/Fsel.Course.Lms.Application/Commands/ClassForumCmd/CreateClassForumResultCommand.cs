@@ -48,19 +48,26 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<ClassForumResultModel> methodResult = new MethodResult<ClassForumResultModel>();
-            var isLessonResult = await _lessonResultRepository.AnyAsync(request.LessonResultId);
-            if (!isLessonResult)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumLessonResultErrorCode.LessonResultNotExist));
-                return methodResult;
-            }
+
             var student = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
             if (!student.IsSuccessStatusCode)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumLessonErrorCode.UserNotExist), nameof(student), _authContext.CurrentUserId.ToString());
                 return methodResult;
             }
+            var lessonResult = await _lessonResultRepository.GetByIdAsync(request.LessonResultId);
+            if (lessonResult == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumLessonResultErrorCode.LessonResultsNotExist), nameof(student), _authContext.CurrentUserId.ToString());
+                return methodResult;
+            }
 
+            var classForum = await _classForumRepository.Queryable.FirstOrDefaultAsync(x => x.LessonId == lessonResult.Id, cancellationToken);
+            if (classForum == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumClassForumErrorCode.ClassForumNull), nameof(student), _authContext.CurrentUserId.ToString());
+                return methodResult;
+            }
             var studentId = student?.Content?.Result?.Id;
             var classForumResult = await _classForumResultRepository.Queryable
                     .FirstOrDefaultAsync(x => x.StudentId == studentId && x.LessonResultId == request.LessonResultId, cancellationToken);
@@ -71,7 +78,8 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
                     Content = request.Content,
                     StudentId = studentId ?? default,
                     LessonResultId = request.LessonResultId,
-                    Status = request.IsSubmit ? EnumClassForumResultStatus.Pending : EnumClassForumResultStatus.Draft
+                    Status = request.IsSubmit ? EnumClassForumResultStatus.Pending : EnumClassForumResultStatus.Draft,
+                    ClassForumId = classForum.Id
                 };
             }
             else if (classForumResult.Status != EnumClassForumResultStatus.Draft)
