@@ -53,13 +53,6 @@ namespace Fsel.Course.Application.Commands.ClassForumCmd
                 if (classForum != null)
                 {
                     _mapper.Map(request, classForum);
-                    if (request.FilePaths != null)
-                    {
-                        classForum.ClassForumFiles = request.FilePaths.Select(x => new ClassForumFile
-                        {
-                            FilePath = x,
-                        }).ToList();
-                    }
                     classForum = _classForumRepository.Update(classForum);
                 }
 
