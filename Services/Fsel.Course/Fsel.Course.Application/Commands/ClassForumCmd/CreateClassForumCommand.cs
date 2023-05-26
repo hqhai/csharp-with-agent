@@ -48,7 +48,7 @@ namespace Fsel.Course.Application.Commands.ClassForumCmd
 
             await _classForumRepository.ExecuteTransactionAsync(async () =>
             {
-                var classForum = await _classForumRepository.Queryable.FirstOrDefaultAsync(x => x.Id == request.LessonId, cancellationToken);
+                var classForum = await _classForumRepository.Queryable.Include(x => x.ClassForumFiles).FirstOrDefaultAsync(x => x.Id == request.LessonId, cancellationToken);
                 if (classForum != null)
                 {
                     _mapper.Map(request, classForum);

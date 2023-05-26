@@ -70,6 +70,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
             }
             var studentId = student?.Content?.Result?.Id;
             var classForumResult = await _classForumResultRepository.Queryable
+                    .Include(x => x.ClassForumResultFiles)
                     .FirstOrDefaultAsync(x => x.StudentId == studentId && x.LessonResultId == request.LessonResultId, cancellationToken);
             if (classForumResult == null)
             {
