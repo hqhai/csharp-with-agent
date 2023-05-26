@@ -27,7 +27,8 @@ namespace Fsel.Course.Application.Commands.ClassForumCmd
 
         public CreateClassForumCommandHandler(IMapper mapper
             , IClassForumRepository classForumRepository
-            , ILessonRepository lessonRepository)
+            , ILessonRepository lessonRepository
+            )
         {
             _mapper = mapper;
             _classForumRepository = classForumRepository;
@@ -48,12 +49,20 @@ namespace Fsel.Course.Application.Commands.ClassForumCmd
 
             await _classForumRepository.ExecuteTransactionAsync(async () =>
             {
-                var classForum = await _classForumRepository.Queryable.Include(x => x.ClassForumFiles).FirstOrDefaultAsync(x => x.Id == request.LessonId, cancellationToken);
+                var classForum = await _classForumRepository.Queryable.Include(x => x.ClassForumFiles).FirstOrDefaultAsync(x => x.LessonId == request.LessonId, cancellationToken);
                 if (classForum != null)
                 {
                     _mapper.Map(request, classForum);
+                    if (request.FilePaths != null)
+                    {
+                        classForum.ClassForumFiles = request.FilePaths.Select(x => new ClassForumFile
+                        {
+                            FilePath = x,
+                        }).ToList();
+                    }
                     classForum = _classForumRepository.Update(classForum);
                 }
+
                 if (classForum == null)
                 {
                     classForum = _mapper.Map<ClassForum>(request);
@@ -65,7 +74,6 @@ namespace Fsel.Course.Application.Commands.ClassForumCmd
                     methodResult.AddErrorBadRequest(classForum.ErrorMessages);
                     return methodResult;
                 }
-
                 if (request.FilePaths != null)
                 {
                     classForum.ClassForumFiles = request.FilePaths.Select(x => new ClassForumFile

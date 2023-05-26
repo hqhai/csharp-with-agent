@@ -13,7 +13,6 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.CommandModels.ClassForumResults;
     using Fsel.Course.Domain.Models.EntityModels;
-    using Fsel.Course.Infrastructure.Repositories;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using MediatR;
     using Microsoft.AspNetCore.Http;
@@ -29,17 +28,21 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
         private readonly AuthContext _authContext;
         private readonly IUserService _userService;
         private readonly IClassForumResultRepository _classForumResultRepository;
-        private readonly IClassForumFileRepository _classForumFileRepository;
+
         private readonly IClassForumRepository _classForumRepository;
         private readonly ILessonResultRepository _lessonResultRepository;
 
-        public CreateClassForumResultCommandHandler(IMapper mapper, AuthContext authContext, IUserService userService, IClassForumResultRepository classForumResultRepository, IClassForumFileRepository classForumFileRepository, IClassForumRepository classForumRepository, ILessonResultRepository lessonResultRepository)
+        public CreateClassForumResultCommandHandler(IMapper mapper
+            , AuthContext authContext
+            , IUserService userService
+            , IClassForumResultRepository classForumResultRepository
+            , IClassForumRepository classForumRepository
+            , ILessonResultRepository lessonResultRepository)
         {
             _mapper = mapper;
             _authContext = authContext;
             _userService = userService;
             _classForumResultRepository = classForumResultRepository;
-            _classForumFileRepository = classForumFileRepository;
             _classForumRepository = classForumRepository;
             _lessonResultRepository = lessonResultRepository;
         }
