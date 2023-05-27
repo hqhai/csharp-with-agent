@@ -13,6 +13,7 @@ namespace Fsel.Course.Application.Commands.MockTestCmd
     using Fsel.Course.Domain.Models.CommandModels.MockTests;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Infrastructure.Common;
+    using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Http;
 
@@ -79,7 +80,7 @@ namespace Fsel.Course.Application.Commands.MockTestCmd
                     {
                         Section newSection = newSectionGroup.Sections.ElementAt(sectionGroup.Sections.IndexOf(section));
 
-                        if (sectionGroup.CourseSkill != Shared.Enums.EnumCourseSkill.Speaking)
+                        if (sectionGroup.CourseSkill != EnumCourseSkill.Speaking && sectionGroup.CourseSkill != EnumCourseSkill.Writing)
                         {
                             if (section.SectionParts != null && section.Questions != null && section.SectionParts.Count > 0 && section.Questions.Count > 0)
                             {
@@ -117,7 +118,7 @@ namespace Fsel.Course.Application.Commands.MockTestCmd
                                 return methodResult;
                             }
                         }
-                        else
+                        else if (sectionGroup.CourseSkill != EnumCourseSkill.Writing)
                         {
                             if (section.SectionTimeCodes == null || section.SectionTimeCodes!.Count == 0)
                             {
