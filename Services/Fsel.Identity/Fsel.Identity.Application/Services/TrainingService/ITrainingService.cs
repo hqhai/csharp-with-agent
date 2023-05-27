@@ -1,9 +1,9 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Identity.Application.Services.ITrainingService
+namespace Fsel.Identity.Application.Services.TrainingService
 {
     using Fsel.Common.ActionResults;
-    using Fsel.Identity.Application.Services.TrainingServices.Models;
+    using Fsel.Identity.Application.Services.TrainingService.Models;
     using Microsoft.AspNetCore.Mvc;
     using Refit;
 

@@ -3,7 +3,7 @@
 using Fsel.Core.Extensions;
 using Fsel.Identity.Application.Services;
 using Fsel.Identity.Application.Services.InteractionService;
-using Fsel.Identity.Application.Services.ITrainingService;
+using Fsel.Identity.Application.Services.TrainingService;
 using Fsel.Identity.Domain.Entities;
 using Fsel.Identity.Domain.IRepositories;
 using Fsel.Identity.Infrastructure;

@@ -7,7 +7,7 @@ namespace Fsel.Identity.Application.Queries.UserQuery
     using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Common.ActionResults;
-    using Fsel.Identity.Application.Services.ITrainingService;
+    using Fsel.Identity.Application.Services.TrainingService;
     using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.Enums.ErrorCodes;
     using Fsel.Identity.Domain.Models.EntityModels;

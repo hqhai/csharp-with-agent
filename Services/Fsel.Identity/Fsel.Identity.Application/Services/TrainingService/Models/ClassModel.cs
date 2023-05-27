@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Identity.Application.Services.TrainingServices.Models
+namespace Fsel.Identity.Application.Services.TrainingService.Models
 {
     using System;
     using Fsel.Shared.Enums;
