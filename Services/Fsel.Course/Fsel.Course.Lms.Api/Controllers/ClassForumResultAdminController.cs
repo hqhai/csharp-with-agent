@@ -4,6 +4,7 @@ namespace Fsel.Course.Lms.Api.Controllers
 {
     using Fsel.Common.Constants;
     using Fsel.Shared.Enums;
+    using MediatR;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
 
@@ -13,5 +14,11 @@ namespace Fsel.Course.Lms.Api.Controllers
     [Authorize(Roles = nameof(EnumRole.Admin))]
     public class ClassForumResultAdminController : ControllerBase
     {
+        private readonly IMediator _mediator;
+
+        public ClassForumResultAdminController(IMediator mediator)
+        {
+            _mediator = mediator;
+        }
     }
 }
