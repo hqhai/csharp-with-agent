@@ -8,10 +8,8 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumQuery
     using System.Text;
     using System.Threading;
     using System.Threading.Tasks;
-    using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base;
-    using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
@@ -20,29 +18,30 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumQuery
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class GetClassForumQuery : IRequest<MethodResult<ClassForumModel>>
+    public class GetClassForumResultQuery : IRequest<MethodResult<ClassForumResultModel>>
     {
-        public Guid LessonResultId { get; set; }
+        public Guid ClassForumResultId { get; set; }
     }
 
-    public class GetClassForumQueryHandler : IRequestHandler<GetClassForumQuery, MethodResult<ClassForumModel>>
+    public class GetClassForumResultQueryHandler : IRequestHandler<GetClassForumResultQuery, MethodResult<ClassForumResultModel>>
     {
         private readonly IClassForumRepository _classForumRepository;
         private readonly IUserService _userService;
         private readonly AuthContext _authContext;
+        private readonly IClassForumResultRepository _classForumResultRepository;
 
-        public GetClassForumQueryHandler(IClassForumRepository classForumRepository, IUserService userService, AuthContext authContext)
+        public GetClassForumResultQueryHandler(IClassForumRepository classForumRepository, IUserService userService, AuthContext authContext, IClassForumResultRepository classForumResultRepository)
         {
             _classForumRepository = classForumRepository;
             _userService = userService;
             _authContext = authContext;
+            _classForumResultRepository = classForumResultRepository;
         }
 
-        public async Task<MethodResult<ClassForumModel>> Handle(GetClassForumQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<ClassForumResultModel>> Handle(GetClassForumResultQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            MethodResult<ClassForumModel> methodResult = new MethodResult<ClassForumModel>();
-
+            MethodResult<ClassForumResultModel> methodResult = new MethodResult<ClassForumResultModel>();
             var studentResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
             var student = studentResult?.Content?.Result;
             if (studentResult == null || student == null)
@@ -50,41 +49,37 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumQuery
                 methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.StudentNull));
                 return methodResult;
             }
-            var classForum = await _classForumRepository.Queryable
-                .Include(x => x.ClassForumResults)
-                .ThenInclude(x => x.ClassForumScores)
-                .Include(x => x.ClassForumFiles)
 
-                .FirstOrDefaultAsync(x => x.ClassForumResults.Select(x => x.LessonResultId).Contains(request.LessonResultId), cancellationToken);
-            if (classForum == null)
+            var classForumResult = await _classForumResultRepository.Queryable
+                .Include(x => x.ClassForumResultFiles)
+                .Include(x => x.ClassForumScores)
+                .Where(x => x.Id == request.ClassForumResultId).FirstOrDefaultAsync(cancellationToken);
+
+            if (classForumResult == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumClassForumErrorCode.ClassForumNull));
                 return methodResult;
             }
-            var classForumModel = new ClassForumModel
+            var classForumResultModel = new ClassForumResultModel
             {
-                Id = classForum!.Id,
-                CourseSkill = classForum.CourseSkill,
-                GradingStyle = classForum.GradingStyle,
-                IsActive = classForum.IsActive,
-                MediaPost = classForum.MediaPost,
-                TaggetTimeLimit = classForum.TaggetTimeLimit,
-                TaggetWordLimit = classForum.TaggetWordLimit,
-                ClassForumFiles = classForum.ClassForumFiles!.Select(x => new ClassForumFileModel
+                Id = classForumResult.Id,
+                Content = classForumResult.Content,
+                Status = classForumResult.Status,
+                ClassForumResultFiles = classForumResult.ClassForumResultFiles == null ? null : classForumResult.ClassForumResultFiles.Select(x => new ClassForumResultFileModel
                 {
                     Id = x.Id,
                     FilePath = x.FilePath,
                 }).ToList(),
-                ClassForumScore = classForum.ClassForumResults!.SelectMany(x => x.ClassForumScores).Select(x => new ClassForumScoreModel
+                ClassForumScores = classForumResult.ClassForumScores == null ? null : classForumResult.ClassForumScores.Select(x => new ClassForumScoreModel
                 {
                     Id = x.Id,
-                    Criteria = x.Criteria,
                     Feedback = x.Feedback,
-                    Score = x.Score,
+                    Criteria = x.Criteria,
+                    Score = x.Score
                 }).ToList(),
             };
 
-            methodResult.Result = classForumModel;
+            methodResult.Result = classForumResultModel;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }

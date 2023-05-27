@@ -2,12 +2,10 @@
 
 namespace Fsel.Course.Domain.Models.EntityModels
 {
-    using System;
-    using System.Collections.Generic;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Course.Domain.Enums;
 
-    public class ClassForumResultModel : BaseModel
+    public class ClassForumResultSearchModel : BaseModel
     {
         public string? Content { get; set; }
 
@@ -20,6 +18,11 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public Guid StudentId { get; set; }
 
         public Guid ClassForumId { get; set; }
+        public string? LessonName { get; set; }
+
+        public string? UnitName { get; set; }
+
+        public Guid? TeacherId { get; set; }
 
         public ClassForumModel? ClassForum { get; set; }
 

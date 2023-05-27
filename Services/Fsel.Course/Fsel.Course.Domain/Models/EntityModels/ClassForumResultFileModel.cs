@@ -9,9 +9,10 @@ namespace Fsel.Course.Domain.Models.EntityModels
     using System.Text;
     using System.Threading.Tasks;
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Core.Base.BaseModels;
     using Fsel.Course.Domain.Entities;
 
-    public class ClassForumResultFileModel
+    public class ClassForumResultFileModel : BaseModel
     {
         public string? FilePath { get; set; }
         public Guid ClassForumResultId { get; set; }
