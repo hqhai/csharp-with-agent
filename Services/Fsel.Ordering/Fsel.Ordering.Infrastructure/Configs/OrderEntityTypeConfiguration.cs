@@ -17,7 +17,7 @@ namespace Fsel.Ordering.Infrastructure.Configs
             builder.HasOne(a => a.Package)
                   .WithMany(b => b.Orders)
                   .HasForeignKey(b => b.PackageId)
-                  .OnDelete(DeleteBehavior.NoAction);
+                  .OnDelete(DeleteBehavior.Cascade);
 
             builder.Property(e => e.Status)
                 .HasMaxLength(100)

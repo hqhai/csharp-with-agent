@@ -7,6 +7,7 @@ namespace Fsel.Ordering.Domain.Entities
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Common.Helpers;
     using Fsel.Core.Entities;
+    using Fsel.Ordering.Domain.Enums;
 
     public class Package : Entity
     {
@@ -14,14 +15,13 @@ namespace Fsel.Ordering.Domain.Entities
         /// Code
         /// </summary>
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
-        [MaxLength(250, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
-        public string? Code { get; set; }
+        public EnumPackageCode? Code { get; set; }
 
         /// <summary>
         /// Giá Khóa Học
         /// </summary>
         [Range(0, int.MaxValue, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
-        public double Price { get; set; }
+        public decimal Price { get; set; }
 
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         public string? DescriptionStr { get; set; }

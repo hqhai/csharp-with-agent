@@ -28,8 +28,8 @@ namespace Fsel.Ordering.Infrastructure.Migrations
                     UpdatedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     DeletedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false),
-                    Code = table.Column<string>(type: "nvarchar(250)", maxLength: 250, nullable: false),
-                    Price = table.Column<double>(type: "float", nullable: false),
+                    Code = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    Price = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     DescriptionStr = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
@@ -59,7 +59,7 @@ namespace Fsel.Ordering.Infrastructure.Migrations
                     Status = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     PaymentMethod = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     Price = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    DiscountPercent = table.Column<double>(type: "float", nullable: false),
+                    DiscountPercent = table.Column<int>(type: "int", nullable: false),
                     DiscountPrice = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     TotalPrice = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     CourseId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
@@ -73,7 +73,8 @@ namespace Fsel.Ordering.Infrastructure.Migrations
                         name: "FK_Orders_Packages_PackageId",
                         column: x => x.PackageId,
                         principalTable: "Packages",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.InsertData(
@@ -81,9 +82,9 @@ namespace Fsel.Ordering.Infrastructure.Migrations
                 columns: new[] { "Id", "Code", "CreatedDate", "CreatedFullName", "CreatedUserId", "DeletedDate", "DeletedFullName", "DeletedUserId", "DescriptionStr", "IsDeleted", "Price", "UpdatedDate", "UpdatedFullName", "UpdatedUserId" },
                 values: new object[,]
                 {
-                    { new Guid("42d7ddb2-9f36-4f86-badc-67dc16bb722b"), "BASIC", new DateTime(2023, 5, 26, 17, 3, 54, 618, DateTimeKind.Local).AddTicks(1900), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, "[\"B\\u00E0i gi\\u1EA3ng , b\\u00E0i t\\u1EADp t\\u00EAn n\\u1EC1n t\\u1EA3ng E-learning\",\"Truy c\\u1EADp b\\u00E0i t\\u1EADp h\\u01B0\\u1EDBng d\\u1EABn, v\\u00E0 b\\u00E0i thi Unit\",\"Di\\u1EC5n \\u0111\\u00E0n\"]", false, 1000000.0, null, null, null },
-                    { new Guid("d13ee4ab-785a-425c-bd70-b74b61df42eb"), "PREMIUM", new DateTime(2023, 5, 26, 17, 3, 54, 619, DateTimeKind.Local).AddTicks(8886), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, "[\"B\\u00E0i gi\\u1EA3ng , b\\u00E0i t\\u1EADp t\\u00EAn n\\u1EC1n t\\u1EA3ng E-learning\",\"Truy c\\u1EADp b\\u00E0i t\\u1EADp h\\u01B0\\u1EDBng d\\u1EABn, v\\u00E0 b\\u00E0i thi Unit\",\"Di\\u1EC5n \\u0111\\u00E0n\",\"Gi\\u1EA3ng vi\\u00EAn nh\\u1EADn x\\u00E9t\",\"Truy c\\u1EADp ti\\u1EBFt h\\u1ECDc tr\\u1EF1c tuy\\u1EBFn cho k\\u1EF9 n\\u0103ng n\\u00F3i v\\u1EDBi Gi\\u1EA3ng vi\\u00EAn\"]", false, 10000000.0, null, null, null },
-                    { new Guid("daa6fc87-6461-49d4-b3a5-c9e4cc30bc59"), "STANDARD", new DateTime(2023, 5, 26, 17, 3, 54, 619, DateTimeKind.Local).AddTicks(8215), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, "[\"B\\u00E0i gi\\u1EA3ng , b\\u00E0i t\\u1EADp t\\u00EAn n\\u1EC1n t\\u1EA3ng E-learning\",\"Truy c\\u1EADp b\\u00E0i t\\u1EADp h\\u01B0\\u1EDBng d\\u1EABn, v\\u00E0 b\\u00E0i thi Unit\",\"Di\\u1EC5n \\u0111\\u00E0n\",\"Gi\\u1EA3ng vi\\u00EAn nh\\u1EADn x\\u00E9t\"]", false, 3000000.0, null, null, null }
+                    { new Guid("42d7ddb2-9f36-4f86-badc-67dc16bb722b"), "BASIC", new DateTime(2023, 5, 27, 10, 29, 38, 919, DateTimeKind.Local).AddTicks(9165), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, "[\"B\\u00E0i gi\\u1EA3ng , b\\u00E0i t\\u1EADp t\\u00EAn n\\u1EC1n t\\u1EA3ng E-learning\",\"Truy c\\u1EADp b\\u00E0i t\\u1EADp h\\u01B0\\u1EDBng d\\u1EABn, v\\u00E0 b\\u00E0i thi Unit\",\"Di\\u1EC5n \\u0111\\u00E0n\"]", false, 1000000m, null, null, null },
+                    { new Guid("d13ee4ab-785a-425c-bd70-b74b61df42eb"), "PREMIUM", new DateTime(2023, 5, 27, 10, 29, 38, 921, DateTimeKind.Local).AddTicks(729), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, "[\"B\\u00E0i gi\\u1EA3ng , b\\u00E0i t\\u1EADp t\\u00EAn n\\u1EC1n t\\u1EA3ng E-learning\",\"Truy c\\u1EADp b\\u00E0i t\\u1EADp h\\u01B0\\u1EDBng d\\u1EABn, v\\u00E0 b\\u00E0i thi Unit\",\"Di\\u1EC5n \\u0111\\u00E0n\",\"Gi\\u1EA3ng vi\\u00EAn nh\\u1EADn x\\u00E9t\",\"Truy c\\u1EADp ti\\u1EBFt h\\u1ECDc tr\\u1EF1c tuy\\u1EBFn cho k\\u1EF9 n\\u0103ng n\\u00F3i v\\u1EDBi Gi\\u1EA3ng vi\\u00EAn\"]", false, 10000000m, null, null, null },
+                    { new Guid("daa6fc87-6461-49d4-b3a5-c9e4cc30bc59"), "STANDARD", new DateTime(2023, 5, 27, 10, 29, 38, 921, DateTimeKind.Local).AddTicks(121), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, "[\"B\\u00E0i gi\\u1EA3ng , b\\u00E0i t\\u1EADp t\\u00EAn n\\u1EC1n t\\u1EA3ng E-learning\",\"Truy c\\u1EADp b\\u00E0i t\\u1EADp h\\u01B0\\u1EDBng d\\u1EABn, v\\u00E0 b\\u00E0i thi Unit\",\"Di\\u1EC5n \\u0111\\u00E0n\",\"Gi\\u1EA3ng vi\\u00EAn nh\\u1EADn x\\u00E9t\"]", false, 3000000m, null, null, null }
                 });
 
             migrationBuilder.CreateIndex(

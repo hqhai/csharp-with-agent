@@ -2,11 +2,16 @@
 
 namespace Fsel.Ordering.Application.Queries.OrderQuery
 {
+    using System;
     using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Core.Base;
+    using Fsel.Ordering.Application.Services.UserService;
     using Fsel.Ordering.Domain.Enums.ErrorCodes;
     using Fsel.Ordering.Domain.IRepositories;
     using Fsel.Ordering.Domain.Models.EntityModels;
+    using Fsel.Shared.Enums;
+    using Fsel.Shared.Enums.ErrorCodes;
     using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.AspNetCore.Http;
@@ -15,23 +20,31 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery
     public class GetOrderQuery : IRequest<MethodResult<OrderModel>>
     {
         public Guid PackageId { get; set; }
+        public EnumCourseLevel CourseLevel { get; set; }
     }
 
     public class GetOrderQueryHandler : IRequestHandler<GetOrderQuery, MethodResult<OrderModel>>
     {
         private readonly IPackageRepository _packageRepository;
         private readonly IMapper _mapper;
+        private readonly IUserService _userService;
+        private readonly AuthContext _authContext;
 
-        public GetOrderQueryHandler(IPackageRepository packageRepository, IMapper mapper)
+        public GetOrderQueryHandler(IPackageRepository packageRepository,
+            IMapper mapper,
+            IUserService userService,
+            AuthContext authContext)
         {
             _packageRepository = packageRepository;
             _mapper = mapper;
+            _userService = userService;
+            _authContext = authContext;
         }
 
         public async Task<MethodResult<OrderModel>> Handle(GetOrderQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            MethodResult<OrderModel> methodResult = new MethodResult<OrderModel>(); 
+            MethodResult<OrderModel> methodResult = new MethodResult<OrderModel>();
 
             OrderModel order = new OrderModel();
             var package = await _packageRepository.Queryable.FirstOrDefaultAsync(x => x.Id == request.PackageId, cancellationToken);
@@ -40,8 +53,15 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery
                 methodResult.AddErrorBadRequest(nameof(EnumOrderErrorCode.PackageNotExist));
                 return methodResult;
             }
-            order.Price = package.Price;
-            order.Code = NumberHelper.GenerateOrderCode(8);
+            var student = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
+            if (!student.IsSuccessStatusCode)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError));
+                return methodResult;
+            }
+            string formattedDate = $"{DateTime.Now.Day:00}{DateTime.Now.Month:00}{DateTime.Now.Year}";
+            var code = $"{request.CourseLevel.GetEnumCourseType()}{formattedDate}{package.Code.ToString()!.Substring(0, 1)}{student.Content!.Result!.Human!.Code}";
+            order.Code = code;
             order.Package = _mapper.Map<PackageModel>(package);
             methodResult.Result = order;
             methodResult.StatusCode = StatusCodes.Status200OK;

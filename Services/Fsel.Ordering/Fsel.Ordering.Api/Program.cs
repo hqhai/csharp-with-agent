@@ -2,6 +2,7 @@
 
 using Fsel.Core.Extensions;
 using Fsel.Ordering.Application.Services.CourseService;
+using Fsel.Ordering.Application.Services.UserService;
 using Fsel.Ordering.Domain.IRepositories;
 using Fsel.Ordering.Infrastructure;
 using Fsel.Ordering.Infrastructure.Repositories;
@@ -22,6 +23,7 @@ builder.Services.AddScoped<IPackageRepository, PackageRepository>();
 builder.Services.AddScoped<IOrderRepository, OrderRepository>();
 
 builder.AddRefitClients(typeof(ICourseService), appSetting?.Services?.CourseApiUrl);
+builder.AddRefitClients(typeof(IUserService), appSetting?.Services?.UserApiUrl);
 var app = builder.Build();
 
 app.UseServices();

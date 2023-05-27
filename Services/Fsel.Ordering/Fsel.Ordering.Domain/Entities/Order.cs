@@ -34,10 +34,13 @@ namespace Fsel.Ordering.Domain.Entities
         public string? Address { get; set; }
 
         /// <summary>
-        /// Trạng thái Order
+        /// Trạng thái Đơn hàng
         /// </summary>
         public EnumOrderStatus Status { get; set; }
 
+        ///<summary>
+        /// Phương thức thanh toán
+        ///</summary>
         public EnumPaymentMethodStatus PaymentMethod { get; set; }
 
         /// <summary>
@@ -50,7 +53,7 @@ namespace Fsel.Ordering.Domain.Entities
         /// Giảm giá %
         /// </summary>
         [Range(0, 100, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
-        public double DiscountPercent { get; set; }
+        public int DiscountPercent { get; set; }
 
         /// <summary>
         /// Tổng tiền Giảm giá %

@@ -7,6 +7,11 @@ namespace Fsel.Ordering.Domain.Enums.ErrorCodes
         /// <summary>
         /// Package Does Not Exist
         /// </summary>
-        PackageNotExist
+        PackageNotExist,
+
+        /// <summary>
+        /// Code Order Already Exist
+        /// </summary>
+        CodeOrderAlreadyExist,
     }
 }

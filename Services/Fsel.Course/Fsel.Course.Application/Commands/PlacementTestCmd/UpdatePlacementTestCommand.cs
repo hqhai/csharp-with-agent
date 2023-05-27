@@ -6,7 +6,6 @@ using Fsel.Course.Domain.Entities;
 using Fsel.Course.Domain.Enums.ErrorCodes;
 using Fsel.Course.Domain.IRepositories;
 using Fsel.Course.Domain.Models.CommandModels.PlacementTests;
-using Fsel.Course.Domain.Models.CommandModels.Questions;
 using Fsel.Course.Domain.Models.EntityModels;
 using Fsel.Course.Infrastructure.Common;
 using Fsel.Shared.Enums;
@@ -135,15 +134,6 @@ namespace Fsel.Course.Application.Commands.PlacementTestCmd
                             else
                             {
                                 SectionPart newSectionPart = newSection.SectionParts.ElementAt(section.SectionParts.IndexOf(sectionPart));
-                                //if (sectionPart.Questions == null || sectionPart.Questions.Count == 0)
-                                //{
-                                //    methodResult.AddErrorBadRequest(nameof(EnumQuestionErrorCode.QuestionsNull), nameof(sectionPart.Questions));
-                                //    return methodResult;
-                                //}
-                                //foreach (var question in sectionPart.Questions)
-                                //{
-                                //    GetSectionQuestion(methodResult, question, null, newSectionPart);
-                                //}
 
                                 var method = _sectionConverter.AddQuestionToSession(newSectionPart, sectionPart.Questions);
                                 if (!method.IsOK)

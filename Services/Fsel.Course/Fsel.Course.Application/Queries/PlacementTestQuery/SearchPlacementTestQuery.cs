@@ -46,6 +46,8 @@ namespace Fsel.Course.Application.Queries.PlacementTestQuery
                                          Level = i.Level,
                                          CreatedDate = i.CreatedDate,
                                          CreatedUserId = i.CreatedUserId,
+                                         CreatedFullName = i.CreatedFullName,
+                                         UpdatedFullName = i.UpdatedFullName,
                                          UpdatedDate = i.UpdatedDate,
                                          UpdatedUserId = i.UpdatedUserId,
                                      };

@@ -8,18 +8,20 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base;
     using Fsel.Ordering.Domain.Entities;
+    using Fsel.Ordering.Domain.Enums;
     using Fsel.Ordering.Domain.Enums.ErrorCodes;
     using Fsel.Ordering.Domain.IRepositories;
     using Fsel.Ordering.Domain.Models.CommandModels.Orders;
     using Fsel.Ordering.Domain.Models.EntityModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
+    using Microsoft.EntityFrameworkCore;
 
-    public class CreateOrderCommand : CreateOrderCommandModel, IRequest<MethodResult<OrderModel>>
+    public class CreateOrderCommand : CreateOrderCommandModel, IRequest<MethodResult<OrderProfileModel>>
     {
     }
 
-    public class CreateClassForumCommandHandler : IRequestHandler<CreateOrderCommand, MethodResult<OrderModel>>
+    public class CreateClassForumCommandHandler : IRequestHandler<CreateOrderCommand, MethodResult<OrderProfileModel>>
     {
         private readonly IMapper _mapper;
         private readonly IOrderRepository _orderRepository;
@@ -37,10 +39,10 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
             _packageRepository = packageRepository;
         }
 
-        public async Task<MethodResult<OrderModel>> Handle(CreateOrderCommand request, CancellationToken cancellationToken)
+        public async Task<MethodResult<OrderProfileModel>> Handle(CreateOrderCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            MethodResult<OrderModel> methodResult = new MethodResult<OrderModel>();
+            MethodResult<OrderProfileModel> methodResult = new MethodResult<OrderProfileModel>();
 
             var package = await _packageRepository.GetByIdAsync(request.PackageId);
             if (package == null)
@@ -48,20 +50,33 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
                 methodResult.AddErrorBadRequest(nameof(EnumOrderErrorCode.PackageNotExist));
                 return methodResult;
             }
+
+            if (await _orderRepository.Queryable.AnyAsync(x => x.Code == request.Code,cancellationToken))
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumOrderErrorCode.CodeOrderAlreadyExist));
+                return methodResult;
+            }
+
             Order order = _mapper.Map<Order>(request);
+            order.Status = EnumOrderStatus.New;
             order.UserId = _authContext.CurrentUserId;
+            order.Price = package.Price;
+            order.DiscountPercent = 5;
+            order.DiscountPrice = order.Price * order.DiscountPercent / 100;
+            order.TotalPrice = order.Price - order.DiscountPrice;
             if (!order.IsValid())
             {
                 methodResult.AddErrorBadRequest(order.ErrorMessages);
                 return methodResult;
             }
+
             await _orderRepository.ExecuteTransactionAsync(async () =>
             {
                 order = _orderRepository.Add(order);
                 await _orderRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
                 methodResult.StatusCode = StatusCodes.Status201Created;
-                methodResult.Result = _mapper.Map<OrderModel>(order);
+                methodResult.Result = _mapper.Map<OrderProfileModel>(order);
                 return methodResult;
             });
             return methodResult;

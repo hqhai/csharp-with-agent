@@ -27,7 +27,7 @@ namespace Fsel.Ordering.Api.Controllers
         }
 
         /// <summary>
-        /// Get Order Ramdom
+        /// Get Order
         /// </summary>
         [HttpGet]
         [ProducesResponseType(typeof(MethodResult<OrderModel>), (int)HttpStatusCode.OK)]
@@ -42,11 +42,11 @@ namespace Fsel.Ordering.Api.Controllers
         /// Create Order
         /// </summary>
         [HttpPost]
-        [ProducesResponseType(typeof(MethodResult<OrderModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(MethodResult<OrderProfileModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> Create([FromBody] CreateOrderCommand command)
         {
-            MethodResult<OrderModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            MethodResult<OrderProfileModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
     }

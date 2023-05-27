@@ -10,8 +10,4 @@
     <ProjectReference Include="..\Fsel.Ordering.Domain\Fsel.Ordering.Domain.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Migrations\" />
-  </ItemGroup>
-
 </Project>

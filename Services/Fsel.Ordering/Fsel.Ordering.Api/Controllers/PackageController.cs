@@ -26,12 +26,12 @@ namespace Fsel.Ordering.Api.Controllers
         }
 
         /// <summary>
-        /// Get Order Ramdom
+        /// Get Packages
         /// </summary>
         [HttpGet]
         [ProducesResponseType(typeof(MethodResult<List<PackageModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetOrderByPackageId()
+        public async Task<IActionResult> GetPackages()
         {
             MethodResult<List<PackageModel>> commandResult = await _mediator.Send(new GetPackagesQuery()).ConfigureAwait(false);
             return commandResult.GetActionResult();

@@ -71,8 +71,8 @@ namespace Fsel.Ordering.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(103);
 
-                    b.Property<double>("DiscountPercent")
-                        .HasColumnType("float");
+                    b.Property<int>("DiscountPercent")
+                        .HasColumnType("int");
 
                     b.Property<decimal>("DiscountPrice")
                         .HasColumnType("decimal(18,2)");
@@ -136,8 +136,8 @@ namespace Fsel.Ordering.Infrastructure.Migrations
 
                     b.Property<string>("Code")
                         .IsRequired()
-                        .HasMaxLength(250)
-                        .HasColumnType("nvarchar(250)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2")
@@ -174,8 +174,8 @@ namespace Fsel.Ordering.Infrastructure.Migrations
                         .HasColumnType("bit")
                         .HasColumnOrder(110);
 
-                    b.Property<double>("Price")
-                        .HasColumnType("float");
+                    b.Property<decimal>("Price")
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<DateTime?>("UpdatedDate")
                         .HasColumnType("datetime2")
@@ -199,34 +199,34 @@ namespace Fsel.Ordering.Infrastructure.Migrations
                         {
                             Id = new Guid("42d7ddb2-9f36-4f86-badc-67dc16bb722b"),
                             Code = "BASIC",
-                            CreatedDate = new DateTime(2023, 5, 26, 17, 3, 54, 618, DateTimeKind.Local).AddTicks(1900),
+                            CreatedDate = new DateTime(2023, 5, 27, 10, 29, 38, 919, DateTimeKind.Local).AddTicks(9165),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             DescriptionStr = "[\"B\\u00E0i gi\\u1EA3ng , b\\u00E0i t\\u1EADp t\\u00EAn n\\u1EC1n t\\u1EA3ng E-learning\",\"Truy c\\u1EADp b\\u00E0i t\\u1EADp h\\u01B0\\u1EDBng d\\u1EABn, v\\u00E0 b\\u00E0i thi Unit\",\"Di\\u1EC5n \\u0111\\u00E0n\"]",
                             IsDeleted = false,
-                            Price = 1000000.0
+                            Price = 1000000m
                         },
                         new
                         {
                             Id = new Guid("daa6fc87-6461-49d4-b3a5-c9e4cc30bc59"),
                             Code = "STANDARD",
-                            CreatedDate = new DateTime(2023, 5, 26, 17, 3, 54, 619, DateTimeKind.Local).AddTicks(8215),
+                            CreatedDate = new DateTime(2023, 5, 27, 10, 29, 38, 921, DateTimeKind.Local).AddTicks(121),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             DescriptionStr = "[\"B\\u00E0i gi\\u1EA3ng , b\\u00E0i t\\u1EADp t\\u00EAn n\\u1EC1n t\\u1EA3ng E-learning\",\"Truy c\\u1EADp b\\u00E0i t\\u1EADp h\\u01B0\\u1EDBng d\\u1EABn, v\\u00E0 b\\u00E0i thi Unit\",\"Di\\u1EC5n \\u0111\\u00E0n\",\"Gi\\u1EA3ng vi\\u00EAn nh\\u1EADn x\\u00E9t\"]",
                             IsDeleted = false,
-                            Price = 3000000.0
+                            Price = 3000000m
                         },
                         new
                         {
                             Id = new Guid("d13ee4ab-785a-425c-bd70-b74b61df42eb"),
                             Code = "PREMIUM",
-                            CreatedDate = new DateTime(2023, 5, 26, 17, 3, 54, 619, DateTimeKind.Local).AddTicks(8886),
+                            CreatedDate = new DateTime(2023, 5, 27, 10, 29, 38, 921, DateTimeKind.Local).AddTicks(729),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             DescriptionStr = "[\"B\\u00E0i gi\\u1EA3ng , b\\u00E0i t\\u1EADp t\\u00EAn n\\u1EC1n t\\u1EA3ng E-learning\",\"Truy c\\u1EADp b\\u00E0i t\\u1EADp h\\u01B0\\u1EDBng d\\u1EABn, v\\u00E0 b\\u00E0i thi Unit\",\"Di\\u1EC5n \\u0111\\u00E0n\",\"Gi\\u1EA3ng vi\\u00EAn nh\\u1EADn x\\u00E9t\",\"Truy c\\u1EADp ti\\u1EBFt h\\u1ECDc tr\\u1EF1c tuy\\u1EBFn cho k\\u1EF9 n\\u0103ng n\\u00F3i v\\u1EDBi Gi\\u1EA3ng vi\\u00EAn\"]",
                             IsDeleted = false,
-                            Price = 10000000.0
+                            Price = 10000000m
                         });
                 });
 
@@ -235,7 +235,7 @@ namespace Fsel.Ordering.Infrastructure.Migrations
                     b.HasOne("Fsel.Ordering.Domain.Entities.Package", "Package")
                         .WithMany("Orders")
                         .HasForeignKey("PackageId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Package");

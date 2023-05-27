@@ -51,6 +51,7 @@ namespace Fsel.Course.Application.Commands.PlacementTestCmd
             }
 
             PlacementTest placementTest = _mapper.Map<PlacementTest>(request);
+            placementTest.IsActive = false;
             if (!placementTest.IsValid())
             {
                 methodResult.AddErrorBadRequest(placementTest.ErrorMessages);
@@ -98,15 +99,6 @@ namespace Fsel.Course.Application.Commands.PlacementTestCmd
                                 else
                                 {
                                     SectionPart newSectionPart = newSection.SectionParts.ElementAt(section.SectionParts.IndexOf(sectionPart));
-                                    //if (sectionPart.Questions == null || sectionPart.Questions.Count == 0)
-                                    //{
-                                    //    methodResult.AddErrorBadRequest(nameof(EnumQuestionErrorCode.QuestionsNull), nameof(sectionPart.Questions));
-                                    //    return methodResult;
-                                    //}
-                                    //foreach (var question in sectionPart.Questions)
-                                    //{
-                                    //    GetSectionQuestion(methodResult, question, null, newSectionPart);
-                                    //}
 
                                     var method = _sectionConverter.AddQuestionToSession(newSectionPart, sectionPart.Questions);
                                     if (!method.IsOK)
