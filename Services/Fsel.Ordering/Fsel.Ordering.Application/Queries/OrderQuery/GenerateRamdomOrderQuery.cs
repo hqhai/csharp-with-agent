@@ -18,13 +18,13 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class GetOrderQuery : IRequest<MethodResult<GenerateRamdomOrderModel>>
+    public class GenerateRamdomOrderQuery : IRequest<MethodResult<GenerateRamdomOrderModel>>
     {
         public Guid PackageId { get; set; }
         public EnumCourseLevel CourseLevel { get; set; }
     }
 
-    public class GetOrderQueryHandler : IRequestHandler<GetOrderQuery, MethodResult<GenerateRamdomOrderModel>>
+    public class GetOrderQueryHandler : IRequestHandler<GenerateRamdomOrderQuery, MethodResult<GenerateRamdomOrderModel>>
     {
         private readonly IPackageRepository _packageRepository;
         private readonly IMapper _mapper;
@@ -42,7 +42,7 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery
             _authContext = authContext;
         }
 
-        public async Task<MethodResult<GenerateRamdomOrderModel>> Handle(GetOrderQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<GenerateRamdomOrderModel>> Handle(GenerateRamdomOrderQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<GenerateRamdomOrderModel> methodResult = new MethodResult<GenerateRamdomOrderModel>();
