@@ -45,6 +45,8 @@ namespace Fsel.Course.Infrastructure.Repositories
                                        .ThenInclude(x => x.SectionParts)
                                        .ThenInclude(x => x.SectionQuestions.Where(n => n.Question != null))
                                        .ThenInclude(x => x.Question)
+                                       .Include(x => x.CourseUnitMockTests)
+                                       .Include(x => x.UnitSkillMockTests)
                                        .FirstOrDefaultAsync(x => x.Id == id);
             }
             catch (Exception)
@@ -62,6 +64,8 @@ namespace Fsel.Course.Infrastructure.Repositories
                                       .ThenInclude(x => x!.Sections)
                                       .ThenInclude(x => x.SectionParts)
                                       .ThenInclude(x => x.SectionQuestions)
+                                      .Include(x => x.CourseUnitMockTests)
+                                      .Include(x => x.UnitSkillMockTests)
                                       .Where(x => x.Id == id)
                                       .Select(x => new MockTestModel
                                       {
@@ -69,7 +73,7 @@ namespace Fsel.Course.Infrastructure.Repositories
                                           Name = x.Name,
                                           CourseType = x.CourseType,
                                           CreatedDate = x.CreatedDate,
-                                          IsActive = x.IsActive,
+                                          IsActive = x.UnitSkillMockTests.Any() || x.CourseUnitMockTests.Any(),
                                           MockTestType = x.MockTestType,
                                           SectionGroups = x.MockTestSections.Select(x => x.SectionGroup).Select(x => new SectionGroupModel
                                           {
