@@ -56,6 +56,8 @@ namespace Fsel.Course.Application.Queries.MockTestQuery
                                           CreatedDate = x.CreatedDate,
                                           IsActive = x.UnitSkillMockTests.Any() || x.CourseUnitMockTests.Any(),
                                           MockTestType = x.MockTestType,
+                                          CreatedFullName = x.CreatedFullName,
+                                          UpdatedFullName = x.UpdatedFullName,
                                           Skills = x.MockTestSections.Select(x => x.SectionGroup).Select(n => n!.CourseSkill).ToList(),
                                       });
             if (!string.IsNullOrEmpty(request.Keyword))

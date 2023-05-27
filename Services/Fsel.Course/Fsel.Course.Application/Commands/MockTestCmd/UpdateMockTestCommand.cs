@@ -80,7 +80,7 @@ namespace Fsel.Course.Application.Commands.MockTestCmd
                 return methodResult;
             }
 
-            if (!mockTest.IsActive)
+            if (mockTest.CourseUnitMockTests.Any() || mockTest.UnitSkillMockTests.Any())
             {
                 methodResult.AddErrorBadRequest(nameof(EnumMockTestErrorCode.MockTestInActiveState), nameof(mockTest.IsActive), mockTest.IsActive);
                 return methodResult;
