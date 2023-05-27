@@ -152,7 +152,7 @@ namespace Fsel.Course.Application.Commands.MockTestCmd
                     var correctCount = newSection.SectionParts.SelectMany(x => x.SectionQuestions).Select(x => x.Question).Sum(x => x!.CorrectTotal);
                     if (!SectionValidation.IsCheckSection(newSectionGroup.CourseSkill, section.DisplayOrder, correctCount))
                     {
-                        methodResult.AddErrorBadRequest(nameof(EnumMockTestErrorCode.MockTestMustCorrectScore), nameof(section.DisplayOrder), section.DisplayOrder);
+                        methodResult.AddErrorBadRequest(nameof(EnumMockTestErrorCode.MockTestMustCorrectScore), nameof(correctCount), correctCount);
                         return methodResult;
                     }
                     else

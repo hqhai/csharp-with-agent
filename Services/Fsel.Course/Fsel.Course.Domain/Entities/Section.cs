@@ -11,7 +11,6 @@ namespace Fsel.Course.Domain.Entities
         /// <summary>
         /// Tên Section
         /// </summary>
-        [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         [MaxLength(250, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? Name { get; set; }
 
@@ -28,7 +27,9 @@ namespace Fsel.Course.Domain.Entities
         /// </summary>
         [MaxLength(250, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? VideoFilePath { get; set; }
+
         public int DisplayOrder { get; set; }
+
         public SectionGroup? SectionGroup { get; set; }
         public Guid SectionGroupId { get; set; }
         public ICollection<SectionPart> SectionParts { get; set; } = new List<SectionPart>();
