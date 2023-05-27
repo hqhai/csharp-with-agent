@@ -3,6 +3,7 @@
 namespace Fsel.Ordering.Application.Queries.OrderQuery
 {
     using System;
+    using System.Globalization;
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base;
@@ -17,13 +18,13 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class GetOrderQuery : IRequest<MethodResult<OrderModel>>
+    public class GetOrderQuery : IRequest<MethodResult<GenerateRamdomOrderModel>>
     {
         public Guid PackageId { get; set; }
         public EnumCourseLevel CourseLevel { get; set; }
     }
 
-    public class GetOrderQueryHandler : IRequestHandler<GetOrderQuery, MethodResult<OrderModel>>
+    public class GetOrderQueryHandler : IRequestHandler<GetOrderQuery, MethodResult<GenerateRamdomOrderModel>>
     {
         private readonly IPackageRepository _packageRepository;
         private readonly IMapper _mapper;
@@ -41,12 +42,12 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery
             _authContext = authContext;
         }
 
-        public async Task<MethodResult<OrderModel>> Handle(GetOrderQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<GenerateRamdomOrderModel>> Handle(GetOrderQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            MethodResult<OrderModel> methodResult = new MethodResult<OrderModel>();
+            MethodResult<GenerateRamdomOrderModel> methodResult = new MethodResult<GenerateRamdomOrderModel>();
 
-            OrderModel order = new OrderModel();
+            GenerateRamdomOrderModel order = new GenerateRamdomOrderModel();
             var package = await _packageRepository.Queryable.FirstOrDefaultAsync(x => x.Id == request.PackageId, cancellationToken);
             if (package == null)
             {
@@ -59,7 +60,8 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery
                 methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError));
                 return methodResult;
             }
-            string formattedDate = $"{DateTime.Now.Day:00}{DateTime.Now.Month:00}{DateTime.Now.Year}";
+            CultureInfo culture = new CultureInfo("en-US");
+            string formattedDate = DateTime.Now.ToString("ddMMyyyy", culture);
             var code = $"{request.CourseLevel.GetEnumCourseType()}{formattedDate}{package.Code.ToString()!.Substring(0, 1)}{student.Content!.Result!.Human!.Code}";
             order.Code = code;
             order.Package = _mapper.Map<PackageModel>(package);

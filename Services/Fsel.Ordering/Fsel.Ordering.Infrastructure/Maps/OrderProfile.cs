@@ -12,8 +12,8 @@ namespace Fsel.Ordering.Infrastructure.Maps
     {
         public OrderProfile()
         {
+            CreateMap<Order, GenerateRamdomOrderModel>().IgnoreAllNonExisting();
             CreateMap<Order, OrderModel>().IgnoreAllNonExisting();
-            CreateMap<Order, OrderProfileModel>().IgnoreAllNonExisting();
             CreateMap<CreateOrderCommandModel, Order>().IgnoreAllNonExisting();
         }
     }

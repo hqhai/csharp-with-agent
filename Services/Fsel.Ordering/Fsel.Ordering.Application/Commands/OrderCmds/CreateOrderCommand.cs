@@ -17,11 +17,11 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class CreateOrderCommand : CreateOrderCommandModel, IRequest<MethodResult<OrderProfileModel>>
+    public class CreateOrderCommand : CreateOrderCommandModel, IRequest<MethodResult<OrderModel>>
     {
     }
 
-    public class CreateClassForumCommandHandler : IRequestHandler<CreateOrderCommand, MethodResult<OrderProfileModel>>
+    public class CreateClassForumCommandHandler : IRequestHandler<CreateOrderCommand, MethodResult<OrderModel>>
     {
         private readonly IMapper _mapper;
         private readonly IOrderRepository _orderRepository;
@@ -39,10 +39,10 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
             _packageRepository = packageRepository;
         }
 
-        public async Task<MethodResult<OrderProfileModel>> Handle(CreateOrderCommand request, CancellationToken cancellationToken)
+        public async Task<MethodResult<OrderModel>> Handle(CreateOrderCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            MethodResult<OrderProfileModel> methodResult = new MethodResult<OrderProfileModel>();
+            MethodResult<OrderModel> methodResult = new MethodResult<OrderModel>();
 
             var package = await _packageRepository.GetByIdAsync(request.PackageId);
             if (package == null)
@@ -76,7 +76,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
                 await _orderRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
                 methodResult.StatusCode = StatusCodes.Status201Created;
-                methodResult.Result = _mapper.Map<OrderProfileModel>(order);
+                methodResult.Result = _mapper.Map<OrderModel>(order);
                 return methodResult;
             });
             return methodResult;

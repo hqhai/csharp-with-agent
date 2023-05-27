@@ -46,7 +46,7 @@ namespace Fsel.Interaction.Infrastructure
 
         private static void SeedSurveyQuestions(ModelBuilder builder)
         {
-            var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, Setting.SurveyQuestionFileName);
+            var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, SurveyQuestionSettings.SurveyQuestionFileName);
             var surveyQuestions = ConvertHelper.DeserializeFromFilePath<IList<SurveyQuestion>>(path);
             ArgumentNullException.ThrowIfNull(surveyQuestions);
             builder.Entity<SurveyQuestion>().HasData(surveyQuestions.ToArray());

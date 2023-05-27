@@ -27,14 +27,14 @@ namespace Fsel.Ordering.Api.Controllers
         }
 
         /// <summary>
-        /// Get Order
+        /// Generate Ramdom Order
         /// </summary>
         [HttpGet]
-        [ProducesResponseType(typeof(MethodResult<OrderModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(MethodResult<GenerateRamdomOrderModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetOrderByPackageId([FromQuery] GetOrderQuery query)
+        public async Task<IActionResult> GenerateRamdomOrder([FromQuery] GetOrderQuery query)
         {
-            MethodResult<OrderModel> commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            MethodResult<GenerateRamdomOrderModel> commandResult = await _mediator.Send(query).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
 
@@ -42,11 +42,11 @@ namespace Fsel.Ordering.Api.Controllers
         /// Create Order
         /// </summary>
         [HttpPost]
-        [ProducesResponseType(typeof(MethodResult<OrderProfileModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(MethodResult<OrderModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> Create([FromBody] CreateOrderCommand command)
         {
-            MethodResult<OrderProfileModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            MethodResult<OrderModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
     }
