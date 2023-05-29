@@ -68,7 +68,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
                                     .ThenInclude(x => x.CourseUnitMockTests)
                                     .ThenInclude(x => x.Course)
                                     .ThenInclude(x => x.CourseTeachers)
-                                    .Where(x => x.Status == Domain.Enums.EnumClassForumResultStatus.Pending)
+                                    .Where(x => x.Status == request.Status)
                                     .Select(x => new ClassForumResultSearchModel
                                     {
                                         Id = x.Id,
