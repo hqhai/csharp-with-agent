@@ -51,9 +51,10 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumQuery
                 return methodResult;
             }
             var classForum = await _classForumRepository.Queryable
-                .Include(x => x.ClassForumResults)
+                .Include(x => x.ClassForumResults!)
+                .ThenInclude(x => x.ClassForumScores)
                 .Include(x => x.ClassForumFiles)
-                .FirstOrDefaultAsync(x => x.ClassForumResults.Select(x => x.LessonResultId).Contains(request.LessonResultId), cancellationToken);
+                .FirstOrDefaultAsync(x => x.ClassForumResults!.Select(x => x.LessonResultId).Contains(request.LessonResultId), cancellationToken);
             if (classForum == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumClassForumErrorCode.ClassForumNull));
@@ -68,11 +69,23 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumQuery
                 MediaPost = classForum.MediaPost,
                 TaggetTimeLimit = classForum.TaggetTimeLimit,
                 TaggetWordLimit = classForum.TaggetWordLimit,
-                ClassForumFiles = classForum.ClassForumFiles!.Select(x => new ClassForumFileModel
+                ClassForumFiles = classForum.ClassForumFiles == null ? null : classForum.ClassForumFiles.Select(x => new ClassForumFileModel
                 {
                     Id = x.Id,
                     FilePath = x.FilePath,
                 }).ToList(),
+                ClassForumResult = classForum.ClassForumResults == null ? null : classForum.ClassForumResults.Select(x => new ClassForumResultModel
+                {
+                    Id = x.Id,
+                    Content = x.Content,
+                    ClassForumScores = classForum.ClassForumResults == null ? null : classForum.ClassForumResults.SelectMany(x => x.ClassForumScores).Select(x => new ClassForumScoreModel
+                    {
+                        Id = x.Id,
+                        Score = x.Score,
+                        Criteria = x.Criteria,
+                        Feedback = x.Feedback,
+                    }).ToList(),
+                }).FirstOrDefault()
             };
 
             methodResult.Result = classForumModel;

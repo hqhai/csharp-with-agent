@@ -1,12 +1,14 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-using Fsel.Core.Base.BaseModels;
-using Fsel.Course.Domain.Enums;
-using Fsel.Shared.Enums;
-
 namespace Fsel.Course.Domain.Models.EntityModels
 {
-    public class ClassForumModel : BaseModel
+    using System;
+    using System.Collections.Generic;
+    using Fsel.Core.Base.BaseModels;
+    using Fsel.Course.Domain.Enums;
+    using Fsel.Shared.Enums;
+
+    public class ClassForumSearchModel : BaseModel
     {
         public EnumGradingStyle GradingStyle { get; set; }
 
@@ -22,6 +24,12 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public Guid? LessonId { get; set; }
 
         public LessonModel? Lesson { get; set; }
+
+        public string? LessonName { get; set; }
+
+        public string? UnitName { get; set; }
+
+        public Guid? TeacherId { get; set; }
 
         public IList<ClassForumFileModel>? ClassForumFiles { get; set; }
 
