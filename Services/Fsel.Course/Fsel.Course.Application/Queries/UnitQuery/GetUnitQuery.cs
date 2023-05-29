@@ -51,6 +51,7 @@ namespace Fsel.Course.Application.Queries.UnitQuery
             unitModel.SkillMockTest = unit.UnitSkillMockTests.Select(x =>
             {
                 var model = _mapper.Map<MockTestModel>(x.MockTest);
+                model.Skill = x.MockTest!.MockTestSections.Select(x => x.SectionGroup).Select(x => x!.CourseSkill).FirstOrDefault();
                 return model;
             }).FirstOrDefault();
 
