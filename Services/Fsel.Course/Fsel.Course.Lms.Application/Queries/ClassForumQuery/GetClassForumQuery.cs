@@ -74,13 +74,18 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumQuery
                     Id = x.Id,
                     FilePath = x.FilePath,
                 }).ToList(),
-                ClassForumScore = classForum.ClassForumResults == null ? null : classForum.ClassForumResults.SelectMany(x => x.ClassForumScores).Select(x => new ClassForumScoreModel
+                ClassForumResult = classForum.ClassForumResults == null ? null : classForum.ClassForumResults.Select(x => new ClassForumResultModel
                 {
                     Id = x.Id,
-                    Criteria = x.Criteria,
-                    Feedback = x.Feedback,
-                    Score = x.Score,
-                }).ToList(),
+                    Content = x.Content,
+                    ClassForumScores = classForum.ClassForumResults == null ? null : classForum.ClassForumResults.SelectMany(x => x.ClassForumScores).Select(x => new ClassForumScoreModel
+                    {
+                        Id = x.Id,
+                        Score = x.Score,
+                        Criteria = x.Criteria,
+                        Feedback = x.Feedback,
+                    }).ToList(),
+                }).FirstOrDefault()
             };
 
             methodResult.Result = classForumModel;

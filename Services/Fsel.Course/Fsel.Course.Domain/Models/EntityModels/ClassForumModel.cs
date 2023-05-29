@@ -26,7 +26,5 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public IList<ClassForumFileModel>? ClassForumFiles { get; set; }
 
         public ClassForumResultModel? ClassForumResult { get; set; }
-
-        public IList<ClassForumScoreModel>? ClassForumScore { get; set; }
     }
 }

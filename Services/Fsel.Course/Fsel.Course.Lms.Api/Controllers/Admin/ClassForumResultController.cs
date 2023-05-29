@@ -7,7 +7,7 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
     using Fsel.Common.Constants;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Course.Domain.Models.EntityModels;
-    using Fsel.Course.Lms.Application.Commands.CsoApproveCmd;
+    using Fsel.Course.Lms.Application.Commands.ClassForumResultCmd;
     using Fsel.Course.Lms.Application.Queries.ClassForumResultQuery;
     using Fsel.Shared.Enums;
     using MediatR;
@@ -18,11 +18,11 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
     [Route(Settings.APIDefaultRoute + "/admin/class-forum-result")]
     [ApiController]
     [Authorize(Roles = nameof(EnumRole.MasterAdmin))]
-    public class ClassForumResultAdminController : ControllerBase
+    public class ClassForumResultController : ControllerBase
     {
         private readonly IMediator _mediator;
 
-        public ClassForumResultAdminController(IMediator mediator)
+        public ClassForumResultController(IMediator mediator)
         {
             _mediator = mediator;
         }

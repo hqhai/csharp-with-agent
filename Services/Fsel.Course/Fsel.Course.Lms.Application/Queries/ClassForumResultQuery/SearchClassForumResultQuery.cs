@@ -59,12 +59,6 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
 
             var classForumResultQuery = _classForumResultRepository.Queryable
                                     .Include(x => x.ClassForum)
-                                    .ThenInclude(x => x!.Lesson)
-                                    .ThenInclude(x => x!.UnitLessons.Where(y => y.Unit != null))
-                                    .ThenInclude(x => x.Unit)
-                                    .ThenInclude(x => x!.CourseUnitMockTests)
-                                    .ThenInclude(x => x.Course)
-                                    .ThenInclude(x => x!.CourseTeachers.Where(y => y.Course != null))
                                     .Where(x => x.Status == request.Status)
                                     .Select(x => new ClassForumResultSearchModel
                                     {
@@ -80,12 +74,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
                                         }).FirstOrDefault(),
                                         LessonName = x.ClassForum!.Lesson!.Name,
                                         UnitName = x.ClassForum.Lesson.UnitLessons.Select(x => x.Unit).Select(x => x!.Name).FirstOrDefault(),
-                                        TeacherId = x.ClassForum.Lesson.UnitLessons
-                                                            .Select(x => x.Unit)
-                                                            .SelectMany(x => x!.CourseUnitMockTests)
-                                                            .Select(x => x.Course)
-                                                            .SelectMany(x => x!.CourseTeachers)
-                                                            .Select(x => x.TeacherId).FirstOrDefault(),
+                                        TeacherId = x.GradingTeacherId
                                     });
 
             if (!string.IsNullOrEmpty(request.Keyword))

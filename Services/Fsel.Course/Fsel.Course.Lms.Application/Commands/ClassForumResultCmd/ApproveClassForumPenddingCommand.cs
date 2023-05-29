@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Course.Lms.Application.Commands.CsoApproveCmd
+namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
 {
     using System;
     using System.Linq;
@@ -35,7 +35,7 @@ namespace Fsel.Course.Lms.Application.Commands.CsoApproveCmd
         public async Task<MethodResult<ClassForumResultModel>> Handle(ApproveClassForumPenddingCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            MethodResult<ClassForumResultModel> methodResult = new MethodResult<ClassForumResultModel>();
+            var methodResult = new MethodResult<ClassForumResultModel>();
 
             var classForumResult = await _classForumResultRepository.Queryable.Include(x => x.ClassForumResultFiles)
                                                                     .Where(e => e.Id == request.ClassForumResultId)
