@@ -17,6 +17,11 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         /// <summary>
         /// Class Forum not exist
         /// </summary>
-        ClassForumNotExist
+        ClassForumResultNotExist,
+
+        /// <summary>
+        /// Class Forum result Status not pendding
+        /// </summary>
+        ClassForumResultStatusNotPendding
     }
 }

@@ -28,6 +28,8 @@ namespace Fsel.Course.Domain.Models.EntityModels
 
         public LessonResultModel? LessonResult { get; set; }
 
+        public string? ClassCode { get; set; }
+
         public IList<ClassForumResultFileModel>? ClassForumResultFiles { get; set; }
 
         public IList<ClassForumScoreModel>? ClassForumScores { get; set; }

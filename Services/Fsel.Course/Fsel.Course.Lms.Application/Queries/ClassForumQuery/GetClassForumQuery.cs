@@ -70,12 +70,12 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumQuery
                 MediaPost = classForum.MediaPost,
                 TaggetTimeLimit = classForum.TaggetTimeLimit,
                 TaggetWordLimit = classForum.TaggetWordLimit,
-                ClassForumFiles = classForum.ClassForumFiles!.Select(x => new ClassForumFileModel
+                ClassForumFiles = classForum.ClassForumFiles == null ? null : classForum.ClassForumFiles.Select(x => new ClassForumFileModel
                 {
                     Id = x.Id,
                     FilePath = x.FilePath,
                 }).ToList(),
-                ClassForumScore = classForum.ClassForumResults!.SelectMany(x => x.ClassForumScores).Select(x => new ClassForumScoreModel
+                ClassForumScore = classForum.ClassForumResults == null ? null : classForum.ClassForumResults.SelectMany(x => x.ClassForumScores).Select(x => new ClassForumScoreModel
                 {
                     Id = x.Id,
                     Criteria = x.Criteria,
