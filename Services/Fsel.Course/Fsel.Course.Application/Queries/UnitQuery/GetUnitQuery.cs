@@ -48,6 +48,11 @@ namespace Fsel.Course.Application.Queries.UnitQuery
                                     model.DisplayOrder = x.DisplayOrder;
                                     return model;
                                 }).OrderBy(x => x.DisplayOrder).ToList();
+            unitModel.SkillMockTests = unit.UnitSkillMockTests.Select(x =>
+            {
+                var model = _mapper.Map<MockTestModel>(x.MockTest);
+                return model;
+            }).ToList();
 
             methodResult.Result = unitModel;
             methodResult.StatusCode = StatusCodes.Status200OK;
