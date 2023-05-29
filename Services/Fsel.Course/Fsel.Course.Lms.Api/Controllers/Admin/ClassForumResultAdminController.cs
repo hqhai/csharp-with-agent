@@ -13,6 +13,7 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
     using Microsoft.AspNetCore.Mvc;
     using Fsel.Course.Lms.Application.Queries.ClassForumResultQuery;
     using Fsel.Course.Lms.Application.Queries.ClassForumQuery;
+    using Fsel.Course.Lms.Application.Commands.CsoApproveCmd;
 
     [ApiVersion(Settings.APIVersion)]
     [Route(Settings.APIDefaultRoute + "/admin/class-forum-result")]
@@ -53,12 +54,12 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
         }
 
         /// <summary>
-        /// Update a Course
+        /// Cso approve
         /// </summary>
         [HttpPut("{id}")]
         [ProducesResponseType(typeof(MethodResult<CourseModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> Update([FromRoute] Guid id, [FromBody] UpdateCourseCommand command)
+        public async Task<IActionResult> Update([FromRoute] Guid id, [FromBody] ApproveClassForumPenddingCommand command)
         {
             ArgumentNullException.ThrowIfNull(command);
             command.Id = id;
