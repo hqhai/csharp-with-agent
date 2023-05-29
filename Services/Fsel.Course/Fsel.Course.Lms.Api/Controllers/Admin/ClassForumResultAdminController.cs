@@ -41,7 +41,7 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
         }
 
         /// <summary>
-        /// Cso approve
+        /// Cso approve class forum
         /// </summary>
         [HttpPut]
         [ProducesResponseType(typeof(MethodResult<ClassForumResultModel>), (int)HttpStatusCode.OK)]
