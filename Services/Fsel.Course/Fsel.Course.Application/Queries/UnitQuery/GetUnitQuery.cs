@@ -52,7 +52,7 @@ namespace Fsel.Course.Application.Queries.UnitQuery
             {
                 var model = _mapper.Map<MockTestModel>(x.MockTest);
                 return model;
-            }).ToList();
+            }).FirstOrDefault();
 
             methodResult.Result = unitModel;
             methodResult.StatusCode = StatusCodes.Status200OK;
