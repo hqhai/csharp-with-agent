@@ -2,18 +2,17 @@
 
 namespace Fsel.Course.Lms.Api.Controllers.Admin
 {
-    using Fsel.Common.ActionResults;
     using System.Net;
+    using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Course.Lms.Application.Commands.CsoApproveCmd;
+    using Fsel.Course.Lms.Application.Queries.ClassForumResultQuery;
     using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
-    using Fsel.Course.Lms.Application.Queries.ClassForumResultQuery;
-    using Fsel.Course.Lms.Application.Queries.ClassForumQuery;
-    using Fsel.Course.Lms.Application.Commands.CsoApproveCmd;
 
     [ApiVersion(Settings.APIVersion)]
     [Route(Settings.APIDefaultRoute + "/admin/class-forum-result")]
@@ -42,28 +41,15 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
         }
 
         /// <summary>
-        /// Get Class Forum Result
-        /// </summary>
-        [HttpGet("{id}")]
-        [ProducesResponseType(typeof(MethodResult<ClassForumResultModel>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> Get([FromRoute] Guid id)
-        {
-            var commandResult = await _mediator.Send(new GetClassForumResultQuery { ClassForumResultId = id }).ConfigureAwait(false);
-            return commandResult.GetActionResult();
-        }
-
-        /// <summary>
         /// Cso approve
         /// </summary>
-        [HttpPut("{id}")]
-        [ProducesResponseType(typeof(MethodResult<CourseModel>), (int)HttpStatusCode.OK)]
+        [HttpPut]
+        [ProducesResponseType(typeof(MethodResult<ClassForumResultModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> Update([FromRoute] Guid id, [FromBody] ApproveClassForumPenddingCommand command)
+        public async Task<IActionResult> Update([FromBody] ApproveClassForumPenddingCommand command)
         {
             ArgumentNullException.ThrowIfNull(command);
-            command.Id = id;
-            MethodResult<CourseModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            MethodResult<ClassForumResultModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
     }

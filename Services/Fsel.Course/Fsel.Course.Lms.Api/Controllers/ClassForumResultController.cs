@@ -11,6 +11,7 @@ namespace Fsel.Course.Lms.Api.Controllers
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
     using Fsel.Course.Lms.Application.Commands.ClassForumCmd;
+    using Fsel.Course.Lms.Application.Queries.ClassForumQuery;
 
     [ApiVersion(Settings.APIVersion)]
     [Route(Settings.APIDefaultRoute + "/class-forum-result")]
@@ -34,6 +35,17 @@ namespace Fsel.Course.Lms.Api.Controllers
         public async Task<IActionResult> Create([FromBody] CreateClassForumResultCommand command)
         {
             MethodResult<ClassForumResultModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+        /// <summary>
+        /// Get Class Forum Result
+        /// </summary>
+        [HttpGet("{id}")]
+        [ProducesResponseType(typeof(MethodResult<ClassForumResultModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> Get([FromRoute] Guid id)
+        {
+            var commandResult = await _mediator.Send(new GetClassForumResultQuery { ClassForumResultId = id }).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
     }
