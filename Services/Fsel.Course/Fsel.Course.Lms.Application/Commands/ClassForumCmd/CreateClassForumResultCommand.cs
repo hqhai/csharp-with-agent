@@ -88,7 +88,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
             }
             else if (classForumResult.Status == EnumClassForumResultStatus.Draft || classForumResult.Status == EnumClassForumResultStatus.Denied)
             {
-                classForumResult.Status = EnumClassForumResultStatus.Pending;
+                classForumResult.Status = request.IsSubmit ? EnumClassForumResultStatus.Pending : EnumClassForumResultStatus.Draft;
             }
             else
             {
