@@ -12,6 +12,8 @@ namespace Fsel.Course.Domain.Models.EntityModels
 
         public string? VideoFilePath { get; set; }
 
+        public string? SubFilePath { get; set; }
+
         public bool IsActive { get; set; }
 
         public EnumVideoType Type { get; set; }

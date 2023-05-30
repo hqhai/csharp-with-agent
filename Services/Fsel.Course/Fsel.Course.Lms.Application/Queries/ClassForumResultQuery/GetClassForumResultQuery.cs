@@ -1,11 +1,9 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Course.Lms.Application.Queries.ClassForumQuery
+namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
 {
     using System;
-    using System.Collections.Generic;
     using System.Linq;
-    using System.Text;
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
@@ -41,14 +39,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumQuery
         public async Task<MethodResult<ClassForumResultModel>> Handle(GetClassForumResultQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            MethodResult<ClassForumResultModel> methodResult = new MethodResult<ClassForumResultModel>();
-            var studentResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
-            var student = studentResult?.Content?.Result;
-            if (studentResult == null || student == null)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.StudentNull));
-                return methodResult;
-            }
+            var methodResult = new MethodResult<ClassForumResultModel>();
 
             var classForumResult = await _classForumResultRepository.Queryable
                 .Include(x => x.ClassForumResultFiles)
