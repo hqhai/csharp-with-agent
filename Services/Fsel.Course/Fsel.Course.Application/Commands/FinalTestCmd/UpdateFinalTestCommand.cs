@@ -145,19 +145,19 @@ namespace Fsel.Course.Application.Commands.FinalTestCmd
                 {
                     await _sectionGroupRepository.DeleteAsync(item);
                 }
-                await _sectionGroupRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                await _sectionGroupRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
                 foreach (var item in sectionQuestions)
                 {
                     await _sectionQuestionRepository.DeleteAsync(item);
                 }
-                await _sectionQuestionRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                await _sectionQuestionRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
                 foreach (var item in questions)
                 {
                     await _questionRepository.DeleteAsync(item);
                 }
-                await _questionRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                await _questionRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
                 finalTest = _finalTestRepository.Update(finalTest);
                 await _finalTestRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
