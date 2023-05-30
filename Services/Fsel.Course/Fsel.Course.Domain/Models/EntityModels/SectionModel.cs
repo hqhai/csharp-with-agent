@@ -9,6 +9,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public string? MediaPost { get; set; }
         public int TargetWord { get; set; }
         public string? VideoFilePath { get; set; }
+        public string? SubFilePath { get; set; }
         public int DisplayOrder { get; set; }
         public Guid SectionGroupId { get; set; }
         public IList<SectionPartModel>? SectionParts { get; set; }

@@ -24,6 +24,12 @@ namespace Fsel.Course.Domain.Entities
         public string? VideoFilePath { get; set; }
 
         /// <summary>
+        /// Sub File Path
+        /// </summary>
+        [MaxLength(250, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
+        public string? SubFilePath { get; set; }
+
+        /// <summary>
         /// Loại Video
         /// </summary>
         public EnumVideoType Type { get; set; }

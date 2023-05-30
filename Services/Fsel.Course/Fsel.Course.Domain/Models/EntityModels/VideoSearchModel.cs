@@ -9,7 +9,11 @@ namespace Fsel.Course.Domain.Models.EntityModels
     public class VideoSearchModel : BaseModel
     {
         public string? Name { get; set; }
+
         public string? VideoFilePath { get; set; }
+
+        public string? SubFilePath { get; set; }
+
         public bool IsActive { get; set; }
 
         public EnumCourseLevel CourseLevel { get; set; }
