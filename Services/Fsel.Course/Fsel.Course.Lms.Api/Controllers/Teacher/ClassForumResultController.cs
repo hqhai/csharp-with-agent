@@ -2,22 +2,22 @@
 
 namespace Fsel.Course.Lms.Api.Controllers.Teacher
 {
-    using Fsel.Common.ActionResults;
     using System.Net;
+    using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Course.Lms.Application.Commands.ClassForumScoreCmd;
     using Fsel.Course.Lms.Application.Queries.ClassForumResultQuery;
     using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
-    using Fsel.Course.Lms.Application.Queries.ClassForumQuery;
-    using Fsel.Course.Lms.Application.Commands.ClassForumScoreCmd;
 
     [ApiVersion(Settings.APIVersion)]
     [Route(Settings.APIDefaultRoute + "/teacher/class-forum-result")]
     [ApiController]
+    [Authorize(Roles = nameof(EnumRole.Teacher))]
     public class ClassForumResultController : ControllerBase
     {
         private readonly IMediator _mediator;

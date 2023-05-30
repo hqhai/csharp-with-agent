@@ -98,7 +98,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumScoreCmd
             }
             await _classForumScoreRepository.ExecuteTransactionAsync(async () =>
             {
-                classForumResult.Status = request.IsSubmit ? EnumClassForumResultStatus.Graded : EnumClassForumResultStatus.PendingForGrading;
+                classForumResult.Status = EnumClassForumResultStatus.Graded;
                 await _classForumScoreRepository.AddList(classForumScores);
                 await _classForumScoreRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
