@@ -14,7 +14,7 @@ namespace Fsel.Course.Infrastructure.Maps
         {
             CreateMap<ClassForumScore, ClassForumScoreModel>().IgnoreAllNonExisting();
             CreateMap<CreateClassForumScoreCommandModel, ClassForumScore>().IgnoreAllNonExisting();
-            CreateMap<CreateListClassForumscoreCommandModel, ClassForumScore>().IgnoreAllNonExisting();
+            CreateMap<GradeClassForumCommandModel, ClassForumScore>().IgnoreAllNonExisting();
         }
     }
 }

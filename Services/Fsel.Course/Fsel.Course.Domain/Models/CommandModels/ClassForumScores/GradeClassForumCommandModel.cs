@@ -6,7 +6,7 @@ namespace Fsel.Course.Domain.Models.CommandModels.ClassForumScores
     using System.Collections.Generic;
     using Fsel.Course.Domain.Models.EntityModels;
 
-    public class CreateListClassForumscoreCommandModel
+    public class GradeClassForumCommandModel
     {
         public Guid ClassForumResultId { get; set; }
 

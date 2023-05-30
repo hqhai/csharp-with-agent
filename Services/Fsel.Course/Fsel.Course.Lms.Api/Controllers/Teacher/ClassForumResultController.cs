@@ -33,7 +33,7 @@ namespace Fsel.Course.Lms.Api.Controllers.Teacher
         [HttpGet]
         [ProducesResponseType(typeof(MethodResult<PagingItemsModel<ClassForumResultSearchModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> CsoSearch([FromQuery] SearchClassForumResultQuery query)
+        public async Task<IActionResult> Search([FromQuery] SearchClassForumResultQuery query)
         {
             ArgumentNullException.ThrowIfNull(query);
             query.Status = Domain.Enums.EnumClassForumResultStatus.PendingForGrading;
@@ -54,12 +54,12 @@ namespace Fsel.Course.Lms.Api.Controllers.Teacher
         }
 
         /// <summary>
-        /// Create list Class Forum Score
+        /// Grade Grade Class Forum
         /// </summary>
-        [HttpPost("list-class-forum-score")]
+        [HttpPost("grade-class-forum")]
         [ProducesResponseType(typeof(MethodResult<List<ClassForumScoreModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> CreateList([FromBody] CreateListClassForumScoreCommand command)
+        public async Task<IActionResult> GradeClassForum([FromBody] GradeClassForumCommand command)
         {
             MethodResult<List<ClassForumScoreModel>> commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();

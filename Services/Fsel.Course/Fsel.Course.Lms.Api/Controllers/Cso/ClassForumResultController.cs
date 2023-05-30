@@ -33,7 +33,7 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
         [HttpGet]
         [ProducesResponseType(typeof(MethodResult<PagingItemsModel<ClassForumResultSearchModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> CsoSearch([FromQuery] SearchClassForumResultQuery query)
+        public async Task<IActionResult> Search([FromQuery] SearchClassForumResultQuery query)
         {
             ArgumentNullException.ThrowIfNull(query);
             query.Status = Domain.Enums.EnumClassForumResultStatus.Pending;
@@ -51,6 +51,18 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
         {
             ArgumentNullException.ThrowIfNull(command);
             MethodResult<ClassForumResultModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Get Class Forum Result
+        /// </summary>
+        [HttpGet("{id}")]
+        [ProducesResponseType(typeof(MethodResult<ClassForumResultModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> Get([FromRoute] Guid id)
+        {
+            var commandResult = await _mediator.Send(new GetClassForumResultQuery { ClassForumResultId = id }).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
     }

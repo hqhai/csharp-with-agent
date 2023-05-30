@@ -19,24 +19,24 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumScoreCmd
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class CreateListClassForumScoreCommand : CreateListClassForumscoreCommandModel, IRequest<MethodResult<List<ClassForumScoreModel>>>
+    public class GradeClassForumCommand : GradeClassForumCommandModel, IRequest<MethodResult<List<ClassForumScoreModel>>>
     {
     }
 
-    public class CreateListClassForumScoreCommandHandler : IRequestHandler<CreateListClassForumScoreCommand, MethodResult<List<ClassForumScoreModel>>>
+    public class GradeClassForumCommandHandler : IRequestHandler<GradeClassForumCommand, MethodResult<List<ClassForumScoreModel>>>
     {
         private readonly IMapper _mapper;
         private readonly IClassForumScoreRepository _classForumScoreRepository;
         private readonly IClassForumResultRepository _classForumResultRepository;
 
-        public CreateListClassForumScoreCommandHandler(IMapper mapper, IClassForumScoreRepository classForumScoreRepository, IClassForumResultRepository classForumResultRepository)
+        public GradeClassForumCommandHandler(IMapper mapper, IClassForumScoreRepository classForumScoreRepository, IClassForumResultRepository classForumResultRepository)
         {
             _mapper = mapper;
             _classForumScoreRepository = classForumScoreRepository;
             _classForumResultRepository = classForumResultRepository;
         }
 
-        public async Task<MethodResult<List<ClassForumScoreModel>>> Handle(CreateListClassForumScoreCommand request, CancellationToken cancellationToken)
+        public async Task<MethodResult<List<ClassForumScoreModel>>> Handle(GradeClassForumCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<List<ClassForumScoreModel>> methodResult = new MethodResult<List<ClassForumScoreModel>>();
