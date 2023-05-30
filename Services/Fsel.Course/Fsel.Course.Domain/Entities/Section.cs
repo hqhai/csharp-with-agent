@@ -28,6 +28,12 @@ namespace Fsel.Course.Domain.Entities
         [MaxLength(250, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? VideoFilePath { get; set; }
 
+        /// <summary>
+        /// Sub File Path
+        /// </summary>
+        [MaxLength(250, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
+        public string? SubFilePath { get; set; }
+
         public int DisplayOrder { get; set; }
 
         public SectionGroup? SectionGroup { get; set; }

@@ -1,13 +1,13 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Course.Lms.Api.Controllers.Admin
+namespace Fsel.Course.Lms.Api.Controllers.Teacher
 {
     using System.Net;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Course.Domain.Models.EntityModels;
-    using Fsel.Course.Lms.Application.Commands.ClassForumResultCmd;
+    using Fsel.Course.Lms.Application.Commands.ClassForumScoreCmd;
     using Fsel.Course.Lms.Application.Queries.ClassForumResultQuery;
     using Fsel.Shared.Enums;
     using MediatR;
@@ -15,9 +15,9 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
     using Microsoft.AspNetCore.Mvc;
 
     [ApiVersion(Settings.APIVersion)]
-    [Route(Settings.APIDefaultRoute + "/admin/class-forum-result")]
+    [Route(Settings.APIDefaultRoute + "/teacher/class-forum-result")]
     [ApiController]
-    [Authorize(Roles = nameof(EnumRole.MasterAdmin))]
+    [Authorize(Roles = nameof(EnumRole.Teacher))]
     public class ClassForumResultController : ControllerBase
     {
         private readonly IMediator _mediator;
@@ -30,26 +30,38 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
         /// <summary>
         /// Search Class Forum Result
         /// </summary>
-        [HttpGet("cso/search")]
+        [HttpGet]
         [ProducesResponseType(typeof(MethodResult<PagingItemsModel<ClassForumResultSearchModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> Search([FromQuery] SearchClassForumResultQuery query)
         {
-            query.Status = Domain.Enums.EnumClassForumResultStatus.Pending;
+            ArgumentNullException.ThrowIfNull(query);
+            query.Status = Domain.Enums.EnumClassForumResultStatus.PendingForGrading;
             var queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
 
         /// <summary>
-        /// Cso approve class forum
+        /// Get Class Forum Result
         /// </summary>
-        [HttpPut]
+        [HttpGet("{id}")]
         [ProducesResponseType(typeof(MethodResult<ClassForumResultModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> Update([FromBody] ApproveClassForumPenddingCommand command)
+        public async Task<IActionResult> Get([FromRoute] Guid id)
         {
-            ArgumentNullException.ThrowIfNull(command);
-            MethodResult<ClassForumResultModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            var commandResult = await _mediator.Send(new GetClassForumResultQuery { ClassForumResultId = id }).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Grade Grade Class Forum
+        /// </summary>
+        [HttpPost("grade-class-forum")]
+        [ProducesResponseType(typeof(MethodResult<List<ClassForumScoreModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GradeClassForum([FromBody] GradeClassForumCommand command)
+        {
+            MethodResult<List<ClassForumScoreModel>> commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
     }
