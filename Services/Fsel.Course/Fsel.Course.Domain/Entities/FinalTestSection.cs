@@ -7,15 +7,16 @@ namespace Fsel.Course.Domain.Entities
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Entities;
 
-    public class FinalTestExercise : Entity
+    public class FinalTestSection : Entity
     {
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         public Guid FinalTestId { get; set; }
 
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
-        public Guid ExerciseId { get; set; }
+        public Guid SectionGroupId { get; set; }
 
-        public Exercise? Exercise { get; set; }
+        public SectionGroup? SectionGroup { get; set; }
         public FinalTest? FinalTest { get; set; }
+
     }
 }

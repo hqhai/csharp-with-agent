@@ -6,7 +6,7 @@ namespace Fsel.Course.Domain.Models.CommandModels.FinalTests
     using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations;
     using Fsel.Common.Enums.ErrorCodes;
-    using Fsel.Course.Domain.Models.CommandModels.Exercises;
+    using Fsel.Course.Domain.Models.CommandModels.SectionGroups;
     using Fsel.Shared.Enums;
 
     public class CreateFinalTestCommandModel
@@ -20,6 +20,6 @@ namespace Fsel.Course.Domain.Models.CommandModels.FinalTests
 
         public EnumFinalTestLevel FinalTestLevel { get; set; }
 
-        public IList<CreateExerciseCommandModel>? Exercises { get; set; }
+        public IList<CreateSectionGroupCommandModel>? SectionGroups { get; set; }
     }
 }

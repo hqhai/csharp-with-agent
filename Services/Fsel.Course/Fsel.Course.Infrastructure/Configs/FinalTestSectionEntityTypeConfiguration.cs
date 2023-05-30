@@ -6,20 +6,20 @@ namespace Fsel.Course.Infrastructure.Configs
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-    public class FinalTestExerciseEntityTypeConfiguration : IEntityTypeConfiguration<FinalTestExercise>
+    public class FinalTestSectionEntityTypeConfiguration : IEntityTypeConfiguration<FinalTestSection>
     {
-        public void Configure(EntityTypeBuilder<FinalTestExercise> builder)
+        public void Configure(EntityTypeBuilder<FinalTestSection> builder)
         {
             ArgumentNullException.ThrowIfNull(builder);
 
             builder.HasOne(a => a.FinalTest)
-                .WithMany(b => b.FinalTestExercises)
+                .WithMany(b => b.FinalTestSections)
                 .HasForeignKey(b => b.FinalTestId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            builder.HasOne(a => a.Exercise)
-                .WithMany(b => b.FinalTestExercises)
-                .HasForeignKey(b => b.ExerciseId)
+            builder.HasOne(a => a.SectionGroup)
+                .WithMany(b => b.FinalTestSections)
+                .HasForeignKey(b => b.SectionGroupId)
                 .OnDelete(DeleteBehavior.Cascade);
         }
     }

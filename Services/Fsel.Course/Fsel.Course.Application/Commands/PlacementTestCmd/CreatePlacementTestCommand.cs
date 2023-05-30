@@ -6,7 +6,6 @@ using Fsel.Course.Domain.Entities;
 using Fsel.Course.Domain.Enums.ErrorCodes;
 using Fsel.Course.Domain.IRepositories;
 using Fsel.Course.Domain.Models.CommandModels.PlacementTests;
-using Fsel.Course.Domain.Models.CommandModels.Questions;
 using Fsel.Course.Domain.Models.EntityModels;
 using Fsel.Course.Infrastructure.Common;
 using Fsel.Shared.Enums;
@@ -22,17 +21,14 @@ namespace Fsel.Course.Application.Commands.PlacementTestCmd
     public class CreatePlacementTestCommandHandler : IRequestHandler<CreatePlacementTestCommand, MethodResult<PlacementTestModel>>
     {
         private readonly IPlacementTestRepository _placementTestRepository;
-        private readonly QuestionTypeConverter _questionTypeConverter;
         private readonly IMapper _mapper;
         private readonly SectionConverter _sectionConverter;
 
         public CreatePlacementTestCommandHandler(IPlacementTestRepository placementTestRepository,
-            QuestionTypeConverter questionTypeConverter,
             IMapper mapper,
             SectionConverter sectionConverter)
         {
             _placementTestRepository = placementTestRepository;
-            _questionTypeConverter = questionTypeConverter;
             _mapper = mapper;
             _sectionConverter = sectionConverter;
         }

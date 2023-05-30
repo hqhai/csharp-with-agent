@@ -2,7 +2,7 @@
 
 namespace Fsel.Course.Domain.Models.EntityModels
 {
-    public class FinalTestExerciseAnswerModel
+    public class FinalTestAnswerModel
     {
         public Guid Id { get; set; }
         public Guid FinalTestResultId { get; set; }

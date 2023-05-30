@@ -76,6 +76,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
                              .ThenInclude(unit => unit.FinalTest)
                              .Include(x => x.CourseTeachers.Where(y => !y.IsDeleted))
                              .Where(x => x.Id == @class.CourseId)
+                             .OrderBy(x => x!.CreatedDate)
                              .AsNoTracking()
                              .Select(y => new CourseModel
                              {
@@ -84,8 +85,8 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
                                  Code = y.Code,
                                  InstructionContent = y.InstructionContent,
                                  CourseLevel = y.CourseLevel,
-                                 CourseUnitMockTests = _mapper.Map<IList<CourseUnitMockTestModel>>(y.CourseUnitMockTests),
-                                 CourseTeachers = _mapper.Map<List<CourseTeacherModel>>(y.CourseTeachers),
+                                 CourseUnitMockTests = _mapper.Map<IList<CourseUnitMockTestModel>>(y.CourseUnitMockTests.OrderBy(x => x!.CreatedDate)),
+                                 CourseTeachers = _mapper.Map<List<CourseTeacherModel>>(y.CourseTeachers.OrderBy(x => x!.CreatedDate)),
                              }).FirstOrDefaultAsync(cancellationToken);
 
             var teachersResult = await _userService.GetTeacherByIdsAsync(new GetTeacherByIdsQueryModel { Ids = course?.CourseTeachers?.Select(x => x.TeacherId).ToList() });

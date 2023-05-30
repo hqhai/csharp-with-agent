@@ -7,9 +7,9 @@ namespace Fsel.Course.Infrastructure.Configs
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-    public class FinalTestExerciseAnswerEntityTypeConfiguration : IEntityTypeConfiguration<FinalTestExerciseAnswer>
+    public class FinalTestAnswerEntityTypeConfiguration : IEntityTypeConfiguration<FinalTestAnswer>
     {
-        public void Configure(EntityTypeBuilder<FinalTestExerciseAnswer> builder)
+        public void Configure(EntityTypeBuilder<FinalTestAnswer> builder)
         {
             ArgumentNullException.ThrowIfNull(builder);
 
@@ -18,9 +18,9 @@ namespace Fsel.Course.Infrastructure.Configs
                 .HasForeignKey(b => b.FinalTestResultId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            builder.HasOne(a => a.ExerciseQuestion)
-                .WithMany(b => b.FinalTestExerciseAnswers)
-                .HasForeignKey(b => b.ExerciseQuestionId)
+            builder.HasOne(a => a.SectionQuestion)
+                .WithMany(b => b.FinalTestAnswers)
+                .HasForeignKey(b => b.SectionQuestionId)
                 .OnDelete(DeleteBehavior.Cascade);
         }
     }

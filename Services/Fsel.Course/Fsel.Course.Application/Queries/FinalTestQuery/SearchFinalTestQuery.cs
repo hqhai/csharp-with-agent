@@ -6,7 +6,6 @@ namespace Fsel.Course.Application.Queries.FinalTestQuery
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
-    using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Core.Extensions;
@@ -23,12 +22,10 @@ namespace Fsel.Course.Application.Queries.FinalTestQuery
 
     public class SearchFinalTestQueryHandler : IRequestHandler<SearchFinalTestQuery, MethodResult<PagingItemsModel<FinalTestSearchModel>>>
     {
-        private readonly IMapper _mapper;
         private readonly IFinalTestRepository _finalTestRepository;
 
-        public SearchFinalTestQueryHandler(IMapper mapper, IFinalTestRepository finalTestRepository)
+        public SearchFinalTestQueryHandler(IFinalTestRepository finalTestRepository)
         {
-            _mapper = mapper;
             _finalTestRepository = finalTestRepository;
         }
 
@@ -42,8 +39,6 @@ namespace Fsel.Course.Application.Queries.FinalTestQuery
                 return methodResult;
             }
             var finalTestQuery = _finalTestRepository.Queryable
-                                                .Include(x => x.FinalTestExercises)
-                                                .ThenInclude(x => x.Exercise)
                                                 .Select(x => new FinalTestSearchModel
                                                 {
                                                     Id = x.Id,

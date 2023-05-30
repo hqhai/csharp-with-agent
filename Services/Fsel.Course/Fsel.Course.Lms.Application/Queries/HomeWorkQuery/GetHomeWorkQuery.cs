@@ -90,7 +90,7 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkQuery
                 CourseLevel = homeWork.CourseLevel,
                 CourseSkill = homeWork.CourseSkill,
                 IsActive = homeWork.LessonHomeWorks.Any(),
-                Questions = homeWork.HomeWorkQuestions.Where(x => x.Question != null).Select(n => new QuestionModel
+                Questions = homeWork.HomeWorkQuestions.Where(x => x.Question != null).OrderBy(x => x!.CreatedDate).Select(n => new QuestionModel
                 {
                     Id = n.Question!.Id,
                     CorrectTotal = n.Question!.CorrectTotal,
@@ -100,7 +100,7 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkQuery
                     Config = _questionTypeConverter.QuestionTypeConverterObject(n.Question.Config, n.Question.QuestionType, isDisableAnswers: !checkDone).Item1,
                     ResultAnswer = _mapper.Map<HomeWorkAnswerModel>(n.HomeWorkAnswers.FirstOrDefault())
                 }).ToList(),
-                HomeWorkResult = homeWork.HomeWorkResults.Where(x => x.StudentId == studentId).Select(x => new HomeWorkResultModel
+                HomeWorkResult = homeWork.HomeWorkResults.Where(x => x.StudentId == studentId).OrderBy(x => x!.CreatedDate).Select(x => new HomeWorkResultModel
                 {
                     Id = x.Id,
                     HomeWorkId = x.HomeWorkId,

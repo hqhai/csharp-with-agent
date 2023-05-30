@@ -47,6 +47,7 @@ namespace Fsel.Course.Infrastructure.Repositories
                                        .ThenInclude(x => x.Question)
                                        .Include(x => x.CourseUnitMockTests.Where(y => !y.IsDeleted))
                                        .Include(x => x.UnitSkillMockTests.Where(y => !y.IsDeleted))
+                                       .OrderBy(x => x!.CreatedDate)
                                        .FirstOrDefaultAsync(x => x.Id == id);
             }
             catch (Exception)

@@ -61,8 +61,8 @@ namespace Fsel.Course.Infrastructure
         public DbSet<FinalTest> FinalTests { get; set; }
         public DbSet<MockTestResult> MockTestResults { get; set; }
         public DbSet<MockTestAnswer> MockTestAnswers { get; set; }
-        public DbSet<FinalTestExercise> FinalTestExercises { get; set; }
-        public DbSet<FinalTestExerciseAnswer> FinalTestExerciseAnswers { get; set; }
+        public DbSet<FinalTestSection> FinalTestSections { get; set; }
+        public DbSet<FinalTestAnswer> FinalTestAnswers { get; set; }
         public DbSet<FinalTestResult> FinalTestResults { get; set; }
         public DbSet<ClassForumResult> ClassForumResults { get; set; }
         public DbSet<ClassForumScore> ClassForumScores { get; set; }
@@ -117,8 +117,8 @@ namespace Fsel.Course.Infrastructure
             modelBuilder.ApplyConfiguration(new MockTestEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new MockTestAnswerEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new MockTestResultEntityTypeConfiguration());
-            modelBuilder.ApplyConfiguration(new FinalTestExerciseAnswerEntityTypeConfiguration());
-            modelBuilder.ApplyConfiguration(new FinalTestExerciseEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new FinalTestAnswerEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new FinalTestSectionEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new FinalTestResultEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new ClassForumResultEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new ClassForumScoreEntityTypeConfiguration());

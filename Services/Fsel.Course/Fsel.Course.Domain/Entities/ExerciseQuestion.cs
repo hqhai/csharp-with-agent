@@ -17,6 +17,5 @@ namespace Fsel.Course.Domain.Entities
 
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         public Guid QuestionId { get; set; }
-        public ICollection<FinalTestExerciseAnswer> FinalTestExerciseAnswers { get; set;} = new List<FinalTestExerciseAnswer>();
     }
 }

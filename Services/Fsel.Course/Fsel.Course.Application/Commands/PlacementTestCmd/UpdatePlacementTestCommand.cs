@@ -22,7 +22,6 @@ namespace Fsel.Course.Application.Commands.PlacementTestCmd
     {
         private readonly IPlacementTestRepository _placementTestRepository;
         private readonly ISectionRepository _sectionRepository;
-        private readonly QuestionTypeConverter _questionTypeConverter;
         private readonly ISectionPartRepository _sectionPartRepository;
         private readonly ISectionGroupRepository _sectionGroupRepository;
         private readonly IMapper _mapper;
@@ -30,7 +29,6 @@ namespace Fsel.Course.Application.Commands.PlacementTestCmd
 
         public UpdatePlacementTestCommandHandler(IPlacementTestRepository placementTestRepository,
             ISectionRepository sectionRepository,
-            QuestionTypeConverter questionTypeConverter,
             ISectionPartRepository sectionPartRepository,
             ISectionGroupRepository sectionGroupRepository,
             IMapper mapper,
@@ -38,7 +36,6 @@ namespace Fsel.Course.Application.Commands.PlacementTestCmd
         {
             _placementTestRepository = placementTestRepository;
             _sectionRepository = sectionRepository;
-            _questionTypeConverter = questionTypeConverter;
             _sectionPartRepository = sectionPartRepository;
             _sectionGroupRepository = sectionGroupRepository;
             _mapper = mapper;
