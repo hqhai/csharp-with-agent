@@ -12,6 +12,7 @@
 
   <ItemGroup>
     <Folder Include="InternalEvents\" />
+    <Folder Include="Queries\ClassForumScore\" />
   </ItemGroup>
 
 </Project>
