@@ -15,7 +15,7 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
     using Microsoft.AspNetCore.Mvc;
 
     [ApiVersion(Settings.APIVersion)]
-    [Route(Settings.APIDefaultRoute + "/admin/class-forum-result")]
+    [Route(Settings.APIDefaultRoute + "/cso/class-forum-result")]
     [ApiController]
     [Authorize(Roles = nameof(EnumRole.MasterAdmin))]
     public class ClassForumResultController : ControllerBase
@@ -30,7 +30,7 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
         /// <summary>
         /// Search Class Forum Result
         /// </summary>
-        [HttpGet("cso/search")]
+        [HttpGet]
         [ProducesResponseType(typeof(MethodResult<PagingItemsModel<ClassForumResultSearchModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> CsoSearch([FromQuery] SearchClassForumResultQuery query)

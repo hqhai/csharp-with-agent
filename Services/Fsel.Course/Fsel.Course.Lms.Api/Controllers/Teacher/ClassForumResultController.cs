@@ -18,11 +18,11 @@ namespace Fsel.Course.Lms.Api.Controllers.Teacher
     [ApiVersion(Settings.APIVersion)]
     [Route(Settings.APIDefaultRoute + "/teacher/class-forum-result")]
     [ApiController]
-    public class ClassForumScoreController : ControllerBase
+    public class ClassForumResultController : ControllerBase
     {
         private readonly IMediator _mediator;
 
-        public ClassForumScoreController(IMediator mediator)
+        public ClassForumResultController(IMediator mediator)
         {
             _mediator = mediator;
         }
@@ -30,7 +30,7 @@ namespace Fsel.Course.Lms.Api.Controllers.Teacher
         /// <summary>
         /// Search Class Forum Result
         /// </summary>
-        [HttpGet("cso/search")]
+        [HttpGet]
         [ProducesResponseType(typeof(MethodResult<PagingItemsModel<ClassForumResultSearchModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> CsoSearch([FromQuery] SearchClassForumResultQuery query)
