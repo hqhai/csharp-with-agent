@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fsel.Course.Infrastructure.Migrations
 {
     [DbContext(typeof(CourseDbContext))]
-    [Migration("20230526032757_CreateClassResultAndClassForumScore")]
-    partial class CreateClassResultAndClassForumScore
+    [Migration("20230531104249_Create_Db")]
+    partial class Create_Db
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -2800,12 +2800,15 @@ namespace Fsel.Course.Infrastructure.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Name")
-                        .IsRequired()
                         .HasMaxLength(250)
                         .HasColumnType("nvarchar(250)");
 
                     b.Property<Guid>("SectionGroupId")
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("SubFilePath")
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
 
                     b.Property<int>("TargetWord")
                         .HasColumnType("int");
@@ -3513,6 +3516,10 @@ namespace Fsel.Course.Infrastructure.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
+
+                    b.Property<string>("SubFilePath")
                         .HasMaxLength(250)
                         .HasColumnType("nvarchar(250)");
 
