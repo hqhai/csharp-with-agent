@@ -63,11 +63,6 @@ namespace Fsel.Course.Application.Commands.FinalTestCmd
                     foreach (var section in sectionGroup.Sections)
                     {
                         Section newSection = newSectionGroup.Sections.ElementAt(sectionGroup.Sections.IndexOf(section));
-                        if (section.SectionParts != null && section.Questions != null && section.SectionParts.Count > 0 && section.Questions.Count > 0)
-                        {
-                            methodResult.AddErrorBadRequest(nameof(EnumSectionErrorCode.OnlyOneOfTwoSectionPartsOrQuestions), nameof(section.SectionParts), nameof(section.Questions));
-                            return methodResult;
-                        }
                         if (section.Questions == null || section.Questions.Count == 0)
                         {
                             methodResult.AddErrorBadRequest(nameof(EnumQuestionErrorCode.QuestionsNull), nameof(section.Questions));
