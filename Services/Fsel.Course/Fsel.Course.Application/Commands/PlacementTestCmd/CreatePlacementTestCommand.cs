@@ -8,6 +8,7 @@ using Fsel.Course.Domain.IRepositories;
 using Fsel.Course.Domain.Models.CommandModels.PlacementTests;
 using Fsel.Course.Domain.Models.EntityModels;
 using Fsel.Course.Infrastructure.Common;
+using Fsel.Shared.Enums;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 
@@ -69,7 +70,7 @@ namespace Fsel.Course.Application.Commands.PlacementTestCmd
                     }
 
                     SectionGroup newSectionGroup = _mapper.Map<SectionGroup>(sectionGroup);
-                    var method = _sectionConverter.AddSessionToSessionGroup(newSectionGroup, sectionGroup.Sections, request.Level);
+                    var method = _sectionConverter.AddSessionToSessionGroup(newSectionGroup, sectionGroup.Sections, request.Level == EnumPlacementTestLevel.IELTS ? EnumCourseType.Ielts : EnumCourseType.Academic);
                     if (!method.IsOK)
                     {
                         methodResult.AddError(method.ErrorMessages);

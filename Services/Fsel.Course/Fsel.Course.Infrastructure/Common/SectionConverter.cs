@@ -131,7 +131,7 @@ namespace Fsel.Course.Infrastructure.Common
             return methodResult;
         }
 
-        public VoidMethodResult AddSessionToSessionGroup(dynamic sectionGroup, IList<CreateSectionCommandModel>? sectionModels, EnumPlacementTestLevel? placementTestLevel)
+        public VoidMethodResult AddSessionToSessionGroup(dynamic sectionGroup, IList<CreateSectionCommandModel>? sectionModels, EnumCourseType? type)
         {
             VoidMethodResult methodResult = new VoidMethodResult();
             if (sectionModels == null || sectionModels.Count == 0)
@@ -155,7 +155,7 @@ namespace Fsel.Course.Infrastructure.Common
                         methodResult.AddErrorBadRequest(nameof(EnumSectionErrorCode.OnlyOneOfTwoSectionPartsOrQuestions));
                         return methodResult;
                     }
-                    if (placementTestLevel == EnumPlacementTestLevel.IELTS)
+                    if (type == EnumCourseType.Ielts)
                     {
                         if (section.SectionParts == null || section.SectionParts.Count == 0)
                         {

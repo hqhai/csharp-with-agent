@@ -15,6 +15,7 @@ namespace Fsel.Course.Application.Commands.FinalTestCmd
     using Fsel.Course.Domain.Models.CommandModels.FinalTests;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Infrastructure.Common;
+    using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Http;
 
@@ -90,7 +91,7 @@ namespace Fsel.Course.Application.Commands.FinalTestCmd
                     methodResult.AddErrorBadRequest(nameof(EnumSectionErrorCode.SectionsNull), nameof(sectionGroup.Sections));
                     return methodResult;
                 }
-                var method = _sectionConverter.AddSessionToSessionGroup(newSectionGroup, sectionGroup.Sections, null);
+                var method = _sectionConverter.AddSessionToSessionGroup(newSectionGroup, sectionGroup.Sections, EnumCourseType.Academic);
                 if (!method.IsOK)
                 {
                     methodResult.AddError(method.ErrorMessages);

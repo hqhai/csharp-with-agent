@@ -73,7 +73,7 @@ namespace Fsel.Course.Application.Commands.MockTestCmd
                     }
 
                     SectionGroup newSectionGroup = _mapper.Map<SectionGroup>(sectionGroup);
-                    var method = _sectionConverter.AddSessionToSessionGroup(newSectionGroup, sectionGroup.Sections, EnumPlacementTestLevel.IELTS);
+                    var method = _sectionConverter.AddSessionToSessionGroup(newSectionGroup, sectionGroup.Sections, EnumCourseType.Ielts);
                     if (!method.IsOK)
                     {
                         methodResult.AddError(method.ErrorMessages);

@@ -85,7 +85,7 @@ namespace Fsel.Course.Application.Commands.PlacementTestCmd
                     return methodResult;
                 }
                 var newSectionGroup = _mapper.Map<SectionGroup>(sectionGroup);
-                var method = _sectionConverter.AddSessionToSessionGroup(newSectionGroup, sectionGroup.Sections, request.Level);
+                var method = _sectionConverter.AddSessionToSessionGroup(newSectionGroup, sectionGroup.Sections, request.Level == EnumPlacementTestLevel.IELTS ? EnumCourseType.Ielts : EnumCourseType.Academic);
                 if (!method.IsOK)
                 {
                     methodResult.AddError(method.ErrorMessages);
