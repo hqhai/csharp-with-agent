@@ -9,8 +9,11 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumScoreQuery
     using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Course.Domain.Entities;
+    using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Course.Infrastructure.Repositories;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -23,19 +26,29 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumScoreQuery
     public class GetListClassForumScoresQueryHandler : IRequestHandler<GetListClassForumScoresQuery, MethodResult<IList<ClassForumScoreModel>>>
     {
         private readonly IClassForumScoreRepository _classForumScoreRepository;
+        private readonly IClassForumResultRepository _classForumResultRepository;
         private readonly IMapper _mapper;
 
-        public GetListClassForumScoresQueryHandler(IClassForumScoreRepository classForumScoreRepository, IMapper mapper)
+        public GetListClassForumScoresQueryHandler(IClassForumScoreRepository classForumScoreRepository
+            , IMapper mapper
+            , IClassForumResultRepository classForumResultRepository)
         {
             _classForumScoreRepository = classForumScoreRepository;
             _mapper = mapper;
+            _classForumResultRepository = classForumResultRepository;
         }
 
         public async Task<MethodResult<IList<ClassForumScoreModel>>> Handle(GetListClassForumScoresQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<IList<ClassForumScoreModel>> methodResult = new MethodResult<IList<ClassForumScoreModel>>();
-            var classForumResults = await _classForumScoreRepository.Queryable
+            var isClassForumResult = await _classForumResultRepository.AnyAsync(request.ClassForumResultId);
+            if (!isClassForumResult)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumClassForumResultErrorCode.ClassForumResultNotExist));
+                return methodResult;
+            }
+            var classForumScores = await _classForumScoreRepository.Queryable
                                             .Include(x => x.ClassForumResult)
                                             .Where(x => x.ClassForumResult!.Id == request.ClassForumResultId)
                                             .Select(x => new ClassForumScoreModel
@@ -47,7 +60,12 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumScoreQuery
                                                 Score = x.Score,
                                                 ClassForumResultId = x.ClassForumResultId,
                                             }).ToListAsync(cancellationToken);
-            methodResult.Result = classForumResults;
+            if (classForumScores == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumClassForumScoreErrorCode.ClassForumNotExist));
+                return methodResult;
+            }
+            methodResult.Result = classForumScores;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }
