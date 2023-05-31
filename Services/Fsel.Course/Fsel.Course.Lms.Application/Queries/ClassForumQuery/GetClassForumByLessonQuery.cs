@@ -4,6 +4,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumQuery
 {
     using System.Threading;
     using System.Threading.Tasks;
+    using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.Enums.ErrorCodes;
@@ -21,9 +22,11 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumQuery
     public class GetClassForumByLessonQueryHandler : IRequestHandler<GetClassForumByLessonQuery, MethodResult<ClassForumModel>>
     {
         private readonly IClassForumRepository _classForumRepository;
+        private readonly IMapper _mapper;
 
-        public GetClassForumByLessonQueryHandler(IClassForumRepository classForumRepository)
+        public GetClassForumByLessonQueryHandler(IClassForumRepository classForumRepository, IMapper mapper)
         {
+            _mapper = mapper;
             _classForumRepository = classForumRepository;
         }
 
@@ -41,31 +44,8 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumQuery
                 methodResult.AddErrorBadRequest(nameof(EnumClassForumErrorCode.ClassForumNull));
                 return methodResult;
             }
-            var classForumModel = new ClassForumModel
-            {
-                Id = classForum.Id,
-                CourseSkill = classForum.CourseSkill,
-                IsActive = classForum.IsActive,
-                MediaPost = classForum.MediaPost,
-                TaggetTimeLimit = classForum.TaggetTimeLimit,
-                ClassForumFiles = classForum.ClassForumFiles == null ? null : classForum.ClassForumFiles.Select(x => new ClassForumFileModel
-                {
-                    Id = x.Id,
-                    FilePath = x.FilePath,
-                }).ToList(),
-                ClassForumResults = classForum.ClassForumResults == null ? null : classForum.ClassForumResults.Select(x => new ClassForumResultModel
-                {
-                    Id = x.Id,
-                    Content = x.Content,
-                    Status = x.Status,
-                    ClassForumResultFiles = x.ClassForumResultFiles == null ? null : x.ClassForumResultFiles.Select(x => new ClassForumResultFileModel
-                    {
-                        Id = x.Id,
-                        FilePath = x.FilePath,
-                    }).ToList(),
-                }).ToList(),
-            };
-            methodResult.Result = classForumModel;
+
+            methodResult.Result = _mapper.Map<ClassForumModel>(classForum);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }

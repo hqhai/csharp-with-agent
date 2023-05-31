@@ -9,11 +9,9 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumScoreQuery
     using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Common.ActionResults;
-    using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
-    using Fsel.Course.Infrastructure.Repositories;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -49,7 +47,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumScoreQuery
                 return methodResult;
             }
             var classForumScores = await _classForumScoreRepository.Queryable
-                                            .Where(x => x.ClassForumResult!.Id == request.ClassForumResultId)
+                                            .Where(x => x.ClassForumResultId == request.ClassForumResultId)
                                             .Select(x => new ClassForumScoreModel
                                             {
                                                 Id = x.Id,
