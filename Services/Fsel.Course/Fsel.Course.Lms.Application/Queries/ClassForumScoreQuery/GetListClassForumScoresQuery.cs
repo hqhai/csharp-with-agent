@@ -9,6 +9,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumScoreQuery
     using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
@@ -48,21 +49,9 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumScoreQuery
             }
             var classForumScores = await _classForumScoreRepository.Queryable
                                             .Where(x => x.ClassForumResultId == request.ClassForumResultId)
-                                            .Select(x => new ClassForumScoreModel
-                                            {
-                                                Id = x.Id,
-                                                CreatedDate = x.CreatedDate,
-                                                Criteria = x.Criteria,
-                                                Feedback = x.Feedback,
-                                                Score = x.Score,
-                                                ClassForumResultId = x.ClassForumResultId,
-                                            }).ToListAsync(cancellationToken);
-            if (classForumScores == null)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumClassForumScoreErrorCode.ClassForumNotExist));
-                return methodResult;
-            }
-            methodResult.Result = classForumScores;
+                                            .ToListAsync(cancellationToken);
+
+            methodResult.Result = _mapper.Map<IList<ClassForumScoreModel>>(classForumScores);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }
