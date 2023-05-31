@@ -2,21 +2,17 @@
 
 namespace Fsel.Course.Lms.Api.Controllers.Cso
 {
-    using Fsel.Common.ActionResults;
     using System.Net;
+    using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
-    using Fsel.Course.Lms.Application.Queries.CourseQuery;
-    using Fsel.Shared.Enums;
-    using MediatR;
-    using Microsoft.AspNetCore.Authorization;
-    using Microsoft.AspNetCore.Mvc;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Queries.ClassForumScoreQuery;
+    using MediatR;
+    using Microsoft.AspNetCore.Mvc;
 
     [ApiVersion(Settings.APIVersion)]
     [Route(Settings.APIDefaultRoute + "/cso/class-forum-score")]
     [ApiController]
-    [Authorize(Roles = nameof(EnumRole.MasterAdmin))]
     public class ClassForumScoreController : ControllerBase
     {
         private readonly IMediator _mediator;

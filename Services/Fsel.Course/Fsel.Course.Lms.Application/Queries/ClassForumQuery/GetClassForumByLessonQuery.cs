@@ -32,7 +32,8 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumQuery
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<ClassForumModel> methodResult = new MethodResult<ClassForumModel>();
             var classForum = await _classForumRepository.Queryable
-                                   .Include(x => x.ClassForumResults)
+                                   .Include(x => x.ClassForumResults!)
+                                   .ThenInclude(x => x.ClassForumResultFiles)
                                    .Where(x => x.ClassForumResults!.Any(x => x.Status == EnumClassForumResultStatus.PendingForGrading || x.Status == EnumClassForumResultStatus.Graded))
                                    .FirstOrDefaultAsync(x => x.LessonId == request.LessonId, cancellationToken);
             if (classForum == null)
@@ -52,12 +53,17 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumQuery
                     Id = x.Id,
                     FilePath = x.FilePath,
                 }).ToList(),
-                ClassForumResult = classForum.ClassForumResults == null ? null : classForum.ClassForumResults.Select(x => new ClassForumResultModel
+                ClassForumResults = classForum.ClassForumResults == null ? null : classForum.ClassForumResults.Select(x => new ClassForumResultModel
                 {
                     Id = x.Id,
                     Content = x.Content,
                     Status = x.Status,
-                }).FirstOrDefault(),
+                    ClassForumResultFiles = x.ClassForumResultFiles == null ? null : x.ClassForumResultFiles.Select(x => new ClassForumResultFileModel
+                    {
+                        Id = x.Id,
+                        FilePath = x.FilePath,
+                    }).ToList(),
+                }).ToList(),
             };
             methodResult.Result = classForumModel;
             methodResult.StatusCode = StatusCodes.Status200OK;

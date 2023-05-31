@@ -18,6 +18,5 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public IList<LessonModel>? Lessons { get; set; }
 
         public MockTestModel? SkillMockTest { get; set; }
-        public Guid CourseId { get; set; }
     }
 }

@@ -38,11 +38,6 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
                 return methodResult;
             }
 
-            if (!classForumResult.IsValid())
-            {
-                methodResult.AddErrorBadRequest(classForumResult.ErrorMessages);
-                return methodResult;
-            }
             await _classForumResulRepository.ExecuteTransactionAsync(async () =>
             {
                 var result = await _classForumResulRepository.DeleteAsync(classForumResult);

@@ -46,11 +46,7 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
                                                              Name = x.Name,
                                                          }).ToList(),
                                                      }).ToListAsync(cancellationToken);
-            if (unitQuery.Count == 0)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumUnitErrorCode.UnitsNotExist));
-                return methodResult;
-            }
+
             methodResult.Result = unitQuery;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;

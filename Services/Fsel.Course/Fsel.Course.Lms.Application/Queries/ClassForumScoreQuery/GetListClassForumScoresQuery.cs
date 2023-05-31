@@ -49,7 +49,6 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumScoreQuery
                 return methodResult;
             }
             var classForumScores = await _classForumScoreRepository.Queryable
-                                            .Include(x => x.ClassForumResult)
                                             .Where(x => x.ClassForumResult!.Id == request.ClassForumResultId)
                                             .Select(x => new ClassForumScoreModel
                                             {

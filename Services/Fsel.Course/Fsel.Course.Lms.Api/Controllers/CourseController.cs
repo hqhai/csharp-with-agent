@@ -3,13 +3,12 @@
 using System.Net;
 using Fsel.Common.ActionResults;
 using Fsel.Common.Constants;
-using Fsel.Shared.Enums;
 using Fsel.Course.Domain.Models.EntityModels;
 using Fsel.Course.Lms.Application.Queries.CourseQuery;
+using Fsel.Shared.Enums;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Collections.Generic;
 
 namespace Fsel.Course.Lms.Api.Controllers
 {

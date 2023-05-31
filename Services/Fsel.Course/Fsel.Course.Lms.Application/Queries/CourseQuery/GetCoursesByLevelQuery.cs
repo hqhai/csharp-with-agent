@@ -39,11 +39,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
                                     CourseLevel = x.CourseLevel,
                                     CreatedDate = x.CreatedDate,
                                 }).ToListAsync(cancellationToken);
-            if (courses == null)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.CoursesNotExist));
-                return methodResult;
-            }
+
             methodResult.Result = courses;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
