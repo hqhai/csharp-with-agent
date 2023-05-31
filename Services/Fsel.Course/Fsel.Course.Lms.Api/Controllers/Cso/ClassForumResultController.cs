@@ -9,15 +9,12 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Commands.ClassForumResultCmd;
     using Fsel.Course.Lms.Application.Queries.ClassForumResultQuery;
-    using Fsel.Shared.Enums;
     using MediatR;
-    using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
 
     [ApiVersion(Settings.APIVersion)]
     [Route(Settings.APIDefaultRoute + "/cso/class-forum-result")]
     [ApiController]
-    [Authorize(Roles = nameof(EnumRole.MasterAdmin))]
     public class ClassForumResultController : ControllerBase
     {
         private readonly IMediator _mediator;
@@ -63,6 +60,18 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
         public async Task<IActionResult> Get([FromRoute] Guid id)
         {
             var commandResult = await _mediator.Send(new GetClassForumResultQuery { ClassForumResultId = id }).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Delete a Class Forum result
+        /// </summary>
+        [HttpDelete("{id}")]
+        [ProducesResponseType(typeof(MethodResult<ClassForumResultModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> Delete([FromRoute] Guid id)
+        {
+            MethodResult<bool> commandResult = await _mediator.Send(new DeleteClassForumResultCommand { Id = id }).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
     }
