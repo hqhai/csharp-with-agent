@@ -25,18 +25,15 @@ namespace Fsel.Course.Application.Commands.MockTestCmd
     {
         private readonly IMapper _mapper;
         private readonly IMockTestRepository _mockTestRepository;
-        private readonly QuestionTypeConverter _questionTypeConverter;
         private readonly SectionConverter _sectionConverter;
 
         public CreateMockTestCommandHandler(IMapper mapper
             , IMockTestRepository mockTestRepository
-            , QuestionTypeConverter questionTypeConverter
             , SectionConverter sectionConverter
             )
         {
             _mapper = mapper;
             _mockTestRepository = mockTestRepository;
-            _questionTypeConverter = questionTypeConverter;
             _sectionConverter = sectionConverter;
         }
 
@@ -82,12 +79,6 @@ namespace Fsel.Course.Application.Commands.MockTestCmd
 
                         if (sectionGroup.CourseSkill != EnumCourseSkill.Speaking && sectionGroup.CourseSkill != EnumCourseSkill.Writing)
                         {
-                            if (section.SectionParts != null && section.Questions != null && section.SectionParts.Count > 0 && section.Questions.Count > 0)
-                            {
-                                methodResult.AddErrorBadRequest(nameof(EnumSectionErrorCode.OnlyOneOfTwoSectionPartsOrQuestions), nameof(section.SectionParts), nameof(section.Questions));
-                                return methodResult;
-                            }
-
                             if (section.SectionParts == null || section.SectionParts.Count == 0)
                             {
                                 methodResult.AddErrorBadRequest(nameof(EnumSectionPartErrorCode.SectionPartsNull), nameof(section.SectionParts));
@@ -118,9 +109,9 @@ namespace Fsel.Course.Application.Commands.MockTestCmd
                                 return methodResult;
                             }
                         }
-                        else if (sectionGroup.CourseSkill != EnumCourseSkill.Writing)
+                        else if (sectionGroup.CourseSkill == EnumCourseSkill.Speaking)
                         {
-                            if (section.SectionTimeCodes == null || section.SectionTimeCodes!.Count == 0)
+                            if (section.SectionTimeCodes == null || section.SectionTimeCodes.Count == 0)
                             {
                                 methodResult.AddErrorBadRequest(nameof(EnumSectionTimeCodeErrorCode.TimeCodeCanNotNull), nameof(sectionGroup.CourseSkill));
                                 return methodResult;

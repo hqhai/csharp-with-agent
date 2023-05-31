@@ -148,12 +148,6 @@ namespace Fsel.Course.Application.Commands.PlacementTestCmd
                     }
                     else
                     {
-                        if (section.Questions == null || section.Questions.Count == 0)
-                        {
-                            methodResult.AddErrorBadRequest(nameof(EnumQuestionErrorCode.QuestionNull), nameof(section.Questions));
-                            return methodResult;
-                        }
-
                         var method = _sectionConverter.AddQuestionToSession(section, section.Questions);
                         if (!method.IsOK)
                         {

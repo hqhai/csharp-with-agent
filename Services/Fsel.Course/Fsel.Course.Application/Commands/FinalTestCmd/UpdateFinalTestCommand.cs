@@ -98,17 +98,6 @@ namespace Fsel.Course.Application.Commands.FinalTestCmd
                         return methodResult;
                     }
                     Section newSection = newSectionGroup.Sections.ElementAt(sectionGroup.Sections.IndexOf(section));
-                    if (section.SectionParts != null && section.Questions != null && section.SectionParts.Count > 0 && section.Questions.Count > 0)
-                    {
-                        methodResult.AddErrorBadRequest(nameof(EnumSectionErrorCode.OnlyOneOfTwoSectionPartsOrQuestions));
-                        return methodResult;
-                    }
-
-                    if (section.Questions == null || section.Questions.Count == 0)
-                    {
-                        methodResult.AddErrorBadRequest(nameof(EnumQuestionErrorCode.QuestionNull), nameof(section.Questions));
-                        return methodResult;
-                    }
 
                     var method = _sectionConverter.AddQuestionToSession(newSection, section.Questions);
                     if (!method.IsOK)

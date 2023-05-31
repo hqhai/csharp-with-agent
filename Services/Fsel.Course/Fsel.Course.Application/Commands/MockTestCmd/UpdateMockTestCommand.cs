@@ -132,11 +132,6 @@ namespace Fsel.Course.Application.Commands.MockTestCmd
 
                     if (sectionGroup.CourseSkill != EnumCourseSkill.Speaking && sectionGroup.CourseSkill != EnumCourseSkill.Writing)
                     {
-                        if (section.SectionParts != null && section.Questions != null && section.SectionParts.Count > 0 && section.Questions.Count > 0)
-                        {
-                            methodResult.AddErrorBadRequest(nameof(EnumSectionErrorCode.OnlyOneOfTwoSectionPartsOrQuestions));
-                            return methodResult;
-                        }
                         if (section.SectionParts == null || section.SectionParts.Count == 0)
                         {
                             methodResult.AddErrorBadRequest(nameof(EnumSectionPartErrorCode.SectionPartsNull), nameof(section.SectionParts));
