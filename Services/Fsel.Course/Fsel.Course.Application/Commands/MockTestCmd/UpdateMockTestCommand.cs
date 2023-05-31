@@ -76,34 +76,8 @@ namespace Fsel.Course.Application.Commands.MockTestCmd
             }
 
             var sectionGroups = mockTest.MockTestSections.Select(x => x.SectionGroup ?? new SectionGroup()).ToList();
-            var sections = sectionGroups.SelectMany(x => x.Sections).ToList();
-            List<Question>? questions = null;
-            List<SectionTimeCode>? sectionTimeCodes = null;
-            List<SectionQuestion>? sectionQuestions = null;
-            if (mockTest.MockTestType == EnumMockTestType.SkillMockTest)
-            {
-                var sectionGroup = sectionGroups.FirstOrDefault();
-                if (sectionGroup != null)
-                {
-                    if (sectionGroup.CourseSkill == EnumCourseSkill.Reading || sectionGroup.CourseSkill == EnumCourseSkill.Listening)
-                    {
-                        var sectionParts = sections.SelectMany(x => x.SectionParts).ToList();
-                        sectionQuestions = sectionParts.SelectMany(x => x.SectionQuestions).ToList();
-                        questions = sectionQuestions.Select(x => x.Question ?? new Question()).ToList();
-                    }
-                    else if (sectionGroup.CourseSkill == EnumCourseSkill.Speaking)
-                    {
-                        sectionTimeCodes = sections.SelectMany(x => x.SectionTimeCodes).ToList();
-                    }
-                }
-            }
-            else
-            {
-                var sectionParts = sections.SelectMany(x => x.SectionParts).ToList();
-                sectionQuestions = sectionParts.SelectMany(x => x.SectionQuestions).ToList();
-                questions = sectionQuestions.Select(x => x.Question ?? new Question()).ToList();
-                sectionTimeCodes = sections.SelectMany(x => x.SectionTimeCodes).ToList();
-            }
+            var sectionQuestions = sectionGroups.SelectMany(x => x.Sections).SelectMany(x => x.SectionParts).SelectMany(x => x.SectionQuestions).ToList();
+            var questions = sectionQuestions.Select(x => x.Question ?? new Question()).ToList();
 
             _mapper.Map(request, mockTest);
             mockTest.MockTestSections.Clear();

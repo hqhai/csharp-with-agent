@@ -67,7 +67,7 @@ namespace Fsel.Course.Lms.Application.Queries.FinalTestQuery
                                                         .ThenInclude(x => x!.Sections)
                                                         .ThenInclude(x => x.SectionQuestions)
                                                         .ThenInclude(x => x.Question)
-                                                        .ThenInclude(x => x.SectionQuestions)
+                                                        .ThenInclude(x => x!.SectionQuestions)
                                                         .ThenInclude(x => x.FinalTestAnswers)
                                                         .FirstOrDefaultAsync(x => x.Id == request.FinalTestId, cancellationToken);
 
@@ -91,7 +91,7 @@ namespace Fsel.Course.Lms.Application.Queries.FinalTestQuery
                     Id = x!.Id,
                     ExecutionTime = x!.ExecutionTime,
                     CourseSkill = x.CourseSkill,
-                    Sections = x.Sections.OrderBy(x => x!.DisplayOrder).OrderBy(x => x!.CreatedDate).Select(x => new SectionModel
+                    Sections = x.Sections.OrderBy(x => x!.DisplayOrder).Select(x => new SectionModel
                     {
                         Id = x.Id,
                         Name = x.Name,

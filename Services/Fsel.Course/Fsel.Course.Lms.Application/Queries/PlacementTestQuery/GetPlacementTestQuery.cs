@@ -127,7 +127,6 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestQuery
                                     .ThenInclude(x => x.SectionParts)
                                     .ThenInclude(x => x!.SectionQuestions)
                                     .ThenInclude(x => x.Question)
-                                    .OrderBy(x => x!.CreatedDate)
                                     .ToListAsync(cancellationToken);
 
             var sectionGroups = placementTests.SelectMany(x => x.PlacementTestSections)

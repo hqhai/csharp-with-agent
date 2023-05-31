@@ -116,7 +116,7 @@ namespace Fsel.Course.Lms.Application.Queries.VideoQuery
                         }).ToList()
                     }).ToList(),
                 }).ToList(),
-                VideoResult = video.VideoResults.Where(x => x.StudentId == studentId).OrderBy(x => x!.CreatedDate).Select(x => new VideoResultModel
+                VideoResult = video.VideoResults.Where(x => x.StudentId == studentId).Select(x => new VideoResultModel
                 {
                     Id = x.Id,
                     CorrectCount = x.CorrectCount,
