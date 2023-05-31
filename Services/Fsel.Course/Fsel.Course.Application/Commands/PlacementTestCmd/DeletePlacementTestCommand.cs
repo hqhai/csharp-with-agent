@@ -17,19 +17,19 @@ namespace Fsel.Course.Application.Commands.PlacementTestCmd
     public class DeletePlacementTestCommandHandler : IRequestHandler<DeletePlacementTestCommand, MethodResult<bool>>
     {
         private readonly IPlacementTestRepository _placementTestRepository;
-        private readonly ISectionRepository _sectionRepository;
-        private readonly ISectionPartRepository _sectionPartRepository;
+        private readonly IQuestionRepository _questionRepository;
+        private readonly ISectionQuestionRepository _sectionQuestionRepository;
         private readonly ISectionGroupRepository _sectionGroupRepository;
 
         public DeletePlacementTestCommandHandler(IPlacementTestRepository placementTestRepository
-            , ISectionRepository sectionRepository
-            , ISectionPartRepository sectionPartRepository
+            , IQuestionRepository questionRepository
+            , ISectionQuestionRepository sectionQuestionRepository
             , ISectionGroupRepository sectionGroupRepository
             )
         {
             _placementTestRepository = placementTestRepository;
-            _sectionRepository = sectionRepository;
-            _sectionPartRepository = sectionPartRepository;
+            _questionRepository = questionRepository;
+            _sectionQuestionRepository = sectionQuestionRepository;
             _sectionGroupRepository = sectionGroupRepository;
         }
 
@@ -53,8 +53,20 @@ namespace Fsel.Course.Application.Commands.PlacementTestCmd
                 return methodResult;
             }
             List<SectionGroup> sectionGroups = placementTest.PlacementTestSections.Select(x => x.SectionGroup!).ToList();
-            List<Section> sections = sectionGroups.SelectMany(x => x.Sections).ToList();
-            List<SectionPart> sectionParts = sections.SelectMany(x => x.SectionParts).ToList();
+            List<Section> sections = sectionGroups.SelectMany(x => x.Sections!).ToList();
+            List<SectionPart>? sectionParts = null;
+            List<SectionQuestion>? sectionQuestions = null;
+            List<Question>? questions = null;
+            if (sections.SelectMany(x => x.SectionParts).ToList() == null || sections.SelectMany(x => x.SectionParts).ToList().Count == 0)
+            {
+                sectionParts = sections.SelectMany(x => x.SectionParts).ToList();
+                questions = sectionParts.SelectMany(x => x.SectionQuestions).Select(x => x.Question ?? new Question()).ToList();
+            }
+            else
+            {
+                sectionQuestions = sections.SelectMany(x => x.SectionQuestions).ToList();
+                questions = sectionQuestions.Select(x => x.Question ?? new Question()).ToList();
+            }
 
             #endregion Validation
 
@@ -65,26 +77,26 @@ namespace Fsel.Course.Application.Commands.PlacementTestCmd
                     await _sectionGroupRepository.DeleteAsync(item);
                 }
                 await _sectionGroupRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-
-                foreach (var item in sections)
+                if (sectionQuestions != null && sectionQuestions.Count > 0)
                 {
-                    await _sectionRepository.DeleteAsync(item);
-                }
-                await _sectionRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-
-                if (sectionParts.Count > 0)
-                {
-                    foreach (var item in sectionParts)
+                    foreach (var item in sectionQuestions)
                     {
-                        await _sectionPartRepository.DeleteAsync(item);
+                        await _sectionQuestionRepository.DeleteAsync(item);
                     }
-                    await _sectionPartRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                    await _sectionQuestionRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
                 }
-                await _placementTestRepository.DeleteAsync(placementTest);
+
+                foreach (var item in questions)
+                {
+                    await _questionRepository.DeleteAsync(item);
+                }
+                await _questionRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+
+                var result = await _placementTestRepository.DeleteAsync(placementTest);
                 await _placementTestRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
                 methodResult.StatusCode = StatusCodes.Status200OK;
-                methodResult.Result = true;
+                methodResult.Result = result;
                 return methodResult;
             });
 

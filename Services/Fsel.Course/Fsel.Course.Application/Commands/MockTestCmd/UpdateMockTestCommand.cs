@@ -9,12 +9,13 @@ namespace Fsel.Course.Application.Commands.MockTestCmd
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Course.Domain.Entities;
+    using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.CommandModels.MockTests;
-    using Fsel.Course.Domain.Models.CommandModels.Questions;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Infrastructure.Common;
+    using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Http;
 
@@ -26,36 +27,24 @@ namespace Fsel.Course.Application.Commands.MockTestCmd
     {
         private readonly IMapper _mapper;
         private readonly IMockTestRepository _mockTestRepository;
-        private readonly ISectionRepository _sectionRepository;
-        private readonly QuestionTypeConverter _questionTypeConverter;
-        private readonly ISectionPartRepository _sectionPartRepository;
         private readonly IQuestionRepository _questionRepository;
         private readonly ISectionGroupRepository _sectionGroupRepository;
         private readonly ISectionQuestionRepository _sectionQuestionRepository;
-        private readonly ISectionTimeCodeRepository _sectionTimeCodeRepository;
         private readonly SectionConverter _sectionConverter;
 
         public UpdateMockTestCommandHandler(IMapper mapper
             , IMockTestRepository mockTestRepository
-            , ISectionRepository sectionRepository
-            , QuestionTypeConverter questionTypeConverter
-            , ISectionPartRepository sectionPartRepository
             , IQuestionRepository questionRepository
             , ISectionGroupRepository sectionGroupRepository
             , ISectionQuestionRepository sectionQuestionRepository
-            , ISectionTimeCodeRepository sectionTimeCodeRepository
             , SectionConverter sectionConverter)
 
         {
             _mapper = mapper;
             _mockTestRepository = mockTestRepository;
-            _sectionRepository = sectionRepository;
-            _questionTypeConverter = questionTypeConverter;
-            _sectionPartRepository = sectionPartRepository;
             _questionRepository = questionRepository;
             _sectionGroupRepository = sectionGroupRepository;
             _sectionQuestionRepository = sectionQuestionRepository;
-            _sectionTimeCodeRepository = sectionTimeCodeRepository;
             _sectionConverter = sectionConverter;
             _sectionConverter = sectionConverter;
         }
@@ -87,12 +76,36 @@ namespace Fsel.Course.Application.Commands.MockTestCmd
             }
 
             var sectionGroups = mockTest.MockTestSections.Select(x => x.SectionGroup ?? new SectionGroup()).ToList();
+            var sections = sectionGroups.SelectMany(x => x.Sections).ToList();
+            List<Question>? questions = null;
+            List<SectionTimeCode>? sectionTimeCodes = null;
+            List<SectionQuestion>? sectionQuestions = null;
+            if (mockTest.MockTestType == EnumMockTestType.SkillMockTest)
+            {
+                var sectionGroup = sectionGroups.FirstOrDefault();
+                if (sectionGroup != null)
+                {
+                    if (sectionGroup.CourseSkill == EnumCourseSkill.Reading || sectionGroup.CourseSkill == EnumCourseSkill.Listening)
+                    {
+                        var sectionParts = sections.SelectMany(x => x.SectionParts).ToList();
+                        sectionQuestions = sectionParts.SelectMany(x => x.SectionQuestions).ToList();
+                        questions = sectionQuestions.Select(x => x.Question ?? new Question()).ToList();
+                    }
+                    else if (sectionGroup.CourseSkill == EnumCourseSkill.Speaking)
+                    {
+                        sectionTimeCodes = sections.SelectMany(x => x.SectionTimeCodes).ToList();
+                    }
+                }
+            }
+            else
+            {
+                var sectionParts = sections.SelectMany(x => x.SectionParts).ToList();
+                sectionQuestions = sectionParts.SelectMany(x => x.SectionQuestions).ToList();
+                questions = sectionQuestions.Select(x => x.Question ?? new Question()).ToList();
+                sectionTimeCodes = sections.SelectMany(x => x.SectionTimeCodes).ToList();
+            }
 
             _mapper.Map(request, mockTest);
-            sectionGroups.ForEach(x =>
-            {
-                x.MockTestSections.Clear();
-            });
             mockTest.MockTestSections.Clear();
 
             foreach (var sectionGroup in request.SectionGroups)
@@ -117,14 +130,13 @@ namespace Fsel.Course.Application.Commands.MockTestCmd
                     }
                     Section newSection = newSectionGroup.Sections.ElementAt(sectionGroup.Sections.IndexOf(section));
 
-                    if (sectionGroup.CourseSkill != Shared.Enums.EnumCourseSkill.Speaking)
+                    if (sectionGroup.CourseSkill != EnumCourseSkill.Speaking && sectionGroup.CourseSkill != EnumCourseSkill.Writing)
                     {
                         if (section.SectionParts != null && section.Questions != null && section.SectionParts.Count > 0 && section.Questions.Count > 0)
                         {
                             methodResult.AddErrorBadRequest(nameof(EnumSectionErrorCode.OnlyOneOfTwoSectionPartsOrQuestions));
                             return methodResult;
                         }
-
                         if (section.SectionParts == null || section.SectionParts.Count == 0)
                         {
                             methodResult.AddErrorBadRequest(nameof(EnumSectionPartErrorCode.SectionPartsNull), nameof(section.SectionParts));
@@ -146,16 +158,16 @@ namespace Fsel.Course.Application.Commands.MockTestCmd
                                 {
                                     methodResult.AddError(method.ErrorMessages);
                                 }
+                                var correctCount = newSection.SectionParts.SelectMany(x => x.SectionQuestions).Select(x => x.Question).Sum(x => x!.CorrectTotal);
+                                if (!SectionValidation.IsCheckSection(newSectionGroup.CourseSkill, section.DisplayOrder, correctCount))
+                                {
+                                    methodResult.AddErrorBadRequest(nameof(EnumMockTestErrorCode.MockTestMustCorrectScore), nameof(correctCount), correctCount);
+                                    return methodResult;
+                                }
                             }
                         }
                     }
-                    var correctCount = newSection.SectionParts.SelectMany(x => x.SectionQuestions).Select(x => x.Question).Sum(x => x!.CorrectTotal);
-                    if (!SectionValidation.IsCheckSection(newSectionGroup.CourseSkill, section.DisplayOrder, correctCount))
-                    {
-                        methodResult.AddErrorBadRequest(nameof(EnumMockTestErrorCode.MockTestMustCorrectScore), nameof(correctCount), correctCount);
-                        return methodResult;
-                    }
-                    else
+                    else if (sectionGroup.CourseSkill == EnumCourseSkill.Speaking)
                     {
                         if (section.SectionTimeCodes == null || section.SectionTimeCodes!.Count == 0)
                         {
@@ -206,6 +218,23 @@ namespace Fsel.Course.Application.Commands.MockTestCmd
                     await _sectionGroupRepository.DeleteAsync(item);
                 }
                 await _sectionGroupRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+
+                if (sectionQuestions != null)
+                {
+                    foreach (var item in sectionQuestions)
+                    {
+                        await _sectionQuestionRepository.DeleteAsync(item);
+                    }
+                    await _sectionQuestionRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                }
+                if (questions != null)
+                {
+                    foreach (var item in questions)
+                    {
+                        await _questionRepository.DeleteAsync(item);
+                    }
+                    await _questionRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                }
 
                 mockTest = _mockTestRepository.Update(mockTest);
                 await _mockTestRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);

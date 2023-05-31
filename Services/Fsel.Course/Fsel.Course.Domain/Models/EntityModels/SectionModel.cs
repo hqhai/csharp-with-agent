@@ -11,7 +11,6 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public string? VideoFilePath { get; set; }
         public string? SubFilePath { get; set; }
         public int DisplayOrder { get; set; }
-        public Guid SectionGroupId { get; set; }
         public IList<SectionPartModel>? SectionParts { get; set; }
 
         public IList<SectionTimeCodeModel>? SectionTimeCodes { get; set; }

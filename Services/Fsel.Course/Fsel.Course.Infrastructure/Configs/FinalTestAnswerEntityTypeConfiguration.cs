@@ -14,7 +14,7 @@ namespace Fsel.Course.Infrastructure.Configs
             ArgumentNullException.ThrowIfNull(builder);
 
             builder.HasOne(a => a.FinalTestResult)
-                .WithMany(b => b.FinalTestExerciseAnswers)
+                .WithMany(b => b.FinalTestAnswers)
                 .HasForeignKey(b => b.FinalTestResultId)
                 .OnDelete(DeleteBehavior.Cascade);
 

@@ -67,6 +67,8 @@ namespace Fsel.Course.Lms.Application.Queries.FinalTestQuery
                                                         .ThenInclude(x => x!.Sections)
                                                         .ThenInclude(x => x.SectionQuestions)
                                                         .ThenInclude(x => x.Question)
+                                                        .ThenInclude(x => x.SectionQuestions)
+                                                        .ThenInclude(x => x.FinalTestAnswers)
                                                         .FirstOrDefaultAsync(x => x.Id == request.FinalTestId, cancellationToken);
 
             if (finalTest == null)
@@ -105,7 +107,7 @@ namespace Fsel.Course.Lms.Application.Queries.FinalTestQuery
                             Ungraded = x.Ungraded,
                             CorrectTotal = x.CorrectTotal,
                             Config = _questionTypeConverter.QuestionTypeConverterObject(x.Config, x.QuestionType, isDisableAnswers: !checkDone).Item1,
-                            ResultAnswer = _mapper.Map<VideoTimeCodeAnswerModel>(x.VideoTimeCodeAnswers!.FirstOrDefault())
+                            ResultAnswer = _mapper.Map<FinalTestAnswerModel>(x.SectionQuestions.FirstOrDefault(y => y.QuestionId == x.Id)?.FinalTestAnswers.FirstOrDefault())
                         }).ToList()
                     }).ToList(),
                 }).ToList(),

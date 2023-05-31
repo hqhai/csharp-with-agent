@@ -6,7 +6,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
     {
         public Guid Id { get; set; }
         public Guid FinalTestResultId { get; set; }
-        public Guid ExerciseQuestionId { get; set; }
+        public Guid SectionQuestionId { get; set; }
         public object? Answer { get; set; }
         public int CorrectCount { get; set; }
     }

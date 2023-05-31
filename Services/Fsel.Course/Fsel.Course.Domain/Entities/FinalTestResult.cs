@@ -60,6 +60,6 @@ namespace Fsel.Course.Domain.Entities
         public Guid FinalTestId { get; set; }
         public Course? Course { get; set; }
         public Guid CourseId { get; set; }
-        public ICollection<FinalTestAnswer> FinalTestExerciseAnswers { get; set; } = new List<FinalTestAnswer>();
+        public ICollection<FinalTestAnswer> FinalTestAnswers { get; set; } = new List<FinalTestAnswer>();
     }
 }

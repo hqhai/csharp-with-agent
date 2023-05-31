@@ -7,13 +7,12 @@ namespace Fsel.Course.Application.Commands.MockTestCmd
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
     using Fsel.Course.Domain.Entities;
+    using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
-    using Fsel.Course.Infrastructure.Common;
-    using Fsel.Course.Infrastructure.Repositories;
+    using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Http;
-    using Microsoft.EntityFrameworkCore;
 
     public class DeleteMockTestCommand : IRequest<MethodResult<bool>>
     {
@@ -23,22 +22,16 @@ namespace Fsel.Course.Application.Commands.MockTestCmd
     public class DeleteMockTestCommandHandler : IRequestHandler<DeleteMockTestCommand, MethodResult<bool>>
     {
         private readonly IMockTestRepository _mockTestRepository;
-        private readonly ISectionRepository _sectionRepository;
-        private readonly ISectionPartRepository _sectionPartRepository;
         private readonly IQuestionRepository _questionRepository;
         private readonly ISectionGroupRepository _sectionGroupRepository;
         private readonly ISectionQuestionRepository _sectionQuestionRepository;
 
         public DeleteMockTestCommandHandler(IMockTestRepository mockTestRepository
-            , ISectionRepository sectionRepository
-            , ISectionPartRepository sectionPartRepository
             , IQuestionRepository questionRepository
             , ISectionGroupRepository sectionGroupRepository
             , ISectionQuestionRepository sectionQuestionRepository)
         {
             _mockTestRepository = mockTestRepository;
-            _sectionRepository = sectionRepository;
-            _sectionPartRepository = sectionPartRepository;
             _questionRepository = questionRepository;
             _sectionGroupRepository = sectionGroupRepository;
             _sectionQuestionRepository = sectionQuestionRepository;
@@ -61,9 +54,35 @@ namespace Fsel.Course.Application.Commands.MockTestCmd
                 return methodResult;
             }
 
-            List<SectionGroup> sectionGroups = mockTest.MockTestSections.Select(x => x.SectionGroup!).ToList();
-            List<Section> sections = sectionGroups.SelectMany(x => x.Sections).ToList();
-            List<SectionPart> sectionParts = sections.SelectMany(x => x.SectionParts).ToList();
+            var sectionGroups = mockTest.MockTestSections.Select(x => x.SectionGroup ?? new SectionGroup()).ToList();
+            var sections = sectionGroups.SelectMany(x => x.Sections).ToList();
+            List<Question>? questions = null;
+            List<SectionTimeCode>? sectionTimeCodes = null;
+            List<SectionQuestion>? sectionQuestions = null;
+            if (mockTest.MockTestType == EnumMockTestType.SkillMockTest)
+            {
+                var sectionGroup = sectionGroups.FirstOrDefault();
+                if (sectionGroup != null)
+                {
+                    if (sectionGroup.CourseSkill == EnumCourseSkill.Reading || sectionGroup.CourseSkill == EnumCourseSkill.Listening)
+                    {
+                        var sectionParts = sections.SelectMany(x => x.SectionParts).ToList();
+                        sectionQuestions = sectionParts.SelectMany(x => x.SectionQuestions).ToList();
+                        questions = sectionQuestions.Select(x => x.Question ?? new Question()).ToList();
+                    }
+                    else if (sectionGroup.CourseSkill == EnumCourseSkill.Speaking)
+                    {
+                        sectionTimeCodes = sections.SelectMany(x => x.SectionTimeCodes).ToList();
+                    }
+                }
+            }
+            else
+            {
+                var sectionParts = sections.SelectMany(x => x.SectionParts).ToList();
+                sectionQuestions = sectionParts.SelectMany(x => x.SectionQuestions).ToList();
+                questions = sectionQuestions.Select(x => x.Question ?? new Question()).ToList();
+                sectionTimeCodes = sections.SelectMany(x => x.SectionTimeCodes).ToList();
+            }
 
             await _mockTestRepository.ExecuteTransactionAsync(async () =>
             {
@@ -71,21 +90,23 @@ namespace Fsel.Course.Application.Commands.MockTestCmd
                 {
                     await _sectionGroupRepository.DeleteAsync(item);
                 }
-                await _sectionGroupRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                await _sectionGroupRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
-                foreach (var item in sections)
+                if (sectionQuestions != null)
                 {
-                    await _sectionRepository.DeleteAsync(item);
-                }
-                await _sectionRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-
-                if (sectionParts.Count > 0)
-                {
-                    foreach (var item in sectionParts)
+                    foreach (var item in sectionQuestions)
                     {
-                        await _sectionPartRepository.DeleteAsync(item);
+                        await _sectionQuestionRepository.DeleteAsync(item);
                     }
-                    await _sectionPartRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                    await _sectionQuestionRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                }
+                if (questions != null)
+                {
+                    foreach (var item in questions)
+                    {
+                        await _questionRepository.DeleteAsync(item);
+                    }
+                    await _questionRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
                 }
 
                 await _questionRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);

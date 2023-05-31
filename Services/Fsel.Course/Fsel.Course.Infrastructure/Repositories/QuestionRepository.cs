@@ -41,18 +41,5 @@ namespace Fsel.Course.Infrastructure.Repositories
                 throw;
             }
         }
-
-        public async Task<List<Question>?> GetIncludeExerciseByIdAsync(IEnumerable<Guid> ids)
-        {
-            try
-            {
-                return await Queryable.Include(x => x.ExerciseQuestions).ThenInclude(x => x.Exercise)
-                                    .Where(x => ids.Contains(x.Id)).ToListAsync();
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
     }
 }

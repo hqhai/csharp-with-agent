@@ -21,22 +21,22 @@ namespace Fsel.Course.Application.Commands.PlacementTestCmd
     public class UpdatePlacementTestCommandHandler : IRequestHandler<UpdatePlacementTestCommand, MethodResult<PlacementTestModel>>
     {
         private readonly IPlacementTestRepository _placementTestRepository;
-        private readonly ISectionRepository _sectionRepository;
-        private readonly ISectionPartRepository _sectionPartRepository;
+        private readonly ISectionQuestionRepository _sectionQuestionRepository;
+        private readonly IQuestionRepository _questionRepository;
         private readonly ISectionGroupRepository _sectionGroupRepository;
         private readonly IMapper _mapper;
         private readonly SectionConverter _sectionConverter;
 
         public UpdatePlacementTestCommandHandler(IPlacementTestRepository placementTestRepository,
-            ISectionRepository sectionRepository,
-            ISectionPartRepository sectionPartRepository,
+            ISectionQuestionRepository sectionQuestionRepository,
+            IQuestionRepository questionRepository,
             ISectionGroupRepository sectionGroupRepository,
             IMapper mapper,
             SectionConverter sectionConverter)
         {
             _placementTestRepository = placementTestRepository;
-            _sectionRepository = sectionRepository;
-            _sectionPartRepository = sectionPartRepository;
+            _sectionQuestionRepository = sectionQuestionRepository;
+            _questionRepository = questionRepository;
             _sectionGroupRepository = sectionGroupRepository;
             _mapper = mapper;
             _sectionConverter = sectionConverter;
@@ -68,9 +68,9 @@ namespace Fsel.Course.Application.Commands.PlacementTestCmd
                 return methodResult;
             }
 
-            List<SectionGroup> sectionGroups = placementTest.PlacementTestSections.Select(x => x.SectionGroup ?? new SectionGroup()).ToList();
-            List<Section> sections = sectionGroups.SelectMany(x => x.Sections).ToList();
-            List<SectionPart> sectionParts = sections.SelectMany(x => x.SectionParts).ToList();
+            var sectionGroups = placementTest.PlacementTestSections.Select(x => x.SectionGroup ?? new SectionGroup()).ToList();
+            var sections = sectionGroups.SelectMany(x => x.Sections).ToList();
+            var sectionParts = sections.SelectMany(x => x.SectionParts).ToList();
             List<Question>? questions = null;
             List<SectionQuestion>? sectionQuestions = null;
             if (placementTest.Level == EnumPlacementTestLevel.IELTS)
@@ -192,20 +192,20 @@ namespace Fsel.Course.Application.Commands.PlacementTestCmd
                 }
                 await _sectionGroupRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
-                foreach (var item in sections)
+                if (placementTest.Level != EnumPlacementTestLevel.IELTS)
                 {
-                    await _sectionRepository.DeleteAsync(item);
-                }
-                await _sectionRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-
-                if (sectionParts.Count > 0)
-                {
-                    foreach (var item in sectionParts)
+                    foreach (var item in sectionQuestions)
                     {
-                        await _sectionPartRepository.DeleteAsync(item);
+                        await _sectionQuestionRepository.DeleteAsync(item);
                     }
-                    await _sectionPartRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                    await _sectionQuestionRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
                 }
+
+                foreach (var item in questions)
+                {
+                    await _questionRepository.DeleteAsync(item);
+                }
+                await _questionRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
                 placementTest = _placementTestRepository.Update(placementTest);
                 await _placementTestRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
