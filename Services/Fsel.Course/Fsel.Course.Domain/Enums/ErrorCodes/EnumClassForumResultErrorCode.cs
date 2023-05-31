@@ -27,6 +27,11 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         /// <summary>
         /// Class Forum result Status not pendding For Grading
         /// </summary>
-        ClassForumResultStatusNotPendingForGrading
+        ClassForumResultStatusNotPendingForGrading,
+
+        /// <summary>
+        /// Class Forum Result Not in Status Pending For Grading Or Graded
+        /// </summary>
+        ClassForumResultNotStatusPendingForGradingOrGraded,
     }
 }

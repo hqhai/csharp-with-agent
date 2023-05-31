@@ -6,6 +6,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
+    using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
     using MediatR;
@@ -37,15 +38,19 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
                 methodResult.AddErrorBadRequest(nameof(EnumClassForumResultErrorCode.ClassForumResultNotExist), nameof(request.Id), request.Id);
                 return methodResult;
             }
-
-            await _classForumResulRepository.ExecuteTransactionAsync(async () =>
+            if (classForumResult.Status == EnumClassForumResultStatus.PendingForGrading || classForumResult.Status == EnumClassForumResultStatus.Graded)
             {
-                var result = await _classForumResulRepository.DeleteAsync(classForumResult);
-                await _classForumResulRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
-                methodResult.StatusCode = StatusCodes.Status200OK;
-                methodResult.Result = result;
+                methodResult.AddErrorBadRequest(nameof(EnumClassForumResultErrorCode.ClassForumResultNotExist), nameof(request.Id), request.Id);
                 return methodResult;
-            });
+            }
+            await _classForumResulRepository.ExecuteTransactionAsync(async () =>
+        {
+            var result = await _classForumResulRepository.DeleteAsync(classForumResult);
+            await _classForumResulRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+            methodResult.StatusCode = StatusCodes.Status200OK;
+            methodResult.Result = result;
+            return methodResult;
+        });
 
             return methodResult;
         }
