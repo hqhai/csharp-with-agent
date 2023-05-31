@@ -27,6 +27,11 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         /// <summary>
         /// Class Forum result Status not pendding For Grading
         /// </summary>
-        ClassForumResultStatusNotPendingForGrading
+        ClassForumResultStatusNotPendingForGrading,
+
+        /// <summary>
+        /// Can not delete in the current status
+        /// </summary>
+        CanNotDeleteInCurrentStatus,
     }
 }

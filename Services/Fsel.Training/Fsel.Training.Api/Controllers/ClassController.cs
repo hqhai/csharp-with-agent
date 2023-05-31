@@ -6,6 +6,7 @@ namespace Fsel.Training.Api.Controllers
     using System.Net;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
+    using Fsel.Core.Base.BaseModels;
     using Fsel.Shared.Enums;
     using Fsel.Training.Application.Commands.ClassCmd;
     using Fsel.Training.Application.Queries.ClassQuery;
@@ -72,6 +73,18 @@ namespace Fsel.Training.Api.Controllers
         public async Task<IActionResult> RegisterClass([FromBody] RegisterClassCommand command)
         {
             MethodResult<ClassModel> queryResult = await _mediator.Send(command).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Search Class Forum
+        /// </summary>
+        [HttpGet]
+        [ProducesResponseType(typeof(MethodResult<PagingItemsModel<ClassModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> Search([FromQuery] SearchClassQuery query)
+        {
+            MethodResult<PagingItemsModel<ClassModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
     }

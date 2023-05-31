@@ -10,6 +10,11 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         ClassForumScoresNull,
 
         /// <summary>
+        /// ClassForumScores Not Exist
+        /// </summary>
+        ClassForumNotExist,
+
+        /// <summary>
         /// Score Must Be Less Than9
         /// </summary>
         ScoreMustLessThan9
