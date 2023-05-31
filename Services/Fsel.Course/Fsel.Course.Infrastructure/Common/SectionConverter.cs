@@ -139,6 +139,7 @@ namespace Fsel.Course.Infrastructure.Common
                 methodResult.AddErrorBadRequest(nameof(EnumSectionErrorCode.SectionsNull), nameof(sectionGroup.Sections));
                 return methodResult;
             }
+            IList<Section> sections = sectionGroup.Sections;
             foreach (var section in sectionModels)
             {
                 if (section == null)
@@ -146,7 +147,7 @@ namespace Fsel.Course.Infrastructure.Common
                     methodResult.AddErrorBadRequest(nameof(EnumSectionErrorCode.SectionNull), nameof(section));
                     return methodResult;
                 }
-                Section newSection = sectionGroup.Sections.ElementAt(sectionModels.IndexOf(section));
+                Section newSection = sections.ElementAt(sectionModels.IndexOf(section));
                 if (sectionGroup.CourseSkill != EnumCourseSkill.Speaking && sectionGroup.CourseSkill != EnumCourseSkill.Writing)
                 {
                     if (section.SectionParts != null && section.Questions != null && section.SectionParts.Count > 0 && section.Questions.Count > 0)
@@ -186,6 +187,15 @@ namespace Fsel.Course.Infrastructure.Common
                             return methodResult;
                         }
                     }
+                    else
+                    {
+                        var method = AddQuestionToSession(newSection, section.Questions);
+                        if (!method.IsOK)
+                        {
+                            methodResult.AddError(method.ErrorMessages);
+                            return methodResult;
+                        }
+                    }
                 }
                 else if (sectionGroup.CourseSkill == EnumCourseSkill.Speaking)
                 {
@@ -207,15 +217,15 @@ namespace Fsel.Course.Infrastructure.Common
                         }
                     }
                 }
-                else
-                {
-                    var method = AddQuestionToSession(section, section.Questions);
-                    if (!method.IsOK)
-                    {
-                        methodResult.AddError(method.ErrorMessages);
-                        return methodResult;
-                    }
-                }
+                //else
+                //{
+                //    var method = AddQuestionToSession(section, section.Questions);
+                //    if (!method.IsOK)
+                //    {
+                //        methodResult.AddError(method.ErrorMessages);
+                //        return methodResult;
+                //    }
+                //}
                 if (!newSection.IsValid())
                 {
                     methodResult.AddErrorBadRequest(newSection.ErrorMessages);
