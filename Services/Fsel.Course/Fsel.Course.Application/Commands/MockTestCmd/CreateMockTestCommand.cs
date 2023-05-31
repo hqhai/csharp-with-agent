@@ -13,7 +13,6 @@ namespace Fsel.Course.Application.Commands.MockTestCmd
     using Fsel.Course.Domain.Models.CommandModels.MockTests;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Infrastructure.Common;
-    using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Http;
 
@@ -73,67 +72,10 @@ namespace Fsel.Course.Application.Commands.MockTestCmd
                     }
 
                     SectionGroup newSectionGroup = _mapper.Map<SectionGroup>(sectionGroup);
-                    foreach (var section in sectionGroup.Sections)
+                    var method = _sectionConverter.AddSessionToSessionGroup(newSectionGroup, sectionGroup.Sections, null);
+                    if (!method.IsOK)
                     {
-                        Section newSection = newSectionGroup.Sections.ElementAt(sectionGroup.Sections.IndexOf(section));
-
-                        if (sectionGroup.CourseSkill != EnumCourseSkill.Speaking && sectionGroup.CourseSkill != EnumCourseSkill.Writing)
-                        {
-                            if (section.SectionParts == null || section.SectionParts.Count == 0)
-                            {
-                                methodResult.AddErrorBadRequest(nameof(EnumSectionPartErrorCode.SectionPartsNull), nameof(section.SectionParts));
-                                return methodResult;
-                            }
-                            foreach (var sectionPart in section.SectionParts)
-                            {
-                                if (sectionPart == null)
-                                {
-                                    methodResult.AddErrorBadRequest(nameof(EnumSectionPartErrorCode.SectionPartNull), nameof(sectionPart), sectionPart);
-                                    return methodResult;
-                                }
-                                else
-                                {
-                                    SectionPart newSectionPart = newSection.SectionParts.ElementAt(section.SectionParts.IndexOf(sectionPart));
-
-                                    var method = _sectionConverter.AddQuestionToSession(newSectionPart, sectionPart.Questions);
-                                    if (!method.IsOK)
-                                    {
-                                        methodResult.AddError(method.ErrorMessages);
-                                    }
-                                }
-                            }
-                            var correctCount = newSection.SectionParts.SelectMany(x => x.SectionQuestions).Select(x => x.Question).Sum(x => x!.CorrectTotal);
-                            if (!SectionValidation.IsCheckSection(newSectionGroup.CourseSkill, section.DisplayOrder, correctCount))
-                            {
-                                methodResult.AddErrorBadRequest(nameof(EnumMockTestErrorCode.MockTestMustCorrectScore), nameof(correctCount), correctCount);
-                                return methodResult;
-                            }
-                        }
-                        else if (sectionGroup.CourseSkill == EnumCourseSkill.Speaking)
-                        {
-                            if (section.SectionTimeCodes == null || section.SectionTimeCodes.Count == 0)
-                            {
-                                methodResult.AddErrorBadRequest(nameof(EnumSectionTimeCodeErrorCode.TimeCodeCanNotNull), nameof(sectionGroup.CourseSkill));
-                                return methodResult;
-                            }
-                            foreach (var sectionTimeCode in section.SectionTimeCodes)
-                            {
-                                if (sectionTimeCode == null)
-                                {
-                                    methodResult.AddErrorBadRequest(nameof(EnumSectionTimeCodeErrorCode.SectionTimeCodesNull), nameof(sectionTimeCode), sectionTimeCode);
-                                    return methodResult;
-                                }
-                                else
-                                {
-                                    SectionTimeCode newSectionTimeCode = newSection.SectionTimeCodes.ElementAt(section.SectionTimeCodes.IndexOf(sectionTimeCode));
-                                }
-                            }
-                        }
-                        if (!newSection.IsValid())
-                        {
-                            methodResult.AddErrorBadRequest(newSection.ErrorMessages);
-                            return methodResult;
-                        }
+                        methodResult.AddError(method.ErrorMessages);
                     }
 
                     mockTest.MockTestSections.Add(new MockTestSection

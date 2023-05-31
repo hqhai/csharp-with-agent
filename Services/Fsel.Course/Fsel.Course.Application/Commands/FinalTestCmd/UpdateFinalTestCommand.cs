@@ -90,25 +90,10 @@ namespace Fsel.Course.Application.Commands.FinalTestCmd
                     methodResult.AddErrorBadRequest(nameof(EnumSectionErrorCode.SectionsNull), nameof(sectionGroup.Sections));
                     return methodResult;
                 }
-                foreach (var section in sectionGroup.Sections)
+                var method = _sectionConverter.AddSessionToSessionGroup(newSectionGroup, sectionGroup.Sections, null);
+                if (!method.IsOK)
                 {
-                    if (section == null)
-                    {
-                        methodResult.AddErrorBadRequest(nameof(EnumSectionErrorCode.SectionNull), nameof(section));
-                        return methodResult;
-                    }
-                    Section newSection = newSectionGroup.Sections.ElementAt(sectionGroup.Sections.IndexOf(section));
-
-                    var method = _sectionConverter.AddQuestionToSession(newSection, section.Questions);
-                    if (!method.IsOK)
-                    {
-                        methodResult.AddError(method.ErrorMessages);
-                    }
-
-                    if (!newSection.IsValid())
-                    {
-                        methodResult.AddErrorBadRequest(newSection.ErrorMessages);
-                    }
+                    methodResult.AddError(method.ErrorMessages);
                 }
                 finalTest.FinalTestSections.Add(new FinalTestSection { SectionGroup = newSectionGroup });
                 if (!newSectionGroup.IsValid())
@@ -130,24 +115,7 @@ namespace Fsel.Course.Application.Commands.FinalTestCmd
 
             await _finalTestRepository.ExecuteTransactionAsync(async () =>
             {
-                foreach (var item in sectionGroups)
-                {
-                    await _sectionGroupRepository.DeleteAsync(item);
-                }
-                await _sectionGroupRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
-
-                foreach (var item in sectionQuestions)
-                {
-                    await _sectionQuestionRepository.DeleteAsync(item);
-                }
-                await _sectionQuestionRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
-
-                foreach (var item in questions)
-                {
-                    await _questionRepository.DeleteAsync(item);
-                }
-                await _questionRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
-
+                await _sectionConverter.DeleteSectionGroup(sectionGroups, sectionQuestions, questions);
                 finalTest = _finalTestRepository.Update(finalTest);
                 await _finalTestRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 

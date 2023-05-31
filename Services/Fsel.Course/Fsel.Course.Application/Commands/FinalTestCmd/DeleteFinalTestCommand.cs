@@ -9,6 +9,7 @@ namespace Fsel.Course.Application.Commands.FinalTestCmd
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
+    using Fsel.Course.Infrastructure.Common;
     using MediatR;
     using Microsoft.AspNetCore.Http;
 
@@ -20,19 +21,13 @@ namespace Fsel.Course.Application.Commands.FinalTestCmd
     public class DeleteFinalTestCommandHandler : IRequestHandler<DeleteFinalTestCommand, MethodResult<bool>>
     {
         private readonly IFinalTestRepository _finalTestRepository;
-        private readonly ISectionQuestionRepository _sectionQuestionRepository;
-        private readonly ISectionGroupRepository _sectionGroupRepository;
-        private readonly IQuestionRepository _questionRepository;
+        private readonly SectionConverter _sectionConverter;
 
         public DeleteFinalTestCommandHandler(IFinalTestRepository finalTestRepository
-            , ISectionQuestionRepository sectionQuestionRepository
-            , ISectionGroupRepository sectionGroupRepository
-            , IQuestionRepository questionRepository)
+            , SectionConverter sectionConverter)
         {
             _finalTestRepository = finalTestRepository;
-            _sectionQuestionRepository = sectionQuestionRepository;
-            _sectionGroupRepository = sectionGroupRepository;
-            _questionRepository = questionRepository;
+            _sectionConverter = sectionConverter;
         }
 
         public async Task<MethodResult<bool>> Handle(DeleteFinalTestCommand request, CancellationToken cancellationToken)
@@ -58,23 +53,7 @@ namespace Fsel.Course.Application.Commands.FinalTestCmd
 
             await _finalTestRepository.ExecuteTransactionAsync(async () =>
             {
-                foreach (var item in sectionGroups)
-                {
-                    await _sectionGroupRepository.DeleteAsync(item);
-                }
-                await _sectionGroupRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
-
-                foreach (var item in sectionQuestions)
-                {
-                    await _sectionQuestionRepository.DeleteAsync(item);
-                }
-                await _sectionQuestionRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
-
-                foreach (var item in questions)
-                {
-                    await _questionRepository.DeleteAsync(item);
-                }
-                await _questionRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+                await _sectionConverter.DeleteSectionGroup(sectionGroups, sectionQuestions, questions);
 
                 var result = await _finalTestRepository.DeleteAsync(finalTest);
                 await _finalTestRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);

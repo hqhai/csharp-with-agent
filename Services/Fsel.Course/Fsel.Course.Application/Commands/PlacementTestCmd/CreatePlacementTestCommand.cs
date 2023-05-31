@@ -8,7 +8,6 @@ using Fsel.Course.Domain.IRepositories;
 using Fsel.Course.Domain.Models.CommandModels.PlacementTests;
 using Fsel.Course.Domain.Models.EntityModels;
 using Fsel.Course.Infrastructure.Common;
-using Fsel.Shared.Enums;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 
@@ -70,67 +69,11 @@ namespace Fsel.Course.Application.Commands.PlacementTestCmd
                     }
 
                     SectionGroup newSectionGroup = _mapper.Map<SectionGroup>(sectionGroup);
-                    foreach (var section in sectionGroup.Sections)
+                    var method = _sectionConverter.AddSessionToSessionGroup(newSectionGroup, sectionGroup.Sections, request.Level);
+                    if (!method.IsOK)
                     {
-                        Section newSection = newSectionGroup.Sections.ElementAt(sectionGroup.Sections.IndexOf(section));
-                        if (section.SectionParts != null && section.Questions != null && section.SectionParts.Count > 0 && section.Questions.Count > 0)
-                        {
-                            methodResult.AddErrorBadRequest(nameof(EnumSectionErrorCode.OnlyOneOfTwoSectionPartsOrQuestions), nameof(section.SectionParts), nameof(section.Questions));
-                            return methodResult;
-                        }
-                        if (placementTest.Level == EnumPlacementTestLevel.IELTS)
-                        {
-                            if (section.SectionParts == null || section.SectionParts.Count == 0)
-                            {
-                                methodResult.AddErrorBadRequest(nameof(EnumSectionPartErrorCode.SectionPartsNull), nameof(section.SectionParts));
-                                return methodResult;
-                            }
-                            foreach (var sectionPart in section.SectionParts)
-                            {
-                                if (sectionPart == null)
-                                {
-                                    methodResult.AddErrorBadRequest(nameof(EnumSectionPartErrorCode.SectionPartNull), nameof(sectionPart), sectionPart);
-                                    return methodResult;
-                                }
-                                else
-                                {
-                                    SectionPart newSectionPart = newSection.SectionParts.ElementAt(section.SectionParts.IndexOf(sectionPart));
-
-                                    var method = _sectionConverter.AddQuestionToSession(newSectionPart, sectionPart.Questions);
-                                    if (!method.IsOK)
-                                    {
-                                        methodResult.AddError(method.ErrorMessages);
-                                    }
-                                }
-                            }
-                            var correctCount = newSection.SectionParts.SelectMany(x => x.SectionQuestions).Select(x => x.Question).Sum(x => x!.CorrectTotal);
-                            if (!SectionValidation.IsCheckSection(newSectionGroup.CourseSkill, section.DisplayOrder, correctCount))
-                            {
-                                methodResult.AddErrorBadRequest(nameof(EnumPlacementTestErrorCode.PlacementTestMustCorrectScore), nameof(section.DisplayOrder), section.DisplayOrder);
-                                return methodResult;
-                            }
-                        }
-                        else
-                        {
-                            if (section.Questions == null || section.Questions.Count == 0)
-                            {
-                                methodResult.AddErrorBadRequest(nameof(EnumQuestionErrorCode.QuestionsNull), nameof(section.Questions));
-                                return methodResult;
-                            }
-                            var method = _sectionConverter.AddQuestionToSession(section, section.Questions);
-                            if (!method.IsOK)
-                            {
-                                methodResult.AddError(method.ErrorMessages);
-                            }
-                        }
-
-                        if (!newSection.IsValid())
-                        {
-                            methodResult.AddErrorBadRequest(newSection.ErrorMessages);
-                            return methodResult;
-                        }
+                        methodResult.AddError(method.ErrorMessages);
                     }
-
                     placementTest.PlacementTestSections.Add(new PlacementTestSection
                     {
                         SectionGroup = newSectionGroup

@@ -21,6 +21,6 @@ namespace Fsel.Course.Domain.Models.CommandModels.FinalTests
 
         public EnumFinalTestLevel FinalTestLevel { get; set; }
 
-        public IList<UpdateSectionGroupCommandModel>? SectionGroups { get; set; }
+        public IList<CreateSectionGroupCommandModel>? SectionGroups { get; set; }
     }
 }

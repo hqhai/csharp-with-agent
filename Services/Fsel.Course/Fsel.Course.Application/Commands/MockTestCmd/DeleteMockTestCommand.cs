@@ -9,6 +9,7 @@ namespace Fsel.Course.Application.Commands.MockTestCmd
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
+    using Fsel.Course.Infrastructure.Common;
     using MediatR;
     using Microsoft.AspNetCore.Http;
 
@@ -20,19 +21,13 @@ namespace Fsel.Course.Application.Commands.MockTestCmd
     public class DeleteMockTestCommandHandler : IRequestHandler<DeleteMockTestCommand, MethodResult<bool>>
     {
         private readonly IMockTestRepository _mockTestRepository;
-        private readonly IQuestionRepository _questionRepository;
-        private readonly ISectionGroupRepository _sectionGroupRepository;
-        private readonly ISectionQuestionRepository _sectionQuestionRepository;
+        private readonly SectionConverter _sectionConverter;
 
         public DeleteMockTestCommandHandler(IMockTestRepository mockTestRepository
-            , IQuestionRepository questionRepository
-            , ISectionGroupRepository sectionGroupRepository
-            , ISectionQuestionRepository sectionQuestionRepository)
+            , SectionConverter sectionConverter)
         {
             _mockTestRepository = mockTestRepository;
-            _questionRepository = questionRepository;
-            _sectionGroupRepository = sectionGroupRepository;
-            _sectionQuestionRepository = sectionQuestionRepository;
+            _sectionConverter = sectionConverter;
         }
 
         public async Task<MethodResult<bool>> Handle(DeleteMockTestCommand request, CancellationToken cancellationToken)
@@ -58,23 +53,8 @@ namespace Fsel.Course.Application.Commands.MockTestCmd
 
             await _mockTestRepository.ExecuteTransactionAsync(async () =>
             {
-                foreach (var item in sectionGroups)
-                {
-                    await _sectionGroupRepository.DeleteAsync(item);
-                }
-                await _sectionGroupRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
-                foreach (var item in sectionQuestions)
-                {
-                    await _sectionQuestionRepository.DeleteAsync(item);
-                }
-                await _sectionQuestionRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-                foreach (var item in questions)
-                {
-                    await _questionRepository.DeleteAsync(item);
-                }
-                await _questionRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                await _sectionConverter.DeleteSectionGroup(sectionGroups, sectionQuestions, questions);
 
-                await _questionRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
                 var result = await _mockTestRepository.DeleteAsync(mockTest);
                 await _mockTestRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 

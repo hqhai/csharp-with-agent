@@ -60,20 +60,10 @@ namespace Fsel.Course.Application.Commands.FinalTestCmd
                     }
 
                     SectionGroup newSectionGroup = _mapper.Map<SectionGroup>(sectionGroup);
-                    foreach (var section in sectionGroup.Sections)
+                    var method = _sectionConverter.AddSessionToSessionGroup(newSectionGroup, sectionGroup.Sections, null);
+                    if (!method.IsOK)
                     {
-                        Section newSection = newSectionGroup.Sections.ElementAt(sectionGroup.Sections.IndexOf(section));
-                        var method = _sectionConverter.AddQuestionToSession(newSection, section.Questions);
-                        if (!method.IsOK)
-                        {
-                            methodResult.AddError(method.ErrorMessages);
-                        }
-
-                        if (!newSection.IsValid())
-                        {
-                            methodResult.AddErrorBadRequest(newSection.ErrorMessages);
-                            return methodResult;
-                        }
+                        methodResult.AddError(method.ErrorMessages);
                     }
 
                     finalTest.FinalTestSections.Add(new FinalTestSection
