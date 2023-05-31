@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fsel.Course.Infrastructure.Migrations
 {
     [DbContext(typeof(CourseDbContext))]
-    [Migration("20230530134018_Update_FinalTestTable")]
+    [Migration("20230531110954_Update_FinalTestTable")]
     partial class Update_FinalTestTable
     {
         /// <inheritdoc />
@@ -3936,7 +3936,7 @@ namespace Fsel.Course.Infrastructure.Migrations
             modelBuilder.Entity("Fsel.Course.Domain.Entities.FinalTestAnswer", b =>
                 {
                     b.HasOne("Fsel.Course.Domain.Entities.FinalTestResult", "FinalTestResult")
-                        .WithMany("FinalTestExerciseAnswers")
+                        .WithMany("FinalTestAnswers")
                         .HasForeignKey("FinalTestResultId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -4523,7 +4523,7 @@ namespace Fsel.Course.Infrastructure.Migrations
 
             modelBuilder.Entity("Fsel.Course.Domain.Entities.FinalTestResult", b =>
                 {
-                    b.Navigation("FinalTestExerciseAnswers");
+                    b.Navigation("FinalTestAnswers");
                 });
 
             modelBuilder.Entity("Fsel.Course.Domain.Entities.HomeWork", b =>
