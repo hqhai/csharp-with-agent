@@ -38,9 +38,9 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
                 methodResult.AddErrorBadRequest(nameof(EnumClassForumResultErrorCode.ClassForumResultNotExist), nameof(request.Id), request.Id);
                 return methodResult;
             }
-            if (classForumResult.Status == EnumClassForumResultStatus.PendingForGrading || classForumResult.Status == EnumClassForumResultStatus.Graded)
+            if (classForumResult.Status != EnumClassForumResultStatus.PendingForGrading && classForumResult.Status != EnumClassForumResultStatus.Graded)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumClassForumResultErrorCode.ClassForumResultNotExist), nameof(request.Id), request.Id);
+                methodResult.AddErrorBadRequest(nameof(EnumClassForumResultErrorCode.CanNotDeleteInCurrentStatus), nameof(classForumResult.Status), classForumResult.Status);
                 return methodResult;
             }
             await _classForumResulRepository.ExecuteTransactionAsync(async () =>
