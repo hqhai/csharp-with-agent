@@ -9,6 +9,7 @@ using Fsel.Course.Lms.Application.Queries.CourseQuery;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Collections.Generic;
 
 namespace Fsel.Course.Lms.Api.Controllers
 {

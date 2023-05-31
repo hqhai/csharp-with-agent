@@ -65,5 +65,17 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
             var commandResult = await _mediator.Send(new GetClassForumResultQuery { ClassForumResultId = id }).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
+
+        /// <summary>
+        /// Delete a Class Forum result
+        /// </summary>
+        [HttpDelete("{id}")]
+        [ProducesResponseType(typeof(MethodResult<ClassForumResultModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> Delete([FromRoute] Guid id)
+        {
+            MethodResult<bool> commandResult = await _mediator.Send(new DeleteClassForumResultCommand { Id = id }).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
     }
 }
