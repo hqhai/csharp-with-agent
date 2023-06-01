@@ -60,19 +60,19 @@ namespace Fsel.Course.Infrastructure.Repositories
                                     IsActive = i.LessonVideos.Any(),
                                     TeacherId = i.TeacherId,
                                     CourseLevel = i.CourseLevel,
-                                    VideoTimeCodes = i.VideoTimeCodes.Where(x => !x.IsDeleted).Select(x => new VideoTimeCodeModel
+                                    VideoTimeCodes = i.VideoTimeCodes.Where(x => !x.IsDeleted).OrderBy(x => x!.CreatedDate).Select(x => new VideoTimeCodeModel
                                     {
                                         Id = x.Id,
                                         DisplayTime = x.DisplayTime,
                                         ExecutionTime = x.ExecutionTime,
                                         TimeCodeType = x.TimeCodeType,
                                         VideoId = x.VideoId,
-                                        Exercises = x.TimeCodeExercises.Where(n => n.Exercise != null && !n.IsDeleted).Select(n => n.Exercise).Select(n => new ExerciseModel
+                                        Exercises = x.TimeCodeExercises.Where(n => n.Exercise != null && !n.IsDeleted).Select(n => n.Exercise).OrderBy(x => x!.CreatedDate).Select(n => new ExerciseModel
                                         {
                                             Id = n!.Id,
                                             MediaPost = n.MediaPost,
                                             CourseSkill = n.CourseSkill,
-                                            Questions = n.ExerciseQuestions.Where(m => m.Question != null && !m.IsDeleted).Select(m => m.Question).Select(m => new QuestionModel()
+                                            Questions = n.ExerciseQuestions.Where(m => m.Question != null && !m.IsDeleted).Select(m => m.Question).OrderBy(x => x!.CreatedDate).Select(m => new QuestionModel()
                                             {
                                                 Id = m!.Id,
                                                 QuestionType = m.QuestionType,
@@ -103,6 +103,7 @@ namespace Fsel.Course.Infrastructure.Repositories
                                     .Where(x => !courseLevel.HasValue || x.CourseLevel == courseLevel.Value)
                                     .Where(x => !teacherId.HasValue || x.TeacherId == teacherId.Value)
                                     .Where(x => !codeType.HasValue || x.VideoTimeCodes.Select(n => n.TimeCodeType).Contains(codeType.Value))
+                                    .OrderBy(x => x!.CreatedDate)
                                     .Select(video => new VideoSearchModel
                                     {
                                         Id = video.Id,

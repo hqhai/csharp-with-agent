@@ -34,7 +34,6 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
         private readonly ISectionPartRepository _sectionPartRepository;
         private readonly IMockTestRepository _mockTestRepository;
         private readonly IMockTestSectionRepository _mockTestSectionRepository;
-        private readonly ISectionTimeCodeRepository _sectionTimeCodeRepository;
         private readonly IMapper _mapper;
 
         public CreateMockTestAnswerCommandHandler(AnswerTypeConverter answerTypeConverter
@@ -47,7 +46,6 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
             , ISectionPartRepository sectionPartRepository
             , IMockTestRepository mockTestRepository
             , IMockTestSectionRepository mockTestSectionRepository
-            , ISectionTimeCodeRepository sectionTimeCodeRepository
             , IMapper mapper)
         {
             _answerTypeConverter = answerTypeConverter;
@@ -60,7 +58,6 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
             _sectionPartRepository = sectionPartRepository;
             _mockTestRepository = mockTestRepository;
             _mockTestSectionRepository = mockTestSectionRepository;
-            _sectionTimeCodeRepository = sectionTimeCodeRepository;
             _mapper = mapper;
         }
 

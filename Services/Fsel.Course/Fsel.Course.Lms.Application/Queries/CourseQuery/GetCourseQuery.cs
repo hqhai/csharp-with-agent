@@ -84,7 +84,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
                                  Code = y.Code,
                                  InstructionContent = y.InstructionContent,
                                  CourseLevel = y.CourseLevel,
-                                 CourseUnitMockTests = _mapper.Map<IList<CourseUnitMockTestModel>>(y.CourseUnitMockTests),
+                                 CourseUnitMockTests = _mapper.Map<IList<CourseUnitMockTestModel>>(y.CourseUnitMockTests.OrderBy(x => x!.DisplayOrder)),
                                  CourseTeachers = _mapper.Map<List<CourseTeacherModel>>(y.CourseTeachers),
                              }).FirstOrDefaultAsync(cancellationToken);
 

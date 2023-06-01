@@ -6,6 +6,7 @@ namespace Fsel.Course.Domain.Models.CommandModels.MockTests
     using Fsel.Core.Base.BaseModels;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.Models.CommandModels.SectionGroups;
+    using Fsel.Course.Domain.Models.CommandModels.Sections;
     using Fsel.Shared.Enums;
 
     public class UpdateMockTestCommandModel : BaseCommandModel
@@ -16,6 +17,6 @@ namespace Fsel.Course.Domain.Models.CommandModels.MockTests
 
         public EnumMockTestType MockTestType { get; set; }
 
-        public IList<UpdateSectionGroupCommandModel>? SectionGroups { get; set; }
+        public IList<CreateSectionGroupCommandModel>? SectionGroups { get; set; }
     }
 }

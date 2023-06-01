@@ -62,12 +62,13 @@ namespace Fsel.Course.Lms.Application.Queries.FinalTestQuery
 
             var finalTestResult = await _finalTestResultRepository.Queryable.FirstOrDefaultAsync(x => x.FinalTestId == request.FinalTestId && x.StudentId == studentId, cancellationToken);
 
-            var finalTest = await _finalTestRepository.Queryable.Include(x => x.FinalTestExercises)
-                                                        .ThenInclude(x => x.Exercise)
-                                                        .ThenInclude(x => x!.ExerciseQuestions)
-                                                        .ThenInclude(x => x!.Question)
-                                                        .ThenInclude(x => x!.ExerciseQuestions)
-                                                        .ThenInclude(x => x!.FinalTestExerciseAnswers)
+            var finalTest = await _finalTestRepository.Queryable.Include(x => x.FinalTestSections)
+                                                        .ThenInclude(x => x.SectionGroup)
+                                                        .ThenInclude(x => x!.Sections)
+                                                        .ThenInclude(x => x.SectionQuestions)
+                                                        .ThenInclude(x => x.Question)
+                                                        .ThenInclude(x => x!.SectionQuestions)
+                                                        .ThenInclude(x => x.FinalTestAnswers)
                                                         .FirstOrDefaultAsync(x => x.Id == request.FinalTestId, cancellationToken);
 
             if (finalTest == null)
@@ -81,23 +82,34 @@ namespace Fsel.Course.Lms.Application.Queries.FinalTestQuery
                 Id = finalTest.Id,
                 Name = finalTest.Name,
                 IsActive = finalTest.IsActive,
-                ExecutionTime = finalTest.ExecutionTime,
                 FinalTestLevel = finalTest.FinalTestLevel,
-                Exercises = finalTest.FinalTestExercises.Where(n => n.Exercise != null).Select(n => n.Exercise).Select(n => new ExerciseModel
+                CreatedDate = finalTest.CreatedDate,
+                CreatedFullName = finalTest.CreatedFullName,
+                ExecutionTime = finalTest.ExecutionTime,
+                SectionGroups = finalTest.FinalTestSections.Select(x => x.SectionGroup).OrderBy(x => x!.CreatedDate).Select(x => new SectionGroupModel
                 {
-                    Id = n!.Id,
-                    MediaPost = n.MediaPost,
-                    CourseSkill = n.CourseSkill,
-                    Questions = n.ExerciseQuestions.Where(m => m.Question != null).Select(m => m.Question).Select(m => new QuestionModel()
+                    Id = x!.Id,
+                    ExecutionTime = x!.ExecutionTime,
+                    CourseSkill = x.CourseSkill,
+                    Sections = x.Sections.OrderBy(x => x!.DisplayOrder).Select(x => new SectionModel
                     {
-                        Id = m!.Id,
-                        QuestionType = m.QuestionType,
-                        CorrectTotal = m.CorrectTotal,
-                        Explanation = m.Explanation,
-                        Ungraded = m.Ungraded,
-                        Config = _questionTypeConverter.QuestionTypeConverterObject(m.Config, m.QuestionType, false, true).Item1,
-                        ResultAnswer = finalTestResult == null ? null : _mapper.Map<FinalTestExerciseAnswerModel>(m.ExerciseQuestions.SelectMany(x => x.FinalTestExerciseAnswers).FirstOrDefault(x => x.FinalTestResultId == finalTestResult.Id))
-                    }).ToList()
+                        Id = x.Id,
+                        Name = x.Name,
+                        MediaPost = x.MediaPost,
+                        VideoFilePath = x.VideoFilePath,
+                        DisplayOrder = x.DisplayOrder,
+                        TargetWord = x.TargetWord,
+                        Questions = x.SectionQuestions.Select(x => x.Question).OrderBy(x => x!.CreatedDate).Select(x => new QuestionModel
+                        {
+                            Id = x!.Id,
+                            QuestionType = x.QuestionType,
+                            Explanation = x.Explanation,
+                            Ungraded = x.Ungraded,
+                            CorrectTotal = x.CorrectTotal,
+                            Config = _questionTypeConverter.QuestionTypeConverterObject(x.Config, x.QuestionType, isDisableAnswers: !checkDone).Item1,
+                            ResultAnswer = _mapper.Map<FinalTestAnswerModel>(x.SectionQuestions.FirstOrDefault(y => y.QuestionId == x.Id)?.FinalTestAnswers.FirstOrDefault())
+                        }).ToList()
+                    }).ToList(),
                 }).ToList(),
                 FinalTestResult = finalTestResult == null ? null : new FinalTestResultModel
                 {

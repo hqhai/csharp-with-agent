@@ -16,7 +16,6 @@ namespace Fsel.Course.Domain.Models.CommandModels.Sections
         public string? SubFilePath { get; set; }
         public IList<UpdateSectionPartCommandModel>? SectionParts { get; set; }
         public IList<CreateQuestionCommandModel>? Questions { get; set; }
-
         public IList<UpdateSectionTimeCodeCommandModel>? SectionTimeCodes { get; set; }
     }
 }

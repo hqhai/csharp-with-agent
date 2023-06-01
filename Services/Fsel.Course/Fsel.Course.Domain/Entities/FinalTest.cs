@@ -34,7 +34,7 @@ namespace Fsel.Course.Domain.Entities
         /// </summary>
         public EnumFinalTestLevel FinalTestLevel { get; set; }
         public ICollection<CourseUnitMockTest>? CourseUnitMockTests { get; set; }
-        public ICollection<FinalTestExercise> FinalTestExercises { get; set; } = new List<FinalTestExercise>();
+        public ICollection<FinalTestSection> FinalTestSections { get; set; } = new List<FinalTestSection>();
         public ICollection<FinalTestResult> FinalTestResults { get; set; } = new List<FinalTestResult>();
     }
 }

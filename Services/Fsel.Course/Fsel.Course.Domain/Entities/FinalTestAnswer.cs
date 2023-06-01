@@ -8,7 +8,7 @@ namespace Fsel.Course.Domain.Entities
     using Fsel.Common.Helpers;
     using Fsel.Core.Entities;
 
-    public class FinalTestExerciseAnswer : Entity
+    public class FinalTestAnswer : Entity
     {
         /// <summary>
         /// Câu trả lời
@@ -34,9 +34,9 @@ namespace Fsel.Course.Domain.Entities
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         public Guid FinalTestResultId { get; set; }
 
-        public ExerciseQuestion? ExerciseQuestion { get; set; }
+        public SectionQuestion? SectionQuestion { get; set; }
 
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
-        public Guid ExerciseQuestionId { get; set; }
+        public Guid SectionQuestionId { get; set; }
     }
 }

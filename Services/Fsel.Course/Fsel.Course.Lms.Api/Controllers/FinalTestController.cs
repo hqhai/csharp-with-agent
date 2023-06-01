@@ -45,7 +45,7 @@ namespace Fsel.Course.Lms.Api.Controllers
         [HttpPost("final-test-answers")]
         [ProducesResponseType(typeof(MethodResult<FinalTestResultModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> CreateAnswer([FromBody] CreateFinalTestExerciseAnswerCommand command)
+        public async Task<IActionResult> CreateAnswer([FromBody] CreateFinalTestAnswerCommand command)
         {
             MethodResult<FinalTestResultModel> queryResult = await _mediator.Send(command).ConfigureAwait(false);
             return queryResult.GetActionResult();

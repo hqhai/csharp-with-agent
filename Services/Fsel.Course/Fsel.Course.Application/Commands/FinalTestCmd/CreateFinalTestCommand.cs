@@ -13,6 +13,7 @@ namespace Fsel.Course.Application.Commands.FinalTestCmd
     using Fsel.Course.Domain.Models.CommandModels.FinalTests;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Infrastructure.Common;
+    using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Http;
 
@@ -23,77 +24,60 @@ namespace Fsel.Course.Application.Commands.FinalTestCmd
     public class CreateFinalTestCommandHandler : IRequestHandler<CreateFinalTestCommand, MethodResult<FinalTestModel>>
     {
         private readonly IMapper _mapper;
-        private readonly QuestionTypeConverter _questionTypeConverter;
         private readonly IFinalTestRepository _finalTestRepository;
+        private readonly SectionConverter _sectionConverter;
 
-        public CreateFinalTestCommandHandler(IMapper mapper, QuestionTypeConverter questionTypeConverter, IFinalTestRepository finalTestRepository)
+        public CreateFinalTestCommandHandler(IMapper mapper, IFinalTestRepository finalTestRepository, SectionConverter sectionConverter)
         {
             _mapper = mapper;
-            _questionTypeConverter = questionTypeConverter;
             _finalTestRepository = finalTestRepository;
+            _sectionConverter = sectionConverter;
         }
 
         public async Task<MethodResult<FinalTestModel>> Handle(CreateFinalTestCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<FinalTestModel> methodResult = new MethodResult<FinalTestModel>();
-            if (request.Exercises == null || request.Exercises.Count == 0)
+            if (request.SectionGroups == null || request.SectionGroups.Count == 0)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumExerciseErrorCode.ExercisesNull), nameof(request.Exercises));
+                methodResult.AddErrorBadRequest(nameof(EnumSectionGroupErrorCode.SectionGroupsNull), nameof(request.SectionGroups));
                 return methodResult;
             }
             FinalTest finalTest = _mapper.Map<FinalTest>(request);
 
-            request.Exercises.ForEach(x =>
+            foreach (var sectionGroup in request.SectionGroups)
             {
-                if (x == null)
+                if (sectionGroup == null)
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumExerciseErrorCode.ExercisesNull), nameof(request.Exercises), x);
+                    methodResult.AddErrorBadRequest(nameof(EnumSectionGroupErrorCode.SectionGroupNull), nameof(sectionGroup));
+                    return methodResult;
                 }
                 else
                 {
-                    Exercise excercise = _mapper.Map<Exercise>(x);
-                    finalTest.FinalTestExercises.Add(new FinalTestExercise
+                    if (sectionGroup.Sections == null || sectionGroup.Sections.Count == 0)
                     {
-                        Exercise = excercise
-                    });
-                    if (x.Questions == null || x.Questions.Count == 0)
-                    {
-                        methodResult.AddErrorBadRequest(nameof(EnumQuestionErrorCode.QuestionNull), nameof(x.Questions), x.Questions);
+                        methodResult.AddErrorBadRequest(nameof(EnumSectionErrorCode.SectionsNull), nameof(sectionGroup.Sections));
+                        return methodResult;
                     }
-                    x.Questions.ForEach(q =>
+
+                    SectionGroup newSectionGroup = _mapper.Map<SectionGroup>(sectionGroup);
+                    var method = _sectionConverter.AddSessionToSessionGroup(newSectionGroup, sectionGroup.Sections, EnumCourseType.Academic);
+                    if (!method.IsOK)
                     {
-                        if (q == null)
-                        {
-                            methodResult.AddErrorBadRequest(nameof(EnumQuestionErrorCode.QuestionNull), nameof(x.Questions), q);
-                        }
-                        else
-                        {
-                            Question question = _mapper.Map<Question>(q);
-                            var (config, correctTotal) = _questionTypeConverter.QuestionTypeConverterObject(question.Config, question.QuestionType, isShowCorrectTotal: !question.Ungraded, false);
-                            if (config == null)
-                            {
-                                methodResult.AddErrorBadRequest(nameof(EnumVideoErrorCode.ConfigIsInTheWrongFormat), nameof(question.Config), question.Config);
-                            }
-                            question.CorrectTotal = correctTotal;
+                        methodResult.AddError(method.ErrorMessages);
+                    }
 
-                            excercise.ExerciseQuestions.Add(new ExerciseQuestion
-                            {
-                                Question = question
-                            });
-
-                            if (!question.IsValid())
-                            {
-                                methodResult.AddErrorBadRequest(question.ErrorMessages);
-                            }
-                        }
+                    finalTest.FinalTestSections.Add(new FinalTestSection
+                    {
+                        SectionGroup = newSectionGroup
                     });
-                    if (!excercise.IsValid())
+                    if (!newSectionGroup.IsValid())
                     {
-                        methodResult.AddErrorBadRequest(excercise.ErrorMessages);
+                        methodResult.AddErrorBadRequest(newSectionGroup.ErrorMessages);
+                        return methodResult;
                     }
                 }
-            });
+            }
             if (!finalTest.IsValid())
             {
                 methodResult.AddErrorBadRequest(finalTest.ErrorMessages);

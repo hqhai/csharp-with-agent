@@ -6,8 +6,10 @@ namespace Fsel.Course.Application.Commands.FinalTestCmd
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
+    using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
+    using Fsel.Course.Infrastructure.Common;
     using MediatR;
     using Microsoft.AspNetCore.Http;
 
@@ -19,10 +21,13 @@ namespace Fsel.Course.Application.Commands.FinalTestCmd
     public class DeleteFinalTestCommandHandler : IRequestHandler<DeleteFinalTestCommand, MethodResult<bool>>
     {
         private readonly IFinalTestRepository _finalTestRepository;
+        private readonly SectionConverter _sectionConverter;
 
-        public DeleteFinalTestCommandHandler(IFinalTestRepository finalTestRepository)
+        public DeleteFinalTestCommandHandler(IFinalTestRepository finalTestRepository
+            , SectionConverter sectionConverter)
         {
             _finalTestRepository = finalTestRepository;
+            _sectionConverter = sectionConverter;
         }
 
         public async Task<MethodResult<bool>> Handle(DeleteFinalTestCommand request, CancellationToken cancellationToken)
@@ -40,8 +45,16 @@ namespace Fsel.Course.Application.Commands.FinalTestCmd
                 methodResult.AddErrorBadRequest(nameof(EnumFinalTestErrorCode.FinalTestInActiveState), nameof(finalTest.IsActive), finalTest.IsActive);
                 return methodResult;
             }
+
+            List<SectionGroup> sectionGroups = finalTest.FinalTestSections.Select(x => x.SectionGroup ?? new SectionGroup()).ToList();
+            List<Section> sections = sectionGroups.SelectMany(x => x.Sections).ToList();
+            List<SectionQuestion> sectionQuestions = sections.SelectMany(x => x.SectionQuestions).ToList();
+            List<Question> questions = sectionQuestions.Select(x => x.Question ?? new Question()).ToList();
+
             await _finalTestRepository.ExecuteTransactionAsync(async () =>
             {
+                await _sectionConverter.DeleteSectionGroup(sectionGroups, sectionQuestions, questions);
+
                 var result = await _finalTestRepository.DeleteAsync(finalTest);
                 await _finalTestRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 

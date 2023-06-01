@@ -21,26 +21,14 @@ namespace Fsel.Course.Application.Commands.PlacementTestCmd
     public class UpdatePlacementTestCommandHandler : IRequestHandler<UpdatePlacementTestCommand, MethodResult<PlacementTestModel>>
     {
         private readonly IPlacementTestRepository _placementTestRepository;
-        private readonly ISectionRepository _sectionRepository;
-        private readonly QuestionTypeConverter _questionTypeConverter;
-        private readonly ISectionPartRepository _sectionPartRepository;
-        private readonly ISectionGroupRepository _sectionGroupRepository;
         private readonly IMapper _mapper;
         private readonly SectionConverter _sectionConverter;
 
         public UpdatePlacementTestCommandHandler(IPlacementTestRepository placementTestRepository,
-            ISectionRepository sectionRepository,
-            QuestionTypeConverter questionTypeConverter,
-            ISectionPartRepository sectionPartRepository,
-            ISectionGroupRepository sectionGroupRepository,
             IMapper mapper,
             SectionConverter sectionConverter)
         {
             _placementTestRepository = placementTestRepository;
-            _sectionRepository = sectionRepository;
-            _questionTypeConverter = questionTypeConverter;
-            _sectionPartRepository = sectionPartRepository;
-            _sectionGroupRepository = sectionGroupRepository;
             _mapper = mapper;
             _sectionConverter = sectionConverter;
         }
@@ -71,11 +59,10 @@ namespace Fsel.Course.Application.Commands.PlacementTestCmd
                 return methodResult;
             }
 
-            List<SectionGroup> sectionGroups = placementTest.PlacementTestSections.Select(x => x.SectionGroup ?? new SectionGroup()).ToList();
-            List<Section> sections = sectionGroups.SelectMany(x => x.Sections).ToList();
-            List<SectionPart> sectionParts = sections.SelectMany(x => x.SectionParts).ToList();
-            List<Question>? questions = null;
-            List<SectionQuestion>? sectionQuestions = null;
+            IList<SectionGroup> sectionGroups = placementTest.PlacementTestSections.Select(x => x.SectionGroup ?? new SectionGroup()).ToList();
+            var sectionParts = sectionGroups.SelectMany(x => x.Sections).SelectMany(x => x.SectionParts).ToList();
+            IList<Question> questions;
+            IList<SectionQuestion> sectionQuestions;
             if (placementTest.Level == EnumPlacementTestLevel.IELTS)
             {
                 sectionQuestions = sectionParts.SelectMany(x => x.SectionQuestions).ToList();
@@ -83,8 +70,8 @@ namespace Fsel.Course.Application.Commands.PlacementTestCmd
             }
             else
             {
-                sectionQuestions = sections.SelectMany(x => x.SectionQuestions).ToList();
-                questions = sections.SelectMany(x => x.SectionQuestions).Select(x => x.Question ?? new Question()).ToList();
+                sectionQuestions = sectionGroups.SelectMany(x => x.Sections).SelectMany(x => x.SectionQuestions).ToList();
+                questions = sectionGroups.SelectMany(x => x.Sections).SelectMany(x => x.SectionQuestions).Select(x => x.Question ?? new Question()).ToList();
             }
 
             _mapper.Map(request, placementTest);
@@ -98,76 +85,10 @@ namespace Fsel.Course.Application.Commands.PlacementTestCmd
                     return methodResult;
                 }
                 var newSectionGroup = _mapper.Map<SectionGroup>(sectionGroup);
-                if (sectionGroup.Sections == null || sectionGroup.Sections.Count == 0)
+                var method = _sectionConverter.AddSessionToSessionGroup(newSectionGroup, sectionGroup.Sections, request.Level == EnumPlacementTestLevel.IELTS ? EnumCourseType.Ielts : EnumCourseType.Academic);
+                if (!method.IsOK)
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumSectionErrorCode.SectionsNull), nameof(sectionGroup.Sections));
-                    return methodResult;
-                }
-                foreach (var section in sectionGroup.Sections)
-                {
-                    if (section == null)
-                    {
-                        methodResult.AddErrorBadRequest(nameof(EnumSectionErrorCode.SectionNull), nameof(section));
-                        return methodResult;
-                    }
-                    Section newSection = newSectionGroup.Sections.ElementAt(sectionGroup.Sections.IndexOf(section));
-                    if (section.SectionParts != null && section.Questions != null && section.SectionParts.Count > 0 && section.Questions.Count > 0)
-                    {
-                        methodResult.AddErrorBadRequest(nameof(EnumSectionErrorCode.OnlyOneOfTwoSectionPartsOrQuestions));
-                        return methodResult;
-                    }
-
-                    if (request.Level == EnumPlacementTestLevel.IELTS)
-                    {
-                        if (section.SectionParts == null || section.SectionParts.Count == 0)
-                        {
-                            methodResult.AddErrorBadRequest(nameof(EnumSectionPartErrorCode.SectionPartsNull), nameof(section.SectionParts));
-                            return methodResult;
-                        }
-                        foreach (var sectionPart in section.SectionParts)
-                        {
-                            if (sectionPart == null)
-                            {
-                                methodResult.AddErrorBadRequest(nameof(EnumSectionPartErrorCode.SectionPartNull), nameof(sectionPart), sectionPart);
-                                return methodResult;
-                            }
-                            else
-                            {
-                                SectionPart newSectionPart = newSection.SectionParts.ElementAt(section.SectionParts.IndexOf(sectionPart));
-
-                                var method = _sectionConverter.AddQuestionToSession(newSectionPart, sectionPart.Questions);
-                                if (!method.IsOK)
-                                {
-                                    methodResult.AddError(method.ErrorMessages);
-                                }
-                            }
-                        }
-                        var correctCount = newSection.SectionParts.SelectMany(x => x.SectionQuestions).Select(x => x.Question).Sum(x => x!.CorrectTotal);
-                        if (!SectionValidation.IsCheckSection(newSectionGroup.CourseSkill, section.DisplayOrder, correctCount))
-                        {
-                            methodResult.AddErrorBadRequest(nameof(EnumPlacementTestErrorCode.PlacementTestMustCorrectScore), nameof(section.DisplayOrder), section.DisplayOrder);
-                            return methodResult;
-                        }
-                    }
-                    else
-                    {
-                        if (section.Questions == null || section.Questions.Count == 0)
-                        {
-                            methodResult.AddErrorBadRequest(nameof(EnumQuestionErrorCode.QuestionNull), nameof(section.Questions));
-                            return methodResult;
-                        }
-
-                        var method = _sectionConverter.AddQuestionToSession(section, section.Questions);
-                        if (!method.IsOK)
-                        {
-                            methodResult.AddError(method.ErrorMessages);
-                        }
-                    }
-
-                    if (!newSection.IsValid())
-                    {
-                        methodResult.AddErrorBadRequest(newSection.ErrorMessages);
-                    }
+                    methodResult.AddError(method.ErrorMessages);
                 }
                 placementTest.PlacementTestSections.Add(new PlacementTestSection { SectionGroup = newSectionGroup });
                 if (!newSectionGroup.IsValid())
@@ -189,27 +110,7 @@ namespace Fsel.Course.Application.Commands.PlacementTestCmd
 
             await _placementTestRepository.ExecuteTransactionAsync(async () =>
             {
-                foreach (var item in sectionGroups)
-                {
-                    await _sectionGroupRepository.DeleteAsync(item);
-                }
-                await _sectionGroupRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-
-                foreach (var item in sections)
-                {
-                    await _sectionRepository.DeleteAsync(item);
-                }
-                await _sectionRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-
-                if (sectionParts.Count > 0)
-                {
-                    foreach (var item in sectionParts)
-                    {
-                        await _sectionPartRepository.DeleteAsync(item);
-                    }
-                    await _sectionPartRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-                }
-
+                await _sectionConverter.DeleteSectionGroup(sectionGroups, sectionQuestions, questions);
                 placementTest = _placementTestRepository.Update(placementTest);
                 await _placementTestRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 

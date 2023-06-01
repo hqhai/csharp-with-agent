@@ -2,22 +2,26 @@
 
 namespace Fsel.Course.Domain.Enums.ErrorCodes
 {
-    public enum EnumFinalTestExerciseAnswerErrorCode
+    public enum EnumFinalTestAnswerErrorCode
     {
         /// <summary>
         /// Answers Is Null
         /// </summary>
         AnswersNull,
 
-
         /// <summary>
-        /// ExerciseAnswers Is Null
+        /// SectionAnswers Is Null
         /// </summary>
-        ExerciseAnswersNull,
+        SectionAnswersNull,
 
         /// <summary>
         /// Answer Is In The Wrong Format
         /// </summary>
-        AnswerIsInTheWrongFormat
+        AnswerIsInTheWrongFormat,
+
+        /// <summary>
+        /// FinalTest Answers is Null
+        /// </summary>
+        FinalTestAnswersNull
     }
 }

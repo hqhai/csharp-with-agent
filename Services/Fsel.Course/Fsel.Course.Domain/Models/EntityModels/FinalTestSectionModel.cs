@@ -9,7 +9,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
     using System.Threading.Tasks;
     using Fsel.Core.Base.BaseModels;
 
-    public class FinalTestExerciseModel : BaseModel
+    public class FinalTestSectionModel : BaseModel
     {
         public Guid FinalTestId { get; set; }
 

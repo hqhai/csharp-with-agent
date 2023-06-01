@@ -99,12 +99,12 @@ namespace Fsel.Course.Lms.Application.Queries.VideoQuery
                     ExecutionTime = x.ExecutionTime,
                     TimeCodeType = x.TimeCodeType,
                     VideoId = x.VideoId,
-                    Exercises = x.TimeCodeExercises.Where(n => n.Exercise != null).Select(n => n.Exercise).Select(n => new ExerciseModel
+                    Exercises = x.TimeCodeExercises.Where(n => n.Exercise != null).OrderBy(x => x!.CreatedDate).Select(n => n.Exercise).Select(n => new ExerciseModel
                     {
                         Id = n!.Id,
                         MediaPost = n.MediaPost,
                         CourseSkill = n.CourseSkill,
-                        Questions = n.ExerciseQuestions.Where(m => m.Question != null).Select(m => m.Question).Select(m => new QuestionModel()
+                        Questions = n.ExerciseQuestions.Where(m => m.Question != null).OrderBy(x => x!.CreatedDate).Select(m => m.Question).Select(m => new QuestionModel()
                         {
                             Id = m!.Id,
                             QuestionType = m.QuestionType,

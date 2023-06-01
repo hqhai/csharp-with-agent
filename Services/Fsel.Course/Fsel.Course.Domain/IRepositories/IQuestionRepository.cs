@@ -9,6 +9,5 @@ namespace Fsel.Course.Domain.IRepositories
     {
         Task<List<Question>?> GetIncludeTimeCodeByIdAsync(IEnumerable<Guid> ids);
         Task<List<Question>?> GetIncludeSectionByIdAsync(IEnumerable<Guid> ids);
-        Task<List<Question>?> GetIncludeExerciseByIdAsync(IEnumerable<Guid> ids);
     }
 }
