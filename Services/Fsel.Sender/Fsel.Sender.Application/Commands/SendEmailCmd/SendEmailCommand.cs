@@ -37,7 +37,10 @@ namespace Fsel.Sender.Application.Commands.SendEmailCmd
             sendEmail.ToEmails = request.ToEmails;
             sendEmail.CcEmails = request.CcEmails;
             sendEmail.BccEmails = request.BccEmails;
-            sendEmail.Content = request.Content;
+            var filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Resources//ForgotPassword.html");
+            //string filePath = "Domain/Resources/SignUp.html";
+            string body = File.ReadAllText(filePath);
+            sendEmail.Content = body;
             try
             {
                 using (var emailMessage = CreateEmailMessage(sendEmail))
@@ -87,7 +90,7 @@ namespace Fsel.Sender.Application.Commands.SendEmailCmd
             }
 
             emailMessage.Subject = message.Subject;
-            emailMessage.Body = new TextPart(MimeKit.Text.TextFormat.Text) { Text = message.Content };
+            emailMessage.Body = new TextPart(MimeKit.Text.TextFormat.Html) { Text = message.Content };
 
             return emailMessage;
         }
