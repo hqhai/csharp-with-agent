@@ -80,6 +80,5 @@ namespace Fsel.Identity.Api.Controllers
             MethodResult<UserProfileModel> commandResult = await _mediator.Send(new GetUserProfileQuery()).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
-
     }
 }
