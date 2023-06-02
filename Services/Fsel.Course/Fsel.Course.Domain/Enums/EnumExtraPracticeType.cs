@@ -6,6 +6,8 @@ namespace Fsel.Course.Domain.Enums
     {
         VideoLink,
         VideoTimeCode,
-        Book
+        Book,
+        Exercise,
+        Article
     }
 }
