@@ -19,14 +19,14 @@ namespace Fsel.Course.Domain.Entities
         [NotMapped]
         public TimeSpan ExecutionTimeSpan
         {
-            get { return TimeSpan.FromTicks(ExecutionTime); }
+            get { return TimeSpan.FromSeconds(ExecutionTime); }
         }
 
         public EnumCourseSkill CourseSkill { get; set; }
 
         public ICollection<Section> Sections { get; set; } = new List<Section>();
         public ICollection<MockTestSection> MockTestSections { get; set; } = new List<MockTestSection>();
-
+        public ICollection<FinalTestSection> FinalTestSections { get; set; } = new List<FinalTestSection>();
         public ICollection<PlacementTestSection> PlacementTestSections { get; set; } = new List<PlacementTestSection>();
     }
 }

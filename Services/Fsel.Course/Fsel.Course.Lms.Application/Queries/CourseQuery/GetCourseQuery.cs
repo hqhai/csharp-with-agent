@@ -68,10 +68,12 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
             }
 
             var course = await _courseRepository.Queryable
-                             .Include(x => x.CourseUnitMockTests.Where(y => !y.IsDeleted))
+                             .Include(x => x.CourseUnitMockTests)
                              .ThenInclude(unit => unit.Unit)
-                             .Include(x => x.CourseUnitMockTests.Where(y => !y.IsDeleted))
+                             .Include(x => x.CourseUnitMockTests)
                              .ThenInclude(unit => unit.MockTest)
+                             .Include(x => x.CourseUnitMockTests)
+                             .ThenInclude(unit => unit.FinalTest)
                              .Include(x => x.CourseTeachers.Where(y => !y.IsDeleted))
                              .Where(x => x.Id == @class.CourseId)
                              .AsNoTracking()
@@ -82,7 +84,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
                                  Code = y.Code,
                                  InstructionContent = y.InstructionContent,
                                  CourseLevel = y.CourseLevel,
-                                 CourseUnitMockTests = _mapper.Map<IList<CourseUnitMockTestModel>>(y.CourseUnitMockTests),
+                                 CourseUnitMockTests = _mapper.Map<IList<CourseUnitMockTestModel>>(y.CourseUnitMockTests.OrderBy(x => x!.DisplayOrder)),
                                  CourseTeachers = _mapper.Map<List<CourseTeacherModel>>(y.CourseTeachers),
                              }).FirstOrDefaultAsync(cancellationToken);
 

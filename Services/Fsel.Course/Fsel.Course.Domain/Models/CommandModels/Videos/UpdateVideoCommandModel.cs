@@ -11,6 +11,7 @@ namespace Fsel.Course.Domain.Models.CommandModels.Videos
     {
         public string? Name { get; set; }
         public string? VideoFilePath { get; set; }
+        public string? SubFilePath { get; set; }
         public EnumVideoType Type { get; set; }
         public Guid TeacherId { get; set; }
 

@@ -12,22 +12,12 @@ namespace Fsel.Identity.Domain.Entities
     public class CSO : Entity
     {
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
-        public string? CourseTypesStr { get; set; }
-
-        [NotMapped]
-        public object? CourseTypes
-        {
-            get { return ConvertHelper.Deserialize<object>(CourseTypesStr); }
-            set { CourseTypesStr = ConvertHelper.Serialize(value); }
-        }
-
-        [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         public string? RoleLivesStr { get; set; }
 
         [NotMapped]
-        public IList<EnumRoleLive>? RoleLives
+        public IList<EnumCourseType>? RoleLives
         {
-            get { return ConvertHelper.Deserialize<IList<EnumRoleLive>>(RoleLivesStr); }
+            get { return ConvertHelper.Deserialize<IList<EnumCourseType>>(RoleLivesStr); }
             set { RoleLivesStr = ConvertHelper.Serialize(value); }
         }
 
@@ -35,10 +25,21 @@ namespace Fsel.Identity.Domain.Entities
         public string? CourseLevelsStr { get; set; }
 
         [NotMapped]
-        public object? CourseLevels
+        public IList<EnumCourseLevel>? CourseLevels
         {
-            get { return ConvertHelper.Deserialize<object>(CourseLevelsStr); }
+            get { return ConvertHelper.Deserialize<IList<EnumCourseLevel>>(CourseLevelsStr); }
             set { CourseLevelsStr = ConvertHelper.Serialize(value); }
+        }
+
+
+        [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
+        public string? SubscriptionClassesStr { get; set; }
+
+        [NotMapped]
+        public IList<EnumSubscriptionClass>? SubscriptionClasses
+        {
+            get { return ConvertHelper.Deserialize<IList<EnumSubscriptionClass>>(SubscriptionClassesStr); }
+            set { SubscriptionClassesStr = ConvertHelper.Serialize(value); }
         }
 
         [MaxLength(1000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]

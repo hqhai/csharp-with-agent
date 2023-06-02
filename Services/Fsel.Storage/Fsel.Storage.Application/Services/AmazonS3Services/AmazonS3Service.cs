@@ -21,6 +21,7 @@ namespace Fsel.Storage.Application.Services.AmazonS3Services
         private readonly double _partSize = ByteSize.FromMegabytes(100).Bytes; // Size of each part (100 MB)
         private readonly Dictionary<EnumFolderType, double> _maximumCapacity = new Dictionary<EnumFolderType, double>
         {
+            { EnumFolderType.Fsis, ByteSize.FromGigabytes(1).Bytes }, //maximum question size (1 GB)
             { EnumFolderType.Videos, ByteSize.FromGigabytes(5).Bytes }, //maximum video size (5 GB)
             { EnumFolderType.Files, ByteSize.FromMegabytes(6).Bytes }, //maximum file size (6 MB)
             { EnumFolderType.Questions, ByteSize.FromMegabytes(6).Bytes } //maximum question size (6 MB)

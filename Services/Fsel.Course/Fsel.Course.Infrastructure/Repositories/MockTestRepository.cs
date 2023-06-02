@@ -37,14 +37,17 @@ namespace Fsel.Course.Infrastructure.Repositories
             {
                 return await Queryable.Include(x => x.MockTestSections.Where(n => n.SectionGroup != null))
                                        .ThenInclude(x => x.SectionGroup)
-                                       .ThenInclude(x => x!.Sections)
-                                       .ThenInclude(x => x.SectionTimeCodes)
+                                       .ThenInclude(x => x!.Sections.Where(y => !y.IsDeleted))
+                                       .ThenInclude(x => x.SectionTimeCodes.Where(y => !y.IsDeleted))
                                        .Include(x => x.MockTestSections.Where(n => n.SectionGroup != null))
                                        .ThenInclude(x => x.SectionGroup)
-                                       .ThenInclude(x => x!.Sections)
-                                       .ThenInclude(x => x.SectionParts)
+                                       .ThenInclude(x => x!.Sections.Where(y => !y.IsDeleted))
+                                       .ThenInclude(x => x.SectionParts.Where(y => !y.IsDeleted))
                                        .ThenInclude(x => x.SectionQuestions.Where(n => n.Question != null))
                                        .ThenInclude(x => x.Question)
+                                       .Include(x => x.CourseUnitMockTests.Where(y => !y.IsDeleted))
+                                       .Include(x => x.UnitSkillMockTests.Where(y => !y.IsDeleted))
+                                       .OrderBy(x => x!.CreatedDate)
                                        .FirstOrDefaultAsync(x => x.Id == id);
             }
             catch (Exception)
@@ -59,9 +62,11 @@ namespace Fsel.Course.Infrastructure.Repositories
             {
                 return await Queryable.Include(x => x.MockTestSections.Where(y => !y.IsDeleted))
                                       .ThenInclude(x => x.SectionGroup)
-                                      .ThenInclude(x => x!.Sections)
-                                      .ThenInclude(x => x.SectionParts)
-                                      .ThenInclude(x => x.SectionQuestions)
+                                      .ThenInclude(x => x!.Sections.Where(y => !y.IsDeleted))
+                                      .ThenInclude(x => x.SectionParts.Where(y => !y.IsDeleted))
+                                      .ThenInclude(x => x.SectionQuestions.Where(y => !y.IsDeleted))
+                                      .Include(x => x.CourseUnitMockTests.Where(y => !y.IsDeleted))
+                                      .Include(x => x.UnitSkillMockTests.Where(y => !y.IsDeleted))
                                       .Where(x => x.Id == id)
                                       .Select(x => new MockTestModel
                                       {
@@ -69,38 +74,35 @@ namespace Fsel.Course.Infrastructure.Repositories
                                           Name = x.Name,
                                           CourseType = x.CourseType,
                                           CreatedDate = x.CreatedDate,
-                                          IsActive = x.IsActive,
+                                          IsActive = x.UnitSkillMockTests.Any() || x.CourseUnitMockTests.Any(),
                                           MockTestType = x.MockTestType,
-                                          SectionGroups = x.MockTestSections.Select(x => x.SectionGroup).Select(x => new SectionGroupModel
+                                          SectionGroups = x.MockTestSections.Select(x => x.SectionGroup).OrderBy(x => x!.CreatedDate).Select(x => new SectionGroupModel
                                           {
                                               Id = x!.Id,
                                               ExecutionTime = x.ExecutionTime,
                                               CourseSkill = x.CourseSkill,
-                                              Sections = x.Sections.Select(x => new SectionModel
+                                              Sections = x.Sections.OrderBy(x => x.DisplayOrder).Select(x => new SectionModel
                                               {
                                                   Id = x.Id,
                                                   Name = x.Name,
                                                   MediaPost = x.MediaPost,
+                                                  VideoFilePath = x.VideoFilePath,
+                                                  DisplayOrder = x.DisplayOrder,
                                                   TargetWord = x.TargetWord,
-                                                  CreatedDate = x.CreatedDate,
-                                                  CreatedUserId = x.CreatedUserId,
-                                                  SectionTimeCodes = x.SectionTimeCodes.Select(x => new SectionTimeCodeModel
+                                                  SectionTimeCodes = x.SectionTimeCodes.OrderBy(x => x!.CreatedDate).Select(x => new SectionTimeCodeModel
                                                   {
                                                       Id = x.Id,
                                                       Name = x.Name,
-                                                      CreatedDate = x.CreatedDate,
                                                       DisplayTime = x.DisplayTime,
                                                       ExecutionTime = x.ExecutionTime,
                                                       SectionId = x.SectionId,
                                                   }).ToList(),
-                                                  SectionParts = x.SectionParts.Select(x => new SectionPartModel
+                                                  SectionParts = x.SectionParts.OrderBy(x => x!.CreatedDate).Select(x => new SectionPartModel
                                                   {
                                                       Id = x.Id,
-                                                      CreatedDate = x.CreatedDate,
                                                       PartName = x.PartName,
                                                       SectionId = x.SectionId,
-                                                      CreatedFullName = x.CreatedFullName,
-                                                      Question = x.SectionQuestions.Select(x => x.Question).Select(x => new QuestionModel
+                                                      Questions = x.SectionQuestions.Select(x => x.Question).OrderBy(x => x!.CreatedDate).Select(x => new QuestionModel
                                                       {
                                                           Id = x!.Id,
                                                           QuestionType = x.QuestionType,

@@ -46,14 +46,18 @@ namespace Fsel.Course.Application.Queries.MockTestQuery
             var mockTestQuery = _mockTestRepository.Queryable
                                       .Include(x => x.MockTestSections.Where(y => !y.IsDeleted))
                                       .ThenInclude(x => x.SectionGroup)
+                                      .Include(x => x.CourseUnitMockTests)
+                                      .Include(x => x.UnitSkillMockTests)
                                       .Select(x => new MockTestSearchModel
                                       {
                                           Id = x.Id,
                                           Name = x.Name,
                                           CourseType = x.CourseType,
                                           CreatedDate = x.CreatedDate,
-                                          IsActive = x.IsActive,
+                                          IsActive = x.UnitSkillMockTests.Any() || x.CourseUnitMockTests.Any(),
                                           MockTestType = x.MockTestType,
+                                          CreatedFullName = x.CreatedFullName,
+                                          UpdatedFullName = x.UpdatedFullName,
                                           Skills = x.MockTestSections.Select(x => x.SectionGroup).Select(n => n!.CourseSkill).ToList(),
                                       });
             if (!string.IsNullOrEmpty(request.Keyword))

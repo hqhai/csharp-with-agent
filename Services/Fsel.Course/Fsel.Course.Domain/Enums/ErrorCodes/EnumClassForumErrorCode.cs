@@ -7,6 +7,21 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         /// <summary>
         /// ClassForum Is Null
         /// </summary>
-        ClassForumNull
+        ClassForumNull,
+
+        /// <summary>
+        /// Class Forum File Is Null
+        /// </summary>
+        ClassForumFileNull,
+
+        /// <summary>
+        /// Class Forum not exist
+        /// </summary>
+        ClassForumNotExist,
+
+        /// <summary>
+        /// ClassForumHasNotSubmit
+        /// </summary>
+        ClassForumHasNotSubmit
     }
 }

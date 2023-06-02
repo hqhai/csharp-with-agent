@@ -42,10 +42,10 @@ namespace Fsel.Course.Lcms.Api.Controllers
         /// <summary>
         /// Update Status Placement Test
         /// </summary>
-        [HttpGet("active")]
+        [HttpPost("active")]
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> ActivePlacementTest([FromQuery] UpdateStatusPlacementTestCommand command)
+        public async Task<IActionResult> ActivePlacementTest([FromBody] UpdateStatusPlacementTestCommand command)
         {
             MethodResult<bool> queryResult = await _mediator.Send(command).ConfigureAwait(false);
             return queryResult.GetActionResult();

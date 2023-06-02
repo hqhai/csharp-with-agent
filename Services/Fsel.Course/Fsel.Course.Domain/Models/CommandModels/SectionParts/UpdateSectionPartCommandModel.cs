@@ -7,6 +7,6 @@ namespace Fsel.Course.Domain.Models.CommandModels.SectionParts
     public class UpdateSectionPartCommandModel
     {
         public string? PartName { get; set; }
-        public IList<UpdateQuestionCommandModel>? Questions { get; set; }
+        public IList<CreateQuestionCommandModel>? Questions { get; set; }
     }
 }

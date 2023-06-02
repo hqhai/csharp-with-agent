@@ -11,6 +11,8 @@ namespace Fsel.Shared.Enums
         QuestionType,
         TimeCodeType,
         PlacementTestLevel,
-        FinalTestLevel
+        FinalTestLevel,
+        SubscriptionClass,
+        RoleLive
     }
 }

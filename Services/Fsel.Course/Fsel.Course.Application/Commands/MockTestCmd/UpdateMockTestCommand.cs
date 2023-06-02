@@ -3,7 +3,6 @@
 namespace Fsel.Course.Application.Commands.MockTestCmd
 {
     using System;
-    using System.Collections.Generic;
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
@@ -13,9 +12,9 @@ namespace Fsel.Course.Application.Commands.MockTestCmd
     using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.CommandModels.MockTests;
-    using Fsel.Course.Domain.Models.CommandModels.Questions;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Infrastructure.Common;
+    using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Http;
 
@@ -27,33 +26,17 @@ namespace Fsel.Course.Application.Commands.MockTestCmd
     {
         private readonly IMapper _mapper;
         private readonly IMockTestRepository _mockTestRepository;
-        private readonly ISectionRepository _sectionRepository;
-        private readonly QuestionTypeConverter _questionTypeConverter;
-        private readonly ISectionPartRepository _sectionPartRepository;
-        private readonly IQuestionRepository _questionRepository;
-        private readonly ISectionGroupRepository _sectionGroupRepository;
-        private readonly ISectionQuestionRepository _sectionQuestionRepository;
-        private readonly ISectionTimeCodeRepository _sectionTimeCodeRepository;
+        private readonly SectionConverter _sectionConverter;
 
         public UpdateMockTestCommandHandler(IMapper mapper
             , IMockTestRepository mockTestRepository
-            , ISectionRepository sectionRepository
-            , QuestionTypeConverter questionTypeConverter
-            , ISectionPartRepository sectionPartRepository
-            , IQuestionRepository questionRepository
-            , ISectionGroupRepository sectionGroupRepository
-            , ISectionQuestionRepository sectionQuestionRepository
-            , ISectionTimeCodeRepository sectionTimeCodeRepository)
+            , SectionConverter sectionConverter)
+
         {
             _mapper = mapper;
             _mockTestRepository = mockTestRepository;
-            _sectionRepository = sectionRepository;
-            _questionTypeConverter = questionTypeConverter;
-            _sectionPartRepository = sectionPartRepository;
-            _questionRepository = questionRepository;
-            _sectionGroupRepository = sectionGroupRepository;
-            _sectionQuestionRepository = sectionQuestionRepository;
-            _sectionTimeCodeRepository = sectionTimeCodeRepository;
+            _sectionConverter = sectionConverter;
+            _sectionConverter = sectionConverter;
         }
 
         public async Task<MethodResult<MockTestModel>> Handle(UpdateMockTestCommand request, CancellationToken cancellationToken)
@@ -76,19 +59,17 @@ namespace Fsel.Course.Application.Commands.MockTestCmd
                 return methodResult;
             }
 
-            if (mockTest.IsActive)
+            if (mockTest.CourseUnitMockTests.Any() || mockTest.UnitSkillMockTests.Any())
             {
                 methodResult.AddErrorBadRequest(nameof(EnumMockTestErrorCode.MockTestInActiveState), nameof(mockTest.IsActive), mockTest.IsActive);
                 return methodResult;
             }
 
             var sectionGroups = mockTest.MockTestSections.Select(x => x.SectionGroup ?? new SectionGroup()).ToList();
+            var sectionQuestions = sectionGroups.SelectMany(x => x.Sections).SelectMany(x => x.SectionParts).SelectMany(x => x.SectionQuestions).ToList();
+            var questions = sectionQuestions.Select(x => x.Question ?? new Question()).ToList();
 
             _mapper.Map(request, mockTest);
-            sectionGroups.ForEach(x =>
-            {
-                x.MockTestSections.Clear();
-            });
             mockTest.MockTestSections.Clear();
 
             foreach (var sectionGroup in request.SectionGroups)
@@ -99,85 +80,10 @@ namespace Fsel.Course.Application.Commands.MockTestCmd
                     return methodResult;
                 }
                 var newSectionGroup = _mapper.Map<SectionGroup>(sectionGroup);
-                if (sectionGroup.Sections == null || sectionGroup.Sections.Count == 0)
+                var method = _sectionConverter.AddSessionToSessionGroup(newSectionGroup, sectionGroup.Sections, EnumCourseType.Ielts);
+                if (!method.IsOK)
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumSectionErrorCode.SectionsNull), nameof(sectionGroup.Sections));
-                    return methodResult;
-                }
-                foreach (var section in sectionGroup.Sections)
-                {
-                    if (section == null)
-                    {
-                        methodResult.AddErrorBadRequest(nameof(EnumSectionErrorCode.SectionNull), nameof(section));
-                        return methodResult;
-                    }
-                    Section newSection = newSectionGroup.Sections.ElementAt(sectionGroup.Sections.IndexOf(section));
-
-                    if (sectionGroup.CourseSkill != Shared.Enums.EnumCourseSkill.Speaking)
-                    {
-                        if (section.SectionParts != null && section.Questions != null && section.SectionParts.Count > 0 && section.Questions.Count > 0)
-                        {
-                            methodResult.AddErrorBadRequest(nameof(EnumSectionErrorCode.OnlyOneOfTwoSectionPartsOrQuestions));
-                            return methodResult;
-                        }
-
-                        if (section.SectionParts == null || section.SectionParts.Count == 0)
-                        {
-                            methodResult.AddErrorBadRequest(nameof(EnumSectionPartErrorCode.SectionPartsNull), nameof(section.SectionParts));
-                            return methodResult;
-                        }
-                        foreach (var sectionPart in section.SectionParts)
-                        {
-                            if (sectionPart == null)
-                            {
-                                methodResult.AddErrorBadRequest(nameof(EnumSectionPartErrorCode.SectionPartNull), nameof(sectionPart), sectionPart);
-                                return methodResult;
-                            }
-                            else
-                            {
-                                SectionPart newSectionPart = newSection.SectionParts.ElementAt(section.SectionParts.IndexOf(sectionPart));
-                                if (sectionPart.Questions == null || sectionPart.Questions.Count == 0)
-                                {
-                                    methodResult.AddErrorBadRequest(nameof(EnumQuestionErrorCode.QuestionsNull), nameof(sectionPart.Questions));
-                                    return methodResult;
-                                }
-                                foreach (var question in sectionPart.Questions)
-                                {
-                                    GetSectionQuestion(methodResult, question, null, newSectionPart);
-                                }
-                                if (!newSectionPart.IsValid())
-                                {
-                                    methodResult.AddErrorBadRequest(newSectionPart.ErrorMessages);
-                                    return methodResult;
-                                }
-                            }
-                        }
-                    }
-                    else
-                    {
-                        if (section.SectionTimeCodes == null || section.SectionTimeCodes!.Count == 0)
-                        {
-                            methodResult.AddErrorBadRequest(nameof(EnumSectionTimeCodeErrorCode.TimeCodeCanNotNull), nameof(sectionGroup.CourseSkill));
-                            return methodResult;
-                        }
-                        foreach (var sectionTimeCode in section.SectionTimeCodes)
-                        {
-                            if (sectionTimeCode == null)
-                            {
-                                methodResult.AddErrorBadRequest(nameof(EnumSectionTimeCodeErrorCode.SectionTimeCodesNull), nameof(sectionTimeCode), sectionTimeCode);
-                                return methodResult;
-                            }
-                            else
-                            {
-                                SectionTimeCode newSectionTimeCode = newSection.SectionTimeCodes.ElementAt(section.SectionTimeCodes.IndexOf(sectionTimeCode));
-                            }
-                        }
-                    }
-
-                    if (!newSection.IsValid())
-                    {
-                        methodResult.AddErrorBadRequest(newSection.ErrorMessages);
-                    }
+                    methodResult.AddError(method.ErrorMessages);
                 }
                 mockTest.MockTestSections.Add(new MockTestSection { SectionGroup = newSectionGroup });
                 if (!newSectionGroup.IsValid())
@@ -199,12 +105,7 @@ namespace Fsel.Course.Application.Commands.MockTestCmd
 
             await _mockTestRepository.ExecuteTransactionAsync(async () =>
             {
-                foreach (var item in sectionGroups)
-                {
-                    await _sectionGroupRepository.DeleteAsync(item);
-                }
-                await _sectionGroupRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
-
+                await _sectionConverter.DeleteSectionGroup(sectionGroups, sectionQuestions, questions);
                 mockTest = _mockTestRepository.Update(mockTest);
                 await _mockTestRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
@@ -214,43 +115,6 @@ namespace Fsel.Course.Application.Commands.MockTestCmd
             });
 
             return methodResult;
-        }
-
-        private void GetSectionQuestion(MethodResult<MockTestModel> methodResult, UpdateQuestionCommandModel question, Section? section, SectionPart? sectionPart)
-        {
-            if (question == null)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumQuestionErrorCode.QuestionNull), nameof(question));
-            }
-            else
-            {
-                Question newQuestion = _mapper.Map<Question>(question);
-                var (config, correctTotal) = _questionTypeConverter.QuestionTypeConverterObject(question.Config, newQuestion.QuestionType, isShowCorrectTotal: !question.Ungraded, false);
-                if (config == null)
-                {
-                    methodResult.AddErrorBadRequest(nameof(EnumVideoErrorCode.ConfigIsInTheWrongFormat), nameof(question.Config), question.Config);
-                }
-                if (!newQuestion.IsValid())
-                {
-                    methodResult.AddErrorBadRequest(newQuestion.ErrorMessages);
-                }
-                newQuestion.CorrectTotal = correctTotal;
-
-                if (section != null)
-                {
-                    section.SectionQuestions.Add(new SectionQuestion
-                    {
-                        Question = newQuestion,
-                    });
-                }
-                else if (sectionPart != null)
-                {
-                    sectionPart.SectionQuestions.Add(new SectionQuestion
-                    {
-                        Question = newQuestion,
-                    });
-                }
-            }
         }
     }
 }

@@ -19,5 +19,9 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public IList<MockTestSectionModel>? MockTestSections { get; set; }
 
         public IList<SectionGroupModel>? SectionGroups { get; set; }
+
+        public MockTestResultModel? MockTestResult { get; set; }
+
+        public EnumCourseSkill? Skill { get; set; }
     }
 }

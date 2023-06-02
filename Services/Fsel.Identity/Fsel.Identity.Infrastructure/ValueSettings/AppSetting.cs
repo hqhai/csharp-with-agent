@@ -19,6 +19,7 @@ namespace Fsel.Identity.Infrastructure.ValueSettings
     public class Services : BaseServices
     {
         public string? InteractionApiUrl { get; set; }
+        public string? TrainingApiUrl { get; set; }
     }
 
     public class Otp

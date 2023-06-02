@@ -3,6 +3,7 @@ using Fsel.Common.Helpers;
 using Fsel.Core.Base;
 using Fsel.Interaction.Domain.Entities;
 using Fsel.Interaction.Infrastructure.Configs;
+using Fsel.Shared.Constants;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -45,7 +46,7 @@ namespace Fsel.Interaction.Infrastructure
 
         private static void SeedSurveyQuestions(ModelBuilder builder)
         {
-            var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, Settings.SurveyQuestionFileName);
+            var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, SurveyQuestionSettings.SurveyQuestionFileName);
             var surveyQuestions = ConvertHelper.DeserializeFromFilePath<IList<SurveyQuestion>>(path);
             ArgumentNullException.ThrowIfNull(surveyQuestions);
             builder.Entity<SurveyQuestion>().HasData(surveyQuestions.ToArray());

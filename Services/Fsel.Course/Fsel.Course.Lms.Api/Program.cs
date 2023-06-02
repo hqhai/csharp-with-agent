@@ -50,9 +50,37 @@ builder.Services.AddScoped<ILessonInstructionRepository, LessonInstructionReposi
 builder.Services.AddScoped<IHomeWorkAnswerRepository, HomeWorkAnswerRepository>();
 builder.Services.AddScoped<IHomeWorkQuestionRepository, HomeWorkQuestionRepository>();
 builder.Services.AddScoped<IHomeWorkResultRepository, HomeWorkResultRepository>();
+builder.Services.AddScoped<IMockTestResultRepository, MockTestResultRepository>();
+builder.Services.AddScoped<IMockTestAnswerRepository, MockTestAnswerRepository>();
+builder.Services.AddScoped<IMockTestSectionRepository, MockTestSectionRepository>();
+builder.Services.AddScoped<IUnitSkillMockTestRepository, UnitSkillMockTestRepository>();
+builder.Services.AddScoped<ISectionQuestionRepository, SectionQuestionRepository>();
+builder.Services.AddScoped<ISectionGroupRepository, SectionGroupRepository>();
+builder.Services.AddScoped<ISectionPartRepository, SectionPartRepository>();
+builder.Services.AddScoped<ISectionRepository, SectionRepository>();
+builder.Services.AddScoped<ISectionTimeCodeRepository, SectionTimeCodeRepository>();
+
+builder.Services.AddScoped<IPlacementTestResultRepository, PlacementTestResultRepository>();
+builder.Services.AddScoped<IPlacementTestRepository, PlacementTestRepository>();
+builder.Services.AddScoped<IPlacementTestSectionRepository, PlacementTestSectionRepository>();
+builder.Services.AddScoped<IPlacementTestAnswerRepository, PlacementTestAnswerRepository>();
+
+builder.Services.AddScoped<ISectionGroupRepository, SectionGroupRepository>();
+builder.Services.AddScoped<ISectionPartRepository, SectionPartRepository>();
+builder.Services.AddScoped<ISectionRepository, SectionRepository>();
+builder.Services.AddScoped<ISectionTimeCodeRepository, SectionTimeCodeRepository>();
+builder.Services.AddScoped<ISectionQuestionRepository, SectionQuestionRepository>();
+builder.Services.AddScoped<IFinalTestRepository, FinalTestRepository>();
+builder.Services.AddScoped<IFinalTestAnswerRepository, FinalTestAnswerRepository>();
+builder.Services.AddScoped<IFinalTestResultRepository, FinalTestResultRepository>();
+builder.Services.AddScoped<IClassForumFileRepository, ClassForumFileRepository>();
+builder.Services.AddScoped<IClassForumResultRepository, ClassForumResultRepository>();
+builder.Services.AddScoped<IClassForumResultFileRepository, ClassForumResultFileRepository>();
+builder.Services.AddScoped<IClassForumScoreRepository, ClassForumScoreRepository>();
 
 builder.Services.AddScoped<QuestionTypeConverter>();
 builder.Services.AddScoped<AnswerTypeConverter>();
+builder.Services.AddScoped<SectionConverter>();
 
 builder.AddRefitClients(typeof(IUserService), appSetting?.Services?.UserApiUrl);
 builder.AddRefitClients(typeof(ITrainingService), appSetting?.Services?.ClassApiUrl);

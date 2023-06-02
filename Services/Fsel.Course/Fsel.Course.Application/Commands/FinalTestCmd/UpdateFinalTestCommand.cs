@@ -15,6 +15,7 @@ namespace Fsel.Course.Application.Commands.FinalTestCmd
     using Fsel.Course.Domain.Models.CommandModels.FinalTests;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Infrastructure.Common;
+    using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Http;
 
@@ -25,22 +26,25 @@ namespace Fsel.Course.Application.Commands.FinalTestCmd
     public class UpdateFinalTestCommandHandler : IRequestHandler<UpdateFinalTestCommand, MethodResult<FinalTestModel>>
     {
         private readonly IMapper _mapper;
-        private readonly QuestionTypeConverter _questionTypeConverter;
         private readonly IFinalTestRepository _finalTestRepository;
         private readonly IQuestionRepository _questionRepository;
-        private readonly IExerciseRepository _exerciseRepository;
+        private readonly ISectionGroupRepository _sectionGroupRepository;
+        private readonly ISectionQuestionRepository _sectionQuestionRepository;
+        private readonly SectionConverter _sectionConverter;
 
         public UpdateFinalTestCommandHandler(IMapper mapper
-            , QuestionTypeConverter questionTypeConverter
             , IFinalTestRepository finalTestRepository
             , IQuestionRepository questionRepository
-            , IExerciseRepository exerciseRepository)
+            , ISectionGroupRepository sectionGroupRepository
+            , ISectionQuestionRepository sectionQuestionRepository
+            , SectionConverter sectionConverter)
         {
             _mapper = mapper;
-            _questionTypeConverter = questionTypeConverter;
             _finalTestRepository = finalTestRepository;
             _questionRepository = questionRepository;
-            _exerciseRepository = exerciseRepository;
+            _sectionGroupRepository = sectionGroupRepository;
+            _sectionQuestionRepository = sectionQuestionRepository;
+            _sectionConverter = sectionConverter;
         }
 
         public async Task<MethodResult<FinalTestModel>> Handle(UpdateFinalTestCommand request, CancellationToken cancellationToken)
@@ -62,56 +66,40 @@ namespace Fsel.Course.Application.Commands.FinalTestCmd
                 return methodResult;
             }
 
-            if (request.Exercises == null || request.Exercises.Count == 0)
+            if (request.SectionGroups == null || request.SectionGroups.Count == 0)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumExerciseErrorCode.ExercisesNull), nameof(request.Exercises));
+                methodResult.AddErrorBadRequest(nameof(EnumExerciseErrorCode.ExercisesNull), nameof(request.SectionGroups));
                 return methodResult;
             }
-            List<Exercise> exercises = finalTest.FinalTestExercises.Select(x => x.Exercise!).ToList();
-            List<Question>? questions = exercises.SelectMany(x => x.ExerciseQuestions).Select(x => x.Question!).ToList();
+            List<SectionGroup> sectionGroups = finalTest.FinalTestSections.Select(x => x.SectionGroup ?? new SectionGroup()).ToList();
+            List<Section> sections = sectionGroups.SelectMany(x => x.Sections).ToList();
+            List<SectionQuestion> sectionQuestions = sections.SelectMany(x => x.SectionQuestions).ToList();
+            List<Question> questions = sectionQuestions.Select(x => x.Question ?? new Question()).ToList();
+
             _mapper.Map(request, finalTest);
-            finalTest.FinalTestExercises = new List<FinalTestExercise>();
-            foreach (var exercise in request.Exercises)
+            finalTest.FinalTestSections = new List<FinalTestSection>();
+            foreach (var sectionGroup in request.SectionGroups)
             {
-                if (exercise == null)
+                if (sectionGroup == null)
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumExerciseErrorCode.ExerciseNull), nameof(exercise), exercise);
+                    methodResult.AddErrorBadRequest(nameof(EnumSectionGroupErrorCode.SectionGroupNull), nameof(sectionGroup));
+                    return methodResult;
                 }
-                var newExercise = _mapper.Map<Exercise>(exercise);
-                newExercise.ExerciseQuestions = new List<ExerciseQuestion>();
-                if (exercise!.Questions == null || exercise.Questions.Count == 0)
+                var newSectionGroup = _mapper.Map<SectionGroup>(sectionGroup);
+                if (sectionGroup.Sections == null || sectionGroup.Sections.Count == 0)
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumQuestionErrorCode.QuestionNull), nameof(exercise.Questions), exercise.Questions);
+                    methodResult.AddErrorBadRequest(nameof(EnumSectionErrorCode.SectionsNull), nameof(sectionGroup.Sections));
+                    return methodResult;
                 }
-                foreach (var question in exercise.Questions!)
+                var method = _sectionConverter.AddSessionToSessionGroup(newSectionGroup, sectionGroup.Sections, EnumCourseType.Academic);
+                if (!method.IsOK)
                 {
-                    if (question == null)
-                    {
-                        methodResult.AddErrorBadRequest(nameof(EnumQuestionErrorCode.QuestionNull), nameof(question), question);
-                    }
-                    var newQuestion = _mapper.Map<Question>(question);
-                    newExercise.ExerciseQuestions.Add(new ExerciseQuestion
-                    {
-                        Question = newQuestion
-                    });
-                    var (config, correctTotal) = _questionTypeConverter.QuestionTypeConverterObject(question!.Config, question.QuestionType, isShowCorrectTotal: !question.Ungraded, false);
-                    if (config == null)
-                    {
-                        methodResult.AddErrorBadRequest(nameof(EnumVideoErrorCode.ConfigIsInTheWrongFormat), nameof(question.Config), question.Config);
-                    }
-                    newQuestion.CorrectTotal = correctTotal;
-                    if (!newQuestion.IsValid())
-                    {
-                        methodResult.AddErrorBadRequest(newQuestion.ErrorMessages);
-                    }
+                    methodResult.AddError(method.ErrorMessages);
                 }
-                finalTest.FinalTestExercises.Add(new FinalTestExercise
+                finalTest.FinalTestSections.Add(new FinalTestSection { SectionGroup = newSectionGroup });
+                if (!newSectionGroup.IsValid())
                 {
-                    Exercise = newExercise
-                });
-                if (!newExercise.IsValid())
-                {
-                    methodResult.AddErrorBadRequest(newExercise.ErrorMessages);
+                    methodResult.AddErrorBadRequest(newSectionGroup.ErrorMessages);
                 }
             }
             if (!finalTest.IsValid())
@@ -128,18 +116,7 @@ namespace Fsel.Course.Application.Commands.FinalTestCmd
 
             await _finalTestRepository.ExecuteTransactionAsync(async () =>
             {
-                foreach (var item in exercises)
-                {
-                    await _exerciseRepository.DeleteAsync(item);
-                }
-                await _exerciseRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-
-                foreach (var item in questions)
-                {
-                    await _questionRepository.DeleteAsync(item);
-                }
-                await _questionRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-
+                await _sectionConverter.DeleteSectionGroup(sectionGroups, sectionQuestions, questions);
                 finalTest = _finalTestRepository.Update(finalTest);
                 await _finalTestRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 

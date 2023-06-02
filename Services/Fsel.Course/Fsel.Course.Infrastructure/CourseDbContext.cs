@@ -50,6 +50,8 @@ namespace Fsel.Course.Infrastructure
         public DbSet<HomeWorkResult> HomeWorkResults { get; set; }
 
         public DbSet<PlacementTestSection> PlacementTestSections { get; set; }
+        public DbSet<PlacementTestAnswer> PlacementTestAnswers { get; set; }
+        public DbSet<PlacementTestResult> PlacementTestResults { get; set; }
         public DbSet<Section> Sections { get; set; }
         public DbSet<SectionGroup> SectionGroups { get; set; }
         public DbSet<SectionPart> SectionParts { get; set; }
@@ -57,12 +59,22 @@ namespace Fsel.Course.Infrastructure
         public DbSet<SectionTimeCode> SectionTimeCodes { get; set; }
         public DbSet<MockTestSection> MockTestSections { get; set; }
         public DbSet<FinalTest> FinalTests { get; set; }
+        public DbSet<MockTestResult> MockTestResults { get; set; }
+        public DbSet<MockTestAnswer> MockTestAnswers { get; set; }
+        public DbSet<FinalTestSection> FinalTestSections { get; set; }
+        public DbSet<FinalTestAnswer> FinalTestAnswers { get; set; }
+        public DbSet<FinalTestResult> FinalTestResults { get; set; }
+        public DbSet<ClassForumResult> ClassForumResults { get; set; }
+        public DbSet<ClassForumScore> ClassForumScores { get; set; }
+        public DbSet<ClassForumResultFile> ClassForumResultFiles { get; set; }
+        public DbSet<ClassForumFile> ClassForumFiles { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             ArgumentNullException.ThrowIfNull(modelBuilder);
             modelBuilder.ApplyConfiguration(new ClassForumEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new CourseEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new CourseResultEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new CourseTeacherEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new CourseUnitMockTestEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new ExerciseEntityTypeConfiguration());
@@ -91,7 +103,10 @@ namespace Fsel.Course.Infrastructure
             modelBuilder.ApplyConfiguration(new HomeWorkAnswerEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new HomeWorkResultEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new HomeWorkQuestionEntityTypeConfiguration());
+
             modelBuilder.ApplyConfiguration(new PlacementTestSectionEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new PlacementTestAnswerEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new PlacementTestResultEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new SectionEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new SectionGroupEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new SectionPartEntityTypeConfiguration());
@@ -99,6 +114,16 @@ namespace Fsel.Course.Infrastructure
             modelBuilder.ApplyConfiguration(new SectionTimeCodeEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new MockTestSectionEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new FinalTestEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new MockTestEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new MockTestAnswerEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new MockTestResultEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new FinalTestAnswerEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new FinalTestSectionEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new FinalTestResultEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new ClassForumResultEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new ClassForumScoreEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new ClassForumFileEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new ClassForumResultFileEntityTypeConfiguration());
 
             base.OnModelCreating(modelBuilder);
         }
