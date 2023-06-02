@@ -13,6 +13,7 @@ using Fsel.Identity.Domain.IRepositories;
 using Fsel.Identity.Domain.Models.CommandModels.Users;
 using Fsel.Identity.Domain.Models.EntityModels;
 using Fsel.Identity.Infrastructure.ValueSettings;
+using Fsel.Shared.Constants;
 using Fsel.Shared.Enums;
 using MediatR;
 using Microsoft.AspNetCore.Http;
@@ -118,7 +119,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
                     await _userOtpCodeRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
                 }
                 var content = string.Format(CultureInfo.InvariantCulture, _appSetting.ConstantUrl!.ConfirmOtpUrl!, otp) + "  " + "Mã OTP là : " + otp;
-                var subject = StringValues.SendOtpSubject + user.FullName;
+                var subject = SenderSettings.SendOtpSubject + user.FullName;
                 var sendResult = new MethodResult<bool>();
                 if (request != null && request.Email != null)
                 {

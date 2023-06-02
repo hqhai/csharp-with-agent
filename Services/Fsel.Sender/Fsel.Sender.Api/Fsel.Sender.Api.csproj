@@ -7,15 +7,15 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="Resources\ForgotPassword.html" />
-    <None Remove="Resources\SignUp.html" />
+    <None Remove="Resources\SendOtp.html" />
+    <None Remove="Resources\SendOtpAndLink.html" />
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="Resources\ForgotPassword.html">
+    <Content Include="Resources\SendOtp.html">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\SignUp.html">
+    <Content Include="Resources\SendOtpAndLink.html">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

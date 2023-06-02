@@ -2,9 +2,9 @@
 
 namespace Fsel.Shared.Enums
 {
-    public enum EnumResources
+    public enum EnumSenderTemplate
     {
-        Register,
-        FogotPassword
+        SendOtp,
+        SendOtpAndLink
     }
 }

@@ -15,6 +15,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
     using Fsel.Identity.Domain.Enums.ErrorCodes;
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Infrastructure.ValueSettings;
+    using Fsel.Shared.Constants;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Identity;
@@ -76,8 +77,8 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                 _userOtpCodeRepository.Add(userOtpCode);
                 await _userOtpCodeRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             }
-            var content = string.Format(CultureInfo.InvariantCulture, StringValues.SendOtpContent, user.FullName, userOtpCode.OTPCode);
-            var subject = StringValues.SendOtpSubject + $"{userOtpCode.OTPCode}";
+            var content = string.Format(CultureInfo.InvariantCulture, /*StringValues.SendOtpContent*/ string.Empty, user.FullName, userOtpCode.OTPCode);
+            var subject = SenderSettings.SendOtpSubject + $"{userOtpCode.OTPCode}";
             var sendResult = new MethodResult<bool>();
             if (!string.IsNullOrEmpty(request.Email))
             {
