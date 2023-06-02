@@ -7,8 +7,6 @@ using Fsel.Sender.Domain.Models.Commands;
 using Fsel.Shared.Constants;
 using MediatR;
 using Microsoft.AspNetCore.Http;
-using Newtonsoft.Json.Linq;
-using Newtonsoft.Json;
 
 namespace Fsel.Sender.Application.Commands.SendEmailCmd
 {
@@ -41,22 +39,10 @@ namespace Fsel.Sender.Application.Commands.SendEmailCmd
             using StreamReader streamReader = new StreamReader(path);
             var body = await streamReader.ReadToEndAsync(cancellationToken);
 
-            JObject? converted = JsonConvert.DeserializeObject<JObject>(request.Params.Serialize());
-
-            Dictionary<string, string> keyValueMap = new Dictionary<string, string>();
-            if (converted != null)
+            var @params = ObjectHelper.GetDictionary(request.Params);
+            @params.ForEach(item =>
             {
-                foreach (KeyValuePair<string, JToken> keyValuePair in converted)
-                {
-                    keyValueMap.Add(keyValuePair.Key, keyValuePair.Value.ToString());
-                }
-            }
-
-
-            //var @params = ObjectHelper.GetDictionary(request.Params);
-            keyValueMap.ForEach(item =>
-            {
-                body = body.Replace($"[{item.Key}]", item.Value, StringComparison.InvariantCulture);
+                body = body.Replace($"[{item.Key}]", item.Value, StringComparison.CurrentCultureIgnoreCase);
             });
 
             methodResult = await _mediator.Send(new SendEmailCommand
