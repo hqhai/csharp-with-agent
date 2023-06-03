@@ -6,7 +6,9 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
     using Fsel.Identity.Application.Services;
+    using Fsel.Shared.Enums;
     using MediatR;
+    using Refit;
 
     public class SenderCommand : IRequest<MethodResult<bool>>
     {
@@ -14,6 +16,8 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
         public string? PhoneNumber { get; set; }
         public string? Content { get; set; }
         public string? Subject { get; set; }
+        public object? Params { get; set; }
+        public EnumSenderTemplate? Template { get; set; }
     }
 
     public class SendOTPCommandHandler : IRequestHandler<SenderCommand, MethodResult<bool>>
@@ -32,13 +36,25 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
 
             if (!string.IsNullOrEmpty(request.Email))
             {
-                var senderCommandModel = new SendEmailCommandModel
+                var senderCommandModel = new SendEmailByTemplateCommandModel
                 {
                     Content = request.Content,
                     Subject = request.Subject,
+                    Params = request.Params,
+                    Template = request.Template,
                     ToEmails = new List<string> { $"{request.Email}" }
                 };
-                var sendResult = await _senderService.SendEmailAsync(senderCommandModel);
+
+                IApiResponse<MethodResult<bool>> sendResult;
+                if (request.Template.HasValue)
+                {
+                    sendResult = await _senderService.SendEmailAsync(senderCommandModel);
+                }
+                else
+                {
+                    sendResult = await _senderService.SendEmailAsync((SendEmailCommandModel)senderCommandModel);
+                }
+
                 if (!sendResult.IsSuccessStatusCode)
                 {
                     methodResult.AddErrorBadRequest(sendResult.Content?.ErrorMessages);

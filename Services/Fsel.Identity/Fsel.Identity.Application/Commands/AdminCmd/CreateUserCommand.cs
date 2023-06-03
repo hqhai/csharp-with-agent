@@ -15,6 +15,7 @@ using Fsel.Identity.Domain.Models.EntityModels;
 using Fsel.Identity.Infrastructure.ValueSettings;
 using Fsel.Shared.Constants;
 using Fsel.Shared.Enums;
+using Fsel.Shared.Models.SenderTemplates;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -118,12 +119,18 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
                     _userOtpCodeRepository.Add(userOtpCode);
                     await _userOtpCodeRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
                 }
-                var content = string.Format(CultureInfo.InvariantCulture, _appSetting.ConstantUrl!.ConfirmOtpUrl!, otp) + "  " + "Mã OTP là : " + otp;
-                var subject = SenderSettings.SendOtpSubject + user.FullName;
-                var sendResult = new MethodResult<bool>();
-                if (request != null && request.Email != null)
+
+                var param = new SendOtpTemplateModel
                 {
-                    sendResult = await _mediator.Send(new SenderCommand { Email = user.Email, Content = content, Subject = subject }, cancellationToken).ConfigureAwait(false);
+                    OtpCode = otp,
+                    AccessLink = string.Format(CultureInfo.InvariantCulture, _appSetting.ConstantUrl!.ConfirmOtpUrl!, otp),
+                    OtpValidTime = string.Format(CultureInfo.InvariantCulture, SenderSettings.OtpValidDay, _appSetting!.Otp!.StepDayWithAdmin)
+                };
+                var subject = string.Format(CultureInfo.InvariantCulture, SenderSettings.SendOtpSubjectFullName, user.FullName);
+                var sendResult = new MethodResult<bool>();
+                if (!string.IsNullOrEmpty(request.Email))
+                {
+                    sendResult = await _mediator.Send(new SenderCommand { Email = user.Email, Subject = subject, Params = param, Template = EnumSenderTemplate.SendOtpAndLink }, cancellationToken).ConfigureAwait(false);
                 }
 
                 if (!sendResult.IsOK)

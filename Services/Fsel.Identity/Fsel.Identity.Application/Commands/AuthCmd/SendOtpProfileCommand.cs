@@ -16,6 +16,8 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Infrastructure.ValueSettings;
     using Fsel.Shared.Constants;
+    using Fsel.Shared.Enums;
+    using Fsel.Shared.Models.SenderTemplates;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Identity;
@@ -77,16 +79,21 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                 _userOtpCodeRepository.Add(userOtpCode);
                 await _userOtpCodeRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             }
-            var content = string.Format(CultureInfo.InvariantCulture, /*StringValues.SendOtpContent*/ string.Empty, user.FullName, userOtpCode.OTPCode);
-            var subject = SenderSettings.SendOtpSubject + $"{userOtpCode.OTPCode}";
+
+            var param = new SendOtpTemplateModel
+            {
+                OtpCode = userOtpCode.OTPCode,
+                OtpValidTime = string.Format(CultureInfo.InvariantCulture, SenderSettings.OtpValidDay, _appSetting!.Otp!.StepDayWithAdmin)
+            };
+            var subject = string.Format(CultureInfo.InvariantCulture, SenderSettings.SendOtpSubjectFullName, user.FullName);
             var sendResult = new MethodResult<bool>();
             if (!string.IsNullOrEmpty(request.Email))
             {
-                sendResult = await _mediator.Send(new SenderCommand { Email = request.Email, Content = content, Subject = subject }, cancellationToken).ConfigureAwait(false);
+                sendResult = await _mediator.Send(new SenderCommand { Email = user.Email, Subject = subject, Params = param, Template = EnumSenderTemplate.SendOtp }, cancellationToken).ConfigureAwait(false);
             }
             else if (!string.IsNullOrEmpty(request.PhoneNumber))
             {
-                sendResult = await _mediator.Send(new SenderCommand { Email = user.Email, Content = content, Subject = subject }, cancellationToken).ConfigureAwait(false);
+                sendResult = await _mediator.Send(new SenderCommand { Email = user.Email, Subject = subject }, cancellationToken).ConfigureAwait(false);
             }
 
             if (!sendResult.IsOK)
