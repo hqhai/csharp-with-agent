@@ -81,5 +81,17 @@ namespace Fsel.Identity.Api.Controllers
             return commandResult.GetActionResult();
         }
 
+        /// <summary>
+        /// Get List User Profile
+        /// </summary>
+        [Authorize]
+        [HttpGet("get-list-user-profile")]
+        [ProducesResponseType(typeof(MethodResult<IList<UserProfileModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetListProfileUser()
+        {
+            MethodResult<IList<UserProfileModel>> commandResult = await _mediator.Send(new GetListUserProfileQuery()).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
     }
 }
