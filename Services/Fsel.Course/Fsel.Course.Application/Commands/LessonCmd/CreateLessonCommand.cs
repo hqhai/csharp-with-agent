@@ -115,6 +115,11 @@ namespace Fsel.Course.Application.Commands.LessonCmd
 
             await _lessonRepository.ExecuteTransactionAsync(async () =>
             {
+                classForum.ClassForumFiles = request.ClassForum.FilePaths!.Select(x => new ClassForumFile
+                {
+                    FilePath = x,
+                }).ToList();
+
                 lesson.LessonHomeWorks = request.HomeWorkIds.Select((x) => new LessonHomeWork
                 {
                     HomeWorkId = x
