@@ -121,7 +121,7 @@ namespace Fsel.Storage.Application.Services.AmazonS3Services
                     return result;
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 result.AddErrorServer();
                 return result;

@@ -5,7 +5,6 @@ using System.Text;
 using System.Transactions;
 using AutoMapper;
 using Fsel.Common.ActionResults;
-using Fsel.Common.Constants;
 using Fsel.Common.Helpers;
 using Fsel.Identity.Domain.Entities;
 using Fsel.Identity.Domain.Enums;
@@ -14,6 +13,9 @@ using Fsel.Identity.Domain.IRepositories;
 using Fsel.Identity.Domain.Models.CommandModels.Auths;
 using Fsel.Identity.Domain.Models.EntityModels;
 using Fsel.Identity.Infrastructure.ValueSettings;
+using Fsel.Shared.Constants;
+using Fsel.Shared.Enums;
+using Fsel.Shared.Models.SenderTemplates;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -69,6 +71,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                     {
                         try
                         {
+                            ArgumentNullException.ThrowIfNull(request);
                             var role = await _roleManager.FindByNameAsync(request?.Role.ToString() ?? string.Empty);
                             if (role == null)
                             {
@@ -131,13 +134,23 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                                 _userOtpCodeRepository.Update(userOtpCode);
                                 await _userOtpCodeRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
                             }
-                            var content = string.Format(CultureInfo.InvariantCulture, StringValues.SendOtpContent, user.FullName, otp);
-                            var subject = StringValues.SendOtpSubject + $"{otp}";
 
-                            MethodResult<bool> sendResult = new MethodResult<bool>();
-                            if (request != null && request.Email != null)
+                            var param = new SendOtpTemplateModel
                             {
-                                sendResult = await _mediator.Send(new SenderCommand { Email = user.Email, Content = content, Subject = subject }, cancellationToken).ConfigureAwait(false);
+                                OtpCode = userOtpCode.OTPCode,
+                                OtpValidTime = string.Format(CultureInfo.InvariantCulture, SenderSettings.OtpValidMinute, _appSetting!.Otp!.StepTime)
+                            };
+                            var subject = string.Format(CultureInfo.InvariantCulture, SenderSettings.SendOtpSubjectFullName, user.FullName);
+                            var sendResult = new MethodResult<bool>();
+
+                            ArgumentNullException.ThrowIfNull(request);
+                            if (!string.IsNullOrEmpty(request.Email))
+                            {
+                                sendResult = await _mediator.Send(new SenderCommand { Email = user.Email, Subject = subject, Params = param, Template = EnumSenderTemplate.SendOtp }, cancellationToken).ConfigureAwait(false);
+                            }
+                            else if (!string.IsNullOrEmpty(request.PhoneNumber))
+                            {
+                                sendResult = await _mediator.Send(new SenderCommand { Email = user.Email, Subject = subject }, cancellationToken).ConfigureAwait(false);
                             }
 
                             if (!sendResult.IsOK)

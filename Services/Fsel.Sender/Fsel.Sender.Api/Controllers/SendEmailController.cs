@@ -10,7 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace Fsel.Sender.Api.Controllers
 {
     [ApiVersion(Settings.APIVersion)]
-    [Route(Settings.APIDefaultRoute + "/sender")]
+    [Route(Settings.APIDefaultRoute + "/send-email")]
     [ApiController]
     public class SendEmailController : ControllerBase
     {
@@ -28,6 +28,18 @@ namespace Fsel.Sender.Api.Controllers
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> SendEmail([FromBody] SendEmailCommand command)
+        {
+            MethodResult<bool> commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// SendMail
+        /// </summary>
+        [HttpPost("send-by-template")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> SendEmail([FromBody] SendEmailByTemplateCommand command)
         {
             MethodResult<bool> commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();
