@@ -10,8 +10,10 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
     using Fsel.Interaction.Domain.Entities;
     using Fsel.Interaction.Domain.IRepositories;
     using Fsel.Interaction.Domain.Models.CommandModels.Comments;
+    using Fsel.Interaction.Infrastructure.Repositories;
     using MediatR;
     using Microsoft.AspNetCore.Http;
+    using Microsoft.EntityFrameworkCore;
 
     public class CreateCommentCommand : CreateCommentCommandModel, IRequest<MethodResult<bool>>
     {
@@ -35,7 +37,7 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<bool> methodResult = new MethodResult<bool>();
             Comments comments = _mapper.Map<Comments>(request);
-
+            await _commentRepository.Queryable.FirstOrDefaultAsync(x => x.ObjectId == request.ObjectId, cancellationToken);
             comments.UserId = _authContext.CurrentUserId;
             if (!comments.IsValid())
             {

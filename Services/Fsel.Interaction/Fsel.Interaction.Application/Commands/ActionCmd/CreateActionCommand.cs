@@ -15,6 +15,7 @@ namespace Fsel.Interaction.Application.Commands.ActionCmd
     using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Http;
+    using Microsoft.EntityFrameworkCore;
 
     public class CreateActionCommand : CreateActionCommandModel, IRequest<MethodResult<bool>>
     {
@@ -39,14 +40,17 @@ namespace Fsel.Interaction.Application.Commands.ActionCmd
             MethodResult<bool> methodResult = new MethodResult<bool>();
             InteractionActions actions = _mapper.Map<InteractionActions>(request);
             actions.UserId = _authContext.CurrentUserId;
+
             if (!actions.IsValid())
             {
                 methodResult.AddErrorBadRequest(actions.ErrorMessages);
                 return methodResult;
             }
+
+            await _interactionActionRepository.Queryable.FirstOrDefaultAsync(x => x.ObjectId == request.ObjectId, cancellationToken);
+
             await _interactionActionRepository.ExecuteTransactionAsync(async () =>
             {
-                actions.Type = EnumInteractionActionType.Like;
                 actions = _interactionActionRepository.Add(actions);
                 await _interactionActionRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 

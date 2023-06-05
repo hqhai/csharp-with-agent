@@ -6,7 +6,7 @@ namespace Fsel.Interaction.Domain.Models.CommandModels.Actions
 
     public class CreateActionCommandModel
     {
-        public Guid Id { get; set; }
+        public Guid ObjectId { get; set; }
         public EnumInteractionActionType Type { get; set; }
     }
 }
