@@ -115,11 +115,6 @@ namespace Fsel.Course.Application.Commands.LessonCmd
 
             await _lessonRepository.ExecuteTransactionAsync(async () =>
             {
-                classForum.ClassForumFiles = request.ClassForum.FilePaths!.Select(x => new ClassForumFile
-                {
-                    FilePath = x,
-                }).ToList();
-
                 lesson.LessonHomeWorks = request.HomeWorkIds.Select((x) => new LessonHomeWork
                 {
                     HomeWorkId = x
@@ -136,8 +131,12 @@ namespace Fsel.Course.Application.Commands.LessonCmd
                 lesson.LessonInstructions = _mapper.Map<IList<LessonInstruction>>(request.LessonInstructions);
 
                 classForum.LessonId = lesson.Id;
-                lesson.ClassForum = classForum;
+                classForum.ClassForumFiles = request.ClassForum.FilePaths!.Select(x => new ClassForumFile
+                {
+                    FilePath = x,
+                }).ToList();
 
+                lesson.ClassForum = classForum;
                 lesson = _lessonRepository.Add(lesson);
                 await _lessonRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
