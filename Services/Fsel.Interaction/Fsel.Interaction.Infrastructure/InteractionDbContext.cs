@@ -30,8 +30,8 @@ namespace Fsel.Interaction.Infrastructure
 
         public DbSet<SurveyQuestion> SurveyQuestions { get; set; }
         public DbSet<CustomerSurvey> CustomerSurveys { get; set; }
-        public DbSet<InteractionActions> InteractionActions { get; set; }
-        public DbSet<Comments> Comments { get; set; }
+        public DbSet<InteractionAction> InteractionActions { get; set; }
+        public DbSet<Comment> Comments { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {

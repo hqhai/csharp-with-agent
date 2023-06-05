@@ -20,12 +20,12 @@ namespace Fsel.Interaction.Application.Queries.InteractionQuery
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class GetLikeCommentByObjectId : IRequest<MethodResult<IList<ListCommentModel>>>
+    public class GetCommentsByObjectId : IRequest<MethodResult<IList<ListCommentModel>>>
     {
         public Guid ObjectId { get; set; }
     }
 
-    public class GetLikeCommentByObjectIdHandler : IRequestHandler<GetLikeCommentByObjectId, MethodResult<IList<ListCommentModel>>>
+    public class GetLikeCommentByObjectIdHandler : IRequestHandler<GetCommentsByObjectId, MethodResult<IList<ListCommentModel>>>
     {
         private readonly ICommentRepository _commentRepository;
         private readonly IInteractionActionRepository _interactionActionRepository;
@@ -46,7 +46,7 @@ namespace Fsel.Interaction.Application.Queries.InteractionQuery
             _userService = userService;
         }
 
-        public async Task<MethodResult<IList<ListCommentModel>>> Handle(GetLikeCommentByObjectId request, CancellationToken cancellationToken)
+        public async Task<MethodResult<IList<ListCommentModel>>> Handle(GetCommentsByObjectId request, CancellationToken cancellationToken)
         {
             MethodResult<IList<ListCommentModel>> methodResult = new MethodResult<IList<ListCommentModel>>();
             ArgumentNullException.ThrowIfNull(request);
@@ -67,7 +67,7 @@ namespace Fsel.Interaction.Application.Queries.InteractionQuery
             return methodResult;
         }
 
-        public async Task<CommentModel> Get(Comments x)
+        public async Task<CommentModel> Get(Comment x)
         {
             return new CommentModel
             {
@@ -81,7 +81,7 @@ namespace Fsel.Interaction.Application.Queries.InteractionQuery
             };
         }
 
-        public async Task<IList<CommentModel>?> ListCommentModelAsync(Comments comment)
+        public async Task<IList<CommentModel>?> ListCommentModelAsync(Comment comment)
         {
             var commentModel = _mapper.Map<CommentModel>(comment);
 

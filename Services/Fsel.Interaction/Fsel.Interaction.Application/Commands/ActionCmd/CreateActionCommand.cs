@@ -38,7 +38,7 @@ namespace Fsel.Interaction.Application.Commands.ActionCmd
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<bool> methodResult = new MethodResult<bool>();
-            InteractionActions actions = _mapper.Map<InteractionActions>(request);
+            InteractionAction actions = _mapper.Map<InteractionAction>(request);
             actions.UserId = _authContext.CurrentUserId;
 
             if (!actions.IsValid())

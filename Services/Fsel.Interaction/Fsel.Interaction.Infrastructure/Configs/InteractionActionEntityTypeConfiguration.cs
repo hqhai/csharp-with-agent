@@ -8,9 +8,9 @@ namespace Fsel.Interaction.Infrastructure.Configs
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-    public class InteractionActionEntityTypeConfiguration : IEntityTypeConfiguration<InteractionActions>
+    public class InteractionActionEntityTypeConfiguration : IEntityTypeConfiguration<InteractionAction>
     {
-        public void Configure(EntityTypeBuilder<InteractionActions> builder)
+        public void Configure(EntityTypeBuilder<InteractionAction> builder)
         {
             ArgumentNullException.ThrowIfNull(builder);
             builder.Property(e => e.Type)

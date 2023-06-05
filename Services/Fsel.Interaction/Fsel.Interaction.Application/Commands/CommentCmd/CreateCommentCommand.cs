@@ -36,18 +36,18 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<bool> methodResult = new MethodResult<bool>();
-            Comments comments = _mapper.Map<Comments>(request);
+            Comment comment = _mapper.Map<Comment>(request);
             await _commentRepository.Queryable.FirstOrDefaultAsync(x => x.ObjectId == request.ObjectId, cancellationToken);
-            comments.UserId = _authContext.CurrentUserId;
-            if (!comments.IsValid())
+            comment.UserId = _authContext.CurrentUserId;
+            if (!comment.IsValid())
             {
-                methodResult.AddErrorBadRequest(comments.ErrorMessages);
+                methodResult.AddErrorBadRequest(comment.ErrorMessages);
                 return methodResult;
             }
             await _commentRepository.ExecuteTransactionAsync(async () =>
             {
-                comments.Status = Shared.Enums.EnumCommentStatus.Normal;
-                comments = _commentRepository.Add(comments);
+                comment.Status = Shared.Enums.EnumCommentStatus.Normal;
+                comment = _commentRepository.Add(comment);
                 await _commentRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
                 methodResult.StatusCode = StatusCodes.Status201Created;

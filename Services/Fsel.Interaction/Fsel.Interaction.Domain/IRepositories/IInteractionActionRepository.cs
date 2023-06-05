@@ -10,7 +10,7 @@ namespace Fsel.Interaction.Domain.IRepositories
     using Fsel.Core.Base.Interfaces;
     using Fsel.Interaction.Domain.Entities;
 
-    public interface IInteractionActionRepository : IRepository<InteractionActions>
+    public interface IInteractionActionRepository : IRepository<InteractionAction>
     {
     }
 }

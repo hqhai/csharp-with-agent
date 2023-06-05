@@ -13,7 +13,7 @@ namespace Fsel.Interaction.Api.Controllers
     using Fsel.Interaction.Application.Queries.InteractionQuery;
 
     [ApiVersion(Settings.APIVersion)]
-    [Route(Settings.APIDefaultRoute + "/interaction-comment")]
+    [Route(Settings.APIDefaultRoute + "/comment")]
     [ApiController]
     public class CommentController : ControllerBase
     {
@@ -27,10 +27,10 @@ namespace Fsel.Interaction.Api.Controllers
         /// <summary>
         /// Create action
         /// </summary>
-        [HttpPost("interaction-comment")]
+        [HttpPost]
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> CreateAnswer([FromBody] CreateCommentCommand command)
+        public async Task<IActionResult> Create([FromBody] CreateCommentCommand command)
         {
             MethodResult<bool> queryResult = await _mediator.Send(command).ConfigureAwait(false);
             return queryResult.GetActionResult();
@@ -42,7 +42,7 @@ namespace Fsel.Interaction.Api.Controllers
         [HttpGet]
         [ProducesResponseType(typeof(MethodResult<IList<ListCommentModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> Get([FromQuery] GetLikeCommentByObjectId command)
+        public async Task<IActionResult> Get([FromQuery] GetCommentsByObjectId command)
         {
             MethodResult<IList<ListCommentModel>> queryResult = await _mediator.Send(command).ConfigureAwait(false);
             return queryResult.GetActionResult();

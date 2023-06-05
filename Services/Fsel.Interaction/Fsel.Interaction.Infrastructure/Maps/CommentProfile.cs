@@ -12,8 +12,8 @@ namespace Fsel.Interaction.Infrastructure.Maps
     {
         public CommentProfile()
         {
-            CreateMap<Comments, CommentModel>().IgnoreAllNonExisting();
-            CreateMap<CreateCommentCommandModel, Comments>().IgnoreAllNonExisting();
+            CreateMap<Comment, CommentModel>().IgnoreAllNonExisting();
+            CreateMap<CreateCommentCommandModel, Comment>().IgnoreAllNonExisting();
         }
     }
 }

@@ -24,10 +24,10 @@ namespace Fsel.Interaction.Api.Controllers
         /// <summary>
         /// Create action
         /// </summary>
-        [HttpPost("interaction-action")]
+        [HttpPost]
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> CreateAnswer([FromBody] CreateActionCommand command)
+        public async Task<IActionResult> Create([FromBody] CreateActionCommand command)
         {
             MethodResult<bool> queryResult = await _mediator.Send(command).ConfigureAwait(false);
             return queryResult.GetActionResult();

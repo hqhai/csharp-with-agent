@@ -6,7 +6,7 @@ namespace Fsel.Interaction.Infrastructure.Repositories
     using Fsel.Interaction.Domain.Entities;
     using Fsel.Interaction.Domain.IRepositories;
 
-    public class CommentRepository : BaseRepository<Comments>, ICommentRepository
+    public class CommentRepository : BaseRepository<Comment>, ICommentRepository
     {
         public CommentRepository(InteractionDbContext dbContext, AuthContext authContext) : base(dbContext, authContext)
         {

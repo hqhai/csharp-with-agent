@@ -8,9 +8,9 @@ namespace Fsel.Interaction.Infrastructure.Configs
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-    public class CommentEntityTypeConfiguration : IEntityTypeConfiguration<Comments>
+    public class CommentEntityTypeConfiguration : IEntityTypeConfiguration<Comment>
     {
-        public void Configure(EntityTypeBuilder<Comments> builder)
+        public void Configure(EntityTypeBuilder<Comment> builder)
         {
             ArgumentNullException.ThrowIfNull(builder);
             builder.Property(e => e.Status)

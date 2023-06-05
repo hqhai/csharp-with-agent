@@ -18,6 +18,6 @@ namespace Fsel.Interaction.Domain.Models.EntityModels
         public EnumSurveyQuestion Type { get; set; }
         public object? Answers { get; set; }
 
-        public IList<InteractionActions>? CustomerSurveys { get; set; }
+        public IList<CustomerSurvey>? CustomerSurveys { get; set; }
     }
 }
