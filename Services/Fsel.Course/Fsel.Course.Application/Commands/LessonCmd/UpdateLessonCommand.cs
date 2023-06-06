@@ -115,6 +115,7 @@ namespace Fsel.Course.Application.Commands.LessonCmd
                 methodResult.AddErrorBadRequest(nameof(EnumLessonErrorCode.LessonNameIsExist), nameof(request.Name), request.Name);
                 return methodResult;
             }
+
             #endregion Validation
 
             await _lessonRepository.ExecuteTransactionAsync(async () =>
@@ -132,10 +133,17 @@ namespace Fsel.Course.Application.Commands.LessonCmd
                     VideoId = x
                 }).ToList();
 
-                _mapper.Map(request.ClassForum, lesson.ClassForum);
                 lesson.LessonInstructions = _mapper.Map<IList<LessonInstruction>>(request.LessonInstructions);
                 _mapper.Map(request, lesson);
 
+                if (lesson.ClassForum != null)
+                {
+                    _mapper.Map(request.ClassForum, lesson.ClassForum);
+                    lesson.ClassForum.ClassForumFiles = request.ClassForum?.FilePaths?.Select(x => new ClassForumFile
+                    {
+                        FilePath = x,
+                    }).ToList();
+                }
                 lesson = _lessonRepository.Update(lesson);
                 await _lessonRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 

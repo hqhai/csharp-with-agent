@@ -6,6 +6,7 @@ using Fsel.Common.Helpers;
 using Fsel.Sender.Domain.Models.Commands;
 using Fsel.Sender.Domain.Models.Entities;
 using Fsel.Sender.Domain.ValueSettings;
+using Fsel.Shared.Constants;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using MimeKit;
@@ -16,11 +17,11 @@ namespace Fsel.Sender.Application.Commands.SendEmailCmd
     {
     }
 
-    public class LoginCommandHandler : IRequestHandler<SendEmailCommand, MethodResult<bool>>
+    public class SendEmailCommandHandler : IRequestHandler<SendEmailCommand, MethodResult<bool>>
     {
         private readonly AppSetting _appSetting;
 
-        public LoginCommandHandler(AppSetting appSetting)
+        public SendEmailCommandHandler(AppSetting appSetting)
         {
             _appSetting = appSetting;
         }
@@ -60,13 +61,13 @@ namespace Fsel.Sender.Application.Commands.SendEmailCmd
         private MimeMessage CreateEmailMessage(SendEmailModel message)
         {
             var emailMessage = new MimeMessage();
-            emailMessage.From.Add(new MailboxAddress(StringValues.SendOtpSubject, _appSetting?.Smtp?.From ?? string.Empty));
+            emailMessage.From.Add(new MailboxAddress(SenderSettings.HostName, _appSetting?.Smtp?.From ?? string.Empty));
 
             if (message.ToEmails != null && message.ToEmails.IsValidEmail())
             {
                 foreach (var item in message.ToEmails)
                 {
-                    emailMessage.To.Add(new MailboxAddress(StringValues.SendOtpSubject, item));
+                    emailMessage.To.Add(new MailboxAddress(item, item));
                 }
             }
 
@@ -74,7 +75,7 @@ namespace Fsel.Sender.Application.Commands.SendEmailCmd
             {
                 foreach (var item in message.BccEmails)
                 {
-                    emailMessage.Bcc.Add(new MailboxAddress(StringValues.SendOtpSubject, item));
+                    emailMessage.Bcc.Add(new MailboxAddress(item, item));
                 }
             }
 
@@ -82,12 +83,12 @@ namespace Fsel.Sender.Application.Commands.SendEmailCmd
             {
                 foreach (var item in message.CcEmails)
                 {
-                    emailMessage.Cc.Add(new MailboxAddress(StringValues.SendOtpSubject, item));
+                    emailMessage.Cc.Add(new MailboxAddress(item, item));
                 }
             }
 
             emailMessage.Subject = message.Subject;
-            emailMessage.Body = new TextPart(MimeKit.Text.TextFormat.Text) { Text = message.Content };
+            emailMessage.Body = new TextPart(MimeKit.Text.TextFormat.Html) { Text = message.Content };
 
             return emailMessage;
         }

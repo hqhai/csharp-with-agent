@@ -21,8 +21,6 @@ namespace Fsel.Course.Domain.Models.EntityModels
 
         public Guid? LessonId { get; set; }
 
-        public LessonModel? Lesson { get; set; }
-
         public IList<ClassForumFileModel>? ClassForumFiles { get; set; }
 
         public IList<ClassForumResultModel>? ClassForumResults { get; set; }

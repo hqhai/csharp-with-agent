@@ -1,9 +1,5 @@
 // Copyright (c) Atlantic. All rights reserved.
-using System.Net;
-using Fsel.Common.ActionResults;
 using Fsel.Common.Constants;
-using Fsel.Course.Application.Commands.ClassForumCmd;
-using Fsel.Course.Domain.Models.EntityModels;
 using Fsel.Shared.Enums;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -22,18 +18,6 @@ namespace Fsel.Course.Lcms.Api.Controllers
         public ClassForumController(IMediator mediator)
         {
             _mediator = mediator;
-        }
-
-        /// <summary>
-        /// Create/Update a Class Forum
-        /// </summary>
-        [HttpPost]
-        [ProducesResponseType(typeof(MethodResult<ClassForumModel>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> Create([FromBody] CreateClassForumCommand command)
-        {
-            MethodResult<ClassForumModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
-            return commandResult.GetActionResult();
         }
     }
 }

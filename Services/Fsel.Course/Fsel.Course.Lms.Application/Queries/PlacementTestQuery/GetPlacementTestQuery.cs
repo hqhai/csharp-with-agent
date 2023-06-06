@@ -149,7 +149,7 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestQuery
                 {
                     Sections = sectionsResult,
                     CourseSkill = skill,
-                    ExecutionTime = skill == EnumCourseSkill.Listening ? PlacementTestValue.ListeningExecutionTime : PlacementTestValue.ReadingExecutionTime,
+                    ExecutionTime = skill == EnumCourseSkill.Listening ? PlacementTestSettings.ListeningExecutionTime : PlacementTestSettings.ReadingExecutionTime,
                 });
                 if (sectionGroupModel != null)
                 {
