@@ -14,8 +14,7 @@ namespace Fsel.Course.Domain.Models.CommandModels.Videos
         public string? SubFilePath { get; set; }
         public EnumVideoType Type { get; set; }
         public Guid TeacherId { get; set; }
-
         public EnumCourseLevel CourseLevel { get; set; }
-        public IList<UpdateVideoTimeCodeCommandModel>? VideoTimeCodes { get; set; }
+        public IList<CreateVideoTimeCodeCommandModel>? VideoTimeCodes { get; set; }
     }
 }

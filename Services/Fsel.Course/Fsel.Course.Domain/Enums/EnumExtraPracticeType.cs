@@ -2,12 +2,23 @@
 
 namespace Fsel.Course.Domain.Enums
 {
+    using System.ComponentModel;
+
     public enum EnumExtraPracticeType
     {
-        VideoLink,
-        VideoTimeCode,
+        [Description("Video embed")]
+        VideoEmbed,
+
+        [Description("Interactive Video")]
+        InteractiveVideo,
+
+        [Description("Book")]
         Book,
+
+        [Description("Exercise")]
         Exercise,
-        Article
+
+        [Description("Articles")]
+        Articles
     }
 }

@@ -29,7 +29,7 @@ namespace Fsel.Ordering.Api.Controllers
         /// <summary>
         /// Generate Ramdom Order
         /// </summary>
-        [HttpGet]
+        [HttpGet("")]
         [ProducesResponseType(typeof(MethodResult<GenerateRamdomOrderModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GenerateRamdomOrder([FromQuery] GenerateRamdomOrderQuery query)
