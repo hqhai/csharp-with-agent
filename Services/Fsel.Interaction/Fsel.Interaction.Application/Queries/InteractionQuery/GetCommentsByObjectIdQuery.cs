@@ -10,6 +10,7 @@ namespace Fsel.Interaction.Application.Queries.InteractionQuery
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base;
+    using Fsel.Interaction.Application.Services.UserServices;
     using Fsel.Interaction.Application.Services.UserServices.Models;
     using Fsel.Interaction.Domain.Entities;
     using Fsel.Interaction.Domain.Enums.ErrorCodes;
@@ -55,6 +56,16 @@ namespace Fsel.Interaction.Application.Queries.InteractionQuery
                             .Queryable
                             .Where(x => x.Status == EnumCommentStatus.Normal || x.UserId == _authContext.CurrentUserId)
                             .Select(x => Get(x)).ToListAsync(cancellationToken);
+            /*.Select(x => new CommentModel
+            {
+                Id = x.Id,
+                Content = x.Content,
+                Status = x.Status,
+                LikeNumber = x.LikeNumber,
+                CreatedDate = x.CreatedDate,
+                CreatedFullName = x.CreatedFullName,
+                Comments = ListCommentModelAsync(x),
+            }).ToListAsync(cancellationToken);*/
 
             if (comment == null)
             {
