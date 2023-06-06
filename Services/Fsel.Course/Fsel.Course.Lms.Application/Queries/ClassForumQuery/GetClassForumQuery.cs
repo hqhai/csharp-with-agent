@@ -71,13 +71,13 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumQuery
                 methodResult.AddErrorBadRequest(nameof(EnumClassForumErrorCode.ClassForumNotExist));
                 return methodResult;
             }
+            var classForumModel = _mapper.Map<ClassForumModel>(classForum);
 
             var classForumResult = await _classForumResultRepository.Queryable
                 .Include(x => x.ClassForumResultFiles)
                 .Include(x => x.ClassForumScores)
                 .FirstOrDefaultAsync(x => x.ClassForumId == classForum.Id && x.LessonResultId == request.LessonResultId, cancellationToken);
 
-            var classForumModel = _mapper.Map<ClassForumModel>(classForum);
             classForumModel.ClassForumResultCurrentStudent = _mapper.Map<ClassForumResultModel>(classForumResult);
 
             if (classForumResult != null && classForumResult.Status != EnumClassForumResultStatus.Draft)
@@ -85,7 +85,9 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumQuery
                 var classForumResults = await _classForumResultRepository.Queryable
                     .Include(x => x.ClassForumResultFiles)
                     .Include(x => x.ClassForumScores)
-                    .Where(x => x.ClassForumId == classForum.Id && x.Id != classForumResult.Id)
+                    .Where(x => x.ClassForumId == classForum.Id &&
+                                x.Status != EnumClassForumResultStatus.Draft &&
+                                x.Id != classForumResult.Id)
                     .ToListAsync(cancellationToken);
 
                 classForumModel.ClassForumResultAllStudents = _mapper.Map<IList<ClassForumResultModel>>(classForumResults);
