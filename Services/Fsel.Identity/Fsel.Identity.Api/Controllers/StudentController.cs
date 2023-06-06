@@ -86,7 +86,7 @@ namespace Fsel.Identity.Api.Controllers
         /// <summary>
         /// Get list user by Ids
         /// </summary>
-        [HttpPost("get-by-ids")]
+        [HttpPost("get-by-user-ids")]
         [ProducesResponseType(typeof(MethodResult<IList<TeacherModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetByIds([FromBody] GetStudentByUserIdsQuery query)

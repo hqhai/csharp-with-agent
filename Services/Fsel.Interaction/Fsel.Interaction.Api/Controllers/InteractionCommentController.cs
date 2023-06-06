@@ -40,11 +40,11 @@ namespace Fsel.Interaction.Api.Controllers
         /// get comment
         /// </summary>
         [HttpGet]
-        [ProducesResponseType(typeof(MethodResult<IList<ListCommentModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(MethodResult<IList<CommentModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> Get([FromQuery] GetCommentsByObjectId command)
+        public async Task<IActionResult> Get([FromQuery] GetCommentsByObjectIdQuery command)
         {
-            MethodResult<IList<ListCommentModel>> queryResult = await _mediator.Send(command).ConfigureAwait(false);
+            MethodResult<IList<CommentModel>> queryResult = await _mediator.Send(command).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
     }

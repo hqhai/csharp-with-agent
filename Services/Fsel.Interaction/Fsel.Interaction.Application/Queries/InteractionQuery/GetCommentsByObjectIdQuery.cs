@@ -20,12 +20,12 @@ namespace Fsel.Interaction.Application.Queries.InteractionQuery
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class GetCommentsByObjectId : IRequest<MethodResult<IList<ListCommentModel>>>
+    public class GetCommentsByObjectIdQuery : IRequest<MethodResult<IList<CommentModel>>>
     {
         public Guid ObjectId { get; set; }
     }
 
-    public class GetLikeCommentByObjectIdHandler : IRequestHandler<GetCommentsByObjectId, MethodResult<IList<ListCommentModel>>>
+    public class GetCommentsByObjectIdQueryHandler : IRequestHandler<GetCommentsByObjectIdQuery, MethodResult<IList<CommentModel>>>
     {
         private readonly ICommentRepository _commentRepository;
         private readonly IInteractionActionRepository _interactionActionRepository;
@@ -33,7 +33,7 @@ namespace Fsel.Interaction.Application.Queries.InteractionQuery
         private readonly AuthContext _authContext;
         private readonly IUserService _userService;
 
-        public GetLikeCommentByObjectIdHandler(ICommentRepository commentRepository
+        public GetCommentsByObjectIdQueryHandler(ICommentRepository commentRepository
             , IInteractionActionRepository interactionActionRepository
             , IMapper mapper
             , AuthContext authContext
@@ -46,9 +46,9 @@ namespace Fsel.Interaction.Application.Queries.InteractionQuery
             _userService = userService;
         }
 
-        public async Task<MethodResult<IList<ListCommentModel>>> Handle(GetCommentsByObjectId request, CancellationToken cancellationToken)
+        public async Task<MethodResult<IList<CommentModel>>> Handle(GetCommentsByObjectIdQuery request, CancellationToken cancellationToken)
         {
-            MethodResult<IList<ListCommentModel>> methodResult = new MethodResult<IList<ListCommentModel>>();
+            MethodResult<IList<CommentModel>> methodResult = new MethodResult<IList<CommentModel>>();
             ArgumentNullException.ThrowIfNull(request);
 
             var comment = await _commentRepository
@@ -62,7 +62,7 @@ namespace Fsel.Interaction.Application.Queries.InteractionQuery
                 return methodResult;
             }
 
-            methodResult.Result = _mapper.Map<IList<ListCommentModel>>(comment);
+            methodResult.Result = _mapper.Map<IList<CommentModel>>(comment);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }
