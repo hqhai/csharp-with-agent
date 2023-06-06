@@ -62,7 +62,7 @@ namespace Fsel.Interaction.Application.Queries.InteractionQuery
             var commentQuery = from c in _commentRepository.Queryable
                                join ca in _interactionActionRepository.Queryable on c.Id equals ca.ObjectId into caJ
                                from p in caJ.DefaultIfEmpty()
-                               where c.Id == objectId && (p == null || (p.Type != EnumInteractionActionType.Disable && p.UserId == _authContext.CurrentUserId))
+                               where c.ObjectId == objectId && (p == null || (p.Type != EnumInteractionActionType.Disable && p.UserId == _authContext.CurrentUserId))
                                select c;
 
             var comments = await commentQuery.ToListAsync();
@@ -75,7 +75,7 @@ namespace Fsel.Interaction.Application.Queries.InteractionQuery
                 foreach (var item in commentModels)
                 {
                     var actionLikes = _interactionActionRepository.Queryable.Where(x => x.ObjectId == item.Id && x.Type == EnumInteractionActionType.Like).ToList();
-                    item.Comments = await GetCommentsByObjectIdAsync(item.ObjectId);
+                    item.Comments = await GetCommentsByObjectIdAsync(item.Id);
                     item.CommentNumber = item.Comments?.Count ?? default;
                     item.LikeNumber = actionLikes.Count;
                     item.IsLiked = actionLikes.Any(x => x.UserId == _authContext.CurrentUserId);
