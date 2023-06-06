@@ -11,7 +11,6 @@ namespace Fsel.Interaction.Application.Queries.InteractionQuery
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base;
     using Fsel.Interaction.Application.Services.UserServices;
-    using Fsel.Interaction.Application.Services.UserServices.Models;
     using Fsel.Interaction.Domain.Entities;
     using Fsel.Interaction.Domain.Enums.ErrorCodes;
     using Fsel.Interaction.Domain.IRepositories;
@@ -49,81 +48,34 @@ namespace Fsel.Interaction.Application.Queries.InteractionQuery
 
         public async Task<MethodResult<IList<CommentModel>>> Handle(GetCommentsByObjectIdQuery request, CancellationToken cancellationToken)
         {
-            MethodResult<IList<CommentModel>> methodResult = new MethodResult<IList<CommentModel>>();
             ArgumentNullException.ThrowIfNull(request);
 
-            var comment = await _commentRepository
-                            .Queryable
-                            .Where(x => x.Status == EnumCommentStatus.Normal || x.UserId == _authContext.CurrentUserId)
-                            .Select(x => Get(x)).ToListAsync(cancellationToken);
-            /*.Select(x => new CommentModel
-            {
-                Id = x.Id,
-                Content = x.Content,
-                Status = x.Status,
-                LikeNumber = x.LikeNumber,
-                CreatedDate = x.CreatedDate,
-                CreatedFullName = x.CreatedFullName,
-                Comments = ListCommentModelAsync(x),
-            }).ToListAsync(cancellationToken);*/
+            MethodResult<IList<CommentModel>> methodResult = new MethodResult<IList<CommentModel>>();
 
-            if (comment == null)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumCommentErrorCode.CommentNotExist), nameof(request.ObjectId), request.ObjectId);
-                return methodResult;
-            }
-
-            methodResult.Result = _mapper.Map<IList<CommentModel>>(comment);
+            methodResult.Result = await GetCommentsByObjectIdAsync(request.ObjectId);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }
 
-        public async Task<CommentModel> Get(Comment x)
+        public async Task<IList<CommentModel>?> GetCommentsByObjectIdAsync(Guid objectId)
         {
-            return new CommentModel
-            {
-                Id = x.Id,
-                Content = x.Content,
-                Status = x.Status,
-                LikeNumber = x.LikeNumber,
-                CreatedDate = x.CreatedDate,
-                CreatedFullName = x.CreatedFullName,
-                Comments = await ListCommentModelAsync(x),
-            };
-        }
-
-        public async Task<IList<CommentModel>?> ListCommentModelAsync(Comment comment)
-        {
-            var commentModel = _mapper.Map<CommentModel>(comment);
-
-            commentModel.Comments = await ViewListAsync(commentModel);
-
-            return commentModel.Comments;
-        }
-
-        public async Task<IList<CommentModel>?> ViewListAsync(CommentModel? comment)
-        {
-            if (comment == null)
-            {
-                return null;
-            }
-
             var commentQuery = from c in _commentRepository.Queryable
                                join ca in _interactionActionRepository.Queryable on c.Id equals ca.ObjectId into caJ
                                from p in caJ.DefaultIfEmpty()
-                               where p == null || (p.Type != EnumInteractionActionType.Disable && p.UserId == _authContext.CurrentUserId)
+                               where c.ObjectId == objectId && (p == null || (p.Type != EnumInteractionActionType.Disable && p.UserId == _authContext.CurrentUserId))
                                select c;
 
             var comments = await commentQuery.ToListAsync();
-
             var userResult = await _userService.GetStudentByUserIdsAsync(comments.Select(x => x.UserId).ToList());
+
+            var results = new List<CommentModel>();
             if (comments != null && comments.Count > 0)
             {
-                comment.Comments = _mapper.Map<IList<CommentModel>>(comments);
-                foreach (var item in comment.Comments)
+                var commentModels = _mapper.Map<IList<CommentModel>>(comments);
+                foreach (var item in commentModels)
                 {
                     var actionLikes = _interactionActionRepository.Queryable.Where(x => x.ObjectId == item.Id && x.Type == EnumInteractionActionType.Like).ToList();
-                    item.Comments = await ViewListAsync(item);
+                    item.Comments = await GetCommentsByObjectIdAsync(item.ObjectId);
                     item.CommentNumber = item.Comments?.Count ?? default;
                     item.LikeNumber = actionLikes.Count;
                     item.IsLiked = actionLikes.Any(x => x.UserId == _authContext.CurrentUserId);
@@ -132,8 +84,10 @@ namespace Fsel.Interaction.Application.Queries.InteractionQuery
                     item.AvatarPath = userResult.Content?.Result?.FirstOrDefault(x => x.Human?.AvatarPath == item.AvatarPath)?.Human!.AvatarPath;
                     item.FullName = userResult.Content?.Result?.FirstOrDefault(x => x.Human?.FullName == item.FullName)?.Human!.AvatarPath;
                 }
+
+                results.AddRange(commentModels);
             }
-            return comment.Comments;
+            return results;
         }
     }
 }
