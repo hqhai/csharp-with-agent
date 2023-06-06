@@ -105,7 +105,7 @@ namespace Fsel.Interaction.Application.Queries.InteractionQuery
 
             var comments = await commentQuery.ToListAsync();
 
-            var userResult = await _userService.GetListUserProflie(comments.Select(x => x.UserId).ToList());
+            var userResult = await _userService.GetStudentByUserIdsAsync(comments.Select(x => x.UserId).ToList());
             if (comments != null && comments.Count > 0)
             {
                 comment.Comments = _mapper.Map<IList<CommentModel>>(comments);
@@ -118,8 +118,8 @@ namespace Fsel.Interaction.Application.Queries.InteractionQuery
                     item.IsLiked = actionLikes.Any(x => x.UserId == _authContext.CurrentUserId);
                     item.ObjectId = item.ObjectId;
 
-                    item.AvatarPath = userResult.Content?.Result?.FirstOrDefault(x => x.AvatarPath == item.AvatarPath)?.AvatarPath;
-                    item.FullName = userResult.Content?.Result?.FirstOrDefault(x => x.FullName == item.FullName)?.FullName;
+                    item.AvatarPath = userResult.Content?.Result?.FirstOrDefault(x => x.Human?.AvatarPath == item.AvatarPath)?.Human!.AvatarPath;
+                    item.FullName = userResult.Content?.Result?.FirstOrDefault(x => x.Human?.FullName == item.FullName)?.Human!.AvatarPath;
                 }
             }
             return comment.Comments;

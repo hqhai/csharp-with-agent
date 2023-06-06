@@ -32,7 +32,7 @@ namespace Fsel.Interaction.Application.Services.UserServices.Models
         [Get("/admin/user/get-user/{id}")]
         Task<IApiResponse<MethodResult<UserProfileModel>>> GetUserProflie([FromRoute] Guid id);
 
-        [Get("/admin/user/get-list-user-profile")]
-        Task<IApiResponse<MethodResult<IList<UserProfileModel>>>> GetListUserProflie([FromRoute] IList<Guid> id);
+        [Get("/student/get-by-ids")]
+        Task<IApiResponse<MethodResult<IList<StudentModel>>>> GetStudentByUserIdsAsync([FromRoute] IList<Guid> ids);
     }
 }
