@@ -2,7 +2,7 @@
 
 using Fsel.Common.ValueSettings;
 using Fsel.Core.Extensions;
-using Fsel.Interaction.Application.Services.UserServices.Models;
+using Fsel.Interaction.Application.Services.UserServices;
 using Fsel.Interaction.Domain.IRepositories;
 using Fsel.Interaction.Infrastructure;
 using Fsel.Interaction.Infrastructure.Repositories;
