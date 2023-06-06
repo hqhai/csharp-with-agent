@@ -9,5 +9,6 @@ namespace Fsel.Identity.Domain.IRepositories
 
     public interface IStudentRepository : IRepository<Student>
     {
+        Task<IList<Student>> GetIncludeByIdsAsync(IList<Guid> ids, int? siteId = null);
     }
 }

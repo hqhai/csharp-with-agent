@@ -38,12 +38,12 @@ namespace Fsel.Interaction.Application.Commands.ActionCmd
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<bool> methodResult = new MethodResult<bool>();
-            InteractionAction actions = _mapper.Map<InteractionAction>(request);
-            actions.UserId = _authContext.CurrentUserId;
+            InteractionAction action = _mapper.Map<InteractionAction>(request);
+            action.UserId = _authContext.CurrentUserId;
 
-            if (!actions.IsValid())
+            if (!action.IsValid())
             {
-                methodResult.AddErrorBadRequest(actions.ErrorMessages);
+                methodResult.AddErrorBadRequest(action.ErrorMessages);
                 return methodResult;
             }
 
@@ -51,7 +51,7 @@ namespace Fsel.Interaction.Application.Commands.ActionCmd
 
             await _interactionActionRepository.ExecuteTransactionAsync(async () =>
             {
-                actions = _interactionActionRepository.Add(actions);
+                action = _interactionActionRepository.Add(action);
                 await _interactionActionRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
                 methodResult.StatusCode = StatusCodes.Status201Created;

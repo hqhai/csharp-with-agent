@@ -8,9 +8,11 @@ namespace Fsel.Identity.Application.Queries.StudentQuery
     using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.Enums.ErrorCodes;
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Domain.Models.EntityModels;
+    using Fsel.Identity.Infrastructure.Repositories;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -36,16 +38,19 @@ namespace Fsel.Identity.Application.Queries.StudentQuery
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<IList<StudentModel>> methodResult = new MethodResult<IList<StudentModel>>();
 
-            var student = await _studentRepository.Queryable
-                                        .Include(i => i.Human)
-                                        .FirstOrDefaultAsync(i => i.Human != null && i.Human.UserId == request.UserIds!.ToString(), cancellationToken);
-
-            if (student == null)
+            if (request.UserIds == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumStudentErrorCode.StudentNull));
+                methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 return methodResult;
             }
-            methodResult.Result = _mapper.Map<IList<StudentModel>>(student);
+            var students = await _studentRepository.GetIncludeByIdsAsync(request.UserIds);
+
+            if (students == null || students.Count == 0)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumStudentErrorCode.StudentsNotExist));
+                return methodResult;
+            }
+            methodResult.Result = _mapper.Map<IList<StudentModel>>(students);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }
