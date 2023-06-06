@@ -31,6 +31,9 @@ namespace Fsel.Course.Application.Queries.CategoryQuery
                 case EnumCourseSourceData.CourseType:
                     methodResult.Result = ConvertHelper.EnumToListModel<EnumCourseType>();
                     break;
+                case EnumCourseSourceData.CourseLevel:
+                    methodResult.Result = ConvertHelper.EnumToListModel<EnumCourseLevel>();
+                    break;
 
                 case EnumCourseSourceData.CourseSkill:
                     methodResult.Result = ConvertHelper.EnumToListModel<EnumCourseSkill>();
