@@ -21,10 +21,10 @@ namespace Fsel.Course.Domain.Models.EntityModels
 
         public Guid? LessonId { get; set; }
 
-        public ClassForumResultModel? ClassForumResult { get; set; }
+        public ClassForumResultModel? ClassForumResultCurrentStudent { get; set; }
 
         public IList<ClassForumFileModel>? ClassForumFiles { get; set; }
 
-        public IList<ClassForumResultModel>? ClassForumResults { get; set; }
+        public IList<ClassForumResultModel>? ClassForumResultAllStudents { get; set; }
     }
 }
