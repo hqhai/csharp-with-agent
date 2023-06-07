@@ -177,6 +177,7 @@ namespace Fsel.Course.Infrastructure.Common
             }
             if (extraPracticeExercises.Count > 0)
             {
+                extraPractice.ExtraPracticeExercises.Clear();
                 extraPractice.ExtraPracticeExercises = extraPracticeExercises;
             }
 

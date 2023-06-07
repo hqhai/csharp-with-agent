@@ -20,13 +20,13 @@ namespace Fsel.Course.Application.Commands.ExtraPracticeCmd
     {
         private readonly IExtraPracticeRepository _extraPracticeRepository;
         private readonly IMapper _mapper;
-        private readonly VideoConverter _videoConverter;
+        private readonly ExtraPracticeConverter _extraPracticeConverter;
 
-        public CreateExtraPracticeCommandHandler(IExtraPracticeRepository extraPracticeRepository, IMapper mapper, VideoConverter videoConverter)
+        public CreateExtraPracticeCommandHandler(IExtraPracticeRepository extraPracticeRepository, IMapper mapper, ExtraPracticeConverter extraPracticeConverter)
         {
             _extraPracticeRepository = extraPracticeRepository;
             _mapper = mapper;
-            _videoConverter = videoConverter;
+            _extraPracticeConverter = extraPracticeConverter;
         }
 
         public async Task<MethodResult<ExtraPracticeModel>> Handle(CreateExtraPracticeCommand request, CancellationToken cancellationToken)
@@ -38,6 +38,12 @@ namespace Fsel.Course.Application.Commands.ExtraPracticeCmd
             if (!extraPractice.IsValid())
             {
                 methodResult.AddErrorBadRequest(extraPractice.ErrorMessages);
+                return methodResult;
+            }
+            var method = await _extraPracticeConverter.CreateExtraPractice(extraPractice, request);
+            if (!method.IsOK)
+            {
+                methodResult.AddError(method.ErrorMessages);
                 return methodResult;
             }
 

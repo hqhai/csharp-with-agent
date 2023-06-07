@@ -2,7 +2,52 @@
 
 namespace Fsel.Course.Application.Commands.ExtraPracticeCmd
 {
-    public class DeleteExtraPracticeCommand
+    using Fsel.Common.ActionResults;
+    using Fsel.Course.Domain.Enums.ErrorCodes;
+    using Fsel.Course.Domain.IRepositories;
+    using MediatR;
+    using Microsoft.AspNetCore.Http;
+
+    public class DeleteExtraPracticeCommand : IRequest<MethodResult<bool>>
     {
+        public Guid Id { get; set; }
+    }
+
+    public class DeleteExtraPracticeCommandHandler : IRequestHandler<DeleteExtraPracticeCommand, MethodResult<bool>>
+    {
+        private readonly IExtraPracticeRepository _extraPracticeRepository;
+
+        public DeleteExtraPracticeCommandHandler(IExtraPracticeRepository extraPracticeRepository)
+        {
+            _extraPracticeRepository = extraPracticeRepository;
+        }
+
+        public async Task<MethodResult<bool>> Handle(DeleteExtraPracticeCommand request, CancellationToken cancellationToken)
+        {
+            ArgumentNullException.ThrowIfNull(request);
+            MethodResult<bool> methodResult = new MethodResult<bool>();
+            var extraPractice = await _extraPracticeRepository.GetIncludeByIdAsync(request.Id);
+            if (extraPractice == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumExtraPractiveErrorCode.ExtraPracticeNotExist), nameof(request.Id), request.Id);
+                return methodResult;
+            }
+            if (extraPractice.IsActive)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumExtraPractiveErrorCode.ExtraPracticeInActiveState), nameof(extraPractice.IsActive), extraPractice.IsActive);
+                return methodResult;
+            }
+
+            await _extraPracticeRepository.ExecuteTransactionAsync(async () =>
+            {
+                var result = await _extraPracticeRepository.DeleteAsync(extraPractice);
+                await _extraPracticeRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+
+                methodResult.StatusCode = StatusCodes.Status200OK;
+                methodResult.Result = result;
+                return methodResult;
+            });
+            return methodResult;
+        }
     }
 }
