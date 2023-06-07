@@ -10,12 +10,13 @@ EXPOSE 443
 
 FROM mcr.microsoft.com/dotnet/sdk:7.0 AS build
 WORKDIR /src
-COPY ["../../Services/Fsel.Sender/Fsel.Sender.Api/Fsel.Sender.Api.csproj", "Services/Fsel.Sender/Fsel.Sender.Api/"]
-COPY ["../../Services/Fsel.Sender/Fsel.Sender.Application/Fsel.Sender.Application.csproj", "Services/Fsel.Sender/Fsel.Sender.Application/"]
-COPY ["../../Services/Fsel.Sender/Fsel.Sender.Infrastructure/Fsel.Sender.Infrastructure.csproj", "Services/Fsel.Sender/Fsel.Sender.Infrastructure/"]
-COPY ["../../Services/Shared/Fsel.Core/Fsel.Core.csproj", "Services/Shared/Fsel.Core/"]
-COPY ["../../Services/Shared/Fsel.Common/Fsel.Common.csproj", "Services/Shared/Fsel.Common/"]
-COPY ["../../Services/Fsel.Sender/Fsel.Sender.Domain/Fsel.Sender.Domain.csproj", "Services/Fsel.Sender/Fsel.Sender.Domain/"]
+COPY ["Services/Fsel.Sender/Fsel.Sender.Api/Fsel.Sender.Api.csproj", "Services/Fsel.Sender/Fsel.Sender.Api/"]
+COPY ["Services/Fsel.Sender/Fsel.Sender.Application/Fsel.Sender.Application.csproj", "Services/Fsel.Sender/Fsel.Sender.Application/"]
+COPY ["Services/Fsel.Sender/Fsel.Sender.Infrastructure/Fsel.Sender.Infrastructure.csproj", "Services/Fsel.Sender/Fsel.Sender.Infrastructure/"]
+COPY ["Services/Fsel.Sender/Fsel.Sender.Domain/Fsel.Sender.Domain.csproj", "Services/Fsel.Sender/Fsel.Sender.Domain/"]
+COPY ["Services/Shared/Fsel.Shared/Fsel.Shared.csproj", "Services/Shared/Fsel.Shared/"]
+COPY ["Services/Shared/Fsel.Core/Fsel.Core.csproj", "Services/Shared/Fsel.Core/"]
+COPY ["Services/Shared/Fsel.Common/Fsel.Common.csproj", "Services/Shared/Fsel.Common/"]
 RUN dotnet restore "Services/Fsel.Sender/Fsel.Sender.Api/Fsel.Sender.Api.csproj"
 COPY . .
 WORKDIR "/src/Services/Fsel.Sender/Fsel.Sender.Api"
