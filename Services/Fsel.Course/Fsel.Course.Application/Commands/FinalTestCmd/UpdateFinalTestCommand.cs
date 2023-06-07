@@ -94,7 +94,7 @@ namespace Fsel.Course.Application.Commands.FinalTestCmd
                 var method = _sectionConverter.AddSessionToSessionGroup(newSectionGroup, sectionGroup.Sections, EnumCourseType.Academic);
                 if (!method.IsOK)
                 {
-                    methodResult.AddError(method.ErrorMessages);
+                    methodResult.AddErrorBadRequest(method.ErrorMessages);
                 }
                 finalTest.FinalTestSections.Add(new FinalTestSection { SectionGroup = newSectionGroup });
                 if (!newSectionGroup.IsValid())
