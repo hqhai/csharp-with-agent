@@ -60,7 +60,7 @@ namespace Fsel.Course.Infrastructure.Repositories
                                     IsActive = i.LessonVideos.Any(),
                                     TeacherId = i.TeacherId,
                                     CourseLevel = i.CourseLevel,
-                                    VideoTimeCodes = i.VideoTimeCodes.Where(x => !x.IsDeleted).OrderBy(x => x!.CreatedDate).Select(x => new VideoTimeCodeModel
+                                    VideoTimeCodes = i.VideoTimeCodes.Where(x => !x.IsDeleted).OrderBy(x => x!.DisplayTime).Select(x => new VideoTimeCodeModel
                                     {
                                         Id = x.Id,
                                         DisplayTime = x.DisplayTime,
