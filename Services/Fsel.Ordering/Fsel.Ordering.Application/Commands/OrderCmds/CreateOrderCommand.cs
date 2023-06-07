@@ -7,12 +7,16 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base;
+    using Fsel.Ordering.Application.Services.CourseService;
+    using Fsel.Ordering.Application.Services.TrainingService;
+    using Fsel.Ordering.Application.Services.TrainingService.CommandModels;
     using Fsel.Ordering.Domain.Entities;
     using Fsel.Ordering.Domain.Enums;
     using Fsel.Ordering.Domain.Enums.ErrorCodes;
     using Fsel.Ordering.Domain.IRepositories;
     using Fsel.Ordering.Domain.Models.CommandModels.Orders;
     using Fsel.Ordering.Domain.Models.EntityModels;
+    using Fsel.Shared.Enums.ErrorCodes;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -26,16 +30,22 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
         private readonly IMapper _mapper;
         private readonly IOrderRepository _orderRepository;
         private readonly AuthContext _authContext;
+        private readonly ITrainingService _trainingService;
+        private readonly ICourseService _courseService;
         private readonly IPackageRepository _packageRepository;
 
         public CreateClassForumCommandHandler(IMapper mapper,
             IOrderRepository orderRepository,
             AuthContext authContext,
+            ITrainingService trainingService,
+            ICourseService courseService,
             IPackageRepository packageRepository)
         {
             _mapper = mapper;
             _orderRepository = orderRepository;
             _authContext = authContext;
+            _trainingService = trainingService;
+            _courseService = courseService;
             _packageRepository = packageRepository;
         }
 
@@ -51,9 +61,33 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
                 return methodResult;
             }
 
-            if (await _orderRepository.Queryable.AnyAsync(x => x.Code == request.Code,cancellationToken))
+            if (await _orderRepository.Queryable.AnyAsync(x => x.Code == request.Code, cancellationToken))
             {
                 methodResult.AddErrorBadRequest(nameof(EnumOrderErrorCode.CodeOrderAlreadyExist));
+                return methodResult;
+            }
+
+            var course = await _courseService.GetCourseByIdAsync(request.CourseId);
+            if (!course.IsSuccessStatusCode)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallCourseServiceError));
+                return methodResult;
+            }
+            if (course?.Content?.Result == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumOrderErrorCode.CourseNotExist));
+                return methodResult;
+            }
+
+            var classnew = await _trainingService.RegisterClassAsync(new RegisterClassCommandModel { Code = request.Code, CourseId = request.CourseId, CourseLevel = request.CourseLevel, PackageCode = package.Code ?? default });
+            if (!classnew.IsSuccessStatusCode)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallTrainingServiceError));
+                return methodResult;
+            }
+            if (classnew?.Content?.Result == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumOrderErrorCode.ClassNotExist));
                 return methodResult;
             }
 

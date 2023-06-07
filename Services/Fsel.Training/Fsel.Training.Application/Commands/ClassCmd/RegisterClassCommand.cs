@@ -91,7 +91,7 @@ namespace Fsel.Training.Application.Commands.ClassCmd
 
                 await UpdateClassAsync(classnew, studentId);
 
-                student = await _userService.UpdateStudentByClassAsync(new UpdateStudentByClassIdModel { ClassId = classnew.Id, StudentId = studentId });
+                student = await _userService.UpdateStudentByClassAsync(new UpdateStudentByClassIdModel { ClassId = classnew.Id, StudentId = studentId, Membership = request.PackageCode.ToString() });
 
                 methodResult.StatusCode = StatusCodes.Status201Created;
                 methodResult.Result = _mapper.Map<ClassModel>(classnew);

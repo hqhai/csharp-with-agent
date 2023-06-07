@@ -7,6 +7,7 @@ namespace Fsel.Ordering.Domain.Entities
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Common.Helpers;
     using Fsel.Core.Entities;
+    using Fsel.Ordering.Domain.Entities.PackageConfigs;
     using Fsel.Ordering.Domain.Enums;
 
     public class Package : Entity
@@ -27,9 +28,9 @@ namespace Fsel.Ordering.Domain.Entities
         public string? DescriptionStr { get; set; }
 
         [NotMapped]
-        public IList<string>? Description
+        public IList<PackageConfig>? Description
         {
-            get { return ConvertHelper.Deserialize<IList<string>>(DescriptionStr); }
+            get { return ConvertHelper.Deserialize<IList<PackageConfig>>(DescriptionStr); }
             set { DescriptionStr = ConvertHelper.Serialize(value); }
         }
 

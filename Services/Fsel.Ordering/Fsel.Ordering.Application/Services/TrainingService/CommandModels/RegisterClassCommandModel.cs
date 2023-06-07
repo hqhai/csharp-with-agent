@@ -1,7 +1,8 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Training.Domain.Models.CommandModels.Classes
+namespace Fsel.Ordering.Application.Services.TrainingService.CommandModels
 {
+    using System;
     using Fsel.Ordering.Domain.Enums;
     using Fsel.Shared.Enums;
 
