@@ -8,7 +8,6 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base;
-    using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
@@ -16,7 +15,6 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
     using Fsel.Course.Lms.Application.Services.UserServices;
     using MediatR;
     using Microsoft.AspNetCore.Http;
-    using Microsoft.EntityFrameworkCore;
 
     public class RateClassForumResultCommand : RateClassForumResultCommandModel, IRequest<MethodResult<bool>>
     {
@@ -49,23 +47,14 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
             }
             var studentId = student?.Content?.Result?.Id;
 
-            var classForumResult = await _classForumResultRepository.Queryable
-                                        .Where(x => x.StudentId == studentId
-                                        && x.Id == request.ClassForumResultId)
-                                        .FirstOrDefaultAsync(cancellationToken);
+            var classForumResult = await _classForumResultRepository.GetByIdAsync(request.ClassForumResultId);
 
             if (classForumResult == null)
             {
-                classForumResult = new ClassForumResult
-                {
-                    StudentId = studentId ?? default,
-                    Id = request.ClassForumResultId,
-                    FeedBackNote = request.FeedBackNote,
-                    FeedBackStars = request.FeedBackStars,
-                };
-                /*methodResult.AddErrorBadRequest(nameof(EnumClassForumResultErrorCode.ClassForumResultNotExist), nameof(request.ClassForumResultId), request.ClassForumResultId);
-                return methodResult;*/
+                methodResult.AddErrorBadRequest(nameof(EnumClassForumResultErrorCode.ClassForumResultNotExist), nameof(request.ClassForumResultId), request.ClassForumResultId);
+                return methodResult;
             }
+
             if (classForumResult.FeedBackStars > 5)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumClassForumResultErrorCode.ClassForumResultStatusNotGraded));
@@ -76,6 +65,8 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
                 methodResult.AddErrorBadRequest(nameof(EnumClassForumResultErrorCode.ClassForumResultStatusNotGraded));
                 return methodResult;
             }
+
+            _mapper.Map(request, classForumResult);
             await _classForumResultRepository.ExecuteTransactionAsync(async () =>
             {
                 classForumResult = _classForumResultRepository.Update(classForumResult);

@@ -212,9 +212,10 @@ namespace Fsel.Course.Infrastructure.Migrations
                         .HasColumnOrder(103);
 
                     b.Property<string>("FeedBackNote")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
 
-                    b.Property<int>("FeedBackStars")
+                    b.Property<int?>("FeedBackStars")
                         .HasColumnType("int");
 
                     b.Property<Guid?>("GradingTeacherId")

@@ -13,15 +13,15 @@ namespace Fsel.Course.Infrastructure.Migrations
             migrationBuilder.AddColumn<string>(
                 name: "FeedBackNote",
                 table: "ClassForumResults",
-                type: "nvarchar(max)",
+                type: "nvarchar(1000)",
+                maxLength: 1000,
                 nullable: true);
 
             migrationBuilder.AddColumn<int>(
                 name: "FeedBackStars",
                 table: "ClassForumResults",
                 type: "int",
-                nullable: false,
-                defaultValue: 0);
+                nullable: true);
         }
 
         /// <inheritdoc />

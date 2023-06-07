@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fsel.Course.Infrastructure.Migrations
 {
     [DbContext(typeof(CourseDbContext))]
-    [Migration("20230607021518_UpdateClassForumResultTable")]
+    [Migration("20230607070530_UpdateClassForumResultTable")]
     partial class UpdateClassForumResultTable
     {
         /// <inheritdoc />
@@ -215,9 +215,10 @@ namespace Fsel.Course.Infrastructure.Migrations
                         .HasColumnOrder(103);
 
                     b.Property<string>("FeedBackNote")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
 
-                    b.Property<int>("FeedBackStars")
+                    b.Property<int?>("FeedBackStars")
                         .HasColumnType("int");
 
                     b.Property<Guid?>("GradingTeacherId")
