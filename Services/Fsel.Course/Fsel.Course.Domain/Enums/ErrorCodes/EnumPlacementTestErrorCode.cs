@@ -20,8 +20,8 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         PlacementTestInActiveState,
 
         /// <summary>
-        /// PlacementTest must have the correct score
+        ///  must have the correct score
         /// </summary>
-        PlacementTestMustCorrectScore,
+        MustCorrectScore,
     }
 }

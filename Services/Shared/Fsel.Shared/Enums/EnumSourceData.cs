@@ -4,6 +4,7 @@ namespace Fsel.Shared.Enums
 {
     public enum EnumCourseSourceData
     {
+        CourseLevel,
         CourseType,
         CourseSkill,
         CourseStatus,
