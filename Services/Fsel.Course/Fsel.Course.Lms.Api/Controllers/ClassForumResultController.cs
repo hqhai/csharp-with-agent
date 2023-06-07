@@ -42,10 +42,10 @@ namespace Fsel.Course.Lms.Api.Controllers
         /// <summary>
         /// Rate Class Forum Result
         /// </summary>
-        [HttpPost("rate-class-forum-result")]
+        [HttpPost("rate")]
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> RateClassForum([FromBody] RateClassForumResultCommand command)
+        public async Task<IActionResult> Rate([FromBody] RateClassForumResultCommand command)
         {
             MethodResult<bool> commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();

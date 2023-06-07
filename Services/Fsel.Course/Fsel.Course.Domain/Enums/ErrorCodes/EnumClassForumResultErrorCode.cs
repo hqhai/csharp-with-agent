@@ -43,5 +43,10 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         /// Beed Back Star Can only Have 5 star
         /// </summary>
         FeedBackStarOnlyCanHane5,
+
+        /// <summary>
+        /// Result not from student
+        /// </summary>
+        ResultNotFromStudent,
     }
 }

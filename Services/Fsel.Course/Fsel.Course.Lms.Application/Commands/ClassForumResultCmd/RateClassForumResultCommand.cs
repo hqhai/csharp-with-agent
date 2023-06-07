@@ -54,7 +54,11 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
                 methodResult.AddErrorBadRequest(nameof(EnumClassForumResultErrorCode.ClassForumResultNotExist), nameof(request.ClassForumResultId), request.ClassForumResultId);
                 return methodResult;
             }
-
+            if (studentId != classForumResult.StudentId)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumClassForumResultErrorCode.ResultNotFromStudent));
+                return methodResult;
+            }
             if (classForumResult.FeedBackStars > 5)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumClassForumResultErrorCode.ClassForumResultStatusNotGraded));
