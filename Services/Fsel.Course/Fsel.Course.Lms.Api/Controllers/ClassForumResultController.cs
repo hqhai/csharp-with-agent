@@ -7,6 +7,7 @@ namespace Fsel.Course.Lms.Api.Controllers
     using Fsel.Common.Constants;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Commands.ClassForumCmd;
+    using Fsel.Course.Lms.Application.Commands.ClassForumResultCmd;
     using Fsel.Course.Lms.Application.Queries.ClassForumResultQuery;
     using Fsel.Shared.Enums;
     using MediatR;
@@ -35,6 +36,18 @@ namespace Fsel.Course.Lms.Api.Controllers
         public async Task<IActionResult> Create([FromBody] CreateClassForumResultCommand command)
         {
             MethodResult<ClassForumResultModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Rate Class Forum Result
+        /// </summary>
+        [HttpPost("rate-class-forum-result")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> RateClassForum([FromBody] RateClassForumResultCommand command)
+        {
+            MethodResult<bool> commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
 
