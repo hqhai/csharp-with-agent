@@ -33,5 +33,20 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         /// Can not delete in the current status
         /// </summary>
         CanNotDeleteInCurrentStatus,
+
+        /// <summary>
+        /// Class Forum result Status not graded
+        /// </summary>
+        ClassForumResultStatusNotGraded,
+
+        /// <summary>
+        /// Beed Back Star Can only Have 5 star
+        /// </summary>
+        FeedBackStarOnlyCanHane5,
+
+        /// <summary>
+        /// Result not from student
+        /// </summary>
+        ResultNotFromStudent,
     }
 }
