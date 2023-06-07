@@ -92,7 +92,7 @@ namespace Fsel.Course.Lms.Application.Queries.VideoQuery
                 IsActive = video.LessonVideos.Any(),
                 TeacherId = video.TeacherId,
                 CourseLevel = video.CourseLevel,
-                VideoTimeCodes = video.VideoTimeCodes.Select(x => new VideoTimeCodeModel
+                VideoTimeCodes = video.VideoTimeCodes.OrderBy(x => x!.DisplayTime).Select(x => new VideoTimeCodeModel
                 {
                     Id = x.Id,
                     DisplayTime = x.DisplayTime,
