@@ -17,6 +17,6 @@ namespace Fsel.Course.Domain.Models.CommandModels.ExtraPractices
         public string? Abstract { get; set; }
         public EnumExtraPracticeType Type { get; set; }
         public EnumCourseLevel CourseLevel { get; set; }
-        public IList<UpdateExtraPracticeCommandModel>? ExtraPracticeChapters { get; set; }
+        public IList<CreateExtraPracticeCommandModel>? ExtraPracticeChapters { get; set; }
     }
 }
