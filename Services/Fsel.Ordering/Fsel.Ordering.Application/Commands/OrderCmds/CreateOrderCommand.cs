@@ -7,7 +7,6 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base;
-    using Fsel.Ordering.Application.Services.CourseService;
     using Fsel.Ordering.Application.Services.TrainingService;
     using Fsel.Ordering.Application.Services.TrainingService.CommandModels;
     using Fsel.Ordering.Domain.Entities;
@@ -31,21 +30,18 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
         private readonly IOrderRepository _orderRepository;
         private readonly AuthContext _authContext;
         private readonly ITrainingService _trainingService;
-        private readonly ICourseService _courseService;
         private readonly IPackageRepository _packageRepository;
 
         public CreateClassForumCommandHandler(IMapper mapper,
             IOrderRepository orderRepository,
             AuthContext authContext,
             ITrainingService trainingService,
-            ICourseService courseService,
             IPackageRepository packageRepository)
         {
             _mapper = mapper;
             _orderRepository = orderRepository;
             _authContext = authContext;
             _trainingService = trainingService;
-            _courseService = courseService;
             _packageRepository = packageRepository;
         }
 
@@ -64,18 +60,6 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
             if (await _orderRepository.Queryable.AnyAsync(x => x.Code == request.Code, cancellationToken))
             {
                 methodResult.AddErrorBadRequest(nameof(EnumOrderErrorCode.CodeOrderAlreadyExist));
-                return methodResult;
-            }
-
-            var course = await _courseService.GetCourseByIdAsync(request.CourseId);
-            if (!course.IsSuccessStatusCode)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallCourseServiceError));
-                return methodResult;
-            }
-            if (course?.Content?.Result == null)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumOrderErrorCode.CourseNotExist));
                 return methodResult;
             }
 
