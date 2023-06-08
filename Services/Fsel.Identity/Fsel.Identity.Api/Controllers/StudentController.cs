@@ -82,5 +82,17 @@ namespace Fsel.Identity.Api.Controllers
             MethodResult<bool> commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
+
+        /// <summary>
+        /// Get Students by Ids
+        /// </summary>
+        [HttpPost("get-students-by-ids")]
+        [ProducesResponseType(typeof(MethodResult<List<StudentModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetStudentsByIds([FromBody] IList<string> ids)
+        {
+            MethodResult<List<StudentModel>> commandResult = await _mediator.Send(new GetStudentsByIdsQuery { Ids = ids }).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
     }
 }
