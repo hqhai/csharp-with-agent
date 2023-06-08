@@ -13,7 +13,7 @@ namespace Fsel.Ordering.Domain.Models.EntityModels
         public EnumPaymentMethodStatus PaymentMethod { get; set; }
         public string? PackageName { get; set; }
         public EnumOrderStatus Status { get; set; }
-        public string? UserId { get; set; }
+        public Guid UserId { get; set; }
         public Guid CourseId { get; set; }
     }
 }

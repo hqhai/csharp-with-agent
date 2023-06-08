@@ -1,6 +1,7 @@
 // Copyright (c) Atlantic. All rights reserved.
 
 using Fsel.Core.Extensions;
+using Fsel.Ordering.Application.Services.CourseService;
 using Fsel.Ordering.Application.Services.TrainingService;
 using Fsel.Ordering.Application.Services.UserService;
 using Fsel.Ordering.Domain.IRepositories;
@@ -23,6 +24,7 @@ builder.Services.AddScoped<IPackageRepository, PackageRepository>();
 builder.Services.AddScoped<IOrderRepository, OrderRepository>();
 
 builder.AddRefitClients(typeof(IUserService), appSetting?.Services?.UserApiUrl);
+builder.AddRefitClients(typeof(ILmsCourseService), appSetting?.Services?.LmsCourseApiUrl);
 builder.AddRefitClients(typeof(ITrainingService), appSetting?.Services?.ClassApiUrl);
 var app = builder.Build();
 

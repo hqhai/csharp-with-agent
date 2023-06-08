@@ -23,5 +23,8 @@ namespace Fsel.Training.Application.Services.UserServices
 
         [Get("/student/get-class-has-too-many-students/{id}")]
         Task<IApiResponse<MethodResult<bool>>> GetStudentByClassIdCheckAsync([FromRoute] Guid id);
+
+        [Put("/student/delete-student-from-class/{id}")]
+        Task<IApiResponse<MethodResult<bool>>> DeleteStudentFromClass([FromRoute] Guid id);
     }
 }

@@ -7,8 +7,7 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Core.Extensions;
-    using Fsel.Ordering.Application.Services.UserService;
-    using Fsel.Ordering.Application.Services.UserService.Models;
+    using Fsel.Ordering.Application.Services.CourseService;
     using Fsel.Ordering.Domain.Enums;
     using Fsel.Ordering.Domain.IRepositories;
     using Fsel.Ordering.Domain.Models.EntityModels;
@@ -24,12 +23,12 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery
     public class SearchOrderQueryHandler : IRequestHandler<SearchOrderQuery, MethodResult<PagingItemsModel<SearchOrderModel>>>
     {
         private readonly IOrderRepository _orderRepository;
-        private readonly IUserService _userService;
+        private readonly ILmsCourseService _lmsCourseService;
 
-        public SearchOrderQueryHandler(IOrderRepository orderRepository, IUserService userService)
+        public SearchOrderQueryHandler(IOrderRepository orderRepository, ILmsCourseService lmsCourseService)
         {
             _orderRepository = orderRepository;
-            _userService = userService;
+            _lmsCourseService = lmsCourseService;
         }
 
         public async Task<MethodResult<PagingItemsModel<SearchOrderModel>>> Handle(SearchOrderQuery request, CancellationToken cancellationToken)
@@ -45,7 +44,7 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery
             var orders = _orderRepository.Queryable.Include(p => p.Package).Select(x => new SearchOrderModel
             {
                 Id = x.Id,
-                UserId = x.UserId.ToString(),
+                UserId = x.UserId,
                 Code = x.Code,
                 CourseId = x.CourseId,
                 CreatedDate = x.CreatedDate,
@@ -64,18 +63,15 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery
                     .AsNoTracking()
                     .ToListAsync(cancellationToken: cancellationToken)
                     .ConfigureAwait(false);
-            GetStudentByUserIdsQuery getStudentByUserIdsQuery = new GetStudentByUserIdsQuery()
-            {
-                UserIds = lists.Select(p => p.UserId).ToList()!,
-            };
-            var students = await _userService.GetStudentsByIdsAsync(getStudentByUserIdsQuery);
-            if (students.IsSuccessStatusCode)
+            var courses = await _lmsCourseService.GetCoursesByIdsAsync(lists.Select(p => p.CourseId).ToList()!);
+            if (courses.IsSuccessStatusCode)
             {
                 foreach (var item in lists)
                 {
-                    item.CourseName = students.Content?.Result?.FirstOrDefault(x => string.Equals(item.UserId, x.UserId, StringComparison.OrdinalIgnoreCase))?.CourseLevel;
+                    item.CourseName = courses.Content?.Result?.FirstOrDefault(x => item.CourseId == x.Id)?.CourseLevel;
                 }
             }
+
             methodResult.Result = new PagingItemsModel<SearchOrderModel>(lists, request, totalItem);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;

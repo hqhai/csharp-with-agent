@@ -94,5 +94,17 @@ namespace Fsel.Identity.Api.Controllers
             MethodResult<IList<StudentModel>> commandResult = await _mediator.Send(query).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
+
+        /// <summary>
+        /// Delete Student from Class
+        /// </summary>
+        [HttpPut("delete-student-from-class/{id}")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> DeleteStudentFromClass([FromRoute] Guid id)
+        {
+            MethodResult<bool> commandResult = await _mediator.Send(new DeleteStudentFromClassCommand { StudentId = id}).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
     }
 }
