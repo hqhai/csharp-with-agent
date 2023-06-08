@@ -10,9 +10,10 @@ EXPOSE 443
 
 FROM mcr.microsoft.com/dotnet/sdk:7.0 AS build
 WORKDIR /src
-COPY ["../../Services/Fsel.Gateway/Fsel.Gateway.Api/Fsel.Gateway.Api.csproj", "Services/Fsel.Gateway/Fsel.Gateway.Api/"]
-COPY ["../../Services/Shared/Fsel.Core/Fsel.Core.csproj", "Services/Shared/Fsel.Core/"]
-COPY ["../../Services/Shared/Fsel.Common/Fsel.Common.csproj", "Services/Shared/Fsel.Common/"]
+COPY ["Services/Fsel.Gateway/Fsel.Gateway.Api/Fsel.Gateway.Api.csproj", "Services/Fsel.Gateway/Fsel.Gateway.Api/"]
+COPY ["Services/Shared/Fsel.Shared/Fsel.Shared.csproj", "Services/Shared/Fsel.Shared/"]
+COPY ["Services/Shared/Fsel.Core/Fsel.Core.csproj", "Services/Shared/Fsel.Core/"]
+COPY ["Services/Shared/Fsel.Common/Fsel.Common.csproj", "Services/Shared/Fsel.Common/"]
 RUN dotnet restore "Services/Fsel.Gateway/Fsel.Gateway.Api/Fsel.Gateway.Api.csproj"
 COPY . .
 WORKDIR "/src/Services/Fsel.Gateway/Fsel.Gateway.Api"
