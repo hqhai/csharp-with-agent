@@ -17,12 +17,23 @@ namespace Fsel.Course.Infrastructure.Common
         private readonly IExtraPracticeRepository _extraPracticeRepository;
         private readonly IMapper _mapper;
         private readonly VideoConverter _videoConverter;
+        private readonly IExtraPracticeExerciseRepository _extraPracticeExerciseRepository;
+        private readonly IExerciseRepository _exerciseRepository;
+        private readonly IQuestionRepository _questionRepository;
 
-        public ExtraPracticeConverter(IExtraPracticeRepository extraPracticeRepository, IMapper mapper, VideoConverter videoConverter)
+        public ExtraPracticeConverter(IExtraPracticeRepository extraPracticeRepository, IMapper mapper
+            , VideoConverter videoConverter
+            , IExtraPracticeExerciseRepository extraPracticeExerciseRepository
+            , IExerciseRepository exerciseRepository
+            , IQuestionRepository questionRepository
+            )
         {
             _extraPracticeRepository = extraPracticeRepository;
             _mapper = mapper;
             _videoConverter = videoConverter;
+            _extraPracticeExerciseRepository = extraPracticeExerciseRepository;
+            _exerciseRepository = exerciseRepository;
+            _questionRepository = questionRepository;
         }
 
         public VoidMethodResult AddExtraPracticeChapterExercise(dynamic extraPracticeChapters, IList<CreateExtraPracticeChapterCommandModel>? exercisePracticeChapters)
@@ -193,6 +204,59 @@ namespace Fsel.Course.Infrastructure.Common
                 extraPractice.ExtraPracticeChapters = extraPracticeChapters;
             }
 
+            return methodResult;
+        }
+
+        public async Task<VoidMethodResult> DeleteExtraPractice(ExtraPractice? extraPractice, CancellationToken cancellationToken)
+        {
+            ArgumentNullException.ThrowIfNull(extraPractice);
+            VoidMethodResult methodResult = new VoidMethodResult();
+            IList<ExtraPracticeExercise> extraPracticeExercises = new List<ExtraPracticeExercise>();
+            IList<Exercise> exercises = new List<Exercise>();
+            IList<Question> questions = new List<Question>();
+            if (extraPractice.ExtraPracticeExercises != null && extraPractice.ExtraPracticeExercises.Count > 0)
+            {
+                extraPracticeExercises = extraPractice.ExtraPracticeExercises.ToList();
+                extraPractice.ExtraPracticeExercises.Clear();
+            }
+            else if (extraPractice.ExtraPracticeChapters.SelectMany(x => x.ExtraPracticeExercises).ToList().Count > 0)
+            {
+                extraPracticeExercises = extraPractice.ExtraPracticeChapters.SelectMany(x => x.ExtraPracticeExercises).ToList();
+                extraPractice.ExtraPracticeChapters.Clear();
+            }
+            else if (extraPractice.Video != null)
+            {
+                exercises = extraPractice.Video.VideoTimeCodes.SelectMany(x => x.TimeCodeExercises).Select(x => x.Exercise ?? new Exercise()).ToList();
+                questions = exercises.SelectMany(x => x.ExerciseQuestions).Select(x => x.Question ?? new Question()).ToList();
+            }
+            if (extraPracticeExercises != null && extraPracticeExercises.Count > 0)
+            {
+                exercises = extraPracticeExercises.Select(x => x.Exercise ?? new Exercise()).ToList();
+                questions = exercises.SelectMany(x => x.ExerciseQuestions).Select(x => x.Question ?? new Question()).ToList();
+            }
+            if (extraPracticeExercises != null)
+            {
+                foreach (var item in extraPracticeExercises)
+                {
+                    await _extraPracticeExerciseRepository.DeleteAsync(item);
+                }
+                await _extraPracticeExerciseRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+            }
+
+            if (exercises != null)
+            {
+                foreach (var item in exercises)
+                {
+                    await _exerciseRepository.DeleteAsync(item);
+                }
+                await _exerciseRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+
+                foreach (var item in questions)
+                {
+                    await _questionRepository.DeleteAsync(item);
+                }
+                await _questionRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+            }
             return methodResult;
         }
     }

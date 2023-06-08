@@ -8,7 +8,7 @@ using Fsel.Identity.Domain.Models.EntityModels;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Fsel.Identity.Userentication.Controllers
+namespace Fsel.Identity.Authentication.Controllers
 {
     [ApiVersion(Settings.APIVersion)]
     [Route(Settings.APIDefaultRoute + "/user")]

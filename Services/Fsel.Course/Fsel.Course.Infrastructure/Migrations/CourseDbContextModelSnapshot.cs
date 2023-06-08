@@ -1048,7 +1048,7 @@ namespace Fsel.Course.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(103);
 
-                    b.Property<Guid>("ExerciseId")
+                    b.Property<Guid?>("ExerciseId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid?>("ExtraPracticeChapterId")
@@ -4127,8 +4127,7 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.HasOne("Fsel.Course.Domain.Entities.Exercise", "Exercise")
                         .WithMany("ExtraPracticeExercises")
                         .HasForeignKey("ExerciseId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.SetNull);
 
                     b.HasOne("Fsel.Course.Domain.Entities.ExtraPracticeChapter", "ExtraPracticeChapter")
                         .WithMany("ExtraPracticeExercises")

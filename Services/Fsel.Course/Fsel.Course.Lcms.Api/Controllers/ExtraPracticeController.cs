@@ -5,6 +5,7 @@ namespace Fsel.Course.Lcms.Api.Controllers
     using System.Net;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
+    using Fsel.Core.Base.BaseModels;
     using Fsel.Course.Application.Commands.ExtraPracticeCmd;
     using Fsel.Course.Application.Queries.ExtraPracticeQuery;
     using Fsel.Course.Domain.Models.EntityModels;
@@ -36,6 +37,18 @@ namespace Fsel.Course.Lcms.Api.Controllers
         {
             MethodResult<ExtraPracticeModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Search ExtraPractices
+        /// </summary>
+        [HttpGet]
+        [ProducesResponseType(typeof(MethodResult<PagingItemsModel<ExtraPracticeModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> Search([FromQuery] SearchExtraPracticeQuery query)
+        {
+            MethodResult<PagingItemsModel<ExtraPracticeModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
         }
 
         /// <summary>

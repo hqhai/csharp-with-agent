@@ -4,7 +4,6 @@ namespace Fsel.Course.Application.Commands.ExtraPracticeCmd
 {
     using AutoMapper;
     using Fsel.Common.ActionResults;
-    using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.CommandModels.ExtraPractices;
@@ -22,20 +21,14 @@ namespace Fsel.Course.Application.Commands.ExtraPracticeCmd
         private readonly IExtraPracticeRepository _extraPracticeRepository;
         private readonly IMapper _mapper;
         private readonly ExtraPracticeConverter _extraPracticeConverter;
-        private readonly IQuestionRepository _questionRepository;
-        private readonly IExerciseRepository _exerciseRepository;
 
         public UpdateExtraPracticeCommandHandler(IExtraPracticeRepository extraPracticeRepository,
             IMapper mapper,
-            ExtraPracticeConverter extraPracticeConverter,
-            IQuestionRepository questionRepository,
-            IExerciseRepository exerciseRepository)
+            ExtraPracticeConverter extraPracticeConverter)
         {
             _extraPracticeRepository = extraPracticeRepository;
             _mapper = mapper;
             _extraPracticeConverter = extraPracticeConverter;
-            _questionRepository = questionRepository;
-            _exerciseRepository = exerciseRepository;
         }
 
         public async Task<MethodResult<ExtraPracticeModel>> Handle(UpdateExtraPracticeCommand request, CancellationToken cancellationToken)
@@ -55,33 +48,23 @@ namespace Fsel.Course.Application.Commands.ExtraPracticeCmd
                 return methodResult;
             }
 
-            List<Exercise> exercises = extraPractice.ExtraPracticeExercises.Select(x => x.Exercise ?? new Exercise()).ToList();
-            List<Question> questions = exercises.SelectMany(x => x.ExerciseQuestions).Select(x => x.Question ?? new Question()).ToList();
-
-            _mapper.Map(request, extraPractice);
             var method = await _extraPracticeConverter.UpdateExtraPractice(extraPractice, request);
             if (!method.IsOK)
             {
-                methodResult.AddError(method.ErrorMessages);
+                methodResult.AddErrorBadRequest(method.ErrorMessages);
                 return methodResult;
             }
 
             await _extraPracticeRepository.ExecuteTransactionAsync(async () =>
             {
-                foreach (var item in exercises)
+                var method = await _extraPracticeConverter.DeleteExtraPractice(extraPractice, cancellationToken);
+                if (!method.IsOK)
                 {
-                    await _exerciseRepository.DeleteAsync(item);
+                    methodResult.AddErrorBadRequest(method.ErrorMessages);
+                    return methodResult;
                 }
-                await _exerciseRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-
-                foreach (var item in questions)
-                {
-                    await _questionRepository.DeleteAsync(item);
-                }
-                await _questionRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
                 extraPractice = _extraPracticeRepository.Update(extraPractice);
-
                 await _extraPracticeRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
                 methodResult.StatusCode = StatusCodes.Status200OK;

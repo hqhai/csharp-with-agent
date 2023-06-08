@@ -43,14 +43,13 @@ namespace Fsel.Course.Application.Commands.ExtraPracticeCmd
             var method = await _extraPracticeConverter.CreateExtraPractice(extraPractice, request);
             if (!method.IsOK)
             {
-                methodResult.AddError(method.ErrorMessages);
+                methodResult.AddErrorBadRequest(method.ErrorMessages);
                 return methodResult;
             }
 
             await _extraPracticeRepository.ExecuteTransactionAsync(async () =>
             {
                 extraPractice = _extraPracticeRepository.Add(extraPractice);
-
                 await _extraPracticeRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
                 methodResult.StatusCode = StatusCodes.Status201Created;

@@ -24,7 +24,7 @@ namespace Fsel.Course.Infrastructure.Configs
             builder.HasOne(a => a.Exercise)
                 .WithMany(b => b.ExtraPracticeExercises)
                 .HasForeignKey(b => b.ExerciseId)
-                .OnDelete(DeleteBehavior.NoAction);
+                .OnDelete(DeleteBehavior.SetNull);
         }
     }
 }

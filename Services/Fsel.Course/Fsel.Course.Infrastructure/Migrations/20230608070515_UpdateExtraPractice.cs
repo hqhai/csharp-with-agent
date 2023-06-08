@@ -97,7 +97,7 @@ namespace Fsel.Course.Infrastructure.Migrations
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false),
                     ExtraPracticeChapterId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     ExtraPracticeId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    ExerciseId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                    ExerciseId = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -106,7 +106,8 @@ namespace Fsel.Course.Infrastructure.Migrations
                         name: "FK_ExtraPracticeExercises_Exercises_ExerciseId",
                         column: x => x.ExerciseId,
                         principalTable: "Exercises",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.SetNull);
                     table.ForeignKey(
                         name: "FK_ExtraPracticeExercises_ExtraPracticeChapters_ExtraPracticeChapterId",
                         column: x => x.ExtraPracticeChapterId,

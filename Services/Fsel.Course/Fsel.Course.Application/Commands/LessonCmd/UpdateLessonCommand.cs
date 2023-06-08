@@ -7,7 +7,6 @@ using Fsel.Course.Domain.Enums.ErrorCodes;
 using Fsel.Course.Domain.IRepositories;
 using Fsel.Course.Domain.Models.CommandModels.Lessons;
 using Fsel.Course.Domain.Models.EntityModels;
-using Fsel.Course.Infrastructure.Repositories;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
@@ -75,24 +74,20 @@ namespace Fsel.Course.Application.Commands.LessonCmd
                 return methodResult;
             }
 
-            if (request.ExtraPracticeIds == null || request.ExtraPracticeIds.Count == 0)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumExtraPracticeErrorCode.ExtraPracticesNull), nameof(request.ExtraPracticeIds), request.ExtraPracticeIds);
-                return methodResult;
-            }
-
             var isLessonUsed = await _lessonRepository.IsLessonUsed(request.Id);
             if (isLessonUsed)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumLessonErrorCode.LessonUsed), nameof(request.Id), request.Id);
                 return methodResult;
             }
-
-            if (_extraPracticeRepository.IsIdsInValid(request.ExtraPracticeIds))
+            if (request.ExtraPracticeIds != null && request.ExtraPracticeIds.Count > 0)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumExtraPracticeErrorCode.ExtraPracticesNotExist), nameof(request.ExtraPracticeIds), request.ExtraPracticeIds);
+                if (_extraPracticeRepository.IsIdsInValid(request.ExtraPracticeIds))
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumExtraPracticeErrorCode.ExtraPracticesNotExist), nameof(request.ExtraPracticeIds), request.ExtraPracticeIds);
 
-                return methodResult;
+                    return methodResult;
+                }
             }
 
             if (_videoRepository.IsIdsInValid(request.VideoIds))
@@ -120,10 +115,13 @@ namespace Fsel.Course.Application.Commands.LessonCmd
 
             await _lessonRepository.ExecuteTransactionAsync(async () =>
             {
-                lesson.LessonExtraPractices = request.ExtraPracticeIds.Select(x => new LessonExtraPractice
+                if (request.ExtraPracticeIds != null && request.ExtraPracticeIds.Count > 0)
                 {
-                    ExtracPraticeId = x
-                }).ToList();
+                    lesson.LessonExtraPractices = request.ExtraPracticeIds.Select(x => new LessonExtraPractice
+                    {
+                        ExtracPraticeId = x
+                    }).ToList();
+                }
                 lesson.LessonHomeWorks = request.HomeWorkIds.Select(x => new LessonHomeWork
                 {
                     HomeWorkId = x
@@ -142,7 +140,7 @@ namespace Fsel.Course.Application.Commands.LessonCmd
                     lesson.ClassForum.ClassForumFiles = request.ClassForum?.FilePaths?.Select(x => new ClassForumFile
                     {
                         FilePath = x,
-                    }).ToList();
+                    }).ToList() ?? new List<ClassForumFile>();
                 }
                 lesson = _lessonRepository.Update(lesson);
                 await _lessonRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);

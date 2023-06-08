@@ -5,6 +5,7 @@ namespace Fsel.Course.Application.Commands.ExtraPracticeCmd
     using Fsel.Common.ActionResults;
     using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
+    using Fsel.Course.Infrastructure.Common;
     using MediatR;
     using Microsoft.AspNetCore.Http;
 
@@ -16,10 +17,12 @@ namespace Fsel.Course.Application.Commands.ExtraPracticeCmd
     public class DeleteExtraPracticeCommandHandler : IRequestHandler<DeleteExtraPracticeCommand, MethodResult<bool>>
     {
         private readonly IExtraPracticeRepository _extraPracticeRepository;
+        private readonly ExtraPracticeConverter _extraPracticeConverter;
 
-        public DeleteExtraPracticeCommandHandler(IExtraPracticeRepository extraPracticeRepository)
+        public DeleteExtraPracticeCommandHandler(IExtraPracticeRepository extraPracticeRepository, ExtraPracticeConverter extraPracticeConverter)
         {
             _extraPracticeRepository = extraPracticeRepository;
+            _extraPracticeConverter = extraPracticeConverter;
         }
 
         public async Task<MethodResult<bool>> Handle(DeleteExtraPracticeCommand request, CancellationToken cancellationToken)
@@ -40,6 +43,12 @@ namespace Fsel.Course.Application.Commands.ExtraPracticeCmd
 
             await _extraPracticeRepository.ExecuteTransactionAsync(async () =>
             {
+                var method = await _extraPracticeConverter.DeleteExtraPractice(extraPractice, cancellationToken);
+                if (!method.IsOK)
+                {
+                    methodResult.AddErrorBadRequest(method.ErrorMessages);
+                    return methodResult;
+                }
                 var result = await _extraPracticeRepository.DeleteAsync(extraPractice);
                 await _extraPracticeRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
