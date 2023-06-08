@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fsel.Course.Infrastructure.Migrations
 {
     [DbContext(typeof(CourseDbContext))]
-    [Migration("20230607100146_UpdateExtraPractive")]
-    partial class UpdateExtraPractive
+    [Migration("20230608032708_UpdateExtraPractice")]
+    partial class UpdateExtraPractice
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -213,6 +213,13 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.Property<Guid?>("DeletedUserId")
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(103);
+
+                    b.Property<string>("FeedBackNote")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<int?>("FeedBackStars")
+                        .HasColumnType("int");
 
                     b.Property<Guid?>("GradingTeacherId")
                         .HasColumnType("uniqueidentifier");
@@ -1050,7 +1057,7 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.Property<Guid?>("ExtraPracticeChapterId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("ExtraPracticeId")
+                    b.Property<Guid?>("ExtraPracticeId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<bool>("IsDeleted")
@@ -4134,8 +4141,7 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.HasOne("Fsel.Course.Domain.Entities.ExtraPractice", "ExtraPractice")
                         .WithMany("ExtraPracticeExercises")
                         .HasForeignKey("ExtraPracticeId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.NoAction);
 
                     b.Navigation("Exercise");
 

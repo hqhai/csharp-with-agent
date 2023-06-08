@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Fsel.Course.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class UpdateExtraPractive : Migration
+    public partial class UpdateExtraPractice : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -96,7 +96,7 @@ namespace Fsel.Course.Infrastructure.Migrations
                     DeletedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false),
                     ExtraPracticeChapterId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    ExtraPracticeId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    ExtraPracticeId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     ExerciseId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>

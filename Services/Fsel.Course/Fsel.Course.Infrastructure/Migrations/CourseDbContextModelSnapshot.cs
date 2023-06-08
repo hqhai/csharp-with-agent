@@ -1054,7 +1054,7 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.Property<Guid?>("ExtraPracticeChapterId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("ExtraPracticeId")
+                    b.Property<Guid?>("ExtraPracticeId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<bool>("IsDeleted")
@@ -4138,8 +4138,7 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.HasOne("Fsel.Course.Domain.Entities.ExtraPractice", "ExtraPractice")
                         .WithMany("ExtraPracticeExercises")
                         .HasForeignKey("ExtraPracticeId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.NoAction);
 
                     b.Navigation("Exercise");
 
