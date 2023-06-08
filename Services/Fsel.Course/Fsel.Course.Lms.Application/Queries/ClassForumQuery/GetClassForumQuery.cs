@@ -9,6 +9,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumQuery
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base;
+    using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
@@ -19,22 +20,27 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumQuery
 
     public class GetClassForumQuery : IRequest<MethodResult<ClassForumModel>>
     {
-        public Guid LessonResultId { get; set; }
+        public Guid LessonId { get; set; }
+        public Guid? LessonResultId { get; set; }
     }
 
     public class GetClassForumQueryHandler : IRequestHandler<GetClassForumQuery, MethodResult<ClassForumModel>>
     {
         private readonly IClassForumRepository _classForumRepository;
+        private readonly IClassForumResultRepository _classForumResultRepository;
         private readonly IUserService _userService;
         private readonly AuthContext _authContext;
         private readonly IMapper _mapper;
+        private readonly ILessonRepository _lessonRepository;
 
-        public GetClassForumQueryHandler(IClassForumRepository classForumRepository, IUserService userService, AuthContext authContext, IMapper mapper)
+        public GetClassForumQueryHandler(IClassForumRepository classForumRepository, IClassForumResultRepository classForumResultRepository, IUserService userService, AuthContext authContext, IMapper mapper, ILessonRepository lessonRepository)
         {
             _classForumRepository = classForumRepository;
+            _classForumResultRepository = classForumResultRepository;
             _userService = userService;
             _authContext = authContext;
             _mapper = mapper;
+            _lessonRepository = lessonRepository;
         }
 
         public async Task<MethodResult<ClassForumModel>> Handle(GetClassForumQuery request, CancellationToken cancellationToken)
@@ -49,13 +55,45 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumQuery
                 methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.StudentNull));
                 return methodResult;
             }
-            var classForum = await _classForumRepository.Queryable
-                .Include(x => x.ClassForumResults!)
-                .ThenInclude(x => x.ClassForumScores)
-                .Include(x => x.ClassForumFiles)
-                .FirstOrDefaultAsync(x => x.ClassForumResults!.Select(x => x.LessonResultId).Contains(request.LessonResultId), cancellationToken);
+            var isLesson = await _lessonRepository.AnyAsync(request.LessonId);
+            if (!isLesson)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumLessonErrorCode.LessonsNotExist));
+                return methodResult;
+            }
 
-            methodResult.Result = _mapper.Map<ClassForumModel>(classForum);
+            var classForum = await _classForumRepository.Queryable
+                .Include(x => x.ClassForumFiles)
+                .FirstOrDefaultAsync(x => x.LessonId == request.LessonId, cancellationToken);
+
+            if (classForum == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumClassForumErrorCode.ClassForumNotExist));
+                return methodResult;
+            }
+            var classForumModel = _mapper.Map<ClassForumModel>(classForum);
+
+            var classForumResult = await _classForumResultRepository.Queryable
+                .Include(x => x.ClassForumResultFiles)
+                .Include(x => x.ClassForumScores)
+                .FirstOrDefaultAsync(x => x.ClassForumId == classForum.Id && x.LessonResultId == request.LessonResultId, cancellationToken);
+
+            classForumModel.ClassForumResultCurrentStudent = _mapper.Map<ClassForumResultModel>(classForumResult);
+
+            if (classForumResult != null && classForumResult.Status != EnumClassForumResultStatus.Draft)
+            {
+                var classForumResults = await _classForumResultRepository.Queryable
+                    .Include(x => x.ClassForumResultFiles)
+                    .Include(x => x.ClassForumScores)
+                    .Where(x => x.ClassForumId == classForum.Id &&
+                                x.Status != EnumClassForumResultStatus.Draft &&
+                                x.Id != classForumResult.Id)
+                    .ToListAsync(cancellationToken);
+
+                classForumModel.ClassForumResultAllStudents = _mapper.Map<IList<ClassForumResultModel>>(classForumResults);
+            }
+
+            methodResult.Result = classForumModel;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }

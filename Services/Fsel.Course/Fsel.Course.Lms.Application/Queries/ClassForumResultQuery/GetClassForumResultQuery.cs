@@ -58,7 +58,6 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
                 Status = classForumResult.Status,
                 ClassForumResultFiles = classForumResult.ClassForumResultFiles == null ? null : classForumResult.ClassForumResultFiles.Select(x => new ClassForumResultFileModel
                 {
-                    Id = x.Id,
                     FilePath = x.FilePath,
                 }).ToList(),
                 ClassForumScores = classForumResult.ClassForumScores == null ? null : classForumResult.ClassForumScores.Select(x => new ClassForumScoreModel

@@ -5,6 +5,8 @@ using Fsel.Common.ActionResults;
 using Fsel.Common.Constants;
 using Fsel.Identity.Application.Commands.AuthCmd;
 using Fsel.Identity.Application.Commands.UserCmd;
+using Fsel.Identity.Application.Queries.StudentQuery;
+using Fsel.Identity.Application.Queries.TeacherQuery;
 using Fsel.Identity.Application.Queries.UserQuery;
 using Fsel.Identity.Domain.Models.EntityModels;
 using Fsel.Shared.Enums;
@@ -80,6 +82,5 @@ namespace Fsel.Identity.Api.Controllers
             MethodResult<UserProfileModel> commandResult = await _mediator.Send(new GetUserProfileQuery()).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
-
     }
 }

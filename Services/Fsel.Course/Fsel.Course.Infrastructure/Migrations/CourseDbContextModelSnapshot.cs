@@ -211,6 +211,13 @@ namespace Fsel.Course.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(103);
 
+                    b.Property<string>("FeedBackNote")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<int?>("FeedBackStars")
+                        .HasColumnType("int");
+
                     b.Property<Guid?>("GradingTeacherId")
                         .HasColumnType("uniqueidentifier");
 

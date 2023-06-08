@@ -38,11 +38,6 @@ namespace Fsel.Course.Application.Queries.MockTestQuery
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<PagingItemsModel<MockTestSearchModel>> methodResult = new MethodResult<PagingItemsModel<MockTestSearchModel>>();
 
-            if (request.PageSize > 100)
-            {
-                methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                return methodResult;
-            }
             var mockTestQuery = _mockTestRepository.Queryable
                                       .Include(x => x.MockTestSections.Where(y => !y.IsDeleted))
                                       .ThenInclude(x => x.SectionGroup)

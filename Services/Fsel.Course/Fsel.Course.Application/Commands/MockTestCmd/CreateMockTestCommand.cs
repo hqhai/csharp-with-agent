@@ -76,7 +76,7 @@ namespace Fsel.Course.Application.Commands.MockTestCmd
                     var method = _sectionConverter.AddSessionToSessionGroup(newSectionGroup, sectionGroup.Sections, EnumCourseType.Ielts);
                     if (!method.IsOK)
                     {
-                        methodResult.AddError(method.ErrorMessages);
+                        methodResult.AddErrorBadRequest(method.ErrorMessages);
                     }
 
                     mockTest.MockTestSections.Add(new MockTestSection

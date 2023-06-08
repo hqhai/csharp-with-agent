@@ -49,8 +49,8 @@ namespace Fsel.Course.Domain.Entities
         public Guid LessonId { get; set; }
         public Lesson? Lesson { get; set; }
 
-        public IList<ClassForumResult>? ClassForumResults { get; set; } = new List<ClassForumResult>();
+        public ICollection<ClassForumResult> ClassForumResults { get; set; } = new List<ClassForumResult>();
 
-        public IList<ClassForumFile>? ClassForumFiles { get; set; } = new List<ClassForumFile>();
+        public ICollection<ClassForumFile> ClassForumFiles { get; set; } = new List<ClassForumFile>();
     }
 }
