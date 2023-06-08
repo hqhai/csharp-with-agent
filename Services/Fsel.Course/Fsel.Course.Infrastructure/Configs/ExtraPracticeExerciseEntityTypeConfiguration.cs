@@ -14,17 +14,17 @@ namespace Fsel.Course.Infrastructure.Configs
             builder.HasOne(a => a.ExtraPractice)
                 .WithMany(b => b.ExtraPracticeExercises)
                 .HasForeignKey(b => b.ExtraPracticeId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.NoAction);
 
             builder.HasOne(a => a.ExtraPracticeChapter)
                 .WithMany(b => b.ExtraPracticeExercises)
                 .HasForeignKey(b => b.ExtraPracticeChapterId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.NoAction);
 
             builder.HasOne(a => a.Exercise)
                 .WithMany(b => b.ExtraPracticeExercises)
                 .HasForeignKey(b => b.ExerciseId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.NoAction);
         }
     }
 }

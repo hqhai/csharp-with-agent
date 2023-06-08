@@ -18,7 +18,7 @@ namespace Fsel.Course.Domain.Models.CommandModels.ExtraPractices
 
         public string? InstructionContent { get; set; }
         public IList<string>? FilePaths { get; set; }
-        public string? VideoPath { get; set; }
+        public string? VideoLink { get; set; }
         public string? Author { get; set; }
         public string? Abstract { get; set; }
 
@@ -28,7 +28,7 @@ namespace Fsel.Course.Domain.Models.CommandModels.ExtraPractices
         [Required]
         public EnumCourseLevel CourseLevel { get; set; }
 
-        public IList<CreateExtraPracticeChapterCommand>? ExtraPracticeChapters { get; set; }
+        public IList<CreateExtraPracticeChapterCommandModel>? ExtraPracticeChapters { get; set; }
         public IList<CreateExerciseCommandModel>? Exercises { get; set; } //Type : Video Embed,Exercise
         public CreateVideoCommandModel? Video { get; set; } //Type : Interactive Video
         // Type : Articles

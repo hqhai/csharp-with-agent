@@ -46,12 +46,12 @@ namespace Fsel.Course.Application.Commands.ExtraPracticeCmd
             var extraPractice = await _extraPracticeRepository.GetIncludeByIdAsync(request.Id);
             if (extraPractice == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumExtraPractiveErrorCode.ExtraPracticeNotExist), nameof(request.Id), request.Id);
+                methodResult.AddErrorBadRequest(nameof(EnumExtraPracticeErrorCode.ExtraPracticeNotExist), nameof(request.Id), request.Id);
                 return methodResult;
             }
             if (extraPractice.IsActive)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumExtraPractiveErrorCode.ExtraPracticeInActiveState), nameof(extraPractice.IsActive), extraPractice.IsActive);
+                methodResult.AddErrorBadRequest(nameof(EnumExtraPracticeErrorCode.ExtraPracticeInActiveState), nameof(extraPractice.IsActive), extraPractice.IsActive);
                 return methodResult;
             }
 

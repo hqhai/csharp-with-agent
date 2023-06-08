@@ -5,8 +5,8 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
     public enum EnumLessonExtraPracticeErrorCode
     {
         /// <summary>
-        /// Lesson ExtraPractive Is Null
+        /// Lesson ExtraPractice Is Null
         /// </summary>
-        LessonExtraPractiveNull
+        LessonExtraPracticeNull
     }
 }

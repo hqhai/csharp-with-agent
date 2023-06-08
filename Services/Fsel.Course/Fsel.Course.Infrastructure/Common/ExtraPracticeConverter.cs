@@ -25,7 +25,7 @@ namespace Fsel.Course.Infrastructure.Common
             _videoConverter = videoConverter;
         }
 
-        public VoidMethodResult AddExtraPracticeExercise(dynamic extraPracticeExercises, IList<CreateExtraPracticeChapterCommand>? exercisePracticeChapters)
+        public VoidMethodResult AddExtraPracticeChapterExercise(dynamic extraPracticeChapters, IList<CreateExtraPracticeChapterCommandModel>? exercisePracticeChapters)
         {
             ArgumentNullException.ThrowIfNull(exercisePracticeChapters);
             VoidMethodResult methodResult = new VoidMethodResult();
@@ -34,7 +34,7 @@ namespace Fsel.Course.Infrastructure.Common
                 ExtraPracticeChapter extraPracticeChapter = _mapper.Map<ExtraPracticeChapter>(item);
                 if (item == null)
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumExtraPractiveChapterErrorCode.ExtraPracticeChapterNull));
+                    methodResult.AddErrorBadRequest(nameof(EnumExtraPracticeChapterErrorCode.ExtraPracticeChapterNull));
                     return methodResult;
                 }
                 if (item.Exercises != null && item.Exercises.Count > 0)
@@ -53,8 +53,9 @@ namespace Fsel.Course.Infrastructure.Common
                             methodResult.AddError(method.ErrorMessages);
                             return methodResult;
                         }
-                        extraPracticeExercises.Add(new ExtraPracticeExercise { Exercise = excerciseNew, ExtraPracticeChapter = extraPracticeChapter });
+                        extraPracticeChapter.ExtraPracticeExercises.Add(new ExtraPracticeExercise { Exercise = excerciseNew });
                     }
+                    extraPracticeChapters.Add(extraPracticeChapter);
                 }
             }
             return methodResult;
@@ -94,9 +95,10 @@ namespace Fsel.Course.Infrastructure.Common
             VoidMethodResult methodResult = new VoidMethodResult();
 
             List<ExtraPracticeExercise> extraPracticeExercises = new List<ExtraPracticeExercise>();
+            List<ExtraPracticeChapter> extraPracticeChapters = new List<ExtraPracticeChapter>();
             if (request.Type == EnumExtraPracticeType.Book && request.ExtraPracticeChapters != null && request.ExtraPracticeChapters.Count > 0)
             {
-                var method = AddExtraPracticeExercise(extraPracticeExercises, request.ExtraPracticeChapters);
+                var method = AddExtraPracticeChapterExercise(extraPracticeChapters, request.ExtraPracticeChapters);
                 if (!method.IsOK)
                 {
                     methodResult.AddError(method.ErrorMessages);
@@ -132,18 +134,24 @@ namespace Fsel.Course.Infrastructure.Common
             {
                 extraPractice.ExtraPracticeExercises = extraPracticeExercises;
             }
+            else if (extraPracticeChapters.Count > 0)
+            {
+                extraPractice.ExtraPracticeChapters = extraPracticeChapters;
+            }
 
             return methodResult;
         }
+
         public async Task<VoidMethodResult> UpdateExtraPractice(dynamic extraPractice, UpdateExtraPracticeCommandModel? request)
         {
             ArgumentNullException.ThrowIfNull(request);
             VoidMethodResult methodResult = new VoidMethodResult();
 
             List<ExtraPracticeExercise> extraPracticeExercises = new List<ExtraPracticeExercise>();
+            List<ExtraPracticeChapter> extraPracticeChapters = new List<ExtraPracticeChapter>();
             if (request.Type == EnumExtraPracticeType.Book && request.ExtraPracticeChapters != null && request.ExtraPracticeChapters.Count > 0)
             {
-                var method = AddExtraPracticeExercise(extraPracticeExercises, request.ExtraPracticeChapters);
+                var method = AddExtraPracticeChapterExercise(extraPracticeChapters, request.ExtraPracticeChapters);
                 if (!method.IsOK)
                 {
                     methodResult.AddError(method.ErrorMessages);
@@ -179,6 +187,10 @@ namespace Fsel.Course.Infrastructure.Common
             {
                 extraPractice.ExtraPracticeExercises.Clear();
                 extraPractice.ExtraPracticeExercises = extraPracticeExercises;
+            }
+            else if (extraPracticeChapters.Count > 0)
+            {
+                extraPractice.ExtraPracticeChapters = extraPracticeChapters;
             }
 
             return methodResult;

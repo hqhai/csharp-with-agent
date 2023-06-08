@@ -2,7 +2,7 @@
 
 namespace Fsel.Course.Domain.Enums.ErrorCodes
 {
-    public enum EnumExtraPractiveChapterErrorCode
+    public enum EnumExtraPracticeChapterErrorCode
     {
         /// <summary>
         /// ExtraPracticeChapters Is Null

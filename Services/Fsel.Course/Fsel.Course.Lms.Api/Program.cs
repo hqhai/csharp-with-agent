@@ -78,6 +78,7 @@ builder.Services.AddScoped<IClassForumResultRepository, ClassForumResultReposito
 builder.Services.AddScoped<IClassForumResultFileRepository, ClassForumResultFileRepository>();
 builder.Services.AddScoped<IClassForumScoreRepository, ClassForumScoreRepository>();
 
+builder.Services.AddScoped<ExtraPracticeConverter>();
 builder.Services.AddScoped<QuestionTypeConverter>();
 builder.Services.AddScoped<AnswerTypeConverter>();
 builder.Services.AddScoped<SectionConverter>();

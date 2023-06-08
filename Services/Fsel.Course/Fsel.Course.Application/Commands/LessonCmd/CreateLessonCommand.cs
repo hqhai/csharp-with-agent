@@ -59,7 +59,7 @@ namespace Fsel.Course.Application.Commands.LessonCmd
 
             if (request.ExtraPracticeIds == null || request.ExtraPracticeIds.Count == 0)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumExtraPractiveErrorCode.ExtraPracticesNull), nameof(request.ExtraPracticeIds), request.ExtraPracticeIds);
+                methodResult.AddErrorBadRequest(nameof(EnumExtraPracticeErrorCode.ExtraPracticesNull), nameof(request.ExtraPracticeIds), request.ExtraPracticeIds);
                 return methodResult;
             }
 
@@ -86,7 +86,7 @@ namespace Fsel.Course.Application.Commands.LessonCmd
 
             if (_extraPracticeRepository.IsIdsInValid(request.ExtraPracticeIds))
             {
-                methodResult.AddErrorBadRequest(nameof(EnumExtraPractiveErrorCode.ExtraPracticesNotExist), nameof(request.ExtraPracticeIds), request.ExtraPracticeIds);
+                methodResult.AddErrorBadRequest(nameof(EnumExtraPracticeErrorCode.ExtraPracticesNotExist), nameof(request.ExtraPracticeIds), request.ExtraPracticeIds);
                 return methodResult;
             }
 

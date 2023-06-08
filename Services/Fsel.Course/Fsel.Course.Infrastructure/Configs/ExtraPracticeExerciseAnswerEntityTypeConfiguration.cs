@@ -11,16 +11,16 @@ namespace Fsel.Course.Infrastructure.Configs
     {
         public void Configure(EntityTypeBuilder<ExtraPracticeExerciseAnswer> builder)
         {
-            ArgumentNullException.ThrowIfNull(builder);
-            builder.HasOne(a => a.ExerciseQuestion)
-                .WithMany(b => b.ExtraPracticeExerciseAnswers)
-                .HasForeignKey(b => b.ExerciseQuestionId)
-                .OnDelete(DeleteBehavior.Cascade);
+            //ArgumentNullException.ThrowIfNull(builder);
+            //builder.HasOne(a => a.ExerciseQuestion)
+            //    .WithMany(b => b.ExtraPracticeExerciseAnswers)
+            //    .HasForeignKey(b => b.ExerciseQuestionId)
+            //    .OnDelete(DeleteBehavior.Cascade);
 
-            builder.HasOne(a => a.ExtraPracticeExercise)
-                .WithMany(b => b.ExtraPracticeExerciseAnswers)
-                .HasForeignKey(b => b.ExtraPracticeExerciseId)
-                .OnDelete(DeleteBehavior.Cascade);
+            //builder.HasOne(a => a.ExtraPracticeExercise)
+            //    .WithMany(b => b.ExtraPracticeExerciseAnswers)
+            //    .HasForeignKey(b => b.ExtraPracticeExerciseId)
+            //    .OnDelete(DeleteBehavior.Cascade);
 
         }
     }
