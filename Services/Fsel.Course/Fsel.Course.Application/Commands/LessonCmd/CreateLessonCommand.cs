@@ -7,7 +7,6 @@ using Fsel.Course.Domain.Enums.ErrorCodes;
 using Fsel.Course.Domain.IRepositories;
 using Fsel.Course.Domain.Models.CommandModels.Lessons;
 using Fsel.Course.Domain.Models.EntityModels;
-using Fsel.Course.Infrastructure.Repositories;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
@@ -57,12 +56,6 @@ namespace Fsel.Course.Application.Commands.LessonCmd
                 return methodResult;
             }
 
-            if (request.ExtraPracticeIds == null || request.ExtraPracticeIds.Count == 0)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumExtraPractiveErrorCode.ExtraPracticesNull), nameof(request.ExtraPracticeIds), request.ExtraPracticeIds);
-                return methodResult;
-            }
-
             if (request.VideoIds == null || request.VideoIds.Count == 0)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumVideoErrorCode.VideosNull), nameof(request.VideoIds), request.VideoIds);
@@ -83,11 +76,13 @@ namespace Fsel.Course.Application.Commands.LessonCmd
                 methodResult.AddErrorBadRequest(nameof(EnumHomeWorkErrorCode.HomeworksNotExist), nameof(request.HomeWorkIds), request.HomeWorkIds);
                 return methodResult;
             }
-
-            if (_extraPracticeRepository.IsIdsInValid(request.ExtraPracticeIds))
+            if (request.ExtraPracticeIds != null && request.ExtraPracticeIds.Count > 0)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumExtraPractiveErrorCode.ExtraPracticesNotExist), nameof(request.ExtraPracticeIds), request.ExtraPracticeIds);
-                return methodResult;
+                if (_extraPracticeRepository.IsIdsInValid(request.ExtraPracticeIds))
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumExtraPractiveErrorCode.ExtraPracticesNotExist), nameof(request.ExtraPracticeIds), request.ExtraPracticeIds);
+                    return methodResult;
+                }
             }
 
             if (_videoRepository.IsIdsInValid(request.VideoIds))
@@ -119,10 +114,13 @@ namespace Fsel.Course.Application.Commands.LessonCmd
                 {
                     HomeWorkId = x
                 }).ToList();
-                lesson.LessonExtraPractices = request.ExtraPracticeIds.Select((x) => new LessonExtraPractice
+                if (request.ExtraPracticeIds != null && request.ExtraPracticeIds.Count > 0)
                 {
-                    ExtracPraticeId = x
-                }).ToList();
+                    lesson.LessonExtraPractices = request.ExtraPracticeIds.Select((x) => new LessonExtraPractice
+                    {
+                        ExtracPraticeId = x
+                    }).ToList();
+                }
                 lesson.LessonVideos = request.VideoIds.Select((x) => new LessonVideo
                 {
                     VideoId = x
