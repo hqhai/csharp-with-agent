@@ -21,6 +21,9 @@ namespace Fsel.Course.Domain.Models.EntityModels
 
         public Guid ClassForumId { get; set; }
 
+        public int? FeedBackStars { get; set; }
+        public string? FeedBackNote { get; set; }
+
         public ClassForumModel? ClassForum { get; set; }
 
         public LessonResultModel? LessonResult { get; set; }

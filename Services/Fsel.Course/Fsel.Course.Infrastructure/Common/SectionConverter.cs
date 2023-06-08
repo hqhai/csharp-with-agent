@@ -176,14 +176,14 @@ namespace Fsel.Course.Infrastructure.Common
                                 var method = AddQuestionToSession(newSectionPart, sectionPart.Questions);
                                 if (!method.IsOK)
                                 {
-                                    methodResult.AddError(method.ErrorMessages);
+                                    methodResult.AddErrorBadRequest(method.ErrorMessages);
                                 }
                             }
                         }
                         var correctCount = newSection.SectionParts.SelectMany(x => x.SectionQuestions).Select(x => x.Question).Sum(x => x!.CorrectTotal);
                         if (!SectionValidation.IsCheckSection(sectionGroup.CourseSkill, section.DisplayOrder, correctCount))
                         {
-                            methodResult.AddErrorBadRequest(nameof(EnumPlacementTestErrorCode.PlacementTestMustCorrectScore), nameof(section.DisplayOrder), section.DisplayOrder);
+                            methodResult.AddErrorBadRequest(nameof(EnumPlacementTestErrorCode.MustCorrectScore), nameof(section.DisplayOrder), section.DisplayOrder);
                             return methodResult;
                         }
                     }
@@ -192,7 +192,7 @@ namespace Fsel.Course.Infrastructure.Common
                         var method = AddQuestionToSession(newSection, section.Questions);
                         if (!method.IsOK)
                         {
-                            methodResult.AddError(method.ErrorMessages);
+                            methodResult.AddErrorBadRequest(method.ErrorMessages);
                             return methodResult;
                         }
                     }

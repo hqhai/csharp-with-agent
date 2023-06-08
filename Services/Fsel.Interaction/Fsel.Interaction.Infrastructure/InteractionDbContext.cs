@@ -23,11 +23,15 @@ namespace Fsel.Interaction.Infrastructure
 
             modelBuilder.ApplyConfiguration(new SurveyQuestionEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new CustomerSurveyEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new InteractionActionEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new CommentEntityTypeConfiguration());
             base.OnModelCreating(modelBuilder);
         }
 
         public DbSet<SurveyQuestion> SurveyQuestions { get; set; }
         public DbSet<CustomerSurvey> CustomerSurveys { get; set; }
+        public DbSet<InteractionAction> InteractionActions { get; set; }
+        public DbSet<Comment> Comments { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {

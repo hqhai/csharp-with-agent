@@ -1,14 +1,18 @@
 // Copyright (c) Atlantic. All rights reserved.
 
 using Fsel.Common.ActionResults;
+using Fsel.Shared.Enums;
 using Refit;
 
 namespace Fsel.Identity.Application.Services
 {
     public interface ISenderService
     {
-        [Post("/sender")]
+        [Post("/send-email")]
         Task<IApiResponse<MethodResult<bool>>> SendEmailAsync([Body] SendEmailCommandModel command);
+
+        [Post("/send-email/send-by-template")]
+        Task<IApiResponse<MethodResult<bool>>> SendEmailAsync([Body] SendEmailByTemplateCommandModel command);
     }
 
     public class SendEmailCommandModel
@@ -18,5 +22,11 @@ namespace Fsel.Identity.Application.Services
         public IList<string> CcEmails { get; set; } = new List<string>();
         public string? Subject { get; set; }
         public string? Content { get; set; }
+    }
+
+    public class SendEmailByTemplateCommandModel : SendEmailCommandModel
+    {
+        public EnumSenderTemplate? Template { get; set; }
+        public object? Params { get; set; }
     }
 }
