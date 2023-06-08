@@ -8,6 +8,7 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery
     using Fsel.Core.Base.BaseModels;
     using Fsel.Core.Extensions;
     using Fsel.Ordering.Application.Services.UserService;
+    using Fsel.Ordering.Application.Services.UserService.Models;
     using Fsel.Ordering.Domain.Enums;
     using Fsel.Ordering.Domain.IRepositories;
     using Fsel.Ordering.Domain.Models.EntityModels;
@@ -63,7 +64,11 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery
                     .AsNoTracking()
                     .ToListAsync(cancellationToken: cancellationToken)
                     .ConfigureAwait(false);
-            var students = await _userService.GetStudentsByIdsAsync(lists.Select(p => p.UserId).Distinct().ToList()!);
+            GetStudentByUserIdsQuery getStudentByUserIdsQuery = new GetStudentByUserIdsQuery()
+            {
+                UserIds = lists.Select(p => p.UserId).ToList()!,
+            };
+            var students = await _userService.GetStudentsByIdsAsync(getStudentByUserIdsQuery);
             if (students.IsSuccessStatusCode)
             {
                 foreach (var item in lists)

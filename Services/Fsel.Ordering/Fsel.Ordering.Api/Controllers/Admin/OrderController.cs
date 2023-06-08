@@ -44,7 +44,7 @@ namespace Fsel.Ordering.Api.Controllers.Admin
         [HttpPut("change-status-order")]
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> ChangeStatusOrder([FromBody] ChangeStatusOderCommand query)
+        public async Task<IActionResult> ChangeStatusOrder([FromBody] ChangeStatusOrderCommand query)
         {
             MethodResult<bool> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
