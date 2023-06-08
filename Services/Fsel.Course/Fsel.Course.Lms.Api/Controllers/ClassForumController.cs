@@ -29,11 +29,11 @@ namespace Fsel.Course.Lms.Api.Controllers
         /// get Class forum
         /// </summary>
         [HttpGet]
-        [ProducesResponseType(typeof(MethodResult<ClassForumModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(MethodResult<ClassForumByStudentModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> Get([FromQuery] GetClassForumQuery command)
         {
-            MethodResult<ClassForumModel> queryResult = await _mediator.Send(command).ConfigureAwait(false);
+            MethodResult<ClassForumByStudentModel> queryResult = await _mediator.Send(command).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
     }

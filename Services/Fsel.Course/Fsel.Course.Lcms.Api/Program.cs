@@ -7,11 +7,12 @@ using Fsel.Course.Domain.IRepositories;
 using Fsel.Course.Infrastructure;
 using Fsel.Course.Infrastructure.Common;
 using Fsel.Course.Infrastructure.Repositories;
+using Fsel.Course.Infrastructure.ValueSettings;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-var appSetting = builder.AddAppSettings<BaseAppSetting>();
+var appSetting = builder.AddAppSettings<AppSetting>();
 builder.AddServices();
 builder.AddSwaggerGens(appSetting);
 builder.AddAuthenticationJwtBearers(appSetting);

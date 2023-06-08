@@ -6,13 +6,15 @@ using Fsel.Course.Domain.IRepositories;
 using Fsel.Course.Infrastructure;
 using Fsel.Course.Infrastructure.Common;
 using Fsel.Course.Infrastructure.Repositories;
+using Fsel.Course.Infrastructure.ValueSettings;
+using Fsel.Course.Lms.Application.Services.InteractionService;
 using Fsel.Course.Lms.Application.Services.TrainingServices;
 using Fsel.Course.Lms.Application.Services.UserServices;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-var appSetting = builder.AddAppSettings<BaseAppSetting>();
+var appSetting = builder.AddAppSettings<AppSetting>();
 builder.AddServices();
 builder.AddSwaggerGens(appSetting);
 builder.AddAuthenticationJwtBearers(appSetting);
@@ -84,6 +86,7 @@ builder.Services.AddScoped<SectionConverter>();
 
 builder.AddRefitClients(typeof(IUserService), appSetting?.Services?.UserApiUrl);
 builder.AddRefitClients(typeof(ITrainingService), appSetting?.Services?.ClassApiUrl);
+builder.AddRefitClients(typeof(IInteractionService), appSetting?.Services?.InteractionApiUrl);
 
 var app = builder.Build();
 app.UseServices();
