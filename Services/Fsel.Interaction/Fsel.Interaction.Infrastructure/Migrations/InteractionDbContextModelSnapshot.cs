@@ -22,6 +22,77 @@ namespace Fsel.Interaction.Infrastructure.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("Fsel.Interaction.Domain.Entities.Comment", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(0);
+
+                    b.Property<string>("Content")
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(107);
+
+                    b.Property<string>("CreatedFullName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(104);
+
+                    b.Property<Guid>("CreatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(101);
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(109);
+
+                    b.Property<string>("DeletedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(106);
+
+                    b.Property<Guid?>("DeletedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(103);
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit")
+                        .HasColumnOrder(110);
+
+                    b.Property<Guid>("ObjectId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(108);
+
+                    b.Property<string>("UpdatedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(105);
+
+                    b.Property<Guid?>("UpdatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(102);
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Comments");
+                });
+
             modelBuilder.Entity("Fsel.Interaction.Domain.Entities.CustomerSurvey", b =>
                 {
                     b.Property<Guid>("Id")
@@ -81,14 +152,81 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(102);
 
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
                     b.HasIndex("SurveyQuestionId");
 
                     b.ToTable("CustomerSurveys");
+                });
+
+            modelBuilder.Entity("Fsel.Interaction.Domain.Entities.InteractionAction", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(0);
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(107);
+
+                    b.Property<string>("CreatedFullName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(104);
+
+                    b.Property<Guid>("CreatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(101);
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(109);
+
+                    b.Property<string>("DeletedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(106);
+
+                    b.Property<Guid?>("DeletedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(103);
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit")
+                        .HasColumnOrder(110);
+
+                    b.Property<Guid>("ObjectId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(108);
+
+                    b.Property<string>("UpdatedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(105);
+
+                    b.Property<Guid?>("UpdatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(102);
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("InteractionActions");
                 });
 
             modelBuilder.Entity("Fsel.Interaction.Domain.Entities.SurveyQuestion", b =>
@@ -100,8 +238,7 @@ namespace Fsel.Interaction.Infrastructure.Migrations
 
                     b.Property<string>("AnswerStr")
                         .IsRequired()
-                        .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2")
@@ -176,8 +313,8 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                         new
                         {
                             Id = new Guid("492d8bb9-cdbe-42e7-aa16-35a1915c3621"),
-                            AnswerStr = "[{\"Id\":1,\"Content\":\"T\\u00ECm ki\\u1EBFm Google\",\"Image\":\"Google\"},{\"Id\":2,\"Content\":\"Facebook\",\"Image\":\"Facebook\"},{\"Id\":3,\"Content\":\"Youtube\",\"Image\":\"Youtube\"},{\"Id\":4,\"Content\":\"Tiktok\",\"Image\":\"Tiktok\"},{\"Id\":5,\"Content\":\"B\\u1EA1n b\\u00E8/Gia \\u0111\\u00ECnh\",\"Image\":\"B\\u1EA1n b\\u00E8/Gia \\u0111\\u00ECnh\"},{\"Id\":6,\"Content\":\"Tin t\\u1EE9c/B\\u00E1o ch\\u00ED/Blog\",\"Image\":\"Tin t\\u1EE9c/B\\u00E1o ch\\u00ED/Blog\"},{\"Id\":7,\"Content\":\"Tivi\",\"Image\":\"Tivi\"},{\"Id\":8,\"Content\":\"Kh\\u00E1c....\",\"Image\":\"Kh\\u00E1c....\"}]",
-                            CreatedDate = new DateTime(2023, 3, 27, 10, 3, 50, 614, DateTimeKind.Local).AddTicks(6078),
+                            AnswerStr = "[{\"id\":1,\"content\":\"T\\u00ECm ki\\u1EBFm Google\",\"image\":\"Google\"},{\"id\":2,\"content\":\"Facebook\",\"image\":\"Facebook\"},{\"id\":3,\"content\":\"Youtube\",\"image\":\"Youtube\"},{\"id\":4,\"content\":\"Tiktok\",\"image\":\"Tiktok\"},{\"id\":5,\"content\":\"B\\u1EA1n b\\u00E8/Gia \\u0111\\u00ECnh\",\"image\":\"B\\u1EA1n b\\u00E8/Gia \\u0111\\u00ECnh\"},{\"id\":6,\"content\":\"Tin t\\u1EE9c/B\\u00E1o ch\\u00ED/Blog\",\"image\":\"Tin t\\u1EE9c/B\\u00E1o ch\\u00ED/Blog\"},{\"id\":7,\"content\":\"Tivi\",\"image\":\"Tivi\"},{\"id\":8,\"content\":\"Kh\\u00E1c....\",\"image\":\"Kh\\u00E1c....\"}]",
+                            CreatedDate = new DateTime(2023, 6, 6, 16, 55, 21, 194, DateTimeKind.Local).AddTicks(5513),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             Description = "addd",
@@ -185,13 +322,13 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                             Icon = "addd",
                             IsDeleted = false,
                             Question = "Bạn biết đến Fsel từ đâu?",
-                            Type = "FselSource"
+                            Type = "YourDirection"
                         },
                         new
                         {
                             Id = new Guid("763d8bb9-cdbe-42e7-aa16-35a1915c3512"),
-                            AnswerStr = "[{\"Id\":1,\"Content\":\"B\\u1EA1n \\u0111\\u00E3 bi\\u1EBFt m\\u1ED9t ch\\u00FAt Ti\\u1EBFng Anh\"},{\"Id\":2,\"Content\":\"\\u0110\\u00E2y l\\u00E0 l\\u1EA7n \\u0111\\u1EA7u b\\u1EA1n h\\u1ECDc Ti\\u1EBFng Anh\"}]",
-                            CreatedDate = new DateTime(2023, 3, 27, 10, 3, 50, 614, DateTimeKind.Local).AddTicks(7185),
+                            AnswerStr = "[{\"id\":1,\"content\":\"B\\u1EA1n \\u0111\\u00E3 bi\\u1EBFt m\\u1ED9t ch\\u00FAt Ti\\u1EBFng Anh\"},{\"id\":2,\"content\":\"\\u0110\\u00E2y l\\u00E0 l\\u1EA7n \\u0111\\u1EA7u b\\u1EA1n h\\u1ECDc Ti\\u1EBFng Anh\"}]",
+                            CreatedDate = new DateTime(2023, 6, 6, 16, 55, 21, 194, DateTimeKind.Local).AddTicks(6649),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             Description = "addd",
@@ -199,13 +336,13 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                             Icon = "addd",
                             IsDeleted = false,
                             Question = "Chọn hướng đi của bạn",
-                            Type = "ChooseDirection"
+                            Type = "ChooseMultipleColumn"
                         },
                         new
                         {
                             Id = new Guid("721d8bb9-cdbe-42e7-aa16-35a1915c1123"),
-                            AnswerStr = "[{\"Id\":1,\"Content\":\"V\\u0103n h\\u00F3a\",\"Image\":\"V\\u0103n h\\u00F3a\"},{\"Id\":2,\"Content\":\"Du l\\u1ECBch\",\"Image\":\"Du l\\u1ECBch\"},{\"Id\":3,\"Content\":\"K\\u1EBFt b\\u1EA1n v\\u00E0 chia s\\u1EBB\",\"Image\":\"K\\u1EBFt b\\u1EA1n v\\u00E0 chia s\\u1EBB\"},{\"Id\":4,\"Content\":\"H\\u1ECDc t\\u1EADp\",\"Image\":\"H\\u1ECDc t\\u1EADp\"},{\"Id\":5,\"Content\":\"C\\u01A1 h\\u1ED9i ngh\\u1EC1 nghi\\u1EC7p\",\"Image\":\"C\\u01A1 h\\u1ED9i ngh\\u1EC1 nghi\\u1EC7p\"},{\"Id\":6,\"Content\":\"Kh\\u00E1c....\",\"Image\":\"Kh\\u00E1c....\"}]",
-                            CreatedDate = new DateTime(2023, 3, 27, 10, 3, 50, 614, DateTimeKind.Local).AddTicks(7397),
+                            AnswerStr = "[{\"id\":1,\"content\":\"V\\u0103n h\\u00F3a\",\"image\":\"V\\u0103n h\\u00F3a\"},{\"id\":2,\"content\":\"Du l\\u1ECBch\",\"image\":\"Du l\\u1ECBch\"},{\"id\":3,\"content\":\"K\\u1EBFt b\\u1EA1n v\\u00E0 chia s\\u1EBB\",\"image\":\"K\\u1EBFt b\\u1EA1n v\\u00E0 chia s\\u1EBB\"},{\"id\":4,\"content\":\"H\\u1ECDc t\\u1EADp\",\"image\":\"H\\u1ECDc t\\u1EADp\"},{\"id\":5,\"content\":\"C\\u01A1 h\\u1ED9i ngh\\u1EC1 nghi\\u1EC7p\",\"image\":\"C\\u01A1 h\\u1ED9i ngh\\u1EC1 nghi\\u1EC7p\"},{\"id\":6,\"content\":\"Kh\\u00E1c....\",\"image\":\"Kh\\u00E1c....\"}]",
+                            CreatedDate = new DateTime(2023, 6, 6, 16, 55, 21, 194, DateTimeKind.Local).AddTicks(7024),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             Description = "addd",
@@ -213,13 +350,13 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                             Icon = "addd",
                             IsDeleted = false,
                             Question = "Tại sao bạn học ngoại ngữ",
-                            Type = "ChooseLanguage"
+                            Type = "ChooseMultipleColumn"
                         },
                         new
                         {
                             Id = new Guid("713d8bb9-cdbe-42e7-aa16-35a1915c3532"),
-                            AnswerStr = "null",
-                            CreatedDate = new DateTime(2023, 3, 27, 10, 3, 50, 614, DateTimeKind.Local).AddTicks(7670),
+                            AnswerStr = "{\"countryCode\":123,\"countryName\":\"Vi\\u1EC7t Nam\",\"provinceCode\":29,\"provinceName\":\"H\\u00E0 N\\u1ED9i\"}",
+                            CreatedDate = new DateTime(2023, 6, 6, 16, 55, 21, 194, DateTimeKind.Local).AddTicks(7399),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             Description = "addd",
@@ -231,27 +368,13 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                         },
                         new
                         {
-                            Id = new Guid("adeaeda6-0e41-4ceb-a3fd-1b195317d776"),
-                            AnswerStr = "[{\"Id\":1,\"Content\":\"8 - 10 am\"},{\"Id\":2,\"Content\":\"1 - 3 pm\"},{\"Id\":3,\"Content\":\"3 - 5 pm\"},{\"Id\":4,\"Content\":\"5 - 9 pm\"},{\"Id\":5,\"Content\":\"7 - 10 pm\"}]",
-                            CreatedDate = new DateTime(2023, 3, 27, 10, 3, 50, 614, DateTimeKind.Local).AddTicks(7843),
+                            Id = new Guid("2be9a620-143d-41f6-815b-2038c21a7b23"),
+                            AnswerStr = "{\"birthday\":null,\"ageGenderQuestions\":[{\"id\":1,\"gender\":\"Male\"},{\"id\":2,\"gender\":\"Female\"},{\"id\":3,\"gender\":\"Other\"}]}",
+                            CreatedDate = new DateTime(2023, 6, 6, 16, 55, 21, 194, DateTimeKind.Local).AddTicks(7618),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             Description = "addd",
                             DisplayOrder = 5,
-                            Icon = "addd",
-                            IsDeleted = false,
-                            Question = "Chọn thời gian học tập ",
-                            Type = "StudyTime"
-                        },
-                        new
-                        {
-                            Id = new Guid("2be9a620-143d-41f6-815b-2038c21a7b23"),
-                            AnswerStr = "{\"Birthday\":null,\"AgeGenderQuestions\":[{\"Id\":1,\"Gender\":\"Male\"},{\"Id\":2,\"Gender\":\"Female\"},{\"Id\":3,\"Gender\":\"Other\"}]}",
-                            CreatedDate = new DateTime(2023, 3, 27, 10, 3, 50, 614, DateTimeKind.Local).AddTicks(8042),
-                            CreatedFullName = "",
-                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            Description = "addd",
-                            DisplayOrder = 6,
                             Icon = "addd",
                             IsDeleted = false,
                             Question = "Xác định độ tuổi và giới tính",

@@ -73,7 +73,7 @@ namespace Fsel.Course.Application.Commands.PlacementTestCmd
                     var method = _sectionConverter.AddSessionToSessionGroup(newSectionGroup, sectionGroup.Sections, request.Level == EnumPlacementTestLevel.IELTS ? EnumCourseType.Ielts : EnumCourseType.Academic);
                     if (!method.IsOK)
                     {
-                        methodResult.AddError(method.ErrorMessages);
+                        methodResult.AddErrorBadRequest(method.ErrorMessages);
                     }
                     placementTest.PlacementTestSections.Add(new PlacementTestSection
                     {

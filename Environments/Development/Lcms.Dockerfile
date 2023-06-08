@@ -10,12 +10,13 @@ EXPOSE 443
 
 FROM mcr.microsoft.com/dotnet/sdk:7.0 AS build
 WORKDIR /src
-COPY ["../../Services/Fsel.Course/Fsel.Course.Lcms.Api/Fsel.Course.Lcms.Api.csproj", "Services/Fsel.Course/Fsel.Course.Lcms.Api/"]
-COPY ["../../Services/Fsel.Course/Fsel.Course.Application/Fsel.Course.Application.csproj", "Services/Fsel.Course/Fsel.Course.Application/"]
-COPY ["../../Services/Fsel.Course/Fsel.Course.Infrastructure/Fsel.Course.Infrastructure.csproj", "Services/Fsel.Course/Fsel.Course.Infrastructure/"]
-COPY ["../../Services/Fsel.Course/Fsel.Course.Domain/Fsel.Course.Domain.csproj", "Services/Fsel.Course/Fsel.Course.Domain/"]
-COPY ["../../Services/Shared/Fsel.Core/Fsel.Core.csproj", "Services/Shared/Fsel.Core/"]
-COPY ["../../Services/Shared/Fsel.Common/Fsel.Common.csproj", "Services/Shared/Fsel.Common/"]
+COPY ["Services/Fsel.Course/Fsel.Course.Lcms.Api/Fsel.Course.Lcms.Api.csproj", "Services/Fsel.Course/Fsel.Course.Lcms.Api/"]
+COPY ["Services/Fsel.Course/Fsel.Course.Application/Fsel.Course.Application.csproj", "Services/Fsel.Course/Fsel.Course.Application/"]
+COPY ["Services/Fsel.Course/Fsel.Course.Infrastructure/Fsel.Course.Infrastructure.csproj", "Services/Fsel.Course/Fsel.Course.Infrastructure/"]
+COPY ["Services/Fsel.Course/Fsel.Course.Domain/Fsel.Course.Domain.csproj", "Services/Fsel.Course/Fsel.Course.Domain/"]
+COPY ["Services/Shared/Fsel.Shared/Fsel.Shared.csproj", "Services/Shared/Fsel.Shared/"]
+COPY ["Services/Shared/Fsel.Core/Fsel.Core.csproj", "Services/Shared/Fsel.Core/"]
+COPY ["Services/Shared/Fsel.Common/Fsel.Common.csproj", "Services/Shared/Fsel.Common/"]
 RUN dotnet restore "Services/Fsel.Course/Fsel.Course.Lcms.Api/Fsel.Course.Lcms.Api.csproj"
 COPY . .
 WORKDIR "/src/Services/Fsel.Course/Fsel.Course.Lcms.Api"

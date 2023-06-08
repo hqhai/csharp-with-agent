@@ -30,6 +30,12 @@ namespace Fsel.Course.Domain.Entities
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         public Guid ClassForumId { get; set; }
 
+        [Range(0, 5, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
+        public int? FeedBackStars { get; set; }
+
+        [MaxLength(1000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
+        public string? FeedBackNote { get; set; }
+
         public ClassForum? ClassForum { get; set; }
 
         public LessonResult? LessonResult { get; set; }
