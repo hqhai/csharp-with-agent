@@ -2,10 +2,11 @@
 
 namespace Fsel.Course.Domain.Models.EntityModels
 {
-    public class LessonScoreModel
+    using Fsel.Course.Domain.Enums;
+
+    public class TimeCodeScoreModel
     {
+        public EnumTimeCodeType Type { get; set; }
         public IList<LessonSkillScoreModel>? LessonSkillScores { get; set; }
-        public double Percent { get; set; }
-        public IList<TimeCodeScoreModel>? TimeCodeScores { get; set; }
     }
 }
