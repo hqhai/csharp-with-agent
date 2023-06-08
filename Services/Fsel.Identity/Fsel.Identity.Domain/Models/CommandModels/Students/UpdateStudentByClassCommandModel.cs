@@ -6,6 +6,6 @@ namespace Fsel.Identity.Domain.Models.CommandModels.Students
     {
         public Guid ClassId { get; set; }
         public Guid StudentId { get; set; }
-        public string? Membership { get; set; }
+        public Guid? PackageId { get; set; }
     }
 }

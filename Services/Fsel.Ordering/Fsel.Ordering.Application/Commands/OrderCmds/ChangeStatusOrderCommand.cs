@@ -12,11 +12,11 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
     using MediatR;
     using Microsoft.AspNetCore.Http;
 
-    public class ChangeStatusOderCommand : ChangeStatusOrderCommandModel, IRequest<MethodResult<bool>>
+    public class ChangeStatusOrderCommand : ChangeStatusOrderCommandModel, IRequest<MethodResult<bool>>
     {
     }
 
-    public class ChangeStatusOderCommandHandler : IRequestHandler<ChangeStatusOderCommand, MethodResult<bool>>
+    public class ChangeStatusOderCommandHandler : IRequestHandler<ChangeStatusOrderCommand, MethodResult<bool>>
     {
         private readonly IOrderRepository _orderRepository;
 
@@ -25,7 +25,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
             _orderRepository = orderRepository;
         }
 
-        public async Task<MethodResult<bool>> Handle(ChangeStatusOderCommand request, CancellationToken cancellationToken)
+        public async Task<MethodResult<bool>> Handle(ChangeStatusOrderCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<bool> methodResult = new MethodResult<bool>();

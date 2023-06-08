@@ -41,7 +41,7 @@ namespace Fsel.Identity.Application.Queries.StudentQuery
                                         .Where(i => i.Human != null && request.UserIds!.Contains(i.Human.UserId!))
                                         .Select(x => new StudentModel
                                         {
-                                            Membership = x.Membership,
+                                            PackageId = x.PackageId,
                                             ClassId = x.ClassId,
                                             CourseLevel = x.CourseLevel,
                                             CreatedDate = x.CreatedDate,

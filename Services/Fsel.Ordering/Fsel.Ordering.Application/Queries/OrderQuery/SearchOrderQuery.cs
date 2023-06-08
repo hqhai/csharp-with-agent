@@ -42,7 +42,7 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 return methodResult;
             }
-            var oders = _orderRepository.Queryable.Include(p => p.Package).Select(x => new SearchOrderModel
+            var orders = _orderRepository.Queryable.Include(p => p.Package).Select(x => new SearchOrderModel
             {
                 Id = x.Id,
                 UserId = x.UserId.ToString(),
@@ -56,10 +56,10 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery
             });
             if (request.Status.HasValue)
             {
-                oders = oders.Where(p => request.Status == false ? p.Status == EnumOrderStatus.New : p.Status != EnumOrderStatus.New);
+                orders = orders.Where(p => request.Status == false ? p.Status == EnumOrderStatus.New : p.Status != EnumOrderStatus.New);
             }
-            int totalItem = await oders.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
-            var lists = await oders
+            int totalItem = await orders.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
+            var lists = await orders
                     .ApplySortAndPaging(request)
                     .AsNoTracking()
                     .ToListAsync(cancellationToken: cancellationToken)

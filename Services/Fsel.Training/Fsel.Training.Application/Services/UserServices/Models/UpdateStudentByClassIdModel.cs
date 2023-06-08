@@ -8,6 +8,6 @@ namespace Fsel.Training.Application.Services.UserServices.Models
     {
         public Guid? ClassId { get; set; }
         public Guid StudentId { get; set; }
-        public string? Membership { get; set; }
+        public Guid? PackageId { get; set; }
     }
 }

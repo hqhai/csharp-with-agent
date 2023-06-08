@@ -45,7 +45,7 @@ namespace Fsel.Identity.Application.Queries.StudentQuery
             var students = await _studentRepository.Queryable.Include(h => h.Human).Select(p => new StudentModel
             {
                 Id = p.Id,
-                Membership = p.Membership,
+                PackageId = p.PackageId,
                 Occupation = p.Occupation,
                 School = p.School,
                 CourseLevel = p.CourseLevel,
