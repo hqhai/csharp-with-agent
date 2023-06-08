@@ -5,6 +5,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
+    using Fsel.Ordering.Application.Services.TrainingService;
     using Fsel.Ordering.Domain.Enums;
     using Fsel.Ordering.Domain.Enums.ErrorCodes;
     using Fsel.Ordering.Domain.IRepositories;
@@ -19,10 +20,12 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
     public class ChangeStatusOrderCommandHandler : IRequestHandler<ChangeStatusOrderCommand, MethodResult<bool>>
     {
         private readonly IOrderRepository _orderRepository;
+        private readonly ITrainingService _trainingService;
 
-        public ChangeStatusOrderCommandHandler(IOrderRepository orderRepository)
+        public ChangeStatusOrderCommandHandler(IOrderRepository orderRepository, ITrainingService trainingService)
         {
             _orderRepository = orderRepository;
+            _trainingService = trainingService;
         }
 
         public async Task<MethodResult<bool>> Handle(ChangeStatusOrderCommand request, CancellationToken cancellationToken)
@@ -47,7 +50,15 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
                 order.Status = request.OderStatus;
                 order = _orderRepository.Update(order);
                 await _orderRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
-
+                if (request.OderStatus == EnumOrderStatus.Reject)
+                {
+                    var student = await _trainingService.DeleteStudentFromClass(order.UserId);
+                    if (!student.IsSuccessStatusCode)
+                    {
+                        methodResult.AddErrorBadRequest(nameof(EnumOrderErrorCode.UpdateNotSuccess));
+                        return methodResult;
+                    }
+                }
                 methodResult.StatusCode = StatusCodes.Status201Created;
                 methodResult.Result = true;
                 return methodResult;

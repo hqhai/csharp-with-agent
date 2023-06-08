@@ -33,5 +33,10 @@ namespace Fsel.Ordering.Domain.Enums.ErrorCodes
         /// Order Status Is Not New
         /// </summary>
         OrderStatusIsNotNew,
+
+        /// <summary>
+        /// Update Not Success
+        /// </summary>
+        UpdateNotSuccess,
     }
 }
