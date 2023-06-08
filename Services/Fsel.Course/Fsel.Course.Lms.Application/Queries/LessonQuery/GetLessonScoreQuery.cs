@@ -129,26 +129,26 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
                                  CorrectCount = answerQJ != null ? answerQJ.CorrectCount : default,
                              };
 
-            //var scoreTimeCodeQuery = from type in types
-            //                         join questionQ in questionTimeCodes on type equals questionQ.Type into questionQ_jointable
-            //                         from questionQJ in questionQ_jointable.DefaultIfEmpty()
-            //                         join answerQ in answerTimeCodeQuery on type equals answerQ.Type into answerQ_jointable
-            //                         from answerQJ in answerQ_jointable.DefaultIfEmpty()
-            //                         select new TimeCodeScoreModel
-            //                         {
-            //                             Type = type,
-            //                             LessonSkillScores = from skill in skills
-            //                                                 join questionQ in questionTimeCodes on skill equals questionQ.Skill into questionQ_jointable
-            //                                                 from questionQJ in questionQ_jointable.DefaultIfEmpty()
-            //                                                 join answerQ in answerTimeCodeQuery on skill equals answerQ.Skill into answerQ_jointable
-            //                                                 from answerQJ in answerQ_jointable.DefaultIfEmpty()
-            //                                                 select new LessonSkillScoreModel
-            //                                                 {
-            //                                                     Skill = skill,
-            //                                                     TotalCount = questionQJ != null ? questionQJ.TotalCount : default,
-            //                                                     CorrectCount = answerQJ != null ? answerQJ.CorrectCount : default,
-            //                                                 }
-            //                         };
+            var scoreTimeCodeQuery = from type in types
+                                     join questionQ in questionTimeCodes on type equals questionQ.Type into questionQ_jointable
+                                     from questionQJ in questionQ_jointable.DefaultIfEmpty()
+                                     join answerQ in answerTimeCodeQuery on type equals answerQ.Type into answerQ_jointable
+                                     from answerQJ in answerQ_jointable.DefaultIfEmpty()
+                                     select new TimeCodeScoreModel
+                                     {
+                                         Type = type,
+                                         LessonSkillScores = (from skill in skills
+                                                             join question1Q in questionTimeCodes on skill equals question1Q.Skill into questionQ_jointable
+                                                             from question1QJ in questionQ_jointable.DefaultIfEmpty()
+                                                             join answer1Q in answerTimeCodeQuery on skill equals answer1Q.Skill into answerQ_jointable
+                                                             from answer1QJ in answerQ_jointable.DefaultIfEmpty()
+                                                             select new LessonSkillScoreModel
+                                                             {
+                                                                 Skill = skill,
+                                                                 TotalCount = questionQJ != null ? questionQJ.TotalCount : default,
+                                                                 CorrectCount = answerQJ != null ? answerQJ.CorrectCount : default,
+                                                             })
+                                     };
 
             var correctCount = scoreQuery.Select(x => x.CorrectCount).Sum();
             var totalCount = scoreQuery.Select(x => x.TotalCount).Sum();
