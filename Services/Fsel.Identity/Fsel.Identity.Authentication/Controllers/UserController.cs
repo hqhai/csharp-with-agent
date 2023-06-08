@@ -8,7 +8,7 @@ using Fsel.Identity.Domain.Models.EntityModels;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Fsel.Identity.Userentication.Controllers
+namespace Fsel.Identity.Authentication.Controllers
 {
     [ApiVersion(Settings.APIVersion)]
     [Route(Settings.APIDefaultRoute + "/user")]
@@ -77,6 +77,18 @@ namespace Fsel.Identity.Userentication.Controllers
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> SendOtpProfile([FromQuery] SendOtpProfileCommand command)
+        {
+            MethodResult<bool> commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Check Otp
+        /// </summary>
+        [HttpGet("check-otp")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> CheckOtp([FromQuery] CheckOtpCommand command)
         {
             MethodResult<bool> commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();
