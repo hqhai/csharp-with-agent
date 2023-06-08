@@ -83,6 +83,18 @@ namespace Fsel.Identity.Authentication.Controllers
         }
 
         /// <summary>
+        /// Check Otp
+        /// </summary>
+        [HttpGet("check-otp")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> CheckOtp([FromQuery] CheckOtpCommand command)
+        {
+            MethodResult<bool> commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
         /// Comfirm Otp Profile
         /// </summary>
         [HttpGet("comfirm-otp-profile")]
