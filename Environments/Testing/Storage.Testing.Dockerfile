@@ -10,20 +10,23 @@ EXPOSE 443
 
 FROM mcr.microsoft.com/dotnet/sdk:7.0 AS build
 WORKDIR /src
-COPY ["Services/Fsel.Gateway/Fsel.Gateway.Api/Fsel.Gateway.Api.csproj", "Services/Fsel.Gateway/Fsel.Gateway.Api/"]
+COPY ["Services/Fsel.Storage/Fsel.Storage.Api/Fsel.Storage.Api.csproj", "Services/Fsel.Storage/Fsel.Storage.Api/"]
+COPY ["Services/Fsel.Storage/Fsel.Storage.Application/Fsel.Storage.Application.csproj", "Services/Fsel.Storage/Fsel.Storage.Application/"]
+COPY ["Services/Fsel.Storage/Fsel.Storage.Infrastructure/Fsel.Storage.Infrastructure.csproj", "Services/Fsel.Storage/Fsel.Storage.Infrastructure/"]
+COPY ["Services/Fsel.Storage/Fsel.Storage.Domain/Fsel.Storage.Domain.csproj", "Services/Fsel.Storage/Fsel.Storage.Domain/"]
 COPY ["Services/Shared/Fsel.Shared/Fsel.Shared.csproj", "Services/Shared/Fsel.Shared/"]
 COPY ["Services/Shared/Fsel.Core/Fsel.Core.csproj", "Services/Shared/Fsel.Core/"]
 COPY ["Services/Shared/Fsel.Common/Fsel.Common.csproj", "Services/Shared/Fsel.Common/"]
-RUN dotnet restore "Services/Fsel.Gateway/Fsel.Gateway.Api/Fsel.Gateway.Api.csproj"
+RUN dotnet restore "Services/Fsel.Storage/Fsel.Storage.Api/Fsel.Storage.Api.csproj"
 COPY . .
-WORKDIR "/src/Services/Fsel.Gateway/Fsel.Gateway.Api"
-RUN dotnet build "Fsel.Gateway.Api.csproj" -c Release -o /app/build
+WORKDIR "/src/Services/Fsel.Storage/Fsel.Storage.Api"
+RUN dotnet build "Fsel.Storage.Api.csproj" -c Release -o /app/build
 
 FROM build AS publish
-RUN dotnet publish "Fsel.Gateway.Api.csproj" -c Release -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "Fsel.Storage.Api.csproj" -c Release -o /app/publish /p:UseAppHost=false
 
 FROM base AS final
 WORKDIR /app
 ENV ASPNETCORE_ENVIRONMENT=Testing
 COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "Fsel.Gateway.Api.dll"]
+ENTRYPOINT ["dotnet", "Fsel.Storage.Api.dll"]

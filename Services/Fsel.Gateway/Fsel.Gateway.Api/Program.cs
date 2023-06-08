@@ -1,7 +1,6 @@
 using Fsel.Common.ValueSettings;
 using Fsel.Core.Extensions;
 using Ocelot.DependencyInjection;
-using Ocelot.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,7 +12,7 @@ builder.Services.AddSwaggerForOcelot(builder.Configuration);
 builder.Services.AddSwaggerGen();
 
 builder.Configuration
-    .AddJsonFile("ocelot.json", optional: false, reloadOnChange: true)
+    .AddJsonFile($"ocelot.{builder.Environment.EnvironmentName}.json", optional: false, reloadOnChange: true)
     .AddEnvironmentVariables();
 builder.Services.AddOcelot(builder.Configuration);
 
