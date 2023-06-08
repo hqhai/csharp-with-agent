@@ -63,7 +63,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
                 return methodResult;
             }
 
-            var classnew = await _trainingService.RegisterClassAsync(new RegisterClassCommandModel { Code = request.Code, CourseId = request.CourseId, CourseLevel = request.CourseLevel, PackageCode = package.Code ?? default });
+            var classnew = await _trainingService.RegisterClassAsync(new RegisterClassCommandModel { Code = request.Code, CourseId = request.CourseId, CourseLevel = request.CourseLevel, PackageId = request.PackageId });
             if (!classnew.IsSuccessStatusCode)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallTrainingServiceError));

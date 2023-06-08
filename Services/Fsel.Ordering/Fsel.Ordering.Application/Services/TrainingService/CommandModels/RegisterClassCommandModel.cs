@@ -8,7 +8,7 @@ namespace Fsel.Ordering.Application.Services.TrainingService.CommandModels
 
     public class RegisterClassCommandModel
     {
-        public EnumPackageCode PackageCode { get; set; }
+        public Guid PackageId { get; set; }
         public Guid CourseId { get; set; }
         public string? Code { get; set; }
         public EnumCourseLevel CourseLevel { get; set; }
