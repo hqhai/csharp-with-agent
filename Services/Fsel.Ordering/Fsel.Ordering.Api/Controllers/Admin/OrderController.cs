@@ -29,7 +29,7 @@ namespace Fsel.Ordering.Api.Controllers.Admin
         /// <summary>
         /// Search Course
         /// </summary>
-        [HttpGet("search-oder")]
+        [HttpGet("search-order")]
         [ProducesResponseType(typeof(MethodResult<PagingItemsModel<SearchOrderModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> Search([FromQuery] SearchOrderQuery query)

@@ -25,13 +25,13 @@ namespace Fsel.Ordering.Domain.Enums.ErrorCodes
         CodeOrderAlreadyExist,
 
         /// <summary>
-        /// Oder Does Not Exist
+        /// Order Does Not Exist
         /// </summary>
-        OderNotExist,
+        OrderNotExist,
 
         /// <summary>
-        /// Oder Status Is Not New
+        /// Order Status Is Not New
         /// </summary>
-        OderStatusIsNotNew,
+        OrderStatusIsNotNew,
     }
 }

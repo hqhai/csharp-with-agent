@@ -16,11 +16,11 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
     {
     }
 
-    public class ChangeStatusOderCommandHandler : IRequestHandler<ChangeStatusOrderCommand, MethodResult<bool>>
+    public class ChangeStatusOrderCommandHandler : IRequestHandler<ChangeStatusOrderCommand, MethodResult<bool>>
     {
         private readonly IOrderRepository _orderRepository;
 
-        public ChangeStatusOderCommandHandler(IOrderRepository orderRepository)
+        public ChangeStatusOrderCommandHandler(IOrderRepository orderRepository)
         {
             _orderRepository = orderRepository;
         }
@@ -33,12 +33,12 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
             var order = await _orderRepository.GetByIdAsync(request.OderId);
             if (order == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumOrderErrorCode.OderNotExist));
+                methodResult.AddErrorBadRequest(nameof(EnumOrderErrorCode.OrderNotExist));
                 return methodResult;
             }
             if (order.Status != EnumOrderStatus.New)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumOrderErrorCode.OderStatusIsNotNew));
+                methodResult.AddErrorBadRequest(nameof(EnumOrderErrorCode.OrderStatusIsNotNew));
                 return methodResult;
             }
 
