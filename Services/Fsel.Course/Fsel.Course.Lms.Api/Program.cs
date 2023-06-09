@@ -32,6 +32,7 @@ builder.Services.AddScoped<IUnitLessonRepository, UnitLessonRepository>();
 builder.Services.AddScoped<IVideoTimeCodeRepository, VideoTimeCodeRepository>();
 builder.Services.AddScoped<IVideoRepository, VideoRepository>();
 builder.Services.AddScoped<IExtraPracticeRepository, ExtraPracticeRepository>();
+builder.Services.AddScoped<IExtraPracticeExerciseRepository, ExtraPracticeExerciseRepository>();
 builder.Services.AddScoped<IClassForumRepository, ClassForumRepository>();
 builder.Services.AddScoped<IHomeWorkRepository, HomeWorkRepository>();
 builder.Services.AddScoped<IExerciseRepository, ExerciseRepository>();
@@ -80,10 +81,11 @@ builder.Services.AddScoped<IClassForumResultRepository, ClassForumResultReposito
 builder.Services.AddScoped<IClassForumResultFileRepository, ClassForumResultFileRepository>();
 builder.Services.AddScoped<IClassForumScoreRepository, ClassForumScoreRepository>();
 
+builder.Services.AddScoped<ExtraPracticeConverter>();
 builder.Services.AddScoped<QuestionTypeConverter>();
 builder.Services.AddScoped<AnswerTypeConverter>();
 builder.Services.AddScoped<SectionConverter>();
-
+builder.Services.AddScoped<VideoConverter>();
 builder.AddRefitClients(typeof(IUserService), appSetting?.Services?.UserApiUrl);
 builder.AddRefitClients(typeof(ITrainingService), appSetting?.Services?.ClassApiUrl);
 builder.AddRefitClients(typeof(IInteractionService), appSetting?.Services?.InteractionApiUrl);
