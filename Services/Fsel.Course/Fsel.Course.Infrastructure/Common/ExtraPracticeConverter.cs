@@ -58,7 +58,7 @@ namespace Fsel.Course.Infrastructure.Common
                             return methodResult;
                         }
                         Exercise excerciseNew = _mapper.Map<Exercise>(exercise);
-                        var method = _videoConverter.ExerciseValuedate(excerciseNew, exercise);
+                        var method = _videoConverter.AddQuestionToExercise(excerciseNew, exercise);
                         if (!method.IsOK)
                         {
                             methodResult.AddError(method.ErrorMessages);
@@ -89,7 +89,7 @@ namespace Fsel.Course.Infrastructure.Common
                     return methodResult;
                 }
                 Exercise excerciseNew = _mapper.Map<Exercise>(exercise);
-                var method = _videoConverter.ExerciseValuedate(excerciseNew, exercise);
+                var method = _videoConverter.AddQuestionToExercise(excerciseNew, exercise);
                 if (!method.IsOK)
                 {
                     methodResult.AddError(method.ErrorMessages);

@@ -17,19 +17,25 @@ namespace Fsel.Course.Infrastructure.Common
     public class VideoConverter
     {
         private readonly IVideoRepository _videoRepository;
+        private readonly IQuestionRepository _questionRepository;
+        private readonly IExerciseRepository _exerciseRepository;
         private readonly QuestionTypeConverter _questionTypeConverter;
         private readonly IMapper _mapper;
 
         public VideoConverter(IVideoRepository videoRepository
+            , IQuestionRepository questionRepository
+            , IExerciseRepository exerciseRepository
             , QuestionTypeConverter questionTypeConverter
             , IMapper mapper)
         {
             _videoRepository = videoRepository;
+            _questionRepository = questionRepository;
+            _exerciseRepository = exerciseRepository;
             _questionTypeConverter = questionTypeConverter;
             _mapper = mapper;
         }
 
-        public VoidMethodResult ExerciseValuedate(dynamic newExercise, CreateExerciseCommandModel? exercise)
+        public VoidMethodResult AddQuestionToExercise(dynamic newExercise, CreateExerciseCommandModel? exercise)
         {
             ArgumentNullException.ThrowIfNull(exercise);
             VoidMethodResult methodResult = new VoidMethodResult();
@@ -107,7 +113,7 @@ namespace Fsel.Course.Infrastructure.Common
                         return methodResult;
                     }
                     var newExercise = _mapper.Map<Exercise>(exercise);
-                    var method = ExerciseValuedate(newExercise, exercise);
+                    var method = AddQuestionToExercise(newExercise, exercise);
                     if (!method.IsOK)
                     {
                         methodResult.AddError(method.ErrorMessages);
@@ -203,6 +209,26 @@ namespace Fsel.Course.Infrastructure.Common
                 methodResult.AddErrorBadRequest(video.ErrorMessages);
                 return methodResult;
             }
+            return methodResult;
+        }
+        public async Task<VoidMethodResult> DeleteExerciseToVideo(Video video)
+        {
+            ArgumentNullException.ThrowIfNull(video);
+            VoidMethodResult methodResult = new VoidMethodResult();
+
+            List<Exercise> exercises = video.VideoTimeCodes.SelectMany(x => x.TimeCodeExercises).Select(x => x.Exercise!).ToList();
+            List<Question> questions = exercises.SelectMany(x => x.ExerciseQuestions).Select(x => x.Question!).ToList();
+            foreach (var item in exercises)
+            {
+                await _exerciseRepository.DeleteAsync(item);
+            }
+            await _exerciseRepository.UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
+
+            foreach (var item in questions)
+            {
+                await _questionRepository.DeleteAsync(item);
+            }
+            await _questionRepository.UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
             return methodResult;
         }
     }

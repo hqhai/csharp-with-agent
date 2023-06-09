@@ -2,7 +2,6 @@
 
 using AutoMapper;
 using Fsel.Common.ActionResults;
-using Fsel.Course.Domain.Entities;
 using Fsel.Course.Domain.Enums.ErrorCodes;
 using Fsel.Course.Domain.IRepositories;
 using Fsel.Course.Domain.Models.CommandModels.Videos;
@@ -22,20 +21,14 @@ namespace Fsel.Course.Application.Commands.VideoCmd
         private readonly IVideoRepository _videoRepository;
         private readonly IMapper _mapper;
         private readonly VideoConverter _videoConverter;
-        private readonly IExerciseRepository _exerciseRepository;
-        private readonly IQuestionRepository _questionRepository;
 
         public UpdateVideoCommandHandler(IVideoRepository videoRepository
             , IMapper mapper
-            , VideoConverter videoConverter
-            , IExerciseRepository exerciseRepository
-            , IQuestionRepository questionRepository)
+            , VideoConverter videoConverter)
         {
             _videoRepository = videoRepository;
             _mapper = mapper;
             _videoConverter = videoConverter;
-            _exerciseRepository = exerciseRepository;
-            _questionRepository = questionRepository;
         }
 
         public async Task<MethodResult<VideoModel>> Handle(UpdateVideoCommand request, CancellationToken cancellationToken)
@@ -64,8 +57,6 @@ namespace Fsel.Course.Application.Commands.VideoCmd
                 return methodResult;
             }
 
-            List<Exercise> exercises = video.VideoTimeCodes.SelectMany(x => x.TimeCodeExercises).Select(x => x.Exercise!).ToList();
-            List<Question> questions = exercises.SelectMany(x => x.ExerciseQuestions).Select(x => x.Question!).ToList();
             _mapper.Map(request, video);
 
             var method = await _videoConverter.UpdateTimeCodeToVideo(video, request);
@@ -79,18 +70,12 @@ namespace Fsel.Course.Application.Commands.VideoCmd
 
             await _videoRepository.ExecuteTransactionAsync(async () =>
             {
-                foreach (var item in exercises)
+                var method = await _videoConverter.DeleteExerciseToVideo(video);
+                if (!method.IsOK)
                 {
-                    await _exerciseRepository.DeleteAsync(item);
+                    methodResult.AddError(method.ErrorMessages);
+                    return methodResult;
                 }
-                await _exerciseRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-
-                foreach (var item in questions)
-                {
-                    await _questionRepository.DeleteAsync(item);
-                }
-                await _questionRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-
                 video = _videoRepository.Update(video);
                 await _videoRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
