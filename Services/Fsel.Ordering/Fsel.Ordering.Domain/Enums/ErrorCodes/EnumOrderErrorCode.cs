@@ -10,8 +10,33 @@ namespace Fsel.Ordering.Domain.Enums.ErrorCodes
         PackageNotExist,
 
         /// <summary>
+        /// Course Does Not Exist
+        /// </summary>
+        CourseNotExist,
+
+        /// <summary>
+        /// Class Does Not Exist
+        /// </summary>
+        ClassNotExist,
+
+        /// <summary>
         /// Code Order Already Exist
         /// </summary>
         CodeOrderAlreadyExist,
+
+        /// <summary>
+        /// Order Does Not Exist
+        /// </summary>
+        OrderNotExist,
+
+        /// <summary>
+        /// Order Status Is Not New
+        /// </summary>
+        OrderStatusIsNotNew,
+
+        /// <summary>
+        /// Update Not Success
+        /// </summary>
+        UpdateNotSuccess,
     }
 }

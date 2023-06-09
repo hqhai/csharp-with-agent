@@ -80,12 +80,12 @@ namespace Fsel.Course.Application.Commands.LessonCmd
                 methodResult.AddErrorBadRequest(nameof(EnumLessonErrorCode.LessonUsed), nameof(request.Id), request.Id);
                 return methodResult;
             }
+
             if (request.ExtraPracticeIds != null && request.ExtraPracticeIds.Count > 0)
             {
                 if (_extraPracticeRepository.IsIdsInValid(request.ExtraPracticeIds))
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumExtraPracticeErrorCode.ExtraPracticesNotExist), nameof(request.ExtraPracticeIds), request.ExtraPracticeIds);
-
+                    methodResult.AddErrorBadRequest(nameof(EnumExtraPractiveErrorCode.ExtraPracticesNotExist), nameof(request.ExtraPracticeIds), request.ExtraPracticeIds);
                     return methodResult;
                 }
             }
