@@ -11,8 +11,7 @@ namespace Fsel.Identity.Domain.Entities
 
     public class Student : Entity
     {
-        [MaxLength(250, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
-        public string? Membership { get; set; }
+        public Guid? PackageId { get; set; }
 
         [MaxLength(250, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? Occupation { get; set; }

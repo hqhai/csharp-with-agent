@@ -7,6 +7,16 @@ namespace Fsel.Shared.Enums.ErrorCodes
         /// <summary>
         /// Call to service UserService error
         /// </summary>
-        CallUserServiceError
+        CallUserServiceError,
+
+        /// <summary>
+        /// Call to service CourseService error
+        /// </summary>
+        CallCourseServiceError,
+
+        /// <summary>
+        /// Call to service TrainingService error
+        /// </summary>
+        CallTrainingServiceError
     }
 }

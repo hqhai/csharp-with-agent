@@ -9,6 +9,7 @@ namespace Fsel.Training.Api.Controllers
     using Fsel.Core.Base.BaseModels;
     using Fsel.Shared.Enums;
     using Fsel.Training.Application.Commands.ClassCmd;
+    using Fsel.Training.Application.Commands.ClassStudentCmd;
     using Fsel.Training.Application.Queries.ClassQuery;
     using Fsel.Training.Domain.Models.EntityModels;
     using MediatR;
@@ -86,6 +87,18 @@ namespace Fsel.Training.Api.Controllers
         {
             MethodResult<PagingItemsModel<ClassModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// get class list status new
+        /// </summary>
+        [HttpDelete("delete-student-from-class/{id}")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.BadRequest)]
+        public async Task<IActionResult> DeleteStudentFromClass([FromRoute] Guid id)
+        {
+            MethodResult<bool> commandResult = await _mediator.Send(new DeleteStudentFromClassCommand { UserId = id }).ConfigureAwait(false);
+            return commandResult.GetActionResult();
         }
     }
 }
