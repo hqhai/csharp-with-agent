@@ -80,5 +80,7 @@ namespace Fsel.Course.Domain.Entities
         public ICollection<LessonExtraPractice> LessonExtraPractices { get; set; } = new List<LessonExtraPractice>();
         public ICollection<ExtraPracticeChapter> ExtraPracticeChapters { get; set; } = new List<ExtraPracticeChapter>();
         public ICollection<ExtraPracticeExercise> ExtraPracticeExercises { get; set; } = new List<ExtraPracticeExercise>();
+
+        public ICollection<ExtraPracticeResult> ExtraPracticeResults { get; set; } = new List<ExtraPracticeResult>();
     }
 }

@@ -8,7 +8,7 @@ namespace Fsel.Course.Domain.Entities
     using Fsel.Common.Helpers;
     using Fsel.Core.Entities;
 
-    public class ExtraPracticeExerciseAnswer : Entity
+    public class ExtraPracticeAnswer : Entity
     {
         /// <summary>
         /// Câu trả lời
@@ -23,11 +23,15 @@ namespace Fsel.Course.Domain.Entities
             set { AnswerStr = ConvertHelper.Serialize(value); }
         }
 
-        public ExtraPracticeExercise? ExtraPracticeExercise { get; set; }
-        public ExerciseQuestion? ExerciseQuestion { get; set; }
+        /// <summary>
+        /// Tổng số câu trả lời đúng
+        /// </summary>
+        [Range(0, 10000_0000, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
+        public int CorrectTotal { get; set; }
 
-        public Guid ExtraPracticeExerciseId { get; set; }
+        public ExtraPracticeResult? ExtraPracticeResult { get; set; }
+        public ExerciseQuestion? ExerciseQuestion { get; set; }
+        public Guid ExtraPracticeResultId { get; set; }
         public Guid ExerciseQuestionId { get; set; }
-        public Guid StudentId { get; set; }
     }
 }
