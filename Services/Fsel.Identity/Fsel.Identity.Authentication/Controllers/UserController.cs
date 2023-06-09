@@ -8,7 +8,7 @@ using Fsel.Identity.Domain.Models.EntityModels;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Fsel.Identity.Userentication.Controllers
+namespace Fsel.Identity.Authentication.Controllers
 {
     [ApiVersion(Settings.APIVersion)]
     [Route(Settings.APIDefaultRoute + "/user")]
@@ -23,7 +23,7 @@ namespace Fsel.Identity.Userentication.Controllers
         }
 
         /// <summary>
-        /// Refresh Token
+        /// Sign Up
         /// </summary>
         [HttpPost("sign-up")]
         [ProducesResponseType(typeof(MethodResult<UserModel>), (int)HttpStatusCode.OK)]
@@ -35,20 +35,14 @@ namespace Fsel.Identity.Userentication.Controllers
         }
 
         /// <summary>
-        /// Confirm OTP
+        /// Confirm OTP SignUp
         /// </summary>
-        [HttpGet("confirm-otp")]
-        [ProducesResponseType(typeof(MethodResult<TokenModel>), (int)HttpStatusCode.OK)]
+        [HttpPost("confirm-otp-signup")]
+        [ProducesResponseType(typeof(MethodResult<ConfirmOtpModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> ConfirmOTP(string code, string? email)
+        public async Task<IActionResult> ConfirmOTPSignUp([FromBody] ComfirmOTPSignUpCommand command)
         {
-            ComfirmOTPCommand command = new ComfirmOTPCommand
-            {
-                Code = code,
-                Email = email,
-                //PhoneNumber = phonenumber
-            };
-            MethodResult<TokenModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            MethodResult<ConfirmOtpModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
 
@@ -65,12 +59,48 @@ namespace Fsel.Identity.Userentication.Controllers
         }
 
         /// <summary>
-        /// Reset Password
+        /// Comfirm OTP Reset Password
         /// </summary>
-        [HttpPost("reset-password")]
+        [HttpPost("comfirm-otp-reset-password")]
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordCommand command)
+        public async Task<IActionResult> ComfirmOTPResetPassword([FromBody] ComfirmOTPResetPasswordCommand command)
+        {
+            MethodResult<bool> commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Send otp email user
+        /// </summary>
+        [HttpGet("send-otp-profile")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> SendOtpProfile([FromQuery] SendOtpProfileCommand command)
+        {
+            MethodResult<bool> commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Check Otp
+        /// </summary>
+        [HttpGet("check-otp")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> CheckOtp([FromQuery] CheckOtpCommand command)
+        {
+            MethodResult<bool> commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Comfirm Otp Profile
+        /// </summary>
+        [HttpGet("comfirm-otp-profile")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> ComfirmOtpProfile([FromQuery] ComfirmOtpProfileCommand command)
         {
             MethodResult<bool> commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();

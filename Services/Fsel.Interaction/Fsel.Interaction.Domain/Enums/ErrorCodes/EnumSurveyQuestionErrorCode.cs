@@ -5,8 +5,8 @@ namespace Fsel.Interaction.Domain.Enums.ErrorCodes
     public enum EnumSurveyQuestionErrorCode
     {
         /// <summary>
-        /// SurveyQuestionId not in existence
+        /// SurveyQuestion not in existence
         /// </summary>
-        SurveyQuestionIdNotInExistence,
+        SurveyQuestionNotInExistence,
     }
 }

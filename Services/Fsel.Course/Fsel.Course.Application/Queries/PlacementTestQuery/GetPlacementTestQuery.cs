@@ -31,13 +31,11 @@ namespace Fsel.Course.Application.Queries.PlacementTestQuery
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<PlacementTestModel> methodResult = new MethodResult<PlacementTestModel>();
 
-            var placementTest = await _placementTestRepository.GetByIdAsync(request.Id);
+            var placementTest = await _placementTestRepository.GetIncludePlacementTestById(request.Id);
 
             if (placementTest == null)
             {
-                methodResult.AddErrorBadRequest(
-                    nameof(EnumPlacementTestErrorCode.PlacementTestNotExist),
-                    nameof(request.Id), request.Id);
+                methodResult.AddErrorBadRequest(nameof(EnumPlacementTestErrorCode.PlacementTestNotExist), nameof(request.Id), request.Id);
                 return methodResult;
             }
 

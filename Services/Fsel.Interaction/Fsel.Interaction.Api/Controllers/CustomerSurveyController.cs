@@ -6,7 +6,7 @@ namespace Fsel.Interaction.Api.Controllers
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
     using Fsel.Interaction.Application.Commands.CustomerSurveyCmd;
-    using Fsel.Interaction.Application.Queries;
+    using Fsel.Interaction.Application.Queries.CustomerSurveyQuery;
     using Fsel.Interaction.Domain.Models.EntityModels;
     using MediatR;
     using Microsoft.AspNetCore.Authorization;
@@ -15,7 +15,7 @@ namespace Fsel.Interaction.Api.Controllers
     [ApiVersion(Settings.APIVersion)]
     [Route(Settings.APIDefaultRoute + "/customerSurvey")]
     [ApiController]
-    [Authorize]
+
     public class CustomerSurveyController : ControllerBase
     {
         private readonly IMediator _mediator;
@@ -28,6 +28,7 @@ namespace Fsel.Interaction.Api.Controllers
         /// <summary>
         /// Create a Customer Survey
         /// </summary>
+        [Authorize]
         [HttpPost]
         [ProducesResponseType(typeof(MethodResult<IList<CustomerSurveyModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
@@ -38,14 +39,14 @@ namespace Fsel.Interaction.Api.Controllers
         }
 
         /// <summary>
-        /// GetAll Survey Question
+        /// Check Student by id
         /// </summary>
-        [HttpGet]
-        [ProducesResponseType(typeof(MethodResult<IList<SurveyQuestionModel>>), (int)HttpStatusCode.OK)]
+        [HttpGet("IsCompleted/{id}")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetAll()
+        public async Task<IActionResult> IsSurveyCompletedByStudentId([FromRoute] Guid id)
         {
-            MethodResult<IList<SurveyQuestionModel>> queryResult = await _mediator.Send(new GetAllSurveyQuestQuery()).ConfigureAwait(false);
+            MethodResult<bool> queryResult = await _mediator.Send(new GetIsSurveyByStudentIdQuery { Id = id }).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
     }

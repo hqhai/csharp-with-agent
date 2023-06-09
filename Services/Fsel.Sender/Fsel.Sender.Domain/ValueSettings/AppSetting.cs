@@ -2,7 +2,9 @@
 
 namespace Fsel.Sender.Domain.ValueSettings
 {
-    public class AppSetting
+    using Fsel.Common.ValueSettings;
+
+    public class AppSetting : BaseAppSetting
     {
         public Smtp? Smtp { get; set; }
     }

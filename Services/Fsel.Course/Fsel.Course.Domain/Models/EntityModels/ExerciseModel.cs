@@ -1,13 +1,12 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-using Fsel.Common.Enums;
-using Fsel.Core.Base.BaseModels;
-using Fsel.Course.Domain.Enums;
+using Fsel.Shared.Enums;
 
 namespace Fsel.Course.Domain.Models.EntityModels
 {
-    public class ExerciseModel : BaseModel
+    public class ExerciseModel 
     {
+        public Guid Id { get; set; }
         public string? Name { get; set; }
 
         public string? MediaPost { get; set; }

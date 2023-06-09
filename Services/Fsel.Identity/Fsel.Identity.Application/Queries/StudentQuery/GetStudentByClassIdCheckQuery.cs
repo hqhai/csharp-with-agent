@@ -14,7 +14,7 @@ namespace Fsel.Identity.Application.Queries.StudentQuery
 
     public class GetStudentByClassIdCheckQuery : IRequest<MethodResult<bool>>
     {
-        public string? Id { get; set; }
+        public Guid ClassId { get; set; }
     }
 
     public class GetStudentByClassIdCheckQueryHandler : IRequestHandler<GetStudentByClassIdCheckQuery, MethodResult<bool>>
@@ -32,19 +32,17 @@ namespace Fsel.Identity.Application.Queries.StudentQuery
 
             MethodResult<bool> methodResult = new MethodResult<bool>();
 
-            var student = await _studentRepository.Queryable.Where(x => x.ClassId.ToString() == request.Id).ToListAsync(cancellationToken: cancellationToken);
+            var student = await _studentRepository.Queryable.Where(x => x.ClassId == request.ClassId).ToListAsync(cancellationToken: cancellationToken);
             if (student == null)
             {
                 methodResult.Result = false;
-                methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                methodResult.AddError(nameof(EnumStudentErrorCode.StudentsNotExist));
+                methodResult.AddErrorBadRequest(nameof(EnumStudentErrorCode.StudentsNotExist));
                 return methodResult;
             }
             else if (student.Count >= 12)
             {
                 methodResult.Result = false;
-                methodResult.AddError(nameof(EnumStudentErrorCode.ClassMoreThan12Students));
-                methodResult.StatusCode = StatusCodes.Status400BadRequest;
+                methodResult.AddErrorBadRequest(nameof(EnumStudentErrorCode.ClassMoreThan12Students));
             }
             else if (student.Count < 12)
             {

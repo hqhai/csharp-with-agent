@@ -16,7 +16,7 @@ namespace Fsel.Identity.Application.Queries.StudentQuery
 
     public class GetStudentByUserIdQuery : IRequest<MethodResult<StudentModel>>
     {
-        public string? Id { get; set; }
+        public Guid Id { get; set; }
     }
 
     public class GetStudentByUserIdQueryHandler : IRequestHandler<GetStudentByUserIdQuery, MethodResult<StudentModel>>
@@ -36,12 +36,11 @@ namespace Fsel.Identity.Application.Queries.StudentQuery
             var methodResult = new MethodResult<StudentModel>();
             var student = await _studentRepository.Queryable
                                         .Include(i => i.Human)
-                                        .FirstOrDefaultAsync(i => i.Human != null && i.Human.UserId == request.Id, cancellationToken);
+                                        .FirstOrDefaultAsync(i => i.Human != null && i.Human.UserId == request.Id.ToString(), cancellationToken);
 
             if (student == null)
             {
-                methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                methodResult.AddError(nameof(EnumStudentErrorCode.StudentNull));
+                methodResult.AddErrorBadRequest(nameof(EnumStudentErrorCode.StudentNull));
                 return methodResult;
             }
             methodResult.Result = _mapper.Map<StudentModel>(student);

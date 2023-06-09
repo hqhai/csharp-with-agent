@@ -17,13 +17,31 @@ namespace Fsel.Course.Domain.Entities
         public EnumQuestionType QuestionType { get; set; }
 
         /// <summary>
+        /// Check câu hỏi có tính điểm không
+        /// </summary>
+        private bool _ungraded;
+
+        public bool Ungraded
+        {
+            get { return _ungraded; }
+            set { _ungraded = QuestionType == EnumQuestionType.ExercisePreparation || value; }
+        }
+
+        /// <summary>
+        /// Lưu câu giải thích
+        /// </summary>
+        [MaxLength(250, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
+        public string? Explanation { get; set; }
+
+        /// <summary>
         /// Tổng số câu trả lời đúng
         /// </summary>
-        [Range(1, 10000_0000, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
+        [Range(0, 10000_0000, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
         public int CorrectTotal { get; set; }
 
-        public bool IsSave { get; set; }
-
+        /// <summary>
+        /// Config
+        /// </summary>
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         public string? ConfigStr { get; set; }
 
@@ -35,6 +53,8 @@ namespace Fsel.Course.Domain.Entities
         }
 
         public ICollection<ExerciseQuestion> ExerciseQuestions { get; set; } = new List<ExerciseQuestion>();
-        public VideoTimeCodeAnswer? VideoTimeCodeAnswer { get; set; }
+        public ICollection<VideoTimeCodeAnswer> VideoTimeCodeAnswers { get; set; } = new List<VideoTimeCodeAnswer>();
+        public ICollection<HomeWorkQuestion> HomeWorkQuestions { get; set; } = new List<HomeWorkQuestion>();
+        public ICollection<SectionQuestion> SectionQuestions { get; set; } = new List<SectionQuestion>();
     }
 }

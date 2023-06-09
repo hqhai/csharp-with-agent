@@ -5,18 +5,33 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
     public enum EnumMockTestErrorCode
     {
         /// <summary>
-        /// Mock Final Test  not is correct
+        /// MockTests does not exist
         /// </summary>
-        TestNotCorrect,
+        MockTestsNotExist,
 
         /// <summary>
-        /// Mock Type = UnitMockTest
+        /// MockTest Exists Other Than TypeSkillMockTest
         /// </summary>
-        MockTestInValid,
+        MockTestExistsOtherThanTypeSkillMockTest,
 
         /// <summary>
-        /// Mock Type = CourseUnitMockTest
+        /// MockTest Exists Other Than TypeFullMockTest
         /// </summary>
-        TestInValid
+        MockTestExistsOtherThanTypeFullMockTest,
+
+        /// <summary>
+        /// MockTest  is in active state
+        /// </summary>
+        MockTestInActiveState,
+
+        /// <summary>
+        /// User does not exist
+        /// </summary>
+        UserNotExist,
+
+        /// <summary>
+        /// MockTest must correct score
+        /// </summary>
+        MockTestMustCorrectScore
     }
 }

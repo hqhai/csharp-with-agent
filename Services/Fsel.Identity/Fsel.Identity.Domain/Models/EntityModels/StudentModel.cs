@@ -3,22 +3,22 @@
 namespace Fsel.Identity.Domain.Models.EntityModels
 {
     using System;
-    using Fsel.Common.Enums;
+    using Fsel.Shared.Enums;
     using Fsel.Core.Base.BaseModels;
-    using Fsel.Identity.Domain.Entities;
 
     public class StudentModel : BaseModel
     {
-        public string? Membership { get; set; }
+        public Guid? PackageId { get; set; }
 
         public string? Occupation { get; set; }
 
         public string? School { get; set; }
-
+        public HumanProfileModel? Human { get; set; }
         public EnumCourseLevel CourseLevel { get; set; }
 
-        public Guid ClassId { get; set; }
+        public Guid? ClassId { get; set; }
 
         public Guid HumanId { get; set; }
+        public string? UserId { get; set; }
     }
 }

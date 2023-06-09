@@ -2,7 +2,6 @@
 
 using AutoMapper;
 using Fsel.Common.ActionResults;
-using Fsel.Course.Domain.Entities;
 using Fsel.Course.Domain.Enums.ErrorCodes;
 using Fsel.Course.Domain.IRepositories;
 using Fsel.Course.Domain.Models.CommandModels.Videos;
@@ -21,33 +20,23 @@ namespace Fsel.Course.Application.Commands.VideoCmd
     {
         private readonly IVideoRepository _videoRepository;
         private readonly IMapper _mapper;
-        private readonly QuestionTypeCountConverter _questionTypeCountConverter;
-        private readonly QuestionTypeValidation _questionTypeValidation;
+        private readonly VideoConverter _videoConverter;
 
         public UpdateVideoCommandHandler(IVideoRepository videoRepository
             , IMapper mapper
-            , QuestionTypeCountConverter questionTypeCountConverter
-            , QuestionTypeValidation questionTypeValidation)
+            , VideoConverter videoConverter)
         {
             _videoRepository = videoRepository;
             _mapper = mapper;
-            _questionTypeCountConverter = questionTypeCountConverter;
-            _questionTypeValidation = questionTypeValidation;
+            _videoConverter = videoConverter;
         }
 
         public async Task<MethodResult<VideoModel>> Handle(UpdateVideoCommand request, CancellationToken cancellationToken)
         {
-            MethodResult<VideoModel> methodResult = new MethodResult<VideoModel>();
             ArgumentNullException.ThrowIfNull(request);
+            MethodResult<VideoModel> methodResult = new MethodResult<VideoModel>();
 
             #region Validation
-
-            if (request.VideoTimeCodes == null)
-            {
-                methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                methodResult.AddError(nameof(EnumVideoTimeCodeErrorCode.DisplayTimeGreaterThan1));
-                return methodResult;
-            }
 
             #region Tạm thời không validate isTeacher
 
@@ -61,106 +50,19 @@ namespace Fsel.Course.Application.Commands.VideoCmd
 
             #endregion Tạm thời không validate isTeacher
 
-            #region Tạm thời không validate VideoUsed
-
-            //var isVideoUsed = await _videoRepository.IsVideoUsed(request.Id);
-            //if (isVideoUsed)
-            //{
-            //    methodResult.AddErrorBadRequest(
-            //        nameof(EnumVideoErrorCode.VideoUsed),
-            //        nameof(request.Id), request.Id);
-            //    return methodResult;
-            //}
-
-            #endregion Tạm thời không validate VideoUsed
-
-            // Lưu dữ liệu Video
             var video = await _videoRepository.GetIncludeByIdAsync(request.Id);
             if (video == null)
             {
-                methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                methodResult.AddError(nameof(EnumVideoErrorCode.VideoNotCorrect));
+                methodResult.AddErrorBadRequest(nameof(EnumVideoErrorCode.VideoNotExist), nameof(request.Id), request.Id);
                 return methodResult;
             }
-            video = _mapper.Map(request, video);
 
-            request.VideoTimeCodes.ForEach(x =>
+            _mapper.Map(request, video);
+
+            var method = await _videoConverter.UpdateTimeCodeToVideo(video, request);
+            if (!method.IsOK)
             {
-                if (x == null)
-                {
-                    methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                    methodResult.AddError(nameof(EnumVideoTimeCodeErrorCode.VideoTimeCodeNotCorrect));
-                }
-                else
-                {
-                    VideoTimeCode videoTimeCode = video.VideoTimeCodes.ElementAt(request.VideoTimeCodes.IndexOf(x));
-                    x.Exercises.ForEach(n =>
-                    {
-                        if (n == null)
-                        {
-                            methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                            methodResult.AddError(nameof(EnumExerciseErrorCode.ExerciseNull));
-                        }
-                        else
-                        {
-                            Exercise excercise = _mapper.Map<Exercise>(n);
-                            videoTimeCode.TimeCodeExercises.Add(new TimeCodeExercise
-                            {
-                                Exercise = excercise
-                            });
-                            n.Questions.ForEach(q =>
-                            {
-                                if (q == null)
-                                {
-                                    methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                                    methodResult.AddError(nameof(EnumQuestionErrorCode.QuestionNotCorrect));
-                                }
-                                else
-                                {
-                                    Question question = _mapper.Map<Question>(q);
-                                    var ischeck = _questionTypeValidation.TryParseQuestionType(question.Config, question.QuestionType);
-                                    if (!ischeck)
-                                    {
-                                        methodResult.AddErrorBadRequest(nameof(EnumVideoErrorCode.ConfigIsInTheWrongFormat), nameof(question.Config));
-                                    }
-                                    question.CorrectTotal = _questionTypeCountConverter.GetTotalCorrectByQuestionType(question.Config, question.QuestionType) ?? default;
-                                    excercise.ExerciseQuestions.Add(new ExerciseQuestion
-                                    {
-                                        Question = question
-                                    });
-
-                                    if (!question.IsValid())
-                                    {
-                                        methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                                        methodResult.AddResultFromErrorList(question.ErrorMessages);
-                                    }
-                                }
-                            });
-
-                            if (!excercise.IsValid())
-                            {
-                                methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                                methodResult.AddResultFromErrorList(excercise.ErrorMessages);
-                            }
-                        }
-                    });
-
-                    if (!videoTimeCode.IsValid())
-                    {
-                        methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                        methodResult.AddResultFromErrorList(videoTimeCode.ErrorMessages);
-                    }
-                }
-            });
-
-            if (!video.IsValid())
-            {
-                methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                methodResult.AddResultFromErrorList(video.ErrorMessages);
-                return methodResult;
-            }
-            else if (!methodResult.IsOK)
-            {
+                methodResult.AddError(method.ErrorMessages);
                 return methodResult;
             }
 
@@ -168,6 +70,12 @@ namespace Fsel.Course.Application.Commands.VideoCmd
 
             await _videoRepository.ExecuteTransactionAsync(async () =>
             {
+                var method = await _videoConverter.DeleteExerciseToVideo(video);
+                if (!method.IsOK)
+                {
+                    methodResult.AddError(method.ErrorMessages);
+                    return methodResult;
+                }
                 video = _videoRepository.Update(video);
                 await _videoRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 

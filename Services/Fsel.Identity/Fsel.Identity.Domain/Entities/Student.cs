@@ -5,14 +5,13 @@ namespace Fsel.Identity.Domain.Entities
     using System;
     using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations;
-    using Fsel.Common.Enums;
+    using Fsel.Shared.Enums;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Entities;
 
     public class Student : Entity
     {
-        [MaxLength(250, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
-        public string? Membership { get; set; }
+        public Guid? PackageId { get; set; }
 
         [MaxLength(250, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? Occupation { get; set; }
@@ -22,12 +21,14 @@ namespace Fsel.Identity.Domain.Entities
 
         public EnumCourseLevel CourseLevel { get; set; }
 
-        public Guid ClassId { get; set; }
+        public bool CreatedByParent { get; set; }
+
+        public Guid? ClassId { get; set; }
 
         public Human? Human { get; set; }
 
         public Guid HumanId { get; set; }
 
-        public IList<ParentStudent> ParentStudents { get; set; } = new List<ParentStudent>();
+        public ICollection<ParentStudent> ParentStudents { get; set; } = new List<ParentStudent>();
     }
 }

@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-using Fsel.Common.Enums;
+using Fsel.Shared.Enums;
 using Fsel.Core.Base.BaseModels;
 
 namespace Fsel.Course.Domain.Models.EntityModels
@@ -13,6 +13,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
 
         public bool IsActive { get; set; }
 
-        public EnumCourseLevel CourseLevel { get; set; }
+        public EnumPlacementTestLevel Level { get; set; }
+        public IList<SectionGroupModel>? SectionGroups { get; set; }
     }
 }

@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-using Fsel.Common.Enums;
+using Fsel.Shared.Enums;
 
 namespace Fsel.Course.Domain.Models.CommandModels.Units
 {
@@ -8,7 +8,7 @@ namespace Fsel.Course.Domain.Models.CommandModels.Units
     {
         public string? Name { get; set; }
 
-        public string? DisplayName { get; set; }
+        public string? Code { get; set; }
 
         public IList<Guid>? LessonIds { get; set; }
 

@@ -26,6 +26,11 @@ namespace Fsel.Course.Infrastructure.Repositories
             {
                 return await Queryable
                 .Include(x => x.CourseUnitMockTests.Where(n => !n.IsDeleted))
+                .ThenInclude(x => x.Unit)
+                .Include(x => x.CourseUnitMockTests.Where(n => !n.IsDeleted))
+                .ThenInclude(x => x.FinalTest)
+                .Include(x => x.CourseUnitMockTests.Where(n => !n.IsDeleted))
+                .ThenInclude(x => x.MockTest)
                 .Include(x => x.CourseTeachers.Where(c => !c.IsDeleted)).FirstOrDefaultAsync(x => x.Id == id);
             }
             catch (Exception)
@@ -38,13 +43,12 @@ namespace Fsel.Course.Infrastructure.Repositories
         {
             try
             {
-                return await Queryable.Include(x => x.CourseResult)
-                                        .Include(e => e.CourseClassStudents.Where(y => y.IsDeleted == false))
+                return await Queryable.Include(x => x.CourseResults)
                                         .Include(x => x.CourseUnitMockTests.Where(y => y.IsDeleted == false))
                                         .ThenInclude(x => x.Unit)
-                                        .ThenInclude(x => (x ?? new()).UnitLessons.Where(y => y.IsDeleted == false))
+                                        .ThenInclude(x => x!.UnitLessons.Where(y => y.IsDeleted == false))
                                         .ThenInclude(x => x.Lesson)
-                                        .ThenInclude(x => (x ?? new()).LessonVideos.Where(y => y.IsDeleted == false))
+                                        .ThenInclude(x => x!.LessonVideos.Where(y => y.IsDeleted == false))
                                         .Where(x => x.Id == id).FirstOrDefaultAsync();
             }
             catch (Exception)

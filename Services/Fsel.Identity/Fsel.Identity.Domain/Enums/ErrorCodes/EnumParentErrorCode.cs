@@ -10,7 +10,7 @@ namespace Fsel.Identity.Domain.Enums.ErrorCodes
         ParentNotExist,
 
         /// <summary>
-        /// Parent null
+        /// Parent is null
         /// </summary>
         ParentNull,
 

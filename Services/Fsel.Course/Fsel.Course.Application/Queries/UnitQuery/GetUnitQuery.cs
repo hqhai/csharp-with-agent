@@ -28,21 +28,32 @@ namespace Fsel.Course.Application.Queries.UnitQuery
 
         public async Task<MethodResult<UnitModel>> Handle(GetUnitQuery request, CancellationToken cancellationToken)
         {
+            ArgumentNullException.ThrowIfNull(request);
+
             MethodResult<UnitModel> methodResult = new MethodResult<UnitModel>();
 
             var unit = await _unitRepository.GetIncludeByIdAsync(request.Id);
 
             if (unit == null)
             {
-                methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                methodResult.AddErrorBadRequest(
-                    nameof(EnumUnitErrorCode.UnitNotExist),
-                    nameof(request.Id), request.Id);
+                methodResult.AddErrorBadRequest(nameof(EnumUnitErrorCode.UnitNotExist), nameof(request.Id), request.Id);
                 return methodResult;
             }
 
             var unitModel = _mapper.Map<UnitModel>(unit);
             unitModel.IsActive = unit.CourseUnitMockTests.Any();
+            unitModel.Lessons = unit.UnitLessons.Select(x =>
+                                {
+                                    var model = _mapper.Map<LessonModel>(x.Lesson);
+                                    model.DisplayOrder = x.DisplayOrder;
+                                    return model;
+                                }).OrderBy(x => x.DisplayOrder).ToList();
+            unitModel.SkillMockTest = unit.UnitSkillMockTests.Select(x =>
+            {
+                var model = _mapper.Map<MockTestModel>(x.MockTest);
+                model.Skill = x.MockTest!.MockTestSections.Select(x => x.SectionGroup).Select(x => x!.CourseSkill).FirstOrDefault();
+                return model;
+            }).FirstOrDefault();
 
             methodResult.Result = unitModel;
             methodResult.StatusCode = StatusCodes.Status200OK;

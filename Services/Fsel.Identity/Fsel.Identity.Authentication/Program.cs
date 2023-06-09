@@ -2,6 +2,8 @@
 
 using Fsel.Core.Extensions;
 using Fsel.Identity.Application.Services;
+using Fsel.Identity.Application.Services.InteractionService;
+using Fsel.Identity.Application.Services.TrainingService;
 using Fsel.Identity.Domain.Entities;
 using Fsel.Identity.Domain.IRepositories;
 using Fsel.Identity.Infrastructure;
@@ -13,7 +15,7 @@ var builder = WebApplication.CreateBuilder(args);
 var appSetting = builder.AddAppSettings<AppSetting>();
 builder.AddServices();
 builder.AddSwaggerGens(appSetting);
-builder.AddAuthentication();
+builder.AddAuthenticationIdentity(appSetting);
 builder.AddDbContexts<UserDbContext>();
 
 builder.Services.AddIdentity<User, Role>()
@@ -26,9 +28,14 @@ builder.Services.AddScoped<IHumanRepository, HumanRepository>();
 builder.Services.AddScoped<ITeacherRepository, TeacherRepository>();
 builder.Services.AddScoped<IParentRepository, ParentRepository>();
 builder.Services.AddScoped<IStudentRepository, StudentRepository>();
+builder.Services.AddScoped<IUserOtpCodeRepository, UserOtpCodeRepository>();
 builder.Services.AddScoped<IParentStudentRepository, ParentStudentRepository>();
+builder.Services.AddScoped<ICSORepository, CSORepository>();
+builder.Services.AddScoped<ITeacherBankAccountRepository, TeacherBankAccountRepository>();
 builder.AddRefitClients(typeof(ISenderService), appSetting?.Services?.SenderApiUrl);
 
+builder.AddRefitClients(typeof(IInteractionService), appSetting?.Services?.InteractionApiUrl);
+builder.AddRefitClients(typeof(ITrainingService), appSetting?.Services?.ClassApiUrl);
 //App config
 var app = builder.Build();
 app.UseServices();

@@ -40,7 +40,7 @@ namespace Fsel.Identity.Application.Queries.TeacherQuery
             var teachers = await _teacherRepository.GetIncludeByIdsAsync(request.Ids);
             if (teachers == null || teachers.Count == 0)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumTeacherErrorCode.TeachersDoesNotExitst));
+                methodResult.AddErrorBadRequest(nameof(EnumTeacherErrorCode.TeachersNotExist));
                 return methodResult;
             }
             methodResult.Result = _mapper.Map<IList<TeacherModel>>(teachers);

@@ -1,8 +1,8 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-using AutoMapper;
 using Fsel.Common.ActionResults;
 using Fsel.Core.Base.BaseModels;
+using Fsel.Core.Extensions;
 using Fsel.Course.Application.Services.UserServices;
 using Fsel.Course.Application.Services.UserServices.Models;
 using Fsel.Course.Domain.IRepositories;
@@ -21,13 +21,11 @@ namespace Fsel.Course.Application.Queries.UnitQuery
     public class SearchUnitQueryHandler : IRequestHandler<SearchUnitQuery, MethodResult<PagingItemsModel<UnitSearchModel>>>
     {
         private readonly IUnitRepository _unitRepository;
-        private readonly IMapper _mapper;
         private readonly IUserService _userService;
 
-        public SearchUnitQueryHandler(IMapper mapper, IUnitRepository unitRepository, IUserService userService)
+        public SearchUnitQueryHandler(IUnitRepository unitRepository, IUserService userService)
         {
             _unitRepository = unitRepository;
-            _mapper = mapper;
             _userService = userService;
         }
 
@@ -44,64 +42,60 @@ namespace Fsel.Course.Application.Queries.UnitQuery
 
             var unitQuery = _unitRepository.Queryable
                                     .Include(x => x.CourseUnitMockTests.Where(y => !y.IsDeleted))
-                                    .Include(unit => unit.UnitLessons)
+                                    .Include(unit => unit.UnitLessons.Where(y => !y.IsDeleted))
                                     .ThenInclude(unitLesson => unitLesson.Lesson)
-                                    .ThenInclude(lesson => (lesson ?? new()).LessonVideos)
+                                    .ThenInclude(lesson => lesson!.LessonVideos.Where(y => !y.IsDeleted))
                                     .ThenInclude(lessonVideo => lessonVideo.Video)
-                                    .Where(x => x.CourseLevel == request.CourseLevel)
 
                             .Select(unit => new UnitSearchModel
                             {
                                 Id = unit.Id,
                                 Name = unit.Name,
-                                DisplayName = unit.DisplayName,
-                                IsActive = unit.CourseUnitMockTests.Any(),
+                                Code = unit.Code,
+                                IsActive = unit.CourseUnitMockTests.Where(n => !n.IsDeleted).Any(),
                                 CourseLevel = unit.CourseLevel,
                                 CreatedDate = unit.CreatedDate,
                                 CreatedUserId = unit.CreatedUserId,
                                 UpdatedDate = unit.UpdatedDate,
                                 UpdatedUserId = unit.UpdatedUserId,
-                                TeacherId = unit.UnitLessons.Select(l => l.Lesson)
-                                                .SelectMany(lv => (lv ?? new()).LessonVideos)
+                                TeacherIds = unit.UnitLessons.Select(l => l.Lesson)
+                                                .SelectMany(lv => lv!.LessonVideos.Where(n => !n.IsDeleted))
                                                 .Select(v => v.Video)
-                                                .Select(n => (n ?? new()).TeacherId).FirstOrDefault(),
+                                                .Select(n => n!.TeacherId ?? Guid.Empty).ToList()
                             });
 
-            //Keyword
             if (!string.IsNullOrEmpty(request.Keyword))
             {
-                unitQuery = unitQuery.Where(m => m.Id.ToString() == request.Keyword || (m.Name ?? string.Empty).Contains(request.Keyword));
+                unitQuery = unitQuery.Where(m => m.Id.ToString() == request.Keyword || (m.Name ?? string.Empty).Contains(request.Keyword) || (m.Code ?? string.Empty).Contains(request.Keyword));
             }
 
-            //Keyword
+            if (request.CourseLevel != null)
+            {
+                unitQuery = unitQuery.Where(m => m.CourseLevel == request.CourseLevel);
+            }
+
             if (request.TeacherId.HasValue)
             {
-                unitQuery = unitQuery.Where(m => m.TeacherId == request.TeacherId.Value);
+                unitQuery = unitQuery.Where(m => m!.TeacherIds!.Any(x => x == request.TeacherId));
             }
 
             int totalItem = await unitQuery.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
-            var lists = await unitQuery.OrderByDescending(x => x.CreatedDate)
-                    .Skip((request.Page - 1) * request.PageSize)
-                    .Take(request.PageSize)
+            var lists = await unitQuery
+                    .ApplySortAndPaging(request)
                     .AsNoTracking()
                     .ToListAsync(cancellationToken: cancellationToken)
                     .ConfigureAwait(false);
 
-            var teachers = await _userService.GetTeacherByIdsAsync(new GetTeacherByIdsQueryModel { Ids = unitQuery.Select(x => x.TeacherId ?? Guid.Empty).ToList() });
+            var teachers = await _userService.GetTeacherByIdsAsync(new GetTeacherByIdsQueryModel { Ids = unitQuery.SelectMany(x => x.TeacherIds!).Distinct().ToList() });
             if (teachers.IsSuccessStatusCode)
             {
                 foreach (var item in lists)
                 {
-                    item.TeacherName = teachers.Content?.Result?.FirstOrDefault(x => x.Id == item.TeacherId)?.Human?.FullName;
+                    item.TeacherNames = teachers.Content?.Result?.Where(x => item.TeacherIds!.Contains(x.Id)).Select(x => x.Human?.FullName ?? string.Empty).ToList();
                 }
             }
 
-            methodResult.Result = new PagingItemsModel<UnitSearchModel>
-            {
-                Items = _mapper.Map<IEnumerable<UnitSearchModel>>(lists),
-                PagingInfo = new PagingInfoModel { Page = request.Page, PageSize = request.PageSize, TotalItems = totalItem }
-            };
-
+            methodResult.Result = new PagingItemsModel<UnitSearchModel>(lists, request, totalItem);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }

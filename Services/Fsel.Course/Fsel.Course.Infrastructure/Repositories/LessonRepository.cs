@@ -17,9 +17,34 @@ namespace Fsel.Course.Infrastructure.Repositories
         {
             try
             {
-                return await Queryable
-                .Include(x => x.UnitLessons.Where(n => !n.IsDeleted))
-                .FirstOrDefaultAsync(x => x.Id == id);
+                return await Queryable.Include(e => e.UnitLessons.Where(n => !n.IsDeleted))
+                                 .Include(e => e.UnitLessons.Where(n => !n.IsDeleted))
+                                 .Include(e => e.ClassForum)
+                                 .ThenInclude(e => e!.ClassForumFiles)
+                                 .Include(x => x.LessonResults.Where(n => !n.IsDeleted))
+                                 .Include(e => e.LessonHomeWorks.Where(n => !n.IsDeleted))
+                                 .ThenInclude(e => e.HomeWork)
+                                 .Include(e => e.LessonExtraPractices.Where(n => !n.IsDeleted))
+                                 .Include(e => e.LessonInstructions.Where(n => !n.IsDeleted))
+                                 .Include(e => e.LessonVideos.Where(n => !n.IsDeleted))
+                                 .ThenInclude(x => x.Video)
+                                 .ThenInclude(x => x!.VideoTimeCodes.Where(n => !n.IsDeleted))
+                                 .FirstOrDefaultAsync(x => x.Id == id);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<Lesson?> GetIncludeVideoByIdAsync(Guid id)
+        {
+            try
+            {
+                return await Queryable.Include(x => x.LessonResults.Where(n => !n.IsDeleted))
+                                      .Include(x => x.LessonVideos.Where(n => !n.IsDeleted))
+                                      .ThenInclude(x => x.Video)
+                                      .FirstOrDefaultAsync(x => x.Id == id);
             }
             catch (Exception)
             {
@@ -32,21 +57,6 @@ namespace Fsel.Course.Infrastructure.Repositories
             return await Queryable
                  .Include(x => x.UnitLessons.Where(n => !n.IsDeleted))
                  .AnyAsync(x => x.Id == id && x.UnitLessons.Count > 0);
-        }
-
-        public async Task<Lesson?> GetIncludeVideoByIdAsync(Guid id)
-        {
-            try
-            {
-                return await Queryable.Include(x => x.LessonResults)
-                                      .Include(x => x.LessonVideos)
-                                      .ThenInclude(x => x.Video)
-                                      .FirstOrDefaultAsync(x => x.Id == id);
-            }
-            catch (Exception)
-            {
-                throw;
-            }
         }
     }
 }

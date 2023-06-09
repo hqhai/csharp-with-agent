@@ -2,23 +2,15 @@
 
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using Fsel.Common.Enums;
+using Fsel.Shared.Enums;
 using Fsel.Common.Enums.ErrorCodes;
 using Fsel.Core.Entities;
 using Fsel.Course.Domain.Enums;
-using Fsel.Course.Domain.Enums.ErrorCodes;
 
 namespace Fsel.Course.Domain.Entities
 {
     public class ClassForum : Entity
     {
-        /// <summary>
-        /// Nội dung
-        /// </summary>
-        [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
-        [MaxLength(250, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
-        public string? Title { get; set; }
-
         /// <summary>
         /// Cách chấm điểm
         /// </summary>
@@ -39,7 +31,7 @@ namespace Fsel.Course.Domain.Entities
         [NotMapped]
         public TimeSpan TaggetTimeSpanLimit
         {
-            get { return TimeSpan.FromTicks(TaggetTimeLimit); }
+            get { return TimeSpan.FromSeconds(TaggetTimeLimit); }
         }
 
         /// <summary>
@@ -56,5 +48,9 @@ namespace Fsel.Course.Domain.Entities
 
         public Guid LessonId { get; set; }
         public Lesson? Lesson { get; set; }
+
+        public ICollection<ClassForumResult> ClassForumResults { get; set; } = new List<ClassForumResult>();
+
+        public ICollection<ClassForumFile> ClassForumFiles { get; set; } = new List<ClassForumFile>();
     }
 }

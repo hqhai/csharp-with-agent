@@ -4,7 +4,7 @@ namespace Fsel.Identity.Domain.Models.QueryModels.Teachers
 {
     using Fsel.Core.Base.BaseModels;
 
-    public class SearchTeacherQueryModel : BaseQueyModel
+    public class SearchTeacherQueryModel : BaseQueryModel
     {
     }
 }

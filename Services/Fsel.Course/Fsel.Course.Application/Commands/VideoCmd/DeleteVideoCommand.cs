@@ -3,6 +3,7 @@
 using Fsel.Common.ActionResults;
 using Fsel.Course.Domain.Enums.ErrorCodes;
 using Fsel.Course.Domain.IRepositories;
+using Fsel.Course.Infrastructure.Common;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
@@ -17,16 +18,18 @@ namespace Fsel.Course.Application.Commands.VideoCmd
     public class DeleteVideoCommandHandler : IRequestHandler<DeleteVideoCommand, MethodResult<bool>>
     {
         private readonly IVideoRepository _videoRepository;
+        private readonly VideoConverter _videoConverter;
 
-        public DeleteVideoCommandHandler(IVideoRepository videoRepository)
+        public DeleteVideoCommandHandler(IVideoRepository videoRepository, VideoConverter videoConverter)
         {
             _videoRepository = videoRepository;
+            _videoConverter = videoConverter;
         }
 
         public async Task<MethodResult<bool>> Handle(DeleteVideoCommand request, CancellationToken cancellationToken)
         {
-            MethodResult<bool> methodResult = new MethodResult<bool>();
             ArgumentNullException.ThrowIfNull(request);
+            MethodResult<bool> methodResult = new MethodResult<bool>();
 
             #region Validation
 
@@ -34,7 +37,7 @@ namespace Fsel.Course.Application.Commands.VideoCmd
                                            .Include(i => i.VideoTimeCodes.Where(x => !x.IsDeleted))
                                            .ThenInclude(x => x.TimeCodeExercises.Where(x => !x.IsDeleted && x.Exercise != null))
                                            .ThenInclude(x => x.Exercise)
-                                           .ThenInclude(x => (x ?? new()).ExerciseQuestions.Where(x => !x.IsDeleted))
+                                           .ThenInclude(x => x!.ExerciseQuestions.Where(x => !x.IsDeleted))
                                            .ThenInclude(x => x.Question)
                                            .FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken: cancellationToken);
             if (video == null)
@@ -55,6 +58,12 @@ namespace Fsel.Course.Application.Commands.VideoCmd
 
             await _videoRepository.ExecuteTransactionAsync(async () =>
             {
+                var method = await _videoConverter.DeleteExerciseToVideo(video);
+                if (!method.IsOK)
+                {
+                    methodResult.AddError(method.ErrorMessages);
+                    return methodResult;
+                }
                 var result = await _videoRepository.DeleteAsync(video);
                 await _videoRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 

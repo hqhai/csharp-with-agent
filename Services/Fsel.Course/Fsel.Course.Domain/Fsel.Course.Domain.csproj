@@ -8,10 +8,11 @@
 
   <ItemGroup>
     <Folder Include="Constants\" />
+    <Folder Include="Models\CommandModels\PlacementTestResults\" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Shared\Fsel.Core\Fsel.Core.csproj" />
+    <ProjectReference Include="..\..\Shared\Fsel.Shared\Fsel.Shared.csproj" />
   </ItemGroup>
 
 </Project>

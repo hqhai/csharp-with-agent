@@ -25,14 +25,22 @@ namespace Fsel.Course.Application.Commands.UnitCmd
 
         public async Task<MethodResult<bool>> Handle(DeleteUnitCommand request, CancellationToken cancellationToken)
         {
+            ArgumentNullException.ThrowIfNull(request);
             MethodResult<bool> methodResult = new MethodResult<bool>();
 
             var unit = await _unitRepository.Queryable
-                                    .Include(e => e.UnitLessons)
+                                    .Include(e => e.UnitLessons.Where(n => !n.IsDeleted))
                                     .FirstOrDefaultAsync(e => e.Id == request.Id, cancellationToken: cancellationToken);
             if (unit == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumUnitErrorCode.UnitNotExist), nameof(request.Id), request?.Id);
+                return methodResult;
+            }
+
+            var isUnitUsed = await _unitRepository.IsUnitUsed(request.Id);
+            if (isUnitUsed)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumUnitErrorCode.UnitUsed), nameof(request.Id), request.Id);
                 return methodResult;
             }
 

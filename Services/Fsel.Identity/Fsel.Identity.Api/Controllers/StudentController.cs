@@ -29,7 +29,7 @@ namespace Fsel.Identity.Api.Controllers
         [HttpGet("get-by-user-id/{id}")]
         [ProducesResponseType(typeof(MethodResult<StudentModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetByUserId([FromRoute] string? id)
+        public async Task<IActionResult> GetByUserId([FromRoute] Guid id)
         {
             MethodResult<StudentModel> commandResult = await _mediator.Send(new GetStudentByUserIdQuery { Id = id }).ConfigureAwait(false);
             return commandResult.GetActionResult();
@@ -41,9 +41,9 @@ namespace Fsel.Identity.Api.Controllers
         [HttpGet("get-student-by-class-id/{id}")]
         [ProducesResponseType(typeof(MethodResult<IList<StudentModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetStudentByClassId([FromRoute] string? id)
+        public async Task<IActionResult> GetStudentByClassId([FromRoute] Guid id)
         {
-            MethodResult<IList<StudentModel>> commandResult = await _mediator.Send(new GetStudentByClassIdQuery { Id = id }).ConfigureAwait(false);
+            MethodResult<IList<StudentModel>> commandResult = await _mediator.Send(new GetStudentByClassIdQuery { ClassId = id }).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
 
@@ -53,9 +53,9 @@ namespace Fsel.Identity.Api.Controllers
         [HttpGet("get-class-has-too-many-students/{id}")]
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetStudentByClassIdCheck([FromRoute] string? id)
+        public async Task<IActionResult> GetStudentByClassIdCheck([FromRoute] Guid id)
         {
-            MethodResult<bool> commandResult = await _mediator.Send(new GetStudentByClassIdCheckQuery { Id = id }).ConfigureAwait(false);
+            MethodResult<bool> commandResult = await _mediator.Send(new GetStudentByClassIdCheckQuery { ClassId = id }).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
 
@@ -68,6 +68,42 @@ namespace Fsel.Identity.Api.Controllers
         public async Task<IActionResult> UpdateStudentByClassId([FromBody] UpdateStudentByClassCommand query)
         {
             MethodResult<StudentModel> commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Update Student By Level
+        /// </summary>
+        [HttpPut("update-student-level")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> UpdateStudentByLevel([FromBody] UpdateStudentByCourseLevelCommand command)
+        {
+            MethodResult<bool> commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Get list user by Ids
+        /// </summary>
+        [HttpPost("get-by-user-ids")]
+        [ProducesResponseType(typeof(MethodResult<IList<StudentModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetByIds([FromBody] GetStudentByUserIdsQuery query)
+        {
+            MethodResult<IList<StudentModel>> commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Delete Student from Class
+        /// </summary>
+        [HttpPut("delete-student-from-class/{id}")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> DeleteStudentFromClass([FromRoute] Guid id)
+        {
+            MethodResult<bool> commandResult = await _mediator.Send(new DeleteStudentFromClassCommand { Id = id }).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
     }

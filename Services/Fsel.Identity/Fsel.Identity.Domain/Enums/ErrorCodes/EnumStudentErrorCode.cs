@@ -10,12 +10,12 @@ namespace Fsel.Identity.Domain.Enums.ErrorCodes
         StudentNotExist,
 
         /// <summary>
-        /// Student null
+        /// Student is null
         /// </summary>
         StudentNull,
 
         /// <summary>
-        /// User null
+        /// User is null
         /// </summary>
         UserNull,
 

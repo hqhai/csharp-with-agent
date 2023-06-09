@@ -3,7 +3,7 @@
 namespace Fsel.Course.Application.Services.UserServices.Models
 {
     using System;
-    using Fsel.Common.Enums;
+    using Fsel.Shared.Enums;
     using Fsel.Core.Base.BaseModels;
 
     public class StudentModel : BaseModel
@@ -15,7 +15,7 @@ namespace Fsel.Course.Application.Services.UserServices.Models
 
         public EnumCourseLevel CourseLevel { get; set; }
 
-        public Guid ClassId { get; set; }
+        public Guid? ClassId { get; set; }
 
         public HumanModel? Human { get; set; }
     }

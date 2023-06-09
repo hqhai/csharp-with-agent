@@ -13,7 +13,7 @@ namespace Fsel.Course.Domain.Entities.QuestionTypeConfigs.Answers
     {
         public long Id { get; set; }
 
-        public string? Answer { get; set; }
+        public IList<string>? Answer { get; set; }
 
         public bool IsExact { get; set; }
     }

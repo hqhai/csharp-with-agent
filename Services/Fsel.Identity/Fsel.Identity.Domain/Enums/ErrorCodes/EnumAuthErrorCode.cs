@@ -25,6 +25,11 @@ namespace Fsel.Identity.Domain.Enums.ErrorCodes
         EmailNotExist,
 
         /// <summary>
+        /// User does not exist
+        /// </summary>
+        UserNotExist,
+
+        /// <summary>
         /// Old password is incorrect
         /// </summary>
         OldPasswordIncorrect,
@@ -112,6 +117,36 @@ namespace Fsel.Identity.Domain.Enums.ErrorCodes
         /// <summary>
         /// OTP has expired, please click on the Resend code button below to receive a new OTP
         /// </summary>
-        OTPExpired
+        OTPExpired,
+
+        /// <summary>
+        /// Email is Null
+        /// </summary>
+        EmailNull,
+
+        /// <summary>
+        /// UserName already exist
+        /// </summary>
+        UserNameAlreadyExist,
+
+        /// <summary>
+        /// Survey Called Error
+        /// </summary>
+        SurveyCalledError,
+
+        /// <summary>
+        /// Otp is null
+        /// </summary>
+        OtpNull,
+
+        /// <summary>
+        /// Otp does not exist
+        /// </summary>
+        OtpNotExist,
+
+        /// <summary>
+        /// Account has been locked
+        /// </summary>
+        AccountHasBeenLocked,
     }
 }

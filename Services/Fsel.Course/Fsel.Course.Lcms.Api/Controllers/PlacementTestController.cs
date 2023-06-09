@@ -3,7 +3,7 @@
 using System.Net;
 using Fsel.Common.ActionResults;
 using Fsel.Common.Constants;
-using Fsel.Common.Enums;
+using Fsel.Shared.Enums;
 using Fsel.Core.Base.BaseModels;
 using Fsel.Course.Application.Commands.PlacementTestCmd;
 using Fsel.Course.Application.Queries.PlacementTestQuery;
@@ -36,6 +36,18 @@ namespace Fsel.Course.Lcms.Api.Controllers
         public async Task<IActionResult> Search([FromQuery] SearchPlacementTestQuery query)
         {
             MethodResult<PagingItemsModel<PlacementTestModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Update Status Placement Test
+        /// </summary>
+        [HttpPost("active")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> ActivePlacementTest([FromBody] UpdateStatusPlacementTestCommand command)
+        {
+            MethodResult<bool> queryResult = await _mediator.Send(command).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
 
