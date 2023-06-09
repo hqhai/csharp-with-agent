@@ -24,7 +24,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
     {
     }
 
-    public class CreateClassForumCommandHandler : IRequestHandler<CreateOrderCommand, MethodResult<OrderModel>>
+    public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, MethodResult<OrderModel>>
     {
         private readonly IMapper _mapper;
         private readonly IOrderRepository _orderRepository;
@@ -32,7 +32,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
         private readonly ITrainingService _trainingService;
         private readonly IPackageRepository _packageRepository;
 
-        public CreateClassForumCommandHandler(IMapper mapper,
+        public CreateOrderCommandHandler(IMapper mapper,
             IOrderRepository orderRepository,
             AuthContext authContext,
             ITrainingService trainingService,
