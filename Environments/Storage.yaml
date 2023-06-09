@@ -1,20 +1,20 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: lms-api
+  name: storage-api
 spec:
   replicas: 2
   selector:
     matchLabels:
-      app: lms-api
+      app: storage-api
   template:
     metadata:
       labels:
-        app: lms-api
+        app: storage-api
     spec:
       containers:
-      - name: lms
-        image: fselacr.azurecr.io/lmsapi
+      - name: storage
+        image: fselacr.azurecr.io/storageapi
         imagePullPolicy: Always
         ports:
         - containerPort: 80
@@ -23,10 +23,10 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: lms-api-svc
+  name: storage-api-svc
 spec:
   selector:
-    app: lms-api
+    app: storage-api
   ports:
     - protocol: TCP
       port: 80

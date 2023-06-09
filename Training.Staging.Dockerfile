@@ -27,6 +27,6 @@ RUN dotnet publish "Fsel.Training.Api.csproj" -c Release -o /app/publish /p:UseA
 
 FROM base AS final
 WORKDIR /app
-ENV ASPNETCORE_ENVIRONMENT=Development
+ENV ASPNETCORE_ENVIRONMENT=Staging
 COPY --from=publish /app/publish .
 ENTRYPOINT ["dotnet", "Fsel.Training.Api.dll"]

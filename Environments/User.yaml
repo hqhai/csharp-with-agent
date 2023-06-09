@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: user
-        image: userfselacr.azurecr.io/fsel_src
+        image: fselacr.azurecr.io/userapi
         imagePullPolicy: Always
         ports:
         - containerPort: 80
