@@ -38,7 +38,7 @@ namespace Fsel.Interaction.Api.Controllers
         /// <summary>
         /// get interaction action
         /// </summary>
-        [HttpPost("action")]
+        [HttpPost("actions")]
         [ProducesResponseType(typeof(MethodResult<IList<InteractionActionModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> Get([FromBody] GetActionObjecIdsQuery command)

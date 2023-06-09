@@ -10,7 +10,7 @@ namespace Fsel.Course.Lms.Application.Services.InteractionService
 
     public interface IInteractionService
     {
-        [Post("/interaction-action/action")]
+        [Post("/interaction-action/actions")]
         Task<IApiResponse<MethodResult<IList<InteractionActionModel>>>> GetsActionAsync([Body] InteractionActionCommandModel command);
     }
 }
