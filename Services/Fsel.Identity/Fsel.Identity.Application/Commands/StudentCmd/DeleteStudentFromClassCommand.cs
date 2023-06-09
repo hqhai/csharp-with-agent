@@ -14,7 +14,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
 
     public class DeleteStudentFromClassCommand : IRequest<MethodResult<bool>>
     {
-        public Guid StudentId { get; set; }
+        public Guid Id { get; set; }
     }
 
     public class DeleteStudentFromClassCommandHandler : IRequestHandler<DeleteStudentFromClassCommand, MethodResult<bool>>
@@ -33,13 +33,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<bool> methodResult = new MethodResult<bool>();
 
-            var human = await _humanRepository.Queryable.FirstOrDefaultAsync(p => p.UserId == request.StudentId.ToString(), cancellationToken);
-            if(human == null)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumHumanErrorCode.HumanNotExist));
-                return methodResult;
-            }
-            var student = await _studentRepository.Queryable.FirstOrDefaultAsync(p => p.HumanId == human.Id, cancellationToken);
+            var student = await _studentRepository.GetByIdAsync(request.Id);
             if (student == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumHumanErrorCode.StudentNotExist));

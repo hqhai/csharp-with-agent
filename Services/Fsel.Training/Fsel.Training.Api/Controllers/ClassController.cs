@@ -97,7 +97,7 @@ namespace Fsel.Training.Api.Controllers
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.BadRequest)]
         public async Task<IActionResult> DeleteStudentFromClass([FromRoute] Guid id)
         {
-            MethodResult<bool> commandResult = await _mediator.Send(new DeleteStudentFromClassCommand { StudentId = id }).ConfigureAwait(false);
+            MethodResult<bool> commandResult = await _mediator.Send(new DeleteStudentFromClassCommand { UserId = id }).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
     }

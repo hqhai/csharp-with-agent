@@ -15,7 +15,7 @@ namespace Fsel.Training.Application.Commands.ClassStudentCmd
 
     public class DeleteStudentFromClassCommand : IRequest<MethodResult<bool>>
     {
-        public Guid StudentId { get; set; }
+        public Guid UserId { get; set; }
     }
 
     public class DeleteStudentFromClassCommandHandler : IRequestHandler<DeleteStudentFromClassCommand, MethodResult<bool>>
@@ -32,8 +32,14 @@ namespace Fsel.Training.Application.Commands.ClassStudentCmd
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<bool> methodResult = new MethodResult<bool>();
-
-            var classStudent = await _classStudentRepository.Queryable.FirstOrDefaultAsync(p => p.StudentId == request.StudentId, cancellationToken);
+            var student = await _userService.GetStudentByUserIdAsync(request.UserId);
+            if (!student.IsSuccessStatusCode)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumClassErrorCode.StudentsNotExits));
+                return methodResult;
+            }
+            var studentId = student.Content?.Result?.Id;
+            var classStudent = await _classStudentRepository.Queryable.FirstOrDefaultAsync(p => p.StudentId == studentId, cancellationToken);
             if (classStudent == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumClassErrorCode.ClassStudentNotExist));
@@ -41,8 +47,8 @@ namespace Fsel.Training.Application.Commands.ClassStudentCmd
             }
             await _classStudentRepository.ExecuteTransactionAsync(async () =>
             {
-                var student = await _userService.DeleteStudentFromClass(request.StudentId);
-                if (!student.IsSuccessStatusCode)
+                var deleteStudentFromClass = await _userService.DeleteStudentFromClass(studentId ?? Guid.Empty);
+                if (!deleteStudentFromClass.IsSuccessStatusCode)
                 {
                     methodResult.AddErrorBadRequest(nameof(EnumClassErrorCode.DeleteClassInStudentNotSuccess));
                     return methodResult;

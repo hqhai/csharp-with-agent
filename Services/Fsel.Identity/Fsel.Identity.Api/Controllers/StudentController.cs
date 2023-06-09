@@ -103,7 +103,7 @@ namespace Fsel.Identity.Api.Controllers
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> DeleteStudentFromClass([FromRoute] Guid id)
         {
-            MethodResult<bool> commandResult = await _mediator.Send(new DeleteStudentFromClassCommand { StudentId = id}).ConfigureAwait(false);
+            MethodResult<bool> commandResult = await _mediator.Send(new DeleteStudentFromClassCommand { Id = id }).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
     }
