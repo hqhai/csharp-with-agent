@@ -6,6 +6,8 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
     using Fsel.Ordering.Application.Services.TrainingService;
+    using Fsel.Ordering.Application.Services.UserService;
+    using Fsel.Ordering.Application.Services.UserService.Models;
     using Fsel.Ordering.Domain.Enums;
     using Fsel.Ordering.Domain.Enums.ErrorCodes;
     using Fsel.Ordering.Domain.IRepositories;
@@ -21,11 +23,13 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
     {
         private readonly IOrderRepository _orderRepository;
         private readonly ITrainingService _trainingService;
+        private readonly IUserService _userService;
 
-        public ChangeStatusOrderCommandHandler(IOrderRepository orderRepository, ITrainingService trainingService)
+        public ChangeStatusOrderCommandHandler(IOrderRepository orderRepository, ITrainingService trainingService, IUserService userService)
         {
             _orderRepository = orderRepository;
             _trainingService = trainingService;
+            _userService = userService;
         }
 
         public async Task<MethodResult<bool>> Handle(ChangeStatusOrderCommand request, CancellationToken cancellationToken)
@@ -58,6 +62,10 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
                         methodResult.AddErrorBadRequest(nameof(EnumOrderErrorCode.UpdateNotSuccess));
                         return methodResult;
                     }
+                }
+                if (order.Status != EnumOrderStatus.Payment)
+                {
+                    //var student = await _userService.UpdateStudentByClassAsync(new UpdateStudentByClassIdModel { ClassId = classnew.Id, StudentId = studentId, PackageId = request.PackageId });
                 }
                 methodResult.StatusCode = StatusCodes.Status201Created;
                 methodResult.Result = true;
