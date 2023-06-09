@@ -6,9 +6,9 @@ services:
         image: ${DOCKER_REGISTRY-}auths-microservice:v1
         build:
             context: ./../
-            dockerfile: Environments/Development/Auth.Dockerfile
+            dockerfile: Environments/Testing/Auth.Testing.Dockerfile
         environment:
-            - ASPNETCORE_ENVIRONMENT=Development
+            - ASPNETCORE_ENVIRONMENT=Testing
             - CONNECTIONSTRINGS__DEFAULTCONNECTION=Data Source=183.91.11.235;Initial Catalog=env-dev.user-service;User Id=sa;Password=FselTech@2023;TrustServerCertificate=true;
             - SERVICENAME=Auth
             - JWT__SECRETKEY=JsonWebApiTokenWithSwaggerAuthorizationAuthenticationAspNetCore
@@ -32,9 +32,9 @@ services:
         image: ${DOCKER_REGISTRY-}users-microservice:v1
         build:
             context: ./../
-            dockerfile: Environments/Development/User.Dockerfile
+            dockerfile: Environments/Testing/User.Testing.Dockerfile
         environment:
-            - ASPNETCORE_ENVIRONMENT=Development
+            - ASPNETCORE_ENVIRONMENT=Testing
             - CONNECTIONSTRINGS__DEFAULTCONNECTION=Data Source=183.91.11.235;Initial Catalog=env-dev.user-service;User Id=sa;Password=FselTech@2023;TrustServerCertificate=true;
             - SERVICENAME=User
             - JWT__SECRETKEY=JsonWebApiTokenWithSwaggerAuthorizationAuthenticationAspNetCore
@@ -58,9 +58,9 @@ services:
         image: ${DOCKER_REGISTRY-}lcms-microservice:v1
         build:
             context: ./../
-            dockerfile: Environments/Development/Lcms.Dockerfile
+            dockerfile: Environments/Testing/Lcms.Testing.Dockerfile
         environment:
-            - ASPNETCORE_ENVIRONMENT=Development
+            - ASPNETCORE_ENVIRONMENT=Testing
             - CONNECTIONSTRINGS__DEFAULTCONNECTION=Data Source=183.91.11.235;Initial Catalog=env-dev.course-service;User Id=sa;Password=FselTech@2023;TrustServerCertificate=true;
             - SERVICENAME=Lcms Course
             - JWT__SECRETKEY=JsonWebApiTokenWithSwaggerAuthorizationAuthenticationAspNetCore
@@ -79,9 +79,9 @@ services:
         image: ${DOCKER_REGISTRY-}lms-microservice:v1
         build:
             context: ./../
-            dockerfile: Environments/Development/Lms.Dockerfile
+            dockerfile: Environments/Testing/Lms.Testing.Dockerfile
         environment:
-            - ASPNETCORE_ENVIRONMENT=Development
+            - ASPNETCORE_ENVIRONMENT=Testing
             - CONNECTIONSTRINGS__DEFAULTCONNECTION=Data Source=183.91.11.235;Initial Catalog=env-dev.course-service;User Id=sa;Password=FselTech@2023;TrustServerCertificate=true;
             - SERVICENAME=Lms Course
             - JWT__SECRETKEY=JsonWebApiTokenWithSwaggerAuthorizationAuthenticationAspNetCore
@@ -101,9 +101,9 @@ services:
         image: ${DOCKER_REGISTRY-}storage-smicroservice:v1
         build:
             context: ./../
-            dockerfile: Environments/Development/Storage.Dockerfile
+            dockerfile: Environments/Testing/Storage.Testing.Dockerfile
         environment:
-            - ASPNETCORE_ENVIRONMENT=Development
+            - ASPNETCORE_ENVIRONMENT=Testing
             - SERVICENAME=Storage
             - JWT__SECRETKEY=JsonWebApiTokenWithSwaggerAuthorizationAuthenticationAspNetCore
             - JWT__ISSUER=baseWebApiIssuer
@@ -127,9 +127,9 @@ services:
         image: ${DOCKER_REGISTRY-}sender-microservice:v1
         build:
             context: ./../
-            dockerfile: Environments/Development/Sender.Dockerfile
+            dockerfile: Environments/Testing/Sender.Testing.Dockerfile
         environment:
-            - ASPNETCORE_ENVIRONMENT=Development
+            - ASPNETCORE_ENVIRONMENT=Testing
             - SERVICENAME=Sender
             - SMTP__FROM=duongphanthtb@gmail.com
             - SMTP__SMTPSERVER=smtp.gmail.com
@@ -145,9 +145,9 @@ services:
         image: ${DOCKER_REGISTRY-}training-microservice:v1
         build:
             context: ./../
-            dockerfile: Environments/Development/Training.Dockerfile
+            dockerfile: Environments/Testing/Training.Testing.Dockerfile
         environment:
-            - ASPNETCORE_ENVIRONMENT=Development
+            - ASPNETCORE_ENVIRONMENT=Testing
             - CONNECTIONSTRINGS__DEFAULTCONNECTION=Data Source=183.91.11.235;Initial Catalog=env-dev.training-service;User Id=sa;Password=FselTech@2023;TrustServerCertificate=true;
             - SERVICENAME=Training
             - JWT__SECRETKEY=JsonWebApiTokenWithSwaggerAuthorizationAuthenticationAspNetCore
@@ -167,9 +167,9 @@ services:
         image: ${DOCKER_REGISTRY-}interaction-microservice:v1
         build:
             context: ./../
-            dockerfile: Environments/Development/Interaction.Dockerfile
+            dockerfile: Environments/Testing/Interaction.Testing.Dockerfile
         environment:
-            - ASPNETCORE_ENVIRONMENT=Development
+            - ASPNETCORE_ENVIRONMENT=Testing
             - CONNECTIONSTRINGS__DEFAULTCONNECTION=Data Source=183.91.11.235;Initial Catalog=env-dev.interaction-service;User Id=sa;Password=FselTech@2023;TrustServerCertificate=true;
             - SERVICENAME=Interaction
             - JWT__SECRETKEY=JsonWebApiTokenWithSwaggerAuthorizationAuthenticationAspNetCore
@@ -187,9 +187,9 @@ services:
         image: ${DOCKER_REGISTRY-}ordering-microservice:v1
         build:
             context: ./../
-            dockerfile: Environments/Development/Ordering.Dockerfile
+            dockerfile: Environments/Testing/Ordering.Testing.Dockerfile
         environment:
-            - ASPNETCORE_ENVIRONMENT=Development
+            - ASPNETCORE_ENVIRONMENT=Testing
             - CONNECTIONSTRINGS__DEFAULTCONNECTION=Data Source=183.91.11.235;Initial Catalog=env-dev.ordering-service;User Id=sa;Password=FselTech@2023;TrustServerCertificate=true;
             - SERVICENAME=Ordering
             - JWT__SECRETKEY=JsonWebApiTokenWithSwaggerAuthorizationAuthenticationAspNetCore
@@ -208,9 +208,9 @@ services:
         image: ${DOCKER_REGISTRY-}gatewaymicroservice:v1
         build:
             context: ./../
-            dockerfile: Environments/Development/Gateway.Dockerfile
+            dockerfile: Environments/Testing/Gateway.Testing.Dockerfile
         environment:
-            - ASPNETCORE_ENVIRONMENT=Development
+            - ASPNETCORE_ENVIRONMENT=Testing
             - JWT__SECRETKEY=JsonWebApiTokenWithSwaggerAuthorizationAuthenticationAspNetCore
             - JWT__ISSUER=baseWebApiIssuer
             - JWT__AUDIENCE=baseWebApiAudience
