@@ -18,11 +18,11 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class SearchClassForumResultHasBeenFlaggedQuery : SearchClassForumResultHasBeenFlaggedQueryModel, IRequest<MethodResult<PagingItemsModel<ClassForumResultSearchModel>>>
+    public class SearchClassForumResultHasBeenFlaggedQuery : SearchClassForumResultHasBeenFlaggedQueryModel, IRequest<MethodResult<PagingItemsModel<ClassForumResultModel>>>
     {
     }
 
-    public class SearchClassForumResultHasBeenFlaggedQueryHandler : IRequestHandler<SearchClassForumResultHasBeenFlaggedQuery, MethodResult<PagingItemsModel<ClassForumResultSearchModel>>>
+    public class SearchClassForumResultHasBeenFlaggedQueryHandler : IRequestHandler<SearchClassForumResultHasBeenFlaggedQuery, MethodResult<PagingItemsModel<ClassForumResultModel>>>
     {
         private readonly IClassForumResultRepository _classForumResultRepository;
 
@@ -31,10 +31,10 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
             _classForumResultRepository = classForumResultRepository;
         }
 
-        public async Task<MethodResult<PagingItemsModel<ClassForumResultSearchModel>>> Handle(SearchClassForumResultHasBeenFlaggedQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<PagingItemsModel<ClassForumResultModel>>> Handle(SearchClassForumResultHasBeenFlaggedQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            MethodResult<PagingItemsModel<ClassForumResultSearchModel>> methodResult = new MethodResult<PagingItemsModel<ClassForumResultSearchModel>>();
+            MethodResult<PagingItemsModel<ClassForumResultModel>> methodResult = new MethodResult<PagingItemsModel<ClassForumResultModel>>();
             if (request.PageSize > 100)
             {
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
@@ -43,7 +43,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
             var classForumResultQuery = _classForumResultRepository.Queryable
                                     .Include(x => x.ClassForum)
                                     .Where(x => x.IsFlagged == true)
-                                    .Select(x => new ClassForumResultSearchModel
+                                    .Select(x => new ClassForumResultModel
                                     {
                                         Id = x.Id,
                                         CreatedDate = x.CreatedDate,
@@ -61,7 +61,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
                     .AsNoTracking()
                     .ToListAsync(cancellationToken: cancellationToken)
                     .ConfigureAwait(false);
-            methodResult.Result = new PagingItemsModel<ClassForumResultSearchModel>(lists, request, totalItem);
+            methodResult.Result = new PagingItemsModel<ClassForumResultModel>(lists, request, totalItem);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }

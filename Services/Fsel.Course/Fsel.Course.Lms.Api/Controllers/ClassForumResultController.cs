@@ -65,15 +65,15 @@ namespace Fsel.Course.Lms.Api.Controllers
         }
 
         /// <summary>
-        /// Search Class forum result
+        /// Update a Class forum result flagged
         /// </summary>
-        [HttpGet]
-        [ProducesResponseType(typeof(MethodResult<PagingItemsModel<ClassForumResultSearchModel>>), (int)HttpStatusCode.OK)]
+        [HttpPut("active/{id}")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> Search([FromQuery] SearchClassForumResultHasBeenFlaggedQuery query)
+        public async Task<IActionResult> Active([FromRoute] Guid id)
         {
-            MethodResult<PagingItemsModel<ClassForumResultSearchModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
-            return queryResult.GetActionResult();
+            MethodResult<bool> commandResult = await _mediator.Send(new ChangeToFlaggedStatusCommand { Id = id }).ConfigureAwait(false);
+            return commandResult.GetActionResult();
         }
     }
 }

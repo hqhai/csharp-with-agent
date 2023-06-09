@@ -24,6 +24,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
 
         public Guid? TeacherId { get; set; }
 
+        public bool? IsFlagged { get; set; }
         public ClassForumModel? ClassForum { get; set; }
 
         public LessonResultModel? LessonResult { get; set; }
