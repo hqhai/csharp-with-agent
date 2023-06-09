@@ -385,13 +385,12 @@ namespace Fsel.Identity.Infrastructure.Migrations
                         .HasColumnType("bit")
                         .HasColumnOrder(110);
 
-                    b.Property<string>("Membership")
-                        .HasMaxLength(250)
-                        .HasColumnType("nvarchar(250)");
-
                     b.Property<string>("Occupation")
                         .HasMaxLength(250)
                         .HasColumnType("nvarchar(250)");
+
+                    b.Property<Guid?>("PackageId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("School")
                         .HasMaxLength(250)

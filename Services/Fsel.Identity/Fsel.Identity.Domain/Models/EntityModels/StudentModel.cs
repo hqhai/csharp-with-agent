@@ -8,7 +8,7 @@ namespace Fsel.Identity.Domain.Models.EntityModels
 
     public class StudentModel : BaseModel
     {
-        public string? Membership { get; set; }
+        public Guid? PackageId { get; set; }
 
         public string? Occupation { get; set; }
 
@@ -19,5 +19,6 @@ namespace Fsel.Identity.Domain.Models.EntityModels
         public Guid? ClassId { get; set; }
 
         public Guid HumanId { get; set; }
+        public string? UserId { get; set; }
     }
 }

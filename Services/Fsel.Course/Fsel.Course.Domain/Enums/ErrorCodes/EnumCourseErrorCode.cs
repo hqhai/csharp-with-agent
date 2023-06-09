@@ -73,5 +73,10 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         /// Course is in New state, can't start Lesson
         /// </summary>
         CourseIsNewStateCantStartLesson,
+
+        /// <summary>
+        /// CourseIds Null
+        /// </summary>
+        CourseIdsNull,
     }
 }

@@ -5,6 +5,7 @@ namespace Fsel.Ordering.Domain.Enums
     public enum EnumOrderStatus
     {
         New,
-        Paymented
+        Payment,
+        Reject
     }
 }
