@@ -62,7 +62,7 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
                                 .ThenInclude(x => x.Unit)
                                 .ThenInclude(x => x.UnitSkillMockTests.Where(x => !x.IsDeleted))
                                 .ThenInclude(x => x.MockTest)
-                                .ThenInclude(x => x.MockTestSections)
+                                .ThenInclude(x => x.MockTestSections.Where(x => !x.IsDeleted))
                                 .ThenInclude(x => x.SectionGroup)
                                 .Include(x => x.UnitLessons.Where(x => !x.IsDeleted))
                                 .ThenInclude(x => x.Unit)
