@@ -47,12 +47,6 @@ namespace Fsel.Training.Application.Commands.ClassStudentCmd
             }
             await _classStudentRepository.ExecuteTransactionAsync(async () =>
             {
-                var deleteStudentFromClass = await _userService.DeleteStudentFromClass(studentId ?? Guid.Empty);
-                if (!deleteStudentFromClass.IsSuccessStatusCode)
-                {
-                    methodResult.AddErrorBadRequest(nameof(EnumClassErrorCode.DeleteClassInStudentNotSuccess));
-                    return methodResult;
-                }
                 await _classStudentRepository.DeleteAsync(classStudent);
                 await _classStudentRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
                 methodResult.StatusCode = StatusCodes.Status200OK;
