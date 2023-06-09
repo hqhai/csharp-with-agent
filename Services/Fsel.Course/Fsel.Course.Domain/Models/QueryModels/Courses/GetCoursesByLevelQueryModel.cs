@@ -2,7 +2,7 @@
 
 namespace Fsel.Course.Domain.Models.QueryModels.Courses
 {
-    using Fsel.Common.Enums;
+    using Fsel.Shared.Enums;
 
     public class GetCoursesByLevelQueryModel
     {

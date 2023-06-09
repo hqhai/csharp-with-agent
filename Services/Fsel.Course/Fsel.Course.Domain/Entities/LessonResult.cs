@@ -10,10 +10,22 @@ namespace Fsel.Course.Domain.Entities
 
     public class LessonResult : Entity
     {
-        [Range(1, 10000_0000, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
+        /// <summary>
+        /// Phần trăm cẩu trả lời đúng
+        /// </summary>
+        [Range(0, 10000_0000, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
         public double Percent { get; set; }
 
+        /// <summary>
+        /// Trạng thái
+        /// </summary>
         public EnumResultStatus Status { get; set; }
+
+        /// <summary>
+        /// Lưu ý tóm tắt
+        /// </summary>
+        [MaxLength(2000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
+        public string? SummaryNote { get; set; }
 
         public Course? Course { get; set; }
 
@@ -34,5 +46,11 @@ namespace Fsel.Course.Domain.Entities
         public Guid StudentId { get; set; }
 
         public VideoResult? VideoResult { get; set; }
+
+        public ICollection<LessonNote> LessonNotes { get; set; } = new List<LessonNote>();
+
+        public ICollection<HomeWorkResult> HomeWorkResults { get; set; } = new List<HomeWorkResult>();
+
+        public ICollection<ClassForumResult> ClassForumResults { get; set; } = new List<ClassForumResult>();
     }
 }

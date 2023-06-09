@@ -36,7 +36,7 @@ namespace Fsel.Course.Domain.Entities
         /// <summary>
         /// Tổng số câu trả lời đúng
         /// </summary>
-        [Range(1, 10000_0000, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
+        [Range(0, 10000_0000, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
         public int CorrectTotal { get; set; }
 
         /// <summary>
@@ -53,6 +53,8 @@ namespace Fsel.Course.Domain.Entities
         }
 
         public ICollection<ExerciseQuestion> ExerciseQuestions { get; set; } = new List<ExerciseQuestion>();
-        public VideoTimeCodeAnswer? VideoTimeCodeAnswer { get; set; }
+        public ICollection<VideoTimeCodeAnswer> VideoTimeCodeAnswers { get; set; } = new List<VideoTimeCodeAnswer>();
+        public ICollection<HomeWorkQuestion> HomeWorkQuestions { get; set; } = new List<HomeWorkQuestion>();
+        public ICollection<SectionQuestion> SectionQuestions { get; set; } = new List<SectionQuestion>();
     }
 }

@@ -5,7 +5,6 @@ using Fsel.Course.Domain.Enums.ErrorCodes;
 using Fsel.Course.Domain.IRepositories;
 using MediatR;
 using Microsoft.AspNetCore.Http;
-using Microsoft.EntityFrameworkCore;
 
 namespace Fsel.Course.Application.Commands.LessonCmd
 {
@@ -30,20 +29,17 @@ namespace Fsel.Course.Application.Commands.LessonCmd
 
             #region Validation
 
-            var lesson = await _lessonRepository.Queryable.Include(e => e.UnitLessons)
-                                .Include(e => e.ClassForum).Include(e => e.LessonHomeWorks)
-                                .Include(e => e.LessonVideos).Include(e => e.LessonExtraPractices)
-                                .FirstOrDefaultAsync(e => e.Id == request.Id, cancellationToken: cancellationToken);
+            var lesson = await _lessonRepository.GetIncludeByIdAsync(request.Id);
+
             if (lesson == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumLessonErrorCode.LessonNotExist), nameof(request.Id), request?.Id);
+                methodResult.AddErrorBadRequest(nameof(EnumLessonErrorCode.LessonNotExist), nameof(request.Id), request.Id);
                 return methodResult;
             }
 
             if (!lesson.IsValid())
             {
-                methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                methodResult.AddResultFromErrorList(lesson.ErrorMessages);
+                methodResult.AddErrorBadRequest(lesson.ErrorMessages);
                 return methodResult;
             }
 

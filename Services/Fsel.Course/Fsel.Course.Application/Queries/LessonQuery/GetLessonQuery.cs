@@ -34,15 +34,18 @@ namespace Fsel.Course.Application.Queries.LessonQuery
 
             if (lesson == null)
             {
-                methodResult.AddErrorBadRequest(
-                    nameof(EnumLessonErrorCode.LessonNotExist),
-                    nameof(request.Id), request.Id);
+                methodResult.AddErrorBadRequest(nameof(EnumLessonErrorCode.LessonNotExist), nameof(request.Id), request.Id);
                 return methodResult;
             }
 
-            var lessonModel = _mapper.Map<LessonModel>(lesson);
-            lessonModel.IsActive = lesson.UnitLessons.Any();
+            var video = lesson.LessonVideos.Select(x => x.Video).FirstOrDefault();
 
+            var lessonModel = _mapper.Map<LessonModel>(lesson);
+            lessonModel.Video = _mapper.Map<VideoModel>(video);
+            lessonModel.VideoId = video?.Id;
+            lessonModel.HomeWorks = _mapper.Map<IList<HomeWorkModel>>(lesson.LessonHomeWorks.Select(x => x.HomeWork));
+            lessonModel.ClassForums = _mapper.Map<ClassForumModel>(lesson.ClassForum);
+            lessonModel.IsActive = lesson.UnitLessons.Any();
             methodResult.Result = lessonModel;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;

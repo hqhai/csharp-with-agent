@@ -1,11 +1,9 @@
 // Copyright (c) Atlantic. All rights reserved.
 
 using System.ComponentModel.DataAnnotations;
-using Fsel.Common.Enums;
+using Fsel.Shared.Enums;
 using Fsel.Common.Enums.ErrorCodes;
 using Fsel.Core.Entities;
-using Fsel.Course.Domain.Enums;
-using Fsel.Course.Domain.Enums.ErrorCodes;
 
 namespace Fsel.Course.Domain.Entities
 {
@@ -19,16 +17,17 @@ namespace Fsel.Course.Domain.Entities
         public string? Name { get; set; }
 
         /// <summary>
-        ///  Nội dung bài tập
+        ///  Code
         /// </summary>
-        public string? InstructionContent { get; set; }
+        ///
+        [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
+        [MaxLength(250, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
+        public string? Code { get; set; }
 
         /// <summary>
         /// Media Post
         /// </summary>
         public string? MediaPost { get; set; }
-
-        public bool IsActive { get; set; }
 
         /// <summary>
         /// Trình độ Level
@@ -40,6 +39,9 @@ namespace Fsel.Course.Domain.Entities
         /// </summary>
         public EnumCourseSkill CourseSkill { get; set; }
 
+        public ICollection<HomeWorkResult> HomeWorkResults { get; set; } = new List<HomeWorkResult>();
         public ICollection<LessonHomeWork> LessonHomeWorks { get; set; } = new List<LessonHomeWork>();
+
+        public ICollection<HomeWorkQuestion> HomeWorkQuestions { get; set; } = new List<HomeWorkQuestion>();
     }
 }

@@ -5,18 +5,28 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
     public enum EnumQuestionErrorCode
     {
         /// <summary>
-        /// Question not is correct
+        /// Question Config Is Null
         /// </summary>
-        QuestionNotCorrect,
+        QuestionConfigNull,
 
         /// <summary>
-        /// Question not is exist
+        /// Question does not exist
         /// </summary>
-        QuestionNotIsExist,
+        QuestionNotExist,
 
         /// <summary>
-        /// Question Config not is exist
+        /// Questions does not exist
         /// </summary>
-        QuestionConfigNotIsExist,
+        QuestionsNotExist,
+
+        /// <summary>
+        /// Question Is Null
+        /// </summary>
+        QuestionNull,
+
+        /// <summary>
+        /// Questions Is Null
+        /// </summary>
+        QuestionsNull
     }
 }

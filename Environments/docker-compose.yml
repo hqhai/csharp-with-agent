@@ -1,133 +1,242 @@
 version: '3.5'
 services:
-    AuthService:
-        container_name: auth
+    auth.service:
+        container_name: auth.service
         hostname: AuthService
-        image: ${DOCKER_REGISTRY-}authsmicroservice:v1
+        image: ${DOCKER_REGISTRY-}auths-microservice:v1
         build:
-            context: ./
-            dockerfile: Auth.Dockerfile
+            context: ./../
+            dockerfile: Environments/Testing/Auth.Testing.Dockerfile
         environment:
-            - ASPNETCORE_ENVIRONMENT=Development
+            - ASPNETCORE_ENVIRONMENT=Testing
             - CONNECTIONSTRINGS__DEFAULTCONNECTION=Data Source=183.91.11.235;Initial Catalog=env-dev.user-service;User Id=sa;Password=FselTech@2023;TrustServerCertificate=true;
             - SERVICENAME=Auth
             - JWT__SECRETKEY=JsonWebApiTokenWithSwaggerAuthorizationAuthenticationAspNetCore
             - JWT__ISSUER=baseWebApiIssuer
             - JWT__AUDIENCE=baseWebApiAudience
             - JWT__SUBJECT=baseWebApiSubject
-            - JWT__TOKENVALIDITYINMINUTES=60
+            - JWT__TOKENVALIDITYINMINUTES=1440
             - JWT__REFRESHTOKENVALIDITYINDAYS=7
-            - URL__EMAILCONFIRMURL=https://localhost:7200/auth-gateway/v1/user/confirm-email
-            - SERVICES_SENDERAPIURL=https://localhost:7200/sender-gateway/v1
+            - Otp__StepTime=180
+            - Otp__StepDayWithAdmin=7
+            - ConstantUrl__ConfirmOtpUrl=http://fsel-auth-api.fsel.edu.vn/v1/user/confirm-otp-signup?OTP={0}&NewPassword=Admin@123
+            - SERVICES_SenderApiUrl=http://202.134.19.161:5206/api/v1
+            - SERVICES_InteractionApiUrl=http://202.134.19.161:5208/api/
+            - SERVICES_ClassApiUrl=http://202.134.19.161:5207/api/v1
         ports:
             - 5201:80
             - 7201:443
-    UserService:
-        container_name: user
+    user.service:
+        container_name: user.service
         hostname: UserService
-        image: ${DOCKER_REGISTRY-}usersmicroservice:v1
+        image: ${DOCKER_REGISTRY-}users-microservice:v1
         build:
-            context: ./
-            dockerfile: User.Dockerfile
+            context: ./../
+            dockerfile: Environments/Testing/User.Testing.Dockerfile
         environment:
-            - ASPNETCORE_ENVIRONMENT=Development
+            - ASPNETCORE_ENVIRONMENT=Testing
             - CONNECTIONSTRINGS__DEFAULTCONNECTION=Data Source=183.91.11.235;Initial Catalog=env-dev.user-service;User Id=sa;Password=FselTech@2023;TrustServerCertificate=true;
             - SERVICENAME=User
             - JWT__SECRETKEY=JsonWebApiTokenWithSwaggerAuthorizationAuthenticationAspNetCore
             - JWT__ISSUER=baseWebApiIssuer
             - JWT__AUDIENCE=baseWebApiAudience
             - JWT__SUBJECT=baseWebApiSubject
-            - JWT__TOKENVALIDITYINMINUTES=60
+            - JWT__TOKENVALIDITYINMINUTES=1440
             - JWT__REFRESHTOKENVALIDITYINDAYS=7
-            - SERVICES_SENDERAPIURL=https://localhost:7200/sender-gateway/v1
+            - Otp__StepTime=180
+            - Otp__StepDayWithAdmin=7
+            - ConstantUrl__ConfirmOtpUrl=http://fsel-auth-api.fsel.edu.vn/v1/user/confirm-otp-signup?OTP={0}&NewPassword=Admin@123
+            - SERVICES_SenderApiUrl=http://202.134.19.161:5206/api/v1
+            - SERVICES_InteractionApiUrl=http://202.134.19.161:5208/api/
+            - SERVICES_ClassApiUrl=http://202.134.19.161:5207/api/v1
         ports:
             - 5202:80
             - 7202:443
-    LcmsService:
-        container_name: lcms
+    lcms.service:
+        container_name: lcms.service
         hostname: LcmsService
-        image: ${DOCKER_REGISTRY-}lcmsmicroservice:v1
+        image: ${DOCKER_REGISTRY-}lcms-microservice:v1
         build:
-            context: ./
-            dockerfile: Lcms.Dockerfile
+            context: ./../
+            dockerfile: Environments/Testing/Lcms.Testing.Dockerfile
         environment:
-            - ASPNETCORE_ENVIRONMENT=Development
+            - ASPNETCORE_ENVIRONMENT=Testing
             - CONNECTIONSTRINGS__DEFAULTCONNECTION=Data Source=183.91.11.235;Initial Catalog=env-dev.course-service;User Id=sa;Password=FselTech@2023;TrustServerCertificate=true;
             - SERVICENAME=Lcms Course
             - JWT__SECRETKEY=JsonWebApiTokenWithSwaggerAuthorizationAuthenticationAspNetCore
             - JWT__ISSUER=baseWebApiIssuer
             - JWT__AUDIENCE=baseWebApiAudience
             - JWT__SUBJECT=baseWebApiSubject
-            - JWT__TOKENVALIDITYINMINUTES=60
+            - JWT__TOKENVALIDITYINMINUTES=1440
             - JWT__REFRESHTOKENVALIDITYINDAYS=7
+            - SERVICES_UserApiUrl=http://202.134.19.161:5202/api/v1
         ports:
             - 5203:80
             - 7203:443
-    LmsService:
-        container_name: lms
+    lms.service:
+        container_name: lms.service
         hostname: LmsService
-        image: ${DOCKER_REGISTRY-}lmsmicroservice:v1
+        image: ${DOCKER_REGISTRY-}lms-microservice:v1
         build:
-            context: ./
-            dockerfile: Lms.Dockerfile
+            context: ./../
+            dockerfile: Environments/Testing/Lms.Testing.Dockerfile
         environment:
-            - ASPNETCORE_ENVIRONMENT=Development
+            - ASPNETCORE_ENVIRONMENT=Testing
             - CONNECTIONSTRINGS__DEFAULTCONNECTION=Data Source=183.91.11.235;Initial Catalog=env-dev.course-service;User Id=sa;Password=FselTech@2023;TrustServerCertificate=true;
             - SERVICENAME=Lms Course
             - JWT__SECRETKEY=JsonWebApiTokenWithSwaggerAuthorizationAuthenticationAspNetCore
             - JWT__ISSUER=baseWebApiIssuer
             - JWT__AUDIENCE=baseWebApiAudience
             - JWT__SUBJECT=baseWebApiSubject
-            - JWT__TOKENVALIDITYINMINUTES=60
+            - JWT__TOKENVALIDITYINMINUTES=1440
             - JWT__REFRESHTOKENVALIDITYINDAYS=7
+            - SERVICES_UserApiUrl=http://202.134.19.161:5202/api/v1
+            - SERVICES_ClassApiUrl=http://202.134.19.161:5207/api/v1
         ports:
             - 5204:80
             - 7204:443
-    SenderService:
-        container_name: sender
-        hostname: SenderService
-        image: ${DOCKER_REGISTRY-}sendersmicroservice:v1
+    storage.service:
+        container_name: storage.service
+        hostname: StorageService
+        image: ${DOCKER_REGISTRY-}storage-smicroservice:v1
         build:
-            context: ./
-            dockerfile: Sender.Dockerfile
+            context: ./../
+            dockerfile: Environments/Testing/Storage.Testing.Dockerfile
         environment:
-            - ASPNETCORE_ENVIRONMENT=Development
-            - SERVICENAME=Sender
-            - SMTP__FROM=phanminhphucdctb@gmail.com
-            - SMTP__SMTPSERVER=smtp.gmail.com
-            - SMTP__PORT=465
-            - SMTP__USERNAME=phanminhphucdctb@gmail.com
-            - SMTP__PASSWORD=afyverhrmlidxwbf
-        ports:
-            - 5206:80
-            - 7206:443
-    GatewayService:
-        container_name: gateway
-        hostname: GatewayService
-        image: ${DOCKER_REGISTRY-}gatewaymicroservice:v1
-        build:
-            context: ./
-            dockerfile: Gateway.Dockerfile
-        environment:
-            - ASPNETCORE_ENVIRONMENT=Development
+            - ASPNETCORE_ENVIRONMENT=Testing
+            - SERVICENAME=Storage
             - JWT__SECRETKEY=JsonWebApiTokenWithSwaggerAuthorizationAuthenticationAspNetCore
             - JWT__ISSUER=baseWebApiIssuer
             - JWT__AUDIENCE=baseWebApiAudience
             - JWT__SUBJECT=baseWebApiSubject
-            - JWT__TOKENVALIDITYINMINUTES=60
+            - JWT__TOKENVALIDITYINMINUTES=1440
+            - JWT__REFRESHTOKENVALIDITYINDAYS=7
+            - StorageConfig__BucketName=fsel
+            - StorageConfig__AwsS3BaseUrl=s3-hn-2.cloud.cmctelecom.vn
+            - StorageConfig__AwsAccessKey=O4XEY1D00U6CMM9LCXQW
+            - StorageConfig__AwsSecretAccessKey=nLxuRGDeMkbjqxj2moR3MMILktxz7qGA9GVvExLw
+            - StorageConfig__Folders_Videos=videos
+            - StorageConfig__Folders_Questions=quesions
+            - StorageConfig__Folders_Files=files
+        ports:
+            - 5205:80
+            - 7205:443
+    sender.service:
+        container_name: sender.service
+        hostname: SenderService
+        image: ${DOCKER_REGISTRY-}sender-microservice:v1
+        build:
+            context: ./../
+            dockerfile: Environments/Testing/Sender.Testing.Dockerfile
+        environment:
+            - ASPNETCORE_ENVIRONMENT=Testing
+            - SERVICENAME=Sender
+            - SMTP__FROM=duongphanthtb@gmail.com
+            - SMTP__SMTPSERVER=smtp.gmail.com
+            - SMTP__PORT=465
+            - SMTP__USERNAME=duongphanthtb@gmail.com
+            - SMTP__PASSWORD=ncfigfdzuxiueyvv
+        ports:
+            - 5206:80
+            - 7206:443
+    training.service:
+        container_name: training.service
+        hostname: TrainingService
+        image: ${DOCKER_REGISTRY-}training-microservice:v1
+        build:
+            context: ./../
+            dockerfile: Environments/Testing/Training.Testing.Dockerfile
+        environment:
+            - ASPNETCORE_ENVIRONMENT=Testing
+            - CONNECTIONSTRINGS__DEFAULTCONNECTION=Data Source=183.91.11.235;Initial Catalog=env-dev.training-service;User Id=sa;Password=FselTech@2023;TrustServerCertificate=true;
+            - SERVICENAME=Training
+            - JWT__SECRETKEY=JsonWebApiTokenWithSwaggerAuthorizationAuthenticationAspNetCore
+            - JWT__ISSUER=baseWebApiIssuer
+            - JWT__AUDIENCE=baseWebApiAudience
+            - JWT__SUBJECT=baseWebApiSubject
+            - JWT__TOKENVALIDITYINMINUTES=1440
+            - JWT__REFRESHTOKENVALIDITYINDAYS=7
+            - SERVICES_UserApiUrl=http://202.134.19.161:5202/api/v1
+            - SERVICES_CourseApiUrl=http://202.134.19.161:5203/api/v1
+        ports:
+            - 5207:80
+            - 7207:443
+    interaction.service:
+        container_name: interaction.service
+        hostname: InteractionService
+        image: ${DOCKER_REGISTRY-}interaction-microservice:v1
+        build:
+            context: ./../
+            dockerfile: Environments/Testing/Interaction.Testing.Dockerfile
+        environment:
+            - ASPNETCORE_ENVIRONMENT=Testing
+            - CONNECTIONSTRINGS__DEFAULTCONNECTION=Data Source=183.91.11.235;Initial Catalog=env-dev.interaction-service;User Id=sa;Password=FselTech@2023;TrustServerCertificate=true;
+            - SERVICENAME=Interaction
+            - JWT__SECRETKEY=JsonWebApiTokenWithSwaggerAuthorizationAuthenticationAspNetCore
+            - JWT__ISSUER=baseWebApiIssuer
+            - JWT__AUDIENCE=baseWebApiAudience
+            - JWT__SUBJECT=baseWebApiSubject
+            - JWT__TOKENVALIDITYINMINUTES=1440
+            - JWT__REFRESHTOKENVALIDITYINDAYS=7
+        ports:
+            - 5208:80
+            - 7208:443
+    ordering.service:
+        container_name: ordering.service
+        hostname: OrderingService
+        image: ${DOCKER_REGISTRY-}ordering-microservice:v1
+        build:
+            context: ./../
+            dockerfile: Environments/Testing/Ordering.Testing.Dockerfile
+        environment:
+            - ASPNETCORE_ENVIRONMENT=Testing
+            - CONNECTIONSTRINGS__DEFAULTCONNECTION=Data Source=183.91.11.235;Initial Catalog=env-dev.ordering-service;User Id=sa;Password=FselTech@2023;TrustServerCertificate=true;
+            - SERVICENAME=Ordering
+            - JWT__SECRETKEY=JsonWebApiTokenWithSwaggerAuthorizationAuthenticationAspNetCore
+            - JWT__ISSUER=baseWebApiIssuer
+            - JWT__AUDIENCE=baseWebApiAudience
+            - JWT__SUBJECT=baseWebApiSubject
+            - JWT__TOKENVALIDITYINMINUTES=1440
+            - JWT__REFRESHTOKENVALIDITYINDAYS=7
+            - SERVICES_UserApiUrl=http://202.134.19.161:5202/api/v1
+        ports:
+            - 5209:80
+            - 7209:443
+    gateway.service:
+        container_name: gateway.service
+        hostname: GatewayService
+        image: ${DOCKER_REGISTRY-}gatewaymicroservice:v1
+        build:
+            context: ./../
+            dockerfile: Environments/Testing/Gateway.Testing.Dockerfile
+        environment:
+            - ASPNETCORE_ENVIRONMENT=Testing
+            - JWT__SECRETKEY=JsonWebApiTokenWithSwaggerAuthorizationAuthenticationAspNetCore
+            - JWT__ISSUER=baseWebApiIssuer
+            - JWT__AUDIENCE=baseWebApiAudience
+            - JWT__SUBJECT=baseWebApiSubject
+            - JWT__TOKENVALIDITYINMINUTES=1440
             - JWT__REFRESHTOKENVALIDITYINDAYS=7
         ports:
             - 5200:80
             - 7200:443
         links:
-          - AuthService
-          - UserService
-          - LcmsService
-          - LmsService
-          - SenderService
+            - auth.service
+            - user.service
+            - lcms.service
+            - lms.service
+            - storage.service
+            - sender.service
+            - training.service
+            - interaction.service
+            - ordering.service
         depends_on:
-          - AuthService
-          - UserService
-          - LcmsService
-          - LmsService
-          - SenderService
+            - auth.service
+            - user.service
+            - lcms.service
+            - lms.service
+            - storage.service
+            - sender.service
+            - training.service
+            - interaction.service
+            - ordering.service

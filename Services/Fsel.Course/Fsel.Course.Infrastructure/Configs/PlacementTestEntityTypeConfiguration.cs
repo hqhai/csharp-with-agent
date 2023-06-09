@@ -1,9 +1,8 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-using Fsel.Common.Enums;
 using Fsel.Common.Helpers;
 using Fsel.Course.Domain.Entities;
-using Fsel.Course.Domain.Enums;
+using Fsel.Shared.Enums;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -15,11 +14,11 @@ namespace Fsel.Course.Infrastructure.Configs
         {
             ArgumentNullException.ThrowIfNull(builder);
 
-            builder.Property(e => e.CourseLevel)
+            builder.Property(e => e.Level)
                 .HasMaxLength(100)
                 .HasConversion(
                     v => v.ToString(),
-                    v => v.EnumParse<EnumCourseLevel>());
+                    v => v.EnumParse<EnumPlacementTestLevel>());
         }
     }
 }

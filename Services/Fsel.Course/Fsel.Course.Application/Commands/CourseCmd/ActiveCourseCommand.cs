@@ -17,11 +17,11 @@ namespace Fsel.Course.Application.Commands.CourseCmd
         public Guid Id { get; set; }
     }
 
-    public class UpdateActiveStatusCommandHandler : IRequestHandler<ActiveCourseCommand, MethodResult<bool>>
+    public class ActiveCourseCommandHandler : IRequestHandler<ActiveCourseCommand, MethodResult<bool>>
     {
         private readonly ICourseRepository _courseRepository;
 
-        public UpdateActiveStatusCommandHandler(ICourseRepository courseRepository)
+        public ActiveCourseCommandHandler(ICourseRepository courseRepository)
         {
             _courseRepository = courseRepository;
         }
@@ -35,7 +35,7 @@ namespace Fsel.Course.Application.Commands.CourseCmd
             #region Validation
 
             var course = await _courseRepository.Queryable
-                            .Include(e => e.CourseTeachers)
+                            .Include(e => e.CourseTeachers.Where(n => !n.IsDeleted))
                             .Where(e => e.Id == request.Id)
                             .FirstOrDefaultAsync(cancellationToken: cancellationToken);
 
@@ -45,14 +45,14 @@ namespace Fsel.Course.Application.Commands.CourseCmd
                 return methodResult;
             }
 
-            if (course.Status != EnumCourseStatus.New)
+            if (course.Status == EnumCourseStatus.Active)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.CourseNotInNewState), nameof(course.Status), course.Status);
+                methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.CourseIsActiveState), nameof(course.Status), course.Status);
                 return methodResult;
             }
             var teacherIds = course.CourseTeachers.Select(x => x.TeacherId).ToList();
             var courses = await _courseRepository.Queryable
-                                .Include(e => e.CourseTeachers)
+                                .Include(e => e.CourseTeachers.Where(n => !n.IsDeleted))
                                 .Where(e => e.CourseLevel == course.CourseLevel &&
                                             e.Status == EnumCourseStatus.Active &&
                                             e.CourseTeachers.Count == teacherIds.Count &&

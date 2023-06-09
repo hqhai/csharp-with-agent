@@ -8,13 +8,11 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 
-/*using Course = Fsel.Course.Domain.Entities.Course;*/
-
 namespace Fsel.Course.Infrastructure
 {
     public class CourseDbContext : BaseDbContext
     {
-        public CourseDbContext(DbContextOptions<CourseDbContext> options, IMediator mediator) : base(options, mediator)
+        public CourseDbContext(DbContextOptions<CourseDbContext> options, IMediator mediator, AuthContext authContext) : base(options, mediator, authContext)
         {
         }
 
@@ -28,6 +26,10 @@ namespace Fsel.Course.Infrastructure
         public DbSet<LessonHomeWork> LessonHomeWorks { get; set; }
         public DbSet<LessonExtraPractice> LessonExtraPractices { get; set; }
         public DbSet<ExtraPractice> ExtraPractices { get; set; }
+        public DbSet<ExtraPracticeChapter> ExtraPracticeChapters { get; set; }
+        public DbSet<ExtraPracticeExercise> ExtraPracticeExercises { get; set; }
+        //public DbSet<ExtraPracticeExerciseAnswer> ExtraPracticeExerciseAnswers { get; set; }
+
         public DbSet<HomeWork> HomeWorks { get; set; }
         public DbSet<ClassForum> ClassForums { get; set; }
         public DbSet<UnitLesson> UnitLessons { get; set; }
@@ -39,24 +41,53 @@ namespace Fsel.Course.Infrastructure
         public DbSet<ExerciseQuestion> ExerciseQuestions { get; set; }
         public DbSet<Question> Questions { get; set; }
         public DbSet<CourseTeacher> CourseTeachers { get; set; }
-        public DbSet<CourseClassStudent> CourseClassStudents { get; set; }
         public DbSet<VideoResult> VideoResults { get; set; }
         public DbSet<LessonResult> LessonResults { get; set; }
         public DbSet<UnitResult> UnitResults { get; set; }
         public DbSet<CourseResult> CourseResults { get; set; }
         public DbSet<VideoTimeCodeAnswer> VideoTimeCodeAnswers { get; set; }
+        public DbSet<LessonNote> LessonNotes { get; set; }
         public DbSet<QuestionForm> QuestionForms { get; set; }
+        public DbSet<LessonInstruction> LessonInstructions { get; set; }
+        public DbSet<HomeWorkQuestion> HomeWorkQuestions { get; set; }
+        public DbSet<HomeWorkAnswer> HomeWorkAnswers { get; set; }
+        public DbSet<HomeWorkResult> HomeWorkResults { get; set; }
+
+        public DbSet<PlacementTestSection> PlacementTestSections { get; set; }
+        public DbSet<PlacementTestAnswer> PlacementTestAnswers { get; set; }
+        public DbSet<PlacementTestResult> PlacementTestResults { get; set; }
+        public DbSet<Section> Sections { get; set; }
+        public DbSet<SectionGroup> SectionGroups { get; set; }
+        public DbSet<SectionPart> SectionParts { get; set; }
+        public DbSet<SectionQuestion> SectionQuestions { get; set; }
+        public DbSet<SectionTimeCode> SectionTimeCodes { get; set; }
+        public DbSet<MockTestSection> MockTestSections { get; set; }
+        public DbSet<FinalTest> FinalTests { get; set; }
+        public DbSet<MockTestResult> MockTestResults { get; set; }
+        public DbSet<MockTestAnswer> MockTestAnswers { get; set; }
+        public DbSet<FinalTestSection> FinalTestSections { get; set; }
+        public DbSet<FinalTestAnswer> FinalTestAnswers { get; set; }
+        public DbSet<FinalTestResult> FinalTestResults { get; set; }
+        public DbSet<ClassForumResult> ClassForumResults { get; set; }
+        public DbSet<ClassForumScore> ClassForumScores { get; set; }
+        public DbSet<ClassForumResultFile> ClassForumResultFiles { get; set; }
+        public DbSet<ClassForumFile> ClassForumFiles { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             ArgumentNullException.ThrowIfNull(modelBuilder);
             modelBuilder.ApplyConfiguration(new ClassForumEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new CourseEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new CourseResultEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new CourseTeacherEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new CourseUnitMockTestEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new ExerciseEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new ExerciseQuestionEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new ExtraPracticeEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new ExtraPracticeChapterEntityTypeConfiguration());
+            //modelBuilder.ApplyConfiguration(new ExtraPracticeExerciseAnswerEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new ExtraPracticeExerciseEntityTypeConfiguration());
+
             modelBuilder.ApplyConfiguration(new HomeWorkEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new LessonEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new LessonExtraPracticeEntityTypeConfiguration());
@@ -72,11 +103,35 @@ namespace Fsel.Course.Infrastructure
             modelBuilder.ApplyConfiguration(new VideoEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new VideoTimeCodeEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new LessonResultEntityTypeConfiguraion());
-            modelBuilder.ApplyConfiguration(new CourseClassStudentEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new VideoResultEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new CourseResultEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new VideoTimeCodeAnswerEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new QuestionFormEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new LessonInstructionEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new HomeWorkAnswerEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new HomeWorkResultEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new HomeWorkQuestionEntityTypeConfiguration());
+
+            modelBuilder.ApplyConfiguration(new PlacementTestSectionEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new PlacementTestAnswerEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new PlacementTestResultEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new SectionEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new SectionGroupEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new SectionPartEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new SectionQuestionEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new SectionTimeCodeEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new MockTestSectionEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new FinalTestEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new MockTestEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new MockTestAnswerEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new MockTestResultEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new FinalTestAnswerEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new FinalTestSectionEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new FinalTestResultEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new ClassForumResultEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new ClassForumScoreEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new ClassForumFileEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new ClassForumResultFileEntityTypeConfiguration());
 
             base.OnModelCreating(modelBuilder);
         }

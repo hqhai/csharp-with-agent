@@ -5,7 +5,7 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
     public enum EnumLessonVideoErrorCode
     {
         /// <summary>
-        /// Lesson Video not is correct
+        /// Lesson Video does not exist
         /// </summary>
         LessonVideoNotCorrect
     }

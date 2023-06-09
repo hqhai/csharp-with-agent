@@ -4,6 +4,7 @@ namespace Fsel.Interaction.Application.Commands.CustomerSurveyCmd
 {
     using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Core.Base;
     using Fsel.Interaction.Domain.Entities;
     using Fsel.Interaction.Domain.Enums.ErrorCodes;
     using Fsel.Interaction.Domain.IRepositories;
@@ -20,15 +21,18 @@ namespace Fsel.Interaction.Application.Commands.CustomerSurveyCmd
     public class CreateCustomerSurveyCommandHandler : IRequestHandler<CreateCustomerSurveyCommand, MethodResult<IList<CustomerSurveyModel>>>
     {
         private readonly ICustomerSurveyRepository _customerSurveyRepository;
+        private readonly AuthContext _authContext;
         private readonly ISurveyQuestionRepository _surveyQuestionRepository;
         private readonly IMapper _mapper;
 
         public CreateCustomerSurveyCommandHandler(
             ICustomerSurveyRepository customerSurveyRepository,
+            AuthContext authContext,
             ISurveyQuestionRepository surveyQuestionRepository,
             IMapper mapper)
         {
             _customerSurveyRepository = customerSurveyRepository;
+            _authContext = authContext;
             _surveyQuestionRepository = surveyQuestionRepository;
             _mapper = mapper;
         }
@@ -53,13 +57,12 @@ namespace Fsel.Interaction.Application.Commands.CustomerSurveyCmd
                 var customerSurvey = new CustomerSurvey
                 {
                     Answer = item.Answer,
-                    UserId = request.UserId,
-                    SurveyQuestionId = item.SurveyQuestionId
+                    UserId = _authContext.CurrentUserId.ToString(),
+                    SurveyQuestionId = item.Id
                 };
                 if (!customerSurvey.IsValid())
                 {
-                    methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                    methodResult.AddResultFromErrorList(customerSurvey.ErrorMessages);
+                    methodResult.AddErrorBadRequest(customerSurvey.ErrorMessages);
                     return methodResult;
                 }
 
@@ -68,20 +71,11 @@ namespace Fsel.Interaction.Application.Commands.CustomerSurveyCmd
 
             await _customerSurveyRepository.ExecuteTransactionAsync(async () =>
             {
-                IList<CustomerSurveyModel> customerSurveyModels = new List<CustomerSurveyModel>();
-                foreach (var item in customerSurveys)
-                {
-                    _customerSurveyRepository.Add(item);
-                    var customerSurveyModel = _mapper.Map<CustomerSurveyModel>(item);
-                    customerSurveyModels.Add(customerSurveyModel);
-                }
-                foreach (var item in customerSurveys)
-                {
-                }
+                await _customerSurveyRepository.AddList(customerSurveys);
                 await _customerSurveyRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
-
                 methodResult.StatusCode = StatusCodes.Status201Created;
-                methodResult.Result = customerSurveyModels;
+                methodResult.Result = _mapper.Map<IList<CustomerSurveyModel>>(customerSurveys);
+
                 return methodResult;
             });
 

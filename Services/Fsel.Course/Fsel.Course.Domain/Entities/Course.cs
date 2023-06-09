@@ -2,11 +2,11 @@
 
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using Fsel.Common.Enums;
 using Fsel.Common.Enums.ErrorCodes;
-using Fsel.Common.Helpers;
 using Fsel.Core.Entities;
 using Fsel.Course.Domain.Enums;
+using Fsel.Shared.Enums;
+using Fsel.Shared.Helpers;
 
 namespace Fsel.Course.Domain.Entities
 {
@@ -20,16 +20,16 @@ namespace Fsel.Course.Domain.Entities
         public string? Name { get; set; }
 
         /// <summary>
-        /// Số lượng Unit
+        /// Mã khóa học
         /// </summary>
-        [Range(1, 10000_0000, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
-        public int NumberOfUnits { get; set; }
+        [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
+        [MaxLength(250, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
+        public string? Code { get; set; }
 
         /// <summary>
-        /// Số Lượng Lesson
+        /// Nội dung hướng dẫn khóa học
         /// </summary>
-        [Range(1, 10000_0000, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
-        public int NumberOfLessons { get; set; }
+        public string? InstructionContent { get; set; }
 
         /// <summary>
         /// Loại trạng thái
@@ -49,15 +49,17 @@ namespace Fsel.Course.Domain.Entities
         {
             get
             {
-                return EnumHelper.GetEnumCourseType(CourseLevel);
+                return CourseLevel.GetEnumCourseType();
             }
         }
 
         public ICollection<CourseUnitMockTest> CourseUnitMockTests { get; set; } = new List<CourseUnitMockTest>();
         public ICollection<CourseTeacher> CourseTeachers { get; set; } = new List<CourseTeacher>();
-        public ICollection<CourseClassStudent> CourseClassStudents { get; set; } = new List<CourseClassStudent>();
         public ICollection<UnitResult> UnitResults { get; set; } = new List<UnitResult>();
-        public CourseResult? CourseResult { get; set; }
+        public ICollection<CourseResult>? CourseResults { get; set; } = new List<CourseResult>();
         public ICollection<LessonResult> LessonResults { get; set; } = new List<LessonResult>();
+
+        public ICollection<MockTestResult> MockTestResults { get; set; } = new List<MockTestResult>();
+        public ICollection<FinalTestResult> FinalTestResults { get; set; } = new List<FinalTestResult>();
     }
 }

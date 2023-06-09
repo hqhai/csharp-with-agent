@@ -19,7 +19,7 @@ namespace Fsel.Course.Domain.Entities
         /// <summary>
         /// Thời gian hiện làm bài
         /// </summary>
-        [Range(1, 10000_0000, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
+        [Range(0, 10000_0000, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
         public long ExecutionTime { get; set; }
 
         /// <summary>
@@ -33,13 +33,13 @@ namespace Fsel.Course.Domain.Entities
         [NotMapped]
         public TimeSpan DisplayTimeSpan
         {
-            get { return TimeSpan.FromTicks(DisplayTime); }
+            get { return TimeSpan.FromSeconds(DisplayTime); }
         }
 
         [NotMapped]
         public TimeSpan ExecutionTimeSpan
         {
-            get { return TimeSpan.FromTicks(ExecutionTime); }
+            get { return TimeSpan.FromSeconds(ExecutionTime); }
         }
 
         public ICollection<TimeCodeExercise> TimeCodeExercises { get; set; } = new List<TimeCodeExercise>();

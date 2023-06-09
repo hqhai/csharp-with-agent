@@ -2,6 +2,7 @@
 
 using AutoMapper;
 using Fsel.Common.ActionResults;
+using Fsel.Course.Domain.Entities;
 using Fsel.Course.Domain.Enums;
 using Fsel.Course.Domain.Enums.ErrorCodes;
 using Fsel.Course.Domain.IRepositories;
@@ -35,14 +36,14 @@ namespace Fsel.Course.Application.Commands.UnitCmd
 
         public async Task<MethodResult<UnitModel>> Handle(UpdateUnitCommand request, CancellationToken cancellationToken)
         {
-            MethodResult<UnitModel> methodResult = new MethodResult<UnitModel>();
             ArgumentNullException.ThrowIfNull(request);
+            MethodResult<UnitModel> methodResult = new MethodResult<UnitModel>();
 
             #region Validation
 
             var unit = await _unitRepository.Queryable
-                                    .Include(e => e.UnitLessons)
-                                    .Include(e => e.UnitSkillMockTests)
+                                    .Include(e => e.UnitLessons.Where(n => !n.IsDeleted))
+                                    .Include(e => e.UnitSkillMockTests.Where(n => !n.IsDeleted))
                                     .FirstOrDefaultAsync(e => e.Id == request.Id, cancellationToken: cancellationToken);
             if (unit == null)
             {
@@ -53,26 +54,26 @@ namespace Fsel.Course.Application.Commands.UnitCmd
             var isUnitUsed = await _unitRepository.IsUnitUsed(request.Id);
             if (isUnitUsed)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumUnitErrorCode.UnitHaveUsed), nameof(request.Id), request.Id);
+                methodResult.AddErrorBadRequest(nameof(EnumUnitErrorCode.UnitUsed), nameof(request.Id), request.Id);
                 return methodResult;
             }
 
-            if (request.LessonIds == null)
+            if (request.LessonIds == null || request.LessonIds.Count == 0)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumUnitErrorCode.UnitIdNotCorrect), nameof(request.LessonIds), request.LessonIds);
+                methodResult.AddErrorBadRequest(nameof(EnumLessonErrorCode.LessonsNull), nameof(request.LessonIds), request.LessonIds);
                 return methodResult;
             }
 
             if (_lessonRepository.IsIdsInValid(request.LessonIds))
             {
-                methodResult.AddErrorBadRequest(nameof(EnumLessonErrorCode.LessonNotCorrect), nameof(request.LessonIds), request.LessonIds);
+                methodResult.AddErrorBadRequest(nameof(EnumLessonErrorCode.LessonsNotExist), nameof(request.LessonIds), request.LessonIds);
                 return methodResult;
             }
 
-            var checkMockTest = _mockTestRepository.Queryable.Any(x => x.MockTestType == EnumMockTestType.UnitMockTest && x.Id == request.MockTestId);
+            var checkMockTest = _mockTestRepository.Queryable.Any(x => x.MockTestType == EnumMockTestType.SkillMockTest && x.Id == request.MockTestId);
             if (!checkMockTest)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumMockTestErrorCode.MockTestInValid));
+                methodResult.AddErrorBadRequest(nameof(EnumMockTestErrorCode.MockTestExistsOtherThanTypeSkillMockTest), nameof(request.MockTestId), request.MockTestId);
                 return methodResult;
             }
 
@@ -80,8 +81,7 @@ namespace Fsel.Course.Application.Commands.UnitCmd
 
             if (!unit.IsValid())
             {
-                methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                methodResult.AddResultFromErrorList(unit.ErrorMessages);
+                methodResult.AddErrorBadRequest(unit.ErrorMessages);
                 return methodResult;
             }
 
@@ -89,6 +89,12 @@ namespace Fsel.Course.Application.Commands.UnitCmd
 
             await _unitRepository.ExecuteTransactionAsync(async () =>
             {
+                unit.UnitLessons = request.LessonIds.Select((x, index) => new UnitLesson
+                {
+                    DisplayOrder = index,
+                    LessonId = x
+                }).ToList();
+
                 unit = _unitRepository.Update(unit);
                 await _unitRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 

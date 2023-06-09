@@ -7,6 +7,7 @@ namespace Fsel.Training.Application.Services.UserServices.Models
     public class UpdateStudentByClassIdModel
     {
         public Guid? ClassId { get; set; }
-        public Guid UserId { get; set; }
+        public Guid StudentId { get; set; }
+        public Guid? PackageId { get; set; }
     }
 }

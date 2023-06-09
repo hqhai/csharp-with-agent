@@ -3,9 +3,12 @@
 using AutoMapper;
 using Fsel.Common.ActionResults;
 using Fsel.Course.Domain.Entities;
+using Fsel.Course.Domain.Enums.ErrorCodes;
 using Fsel.Course.Domain.IRepositories;
 using Fsel.Course.Domain.Models.CommandModels.PlacementTests;
 using Fsel.Course.Domain.Models.EntityModels;
+using Fsel.Course.Infrastructure.Common;
+using Fsel.Shared.Enums;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 
@@ -19,26 +22,73 @@ namespace Fsel.Course.Application.Commands.PlacementTestCmd
     {
         private readonly IPlacementTestRepository _placementTestRepository;
         private readonly IMapper _mapper;
+        private readonly SectionConverter _sectionConverter;
 
         public CreatePlacementTestCommandHandler(IPlacementTestRepository placementTestRepository,
-            IMapper mapper)
+            IMapper mapper,
+            SectionConverter sectionConverter)
         {
             _placementTestRepository = placementTestRepository;
             _mapper = mapper;
+            _sectionConverter = sectionConverter;
         }
 
         public async Task<MethodResult<PlacementTestModel>> Handle(CreatePlacementTestCommand request, CancellationToken cancellationToken)
         {
+            ArgumentNullException.ThrowIfNull(request);
             MethodResult<PlacementTestModel> methodResult = new MethodResult<PlacementTestModel>();
 
             #region Validation
 
-            PlacementTest placementTest = _mapper.Map<PlacementTest>(request);
+            if (request.SectionGroups == null || request.SectionGroups.Count == 0)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSectionGroupErrorCode.SectionGroupsNull), nameof(request.SectionGroups));
+                return methodResult;
+            }
 
+            PlacementTest placementTest = _mapper.Map<PlacementTest>(request);
+            placementTest.IsActive = false;
             if (!placementTest.IsValid())
             {
-                methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                methodResult.AddResultFromErrorList(placementTest.ErrorMessages);
+                methodResult.AddErrorBadRequest(placementTest.ErrorMessages);
+                return methodResult;
+            }
+
+            foreach (var sectionGroup in request.SectionGroups)
+            {
+                if (sectionGroup == null)
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumSectionGroupErrorCode.SectionGroupNull), nameof(sectionGroup));
+                    return methodResult;
+                }
+                else
+                {
+                    if (sectionGroup.Sections == null || sectionGroup.Sections.Count == 0)
+                    {
+                        methodResult.AddErrorBadRequest(nameof(EnumSectionErrorCode.SectionsNull), nameof(sectionGroup.Sections));
+                        return methodResult;
+                    }
+
+                    SectionGroup newSectionGroup = _mapper.Map<SectionGroup>(sectionGroup);
+                    var method = _sectionConverter.AddSessionToSessionGroup(newSectionGroup, sectionGroup.Sections, request.Level == EnumPlacementTestLevel.IELTS ? EnumCourseType.Ielts : EnumCourseType.Academic);
+                    if (!method.IsOK)
+                    {
+                        methodResult.AddErrorBadRequest(method.ErrorMessages);
+                    }
+                    placementTest.PlacementTestSections.Add(new PlacementTestSection
+                    {
+                        SectionGroup = newSectionGroup
+                    });
+                    if (!newSectionGroup.IsValid())
+                    {
+                        methodResult.AddErrorBadRequest(newSectionGroup.ErrorMessages);
+                        return methodResult;
+                    }
+                }
+            }
+
+            if (!methodResult.IsOK)
+            {
                 return methodResult;
             }
 

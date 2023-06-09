@@ -1,15 +1,13 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-using Fsel.Common.Enums;
-using Fsel.Core.Base.BaseModels;
+using Fsel.Shared.Enums;
 using Fsel.Course.Domain.Enums;
+using Fsel.Core.Base.BaseModels;
 
 namespace Fsel.Course.Domain.Models.CommandModels.ClassForums
 {
     public class UpdateClassForumCommandModel : BaseCommandModel
     {
-        public string? Title { get; set; }
-
         public EnumGradingStyle GradingStyle { get; set; }
 
         public long TaggetWordLimit { get; set; }
@@ -21,5 +19,9 @@ namespace Fsel.Course.Domain.Models.CommandModels.ClassForums
         public bool IsActive { get; set; }
 
         public EnumCourseSkill CourseSkill { get; set; }
+
+        public Guid LessonId { get; set; }
+
+        public IList<string>? FilePaths { get; set; }
     }
 }

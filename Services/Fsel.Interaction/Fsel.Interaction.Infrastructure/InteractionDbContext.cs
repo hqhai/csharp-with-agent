@@ -3,6 +3,7 @@ using Fsel.Common.Helpers;
 using Fsel.Core.Base;
 using Fsel.Interaction.Domain.Entities;
 using Fsel.Interaction.Infrastructure.Configs;
+using Fsel.Shared.Constants;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -11,7 +12,7 @@ namespace Fsel.Interaction.Infrastructure
 {
     public class InteractionDbContext : BaseDbContext
     {
-        public InteractionDbContext(DbContextOptions<InteractionDbContext> options, IMediator mediator) : base(options, mediator)
+        public InteractionDbContext(DbContextOptions<InteractionDbContext> options, IMediator mediator, AuthContext authContext) : base(options, mediator, authContext)
         {
         }
 
@@ -22,11 +23,15 @@ namespace Fsel.Interaction.Infrastructure
 
             modelBuilder.ApplyConfiguration(new SurveyQuestionEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new CustomerSurveyEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new InteractionActionEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new CommentEntityTypeConfiguration());
             base.OnModelCreating(modelBuilder);
         }
 
         public DbSet<SurveyQuestion> SurveyQuestions { get; set; }
         public DbSet<CustomerSurvey> CustomerSurveys { get; set; }
+        public DbSet<InteractionAction> InteractionActions { get; set; }
+        public DbSet<Comment> Comments { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -45,7 +50,7 @@ namespace Fsel.Interaction.Infrastructure
 
         private static void SeedSurveyQuestions(ModelBuilder builder)
         {
-            var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, Settings.SurveyQuestionFileName);
+            var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, SurveyQuestionSettings.SurveyQuestionFileName);
             var surveyQuestions = ConvertHelper.DeserializeFromFilePath<IList<SurveyQuestion>>(path);
             ArgumentNullException.ThrowIfNull(surveyQuestions);
             builder.Entity<SurveyQuestion>().HasData(surveyQuestions.ToArray());

@@ -2,17 +2,11 @@
 
 namespace Fsel.Course.Domain.Enums.ErrorCodes
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
-    using System.Threading.Tasks;
-
     public enum EnumCourseTeacherErrorCode
     {
         /// <summary>
-        /// Course Teacher null
+        /// Course Teachers Is Null
         /// </summary>
-        CourseTeacherNull
+        CourseTeachersNull
     }
 }

@@ -9,6 +9,7 @@ using Fsel.Course.Domain.Models.CommandModels.Lessons;
 using Fsel.Course.Domain.Models.EntityModels;
 using MediatR;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 
 namespace Fsel.Course.Application.Commands.LessonCmd
 {
@@ -43,27 +44,27 @@ namespace Fsel.Course.Application.Commands.LessonCmd
 
             #region Validation
 
-            if (request.HomeWorkIds == null)
+            if (request.HomeWorkIds == null || request.HomeWorkIds.Count == 0)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumHomeWorkErrorCode.HomeWorkNull), nameof(request.HomeWorkIds));
+                methodResult.AddErrorBadRequest(nameof(EnumHomeWorkErrorCode.HomeWorksNull), nameof(request.HomeWorkIds), request.HomeWorkIds);
                 return methodResult;
             }
 
-            if (request.ExtraPracticeIds == null)
+            if (request.LessonInstructions == null || request.LessonInstructions.Count == 0)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumExtraPractiveErrorCode.ExtraPractiveNull), nameof(request.ExtraPracticeIds));
+                methodResult.AddErrorBadRequest(nameof(EnumLessonInstructionErrorCode.LessonInstructionsNull), nameof(request.LessonInstructions), request.LessonInstructions);
                 return methodResult;
             }
 
-            if (request.VideoIds == null)
+            if (request.VideoIds == null || request.VideoIds.Count == 0)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumVideoErrorCode.VideoNotCorrect), nameof(request.VideoIds));
+                methodResult.AddErrorBadRequest(nameof(EnumVideoErrorCode.VideosNull), nameof(request.VideoIds), request.VideoIds);
                 return methodResult;
             }
 
             if (request.ClassForum == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumClassForumErrorCode.ClassForumIsNotCorrect), nameof(request.ClassForum));
+                methodResult.AddErrorBadRequest(nameof(EnumClassForumErrorCode.ClassForumNull), nameof(request.ClassForum), request.ClassForum);
                 return methodResult;
             }
 
@@ -72,19 +73,28 @@ namespace Fsel.Course.Application.Commands.LessonCmd
 
             if (_homeWorkRepository.IsIdsInValid(request.HomeWorkIds))
             {
-                methodResult.AddErrorBadRequest(nameof(EnumHomeWorkErrorCode.HomeWorkNull), nameof(request.HomeWorkIds), request.HomeWorkIds);
+                methodResult.AddErrorBadRequest(nameof(EnumHomeWorkErrorCode.HomeworksNotExist), nameof(request.HomeWorkIds), request.HomeWorkIds);
                 return methodResult;
             }
-
-            if (_extraPracticeRepository.IsIdsInValid(request.ExtraPracticeIds))
+            if (request.ExtraPracticeIds != null && request.ExtraPracticeIds.Count > 0)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumExtraPractiveErrorCode.ExtraPractiveNull), nameof(request.ExtraPracticeIds), request.ExtraPracticeIds);
-                return methodResult;
+                if (_extraPracticeRepository.IsIdsInValid(request.ExtraPracticeIds))
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumExtraPracticeErrorCode.ExtraPracticesNotExist), nameof(request.ExtraPracticeIds), request.ExtraPracticeIds);
+                    return methodResult;
+                }
             }
 
             if (_videoRepository.IsIdsInValid(request.VideoIds))
             {
-                methodResult.AddErrorBadRequest(nameof(EnumVideoErrorCode.VideoNotCorrect), nameof(request.VideoIds), request.VideoIds);
+                methodResult.AddErrorBadRequest(nameof(EnumVideoErrorCode.VideosNotExist), nameof(request.VideoIds), request.VideoIds);
+                return methodResult;
+            }
+
+            var isExistName = await _lessonRepository.Queryable.AnyAsync(x => x.Name == request.Name, cancellationToken);
+            if (isExistName)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumLessonErrorCode.LessonNameIsExist), nameof(request.Name), request.Name);
                 return methodResult;
             }
 
@@ -92,8 +102,7 @@ namespace Fsel.Course.Application.Commands.LessonCmd
 
             if (!lesson.IsValid())
             {
-                methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                methodResult.AddResultFromErrorList(lesson.ErrorMessages);
+                methodResult.AddErrorBadRequest(lesson.ErrorMessages);
                 return methodResult;
             }
 
@@ -105,18 +114,27 @@ namespace Fsel.Course.Application.Commands.LessonCmd
                 {
                     HomeWorkId = x
                 }).ToList();
-                lesson.LessonExtraPractices = request.ExtraPracticeIds.Select((x) => new LessonExtraPractice
+                if (request.ExtraPracticeIds != null && request.ExtraPracticeIds.Count > 0)
                 {
-                    ExtracPraticeId = x
-                }).ToList();
+                    lesson.LessonExtraPractices = request.ExtraPracticeIds.Select((x) => new LessonExtraPractice
+                    {
+                        ExtracPraticeId = x
+                    }).ToList();
+                }
                 lesson.LessonVideos = request.VideoIds.Select((x) => new LessonVideo
                 {
                     VideoId = x
                 }).ToList();
 
-                classForum.LessonId = lesson.Id;
-                lesson.ClassForum = classForum;
+                lesson.LessonInstructions = _mapper.Map<IList<LessonInstruction>>(request.LessonInstructions);
 
+                classForum.LessonId = lesson.Id;
+                classForum.ClassForumFiles = request.ClassForum.FilePaths!.Select(x => new ClassForumFile
+                {
+                    FilePath = x,
+                }).ToList();
+
+                lesson.ClassForum = classForum;
                 lesson = _lessonRepository.Add(lesson);
                 await _lessonRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 

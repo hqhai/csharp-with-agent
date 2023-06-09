@@ -5,6 +5,16 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
     public enum EnumLessonErrorCode
     {
         /// <summary>
+        /// Lessons does not exist
+        /// </summary>
+        LessonsNotExist,
+
+        /// <summary>
+        /// Lessons name is exist
+        /// </summary>
+        LessonNameIsExist,
+
+        /// <summary>
         /// Lesson does not exist
         /// </summary>
         LessonNotExist,
@@ -15,28 +25,13 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         LessonUsed,
 
         /// <summary>
-        /// Lesson not is correct
+        /// Lessons Is Null
         /// </summary>
-        LessonNotCorrect,
+        LessonsNull,
 
         /// <summary>
-        /// User Not Student
+        /// User does not exist
         /// </summary>
-        NotStudent,
-
-        /// <summary>
-        /// Student not in class
-        /// </summary>
-        StudentNotInClass,
-
-        /// <summary>
-        /// Student is null
-        /// </summary>
-        StudentNull,
-
-        /// <summary>
-        /// List Lesson does not exist
-        /// </summary>
-        ListLessonNotExist,
+        UserNotExist
     }
 }

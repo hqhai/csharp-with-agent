@@ -34,19 +34,21 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<IList<LessonModel>> methodResult = new MethodResult<IList<LessonModel>>();
             var lessonQuery = await _lessonRepository.Queryable
-                                .Include(x => x.UnitLessons)
+                                .Include(x => x.UnitLessons.Where(x => !x.IsDeleted))
+                                .Where(x => x.UnitLessons.Select(x => x.UnitId).Contains(request.UnitId))
                                 .AsNoTracking()
                                 .Select(x => new LessonModel
                                 {
                                     Id = x.Id,
                                     Name = x.Name,
                                     InstructionContent = x.InstructionContent,
-                                    DisplayName = x.DisplayName,
-                                }).ToListAsync(cancellationToken: cancellationToken);
+                                    IsActive = x.UnitLessons.Any(),
+                                    DisplayOrder = x.UnitLessons.Where(n => n.UnitId == request.UnitId).Select(x => x.DisplayOrder).FirstOrDefault(),
+                                }).OrderBy(x => x.DisplayOrder).ToListAsync(cancellationToken: cancellationToken);
 
             if (lessonQuery.Count == 0)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumLessonErrorCode.ListLessonNotExist));
+                methodResult.AddErrorBadRequest(nameof(EnumLessonErrorCode.LessonsNotExist));
                 return methodResult;
             }
             methodResult.Result = lessonQuery;

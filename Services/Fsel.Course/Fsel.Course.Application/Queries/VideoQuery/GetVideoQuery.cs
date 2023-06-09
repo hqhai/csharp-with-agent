@@ -26,8 +26,9 @@ namespace Fsel.Course.Application.Queries.VideoQuery
 
         public async Task<MethodResult<VideoModel>> Handle(GetVideoQuery request, CancellationToken cancellationToken)
         {
-            MethodResult<VideoModel> methodResult = new MethodResult<VideoModel>();
             ArgumentNullException.ThrowIfNull(request);
+            MethodResult<VideoModel> methodResult = new MethodResult<VideoModel>();
+
             var video = await _videoRepository.GetIncludeAllAsync(request.Id);
 
             if (video == null)

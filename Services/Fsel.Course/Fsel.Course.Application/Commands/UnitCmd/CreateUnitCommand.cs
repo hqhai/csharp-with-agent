@@ -10,7 +10,7 @@ using Fsel.Course.Domain.Models.CommandModels.Units;
 using Fsel.Course.Domain.Models.EntityModels;
 using MediatR;
 using Microsoft.AspNetCore.Http;
-
+using Microsoft.EntityFrameworkCore;
 using Unit = Fsel.Course.Domain.Entities.Unit;
 
 namespace Fsel.Course.Application.Commands.UnitCmd
@@ -26,8 +26,10 @@ namespace Fsel.Course.Application.Commands.UnitCmd
         private readonly ILessonRepository _lessonRepository;
         private readonly IMockTestRepository _mockTestRepository;
 
-        public CreateUnitCommandHandler(IUnitRepository unitRepository, ILessonRepository lessonRepository, IMockTestRepository mockTestRepository,
-            IMapper mapper)
+        public CreateUnitCommandHandler(IUnitRepository unitRepository
+            , ILessonRepository lessonRepository
+            , IMockTestRepository mockTestRepository
+            , IMapper mapper)
         {
             _lessonRepository = lessonRepository;
             _unitRepository = unitRepository;
@@ -37,6 +39,7 @@ namespace Fsel.Course.Application.Commands.UnitCmd
 
         public async Task<MethodResult<UnitModel>> Handle(CreateUnitCommand request, CancellationToken cancellationToken)
         {
+            ArgumentNullException.ThrowIfNull(request);
             MethodResult<UnitModel> methodResult = new MethodResult<UnitModel>();
 
             #region Validation
@@ -45,27 +48,26 @@ namespace Fsel.Course.Application.Commands.UnitCmd
 
             if (!unit.IsValid())
             {
-                methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                methodResult.AddResultFromErrorList(unit.ErrorMessages);
+                methodResult.AddErrorBadRequest(unit.ErrorMessages);
                 return methodResult;
             }
 
-            if (request?.LessonIds == null)
+            if (request.LessonIds == null || request.LessonIds.Count == 0)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumUnitErrorCode.UnitIdNotCorrect), nameof(request.LessonIds), request?.LessonIds);
+                methodResult.AddErrorBadRequest(nameof(EnumLessonErrorCode.LessonsNull), nameof(request.LessonIds), request.LessonIds);
                 return methodResult;
             }
 
             if (_lessonRepository.IsIdsInValid(request.LessonIds))
             {
-                methodResult.AddErrorBadRequest(nameof(EnumLessonErrorCode.LessonNotCorrect), nameof(request.LessonIds), request.LessonIds);
+                methodResult.AddErrorBadRequest(nameof(EnumLessonErrorCode.LessonsNotExist), nameof(request.LessonIds), request.LessonIds);
                 return methodResult;
             }
 
-            var checkMockTest = _mockTestRepository.Queryable.Any(x => x.MockTestType == EnumMockTestType.UnitMockTest && x.Id == request.MockTestId);
+            var checkMockTest = _mockTestRepository.Queryable.Any(x => x.MockTestType == EnumMockTestType.SkillMockTest && x.Id == request.MockTestId);
             if (!checkMockTest)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumMockTestErrorCode.MockTestInValid));
+                methodResult.AddErrorBadRequest(nameof(EnumMockTestErrorCode.MockTestExistsOtherThanTypeSkillMockTest), nameof(request.MockTestId), request.MockTestId);
                 return methodResult;
             }
 
@@ -73,18 +75,19 @@ namespace Fsel.Course.Application.Commands.UnitCmd
 
             await _unitRepository.ExecuteTransactionAsync(async () =>
             {
-                unit.UnitLessons = request.LessonIds.Select(x => new UnitLesson
+                unit.UnitLessons = request.LessonIds.Select((x, index) => new UnitLesson
                 {
+                    DisplayOrder = index,
                     LessonId = x
                 }).ToList();
 
                 unit.UnitSkillMockTests = new List<UnitSkillMockTest>
-                 {
-                     new UnitSkillMockTest
-                     {
-                         MockTestId = request.MockTestId,
-                     }
-                 };
+                {
+                    new UnitSkillMockTest
+                    {
+                        MockTestId = request.MockTestId,
+                    }
+                };
 
                 unit = _unitRepository.Add(unit);
                 await _unitRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);

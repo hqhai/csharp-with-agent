@@ -1,9 +1,9 @@
 // Copyright (c) Atlantic. All rights reserved.
 
 using System.ComponentModel.DataAnnotations;
-using Fsel.Common.Enums;
 using Fsel.Common.Enums.ErrorCodes;
 using Fsel.Core.Entities;
+using Fsel.Shared.Enums;
 
 namespace Fsel.Course.Domain.Entities
 {
@@ -29,6 +29,8 @@ namespace Fsel.Course.Domain.Entities
         /// <summary>
         /// Trình độ khóa
         /// </summary>
-        public EnumCourseLevel CourseLevel { get; set; }
+        public EnumPlacementTestLevel Level { get; set; }
+
+        public ICollection<PlacementTestSection> PlacementTestSections { get; set; } = new List<PlacementTestSection>();
     }
 }

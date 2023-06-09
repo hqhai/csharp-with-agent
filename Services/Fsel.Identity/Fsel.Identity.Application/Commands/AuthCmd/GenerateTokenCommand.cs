@@ -5,15 +5,17 @@ using System.Security.Claims;
 using System.Text;
 using Fsel.Common.ActionResults;
 using Fsel.Common.Helpers;
+using Fsel.Identity.Application.Services.InteractionService;
 using Fsel.Identity.Domain.Entities;
 using Fsel.Identity.Domain.IRepositories;
 using Fsel.Identity.Domain.Models.EntityModels;
-using Fsel.Identity.Infrastructure;
 using Fsel.Identity.Infrastructure.ValueSettings;
+using Fsel.Shared.Enums;
 using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 
 namespace Fsel.Identity.Application.Commands.AuthCmd
@@ -26,15 +28,21 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
     public class GenerateTokenCommandHandler : IRequestHandler<GenerateTokenCommand, MethodResult<TokenModel>>
     {
         private readonly UserManager<User> _userManager;
+        private readonly IInteractionService _interactionService;
         private readonly IUserTokenRepository _userTokenRepository;
+        private readonly IHumanRepository _humanRepository;
         private readonly AppSetting _appSetting;
 
         public GenerateTokenCommandHandler(UserManager<User> userManager,
+            IInteractionService interactionService,
             IUserTokenRepository userTokenRepository,
+            IHumanRepository humanRepository,
             AppSetting appSetting)
         {
             _userManager = userManager;
+            _interactionService = interactionService;
             _userTokenRepository = userTokenRepository;
+            _humanRepository = humanRepository;
             _appSetting = appSetting;
         }
 
@@ -95,12 +103,28 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                 RefreshToken = refreshToken,
                 Expiration = token.ValidTo.ConvertTimeFromUtc(TimeZoneInfo.Local),
                 FullName = user.FullName,
-                Roles = userRoles.ToList()
+                Roles = userRoles.ToList(),
             };
+
+            if (userRoles.Contains(EnumRole.Student.ToString()))
+            {
+                tokenLogin.ClassId = await GetClassId(user.Id);
+                var isSurvey = await _interactionService.IsSurveyCompleted(Guid.Parse(request.Id ?? string.Empty));
+                if (isSurvey.IsSuccessStatusCode)
+                {
+                    tokenLogin.IsSurvey = isSurvey?.Content?.Result;
+                }
+            }
 
             methodResult.Result = tokenLogin;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
+        }
+
+        private async Task<Guid?> GetClassId(string? userId)
+        {
+            var human = await _humanRepository.Queryable.Include(x => x.Student).FirstOrDefaultAsync(x => x.UserId == userId);
+            return human?.Student?.ClassId;
         }
     }
 }

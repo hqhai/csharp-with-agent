@@ -5,8 +5,13 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
     public enum EnumLessonResultErrorCode
     {
         /// <summary>
-        /// Lesson Results  does not exist
+        /// Lesson Results does not exist
         /// </summary>
-        LessonResultsDoesNotExist,
+        LessonResultsNotExist,
+
+        /// <summary>
+        /// Lesson Result does not exist
+        /// </summary>
+        LessonResultNotExist,
     }
 }

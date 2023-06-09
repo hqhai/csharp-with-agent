@@ -3,8 +3,6 @@
 namespace Fsel.Course.Domain.Models.EntityModels
 {
     using System;
-    using Fsel.Common.Enums.ErrorCodes;
-    using System.ComponentModel.DataAnnotations;
     using Fsel.Core.Base.BaseModels;
 
     public class CourseTeacherModel : BaseModel

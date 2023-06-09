@@ -7,13 +7,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Queries\UnitQuery\**" />
-    <EmbeddedResource Remove="Queries\UnitQuery\**" />
-    <None Remove="Queries\UnitQuery\**" />
+    <ProjectReference Include="..\Fsel.Course.Infrastructure\Fsel.Course.Infrastructure.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Fsel.Course.Infrastructure\Fsel.Course.Infrastructure.csproj" />
+    <Folder Include="InternalEvents\" />
   </ItemGroup>
 
 </Project>

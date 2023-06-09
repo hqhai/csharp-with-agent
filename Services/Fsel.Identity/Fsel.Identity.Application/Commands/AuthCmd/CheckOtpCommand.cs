@@ -1,0 +1,67 @@
+// Copyright (c) Atlantic. All rights reserved.
+
+namespace Fsel.Identity.Application.Commands.AuthCmd
+{
+    using System;
+    using System.Threading.Tasks;
+    using Fsel.Common.ActionResults;
+    using Fsel.Identity.Domain.Entities;
+    using Fsel.Identity.Domain.Enums;
+    using Fsel.Identity.Domain.Enums.ErrorCodes;
+    using Fsel.Identity.Domain.IRepositories;
+    using MediatR;
+    using Microsoft.AspNetCore.Http;
+    using Microsoft.AspNetCore.Identity;
+    using Microsoft.EntityFrameworkCore;
+
+    public class CheckOtpCommand : IRequest<MethodResult<bool>>
+    {
+        public string? Otp { get; set; }
+    }
+
+    public class CheckOtpCommandHandler : IRequestHandler<CheckOtpCommand, MethodResult<bool>>
+    {
+        private readonly UserManager<User> _userManager;
+        private readonly IUserOtpCodeRepository _userOtpCodeRepository;
+
+        public CheckOtpCommandHandler(UserManager<User> userManager
+            , IUserOtpCodeRepository userOtpCodeRepository)
+        {
+            _userManager = userManager;
+            _userOtpCodeRepository = userOtpCodeRepository;
+        }
+
+        public async Task<MethodResult<bool>> Handle(CheckOtpCommand request, CancellationToken cancellationToken)
+        {
+            ArgumentNullException.ThrowIfNull(request);
+            var methodResult = new MethodResult<bool>();
+
+            var user = await _userManager.Users.Include(x => x.UserOtpCodes)
+                               .FirstOrDefaultAsync(x => x.UserOtpCodes.Where(x => x.Status == EnumStatusUser.New).Select(x => x.OTPCode).Contains(request.Otp), cancellationToken);
+
+            if (user == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumAuthErrorCode.OtpNotExist), nameof(request.Otp), request.Otp);
+                return methodResult;
+            }
+
+            var userOtpCode = await _userOtpCodeRepository.Queryable
+                       .FirstOrDefaultAsync(x => x.UserId == user!.Id && x.Status == EnumStatusUser.New && !x.IsDeleted && x.OTPCode == request.Otp, cancellationToken);
+            if (userOtpCode == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumAuthErrorCode.InvalidOTP), nameof(request.Otp), request.Otp);
+                return methodResult;
+            }
+
+            if (DateTime.Compare(DateTime.Now, userOtpCode.ExpiredTime) > 0)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumAuthErrorCode.OTPExpired), nameof(request.Otp), request.Otp);
+                return methodResult;
+            }
+
+            methodResult.Result = true;
+            methodResult.StatusCode = StatusCodes.Status200OK;
+            return methodResult;
+        }
+    }
+}

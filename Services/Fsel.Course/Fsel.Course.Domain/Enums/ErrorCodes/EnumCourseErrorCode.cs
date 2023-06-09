@@ -5,14 +5,19 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
     public enum EnumCourseErrorCode
     {
         /// <summary>
+        /// Courses does not exist
+        /// </summary>
+        CoursesNotExist,
+
+        /// <summary>
         /// Course does not exist
         /// </summary>
         CourseNotExist,
 
         /// <summary>
-        /// List Course does not exist
+        /// Course already exists
         /// </summary>
-        ListCourseNotExist,
+        CourseCodeIsExist,
 
         /// <summary>
         /// Course is not in a new state
@@ -20,42 +25,32 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         CourseNotInNewState,
 
         /// <summary>
-        /// User Not Student
-        /// </summary>
-        NotStudent,
-
-        /// <summary>
         /// Student not in class
         /// </summary>
         StudentNotInClass,
 
         /// <summary>
-        /// List Teacher by course does not exist
+        /// Teachers does not exist
         /// </summary>
-        ListTeacherCourseNotExist,
+        TeachersNotExist,
 
         /// <summary>
-        /// Course not in Class
+        /// Class does not exist
         /// </summary>
-        CourseNotInClass,
+        ClassNotExist,
 
         /// <summary>
-        /// Classes new not exist
+        /// Classes does not exist
         /// </summary>
-        ClassesNewNotExitst,
+        ClassesNotExist,
 
         /// <summary>
-        /// Students not exist
+        /// Classe Code does not exist
         /// </summary>
-        StudentsNotExist,
+        ClasseCodeNotExist,
 
         /// <summary>
-        /// Classes not exist
-        /// </summary>
-        ClassesNotExitst,
-
-        /// <summary>
-        /// Student is null
+        /// Student Is Null
         /// </summary>
         StudentNull,
 
@@ -65,8 +60,23 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         MocktestIdAndUnitIdAreMutuallyExclusive,
 
         /// <summary>
-        /// Course must be in an active state
+        /// Course must be in an Active state
         /// </summary>
-        CourseMustActiveState
+        CourseMustActiveState,
+
+        /// <summary>
+        /// Course is in Active state
+        /// </summary>
+        CourseIsActiveState,
+
+        /// <summary>
+        /// Course is in New state, can't start Lesson
+        /// </summary>
+        CourseIsNewStateCantStartLesson,
+
+        /// <summary>
+        /// CourseIds Null
+        /// </summary>
+        CourseIdsNull,
     }
 }

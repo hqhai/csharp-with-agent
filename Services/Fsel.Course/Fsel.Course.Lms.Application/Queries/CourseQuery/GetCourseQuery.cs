@@ -10,6 +10,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
     using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Course.Lms.Application.Services.TrainingServices;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Course.Lms.Application.Services.UserServices.Models;
     using MediatR;
@@ -25,56 +26,65 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
         private readonly ICourseRepository _courseRepository;
         private readonly IMapper _mapper;
         private readonly IUserService _userService;
+        private readonly ITrainingService _trainingService;
         private readonly AuthContext _authContext;
-        private readonly ICourseClassStudentRepository _courseClassStudentRepository;
 
         public GetCourseQueryHandler(IMapper mapper,
             AuthContext authContext,
             ICourseRepository courseRepository,
-            ICourseClassStudentRepository courseClassStudentRepository,
-            IUserService userService)
+            IUserService userService,
+            ITrainingService trainingService)
         {
             _courseRepository = courseRepository;
             _mapper = mapper;
             _userService = userService;
+            _trainingService = trainingService;
             _authContext = authContext;
-            _courseClassStudentRepository = courseClassStudentRepository;
         }
 
         public async Task<MethodResult<CourseModel>> Handle(GetCourseQuery request, CancellationToken cancellationToken)
         {
             var methodResult = new MethodResult<CourseModel>();
 
-            var user = _authContext.CurrentUserId.ToString();
-            var studentResult = await _userService.GetStudentByUserIdAsync(user);
+            var studentResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
             var student = studentResult?.Content?.Result;
             if (studentResult == null || student == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.NotStudent));
+                methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.StudentNull));
                 return methodResult;
             }
 
-            var courseClassStudent = await _courseClassStudentRepository.Queryable.FirstOrDefaultAsync(x => x.StudentId == student.Id, cancellationToken);
-            if (courseClassStudent == null)
+            var classResult = await _trainingService.GetClassByStudentId(student.Id);
+            if (!classResult.IsSuccessStatusCode)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.StudentNotInClass));
                 return methodResult;
             }
+            var @class = classResult?.Content?.Result;
+            if (@class == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.ClassesNotExist));
+                return methodResult;
+            }
 
             var course = await _courseRepository.Queryable
-                             .Include(x => x.CourseUnitMockTests.Where(y => !y.IsDeleted))
+                             .Include(x => x.CourseUnitMockTests)
                              .ThenInclude(unit => unit.Unit)
-                             .Include(x => x.CourseUnitMockTests.Where(y => !y.IsDeleted))
+                             .Include(x => x.CourseUnitMockTests)
                              .ThenInclude(unit => unit.MockTest)
+                             .Include(x => x.CourseUnitMockTests)
+                             .ThenInclude(unit => unit.FinalTest)
                              .Include(x => x.CourseTeachers.Where(y => !y.IsDeleted))
-                             .Where(x => x.Id == courseClassStudent.CourseId)
+                             .Where(x => x.Id == @class.CourseId)
                              .AsNoTracking()
                              .Select(y => new CourseModel
                              {
                                  Id = y.Id,
                                  Name = y.Name,
+                                 Code = y.Code,
+                                 InstructionContent = y.InstructionContent,
                                  CourseLevel = y.CourseLevel,
-                                 CourseUnitMockTests = _mapper.Map<IList<CourseUnitMockTestModel>>(y.CourseUnitMockTests),
+                                 CourseUnitMockTests = _mapper.Map<IList<CourseUnitMockTestModel>>(y.CourseUnitMockTests.OrderBy(x => x!.DisplayOrder)),
                                  CourseTeachers = _mapper.Map<List<CourseTeacherModel>>(y.CourseTeachers),
                              }).FirstOrDefaultAsync(cancellationToken);
 

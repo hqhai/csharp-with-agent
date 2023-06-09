@@ -37,6 +37,7 @@ namespace Fsel.Course.Application.Queries.QuestionFormQuery
                 methodResult.AddErrorBadRequest(nameof(EnumQuestionFormErrorCode.QuestionFormNotExist), nameof(request.Id), request.Id);
                 return methodResult;
             }
+
             methodResult.Result = _mapper.Map<QuestionFormModel>(questionForm);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;

@@ -1,9 +1,9 @@
 // Copyright (c) Atlantic. All rights reserved.
 
 using Fsel.Common.ActionResults;
-using Fsel.Common.Enums;
-using Fsel.Common.Helpers;
-using Fsel.Training.Doman.IRepositories;
+using Fsel.Shared.Enums;
+using Fsel.Shared.Helpers;
+using Fsel.Training.Domain.IRepositories;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
@@ -11,7 +11,8 @@ namespace Fsel.Training.Application.Queries.ClassQuery
 {
     public class GetNewClassCodeQuery : IRequest<MethodResult<string>>
     {
-        public EnumCourseLevel CourseLevel { get; set; }
+        public EnumCourseLevel? CourseLevel { get; set; }
+        public string? Code { get; set; }
     }
 
     public class GetNewClassCodeQueryHandler : IRequestHandler<GetNewClassCodeQuery, MethodResult<string>>
@@ -31,10 +32,9 @@ namespace Fsel.Training.Application.Queries.ClassQuery
             var currentDate = DateTime.Now;
             var weekNumber = (currentDate.DayOfYear - 1) / 7 + 1;
             var lastDigitOfYear = currentDate.Year % 10;
-            var level = EnumHelper.GetCodeByEnumCourseLevel(request.CourseLevel);
+            var level = request.CourseLevel.GetCodeByEnumCourseLevel();
             var stt = await _classRepository.Queryable.CountAsync(cancellationToken: cancellationToken);
-
-            string codeClass = $"{level}_{weekNumber}{lastDigitOfYear}{stt}S";
+            string codeClass = $"{level}_{request.Code}_{weekNumber}{lastDigitOfYear}{stt:000}S";
             methodResult.Result = codeClass;
             return methodResult;
         }

@@ -10,6 +10,8 @@ namespace Fsel.Course.Infrastructure.Configs
     {
         public void Configure(EntityTypeBuilder<VideoTimeCodeAnswer> builder)
         {
+            ArgumentNullException.ThrowIfNull(builder);
+
             builder.HasOne(a => a.VideoResult)
               .WithMany(b => b.VideoTimeCodeAnswers)
               .HasForeignKey(b => b.VideoResultId)
@@ -24,6 +26,11 @@ namespace Fsel.Course.Infrastructure.Configs
               .WithMany(b => b.VideoTimeCodeAnswers)
               .HasForeignKey(b => b.ExerciseId)
               .OnDelete(DeleteBehavior.NoAction);
+
+            builder.HasOne(a => a.Question)
+                   .WithMany(b => b.VideoTimeCodeAnswers)
+                   .HasForeignKey(b => b.QuestionId)
+                   .OnDelete(DeleteBehavior.NoAction);
         }
     }
 }

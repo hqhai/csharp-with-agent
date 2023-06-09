@@ -1,7 +1,7 @@
 // Copyright (c) Atlantic. All rights reserved.
 
 using System.ComponentModel.DataAnnotations;
-using Fsel.Common.Enums;
+using Fsel.Shared.Enums;
 using Fsel.Common.Enums.ErrorCodes;
 using Fsel.Core.Entities;
 using Fsel.Course.Domain.Enums;
@@ -29,7 +29,9 @@ namespace Fsel.Course.Domain.Entities
         /// </summary>
         public EnumMockTestType MockTestType { get; set; }
 
+        public ICollection<MockTestSection> MockTestSections { get; set; } = new List<MockTestSection>();
         public ICollection<CourseUnitMockTest> CourseUnitMockTests { get; set; } = new List<CourseUnitMockTest>();
+        public ICollection<MockTestResult> MockTestResults { get; set; } = new List<MockTestResult>();
 
         public ICollection<UnitSkillMockTest> UnitSkillMockTests { get; set; } = new List<UnitSkillMockTest>();
     }

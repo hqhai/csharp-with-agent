@@ -8,11 +8,11 @@ namespace Fsel.Training.Infrastructure
     using MediatR;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Configuration;
-    using Fsel.Training.Doman.Entities;
+    using Fsel.Training.Domain.Entities;
 
     public class TrainingDbContext : BaseDbContext
     {
-        public TrainingDbContext(DbContextOptions<TrainingDbContext> options, IMediator mediator) : base(options, mediator)
+        public TrainingDbContext(DbContextOptions<TrainingDbContext> options, IMediator mediator, AuthContext authContext) : base(options, mediator, authContext)
         {
         }
 
@@ -21,10 +21,12 @@ namespace Fsel.Training.Infrastructure
             ArgumentNullException.ThrowIfNull(modelBuilder);
 
             modelBuilder.ApplyConfiguration(new ClassEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new ClassStudentEntityTypeConfiguration());
             base.OnModelCreating(modelBuilder);
         }
 
         public DbSet<Class> Classes { get; set; }
+        public DbSet<ClassStudent> ClassStudents { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {

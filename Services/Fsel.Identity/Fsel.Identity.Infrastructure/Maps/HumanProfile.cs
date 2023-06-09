@@ -8,6 +8,8 @@ namespace Fsel.Identity.Infrastructure.Maps
     using Fsel.Identity.Domain.Models.CommandModels.Auths;
     using Fsel.Identity.Domain.Models.CommandModels.Humans;
     using Fsel.Identity.Domain.Models.CommandModels.Parents;
+    using Fsel.Identity.Domain.Models.CommandModels.Students;
+    using Fsel.Identity.Domain.Models.CommandModels.Users;
     using Fsel.Identity.Domain.Models.EntityModels;
 
     public class HumanProfile : Profile
@@ -19,7 +21,19 @@ namespace Fsel.Identity.Infrastructure.Maps
             CreateMap<UpdateHumanCommandModel, Human>().IgnoreAllNonExisting();
             CreateMap<SignUpCommandModel, Human>().IgnoreAllNonExisting();
             CreateMap<User, Human>().IgnoreAllNonExisting();
+            CreateMap<TokenModel, ConfirmOtpModel>().IgnoreAllNonExisting();
+            CreateMap<ConfirmOTPCommandModel, Human>().IgnoreAllNonExisting();
             CreateMap<CreateStudentByParentCommandModel, Human>().IgnoreAllNonExisting();
+
+            CreateMap<CreateUserCommandModel, Human>().IgnoreAllNonExisting();
+            CreateMap<UpdateUserCommandModel, Human>().ForMember(m => m.Id, opt => opt.Ignore()).IgnoreAllNonExisting();
+
+            CreateMap<UpdateUserProfileCommandModel, Human>().IgnoreAllNonExisting();
+            CreateMap<UpdateParentCommandModel, Human>().IgnoreAllNonExisting();
+            CreateMap<UpdateStudentProfileCommandModel, Human>().IgnoreAllNonExisting();
+            CreateMap<Human, UserProfileModel>().ForMember(m => m.Id, opt => opt.Ignore()).IgnoreAllNonExisting();
+            CreateMap<Human, HumanProfileModel>().IgnoreAllNonExisting();
+            CreateMap<UpdateCodeStudentCommandModel, Human>().IgnoreAllNonExisting();
         }
     }
 }

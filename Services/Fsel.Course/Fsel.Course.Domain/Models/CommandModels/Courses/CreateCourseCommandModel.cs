@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-using Fsel.Common.Enums;
+using Fsel.Shared.Enums;
 using Fsel.Course.Domain.Models.CommandModels.CourseTeachers;
 using Fsel.Course.Domain.Models.CommandModels.CourseUnitMockTests;
 
@@ -10,9 +10,9 @@ namespace Fsel.Course.Domain.Models.CommandModels.Courses
     {
         public string? Name { get; set; }
 
-        public int NumberOfUnits { get; set; }
+        public string? Code { get; set; }
 
-        public int NumberOfLessons { get; set; }
+        public string? InstructionContent { get; set; }
 
         public EnumCourseLevel CourseLevel { get; set; }
 

@@ -5,13 +5,23 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
     public enum EnumClassForumErrorCode
     {
         /// <summary>
-        /// ClassForum null
+        /// ClassForum Is Null
         /// </summary>
         ClassForumNull,
 
         /// <summary>
-        /// ClassForum is not correct
+        /// Class Forum File Is Null
         /// </summary>
-        ClassForumIsNotCorrect,
+        ClassForumFileNull,
+
+        /// <summary>
+        /// Class Forum not exist
+        /// </summary>
+        ClassForumNotExist,
+
+        /// <summary>
+        /// ClassForumHasNotSubmit
+        /// </summary>
+        ClassForumHasNotSubmit
     }
 }
