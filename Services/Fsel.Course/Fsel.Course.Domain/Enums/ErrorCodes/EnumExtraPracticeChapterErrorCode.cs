@@ -2,16 +2,16 @@
 
 namespace Fsel.Course.Domain.Enums.ErrorCodes
 {
-    public enum EnumExtraPractiveErrorCode
+    public enum EnumExtraPracticeChapterErrorCode
     {
         /// <summary>
-        /// ExtraPractices Is Null
+        /// ExtraPracticeChapters Is Null
         /// </summary>
-        ExtraPracticesNull,
+        ExtraPracticeChaptersNull,
 
         /// <summary>
-        /// ExtraPractices does not exist
+        /// ExtraPracticeChapter Is Null
         /// </summary>
-        ExtraPracticesNotExist
+        ExtraPracticeChapterNull,
     }
 }

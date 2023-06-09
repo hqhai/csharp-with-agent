@@ -24,6 +24,13 @@ namespace Fsel.Course.Infrastructure.Configs
                 .HasConversion(
                     v => v.ToString(),
                     v => v.EnumParse<EnumCourseLevel>());
+
+            builder.HasOne(a => a.Video)
+                    .WithOne(b => b.ExtraPractice)
+                    .HasForeignKey<ExtraPractice>(p => p.VideoId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+            builder.HasIndex(x => x.VideoId).IsUnique(false);
         }
     }
 }
