@@ -84,7 +84,7 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
                                     DisplayOrder = x.UnitLessons.Where(n => n.UnitId == request.UnitId).Select(x => x.DisplayOrder).FirstOrDefault(),
                                     LessonInstructions = _mapper.Map<IList<LessonInstructionModel>>(x.LessonInstructions),
                                     LessonResult = _mapper.Map<LessonResultModel>(x.LessonResults.FirstOrDefault(y => y.UnitId == request.UnitId && y.CourseId == request.CourseId && y.StudentId == studentId)),
-                                    MockTest = x.UnitLessons.Select(x => x.Unit).SelectMany(x => x.UnitSkillMockTests.Where(x => !x.IsDeleted)).Select(x => x.MockTest).Select(x => new MockTestModel
+                                    MockTest = x.UnitLessons.Select(x => x.Unit).Where(x => x.CourseUnitMockTests != null && x.CourseUnitMockTests.Count > 0).SelectMany(x => x.UnitSkillMockTests.Where(x => !x.IsDeleted)).Select(x => x.MockTest).Select(x => new MockTestModel
                                     {
                                         CourseType = x!.CourseType,
                                         Id = x.Id,
@@ -94,14 +94,7 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
                                             Id = x.Id,
                                             CourseSkill = x.CourseSkill
                                         }).ToList(),
-                                    }).FirstOrDefault(),
-                                    FinalTest = x.UnitLessons.Select(x => x.Unit).SelectMany(x => x.CourseUnitMockTests.Where(x => !x.IsDeleted)).Select(x => x.FinalTest).Select(x => new FinalTestModel
-                                    {
-                                        Id = x.Id,
-                                        Name = x.Name,
-                                        FinalTestLevel = x.FinalTestLevel,
-                                        IsActive = x.IsActive,
-                                    }).FirstOrDefault(),
+                                    }).FirstOrDefault(),                                  
                                 }).OrderBy(x => x.DisplayOrder).ToListAsync(cancellationToken: cancellationToken);
 
             if (lessonQuery.Count == 0)

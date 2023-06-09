@@ -28,7 +28,6 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public ClassForumModel? ClassForum { get; set; }
 
         public MockTestModel? MockTest { get; set; }
-
-        public FinalTestModel? FinalTest { get; set; }
+        
     }
 }
