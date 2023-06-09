@@ -8,6 +8,7 @@ namespace Fsel.Ordering.Domain.Models.CommandModels.Orders
     public class ChangeStatusOrderCommandModel
     {
         public Guid OderId { get; set; }
+        public Guid PackageId { get; set; }
         public EnumOrderStatus OderStatus { get; set; }
     }
 }

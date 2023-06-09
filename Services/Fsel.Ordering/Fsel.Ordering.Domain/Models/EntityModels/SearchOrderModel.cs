@@ -15,5 +15,6 @@ namespace Fsel.Ordering.Domain.Models.EntityModels
         public EnumOrderStatus Status { get; set; }
         public Guid UserId { get; set; }
         public Guid CourseId { get; set; }
+        public Guid PackageId { get; set; }
     }
 }
