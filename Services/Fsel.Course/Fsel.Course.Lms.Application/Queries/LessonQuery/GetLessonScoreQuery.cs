@@ -11,6 +11,7 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Shared.Enums;
     using MediatR;
+    using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
     public class GetLessonScoreQuery : IRequest<MethodResult<LessonScoreModel>>
@@ -93,9 +94,21 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
                                   Skill = g.Key.CourseSkill,
                                   CorrectCount = g.Sum(x => x.vtca.CorrectCount)
                               };
-
+            var answerTimeCodeQuery = from baseQ in baseQuery
+                                      join vtca in _videoTimeCodeAnswerRepository.Queryable on baseQ.Id equals vtca.VideoResultId
+                                      join e in _exerciseRepository.Queryable on vtca.ExerciseId equals e.Id
+                                      join te in _timeCodeExerciseRepository.Queryable on e.Id equals te.ExerciseId
+                                      join vt in _videoTimeCodeRepository.Queryable on te.VideoTimeCodeId equals vt.Id
+                                      where vt.TimeCodeType != EnumTimeCodeType.Standalone
+                                      group new { vt, vtca } by new { vt.TimeCodeType, e.CourseSkill } into g
+                                      select new
+                                      {
+                                          Type = g.Key.TimeCodeType,
+                                          Skill = g.Key.CourseSkill,
+                                          CorrectCount = g.Sum(x => x.vtca.CorrectCount)
+                                      };
             var answers = await answerQuery.ToListAsync(cancellationToken);
-            var answerTimeCodeQuery = answerQuery.Where(x => x.Type != EnumTimeCodeType.Standalone).ToListAsync(cancellationToken);
+            var answerTimeCodes = answerTimeCodeQuery.ToListAsync(cancellationToken);
 
             var questionQuery = from baseQ in baseQuery
                                 join v in _videoRepository.Queryable on baseQ.VideoId equals v.Id
@@ -128,7 +141,6 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
                                  TotalCount = questionQJ != null ? questionQJ.TotalCount : default,
                                  CorrectCount = answerQJ != null ? answerQJ.CorrectCount : default,
                              };
-
             var scoreTimeCodeQuery = from type in types
                                      join questionQ in questionTimeCodes on type equals questionQ.Type into questionQ_jointable
                                      from questionQJ in questionQ_jointable.DefaultIfEmpty()
@@ -138,18 +150,29 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
                                      {
                                          Type = type,
                                          LessonSkillScores = (from skill in skills
-                                                             join question1Q in questionTimeCodes on skill equals question1Q.Skill into questionQ_jointable
-                                                             from question1QJ in questionQ_jointable.DefaultIfEmpty()
-                                                             join answer1Q in answerTimeCodeQuery on skill equals answer1Q.Skill into answerQ_jointable
-                                                             from answer1QJ in answerQ_jointable.DefaultIfEmpty()
-                                                             select new LessonSkillScoreModel
-                                                             {
-                                                                 Skill = skill,
-                                                                 TotalCount = questionQJ != null ? questionQJ.TotalCount : default,
-                                                                 CorrectCount = answerQJ != null ? answerQJ.CorrectCount : default,
-                                                             })
+                                                              join questionTimeCodeQ in questionTimeCodes on skill equals questionTimeCodeQ.Skill into questionTimeCodeQ_jointable
+                                                              from questionTimeCodeQJ in questionTimeCodeQ_jointable.DefaultIfEmpty()
+                                                              join answerTimeCodeQ in answerTimeCodeQuery on skill equals answerTimeCodeQ.Skill into answerTimeCodeQ_jointable
+                                                              from answerTimeCodeQJ in answerTimeCodeQ_jointable.DefaultIfEmpty()
+                                                              select new LessonSkillScoreModel
+                                                              {
+                                                                  Skill = skill,
+                                                                  TotalCount = questionTimeCodeQJ != null ? questionTimeCodeQJ.TotalCount : default,
+                                                                  CorrectCount = answerTimeCodeQJ != null ? answerTimeCodeQJ.CorrectCount : default,
+                                                              }).ToList()
                                      };
-
+            foreach (var item in scoreTimeCodeQuery.ToList())
+            {
+                if (item.LessonSkillScores != null && item.LessonSkillScores.Count > 0)
+                {
+                    var correctCountTimeCode = item.LessonSkillScores.Select(x => x.CorrectCount).Sum();
+                    var totalCountTimeCode = item.LessonSkillScores.Select(x => x.TotalCount).Sum();
+                    if (totalCountTimeCode != 0)
+                    {
+                        item.Percent = (correctCountTimeCode / (double)totalCountTimeCode) * 100;
+                    }
+                }
+            }
             var correctCount = scoreQuery.Select(x => x.CorrectCount).Sum();
             var totalCount = scoreQuery.Select(x => x.TotalCount).Sum();
             if (totalCount != 0)
@@ -158,7 +181,7 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
             }
 
             lessonScore.LessonSkillScores = scoreQuery.ToList();
-            lessonScore.TimeCodeScores =
+            lessonScore.TimeCodeScores = scoreTimeCodeQuery.ToList();
             methodResult.Result = lessonScore;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
