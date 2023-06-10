@@ -13,21 +13,21 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class ChangeToFlaggedStatusCommand : IRequest<MethodResult<bool>>
+    public class FlagClassForumResultCommand : IRequest<MethodResult<bool>>
     {
         public Guid Id { get; set; }
     }
 
-    public class ChangeToFlaggedStatusCommandHandler : IRequestHandler<ChangeToFlaggedStatusCommand, MethodResult<bool>>
+    public class FlagClassForumResultCommandHandler : IRequestHandler<FlagClassForumResultCommand, MethodResult<bool>>
     {
         private readonly IClassForumResultRepository _classForumResultRepository;
 
-        public ChangeToFlaggedStatusCommandHandler(IClassForumResultRepository classForumResultRepository)
+        public FlagClassForumResultCommandHandler(IClassForumResultRepository classForumResultRepository)
         {
             _classForumResultRepository = classForumResultRepository;
         }
 
-        public async Task<MethodResult<bool>> Handle(ChangeToFlaggedStatusCommand request, CancellationToken cancellationToken)
+        public async Task<MethodResult<bool>> Handle(FlagClassForumResultCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
 

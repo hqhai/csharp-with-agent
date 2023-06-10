@@ -67,12 +67,12 @@ namespace Fsel.Course.Lms.Api.Controllers
         /// <summary>
         /// Update a Class forum result flagged
         /// </summary>
-        [HttpPut("active/{id}")]
+        [HttpPut("flag/{id}")]
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> Active([FromRoute] Guid id)
+        public async Task<IActionResult> Flag([FromRoute] Guid id)
         {
-            MethodResult<bool> commandResult = await _mediator.Send(new ChangeToFlaggedStatusCommand { Id = id }).ConfigureAwait(false);
+            MethodResult<bool> commandResult = await _mediator.Send(new FlagClassForumResultCommand { Id = id }).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
     }

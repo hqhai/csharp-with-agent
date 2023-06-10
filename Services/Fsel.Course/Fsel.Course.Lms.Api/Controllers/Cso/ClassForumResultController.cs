@@ -57,7 +57,7 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
         [HttpPost("approve-flagged")]
         [ProducesResponseType(typeof(MethodResult<ClassForumResultModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> Delete([FromBody] ApproveFlaggedClassForumResultCommand command)
+        public async Task<IActionResult> ApproveFlagged([FromBody] ApproveFlaggedClassForumResultCommand command)
         {
             MethodResult<ClassForumResultModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();
@@ -90,10 +90,10 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
         /// <summary>
         /// Search Class forum result
         /// </summary>
-        [HttpGet("flagged")]
+        [HttpGet("search-by-flagged")]
         [ProducesResponseType(typeof(MethodResult<PagingItemsModel<ClassForumResultModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> Search([FromQuery] SearchClassForumResultHasBeenFlaggedQuery query)
+        public async Task<IActionResult> SearchByFlagged([FromQuery] SearchClassForumResultHasBeenFlaggedQuery query)
         {
             MethodResult<PagingItemsModel<ClassForumResultModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
