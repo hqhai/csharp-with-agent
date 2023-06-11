@@ -3,15 +3,12 @@
 using AutoMapper;
 using Fsel.Common.ActionResults;
 using Fsel.Course.Domain.Entities;
-using Fsel.Course.Domain.Enums;
-using Fsel.Course.Domain.Enums.ErrorCodes;
 using Fsel.Course.Domain.IRepositories;
 using Fsel.Course.Domain.Models.CommandModels.Videos;
 using Fsel.Course.Domain.Models.EntityModels;
 using Fsel.Course.Infrastructure.Common;
 using MediatR;
 using Microsoft.AspNetCore.Http;
-using Microsoft.EntityFrameworkCore;
 
 namespace Fsel.Course.Application.Commands.VideoCmd
 {
@@ -22,15 +19,15 @@ namespace Fsel.Course.Application.Commands.VideoCmd
     public class CreateVideoCommandHandler : IRequestHandler<CreateVideoCommand, MethodResult<VideoModel>>
     {
         private readonly IVideoRepository _videoRepository;
-        private readonly QuestionTypeConverter _questionTypeConverter;
+        private readonly VideoConverter _videoConverter;
         private readonly IMapper _mapper;
 
         public CreateVideoCommandHandler(IVideoRepository videoRepository
-            , QuestionTypeConverter questionTypeConverter
+            , VideoConverter videoConverter
             , IMapper mapper)
         {
             _videoRepository = videoRepository;
-            _questionTypeConverter = questionTypeConverter;
+            _videoConverter = videoConverter;
             _mapper = mapper;
         }
 
@@ -41,111 +38,13 @@ namespace Fsel.Course.Application.Commands.VideoCmd
 
             #region Validation
 
-            if (request.VideoTimeCodes == null || request.VideoTimeCodes.Count == 0)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumVideoTimeCodeErrorCode.VideoTimeCodesNull), nameof(request.VideoTimeCodes), request.VideoTimeCodes);
-                return methodResult;
-            }
-
-            var listTimeCodeType = request.VideoTimeCodes.Select(x => x.TimeCodeType).ToList();
-            if (listTimeCodeType.Contains(EnumTimeCodeType.UnitTest) && listTimeCodeType.Contains(EnumTimeCodeType.SkillTest))
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumVideoErrorCode.CanNotUnitTestAndSkillTestAtTheSameTime), nameof(listTimeCodeType), listTimeCodeType);
-                return methodResult;
-            }
-
-            var isExistName = await _videoRepository.Queryable.AnyAsync(x => x.Name == request.Name, cancellationToken);
-            if (isExistName)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumVideoErrorCode.VideoNameIsExist), nameof(request.Name), request.Name);
-                return methodResult;
-            }
-
             Video video = _mapper.Map<Video>(request);
-
-            request.VideoTimeCodes.ForEach(x =>
+            var method = await _videoConverter.CreateTimeCodeToVideo(video, request);
+            if (!method.IsOK)
             {
-                if (x == null)
-                {
-                    methodResult.AddErrorBadRequest(nameof(EnumVideoTimeCodeErrorCode.VideoTimeCodeNull), nameof(request.VideoTimeCodes), x);
-                }
-                else
-                {
-                    VideoTimeCode videoTimeCode = video.VideoTimeCodes.ElementAt(request.VideoTimeCodes.IndexOf(x));
-                    if (x.Exercises == null || x.Exercises.Count == 0)
-                    {
-                        methodResult.AddErrorBadRequest(nameof(EnumExerciseErrorCode.ExercisesNull), nameof(x.Exercises), x.Exercises);
-                    }
-
-                    x.Exercises.ForEach(n =>
-                    {
-                        if (n == null)
-                        {
-                            methodResult.AddErrorBadRequest(nameof(EnumExerciseErrorCode.ExerciseNull), nameof(x.Exercises), x.Exercises);
-                        }
-                        else
-                        {
-                            Exercise excercise = _mapper.Map<Exercise>(n);
-                            videoTimeCode.TimeCodeExercises.Add(new TimeCodeExercise
-                            {
-                                Exercise = excercise
-                            });
-                            if (n.Questions == null || n.Questions.Count == 0)
-                            {
-                                methodResult.AddErrorBadRequest(nameof(EnumQuestionErrorCode.QuestionNull), nameof(n.Questions), n.Questions);
-                            }
-                            n.Questions.ForEach(q =>
-                            {
-                                if (q == null)
-                                {
-                                    methodResult.AddErrorBadRequest(nameof(EnumQuestionErrorCode.QuestionNull), nameof(n.Questions), q);
-                                }
-                                else
-                                {
-                                    Question question = _mapper.Map<Question>(q);
-                                    var (config, correctTotal) = _questionTypeConverter.QuestionTypeConverterObject(question.Config, question.QuestionType, isShowCorrectTotal: !question.Ungraded, false);
-                                    if (config == null)
-                                    {
-                                        methodResult.AddErrorBadRequest(nameof(EnumVideoErrorCode.ConfigIsInTheWrongFormat), nameof(question.Config), question.Config);
-                                    }
-                                    question.CorrectTotal = correctTotal;
-
-                                    excercise.ExerciseQuestions.Add(new ExerciseQuestion
-                                    {
-                                        Question = question
-                                    });
-
-                                    if (!question.IsValid())
-                                    {
-                                        methodResult.AddErrorBadRequest(question.ErrorMessages);
-                                    }
-                                }
-                            });
-
-                            if (!excercise.IsValid())
-                            {
-                                methodResult.AddErrorBadRequest(excercise.ErrorMessages);
-                            }
-                        }
-                    });
-
-                    if (!videoTimeCode.IsValid())
-                    {
-                        methodResult.AddErrorBadRequest(videoTimeCode.ErrorMessages);
-                    }
-                }
-            });
-
-            if (!video.IsValid())
-            {
-                methodResult.AddErrorBadRequest(video.ErrorMessages);
+                methodResult.AddError(method.ErrorMessages);
                 return methodResult;
             }
-            else if (!methodResult.IsOK)
-            {
-                return methodResult;
-            }
-
             #endregion Validation
 
             await _videoRepository.ExecuteTransactionAsync(async () =>

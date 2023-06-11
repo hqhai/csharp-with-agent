@@ -43,7 +43,7 @@ namespace Fsel.Course.Domain.Entities
         /// Trình độ khóa
         /// </summary>
         public EnumCourseLevel CourseLevel { get; set; }
-
+        public ExtraPractice? ExtraPractice { get; set; }
         public ICollection<LessonVideo> LessonVideos { get; set; } = new List<LessonVideo>();
         public ICollection<VideoTimeCode> VideoTimeCodes { get; set; } = new List<VideoTimeCode>();
         public ICollection<VideoResult> VideoResults { get; set; } = new List<VideoResult>();

@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: auth
-        image: authfselacr.azurecr.io/fsel_src
+        image: fselacr.azurecr.io/authapi
         imagePullPolicy: Always
         ports:
         - containerPort: 80

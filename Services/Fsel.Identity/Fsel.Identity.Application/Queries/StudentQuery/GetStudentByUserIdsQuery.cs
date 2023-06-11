@@ -8,11 +8,9 @@ namespace Fsel.Identity.Application.Queries.StudentQuery
     using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Common.ActionResults;
-    using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.Enums.ErrorCodes;
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Domain.Models.EntityModels;
-    using Fsel.Identity.Infrastructure.Repositories;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -43,13 +41,14 @@ namespace Fsel.Identity.Application.Queries.StudentQuery
                                         .Where(i => i.Human != null && request.UserIds!.Contains(i.Human.UserId!))
                                         .Select(x => new StudentModel
                                         {
-                                            Membership = x.Membership,
+                                            PackageId = x.PackageId,
                                             ClassId = x.ClassId,
                                             CourseLevel = x.CourseLevel,
                                             CreatedDate = x.CreatedDate,
                                             HumanId = x.HumanId,
                                             School = x.School,
-                                            Human = _mapper.Map<HumanProfileModel>(x)
+                                            Human = _mapper.Map<HumanProfileModel>(x),
+                                            UserId = x.Human!.UserId,
                                         }).ToListAsync(cancellationToken);
 
             if (students == null)

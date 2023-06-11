@@ -9,7 +9,6 @@ namespace Fsel.Training.Application.Commands.ClassCmd
     using Fsel.Shared.Enums;
     using Fsel.Training.Application.Queries.ClassQuery;
     using Fsel.Training.Application.Services.UserServices;
-    using Fsel.Training.Application.Services.UserServices.Models;
     using Fsel.Training.Domain.Entities;
     using Fsel.Training.Domain.Enums.ErrorCodes;
     using Fsel.Training.Domain.IRepositories;
@@ -90,8 +89,6 @@ namespace Fsel.Training.Application.Commands.ClassCmd
                 }
 
                 await UpdateClassAsync(classnew, studentId);
-
-                student = await _userService.UpdateStudentByClassAsync(new UpdateStudentByClassIdModel { ClassId = classnew.Id, StudentId = studentId });
 
                 methodResult.StatusCode = StatusCodes.Status201Created;
                 methodResult.Result = _mapper.Map<ClassModel>(classnew);

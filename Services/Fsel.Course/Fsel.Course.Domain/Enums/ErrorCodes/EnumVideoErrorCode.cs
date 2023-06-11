@@ -30,6 +30,11 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         VideosNull,
 
         /// <summary>
+        /// Video Is Null
+        /// </summary>
+        VideoNull,
+
+        /// <summary>
         /// Config is in the wrong format
         /// </summary>
         ConfigIsInTheWrongFormat,

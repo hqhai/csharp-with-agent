@@ -18,7 +18,7 @@ namespace Fsel.Ordering.Infrastructure.ValueSettings
     }
     public class Services : BaseServices
     {
-        public string? CourseApiUrl { get; set; }
+        public string? LmsCourseApiUrl { get; set; }
     }
 
     public class Otp

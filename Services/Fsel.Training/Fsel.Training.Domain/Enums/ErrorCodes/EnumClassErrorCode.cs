@@ -38,5 +38,15 @@ namespace Fsel.Training.Domain.Enums.ErrorCodes
         /// Courses is null
         /// </summary>
         CoursesNull,
+
+        /// <summary>
+        /// Class Student not exist
+        /// </summary>
+        ClassStudentNotExist,
+
+        /// <summary>
+        /// Delete Class In Student Not Success
+        /// </summary>
+        DeleteClassInStudentNotSuccess,
     }
 }
