@@ -1,0 +1,24 @@
+version: '3.5'
+services:
+    training.service:
+        container_name: training.service
+        hostname: TrainingService
+        image: ${DOCKER_REGISTRY-}training-microservice:v1
+        build:
+            context: ./../../
+            dockerfile: Environments/Testing/Training.Testing.Dockerfile
+        environment:
+            - ASPNETCORE_ENVIRONMENT=Testing
+            - CONNECTIONSTRINGS__DEFAULTCONNECTION=Data Source=183.91.11.235;Initial Catalog=env-dev.training-service;User Id=sa;Password=FselTech@2023;TrustServerCertificate=true;
+            - SERVICENAME=Training
+            - JWT__SECRETKEY=JsonWebApiTokenWithSwaggerAuthorizationAuthenticationAspNetCore
+            - JWT__ISSUER=baseWebApiIssuer
+            - JWT__AUDIENCE=baseWebApiAudience
+            - JWT__SUBJECT=baseWebApiSubject
+            - JWT__TOKENVALIDITYINMINUTES=1440
+            - JWT__REFRESHTOKENVALIDITYINDAYS=7
+            - SERVICES_UserApiUrl=http://202.134.19.161:5202/api/v1
+            - SERVICES_CourseApiUrl=http://202.134.19.161:5203/api/v1
+        ports:
+            - 5207:80
+            - 7207:443
