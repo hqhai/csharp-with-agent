@@ -31,11 +31,11 @@ namespace Fsel.Course.Lms.Api.Controllers
         /// Get List lesson by unit
         /// </summary>
         [HttpGet]
-        [ProducesResponseType(typeof(MethodResult<IList<LessonModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(MethodResult<LessonsMockTestModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetListLessonByUnitId([FromQuery] GetLessonQuery query)
         {
-            MethodResult<IList<LessonModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            MethodResult<LessonsMockTestModel> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
 

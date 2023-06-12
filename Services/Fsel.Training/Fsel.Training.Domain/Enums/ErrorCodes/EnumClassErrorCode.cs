@@ -48,5 +48,10 @@ namespace Fsel.Training.Domain.Enums.ErrorCodes
         /// Delete Class In Student Not Success
         /// </summary>
         DeleteClassInStudentNotSuccess,
+        /// <summary>
+        /// class not found
+        /// </summary>
+        ClassNotFound
+,
     }
 }

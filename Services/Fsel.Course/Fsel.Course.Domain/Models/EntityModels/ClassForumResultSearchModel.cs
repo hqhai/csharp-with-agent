@@ -29,6 +29,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public EnumCourseLevel CourseLevel { get; set; }
         public EnumCourseType CourseType { get; set; }
 
+        public bool? IsFlagged { get; set; }
         public ClassForumModel? ClassForum { get; set; }
 
         public LessonResultModel? LessonResult { get; set; }
