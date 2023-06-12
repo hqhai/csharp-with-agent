@@ -5,47 +5,47 @@
     "description": "addd",
     "icon": "addd",
     "displayOrder": 1,
-    "type": "YourDirection",
+    "type": "ChooseMultipleColumn",
     "answers": [
       {
         "id": 1,
         "content": "Tìm kiếm Google",
-        "image": "Google"
+        "image": "gmail-icon.png"
       },
       {
         "id": 2,
         "content": "Facebook",
-        "image": "Facebook"
+        "image": "facebook-icon.png"
       },
       {
         "id": 3,
         "content": "Youtube",
-        "image": "Youtube"
+        "image": "youtube-icon.png"
       },
       {
         "id": 4,
         "content": "Tiktok",
-        "image": "Tiktok"
+        "image": "tiktok-icon.png"
       },
       {
         "id": 5,
         "content": "Bạn bè/Gia đình",
-        "image": "Bạn bè/Gia đình"
+        "image": "friends_family-icon.svg"
       },
       {
         "id": 6,
         "content": "Tin tức/Báo chí/Blog",
-        "image": "Tin tức/Báo chí/Blog"
+        "image": "blog-icon.svg"
       },
       {
         "id": 7,
         "content": "Tivi",
-        "image": "Tivi"
+        "image": "tv-icon.svg"
       },
       {
         "id": 8,
         "content": "Khác....",
-        "image": "Khác...."
+        "image": "others-icon.png"
       }
     ]
   },
@@ -55,7 +55,7 @@
     "description": "addd",
     "icon": "addd",
     "displayOrder": 2,
-    "type": "ChooseMultipleColumn",
+    "type": "YourDirection",
     "answers": [
       {
         "id": 1,
@@ -78,32 +78,32 @@
       {
         "id": 1,
         "content": "Văn hóa",
-        "image": "Văn hóa"
+        "image": "castle 1.png"
       },
       {
         "id": 2,
         "content": "Du lịch",
-        "image": "Du lịch"
+        "image": "plane 1.png"
       },
       {
         "id": 3,
         "content": "Kết bạn và chia sẻ",
-        "image": "Kết bạn và chia sẻ"
+        "image": "friendship 1.png"
       },
       {
         "id": 4,
         "content": "Học tập",
-        "image": "Học tập"
+        "image": "mortarboard 1.png"
       },
       {
         "id": 5,
         "content": "Cơ hội nghề nghiệp",
-        "image": "Cơ hội nghề nghiệp"
+        "image": "case 1.png"
       },
       {
         "id": 6,
         "content": "Khác....",
-        "image": "Khác...."
+        "image": "goal 1.png"
       }
     ]
   },
@@ -125,7 +125,7 @@
     "id": "2BE9A620-143D-41F6-815B-2038C21A7B23",
     "question": "Xác định độ tuổi và giới tính",
     "description": "addd",
-    "icon": "addd",
+    "icon": "time.png",
     "displayOrder": 5,
     "type": "AgeGender",
     "answers": {
