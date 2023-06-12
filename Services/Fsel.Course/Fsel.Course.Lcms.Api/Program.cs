@@ -59,6 +59,7 @@ builder.Services.AddScoped<ISectionQuestionRepository, SectionQuestionRepository
 builder.Services.AddScoped<IFinalTestRepository, FinalTestRepository>();
 builder.Services.AddScoped<IFinalTestAnswerRepository, FinalTestAnswerRepository>();
 builder.Services.AddScoped<IFinalTestResultRepository, FinalTestResultRepository>();
+builder.Services.AddScoped<IClassForumResultRepository, ClassForumResultRepository>();
 
 builder.Services.AddScoped<QuestionTypeConverter>();
 builder.Services.AddScoped<ExtraPracticeConverter>();
