@@ -103,6 +103,7 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
                                     CourseType = x!.CourseType,
                                     Id = x.Id,
                                     Name = x.Name,
+                                    TotalQuestion = x.MockTestSections.Select(x => x.SectionGroup).SelectMany(x => x.Sections).SelectMany(x => x.SectionParts).SelectMany(x => x.SectionQuestions).Select(x => x.Question).Select(x => x.CorrectTotal).Sum(),
                                     SectionGroups = x.MockTestSections.Select(x => x.SectionGroup).Select(x => new SectionGroupModel
                                     {
                                         Id = x!.Id,
