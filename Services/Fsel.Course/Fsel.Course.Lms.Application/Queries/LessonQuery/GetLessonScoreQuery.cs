@@ -94,21 +94,9 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
                                   Skill = g.Key.CourseSkill,
                                   CorrectCount = g.Sum(x => x.vtca.CorrectCount)
                               };
-            var answerTimeCodeQuery = from baseQ in baseQuery
-                                      join vtca in _videoTimeCodeAnswerRepository.Queryable on baseQ.Id equals vtca.VideoResultId
-                                      join e in _exerciseRepository.Queryable on vtca.ExerciseId equals e.Id
-                                      join te in _timeCodeExerciseRepository.Queryable on e.Id equals te.ExerciseId
-                                      join vt in _videoTimeCodeRepository.Queryable on te.VideoTimeCodeId equals vt.Id
-                                      where vt.TimeCodeType != EnumTimeCodeType.Standalone
-                                      group new { vt, vtca } by new { vt.TimeCodeType, e.CourseSkill } into g
-                                      select new
-                                      {
-                                          Type = g.Key.TimeCodeType,
-                                          Skill = g.Key.CourseSkill,
-                                          CorrectCount = g.Sum(x => x.vtca.CorrectCount)
-                                      };
-            var answers = await answerQuery.ToListAsync(cancellationToken);
-            var answerTimeCodes = await answerTimeCodeQuery.ToListAsync(cancellationToken);
+
+            var answerTimeCodeQuery = answerQuery.Where(x => x.Type != EnumTimeCodeType.Standalone);
+            var answerStaderlonQuery = answerQuery.Where(x => x.Type == EnumTimeCodeType.Standalone);
 
             var questionQuery = from baseQ in baseQuery
                                 join v in _videoRepository.Queryable on baseQ.VideoId equals v.Id
@@ -125,7 +113,7 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
                                     TotalCount = g.Sum(x => x.q.CorrectTotal)
                                 };
 
-            var questions = await questionQuery.ToListAsync(cancellationToken);
+            var questions = await questionQuery.Where(x => x.Type == EnumTimeCodeType.Standalone).ToListAsync(cancellationToken);
             var questionTimeCodes = await questionQuery.Where(x => x.Type != EnumTimeCodeType.Standalone).ToListAsync(cancellationToken);
 
             var skills = Enum.GetValues(typeof(EnumCourseSkill)).Cast<EnumCourseSkill>();
@@ -133,7 +121,7 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
             var scoreQuery = from skill in skills
                              join questionQ in questions on skill equals questionQ.Skill into questionQ_jointable
                              from questionQJ in questionQ_jointable.DefaultIfEmpty()
-                             join answerQ in answerQuery on skill equals answerQ.Skill into answerQ_jointable
+                             join answerQ in answerStaderlonQuery on skill equals answerQ.Skill into answerQ_jointable
                              from answerQJ in answerQ_jointable.DefaultIfEmpty()
                              select new LessonSkillScoreModel
                              {
@@ -141,31 +129,31 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
                                  TotalCount = questionQJ != null ? questionQJ.TotalCount : default,
                                  CorrectCount = answerQJ != null ? answerQJ.CorrectCount : default,
                              };
+
             var scoreTimeCodeQuery = from type in types
                                      select new TimeCodeScoreModel
                                      {
                                          Type = type,
-                                         LessonSkillScores = (from skill in skills
-                                                              join questionTimeCodeQ in questionTimeCodes on skill equals questionTimeCodeQ.Skill into questionTimeCodeQ_jointable
-                                                              from questionTimeCodeQJ in questionTimeCodeQ_jointable.DefaultIfEmpty()
-                                                              join answerTimeCodeQ in answerTimeCodeQuery on skill equals answerTimeCodeQ.Skill into answerTimeCodeQ_jointable
-                                                              from answerTimeCodeQJ in answerTimeCodeQ_jointable.DefaultIfEmpty()
-                                                              where questionTimeCodeQJ != null && answerTimeCodeQJ != null && questionTimeCodeQJ.Type == type && answerTimeCodeQJ.Type == type
-                                                              select new LessonSkillScoreModel
-                                                              {
-                                                                  Type = type,
-                                                                  Skill = skill,
-                                                                  TotalCount = questionTimeCodeQJ != null ? questionTimeCodeQJ.TotalCount : default,
-                                                                  CorrectCount = answerTimeCodeQJ != null ? answerTimeCodeQJ.CorrectCount : default,
-                                                              }).ToList()
+                                         SkillScores = (from skill in skills
+                                                        join questionTimeCodeQ in questionTimeCodes on skill equals questionTimeCodeQ.Skill into questionTimeCodeQ_jointable
+                                                        from questionTimeCodeQJ in questionTimeCodeQ_jointable.DefaultIfEmpty()
+                                                        join answerTimeCodeQ in answerTimeCodeQuery on skill equals answerTimeCodeQ.Skill into answerTimeCodeQ_jointable
+                                                        from answerTimeCodeQJ in answerTimeCodeQ_jointable.DefaultIfEmpty()
+                                                        where questionTimeCodeQJ != null && answerTimeCodeQJ != null && questionTimeCodeQJ.Type == type && answerTimeCodeQJ.Type == type
+                                                        select new LessonSkillScoreModel
+                                                        {
+                                                            Skill = skill,
+                                                            TotalCount = questionTimeCodeQJ != null ? questionTimeCodeQJ.TotalCount : default,
+                                                            CorrectCount = answerTimeCodeQJ != null ? answerTimeCodeQJ.CorrectCount : default,
+                                                        }).ToList()
                                      };
             var timeCodeScores = scoreTimeCodeQuery.ToList();
             foreach (var item in timeCodeScores)
             {
-                if (item.LessonSkillScores != null && item.LessonSkillScores.Count > 0)
+                if (item.SkillScores != null && item.SkillScores.Count > 0)
                 {
-                    var correctCountTimeCode = item.LessonSkillScores.Select(x => x.CorrectCount).Sum();
-                    var totalCountTimeCode = item.LessonSkillScores.Select(x => x.TotalCount).Sum();
+                    var correctCountTimeCode = item.SkillScores.Select(x => x.CorrectCount).Sum();
+                    var totalCountTimeCode = item.SkillScores.Select(x => x.TotalCount).Sum();
                     if (totalCountTimeCode != 0)
                     {
                         item.Percent = (correctCountTimeCode / (double)totalCountTimeCode) * 100;

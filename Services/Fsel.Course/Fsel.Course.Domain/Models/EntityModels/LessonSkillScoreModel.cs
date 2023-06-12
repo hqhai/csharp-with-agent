@@ -7,7 +7,6 @@ namespace Fsel.Course.Domain.Models.EntityModels
 
     public class LessonSkillScoreModel
     {
-        public EnumTimeCodeType Type { get; set; }
         public EnumCourseSkill Skill { get; set; }
         public long TotalCount { get; set; }
         public long CorrectCount { get; set; }
