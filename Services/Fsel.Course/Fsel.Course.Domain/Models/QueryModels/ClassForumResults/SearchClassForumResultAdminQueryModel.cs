@@ -5,7 +5,7 @@ namespace Fsel.Course.Domain.Models.QueryModels.ClassForumResults
     using Fsel.Core.Base.BaseModels;
     using Fsel.Shared.Enums;
 
-    public class SearchClassForumResultTeacherQueryModel : BaseQueryModel
+    public class SearchClassForumResultAdminQueryModel : BaseQueryModel
     {
         public EnumCourseType? CourseType { get; set; }
 

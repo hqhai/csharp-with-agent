@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Course.Application.Queries.ClassForumResultQuery
+namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
 {
     using System;
     using System.Linq;
@@ -9,6 +9,7 @@ namespace Fsel.Course.Application.Queries.ClassForumResultQuery
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Core.Extensions;
+    using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Domain.Models.QueryModels.ClassForumResults;
@@ -17,20 +18,20 @@ namespace Fsel.Course.Application.Queries.ClassForumResultQuery
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class SearchClassForumResultTeacherQuery : SearchClassForumResultTeacherQueryModel, IRequest<MethodResult<PagingItemsModel<ClassForumResultSearchModel>>>
+    public class SearchClassForumResultAdminQuery : SearchClassForumResultAdminQueryModel, IRequest<MethodResult<PagingItemsModel<ClassForumResultSearchModel>>>
     {
     }
 
-    public class SearchClassForumResultTeacherQueryHandler : IRequestHandler<SearchClassForumResultTeacherQuery, MethodResult<PagingItemsModel<ClassForumResultSearchModel>>>
+    public class SearchClassForumResultAdminQueryHandler : IRequestHandler<SearchClassForumResultAdminQuery, MethodResult<PagingItemsModel<ClassForumResultSearchModel>>>
     {
         private readonly IClassForumResultRepository _classForumResultRepository;
 
-        public SearchClassForumResultTeacherQueryHandler(IClassForumResultRepository classForumResultRepository)
+        public SearchClassForumResultAdminQueryHandler(IClassForumResultRepository classForumResultRepository)
         {
             _classForumResultRepository = classForumResultRepository;
         }
 
-        public async Task<MethodResult<PagingItemsModel<ClassForumResultSearchModel>>> Handle(SearchClassForumResultTeacherQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<PagingItemsModel<ClassForumResultSearchModel>>> Handle(SearchClassForumResultAdminQuery request, CancellationToken cancellationToken)
         {
             MethodResult<PagingItemsModel<ClassForumResultSearchModel>> methodResult = new MethodResult<PagingItemsModel<ClassForumResultSearchModel>>();
             ArgumentNullException.ThrowIfNull(request);
@@ -43,6 +44,7 @@ namespace Fsel.Course.Application.Queries.ClassForumResultQuery
             var classForumResultQuery = _classForumResultRepository.Queryable
                                     .Include(x => x.ClassForum)
                                     .ThenInclude(x => x!.Lesson)
+                                    .Where(x => x.Status == EnumClassForumResultStatus.Graded || x.Status == EnumClassForumResultStatus.PendingForGrading)
                                     .Select(x => new ClassForumResultSearchModel
                                     {
                                         Id = x.Id,
@@ -53,14 +55,14 @@ namespace Fsel.Course.Application.Queries.ClassForumResultQuery
                                         CourseType = x.ClassForum.Lesson!.CourseLevel.GetEnumCourseType(),
                                         CourseLevel = x.ClassForum.Lesson.CourseLevel,
                                     });
-
             if (request.CourseLevel != null)
             {
                 classForumResultQuery = classForumResultQuery.Where(m => m.CourseLevel == request.CourseLevel);
             }
             if (request.CourseType != null)
             {
-                classForumResultQuery = classForumResultQuery.Where(m => m.CourseType == request.CourseType);
+                var courseLevels = request.CourseType.GetEnumCourseLevels();
+                classForumResultQuery = classForumResultQuery.Where(m => courseLevels.Contains(m.CourseLevel));
             }
 
             int totalItem = await classForumResultQuery.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
