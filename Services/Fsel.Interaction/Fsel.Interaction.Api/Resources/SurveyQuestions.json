@@ -10,22 +10,22 @@
       {
         "id": 1,
         "content": "Tìm kiếm Google",
-        "image": "gmail-icon.png"
+        "image": "gmail-icon.svg"
       },
       {
         "id": 2,
         "content": "Facebook",
-        "image": "facebook-icon.png"
+        "image": "facebook-icon.svg"
       },
       {
         "id": 3,
         "content": "Youtube",
-        "image": "youtube-icon.png"
+        "image": "youtube-icon.svg"
       },
       {
         "id": 4,
         "content": "Tiktok",
-        "image": "tiktok-icon.png"
+        "image": "tiktok-icon.svg"
       },
       {
         "id": 5,
@@ -45,7 +45,7 @@
       {
         "id": 8,
         "content": "Khác....",
-        "image": "others-icon.png"
+        "image": "others-icon.svg"
       }
     ]
   },
@@ -71,7 +71,7 @@
     "id": "721D8BB9-CDBE-42E7-AA16-35A1915C1123",
     "question": "Tại sao bạn học ngoại ngữ",
     "description": "addd",
-    "icon": "addd",
+    "icon": "fluent_target-arrow-16-filled.png",
     "displayOrder": 3,
     "type": "ChooseMultipleColumn",
     "answers": [
@@ -111,7 +111,7 @@
     "id": "713D8BB9-CDBE-42E7-AA16-35A1915C3532",
     "question": "Vị trí của bạn",
     "description": "addd",
-    "icon": "addd",
+    "icon": "wideword.png",
     "displayOrder": 4,
     "type": "YourPlace",
     "answers": {
