@@ -151,6 +151,7 @@ namespace Fsel.Course.Lms.Application.Commands.LessonCmd
                     HomeWorkResults = homeWorks.Select(x => new HomeWorkResult
                     {
                         HomeWorkId = x.Id,
+                        Status = EnumResultStatus.Unfinished,
                         StudentId = studentId ?? default,
                     }).ToList()
                 };
