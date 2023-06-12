@@ -12,6 +12,7 @@ namespace Fsel.Course.Application.Queries.ClassForumResultQuery
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Domain.Models.QueryModels.ClassForumResults;
+    using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -42,10 +43,6 @@ namespace Fsel.Course.Application.Queries.ClassForumResultQuery
             var classForumResultQuery = _classForumResultRepository.Queryable
                                     .Include(x => x.ClassForum)
                                     .ThenInclude(x => x!.Lesson)
-                                    .ThenInclude(x => x!.UnitLessons.Where(n => !n.IsDeleted))
-                                    .ThenInclude(x => x.Unit)
-                                    .ThenInclude(x => x!.CourseUnitMockTests.Where(n => !n.IsDeleted))
-                                    .ThenInclude(x => x.Course)
                                     .Select(x => new ClassForumResultSearchModel
                                     {
                                         Id = x.Id,
@@ -53,20 +50,17 @@ namespace Fsel.Course.Application.Queries.ClassForumResultQuery
                                         CreatedDate = x.CreatedDate,
                                         Status = x.Status,
                                         CourseSkill = x.ClassForum!.CourseSkill,
-                                        Courses = x.ClassForum.Lesson!.UnitLessons.Select(x => x.Unit).SelectMany(x => x.CourseUnitMockTests).Select(x => x.Course).Select(x => new CourseModel
-                                        {
-                                            CourseType = x!.CourseType,
-                                            CourseLevel = x!.CourseLevel,
-                                        }).ToList(),
+                                        CourseType = x.ClassForum.Lesson!.CourseLevel.GetEnumCourseType(),
+                                        CourseLevel = x.ClassForum.Lesson.CourseLevel,
                                     });
 
             if (request.CourseLevel != null)
             {
-                classForumResultQuery = classForumResultQuery.Where(m => m.Courses!.Select(x => x.CourseLevel).ToList().Contains(request.CourseLevel ?? default));
+                classForumResultQuery = classForumResultQuery.Where(m => m.CourseLevel == request.CourseLevel);
             }
             if (request.CourseType != null)
             {
-                classForumResultQuery = classForumResultQuery.Where(m => m.Courses!.Select(x => x.CourseType).ToList().Contains(request.CourseType ?? default));
+                classForumResultQuery = classForumResultQuery.Where(m => m.CourseType == request.CourseType);
             }
 
             int totalItem = await classForumResultQuery.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
