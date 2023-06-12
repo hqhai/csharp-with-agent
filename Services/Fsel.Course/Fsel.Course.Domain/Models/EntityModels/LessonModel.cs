@@ -26,9 +26,5 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public IList<HomeWorkModel>? HomeWorks { get; set; }
         public IList<LessonInstructionModel>? LessonInstructions { get; set; }
         public ClassForumModel? ClassForum { get; set; }
-
-        public MockTestModel? MockTest { get; set; }
-
-        public FinalTestModel? FinalTest { get; set; }
     }
 }
