@@ -126,6 +126,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                 {
                     HumanId = human.Id,
                     CreatedByParent = false,
+                    Occupation = "Student"
                 };
             }
             else if (roles.Contains(EnumRoleRegister.Parent.ToString()))
