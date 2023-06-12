@@ -7,6 +7,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
 {
     public class VideoTimeCodeModel : BaseModel
     {
+        public int TotalCount { get; set; }
         public long DisplayTimeTicks { get; set; }
 
         public long ExecutionTimeTicks { get; set; }
