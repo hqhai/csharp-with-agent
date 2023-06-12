@@ -108,7 +108,7 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
                                           CorrectCount = g.Sum(x => x.vtca.CorrectCount)
                                       };
             var answers = await answerQuery.ToListAsync(cancellationToken);
-            var answerTimeCodes = answerTimeCodeQuery.ToListAsync(cancellationToken);
+            var answerTimeCodes = await answerTimeCodeQuery.ToListAsync(cancellationToken);
 
             var questionQuery = from baseQ in baseQuery
                                 join v in _videoRepository.Queryable on baseQ.VideoId equals v.Id
@@ -126,10 +126,10 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
                                 };
 
             var questions = await questionQuery.ToListAsync(cancellationToken);
-            var questionTimeCodes = await questionQuery.Where(x => x.Type != EnumTimeCodeType.UnitTest).ToListAsync(cancellationToken);
+            var questionTimeCodes = await questionQuery.Where(x => x.Type != EnumTimeCodeType.Standalone).ToListAsync(cancellationToken);
 
             var skills = Enum.GetValues(typeof(EnumCourseSkill)).Cast<EnumCourseSkill>();
-            var types = Enum.GetValues(typeof(EnumTimeCodeType)).Cast<EnumTimeCodeType>();
+            var types = Enum.GetValues(typeof(EnumTimeCodeType)).Cast<EnumTimeCodeType>().Where(x => x != EnumTimeCodeType.Standalone);
             var scoreQuery = from skill in skills
                              join questionQ in questions on skill equals questionQ.Skill into questionQ_jointable
                              from questionQJ in questionQ_jointable.DefaultIfEmpty()
@@ -142,10 +142,6 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
                                  CorrectCount = answerQJ != null ? answerQJ.CorrectCount : default,
                              };
             var scoreTimeCodeQuery = from type in types
-                                     join questionQ in questionTimeCodes on type equals questionQ.Type into questionQ_jointable
-                                     from questionQJ in questionQ_jointable.DefaultIfEmpty()
-                                     join answerQ in answerTimeCodeQuery on type equals answerQ.Type into answerQ_jointable
-                                     from answerQJ in answerQ_jointable.DefaultIfEmpty()
                                      select new TimeCodeScoreModel
                                      {
                                          Type = type,
@@ -154,14 +150,17 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
                                                               from questionTimeCodeQJ in questionTimeCodeQ_jointable.DefaultIfEmpty()
                                                               join answerTimeCodeQ in answerTimeCodeQuery on skill equals answerTimeCodeQ.Skill into answerTimeCodeQ_jointable
                                                               from answerTimeCodeQJ in answerTimeCodeQ_jointable.DefaultIfEmpty()
+                                                              where questionTimeCodeQJ != null && answerTimeCodeQJ != null && questionTimeCodeQJ.Type == type && answerTimeCodeQJ.Type == type
                                                               select new LessonSkillScoreModel
                                                               {
+                                                                  Type = type,
                                                                   Skill = skill,
                                                                   TotalCount = questionTimeCodeQJ != null ? questionTimeCodeQJ.TotalCount : default,
                                                                   CorrectCount = answerTimeCodeQJ != null ? answerTimeCodeQJ.CorrectCount : default,
                                                               }).ToList()
                                      };
-            foreach (var item in scoreTimeCodeQuery.ToList())
+            var timeCodeScores = scoreTimeCodeQuery.ToList();
+            foreach (var item in timeCodeScores)
             {
                 if (item.LessonSkillScores != null && item.LessonSkillScores.Count > 0)
                 {
@@ -181,7 +180,7 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
             }
 
             lessonScore.LessonSkillScores = scoreQuery.ToList();
-            lessonScore.TimeCodeScores = scoreTimeCodeQuery.ToList();
+            lessonScore.TimeCodeScores = timeCodeScores;
             methodResult.Result = lessonScore;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
