@@ -16,7 +16,7 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class SearchOrderQuery : SearchOderQueryModel, IRequest<MethodResult<PagingItemsModel<SearchOrderModel>>>
+    public class SearchOrderQuery : SearchOrderQueryModel, IRequest<MethodResult<PagingItemsModel<SearchOrderModel>>>
     {
     }
 

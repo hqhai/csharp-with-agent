@@ -4,7 +4,7 @@ namespace Fsel.Ordering.Domain.Models.QueryModels.Oders
 {
     using Fsel.Core.Base.BaseModels;
 
-    public class SearchOderQueryModel : BaseQueryModel
+    public class SearchOrderQueryModel : BaseQueryModel
     {
         public bool? Status { get; set; }
     }

@@ -17,6 +17,6 @@ namespace Fsel.Ordering.Application.Services.TrainingService
         Task<IApiResponse<MethodResult<bool>>> DeleteStudentFromClass([FromRoute] Guid id);
 
         [Get("/class/get-new-class-by-student-id/{id}")]
-        Task<IApiResponse<MethodResult<ClassModel>>> GetClassIdByStudentId([FromRoute] Guid id);
+        Task<IApiResponse<MethodResult<ClassModel>>> GetNewClassByStudentId([FromRoute] Guid id);
     }
 }
