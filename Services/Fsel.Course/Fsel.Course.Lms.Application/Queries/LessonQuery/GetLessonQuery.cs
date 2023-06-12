@@ -93,9 +93,22 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
             var mocktest = await _unitRepository.Queryable
                                 .Include(x => x.UnitSkillMockTests)
                                 .ThenInclude(x => x.MockTest)
+                                .ThenInclude(x => x!.MockTestSections)
+                                .ThenInclude(x => x.SectionGroup)
                                 .Where(x => x.Id == request.UnitId)
                                 .SelectMany(x => x.UnitSkillMockTests)
                                 .Select(x => x.MockTest)
+                                .Select(x => new MockTestModel
+                                {
+                                    CourseType = x!.CourseType,
+                                    Id = x.Id,
+                                    Name = x.Name,
+                                    SectionGroups = x.MockTestSections.Select(x => x.SectionGroup).Select(x => new SectionGroupModel
+                                    {
+                                        Id = x!.Id,
+                                        CourseSkill = x.CourseSkill
+                                    }).ToList(),
+                                })
                                 .FirstOrDefaultAsync(cancellationToken);
 
             methodResult.Result = new LessonsMockTestModel
