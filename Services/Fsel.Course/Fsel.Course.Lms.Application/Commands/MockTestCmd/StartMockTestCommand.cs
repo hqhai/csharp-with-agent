@@ -34,9 +34,16 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
         private readonly IMockTestResultRepository _mockTestResultRepository;
         private readonly IUnitSkillMockTestRepository _unitSkillMockTestRepository;
         private readonly SectionConverter _sectionConverter;
-        private readonly QuestionTypeConverter _questionTypeConverter;
 
-        public StartMockTestCommandHandler(ICourseRepository courseRepository, IUnitRepository unitRepository, IUserService userService, IMapper mapper, AuthContext authContext, IMockTestRepository mockTestRepository, IMockTestResultRepository mockTestResultRepository, IUnitSkillMockTestRepository unitSkillMockTestRepository, SectionConverter sectionConverter, QuestionTypeConverter questionTypeConverter)
+        public StartMockTestCommandHandler(ICourseRepository courseRepository
+            , IUnitRepository unitRepository
+            , IUserService userService
+            , IMapper mapper
+            , AuthContext authContext
+            , IMockTestRepository mockTestRepository
+            , IMockTestResultRepository mockTestResultRepository
+            , IUnitSkillMockTestRepository unitSkillMockTestRepository
+            , SectionConverter sectionConverter)
         {
             _courseRepository = courseRepository;
             _unitRepository = unitRepository;
@@ -47,7 +54,6 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
             _mockTestResultRepository = mockTestResultRepository;
             _unitSkillMockTestRepository = unitSkillMockTestRepository;
             _sectionConverter = sectionConverter;
-            _questionTypeConverter = questionTypeConverter;
         }
 
         public async Task<MethodResult<MockTestModel>> Handle(StartMockTestCommand request, CancellationToken cancellationToken)
@@ -138,47 +144,10 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
                 CreatedFullName = mockTest.CreatedFullName,
                 CreatedUserId = mockTest.CreatedUserId,
                 IsActive = mockTest.IsActive,
-                /* SectionGroups = mockTest!.MockTestSections.Where(x => x.SectionGroup != null)
+                SectionGroups = mockTest!.MockTestSections.Where(x => x.SectionGroup != null)
                          .Select(x => x.SectionGroup)
-                         .Select(x => _sectionConverter.GetSectionGroupModel(x, !checkDone)).ToList(),*/
-                SectionGroups = mockTest.MockTestSections.Select(x => x.SectionGroup).Select(x => new SectionGroupModel
-                {
-                    Id = x!.Id,
-                    ExecutionTime = x.ExecutionTime,
-                    CourseSkill = x.CourseSkill,
-                    CreatedDate = x.CreatedDate,
-                    TotalQuestion = x.Sections.SelectMany(x => x.SectionQuestions).Select(x => x.Question).Select(x => x.CorrectTotal).Sum(),
-                    Sections = x.Sections.Select(x => new SectionModel
-                    {
-                        Id = x.Id,
-                        Name = x.Name,
-                        MediaPost = x.MediaPost,
-                        TargetWord = x.TargetWord,
-                        VideoFilePath = x.VideoFilePath,
+                         .Select(x => _sectionConverter.GetSectionGroupModel(x, !checkDone)).ToList(),
 
-                        SectionParts = x.SectionParts.Select(x => new SectionPartModel
-                        {
-                            Id = x.Id,
-                            PartName = x.PartName,
-                            Questions = x.SectionQuestions.Select(x => x.Question).Select(x => new QuestionModel
-                            {
-                                Id = x!.Id,
-                                CorrectTotal = x.CorrectTotal,
-
-                                Explanation = x.Explanation,
-                                QuestionType = x.QuestionType,
-                                Config = _questionTypeConverter.QuestionTypeConverterObject(x.Config, x.QuestionType, isDisableAnswers: !checkDone).Item1,
-                            }).ToList(),
-                        }).ToList(),
-                        SectionTimeCodes = x.SectionTimeCodes.Select(x => new SectionTimeCodeModel
-                        {
-                            Id = x.Id,
-                            DisplayTime = x.DisplayTime,
-                            ExecutionTime = x.ExecutionTime,
-                            Name = x.Name,
-                        }).ToList(),
-                    }).ToList(),
-                }).ToList(),
                 MockTestResult = mockTest.MockTestResults.Where(x => x.StudentId == studentId).Select(x => new MockTestResultModel
                 {
                     Id = x.Id,
