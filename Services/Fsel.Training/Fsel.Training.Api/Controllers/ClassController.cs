@@ -104,12 +104,12 @@ namespace Fsel.Training.Api.Controllers
         /// <summary>
         /// get classid by studentid
         /// </summary>
-        [HttpGet("get-class-id-by-student-id/{id}")]
-        [ProducesResponseType(typeof(MethodResult<Guid>), (int)HttpStatusCode.OK)]
+        [HttpGet("get-new-class-by-student-id/{id}")]
+        [ProducesResponseType(typeof(MethodResult<ClassModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.BadRequest)]
         public async Task<IActionResult> GetClassIdByStudentId([FromRoute] Guid id)
         {
-            MethodResult<Guid> commandResult = await _mediator.Send(new GetClassIdByStudentIdQuery { StudentId = id }).ConfigureAwait(false);
+            MethodResult<ClassModel> commandResult = await _mediator.Send(new GetNewClassByStudentIdQuery { StudentId = id }).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
     }

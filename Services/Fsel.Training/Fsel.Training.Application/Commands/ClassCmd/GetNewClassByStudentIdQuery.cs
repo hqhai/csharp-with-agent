@@ -13,31 +13,41 @@ namespace Fsel.Training.Application.Commands.ClassCmd
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class GetClassIdByStudentIdQuery : IRequest<MethodResult<Guid>>
+    public class GetNewClassByStudentIdQuery : IRequest<MethodResult<ClassModel>>
     {
         public Guid StudentId { get; set; }
     }
 
-    public class GetClassIdByStudentIdQueryHandler : IRequestHandler<GetClassIdByStudentIdQuery, MethodResult<Guid>>
+    public class GetNewClassByStudentIdQueryHandler : IRequestHandler<GetNewClassByStudentIdQuery, MethodResult<ClassModel>>
     {
         private readonly IClassRepository _classRepository;
 
-        public GetClassIdByStudentIdQueryHandler(IClassRepository classRepository)
+        public GetNewClassByStudentIdQueryHandler(IClassRepository classRepository)
         {
             _classRepository = classRepository;
         }
 
-        public async Task<MethodResult<Guid>> Handle(GetClassIdByStudentIdQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<ClassModel>> Handle(GetNewClassByStudentIdQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            MethodResult<Guid> methodResult = new MethodResult<Guid>();
+            MethodResult<ClassModel> methodResult = new MethodResult<ClassModel>();
             var classes = await _classRepository.Queryable.Include(cs => cs.ClassStudents).FirstOrDefaultAsync(p => p.Status == EnumClassType.New && p.ClassStudents.Any(p => p.StudentId == request.StudentId), cancellationToken);
             if (classes == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumClassErrorCode.ClassNotFound));
                 return methodResult;
             }
-            methodResult.Result = classes.Id;
+            ClassModel classModel = new ClassModel()
+            {
+                Id = classes.Id,
+                Code = classes.Code,
+                Name = classes.Name,
+                Status = classes.Status,
+                StartTime = classes.StartTime,
+                EndTime = classes.EndTime,
+                CourseId = classes.CourseId,
+            };
+            methodResult.Result = classModel;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }

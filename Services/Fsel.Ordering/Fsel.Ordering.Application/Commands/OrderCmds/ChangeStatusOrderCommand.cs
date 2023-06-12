@@ -77,7 +77,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
                         methodResult.AddErrorBadRequest(nameof(EnumOrderErrorCode.ClassNotFound));
                         return methodResult;
                     }
-                    var updateStudentByClass = await _userService.UpdateStudentByClassAsync(new UpdateStudentByClassIdModel { ClassId = classes.Content?.Result, StudentId = student.Content!.Result!.Id, PackageId = request.PackageId });
+                    var updateStudentByClass = await _userService.UpdateStudentByClassAsync(new UpdateStudentByClassIdModel { ClassId = classes.Content?.Result?.Id, StudentId = student.Content!.Result!.Id, PackageId = request.PackageId });
                     if (!updateStudentByClass.IsSuccessStatusCode)
                     {
                         methodResult.AddErrorBadRequest(nameof(EnumOrderErrorCode.UpdateNotSuccess));
