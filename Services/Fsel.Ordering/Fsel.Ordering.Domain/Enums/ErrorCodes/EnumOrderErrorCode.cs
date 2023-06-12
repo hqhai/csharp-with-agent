@@ -38,5 +38,15 @@ namespace Fsel.Ordering.Domain.Enums.ErrorCodes
         /// Update Not Success
         /// </summary>
         UpdateNotSuccess,
+
+        /// <summary>
+        /// Student Not Exist
+        /// </summary>
+        StudentNotExist,
+
+        /// <summary>
+        /// Class Not Found
+        /// </summary>
+        ClassNotFound,
     }
 }
