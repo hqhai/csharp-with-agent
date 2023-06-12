@@ -53,7 +53,7 @@ namespace Fsel.Course.Application.Queries.ClassForumResultQuery
                                         CreatedDate = x.CreatedDate,
                                         Status = x.Status,
                                         CourseSkill = x.ClassForum!.CourseSkill,
-                                        Courses = x.ClassForum.Lesson!.UnitLessons.Select(x => x.Unit).SelectMany(x => x.CourseUnitMockTests).Select(x => x.Course).Select(x => new CourseSearchModel
+                                        Courses = x.ClassForum.Lesson!.UnitLessons.Select(x => x.Unit).SelectMany(x => x.CourseUnitMockTests).Select(x => x.Course).Select(x => new CourseModel
                                         {
                                             CourseType = x!.CourseType,
                                             CourseLevel = x!.CourseLevel,
@@ -62,11 +62,11 @@ namespace Fsel.Course.Application.Queries.ClassForumResultQuery
 
             if (request.CourseLevel != null)
             {
-                classForumResultQuery = classForumResultQuery.Where(m => m.Courses!.ToList().Select(x => x.CourseLevel).Contains(request.CourseLevel ?? default));
+                classForumResultQuery = classForumResultQuery.Where(m => m.Courses!.Select(x => x.CourseLevel).ToList().Contains(request.CourseLevel ?? default));
             }
             if (request.CourseType != null)
             {
-                classForumResultQuery = classForumResultQuery.Where(m => m.CourseType == request.CourseType);
+                classForumResultQuery = classForumResultQuery.Where(m => m.Courses!.Select(x => x.CourseType).ToList().Contains(request.CourseType ?? default));
             }
 
             int totalItem = await classForumResultQuery.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
