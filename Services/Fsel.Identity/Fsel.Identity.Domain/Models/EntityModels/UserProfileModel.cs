@@ -23,6 +23,7 @@ namespace Fsel.Identity.Domain.Models.EntityModels
         public string? CodeClass { get; set; }
         public IList<string>? Roles { get; set; }
         public EnumCourseLevel CourseLevel { get; set; }
+        public Guid? PackageId { get; set; }
         public string? Membership { get; set; }
         public string? Occupation { get; set; }
         public string? PassportPath { get; set; }
