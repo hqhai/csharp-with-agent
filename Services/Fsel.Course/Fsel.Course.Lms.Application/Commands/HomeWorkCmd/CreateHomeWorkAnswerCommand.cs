@@ -49,12 +49,6 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd
 
             #region Validation
 
-            if (request.Answers.All(x => x.Answer == null) || request.Answers.Count == 0 || request.Answers == null)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumHomeWorkAnswerErrorCode.AnswerNull), nameof(request.Answers), request.Answers);
-                return methodResult;
-            }
-
             var homeWorkResult = await _homeWorkResultRepository.Queryable.Include(x => x.HomeWorkAnswers).FirstOrDefaultAsync(x => x.Id == request.HomeWorkResultId, cancellationToken);
             if (homeWorkResult == null)
             {
@@ -64,43 +58,46 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd
             var skillScores = new List<SkillScores>();
             foreach (var item in request.Answers)
             {
-                var question = await _questionRepository.GetByIdAsync(item.QuestionId);
-                if (question == null)
+                if (item.Answer != null)
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumQuestionErrorCode.QuestionNotExist), nameof(item.QuestionId), item.QuestionId);
-                    return methodResult;
-                }
-                else if (question.Config == null)
-                {
-                    methodResult.AddErrorBadRequest(nameof(EnumQuestionErrorCode.QuestionConfigNull), nameof(question), question);
-                    return methodResult;
-                }
-
-                var homeWorkQuestion = await _homeWorkQuestionRepository.Queryable.Where(x => x.HomeWorkId == homeWorkResult.HomeWorkId && x.QuestionId == item.QuestionId)
-                                                                    .FirstOrDefaultAsync(cancellationToken: cancellationToken);
-                if (homeWorkQuestion == null)
-                {
-                    methodResult.AddErrorBadRequest(nameof(EnumHomeWorkQuestionErrorCode.HomeWorkQuestionNotExist), nameof(homeWorkQuestion), homeWorkResult.HomeWorkId, item.QuestionId);
-                    return methodResult;
-                }
-                var isHomeWorkAnswer = await _homeWorkAnswerRepository.Queryable.AnyAsync(x => x.HomeWorkQuestionId == homeWorkQuestion.Id && x.HomeWorkResultId == request.HomeWorkResultId, cancellationToken);
-                if (!isHomeWorkAnswer)
-                {
-                    var (answerConfig, correctCount) = _answerTypeConverter.GetTotalCorrectByAsnwerType(item.Answer, question.Config, question.QuestionType);
-                    if (answerConfig == null)
+                    var question = await _questionRepository.GetByIdAsync(item.QuestionId);
+                    if (question == null)
                     {
-                        methodResult.AddErrorBadRequest(nameof(EnumHomeWorkAnswerErrorCode.AnswerIsInTheWrongFormat), nameof(answerConfig), answerConfig);
+                        methodResult.AddErrorBadRequest(nameof(EnumQuestionErrorCode.QuestionNotExist), nameof(item.QuestionId), item.QuestionId);
+                        return methodResult;
+                    }
+                    else if (question.Config == null)
+                    {
+                        methodResult.AddErrorBadRequest(nameof(EnumQuestionErrorCode.QuestionConfigNull), nameof(question), question);
                         return methodResult;
                     }
 
-                    homeWorkResult.HomeWorkAnswers.Add(new HomeWorkAnswer
+                    var homeWorkQuestion = await _homeWorkQuestionRepository.Queryable.Where(x => x.HomeWorkId == homeWorkResult.HomeWorkId && x.QuestionId == item.QuestionId)
+                                                                        .FirstOrDefaultAsync(cancellationToken: cancellationToken);
+                    if (homeWorkQuestion == null)
                     {
-                        Answer = answerConfig,
-                        CorrectCount = correctCount,
-                        HomeWorkQuestionId = homeWorkQuestion.Id,
-                        HomeWorkResultId = homeWorkResult.Id
-                    });
-                    skillScores.Add(new SkillScores { TotalCount = question.CorrectTotal, CorrectCount = correctCount });
+                        methodResult.AddErrorBadRequest(nameof(EnumHomeWorkQuestionErrorCode.HomeWorkQuestionNotExist), nameof(homeWorkQuestion), homeWorkResult.HomeWorkId, item.QuestionId);
+                        return methodResult;
+                    }
+                    var isHomeWorkAnswer = await _homeWorkAnswerRepository.Queryable.AnyAsync(x => x.HomeWorkQuestionId == homeWorkQuestion.Id && x.HomeWorkResultId == request.HomeWorkResultId, cancellationToken);
+                    if (!isHomeWorkAnswer)
+                    {
+                        var (answerConfig, correctCount) = _answerTypeConverter.GetTotalCorrectByAsnwerType(item.Answer, question.Config, question.QuestionType);
+                        if (answerConfig == null)
+                        {
+                            methodResult.AddErrorBadRequest(nameof(EnumHomeWorkAnswerErrorCode.AnswerIsInTheWrongFormat), nameof(answerConfig), answerConfig);
+                            return methodResult;
+                        }
+
+                        homeWorkResult.HomeWorkAnswers.Add(new HomeWorkAnswer
+                        {
+                            Answer = answerConfig,
+                            CorrectCount = correctCount,
+                            HomeWorkQuestionId = homeWorkQuestion.Id,
+                            HomeWorkResultId = homeWorkResult.Id
+                        });
+                        skillScores.Add(new SkillScores { TotalCount = question.CorrectTotal, CorrectCount = correctCount });
+                    }
                 }
             }
             var skillScore = await _homeWorkResultRepository.Queryable
