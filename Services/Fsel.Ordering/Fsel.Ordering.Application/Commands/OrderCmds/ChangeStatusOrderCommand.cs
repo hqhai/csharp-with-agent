@@ -37,7 +37,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<bool> methodResult = new MethodResult<bool>();
 
-            var order = await _orderRepository.GetByIdAsync(request.OderId);
+            var order = await _orderRepository.GetByIdAsync(request.OrderId);
             if (order == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumOrderErrorCode.OrderNotExist));
@@ -62,7 +62,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
             }
             await _orderRepository.ExecuteTransactionAsync(async () =>
             {
-                if (request.OderStatus == EnumOrderStatus.Reject)
+                if (request.OrderStatus == EnumOrderStatus.Reject)
                 {
                     var classStudent = await _trainingService.DeleteStudentFromClass(order.UserId);
                     if (!classStudent.IsSuccessStatusCode)
@@ -71,7 +71,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
                         return methodResult;
                     }
                 }
-                if (request.OderStatus == EnumOrderStatus.Payment)
+                else if (request.OrderStatus == EnumOrderStatus.Payment)
                 {
                     var updateStudentByClass = await _userService.UpdateStudentByClassAsync(new UpdateStudentByClassIdModel { ClassId = classes.Content?.Result?.Id, StudentId = student.Content!.Result!.Id, PackageId = request.PackageId });
                     if (!updateStudentByClass.IsSuccessStatusCode)
@@ -80,7 +80,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
                         return methodResult;
                     }
                 }
-                order.Status = request.OderStatus;
+                order.Status = request.OrderStatus;
                 order = _orderRepository.Update(order);
                 await _orderRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 

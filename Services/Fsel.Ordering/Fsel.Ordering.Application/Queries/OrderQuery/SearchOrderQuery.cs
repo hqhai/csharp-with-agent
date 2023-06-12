@@ -16,11 +16,11 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class SearchOrderQuery : SearchOrderQueryModel, IRequest<MethodResult<PagingItemsModel<SearchOrderModel>>>
+    public class SearchOrderQuery : SearchOrderQueryModel, IRequest<MethodResult<PagingItemsModel<OrderSearchModel>>>
     {
     }
 
-    public class SearchOrderQueryHandler : IRequestHandler<SearchOrderQuery, MethodResult<PagingItemsModel<SearchOrderModel>>>
+    public class SearchOrderQueryHandler : IRequestHandler<SearchOrderQuery, MethodResult<PagingItemsModel<OrderSearchModel>>>
     {
         private readonly IOrderRepository _orderRepository;
         private readonly ILmsCourseService _lmsCourseService;
@@ -31,17 +31,17 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery
             _lmsCourseService = lmsCourseService;
         }
 
-        public async Task<MethodResult<PagingItemsModel<SearchOrderModel>>> Handle(SearchOrderQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<PagingItemsModel<OrderSearchModel>>> Handle(SearchOrderQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            var methodResult = new MethodResult<PagingItemsModel<SearchOrderModel>>();
+            var methodResult = new MethodResult<PagingItemsModel<OrderSearchModel>>();
 
             if (request.PageSize > 100)
             {
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 return methodResult;
             }
-            var orders = _orderRepository.Queryable.Include(p => p.Package).Select(x => new SearchOrderModel
+            var orders = _orderRepository.Queryable.Include(p => p.Package).Select(x => new OrderSearchModel
             {
                 Id = x.Id,
                 UserId = x.UserId,
@@ -73,7 +73,7 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery
                 }
             }
 
-            methodResult.Result = new PagingItemsModel<SearchOrderModel>(lists, request, totalItem);
+            methodResult.Result = new PagingItemsModel<OrderSearchModel>(lists, request, totalItem);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }
