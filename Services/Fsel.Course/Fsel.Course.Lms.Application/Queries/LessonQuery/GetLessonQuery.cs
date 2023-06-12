@@ -114,7 +114,7 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
             methodResult.Result = new LessonsMockTestModel
             {
                 Lessons = lessons,
-                MockTest = _mapper.Map<MockTestModel>(mocktest)
+                MockTest = mocktest
             };
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
