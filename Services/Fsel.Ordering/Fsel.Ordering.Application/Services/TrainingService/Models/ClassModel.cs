@@ -2,9 +2,10 @@
 
 namespace Fsel.Ordering.Application.Services.TrainingService.Models
 {
+    using Fsel.Core.Base.BaseModels;
     using Fsel.Shared.Enums;
 
-    public class ClassModel
+    public class ClassModel : BaseModel
     {
         public string? Code { get; set; }
         public string? Name { get; set; }
