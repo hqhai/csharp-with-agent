@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Course.Lms.Api.Controllers.Admin
+namespace Fsel.Course.Lms.Api.Controllers.Cso
 {
     using System.Net;
     using Fsel.Common.ActionResults;
