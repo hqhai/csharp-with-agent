@@ -12,10 +12,6 @@ namespace Fsel.Course.Domain.Models.EntityModels
 
         public int CorrectCount { get; set; }
 
-        public HomeWorkQuestion? HomeWorkQuestion { get; set; }
-
-        public HomeWorkResult? HomeWorkResult { get; set; }
-
         public Guid? HomeWorkQuestionId { get; set; }
 
         public Guid? HomeWorkResultId { get; set; }
