@@ -42,11 +42,11 @@ namespace Fsel.Course.Lms.Api.Controllers
         /// Get lesson homework score
         /// </summary>
         [HttpGet("get-list-homework")]
-        [ProducesResponseType(typeof(MethodResult<IList<LessonHomeworkSearchModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(MethodResult<IList<LessonHomeWorkResultModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetListHomeWork([FromQuery] GetListHomeworkQuery query)
         {
-            MethodResult<IList<LessonHomeworkSearchModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            MethodResult<IList<LessonHomeWorkResultModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
 
