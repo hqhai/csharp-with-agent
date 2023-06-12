@@ -11,7 +11,6 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public string? Code { get; set; }
         public string? Name { get; set; }
         public string? InstructionContent { get; set; }
-        public string? FilePathsStr { get; set; }
         public object? FilePaths { get; set; }
         public string? Author { get; set; }
         public string? Abstract { get; set; }
@@ -23,5 +22,8 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public IList<ExtraPracticeChapterModel>? ExtraPracticeChapters { get; set; }
         public VideoModel? Video { get; set; }
         public IList<ExerciseModel>? Exercises { get; set; }
+        public double? Percent { get; set; }
+        public Guid? UnitId { get; set; }
+        public string? NameUnit { get; set; }
     }
 }

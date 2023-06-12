@@ -12,5 +12,6 @@ namespace Fsel.Course.Domain.Models.QueryModels.ExtraPractices
         public IList<EnumCourseSkill>? CourseSkills { get; set; }
         public IList<EnumExtraPracticeProgress>? Progresses { get; set; }
         public IList<EnumExtraPracticeType>? Types { get; set; }
+        public EnumSortFilter? SortFilter { get; set; }
     }
 }
