@@ -100,5 +100,17 @@ namespace Fsel.Training.Api.Controllers
             MethodResult<bool> commandResult = await _mediator.Send(new DeleteStudentFromClassCommand { UserId = id }).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
+
+        /// <summary>
+        /// get classid by studentid
+        /// </summary>
+        [HttpGet("get-new-class-by-student-id/{id}")]
+        [ProducesResponseType(typeof(MethodResult<ClassModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.BadRequest)]
+        public async Task<IActionResult> GetClassIdByStudentId([FromRoute] Guid id)
+        {
+            MethodResult<ClassModel> commandResult = await _mediator.Send(new GetNewClassByStudentIdQuery { StudentId = id }).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
     }
 }

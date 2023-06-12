@@ -36,6 +36,8 @@ namespace Fsel.Course.Domain.Entities
         [MaxLength(1000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? FeedBackNote { get; set; }
 
+        public bool? IsFlagged { get; set; }
+
         public ClassForum? ClassForum { get; set; }
 
         public LessonResult? LessonResult { get; set; }

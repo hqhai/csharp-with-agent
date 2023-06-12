@@ -13,7 +13,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public bool IsActive { get; set; }
 
         public int ExecutionTime { get; set; }
-
+        public long TotalQuestion { get; set; }
         public EnumFinalTestLevel FinalTestLevel { get; set; }
 
         public IList<SectionGroupModel>? SectionGroups { get; set; }

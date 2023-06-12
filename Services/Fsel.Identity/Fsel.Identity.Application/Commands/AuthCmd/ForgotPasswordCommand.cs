@@ -74,7 +74,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                     UserId = user.Id,
                     OTPCode = otp,
                     Status = EnumStatusUser.New,
-                    ExpiredTime = DateTime.Now.AddSeconds(_appSetting!.Otp!.StepTime)
+                    ExpiredTime = DateTime.Now.AddMinutes(_appSetting!.Otp!.StepTime)
                 };
                 _userOtpCodeRepository.Add(userOtpCode);
                 await _userOtpCodeRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
@@ -82,7 +82,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             else
             {
                 userOtpCode.OTPCode = otp;
-                userOtpCode.ExpiredTime = DateTime.Now.AddSeconds(_appSetting!.Otp!.StepTime);
+                userOtpCode.ExpiredTime = DateTime.Now.AddMinutes(_appSetting!.Otp!.StepTime);
                 _userOtpCodeRepository.Update(userOtpCode);
                 await _userOtpCodeRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             }

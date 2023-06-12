@@ -6,7 +6,7 @@ namespace Fsel.Ordering.Domain.Models.EntityModels
     using Fsel.Ordering.Domain.Enums;
     using Fsel.Shared.Enums;
 
-    public class SearchOrderModel : BaseModel
+    public class OrderSearchModel : BaseModel
     {
         public string? Code { get; set; }
         public EnumCourseLevel? CourseName { get; set; }
@@ -15,5 +15,6 @@ namespace Fsel.Ordering.Domain.Models.EntityModels
         public EnumOrderStatus Status { get; set; }
         public Guid UserId { get; set; }
         public Guid CourseId { get; set; }
+        public Guid PackageId { get; set; }
     }
 }
