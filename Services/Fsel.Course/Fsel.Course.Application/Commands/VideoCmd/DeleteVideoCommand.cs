@@ -61,7 +61,7 @@ namespace Fsel.Course.Application.Commands.VideoCmd
                 var method = await _videoConverter.DeleteExerciseToVideo(video);
                 if (!method.IsOK)
                 {
-                    methodResult.AddError(method.ErrorMessages);
+                    methodResult.AddErrorBadRequest(method.ErrorMessages);
                     return methodResult;
                 }
                 var result = await _videoRepository.DeleteAsync(video);

@@ -64,7 +64,7 @@ namespace Fsel.Course.Application.Commands.VideoCmd
                 var method = await _videoConverter.DeleteExerciseToVideo(video);
                 if (!method.IsOK)
                 {
-                    methodResult.AddError(method.ErrorMessages);
+                    methodResult.AddErrorBadRequest(method.ErrorMessages);
                     return methodResult;
                 }
 
@@ -73,7 +73,7 @@ namespace Fsel.Course.Application.Commands.VideoCmd
                 method = await _videoConverter.UpdateTimeCodeToVideo(video, request);
                 if (!method.IsOK)
                 {
-                    methodResult.AddError(method.ErrorMessages);
+                    methodResult.AddErrorBadRequest(method.ErrorMessages);
                     return methodResult;
                 }
 
