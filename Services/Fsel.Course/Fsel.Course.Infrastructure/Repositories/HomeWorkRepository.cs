@@ -25,7 +25,7 @@ namespace Fsel.Course.Infrastructure.Repositories
         {
             try
             {
-                return await Queryable.Include(x => x.HomeWorkQuestions)
+                return await Queryable.Include(x => x.HomeWorkQuestions.Where(n => !n.IsDeleted))
                     .ThenInclude(x => x.Question)
                     .Where(x => x.Id == id)
                     .Select(x => new HomeWorkModel
@@ -37,7 +37,7 @@ namespace Fsel.Course.Infrastructure.Repositories
                         IsActive = x.LessonHomeWorks.Any(),
                         CourseLevel = x.CourseLevel,
                         CourseSkill = x.CourseSkill,
-                        Questions = x.HomeWorkQuestions.Where(m => m.Question != null).Select(m => m.Question).Select(m => new QuestionModel()
+                        Questions = x.HomeWorkQuestions.Where(m => m.Question != null && !m.IsDeleted).Select(m => m.Question).OrderBy(x => x.CreatedDate).Select(m => new QuestionModel()
                         {
                             Id = m!.Id,
                             QuestionType = m.QuestionType,

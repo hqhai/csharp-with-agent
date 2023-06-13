@@ -42,7 +42,7 @@ namespace Fsel.Course.Application.Commands.VideoCmd
             var method = await _videoConverter.CreateTimeCodeToVideo(video, request);
             if (!method.IsOK)
             {
-                methodResult.AddError(method.ErrorMessages);
+                methodResult.AddErrorBadRequest(method.ErrorMessages);
                 return methodResult;
             }
             #endregion Validation
