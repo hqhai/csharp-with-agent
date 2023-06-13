@@ -3,12 +3,14 @@
 using AutoMapper;
 using Fsel.Common.ActionResults;
 using Fsel.Course.Domain.Entities;
+using Fsel.Course.Domain.Enums;
 using Fsel.Course.Domain.Enums.ErrorCodes;
 using Fsel.Course.Domain.IRepositories;
 using Fsel.Course.Domain.Models.CommandModels.PlacementTests;
 using Fsel.Course.Domain.Models.EntityModels;
 using Fsel.Course.Infrastructure.Common;
 using Fsel.Shared.Enums;
+using Fsel.Shared.Helpers;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 
@@ -96,6 +98,16 @@ namespace Fsel.Course.Application.Commands.PlacementTestCmd
 
             await _placementTestRepository.ExecuteTransactionAsync(async () =>
             {
+                placementTest.ExtraPractice = new ExtraPractice
+                {
+                    Code = placementTest.Name,
+                    Name = placementTest.Name,
+                    IsActive = placementTest.IsActive,
+                    InstructionContent = placementTest.InstructionContent,
+                    Type = EnumExtraPracticeType.MockTest;
+                    CourseLevel = placementTest.Level.GetCourseLevelByPlacementTestLevel()
+                };
+
                 placementTest = _placementTestRepository.Add(placementTest);
                 await _placementTestRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 

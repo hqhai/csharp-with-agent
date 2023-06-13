@@ -77,10 +77,11 @@ namespace Fsel.Course.Domain.Entities
         public EnumCourseLevel CourseLevel { get; set; }
         public Guid? VideoId { get; set; }
         public Video? Video { get; set; }
+        public Guid? PlacementTestId { get; set; }
+        public PlacementTest? PlacementTest { get; set; }
         public ICollection<LessonExtraPractice> LessonExtraPractices { get; set; } = new List<LessonExtraPractice>();
         public ICollection<ExtraPracticeChapter> ExtraPracticeChapters { get; set; } = new List<ExtraPracticeChapter>();
         public ICollection<ExtraPracticeExercise> ExtraPracticeExercises { get; set; } = new List<ExtraPracticeExercise>();
-
         public ICollection<ExtraPracticeResult> ExtraPracticeResults { get; set; } = new List<ExtraPracticeResult>();
     }
 }

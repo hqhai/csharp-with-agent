@@ -2,6 +2,7 @@
 
 namespace Fsel.Course.Lms.Application.Queries.ExtraPracticeQuery
 {
+    using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Core.Extensions;
@@ -19,16 +20,20 @@ namespace Fsel.Course.Lms.Application.Queries.ExtraPracticeQuery
     public class SearchExtraPracticeQueryHandler : IRequestHandler<SearchExtraPracticeQuery, MethodResult<PagingItemsModel<ExtraPracticeModel>>>
     {
         private readonly IExtraPracticeRepository _extraPracticeRepository;
+        private readonly IMapper _mapper;
 
-        public SearchExtraPracticeQueryHandler(IExtraPracticeRepository extraPracticeRepository)
+        public SearchExtraPracticeQueryHandler(IExtraPracticeRepository extraPracticeRepository, IMapper mapper)
         {
             _extraPracticeRepository = extraPracticeRepository;
+            _mapper = mapper;
         }
 
         public async Task<MethodResult<PagingItemsModel<ExtraPracticeModel>>> Handle(SearchExtraPracticeQuery request, CancellationToken cancellationToken)
         {
             var methodResult = new MethodResult<PagingItemsModel<ExtraPracticeModel>>();
-            var extraPracticeQuery = _extraPracticeRepository.Queryable.Include(x => x.LessonExtraPractices)
+            var extraPracticeQuery = _extraPracticeRepository.Queryable
+                                                        .Include(x => x.PlacementTest)
+                                                        .Include(x => x.LessonExtraPractices.Where(n => !n.IsDeleted && n.Lesson != null))
                                                         .ThenInclude(x => x.Lesson)
                                                         .ThenInclude(x => x!.UnitLessons.Where(n => !n.IsDeleted))
                                                         .ThenInclude(x => x.Unit)
@@ -59,8 +64,10 @@ namespace Fsel.Course.Lms.Application.Queries.ExtraPracticeQuery
                                                             {
                                                                 CourseSkill = x!.CourseSkill
                                                             }).ToList() : default,
-
+                                                            PlacementTest = _mapper.Map<PlacementTestModel>(x.PlacementTest),
+                                                            UnitId = x.LessonExtraPractices.Where(n => !n.IsDeleted && n.Lesson != null).Select(x => x.Lesson).SelectMany(x => x.UnitLessons).Select(x => x.UnitId).FirstOrDefault(),
                                                         });
+
             int totalItem = await extraPracticeQuery.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
             var lists = await extraPracticeQuery
                     .ApplySortAndPaging(request)

@@ -21,6 +21,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public Guid VideoId { get; set; }
         public IList<ExtraPracticeChapterModel>? ExtraPracticeChapters { get; set; }
         public VideoModel? Video { get; set; }
+        public PlacementTestModel? PlacementTest { get; set; }
         public IList<ExerciseModel>? Exercises { get; set; }
         public double? Percent { get; set; }
         public Guid? UnitId { get; set; }
