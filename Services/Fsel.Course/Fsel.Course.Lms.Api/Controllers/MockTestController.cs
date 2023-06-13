@@ -8,6 +8,7 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Fsel.Course.Lms.Application.Commands.MockTestCmd;
+using Fsel.Course.Lms.Application.Queries.MockTestQuery;
 
 namespace Fsel.Course.Lms.Api.Controllers
 {
@@ -37,14 +38,14 @@ namespace Fsel.Course.Lms.Api.Controllers
         }
 
         /// <summary>
-        /// Start MockTest
+        /// Get MockTest
         /// </summary>
-        [HttpGet("start-mock-test")]
+        [HttpGet("get-mock-test")]
         [ProducesResponseType(typeof(MethodResult<MockTestModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> StartPlacementTest([FromQuery] StartMockTestCommand command)
+        public async Task<IActionResult> Get([FromQuery] GetMockTestQuery query)
         {
-            MethodResult<MockTestModel> queryResult = await _mediator.Send(command).ConfigureAwait(false);
+            MethodResult<MockTestModel> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
     }
