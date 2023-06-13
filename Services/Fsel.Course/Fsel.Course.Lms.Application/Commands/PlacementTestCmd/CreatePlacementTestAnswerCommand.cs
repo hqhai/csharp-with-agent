@@ -146,8 +146,8 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
                 if (placementTestResult.Level == EnumPlacementTestLevel.IELTS)
                 {
                     skillScore.Scores = skillScore.CorrectCount.GetIeltsScore(skillScore.Skill);
-                    skillScores.Add(skillScore);
                 }
+                skillScores.Add(skillScore);
             }
 
             #endregion Validation
