@@ -49,12 +49,6 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd
 
             #region Validation
 
-            if (request.Answers.All(x => x.Answer == null) || request.Answers.Count == 0 || request.Answers == null)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumHomeWorkAnswerErrorCode.AnswerNull), nameof(request.Answers), request.Answers);
-                return methodResult;
-            }
-
             var homeWorkResult = await _homeWorkResultRepository.Queryable.Include(x => x.HomeWorkAnswers).FirstOrDefaultAsync(x => x.Id == request.HomeWorkResultId, cancellationToken);
             if (homeWorkResult == null)
             {
@@ -84,7 +78,7 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd
                     return methodResult;
                 }
                 var isHomeWorkAnswer = await _homeWorkAnswerRepository.Queryable.AnyAsync(x => x.HomeWorkQuestionId == homeWorkQuestion.Id && x.HomeWorkResultId == request.HomeWorkResultId, cancellationToken);
-                if (!isHomeWorkAnswer)
+                if (!isHomeWorkAnswer && item.Answer != null)
                 {
                     var (answerConfig, correctCount) = _answerTypeConverter.GetTotalCorrectByAsnwerType(item.Answer, question.Config, question.QuestionType);
                     if (answerConfig == null)
@@ -119,7 +113,7 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd
                                 QuestionTotal = h.HomeWork.HomeWorkQuestions.Select(x => x.Question).Count(),
                                 QuestionCompleted = h.HomeWorkAnswers.Count()
                             }).FirstOrDefaultAsync(cancellationToken);
-            if (skillScore != null && skillScore.QuestionCompleted + Convert.ToInt32(skillScores.Sum(x => x.CorrectCount)) == skillScore.QuestionTotal)
+            if (skillScore != null && skillScore.QuestionCompleted + Convert.ToInt32(skillScores.Count) == skillScore.QuestionTotal)
             {
                 homeWorkResult.CorrectCount = homeWorkResult.CorrectCount + Convert.ToInt32(skillScores.Sum(x => x.CorrectCount));
                 homeWorkResult.CorrectTotal = homeWorkResult.CorrectTotal + Convert.ToInt32(skillScores.Sum(x => x.TotalCount));
