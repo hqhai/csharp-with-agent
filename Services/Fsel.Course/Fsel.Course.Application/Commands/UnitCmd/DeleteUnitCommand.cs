@@ -30,6 +30,7 @@ namespace Fsel.Course.Application.Commands.UnitCmd
 
             var unit = await _unitRepository.Queryable
                                     .Include(e => e.UnitLessons.Where(n => !n.IsDeleted))
+                                    .Include(e => e.UnitSkillMockTests.Where(n => !n.IsDeleted))
                                     .FirstOrDefaultAsync(e => e.Id == request.Id, cancellationToken: cancellationToken);
             if (unit == null)
             {

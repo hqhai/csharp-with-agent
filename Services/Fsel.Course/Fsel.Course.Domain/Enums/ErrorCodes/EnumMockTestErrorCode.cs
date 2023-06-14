@@ -32,6 +32,16 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         /// <summary>
         /// MockTest must correct score
         /// </summary>
-        MockTestMustCorrectScore
+        MockTestMustCorrectScore,
+
+        /// <summary>
+        /// MockTest Type Does Not Exist
+        /// </summary>
+        MockTestTypeNotExist,
+
+        /// <summary>
+        /// Code And Level Already Exist
+        /// </summary>
+        CodeAndLevelAlreadyExist,
     }
 }
