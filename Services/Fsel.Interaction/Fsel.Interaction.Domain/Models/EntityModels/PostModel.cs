@@ -19,6 +19,10 @@ namespace Fsel.Interaction.Domain.Models.EntityModels
 
         public Guid UserId { get; set; }
 
+        public string? AvatarPath { get; set; }
+
+        public string? FullName { get; set; }
+
         public IList<string>? FilePaths { get; set; }
 
         public IList<TopicTag>? TopicTags { get; set; }

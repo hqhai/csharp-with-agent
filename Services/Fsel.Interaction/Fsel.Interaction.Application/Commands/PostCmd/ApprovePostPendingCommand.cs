@@ -9,7 +9,6 @@ namespace Fsel.Interaction.Application.Commands.PostCmd
     using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Common.ActionResults;
-    using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Interaction.Application.Commands.TopicTagCmd;
     using Fsel.Interaction.Domain.Entities;
     using Fsel.Interaction.Domain.Enums.ErrorCodes;

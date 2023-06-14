@@ -8,6 +8,7 @@ namespace Fsel.Interaction.Application.Queries.PostQuery
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Core.Extensions;
+    using Fsel.Interaction.Domain.Entities;
     using Fsel.Interaction.Domain.IRepositories;
     using Fsel.Interaction.Domain.Models.EntityModels;
     using Fsel.Shared.Enums;
@@ -45,14 +46,19 @@ namespace Fsel.Interaction.Application.Queries.PostQuery
                                select c;
             var comments = await commentQuery.ToListAsync(cancellationToken);
 
-            var postIds = comments.Select(async x => await GetAncestorIds(x.Id))
+            var posts = comments.Select(async (x) => new { Comment = x, PostId = await GetPostId(x.Id) })
                                .Select(t => t.Result)
                                .Where(i => i != null)
-                               .ToList();
+                               .GroupBy(i => i.PostId)
+                               .Select(x => new
+                               {
+                                   PostId = x.Key,
+                                   Comments = x.ToList()
+                               }).ToList();
 
             var query = from p in _postRepository.Queryable
                         join ia in _interactionActionRepository.Queryable on p.Id equals ia.ObjectId
-                        where ia.Type == EnumInteractionActionType.Flag && postIds.Contains(p.Id)
+                        where ia.Type == EnumInteractionActionType.Flag && posts.Select(x => x.PostId).Contains(p.Id)
                         select p;
 
             int totalItem = await query.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
@@ -65,8 +71,12 @@ namespace Fsel.Interaction.Application.Queries.PostQuery
                     {
                         var model = _mapper.Map<PostModel>(x);
                         model.TopicTags = x.PostTags.Select(x => x.TopicTag!).ToList();
+                        model.Comments = _mapper.Map<IList<CommentModel>>(posts.FirstOrDefault(n => n.PostId == x.Id)?.Comments);
                         return model;
                     }).ToList();
+
+            var userIds = lists.Select(x => x.UserId).ToList();
+            userIds.AddRange(lists.SelectMany(x => x.Comments!).Select(x => x.UserId));
 
             methodResult.Result = new PagingItemsModel<PostModel>(lists, request, totalItem);
             methodResult.StatusCode = StatusCodes.Status200OK;
@@ -74,12 +84,12 @@ namespace Fsel.Interaction.Application.Queries.PostQuery
             return methodResult;
         }
 
-        private async Task<Guid?> GetAncestorIds(Guid id)
+        private async Task<Guid> GetPostId(Guid id)
         {
             var comment = await _commentRepository.Queryable.FirstOrDefaultAsync(n => n.Id == id);
             if (comment != null)
             {
-                return await GetAncestorIds(comment.ObjectId);
+                return await GetPostId(comment.ObjectId);
             }
 
             return id;
