@@ -40,7 +40,6 @@ namespace Fsel.Course.Infrastructure.Common
             ArgumentNullException.ThrowIfNull(request);
             VoidMethodResult methodResult = new VoidMethodResult();
 
-          
             if (!course.IsValid())
             {
                 methodResult.AddErrorBadRequest(course.ErrorMessages);
@@ -65,8 +64,7 @@ namespace Fsel.Course.Infrastructure.Common
                 return methodResult;
             }
 
-            var isExistCode = await _courseRepository.Queryable.AnyAsync(x => x.Code == request.Code && request.Id == default || x.Id != request.Id);
-            if (isExistCode)
+            if (await _courseRepository.Queryable.AnyAsync(x => x.Code == request.Code && x.CourseLevel == request.CourseLevel && (request.Id == Guid.Empty || x.Id != request.Id)))
             {
                 methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.CourseCodeIsExist), nameof(request.Code), request.Code);
                 return methodResult;

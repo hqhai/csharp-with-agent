@@ -60,7 +60,7 @@ namespace Fsel.Course.Infrastructure.Common
                 return methodResult;
             }
 
-            if (await _unitRepository.Queryable.AnyAsync(x => x.Code == request.Code && x.CourseLevel == request.CourseLevel && request.Id == default || x.Id != request.Id))
+            if (await _unitRepository.Queryable.AnyAsync(x => x.Code == request.Code && x.CourseLevel == request.CourseLevel && (request.Id == Guid.Empty || x.Id != request.Id)))
             {
                 methodResult.AddErrorBadRequest(nameof(EnumMockTestErrorCode.CodeAndLevelAlreadyExist), nameof(request.Code), request.Code);
                 return methodResult;

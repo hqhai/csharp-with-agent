@@ -25,6 +25,11 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         MockTestInActiveState,
 
         /// <summary>
+        /// MockTest is not in active state
+        /// </summary>
+        MockTestNotInActiveState,
+
+        /// <summary>
         /// User does not exist
         /// </summary>
         UserNotExist,

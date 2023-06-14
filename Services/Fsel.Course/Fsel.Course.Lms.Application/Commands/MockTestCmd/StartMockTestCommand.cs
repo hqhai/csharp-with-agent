@@ -107,9 +107,9 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
                 return methodResult;
             }
 
-            if (mockTest.CourseUnitMockTests.Any() || mockTest.UnitSkillMockTests.Any())
+            if (!(mockTest.CourseUnitMockTests.Any() || mockTest.UnitSkillMockTests.Any()))
             {
-                methodResult.AddErrorBadRequest(nameof(EnumMockTestErrorCode.MockTestInActiveState));
+                methodResult.AddErrorBadRequest(nameof(EnumMockTestErrorCode.MockTestNotInActiveState));
                 return methodResult;
             }
 

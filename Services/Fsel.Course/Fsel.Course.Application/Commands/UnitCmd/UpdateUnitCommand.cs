@@ -56,7 +56,7 @@ namespace Fsel.Course.Application.Commands.UnitCmd
                 methodResult.AddErrorBadRequest(nameof(EnumUnitErrorCode.UnitUsed), nameof(request.Id), request.Id);
                 return methodResult;
             }
-            unit = _mapper.Map<Domain.Entities.Unit>(request);
+            _mapper.Map(request, unit);
             var method = await _unitHelper.UnitValue(unit, request);
             if (!method.IsOK)
             {
