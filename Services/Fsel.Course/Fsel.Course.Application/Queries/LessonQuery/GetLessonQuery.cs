@@ -44,7 +44,7 @@ namespace Fsel.Course.Application.Queries.LessonQuery
             lessonModel.Video = _mapper.Map<VideoModel>(video);
             lessonModel.VideoId = video?.Id;
             lessonModel.HomeWorks = _mapper.Map<IList<HomeWorkModel>>(lesson.LessonHomeWorks.Select(x => x.HomeWork));
-            lessonModel.ClassForums = _mapper.Map<ClassForumModel>(lesson.ClassForum);
+            lessonModel.ClassForum = _mapper.Map<ClassForumModel>(lesson.ClassForum);
             lessonModel.IsActive = lesson.UnitLessons.Any();
             methodResult.Result = lessonModel;
             methodResult.StatusCode = StatusCodes.Status200OK;

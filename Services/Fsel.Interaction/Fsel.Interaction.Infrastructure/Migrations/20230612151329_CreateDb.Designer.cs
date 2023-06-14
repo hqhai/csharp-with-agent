@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fsel.Interaction.Infrastructure.Migrations
 {
     [DbContext(typeof(InteractionDbContext))]
-    [Migration("20230606095521_CreateCommentTableAndInteractionAction")]
-    partial class CreateCommentTableAndInteractionAction
+    [Migration("20230612151329_CreateDb")]
+    partial class CreateDb
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -316,8 +316,8 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                         new
                         {
                             Id = new Guid("492d8bb9-cdbe-42e7-aa16-35a1915c3621"),
-                            AnswerStr = "[{\"id\":1,\"content\":\"T\\u00ECm ki\\u1EBFm Google\",\"image\":\"Google\"},{\"id\":2,\"content\":\"Facebook\",\"image\":\"Facebook\"},{\"id\":3,\"content\":\"Youtube\",\"image\":\"Youtube\"},{\"id\":4,\"content\":\"Tiktok\",\"image\":\"Tiktok\"},{\"id\":5,\"content\":\"B\\u1EA1n b\\u00E8/Gia \\u0111\\u00ECnh\",\"image\":\"B\\u1EA1n b\\u00E8/Gia \\u0111\\u00ECnh\"},{\"id\":6,\"content\":\"Tin t\\u1EE9c/B\\u00E1o ch\\u00ED/Blog\",\"image\":\"Tin t\\u1EE9c/B\\u00E1o ch\\u00ED/Blog\"},{\"id\":7,\"content\":\"Tivi\",\"image\":\"Tivi\"},{\"id\":8,\"content\":\"Kh\\u00E1c....\",\"image\":\"Kh\\u00E1c....\"}]",
-                            CreatedDate = new DateTime(2023, 6, 6, 16, 55, 21, 194, DateTimeKind.Local).AddTicks(5513),
+                            AnswerStr = "[{\"id\":1,\"content\":\"T\\u00ECm ki\\u1EBFm Google\",\"image\":\"gmail-icon.svg\"},{\"id\":2,\"content\":\"Facebook\",\"image\":\"facebook-icon.svg\"},{\"id\":3,\"content\":\"Youtube\",\"image\":\"youtube-icon.svg\"},{\"id\":4,\"content\":\"Tiktok\",\"image\":\"tiktok-icon.svg\"},{\"id\":5,\"content\":\"B\\u1EA1n b\\u00E8/Gia \\u0111\\u00ECnh\",\"image\":\"friends_family-icon.svg\"},{\"id\":6,\"content\":\"Tin t\\u1EE9c/B\\u00E1o ch\\u00ED/Blog\",\"image\":\"blog-icon.svg\"},{\"id\":7,\"content\":\"Tivi\",\"image\":\"tv-icon.svg\"},{\"id\":8,\"content\":\"Kh\\u00E1c....\",\"image\":\"others-icon.svg\"}]",
+                            CreatedDate = new DateTime(2023, 6, 12, 22, 13, 28, 387, DateTimeKind.Local).AddTicks(3389),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             Description = "addd",
@@ -325,13 +325,13 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                             Icon = "addd",
                             IsDeleted = false,
                             Question = "Bạn biết đến Fsel từ đâu?",
-                            Type = "YourDirection"
+                            Type = "ChooseMultipleColumn"
                         },
                         new
                         {
                             Id = new Guid("763d8bb9-cdbe-42e7-aa16-35a1915c3512"),
                             AnswerStr = "[{\"id\":1,\"content\":\"B\\u1EA1n \\u0111\\u00E3 bi\\u1EBFt m\\u1ED9t ch\\u00FAt Ti\\u1EBFng Anh\"},{\"id\":2,\"content\":\"\\u0110\\u00E2y l\\u00E0 l\\u1EA7n \\u0111\\u1EA7u b\\u1EA1n h\\u1ECDc Ti\\u1EBFng Anh\"}]",
-                            CreatedDate = new DateTime(2023, 6, 6, 16, 55, 21, 194, DateTimeKind.Local).AddTicks(6649),
+                            CreatedDate = new DateTime(2023, 6, 12, 22, 13, 28, 390, DateTimeKind.Local).AddTicks(7878),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             Description = "addd",
@@ -339,18 +339,18 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                             Icon = "addd",
                             IsDeleted = false,
                             Question = "Chọn hướng đi của bạn",
-                            Type = "ChooseMultipleColumn"
+                            Type = "YourDirection"
                         },
                         new
                         {
                             Id = new Guid("721d8bb9-cdbe-42e7-aa16-35a1915c1123"),
-                            AnswerStr = "[{\"id\":1,\"content\":\"V\\u0103n h\\u00F3a\",\"image\":\"V\\u0103n h\\u00F3a\"},{\"id\":2,\"content\":\"Du l\\u1ECBch\",\"image\":\"Du l\\u1ECBch\"},{\"id\":3,\"content\":\"K\\u1EBFt b\\u1EA1n v\\u00E0 chia s\\u1EBB\",\"image\":\"K\\u1EBFt b\\u1EA1n v\\u00E0 chia s\\u1EBB\"},{\"id\":4,\"content\":\"H\\u1ECDc t\\u1EADp\",\"image\":\"H\\u1ECDc t\\u1EADp\"},{\"id\":5,\"content\":\"C\\u01A1 h\\u1ED9i ngh\\u1EC1 nghi\\u1EC7p\",\"image\":\"C\\u01A1 h\\u1ED9i ngh\\u1EC1 nghi\\u1EC7p\"},{\"id\":6,\"content\":\"Kh\\u00E1c....\",\"image\":\"Kh\\u00E1c....\"}]",
-                            CreatedDate = new DateTime(2023, 6, 6, 16, 55, 21, 194, DateTimeKind.Local).AddTicks(7024),
+                            AnswerStr = "[{\"id\":1,\"content\":\"V\\u0103n h\\u00F3a\",\"image\":\"castle 1.png\"},{\"id\":2,\"content\":\"Du l\\u1ECBch\",\"image\":\"plane 1.png\"},{\"id\":3,\"content\":\"K\\u1EBFt b\\u1EA1n v\\u00E0 chia s\\u1EBB\",\"image\":\"friendship 1.png\"},{\"id\":4,\"content\":\"H\\u1ECDc t\\u1EADp\",\"image\":\"mortarboard 1.png\"},{\"id\":5,\"content\":\"C\\u01A1 h\\u1ED9i ngh\\u1EC1 nghi\\u1EC7p\",\"image\":\"case 1.png\"},{\"id\":6,\"content\":\"Kh\\u00E1c....\",\"image\":\"goal 1.png\"}]",
+                            CreatedDate = new DateTime(2023, 6, 12, 22, 13, 28, 391, DateTimeKind.Local).AddTicks(678),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             Description = "addd",
                             DisplayOrder = 3,
-                            Icon = "addd",
+                            Icon = "fluent_target-arrow-16-filled.png",
                             IsDeleted = false,
                             Question = "Tại sao bạn học ngoại ngữ",
                             Type = "ChooseMultipleColumn"
@@ -359,12 +359,12 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                         {
                             Id = new Guid("713d8bb9-cdbe-42e7-aa16-35a1915c3532"),
                             AnswerStr = "{\"countryCode\":123,\"countryName\":\"Vi\\u1EC7t Nam\",\"provinceCode\":29,\"provinceName\":\"H\\u00E0 N\\u1ED9i\"}",
-                            CreatedDate = new DateTime(2023, 6, 6, 16, 55, 21, 194, DateTimeKind.Local).AddTicks(7399),
+                            CreatedDate = new DateTime(2023, 6, 12, 22, 13, 28, 391, DateTimeKind.Local).AddTicks(2250),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             Description = "addd",
                             DisplayOrder = 4,
-                            Icon = "addd",
+                            Icon = "wideword.png",
                             IsDeleted = false,
                             Question = "Vị trí của bạn",
                             Type = "YourPlace"
@@ -373,12 +373,12 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                         {
                             Id = new Guid("2be9a620-143d-41f6-815b-2038c21a7b23"),
                             AnswerStr = "{\"birthday\":null,\"ageGenderQuestions\":[{\"id\":1,\"gender\":\"Male\"},{\"id\":2,\"gender\":\"Female\"},{\"id\":3,\"gender\":\"Other\"}]}",
-                            CreatedDate = new DateTime(2023, 6, 6, 16, 55, 21, 194, DateTimeKind.Local).AddTicks(7618),
+                            CreatedDate = new DateTime(2023, 6, 12, 22, 13, 28, 391, DateTimeKind.Local).AddTicks(3313),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             Description = "addd",
                             DisplayOrder = 5,
-                            Icon = "addd",
+                            Icon = "time.png",
                             IsDeleted = false,
                             Question = "Xác định độ tuổi và giới tính",
                             Type = "AgeGender"

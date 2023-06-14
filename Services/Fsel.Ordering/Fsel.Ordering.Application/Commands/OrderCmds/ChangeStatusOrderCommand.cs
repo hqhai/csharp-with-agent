@@ -37,7 +37,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<bool> methodResult = new MethodResult<bool>();
 
-            var order = await _orderRepository.GetByIdAsync(request.OderId);
+            var order = await _orderRepository.GetByIdAsync(request.OrderId);
             if (order == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumOrderErrorCode.OrderNotExist));
@@ -48,25 +48,42 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
                 methodResult.AddErrorBadRequest(nameof(EnumOrderErrorCode.OrderStatusIsNotNew));
                 return methodResult;
             }
-
+            var student = await _userService.GetStudentByUserIdAsync(order.UserId);
+            if (!student.IsSuccessStatusCode)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumOrderErrorCode.StudentNotExist));
+                return methodResult;
+            }
+            var classes = await _trainingService.GetNewClassByStudentId(student.Content!.Result!.Id);
+            if (!classes.IsSuccessStatusCode)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumOrderErrorCode.ClassNotFound));
+                return methodResult;
+            }
             await _orderRepository.ExecuteTransactionAsync(async () =>
             {
-                order.Status = request.OderStatus;
-                order = _orderRepository.Update(order);
-                await _orderRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
-                if (request.OderStatus == EnumOrderStatus.Reject)
+                if (request.OrderStatus == EnumOrderStatus.Reject)
                 {
-                    var student = await _trainingService.DeleteStudentFromClass(order.UserId);
-                    if (!student.IsSuccessStatusCode)
+                    var classStudent = await _trainingService.DeleteStudentFromClass(order.UserId);
+                    if (!classStudent.IsSuccessStatusCode)
                     {
                         methodResult.AddErrorBadRequest(nameof(EnumOrderErrorCode.UpdateNotSuccess));
                         return methodResult;
                     }
                 }
-                if (order.Status != EnumOrderStatus.Payment)
+                else if (request.OrderStatus == EnumOrderStatus.Payment)
                 {
-                    //var student = await _userService.UpdateStudentByClassAsync(new UpdateStudentByClassIdModel { ClassId = classnew.Id, StudentId = studentId, PackageId = request.PackageId });
+                    var updateStudentByClass = await _userService.UpdateStudentByClassAsync(new UpdateStudentByClassIdModel { ClassId = classes.Content?.Result?.Id, StudentId = student.Content!.Result!.Id, PackageId = request.PackageId });
+                    if (!updateStudentByClass.IsSuccessStatusCode)
+                    {
+                        methodResult.AddErrorBadRequest(nameof(EnumOrderErrorCode.UpdateNotSuccess));
+                        return methodResult;
+                    }
                 }
+                order.Status = request.OrderStatus;
+                order = _orderRepository.Update(order);
+                await _orderRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+
                 methodResult.StatusCode = StatusCodes.Status201Created;
                 methodResult.Result = true;
                 return methodResult;
