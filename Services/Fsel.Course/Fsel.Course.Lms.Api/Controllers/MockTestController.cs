@@ -1,13 +1,13 @@
 // Copyright (c) Atlantic. All rights reserved.
-using Fsel.Common.ActionResults;
 using System.Net;
+using Fsel.Common.ActionResults;
 using Fsel.Common.Constants;
 using Fsel.Course.Domain.Models.EntityModels;
+using Fsel.Course.Lms.Application.Commands.MockTestCmd;
 using Fsel.Shared.Enums;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Fsel.Course.Lms.Application.Commands.MockTestCmd;
 
 namespace Fsel.Course.Lms.Api.Controllers
 {
@@ -42,9 +42,9 @@ namespace Fsel.Course.Lms.Api.Controllers
         [HttpGet("start-mock-test")]
         [ProducesResponseType(typeof(MethodResult<MockTestModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> StartPlacementTest([FromQuery] StartMockTestCommand command)
+        public async Task<IActionResult> StartMockTest([FromQuery] StartMockTestCommand query)
         {
-            MethodResult<MockTestModel> queryResult = await _mediator.Send(command).ConfigureAwait(false);
+            MethodResult<MockTestModel> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
     }
