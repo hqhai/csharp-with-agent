@@ -1,6 +1,5 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-using Fsel.Common.ValueSettings;
 using Fsel.Core.Extensions;
 using Fsel.Course.Application.Services.UserServices;
 using Fsel.Course.Domain.IRepositories;
@@ -66,6 +65,8 @@ builder.Services.AddScoped<ExtraPracticeConverter>();
 builder.Services.AddScoped<AnswerTypeConverter>();
 builder.Services.AddScoped<SectionConverter>();
 builder.Services.AddScoped<VideoConverter>();
+builder.Services.AddScoped<CourseHelper>();
+builder.Services.AddScoped<UnitHelper>();
 builder.AddRefitClients(typeof(IUserService), appSetting?.Services?.UserApiUrl);
 var app = builder.Build();
 
