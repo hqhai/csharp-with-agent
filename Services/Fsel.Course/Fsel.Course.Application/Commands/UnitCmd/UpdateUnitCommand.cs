@@ -3,11 +3,11 @@
 using AutoMapper;
 using Fsel.Common.ActionResults;
 using Fsel.Course.Domain.Entities;
-using Fsel.Course.Domain.Enums;
 using Fsel.Course.Domain.Enums.ErrorCodes;
 using Fsel.Course.Domain.IRepositories;
 using Fsel.Course.Domain.Models.CommandModels.Units;
 using Fsel.Course.Domain.Models.EntityModels;
+using Fsel.Course.Infrastructure.Common;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
@@ -21,17 +21,16 @@ namespace Fsel.Course.Application.Commands.UnitCmd
     public class UpdateUnitCommandHandler : IRequestHandler<UpdateUnitCommand, MethodResult<UnitModel>>
     {
         private readonly IUnitRepository _unitRepository;
+        private readonly UnitHelper _unitHelper;
         private readonly IMapper _mapper;
-        private readonly ILessonRepository _lessonRepository;
-        private readonly IMockTestRepository _mockTestRepository;
 
-        public UpdateUnitCommandHandler(IUnitRepository unitTestRepository, ILessonRepository lessonRepository, IMockTestRepository mockTestRepository,
+        public UpdateUnitCommandHandler(IUnitRepository unitTestRepository,
+            UnitHelper unitHelper,
             IMapper mapper)
         {
-            _lessonRepository = lessonRepository;
             _unitRepository = unitTestRepository;
+            _unitHelper = unitHelper;
             _mapper = mapper;
-            _mockTestRepository = mockTestRepository;
         }
 
         public async Task<MethodResult<UnitModel>> Handle(UpdateUnitCommand request, CancellationToken cancellationToken)
@@ -57,31 +56,11 @@ namespace Fsel.Course.Application.Commands.UnitCmd
                 methodResult.AddErrorBadRequest(nameof(EnumUnitErrorCode.UnitUsed), nameof(request.Id), request.Id);
                 return methodResult;
             }
-
-            if (request.LessonIds == null || request.LessonIds.Count == 0)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumLessonErrorCode.LessonsNull), nameof(request.LessonIds), request.LessonIds);
-                return methodResult;
-            }
-
-            if (_lessonRepository.IsIdsInValid(request.LessonIds))
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumLessonErrorCode.LessonsNotExist), nameof(request.LessonIds), request.LessonIds);
-                return methodResult;
-            }
-
-            var checkMockTest = _mockTestRepository.Queryable.Any(x => x.MockTestType == EnumMockTestType.SkillMockTest && x.Id == request.MockTestId);
-            if (!checkMockTest)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumMockTestErrorCode.MockTestExistsOtherThanTypeSkillMockTest), nameof(request.MockTestId), request.MockTestId);
-                return methodResult;
-            }
-
             _mapper.Map(request, unit);
-
-            if (!unit.IsValid())
+            var method = await _unitHelper.Validate(unit, request);
+            if (!method.IsOK)
             {
-                methodResult.AddErrorBadRequest(unit.ErrorMessages);
+                methodResult.AddErrorBadRequest(method.ErrorMessages);
                 return methodResult;
             }
 
@@ -89,16 +68,23 @@ namespace Fsel.Course.Application.Commands.UnitCmd
 
             await _unitRepository.ExecuteTransactionAsync(async () =>
             {
-                unit.UnitLessons = request.LessonIds.Select((x, index) => new UnitLesson
+                unit.UnitLessons = request.LessonIds!.Select((x, index) => new UnitLesson
                 {
                     DisplayOrder = index,
                     LessonId = x
                 }).ToList();
 
+                unit.UnitSkillMockTests = new List<UnitSkillMockTest>
+                {
+                    new UnitSkillMockTest
+                    {
+                        MockTestId = request.MockTestId,
+                    }
+                };
                 unit = _unitRepository.Update(unit);
                 await _unitRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
-                methodResult.StatusCode = StatusCodes.Status201Created;
+                methodResult.StatusCode = StatusCodes.Status200OK;
                 methodResult.Result = _mapper.Map<UnitModel>(unit);
                 return methodResult;
             });

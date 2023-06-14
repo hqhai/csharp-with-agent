@@ -86,6 +86,7 @@ namespace Fsel.Course.Lms.Application.Queries.FinalTestQuery
                 CreatedDate = finalTest.CreatedDate,
                 CreatedFullName = finalTest.CreatedFullName,
                 ExecutionTime = finalTest.ExecutionTime,
+                TotalQuestion = finalTest.FinalTestSections.Select(x => x.SectionGroup).SelectMany(x => x.Sections).SelectMany(x => x.SectionQuestions).Select(x => x.Question).Select(x => x.CorrectTotal).Sum(),
                 SectionGroups = finalTest.FinalTestSections.Select(x => x.SectionGroup).OrderBy(x => x!.CreatedDate).Select(x => new SectionGroupModel
                 {
                     Id = x!.Id,

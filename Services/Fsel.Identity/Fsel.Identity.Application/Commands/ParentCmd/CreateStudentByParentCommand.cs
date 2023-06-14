@@ -118,7 +118,8 @@ namespace Fsel.Identity.Application.Commands.ParentCmd
                     School = request.School,
                     CreatedByParent = true,
                     CourseLevel = EnumCourseLevel.A2,
-                    ParentStudents = new List<ParentStudent> { new ParentStudent { ParentId = parent.Id } }
+                    ParentStudents = new List<ParentStudent> { new ParentStudent { ParentId = parent.Id } },
+                    Occupation = "Student"
                 }
             };
 

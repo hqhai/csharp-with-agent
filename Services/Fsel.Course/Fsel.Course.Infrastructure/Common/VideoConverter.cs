@@ -116,7 +116,7 @@ namespace Fsel.Course.Infrastructure.Common
                     var method = AddQuestionToExercise(newExercise, exercise);
                     if (!method.IsOK)
                     {
-                        methodResult.AddError(method.ErrorMessages);
+                        methodResult.AddErrorBadRequest(method.ErrorMessages);
                         return methodResult;
                     }
                     newTimeCode.TimeCodeExercises.Add(new TimeCodeExercise
@@ -163,7 +163,7 @@ namespace Fsel.Course.Infrastructure.Common
             var method = AddTimeCodeToVideo(video, request.VideoTimeCodes);
             if (!method.IsOK)
             {
-                methodResult.AddError(method.ErrorMessages);
+                methodResult.AddErrorBadRequest(method.ErrorMessages);
                 return methodResult;
             }
             if (!video.IsValid())
@@ -201,7 +201,7 @@ namespace Fsel.Course.Infrastructure.Common
             var method = AddTimeCodeToVideo(video, request.VideoTimeCodes);
             if (!method.IsOK)
             {
-                methodResult.AddError(method.ErrorMessages);
+                methodResult.AddErrorBadRequest(method.ErrorMessages);
                 return methodResult;
             }
             if (!video.IsValid())

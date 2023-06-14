@@ -5,6 +5,7 @@ namespace Fsel.Identity.Application.Queries.UserQuery
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base;
+    using Fsel.Identity.Application.Services.OrderService;
     using Fsel.Identity.Application.Services.TrainingService;
     using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.Enums.ErrorCodes;
@@ -25,13 +26,15 @@ namespace Fsel.Identity.Application.Queries.UserQuery
         private readonly AuthContext _authContext;
         private readonly UserManager<User> _userManager;
         private readonly ITrainingService _trainingService;
+        private readonly IOrderService _orderService;
 
-        public GetUserProfileQueryHandler(IMapper mapper, AuthContext authContext, UserManager<User> userManager, ITrainingService trainingService)
+        public GetUserProfileQueryHandler(IMapper mapper, AuthContext authContext, UserManager<User> userManager, ITrainingService trainingService, IOrderService orderService)
         {
             _mapper = mapper;
             _authContext = authContext;
             _userManager = userManager;
             _trainingService = trainingService;
+            _orderService = orderService;
         }
 
         public async Task<MethodResult<UserProfileModel>> Handle(GetUserProfileQuery request, CancellationToken cancellationToken)
@@ -69,7 +72,7 @@ namespace Fsel.Identity.Application.Queries.UserQuery
                                                    .ThenInclude(x => x!.ParentStudents)
                                                    .FirstOrDefaultAsync(x => x.Id == _authContext.CurrentUserId.ToString(), cancellationToken);
                 var student = userView!.Human!.Student!;
-                if (userView!.Human!.Student!.CreatedByParent == false && student.ParentStudents != null && student.ParentStudents.Count > 0)
+                if (student != null && userView!.Human!.Student!.CreatedByParent == false && student.ParentStudents != null && student.ParentStudents.Count > 0)
                 {
                     userView = await _userManager.Users.Include(x => x.Human)
                                                   .ThenInclude(x => x!.Student)
@@ -105,14 +108,22 @@ namespace Fsel.Identity.Application.Queries.UserQuery
             var userModel = _mapper.Map<UserProfileModel>(userView ?? user);
             _mapper.Map(userView!.Human, userModel);
 
-            if (userRoles.FirstOrDefault() == EnumRole.Student.ToString() && userView!.Human!.Student!.CreatedByParent == false && userView!.Human!.Student!.ParentStudents.Count > 0)
+            if (userRoles.FirstOrDefault() == EnumRole.Student.ToString() && userView!.Human!.Student!.CreatedByParent == false)
             {
                 var classStudent = await _trainingService.GetClassByStudentId(userView!.Human!.Student.Id);
-                userModel!.Parent = _mapper.Map<ParentProfileModel>(userView!.Human!.Student!.ParentStudents!.FirstOrDefault()!.Parent);
                 _mapper.Map(userView!.Human!.Student, userModel);
                 if (classStudent.Content?.Result != null)
                 {
                     userModel.CodeClass = classStudent!.Content!.Result!.Code;
+                }
+                if (userView!.Human!.Student!.ParentStudents.Count > 0)
+                {
+                    userModel!.Parent = _mapper.Map<ParentProfileModel>(userView!.Human!.Student!.ParentStudents!.FirstOrDefault()!.Parent);
+                }
+                var package = await _orderService.GetPackages();
+                if (package.IsSuccessStatusCode)
+                {
+                    userModel.Membership = package.Content?.Result?.FirstOrDefault(p => p.Id == userModel.PackageId)?.Code;
                 }
             }
 

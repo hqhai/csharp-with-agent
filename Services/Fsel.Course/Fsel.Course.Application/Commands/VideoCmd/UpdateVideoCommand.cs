@@ -57,15 +57,6 @@ namespace Fsel.Course.Application.Commands.VideoCmd
                 return methodResult;
             }
 
-            _mapper.Map(request, video);
-
-            var method = await _videoConverter.UpdateTimeCodeToVideo(video, request);
-            if (!method.IsOK)
-            {
-                methodResult.AddError(method.ErrorMessages);
-                return methodResult;
-            }
-
             #endregion Validation
 
             await _videoRepository.ExecuteTransactionAsync(async () =>
@@ -73,9 +64,19 @@ namespace Fsel.Course.Application.Commands.VideoCmd
                 var method = await _videoConverter.DeleteExerciseToVideo(video);
                 if (!method.IsOK)
                 {
-                    methodResult.AddError(method.ErrorMessages);
+                    methodResult.AddErrorBadRequest(method.ErrorMessages);
                     return methodResult;
                 }
+
+                _mapper.Map(request, video);
+
+                method = await _videoConverter.UpdateTimeCodeToVideo(video, request);
+                if (!method.IsOK)
+                {
+                    methodResult.AddErrorBadRequest(method.ErrorMessages);
+                    return methodResult;
+                }
+
                 video = _videoRepository.Update(video);
                 await _videoRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 

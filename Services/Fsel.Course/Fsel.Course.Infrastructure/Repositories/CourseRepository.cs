@@ -25,13 +25,14 @@ namespace Fsel.Course.Infrastructure.Repositories
             try
             {
                 return await Queryable
-                .Include(x => x.CourseUnitMockTests.Where(n => !n.IsDeleted))
+                .Include(x => x.CourseUnitMockTests.Where(n => !n.IsDeleted).OrderBy(x => x.DisplayOrder))
                 .ThenInclude(x => x.Unit)
-                .Include(x => x.CourseUnitMockTests.Where(n => !n.IsDeleted))
+                .Include(x => x.CourseUnitMockTests.Where(n => !n.IsDeleted).OrderBy(x => x.DisplayOrder))
                 .ThenInclude(x => x.FinalTest)
-                .Include(x => x.CourseUnitMockTests.Where(n => !n.IsDeleted))
+                .Include(x => x.CourseUnitMockTests.Where(n => !n.IsDeleted).OrderBy(x => x.DisplayOrder))
                 .ThenInclude(x => x.MockTest)
-                .Include(x => x.CourseTeachers.Where(c => !c.IsDeleted)).FirstOrDefaultAsync(x => x.Id == id);
+                .Include(x => x.CourseTeachers.Where(c => !c.IsDeleted).OrderBy(x => x.CreatedDate))
+                .FirstOrDefaultAsync(x => x.Id == id);
             }
             catch (Exception)
             {

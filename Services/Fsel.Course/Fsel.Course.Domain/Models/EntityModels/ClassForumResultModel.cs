@@ -28,6 +28,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public int? LikeNumber { get; set; }
 
         public string? FeedBackNote { get; set; }
+        public bool? IsFlagged { get; set; }
 
         public ClassForumModel? ClassForum { get; set; }
 

@@ -25,6 +25,11 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         MockTestInActiveState,
 
         /// <summary>
+        /// MockTest is not in active state
+        /// </summary>
+        MockTestNotInActiveState,
+
+        /// <summary>
         /// User does not exist
         /// </summary>
         UserNotExist,
@@ -32,6 +37,16 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         /// <summary>
         /// MockTest must correct score
         /// </summary>
-        MockTestMustCorrectScore
+        MockTestMustCorrectScore,
+
+        /// <summary>
+        /// MockTest Type Does Not Exist
+        /// </summary>
+        MockTestTypeNotExist,
+
+        /// <summary>
+        /// Code And Level Already Exist
+        /// </summary>
+        CodeAndLevelAlreadyExist,
     }
 }

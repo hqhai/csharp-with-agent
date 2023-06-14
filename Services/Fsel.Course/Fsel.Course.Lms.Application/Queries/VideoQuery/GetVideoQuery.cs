@@ -95,11 +95,12 @@ namespace Fsel.Course.Lms.Application.Queries.VideoQuery
                 VideoTimeCodes = video.VideoTimeCodes.OrderBy(x => x!.DisplayTime).Select(x => new VideoTimeCodeModel
                 {
                     Id = x.Id,
+                    TotalCount = x.TimeCodeExercises.Where(x => !x.IsDeleted && x.Exercise != null).Select(x => x.Exercise).SelectMany(x => x!.ExerciseQuestions.Where(x => !x.IsDeleted && x.Question != null)).OrderBy(x => x!.CreatedDate).Select(m => m.Question).Count(),
                     DisplayTime = x.DisplayTime,
                     ExecutionTime = x.ExecutionTime,
                     TimeCodeType = x.TimeCodeType,
                     VideoId = x.VideoId,
-                    Exercises = x.TimeCodeExercises.Where(n => n.Exercise != null).OrderBy(x => x!.CreatedDate).Select(n => n.Exercise).Select(n => new ExerciseModel
+                    Exercises = x.TimeCodeExercises.Where(n => !n.IsDeleted && n.Exercise != null).OrderBy(x => x!.CreatedDate).Select(n => n.Exercise).Select(n => new ExerciseModel
                     {
                         Id = n!.Id,
                         MediaPost = n.MediaPost,

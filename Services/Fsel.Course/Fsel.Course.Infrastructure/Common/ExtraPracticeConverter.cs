@@ -61,7 +61,7 @@ namespace Fsel.Course.Infrastructure.Common
                         var method = _videoConverter.AddQuestionToExercise(excerciseNew, exercise);
                         if (!method.IsOK)
                         {
-                            methodResult.AddError(method.ErrorMessages);
+                            methodResult.AddErrorBadRequest(method.ErrorMessages);
                             return methodResult;
                         }
                         extraPracticeChapter.ExtraPracticeExercises.Add(new ExtraPracticeExercise { Exercise = excerciseNew });
@@ -92,7 +92,7 @@ namespace Fsel.Course.Infrastructure.Common
                 var method = _videoConverter.AddQuestionToExercise(excerciseNew, exercise);
                 if (!method.IsOK)
                 {
-                    methodResult.AddError(method.ErrorMessages);
+                    methodResult.AddErrorBadRequest(method.ErrorMessages);
                     return methodResult;
                 }
                 extraPracticeExercises.Add(new ExtraPracticeExercise { Exercise = excerciseNew });
@@ -112,7 +112,7 @@ namespace Fsel.Course.Infrastructure.Common
                 var method = AddExtraPracticeChapterExercise(extraPracticeChapters, request.ExtraPracticeChapters);
                 if (!method.IsOK)
                 {
-                    methodResult.AddError(method.ErrorMessages);
+                    methodResult.AddErrorBadRequest(method.ErrorMessages);
                     return methodResult;
                 }
             }
@@ -121,7 +121,7 @@ namespace Fsel.Course.Infrastructure.Common
                 var method = AddExerciseToExtraPractice(extraPracticeExercises, request.Exercises);
                 if (!method.IsOK)
                 {
-                    methodResult.AddError(method.ErrorMessages);
+                    methodResult.AddErrorBadRequest(method.ErrorMessages);
                     return methodResult;
                 }
             }
@@ -136,7 +136,7 @@ namespace Fsel.Course.Infrastructure.Common
                 var method = await _videoConverter.CreateTimeCodeToVideo(video, request.Video);
                 if (!method.IsOK)
                 {
-                    methodResult.AddError(method.ErrorMessages);
+                    methodResult.AddErrorBadRequest(method.ErrorMessages);
                     return methodResult;
                 }
                 extraPractice.Video = video;
@@ -165,7 +165,7 @@ namespace Fsel.Course.Infrastructure.Common
                 var method = AddExtraPracticeChapterExercise(extraPracticeChapters, request.ExtraPracticeChapters);
                 if (!method.IsOK)
                 {
-                    methodResult.AddError(method.ErrorMessages);
+                    methodResult.AddErrorBadRequest(method.ErrorMessages);
                     return methodResult;
                 }
             }
@@ -174,7 +174,7 @@ namespace Fsel.Course.Infrastructure.Common
                 var method = AddExerciseToExtraPractice(extraPracticeExercises, request.Exercises);
                 if (!method.IsOK)
                 {
-                    methodResult.AddError(method.ErrorMessages);
+                    methodResult.AddErrorBadRequest(method.ErrorMessages);
                     return methodResult;
                 }
             }
@@ -189,7 +189,7 @@ namespace Fsel.Course.Infrastructure.Common
                 var method = await _videoConverter.CreateTimeCodeToVideo(video, request.Video);
                 if (!method.IsOK)
                 {
-                    methodResult.AddError(method.ErrorMessages);
+                    methodResult.AddErrorBadRequest(method.ErrorMessages);
                     return methodResult;
                 }
                 extraPractice.Video = video;
