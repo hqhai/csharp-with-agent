@@ -202,10 +202,10 @@ services:
         ports:
             - 5209:80
             - 7209:443
-    gateway.service:
+    gateway.testing.service:
         container_name: gateway.service
         hostname: GatewayService
-        image: ${DOCKER_REGISTRY-}gatewaymicroservice:v1
+        image: ${DOCKER_REGISTRY-}gateway-testing-microservice:v1
         build:
             context: ./../
             dockerfile: Environments/Testing/Gateway.Testing.Dockerfile
