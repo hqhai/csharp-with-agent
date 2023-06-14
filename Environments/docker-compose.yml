@@ -202,41 +202,41 @@ services:
         ports:
             - 5209:80
             - 7209:443
-    # gateway.service:
-        # container_name: gateway.service
-        # hostname: GatewayService
-        # image: ${DOCKER_REGISTRY-}gateway-microservice:v1
-        # build:
-            # context: ./../
-            # dockerfile: Environments/Testing/Gateway.Testing.Dockerfile
-        # environment:
-            # - ASPNETCORE_ENVIRONMENT=Testing
-            # - JWT__SECRETKEY=JsonWebApiTokenWithSwaggerAuthorizationAuthenticationAspNetCore
-            # - JWT__ISSUER=baseWebApiIssuer
-            # - JWT__AUDIENCE=baseWebApiAudience
-            # - JWT__SUBJECT=baseWebApiSubject
-            # - JWT__TOKENVALIDITYINMINUTES=1440
-            # - JWT__REFRESHTOKENVALIDITYINDAYS=7
-        # ports:
-            # - 5200:80
-            # - 7200:443
-        # links:
-            # - auth.service
-            # - user.service
-            # - lcms.service
-            # - lms.service
-            # - storage.service
-            # - sender.service
-            # - training.service
-            # - interaction.service
-            # - ordering.service
-        # depends_on:
-            # - auth.service
-            # - user.service
-            # - lcms.service
-            # - lms.service
-            # - storage.service
-            # - sender.service
-            # - training.service
-            # - interaction.service
-            # - ordering.service
+    gateway.testing.service:
+        container_name: gateway.service
+        hostname: GatewayService
+        image: ${DOCKER_REGISTRY-}gateway-testing-microservice:v1
+        build:
+            context: ./../
+            dockerfile: Environments/Testing/Gateway.Testing.Dockerfile
+        environment:
+            - ASPNETCORE_ENVIRONMENT=Testing
+            - JWT__SECRETKEY=JsonWebApiTokenWithSwaggerAuthorizationAuthenticationAspNetCore
+            - JWT__ISSUER=baseWebApiIssuer
+            - JWT__AUDIENCE=baseWebApiAudience
+            - JWT__SUBJECT=baseWebApiSubject
+            - JWT__TOKENVALIDITYINMINUTES=1440
+            - JWT__REFRESHTOKENVALIDITYINDAYS=7
+        ports:
+            - 5200:80
+            - 7200:443
+        links:
+            - auth.service
+            - user.service
+            - lcms.service
+            - lms.service
+            - storage.service
+            - sender.service
+            - training.service
+            - interaction.service
+            - ordering.service
+        depends_on:
+            - auth.service
+            - user.service
+            - lcms.service
+            - lms.service
+            - storage.service
+            - sender.service
+            - training.service
+            - interaction.service
+            - ordering.service
