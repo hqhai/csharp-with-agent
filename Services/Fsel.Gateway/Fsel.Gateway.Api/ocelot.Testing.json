@@ -1,6 +1,6 @@
 {
   "GlobalConfiguration": {
-    "BaseUrl": "http://42.96.40.137:5200"
+    "BaseUrl": "http://localhost:5200"
   },
   "Routes": [
     // Auth Service
@@ -12,8 +12,8 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "42.96.40.137",
-          "Port": 5201
+          "Host": "auth.service",
+          "Port": 80
         }
       ]
     },
@@ -26,8 +26,8 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "42.96.40.137",
-          "Port": 5202
+          "Host": "user.service",
+          "Port": 80
         }
       ],
       "AuthenticationOptions": {
@@ -44,8 +44,8 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "42.96.40.137",
-          "Port": 5203
+          "Host": "lcms.service",
+          "Port": 80
         }
       ],
       "AuthenticationOptions": {
@@ -62,8 +62,8 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "42.96.40.137",
-          "Port": 5204
+          "Host": "lms.service",
+          "Port": 80
         }
       ],
       "AuthenticationOptions": {
@@ -80,8 +80,8 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "42.96.40.137",
-          "Port": 5205
+          "Host": "storage.service",
+          "Port": 80
         }
       ]
     },
@@ -94,8 +94,8 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "42.96.40.137",
-          "Port": 5206
+          "Host": "sender.service",
+          "Port": 80
         }
       ]
     },
@@ -108,8 +108,8 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "42.96.40.137",
-          "Port": 5207
+          "Host": "training.service",
+          "Port": 80
         }
       ]
     },
@@ -122,8 +122,8 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "42.96.40.137",
-          "Port": 5208
+          "Host": "interaction.service",
+          "Port": 80
         }
       ]
     },
@@ -136,8 +136,8 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "42.96.40.137",
-          "Port": 5209
+          "Host": "ordering.service",
+          "Port": 80
         }
       ]
     }
@@ -149,7 +149,7 @@
         {
           "Name": "Auths API",
           "Version": "v1",
-          "Url": "http://42.96.40.137:5201/swagger/v1/swagger.json"
+          "Url": "http://auth.service/swagger/v1/swagger.json"
         }
       ]
     },
@@ -159,7 +159,7 @@
         {
           "Name": "Users API",
           "Version": "v1",
-          "Url": "http://42.96.40.137:5202/swagger/v1/swagger.json"
+          "Url": "http://user.service/swagger/v1/swagger.json"
         }
       ]
     },
@@ -169,7 +169,7 @@
         {
           "Name": "Lcms Courses API",
           "Version": "v1",
-          "Url": "http://42.96.40.137:5203/swagger/v1/swagger.json"
+          "Url": "http://lcms.service/swagger/v1/swagger.json"
         }
       ]
     },
@@ -179,7 +179,7 @@
         {
           "Name": "Lms Courses API",
           "Version": "v1",
-          "Url": "http://42.96.40.137:5204/swagger/v1/swagger.json"
+          "Url": "http://lms.service/swagger/v1/swagger.json"
         }
       ]
     },
@@ -189,7 +189,7 @@
         {
           "Name": "Storage API",
           "Version": "v1",
-          "Url": "http://42.96.40.137:5205/swagger/v1/swagger.json"
+          "Url": "http://storage.service/swagger/v1/swagger.json"
         }
       ]
     },
@@ -199,7 +199,7 @@
         {
           "Name": "Senders API",
           "Version": "v1",
-          "Url": "http://42.96.40.137:5206/swagger/v1/swagger.json"
+          "Url": "http://sender.service/swagger/v1/swagger.json"
         }
       ]
     },
@@ -209,7 +209,7 @@
         {
           "Name": "Training API",
           "Version": "v1",
-          "Url": "http://42.96.40.137:5207/swagger/v1/swagger.json"
+          "Url": "http://training.service/swagger/v1/swagger.json"
         }
       ]
     },
@@ -219,7 +219,7 @@
         {
           "Name": "Interaction API",
           "Version": "v1",
-          "Url": "http://42.96.40.137:5208/swagger/v1/swagger.json"
+          "Url": "http://interaction.service/swagger/v1/swagger.json"
         }
       ]
     },
@@ -229,7 +229,7 @@
         {
           "Name": "Ordering API",
           "Version": "v1",
-          "Url": "http://42.96.40.137:5209/swagger/v1/swagger.json"
+          "Url": "http://ordering.service/swagger/v1/swagger.json"
         }
       ]
     }
