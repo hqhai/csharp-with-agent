@@ -100,20 +100,10 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
                 _mockTestResultRepository.Add(mockTestResult);
                 await _mockTestResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
             }
-            var mockTest = await _mockTestRepository.GetIncludeByIdAsync(request.MockTestId);
-            if (mockTest == null)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumMockTestErrorCode.MockTestsNotExist), nameof(request.MockTestId), request.MockTestId);
-                return methodResult;
-            }
 
-            if (!(mockTest.CourseUnitMockTests.Any() || mockTest.UnitSkillMockTests.Any()))
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumMockTestErrorCode.MockTestNotInActiveState));
-                return methodResult;
-            }
-
-            mockTest = await _mockTestRepository.Queryable
+            var mockTest = await _mockTestRepository.Queryable
+                                                .Include(x => x.UnitSkillMockTests.Where(x => !x.IsDeleted))
+                                                .Include(x => x.CourseUnitMockTests.Where(x => !x.IsDeleted))
                                                 .Include(x => x.MockTestSections.Where(x => !x.IsDeleted))
                                                 .ThenInclude(x => x.SectionGroup)
                                                 .ThenInclude(x => x!.Sections.Where(x => !x.IsDeleted))
@@ -134,7 +124,17 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
                                                 .Where(x => x.Id == request.MockTestId && x.MockTestResults.Any(x => x.StudentId == studentId))
                                                 .AsNoTracking()
                                                 .FirstOrDefaultAsync(cancellationToken: cancellationToken);
+            if (mockTest == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumMockTestErrorCode.MockTestsNotExist), nameof(request.MockTestId), request.MockTestId);
+                return methodResult;
+            }
 
+            if (!(mockTest.CourseUnitMockTests.Any() || mockTest.UnitSkillMockTests.Any()))
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumMockTestErrorCode.MockTestNotInActiveState));
+                return methodResult;
+            }
             var checkDone = mockTestResult.Status == EnumResultStatus.Done;
 
             var mockTestModel = new MockTestModel()

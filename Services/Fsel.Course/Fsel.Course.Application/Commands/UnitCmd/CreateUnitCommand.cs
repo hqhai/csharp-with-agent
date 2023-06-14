@@ -38,7 +38,7 @@ namespace Fsel.Course.Application.Commands.UnitCmd
             MethodResult<UnitModel> methodResult = new MethodResult<UnitModel>();
 
             Unit unit = _mapper.Map<Unit>(request);
-            var method = await _unitHelper.UnitValue(unit, request);
+            var method = await _unitHelper.Validate(unit, request);
             if (!method.IsOK)
             {
                 methodResult.AddErrorBadRequest(method.ErrorMessages);

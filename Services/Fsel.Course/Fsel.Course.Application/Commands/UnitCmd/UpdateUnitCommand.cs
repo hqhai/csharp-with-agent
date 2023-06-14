@@ -57,7 +57,7 @@ namespace Fsel.Course.Application.Commands.UnitCmd
                 return methodResult;
             }
             _mapper.Map(request, unit);
-            var method = await _unitHelper.UnitValue(unit, request);
+            var method = await _unitHelper.Validate(unit, request);
             if (!method.IsOK)
             {
                 methodResult.AddErrorBadRequest(method.ErrorMessages);

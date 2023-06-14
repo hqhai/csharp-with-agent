@@ -35,7 +35,7 @@ namespace Fsel.Course.Infrastructure.Common
             _mockTestRepository = mockTestRepository;
         }
 
-        public async Task<VoidMethodResult> CourseValue(dynamic course, UpdateCourseCommandModel? request)
+        public async Task<VoidMethodResult> Validate(dynamic course, UpdateCourseCommandModel? request)
         {
             ArgumentNullException.ThrowIfNull(request);
             VoidMethodResult methodResult = new VoidMethodResult();

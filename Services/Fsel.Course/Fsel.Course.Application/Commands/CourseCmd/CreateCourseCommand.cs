@@ -53,12 +53,18 @@ namespace Fsel.Course.Application.Commands.CourseCmd
                 methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.TeachersNotExist), nameof(teachers), course.CourseTeachers.Select(x => x.TeacherId).ToList());
                 return methodResult;
             }
+            var method = await _courseHelper.Validate(course, request);
+            if (!method.IsOK)
+            {
+                methodResult.AddErrorBadRequest(method.ErrorMessages);
+                return methodResult;
+            }
 
             #endregion Validation
 
             await _courseRepository.ExecuteTransactionAsync(async () =>
             {
-                var method = await _courseHelper.CourseValue(course, request);
+                var method = await _courseHelper.Validate(course, request);
                 if (!method.IsOK)
                 {
                     methodResult.AddErrorBadRequest(method.ErrorMessages);

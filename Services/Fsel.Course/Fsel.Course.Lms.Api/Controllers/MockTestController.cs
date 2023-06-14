@@ -42,7 +42,7 @@ namespace Fsel.Course.Lms.Api.Controllers
         [HttpGet("start-mock-test")]
         [ProducesResponseType(typeof(MethodResult<MockTestModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> Get([FromQuery] StartMockTestCommand query)
+        public async Task<IActionResult> StartMockTest([FromQuery] StartMockTestCommand query)
         {
             MethodResult<MockTestModel> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();

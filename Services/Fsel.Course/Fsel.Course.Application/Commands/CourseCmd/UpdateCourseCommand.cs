@@ -51,7 +51,12 @@ namespace Fsel.Course.Application.Commands.CourseCmd
                 methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.CourseNotExist));
                 return methodResult;
             }
-
+            var method = await _courseHelper.Validate(course, request);
+            if (!method.IsOK)
+            {
+                methodResult.AddErrorBadRequest(method.ErrorMessages);
+                return methodResult;
+            }
             if (course.Status != EnumCourseStatus.New)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.CourseNotInNewState), nameof(course.Status), course.Status);
@@ -69,12 +74,6 @@ namespace Fsel.Course.Application.Commands.CourseCmd
 
             await _courseRepository.ExecuteTransactionAsync(async () =>
             {
-                var method = await _courseHelper.CourseValue(course, request);
-                if (!method.IsOK)
-                {
-                    methodResult.AddErrorBadRequest(method.ErrorMessages);
-                    return methodResult;
-                }
                 course = _courseRepository.Update(course);
 
                 await _courseRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
