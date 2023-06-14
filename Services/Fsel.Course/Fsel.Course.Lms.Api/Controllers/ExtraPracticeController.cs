@@ -5,6 +5,7 @@ namespace Fsel.Course.Lms.Api.Controllers
     using System.Net;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
+    using Fsel.Core.Base.BaseModels;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Queries.ExtraPracticeQuery;
     using Fsel.Shared.Enums;
@@ -34,6 +35,18 @@ namespace Fsel.Course.Lms.Api.Controllers
         public async Task<IActionResult> GetLevelByUnits()
         {
             MethodResult<object> queryResult = await _mediator.Send(new GetListLevelByUnitQuery()).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Search ExtraPractice
+        /// </summary>
+        [HttpGet()]
+        [ProducesResponseType(typeof(MethodResult<PagingItemsModel<ExtraPracticeModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> Search([FromQuery] SearchExtraPracticeQuery query)
+        {
+            MethodResult<PagingItemsModel<ExtraPracticeModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
     }

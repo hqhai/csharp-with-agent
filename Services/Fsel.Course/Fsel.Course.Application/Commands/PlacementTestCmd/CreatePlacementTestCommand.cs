@@ -104,7 +104,7 @@ namespace Fsel.Course.Application.Commands.PlacementTestCmd
                     Name = placementTest.Name,
                     IsActive = placementTest.IsActive,
                     InstructionContent = placementTest.InstructionContent,
-                    Type = EnumExtraPracticeType.MockTest;
+                    Type = EnumExtraPracticeType.MockTest,
                     CourseLevel = placementTest.Level.GetCourseLevelByPlacementTestLevel()
                 };
 
