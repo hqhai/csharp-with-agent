@@ -20,6 +20,7 @@ COPY ["Services/Shared/Fsel.Common/Fsel.Common.csproj", "Services/Shared/Fsel.Co
 RUN dotnet restore "Services/Fsel.Course/Fsel.Course.Lms.Api/Fsel.Course.Lms.Api.csproj"
 COPY . .
 WORKDIR "/src/Services/Fsel.Course/Fsel.Course.Lms.Api"
+ARG CACHEBUST=1
 RUN dotnet build "Fsel.Course.Lms.Api.csproj" -c Release -o /app/build
 
 FROM build AS publish
