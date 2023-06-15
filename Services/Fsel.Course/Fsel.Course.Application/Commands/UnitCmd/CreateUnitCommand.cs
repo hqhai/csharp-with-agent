@@ -44,7 +44,6 @@ namespace Fsel.Course.Application.Commands.UnitCmd
                 methodResult.AddErrorBadRequest(method.ErrorMessages);
                 return methodResult;
             }
-
             await _unitRepository.ExecuteTransactionAsync(async () =>
             {
                 unit.UnitLessons = request.LessonIds!.Select((x, index) => new UnitLesson
@@ -52,14 +51,16 @@ namespace Fsel.Course.Application.Commands.UnitCmd
                     DisplayOrder = index,
                     LessonId = x
                 }).ToList();
-
-                unit.UnitSkillMockTests = new List<UnitSkillMockTest>
+                if (request.MockTestId != null)
                 {
+                    unit.UnitSkillMockTests = new List<UnitSkillMockTest>
+                    {
                     new UnitSkillMockTest
                     {
-                        MockTestId = request.MockTestId,
+                        MockTestId = request.MockTestId ?? default,
                     }
-                };
+                    };
+                }
                 unit = _unitRepository.Add(unit);
                 await _unitRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
