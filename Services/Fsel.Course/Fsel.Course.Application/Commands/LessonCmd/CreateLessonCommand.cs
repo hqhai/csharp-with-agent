@@ -114,6 +114,7 @@ namespace Fsel.Course.Application.Commands.LessonCmd
                 {
                     HomeWorkId = x
                 }).ToList();
+
                 if (request.ExtraPracticeIds != null && request.ExtraPracticeIds.Count > 0)
                 {
                     lesson.LessonExtraPractices = request.ExtraPracticeIds.Select((x) => new LessonExtraPractice

@@ -52,10 +52,7 @@ namespace Fsel.Course.Domain.Entities
         public Guid CourseId { get; set; }
 
         public Unit? Unit { get; set; }
-
-        [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         public Guid? UnitId { get; set; }
-
         public MockTest? MockTest { get; set; }
 
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
