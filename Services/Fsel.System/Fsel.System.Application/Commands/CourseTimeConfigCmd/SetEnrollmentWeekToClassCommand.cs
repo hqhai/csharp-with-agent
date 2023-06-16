@@ -37,10 +37,13 @@ namespace Fsel.System.Application.Commands.CourseTimeConfigCmd
             var courseTimeConfigs = await _courseTimeConfigRepository.GetByIdsAsync(request.Ids!);
             if (courseTimeConfigs == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumCourseTimeConfigErrorCode.CourseTimeConfigNotEmpty), nameof(request.Id), request.Id);
+                methodResult.AddErrorBadRequest(nameof(EnumCourseTimeConfigErrorCode.CourseTimeConfigNotEmpty), nameof(request.Ids), request.Ids);
                 return methodResult;
             }
             _mapper.Map(request, courseTimeConfigs);
+
+            #endregion Validation
+
             await _courseTimeConfigRepository.ExecuteTransactionAsync(async () =>
             {
                 _courseTimeConfigRepository.UpdateList(courseTimeConfigs);

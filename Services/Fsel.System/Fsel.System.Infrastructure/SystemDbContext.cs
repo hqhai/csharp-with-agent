@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Fsel.Common.Constants;
 using Fsel.Core.Base;
+using Fsel.Shared.Enums;
 using Fsel.System.Domain.Entities;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -21,6 +22,7 @@ namespace Fsel.System.Infrastructure
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             ArgumentNullException.ThrowIfNull(modelBuilder);
+            SeedCourselevel(modelBuilder);
 
             base.OnModelCreating(modelBuilder);
         }
@@ -41,6 +43,22 @@ namespace Fsel.System.Infrastructure
                     configuration.GetConnectionString(Settings.DefaultConnection),
                     options => options.MigrationsAssembly(GetType().Assembly.GetName().Name));
             }
+        }
+
+        private static void SeedCourselevel(ModelBuilder builder)
+        {
+            builder.Entity<CourseTimeConfig>().HasData
+                (
+                    new CourseTimeConfig() { CourseLevel = EnumCourseLevel.A1 },
+                    new CourseTimeConfig() { CourseLevel = EnumCourseLevel.A2 },
+                    new CourseTimeConfig() { CourseLevel = EnumCourseLevel.B1 },
+                    new CourseTimeConfig() { CourseLevel = EnumCourseLevel.B1Plus },
+                    new CourseTimeConfig() { CourseLevel = EnumCourseLevel.B2 },
+                    new CourseTimeConfig() { CourseLevel = EnumCourseLevel.RFE },
+                    new CourseTimeConfig() { CourseLevel = EnumCourseLevel.MS3 },
+                    new CourseTimeConfig() { CourseLevel = EnumCourseLevel.MS2 },
+                    new CourseTimeConfig() { CourseLevel = EnumCourseLevel.MS1 }
+                );
         }
     }
 }
