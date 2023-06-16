@@ -53,7 +53,7 @@ namespace Fsel.Interaction.Application.Queries.PostQuery
                     .Select(x =>
                     {
                         var model = _mapper.Map<PostModel>(x);
-                        model.TopicTags = x.PostTags.Select(x => x.TopicTag!).ToList();
+                        model.TopicTags = _mapper.Map<IList<TopicTagModel>>(x.PostTags.Select(x => x.TopicTag!));
                         return model;
                     }).ToList();
 
