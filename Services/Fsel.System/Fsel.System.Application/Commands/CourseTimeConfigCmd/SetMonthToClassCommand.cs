@@ -15,7 +15,6 @@ namespace Fsel.System.Application.Commands.CourseTimeConfigCmd
 
     public class SetMonthToClassCommand : SetMonthToClassCommandModel, IRequest<MethodResult<CourseTimeConfigModel>>
     {
-        public Guid Id { get; set; }
     }
 
     public class SetMonthToClassCommandHandler : IRequestHandler<SetMonthToClassCommand, MethodResult<CourseTimeConfigModel>>
