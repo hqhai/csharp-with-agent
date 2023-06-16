@@ -8,9 +8,9 @@ namespace Fsel.System.Api.Controllers
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
     using Fsel.System.Domain.Models;
-    using Fsel.System.Application.Querys;
     using global::System.Net;
-    using Fsel.System.Application.Commands;
+    using Fsel.System.Application.Querys.LiveTimeFrames;
+    using Fsel.System.Application.Commands.LiveTimeFrameCmd;
 
     [ApiVersion(Settings.APIVersion)]
     [Route(Settings.APIDefaultRoute + "/live-time-frame")]

@@ -1,4 +1,4 @@
-namespace Fsel.System.Application.Querys
+namespace Fsel.System.Application.Querys.LiveTimeFrames
 {
     using Fsel.Common.ActionResults;
     using Fsel.System.Domain.IRepositories;
@@ -24,7 +24,7 @@ namespace Fsel.System.Application.Querys
         public async Task<MethodResult<IList<LiveTimeFrameModel>>> Handle(GetListLiveTimeFrameQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            MethodResult<IList<LiveTimeFrameModel>> methodResult = new MethodResult<IList<LiveTimeFrameModel>>();
+            var methodResult = new MethodResult<IList<LiveTimeFrameModel>>();
 
             var liveTimeFrame = await _liveTimeFrameRepository.Queryable
                                     .Select(x => new LiveTimeFrameModel

@@ -51,6 +51,9 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{5E7078A9-8DE2-459D-854D-7D8625E92C43}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{59DE02A4-17D3-42F9-A1D8-823589A563D0}"
+	ProjectSection(SolutionItems) = preProject
+		Services\Fsel.System\Fsel.System.Domain\Models\EntityModels\LiveTimeFrameModel.cs = Services\Fsel.System\Fsel.System.Domain\Models\EntityModels\LiveTimeFrameModel.cs
+	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Fsel.Course.Lcms.Api", "Services\Fsel.Course\Fsel.Course.Lcms.Api\Fsel.Course.Lcms.Api.csproj", "{06095DB5-3242-48B9-8713-557E2605E16D}"
 EndProject

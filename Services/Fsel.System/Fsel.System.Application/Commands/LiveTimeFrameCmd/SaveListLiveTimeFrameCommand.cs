@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.System.Application.Commands
+namespace Fsel.System.Application.Commands.LiveTimeFrameCmd
 {
     using AutoMapper;
     using Fsel.Common.ActionResults;
@@ -31,7 +31,7 @@ namespace Fsel.System.Application.Commands
         public async Task<MethodResult<IList<LiveTimeFrameModel>>> Handle(SaveListLiveTimeFrameCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            MethodResult<IList<LiveTimeFrameModel>> methodResult = new MethodResult<IList<LiveTimeFrameModel>>();
+            var methodResult = new MethodResult<IList<LiveTimeFrameModel>>();
 
             if (request.LiveTimeFrames == null || request.LiveTimeFrames.Count == 0)
             {
@@ -39,8 +39,8 @@ namespace Fsel.System.Application.Commands
                 return methodResult;
             }
 
-            List<LiveTimeFrame> createLiveTimeFrameResults = new List<LiveTimeFrame>();
-            List<LiveTimeFrame> updateLiveTimeFrameResults = new List<LiveTimeFrame>();
+            var createLiveTimeFrameResults = new List<LiveTimeFrame>();
+            var updateLiveTimeFrameResults = new List<LiveTimeFrame>();
             var liveTimeFrameIds = request.LiveTimeFrames.Select(x => x.Id).ToArray();
             var deleteLiveTimeFrame = await _liveTimeFrameRepository.Queryable.Where(x => !liveTimeFrameIds.Contains(x.Id)).ToListAsync(cancellationToken);
 
