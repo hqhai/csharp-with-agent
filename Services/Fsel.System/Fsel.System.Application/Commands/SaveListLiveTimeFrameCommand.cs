@@ -46,20 +46,16 @@ namespace Fsel.System.Application.Commands
 
             foreach (var item in request.LiveTimeFrames)
             {
+                LiveTimeFrame? liveTimeFrameNew;
                 if (item.Id.HasValue)
                 {
-                    var liveTimeFrameNew = await _liveTimeFrameRepository.GetByIdAsync(item.Id.Value);
+                    liveTimeFrameNew = await _liveTimeFrameRepository.GetByIdAsync(item.Id.Value);
                     if (liveTimeFrameNew == null)
                     {
                         methodResult.AddErrorBadRequest(nameof(EnumLiveTimeFrameErrorCode.LiveTimeFramesNotEmpty));
                         return methodResult;
                     }
                     liveTimeFrameNew = _mapper.Map(item, liveTimeFrameNew);
-                    if (!liveTimeFrameNew.IsValid())
-                    {
-                        methodResult.AddErrorBadRequest(liveTimeFrameNew.ErrorMessages);
-                        return methodResult;
-                    }
                     updateLiveTimeFrameResults.Add(liveTimeFrameNew);
                 }
                 else
