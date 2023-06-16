@@ -4,20 +4,29 @@ namespace Fsel.Interaction.Domain.Models.EntityModels
 {
     using System;
     using Fsel.Core.Base.BaseModels;
+    using Fsel.Interaction.Domain.Entities;
     using Fsel.Shared.Enums;
 
-    public class CommentModel : BaseModel
+    public class PostModel : BaseModel
     {
+        public string? Title { get; set; }
+
         public string? Content { get; set; }
-        public bool? IsFlagged { get; set; }
-        public int LikeNumber { get; set; }
-        public int CommentNumber { get; set; }
-        public Guid ObjectId { get; set; }
-        public bool IsLiked { get; set; }
+
+        public EnumPostStatus Status { get; set; }
+
+        public EnumCourseLevel CourseLevel { get; set; }
+
         public Guid UserId { get; set; }
+
         public string? AvatarPath { get; set; }
+
         public string? FullName { get; set; }
-        public EnumInteractionActionType? InteractionActionType { get; set; }
+
+        public IList<string>? FilePaths { get; set; }
+
+        public IList<TopicTagModel>? TopicTags { get; set; }
+
         public IList<CommentModel>? Comments { get; set; }
     }
 }

@@ -46,7 +46,6 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
             }
             await _commentRepository.ExecuteTransactionAsync(async () =>
             {
-                comment.Status = Shared.Enums.EnumCommentStatus.Normal;
                 comment = _commentRepository.Add(comment);
                 await _commentRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 

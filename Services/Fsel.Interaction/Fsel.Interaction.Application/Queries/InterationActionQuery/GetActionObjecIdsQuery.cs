@@ -11,7 +11,6 @@ namespace Fsel.Interaction.Application.Queries.InterationActionQuery
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base;
-    using Fsel.Interaction.Application.Queries.InteractionQuery;
     using Fsel.Interaction.Application.Services.UserServices;
     using Fsel.Interaction.Domain.Enums.ErrorCodes;
     using Fsel.Interaction.Domain.IRepositories;

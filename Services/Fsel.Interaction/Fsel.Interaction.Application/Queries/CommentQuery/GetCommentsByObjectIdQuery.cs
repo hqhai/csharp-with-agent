@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Interaction.Application.Queries.InteractionQuery
+namespace Fsel.Interaction.Application.Queries.CommentQuery
 {
     using System;
     using System.Collections.Generic;
