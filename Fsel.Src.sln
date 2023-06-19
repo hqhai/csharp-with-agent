@@ -104,7 +104,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Fsel.Ordering.Infrastructur
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Fsel.System", "Fsel.System", "{48F314F8-7FFA-4CA6-9DC2-FFA4FB81A1C4}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Fsel.System.Api", "Services\Fsel.System\Fsel.Storage.Api\Fsel.System.Api.csproj", "{CDC10682-95E2-4566-9F82-E8248E5BA185}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Fsel.System.Api", "Services\Fsel.System\Fsel.System.Api\Fsel.System.Api.csproj", "{CDC10682-95E2-4566-9F82-E8248E5BA185}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Fsel.System.Application", "Services\Fsel.System\Fsel.System.Application\Fsel.System.Application.csproj", "{81598BDB-3C97-4DBD-AD42-3BBE510C4C6C}"
 EndProject
