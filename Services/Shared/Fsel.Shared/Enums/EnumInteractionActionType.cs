@@ -4,6 +4,6 @@ namespace Fsel.Shared.Enums
 {
     public enum EnumInteractionActionType
     {
-        Like, Disable
+        Like, Disable, Flag
     }
 }

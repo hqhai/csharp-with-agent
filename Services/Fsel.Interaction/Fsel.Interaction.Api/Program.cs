@@ -20,6 +20,8 @@ builder.Services.AddScoped<ISurveyQuestionRepository, SurveyQuestionRepository>(
 builder.Services.AddScoped<ICustomerSurveyRepository, CustomerSurveyRepository>();
 builder.Services.AddScoped<ICommentRepository, CommentRepository>();
 builder.Services.AddScoped<IInteractionActionRepository, InteractionActionRepository>();
+builder.Services.AddScoped<IPostRepository, PostRepository>();
+builder.Services.AddScoped<ITopicTagRepository, TopicTagRepository>();
 
 builder.AddRefitClients(typeof(IUserService), appSetting?.Services?.UserApiUrl);
 var app = builder.Build();
