@@ -2,6 +2,8 @@
 
 namespace Fsel.Training.Infrastructure.Configs
 {
+    using Fsel.Common.Helpers;
+    using Fsel.Shared.Enums;
     using Fsel.Training.Domain.Entities;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -15,6 +17,12 @@ namespace Fsel.Training.Infrastructure.Configs
                .WithMany(b => b.ClassLiveCalendars)
                .HasForeignKey(b => b.ClassId)
                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Property(e => e.Status)
+                .HasMaxLength(100)
+                .HasConversion(
+                    v => v.ToString(),
+                    v => v.EnumParse<EnumStatusClassLiveCalendar>());
         }
     }
 }
