@@ -3,9 +3,10 @@
 namespace Fsel.Interaction.Domain.Models.CommandModels.Posts.StudentPost
 {
     using System;
+    using Fsel.Core.Base.BaseModels;
     using Fsel.Shared.Enums;
 
-    public class CreatePostCommandModel
+    public class UpdatePostCommandModel : BaseModel
     {
         public string? Title { get; set; }
 

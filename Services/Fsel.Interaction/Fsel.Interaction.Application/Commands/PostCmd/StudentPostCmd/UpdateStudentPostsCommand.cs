@@ -7,49 +7,46 @@ namespace Fsel.Interaction.Application.Commands.ActionCmd
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base;
-    using Fsel.Interaction.Domain.Entities;
+    using Fsel.Interaction.Domain.Enums.ErrorCodes;
     using Fsel.Interaction.Domain.IRepositories;
     using Fsel.Interaction.Domain.Models.CommandModels.Posts.StudentPost;
     using Fsel.Interaction.Domain.Models.EntityModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
 
-    public class CreateStudentPostsCommand : CreatePostCommandModel, IRequest<MethodResult<PostModel>>
+    public class UpdateStudentPostsCommand : UpdatePostCommandModel, IRequest<MethodResult<PostModel>>
     {
     }
 
-    public class CreateStudentPostsCommandCommandHandler : IRequestHandler<CreateStudentPostsCommand, MethodResult<PostModel>>
+    public class UpdateStudentPostsCommandCommandHandler : IRequestHandler<UpdateStudentPostsCommand, MethodResult<PostModel>>
     {
         private readonly IMapper _mapper;
-        private readonly AuthContext _authContext;
         private readonly IPostRepository _iPostRepository;
 
-        public CreateStudentPostsCommandCommandHandler(IMapper mapper, AuthContext authContext, IPostRepository iPostRepository)
+        public UpdateStudentPostsCommandCommandHandler(IMapper mapper, IPostRepository iPostRepository)
         {
             _mapper = mapper;
-            _authContext = authContext;
             _iPostRepository = iPostRepository;
         }
 
-        public async Task<MethodResult<PostModel>> Handle(CreateStudentPostsCommand request, CancellationToken cancellationToken)
+        public async Task<MethodResult<PostModel>> Handle(UpdateStudentPostsCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<PostModel> methodResult = new MethodResult<PostModel>();
 
-            Post studentPosts = _mapper.Map<Post>(request);
-
-            studentPosts.UserId = _authContext.CurrentUserId;
-
-            if (!studentPosts.IsValid())
+            var studentPosts = await _iPostRepository.GetIncludeByIdAsync(request.Id);
+            if (studentPosts == null)
             {
-                methodResult.AddErrorBadRequest(studentPosts.ErrorMessages);
+                methodResult.AddErrorBadRequest(nameof(EnumPostErrorCode.PostNotExist), nameof(request.Id), request.Id);
                 return methodResult;
             }
 
-
             await _iPostRepository.ExecuteTransactionAsync(async () =>
             {
-                studentPosts = _iPostRepository.Add(studentPosts);
+
+                _mapper.Map(request, studentPosts);
+
+                studentPosts = _iPostRepository.Update(studentPosts);
                 await _iPostRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
                 methodResult.StatusCode = StatusCodes.Status201Created;
