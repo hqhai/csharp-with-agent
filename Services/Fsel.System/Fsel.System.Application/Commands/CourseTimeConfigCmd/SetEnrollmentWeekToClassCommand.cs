@@ -4,16 +4,15 @@ namespace Fsel.System.Application.Commands.CourseTimeConfigCmd
 {
     using AutoMapper;
     using Fsel.Common.ActionResults;
-    using Fsel.System.Domain.Enums.ErrorCodes;
     using Fsel.System.Domain.IRepositories;
     using Fsel.System.Domain.Models;
     using Fsel.System.Domain.Models.CommandModels.CourseTimeConfigs;
     using MediatR;
     using Microsoft.AspNetCore.Http;
+    using Microsoft.EntityFrameworkCore;
 
     public class SetEnrollmentWeekToClassCommand : SetEnrollmentWeekToClassCommandModel, IRequest<MethodResult<IList<CourseTimeConfigModel>>>
     {
-        public IList<Guid>? Ids { get; set; }
     }
 
     public class SetEnrollmentWeekToClassCommandHandler : IRequestHandler<SetEnrollmentWeekToClassCommand, MethodResult<IList<CourseTimeConfigModel>>>
@@ -34,13 +33,9 @@ namespace Fsel.System.Application.Commands.CourseTimeConfigCmd
 
             #region Validation
 
-            var courseTimeConfigs = await _courseTimeConfigRepository.GetByIdsAsync(request.Ids!);
-            if (courseTimeConfigs == null)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumCourseTimeConfigErrorCode.CourseTimeConfigNotEmpty), nameof(request.Ids), request.Ids);
-                return methodResult;
-            }
-            _mapper.Map(request, courseTimeConfigs);
+            var courseTimeConfigs = await _courseTimeConfigRepository.Queryable.ToListAsync(cancellationToken);
+
+            courseTimeConfigs.ForEach(x => { x.EnrollmentWeek = request.EnrollmentWeek; });
 
             #endregion Validation
 

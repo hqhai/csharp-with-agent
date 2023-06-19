@@ -27,12 +27,12 @@ namespace Fsel.System.Api.Controllers
         /// <summary>
         /// Get Pacing Guide Detail By Group id
         /// </summary>
-        [HttpGet("{id}")]
+        [HttpGet]
         [ProducesResponseType(typeof(MethodResult<IList<LiveTimeFrameModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> Get([FromRoute] Guid id)
+        public async Task<IActionResult> Get()
         {
-            var commandResult = await _mediator.Send(new GetListLiveTimeFrameQuery { Id = id }).ConfigureAwait(false);
+            var commandResult = await _mediator.Send(new GetListLiveTimeFrameQuery { }).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
 
