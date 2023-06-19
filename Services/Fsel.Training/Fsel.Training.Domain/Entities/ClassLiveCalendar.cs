@@ -7,7 +7,7 @@ namespace Fsel.Training.Domain.Entities
     using Fsel.Core.Entities;
     using Fsel.Shared.Enums;
 
-    public class LiveTimeCalendar : Entity
+    public class ClassLiveCalendar : Entity
     {
         public DateTime LiveDate { get; set; }
         public Guid LiveTimeFrameId { get; set; }

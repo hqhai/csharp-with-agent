@@ -4,7 +4,6 @@ namespace Fsel.Shared.Enums
 {
     public enum EnumStatusClassLiveCalendar
     {
-        Active,
-        InActive
+        WaitForConfirmation, Scheduled, AskToTeacherInstead
     }
 }
