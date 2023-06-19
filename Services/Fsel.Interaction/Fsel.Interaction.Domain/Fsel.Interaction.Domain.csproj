@@ -10,8 +10,4 @@
     <ProjectReference Include="..\..\Shared\Fsel.Shared\Fsel.Shared.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Models\CommandModels\Posts\" />
-  </ItemGroup>
-
 </Project>

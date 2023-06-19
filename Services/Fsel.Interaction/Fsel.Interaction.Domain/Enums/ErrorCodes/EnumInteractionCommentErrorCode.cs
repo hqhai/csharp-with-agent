@@ -8,5 +8,10 @@ namespace Fsel.Interaction.Domain.Enums.ErrorCodes
         /// Comment does not exist
         /// </summary>
         CommentNotExist,
+
+        /// <summary>
+        /// Comment not flagged
+        /// </summary>
+        CommentNotFlagged,
     }
 }
