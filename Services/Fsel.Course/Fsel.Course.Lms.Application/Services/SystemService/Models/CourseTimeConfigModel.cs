@@ -1,11 +1,10 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.System.Domain.Models
+namespace Fsel.Course.Lms.Application.Services.SystemService.Models
 {
-    using Fsel.Core.Base.BaseModels;
-    using Fsel.Shared.Enums;
+    using System;
 
-    public class CourseTimeConfigModel : BaseModel
+    public class CourseTimeConfigModel
     {
         public Guid CourseId { get; set; }
 
