@@ -50,5 +50,6 @@ namespace Fsel.Training.Domain.Entities
         public Guid? CsoId { get; set; }
 
         public ICollection<ClassStudent> ClassStudents { get; set; } = new List<ClassStudent>();
+        public ICollection<LiveTimeCalendar> LiveTimeCalendars { get; set; } = new List<LiveTimeCalendar>();
     }
 }
