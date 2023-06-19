@@ -2,7 +2,9 @@
 
 namespace Fsel.Course.Application.Services.UserServices.Models
 {
-    public class HumanModel
+    using Fsel.Core.Base.BaseModels;
+
+    public class HumanModel : BaseModel
     {
         public string? FullName { get; set; }
     }

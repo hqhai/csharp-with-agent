@@ -8,5 +8,6 @@ namespace Fsel.Training.Domain.Models.QueryModels
     public class SearchClassQueryModel : BaseQueryModel
     {
         public EnumCourseLevel? Level { get; set; }
+        public EnumClassType? Status { get; set; }
     }
 }
