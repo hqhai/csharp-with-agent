@@ -9,7 +9,6 @@ namespace Fsel.System.Application.Querys.LiveTimeFrames
 
     public class GetListLiveTimeFrameQuery : IRequest<MethodResult<IList<LiveTimeFrameModel>>>
     {
-        public Guid Id { get; set; }
     }
 
     public class GetListLiveTimeFrameQueryHandler : IRequestHandler<GetListLiveTimeFrameQuery, MethodResult<IList<LiveTimeFrameModel>>>
@@ -27,6 +26,7 @@ namespace Fsel.System.Application.Querys.LiveTimeFrames
             var methodResult = new MethodResult<IList<LiveTimeFrameModel>>();
 
             var liveTimeFrame = await _liveTimeFrameRepository.Queryable
+
                                     .Select(x => new LiveTimeFrameModel
                                     {
                                         Id = x.Id,
