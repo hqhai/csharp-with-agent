@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Fsel.Training.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class add_livetimecalendartable : Migration
+    public partial class Create_ClassLiveCalendarTable : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -37,7 +37,7 @@ namespace Fsel.Training.Infrastructure.Migrations
                 nullable: true);
 
             migrationBuilder.CreateTable(
-                name: "LiveTimeCalendar",
+                name: "ClassLiveCalendars",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
@@ -55,14 +55,14 @@ namespace Fsel.Training.Infrastructure.Migrations
                     LiveTimeFrameId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     AccessLink = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
                     Note = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
-                    Status = table.Column<int>(type: "int", nullable: false),
+                    Status = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     ClassId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_LiveTimeCalendar", x => x.Id);
+                    table.PrimaryKey("PK_ClassLiveCalendars", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_LiveTimeCalendar_Classes_ClassId",
+                        name: "FK_ClassLiveCalendars_Classes_ClassId",
                         column: x => x.ClassId,
                         principalTable: "Classes",
                         principalColumn: "Id",
@@ -70,8 +70,8 @@ namespace Fsel.Training.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_LiveTimeCalendar_ClassId",
-                table: "LiveTimeCalendar",
+                name: "IX_ClassLiveCalendars_ClassId",
+                table: "ClassLiveCalendars",
                 column: "ClassId");
         }
 
@@ -79,7 +79,7 @@ namespace Fsel.Training.Infrastructure.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "LiveTimeCalendar");
+                name: "ClassLiveCalendars");
 
             migrationBuilder.DropColumn(
                 name: "CsoId",
