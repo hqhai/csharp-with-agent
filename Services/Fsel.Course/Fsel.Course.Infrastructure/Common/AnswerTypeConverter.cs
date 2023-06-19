@@ -3,6 +3,7 @@
 namespace Fsel.Course.Infrastructure.Common
 {
     using System;
+    using System.CodeDom;
     using System.Globalization;
     using System.Linq;
     using Fsel.Common.Helpers;
@@ -189,7 +190,7 @@ namespace Fsel.Course.Infrastructure.Common
 
             if (dataAnswer != null && dataAnswer.Answers != null && dataQuestion != null && dataQuestion.Contents != null && dataQuestion.Contents.Count > 0)
             {
-                if (dataAnswer.Answers.All(x => dataQuestion.Contents.Any(y => y.ToLower(CultureInfo.CurrentCulture) == x.ToLower(CultureInfo.CurrentCulture))))
+                if (dataQuestion.Contents.Any(p => p.ToLower(CultureInfo.CurrentCulture) == dataAnswer.Answers.ToLower(CultureInfo.CurrentCulture)))
                 {
                     dataAnswer.IsExact = true;
                     number++;
