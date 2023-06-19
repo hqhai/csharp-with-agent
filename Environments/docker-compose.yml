@@ -20,9 +20,9 @@ services:
             - Otp__StepTime=3
             - Otp__StepDayWithAdmin=7
             - ConstantUrl__ConfirmOtpUrl=http://fsel-auth-api.fsel.edu.vn/v1/user/confirm-otp-signup?OTP={0}&NewPassword=Admin@123
-            - SERVICES_SenderApiUrl=http://42.96.40.137:5206/api/v1
-            - SERVICES_InteractionApiUrl=http://42.96.40.137:5208/api/
-            - SERVICES_ClassApiUrl=http://42.96.40.137:5207/api/v1
+            - SERVICES_SenderApiUrl=http://202.134.19.161:5206/api/v1
+            - SERVICES_InteractionApiUrl=http://202.134.19.161:5208/api/
+            - SERVICES_ClassApiUrl=http://202.134.19.161:5207/api/v1
         ports:
             - 5201:80
             - 7201:443
@@ -46,9 +46,9 @@ services:
             - Otp__StepTime=3
             - Otp__StepDayWithAdmin=7
             - ConstantUrl__ConfirmOtpUrl=http://fsel-auth-api.fsel.edu.vn/v1/user/confirm-otp-signup?OTP={0}&NewPassword=Admin@123
-            - SERVICES_SenderApiUrl=http://42.96.40.137:5206/api/v1
-            - SERVICES_InteractionApiUrl=http://42.96.40.137:5208/api/
-            - SERVICES_ClassApiUrl=http://42.96.40.137:5207/api/v1
+            - SERVICES_SenderApiUrl=http://202.134.19.161:5206/api/v1
+            - SERVICES_InteractionApiUrl=http://202.134.19.161:5208/api/
+            - SERVICES_ClassApiUrl=http://202.134.19.161:5207/api/v1
         ports:
             - 5202:80
             - 7202:443
@@ -69,7 +69,7 @@ services:
             - JWT__SUBJECT=baseWebApiSubject
             - JWT__TOKENVALIDITYINMINUTES=1440
             - JWT__REFRESHTOKENVALIDITYINDAYS=7
-            - SERVICES_UserApiUrl=http://42.96.40.137:5202/api/v1
+            - SERVICES_UserApiUrl=http://202.134.19.161:5202/api/v1
         ports:
             - 5203:80
             - 7203:443
@@ -90,8 +90,8 @@ services:
             - JWT__SUBJECT=baseWebApiSubject
             - JWT__TOKENVALIDITYINMINUTES=1440
             - JWT__REFRESHTOKENVALIDITYINDAYS=7
-            - SERVICES_UserApiUrl=http://42.96.40.137:5202/api/v1
-            - SERVICES_ClassApiUrl=http://42.96.40.137:5207/api/v1
+            - SERVICES_UserApiUrl=http://202.134.19.161:5202/api/v1
+            - SERVICES_ClassApiUrl=http://202.134.19.161:5207/api/v1
         ports:
             - 5204:80
             - 7204:443
@@ -156,8 +156,8 @@ services:
             - JWT__SUBJECT=baseWebApiSubject
             - JWT__TOKENVALIDITYINMINUTES=1440
             - JWT__REFRESHTOKENVALIDITYINDAYS=7
-            - SERVICES_UserApiUrl=http://42.96.40.137:5202/api/v1
-            - SERVICES_CourseApiUrl=http://42.96.40.137:5203/api/v1
+            - SERVICES_UserApiUrl=http://202.134.19.161:5202/api/v1
+            - SERVICES_CourseApiUrl=http://202.134.19.161:5203/api/v1
         ports:
             - 5207:80
             - 7207:443
@@ -198,7 +198,7 @@ services:
             - JWT__SUBJECT=baseWebApiSubject
             - JWT__TOKENVALIDITYINMINUTES=1440
             - JWT__REFRESHTOKENVALIDITYINDAYS=7
-            - SERVICES_UserApiUrl=http://42.96.40.137:5202/api/v1
+            - SERVICES_UserApiUrl=http://202.134.19.161:5202/api/v1
         ports:
             - 5209:80
             - 7209:443
