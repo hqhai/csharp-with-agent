@@ -16,5 +16,6 @@ namespace Fsel.Identity.Domain.Models.EntityModels
         public EnumGender? Gender { get; set; }
         public string? Email { get; set; }
         public string? AvatarPath { get; set; }
+        public string? UserId { get; set; }
     }
 }
