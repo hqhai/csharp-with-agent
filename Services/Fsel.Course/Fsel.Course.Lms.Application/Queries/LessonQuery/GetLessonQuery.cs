@@ -107,7 +107,8 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
                                     SectionGroups = x.MockTestSections.Select(x => x.SectionGroup).Select(x => new SectionGroupModel
                                     {
                                         Id = x!.Id,
-                                        CourseSkill = x.CourseSkill
+                                        CourseSkill = x.CourseSkill,
+                                        ExecutionTime = x!.ExecutionTime,
                                     }).ToList(),
                                 })
                                 .FirstOrDefaultAsync(cancellationToken);
