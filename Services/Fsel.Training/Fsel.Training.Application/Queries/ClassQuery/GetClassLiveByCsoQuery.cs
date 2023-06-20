@@ -48,6 +48,7 @@ namespace Fsel.Training.Application.Queries.ClassQuery
                                     .Select(x => new ClassModel
                                     {
                                         Id = x.Id,
+                                        Name = x.Name,
                                         TeacherId = x.TeacherId,
                                         Code = x.Code,
                                         ClassStudents = x.ClassStudents.Select(x => new ClassStudentModel
