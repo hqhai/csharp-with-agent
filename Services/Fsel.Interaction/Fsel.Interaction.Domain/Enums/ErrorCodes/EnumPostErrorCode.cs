@@ -13,5 +13,10 @@ namespace Fsel.Interaction.Domain.Enums.ErrorCodes
         /// Post is not pending
         /// </summary>
         PostIsNotPending,
+
+        /// <summary>
+        /// Post not flagged
+        /// </summary>
+        PostNotFlagged,
     }
 }

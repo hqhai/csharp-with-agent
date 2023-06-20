@@ -6,6 +6,7 @@ namespace Fsel.Interaction.Api.Controllers
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
     using Fsel.Core.Base.BaseModels;
+    using Fsel.Interaction.Application.Commands.PostCmd;
     using Fsel.Interaction.Application.Queries.PostQuery;
     using Fsel.Interaction.Domain.Models.EntityModels;
     using MediatR;
@@ -38,13 +39,25 @@ namespace Fsel.Interaction.Api.Controllers
         /// <summary>
         /// Get all topic tag
         /// </summary>
-        [HttpGet("posts-by-flag")]
+        [HttpGet("posts-by-flagged")]
         [ProducesResponseType(typeof(MethodResult<PagingItemsModel<PostModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> Get([FromQuery] GetPostsByFlagQuery query)
         {
             var queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Approve post flagged
+        /// </summary>
+        [HttpGet("approve-flagged")]
+        [ProducesResponseType(typeof(MethodResult<PostModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> Approve([FromBody] ApprovePostFlaggedCommand command)
+        {
+            var commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
         }
     }
 }
