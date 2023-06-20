@@ -2,7 +2,9 @@
 
 namespace Fsel.Training.Domain.Models.QueryModels
 {
-    public class SearchClassLiveCalendarQueryModel
+    using Fsel.Core.Base.BaseModels;
+
+    public class SearchClassLiveQueryModel : BaseQueryModel
     {
     }
 }

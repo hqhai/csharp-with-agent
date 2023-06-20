@@ -6,7 +6,7 @@ namespace Fsel.Training.Infrastructure.Repositories
     using Fsel.Training.Domain.Entities;
     using Fsel.Training.Domain.IRepositories;
 
-    public class ClassLiveCalendarRepository : BaseRepository<ClassLiveCalendar>, IClassLiveCalenderRepository
+    public class ClassLiveCalendarRepository : BaseRepository<ClassLiveCalendar>, IClassLiveCalendarRepository
     {
         public ClassLiveCalendarRepository(TrainingDbContext dbContext, AuthContext authContext) : base(dbContext, authContext)
         {

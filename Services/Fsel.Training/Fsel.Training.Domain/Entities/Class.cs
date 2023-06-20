@@ -41,7 +41,7 @@ namespace Fsel.Training.Domain.Entities
 
         public Guid CourseId { get; set; }
 
-        public Guid? LiveTimeFrameId { get; set; }
+        public Guid PackageId { get; set; }
 
         public DayOfWeek LiveDays { get; set; }
 

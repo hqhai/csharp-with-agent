@@ -5,7 +5,7 @@ namespace Fsel.Training.Domain.IRepositories
     using Fsel.Core.Base.Interfaces;
     using Fsel.Training.Domain.Entities;
 
-    public interface IClassLiveCalenderRepository : IRepository<ClassLiveCalendar>
+    public interface IClassLiveCalendarRepository : IRepository<ClassLiveCalendar>
     {
     }
 }
