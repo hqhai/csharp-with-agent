@@ -22,9 +22,9 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public EnumCourseType CourseType { get; set; }
 
         public IList<Guid>? TeacherIds { get; set; }
-        public int DurationMonth { get; set; }
+        public int? DurationMonth { get; set; }
 
-        public int EnrollmentWeek { get; set; }
+        public int? EnrollmentWeek { get; set; }
 
         public IList<string>? TeacherNames { get; set; }
     }

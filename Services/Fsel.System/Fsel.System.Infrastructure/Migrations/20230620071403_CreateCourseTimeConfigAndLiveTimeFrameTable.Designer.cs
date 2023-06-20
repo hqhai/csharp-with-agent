@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fsel.System.Infrastructure.Migrations
 {
     [DbContext(typeof(SystemDbContext))]
-    [Migration("20230619104131_UpdateCourseTimeConfig")]
-    partial class UpdateCourseTimeConfig
+    [Migration("20230620071403_CreateCourseTimeConfigAndLiveTimeFrameTable")]
+    partial class CreateCourseTimeConfigAndLiveTimeFrameTable
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

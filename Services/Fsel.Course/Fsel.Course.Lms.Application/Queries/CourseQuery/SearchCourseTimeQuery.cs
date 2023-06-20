@@ -62,12 +62,12 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
                     .AsNoTracking()
                     .ToListAsync(cancellationToken: cancellationToken)
                     .ConfigureAwait(false);
-            var courseTimeResult = await _systemService.GetCourseTimeConfigAsync(courseQuery.Select(x => x.Id).ToList());
+            var courseTimeResult = await _systemService.GetCourseTimeConfigAsync(lists.Select(x => x.Id).ToList());
             var courseTimes = courseTimeResult.Content?.Result;
             foreach (var item in lists)
             {
-                item.DurationMonth = courseTimes!.Select(x => x.DurationMonth).FirstOrDefault();
-                item.EnrollmentWeek = courseTimes!.Select(x => x.EnrollmentWeek).FirstOrDefault();
+                item.DurationMonth = courseTimes?.Select(x => x.DurationMonth).FirstOrDefault();
+                item.EnrollmentWeek = courseTimes?.Select(x => x.EnrollmentWeek).FirstOrDefault();
             }
             methodResult.Result = new PagingItemsModel<CourseSearchModel>(lists, request, totalItem);
             methodResult.StatusCode = StatusCodes.Status200OK;
