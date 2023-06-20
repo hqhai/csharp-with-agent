@@ -91,7 +91,7 @@ builder.Services.AddScoped<UnitHelper>();
 builder.AddRefitClients(typeof(IUserService), appSetting?.Services?.UserApiUrl);
 builder.AddRefitClients(typeof(ITrainingService), appSetting?.Services?.ClassApiUrl);
 builder.AddRefitClients(typeof(IInteractionService), appSetting?.Services?.InteractionApiUrl);
-builder.AddRefitClients(typeof(ISystemService), appSetting?.Services?.InteractionApiUrl);
+builder.AddRefitClients(typeof(ISystemService), appSetting?.Services?.SystemApiUrl);
 
 var app = builder.Build();
 app.UseServices();

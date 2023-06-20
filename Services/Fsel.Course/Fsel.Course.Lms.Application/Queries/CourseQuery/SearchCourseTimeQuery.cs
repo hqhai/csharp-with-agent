@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Course.Application.Queries.CourseQuery
+namespace Fsel.Course.Lms.Application.Queries.CourseQuery
 {
     using System;
     using System.Threading;
@@ -32,7 +32,7 @@ namespace Fsel.Course.Application.Queries.CourseQuery
 
         public async Task<MethodResult<PagingItemsModel<CourseSearchModel>>> Handle(SearchCourseTimeQuery request, CancellationToken cancellationToken)
         {
-            MethodResult<PagingItemsModel<CourseSearchModel>> methodResult = new MethodResult<PagingItemsModel<CourseSearchModel>>();
+            var methodResult = new MethodResult<PagingItemsModel<CourseSearchModel>>();
             ArgumentNullException.ThrowIfNull(request);
             if (request.PageSize > 100)
             {
