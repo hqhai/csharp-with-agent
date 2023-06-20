@@ -46,6 +46,7 @@ namespace Fsel.Training.Application.Queries.ClassQuery.Admin
                 return methodResult;
             }
             List<Guid>? CourseIds = new List<Guid>();
+
             if (!string.IsNullOrEmpty(request.Level.ToString()))
             {
                 var courses = await _courseService.GetCoursesByLevelAsync(request.Level);
@@ -60,7 +61,7 @@ namespace Fsel.Training.Application.Queries.ClassQuery.Admin
                 ExpectedDate = p.CreatedDate.AddDays(15),
                 ActivationDate = p.CreatedDate,
                 Status = p.Status,
-                //PackageId = p.PackageId
+                PackageId = p.PackageId
             });
             if (!string.IsNullOrEmpty(request.Status.ToString()))
             {
@@ -72,15 +73,21 @@ namespace Fsel.Training.Application.Queries.ClassQuery.Admin
                     .AsNoTracking()
                     .ToListAsync(cancellationToken: cancellationToken)
                     .ConfigureAwait(false);
-            var teacherIds = classes.Where(p => p.TeacherId != null).Select(x => x.TeacherId).ToList();
-            var teachers = await _userService.GetTeacherByIds(teacherIds);
-            var csoIds = classes.Where(p => p.TeacherId != null).Select(x => x.TeacherId).ToList();
-            var csos = await _userService.GetCSOByIds(csoIds);
+
+            IList<Guid>? teacherAndCSOIds = new List<Guid>();
+
+            var teacherIds = lists.Select(x => x.TeacherId ?? default).Where(p => p != default).ToList();
+            var csoIds = lists.Select(x => x.CSOId ?? default).Where(p => p != default).ToList();
+            teacherAndCSOIds = teacherAndCSOIds.Concat(teacherIds).ToList();
+            teacherAndCSOIds = teacherAndCSOIds.Concat(csoIds).ToList();
+            var teacherAndCSOResult = await _userService.GetTeacherAndCSOByIds(teacherAndCSOIds);
+
             var packages = await _orderService.GetPackages();
-            foreach (var item in classes)
+
+            foreach (var item in lists)
             {
-                item.TeacherName = teachers.Content?.Result?.FirstOrDefault(p => p.Id == item.TeacherId)?.FullName;
-                item.CSOName = csos.Content?.Result?.FirstOrDefault(p => p.Id == item.CSOId)?.FullName;
+                item.TeacherName = teacherAndCSOResult.Content?.Result?.FirstOrDefault(p => p.Id == item.TeacherId)?.FullName;
+                item.CSOName = teacherAndCSOResult.Content?.Result?.FirstOrDefault(p => p.Id == item.CSOId)?.FullName;
                 item.PackageName = packages.Content?.Result?.FirstOrDefault(p => p.Id == item.PackageId)?.Code;
             }
             methodResult.Result = new PagingItemsModel<ClassSearchModel>(lists, request, totalItem);
