@@ -63,13 +63,13 @@ namespace Fsel.Training.Application.Queries.ClassQuery
                     .AsNoTracking()
                     .ToListAsync(cancellationToken: cancellationToken)
                     .ConfigureAwait(false);
-            var teacherResult = await _userService.GetTeacherByIdsAsync(new GetTeacherByIdsQueryModel { Ids = classLiveQuery.Select(x => x.TeacherId ?? default).ToList() });
+            var teacherResult = await _userService.GetTeacherByIdsAsync(new GetTeacherByIdsQueryModel { Ids = classLiveQuery.Select(x => x.TeacherId ?? default).Distinct().ToList() });
             var teachers = teacherResult.Content?.Result;
 
             foreach (var item in lists)
             {
-                /*item.TeacherName = teachers.Content?.Result?.Where(x => item.TeacherId!.Contains(x.Id)).Select(x => x.Human?.FullName ?? string.Empty).ToList();*/
-                //item.TeacherName = teachers.Where(x => item.TeacherId);
+                var teacher = teachers!.FirstOrDefault(x => x.Id == item.TeacherId);
+                item.TeacherName = teacher?.Human?.FullName;
             }
 
             methodResult.Result = new PagingItemsModel<ClassModel>(lists, request, totalItem);

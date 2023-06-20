@@ -31,9 +31,9 @@ namespace Fsel.Identity.Application.Queries.TeacherQuery
             ArgumentNullException.ThrowIfNull(request);
 
             MethodResult<IList<TeacherModel>> methodResult = new MethodResult<IList<TeacherModel>>();
-            if (request.Ids == null)
+            if (request.Ids == null || request.Ids.Where(x => x != Guid.Empty).Count() == 0)
             {
-                methodResult.StatusCode = StatusCodes.Status400BadRequest;
+                methodResult.AddErrorBadRequest(nameof(EnumTeacherErrorCode.TeachersNotExist));
                 return methodResult;
             }
 

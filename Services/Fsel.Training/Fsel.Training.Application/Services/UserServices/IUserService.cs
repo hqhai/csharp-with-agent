@@ -30,7 +30,6 @@ namespace Fsel.Training.Application.Services.UserServices
         [Post("/teacher/get-by-ids")]
         Task<IApiResponse<MethodResult<IList<TeacherModel>>>> GetTeacherByIdsAsync([Body] GetTeacherByIdsQueryModel command);
 
-        [Get("/teacher/get-by-id/{id}")]
-        Task<IApiResponse<MethodResult<TeacherModel>>> GetTeacherByIdAsync([FromRoute] Guid id);
+        
     }
 }
