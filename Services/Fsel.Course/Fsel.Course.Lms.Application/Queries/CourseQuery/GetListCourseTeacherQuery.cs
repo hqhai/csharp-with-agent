@@ -20,6 +20,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
     public class GetListCourseTeacherQuery : IRequest<MethodResult<IList<CourseModel>>>
     {
         public EnumCourseLevel? CourseLevel { get; set; }
+        public Guid PackageId { get; set; }
     }
 
     public class GetListCourseTeacherQueryHandler : IRequestHandler<GetListCourseTeacherQuery, MethodResult<IList<CourseModel>>>
@@ -86,7 +87,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
             }
             var couseClasses = courses.Select(x => new CourseClassModel { CourseId = x.Id, Code = x.Code }).ToList();
 
-            var classcourses = await _trainingService.GetClassListStatusNewAsync(new GetClassListStatusNewModel { Courses = couseClasses, CourseLevel = request.CourseLevel });
+            var classcourses = await _trainingService.GetClassListStatusNewAsync(new GetClassListStatusNewModel { Courses = couseClasses, CourseLevel = request.CourseLevel, PackageId = request.PackageId });
 
             if (!classcourses.IsSuccessStatusCode || classcourses == null)
             {
