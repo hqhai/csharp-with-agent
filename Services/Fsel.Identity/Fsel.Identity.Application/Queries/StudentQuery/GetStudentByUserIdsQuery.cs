@@ -8,7 +8,6 @@ namespace Fsel.Identity.Application.Queries.StudentQuery
     using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Common.ActionResults;
-    using Fsel.Identity.Domain.Enums.ErrorCodes;
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Domain.Models.EntityModels;
     using MediatR;
@@ -41,21 +40,22 @@ namespace Fsel.Identity.Application.Queries.StudentQuery
                                         .Where(i => i.Human != null && request.UserIds!.Contains(i.Human.UserId!))
                                         .Select(x => new StudentModel
                                         {
+                                            Id = x.Id,
                                             PackageId = x.PackageId,
                                             ClassId = x.ClassId,
                                             CourseLevel = x.CourseLevel,
                                             CreatedDate = x.CreatedDate,
                                             HumanId = x.HumanId,
                                             School = x.School,
-                                            Human = _mapper.Map<HumanProfileModel>(x),
+                                            Human = _mapper.Map<HumanProfileModel>(x.Human),
                                             UserId = x.Human!.UserId,
                                         }).ToListAsync(cancellationToken);
 
-            if (students == null)
+            /*if (students == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumStudentErrorCode.StudentsNotExist));
                 return methodResult;
-            }
+            }*/
             methodResult.Result = _mapper.Map<IList<StudentModel>>(students);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
