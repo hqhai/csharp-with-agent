@@ -43,6 +43,8 @@ namespace Fsel.Training.Application.Queries.ClassQuery
                                         }).ToList(),
                                         ClassLiveCalendars = x.ClassLiveCalendars.Select(x => new ClassLiveCalendarModel
                                         {
+                                            AccessLink = x.AccessLink,
+                                            Note = x.Note,
                                         }).ToList(),
                                     }).FirstOrDefaultAsync(cancellationToken);
         }
