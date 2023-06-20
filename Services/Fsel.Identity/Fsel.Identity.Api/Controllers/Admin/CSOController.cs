@@ -31,9 +31,9 @@ namespace Fsel.Identity.Api.Controllers
         [HttpPost]
         [ProducesResponseType(typeof(MethodResult<IList<HumanModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetTeacherAndCSOByIds([FromBody] GetTeacherAndCSOByIdsQuery query)
+        public async Task<IActionResult> GetTeacherAndCSOByIds([FromBody] IList<Guid>? ids)
         {
-            MethodResult<IList<HumanModel>> commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            MethodResult<IList<HumanModel>> commandResult = await _mediator.Send(new GetTeacherAndCSOByIdsQuery { Ids = ids}).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
     }
