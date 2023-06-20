@@ -63,7 +63,8 @@ namespace Fsel.Training.Application.Queries.ClassQuery
                     .AsNoTracking()
                     .ToListAsync(cancellationToken: cancellationToken)
                     .ConfigureAwait(false);
-            var teacherResult = await _userService.GetTeacherByIdsAsync(new GetTeacherByIdsQueryModel { Ids = classLiveQuery.Select(x => x.TeacherId ?? default).Distinct().ToList() });
+
+            var teacherResult = await _userService.GetTeacherByIdsAsync(new GetTeacherByIdsQueryModel { Ids = lists.Select(x => x.TeacherId ?? default).Distinct().ToList() });
             var teachers = teacherResult.Content?.Result;
 
             foreach (var item in lists)
