@@ -4,6 +4,7 @@ using Fsel.Training.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fsel.Training.Infrastructure.Migrations
 {
     [DbContext(typeof(TrainingDbContext))]
-    partial class TrainingDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230619062846_Edit_ClassTable_Add_PackageId")]
+    partial class Edit_ClassTable_Add_PackageId
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -51,9 +54,6 @@ namespace Fsel.Training.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(101);
 
-                    b.Property<Guid?>("CsoId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<DateTime?>("DeletedDate")
                         .HasColumnType("datetime2")
                         .HasColumnOrder(109);
@@ -74,12 +74,6 @@ namespace Fsel.Training.Infrastructure.Migrations
                         .HasColumnType("bit")
                         .HasColumnOrder(110);
 
-                    b.Property<int>("LiveDays")
-                        .HasColumnType("int");
-
-                    b.Property<Guid?>("LiveTimeFrameId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(250)
@@ -95,9 +89,6 @@ namespace Fsel.Training.Infrastructure.Migrations
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
-
-                    b.Property<Guid?>("TeacherId")
-                        .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime?>("UpdatedDate")
                         .HasColumnType("datetime2")
@@ -115,86 +106,6 @@ namespace Fsel.Training.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Classes");
-                });
-
-            modelBuilder.Entity("Fsel.Training.Domain.Entities.ClassLiveCalendar", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier")
-                        .HasColumnOrder(0);
-
-                    b.Property<string>("AccessLink")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<Guid>("ClassId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2")
-                        .HasColumnOrder(107);
-
-                    b.Property<string>("CreatedFullName")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)")
-                        .HasColumnOrder(104);
-
-                    b.Property<Guid>("CreatedUserId")
-                        .HasColumnType("uniqueidentifier")
-                        .HasColumnOrder(101);
-
-                    b.Property<DateTime?>("DeletedDate")
-                        .HasColumnType("datetime2")
-                        .HasColumnOrder(109);
-
-                    b.Property<string>("DeletedFullName")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)")
-                        .HasColumnOrder(106);
-
-                    b.Property<Guid?>("DeletedUserId")
-                        .HasColumnType("uniqueidentifier")
-                        .HasColumnOrder(103);
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit")
-                        .HasColumnOrder(110);
-
-                    b.Property<DateTime>("LiveDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid>("LiveTimeFrameId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Note")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<DateTime?>("UpdatedDate")
-                        .HasColumnType("datetime2")
-                        .HasColumnOrder(108);
-
-                    b.Property<string>("UpdatedFullName")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)")
-                        .HasColumnOrder(105);
-
-                    b.Property<Guid?>("UpdatedUserId")
-                        .HasColumnType("uniqueidentifier")
-                        .HasColumnOrder(102);
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ClassId");
-
-                    b.ToTable("ClassLiveCalendars");
                 });
 
             modelBuilder.Entity("Fsel.Training.Domain.Entities.ClassStudent", b =>
@@ -261,17 +172,6 @@ namespace Fsel.Training.Infrastructure.Migrations
                     b.ToTable("ClassStudents");
                 });
 
-            modelBuilder.Entity("Fsel.Training.Domain.Entities.ClassLiveCalendar", b =>
-                {
-                    b.HasOne("Fsel.Training.Domain.Entities.Class", "Class")
-                        .WithMany("ClassLiveCalendars")
-                        .HasForeignKey("ClassId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Class");
-                });
-
             modelBuilder.Entity("Fsel.Training.Domain.Entities.ClassStudent", b =>
                 {
                     b.HasOne("Fsel.Training.Domain.Entities.Class", "Class")
@@ -285,8 +185,6 @@ namespace Fsel.Training.Infrastructure.Migrations
 
             modelBuilder.Entity("Fsel.Training.Domain.Entities.Class", b =>
                 {
-                    b.Navigation("ClassLiveCalendars");
-
                     b.Navigation("ClassStudents");
                 });
 #pragma warning restore 612, 618
