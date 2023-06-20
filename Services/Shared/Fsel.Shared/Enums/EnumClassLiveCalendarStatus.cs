@@ -2,7 +2,7 @@
 
 namespace Fsel.Shared.Enums
 {
-    public enum EnumStatusClassLiveCalendar
+    public enum EnumClassLiveCalendarStatus
     {
         WaitForConfirmation, Scheduled, AskToTeacherInstead
     }

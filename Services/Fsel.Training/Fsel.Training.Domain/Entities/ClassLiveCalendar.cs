@@ -15,7 +15,7 @@ namespace Fsel.Training.Domain.Entities
         public string? AccessLink { get; set; }
         [MaxLength(500, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? Note { get; set; }
-        public EnumStatusClassLiveCalendar Status { get; set; }
+        public EnumClassLiveCalendarStatus Status { get; set; }
         public Guid ClassId { get; set; }
 
         public Class? Class { get; set; }
