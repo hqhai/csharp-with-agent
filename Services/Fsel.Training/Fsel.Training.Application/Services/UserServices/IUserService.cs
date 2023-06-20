@@ -26,5 +26,10 @@ namespace Fsel.Training.Application.Services.UserServices
 
         [Put("/student/delete-student-from-class/{id}")]
         Task<IApiResponse<MethodResult<bool>>> DeleteStudentFromClass([FromRoute] Guid id);
+
+        [Post("/teacher/get-by-ids")]
+        Task<IApiResponse<MethodResult<IList<TeacherModel>>>> GetTeacherByIdsAsync([Body] GetTeacherByIdsQueryModel command);
+
+        
     }
 }

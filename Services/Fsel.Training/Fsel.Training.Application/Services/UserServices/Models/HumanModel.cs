@@ -5,5 +5,6 @@ namespace Fsel.Course.Application.Services.UserServices.Models
     public class HumanModel
     {
         public string? FullName { get; set; }
+        public string? Birthday { get; set; }
     }
 }

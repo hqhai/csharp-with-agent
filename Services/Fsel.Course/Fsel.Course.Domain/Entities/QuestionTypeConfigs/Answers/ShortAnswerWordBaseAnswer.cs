@@ -4,7 +4,7 @@ namespace Fsel.Course.Domain.Entities.QuestionTypeConfigs.Answers
 {
     public class ShortAnswerWordBaseAnswer
     {
-        public IList<string>? Answers { get; set; }
+        public string? Answers { get; set; }
 
         public bool IsExact { get; set; }
     }
