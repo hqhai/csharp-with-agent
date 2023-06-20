@@ -3,16 +3,16 @@
 namespace Fsel.Course.Domain.Entities
 {
     using System.ComponentModel.DataAnnotations;
-    using Fsel.Shared.Enums;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Entities;
+    using Fsel.Shared.Enums;
 
     public class LessonInstruction : Entity
     {
         /// <summary>
         /// Chỉ dẫn
         /// </summary>
-        [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
+
         [MaxLength(2000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? Instruction { get; set; }
 
