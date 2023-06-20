@@ -45,7 +45,7 @@ namespace Fsel.System.Application.Querys
                                     .Select(x => new CourseTimeConfigModel
                                     {
                                         Id = x.Id,
-                                        CourseLevel = x.CourseLevel,
+                                        CourseId = x.CourseId,
                                         CreatedDate = x.CreatedDate,
                                         DurationMonth = x.DurationMonth,
                                         EnrollmentWeek = x.EnrollmentWeek,

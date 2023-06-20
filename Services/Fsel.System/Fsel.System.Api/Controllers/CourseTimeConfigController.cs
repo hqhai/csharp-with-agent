@@ -7,6 +7,7 @@ namespace Fsel.System.Api.Controllers
     using Fsel.Core.Base.BaseModels;
     using Fsel.System.Application.Commands.CourseTimeConfigCmd;
     using Fsel.System.Application.Querys;
+    using Fsel.System.Application.Querys.CourseTimeConfigQuery;
     using Fsel.System.Domain.Models;
     using global::System.Net;
     using MediatR;
@@ -15,11 +16,11 @@ namespace Fsel.System.Api.Controllers
     [ApiVersion(Settings.APIVersion)]
     [Route(Settings.APIDefaultRoute + "/course-time-config")]
     [ApiController]
-    public class CoureTimeConfigController : ControllerBase
+    public class CourseTimeConfigController : ControllerBase
     {
         private readonly IMediator _mediator;
 
-        public CoureTimeConfigController(IMediator mediator)
+        public CourseTimeConfigController(IMediator mediator)
         {
             _mediator = mediator;
         }
@@ -56,11 +57,23 @@ namespace Fsel.System.Api.Controllers
         [HttpPut]
         [ProducesResponseType(typeof(MethodResult<IList<CourseTimeConfigModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> UpdateList([FromBody] SetEnrollmentWeekToClassCommand command)
+        public async Task<IActionResult> Update([FromBody] SetEnrollmentWeekToClassCommand command)
         {
             ArgumentNullException.ThrowIfNull(command);
             MethodResult<IList<CourseTimeConfigModel>> commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Get List Courses time by course ids
+        /// </summary>
+        [HttpPost]
+        [ProducesResponseType(typeof(MethodResult<IList<CourseTimeConfigModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetCoursesByIds([FromBody] IList<Guid> courseIds)
+        {
+            MethodResult<IList<CourseTimeConfigModel>> queryResult = await _mediator.Send(new GetCourseTimeConfigByListCourseIdQuery { CourseIds = courseIds }).ConfigureAwait(false);
+            return queryResult.GetActionResult();
         }
     }
 }

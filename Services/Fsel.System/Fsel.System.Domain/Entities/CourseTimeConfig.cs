@@ -9,7 +9,7 @@ namespace Fsel.System.Domain.Entities
 
     public class CourseTimeConfig : Entity
     {
-        public EnumCourseLevel CourseLevel { get; set; }
+        public Guid CourseId { get; set; }
 
         [Range(0, 1000, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
         public int DurationMonth { get; set; }

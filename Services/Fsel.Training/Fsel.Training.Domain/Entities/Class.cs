@@ -38,7 +38,7 @@ namespace Fsel.Training.Domain.Entities
         /// Status
         /// </summary>
         public EnumClassType Status { get; set; }
-
+        public Guid PackageId { get; set; }
         public Guid CourseId { get; set; }
 
         public Guid PackageId { get; set; }
@@ -48,6 +48,8 @@ namespace Fsel.Training.Domain.Entities
         public Guid? TeacherId { get; set; }
 
         public Guid? CsoId { get; set; }
+
+        public Guid PackageId { get; set; }
 
         public ICollection<ClassStudent> ClassStudents { get; set; } = new List<ClassStudent>();
         public ICollection<ClassLiveCalendar> ClassLiveCalendars { get; set; } = new List<ClassLiveCalendar>();
