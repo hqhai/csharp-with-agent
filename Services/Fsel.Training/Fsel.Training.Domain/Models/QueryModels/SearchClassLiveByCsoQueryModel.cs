@@ -4,7 +4,7 @@ namespace Fsel.Training.Domain.Models.QueryModels
 {
     using Fsel.Core.Base.BaseModels;
 
-    public class SearchClassLiveQueryModel : BaseQueryModel
+    public class SearchClassLiveByCsoQueryModel : BaseQueryModel
     {
     }
 }

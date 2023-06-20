@@ -29,7 +29,7 @@ namespace Fsel.Training.Api.Controllers.Cso
         [HttpGet]
         [ProducesResponseType(typeof(MethodResult<PagingItemsModel<ClassModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> Search([FromQuery] SearchClassLiveQuery query)
+        public async Task<IActionResult> Search([FromQuery] SearchClassLiveByCsoQuery query)
         {
             MethodResult<PagingItemsModel<ClassModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
