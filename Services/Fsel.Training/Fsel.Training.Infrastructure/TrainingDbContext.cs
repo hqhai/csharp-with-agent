@@ -22,11 +22,13 @@ namespace Fsel.Training.Infrastructure
 
             modelBuilder.ApplyConfiguration(new ClassEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new ClassStudentEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new ClassLiveCalendarEntityTypeConfiguaration());
             base.OnModelCreating(modelBuilder);
         }
 
         public DbSet<Class> Classes { get; set; }
         public DbSet<ClassStudent> ClassStudents { get; set; }
+        public DbSet<ClassLiveCalendar> ClassLiveCalendars { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {

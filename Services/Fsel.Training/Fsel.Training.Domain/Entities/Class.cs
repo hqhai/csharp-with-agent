@@ -41,6 +41,17 @@ namespace Fsel.Training.Domain.Entities
         public Guid PackageId { get; set; }
         public Guid CourseId { get; set; }
 
+        public Guid? LiveTimeFrameId { get; set; }
+
+        public DayOfWeek LiveDays { get; set; }
+
+        public Guid? TeacherId { get; set; }
+
+        public Guid? CsoId { get; set; }
+
+        public Guid PackageId { get; set; }
+
         public ICollection<ClassStudent> ClassStudents { get; set; } = new List<ClassStudent>();
+        public ICollection<ClassLiveCalendar> ClassLiveCalendars { get; set; } = new List<ClassLiveCalendar>();
     }
 }
