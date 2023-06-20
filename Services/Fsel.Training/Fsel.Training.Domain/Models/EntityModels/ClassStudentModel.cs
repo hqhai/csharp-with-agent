@@ -6,7 +6,9 @@ namespace Fsel.Training.Domain.Models.EntityModels
 
     public class ClassStudentModel
     {
-        public Guid ClassId { get; set; }
         public Guid StudentId { get; set; }
+        public string? StudentName { get; set; }
+        public string? PhoneNumber { get; set; }
+        public string? Email { get; set; }
     }
 }

@@ -96,6 +96,18 @@ namespace Fsel.Identity.Api.Controllers
         }
 
         /// <summary>
+        /// Get list student by student ids
+        /// </summary>
+        [HttpPost("get-by-student-ids")]
+        [ProducesResponseType(typeof(MethodResult<IList<StudentModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetStudentByIds([FromBody] IList<Guid> ids)
+        {
+            MethodResult<IList<StudentModel>> commandResult = await _mediator.Send(new GetStudentByIdsQuery { StudentIds = ids }).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
         /// Delete Student from Class
         /// </summary>
         [HttpPut("delete-student-from-class/{id}")]

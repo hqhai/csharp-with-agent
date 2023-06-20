@@ -7,7 +7,6 @@ namespace Fsel.Course.Lms.Application.Services.UserServices
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
     using Fsel.Course.Lms.Application.Services.UserServices.Models;
-    using Fsel.Shared.Enums;
     using Microsoft.AspNetCore.Mvc;
     using Refit;
 
@@ -30,6 +29,5 @@ namespace Fsel.Course.Lms.Application.Services.UserServices
 
         [Put("/student/update-student-level")]
         Task<IApiResponse<MethodResult<bool>>> UpdateStudentByLevelAsync([Body] UpdateStudentByLevelModel command);
-
     }
 }

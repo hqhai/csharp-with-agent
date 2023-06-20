@@ -34,5 +34,17 @@ namespace Fsel.Training.Api.Controllers.Cso
             MethodResult<PagingItemsModel<ClassModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
+
+        /// <summary>
+        /// Get Course
+        /// </summary>
+        [HttpGet("{id}")]
+        [ProducesResponseType(typeof(MethodResult<ClassModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> Get([FromRoute] Guid id)
+        {
+            MethodResult<ClassModel> commandResult = await _mediator.Send(new GetClassLiveByCsoQuery { Id = id }).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
     }
 }
