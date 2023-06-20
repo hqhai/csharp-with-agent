@@ -52,14 +52,15 @@ namespace Fsel.Course.Infrastructure.Common
                 methodResult.AddErrorBadRequest(nameof(EnumLessonErrorCode.LessonsNotExist), nameof(request.LessonIds), request.LessonIds);
                 return methodResult;
             }
-
-            var mockTest = await _mockTestRepository.Queryable.FirstOrDefaultAsync(x => x.MockTestType == EnumMockTestType.SkillMockTest && x.Id == request.MockTestId);
-            if (mockTest == null)
+            if (request.MockTestId != null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumMockTestErrorCode.MockTestExistsOtherThanTypeSkillMockTest), nameof(request.MockTestId), request.MockTestId);
-                return methodResult;
+                var mockTest = await _mockTestRepository.Queryable.FirstOrDefaultAsync(x => x.MockTestType == EnumMockTestType.SkillMockTest && x.Id == request.MockTestId);
+                if (mockTest == null)
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumMockTestErrorCode.MockTestExistsOtherThanTypeSkillMockTest), nameof(request.MockTestId), request.MockTestId);
+                    return methodResult;
+                }
             }
-
             if (await _unitRepository.Queryable.AnyAsync(x => x.Code == request.Code && x.CourseLevel == request.CourseLevel && (request.Id == Guid.Empty || x.Id != request.Id)))
             {
                 methodResult.AddErrorBadRequest(nameof(EnumMockTestErrorCode.CodeAndLevelAlreadyExist), nameof(request.Code), request.Code);

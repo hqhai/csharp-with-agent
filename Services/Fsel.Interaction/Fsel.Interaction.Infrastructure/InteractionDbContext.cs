@@ -25,6 +25,8 @@ namespace Fsel.Interaction.Infrastructure
             modelBuilder.ApplyConfiguration(new CustomerSurveyEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new InteractionActionEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new CommentEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new PostEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new PostTagEntityTypeConfiguration());
             base.OnModelCreating(modelBuilder);
         }
 
@@ -32,6 +34,9 @@ namespace Fsel.Interaction.Infrastructure
         public DbSet<CustomerSurvey> CustomerSurveys { get; set; }
         public DbSet<InteractionAction> InteractionActions { get; set; }
         public DbSet<Comment> Comments { get; set; }
+        public DbSet<Post> Posts { get; set; }
+        public DbSet<PostTag> PostTags { get; set; }
+        public DbSet<TopicTag> TopicTags { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {

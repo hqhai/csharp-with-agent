@@ -58,7 +58,7 @@ namespace Fsel.Training.Application.Commands.ClassCmd
 
                 if (classnew == null)
                 {
-                    classnew = await CreateClassAsync(request.Code, request.CourseId);
+                    classnew = await CreateClassAsync(request.Code, request.CourseId,request.PackageId);
                 }
                 else if (classnew.ClassStudents.Count == 11)
                 {
@@ -98,12 +98,13 @@ namespace Fsel.Training.Application.Commands.ClassCmd
             return methodResult;
         }
 
-        private async Task<Class> CreateClassAsync(string? code, Guid courseId)
+        private async Task<Class> CreateClassAsync(string? code, Guid courseId, Guid PackageId)
         {
             var newClass = new Class();
             newClass.Code = code;
             newClass.Name = code;
             newClass.CourseId = courseId;
+            newClass.PackageId  = PackageId;
             _classRepository.Add(newClass);
             await _classRepository.UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
             return newClass;

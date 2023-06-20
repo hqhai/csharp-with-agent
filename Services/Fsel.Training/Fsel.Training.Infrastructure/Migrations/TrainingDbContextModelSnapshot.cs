@@ -85,6 +85,9 @@ namespace Fsel.Training.Infrastructure.Migrations
                         .HasMaxLength(250)
                         .HasColumnType("nvarchar(250)");
 
+                    b.Property<Guid>("PackageId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<DateTime>("StartTime")
                         .HasColumnType("datetime2");
 

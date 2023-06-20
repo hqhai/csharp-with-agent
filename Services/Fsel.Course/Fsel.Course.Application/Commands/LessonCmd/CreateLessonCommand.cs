@@ -130,10 +130,13 @@ namespace Fsel.Course.Application.Commands.LessonCmd
                 lesson.LessonInstructions = _mapper.Map<IList<LessonInstruction>>(request.LessonInstructions);
 
                 classForum.LessonId = lesson.Id;
-                classForum.ClassForumFiles = request.ClassForum.FilePaths!.Select(x => new ClassForumFile
+                if (request.ClassForum.FilePaths != null && request.ClassForum.FilePaths.Count > 0)
                 {
-                    FilePath = x,
-                }).ToList();
+                    classForum.ClassForumFiles = request.ClassForum.FilePaths.Select(x => new ClassForumFile
+                    {
+                        FilePath = x,
+                    }).ToList();
+                }
 
                 lesson.ClassForum = classForum;
                 lesson = _lessonRepository.Add(lesson);

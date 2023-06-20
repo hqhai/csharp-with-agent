@@ -59,7 +59,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
                 }
                 else
                 {
-                    classForumResult.IsFlagged = false;
+                    classForumResult.IsFlagged = null;
                     _classForumResultRepository.Update(classForumResult);
                 }
 

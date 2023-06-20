@@ -17,6 +17,7 @@ namespace Fsel.Training.Application.Queries.ClassQuery
     {
         public IList<CourseClassModel>? Courses { get; set; }
         public EnumCourseLevel? CourseLevel { get; set; }
+        public Guid PackageId { get; set; }
     }
 
     public class GetClassByStatusNewQueryHandler : IRequestHandler<GetClassByStatusNewQuery, MethodResult<IList<CourseClassModel>>>
@@ -40,8 +41,7 @@ namespace Fsel.Training.Application.Queries.ClassQuery
                 return methodResult;
             }
 
-            List<Class> classes = await _classRepository.Queryable.Where(e => e.Status == EnumClassType.New && request.Courses.Select(x => x.CourseId).Contains(e.CourseId))
-                                                            .ToListAsync(cancellationToken: cancellationToken);
+            List<Class> classes = await _classRepository.Queryable.Where(e => e.Status == EnumClassType.New && request.Courses.Select(x => x.CourseId).Contains(e.CourseId) && e.PackageId == request.PackageId).ToListAsync(cancellationToken: cancellationToken);
 
             IList<CourseClassModel>? courseClassModels = new List<CourseClassModel>();
             foreach (var item in request.Courses)

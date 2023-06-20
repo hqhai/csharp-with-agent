@@ -7,7 +7,7 @@ namespace Fsel.System.Domain.Models
 
     public class CourseTimeConfigModel : BaseModel
     {
-        public EnumCourseLevel CourseLevel { get; set; }
+        public Guid CourseId { get; set; }
 
         public int DurationMonth { get; set; }
 

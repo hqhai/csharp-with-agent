@@ -19,22 +19,22 @@ namespace Fsel.Training.Application.Queries.ClassQuery
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class SearchClassLiveQuery : SearchClassLiveQueryModel, IRequest<MethodResult<PagingItemsModel<ClassModel>>>
+    public class SearchClassLiveByCsoQuery : SearchClassLiveByCsoQueryModel, IRequest<MethodResult<PagingItemsModel<ClassModel>>>
     {
     }
 
-    public class SearchClassLiveQueryHandler : IRequestHandler<SearchClassLiveQuery, MethodResult<PagingItemsModel<ClassModel>>>
+    public class SearchClassLiveByCsoQueryHandler : IRequestHandler<SearchClassLiveByCsoQuery, MethodResult<PagingItemsModel<ClassModel>>>
     {
         private readonly IClassRepository _classRepository;
         private readonly IUserService _userService;
 
-        public SearchClassLiveQueryHandler(IClassRepository classRepository, IUserService userService)
+        public SearchClassLiveByCsoQueryHandler(IClassRepository classRepository, IUserService userService)
         {
             _classRepository = classRepository;
             _userService = userService;
         }
 
-        public async Task<MethodResult<PagingItemsModel<ClassModel>>> Handle(SearchClassLiveQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<PagingItemsModel<ClassModel>>> Handle(SearchClassLiveByCsoQuery request, CancellationToken cancellationToken)
         {
             var methodResult = new MethodResult<PagingItemsModel<ClassModel>>();
             ArgumentNullException.ThrowIfNull(request);
