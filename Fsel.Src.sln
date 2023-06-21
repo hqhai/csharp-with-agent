@@ -102,6 +102,16 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Fsel.Ordering.Domain", "Ser
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Fsel.Ordering.Infrastructure", "Services\Fsel.Ordering\Fsel.Ordering.Infrastructure\Fsel.Ordering.Infrastructure.csproj", "{6B6BCBBD-CCB8-4C15-A857-29BAF20C3307}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Fsel.System", "Fsel.System", "{48F314F8-7FFA-4CA6-9DC2-FFA4FB81A1C4}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Fsel.System.Api", "Services\Fsel.System\Fsel.System.Api\Fsel.System.Api.csproj", "{CDC10682-95E2-4566-9F82-E8248E5BA185}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Fsel.System.Application", "Services\Fsel.System\Fsel.System.Application\Fsel.System.Application.csproj", "{81598BDB-3C97-4DBD-AD42-3BBE510C4C6C}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Fsel.System.Infrastructure", "Services\Fsel.System\Fsel.System.Infrastructure\Fsel.System.Infrastructure.csproj", "{9736B34F-EBBD-4F07-9798-2E3A0292EC3E}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Fsel.System.Domain", "Services\Fsel.System\Fsel.System.Domain\Fsel.System.Domain.csproj", "{C29D4EBA-6C25-4CE4-930B-CC6E034BB205}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -240,6 +250,22 @@ Global
 		{6B6BCBBD-CCB8-4C15-A857-29BAF20C3307}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6B6BCBBD-CCB8-4C15-A857-29BAF20C3307}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6B6BCBBD-CCB8-4C15-A857-29BAF20C3307}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CDC10682-95E2-4566-9F82-E8248E5BA185}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CDC10682-95E2-4566-9F82-E8248E5BA185}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CDC10682-95E2-4566-9F82-E8248E5BA185}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CDC10682-95E2-4566-9F82-E8248E5BA185}.Release|Any CPU.Build.0 = Release|Any CPU
+		{81598BDB-3C97-4DBD-AD42-3BBE510C4C6C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{81598BDB-3C97-4DBD-AD42-3BBE510C4C6C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{81598BDB-3C97-4DBD-AD42-3BBE510C4C6C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{81598BDB-3C97-4DBD-AD42-3BBE510C4C6C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9736B34F-EBBD-4F07-9798-2E3A0292EC3E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9736B34F-EBBD-4F07-9798-2E3A0292EC3E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9736B34F-EBBD-4F07-9798-2E3A0292EC3E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9736B34F-EBBD-4F07-9798-2E3A0292EC3E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C29D4EBA-6C25-4CE4-930B-CC6E034BB205}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C29D4EBA-6C25-4CE4-930B-CC6E034BB205}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C29D4EBA-6C25-4CE4-930B-CC6E034BB205}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C29D4EBA-6C25-4CE4-930B-CC6E034BB205}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -287,6 +313,11 @@ Global
 		{53F681CA-3E35-4480-AFFF-45AC36862FA6} = {9F26AA66-B696-41C4-871A-B89E5877D9AE}
 		{BC64061C-552C-4F9D-8B39-884DF270FC15} = {9F26AA66-B696-41C4-871A-B89E5877D9AE}
 		{6B6BCBBD-CCB8-4C15-A857-29BAF20C3307} = {9F26AA66-B696-41C4-871A-B89E5877D9AE}
+		{48F314F8-7FFA-4CA6-9DC2-FFA4FB81A1C4} = {5E7078A9-8DE2-459D-854D-7D8625E92C43}
+		{CDC10682-95E2-4566-9F82-E8248E5BA185} = {48F314F8-7FFA-4CA6-9DC2-FFA4FB81A1C4}
+		{81598BDB-3C97-4DBD-AD42-3BBE510C4C6C} = {48F314F8-7FFA-4CA6-9DC2-FFA4FB81A1C4}
+		{9736B34F-EBBD-4F07-9798-2E3A0292EC3E} = {48F314F8-7FFA-4CA6-9DC2-FFA4FB81A1C4}
+		{C29D4EBA-6C25-4CE4-930B-CC6E034BB205} = {48F314F8-7FFA-4CA6-9DC2-FFA4FB81A1C4}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {C3F5014D-C4B6-471E-9F07-3E7AE3B37304}

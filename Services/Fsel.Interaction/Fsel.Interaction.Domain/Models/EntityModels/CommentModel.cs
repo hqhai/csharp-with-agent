@@ -9,7 +9,7 @@ namespace Fsel.Interaction.Domain.Models.EntityModels
     public class CommentModel : BaseModel
     {
         public string? Content { get; set; }
-        public EnumCommentStatus Status { get; set; }
+        public bool? IsFlagged { get; set; }
         public int LikeNumber { get; set; }
         public int CommentNumber { get; set; }
         public Guid ObjectId { get; set; }
@@ -17,6 +17,8 @@ namespace Fsel.Interaction.Domain.Models.EntityModels
         public Guid UserId { get; set; }
         public string? AvatarPath { get; set; }
         public string? FullName { get; set; }
+
+        public EnumCourseLevel CourseLevel { get; set; }
         public EnumInteractionActionType? InteractionActionType { get; set; }
         public IList<CommentModel>? Comments { get; set; }
     }

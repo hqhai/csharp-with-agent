@@ -86,7 +86,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
             var studentId = student?.Content?.Result?.Id;
 
             var mockTestResult = await _mockTestResultRepository.Queryable
-                .FirstOrDefaultAsync(x => x.MockTestId == request.MockTestId && x.CourseId == request.CourseId && x.StudentId == studentId && request.UnitId == null || x.UnitId == request.UnitId, cancellationToken);
+                .FirstOrDefaultAsync(x => x.MockTestId == request.MockTestId && x.CourseId == request.CourseId && x.StudentId == studentId && (request.UnitId == null || x.UnitId == request.UnitId), cancellationToken);
             if (mockTestResult == null)
             {
                 mockTestResult = new MockTestResult

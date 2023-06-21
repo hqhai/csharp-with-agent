@@ -33,16 +33,11 @@ namespace Fsel.Identity.Application.Queries.TeacherQuery
             MethodResult<IList<TeacherModel>> methodResult = new MethodResult<IList<TeacherModel>>();
             if (request.Ids == null)
             {
-                methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 return methodResult;
             }
 
             var teachers = await _teacherRepository.GetIncludeByIdsAsync(request.Ids);
-            if (teachers == null || teachers.Count == 0)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumTeacherErrorCode.TeachersNotExist));
-                return methodResult;
-            }
+
             methodResult.Result = _mapper.Map<IList<TeacherModel>>(teachers);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;

@@ -5,12 +5,11 @@ namespace Fsel.Interaction.Api.Controllers
     using Fsel.Common.ActionResults;
     using System.Net;
     using Fsel.Common.Constants;
-    using Fsel.Interaction.Application.Commands.ActionCmd;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
     using Fsel.Interaction.Application.Commands.CommentCmd;
     using Fsel.Interaction.Domain.Models.EntityModels;
-    using Fsel.Interaction.Application.Queries.InteractionQuery;
+    using Fsel.Interaction.Application.Queries.CommentQuery;
 
     [ApiVersion(Settings.APIVersion)]
     [Route(Settings.APIDefaultRoute + "/comment")]
@@ -46,6 +45,18 @@ namespace Fsel.Interaction.Api.Controllers
         {
             MethodResult<IList<CommentModel>> queryResult = await _mediator.Send(command).ConfigureAwait(false);
             return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Approve comment flagged
+        /// </summary>
+        [HttpGet("approve-flagged")]
+        [ProducesResponseType(typeof(MethodResult<CommentModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> Approve([FromBody] ApproveCommentFlaggedCommand command)
+        {
+            var commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
         }
     }
 }

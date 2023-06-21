@@ -17,7 +17,7 @@ services:
             - JWT__SUBJECT=baseWebApiSubject
             - JWT__TOKENVALIDITYINMINUTES=1440
             - JWT__REFRESHTOKENVALIDITYINDAYS=7
-            - Otp__StepTime=180
+            - Otp__StepTime=3
             - Otp__StepDayWithAdmin=7
             - ConstantUrl__ConfirmOtpUrl=http://fsel-auth-api.fsel.edu.vn/v1/user/confirm-otp-signup?OTP={0}&NewPassword=Admin@123
             - SERVICES_SenderApiUrl=http://202.134.19.161:5206/api/v1
@@ -43,7 +43,7 @@ services:
             - JWT__SUBJECT=baseWebApiSubject
             - JWT__TOKENVALIDITYINMINUTES=1440
             - JWT__REFRESHTOKENVALIDITYINDAYS=7
-            - Otp__StepTime=180
+            - Otp__StepTime=3
             - Otp__StepDayWithAdmin=7
             - ConstantUrl__ConfirmOtpUrl=http://fsel-auth-api.fsel.edu.vn/v1/user/confirm-otp-signup?OTP={0}&NewPassword=Admin@123
             - SERVICES_SenderApiUrl=http://202.134.19.161:5206/api/v1
@@ -205,7 +205,7 @@ services:
     gateway.service:
         container_name: gateway.service
         hostname: GatewayService
-        image: ${DOCKER_REGISTRY-}gatewaymicroservice:v1
+        image: ${DOCKER_REGISTRY-}gateway-microservice:v1
         build:
             context: ./../
             dockerfile: Environments/Testing/Gateway.Testing.Dockerfile
