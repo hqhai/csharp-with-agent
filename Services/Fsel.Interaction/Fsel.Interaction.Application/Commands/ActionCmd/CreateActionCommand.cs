@@ -66,7 +66,7 @@ namespace Fsel.Interaction.Application.Commands.ActionCmd
             {
                 if (action != null)
                 {
-                    if (like.Type == EnumInteractionActionType.Like)
+                    if (like!.Type == EnumInteractionActionType.Like)
                     {
                         await _interactionActionRepository.DeleteAsync(action);
                     }
