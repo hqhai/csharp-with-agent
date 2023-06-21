@@ -49,6 +49,9 @@ namespace Fsel.Course.Infrastructure.Common
                 Name = x.Name,
                 MediaPost = x.MediaPost,
                 TargetWord = x.TargetWord,
+                DisplayOrder = x.DisplayOrder,
+                SubFilePath = x.SubFilePath,
+                VideoFilePath = x.VideoFilePath,
                 SectionParts = GetSectionPartModels(x.SectionParts.ToList()),
                 Questions = GetQuestionModels(x.SectionQuestions.ToList(), isDisableAnswers),
                 SectionTimeCodes = GetSectionTimeCodeModels(x.SectionTimeCodes.ToList())
