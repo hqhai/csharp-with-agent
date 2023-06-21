@@ -51,10 +51,22 @@ namespace Fsel.Interaction.Api.Controllers
         /// <summary>
         /// Approve post flagged
         /// </summary>
-        [HttpGet("approve-flagged")]
+        [HttpPost("approve-flagged")]
         [ProducesResponseType(typeof(MethodResult<PostModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> Approve([FromBody] ApprovePostFlaggedCommand command)
+        {
+            var commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Approve post flagged
+        /// </summary>
+        [HttpPost("approve-pending")]
+        [ProducesResponseType(typeof(MethodResult<PostModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> Approve([FromBody] ApprovePostPendingCommand command)
         {
             var commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();
