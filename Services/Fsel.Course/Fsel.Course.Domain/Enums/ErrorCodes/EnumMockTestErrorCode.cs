@@ -48,5 +48,11 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         /// Code And Level Already Exist
         /// </summary>
         CodeAndLevelAlreadyExist,
+
+        /// <summary>
+        /// MockTestIds Not Null
+        /// </summary>
+        MockTestIdsNotNull,
+
     }
 }

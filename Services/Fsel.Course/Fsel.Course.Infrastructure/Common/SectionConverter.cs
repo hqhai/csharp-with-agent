@@ -51,7 +51,9 @@ namespace Fsel.Course.Infrastructure.Common
                 TargetWord = x.TargetWord,
                 SectionParts = GetSectionPartModels(x.SectionParts.ToList()),
                 Questions = GetQuestionModels(x.SectionQuestions.ToList(), isDisableAnswers),
-                SectionTimeCodes = GetSectionTimeCodeModels(x.SectionTimeCodes.ToList())
+                SectionTimeCodes = GetSectionTimeCodeModels(x.SectionTimeCodes.ToList()),
+                ExtraPracticeAnswer = x!.ExtraPracticeAnswers.Count > 0 ? _mapper.Map<ExtraPracticeAnswerModel>(x.ExtraPracticeAnswers.FirstOrDefault()) : null,
+                MockTestAnswer = x!.MockTestAnswers.Count > 0 ? _mapper.Map<MockTestAnswerModel>(x.MockTestAnswers.FirstOrDefault()) : null
             }).ToList();
         }
 
@@ -74,19 +76,22 @@ namespace Fsel.Course.Infrastructure.Common
                 DisplayTime = x.DisplayTime,
                 ExecutionTime = x.ExecutionTime,
                 Name = x.Name,
+                ExtraPracticeAnswer = x!.ExtraPracticeAnswers.Count > 0 ? _mapper.Map<ExtraPracticeAnswerModel>(x.ExtraPracticeAnswers.FirstOrDefault()) : null,
+                MockTestAnswer = x!.MockTestAnswers.Count > 0 ? _mapper.Map<MockTestAnswerModel>(x.MockTestAnswers.FirstOrDefault()) : null
             }).ToList();
         }
 
         public IList<QuestionModel> GetQuestionModels(IList<SectionQuestion> sectionQuestions, bool isDisableAnswers = false)
         {
-            return sectionQuestions.Select(x => x.Question).Select(x => new QuestionModel
+            return sectionQuestions.Select(x => x.Question).OrderBy(x => x!.CreatedDate).Select(x => new QuestionModel
             {
                 Id = x!.Id,
-                QuestionType = x.QuestionType,
-                Explanation = x.Explanation,
-                Ungraded = x.Ungraded,
-                CorrectTotal = x.CorrectTotal,
-                Config = _questionTypeConverter.QuestionTypeConverterObject(x.Config, x.QuestionType, isDisableAnswers: isDisableAnswers).Item1
+                QuestionType = x!.QuestionType,
+                Explanation = x!.Explanation,
+                Ungraded = x!.Ungraded,
+                CorrectTotal = x!.CorrectTotal,
+                Config = _questionTypeConverter.QuestionTypeConverterObject(x!.Config, x!.QuestionType, isDisableAnswers: isDisableAnswers).Item1,
+                ResultAnswer = x!.ExtraPracticeAnswers.Count > 0 ? x.ExtraPracticeAnswers.FirstOrDefault() : null
             }).ToList();
         }
 

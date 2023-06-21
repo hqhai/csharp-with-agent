@@ -23,5 +23,25 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         /// ExtraPractice is in active state
         /// </summary>
         ExtraPracticeInActiveState,
+
+        /// <summary>
+        /// Student is Null
+        /// </summary>
+        StudentNull,
+
+        /// <summary>
+        /// Answer Is In The Wrong Formatl
+        /// </summary>
+        AnswerIsInTheWrongFormat,
+
+        /// <summary>
+        /// ExtraPracticeExercises NUll
+        /// </summary>
+        ExtraPracticeExercisesNull,
+
+        /// <summary>
+        /// ExtraPracticeExercises Does Not Exist
+        /// </summary>
+        ExtraPracticeResultNotExist
     }
 }

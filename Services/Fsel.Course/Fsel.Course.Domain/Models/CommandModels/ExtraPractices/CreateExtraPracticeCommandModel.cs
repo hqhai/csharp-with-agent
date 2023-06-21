@@ -30,6 +30,7 @@ namespace Fsel.Course.Domain.Models.CommandModels.ExtraPractices
 
         public IList<CreateExtraPracticeChapterCommandModel>? ExtraPracticeChapters { get; set; }
         public IList<CreateExerciseCommandModel>? Exercises { get; set; } //Type : Video Embed,Exercise
+        public Guid? MockTestId { get; set; } //Type : MockTest
         public CreateVideoCommandModel? Video { get; set; } //Type : Interactive Video
         // Type : Articles
     }

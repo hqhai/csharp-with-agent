@@ -30,6 +30,7 @@ namespace Fsel.Course.Infrastructure
         public DbSet<ExtraPracticeExercise> ExtraPracticeExercises { get; set; }
         public DbSet<ExtraPracticeAnswer> ExtraPracticeAnswers { get; set; }
         public DbSet<ExtraPracticeResult> ExtraPracticeResults { get; set; }
+        public DbSet<ExtraPracticeExerciseResult> ExtraPracticeExerciseResults { get; set; }
         public DbSet<HomeWork> HomeWorks { get; set; }
         public DbSet<ClassForum> ClassForums { get; set; }
         public DbSet<UnitLesson> UnitLessons { get; set; }
@@ -88,6 +89,7 @@ namespace Fsel.Course.Infrastructure
             modelBuilder.ApplyConfiguration(new ExtraPracticeAnswerEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new ExtraPracticeResultEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new ExtraPracticeExerciseEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new ExtraPracticeExerciseResultEntityTypeConfiguration());
 
             modelBuilder.ApplyConfiguration(new HomeWorkEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new LessonEntityTypeConfiguration());

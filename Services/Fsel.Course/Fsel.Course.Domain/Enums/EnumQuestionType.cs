@@ -53,5 +53,8 @@ namespace Fsel.Course.Domain.Enums
 
         [Description("Exercise preparation")]
         ExercisePreparation,
+
+        [Description("BaseContent")]
+        BaseContent
     }
 }

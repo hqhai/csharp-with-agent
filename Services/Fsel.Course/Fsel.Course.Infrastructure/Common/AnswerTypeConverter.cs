@@ -6,6 +6,7 @@ namespace Fsel.Course.Infrastructure.Common
     using System.Globalization;
     using System.Linq;
     using Fsel.Common.Helpers;
+    using Fsel.Core.Base.BaseModels;
     using Fsel.Course.Domain.Entities.QuestionTypeConfigs.Answers;
     using Fsel.Course.Domain.Entities.QuestionTypeConfigs.Questions;
     using Fsel.Course.Domain.Enums;
@@ -59,6 +60,10 @@ namespace Fsel.Course.Infrastructure.Common
                     totalCorrect = GetTotalCorrectTypeMultipleOptionAnswer(ref configAnswer, configQuestion);
                     break;
 
+                case EnumQuestionType.BaseContent:
+                    totalCorrect = GetTotalCorrectTypeBaseContentAnswer(ref configAnswer);
+                    break;
+
                 case EnumQuestionType.ExercisePreparation:
                     break;
 
@@ -91,6 +96,12 @@ namespace Fsel.Course.Infrastructure.Common
                 }
             }
             configAnswer = dataAnswer;
+            return number;
+        }
+        private static int GetTotalCorrectTypeBaseContentAnswer(ref object? configAnswer)
+        {
+            int number = 0;
+            configAnswer = configAnswer.Deserialize<BaseContentAnswer>();
             return number;
         }
 

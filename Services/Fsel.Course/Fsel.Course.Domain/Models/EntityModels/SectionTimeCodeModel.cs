@@ -11,5 +11,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public long DisplayTime { get; set; }
         public long ExecutionTime { get; set; }
         public Guid SectionId { get; set; }
+        public ExtraPracticeAnswerModel? ExtraPracticeAnswer { get; set; }
+        public MockTestAnswerModel? MockTestAnswer { get; set; }
     }
 }

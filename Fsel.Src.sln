@@ -94,13 +94,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Fsel.Storage.Domain", "Serv
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Fsel.Ordering", "Fsel.Ordering", "{9F26AA66-B696-41C4-871A-B89E5877D9AE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Fsel.Ordering.Api", "Services\Fsel.Ordering\Fsel.Ordering.Api\Fsel.Ordering.Api.csproj", "{2BED5840-1B6E-4BB2-B145-BD8D366F3AAC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Fsel.Ordering.Api", "Services\Fsel.Ordering\Fsel.Ordering.Api\Fsel.Ordering.Api.csproj", "{2BED5840-1B6E-4BB2-B145-BD8D366F3AAC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Fsel.Ordering.Application", "Services\Fsel.Ordering\Fsel.Ordering.Application\Fsel.Ordering.Application.csproj", "{53F681CA-3E35-4480-AFFF-45AC36862FA6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Fsel.Ordering.Application", "Services\Fsel.Ordering\Fsel.Ordering.Application\Fsel.Ordering.Application.csproj", "{53F681CA-3E35-4480-AFFF-45AC36862FA6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Fsel.Ordering.Domain", "Services\Fsel.Ordering\Fsel.Ordering.Domain\Fsel.Ordering.Domain.csproj", "{BC64061C-552C-4F9D-8B39-884DF270FC15}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Fsel.Ordering.Domain", "Services\Fsel.Ordering\Fsel.Ordering.Domain\Fsel.Ordering.Domain.csproj", "{BC64061C-552C-4F9D-8B39-884DF270FC15}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Fsel.Ordering.Infrastructure", "Services\Fsel.Ordering\Fsel.Ordering.Infrastructure\Fsel.Ordering.Infrastructure.csproj", "{6B6BCBBD-CCB8-4C15-A857-29BAF20C3307}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Fsel.Ordering.Infrastructure", "Services\Fsel.Ordering\Fsel.Ordering.Infrastructure\Fsel.Ordering.Infrastructure.csproj", "{6B6BCBBD-CCB8-4C15-A857-29BAF20C3307}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

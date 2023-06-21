@@ -25,7 +25,7 @@ namespace Fsel.Course.Lms.Application.Queries.ExtraPracticeQuery
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<object> methodResult = new MethodResult<object>();
-            var units = await _unitRepository.Queryable.GroupBy(x => x.CourseLevel).Select(x => new
+            var units = await _unitRepository.Queryable.GroupBy(x => x.CourseLevel).AsTracking().Select(x => new
             {
                 CourseLevel = x.Key,
                 Units = x.Select(y => new

@@ -7,6 +7,7 @@ namespace Fsel.Course.Lms.Api.Controllers
     using Fsel.Common.Constants;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd;
     using Fsel.Course.Lms.Application.Queries.ExtraPracticeQuery;
     using Fsel.Shared.Enums;
     using MediatR;
@@ -39,6 +40,18 @@ namespace Fsel.Course.Lms.Api.Controllers
         }
 
         /// <summary>
+        /// Get And Start ExtraPractice
+        /// </summary>
+        [HttpGet("start-extraPractice/{id}")]
+        [ProducesResponseType(typeof(MethodResult<ExtraPracticeModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetAndStartExtraPractice([FromRoute] Guid id)
+        {
+            MethodResult<ExtraPracticeModel> queryResult = await _mediator.Send(new StartExtraPracticeCommand { ExtraPracticeId = id }).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
         /// Search ExtraPractice
         /// </summary>
         [HttpGet()]
@@ -47,6 +60,18 @@ namespace Fsel.Course.Lms.Api.Controllers
         public async Task<IActionResult> Search([FromQuery] SearchExtraPracticeQuery query)
         {
             MethodResult<PagingItemsModel<ExtraPracticeModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Create ExtraPractice Answer
+        /// </summary>
+        [HttpPost("create-extraPractice-answer")]
+        [ProducesResponseType(typeof(MethodResult<ExtraPracticeExerciseResultModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> CreateAnswer([FromBody] CreateExtraPracticeAnswerCommand command)
+        {
+            MethodResult<ExtraPracticeExerciseResultModel> queryResult = await _mediator.Send(command).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
     }

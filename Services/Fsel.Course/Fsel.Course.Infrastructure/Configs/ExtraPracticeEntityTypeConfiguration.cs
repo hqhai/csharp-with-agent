@@ -38,6 +38,13 @@ namespace Fsel.Course.Infrastructure.Configs
                     .OnDelete(DeleteBehavior.Cascade);
 
             builder.HasIndex(x => x.PlacementTestId).IsUnique(false);
+
+            builder.HasOne(a => a.MockTest)
+                   .WithOne(b => b.ExtraPractice)
+                   .HasForeignKey<ExtraPractice>(p => p.MockTestId)
+                   .OnDelete(DeleteBehavior.Cascade);
+
+            builder.HasIndex(x => x.MockTestId).IsUnique(false);
         }
     }
 }
