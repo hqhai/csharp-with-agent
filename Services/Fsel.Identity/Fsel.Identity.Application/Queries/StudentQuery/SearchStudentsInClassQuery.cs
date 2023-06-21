@@ -9,7 +9,6 @@ namespace Fsel.Identity.Application.Queries.StudentQuery
     using Fsel.Core.Extensions;
     using Fsel.Identity.Application.Services.LmsCourseService;
     using Fsel.Identity.Application.Services.TrainingService;
-    using Fsel.Identity.Domain.Enums.ErrorCodes;
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Domain.Models.EntityModels;
     using MediatR;
@@ -51,7 +50,8 @@ namespace Fsel.Identity.Application.Queries.StudentQuery
                 return methodResult;
             }
             var studentIds = studentIdsResult.Content?.Result;
-            var students = _studentRepository.Queryable.Where(p => studentIds!.Count == 0 || studentIds!.Contains(p.Id)).Include(x => x.Human).Select(i => new SearchStudentsInClassModel
+
+            var students = _studentRepository.Queryable.Where(p => studentIds != null && studentIds!.Contains(p.Id)).Include(x => x.Human).Select(i => new SearchStudentsInClassModel
             {
                 Id = i.Id,
                 FullName = i.Human!.FullName,
