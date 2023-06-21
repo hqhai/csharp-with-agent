@@ -2,11 +2,8 @@
 
 namespace Fsel.Training.Domain.Models.EntityModels
 {
-    using Fsel.Shared.Enums;
     using Fsel.Core.Base.BaseModels;
-    using Fsel.Common.Enums.ErrorCodes;
-    using Fsel.Training.Domain.Entities;
-    using System.ComponentModel.DataAnnotations;
+    using Fsel.Shared.Enums;
 
     public class ClassModel : BaseModel
     {

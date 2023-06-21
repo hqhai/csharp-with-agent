@@ -5,6 +5,7 @@ namespace Fsel.Training.Api.Controllers.Cso
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
     using Fsel.Core.Base.BaseModels;
+    using Fsel.Training.Application.Commands.ClassCmd;
     using Fsel.Training.Application.Queries.ClassQuery;
     using Fsel.Training.Domain.Models.EntityModels;
     using MediatR;
@@ -44,6 +45,20 @@ namespace Fsel.Training.Api.Controllers.Cso
         public async Task<IActionResult> Get([FromRoute] Guid id)
         {
             MethodResult<ClassModel> commandResult = await _mediator.Send(new GetClassLiveByCsoQuery { Id = id }).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Update a class live
+        /// </summary>
+        [HttpPut("{id}")]
+        [ProducesResponseType(typeof(MethodResult<ClassModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> Update([FromRoute] Guid id, [FromBody] SaveClassLiveCsoCommand command)
+        {
+            ArgumentNullException.ThrowIfNull(command);
+            command.Id = id;
+            MethodResult<ClassModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
     }
