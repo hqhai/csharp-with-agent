@@ -10,5 +10,7 @@ namespace Fsel.Course.Domain.IRepositories
         Task<bool> IsLessonUsed(Guid id);
 
         Task<Lesson?> GetIncludeVideoByIdAsync(Guid id);
+
+        Task<Lesson?> GetIncludeByIdNoTrackingAsync(Guid id, int? siteId = null);
     }
 }
