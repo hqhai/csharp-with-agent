@@ -84,7 +84,8 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
                     StudentId = studentId ?? default,
                     LessonResultId = request.LessonResultId,
                     Status = request.IsSubmit ? EnumClassForumResultStatus.Pending : EnumClassForumResultStatus.Draft,
-                    ClassForumId = classForum.Id
+                    ClassForumId = classForum.Id,
+                    FilePath = request.FilePath
                 };
             }
             else if (classForumResult.Status == EnumClassForumResultStatus.Draft || classForumResult.Status == EnumClassForumResultStatus.Denied)
