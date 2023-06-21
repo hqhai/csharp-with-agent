@@ -74,6 +74,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
             var studentId = student?.Content?.Result?.Id;
             var classForumResult = await _classForumResultRepository.Queryable
                     .Include(x => x.ClassForumResultFiles)
+                    .Include(x => x.ClassForumScores)
                     .FirstOrDefaultAsync(x => x.StudentId == studentId && x.LessonResultId == request.LessonResultId, cancellationToken);
             if (classForumResult == null)
             {
@@ -103,6 +104,44 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
                     FilePath = x,
                 }).ToList();
             }
+
+            #region Fix hashcode
+
+            classForumResult.Status = EnumClassForumResultStatus.Graded;
+            if (classForum.CourseSkill == Shared.Enums.EnumCourseSkill.Writing)
+            {
+                var score = 0;
+                if (classForumResult.Content!.Length >= classForum.TaggetWordLimit)
+                {
+                    score = 100;
+                }
+                classForumResult.ClassForumScores = new List<ClassForumScore>
+                {
+                new ClassForumScore
+                {
+                    Score= score,
+                    Criteria = EnumClassForumScoreCriteria.Content
+                },
+                new ClassForumScore
+                {
+                    Score= score,
+                    Criteria = EnumClassForumScoreCriteria.Achievement
+                },
+                new ClassForumScore
+                {
+                    Score= score,
+                    Criteria = EnumClassForumScoreCriteria.Organisation
+                },
+                new ClassForumScore
+                {
+                    Score= score,
+                    Criteria = EnumClassForumScoreCriteria.Language
+                }
+                };
+            }
+
+            #endregion Fix hashcode
+
             await _classForumResultRepository.ExecuteTransactionAsync(async () =>
             {
                 _classForumResultRepository.Add(classForumResult);
