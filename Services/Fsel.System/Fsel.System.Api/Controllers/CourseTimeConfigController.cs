@@ -6,9 +6,11 @@ namespace Fsel.System.Api.Controllers
     using Fsel.Common.Constants;
     using Fsel.Core.Base.BaseModels;
     using Fsel.System.Application.Commands.CourseTimeConfigCmd;
+    using Fsel.System.Application.Commands.LiveTimeFrameCmd;
     using Fsel.System.Application.Querys;
     using Fsel.System.Application.Querys.CourseTimeConfigQuery;
     using Fsel.System.Domain.Models;
+    using Fsel.System.Domain.Models.EntityModels;
     using global::System.Net;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
@@ -37,7 +39,7 @@ namespace Fsel.System.Api.Controllers
             return queryResult.GetActionResult();
         }
 
-        /// <summary>
+        /*/// <summary>
         /// Update course time config
         /// </summary>
         [HttpPut("{id}")]
@@ -47,6 +49,18 @@ namespace Fsel.System.Api.Controllers
         {
             ArgumentNullException.ThrowIfNull(command);
             command.Id = id;
+            MethodResult<CourseTimeConfigModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }*/
+
+        /// <summary>
+        /// Save course time config
+        /// </summary>
+        [HttpPost("save-course-time-config")]
+        [ProducesResponseType(typeof(MethodResult<CourseTimeConfigModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> SaveList([FromBody] SetMonthToClassCommand command)
+        {
             MethodResult<CourseTimeConfigModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }

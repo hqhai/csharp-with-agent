@@ -12,6 +12,7 @@ namespace Fsel.System.Application.Commands.CourseTimeConfigCmd
     using global::System;
     using MediatR;
     using Microsoft.AspNetCore.Http;
+    using Microsoft.EntityFrameworkCore;
 
     public class SetMonthToClassCommand : SetMonthToClassCommandModel, IRequest<MethodResult<CourseTimeConfigModel>>
     {
@@ -35,7 +36,7 @@ namespace Fsel.System.Application.Commands.CourseTimeConfigCmd
 
             #region Validation
 
-            var courseTimeConfig = await _courseTimeConfigRepository.GetIncludeByIdAsync(request.Id);
+            var courseTimeConfig = await _courseTimeConfigRepository.Queryable.FirstOrDefaultAsync(cancellationToken);
             if (courseTimeConfig == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumCourseTimeConfigErrorCode.CourseTimeConfigNotEmpty), nameof(request.Id), request.Id);
@@ -47,7 +48,15 @@ namespace Fsel.System.Application.Commands.CourseTimeConfigCmd
             _mapper.Map(request, courseTimeConfig);
             await _courseTimeConfigRepository.ExecuteTransactionAsync(async () =>
             {
-                courseTimeConfig = _courseTimeConfigRepository.Update(courseTimeConfig);
+                if (request.CourseId.HasValue)
+                {
+                    courseTimeConfig = _courseTimeConfigRepository.Update(courseTimeConfig);
+                }
+                else
+                {
+                    courseTimeConfig = _courseTimeConfigRepository.Add(courseTimeConfig);
+                }
+
                 await _courseTimeConfigRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
                 methodResult.StatusCode = StatusCodes.Status201Created;
