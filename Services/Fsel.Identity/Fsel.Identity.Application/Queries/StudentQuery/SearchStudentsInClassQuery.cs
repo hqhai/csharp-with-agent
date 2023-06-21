@@ -9,6 +9,7 @@ namespace Fsel.Identity.Application.Queries.StudentQuery
     using Fsel.Core.Extensions;
     using Fsel.Identity.Application.Services.LmsCourseService;
     using Fsel.Identity.Application.Services.TrainingService;
+    using Fsel.Identity.Domain.Enums.ErrorCodes;
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Domain.Models.EntityModels;
     using MediatR;
@@ -44,8 +45,13 @@ namespace Fsel.Identity.Application.Queries.StudentQuery
                 return methodResult;
             }
             var studentIdsResult = await _trainingService.GetStudentIdsByClassId(request.ClassId);
+            if (!studentIdsResult.IsSuccessStatusCode)
+            {
+                methodResult.AddError(studentIdsResult.Error?.Content, studentIdsResult.StatusCode);
+                return methodResult;
+            }
             var studentIds = studentIdsResult.Content?.Result;
-            var students = _studentRepository.Queryable.Where(p => studentIds!.Contains(p.Id)).Include(x => x.Human).Select(i => new SearchStudentsInClassModel
+            var students = _studentRepository.Queryable.Where(p => studentIds!.Count == 0 || studentIds!.Contains(p.Id)).Include(x => x.Human).Select(i => new SearchStudentsInClassModel
             {
                 Id = i.Id,
                 FullName = i.Human!.FullName,
@@ -72,7 +78,7 @@ namespace Fsel.Identity.Application.Queries.StudentQuery
 
             foreach (var item in lists)
             {
-                item.PTPoint = ptr!.FirstOrDefault(p => p.StudentId == item.Id)!.PTPoint;
+                item.PTPoint = ptr!.FirstOrDefault(p => p.StudentId == item.Id) == null ? 0 : ptr!.FirstOrDefault(p => p.StudentId == item.Id)!.PTPoint;
             }
 
             methodResult.Result = new PagingItemsModel<SearchStudentsInClassModel>(lists, request, totalItem);

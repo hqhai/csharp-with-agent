@@ -13,12 +13,12 @@ namespace Fsel.Training.Application.Queries.ClassQuery
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class GetStudentIdsInClassQuery : IRequest<MethodResult<List<Guid>>>
+    public class GetStudentIdsInClassQuery : IRequest<MethodResult<List<Guid>?>>
     {
         public Guid ClassId { get; set; }
     }
 
-    public class GetStudentIdsInClassQueryHandler : IRequestHandler<GetStudentIdsInClassQuery, MethodResult<List<Guid>>>
+    public class GetStudentIdsInClassQueryHandler : IRequestHandler<GetStudentIdsInClassQuery, MethodResult<List<Guid>?>>
     {
         private readonly IClassStudentRepository _classStudentRepository;
         private readonly IClassRepository _classRepository;
@@ -29,10 +29,10 @@ namespace Fsel.Training.Application.Queries.ClassQuery
             _classRepository = classRepository;
         }
 
-        public async Task<MethodResult<List<Guid>>> Handle(GetStudentIdsInClassQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<List<Guid>?>> Handle(GetStudentIdsInClassQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            MethodResult<List<Guid>> methodResult = new MethodResult<List<Guid>>();
+            MethodResult<List<Guid>?> methodResult = new MethodResult<List<Guid>?>();
 
             var classes = await _classRepository.GetByIdAsync(request.ClassId);
             if (classes == null)

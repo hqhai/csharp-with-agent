@@ -7,6 +7,6 @@ namespace Fsel.Course.Domain.Models.EntityModels
     public class StudentPTPointModel
     {
         public Guid StudentId { get; set; }
-        public long PTPoint { get; set; }
+        public double PTPoint { get; set; }
     }
 }
