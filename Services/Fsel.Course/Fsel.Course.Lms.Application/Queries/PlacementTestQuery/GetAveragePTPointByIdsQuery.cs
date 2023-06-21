@@ -31,18 +31,24 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestQuery
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<List<AveragePTPointModel>>();
             List<AveragePTPointModel> average = new List<AveragePTPointModel>();
+
+            List<Guid>? studentIds = request.PointByIdQueryModels.SelectMany(x => x.StudentIds!).ToList();
+
+            var ptResult = await _placementTestResultRepository.Queryable.Where(x => studentIds.Contains(x.StudentId)).OrderByDescending(p => p.CreatedDate).ToListAsync(cancellationToken);
+
+
             foreach (var item in request.PointByIdQueryModels)
             {
-                var ptResult = await _placementTestResultRepository.Queryable.Where(x => item.StudentIds!.Contains(x.StudentId)).OrderByDescending(p => p.CreatedDate).ToListAsync(cancellationToken);
                 var averagePT = new AveragePTPointModel();
                 averagePT.ClassId = item.ClassId;
-                averagePT.AveragePTPoint = 0;
+
+                double percent = 0;
                 foreach (var student in item.StudentIds!)
                 {
                     var pt = ptResult.FirstOrDefault(p => p.StudentId == student)!;
-                    averagePT.AveragePTPoint += pt == null ? 0 : (long)pt.Percent;
+                    percent += pt?.Percent ?? default;
                 }
-                averagePT.AveragePTPoint = item.StudentIds.Count == 0 ? 0 : averagePT.AveragePTPoint / item.StudentIds.Count;
+                averagePT.AveragePTPoint = item.StudentIds.Count == 0 ? 0 : percent / item.StudentIds.Count;
                 average.Add(averagePT);
             }
             methodResult.Result = average;

@@ -69,7 +69,7 @@ namespace Fsel.Training.Application.Queries.ClassQuery.Admin
                 PackageId = p.PackageId,
                 StudentIds = p.ClassStudents.Select(x => x.StudentId).ToList(),
             });
-            if (!string.IsNullOrEmpty(request.Status.ToString()))
+            if (request.Status.HasValue)
             {
                 classes = classes.Where(p => p.Status == request.Status);
             }

@@ -7,6 +7,6 @@ namespace Fsel.Course.Domain.Models.EntityModels
     public class AveragePTPointModel
     {
         public Guid ClassId { get; set; }
-        public long AveragePTPoint { get; set; }
+        public double AveragePTPoint { get; set; }
     }
 }

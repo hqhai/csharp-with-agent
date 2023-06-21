@@ -13,8 +13,7 @@ namespace Fsel.Training.Domain.Models.EntityModels
         public int NumberOfStudent { get; set; }
         public DateTime ExpectedDate { get; set; }
         public DateTime ActivationDate { get; set; }
-        public int MaxScorePT { get; set; }
-        public long AveragePT { get; set; }
+        public double AveragePT { get; set; }
         public string? CSOName { get; set; }
         public string? TeacherName { get; set; }
         public EnumClassType Status { get; set; }
