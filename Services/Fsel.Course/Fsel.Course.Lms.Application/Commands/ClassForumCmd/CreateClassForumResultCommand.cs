@@ -117,29 +117,6 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
                 {
                     score = 100;
                 }
-                classForumResult.ClassForumScores = new List<ClassForumScore>
-                {
-                new ClassForumScore
-                {
-                    Score= score,
-                    Criteria = EnumClassForumScoreCriteria.Content
-                },
-                new ClassForumScore
-                {
-                    Score= score,
-                    Criteria = EnumClassForumScoreCriteria.Achievement
-                },
-                new ClassForumScore
-                {
-                    Score= score,
-                    Criteria = EnumClassForumScoreCriteria.Organisation
-                },
-                new ClassForumScore
-                {
-                    Score= score,
-                    Criteria = EnumClassForumScoreCriteria.Language
-                }
-                };
             }
             if (classForum.CourseSkill == Shared.Enums.EnumCourseSkill.Writing)
             {
@@ -147,30 +124,30 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
                 {
                     score = 100;
                 }
-                classForumResult.ClassForumScores = new List<ClassForumScore>
-                {
-                new ClassForumScore
-                {
-                    Score= score,
-                    Criteria = EnumClassForumScoreCriteria.Content
-                },
-                new ClassForumScore
-                {
-                    Score= score,
-                    Criteria = EnumClassForumScoreCriteria.Achievement
-                },
-                new ClassForumScore
-                {
-                    Score= score,
-                    Criteria = EnumClassForumScoreCriteria.Organisation
-                },
-                new ClassForumScore
-                {
-                    Score= score,
-                    Criteria = EnumClassForumScoreCriteria.Language
-                }
-                };
             }
+            classForumResult.ClassForumScores = new List<ClassForumScore>
+                {
+                    new ClassForumScore
+                    {
+                        Score= score,
+                        Criteria = EnumClassForumScoreCriteria.Content
+                    },
+                    new ClassForumScore
+                    {
+                        Score= score,
+                        Criteria = EnumClassForumScoreCriteria.Achievement
+                    },
+                    new ClassForumScore
+                    {
+                        Score= score,
+                        Criteria = EnumClassForumScoreCriteria.Organisation
+                    },
+                    new ClassForumScore
+                    {
+                        Score= score,
+                        Criteria = EnumClassForumScoreCriteria.Language
+                    }
+                };
 
             #endregion Fix hashcode
 
