@@ -30,7 +30,7 @@ namespace Fsel.Course.Application.Queries.LessonQuery
         {
             MethodResult<LessonModel> methodResult = new MethodResult<LessonModel>();
             ArgumentNullException.ThrowIfNull(request);
-            var lesson = await _lessonRepository.GetIncludeByIdAsync(request.Id);
+            var lesson = await _lessonRepository.GetIncludeByIdNoTrackingAsync(request.Id);
 
             if (lesson == null)
             {

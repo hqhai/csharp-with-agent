@@ -34,10 +34,7 @@ namespace Fsel.Identity.Api.Controllers
         [HttpPost("change-password")]
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        [Authorize(Roles = nameof(EnumRole.CSO))]
-        [Authorize(Roles = nameof(EnumRole.Teacher))]
-        [Authorize(Roles = nameof(EnumRole.Parent))]
-        [Authorize(Roles = nameof(EnumRole.Student))]
+        [Authorize]
         public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordCommand command)
         {
             MethodResult<bool> commandResult = await _mediator.Send(command).ConfigureAwait(false);
