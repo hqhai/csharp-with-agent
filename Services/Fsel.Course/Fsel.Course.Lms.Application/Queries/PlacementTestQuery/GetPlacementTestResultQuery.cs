@@ -16,18 +16,18 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestQuery
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class GetPlacementTestByUserIdQuery : IRequest<MethodResult<PlacementTestResultModel>>
+    public class GetPlacementTestResultQuery : IRequest<MethodResult<PlacementTestResultModel>>
     {
     }
 
-    public class GetPlacementTestByUserIdQueryHandler : IRequestHandler<GetPlacementTestByUserIdQuery, MethodResult<PlacementTestResultModel>>
+    public class GetPlacementTestResultQueryHandler : IRequestHandler<GetPlacementTestResultQuery, MethodResult<PlacementTestResultModel>>
     {
         private readonly AuthContext _authContext;
         private readonly IUserService _userService;
         private readonly IMapper _mapper;
         private readonly IPlacementTestResultRepository _placementTestResultRepository;
 
-        public GetPlacementTestByUserIdQueryHandler(AuthContext authContext
+        public GetPlacementTestResultQueryHandler(AuthContext authContext
             , IUserService userService
             , IMapper mapper
             , IPlacementTestResultRepository placementTestResultRepository)
@@ -38,7 +38,7 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestQuery
             _placementTestResultRepository = placementTestResultRepository;
         }
 
-        public async Task<MethodResult<PlacementTestResultModel>> Handle(GetPlacementTestByUserIdQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<PlacementTestResultModel>> Handle(GetPlacementTestResultQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<PlacementTestResultModel> methodResult = new MethodResult<PlacementTestResultModel>();

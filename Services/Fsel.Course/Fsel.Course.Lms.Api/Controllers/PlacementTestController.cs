@@ -39,14 +39,14 @@ namespace Fsel.Course.Lms.Api.Controllers
         }
 
         /// <summary>
-        /// get PlacementTest by UserId
+        /// get PlacementTest Result
         /// </summary>
-        [HttpGet]
+        [HttpGet("get-result")]
         [ProducesResponseType(typeof(MethodResult<PlacementTestResultModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetListByUserId()
+        public async Task<IActionResult> GetResult()
         {
-            MethodResult<PlacementTestResultModel> queryResult = await _mediator.Send(new GetPlacementTestByUserIdQuery()).ConfigureAwait(false);
+            MethodResult<PlacementTestResultModel> queryResult = await _mediator.Send(new GetPlacementTestResultQuery()).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
 
