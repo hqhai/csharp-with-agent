@@ -11,6 +11,7 @@ namespace Fsel.Training.Api.Controllers
     using Fsel.Training.Application.Commands.ClassCmd;
     using Fsel.Training.Application.Commands.ClassStudentCmd;
     using Fsel.Training.Application.Queries.ClassQuery;
+    using Fsel.Training.Application.Queries.ClassQuery.Admin;
     using Fsel.Training.Domain.Models.EntityModels;
     using MediatR;
     using Microsoft.AspNetCore.Authorization;
@@ -111,6 +112,18 @@ namespace Fsel.Training.Api.Controllers
         {
             MethodResult<ClassModel> commandResult = await _mediator.Send(new GetNewClassByStudentIdQuery { StudentId = id }).ConfigureAwait(false);
             return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Search Class Forum
+        /// </summary>
+        [HttpGet("search-class")]
+        [ProducesResponseType(typeof(MethodResult<PagingItemsModel<ClassSearchModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> SearchClass([FromQuery] SearchClassByAdminQuery query)
+        {
+            MethodResult<PagingItemsModel<ClassSearchModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
         }
     }
 }

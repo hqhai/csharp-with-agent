@@ -15,5 +15,10 @@ namespace Fsel.Training.Application.Services.CourseServices
 
         [Get("/cso/course/get-course-by-level")]
         Task<IApiResponse<MethodResult<IList<CourseModel>>>> GetCoursesByLevelAsync([FromQuery] EnumCourseLevel? courseLevel);
+        [Get("/course/get-by-level")]
+        Task<IApiResponse<MethodResult<List<CourseModel>>>> GetCourseByLevel([FromQuery] EnumCourseLevel courseLevel);
+
+        [Post("/placement-test/admin")]
+        Task<IApiResponse<MethodResult<List<AveragePTPointModel>>>> GetAveragePTPoint([FromBody] GetAveragePTPointByIdsQueryModel model);
     }
 }
