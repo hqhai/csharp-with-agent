@@ -2,10 +2,10 @@
 
 namespace Fsel.System.Domain.Models.CommandModels.CourseTimeConfigs
 {
-    using Fsel.Core.Base.BaseModels;
-
-    public class SetMonthToClassCommandModel : BaseCommandModel
+    public class SetMonthToClassCommandModel
     {
         public int DurationMonth { get; set; }
+
+        public Guid CourseId { get; set; }
     }
 }
