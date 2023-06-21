@@ -39,20 +39,6 @@ namespace Fsel.System.Api.Controllers
             return queryResult.GetActionResult();
         }
 
-        /*/// <summary>
-        /// Update course time config
-        /// </summary>
-        [HttpPut("{id}")]
-        [ProducesResponseType(typeof(MethodResult<CourseTimeConfigModel>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> Update([FromRoute] Guid id, [FromBody] SetMonthToClassCommand command)
-        {
-            ArgumentNullException.ThrowIfNull(command);
-            command.Id = id;
-            MethodResult<CourseTimeConfigModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
-            return commandResult.GetActionResult();
-        }*/
-
         /// <summary>
         /// Save course time config
         /// </summary>
