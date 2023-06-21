@@ -46,13 +46,42 @@ namespace Fsel.Interaction.Application.Commands.ActionCmd
                 methodResult.AddErrorBadRequest(action.ErrorMessages);
                 return methodResult;
             }
-
-            await _interactionActionRepository.Queryable.FirstOrDefaultAsync(x => x.ObjectId == request.ObjectId, cancellationToken);
+            #region
+            /* if (action != null)
+             {
+                 if (request.Type == EnumInteractionActionType.Like)
+                 {
+                     await _interactionActionRepository.DeleteAsync(action);
+                 }
+                 else if (request.Type != EnumInteractionActionType.Like)
+                 {
+                     methodResult.Result = true;
+                     return methodResult;
+                 }
+             }*/
+            #endregion
+            var like = await _interactionActionRepository.Queryable.FirstOrDefaultAsync(x => x.ObjectId == request.ObjectId, cancellationToken);
 
             await _interactionActionRepository.ExecuteTransactionAsync(async () =>
             {
-                action = _interactionActionRepository.Add(action);
-                await _interactionActionRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+                if (action != null)
+                {
+                    if (like.Type == EnumInteractionActionType.Like)
+                    {
+                        await _interactionActionRepository.DeleteAsync(action);
+                    }
+                    else if (like.Type != EnumInteractionActionType.Like)
+                    {
+                        methodResult.Result = true;
+                        return methodResult;
+                    }
+                }
+                else
+                {
+                    action = _interactionActionRepository.Add(action!);
+                }
+                /*action = _interactionActionRepository.Add(action!);*/
+                await _interactionActionRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
                 methodResult.StatusCode = StatusCodes.Status201Created;
                 methodResult.Result = true;
