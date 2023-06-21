@@ -29,7 +29,7 @@ namespace Fsel.Course.Lms.Api.Controllers
         /// <summary>
         /// get PlacementTest
         /// </summary>
-        [HttpGet("placement-test")]
+        [HttpGet("level")]
         [ProducesResponseType(typeof(MethodResult<PlacementTestBankModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> Get([FromQuery] GetPlacementTestQuery command)
@@ -39,9 +39,21 @@ namespace Fsel.Course.Lms.Api.Controllers
         }
 
         /// <summary>
+        /// get PlacementTest by UserId
+        /// </summary>
+        [HttpGet]
+        [ProducesResponseType(typeof(MethodResult<PlacementTestResultModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetListByUserId()
+        {
+            MethodResult<PlacementTestResultModel> queryResult = await _mediator.Send(new GetPlacementTestByUserIdQuery()).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
         /// Create PlacementTest Answers
         /// </summary>
-        [HttpPost("placement-test-answers")]
+        [HttpPost("create-answers")]
         [ProducesResponseType(typeof(MethodResult<IList<PlacementTestResultModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> CreateAnswer([FromBody] CreatePlacementTestAnswerCommand command)
