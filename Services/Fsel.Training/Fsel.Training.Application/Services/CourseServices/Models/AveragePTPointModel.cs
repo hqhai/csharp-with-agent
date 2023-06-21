@@ -6,6 +6,5 @@ namespace Fsel.Training.Application.Services.CourseServices.Models
     {
         public Guid ClassId { get; set; }
         public long AveragePTPoint { get; set; }
-        public int MaxPTPoint { get; set; }
     }
 }

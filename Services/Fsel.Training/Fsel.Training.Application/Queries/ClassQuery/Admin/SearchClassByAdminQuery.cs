@@ -7,6 +7,7 @@ namespace Fsel.Training.Application.Queries.ClassQuery.Admin
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Core.Extensions;
+    using Fsel.Course.Application.Services.UserServices.Models;
     using Fsel.Training.Application.Services.CourseServices;
     using Fsel.Training.Application.Services.CourseServices.Models;
     using Fsel.Training.Application.Services.OrderServices;
@@ -16,7 +17,6 @@ namespace Fsel.Training.Application.Queries.ClassQuery.Admin
     using Fsel.Training.Domain.Models.QueryModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
-    using Microsoft.AspNetCore.Mvc;
     using Microsoft.EntityFrameworkCore;
 
     public class SearchClassByAdminQuery : SearchClassQueryModel, IRequest<MethodResult<PagingItemsModel<ClassSearchModel>>>
@@ -49,14 +49,14 @@ namespace Fsel.Training.Application.Queries.ClassQuery.Admin
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 return methodResult;
             }
-            List<Guid>? CourseIds = new List<Guid>();
+            List<Guid>? courseIds = new List<Guid>();
 
             if (!string.IsNullOrEmpty(request.Level.ToString()))
             {
                 var courses = await _courseService.GetCoursesByLevelAsync(request.Level);
-                CourseIds = courses.Content?.Result?.Select(p => p.Id).ToList()!;
+                courseIds = courses.Content?.Result?.Select(p => p.Id).ToList()!;
             }
-            var classes = _classRepository.Queryable.Include(i => i.ClassStudents).Where(p => CourseIds.Count == 0 || CourseIds.Contains(p.CourseId)).Select(p => new ClassSearchModel
+            var classes = _classRepository.Queryable.Include(i => i.ClassStudents).Where(p => courseIds.Count == 0 || courseIds.Contains(p.CourseId)).Select(p => new ClassSearchModel
             {
                 Id = p.Id,
                 ClassName = p.Name,
@@ -67,6 +67,7 @@ namespace Fsel.Training.Application.Queries.ClassQuery.Admin
                 ActivationDate = p.CreatedDate,
                 Status = p.Status,
                 PackageId = p.PackageId,
+                StudentIds = p.ClassStudents.Select(x => x.StudentId).ToList(),
             });
             if (!string.IsNullOrEmpty(request.Status.ToString()))
             {
@@ -79,32 +80,34 @@ namespace Fsel.Training.Application.Queries.ClassQuery.Admin
                     .ToListAsync(cancellationToken: cancellationToken)
                     .ConfigureAwait(false);
 
-            IList<Guid>? teacherAndCSOIds = new List<Guid>();
-            var teacherIds = lists.Select(x => x.TeacherId ?? default).ToList();
-            var csoIds = lists.Select(x => x.CSOId ?? default).ToList();
-            teacherAndCSOIds = teacherAndCSOIds.Concat(teacherIds).ToList();
-            teacherAndCSOIds = teacherAndCSOIds.Concat(csoIds).ToList();
-            var teacherAndCSOResult = await _userService.GetTeacherAndCSOByIds(teacherAndCSOIds);
-            var packages = await _orderService.GetPackages();
-            foreach(var item in lists)
+            var teacherResult = _userService.GetTeacherByIdsAsync(new GetTeacherByIdsQueryModel
             {
-                item.StudentIds = await _classStudentRepository.Queryable.Where(p => p.ClassId == item.Id).Select(x => x.StudentId).ToListAsync(cancellationToken);
-            }
-            List<GetAveragePTPointByIdsQueryModel> getAveragePTPoint = new List<GetAveragePTPointByIdsQueryModel>();
-            getAveragePTPoint = lists.Select(x => new GetAveragePTPointByIdsQueryModel
+                Ids = lists.Select(x => x.TeacherId ?? default).ToList()
+            });
+
+            var csosResult = _userService.GetCSOByIds(lists.Select(x => x.CSOId ?? default).ToList());
+
+            var packagesResult = _orderService.GetPackages();
+
+            var ptrResult = _courseService.GetAveragePTPoint(new GetAveragePTPointByIdsQueryModel
             {
-                ClassId = x.Id,
-                StudentIds = x.StudentIds
-            }).ToList();
-            var ptr = await _courseService.GetAveragePTPoint(getAveragePTPoint);
-            var ptrResult = ptr.Content?.Result;
+                PointByIdQueryModels = lists.Select(x => new GetAveragePTPointByIdQueryModel
+                {
+                    ClassId = x.Id,
+                    StudentIds = x.StudentIds
+                }).ToList()
+            });
+
+            await Task.WhenAll(teacherResult, csosResult, packagesResult, ptrResult);
+
+            var ptr = ptrResult.GetAwaiter().GetResult().Content?.Result;
+
             foreach (var item in lists)
             {
-                item.TeacherName = teacherAndCSOResult.Content?.Result?.FirstOrDefault(p => p.Id == item.TeacherId)?.FullName;
-                item.CSOName = teacherAndCSOResult.Content?.Result?.FirstOrDefault(p => p.Id == item.CSOId)?.FullName;
-                item.PackageName = packages.Content?.Result?.FirstOrDefault(p => p.Id == item.PackageId)?.Code;
-                item.MaxScorePT = ptrResult!.FirstOrDefault(p => p.ClassId == item.Id)!.MaxPTPoint;
-                item.AveragePT = ptrResult!.FirstOrDefault(p => p.ClassId == item.Id)!.MaxPTPoint;
+                item.TeacherName = teacherResult.GetAwaiter().GetResult().Content?.Result?.FirstOrDefault(p => p.Id == item.TeacherId)?.Human?.FullName;
+                item.CSOName = csosResult.GetAwaiter().GetResult().Content?.Result?.FirstOrDefault(p => p.Id == item.CSOId)?.FullName;
+                item.PackageName = packagesResult.GetAwaiter().GetResult().Content?.Result?.FirstOrDefault(p => p.Id == item.PackageId)?.Code;
+                item.AveragePT = ptr!.FirstOrDefault(p => p.ClassId == item.Id)!.AveragePTPoint;
             }
 
             methodResult.Result = new PagingItemsModel<ClassSearchModel>(lists, request, totalItem);

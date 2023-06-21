@@ -5,7 +5,7 @@ namespace Fsel.Identity.Api.Controllers
     using System.Net;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
-    using Fsel.Identity.Application.Queries.TeacherQuery;
+    using Fsel.Identity.Application.Queries.CSOQuery;
     using Fsel.Identity.Domain.Models.EntityModels;
     using Fsel.Shared.Enums;
     using MediatR;
@@ -31,9 +31,9 @@ namespace Fsel.Identity.Api.Controllers
         [HttpPost]
         [ProducesResponseType(typeof(MethodResult<IList<HumanModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetTeacherAndCSOByIds([FromBody] IList<Guid>? ids)
+        public async Task<IActionResult> GetCSOByIds([FromBody] IList<Guid>? ids)
         {
-            MethodResult<IList<HumanModel>> commandResult = await _mediator.Send(new GetTeacherAndCSOByIdsQuery { Ids = ids}).ConfigureAwait(false);
+            MethodResult<IList<HumanModel>> commandResult = await _mediator.Send(new GetCSOByIdsQuery { Ids = ids }).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
     }

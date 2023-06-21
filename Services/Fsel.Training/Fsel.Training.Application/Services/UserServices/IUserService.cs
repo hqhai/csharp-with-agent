@@ -37,6 +37,6 @@ namespace Fsel.Training.Application.Services.UserServices
         Task<IApiResponse<MethodResult<IList<StudentModel>>>> GetStudentByUserIdsAsync([Body] IList<Guid> studentIds);
 
         [Post("/cso/admin")]
-        Task<IApiResponse<MethodResult<IList<HumanModel>>>> GetTeacherAndCSOByIds([FromBody] IList<Guid>? ids);
+        Task<IApiResponse<MethodResult<IList<HumanModel>>>> GetCSOByIds([Body] IList<Guid>? ids);
     }
 }

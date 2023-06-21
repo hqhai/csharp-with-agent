@@ -13,7 +13,7 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestQuery
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class GetAveragePTPointByIdsQuery : List<GetAveragePTPointByIdsQueryModel>, IRequest<MethodResult<List<AveragePTPointModel>>>
+    public class GetAveragePTPointByIdsQuery : GetAveragePTPointByIdsQueryModel, IRequest<MethodResult<List<AveragePTPointModel>>>
     {
     }
 
@@ -31,7 +31,7 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestQuery
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<List<AveragePTPointModel>>();
             List<AveragePTPointModel> average = new List<AveragePTPointModel>();
-            foreach (var item in request)
+            foreach (var item in request.PointByIdQueryModels)
             {
                 var ptResult = await _placementTestResultRepository.Queryable.Where(x => item.StudentIds!.Contains(x.StudentId)).OrderByDescending(p => p.CreatedDate).ToListAsync(cancellationToken);
                 var averagePT = new AveragePTPointModel();
@@ -40,9 +40,7 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestQuery
                 foreach (var student in item.StudentIds!)
                 {
                     var pt = ptResult.FirstOrDefault(p => p.StudentId == student)!;
-
-                    averagePT.MaxPTPoint = pt == null ? 0 : pt.CorrectTotal;
-                    averagePT.AveragePTPoint += pt == null ? 0 : pt.CorrectCount;
+                    averagePT.AveragePTPoint += pt == null ? 0 : (long)pt.Percent;
                 }
                 averagePT.AveragePTPoint = item.StudentIds.Count == 0 ? 0 : averagePT.AveragePTPoint / item.StudentIds.Count;
                 average.Add(averagePT);

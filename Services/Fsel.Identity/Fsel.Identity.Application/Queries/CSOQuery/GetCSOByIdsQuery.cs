@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Identity.Application.Queries.TeacherQuery
+namespace Fsel.Identity.Application.Queries.CSOQuery
 {
     using System.Threading;
     using System.Threading.Tasks;
@@ -12,23 +12,21 @@ namespace Fsel.Identity.Application.Queries.TeacherQuery
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class GetTeacherAndCSOByIdsQuery : IRequest<MethodResult<IList<HumanModel>>>
+    public class GetCSOByIdsQuery : IRequest<MethodResult<IList<HumanModel>>>
     {
         public IList<Guid>? Ids { get; set; }
     }
 
-    public class GetCSOByIdsQueryHandler : IRequestHandler<GetTeacherAndCSOByIdsQuery, MethodResult<IList<HumanModel>>>
+    public class GetCSOByIdsQueryHandler : IRequestHandler<GetCSOByIdsQuery, MethodResult<IList<HumanModel>>>
     {
         private readonly ICSORepository _csoRepository;
-        private readonly ITeacherRepository _teacherRepository;
 
-        public GetCSOByIdsQueryHandler(ICSORepository csoRepository, ITeacherRepository teacherRepository)
+        public GetCSOByIdsQueryHandler(ICSORepository csoRepository)
         {
             _csoRepository = csoRepository;
-            _teacherRepository = teacherRepository;
         }
 
-        public async Task<MethodResult<IList<HumanModel>>> Handle(GetTeacherAndCSOByIdsQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<IList<HumanModel>>> Handle(GetCSOByIdsQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
 
@@ -39,20 +37,11 @@ namespace Fsel.Identity.Application.Queries.TeacherQuery
                 return methodResult;
             }
             IList<HumanModel> human = new List<HumanModel>();
-            var listCso = await _csoRepository.Queryable.Where(p => request.Ids.Contains(p.Id)).Include(i => i.Human).Select(x => new HumanModel
+            human = await _csoRepository.Queryable.Where(p => request.Ids.Contains(p.Id)).Include(i => i.Human).Select(x => new HumanModel
             {
                 Id = x.Id,
                 FullName = x.Human!.FullName
             }).ToListAsync(cancellationToken);
-
-            human = human.Concat(listCso).ToList();
-            var teachers = await _teacherRepository.Queryable.Where(p => request.Ids.Contains(p.Id)).Include(i => i.Human).Select(x => new HumanModel
-            {
-                Id = x.Id,
-                FullName = x.Human!.FullName
-            }).ToListAsync(cancellationToken);
-
-            human = human.Concat(teachers).ToList();
 
             methodResult.Result = human;
             methodResult.StatusCode = StatusCodes.Status200OK;

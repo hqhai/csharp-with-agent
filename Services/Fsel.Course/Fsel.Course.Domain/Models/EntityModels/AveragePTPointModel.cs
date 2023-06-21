@@ -8,6 +8,5 @@ namespace Fsel.Course.Domain.Models.EntityModels
     {
         public Guid ClassId { get; set; }
         public long AveragePTPoint { get; set; }
-        public int MaxPTPoint { get; set; }
     }
 }
