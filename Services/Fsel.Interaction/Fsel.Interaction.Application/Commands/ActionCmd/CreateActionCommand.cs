@@ -11,7 +11,6 @@ namespace Fsel.Interaction.Application.Commands.ActionCmd
     using Fsel.Interaction.Domain.Entities;
     using Fsel.Interaction.Domain.IRepositories;
     using Fsel.Interaction.Domain.Models.CommandModels.Actions;
-    using Fsel.Interaction.Infrastructure.Repositories;
     using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Http;
@@ -38,14 +37,6 @@ namespace Fsel.Interaction.Application.Commands.ActionCmd
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<bool> methodResult = new MethodResult<bool>();
-            InteractionAction action = _mapper.Map<InteractionAction>(request);
-            action.UserId = _authContext.CurrentUserId;
-
-            if (!action.IsValid())
-            {
-                methodResult.AddErrorBadRequest(action.ErrorMessages);
-                return methodResult;
-            }
             #region
             /* if (action != null)
              {
@@ -60,30 +51,35 @@ namespace Fsel.Interaction.Application.Commands.ActionCmd
                  }
              }*/
             #endregion
-            var like = await _interactionActionRepository.Queryable.FirstOrDefaultAsync(x => x.ObjectId == request.ObjectId, cancellationToken);
+            var action = await _interactionActionRepository.Queryable
+                            .Where(x => x.UserId == _authContext.CurrentUserId &&
+                                        x.ObjectId == request.ObjectId &&
+                                        x.Type == request.Type)
+                            .FirstOrDefaultAsync(cancellationToken);
 
             await _interactionActionRepository.ExecuteTransactionAsync(async () =>
             {
-                if (action != null)
+                if (action == null)
                 {
-                    if (like!.Type == EnumInteractionActionType.Like)
+                    action = _mapper.Map<InteractionAction>(request);
+                    action.UserId = _authContext.CurrentUserId;
+
+                    if (!action.IsValid())
                     {
-                        await _interactionActionRepository.DeleteAsync(action);
-                    }
-                    else if (like.Type != EnumInteractionActionType.Like)
-                    {
-                        methodResult.Result = true;
+                        methodResult.AddErrorBadRequest(action.ErrorMessages);
                         return methodResult;
                     }
+
+                    action = _interactionActionRepository.Add(action);
                 }
-                else
+                else if (action.Type == EnumInteractionActionType.Like)
                 {
-                    action = _interactionActionRepository.Add(action!);
+                    await _interactionActionRepository.DeleteAsync(action);
                 }
-                /*action = _interactionActionRepository.Add(action!);*/
+
                 await _interactionActionRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
-                methodResult.StatusCode = StatusCodes.Status201Created;
+                methodResult.StatusCode = StatusCodes.Status200OK;
                 methodResult.Result = true;
                 return methodResult;
             });
