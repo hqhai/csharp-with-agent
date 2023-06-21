@@ -111,20 +111,15 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
             classForumResult.Status = EnumClassForumResultStatus.Graded;
             var score = 0;
 
-            if (classForum.CourseSkill == Shared.Enums.EnumCourseSkill.Speaking)
+            if (classForum.CourseSkill == Shared.Enums.EnumCourseSkill.Speaking && request.TimeLimit >= classForum.TaggetWordLimit)
             {
-                if (request.TimeLimit >= classForum.TaggetWordLimit)
-                {
-                    score = 100;
-                }
+                score = 100;
             }
-            if (classForum.CourseSkill == Shared.Enums.EnumCourseSkill.Writing)
+            else if (classForum.CourseSkill == Shared.Enums.EnumCourseSkill.Writing && classForumResult.Content!.Length >= classForum.TaggetWordLimit)
             {
-                if (classForumResult.Content!.Length >= classForum.TaggetWordLimit)
-                {
-                    score = 100;
-                }
+                score = 100;
             }
+
             classForumResult.ClassForumScores = new List<ClassForumScore>
                 {
                     new ClassForumScore
