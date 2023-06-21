@@ -2,7 +2,7 @@ namespace Fsel.System.Application.Querys.LiveTimeFrames
 {
     using Fsel.Common.ActionResults;
     using Fsel.System.Domain.IRepositories;
-    using Fsel.System.Domain.Models;
+    using Fsel.System.Domain.Models.EntityModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;

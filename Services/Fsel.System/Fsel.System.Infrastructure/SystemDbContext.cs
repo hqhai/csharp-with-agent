@@ -42,7 +42,7 @@ namespace Fsel.System.Infrastructure
 
         private static void SeedCourselevel(ModelBuilder builder)
         {
-            builder.Entity<CourseTimeConfig>().HasData
+            /*builder.Entity<CourseTimeConfig>().HasData
                 (
                     new CourseTimeConfig() { CourseLevel = EnumCourseLevel.A1, Id = Guid.Parse("9ceb5cf5-271c-4c53-8d2d-3d273740fccd") },
                     new CourseTimeConfig() { CourseLevel = EnumCourseLevel.A2, Id = Guid.Parse("07312932-5caf-4e01-a670-6cd4aa8650da") },
@@ -53,7 +53,7 @@ namespace Fsel.System.Infrastructure
                     new CourseTimeConfig() { CourseLevel = EnumCourseLevel.MS3, Id = Guid.Parse("2045c855-e5a8-4818-8bf7-d477d02c1b02") },
                     new CourseTimeConfig() { CourseLevel = EnumCourseLevel.MS2, Id = Guid.Parse("382bae8a-55aa-4da0-8287-71182cb17a7c") },
                     new CourseTimeConfig() { CourseLevel = EnumCourseLevel.MS1, Id = Guid.Parse("e0a504cf-ceb2-415a-ad73-cec5429f0e07") }
-                );
+                );*/
         }
     }
 }

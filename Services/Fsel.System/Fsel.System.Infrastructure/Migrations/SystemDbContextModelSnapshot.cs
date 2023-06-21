@@ -29,8 +29,8 @@ namespace Fsel.System.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(0);
 
-                    b.Property<int>("CourseLevel")
-                        .HasColumnType("int");
+                    b.Property<Guid>("CourseId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2")
@@ -85,107 +85,6 @@ namespace Fsel.System.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("CourseTimeConfigs");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = new Guid("9ceb5cf5-271c-4c53-8d2d-3d273740fccd"),
-                            CourseLevel = 0,
-                            CreatedDate = new DateTime(2023, 6, 16, 17, 5, 23, 346, DateTimeKind.Local).AddTicks(578),
-                            CreatedFullName = "",
-                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            DurationMonth = 0,
-                            EnrollmentWeek = 0,
-                            IsDeleted = false
-                        },
-                        new
-                        {
-                            Id = new Guid("07312932-5caf-4e01-a670-6cd4aa8650da"),
-                            CourseLevel = 1,
-                            CreatedDate = new DateTime(2023, 6, 16, 17, 5, 23, 346, DateTimeKind.Local).AddTicks(633),
-                            CreatedFullName = "",
-                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            DurationMonth = 0,
-                            EnrollmentWeek = 0,
-                            IsDeleted = false
-                        },
-                        new
-                        {
-                            Id = new Guid("8dd3c007-775f-4ef6-ad10-efc404c5a2be"),
-                            CourseLevel = 2,
-                            CreatedDate = new DateTime(2023, 6, 16, 17, 5, 23, 346, DateTimeKind.Local).AddTicks(636),
-                            CreatedFullName = "",
-                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            DurationMonth = 0,
-                            EnrollmentWeek = 0,
-                            IsDeleted = false
-                        },
-                        new
-                        {
-                            Id = new Guid("a0904fa2-fce2-432a-bb85-a3f87c1344b4"),
-                            CourseLevel = 3,
-                            CreatedDate = new DateTime(2023, 6, 16, 17, 5, 23, 346, DateTimeKind.Local).AddTicks(638),
-                            CreatedFullName = "",
-                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            DurationMonth = 0,
-                            EnrollmentWeek = 0,
-                            IsDeleted = false
-                        },
-                        new
-                        {
-                            Id = new Guid("18e6bccf-1c88-4886-bc71-bec2c556f913"),
-                            CourseLevel = 4,
-                            CreatedDate = new DateTime(2023, 6, 16, 17, 5, 23, 346, DateTimeKind.Local).AddTicks(640),
-                            CreatedFullName = "",
-                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            DurationMonth = 0,
-                            EnrollmentWeek = 0,
-                            IsDeleted = false
-                        },
-                        new
-                        {
-                            Id = new Guid("85bc760a-be1e-497d-bf62-2126c6178479"),
-                            CourseLevel = 6,
-                            CreatedDate = new DateTime(2023, 6, 16, 17, 5, 23, 346, DateTimeKind.Local).AddTicks(641),
-                            CreatedFullName = "",
-                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            DurationMonth = 0,
-                            EnrollmentWeek = 0,
-                            IsDeleted = false
-                        },
-                        new
-                        {
-                            Id = new Guid("2045c855-e5a8-4818-8bf7-d477d02c1b02"),
-                            CourseLevel = 9,
-                            CreatedDate = new DateTime(2023, 6, 16, 17, 5, 23, 346, DateTimeKind.Local).AddTicks(643),
-                            CreatedFullName = "",
-                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            DurationMonth = 0,
-                            EnrollmentWeek = 0,
-                            IsDeleted = false
-                        },
-                        new
-                        {
-                            Id = new Guid("382bae8a-55aa-4da0-8287-71182cb17a7c"),
-                            CourseLevel = 8,
-                            CreatedDate = new DateTime(2023, 6, 16, 17, 5, 23, 346, DateTimeKind.Local).AddTicks(645),
-                            CreatedFullName = "",
-                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            DurationMonth = 0,
-                            EnrollmentWeek = 0,
-                            IsDeleted = false
-                        },
-                        new
-                        {
-                            Id = new Guid("e0a504cf-ceb2-415a-ad73-cec5429f0e07"),
-                            CourseLevel = 7,
-                            CreatedDate = new DateTime(2023, 6, 16, 17, 5, 23, 346, DateTimeKind.Local).AddTicks(646),
-                            CreatedFullName = "",
-                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            DurationMonth = 0,
-                            EnrollmentWeek = 0,
-                            IsDeleted = false
-                        });
                 });
 
             modelBuilder.Entity("Fsel.System.Domain.Entities.LiveTimeFrame", b =>
@@ -222,14 +121,16 @@ namespace Fsel.System.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(103);
 
-                    b.Property<DateTime>("EndTime")
+                    b.Property<DateTime?>("EndTime")
+                        .IsRequired()
                         .HasColumnType("datetime2");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit")
                         .HasColumnOrder(110);
 
-                    b.Property<DateTime>("StartTime")
+                    b.Property<DateTime?>("StartTime")
+                        .IsRequired()
                         .HasColumnType("datetime2");
 
                     b.Property<DateTime?>("UpdatedDate")

@@ -21,6 +21,7 @@ namespace Fsel.Course.Infrastructure.ValueSettings
     {
         public string? InteractionApiUrl { get; set; }
         public string? TrainingApiUrl { get; set; }
+        public string? SystemApiUrl { get; set; }
     }
 
     public class Otp

@@ -7,8 +7,8 @@ namespace Fsel.System.Application.Commands.LiveTimeFrameCmd
     using Fsel.System.Domain.Entities;
     using Fsel.System.Domain.Enums.ErrorCodes;
     using Fsel.System.Domain.IRepositories;
-    using Fsel.System.Domain.Models;
     using Fsel.System.Domain.Models.CommandModels.LiveTimeFrames;
+    using Fsel.System.Domain.Models.EntityModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -75,6 +75,7 @@ namespace Fsel.System.Application.Commands.LiveTimeFrameCmd
             {
                 await _liveTimeFrameRepository.DeleteAsync(item);
             }
+
             await _liveTimeFrameRepository.ExecuteTransactionAsync(async () =>
             {
                 await _liveTimeFrameRepository.AddList(createLiveTimeFrameResults);
@@ -82,11 +83,11 @@ namespace Fsel.System.Application.Commands.LiveTimeFrameCmd
 
                 await _liveTimeFrameRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
-                createLiveTimeFrameResults.AddRange(updateLiveTimeFrameResults);
-                methodResult.StatusCode = StatusCodes.Status201Created;
-                methodResult.Result = _mapper.Map<IList<LiveTimeFrameModel>>(createLiveTimeFrameResults);
                 return methodResult;
             });
+            createLiveTimeFrameResults.AddRange(updateLiveTimeFrameResults);
+            methodResult.StatusCode = StatusCodes.Status201Created;
+            methodResult.Result = _mapper.Map<IList<LiveTimeFrameModel>>(createLiveTimeFrameResults);
 
             return methodResult;
         }

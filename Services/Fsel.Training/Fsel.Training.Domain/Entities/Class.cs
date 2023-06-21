@@ -38,10 +38,9 @@ namespace Fsel.Training.Domain.Entities
         /// Status
         /// </summary>
         public EnumClassType Status { get; set; }
+
         public Guid PackageId { get; set; }
         public Guid CourseId { get; set; }
-
-        public Guid? LiveTimeFrameId { get; set; }
 
         public DayOfWeek LiveDays { get; set; }
 

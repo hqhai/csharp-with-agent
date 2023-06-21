@@ -1929,7 +1929,6 @@ namespace Fsel.Course.Infrastructure.Migrations
                         .HasColumnOrder(103);
 
                     b.Property<string>("Instruction")
-                        .IsRequired()
                         .HasMaxLength(2000)
                         .HasColumnType("nvarchar(2000)");
 
