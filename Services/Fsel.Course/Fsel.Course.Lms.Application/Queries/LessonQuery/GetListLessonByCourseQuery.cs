@@ -35,6 +35,7 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
                                                      .Include(x => x.UnitLessons.Where(n => !n.IsDeleted))
                                                      .ThenInclude(x => x.Lesson)
                                                      .Include(x => x.CourseUnitMockTests.Where(x => x.CourseId == request.CourseId))
+                                                     .AsNoTracking()
                                                      .Select(x => new
                                                      {
                                                          Id = x.Id,
