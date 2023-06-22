@@ -63,7 +63,7 @@ namespace Fsel.Identity.Application.Queries.StudentQuery
 
             if (!string.IsNullOrEmpty(request.Keyword))
             {
-                students = students.Where(m => request.Keyword.Contains(m.FullName ?? string.Empty));
+                students = students.Where(m => m.FullName != null && m.FullName.Contains(request.Keyword));
             }
 
             int totalItem = await students.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
