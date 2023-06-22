@@ -5,7 +5,6 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
-    using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
     using MediatR;
     using Microsoft.AspNetCore.Http;
@@ -18,12 +17,10 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
 
     public class GetListLessonByCourseQueryHandler : IRequestHandler<GetListLessonByCourseQuery, MethodResult<object>>
     {
-        private readonly ILessonRepository _lessonRepository;
         private readonly IUnitRepository _unitRepository;
 
-        public GetListLessonByCourseQueryHandler(ILessonRepository lessonRepository, IUnitRepository unitRepository)
+        public GetListLessonByCourseQueryHandler(IUnitRepository unitRepository)
         {
-            _lessonRepository = lessonRepository;
             _unitRepository = unitRepository;
         }
 

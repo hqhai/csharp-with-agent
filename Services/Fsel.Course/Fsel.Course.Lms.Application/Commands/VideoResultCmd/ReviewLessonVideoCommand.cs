@@ -4,6 +4,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoResultCmd
 {
     using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Course.Domain.Entities.SkillScoresConfigs;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
@@ -101,7 +102,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoResultCmd
             var skills = Enum.GetValues(typeof(EnumCourseSkill)).Cast<EnumCourseSkill>();
             var types = Enum.GetValues(typeof(EnumTimeCodeType)).Cast<EnumTimeCodeType>();
             var scoreQuery = from type in types
-                             select new TimeCodeScoreModel
+                             select new VideoSkillScores
                              {
                                  Type = type,
                                  SkillScores = (from skill in skills
@@ -110,17 +111,18 @@ namespace Fsel.Course.Lms.Application.Commands.VideoResultCmd
                                                 join answerTimeCodeQ in answerQuery on skill equals answerTimeCodeQ.Skill into answerTimeCodeQ_jointable
                                                 from answerTimeCodeQJ in answerTimeCodeQ_jointable.DefaultIfEmpty()
                                                 where questionTimeCodeQJ != null && answerTimeCodeQJ != null && questionTimeCodeQJ.Type == type && answerTimeCodeQJ.Type == type
-                                                select new LessonSkillScoreModel
+                                                select new SkillScores
                                                 {
                                                     Skill = skill,
                                                     TotalCount = questionTimeCodeQJ != null ? questionTimeCodeQJ.TotalCount : default,
                                                     CorrectCount = answerTimeCodeQJ != null ? answerTimeCodeQJ.CorrectCount : default,
                                                 }).ToList()
                              };
-            videoResult.CorrectCount = await answerQuery.SumAsync(x => x.CorrectCount, cancellationToken);
-            videoResult.CorrectTotal = await questionQuery.SumAsync(x => x.TotalCount, cancellationToken);
+            videoResult.CorrectCount = (int)scoreQuery.Where(x => x.Type == EnumTimeCodeType.Standalone).SelectMany(x => x.SkillScores!).Sum(x => x.CorrectCount);
+            videoResult.CorrectTotal = (int)scoreQuery.Where(x => x.Type == EnumTimeCodeType.Standalone).SelectMany(x => x.SkillScores!).Sum(x => x.TotalCount);
             videoResult.Status = EnumResultStatus.Done;
             videoResult.Percent = (double)videoResult.CorrectCount / videoResult.CorrectTotal * 100;
+            videoResult.VideoSkillScores = scoreQuery.ToList();
             await _videoResultRepository.ExecuteTransactionAsync(async () =>
             {
                 videoResult = _videoResultRepository.Update(videoResult);

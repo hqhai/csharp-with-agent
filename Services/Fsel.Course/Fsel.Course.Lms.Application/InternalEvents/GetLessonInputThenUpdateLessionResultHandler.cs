@@ -56,19 +56,19 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             }
         }
 
-        public async Task<List<SkillScores>> SkillScoreVideo(VideoResult videoResult)
-        {
-            List<SkillScores> skillScores = new List<SkillScores>();
-            var video = await _videoRepository.Queryable.Include(i => i.VideoTimeCodes.Where(x => !x.IsDeleted))
-                                    .ThenInclude(x => x.TimeCodeExercises.Where(x => !x.IsDeleted && x.Exercise != null))
-                                    .ThenInclude(x => x.Exercise)
-                                    .ThenInclude(x => x!.ExerciseQuestions.Where(x => !x.IsDeleted))
-                                    .ThenInclude(x => x.Question)
-                                    .ThenInclude(x => x!.VideoTimeCodeAnswers!.Where(x => videoResult != null && x.VideoResultId == videoResult.Id))
-                                .Include(i => i.VideoResults.Where(x => !x.IsDeleted))
-                                .Where(x => x.Id == videoResult.VideoId && x.VideoTimeCodes.Any(x => x.TimeCodeType == EnumTimeCodeType.Standalone))
-                                .AsNoTracking()
-                                .FirstOrDefaultAsync();
-        }
+        //public async Task<List<SkillScores>> SkillScoreVideo(VideoResult videoResult)
+        //{
+        //    List<SkillScores> skillScores = new List<SkillScores>();
+        //    var video = await _videoRepository.Queryable.Include(i => i.VideoTimeCodes.Where(x => !x.IsDeleted))
+        //                            .ThenInclude(x => x.TimeCodeExercises.Where(x => !x.IsDeleted && x.Exercise != null))
+        //                            .ThenInclude(x => x.Exercise)
+        //                            .ThenInclude(x => x!.ExerciseQuestions.Where(x => !x.IsDeleted))
+        //                            .ThenInclude(x => x.Question)
+        //                            .ThenInclude(x => x!.VideoTimeCodeAnswers!.Where(x => videoResult != null && x.VideoResultId == videoResult.Id))
+        //                        .Include(i => i.VideoResults.Where(x => !x.IsDeleted))
+        //                        .Where(x => x.Id == videoResult.VideoId && x.VideoTimeCodes.Any(x => x.TimeCodeType == EnumTimeCodeType.Standalone))
+        //                        .AsNoTracking()
+        //                        .FirstOrDefaultAsync();
+        //}
     }
 }
