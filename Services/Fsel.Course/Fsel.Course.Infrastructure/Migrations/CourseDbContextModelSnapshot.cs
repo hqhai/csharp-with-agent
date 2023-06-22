@@ -79,8 +79,8 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.Property<string>("MediaPost")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<long>("TaggetTimeLimit")
-                        .HasColumnType("bigint");
+                    b.Property<double>("TaggetTimeLimit")
+                        .HasColumnType("float");
 
                     b.Property<long>("TaggetWordLimit")
                         .HasColumnType("bigint");
@@ -1126,8 +1126,8 @@ namespace Fsel.Course.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(103);
 
-                    b.Property<int>("ExecutionTime")
-                        .HasColumnType("int");
+                    b.Property<double>("ExecutionTime")
+                        .HasColumnType("float");
 
                     b.Property<string>("FinalTestLevel")
                         .IsRequired()
@@ -3046,8 +3046,8 @@ namespace Fsel.Course.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(103);
 
-                    b.Property<long>("ExecutionTime")
-                        .HasColumnType("bigint");
+                    b.Property<double>("ExecutionTime")
+                        .HasColumnType("float");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit")
@@ -3242,11 +3242,11 @@ namespace Fsel.Course.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(103);
 
-                    b.Property<long>("DisplayTime")
-                        .HasColumnType("bigint");
+                    b.Property<double>("DisplayTime")
+                        .HasColumnType("float");
 
-                    b.Property<long>("ExecutionTime")
-                        .HasColumnType("bigint");
+                    b.Property<double>("ExecutionTime")
+                        .HasColumnType("float");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit")
@@ -3847,11 +3847,11 @@ namespace Fsel.Course.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(103);
 
-                    b.Property<long>("DisplayTime")
-                        .HasColumnType("bigint");
+                    b.Property<double>("DisplayTime")
+                        .HasColumnType("float");
 
-                    b.Property<long>("ExecutionTime")
-                        .HasColumnType("bigint");
+                    b.Property<double>("ExecutionTime")
+                        .HasColumnType("float");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit")

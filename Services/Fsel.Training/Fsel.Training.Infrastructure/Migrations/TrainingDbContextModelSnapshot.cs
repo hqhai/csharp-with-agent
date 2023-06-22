@@ -67,15 +67,15 @@ namespace Fsel.Training.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(103);
 
-                    b.Property<DateTime>("EndTime")
+                    b.Property<DateTime?>("EndTime")
                         .HasColumnType("datetime2");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit")
                         .HasColumnOrder(110);
 
-                    b.Property<int>("LiveDays")
-                        .HasColumnType("int");
+                    b.Property<string>("LiveDaysStr")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<Guid?>("LiveTimeFrameId")
                         .HasColumnType("uniqueidentifier");
@@ -88,7 +88,7 @@ namespace Fsel.Training.Infrastructure.Migrations
                     b.Property<Guid>("PackageId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("StartTime")
+                    b.Property<DateTime?>("StartTime")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Status")

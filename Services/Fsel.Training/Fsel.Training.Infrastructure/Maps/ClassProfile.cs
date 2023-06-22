@@ -6,6 +6,7 @@ namespace Fsel.Training.Infrastructure.Maps
     using Fsel.Training.Domain.Models.EntityModels;
     using Fsel.Core.Extensions;
     using Fsel.Training.Domain.Entities;
+    using Fsel.Training.Domain.Models.CommandModels.Classes;
 
     public class ClassProfile : Profile
     {
@@ -13,6 +14,7 @@ namespace Fsel.Training.Infrastructure.Maps
         {
             CreateMap<Class, ClassModel>().IgnoreAllNonExisting();
             CreateMap<Class, CourseClassModel>().IgnoreAllNonExisting();
+            CreateMap<CreateClassCommandModel, Class>().IgnoreAllNonExisting();
         }
     }
 }

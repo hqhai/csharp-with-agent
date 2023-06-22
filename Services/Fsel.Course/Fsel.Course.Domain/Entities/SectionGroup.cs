@@ -11,10 +11,10 @@ namespace Fsel.Course.Domain.Entities
     public class SectionGroup : Entity
     {
         /// <summary>
-        /// Thời gian hiện làm bài
+        /// Thời gian làm bài
         /// </summary>
         [Range(0, 10000_0000, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
-        public long ExecutionTime { get; set; }
+        public double ExecutionTime { get; set; }
 
         [NotMapped]
         public TimeSpan ExecutionTimeSpan
