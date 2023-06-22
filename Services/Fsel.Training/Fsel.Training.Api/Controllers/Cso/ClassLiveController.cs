@@ -7,6 +7,7 @@ namespace Fsel.Training.Api.Controllers.Cso
     using Fsel.Core.Base.BaseModels;
     using Fsel.Training.Application.Commands.ClassCmd;
     using Fsel.Training.Application.Queries.ClassQuery;
+    using Fsel.Training.Application.Queries.Schedule;
     using Fsel.Training.Domain.Models.EntityModels;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
@@ -37,7 +38,7 @@ namespace Fsel.Training.Api.Controllers.Cso
         }
 
         /// <summary>
-        /// Get Course
+        /// Get class live
         /// </summary>
         [HttpGet("{id}")]
         [ProducesResponseType(typeof(MethodResult<ClassLiveCalendarModel>), (int)HttpStatusCode.OK)]
@@ -45,6 +46,19 @@ namespace Fsel.Training.Api.Controllers.Cso
         public async Task<IActionResult> Get([FromRoute] Guid id)
         {
             MethodResult<ClassLiveCalendarModel> commandResult = await _mediator.Send(new GetClassLiveByCsoQuery { Id = id }).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Get class live priority
+        /// </summary>
+
+        [HttpGet]
+        [ProducesResponseType(typeof(MethodResult<IList<TeacherFreeTimeModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> Get()
+        {
+            MethodResult<IList<TeacherFreeTimeModel>> commandResult = await _mediator.Send(new GetListPriorityCalenderQuery()).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
 

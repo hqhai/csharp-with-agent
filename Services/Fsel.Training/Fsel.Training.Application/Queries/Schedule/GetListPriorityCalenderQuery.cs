@@ -15,20 +15,20 @@ namespace Fsel.Training.Application.Queries.Schedule
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class PriorityCalenderQuery : IRequest<MethodResult<IList<TeacherFreeTimeModel>>>
+    public class GetListPriorityCalenderQuery : IRequest<MethodResult<IList<TeacherFreeTimeModel>>>
     {
     }
 
-    public class PriorityCalenderQueryHandler : IRequestHandler<PriorityCalenderQuery, MethodResult<IList<TeacherFreeTimeModel>>>
+    public class GetListPriorityCalenderQueryHandler : IRequestHandler<GetListPriorityCalenderQuery, MethodResult<IList<TeacherFreeTimeModel>>>
     {
         private readonly ITeacherFreeTimeRepository _teacherFreeTimeRepository;
 
-        public PriorityCalenderQueryHandler(ITeacherFreeTimeRepository teacherFreeTimeRepository)
+        public GetListPriorityCalenderQueryHandler(ITeacherFreeTimeRepository teacherFreeTimeRepository)
         {
             _teacherFreeTimeRepository = teacherFreeTimeRepository;
         }
 
-        public async Task<MethodResult<IList<TeacherFreeTimeModel>>> Handle(PriorityCalenderQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<IList<TeacherFreeTimeModel>>> Handle(GetListPriorityCalenderQuery request, CancellationToken cancellationToken)
         {
             var methodResult = new MethodResult<IList<TeacherFreeTimeModel>>();
 
