@@ -9,7 +9,6 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumQuery
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base;
-    using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
@@ -75,6 +74,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumQuery
 
             var classForum = await _classForumRepository.Queryable
                 .Include(x => x.ClassForumFiles)
+                .Include(x => x.Lesson)
                 .FirstOrDefaultAsync(x => x.LessonId == request.LessonId, cancellationToken);
 
             if (classForum == null)
