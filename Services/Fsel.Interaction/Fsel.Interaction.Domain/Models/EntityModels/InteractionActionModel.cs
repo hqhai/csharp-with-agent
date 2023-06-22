@@ -16,5 +16,7 @@ namespace Fsel.Interaction.Domain.Models.EntityModels
         public int CommentNumber { get; set; }
 
         public bool IsDisable { get; set; }
+
+        public bool IsLiked { get; set; }
     }
 }
