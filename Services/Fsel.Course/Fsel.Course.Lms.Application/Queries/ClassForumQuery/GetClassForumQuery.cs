@@ -74,7 +74,6 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumQuery
 
             var classForum = await _classForumRepository.Queryable
                 .Include(x => x.ClassForumFiles)
-                .Include(x => x.Lesson)
                 .FirstOrDefaultAsync(x => x.LessonId == request.LessonId, cancellationToken);
 
             if (classForum == null)
@@ -107,6 +106,20 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumQuery
                     }
                 }
 
+                var actionLikeResult = await _interactionService.GetsIsLikeActionAsync(new IsLikeCommandModel { ObjectIds = classForumResults.Select(x => x.Id).ToList(), CurrentUserId = _authContext.CurrentUserId });
+                var actionLikes = actionLikeResult.Content?.Result;
+                if (actionLikes != null)
+                {
+                    classForumResults = classForumResults.Where(x => !actions.Any(n => n.IsDisable && n.ObjectId == x.Id)).ToList();
+                    foreach (var item in classForumResults)
+                    {
+                        var isLiked = actionLikes.Any(x => x.ObjectId == item.Id);
+                        if (isLiked)
+                        {
+                            item.IsLiked = true;
+                        }
+                    }
+                }
                 var classForumResultCurrentStudent = classForumResults.FirstOrDefault(x => x.ClassForumId == classForum.Id && x.LessonResultId == request.LessonResultId);
                 classForumByStudentModel.ClassForumResultCurrentStudent = classForumResultCurrentStudent;
 

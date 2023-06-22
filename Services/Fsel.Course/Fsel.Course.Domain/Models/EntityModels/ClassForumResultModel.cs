@@ -7,6 +7,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
     using Fsel.Core.Base.BaseModels;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums;
+    using Fsel.Shared.Enums;
 
     public class ClassForumResultModel : BaseModel
     {
@@ -32,7 +33,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public bool? IsFlagged { get; set; }
 
         public bool? IsLiked { get; set; }
-
+        public EnumCourseLevel CourseLevel { get; set; }
         public ClassForumModel? ClassForum { get; set; }
 
         public LessonResultModel? LessonResult { get; set; }

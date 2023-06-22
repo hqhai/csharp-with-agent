@@ -46,5 +46,17 @@ namespace Fsel.Interaction.Api.Controllers
             MethodResult<IList<InteractionActionModel>> queryResult = await _mediator.Send(command).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
+
+        /// <summary>
+        /// get interaction action
+        /// </summary>
+        [HttpPost("is-liked")]
+        [ProducesResponseType(typeof(MethodResult<IList<InteractionActionModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> IsLiked([FromBody] CheckIsLikedByObjectIdsQuery command)
+        {
+            MethodResult<IList<InteractionActionModel>> queryResult = await _mediator.Send(command).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
     }
 }

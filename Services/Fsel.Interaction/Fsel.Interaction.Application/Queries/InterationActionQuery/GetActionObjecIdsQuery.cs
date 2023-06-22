@@ -5,14 +5,9 @@ namespace Fsel.Interaction.Application.Queries.InterationActionQuery
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using System.Text;
     using System.Threading;
     using System.Threading.Tasks;
-    using AutoMapper;
     using Fsel.Common.ActionResults;
-    using Fsel.Core.Base;
-    using Fsel.Interaction.Application.Services.UserServices;
-    using Fsel.Interaction.Domain.Enums.ErrorCodes;
     using Fsel.Interaction.Domain.IRepositories;
     using Fsel.Interaction.Domain.Models.EntityModels;
     using Fsel.Shared.Enums;
