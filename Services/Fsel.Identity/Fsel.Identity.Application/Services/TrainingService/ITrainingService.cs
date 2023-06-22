@@ -11,5 +11,8 @@ namespace Fsel.Identity.Application.Services.TrainingService
     {
         [Get("/class/get-class-by-student/{studentId}")]
         Task<IApiResponse<MethodResult<ClassModel>>> GetClassByStudentId([FromRoute] Guid studentId);
+
+        [Get("/admin/class/{classId}")]
+        Task<IApiResponse<MethodResult<List<Guid>?>>> GetStudentIdsByClassId([FromRoute] Guid classId);
     }
 }

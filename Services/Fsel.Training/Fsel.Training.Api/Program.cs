@@ -3,6 +3,7 @@
 using Fsel.Common.ValueSettings;
 using Fsel.Core.Extensions;
 using Fsel.Training.Application.Services.CourseServices;
+using Fsel.Training.Application.Services.OrderServices;
 using Fsel.Training.Application.Services.UserServices;
 using Fsel.Training.Domain.IRepositories;
 using Fsel.Training.Infrastructure;
@@ -28,6 +29,7 @@ builder.Services.AddScoped<IClassStudentRepository, ClassStudentRepository>();
 builder.Services.AddScoped<IClassLiveCalendarRepository, ClassLiveCalendarRepository>();
 builder.AddRefitClients(typeof(IUserService), appSetting?.Services?.UserApiUrl);
 builder.AddRefitClients(typeof(ICourseService), appSetting?.Services?.CourseApiUrl);
+builder.AddRefitClients(typeof(IOrderService), appSetting?.Services?.OrderApiUrl);
 
 var app = builder.Build();
 
