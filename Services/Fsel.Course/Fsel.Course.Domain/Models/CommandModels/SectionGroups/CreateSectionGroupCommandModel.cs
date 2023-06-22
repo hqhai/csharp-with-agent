@@ -7,7 +7,7 @@ namespace Fsel.Course.Domain.Models.CommandModels.SectionGroups
 
     public class CreateSectionGroupCommandModel
     {
-        public long ExecutionTime { get; set; }
+        public double ExecutionTime { get; set; }
         public EnumCourseSkill CourseSkill { get; set; }
         public IList<CreateSectionCommandModel>? Sections { get; set; }
     }

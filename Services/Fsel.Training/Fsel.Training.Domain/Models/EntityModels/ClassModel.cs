@@ -2,11 +2,8 @@
 
 namespace Fsel.Training.Domain.Models.EntityModels
 {
-    using Fsel.Shared.Enums;
     using Fsel.Core.Base.BaseModels;
-    using Fsel.Common.Enums.ErrorCodes;
-    using Fsel.Training.Domain.Entities;
-    using System.ComponentModel.DataAnnotations;
+    using Fsel.Shared.Enums;
 
     public class ClassModel : BaseModel
     {
@@ -27,8 +24,6 @@ namespace Fsel.Training.Domain.Models.EntityModels
         public DayOfWeek LiveDays { get; set; }
 
         public Guid? TeacherId { get; set; }
-
-        public string? TeacherName { get; set; }
 
         public EnumCourseLevel CourseLevel { get; set; }
 
