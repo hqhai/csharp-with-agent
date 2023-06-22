@@ -15,6 +15,8 @@ namespace Fsel.Interaction.Application.Queries.PostQuery
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
+    using Microsoft.Extensions.Hosting;
+    using Microsoft.VisualBasic;
 
     public class GetActivePostListQuery : GetActivePostListQueryModel, IRequest<MethodResult<PagingItemsModel<PostSearchModel>>>
     {
@@ -51,10 +53,13 @@ namespace Fsel.Interaction.Application.Queries.PostQuery
 
             var student = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
             var courseLevel = student?.Content?.Result?.CourseLevel;
-            var postQuery = _postRepository.Queryable;
-            IQueryable<Post> sortedQuery = postQuery;
-            
 
+            var postQuery = _postRepository.Queryable.Where(post => !_interactionActionRepository.Queryable
+                                                     .Any(interaction => interaction.ObjectId == post.Id &&
+                                                      interaction.Type == EnumInteractionActionType.Disable &&
+                                                      interaction.UserId == _authContext.CurrentUserId));
+
+            IQueryable<Post> sortedQuery = postQuery;
             switch (request.PostType)
             {
                 case EnumPostType.Recent:
@@ -115,7 +120,7 @@ namespace Fsel.Interaction.Application.Queries.PostQuery
                     break;
             }
 
-            var result = sortedQuery2.Select(post => new PostSearchModel
+            var result = sortedQuery.Select(post => new PostSearchModel
             {
                 Id = post.Id,
                 Title = post.Title,
@@ -127,8 +132,6 @@ namespace Fsel.Interaction.Application.Queries.PostQuery
                 CreatedDate = post.CreatedDate,
                 UpdatedDate = post.UpdatedDate,
                 UpdatedUserId = post.UpdatedUserId,
-                LikeCount = post.LikeCount,
-                CommentCount = post.CommentCount
             });
 
             int totalItem = await sortedQuery.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
