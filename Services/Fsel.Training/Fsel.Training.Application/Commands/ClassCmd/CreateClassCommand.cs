@@ -6,6 +6,7 @@ namespace Fsel.Training.Application.Commands.ClassCmd
     using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Shared.Enums;
     using Fsel.Training.Application.Queries.ClassQuery;
     using Fsel.Training.Domain.Entities;
     using Fsel.Training.Domain.Enums.ErrorCodes;
@@ -51,6 +52,7 @@ namespace Fsel.Training.Application.Commands.ClassCmd
                 var newClass = _mapper.Map<Class>(request);
                 newClass.Code = generateClassCode.Result;
                 newClass.Name = generateClassCode.Result;
+                newClass.Status = EnumClassType.New;
                 if (!newClass.IsValid())
                 {
                     methodResult.AddErrorBadRequest(newClass.ErrorMessages);
