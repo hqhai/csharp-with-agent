@@ -31,7 +31,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public string? FeedBackNote { get; set; }
         public bool? IsFlagged { get; set; }
 
-        /*public bool? IsLiked { get; set; }*/
+        public bool? IsLiked { get; set; }
 
         public ClassForumModel? ClassForum { get; set; }
 
