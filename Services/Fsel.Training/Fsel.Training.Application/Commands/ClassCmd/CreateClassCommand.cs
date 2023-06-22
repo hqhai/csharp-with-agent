@@ -39,8 +39,8 @@ namespace Fsel.Training.Application.Commands.ClassCmd
             MethodResult<ClassModel> methodResult = new MethodResult<ClassModel>();
 
             var generateClassCode = await _mediator.Send(new GetNewClassCodeQuery { CourseLevel = request.CourseLevel, Code = request.CourseName }, cancellationToken).ConfigureAwait(false);
-            var checkClassCode = await _classRepository.Queryable.FirstOrDefaultAsync(p => p.Code == generateClassCode.Result, cancellationToken);
-            if(checkClassCode != null)
+            var checkExistClassCode = await _classRepository.Queryable.AnyAsync(p => p.Code == generateClassCode.Result, cancellationToken);
+            if (checkExistClassCode)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumClassErrorCode.CodeClassAlreadyExist));
                 return methodResult;
