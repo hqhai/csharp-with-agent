@@ -17,7 +17,7 @@ services:
             - JWT__SUBJECT=baseWebApiSubject
             - JWT__TOKENVALIDITYINMINUTES=1440
             - JWT__REFRESHTOKENVALIDITYINDAYS=7
-            - SERVICES_UserApiUrl=http://202.134.19.161:5202/api/v1
+            - SERVICES_UserApiUrl=http://42.96.58.145:5202/api/v1
         ports:
             - 5203:80
             - 7203:443
@@ -38,8 +38,10 @@ services:
             - JWT__SUBJECT=baseWebApiSubject
             - JWT__TOKENVALIDITYINMINUTES=1440
             - JWT__REFRESHTOKENVALIDITYINDAYS=7
-            - SERVICES_UserApiUrl=http://202.134.19.161:5202/api/v1
-            - SERVICES_ClassApiUrl=http://202.134.19.161:5207/api/v1
+            - SERVICES_UserApiUrl=http://42.96.58.145:5202/api/v1
+            - SERVICES_ClassApiUrl=http://42.96.58.145:5207/api/v1
+            - SERVICES_InteractionApiUrl=http://42.96.58.145:5208/api/v1
+            - SERVICES_SystemApiUrl=http://42.96.58.145:52010/api/v1
         ports:
             - 5204:80
             - 7204:443
