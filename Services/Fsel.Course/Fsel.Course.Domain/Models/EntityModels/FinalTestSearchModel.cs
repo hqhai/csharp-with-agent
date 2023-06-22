@@ -12,7 +12,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
 
         public bool IsActive { get; set; }
 
-        public int ExecutionTime { get; set; }
+        public double ExecutionTime { get; set; }
 
         public EnumFinalTestLevel FinalTestLevel { get; set; }
 

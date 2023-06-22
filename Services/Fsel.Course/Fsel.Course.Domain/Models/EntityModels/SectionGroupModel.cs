@@ -7,7 +7,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
 
     public class SectionGroupModel : BaseModel
     {
-        public long ExecutionTime { get; set; }
+        public double ExecutionTime { get; set; }
         public EnumCourseSkill CourseSkill { get; set; }
         public long TotalQuestion { get; set; }
         public IList<SectionModel>? Sections { get; set; }
