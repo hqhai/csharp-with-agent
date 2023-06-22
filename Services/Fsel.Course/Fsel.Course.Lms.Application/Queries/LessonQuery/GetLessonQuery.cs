@@ -95,6 +95,7 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
                                 .ThenInclude(x => x.MockTest)
                                 .ThenInclude(x => x!.MockTestSections)
                                 .ThenInclude(x => x.SectionGroup)
+                                .Include(x => x.MockTestResults)
                                 .Where(x => x.Id == request.UnitId)
                                 .SelectMany(x => x.UnitSkillMockTests)
                                 .Select(x => x.MockTest)
@@ -107,8 +108,21 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
                                     SectionGroups = x.MockTestSections.Select(x => x.SectionGroup).Select(x => new SectionGroupModel
                                     {
                                         Id = x!.Id,
-                                        CourseSkill = x.CourseSkill
+                                        CourseSkill = x.CourseSkill,
+                                        ExecutionTime = x!.ExecutionTime,
                                     }).ToList(),
+                                    MockTestResult = x.MockTestResults.Select(x => new MockTestResultModel
+                                    {
+                                        Id = x!.Id,
+                                        CorrectCount = x!.CorrectCount,
+                                        CorrectTotal = x!.CorrectTotal,
+                                        CourseId = x!.CourseId,
+                                        CreatedDate = x!.CreatedDate,
+                                        Percent = x!.Percent,
+                                        Status = x!.Status,
+                                        UnitId = x!.UnitId,
+                                        StudentId = x!.StudentId,
+                                    }).FirstOrDefault(),
                                 })
                                 .FirstOrDefaultAsync(cancellationToken);
 

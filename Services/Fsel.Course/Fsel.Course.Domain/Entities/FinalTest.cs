@@ -27,12 +27,13 @@ namespace Fsel.Course.Domain.Entities
         /// Thời gian hiện làm bài
         /// </summary>
         [Range(0, 10000_0000, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
-        public int ExecutionTime { get; set; }
+        public double ExecutionTime { get; set; }
 
         /// <summary>
         /// Loại FinalTest
         /// </summary>
         public EnumFinalTestLevel FinalTestLevel { get; set; }
+
         public ICollection<CourseUnitMockTest>? CourseUnitMockTests { get; set; }
         public ICollection<FinalTestSection> FinalTestSections { get; set; } = new List<FinalTestSection>();
         public ICollection<FinalTestResult> FinalTestResults { get; set; } = new List<FinalTestResult>();

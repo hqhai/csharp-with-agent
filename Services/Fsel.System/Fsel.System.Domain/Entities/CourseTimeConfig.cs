@@ -4,7 +4,6 @@ namespace Fsel.System.Domain.Entities
 {
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Entities;
-    using Fsel.Shared.Enums;
     using global::System.ComponentModel.DataAnnotations;
 
     public class CourseTimeConfig : Entity

@@ -8,5 +8,10 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         /// PlacementTest Result does not exist
         /// </summary>
         PlacementTestResultNotExist,
+
+        /// <summary>
+        /// Ids Null
+        /// </summary>
+        IdsNull,
     }
 }
