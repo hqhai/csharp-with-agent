@@ -47,7 +47,7 @@ namespace Fsel.Training.Application.Queries.ClassQuery
                                         Note = x.Note,
                                         TeacherId = x.Class!.TeacherId,
                                         ClassName = x.Class.Name,
-                                        Code = x.Class.Code,
+                                        ClassCode = x.Class.Code,
                                         ClassStudents = x.Class.ClassStudents.Select(x => new ClassStudentModel
                                         {
                                             StudentId = x.StudentId

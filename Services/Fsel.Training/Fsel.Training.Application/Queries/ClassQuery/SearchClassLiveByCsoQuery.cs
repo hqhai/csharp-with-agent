@@ -53,7 +53,7 @@ namespace Fsel.Training.Application.Queries.ClassQuery
                                         {
                                             Id = x.Id,
                                             ClassName = x.Class!.Name,
-                                            Code = x.Class.Code,
+                                            ClassCode = x.Class.Code,
                                             TeacherId = x.Class.TeacherId,
                                             StartTime = x.Class.StartTime,
                                             EndTime = x.Class.EndTime,
@@ -65,9 +65,9 @@ namespace Fsel.Training.Application.Queries.ClassQuery
                 classLiveQuery = classLiveQuery.Where(m => m.Id.ToString() == request.Keyword || (m.ClassName ?? string.Empty).Contains(request.Keyword));
             }
 
-            if (request.Code != null)
+            if (request.ClassCode != null)
             {
-                classLiveQuery = classLiveQuery.Where(m => m.Code == request.Code);
+                classLiveQuery = classLiveQuery.Where(m => m.ClassCode == request.ClassCode);
             }
             int totalItem = await classLiveQuery.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
             var lists = await classLiveQuery

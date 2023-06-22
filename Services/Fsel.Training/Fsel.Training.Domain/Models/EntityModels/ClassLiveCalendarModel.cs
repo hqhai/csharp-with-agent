@@ -14,7 +14,7 @@ namespace Fsel.Training.Domain.Models.EntityModels
         public EnumClassLiveCalendarStatus Status { get; set; }
         public Guid ClassId { get; set; }
         public string? TeacherName { get; set; }
-        public string? Code { get; set; }
+        public string? ClassCode { get; set; }
         public string? ClassName { get; set; }
         public Guid? TeacherId { get; set; }
         public DateTime EndTime { get; set; }
