@@ -1,10 +1,14 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Course.Application.Services.UserServices.Models
+namespace Fsel.Training.Application.Services.UserServices.Models
 {
-    public class HumanModel
+    using Fsel.Core.Base.BaseModels;
+
+    public class HumanModel : BaseModel
     {
         public string? FullName { get; set; }
         public string? Birthday { get; set; }
+        public string? Email { get; set; }
+        public string? PhoneNumber { get; set; }
     }
 }

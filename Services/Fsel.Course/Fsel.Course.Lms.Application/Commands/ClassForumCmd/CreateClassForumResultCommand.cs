@@ -74,6 +74,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
             var studentId = student?.Content?.Result?.Id;
             var classForumResult = await _classForumResultRepository.Queryable
                     .Include(x => x.ClassForumResultFiles)
+                    .Include(x => x.ClassForumScores)
                     .FirstOrDefaultAsync(x => x.StudentId == studentId && x.LessonResultId == request.LessonResultId, cancellationToken);
             if (classForumResult == null)
             {
@@ -83,7 +84,8 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
                     StudentId = studentId ?? default,
                     LessonResultId = request.LessonResultId,
                     Status = request.IsSubmit ? EnumClassForumResultStatus.Pending : EnumClassForumResultStatus.Draft,
-                    ClassForumId = classForum.Id
+                    ClassForumId = classForum.Id,
+                    FilePath = request.FilePath
                 };
             }
             else if (classForumResult.Status == EnumClassForumResultStatus.Draft || classForumResult.Status == EnumClassForumResultStatus.Denied)
@@ -103,6 +105,47 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
                     FilePath = x,
                 }).ToList();
             }
+
+            #region Fix hashcode
+
+            classForumResult.Status = EnumClassForumResultStatus.Graded;
+            var score = 0;
+
+            if (classForum.CourseSkill == Shared.Enums.EnumCourseSkill.Speaking && request.TimeLimit >= classForum.TaggetWordLimit)
+            {
+                score = 100;
+            }
+            else if (classForum.CourseSkill == Shared.Enums.EnumCourseSkill.Writing && classForumResult.Content!.Length >= classForum.TaggetWordLimit)
+            {
+                score = 100;
+            }
+
+            classForumResult.ClassForumScores = new List<ClassForumScore>
+                {
+                    new ClassForumScore
+                    {
+                        Score= score,
+                        Criteria = EnumClassForumScoreCriteria.Content
+                    },
+                    new ClassForumScore
+                    {
+                        Score= score,
+                        Criteria = EnumClassForumScoreCriteria.Achievement
+                    },
+                    new ClassForumScore
+                    {
+                        Score= score,
+                        Criteria = EnumClassForumScoreCriteria.Organisation
+                    },
+                    new ClassForumScore
+                    {
+                        Score= score,
+                        Criteria = EnumClassForumScoreCriteria.Language
+                    }
+                };
+
+            #endregion Fix hashcode
+
             await _classForumResultRepository.ExecuteTransactionAsync(async () =>
             {
                 _classForumResultRepository.Add(classForumResult);

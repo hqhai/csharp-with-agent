@@ -4,7 +4,9 @@ namespace Fsel.Training.Domain.Entities
 {
     using System;
     using System.ComponentModel.DataAnnotations;
+    using System.ComponentModel.DataAnnotations.Schema;
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Common.Helpers;
     using Fsel.Core.Entities;
     using Fsel.Shared.Enums;
 
@@ -27,12 +29,12 @@ namespace Fsel.Training.Domain.Entities
         /// <summary>
         /// End Time
         /// </summary>
-        public DateTime EndTime { get; set; }
+        public DateTime? EndTime { get; set; }
 
         /// <summary>
         /// Start Time
         /// </summary>
-        public DateTime StartTime { get; set; }
+        public DateTime? StartTime { get; set; }
 
         /// <summary>
         /// Status
@@ -40,9 +42,22 @@ namespace Fsel.Training.Domain.Entities
         public EnumClassType Status { get; set; }
 
         public Guid PackageId { get; set; }
+
         public Guid CourseId { get; set; }
 
-        public DayOfWeek LiveDays { get; set; }
+        public Guid? LiveTimeFrameId { get; set; }
+
+        /// <summary>
+        /// LiveDays
+        /// </summary>
+        public string? LiveDaysStr { get; set; }
+
+        [NotMapped]
+        public IList<DayOfWeek>? LiveDays
+        {
+            get { return ConvertHelper.Deserialize<IList<DayOfWeek>>(LiveDaysStr); }
+            set { LiveDaysStr = ConvertHelper.Serialize(value); }
+        }
 
         public Guid? TeacherId { get; set; }
 

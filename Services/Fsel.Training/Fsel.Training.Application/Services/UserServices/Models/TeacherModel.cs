@@ -4,7 +4,6 @@ namespace Fsel.Training.Application.Services.UserServices.Models
 {
     using System;
     using Fsel.Core.Base.BaseModels;
-    using Fsel.Course.Application.Services.UserServices.Models;
 
     public class TeacherModel : BaseModel
     {

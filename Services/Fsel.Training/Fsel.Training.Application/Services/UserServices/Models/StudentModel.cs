@@ -5,6 +5,7 @@ namespace Fsel.Course.Application.Services.UserServices.Models
     using System;
     using Fsel.Shared.Enums;
     using Fsel.Core.Base.BaseModels;
+    using Fsel.Training.Application.Services.UserServices.Models;
 
     public class StudentModel : BaseModel
     {

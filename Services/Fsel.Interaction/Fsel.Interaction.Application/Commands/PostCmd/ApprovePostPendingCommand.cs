@@ -3,14 +3,9 @@
 namespace Fsel.Interaction.Application.Commands.PostCmd
 {
     using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
     using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Common.ActionResults;
-    using Fsel.Interaction.Application.Commands.TopicTagCmd;
-    using Fsel.Interaction.Domain.Entities;
     using Fsel.Interaction.Domain.Enums.ErrorCodes;
     using Fsel.Interaction.Domain.IRepositories;
     using Fsel.Interaction.Domain.Models.CommandModels.Posts;

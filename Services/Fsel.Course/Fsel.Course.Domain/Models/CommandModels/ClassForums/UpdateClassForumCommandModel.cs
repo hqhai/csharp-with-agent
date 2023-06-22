@@ -12,7 +12,7 @@ namespace Fsel.Course.Domain.Models.CommandModels.ClassForums
 
         public long TaggetWordLimit { get; set; }
 
-        public long TaggetTimeLimit { get; set; }
+        public double TaggetTimeLimit { get; set; }
 
         public string? MediaPost { get; set; }
 
