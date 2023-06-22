@@ -56,7 +56,12 @@ namespace Fsel.Training.Domain.Enums.ErrorCodes
         /// <summary>
         /// Code Class Already Exist
         /// </summary>
-        CodeClassAlreadyExist
+        CodeClassAlreadyExist,
+
+        /// <summary>
+        /// Status Of Class is not New
+        /// </summary>
+        StatusOfClassIsNotNew
 ,
     }
 }
