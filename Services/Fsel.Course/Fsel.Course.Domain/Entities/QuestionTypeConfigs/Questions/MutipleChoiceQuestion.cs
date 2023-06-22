@@ -17,6 +17,8 @@ namespace Fsel.Course.Domain.Entities.QuestionTypeConfigs.Questions
     public class MutipleChoiceQuestionContent
     {
         public long Id { get; set; }
+        [JsonRequired]
+        public string? FilePath { get; set; }
 
         [JsonRequired]
         public string? Content { get; set; }
