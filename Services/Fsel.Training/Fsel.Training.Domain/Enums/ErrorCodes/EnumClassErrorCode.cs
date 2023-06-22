@@ -51,7 +51,12 @@ namespace Fsel.Training.Domain.Enums.ErrorCodes
         /// <summary>
         /// class not found
         /// </summary>
-        ClassNotFound
+        ClassNotFound,
+
+        /// <summary>
+        /// Code Class Already Exist
+        /// </summary>
+        CodeClassAlreadyExist
 ,
     }
 }
