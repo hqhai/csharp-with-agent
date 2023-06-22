@@ -17,11 +17,12 @@ namespace Fsel.Training.Domain.Models.EntityModels
         public string? ClassCode { get; set; }
         public string? ClassName { get; set; }
         public Guid? TeacherId { get; set; }
-        public DateTime EndTime { get; set; }
+        public DateTime? EndTime { get; set; }
 
-        public DateTime StartTime { get; set; }
+        public DateTime? StartTime { get; set; }
 
-        public DayOfWeek LiveDays { get; set; }
+        public IList<DayOfWeek>? LiveDays { get; set; }
+
         public EnumCourseLevel CourseLevel { get; set; }
         public ClassModel? Class { get; set; }
         public IList<ClassStudentModel>? ClassStudents { get; set; }
