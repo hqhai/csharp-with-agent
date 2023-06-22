@@ -26,7 +26,7 @@ namespace Fsel.Course.Domain.Entities
         /// Thời gian giới hạn
         /// </summary>
         [Range(1, 10000_0000, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
-        public long TaggetTimeLimit { get; set; }
+        public double TaggetTimeLimit { get; set; }
 
         [NotMapped]
         public TimeSpan TaggetTimeSpanLimit

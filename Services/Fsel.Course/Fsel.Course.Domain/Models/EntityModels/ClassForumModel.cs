@@ -11,7 +11,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public EnumGradingStyle GradingStyle { get; set; }
 
         public long TaggetWordLimit { get; set; }
-        public long TaggetTimeLimit { get; set; }
+        public double TaggetTimeLimit { get; set; }
 
         public string? MediaPost { get; set; }
 
