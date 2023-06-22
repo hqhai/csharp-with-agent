@@ -1,15 +1,12 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Training.Domain.Entities
+namespace Fsel.Training.Domain.Models.EntityModels
 {
     using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
-    using System.Threading.Tasks;
-    using Fsel.Core.Entities;
+    using Fsel.Core.Base.BaseModels;
+    using Fsel.Training.Domain.Entities;
 
-    public class TeacherFreeDate : Entity
+    public class TeacherFreeDateModel : BaseModel
     {
         /// <summary>
         /// End Time
@@ -22,6 +19,5 @@ namespace Fsel.Training.Domain.Entities
         public DateTime StartTime { get; set; }
 
         public Guid TeacherId { get; set; }
-        public ICollection<TeacherFreeTime> TeacherFreeTimes { get; set; } = new List<TeacherFreeTime>();
     }
 }

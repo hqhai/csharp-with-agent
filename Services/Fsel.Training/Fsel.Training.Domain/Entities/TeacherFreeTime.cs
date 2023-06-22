@@ -15,5 +15,6 @@ namespace Fsel.Training.Domain.Entities
         public EnumDayOfWeek DayOfWeek { get; set; }
 
         public int Priority { get; set; }
+        public TeacherFreeDate? TeacherFreeDate { get; set; }
     }
 }
