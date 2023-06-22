@@ -10,6 +10,8 @@ namespace Fsel.Training.Api.Controllers.Admin
     using MediatR;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
+    using Fsel.Training.Domain.Models.EntityModels;
+    using Fsel.Training.Application.Commands.ClassCmd;
 
     [ApiVersion(Settings.APIVersion)]
     [Route(Settings.APIDefaultRoute + "/admin/class")]
@@ -25,12 +27,23 @@ namespace Fsel.Training.Api.Controllers.Admin
             _mediator = mediator;
         }
 
+
         [HttpGet("{id}")]
         [ProducesResponseType(typeof(MethodResult<List<Guid>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> Get([FromRoute] Guid id)
         {
             MethodResult<List<Guid>?> commandResult = await _mediator.Send(new GetStudentIdsInClassQuery { ClassId = id }).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+
+        [HttpPost]
+        [ProducesResponseType(typeof(MethodResult<ClassModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> CreateClass([FromBody] CreateClassCommand command)
+        {
+            MethodResult<ClassModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
     }

@@ -49,13 +49,13 @@ namespace Fsel.Training.Application.Commands.ClassCmd
             await _classRepository.ExecuteTransactionAsync(async () =>
             {
                 var newClass = _mapper.Map<Class>(request);
+                newClass.Code = generateClassCode.Result;
+                newClass.Name = generateClassCode.Result;
                 if (!newClass.IsValid())
                 {
                     methodResult.AddErrorBadRequest(newClass.ErrorMessages);
                     return methodResult;
                 }
-                newClass.Code = generateClassCode.Result;
-                newClass.Name = generateClassCode.Result;
                 newClass = _classRepository.Add(newClass);
                 await _classRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
                 methodResult.StatusCode = StatusCodes.Status201Created;
