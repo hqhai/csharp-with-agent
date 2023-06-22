@@ -6,15 +6,16 @@ namespace Fsel.Interaction.Application.Commands.ActionCmd
     using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Common.ActionResults;
-    using Fsel.Core.Base;
+    using Fsel.Interaction.Domain.Entities;
     using Fsel.Interaction.Domain.Enums.ErrorCodes;
     using Fsel.Interaction.Domain.IRepositories;
     using Fsel.Interaction.Domain.Models.CommandModels.Posts.StudentPost;
     using Fsel.Interaction.Domain.Models.EntityModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
+    using Microsoft.EntityFrameworkCore;
 
-    public class UpdateStudentPostsCommand : UpdatePostCommandModel, IRequest<MethodResult<PostModel>>
+    public class UpdateStudentPostsCommand : CreatePostCommandModel, IRequest<MethodResult<PostModel>>
     {
     }
 
@@ -34,17 +35,25 @@ namespace Fsel.Interaction.Application.Commands.ActionCmd
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<PostModel> methodResult = new MethodResult<PostModel>();
 
-            var studentPosts = await _iPostRepository.GetIncludeByIdAsync(request.Id);
+            #region Validation
+
+            var studentPosts = await _iPostRepository.Queryable
+                                   .Include(e => e.PostTags.Where(n => !n.IsDeleted))
+                                   .FirstOrDefaultAsync(e => e.Id == request.Id, cancellationToken: cancellationToken);
             if (studentPosts == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumPostErrorCode.PostNotExist), nameof(request.Id), request.Id);
                 return methodResult;
             }
+            _mapper.Map(request, studentPosts);
+            #endregion
 
             await _iPostRepository.ExecuteTransactionAsync(async () =>
             {
-
-                _mapper.Map(request, studentPosts);
+                studentPosts.PostTags = request.TopicTagIds!.Select((x, index) => new PostTag
+                {
+                    TopicTagId = x
+                }).ToList();
 
                 studentPosts = _iPostRepository.Update(studentPosts);
                 await _iPostRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);

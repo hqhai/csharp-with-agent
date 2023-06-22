@@ -10,6 +10,7 @@ namespace Fsel.Interaction.Application.Commands.ActionCmd
     using Fsel.Interaction.Domain.IRepositories;
     using MediatR;
     using Microsoft.AspNetCore.Http;
+    using Microsoft.EntityFrameworkCore;
 
     public class DeleteStudentPostsCommand : IRequest<MethodResult<bool>>
     {
@@ -33,7 +34,11 @@ namespace Fsel.Interaction.Application.Commands.ActionCmd
             MethodResult<bool> methodResult = new MethodResult<bool>();
 
 
-            var studentPosts = await _iPostRepository.GetIncludeByIdAsync(request.Id);
+
+            var studentPosts = await _iPostRepository.Queryable
+                                    .Include(e => e.PostTags.Where(n => !n.IsDeleted))
+                                    .FirstOrDefaultAsync(e => e.Id == request.Id, cancellationToken: cancellationToken);
+
             if (studentPosts == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumPostErrorCode.PostNotExist), nameof(request.Id), request.Id);
@@ -43,7 +48,6 @@ namespace Fsel.Interaction.Application.Commands.ActionCmd
             await _iPostRepository.ExecuteTransactionAsync(async () =>
             {
 
-                _mapper.Map(request, studentPosts);
 
                 var result = await _iPostRepository.DeleteAsync(studentPosts);
                 await _iPostRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
@@ -57,3 +61,4 @@ namespace Fsel.Interaction.Application.Commands.ActionCmd
         }
     }
 }
+

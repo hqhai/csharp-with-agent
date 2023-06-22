@@ -9,6 +9,7 @@ namespace Fsel.Interaction.Application.Queries.PostQuery
     using Fsel.Interaction.Domain.IRepositories;
     using Fsel.Interaction.Domain.Models.EntityModels;
     using Fsel.Interaction.Domain.Models.QueryModels.Posts;
+    using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -16,6 +17,7 @@ namespace Fsel.Interaction.Application.Queries.PostQuery
     public class GetPostsByStudentQuery : GetPostsByStudentQueryModel, IRequest<MethodResult<List<PostModel>>>
     {
         public Guid StudentId { get; set; }
+        public EnumPostStatus? Status { get; set; }
     }
 
     public class GetPostByStudentQueryHandler : IRequestHandler<GetPostsByStudentQuery, MethodResult<List<PostModel>>>

@@ -49,6 +49,11 @@ namespace Fsel.Interaction.Application.Commands.ActionCmd
 
             await _iPostRepository.ExecuteTransactionAsync(async () =>
             {
+                studentPosts.PostTags = request.TopicTagIds!.Select((x) => new PostTag
+                {
+                    TopicTagId = x
+                }).ToList();
+
                 studentPosts = _iPostRepository.Add(studentPosts);
                 await _iPostRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
