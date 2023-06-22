@@ -16,7 +16,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public EnumResultStatus Status { get; set; }
         public double NumberOfStars { get; set; }
         public string? Feedback { get; set; }
-        public LessonResult? LessonResult { get; set; }
+        public LessonResultModel? LessonResult { get; set; }
         public Guid LessonResultId { get; set; }
         public Video? Video { get; set; }
         public Guid VideoId { get; set; }
