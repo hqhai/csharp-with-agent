@@ -6,5 +6,8 @@ namespace Fsel.Training.Domain.Models.QueryModels
 
     public class SearchClassLiveByCsoQueryModel : BaseQueryModel
     {
+        public string? Code { get; set; }
+
+        public string? ClassName { get; set; }
     }
 }

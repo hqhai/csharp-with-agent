@@ -13,13 +13,13 @@ namespace Fsel.Training.Api.Controllers.Cso
     using System.Net;
 
     [ApiVersion(Settings.APIVersion)]
-    [Route(Settings.APIDefaultRoute + "/cso/class")]
+    [Route(Settings.APIDefaultRoute + "/cso/class-live")]
     [ApiController]
-    public class ClassController : ControllerBase
+    public class ClassLiveController : ControllerBase
     {
         private readonly IMediator _mediator;
 
-        public ClassController(IMediator mediator)
+        public ClassLiveController(IMediator mediator)
         {
             _mediator = mediator;
         }
@@ -28,11 +28,11 @@ namespace Fsel.Training.Api.Controllers.Cso
         /// Search Course
         /// </summary>
         [HttpGet]
-        [ProducesResponseType(typeof(MethodResult<PagingItemsModel<ClassModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(MethodResult<PagingItemsModel<ClassLiveCalendarModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> Search([FromQuery] SearchClassLiveByCsoQuery query)
         {
-            MethodResult<PagingItemsModel<ClassModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            MethodResult<PagingItemsModel<ClassLiveCalendarModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
 
@@ -40,11 +40,11 @@ namespace Fsel.Training.Api.Controllers.Cso
         /// Get Course
         /// </summary>
         [HttpGet("{id}")]
-        [ProducesResponseType(typeof(MethodResult<ClassModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(MethodResult<ClassLiveCalendarModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> Get([FromRoute] Guid id)
         {
-            MethodResult<ClassModel> commandResult = await _mediator.Send(new GetClassLiveByCsoQuery { Id = id }).ConfigureAwait(false);
+            MethodResult<ClassLiveCalendarModel> commandResult = await _mediator.Send(new GetClassLiveByCsoQuery { Id = id }).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
 
@@ -52,13 +52,13 @@ namespace Fsel.Training.Api.Controllers.Cso
         /// Update a class live
         /// </summary>
         [HttpPut("{id}")]
-        [ProducesResponseType(typeof(MethodResult<ClassModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(MethodResult<ClassLiveCalendarModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> Update([FromRoute] Guid id, [FromBody] SaveClassLiveCsoCommand command)
         {
             ArgumentNullException.ThrowIfNull(command);
             command.Id = id;
-            MethodResult<ClassModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            MethodResult<ClassLiveCalendarModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
     }

@@ -25,6 +25,7 @@ builder.AddAuthenticationJwtBearers(appSetting);
 builder.AddDbContexts<TrainingDbContext>();
 builder.Services.AddScoped<IClassRepository, ClassRepository>();
 builder.Services.AddScoped<IClassStudentRepository, ClassStudentRepository>();
+builder.Services.AddScoped<IClassLiveCalendarRepository, ClassLiveCalendarRepository>();
 builder.AddRefitClients(typeof(IUserService), appSetting?.Services?.UserApiUrl);
 builder.AddRefitClients(typeof(ICourseService), appSetting?.Services?.CourseApiUrl);
 

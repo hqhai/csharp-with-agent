@@ -3,15 +3,10 @@
 namespace Fsel.Training.Application.Commands.ClassCmd
 {
     using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
     using System.Threading;
     using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Common.ActionResults;
-    using Fsel.Core.Base;
-    using Fsel.Training.Domain.Entities;
     using Fsel.Training.Domain.Enums.ErrorCodes;
     using Fsel.Training.Domain.IRepositories;
     using Fsel.Training.Domain.Models.CommandModels.Classes;
@@ -20,54 +15,41 @@ namespace Fsel.Training.Application.Commands.ClassCmd
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class SaveClassLiveCsoCommand : SaveClassLiveCsoCommandModel, IRequest<MethodResult<ClassModel>>
+    public class SaveClassLiveCsoCommand : SaveClassLiveCsoCommandModel, IRequest<MethodResult<ClassLiveCalendarModel>>
     {
     }
 
-    public class SaveClassLiveCsoCommandHandler : IRequestHandler<SaveClassLiveCsoCommand, MethodResult<ClassModel>>
+    public class SaveClassLiveCsoCommandHandler : IRequestHandler<SaveClassLiveCsoCommand, MethodResult<ClassLiveCalendarModel>>
     {
-        private readonly IClassRepository _classRepository;
+        private readonly IClassLiveCalendarRepository _classLiveCalenderRepository;
         private readonly IMapper _mapper;
 
-        public SaveClassLiveCsoCommandHandler(IClassRepository classRepository, IMapper mapper)
+        public SaveClassLiveCsoCommandHandler(IClassLiveCalendarRepository classLiveCalenderRepository, IMapper mapper)
         {
-            _classRepository = classRepository;
+            _classLiveCalenderRepository = classLiveCalenderRepository;
             _mapper = mapper;
         }
 
-        public async Task<MethodResult<ClassModel>> Handle(SaveClassLiveCsoCommand request, CancellationToken cancellationToken)
+        public async Task<MethodResult<ClassLiveCalendarModel>> Handle(SaveClassLiveCsoCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            MethodResult<ClassModel> methodResult = new MethodResult<ClassModel>();
+            MethodResult<ClassLiveCalendarModel> methodResult = new MethodResult<ClassLiveCalendarModel>();
 
-            var @class = await _classRepository.Queryable.Include(x => x.ClassLiveCalendars).FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
+            var classLive = await _classLiveCalenderRepository.Queryable.FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
 
-            if (@class == null)
+            if (classLive == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumClassErrorCode.ClassNotFound));
                 return methodResult;
             }
-            if (request.AccessLink != null)
+            _mapper.Map(request, classLive);
+            await _classLiveCalenderRepository.ExecuteTransactionAsync(async () =>
             {
-                @class.ClassLiveCalendars = request.AccessLink.Select(x => new ClassLiveCalendar
-                {
-                    AccessLink = x.ToString(),
-                }).ToList();
-            }
-            if (request.Note != null)
-            {
-                @class.ClassLiveCalendars = request.Note.Select(x => new ClassLiveCalendar
-                {
-                    Note = x.ToString(),
-                }).ToList();
-            }
-            await _classRepository.ExecuteTransactionAsync(async () =>
-            {
-                _classRepository.Update(@class);
-                await _classRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+                _classLiveCalenderRepository.Update(classLive);
+                await _classLiveCalenderRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
                 methodResult.StatusCode = StatusCodes.Status201Created;
-                methodResult.Result = _mapper.Map<ClassModel>(@class);
+                methodResult.Result = _mapper.Map<ClassLiveCalendarModel>(classLive);
                 return methodResult;
             });
 
