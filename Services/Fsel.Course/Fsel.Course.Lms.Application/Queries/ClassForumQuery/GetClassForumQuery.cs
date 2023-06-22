@@ -103,23 +103,10 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumQuery
                         var action = actions.FirstOrDefault(x => x.ObjectId == item.Id);
                         item.CommentNumber = action?.CommentNumber;
                         item.LikeNumber = action?.LikeNumber;
+                        item.IsLiked = action?.IsLiked;
                     }
                 }
 
-                var actionLikeResult = await _interactionService.GetsIsLikeActionAsync(new IsLikeCommandModel { ObjectIds = classForumResults.Select(x => x.Id).ToList(), CurrentUserId = _authContext.CurrentUserId });
-                var actionLikes = actionLikeResult.Content?.Result;
-                if (actionLikes != null)
-                {
-                    classForumResults = classForumResults.Where(x => !actions.Any(n => n.IsDisable && n.ObjectId == x.Id)).ToList();
-                    foreach (var item in classForumResults)
-                    {
-                        var isLiked = actionLikes.Any(x => x.ObjectId == item.Id);
-                        if (isLiked)
-                        {
-                            item.IsLiked = true;
-                        }
-                    }
-                }
                 var classForumResultCurrentStudent = classForumResults.FirstOrDefault(x => x.ClassForumId == classForum.Id && x.LessonResultId == request.LessonResultId);
                 classForumByStudentModel.ClassForumResultCurrentStudent = classForumResultCurrentStudent;
 

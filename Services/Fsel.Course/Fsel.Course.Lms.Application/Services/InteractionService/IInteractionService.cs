@@ -12,8 +12,5 @@ namespace Fsel.Course.Lms.Application.Services.InteractionService
     {
         [Post("/interaction-action/actions")]
         Task<IApiResponse<MethodResult<IList<InteractionActionModel>>>> GetsActionAsync([Body] InteractionActionCommandModel command);
-
-        [Post("/interaction-action/is-liked")]
-        Task<IApiResponse<MethodResult<IList<InteractionActionModel>>>> GetsIsLikeActionAsync([Body] IsLikeCommandModel command);
     }
 }

@@ -65,6 +65,7 @@ namespace Fsel.Interaction.Application.Queries.InterationActionQuery
                 {
                     ObjectId = action.ObjectId,
                     IsDisable = action.Datas.Any(x => x.Type == EnumInteractionActionType.Disable && x.UserId == request.UserId),
+                    IsLiked = action.Datas.Any(x => x.Type == EnumInteractionActionType.Like && x.UserId == request.UserId),
                     LikeNumber = action.Datas.Where(x => x.Type == EnumInteractionActionType.Like).Count(),
                     CommentNumber = comments.FirstOrDefault(x => x.ObjectId == action.ObjectId)?.Number ?? default,
                 });

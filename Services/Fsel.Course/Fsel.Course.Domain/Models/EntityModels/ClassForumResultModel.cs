@@ -30,10 +30,13 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public int? LikeNumber { get; set; }
 
         public string? FeedBackNote { get; set; }
+
         public bool? IsFlagged { get; set; }
 
         public bool? IsLiked { get; set; }
+
         public EnumCourseLevel CourseLevel { get; set; }
+
         public ClassForumModel? ClassForum { get; set; }
 
         public LessonResultModel? LessonResult { get; set; }
