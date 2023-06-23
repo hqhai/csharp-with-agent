@@ -23,13 +23,11 @@ namespace Fsel.Training.Application.Queries.ClassQuery
     {
         private readonly IMapper _mapper;
         private readonly IClassRepository _classRepository;
-        private readonly IMediator _mediator;
 
-        public GetClassByStudentIdQueryHandler(IMapper mapper, IClassRepository classRepository, IMediator mediator)
+        public GetClassByStudentIdQueryHandler(IMapper mapper, IClassRepository classRepository)
         {
             _mapper = mapper;
             _classRepository = classRepository;
-            _mediator = mediator;
         }
 
         public async Task<MethodResult<ClassModel>> Handle(GetClassByStudentIdQuery request, CancellationToken cancellationToken)

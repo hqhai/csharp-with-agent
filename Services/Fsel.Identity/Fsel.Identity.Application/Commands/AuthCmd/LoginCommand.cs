@@ -63,7 +63,8 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                     StatusCodes.Status401Unauthorized, nameof(EnumAuthErrorCode.UserNameAndPasswordIncorrect), new Error(nameof(request.Username), request.Username), new Error(nameof(request.Password), request.Password));
                 return methodResult;
             }
-            methodResult = await _mediator.Send(new GenerateTokenCommand { Id = user.Id }, cancellationToken).ConfigureAwait(false);
+            var generateToken = await _mediator.Send(new GenerateTokenCommand { Id = user.Id }, cancellationToken).ConfigureAwait(false);
+            methodResult = generateToken;
             return methodResult;
         }
     }

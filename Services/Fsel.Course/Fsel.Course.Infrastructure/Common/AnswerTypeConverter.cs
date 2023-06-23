@@ -167,7 +167,7 @@ namespace Fsel.Course.Infrastructure.Common
             if (dataAnswer != null && dataAnswer.Answers != null && dataQuestion != null)
             {
                 var answerStrs = dataAnswer.Answers.Split(' ');
-                if (answerStrs != null && dataQuestion.ExactWordCount == answerStrs.Length)
+                if (answerStrs != null && answerStrs.Length >= dataQuestion.ExactWordCount)
                 {
                     dataAnswer.IsExact = true;
                     number++;
@@ -236,10 +236,11 @@ namespace Fsel.Course.Infrastructure.Common
         {
             if (words[index].IndexOf('|', StringComparison.Ordinal) != -1)
             {
-                string[] answerWords = words[index].Split('|');
-                foreach (var item in answerWords)
+                string[] questionWords = words[index].Split('|');
+                string[] answerWords = word.Split(' ');
+                foreach (var item in questionWords)
                 {
-                    if (item == word)
+                    if (answerWords.Any(x => x == item))
                     {
                         return true;
                     }
