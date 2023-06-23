@@ -10,4 +10,8 @@
     <ProjectReference Include="..\Fsel.Training.Infrastructure\Fsel.Training.Infrastructure.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Services\SystemServices\Model\" />
+  </ItemGroup>
+
 </Project>

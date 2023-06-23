@@ -58,7 +58,7 @@ namespace Fsel.Training.Api.Controllers.Cso
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> Get()
         {
-            MethodResult<IList<TeacherFreeTimeModel>> commandResult = await _mediator.Send(new GetListPriorityCalenderQuery()).ConfigureAwait(false);
+            MethodResult<IList<TeacherFreeTimeModel>> commandResult = await _mediator.Send(new SearchPriorityCalenderQuery()).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
 

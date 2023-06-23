@@ -22,5 +22,7 @@ namespace Fsel.Training.Domain.Models.EntityModels
         public DateTime StartTime { get; set; }
 
         public Guid TeacherId { get; set; }
+
+        public string? TeacherName { get; set; }
     }
 }
