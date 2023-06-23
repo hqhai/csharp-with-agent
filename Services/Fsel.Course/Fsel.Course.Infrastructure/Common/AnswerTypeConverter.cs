@@ -167,7 +167,7 @@ namespace Fsel.Course.Infrastructure.Common
             if (dataAnswer != null && dataAnswer.Answers != null && dataQuestion != null)
             {
                 var answerStrs = dataAnswer.Answers.Split(' ');
-                if (answerStrs != null && dataQuestion.ExactWordCount == answerStrs.Length)
+                if (answerStrs != null && answerStrs.Length >= dataQuestion.ExactWordCount)
                 {
                     dataAnswer.IsExact = true;
                     number++;
