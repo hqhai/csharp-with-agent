@@ -23,5 +23,7 @@ namespace Fsel.Training.Domain.Models.EntityModels
         public string? TeacherName { get; set; }
 
         public IList<TeacherFreeTimeModel>? TeacherFreeTimes { get; set; }
+        public DateTime? TimeFrameEndTime { get; set; }
+        public DateTime? TimeFrameStartTime { get; set; }
     }
 }

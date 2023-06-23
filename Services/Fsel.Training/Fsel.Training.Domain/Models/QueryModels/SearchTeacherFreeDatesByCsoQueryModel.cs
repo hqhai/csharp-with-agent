@@ -10,6 +10,6 @@ namespace Fsel.Training.Domain.Models.QueryModels
 
         public DateTime? StartTime { get; set; }
 
-        public Guid TeacherId { get; set; }
+        public Guid? TeacherId { get; set; }
     }
 }

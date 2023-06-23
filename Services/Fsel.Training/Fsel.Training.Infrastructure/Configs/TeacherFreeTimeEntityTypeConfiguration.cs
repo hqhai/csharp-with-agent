@@ -17,12 +17,6 @@ namespace Fsel.Training.Infrastructure.Configs
                .WithMany(b => b.TeacherFreeTimes)
                .HasForeignKey(b => b.TeacherFreeDateId)
                .OnDelete(DeleteBehavior.Cascade);
-
-            builder.Property(e => e.DayOfWeek)
-                .HasMaxLength(100)
-                .HasConversion(
-                    v => v.ToString(),
-                    v => v.EnumParse<EnumDayOfWeek>());
         }
     }
 }

@@ -12,9 +12,9 @@ namespace Fsel.Training.Domain.Models.EntityModels
 
         public Guid TeacherFreeDateId { get; set; }
 
-        public EnumDayOfWeek DayOfWeek { get; set; }
+        public DayOfWeek DayOfWeek { get; set; }
 
-        public int Priority { get; set; }
+        public bool Priority { get; set; }
         public TeacherFreeDateModel? TeacherFreeDate { get; set; }
 
         public DateTime EndTime { get; set; }

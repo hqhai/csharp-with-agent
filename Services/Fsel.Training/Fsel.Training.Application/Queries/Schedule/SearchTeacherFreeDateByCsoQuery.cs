@@ -55,11 +55,18 @@ namespace Fsel.Training.Application.Queries.Schedule
                                         StartTime = x.StartTime,
                                         EndTime = x.EndTime,
                                         TeacherId = x.TeacherId,
+                                        CreatedDate = x.CreatedDate,
                                         TeacherFreeTimes = x.TeacherFreeTimes.Select(x => new TeacherFreeTimeModel
                                         {
+                                            Id = x.Id,
+                                            LiveTimeFrameId = x.LiveTimeFrameId,
+                                            DayOfWeek = x.DayOfWeek,
                                         }).ToList(),
                                     });
-
+            if (request.TeacherId != null)
+            {
+                teacherFreeDateQuery = teacherFreeDateQuery.Where(m => m.TeacherId == request.TeacherId);
+            }
             if (request.StartTime != null)
             {
                 teacherFreeDateQuery = teacherFreeDateQuery.Where(m => m.StartTime == request.StartTime);
@@ -67,6 +74,9 @@ namespace Fsel.Training.Application.Queries.Schedule
             if (request.EndTime != null)
             {
                 teacherFreeDateQuery = teacherFreeDateQuery.Where(m => m.EndTime == request.EndTime);
+            }
+            if (request.StartTime < request.EndTime)
+            {
             }
             int totalItem = await teacherFreeDateQuery.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
             var lists = await teacherFreeDateQuery
@@ -82,7 +92,14 @@ namespace Fsel.Training.Application.Queries.Schedule
                 var teacher = teachers!.FirstOrDefault(x => x.Id == item.TeacherId);
                 item.TeacherName = teacher?.Human?.FullName;
             }
+            var timeFrameResult = await _systemService.GetTimeFramByIdsAsync(teacherFreeDateQuery.SelectMany(x => x.TeacherFreeTimes!).Select(x => x.LiveTimeFrameId).ToList());
+            var timeFrames = timeFrameResult.Content?.Result;
 
+            foreach (var item in lists)
+            {
+                item.TimeFrameEndTime = timeFrames!.EndTime;
+                item.TimeFrameStartTime = timeFrames!.StartTime;
+            }
             methodResult.Result = new PagingItemsModel<TeacherFreeDateModel>(lists, request, totalItem);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;

@@ -12,27 +12,15 @@ namespace Fsel.Training.Api.Controllers.Cso
     using Microsoft.AspNetCore.Mvc;
 
     [ApiVersion(Settings.APIVersion)]
-    [Route(Settings.APIDefaultRoute + "/cso/teacher-live-time")]
+    [Route(Settings.APIDefaultRoute + "/cso/teacher-free-time")]
     [ApiController]
-    public class TeacherTimeLiveController : ControllerBase
+    public class TeacherFreeTimeController : ControllerBase
     {
         private readonly IMediator _mediator;
 
-        public TeacherTimeLiveController(IMediator mediator)
+        public TeacherFreeTimeController(IMediator mediator)
         {
             _mediator = mediator;
-        }
-
-        /// <summary>
-        /// Get lít teacher live time
-        /// </summary>
-        [HttpGet]
-        [ProducesResponseType(typeof(MethodResult<PagingItemsModel<TeacherFreeDateModel>>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> Get()
-        {
-            MethodResult<PagingItemsModel<TeacherFreeDateModel>> commandResult = await _mediator.Send(new SearchTeacherFreeDateByCsoQuery { }).ConfigureAwait(false);
-            return commandResult.GetActionResult();
         }
 
         /// <summary>
