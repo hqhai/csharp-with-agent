@@ -13,7 +13,6 @@ namespace Fsel.Interaction.Application.Queries.PostQuery
 
     public class GetTopTrendingsQuery : GetPostTrendingQueryModel, IRequest<MethodResult<List<TopicTagModel>>>
     {
-
     }
 
     public class GetTopTrendingsQueryHandler : IRequestHandler<GetTopTrendingsQuery, MethodResult<List<TopicTagModel>>>
@@ -38,7 +37,7 @@ namespace Fsel.Interaction.Application.Queries.PostQuery
                                             Id = tag.Id,
                                             Name = tag.Name,
                                             Color = tag.Color,
-                                            PostTags = tag.PostTags.ToList()
+                                            PostCount = tag.PostTags.Count
                                         }).ToListAsync(cancellationToken: cancellationToken);
 
             methodResult.Result = topicPostQuery;
