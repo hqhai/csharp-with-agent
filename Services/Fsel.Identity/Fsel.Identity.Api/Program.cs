@@ -2,6 +2,7 @@
 
 using Fsel.Core.Extensions;
 using Fsel.Identity.Application.Services;
+using Fsel.Identity.Application.Services.CourseService;
 using Fsel.Identity.Application.Services.InteractionService;
 using Fsel.Identity.Application.Services.OrderService;
 using Fsel.Identity.Application.Services.TrainingService;
@@ -40,6 +41,7 @@ builder.AddRefitClients(typeof(ISenderService), appSetting?.Services?.SenderApiU
 builder.AddRefitClients(typeof(IOrderService), appSetting?.Services?.OrderApiUrl);
 builder.AddRefitClients(typeof(IInteractionService), appSetting?.Services?.InteractionApiUrl);
 builder.AddRefitClients(typeof(ITrainingService), appSetting?.Services?.ClassApiUrl);
+builder.AddRefitClients(typeof(ICourseService), appSetting?.Services?.CourseApiUrl);
 var app = builder.Build();
 app.UseServices();
 app.Run();

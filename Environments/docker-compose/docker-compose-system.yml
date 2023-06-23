@@ -1,16 +1,16 @@
 version: '3.5'
 services:
-    interaction.service:
-        container_name: interaction.service
-        hostname: InteractionService
-        image: ${DOCKER_REGISTRY-}interaction-microservice:v1
+    system.service:
+        container_name: system.service
+        hostname: SystemService
+        image: ${DOCKER_REGISTRY-}system-microservice:v1
         build:
             context: ./../../
-            dockerfile: Environments/Testing/Interaction.Testing.Dockerfile
+            dockerfile: Environments/Testing/System.Testing.Dockerfile
         environment:
             - ASPNETCORE_ENVIRONMENT=Testing
-            - CONNECTIONSTRINGS__DEFAULTCONNECTION=Data Source=183.91.11.235;Initial Catalog=env-dev.interaction-service;User Id=sa;Password=FselTech@2023;TrustServerCertificate=true;
-            - SERVICENAME=Interaction
+            - CONNECTIONSTRINGS__DEFAULTCONNECTION=Data Source=183.91.11.235;Initial Catalog=env-dev.system-service;User Id=sa;Password=FselTech@2023;TrustServerCertificate=true;
+            - SERVICENAME=System
             - JWT__SECRETKEY=JsonWebApiTokenWithSwaggerAuthorizationAuthenticationAspNetCore
             - JWT__ISSUER=baseWebApiIssuer
             - JWT__AUDIENCE=baseWebApiAudience
@@ -19,5 +19,5 @@ services:
             - JWT__REFRESHTOKENVALIDITYINDAYS=7
             - SERVICES_UserApiUrl=http://42.96.58.145:5202/api/v1
         ports:
-            - 5208:80
-            - 7208:443
+            - 52010:80
+            - 7010:443
