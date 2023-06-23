@@ -4,6 +4,8 @@ namespace Fsel.Course.Lms.Application.Commands.VideoResultCmd
 {
     using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Core.Applications.InternalEvents;
+    using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Entities.SkillScoresConfigs;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.Enums.ErrorCodes;
@@ -24,6 +26,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoResultCmd
         private readonly IVideoResultRepository _videoResultRepository;
         private readonly IVideoTimeCodeAnswerRepository _videoTimeCodeAnswerRepository;
         private readonly IVideoRepository _videoRepository;
+        private readonly IMediator _mediator;
         private readonly IVideoTimeCodeRepository _videoTimeCodeRepository;
         private readonly ITimeCodeExerciseRepository _timeCodeExerciseRepository;
         private readonly IExerciseRepository _exerciseRepository;
@@ -37,6 +40,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoResultCmd
             ITimeCodeExerciseRepository timeCodeExerciseRepository,
             IExerciseRepository exerciseRepository,
             IVideoRepository videoRepository,
+            IMediator mediator,
             IVideoTimeCodeRepository videoTimeCodeRepository,
             IExerciseQuestionRepository exerciseQuestionRepository,
             IQuestionRepository questionRepository)
@@ -45,6 +49,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoResultCmd
             _timeCodeExerciseRepository = timeCodeExerciseRepository;
             _exerciseRepository = exerciseRepository;
             _videoRepository = videoRepository;
+            _mediator = mediator;
             _videoTimeCodeRepository = videoTimeCodeRepository;
             _exerciseQuestionRepository = exerciseQuestionRepository;
             _questionRepository = questionRepository;
@@ -127,6 +132,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoResultCmd
             {
                 videoResult = _videoResultRepository.Update(videoResult);
                 await _videoResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+                await _mediator.Publish(new EntityChangedEvent<VideoResult>(videoResult), cancellationToken);
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 methodResult.Result = _mapper.Map<VideoResultModel>(videoResult);
                 return methodResult;

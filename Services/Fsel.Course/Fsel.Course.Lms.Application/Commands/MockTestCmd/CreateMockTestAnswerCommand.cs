@@ -7,6 +7,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
     using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Core.Applications.InternalEvents;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.Enums.ErrorCodes;
@@ -25,6 +26,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
     public class CreateMockTestAnswerCommandHandler : IRequestHandler<CreateMockTestAnswerCommand, MethodResult<MockTestResultModel>>
     {
         private readonly AnswerTypeConverter _answerTypeConverter;
+        private readonly IMediator _mediator;
         private readonly IQuestionRepository _questionRepository;
         private readonly IMockTestAnswerRepository _mockTestAnswerRepository;
         private readonly IMockTestResultRepository _mockTestResultRepository;
@@ -37,6 +39,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
         private readonly IMapper _mapper;
 
         public CreateMockTestAnswerCommandHandler(AnswerTypeConverter answerTypeConverter
+            , IMediator mediator
             , IQuestionRepository questionRepository
             , IMockTestAnswerRepository mockTestAnswerRepository
             , IMockTestResultRepository mockTestResultRepository
@@ -49,6 +52,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
             , IMapper mapper)
         {
             _answerTypeConverter = answerTypeConverter;
+            _mediator = mediator;
             _questionRepository = questionRepository;
             _mockTestAnswerRepository = mockTestAnswerRepository;
             _mockTestResultRepository = mockTestResultRepository;
@@ -155,7 +159,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
 
                 _mockTestResultRepository.Update(mockTestResult);
                 await _mockTestResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
-
+                await _mediator.Publish(new EntityChangedEvent<MockTestResult>(mockTestResult), cancellationToken);
                 methodResult.StatusCode = StatusCodes.Status201Created;
                 methodResult.Result = _mapper.Map<MockTestResultModel>(mockTestResult);
                 return methodResult;
