@@ -24,7 +24,7 @@ services:
             - SERVICES_InteractionApiUrl=http://42.96.58.145:5208/api/
             - SERVICES_ClassApiUrl=http://42.96.58.145:5207/api/v1
             - SERVICES_OrderApiUrl=http://42.96.58.145:5209/api/v1
-            - SERVICES_CourseApiUrl=https://42.96.58.145:5204/api/v1
+            - SERVICES_CourseApiUrl=http://42.96.58.145:5204/api/v1
         ports:
             - 5201:80
             - 7201:443
@@ -52,7 +52,7 @@ services:
             - SERVICES_InteractionApiUrl=http://42.96.58.145:5208/api/
             - SERVICES_ClassApiUrl=http://42.96.58.145:5207/api/v1
             - SERVICES_OrderApiUrl=http://42.96.58.145:5209/api/v1
-            - SERVICES_CourseApiUrl=https://42.96.58.145:5204/api/v1
+            - SERVICES_CourseApiUrl=http://42.96.58.145:5204/api/v1
         ports:
             - 5202:80
             - 7202:443
