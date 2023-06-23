@@ -60,9 +60,8 @@ namespace Fsel.Course.Lms.Application.Queries.FinalTestQuery
             }
             var studentId = studentsResult.Content!.Result!.Id;
 
-            var finalTestResult = await _finalTestResultRepository.Queryable.FirstOrDefaultAsync(x => x.FinalTestId == request.FinalTestId && x.StudentId == studentId, cancellationToken);
-
-            var finalTest = await _finalTestRepository.Queryable.Include(x => x.FinalTestSections)
+            var finalTest = await _finalTestRepository.Queryable.Include(x => x.FinalTestResults.Where(x => x.StudentId == studentId))
+                                                        .Include(x => x.FinalTestSections)
                                                         .ThenInclude(x => x.SectionGroup)
                                                         .ThenInclude(x => x!.Sections)
                                                         .ThenInclude(x => x.SectionQuestions)
@@ -76,7 +75,7 @@ namespace Fsel.Course.Lms.Application.Queries.FinalTestQuery
                 methodResult.AddErrorBadRequest(nameof(EnumFinalTestErrorCode.FinalTestsNotExist));
                 return methodResult;
             }
-            var checkDone = finalTestResult != null && finalTestResult.Status == EnumResultStatus.Done;
+            var checkDone = (finalTest.FinalTestResults != null && finalTest.FinalTestResults.Count > 1) && finalTest.FinalTestResults.All(x => x.Status == EnumResultStatus.Done);
             var finalTestModel = new FinalTestModel
             {
                 Id = finalTest.Id,
@@ -112,18 +111,19 @@ namespace Fsel.Course.Lms.Application.Queries.FinalTestQuery
                         }).ToList()
                     }).ToList(),
                 }).ToList(),
-                FinalTestResult = finalTestResult == null ? null : new FinalTestResultModel
+                FinalTestResult = (finalTest.FinalTestResults != null && finalTest.FinalTestResults.Count > 0) ? finalTest.FinalTestResults.Select(x => new FinalTestResultModel
                 {
-                    Id = finalTestResult.Id,
-                    CorrectCount = finalTestResult.CorrectCount,
-                    CorrectTotal = finalTestResult.CorrectTotal,
-                    Percent = finalTestResult.Percent,
-                    Status = finalTestResult.Status,
-                    SkillScores = finalTestResult.SkillScores,
-                    FinalTestId = finalTestResult.FinalTestId,
-                    StudentId = finalTestResult.StudentId,
-                    CourseId = finalTestResult.CourseId,
-                }
+                    Id = x.Id,
+                    CorrectCount = x.CorrectCount,
+                    CorrectTotal = x.CorrectTotal,
+                    Percent = x.Percent,
+                    Status = x.Status,
+                    CreatedDate = x.CreatedDate,
+                    FinalTestId = x.FinalTestId,
+                    StudentId = x.StudentId,
+                    CourseId = x.CourseId,
+                    SkillScores = x.SkillScores
+                }).FirstOrDefault() : null
             };
             methodResult.Result = finalTestModel;
             methodResult.StatusCode = StatusCodes.Status200OK;

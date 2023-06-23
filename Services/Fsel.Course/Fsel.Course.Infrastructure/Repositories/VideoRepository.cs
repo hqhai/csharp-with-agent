@@ -59,6 +59,8 @@ namespace Fsel.Course.Infrastructure.Repositories
                                     VideoFilePath = i.VideoFilePath,
                                     IsActive = i.LessonVideos.Any(),
                                     TeacherId = i.TeacherId,
+                                    SubFilePath = i.SubFilePath,
+                                    Type = i.Type,
                                     CourseLevel = i.CourseLevel,
                                     VideoTimeCodes = i.VideoTimeCodes.Where(x => !x.IsDeleted).OrderBy(x => x!.DisplayTime).Select(x => new VideoTimeCodeModel
                                     {

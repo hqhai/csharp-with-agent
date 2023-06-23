@@ -9,19 +9,13 @@ namespace Fsel.Course.Domain.Models.EntityModels
     public class MockTestModel : BaseModel
     {
         public string? Name { get; set; }
-
         public bool IsActive { get; set; }
-
         public EnumCourseType CourseType { get; set; }
-
         public EnumMockTestType MockTestType { get; set; }
         public long TotalQuestion { get; set; }
         public IList<MockTestSectionModel>? MockTestSections { get; set; }
-
         public IList<SectionGroupModel>? SectionGroups { get; set; }
-
         public MockTestResultModel? MockTestResult { get; set; }
-
         public EnumCourseSkill? Skill { get; set; }
     }
 }
