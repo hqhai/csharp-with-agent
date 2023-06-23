@@ -5,6 +5,7 @@ using System.Security.Claims;
 using System.Text;
 using Fsel.Common.ActionResults;
 using Fsel.Common.Helpers;
+using Fsel.Identity.Application.Services.CourseService;
 using Fsel.Identity.Application.Services.InteractionService;
 using Fsel.Identity.Application.Services.TrainingService;
 using Fsel.Identity.Domain.Entities;
@@ -31,6 +32,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
         private readonly UserManager<User> _userManager;
         private readonly IInteractionService _interactionService;
         private readonly ITrainingService _trainingService;
+        private readonly ICourseService _courseService;
         private readonly IUserTokenRepository _userTokenRepository;
         private readonly IHumanRepository _humanRepository;
         private readonly AppSetting _appSetting;
@@ -38,6 +40,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
         public GenerateTokenCommandHandler(UserManager<User> userManager,
             IInteractionService interactionService,
             ITrainingService trainingService,
+            ICourseService courseService,
             IUserTokenRepository userTokenRepository,
             IHumanRepository humanRepository,
             AppSetting appSetting)
@@ -45,6 +48,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             _userManager = userManager;
             _interactionService = interactionService;
             _trainingService = trainingService;
+            _courseService = courseService;
             _userTokenRepository = userTokenRepository;
             _humanRepository = humanRepository;
             _appSetting = appSetting;
@@ -54,7 +58,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<TokenModel> methodResult = new MethodResult<TokenModel>();
-            var user = await _userManager.Users.Include(x => x.Human).ThenInclude(x => x.Student).FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
+            var user = await _userManager.Users.Include(x => x.Human).ThenInclude(x => x!.Student).FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
             if (user == null)
             {
                 methodResult.StatusCode = StatusCodes.Status401Unauthorized;
@@ -115,6 +119,8 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                 tokenLogin.ClassId = await GetClassId(user.Id);
                 var classStudent = await _trainingService.GetClassByStudentId(user.Human?.Student?.Id ?? default);
                 tokenLogin.ClassCode = classStudent?.Content?.Result?.Code;
+                var isPlacementTest = await _courseService.IsPlacementTestAsync(user.Human?.Student?.Id ?? default);
+                tokenLogin.IsPlacementTest = isPlacementTest?.Content?.Result;
                 var isSurvey = await _interactionService.IsSurveyCompleted(Guid.Parse(request.Id ?? string.Empty));
                 if (isSurvey.IsSuccessStatusCode)
                 {
