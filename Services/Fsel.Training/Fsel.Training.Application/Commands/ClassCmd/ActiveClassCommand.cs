@@ -50,7 +50,7 @@ namespace Fsel.Training.Application.Commands.ClassCmd
             var courseTimeConfigResult = await _systemService.GetCourseTimeConfigByCourseId(courseIds);
             if (!courseTimeConfigResult.IsSuccessStatusCode)
             {
-                methodResult.AddError(courseTimeConfigResult.Error?.Content, courseTimeConfigResult.StatusCode);
+                methodResult.AddError(courseTimeConfigResult.Error);
                 return methodResult;
             }
             var courseTimeConfig = courseTimeConfigResult.Content?.Result;

@@ -93,7 +93,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
                     var activeClassResult = await _trainingService.ActiveClass(order.ClassId);
                     if (!activeClassResult.IsSuccessStatusCode)
                     {
-                        methodResult.AddError(activeClassResult.Error?.Content, activeClassResult.StatusCode);
+                        methodResult.AddError(activeClassResult.Error);
                         return methodResult;
                     }
                 }
