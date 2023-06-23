@@ -55,6 +55,9 @@ namespace Fsel.Training.Application.Queries.Schedule
                                         StartTime = x.StartTime,
                                         EndTime = x.EndTime,
                                         TeacherId = x.TeacherId,
+                                        TeacherFreeTimes = x.TeacherFreeTimes.Select(x => new TeacherFreeTimeModel
+                                        {
+                                        }).ToList(),
                                     });
 
             if (request.StartTime != null)
