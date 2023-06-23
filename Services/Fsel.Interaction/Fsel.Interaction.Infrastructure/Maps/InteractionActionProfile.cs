@@ -6,12 +6,14 @@ namespace Fsel.Interaction.Infrastructure.Maps
     using Fsel.Core.Extensions;
     using Fsel.Interaction.Domain.Entities;
     using Fsel.Interaction.Domain.Models.CommandModels.Actions;
+    using Fsel.Interaction.Domain.Models.EntityModels;
 
     public class InteractionActionProfile : Profile
     {
         public InteractionActionProfile()
         {
             CreateMap<CreateActionCommandModel, InteractionAction>().IgnoreAllNonExisting();
+            CreateMap<InteractionAction, InteractionActionModel>().IgnoreAllNonExisting();
         }
     }
 }

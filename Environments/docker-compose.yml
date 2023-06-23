@@ -23,6 +23,7 @@ services:
             - SERVICES_SenderApiUrl=http://42.96.58.145:5206/api/v1
             - SERVICES_InteractionApiUrl=http://42.96.58.145:5208/api/
             - SERVICES_ClassApiUrl=http://42.96.58.145:5207/api/v1
+            - SERVICES_OrderApiUrl=http://42.96.58.145:5209/api/v1
         ports:
             - 5201:80
             - 7201:443
@@ -49,6 +50,7 @@ services:
             - SERVICES_SenderApiUrl=http://42.96.58.145:5206/api/v1
             - SERVICES_InteractionApiUrl=http://42.96.58.145:5208/api/
             - SERVICES_ClassApiUrl=http://42.96.58.145:5207/api/v1
+            - SERVICES_OrderApiUrl=http://42.96.58.145:5209/api/v1
         ports:
             - 5202:80
             - 7202:443
@@ -92,6 +94,8 @@ services:
             - JWT__REFRESHTOKENVALIDITYINDAYS=7
             - SERVICES_UserApiUrl=http://42.96.58.145:5202/api/v1
             - SERVICES_ClassApiUrl=http://42.96.58.145:5207/api/v1
+            - SERVICES_InteractionApiUrl=http://42.96.58.145:5208/api/v1
+            - SERVICES_SystemApiUrl=http://42.96.58.145:52010/api/v1
         ports:
             - 5204:80
             - 7204:443
@@ -178,6 +182,7 @@ services:
             - JWT__SUBJECT=baseWebApiSubject
             - JWT__TOKENVALIDITYINMINUTES=1440
             - JWT__REFRESHTOKENVALIDITYINDAYS=7
+            - SERVICES_UserApiUrl=http://42.96.58.145:5202/api/v1
         ports:
             - 5208:80
             - 7208:443
@@ -199,9 +204,32 @@ services:
             - JWT__TOKENVALIDITYINMINUTES=1440
             - JWT__REFRESHTOKENVALIDITYINDAYS=7
             - SERVICES_UserApiUrl=http://42.96.58.145:5202/api/v1
+            - SERVICES_ClassApiUrl=http://42.96.58.145:5207/api/v1
+            - SERVICES_LmsCourseApiUrl=http://42.96.58.145:5204/api/v1
         ports:
             - 5209:80
             - 7209:443
+    system.service:
+        container_name: system.service
+        hostname: SystemService
+        image: ${DOCKER_REGISTRY-}system-microservice:v1
+        build:
+            context: ./../
+            dockerfile: Environments/Testing/System.Testing.Dockerfile
+        environment:
+            - ASPNETCORE_ENVIRONMENT=Testing
+            - CONNECTIONSTRINGS__DEFAULTCONNECTION=Data Source=183.91.11.235;Initial Catalog=env-dev.system-service;User Id=sa;Password=FselTech@2023;TrustServerCertificate=true;
+            - SERVICENAME=System
+            - JWT__SECRETKEY=JsonWebApiTokenWithSwaggerAuthorizationAuthenticationAspNetCore
+            - JWT__ISSUER=baseWebApiIssuer
+            - JWT__AUDIENCE=baseWebApiAudience
+            - JWT__SUBJECT=baseWebApiSubject
+            - JWT__TOKENVALIDITYINMINUTES=1440
+            - JWT__REFRESHTOKENVALIDITYINDAYS=7
+            - SERVICES_UserApiUrl=http://42.96.58.145:5202/api/v1
+        ports:
+            - 52010:80
+            - 7010:443
     gateway.service:
         container_name: gateway.service
         hostname: GatewayService
