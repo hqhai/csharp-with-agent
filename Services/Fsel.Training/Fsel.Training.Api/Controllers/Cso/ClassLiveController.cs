@@ -26,12 +26,24 @@ namespace Fsel.Training.Api.Controllers.Cso
         }
 
         /// <summary>
-        /// Search Course
+        /// Search  class live by cso
         /// </summary>
         [HttpGet]
         [ProducesResponseType(typeof(MethodResult<PagingItemsModel<ClassLiveCalendarModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> Search([FromQuery] SearchClassLiveByCsoQuery query)
+        {
+            MethodResult<PagingItemsModel<ClassLiveCalendarModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Search Course
+        /// </summary>
+        [HttpGet]
+        [ProducesResponseType(typeof(MethodResult<PagingItemsModel<ClassLiveCalendarModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> SearchTeacherLive([FromQuery] SearchManageTeacherLiveScheduleQuery query)
         {
             MethodResult<PagingItemsModel<ClassLiveCalendarModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
@@ -46,19 +58,6 @@ namespace Fsel.Training.Api.Controllers.Cso
         public async Task<IActionResult> Get([FromRoute] Guid id)
         {
             MethodResult<ClassLiveCalendarModel> commandResult = await _mediator.Send(new GetClassLiveByCsoQuery { Id = id }).ConfigureAwait(false);
-            return commandResult.GetActionResult();
-        }
-
-        /// <summary>
-        /// Get class live priority
-        /// </summary>
-
-        [HttpGet]
-        [ProducesResponseType(typeof(MethodResult<IList<TeacherFreeTimeModel>>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> Get()
-        {
-            MethodResult<IList<TeacherFreeTimeModel>> commandResult = await _mediator.Send(new SearchPriorityCalenderQuery()).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
 

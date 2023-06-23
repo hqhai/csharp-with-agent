@@ -13,6 +13,7 @@ namespace Fsel.Training.Application.Queries.Schedule
     using Fsel.Core.Base.BaseModels;
     using Fsel.Core.Extensions;
     using Fsel.Course.Application.Services.UserServices.Models;
+    using Fsel.Training.Application.Services.SystemServices;
     using Fsel.Training.Application.Services.UserServices;
     using Fsel.Training.Domain.IRepositories;
     using Fsel.Training.Domain.Models.EntityModels;
@@ -29,11 +30,13 @@ namespace Fsel.Training.Application.Queries.Schedule
     {
         private readonly ITeacherFreeTimeRepository _teacherFreeTimeRepository;
         private readonly IUserService _userService;
+        private readonly ISystemService _systemService;
 
-        public SearchPriorityCalenderQueryHandler(ITeacherFreeTimeRepository teacherFreeTimeRepository, IUserService userService)
+        public SearchPriorityCalenderQueryHandler(ITeacherFreeTimeRepository teacherFreeTimeRepository, IUserService userService, ISystemService systemService)
         {
             _teacherFreeTimeRepository = teacherFreeTimeRepository;
             _userService = userService;
+            _systemService = systemService;
         }
 
         public async Task<MethodResult<PagingItemsModel<TeacherFreeTimeModel>>> Handle(SearchPriorityCalenderQuery request, CancellationToken cancellationToken)
@@ -90,6 +93,19 @@ namespace Fsel.Training.Application.Queries.Schedule
                 var teacher = teachers!.FirstOrDefault(x => x.Id == item.TeacherId);
                 item.TeacherName = teacher?.Human?.FullName;
             }
+            var timeFrameResult = await _systemService.GetTimeFramByIdsAsync(priorityCalenderQuery.Select(x => x.LiveTimeFrameId).ToList());
+            var timeFrames = timeFrameResult.Content?.Result;
+
+            foreach (var item in lists)
+            {
+                item.TimeFrameEndTime = timeFrames!.EndTime;
+                item.TimeFrameStartTime = timeFrames!.StartTime;
+            }
+
+            /*if (request.TimeFrameStartTime != null)
+            {
+                timeFrames = .Where(m => m.StartTime == request.StartTime);
+            }*/
             methodResult.Result = new PagingItemsModel<TeacherFreeTimeModel>(lists, request, totalItem);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;

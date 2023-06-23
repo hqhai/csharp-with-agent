@@ -13,5 +13,8 @@ namespace Fsel.Training.Domain.Models.QueryModels
         public EnumDayOfWeek? DayOfWeek { get; set; }
 
         public int? Priority { get; set; }
+
+        public DateTime? TimeFrameEndTime { get; set; }
+        public DateTime? TimeFrameStartTime { get; set; }
     }
 }
