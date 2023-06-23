@@ -3,12 +3,12 @@
 namespace Fsel.Course.Domain.Models.CommandModels.CourseTeachers
 {
     using System;
-    using Fsel.Course.Domain.Enums.ErrorCodes;
-    using System.ComponentModel.DataAnnotations;
 
     public class CreateCourseTeacherCommandModel
     {
         public Guid TeacherId { get; set; }
+
+        public string? AvatarPath { get; set; }
 
         public string? Nationality { get; set; }
 
