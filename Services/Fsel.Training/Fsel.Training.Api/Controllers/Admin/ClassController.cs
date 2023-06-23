@@ -49,12 +49,12 @@ namespace Fsel.Training.Api.Controllers.Admin
             return commandResult.GetActionResult();
         }
 
-        [HttpGet("get-students-equal-level-package/{id}")]
-        [ProducesResponseType(typeof(MethodResult<List<ClassModel>>), (int)HttpStatusCode.OK)]
+        [HttpGet("get-classes-equal-level-package/{id}")]
+        [ProducesResponseType(typeof(MethodResult<IList<ClassModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetStudentEqualLevelAndPackage([FromRoute] Guid id)
+        public async Task<IActionResult> GetClassesEqualLevelAndPackage([FromRoute] Guid id)
         {
-            MethodResult<IList<ClassModel>> commandResult = await _mediator.Send(new GetStudentEqualLevelAndPackageQuery { ClassId = id }).ConfigureAwait(false);
+            MethodResult<IList<ClassModel>> commandResult = await _mediator.Send(new GetClassesEqualLevelAndPackageQuery { ClassId = id }).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
 
@@ -64,6 +64,16 @@ namespace Fsel.Training.Api.Controllers.Admin
         public async Task<IActionResult> TransferStudent([FromQuery] TransferStudentCommand command)
         {
             MethodResult<bool> commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+
+        [HttpGet("get-students-by-class-id/{id}")]
+        [ProducesResponseType(typeof(MethodResult<IList<ClassStudentModel>?>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetStudentsByClassId([FromRoute] Guid id)
+        {
+            MethodResult<IList<ClassStudentModel>?> commandResult = await _mediator.Send(new GetStudentsByClassIdQuery { ClassId = id }).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
     }
