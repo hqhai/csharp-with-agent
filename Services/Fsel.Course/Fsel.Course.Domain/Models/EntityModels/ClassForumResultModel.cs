@@ -5,7 +5,9 @@ namespace Fsel.Course.Domain.Models.EntityModels
     using System;
     using System.Collections.Generic;
     using Fsel.Core.Base.BaseModels;
+    using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums;
+    using Fsel.Shared.Enums;
 
     public class ClassForumResultModel : BaseModel
     {
@@ -28,7 +30,12 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public int? LikeNumber { get; set; }
 
         public string? FeedBackNote { get; set; }
+
         public bool? IsFlagged { get; set; }
+
+        public bool? IsLiked { get; set; }
+
+        public EnumCourseLevel CourseLevel { get; set; }
 
         public ClassForumModel? ClassForum { get; set; }
 

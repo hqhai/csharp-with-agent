@@ -17,8 +17,8 @@ services:
             - JWT__SUBJECT=baseWebApiSubject
             - JWT__TOKENVALIDITYINMINUTES=1440
             - JWT__REFRESHTOKENVALIDITYINDAYS=7
-            - SERVICES_UserApiUrl=http://202.134.19.161:5202/api/v1
-            - SERVICES_CourseApiUrl=http://202.134.19.161:5203/api/v1
+            - SERVICES_UserApiUrl=http://42.96.58.145:5202/api/v1
+            - SERVICES_CourseApiUrl=http://42.96.58.145:5203/api/v1
         ports:
             - 5207:80
             - 7207:443
