@@ -80,7 +80,7 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
             var lessonResults = await _lessonResultRepository.Queryable.Where(x => x.UnitId == request.UnitId && x.CourseId == request.CourseId && x.StudentId == studentId).ToListAsync(cancellationToken);
             if (lessonResults == null || lessonResults.Count == 0)
             {
-                lessonResults = unit.UnitLessons.Select((x, index) => new LessonResult
+                lessonResults = unit.UnitLessons.OrderBy(x => x.DisplayOrder).Select((x, index) => new LessonResult
                 {
                     UnitId = x.UnitId,
                     LessonId = x.LessonId,

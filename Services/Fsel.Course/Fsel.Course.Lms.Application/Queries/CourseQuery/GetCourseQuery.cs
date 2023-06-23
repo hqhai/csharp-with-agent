@@ -74,137 +74,137 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
                              .Include(x => x.CourseUnitMockTests)
                              .FirstOrDefaultAsync(x => x.Id == @class.CourseId, cancellationToken);
 
-            if (course != null)
+            if (course == null)
             {
-                if (course.CourseResults.Count == 0)
-                {
-                    course.CourseResults.Add(new CourseResult
-                    {
-                        StudentId = student.Id,
-                        CourseId = @class.CourseId,
-                        Status = EnumCourseStatus.Active
-                    });
-                    var unitIds = course.CourseUnitMockTests.Where(x => x.UnitId != null).OrderBy(x => x.DisplayOrder).Select(x => x.UnitId).ToList();
-                    var finalTestIds = course.CourseUnitMockTests.Where(x => x.FinalTestId != null).Select(x => x.FinalTestId).ToList();
-                    var mockTestIds = course.CourseUnitMockTests.Where(x => x.MockTestId != null).Select(x => x.MockTestId).ToList();
-                    if (unitIds.Count > 0)
-                    {
-                        course.UnitResults = unitIds.Select((x, index) => new UnitResult
-                        {
-                            UnitId = x ?? default,
-                            StudentId = student.Id,
-                            Status = index == 0 ? EnumResultStatus.Process : EnumResultStatus.Unfinished
-                        }).ToList();
-                    }
-                    if (finalTestIds.Count > 0)
-                    {
-                        course.FinalTestResults = finalTestIds.Select(x => new FinalTestResult
-                        {
-                            FinalTestId = x ?? default,
-                            StudentId = student.Id,
-                            Status = EnumResultStatus.Unfinished
-                        }).ToList();
-                    }
-                    if (mockTestIds.Count > 0)
-                    {
-                        course.MockTestResults = mockTestIds.Select(x => new MockTestResult
-                        {
-                            MockTestId = x ?? default,
-                            StudentId = student.Id,
-                            Status = EnumResultStatus.Unfinished
-                        }).ToList();
-                    }
-                    course = _courseRepository.Update(course);
-                    await _courseRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
-                }
-                course = await _courseRepository.Queryable
-                            .Include(x => x.CourseResults.Where(y => y.StudentId == student.Id))
-                            .Include(x => x.CourseUnitMockTests)
-                            .ThenInclude(x => x.Unit)
-                            .ThenInclude(x => x!.UnitResults.Where(y => y.StudentId == student.Id))
-                            .Include(x => x.CourseUnitMockTests)
-                            .ThenInclude(x => x.MockTest)
-                            .ThenInclude(x => x!.MockTestResults.Where(y => y.StudentId == student.Id))
-                            .Include(x => x.CourseUnitMockTests)
-                            .ThenInclude(x => x.FinalTest)
-                            .ThenInclude(x => x!.FinalTestResults.Where(y => y.StudentId == student.Id))
-                            .Include(x => x.CourseTeachers)
-                            .Where(x => x.Id == @class.CourseId)
-                            .AsNoTracking()
-                            .FirstOrDefaultAsync(cancellationToken);
-                var courseModel = new CourseModel
-                {
-                    Id = course!.Id,
-                    Name = course.Name,
-                    Code = course.Code,
-                    InstructionContent = course.InstructionContent,
-                    CourseLevel = course.CourseLevel,
-                    CourseUnitMockTests = course.CourseUnitMockTests.OrderBy(x => x!.DisplayOrder).Select(x => new CourseUnitMockTestModel
-                    {
-                        DisplayOrder = x.DisplayOrder,
-                        CourseId = x.CourseId,
-                        FinalTestId = x.FinalTestId,
-                        MockTestId = x.MockTestId,
-                        UnitId = x.UnitId,
-                        FinalTest = x.FinalTest != null ? new FinalTestModel
-                        {
-                            Id = x.FinalTest.Id,
-                            Name = x.FinalTest.Name,
-                            IsActive = x.FinalTest.CourseUnitMockTests.Any(),
-                            FinalTestLevel = x.FinalTest.FinalTestLevel,
-                            CreatedDate = x.FinalTest.CreatedDate,
-                            CreatedFullName = x.FinalTest.CreatedFullName,
-                            ExecutionTime = x.FinalTest.ExecutionTime,
-                            FinalTestResult = _mapper.Map<FinalTestResultModel>(x.FinalTest.FinalTestResults.FirstOrDefault())
-                        } : null,
-                        MockTest = x.MockTest != null ? new MockTestModel
-                        {
-                            Id = x.MockTest.Id,
-                            Name = x.MockTest.Name,
-                            MockTestType = x.MockTest.MockTestType,
-                            CourseType = x.MockTest.CourseType,
-                            CreatedDate = x.MockTest.CreatedDate,
-                            CreatedFullName = x.MockTest.CreatedFullName,
-                            CreatedUserId = x.MockTest.CreatedUserId,
-                            IsActive = x.MockTest.CourseUnitMockTests.Any(),
-                            MockTestResult = _mapper.Map<MockTestResultModel>(x.MockTest.MockTestResults.FirstOrDefault())
-                        } : null,
-                        Unit = x.Unit != null ? new UnitModel
-                        {
-                            Id = x.Unit.Id,
-                            Name = x.Unit.Name,
-                            Code = x.Unit.Code,
-                            CourseLevel = x.Unit.CourseLevel,
-                            CreatedDate = x.Unit.CreatedDate,
-                            CreatedFullName = x.Unit.CreatedFullName,
-                            CreatedUserId = x.Unit.CreatedUserId,
-                            IsActive = x.Unit.CourseUnitMockTests.Any(),
-                            UnitResult = _mapper.Map<UnitResultModel>(x.Unit.UnitResults.FirstOrDefault())
-                        } : null,
-                        Type = x.FinalTest != null ? nameof(x.FinalTest) : x.MockTest != null ? nameof(x.MockTest) : x.Unit != null ? nameof(x.Unit) : null
-                    }).ToList(),
-                    CourseTeachers = _mapper.Map<List<CourseTeacherModel>>(course.CourseTeachers),
-                    CourseResult = _mapper.Map<CourseResultModel>(course.CourseResults.FirstOrDefault()),
-                };
-
-                var teachersResult = await _userService.GetTeacherByIdsAsync(new GetTeacherByIdsQueryModel { Ids = course?.CourseTeachers?.Select(x => x.TeacherId).ToList() });
-                var teachers = teachersResult?.Content?.Result;
-
-                if (teachersResult != null && teachersResult.IsSuccessStatusCode && teachers != null && course?.CourseTeachers != null)
-                {
-                    foreach (var item in courseModel.CourseTeachers)
-                    {
-                        var teacher = teachers.FirstOrDefault(x => x.Id == item.TeacherId);
-                        item.FullName = teacher?.Human?.FullName;
-                        item.AvatarPath = teacher?.Human?.AvatarPath;
-                    }
-                }
-
-                methodResult.Result = courseModel;
+                methodResult.Result = default;
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
             }
-            methodResult.Result = default;
+            if (course.CourseResults.Count == 0)
+            {
+                course.CourseResults.Add(new CourseResult
+                {
+                    StudentId = student.Id,
+                    CourseId = @class.CourseId,
+                    Status = EnumCourseStatus.Active
+                });
+                var unitIds = course.CourseUnitMockTests.Where(x => x.UnitId != null).OrderBy(x => x.DisplayOrder).Select(x => x.UnitId).ToList();
+                var finalTestIds = course.CourseUnitMockTests.Where(x => x.FinalTestId != null).Select(x => x.FinalTestId).ToList();
+                var mockTestIds = course.CourseUnitMockTests.Where(x => x.MockTestId != null).Select(x => x.MockTestId).ToList();
+                if (unitIds.Count > 0)
+                {
+                    course.UnitResults = unitIds.Select((x, index) => new UnitResult
+                    {
+                        UnitId = x ?? default,
+                        StudentId = student.Id,
+                        Status = index == 0 ? EnumResultStatus.Process : EnumResultStatus.Unfinished
+                    }).ToList();
+                }
+                if (finalTestIds.Count > 0)
+                {
+                    course.FinalTestResults = finalTestIds.Select(x => new FinalTestResult
+                    {
+                        FinalTestId = x ?? default,
+                        StudentId = student.Id,
+                        Status = EnumResultStatus.Unfinished
+                    }).ToList();
+                }
+                if (mockTestIds.Count > 0)
+                {
+                    course.MockTestResults = mockTestIds.Select(x => new MockTestResult
+                    {
+                        MockTestId = x ?? default,
+                        StudentId = student.Id,
+                        Status = EnumResultStatus.Unfinished
+                    }).ToList();
+                }
+                course = _courseRepository.Update(course);
+                await _courseRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+            }
+            course = await _courseRepository.Queryable
+                        .Include(x => x.CourseResults.Where(y => y.StudentId == student.Id))
+                        .Include(x => x.CourseUnitMockTests)
+                        .ThenInclude(x => x.Unit)
+                        .ThenInclude(x => x!.UnitResults.Where(y => y.StudentId == student.Id))
+                        .Include(x => x.CourseUnitMockTests)
+                        .ThenInclude(x => x.MockTest)
+                        .ThenInclude(x => x!.MockTestResults.Where(y => y.StudentId == student.Id))
+                        .Include(x => x.CourseUnitMockTests)
+                        .ThenInclude(x => x.FinalTest)
+                        .ThenInclude(x => x!.FinalTestResults.Where(y => y.StudentId == student.Id))
+                        .Include(x => x.CourseTeachers)
+                        .Where(x => x.Id == @class.CourseId)
+                        .AsNoTracking()
+                        .FirstOrDefaultAsync(cancellationToken);
+            var courseModel = new CourseModel
+            {
+                Id = course!.Id,
+                Name = course.Name,
+                Code = course.Code,
+                InstructionContent = course.InstructionContent,
+                CourseLevel = course.CourseLevel,
+                CourseUnitMockTests = course.CourseUnitMockTests.OrderBy(x => x!.DisplayOrder).Select(x => new CourseUnitMockTestModel
+                {
+                    DisplayOrder = x.DisplayOrder,
+                    CourseId = x.CourseId,
+                    FinalTestId = x.FinalTestId,
+                    MockTestId = x.MockTestId,
+                    UnitId = x.UnitId,
+                    FinalTest = x.FinalTest != null ? new FinalTestModel
+                    {
+                        Id = x.FinalTest.Id,
+                        Name = x.FinalTest.Name,
+                        IsActive = x.FinalTest.CourseUnitMockTests.Any(),
+                        FinalTestLevel = x.FinalTest.FinalTestLevel,
+                        CreatedDate = x.FinalTest.CreatedDate,
+                        CreatedFullName = x.FinalTest.CreatedFullName,
+                        ExecutionTime = x.FinalTest.ExecutionTime,
+                        FinalTestResult = _mapper.Map<FinalTestResultModel>(x.FinalTest.FinalTestResults.FirstOrDefault())
+                    } : null,
+                    MockTest = x.MockTest != null ? new MockTestModel
+                    {
+                        Id = x.MockTest.Id,
+                        Name = x.MockTest.Name,
+                        MockTestType = x.MockTest.MockTestType,
+                        CourseType = x.MockTest.CourseType,
+                        CreatedDate = x.MockTest.CreatedDate,
+                        CreatedFullName = x.MockTest.CreatedFullName,
+                        CreatedUserId = x.MockTest.CreatedUserId,
+                        IsActive = x.MockTest.CourseUnitMockTests.Any(),
+                        MockTestResult = _mapper.Map<MockTestResultModel>(x.MockTest.MockTestResults.FirstOrDefault())
+                    } : null,
+                    Unit = x.Unit != null ? new UnitModel
+                    {
+                        Id = x.Unit.Id,
+                        Name = x.Unit.Name,
+                        Code = x.Unit.Code,
+                        CourseLevel = x.Unit.CourseLevel,
+                        CreatedDate = x.Unit.CreatedDate,
+                        CreatedFullName = x.Unit.CreatedFullName,
+                        CreatedUserId = x.Unit.CreatedUserId,
+                        IsActive = x.Unit.CourseUnitMockTests.Any(),
+                        UnitResult = _mapper.Map<UnitResultModel>(x.Unit.UnitResults.FirstOrDefault())
+                    } : null,
+                    Type = x.FinalTest != null ? nameof(x.FinalTest) : x.MockTest != null ? nameof(x.MockTest) : x.Unit != null ? nameof(x.Unit) : null
+                }).ToList(),
+                CourseTeachers = _mapper.Map<List<CourseTeacherModel>>(course.CourseTeachers),
+                CourseResult = _mapper.Map<CourseResultModel>(course.CourseResults.FirstOrDefault()),
+            };
+
+            var teachersResult = await _userService.GetTeacherByIdsAsync(new GetTeacherByIdsQueryModel { Ids = course?.CourseTeachers?.Select(x => x.TeacherId).ToList() });
+            var teachers = teachersResult?.Content?.Result;
+
+            if (teachersResult != null && teachersResult.IsSuccessStatusCode && teachers != null && course?.CourseTeachers != null)
+            {
+                foreach (var item in courseModel.CourseTeachers)
+                {
+                    var teacher = teachers.FirstOrDefault(x => x.Id == item.TeacherId);
+                    item.FullName = teacher?.Human?.FullName;
+                    item.AvatarPath = teacher?.Human?.AvatarPath;
+                }
+            }
+
+            methodResult.Result = courseModel;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }
