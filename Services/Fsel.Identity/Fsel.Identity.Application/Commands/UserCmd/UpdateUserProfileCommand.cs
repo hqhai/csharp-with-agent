@@ -107,9 +107,9 @@ namespace Fsel.Identity.Application.Commands.UserCmd
                 {
                     if (student.ParentStudents == null || student.ParentStudents.Count == 0)
                     {
-                        if (request.Parent.FullName == null)
+                        if (string.IsNullOrEmpty(request.Parent.FullName))
                         {
-                            methodResult.AddErrorBadRequest(nameof(EnumParentErrorCode.ParentFullNameNull));
+                            methodResult.AddErrorBadRequest(nameof(EnumParentErrorCode.ParentFullNameNotNull));
                             return methodResult;
                         }
 
