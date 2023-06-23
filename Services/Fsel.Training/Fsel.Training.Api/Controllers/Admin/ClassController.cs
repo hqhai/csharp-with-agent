@@ -12,6 +12,8 @@ namespace Fsel.Training.Api.Controllers.Admin
     using Microsoft.AspNetCore.Mvc;
     using Fsel.Training.Domain.Models.EntityModels;
     using Fsel.Training.Application.Commands.ClassCmd;
+    using Fsel.Training.Application.Queries.ClassQuery.Admin;
+    using Fsel.Training.Application.Commands.ClassStudentCmd;
 
     [ApiVersion(Settings.APIVersion)]
     [Route(Settings.APIDefaultRoute + "/admin/class")]
@@ -44,6 +46,24 @@ namespace Fsel.Training.Api.Controllers.Admin
         public async Task<IActionResult> CreateClass([FromBody] CreateClassCommand command)
         {
             MethodResult<ClassModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        [HttpGet("get-students-equal-level-package/{id}")]
+        [ProducesResponseType(typeof(MethodResult<List<ClassModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetStudentEqualLevelAndPackage([FromRoute] Guid id)
+        {
+            MethodResult<IList<ClassModel>> commandResult = await _mediator.Send(new GetStudentEqualLevelAndPackageQuery { ClassId = id }).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        [HttpPut]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> TransferStudent([FromQuery] TransferStudentCommand command)
+        {
+            MethodResult<bool> commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
     }

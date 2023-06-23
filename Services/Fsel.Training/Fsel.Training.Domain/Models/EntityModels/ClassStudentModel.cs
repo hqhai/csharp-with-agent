@@ -10,5 +10,6 @@ namespace Fsel.Training.Domain.Models.EntityModels
         public string? StudentName { get; set; }
         public string? PhoneNumber { get; set; }
         public string? Email { get; set; }
+        public string? Code { get; set; }
     }
 }
