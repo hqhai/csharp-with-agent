@@ -37,7 +37,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             var methodResult = new MethodResult<bool>();
 
             var user = await _userManager.Users.Include(x => x.UserOtpCodes)
-                               .FirstOrDefaultAsync(x => x.UserOtpCodes.Where(x => x.Status == EnumStatusUser.New).Select(x => x.OTPCode).Contains(request.Otp), cancellationToken);
+                               .FirstOrDefaultAsync(x => x.UserOtpCodes.Any(x => x.Status == EnumStatusUser.New && x.OTPCode == request.Otp), cancellationToken);
 
             if (user == null)
             {
