@@ -96,7 +96,6 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
                 {
                     var teacher = teachers.FirstOrDefault(x => x.Id == item.TeacherId);
                     item.FullName = teacher?.Human?.FullName;
-                    item.AvatarPath = teacher?.Human?.AvatarPath;
                 }
             }
 
