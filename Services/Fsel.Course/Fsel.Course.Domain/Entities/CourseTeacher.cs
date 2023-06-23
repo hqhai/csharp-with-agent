@@ -17,6 +17,12 @@ namespace Fsel.Course.Domain.Entities
         public Guid CourseId { get; set; }
 
         /// <summary>
+        /// Ảnh đại diện
+        /// </summary>
+        [MaxLength(1000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
+        public string? AvatarPath { get; set; }
+
+        /// <summary>
         /// Quốc tịch
         /// </summary>
         [MaxLength(500, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
