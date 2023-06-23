@@ -10,5 +10,8 @@ namespace Fsel.Course.Lms.Application.Services.TrainingServices.Models
         public IList<CourseClassModel>? Courses { get; set; }
         public EnumCourseLevel? CourseLevel { get; set; }
         public Guid PackageId { get; set; }
+        public Guid? LiveTimeFrameId { get; set; }
+        public IList<DayOfWeek>? LiveDays { get; set; }
+
     }
 }

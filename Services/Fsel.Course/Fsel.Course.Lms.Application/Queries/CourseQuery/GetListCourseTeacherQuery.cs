@@ -21,6 +21,9 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
     {
         public EnumCourseLevel? CourseLevel { get; set; }
         public Guid PackageId { get; set; }
+        public Guid? LiveTimeFrameId { get; set; }
+        public IList<DayOfWeek>? LiveDays { get; set; }
+
     }
 
     public class GetListCourseTeacherQueryHandler : IRequestHandler<GetListCourseTeacherQuery, MethodResult<IList<CourseModel>>>
@@ -86,7 +89,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
             }
             var couseClasses = courses.Select(x => new CourseClassModel { CourseId = x.Id, Code = x.Code }).ToList();
 
-            var classcourses = await _trainingService.GetClassListStatusNewAsync(new GetClassListStatusNewModel { Courses = couseClasses, CourseLevel = request.CourseLevel, PackageId = request.PackageId });
+            var classcourses = await _trainingService.GetClassListStatusNewAsync(new GetClassListStatusNewModel { Courses = couseClasses, CourseLevel = request.CourseLevel, PackageId = request.PackageId, LiveTimeFrameId = request.LiveTimeFrameId, LiveDays = request.LiveDays });
 
             if (!classcourses.IsSuccessStatusCode || classcourses == null)
             {
