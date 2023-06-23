@@ -65,7 +65,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
             var classnew = await _trainingService.RegisterClassAsync(new RegisterClassCommandModel { Code = request.CodeClass, CourseId = request.CourseId, CourseLevel = request.CourseLevel, PackageId = request.PackageId, LiveDays = request.LiveDays, LiveTimeFrameId = request.LiveTimeFrameId });
             if (!classnew.IsSuccessStatusCode)
             {
-                methodResult.AddError(classnew.Error?.Content, classnew.StatusCode);
+                methodResult.AddError(classnew.Error);
                 return methodResult;
             }
             if (classnew?.Content?.Result == null)

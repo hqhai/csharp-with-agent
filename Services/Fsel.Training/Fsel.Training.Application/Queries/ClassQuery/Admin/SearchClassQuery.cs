@@ -19,11 +19,11 @@ namespace Fsel.Training.Application.Queries.ClassQuery.Admin
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class SearchClassByAdminQuery : SearchClassQueryModel, IRequest<MethodResult<PagingItemsModel<ClassSearchModel>>>
+    public class SearchClassQuery : SearchClassQueryModel, IRequest<MethodResult<PagingItemsModel<ClassSearchModel>>>
     {
     }
 
-    public class SearchClassByAdminQueryHandler : IRequestHandler<SearchClassByAdminQuery, MethodResult<PagingItemsModel<ClassSearchModel>>>
+    public class SearchClassQueryHandler : IRequestHandler<SearchClassQuery, MethodResult<PagingItemsModel<ClassSearchModel>>>
     {
         private readonly IClassRepository _classRepository;
         private readonly IUserService _userService;
@@ -31,7 +31,7 @@ namespace Fsel.Training.Application.Queries.ClassQuery.Admin
         private readonly ICourseService _courseService;
         private readonly IClassStudentRepository _classStudentRepository;
 
-        public SearchClassByAdminQueryHandler(IClassRepository classRepository, IUserService userService, IOrderService orderService, ICourseService courseService, IClassStudentRepository classStudentRepository)
+        public SearchClassQueryHandler(IClassRepository classRepository, IUserService userService, IOrderService orderService, ICourseService courseService, IClassStudentRepository classStudentRepository)
         {
             _classRepository = classRepository;
             _userService = userService;
@@ -40,7 +40,7 @@ namespace Fsel.Training.Application.Queries.ClassQuery.Admin
             _classStudentRepository = classStudentRepository;
         }
 
-        public async Task<MethodResult<PagingItemsModel<ClassSearchModel>>> Handle(SearchClassByAdminQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<PagingItemsModel<ClassSearchModel>>> Handle(SearchClassQuery request, CancellationToken cancellationToken)
         {
             MethodResult<PagingItemsModel<ClassSearchModel>> methodResult = new MethodResult<PagingItemsModel<ClassSearchModel>>();
             ArgumentNullException.ThrowIfNull(request);
