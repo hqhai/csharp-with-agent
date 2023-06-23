@@ -16,11 +16,11 @@ namespace Fsel.Interaction.Api.Controllers.Student
     [ApiVersion(Settings.APIVersion)]
     [Route(Settings.APIDefaultRoute + "/student/post")]
     [ApiController]
-    public class StudentPostController : ControllerBase
+    public class PostController : ControllerBase
     {
         private readonly IMediator _mediator;
 
-        public StudentPostController(IMediator mediator)
+        public PostController(IMediator mediator)
         {
             _mediator = mediator;
         }
@@ -31,7 +31,7 @@ namespace Fsel.Interaction.Api.Controllers.Student
         [HttpPost]
         [ProducesResponseType(typeof(MethodResult<PostModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> CreateStudentPost([FromBody] CreateStudentPostsCommand command)
+        public async Task<IActionResult> CreateStudentPost([FromBody] CreatePostCommand command)
         {
             MethodResult<PostModel> queryResult = await _mediator.Send(command).ConfigureAwait(false);
             return queryResult.GetActionResult();
@@ -43,7 +43,7 @@ namespace Fsel.Interaction.Api.Controllers.Student
         [HttpPut("{id}")]
         [ProducesResponseType(typeof(MethodResult<PostModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> UpdateStudentPost([FromRoute] Guid id, [FromBody] UpdateStudentPostsCommand command)
+        public async Task<IActionResult> UpdateStudentPost([FromRoute] Guid id, [FromBody] UpdatePostCommand command)
         {
             ArgumentNullException.ThrowIfNull(command);
             command.Id = id;
@@ -59,19 +59,19 @@ namespace Fsel.Interaction.Api.Controllers.Student
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> DeleteStudentPost([FromRoute] Guid id)
         {
-            MethodResult<bool> commandResult = await _mediator.Send(new DeleteStudentPostsCommand { Id = id }).ConfigureAwait(false);
+            MethodResult<bool> commandResult = await _mediator.Send(new DeletePostCommand { Id = id }).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
 
         /// <summary>
         /// Get posts by student ID
         /// </summary>
-        [HttpGet("posts-by-student/{id}/{status}")]
+        [HttpGet("posts-by-student/{status}")]
         [ProducesResponseType(typeof(MethodResult<List<PostModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetPostsByStudent([FromRoute] Guid id, EnumPostStatus status)
+        public async Task<IActionResult> GetPostsByStudent([FromRoute] EnumPostStatus status)
         {
-            var queryResult = await _mediator.Send(new GetPostsByStudentQuery { StudentId = id, Status = status }).ConfigureAwait(false);
+            var queryResult = await _mediator.Send(new GetPostsByStudentQuery {Status = status }).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
 

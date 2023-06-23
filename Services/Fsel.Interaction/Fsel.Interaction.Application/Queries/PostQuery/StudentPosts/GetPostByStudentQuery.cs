@@ -5,6 +5,8 @@ namespace Fsel.Interaction.Application.Queries.PostQuery
     using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Core.Base;
+    using Fsel.Interaction.Application.Services.UserServices;
     using Fsel.Interaction.Domain.Enums.ErrorCodes;
     using Fsel.Interaction.Domain.IRepositories;
     using Fsel.Interaction.Domain.Models.EntityModels;
@@ -16,7 +18,6 @@ namespace Fsel.Interaction.Application.Queries.PostQuery
 
     public class GetPostsByStudentQuery : GetPostsByStudentQueryModel, IRequest<MethodResult<List<PostModel>>>
     {
-        public Guid StudentId { get; set; }
         public EnumPostStatus? Status { get; set; }
     }
 
@@ -24,11 +25,13 @@ namespace Fsel.Interaction.Application.Queries.PostQuery
     {
         private readonly IPostRepository _postRepository;
         private readonly IMapper _mapper;
+        private readonly AuthContext _authContext;
 
-        public GetPostByStudentQueryHandler(IMapper mapper, IPostRepository postRepository)
+        public GetPostByStudentQueryHandler(IMapper mapper, IPostRepository postRepository, AuthContext authContext, IUserService userService)
         {
             _mapper = mapper;
             _postRepository = postRepository;
+            _authContext = authContext;
         }
 
         public async Task<MethodResult<List<PostModel>>> Handle(GetPostsByStudentQuery request, CancellationToken cancellationToken)
@@ -37,7 +40,7 @@ namespace Fsel.Interaction.Application.Queries.PostQuery
             var methodResult = new MethodResult<List<PostModel>>();
 
             var posts = await _postRepository.Queryable
-                                            .Where(x => x.UserId == request.StudentId && x.Status == request.Status)
+                                            .Where(x => x.UserId == _authContext.CurrentUserId && x.Status == request.Status)
                                             .ToListAsync(cancellationToken);
 
             if (posts == null || posts.Count == 0)

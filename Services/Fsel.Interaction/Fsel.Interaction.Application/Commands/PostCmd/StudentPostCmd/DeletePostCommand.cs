@@ -12,23 +12,23 @@ namespace Fsel.Interaction.Application.Commands.ActionCmd
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class DeleteStudentPostsCommand : IRequest<MethodResult<bool>>
+    public class DeletePostCommand : IRequest<MethodResult<bool>>
     {
         public Guid Id { get; set; }
     }
 
-    public class DeleteStudentPostsCommandCommandHandler : IRequestHandler<DeleteStudentPostsCommand, MethodResult<bool>>
+    public class DeletePostCommandHandler : IRequestHandler<DeletePostCommand, MethodResult<bool>>
     {
         private readonly IMapper _mapper;
         private readonly IPostRepository _iPostRepository;
 
-        public DeleteStudentPostsCommandCommandHandler(IMapper mapper, IPostRepository iPostRepository)
+        public DeletePostCommandHandler(IMapper mapper, IPostRepository iPostRepository)
         {
             _mapper = mapper;
             _iPostRepository = iPostRepository;
         }
 
-        public async Task<MethodResult<bool>> Handle(DeleteStudentPostsCommand request, CancellationToken cancellationToken)
+        public async Task<MethodResult<bool>> Handle(DeletePostCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<bool> methodResult = new MethodResult<bool>();

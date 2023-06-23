@@ -29,7 +29,6 @@ namespace Fsel.Interaction.Application.Queries.PostQuery
         private readonly AuthContext _authContext;
         private readonly IUserService _userService;
         private readonly ICommentRepository _commentRepository;
-        private IQueryable<PostSearchModel> sortedQuery2;
 
         public GetActivePostListQueryHandler
             (

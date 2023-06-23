@@ -6,56 +6,55 @@ namespace Fsel.Interaction.Application.Commands.ActionCmd
     using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Core.Base;
     using Fsel.Interaction.Domain.Entities;
-    using Fsel.Interaction.Domain.Enums.ErrorCodes;
     using Fsel.Interaction.Domain.IRepositories;
     using Fsel.Interaction.Domain.Models.CommandModels.Posts.StudentPost;
     using Fsel.Interaction.Domain.Models.EntityModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
-    using Microsoft.EntityFrameworkCore;
 
-    public class UpdateStudentPostsCommand : CreatePostCommandModel, IRequest<MethodResult<PostModel>>
+    public class CreatePostCommand : CreatePostCommandModel, IRequest<MethodResult<PostModel>>
     {
     }
 
-    public class UpdateStudentPostsCommandCommandHandler : IRequestHandler<UpdateStudentPostsCommand, MethodResult<PostModel>>
+    public class CreatePostCommandHandler : IRequestHandler<CreatePostCommand, MethodResult<PostModel>>
     {
         private readonly IMapper _mapper;
+        private readonly AuthContext _authContext;
         private readonly IPostRepository _iPostRepository;
 
-        public UpdateStudentPostsCommandCommandHandler(IMapper mapper, IPostRepository iPostRepository)
+        public CreatePostCommandHandler(IMapper mapper, AuthContext authContext, IPostRepository iPostRepository)
         {
             _mapper = mapper;
+            _authContext = authContext;
             _iPostRepository = iPostRepository;
         }
 
-        public async Task<MethodResult<PostModel>> Handle(UpdateStudentPostsCommand request, CancellationToken cancellationToken)
+        public async Task<MethodResult<PostModel>> Handle(CreatePostCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<PostModel> methodResult = new MethodResult<PostModel>();
 
-            #region Validation
+            Post studentPosts = _mapper.Map<Post>(request);
 
-            var studentPosts = await _iPostRepository.Queryable
-                                   .Include(e => e.PostTags.Where(n => !n.IsDeleted))
-                                   .FirstOrDefaultAsync(e => e.Id == request.Id, cancellationToken: cancellationToken);
-            if (studentPosts == null)
+            studentPosts.UserId = _authContext.CurrentUserId;
+
+            if (!studentPosts.IsValid())
             {
-                methodResult.AddErrorBadRequest(nameof(EnumPostErrorCode.PostNotExist), nameof(request.Id), request.Id);
+                methodResult.AddErrorBadRequest(studentPosts.ErrorMessages);
                 return methodResult;
             }
-            _mapper.Map(request, studentPosts);
-            #endregion
+
 
             await _iPostRepository.ExecuteTransactionAsync(async () =>
             {
-                studentPosts.PostTags = request.TopicTagIds!.Select((x, index) => new PostTag
+                studentPosts.PostTags = request.TopicTagIds!.Select((x) => new PostTag
                 {
                     TopicTagId = x
                 }).ToList();
 
-                studentPosts = _iPostRepository.Update(studentPosts);
+                studentPosts = _iPostRepository.Add(studentPosts);
                 await _iPostRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
                 methodResult.StatusCode = StatusCodes.Status201Created;
