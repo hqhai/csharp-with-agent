@@ -4,8 +4,7 @@ namespace Fsel.Training.Api.Controllers.Teacher
 {
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
-    using Fsel.Core.Base.BaseModels;
-    using Fsel.Training.Application.Queries.ClassQuery;
+    using Fsel.Training.Application.Queries.CalendarQuery;
     using Fsel.Training.Domain.Models.EntityModels;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
@@ -24,14 +23,14 @@ namespace Fsel.Training.Api.Controllers.Teacher
         }
 
         /// <summary>
-        /// Search Course
+        /// Get Calendar
         /// </summary>
         [HttpGet]
-        [ProducesResponseType(typeof(MethodResult<PagingItemsModel<ClassModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(MethodResult<IList<ClassLiveCalendarModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> Get([FromQuery] SearchClassLiveByCsoQuery query)
+        public async Task<IActionResult> Get([FromQuery] GetCalendarByTeacherQuery query)
         {
-            MethodResult<PagingItemsModel<ClassModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            var queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
     }

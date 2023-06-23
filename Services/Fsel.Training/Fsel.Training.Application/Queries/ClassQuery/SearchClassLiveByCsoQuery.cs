@@ -52,22 +52,27 @@ namespace Fsel.Training.Application.Queries.ClassQuery
                                         .Select(x => new ClassLiveCalendarModel
                                         {
                                             Id = x.Id,
-                                            ClassName = x.Class!.Name,
-                                            ClassCode = x.Class.Code,
-                                            TeacherId = x.Class.TeacherId,
-                                            StartTime = x.Class.StartTime,
-                                            EndTime = x.Class.EndTime,
-                                            CreatedDate = x.Class.CreatedDate,
-                                            LiveDays = x.Class.LiveDays
+                                            ClassId = x.ClassId,
+                                            Class = new ClassModel
+                                            {
+                                                Id = x.Class!.Id,
+                                                Name = x.Class!.Name,
+                                                Code = x.Class!.Code,
+                                                TeacherId = x.Class!.TeacherId,
+                                                StartDate = x.Class!.StartDate,
+                                                EndDate = x.Class!.EndDate,
+                                                LiveDays = x.Class!.LiveDays,
+                                            },
+                                            CreatedDate = x.CreatedDate
                                         });
             if (!string.IsNullOrEmpty(request.Keyword))
             {
-                classLiveQuery = classLiveQuery.Where(m => m.Id.ToString() == request.Keyword || (m.ClassName ?? string.Empty).Contains(request.Keyword));
+                classLiveQuery = classLiveQuery.Where(m => m.Id.ToString() == request.Keyword || (m.Class!.Name ?? string.Empty).Contains(request.Keyword));
             }
 
             if (request.ClassCode != null)
             {
-                classLiveQuery = classLiveQuery.Where(m => m.ClassCode == request.ClassCode);
+                classLiveQuery = classLiveQuery.Where(m => m.Class!.Code == request.ClassCode);
             }
             int totalItem = await classLiveQuery.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
             var lists = await classLiveQuery
@@ -76,13 +81,13 @@ namespace Fsel.Training.Application.Queries.ClassQuery
                     .ToListAsync(cancellationToken: cancellationToken)
                     .ConfigureAwait(false);
 
-            var teacherResult = await _userService.GetTeacherByIdsAsync(new GetTeacherByIdsQueryModel { Ids = lists.Select(x => x.TeacherId ?? default).Distinct().ToList() });
+            var teacherResult = await _userService.GetTeacherByIdsAsync(new GetTeacherByIdsQueryModel { Ids = lists.Select(x => x.Class!.TeacherId ?? default).Distinct().ToList() });
             var teachers = teacherResult.Content?.Result;
 
             foreach (var item in lists)
             {
                 var teacher = teachers!.FirstOrDefault(x => x.Id == item.Class!.TeacherId);
-                item.TeacherName = teacher?.Human?.FullName;
+                item.Class!.TeacherName = teacher?.Human?.FullName;
             }
 
             methodResult.Result = new PagingItemsModel<ClassLiveCalendarModel>(lists, request, totalItem);
