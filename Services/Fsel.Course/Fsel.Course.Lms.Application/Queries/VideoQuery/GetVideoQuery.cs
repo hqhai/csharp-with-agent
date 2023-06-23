@@ -92,6 +92,8 @@ namespace Fsel.Course.Lms.Application.Queries.VideoQuery
                 IsActive = video.LessonVideos.Any(),
                 TeacherId = video.TeacherId,
                 CourseLevel = video.CourseLevel,
+                SubFilePath = video.SubFilePath,
+                Type = video.Type,
                 VideoTimeCodes = video.VideoTimeCodes.OrderBy(x => x!.DisplayTime).Select(x => new VideoTimeCodeModel
                 {
                     Id = x.Id,
