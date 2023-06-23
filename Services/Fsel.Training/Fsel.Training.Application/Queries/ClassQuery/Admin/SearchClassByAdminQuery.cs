@@ -106,7 +106,7 @@ namespace Fsel.Training.Application.Queries.ClassQuery.Admin
             {
                 item.TeacherName = teacherResult.GetAwaiter().GetResult().Content?.Result?.FirstOrDefault(p => p.Id == item.TeacherId)?.Human?.FullName;
                 item.CSOName = csosResult.GetAwaiter().GetResult().Content?.Result?.FirstOrDefault(p => p.Id == item.CSOId)?.FullName;
-                item.PackageName = packagesResult.GetAwaiter().GetResult().Content?.Result?.FirstOrDefault(p => p.Id == item.PackageId)?.Code;
+                item.PackageCode = packagesResult.GetAwaiter().GetResult().Content?.Result?.FirstOrDefault(p => p.Id == item.PackageId)?.Code;
                 item.AveragePT = ptr!.FirstOrDefault(p => p.ClassId == item.Id)!.AveragePTPoint;
             }
 

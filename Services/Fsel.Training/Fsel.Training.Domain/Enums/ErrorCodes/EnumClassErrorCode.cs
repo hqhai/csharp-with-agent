@@ -64,9 +64,14 @@ namespace Fsel.Training.Domain.Enums.ErrorCodes
         StatusOfClassIsNotNew,
 
         /// <summary>
-        /// Course not installed
+        /// Course Time not installed
         /// </summary>
-        CourseNotInstalled
+        CourseTimeNotInstalled,
+
+        /// <summary>
+        /// Package Not Exist
+        /// </summary>
+        PackageNotExist
 ,
     }
 }

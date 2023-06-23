@@ -32,7 +32,7 @@ namespace Fsel.Training.Api.Controllers
         /// <summary>
         /// get class list status new
         /// </summary>
-        [HttpGet("get-class-list-status-new")]
+        [HttpPost("get-class-list-status-new")]
         [ProducesResponseType(typeof(MethodResult<IList<CourseClassModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.BadRequest)]
         public async Task<IActionResult> GetClassListStatusNew([FromBody] GetClassByStatusNewQuery query)

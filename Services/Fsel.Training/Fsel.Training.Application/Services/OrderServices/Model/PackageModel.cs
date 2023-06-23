@@ -2,9 +2,11 @@
 
 namespace Fsel.Training.Application.Services.OrderServices.Model
 {
+    using Fsel.Ordering.Domain.Enums;
+
     public class PackageModel
     {
         public Guid Id { get; set; }
-        public string? Code { get; set; }
+        public EnumPackageCode? Code { get; set; }
     }
 }

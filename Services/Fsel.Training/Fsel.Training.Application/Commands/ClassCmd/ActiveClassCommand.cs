@@ -4,40 +4,37 @@ namespace Fsel.Training.Application.Commands.ClassCmd
 {
     using System.Threading;
     using System.Threading.Tasks;
-    using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Core.Base.BaseModels;
     using Fsel.Shared.Enums;
     using Fsel.Training.Application.Services.SystemServices;
     using Fsel.Training.Domain.Entities;
     using Fsel.Training.Domain.Enums.ErrorCodes;
     using Fsel.Training.Domain.IRepositories;
-    using Fsel.Training.Domain.Models.CommandModels.Classes;
     using MediatR;
     using Microsoft.AspNetCore.Http;
 
-    public class ChangeStatusClassCommand : ChangeStatusClassCommandModel, IRequest<MethodResult<bool>>
+    public class ActiveClassCommand : BaseCommandModel, IRequest<MethodResult<bool>>
     {
     }
 
-    public class ChangeStatusClassCommandHandler : IRequestHandler<ChangeStatusClassCommand, MethodResult<bool>>
+    public class ActiveClassCommandHandler : IRequestHandler<ActiveClassCommand, MethodResult<bool>>
     {
         private readonly IClassRepository _classRepository;
         private readonly ISystemService _systemService;
-        private readonly IMapper _mapper;
 
-        public ChangeStatusClassCommandHandler(IClassRepository classRepository, ISystemService systemService, IMapper mapper = null)
+        public ActiveClassCommandHandler(IClassRepository classRepository, ISystemService systemService)
         {
             _classRepository = classRepository;
             _systemService = systemService;
-            _mapper = mapper;
         }
 
-        public async Task<MethodResult<bool>> Handle(ChangeStatusClassCommand request, CancellationToken cancellationToken)
+        public async Task<MethodResult<bool>> Handle(ActiveClassCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<bool> methodResult = new MethodResult<bool>();
 
-            var classes = await _classRepository.GetByIdAsync(request.ClassId);
+            var classes = await _classRepository.GetByIdAsync(request.Id);
             if (classes == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumClassErrorCode.ClassesNotExits));
@@ -60,27 +57,31 @@ namespace Fsel.Training.Application.Commands.ClassCmd
             var endTime = courseTimeConfig!.FirstOrDefault(p => p.CourseId == classes.Id);
             if (endTime == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumClassErrorCode.CourseNotInstalled));
+                methodResult.AddErrorBadRequest(nameof(EnumClassErrorCode.CourseTimeNotInstalled));
                 return methodResult;
             }
-            classes.LiveDays = request.LiveDays;
-            classes.LiveTimeFrameId = request.LiveTimeFrameId;
             classes.StartTime = DateTime.Now;
             classes.EndTime = DateTime.Now.AddMonths(endTime.DurationMonth);
-            for (DateTime date = DateTime.Now; date <= classes.EndTime; date = date.AddDays(1))
+            classes.Status = EnumClassType.Active;
+
+            if (classes.LiveTimeFrameId.HasValue && classes.LiveDays != null)
             {
-                if (request.LiveDays!.Contains(date.DayOfWeek))
+                for (DateTime date = DateTime.Now; date <= classes.EndTime; date = date.AddDays(1))
                 {
-                    ClassLiveCalendar classLiveCalendar = new ClassLiveCalendar()
+                    if (classes.LiveDays!.Contains(date.DayOfWeek))
                     {
-                        LiveTimeFrameId = request.LiveTimeFrameId,
-                        LiveDate = date,
-                        Status = EnumClassLiveCalendarStatus.NotStudied,
-                        ClassId = classes.Id
-                    };
-                    classes.ClassLiveCalendars.Add(classLiveCalendar);
+                        ClassLiveCalendar classLiveCalendar = new ClassLiveCalendar()
+                        {
+                            LiveTimeFrameId = classes.LiveTimeFrameId ?? default,
+                            LiveDate = date,
+                            Status = EnumClassLiveCalendarStatus.NotStudied,
+                            ClassId = classes.Id
+                        };
+                        classes.ClassLiveCalendars.Add(classLiveCalendar);
+                    }
                 }
             }
+
             await _classRepository.ExecuteTransactionAsync(async () =>
             {
                 _classRepository.Update(classes);
