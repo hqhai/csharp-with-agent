@@ -38,18 +38,6 @@ namespace Fsel.Training.Api.Controllers.Cso
         }
 
         /// <summary>
-        /// Search Course
-        /// </summary>
-        [HttpGet]
-        [ProducesResponseType(typeof(MethodResult<PagingItemsModel<ClassLiveCalendarModel>>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> SearchTeacherLive([FromQuery] SearchManageTeacherLiveScheduleQuery query)
-        {
-            MethodResult<PagingItemsModel<ClassLiveCalendarModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
-            return queryResult.GetActionResult();
-        }
-
-        /// <summary>
         /// Get class live
         /// </summary>
         [HttpGet("{id}")]

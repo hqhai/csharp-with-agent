@@ -5,7 +5,7 @@ namespace Fsel.Training.Domain.Models.QueryModels
     using Fsel.Core.Base.BaseModels;
     using Fsel.Shared.Enums;
 
-    public class SearchPriorityCalenderQueryModel : BaseQueryModel
+    public class SearchTeacherFreeTimeByCsoQueryModel : BaseQueryModel
     {
         public DateTime? EndTime { get; set; }
 

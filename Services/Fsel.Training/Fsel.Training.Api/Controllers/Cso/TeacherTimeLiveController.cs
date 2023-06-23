@@ -27,11 +27,11 @@ namespace Fsel.Training.Api.Controllers.Cso
         /// Get lít teacher live time
         /// </summary>
         [HttpGet]
-        [ProducesResponseType(typeof(MethodResult<IList<TeacherFreeTimeModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(MethodResult<PagingItemsModel<TeacherFreeDateModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> Get()
         {
-            MethodResult<IList<TeacherFreeTimeModel>> commandResult = await _mediator.Send(new GetListTeacherLiveTimeQuery { }).ConfigureAwait(false);
+            MethodResult<PagingItemsModel<TeacherFreeDateModel>> commandResult = await _mediator.Send(new SearchTeacherFreeDateByCsoQuery { }).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
 
@@ -42,7 +42,7 @@ namespace Fsel.Training.Api.Controllers.Cso
         [HttpGet]
         [ProducesResponseType(typeof(MethodResult<PagingItemsModel<TeacherFreeTimeModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> SearchClassLive([FromQuery] SearchPriorityCalenderQuery query)
+        public async Task<IActionResult> SearchClassLive([FromQuery] SearchTeacherFreeTimeByCsoQuery query)
         {
             MethodResult<PagingItemsModel<TeacherFreeTimeModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();

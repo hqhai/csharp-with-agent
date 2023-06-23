@@ -22,24 +22,24 @@ namespace Fsel.Training.Application.Queries.Schedule
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class SearchPriorityCalenderQuery : SearchPriorityCalenderQueryModel, IRequest<MethodResult<PagingItemsModel<TeacherFreeTimeModel>>>
+    public class SearchTeacherFreeTimeByCsoQuery : SearchTeacherFreeTimeByCsoQueryModel, IRequest<MethodResult<PagingItemsModel<TeacherFreeTimeModel>>>
     {
     }
 
-    public class SearchPriorityCalenderQueryHandler : IRequestHandler<SearchPriorityCalenderQuery, MethodResult<PagingItemsModel<TeacherFreeTimeModel>>>
+    public class SearchTeacherFreeTimeByCsoQueryHandler : IRequestHandler<SearchTeacherFreeTimeByCsoQuery, MethodResult<PagingItemsModel<TeacherFreeTimeModel>>>
     {
         private readonly ITeacherFreeTimeRepository _teacherFreeTimeRepository;
         private readonly IUserService _userService;
         private readonly ISystemService _systemService;
 
-        public SearchPriorityCalenderQueryHandler(ITeacherFreeTimeRepository teacherFreeTimeRepository, IUserService userService, ISystemService systemService)
+        public SearchTeacherFreeTimeByCsoQueryHandler(ITeacherFreeTimeRepository teacherFreeTimeRepository, IUserService userService, ISystemService systemService)
         {
             _teacherFreeTimeRepository = teacherFreeTimeRepository;
             _userService = userService;
             _systemService = systemService;
         }
 
-        public async Task<MethodResult<PagingItemsModel<TeacherFreeTimeModel>>> Handle(SearchPriorityCalenderQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<PagingItemsModel<TeacherFreeTimeModel>>> Handle(SearchTeacherFreeTimeByCsoQuery request, CancellationToken cancellationToken)
         {
             var methodResult = new MethodResult<PagingItemsModel<TeacherFreeTimeModel>>();
             ArgumentNullException.ThrowIfNull(request);
