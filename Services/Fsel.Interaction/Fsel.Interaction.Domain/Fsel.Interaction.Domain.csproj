@@ -10,4 +10,8 @@
     <ProjectReference Include="..\..\Shared\Fsel.Shared\Fsel.Shared.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Models\QueryModels\InterationActions\" />
+  </ItemGroup>
+
 </Project>

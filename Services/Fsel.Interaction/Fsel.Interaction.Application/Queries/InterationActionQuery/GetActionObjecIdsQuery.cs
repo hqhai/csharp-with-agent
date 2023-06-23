@@ -5,14 +5,9 @@ namespace Fsel.Interaction.Application.Queries.InterationActionQuery
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using System.Text;
     using System.Threading;
     using System.Threading.Tasks;
-    using AutoMapper;
     using Fsel.Common.ActionResults;
-    using Fsel.Core.Base;
-    using Fsel.Interaction.Application.Services.UserServices;
-    using Fsel.Interaction.Domain.Enums.ErrorCodes;
     using Fsel.Interaction.Domain.IRepositories;
     using Fsel.Interaction.Domain.Models.EntityModels;
     using Fsel.Shared.Enums;
@@ -70,6 +65,7 @@ namespace Fsel.Interaction.Application.Queries.InterationActionQuery
                 {
                     ObjectId = action.ObjectId,
                     IsDisable = action.Datas.Any(x => x.Type == EnumInteractionActionType.Disable && x.UserId == request.UserId),
+                    IsLiked = action.Datas.Any(x => x.Type == EnumInteractionActionType.Like && x.UserId == request.UserId),
                     LikeNumber = action.Datas.Where(x => x.Type == EnumInteractionActionType.Like).Count(),
                     CommentNumber = comments.FirstOrDefault(x => x.ObjectId == action.ObjectId)?.Number ?? default,
                 });
