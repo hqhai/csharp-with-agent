@@ -1,9 +1,9 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-using Fsel.Common.ValueSettings;
 using Fsel.Core.Extensions;
 using Fsel.Training.Application.Services.CourseServices;
 using Fsel.Training.Application.Services.OrderServices;
+using Fsel.Training.Application.Services.SystemServices;
 using Fsel.Training.Application.Services.UserServices;
 using Fsel.Training.Domain.IRepositories;
 using Fsel.Training.Infrastructure;
@@ -30,6 +30,7 @@ builder.Services.AddScoped<IClassLiveCalendarRepository, ClassLiveCalendarReposi
 builder.AddRefitClients(typeof(IUserService), appSetting?.Services?.UserApiUrl);
 builder.AddRefitClients(typeof(ICourseService), appSetting?.Services?.CourseApiUrl);
 builder.AddRefitClients(typeof(IOrderService), appSetting?.Services?.OrderApiUrl);
+builder.AddRefitClients(typeof(ISystemService), appSetting?.Services?.SystemApiUrl);
 
 var app = builder.Build();
 
