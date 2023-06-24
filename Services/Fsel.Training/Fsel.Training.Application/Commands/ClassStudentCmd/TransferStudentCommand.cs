@@ -5,6 +5,8 @@ namespace Fsel.Training.Application.Commands.ClassStudentCmd
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
+    using Fsel.Training.Application.Services.UserServices;
+    using Fsel.Training.Application.Services.UserServices.Models;
     using Fsel.Training.Domain.Enums.ErrorCodes;
     using Fsel.Training.Domain.IRepositories;
     using MediatR;
@@ -15,17 +17,19 @@ namespace Fsel.Training.Application.Commands.ClassStudentCmd
     {
         public Guid ClassId { get; set; }
         public Guid StudentId { get; set; }
+        public Guid PackageId { get; set; }
     }
 
     public class TransferStudentCommandHandler : IRequestHandler<TransferStudentCommand, MethodResult<bool>>
     {
         private readonly IClassRepository _classRepository;
         private readonly IClassStudentRepository _classStudentRepository;
-
-        public TransferStudentCommandHandler(IClassRepository classRepository, IClassStudentRepository classStudentRepository)
+        private readonly IUserService _userService;
+        public TransferStudentCommandHandler(IClassRepository classRepository, IClassStudentRepository classStudentRepository, IUserService userService)
         {
             _classRepository = classRepository;
             _classStudentRepository = classStudentRepository;
+            _userService = userService;
         }
 
         public async Task<MethodResult<bool>> Handle(TransferStudentCommand request, CancellationToken cancellationToken)
@@ -44,8 +48,8 @@ namespace Fsel.Training.Application.Commands.ClassStudentCmd
                 methodResult.AddErrorBadRequest(nameof(EnumClassErrorCode.StudentIsAlreadyInTheClass));
                 return methodResult;
             }
-            var classStudents = await _classStudentRepository.Queryable.Where(p => p.ClassId == request.ClassId).ToListAsync(cancellationToken);
-            if (classStudents.Count >= 12)
+            var countStudent = await _classStudentRepository.Queryable.Where(p => p.ClassId == request.ClassId).ToListAsync(cancellationToken);
+            if (countStudent.Count >= 12)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumClassErrorCode.ClassHasTooManyStudents));
                 return methodResult;
@@ -59,6 +63,17 @@ namespace Fsel.Training.Application.Commands.ClassStudentCmd
             }
             await _classStudentRepository.ExecuteTransactionAsync(async () =>
             {
+                var studentResult = await _userService.UpdateStudentByClassAsync(new UpdateStudentByClassIdModel
+                {
+                    StudentId = request.StudentId,
+                    ClassId = request.ClassId,
+                    PackageId = request.PackageId
+                });
+                if (!studentResult.IsSuccessStatusCode)
+                {
+                    methodResult.AddError(studentResult.Error);
+                    return methodResult;
+                }
                 classStudent.ClassId = request.ClassId;
                 _classStudentRepository.Update(classStudent);
                 await _classStudentRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);

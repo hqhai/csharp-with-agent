@@ -7,16 +7,13 @@ namespace Fsel.Training.Api.Controllers.Admin
     using Fsel.Common.Constants;
     using Fsel.Shared.Enums;
     using Fsel.Training.Application.Commands.ClassCmd;
+    using Fsel.Training.Application.Commands.ClassStudentCmd;
     using Fsel.Training.Application.Queries.ClassQuery;
     using Fsel.Training.Application.Queries.ClassQuery.Admin;
     using Fsel.Training.Domain.Models.EntityModels;
     using MediatR;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
-    using Fsel.Training.Domain.Models.EntityModels;
-    using Fsel.Training.Application.Commands.ClassCmd;
-    using Fsel.Training.Application.Queries.ClassQuery.Admin;
-    using Fsel.Training.Application.Commands.ClassStudentCmd;
 
     [ApiVersion(Settings.APIVersion)]
     [Route(Settings.APIDefaultRoute + "/admin/class")]
@@ -30,6 +27,7 @@ namespace Fsel.Training.Api.Controllers.Admin
         {
             _mediator = mediator;
         }
+
         /// <summary>
         /// get list studentId by classId
         /// </summary>
@@ -41,6 +39,7 @@ namespace Fsel.Training.Api.Controllers.Admin
             MethodResult<List<Guid>?> commandResult = await _mediator.Send(new GetStudentIdsInClassQuery { ClassId = id }).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
+
         /// <summary>
         /// create class
         /// </summary>
@@ -52,6 +51,7 @@ namespace Fsel.Training.Api.Controllers.Admin
             MethodResult<ClassModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
+
         /// <summary>
         /// active class
         /// </summary>
@@ -60,9 +60,10 @@ namespace Fsel.Training.Api.Controllers.Admin
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> ActiveClass([FromRoute] Guid id)
         {
-            MethodResult<bool> commandResult = await _mediator.Send(new ActiveClassCommand { Id = id}).ConfigureAwait(false);
+            MethodResult<bool> commandResult = await _mediator.Send(new ActiveClassCommand { Id = id }).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
+
         /// <summary>
         /// get class by id
         /// </summary>
@@ -74,6 +75,7 @@ namespace Fsel.Training.Api.Controllers.Admin
             MethodResult<ClassModel> commandResult = await _mediator.Send(new GetClassByIdQuery { Id = id }).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
+
         /// <summary>
         /// update class
         /// </summary>
@@ -104,7 +106,6 @@ namespace Fsel.Training.Api.Controllers.Admin
             MethodResult<bool> commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
-
 
         [HttpGet("get-students-by-class-id/{id}")]
         [ProducesResponseType(typeof(MethodResult<IList<ClassStudentModel>?>), (int)HttpStatusCode.OK)]

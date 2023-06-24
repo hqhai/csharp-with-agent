@@ -52,7 +52,8 @@ namespace Fsel.Training.Application.Queries.ClassQuery.Admin
             {
                 StudentId = x.Id,
                 StudentName = x.Human!.FullName,
-                Code = x.Human.Code
+                Code = x.Human.Code,
+                PackageId = x.PackageId
             }).ToList();
 
             methodResult.Result = classStudents;
