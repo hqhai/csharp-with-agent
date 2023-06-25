@@ -10,6 +10,8 @@ namespace Fsel.Training.Api.Controllers.Cso
     using Fsel.Training.Domain.Models.EntityModels;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
+    using Fsel.Training.Application.Queries.ClassQuery.Admin;
+    using Fsel.Training.Application.Queries.Cso;
 
     [ApiVersion(Settings.APIVersion)]
     [Route(Settings.APIDefaultRoute + "/cso/teacher-free-date")]
@@ -33,6 +35,18 @@ namespace Fsel.Training.Api.Controllers.Cso
         {
             MethodResult<PagingItemsModel<TeacherFreeDateModel>> commandResult = await _mediator.Send(new SearchTeacherFreeDateByCsoQuery { }).ConfigureAwait(false);
             return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Search teacher free date
+        /// </summary>
+        [HttpGet("search-class-live")]
+        [ProducesResponseType(typeof(MethodResult<PagingItemsModel<TeacherFreeDateModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> SearchClass([FromQuery] SearchTeacherFreeDateQuery query)
+        {
+            MethodResult<PagingItemsModel<TeacherFreeDateModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
         }
     }
 }
