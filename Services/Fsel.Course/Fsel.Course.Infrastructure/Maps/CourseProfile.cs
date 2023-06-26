@@ -2,6 +2,7 @@
 
 using AutoMapper;
 using Fsel.Core.Extensions;
+using Fsel.Course.Domain.Entities;
 using Fsel.Course.Domain.Models.CommandModels.Courses;
 using Fsel.Course.Domain.Models.EntityModels;
 using EntityCourse = Fsel.Course.Domain.Entities.Course;
@@ -15,6 +16,7 @@ namespace Fsel.Course.Infrastructure.Maps
             CreateMap<EntityCourse, CourseModel>().IgnoreAllNonExisting();
             CreateMap<CreateCourseCommandModel, EntityCourse>().IgnoreAllNonExisting();
             CreateMap<UpdateCourseCommandModel, EntityCourse>().IgnoreAllNonExisting();
+            CreateMap<CourseResult, CourseResultModel>().IgnoreAllNonExisting();
         }
     }
 }

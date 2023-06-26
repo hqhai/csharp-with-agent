@@ -16,7 +16,6 @@ namespace Fsel.Course.Lms.Api.Controllers
     [ApiVersion(Settings.APIVersion)]
     [Route(Settings.APIDefaultRoute + "/placement-test")]
     [ApiController]
-    [Authorize(Roles = nameof(EnumRole.Student))]
     public class PlacmentTestController : ControllerBase
     {
         private readonly IMediator _mediator;
@@ -30,6 +29,7 @@ namespace Fsel.Course.Lms.Api.Controllers
         /// get PlacementTest
         /// </summary>
         [HttpGet("level")]
+        [Authorize(Roles = nameof(EnumRole.Student))]
         [ProducesResponseType(typeof(MethodResult<PlacementTestBankModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> Get([FromQuery] GetPlacementTestQuery command)
@@ -39,9 +39,22 @@ namespace Fsel.Course.Lms.Api.Controllers
         }
 
         /// <summary>
+        /// Check Result by StudentId
+        /// </summary>
+        [HttpGet("check-result/{studentId}")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> CheckResultByStudentId([FromRoute] Guid studentId)
+        {
+            MethodResult<bool> queryResult = await _mediator.Send(new CheckResultByStudentIdQuery { StudentId = studentId }).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
         /// get PlacementTest Result
         /// </summary>
         [HttpGet("get-result")]
+        [Authorize(Roles = nameof(EnumRole.Student))]
         [ProducesResponseType(typeof(MethodResult<PlacementTestResultModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetResult()
@@ -54,6 +67,7 @@ namespace Fsel.Course.Lms.Api.Controllers
         /// Create PlacementTest Answers
         /// </summary>
         [HttpPost("create-answers")]
+        [Authorize(Roles = nameof(EnumRole.Student))]
         [ProducesResponseType(typeof(MethodResult<IList<PlacementTestResultModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> CreateAnswer([FromBody] CreatePlacementTestAnswerCommand command)

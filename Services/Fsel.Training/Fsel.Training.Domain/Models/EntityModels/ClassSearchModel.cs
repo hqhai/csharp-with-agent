@@ -3,7 +3,7 @@
 namespace Fsel.Training.Domain.Models.EntityModels
 {
     using System;
-    using Fsel.Core.Base.BaseModels;
+    using Fsel.Ordering.Domain.Enums;
     using Fsel.Shared.Enums;
 
     public class ClassSearchModel
@@ -17,12 +17,11 @@ namespace Fsel.Training.Domain.Models.EntityModels
         public string? CSOName { get; set; }
         public string? TeacherName { get; set; }
         public EnumClassType Status { get; set; }
-        public string? PackageName { get; set; }
+        public EnumPackageCode? PackageCode { get; set; }
         public Guid PackageId { get; set; }
         public Guid CourseId { get; set; }
         public IList<Guid>? StudentIds { get; set; }
         public Guid? TeacherId { get; set; }
         public Guid? CSOId { get; set; }
-
     }
 }

@@ -1,6 +1,7 @@
 // Copyright (c) Atlantic. All rights reserved.
 
 using Fsel.Core.Base.BaseModels;
+using Fsel.Course.Domain.Entities;
 using Fsel.Course.Domain.Enums;
 using Fsel.Shared.Enums;
 
@@ -22,6 +23,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
 
         public IList<CourseUnitMockTestModel>? CourseUnitMockTests { get; set; }
         public IList<CourseTeacherModel>? CourseTeachers { get; set; }
+        public CourseResultModel? CourseResult { get; set; }
         public CourseClassModel? CourseClass { get; set; }
     }
 }
