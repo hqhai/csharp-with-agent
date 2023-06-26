@@ -28,11 +28,11 @@ namespace Fsel.Training.Api.Controllers.Cso
         /// </summary>
 
         [HttpGet]
-        [ProducesResponseType(typeof(MethodResult<PagingItemsModel<TeacherFreeDateModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(MethodResult<IList<TeacherFreeTimeModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> SearchClassLive([FromQuery] SearchTeacherFreeDateByCsoQuery query)
         {
-            MethodResult<PagingItemsModel<TeacherFreeDateModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            MethodResult<IList<TeacherFreeTimeModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
     }

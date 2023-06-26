@@ -3,8 +3,9 @@
 namespace Fsel.Training.Application.Services.SystemServices.Model
 {
     using System;
+    using Fsel.Core.Base.BaseModels;
 
-    public class LiveTimeFrameModel
+    public class LiveTimeFrameModel : BaseModel
     {
         public DateTime? StartTime { get; set; }
 

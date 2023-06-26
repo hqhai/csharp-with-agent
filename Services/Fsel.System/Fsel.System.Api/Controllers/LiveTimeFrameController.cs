@@ -40,12 +40,12 @@ namespace Fsel.System.Api.Controllers
         /// <summary>
         ///  Get get list live time frame
         /// </summary>
-        [HttpGet("get-list-live-time-frame-by-ids")]
+        [HttpPost("get-by-ids")]
         [ProducesResponseType(typeof(MethodResult<IList<LiveTimeFrameModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetListTimeFrameByIds([FromRoute] IList<Guid> ids)
+        public async Task<IActionResult> GetListTimeFrameByIds([FromBody] GetListLiveTimeFrameByIdsQuery query)
         {
-            var commandResult = await _mediator.Send(new GetListLiveTimeFrameByIdsQuery { Ids = ids }).ConfigureAwait(false);
+            var commandResult = await _mediator.Send(query).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
 
