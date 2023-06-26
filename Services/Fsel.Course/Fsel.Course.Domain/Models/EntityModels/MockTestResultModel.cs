@@ -4,6 +4,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
 {
     using System;
     using Fsel.Core.Base.BaseModels;
+    using Fsel.Course.Domain.Entities.SkillScoresConfigs;
     using Fsel.Course.Domain.Enums;
 
     public class MockTestResultModel : BaseModel
@@ -16,6 +17,8 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public Guid MockTestId { get; set; }
         public Guid? UnitId { get; set; }
         public Guid CourseId { get; set; }
+
+        public IList<SkillScores>? SkillScores { get; set; }
 
         public IList<MockTestAnswerModel>? MockTestAnswers { get; set; }
     }
