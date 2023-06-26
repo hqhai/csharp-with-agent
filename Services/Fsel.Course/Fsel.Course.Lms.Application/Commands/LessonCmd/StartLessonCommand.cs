@@ -60,6 +60,14 @@ namespace Fsel.Course.Lms.Application.Commands.LessonCmd
 
             #region Validation
 
+            var student = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
+            if (!student.IsSuccessStatusCode)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumLessonErrorCode.UserNotExist), nameof(student), _authContext.CurrentUserId.ToString());
+                return methodResult;
+            }
+            var studentId = student?.Content?.Result?.Id;
+
             var course = await _courseRepository.GetByIdAsync(request.CourseId);
             if (course == null)
             {
@@ -71,12 +79,20 @@ namespace Fsel.Course.Lms.Application.Commands.LessonCmd
                 methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.CourseIsNewStateCantStartLesson), nameof(course.Status), course.Status);
                 return methodResult;
             }
-            var unit = await _unitRepository.GetByIdAsync(request.UnitId);
+            var unit = await _unitRepository.Queryable.Include(x => x.LessonResults.Where(x => x.LessonId == request.LessonId && x.UnitId == request.UnitId && x.CourseId == request.CourseId && x.StudentId == studentId))
+                                             .FirstOrDefaultAsync(x => x.Id == request.UnitId, cancellationToken);
             if (unit == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumUnitErrorCode.UnitNotExist), nameof(request.UnitId), request.UnitId);
                 return methodResult;
             }
+
+            if (unit.LessonResults.Any(x => x.Status == EnumResultStatus.Process))
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumLessonResultErrorCode.LessonResultAlreadyExistStatusProcess));
+                return methodResult;
+            }
+
             var lesson = await _lessonRepository.Queryable.Include(x => x.LessonVideos).FirstOrDefaultAsync(x => x.Id == request.LessonId, cancellationToken);
             if (lesson == null)
             {
@@ -84,44 +100,30 @@ namespace Fsel.Course.Lms.Application.Commands.LessonCmd
                 return methodResult;
             }
 
-            var student = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
-            if (!student.IsSuccessStatusCode)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumLessonErrorCode.UserNotExist), nameof(student), _authContext.CurrentUserId.ToString());
-                return methodResult;
-            }
-
             #endregion Validation
 
-            var studentId = student?.Content?.Result?.Id;
             var homeWorks = await _homeWorkRepository.Queryable.Include(x => x.LessonHomeWorks.Where(n => !n.IsDeleted))
                                                 .Where(x => x.LessonHomeWorks.Any(x => x.LessonId == request.LessonId))
                                                 .ToListAsync(cancellationToken);
 
-            var lessonResult = await _lessonResultRepository.Queryable.FirstOrDefaultAsync(x => x.LessonId == request.LessonId && x.UnitId == request.UnitId && x.CourseId == request.CourseId && x.StudentId == studentId, cancellationToken);
-            if (lessonResult == null)
+            var lessonResult = await _lessonResultRepository.Queryable.FirstOrDefaultAsync(x => x.LessonId == request.LessonId && x.UnitId == request.UnitId && x.CourseId == request.CourseId, cancellationToken);
+            if (lessonResult != null && lessonResult.Status == EnumResultStatus.Unfinished)
             {
-                lessonResult = new LessonResult
+                lessonResult.VideoResult = new VideoResult
                 {
+                    VideoId = lesson.LessonVideos.FirstOrDefault()!.VideoId,
+                    Status = EnumResultStatus.Process,
                     StudentId = studentId ?? default,
-                    CourseId = course.Id,
-                    UnitId = unit.Id,
-                    LessonId = request.LessonId,
-                    VideoResult = new VideoResult
-                    {
-                        VideoId = lesson.LessonVideos.FirstOrDefault()!.VideoId,
-                        Status = EnumResultStatus.Process,
-                        StudentId = studentId ?? default,
-                    },
-                    HomeWorkResults = homeWorks.Select(x => new HomeWorkResult
-                    {
-                        HomeWorkId = x.Id,
-                        Status = EnumResultStatus.Unfinished,
-                        StudentId = studentId ?? default,
-                    }).ToList()
                 };
-                _lessonResultRepository.Add(lessonResult);
-                await _lessonResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+                lessonResult.HomeWorkResults = homeWorks.Select(x => new HomeWorkResult
+                {
+                    HomeWorkId = x.Id,
+                    Status = EnumResultStatus.Unfinished,
+                    StudentId = studentId ?? default,
+                }).ToList();
+                lessonResult.Status = EnumResultStatus.Process;
+                lessonResult = _lessonResultRepository.Update(lessonResult);
+                await _lessonResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             }
 
             methodResult.StatusCode = StatusCodes.Status200OK;
