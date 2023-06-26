@@ -15,6 +15,11 @@ namespace Fsel.Identity.Domain.Enums.ErrorCodes
         ParentNull,
 
         /// <summary>
+        /// Parent full name is not null
+        /// </summary>
+        ParentFullNameNotNull,
+
+        /// <summary>
         /// Create student fail
         /// </summary>
         CreateStudentFail,
