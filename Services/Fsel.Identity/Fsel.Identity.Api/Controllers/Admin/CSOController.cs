@@ -15,7 +15,7 @@ namespace Fsel.Identity.Api.Controllers
     [ApiVersion(Settings.APIVersion)]
     [Route(Settings.APIDefaultRoute + "/cso/admin")]
     [ApiController]
-    [Authorize(Roles = nameof(EnumRole.Admin))]
+    //[Authorize(Roles = nameof(EnumRole.Admin))]
     public class CSOController : ControllerBase
     {
         private readonly IMediator _mediator;
@@ -26,7 +26,7 @@ namespace Fsel.Identity.Api.Controllers
         }
 
         /// <summary>
-        /// get teacher and cso
+        /// get list cso by ids
         /// </summary>
         [HttpPost]
         [ProducesResponseType(typeof(MethodResult<IList<HumanModel>>), (int)HttpStatusCode.OK)]
@@ -34,6 +34,18 @@ namespace Fsel.Identity.Api.Controllers
         public async Task<IActionResult> GetCSOByIds([FromBody] IList<Guid>? ids)
         {
             MethodResult<IList<HumanModel>> commandResult = await _mediator.Send(new GetCSOByIdsQuery { Ids = ids }).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// get all cso
+        /// </summary>
+        [HttpGet("get-all")]
+        [ProducesResponseType(typeof(MethodResult<IList<CSOModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetAllCSO()
+        {
+            MethodResult<IList<CSOModel>> commandResult = await _mediator.Send(new GetAllCSOQuery { }).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
     }

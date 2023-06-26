@@ -38,5 +38,10 @@ namespace Fsel.Training.Application.Services.UserServices
 
         [Post("/cso/admin")]
         Task<IApiResponse<MethodResult<IList<HumanModel>>>> GetCSOByIds([Body] IList<Guid>? ids);
+        [Get("/cso/admin/get-all")]
+        Task<IApiResponse<MethodResult<IList<CSOModel>>>> GetAllCSO();
+
+        [Get("/teacher/get-all")]
+        Task<IApiResponse<MethodResult<IList<TeacherModel>>>> GetAllTeacher();
     }
 }

@@ -2,11 +2,10 @@
 
 namespace Fsel.Training.Application.Services.UserServices.Models
 {
-    using System;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Shared.Enums;
 
-    public class TeacherModel : BaseModel
+    public class CSOModel : BaseModel
     {
         public IList<EnumCourseLevel>? CourseLevels { get; set; }
         public string? PassportPath { get; set; }

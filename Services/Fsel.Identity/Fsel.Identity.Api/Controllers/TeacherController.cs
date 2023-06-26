@@ -60,5 +60,17 @@ namespace Fsel.Identity.Api.Controllers
             MethodResult<PagingItemsModel<TeacherModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
+
+        /// <summary>
+        /// get all teacher
+        /// </summary>
+        [HttpGet("get-all")]
+        [ProducesResponseType(typeof(MethodResult<IList<TeacherModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetAllTeacher()
+        {
+            MethodResult<IList<TeacherModel>> commandResult = await _mediator.Send(new GetAllTeacherQuery { }).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
     }
 }
