@@ -15,6 +15,7 @@ namespace Fsel.Training.Application.Queries.ClassQuery.Admin
     public class GetStudentsByClassIdQuery : IRequest<MethodResult<IList<ClassStudentModel>?>>
     {
         public Guid ClassId { get; set; }
+        public string? KeyWord { get; set; }
     }
 
     public class GetStudentsByClassIdQueryHandler : IRequestHandler<GetStudentsByClassIdQuery, MethodResult<IList<ClassStudentModel>?>>
@@ -55,7 +56,10 @@ namespace Fsel.Training.Application.Queries.ClassQuery.Admin
                 Code = x.Human.Code,
                 PackageId = x.PackageId
             }).ToList();
-
+            if (!string.IsNullOrEmpty(request.KeyWord))
+            {
+                classStudents = classStudents.Where(p => !string.IsNullOrEmpty(p.StudentName) && p.StudentName.Contains(request.KeyWord, StringComparison.OrdinalIgnoreCase)).ToList();
+            }
             methodResult.Result = classStudents;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
