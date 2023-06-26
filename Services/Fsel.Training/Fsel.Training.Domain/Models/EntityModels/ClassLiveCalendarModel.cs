@@ -22,7 +22,6 @@ namespace Fsel.Training.Domain.Models.EntityModels
         public DateTime? StartTime { get; set; }
 
         public IList<DayOfWeek>? LiveDays { get; set; }
-
         public EnumCourseLevel CourseLevel { get; set; }
         public ClassModel? Class { get; set; }
         public IList<ClassStudentModel>? ClassStudents { get; set; }

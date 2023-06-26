@@ -17,7 +17,7 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
     [ApiVersion(Settings.APIVersion)]
     [Route(Settings.APIDefaultRoute + "/admin/course")]
     [ApiController]
-    [Authorize(Roles = nameof(EnumRole.MasterAdmin))]
+    [Authorize(Roles = $"{nameof(EnumRole.MasterAdmin)},{nameof(EnumRole.Admin)}")]
     public class CourseController : ControllerBase
     {
         private readonly IMediator _mediator;

@@ -14,25 +14,26 @@ namespace Fsel.Training.Api.Controllers.Cso
     [ApiVersion(Settings.APIVersion)]
     [Route(Settings.APIDefaultRoute + "/cso/teacher-free-date")]
     [ApiController]
-    public class TeacherTimeLiveController : ControllerBase
+    public class TeacherTimeDateController : ControllerBase
     {
         private readonly IMediator _mediator;
 
-        public TeacherTimeLiveController(IMediator mediator)
+        public TeacherTimeDateController(IMediator mediator)
         {
             _mediator = mediator;
         }
 
         /// <summary>
-        /// Get lít teacher live time
+        /// Get class live priority
         /// </summary>
+
         [HttpGet]
-        [ProducesResponseType(typeof(MethodResult<PagingItemsModel<TeacherFreeDateModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(MethodResult<IList<TeacherFreeTimeModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> Get()
+        public async Task<IActionResult> SearchClassLive([FromQuery] SearchTeacherFreeDateByCsoQuery query)
         {
-            MethodResult<PagingItemsModel<TeacherFreeDateModel>> commandResult = await _mediator.Send(new SearchTeacherFreeDateByCsoQuery { }).ConfigureAwait(false);
-            return commandResult.GetActionResult();
+            MethodResult<IList<TeacherFreeTimeModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
         }
     }
 }

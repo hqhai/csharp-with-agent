@@ -10,5 +10,6 @@ namespace Fsel.Training.Application.Services.UserServices.Models
         public string? Birthday { get; set; }
         public string? Email { get; set; }
         public string? PhoneNumber { get; set; }
+        public string? Code { get; set; }
     }
 }

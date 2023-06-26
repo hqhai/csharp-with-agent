@@ -10,7 +10,10 @@ namespace Fsel.Training.Application.Services.SystemServices
 
     public interface ISystemService
     {
-        [Post("/live-time-frame/get-list-live-time-frame-by-ids")]
-        Task<IApiResponse<MethodResult<LiveTimeFrameModel>>> GetTimeFramByIdsAsync([Body] IList<Guid> ids);
+        [Post("/course-time-config")]
+        Task<IApiResponse<MethodResult<IList<CourseTimeConfigModel>>>> GetCourseTimeConfigByCourseId([Body] IList<Guid> courseIds);
+
+        [Post("/live-time-frame/get-by-ids")]
+        Task<IApiResponse<MethodResult<IList<LiveTimeFrameModel>>>> GetTimeFrameByIdsAsync([Body] GetTimeFrameByIdsModel command);
     }
 }
