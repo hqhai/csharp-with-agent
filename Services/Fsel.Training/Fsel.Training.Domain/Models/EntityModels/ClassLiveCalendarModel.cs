@@ -25,5 +25,7 @@ namespace Fsel.Training.Domain.Models.EntityModels
         public EnumCourseLevel CourseLevel { get; set; }
         public ClassModel? Class { get; set; }
         public IList<ClassStudentModel>? ClassStudents { get; set; }
+        public DateTime? TimeFrameEndTime { get; set; }
+        public DateTime? TimeFrameStartTime { get; set; }
     }
 }

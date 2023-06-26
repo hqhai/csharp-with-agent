@@ -11,6 +11,7 @@ namespace Fsel.System.Api.Controllers
     using Fsel.System.Application.Querys.LiveTimeFrames;
     using Fsel.System.Application.Commands.LiveTimeFrameCmd;
     using Fsel.System.Domain.Models.EntityModels;
+    using Fsel.System.Application.Querys.LiveTimeFrameQuery;
 
     [ApiVersion(Settings.APIVersion)]
     [Route(Settings.APIDefaultRoute + "/live-time-frame")]
@@ -25,7 +26,7 @@ namespace Fsel.System.Api.Controllers
         }
 
         /// <summary>
-        /// Get Pacing Guide Detail By Group id
+        /// Get get list live time frame
         /// </summary>
         [HttpGet]
         [ProducesResponseType(typeof(MethodResult<IList<LiveTimeFrameModel>>), (int)HttpStatusCode.OK)]
@@ -37,9 +38,21 @@ namespace Fsel.System.Api.Controllers
         }
 
         /// <summary>
+        ///  Get get list live time frame
+        /// </summary>
+        [HttpPost("get-by-ids")]
+        [ProducesResponseType(typeof(MethodResult<IList<LiveTimeFrameModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetListTimeFrameByIds([FromBody] GetListLiveTimeFrameByIdsQuery query)
+        {
+            var commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
         /// Save list live time frame
         /// </summary>
-        [HttpPost("save-list-live-time-frame")]
+        [HttpPost]
         [ProducesResponseType(typeof(MethodResult<IList<LiveTimeFrameModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> SaveList([FromBody] SaveListLiveTimeFrameCommand command)
