@@ -1,7 +1,5 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-using Microsoft.EntityFrameworkCore;
-
 namespace Fsel.Training.Application.Queries.CalendarQuery
 {
     using System;
@@ -20,6 +18,7 @@ namespace Fsel.Training.Application.Queries.CalendarQuery
     using Fsel.Training.Domain.Models.EntityModels;
     using Fsel.Training.Domain.Models.QueryModels;
     using MediatR;
+    using Microsoft.EntityFrameworkCore;
     using Microsoft.AspNetCore.Http;
 
     public class GetCalendarByTeacherQuery : GetCalendarByTeacherQueryModel, IRequest<MethodResult<IList<ClassLiveCalendarModel>>>
@@ -28,16 +27,16 @@ namespace Fsel.Training.Application.Queries.CalendarQuery
 
     public class GetCalendarByTeacherQueryHandler : IRequestHandler<GetCalendarByTeacherQuery, MethodResult<IList<ClassLiveCalendarModel>>>
     {
-        private readonly IClassLiveCalendarRepository _classLiveCalenderRepository;
+        private readonly IClassLiveCalendarRepository _classLiveCalendarRepository;
         private readonly ICourseService _courseService;
         private readonly ISystemService _systemService;
         private readonly IUserService _userService;
         private readonly IMapper _mapper;
         private readonly AuthContext _authContext;
 
-        public GetCalendarByTeacherQueryHandler(IClassLiveCalendarRepository classLiveCalenderRepository, IUserService userService, IMapper mapper, AuthContext authContext, ICourseService courseService, ISystemService systemService)
+        public GetCalendarByTeacherQueryHandler(IClassLiveCalendarRepository classLiveCalendarRepository, IUserService userService, IMapper mapper, AuthContext authContext, ICourseService courseService, ISystemService systemService)
         {
-            _classLiveCalenderRepository = classLiveCalenderRepository;
+            _classLiveCalendarRepository = classLiveCalendarRepository;
             _userService = userService;
             _mapper = mapper;
             _authContext = authContext;
@@ -77,7 +76,7 @@ namespace Fsel.Training.Application.Queries.CalendarQuery
             }
             var courses = coursesResult.Content?.Result;
 
-            var query = _classLiveCalenderRepository.Queryable
+            var query = _classLiveCalendarRepository.Queryable
                         .Include(x => x.Class)
                         .Where(x => x.LiveDate.Date >= request.StartDate.Value.Date &&
                                     x.LiveDate.Date <= request.EndDate.Value.Date)

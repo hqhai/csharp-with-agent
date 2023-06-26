@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Training.Api.Controllers.Teacher
+namespace Fsel.Training.Api.Controllers
 {
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
@@ -11,7 +11,7 @@ namespace Fsel.Training.Api.Controllers.Teacher
     using System.Net;
 
     [ApiVersion(Settings.APIVersion)]
-    [Route(Settings.APIDefaultRoute + "/teacher/calendar")]
+    [Route(Settings.APIDefaultRoute + "/calendar")]
     [ApiController]
     public class CalendarController : ControllerBase
     {
@@ -25,7 +25,7 @@ namespace Fsel.Training.Api.Controllers.Teacher
         /// <summary>
         /// Get Calendar
         /// </summary>
-        [HttpGet]
+        [HttpGet("teacher")]
         [ProducesResponseType(typeof(MethodResult<IList<ClassLiveCalendarModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> Get([FromQuery] GetCalendarByTeacherQuery query)

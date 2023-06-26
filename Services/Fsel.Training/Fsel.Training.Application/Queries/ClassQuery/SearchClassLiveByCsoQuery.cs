@@ -26,13 +26,13 @@ namespace Fsel.Training.Application.Queries.ClassQuery
 
     public class SearchClassLiveByCsoQueryHandler : IRequestHandler<SearchClassLiveByCsoQuery, MethodResult<PagingItemsModel<ClassLiveCalendarModel>>>
     {
-        private readonly IClassLiveCalendarRepository _classLiveCalenderRepository;
+        private readonly IClassLiveCalendarRepository _classLiveCalendarRepository;
         private readonly IUserService _userService;
         private readonly IMapper _mapper;
 
-        public SearchClassLiveByCsoQueryHandler(IClassLiveCalendarRepository classLiveCalenderRepository, IUserService userService, IMapper mapper)
+        public SearchClassLiveByCsoQueryHandler(IClassLiveCalendarRepository classLiveCalendarRepository, IUserService userService, IMapper mapper)
         {
-            _classLiveCalenderRepository = classLiveCalenderRepository;
+            _classLiveCalendarRepository = classLiveCalendarRepository;
             _userService = userService;
             _mapper = mapper;
         }
@@ -47,7 +47,7 @@ namespace Fsel.Training.Application.Queries.ClassQuery
                 return methodResult;
             }
 
-            var classLiveQuery = _classLiveCalenderRepository.Queryable
+            var classLiveQuery = _classLiveCalendarRepository.Queryable
                                         .Include(x => x.Class)
                                         .Select(x => new ClassLiveCalendarModel
                                         {
