@@ -52,7 +52,7 @@ namespace Fsel.System.Api.Controllers
         /// <summary>
         /// Save list live time frame
         /// </summary>
-        [HttpPost("save-list-live-time-frame")]
+        [HttpPost]
         [ProducesResponseType(typeof(MethodResult<IList<LiveTimeFrameModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> SaveList([FromBody] SaveListLiveTimeFrameCommand command)

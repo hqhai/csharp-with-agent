@@ -27,13 +27,13 @@ namespace Fsel.Training.Application.Queries.Schedule
     {
     }
 
-    public class GetListTeacherLiveTimeQueryHandler : IRequestHandler<SearchTeacherFreeDateByCsoQuery, MethodResult<IList<TeacherFreeTimeModel>>>
+    public class SearchTeacherFreeDateByCsoQueryHandler : IRequestHandler<SearchTeacherFreeDateByCsoQuery, MethodResult<IList<TeacherFreeTimeModel>>>
     {
         private readonly ITeacherFreeTimeRepository _teacherFreeTimeRepository;
         private readonly ISystemService _systemService;
         private readonly IUserService _userService;
 
-        public GetListTeacherLiveTimeQueryHandler(ISystemService systemService, IUserService userService, ITeacherFreeTimeRepository teacherFreeTimeRepository)
+        public SearchTeacherFreeDateByCsoQueryHandler(ISystemService systemService, IUserService userService, ITeacherFreeTimeRepository teacherFreeTimeRepository)
         {
             _systemService = systemService;
             _userService = userService;
