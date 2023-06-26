@@ -107,6 +107,12 @@ namespace Fsel.Identity.Application.Commands.UserCmd
                 {
                     if (student.ParentStudents == null || student.ParentStudents.Count == 0)
                     {
+                        if (string.IsNullOrEmpty(request.Parent.FullName))
+                        {
+                            methodResult.AddErrorBadRequest(nameof(EnumParentErrorCode.ParentFullNameNotNull));
+                            return methodResult;
+                        }
+
                         Human newHuman = _mapper.Map<Human>(request.Parent);
                         newHuman.Parent = _mapper.Map<Parent>(request.Parent);
                         newHuman.Parent.ParentStudents.Add(new ParentStudent

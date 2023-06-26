@@ -9,7 +9,7 @@ namespace Fsel.Course.Application.Services.UserServices.Models
 
     public class StudentModel : BaseModel
     {
-        public string? Membership { get; set; }
+        public Guid? PackageId { get; set; }
         public string? Occupation { get; set; }
 
         public string? School { get; set; }

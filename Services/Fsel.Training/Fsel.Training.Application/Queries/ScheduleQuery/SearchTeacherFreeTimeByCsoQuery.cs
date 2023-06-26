@@ -1,0 +1,93 @@
+// Copyright (c) Atlantic. All rights reserved.
+
+namespace Fsel.Training.Application.Queries.ScheduleQuery
+{
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Threading;
+    using System.Threading.Tasks;
+    using Fsel.Common.ActionResults;
+    using Fsel.Core.Base.BaseModels;
+    using Fsel.Core.Extensions;
+    using Fsel.Course.Application.Services.UserServices.Models;
+    using Fsel.Training.Application.Services.SystemServices;
+    using Fsel.Training.Application.Services.UserServices;
+    using Fsel.Training.Domain.IRepositories;
+    using Fsel.Training.Domain.Models.EntityModels;
+    using Fsel.Training.Domain.Models.QueryModels;
+    using MediatR;
+    using Microsoft.AspNetCore.Http;
+    using Microsoft.EntityFrameworkCore;
+
+    public class SearchTeacherFreeTimeByCsoQuery : SearchTeacherFreeTimeByCsoQueryModel, IRequest<MethodResult<PagingItemsModel<TeacherFreeTimeModel>>>
+    {
+    }
+
+    public class SearchTeacherFreeTimeByCsoQueryHandler : IRequestHandler<SearchTeacherFreeTimeByCsoQuery, MethodResult<PagingItemsModel<TeacherFreeTimeModel>>>
+    {
+        private readonly ITeacherFreeTimeRepository _teacherFreeTimeRepository;
+        private readonly IUserService _userService;
+        private readonly ISystemService _systemService;
+
+        public SearchTeacherFreeTimeByCsoQueryHandler(ITeacherFreeTimeRepository teacherFreeTimeRepository, IUserService userService, ISystemService systemService)
+        {
+            _teacherFreeTimeRepository = teacherFreeTimeRepository;
+            _userService = userService;
+            _systemService = systemService;
+        }
+
+        public async Task<MethodResult<PagingItemsModel<TeacherFreeTimeModel>>> Handle(SearchTeacherFreeTimeByCsoQuery request, CancellationToken cancellationToken)
+        {
+            var methodResult = new MethodResult<PagingItemsModel<TeacherFreeTimeModel>>();
+            ArgumentNullException.ThrowIfNull(request);
+            if (request.PageSize > 100)
+            {
+                methodResult.StatusCode = StatusCodes.Status400BadRequest;
+                return methodResult;
+            }
+
+            var teacherFreeTimeQuery = _teacherFreeTimeRepository.Queryable
+                                    .Include(x => x.TeacherFreeDate)
+                                    .Where(x => request.StartTime == null || x.TeacherFreeDate!.StartTime <= request.StartTime.Value.Date)
+                                    .Where(x => request.EndTime == null || x.TeacherFreeDate!.EndTime >= request.EndTime.Value.Date)
+                                    .Where(x => request.DayOfWeek == null || x.DayOfWeek == request.DayOfWeek)
+                                    .Where(x => request.Priority == null || x.Priority == request.Priority)
+                                    .Where(x => request.LiveTimeFrameId == null || x.LiveTimeFrameId == request.LiveTimeFrameId)
+                                    .Select(x => new TeacherFreeTimeModel
+                                    {
+                                        Id = x.Id,
+                                        CreatedDate = x.CreatedDate,
+                                        Priority = x.Priority,
+                                        TeacherId = x.TeacherFreeDate!.TeacherId,
+                                    });
+
+            int totalItem = await teacherFreeTimeQuery.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
+            var lists = await GetDatas(teacherFreeTimeQuery, request, cancellationToken);
+
+            methodResult.Result = new PagingItemsModel<TeacherFreeTimeModel>(lists, request, totalItem);
+            methodResult.StatusCode = StatusCodes.Status200OK;
+            return methodResult;
+        }
+
+        public async Task<IList<TeacherFreeTimeModel>> GetDatas(IQueryable<TeacherFreeTimeModel> teacherFreeTimeQuery, SearchTeacherFreeTimeByCsoQuery request, CancellationToken cancellationToken)
+        {
+            var lists = await teacherFreeTimeQuery
+                    .ApplySortAndPaging(request)
+                    .AsNoTracking()
+                    .ToListAsync(cancellationToken: cancellationToken)
+                    .ConfigureAwait(false);
+            var teacherResult = await _userService.GetTeacherByIdsAsync(new GetTeacherByIdsQueryModel { Ids = lists.Select(x => x.TeacherId).Distinct().ToList() });
+            var teachers = teacherResult.Content?.Result;
+
+            foreach (var item in lists)
+            {
+                var teacher = teachers!.FirstOrDefault(x => x.Id == item.TeacherId);
+                item.TeacherName = teacher?.Human?.FullName;
+                item.TeacherCode = teacher?.Human?.Code;
+            }
+
+            return lists;
+        }
+    }
+}

@@ -25,7 +25,7 @@ namespace Fsel.Training.Api.Controllers.Cso
         }
 
         /// <summary>
-        /// Search Course
+        /// Search  class live by cso
         /// </summary>
         [HttpGet]
         [ProducesResponseType(typeof(MethodResult<PagingItemsModel<ClassLiveCalendarModel>>), (int)HttpStatusCode.OK)]
@@ -37,7 +37,7 @@ namespace Fsel.Training.Api.Controllers.Cso
         }
 
         /// <summary>
-        /// Get Course
+        /// Get class live
         /// </summary>
         [HttpGet("{id}")]
         [ProducesResponseType(typeof(MethodResult<ClassLiveCalendarModel>), (int)HttpStatusCode.OK)]

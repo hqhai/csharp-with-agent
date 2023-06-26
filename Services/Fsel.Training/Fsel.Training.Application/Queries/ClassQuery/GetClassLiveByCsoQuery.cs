@@ -61,7 +61,7 @@ namespace Fsel.Training.Application.Queries.ClassQuery
             var teacher = teacherResult.Content?.Result;
             classLiveModel.Class!.TeacherName = teacher?.Human?.FullName;
 
-            var studentResult = await _userService.GetStudentByUserIdsAsync(classLiveModel.Class.ClassStudents!.Select(x => x.StudentId).ToList());
+            var studentResult = await _userService.GetStudentsByStudentIdsAsync(classLiveModel.Class.ClassStudents!.Select(x => x.StudentId).ToList());
             var students = studentResult.Content?.Result;
             if (classLiveModel.Class.ClassStudents != null)
             {

@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Training.Application.Commands.ClassCmd
+namespace Fsel.Training.Application.Queries.ClassQuery.Admin
 {
     using System.Threading;
     using System.Threading.Tasks;
@@ -30,14 +30,14 @@ namespace Fsel.Training.Application.Commands.ClassCmd
         public async Task<MethodResult<ClassModel>> Handle(GetNewClassByStudentIdQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            MethodResult<ClassModel> methodResult = new MethodResult<ClassModel>();
+            var methodResult = new MethodResult<ClassModel>();
             var classes = await _classRepository.Queryable.Include(cs => cs.ClassStudents).FirstOrDefaultAsync(p => p.Status == EnumClassType.New && p.ClassStudents.Any(p => p.StudentId == request.StudentId), cancellationToken);
             if (classes == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumClassErrorCode.ClassNotFound));
                 return methodResult;
             }
-            ClassModel classModel = new ClassModel()
+            var classModel = new ClassModel()
             {
                 Id = classes.Id,
                 Code = classes.Code,

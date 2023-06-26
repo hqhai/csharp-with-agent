@@ -27,5 +27,8 @@ namespace Fsel.Training.Application.Services.CourseServices
 
         [Get("/teacher/course/get-course-by-level")]
         Task<IApiResponse<MethodResult<IList<CourseModel>>>> GetCoursesByLevelFromTeacherAsync([FromQuery] EnumCourseLevel? courseLevel);
+
+        [Post("/admin/course")]
+        Task<IApiResponse<MethodResult<IList<CourseModel>>>> GetListCourseByIds([FromBody] IList<Guid> ids);
     }
 }

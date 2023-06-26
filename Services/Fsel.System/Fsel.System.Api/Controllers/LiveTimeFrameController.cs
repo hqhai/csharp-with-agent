@@ -3,14 +3,13 @@
 namespace Fsel.System.Api.Controllers
 {
     using Fsel.Common.ActionResults;
-
     using Fsel.Common.Constants;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
     using global::System.Net;
-    using Fsel.System.Application.Querys.LiveTimeFrames;
     using Fsel.System.Application.Commands.LiveTimeFrameCmd;
     using Fsel.System.Domain.Models.EntityModels;
+    using Fsel.System.Application.Querys.LiveTimeFrameQuery;
 
     [ApiVersion(Settings.APIVersion)]
     [Route(Settings.APIDefaultRoute + "/live-time-frame")]
@@ -25,7 +24,7 @@ namespace Fsel.System.Api.Controllers
         }
 
         /// <summary>
-        /// Get Pacing Guide Detail By Group id
+        /// Get get list live time frame
         /// </summary>
         [HttpGet]
         [ProducesResponseType(typeof(MethodResult<IList<LiveTimeFrameModel>>), (int)HttpStatusCode.OK)]
