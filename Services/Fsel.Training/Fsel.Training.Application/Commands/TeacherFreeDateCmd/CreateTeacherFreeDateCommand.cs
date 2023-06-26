@@ -52,13 +52,13 @@ namespace Fsel.Training.Application.Commands.TeacherFreeDateCmd
             }
             var teacherId = teacher.Content?.Result?.Id;
 
-            if (request.StartDate > request.EndDate)
+            if (request.StartTime > request.EndTime)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumTeacherFreeDateErrorCode.StartDateNotBiggerThanEndDate));
                 return methodResult;
             }
 
-            var isCheck = await _teacherFreeDateRepository.Queryable.AnyAsync(p => (p.StartTime >= request.StartDate || p.EndTime >= request.StartDate) && p.TeacherId == teacherId, cancellationToken);
+            var isCheck = await _teacherFreeDateRepository.Queryable.AnyAsync(p => (p.StartTime >= request.StartTime || p.EndTime >= request.StartTime) && p.TeacherId == teacherId, cancellationToken);
             if (isCheck)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumTeacherFreeDateErrorCode.StartDateAlreadyExists));
