@@ -39,7 +39,7 @@ namespace Fsel.Training.Application.Queries.TeacherFreeDateQuery
             ArgumentNullException.ThrowIfNull(request);
 
             MethodResult<PagingItemsModel<TeacherFreeDateModel>> methodResult = new MethodResult<PagingItemsModel<TeacherFreeDateModel>>();
-            var teacher = await _userService.GetTeacherByIdAsync(_authContext.CurrentUserId);
+            var teacher = await _userService.GetTeacherByUserIdAsync(_authContext.CurrentUserId);
             var teacherId = teacher.Content?.Result?.Id;
 
             var teacherFreeDateQuery = _teacherFreeDateRepository.Queryable.Where(x => x.TeacherId == teacherId)

@@ -49,6 +49,18 @@ namespace Fsel.Identity.Api.Controllers
         }
 
         /// <summary>
+        /// Get teacher by UserId
+        /// </summary>
+        [HttpGet("get-by-userid/{id}")]
+        [ProducesResponseType(typeof(MethodResult<TeacherModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetByUserId([FromRoute] Guid id)
+        {
+            MethodResult<TeacherModel> commandResult = await _mediator.Send(new GetTeacherByUserIdQuery { UserId = id }).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
         /// Search Teacher
         /// </summary>
         [HttpGet]

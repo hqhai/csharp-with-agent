@@ -40,7 +40,7 @@ namespace Fsel.Training.Application.Queries.TeacherFreeDateQuery
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<TeacherFreeDateModel> methodResult = new MethodResult<TeacherFreeDateModel>();
 
-            var teacher = await _userService.GetTeacherByIdAsync(_authContext.CurrentUserId);
+            var teacher = await _userService.GetTeacherByUserIdAsync(_authContext.CurrentUserId);
             if (!teacher.IsSuccessStatusCode)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumTeacherFreeDateErrorCode.TeacherNotExits));

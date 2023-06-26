@@ -44,7 +44,7 @@ namespace Fsel.Training.Application.Commands.TeacherFreeDateCmd
 
             #region Validate
 
-            var teacher = await _userService.GetTeacherByIdAsync(_authContext.CurrentUserId);
+            var teacher = await _userService.GetTeacherByUserIdAsync(_authContext.CurrentUserId);
             if (!teacher.IsSuccessStatusCode)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumTeacherFreeDateErrorCode.TeacherNotExits));
