@@ -20,5 +20,8 @@ namespace Fsel.Training.Application.Services.CourseServices
 
         [Post("/placement-test/admin")]
         Task<IApiResponse<MethodResult<List<AveragePTPointModel>>>> GetAveragePTPoint([FromBody] GetAveragePTPointByIdsQueryModel model);
+
+        [Post("/admin/course")]
+        Task<IApiResponse<MethodResult<IList<CourseModel>>>> GetListCourseByIds([FromBody] IList<Guid> ids);
     }
 }

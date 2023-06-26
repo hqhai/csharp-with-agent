@@ -71,7 +71,17 @@ namespace Fsel.Training.Domain.Enums.ErrorCodes
         /// <summary>
         /// Package Not Exist
         /// </summary>
-        PackageNotExist
+        PackageNotExist,
+
+        /// <summary>
+        /// Student not exist in class
+        /// </summary>
+        StudentNotExistInClass,
+
+        /// <summary>
+        /// Student Is Already In The Class
+        /// </summary>
+        StudentIsAlreadyInTheClass
 ,
     }
 }
