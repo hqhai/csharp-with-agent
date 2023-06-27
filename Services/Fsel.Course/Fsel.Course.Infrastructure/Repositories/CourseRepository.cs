@@ -45,11 +45,11 @@ namespace Fsel.Course.Infrastructure.Repositories
             try
             {
                 return await Queryable.Include(x => x.CourseResults)
-                                        .Include(x => x.CourseUnitMockTests.Where(y => y.IsDeleted == false))
+                                        .Include(x => x.CourseUnitMockTests.Where(y => y.IsDeleted == false).OrderBy(x => x.DisplayOrder))
                                         .ThenInclude(x => x.Unit)
-                                        .ThenInclude(x => x!.UnitLessons.Where(y => y.IsDeleted == false))
+                                        .ThenInclude(x => x!.UnitLessons.Where(y => y.IsDeleted == false).OrderBy(x => x.DisplayOrder))
                                         .ThenInclude(x => x.Lesson)
-                                        .ThenInclude(x => x!.LessonVideos.Where(y => y.IsDeleted == false))
+                                        .ThenInclude(x => x!.LessonVideos.Where(y => y.IsDeleted == false).OrderBy(x => x.CreatedDate))
                                         .Where(x => x.Id == id).FirstOrDefaultAsync();
             }
             catch (Exception)

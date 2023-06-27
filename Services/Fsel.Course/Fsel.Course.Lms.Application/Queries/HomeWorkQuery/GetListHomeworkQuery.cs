@@ -53,10 +53,11 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkQuery
 
             var lessonSkillScoreQuery = _homeWorkResultRepository.Queryable
                                         .Include(x => x.HomeWork)
-                                        .ThenInclude(x => x!.HomeWorkQuestions.Where(x => !x.IsDeleted))
+                                        .ThenInclude(x => x!.HomeWorkQuestions.Where(x => !x.IsDeleted).OrderBy(x => x.CreatedDate))
                                         .ThenInclude(x => x.Question)
-                                        .Include(x => x.HomeWorkAnswers.Where(x => !x.IsDeleted))
+                                        .Include(x => x.HomeWorkAnswers.Where(x => !x.IsDeleted).OrderBy(x => x.CreatedDate))
                                         .Where(x => x.HomeWork != null && x.LessonResultId == request.LessonResultId)
+                                        .OrderBy(x => x.CreatedDate)
                                         .Select(h => new LessonHomeWorkResultModel
                                         {
                                             Id = h.HomeWork!.Id,

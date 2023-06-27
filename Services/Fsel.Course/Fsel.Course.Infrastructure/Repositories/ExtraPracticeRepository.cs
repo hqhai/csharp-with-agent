@@ -121,24 +121,24 @@ namespace Fsel.Course.Infrastructure.Repositories
         {
             try
             {
-                return await Queryable.Include(x => x.ExtraPracticeChapters.Where(n => !n.IsDeleted))
-                                    .ThenInclude(x => x.ExtraPracticeExercises.Where(n => !n.IsDeleted))
+                return await Queryable.Include(x => x.ExtraPracticeChapters.Where(n => !n.IsDeleted).OrderBy(x => x.CreatedDate))
+                                    .ThenInclude(x => x.ExtraPracticeExercises.Where(n => !n.IsDeleted).OrderBy(x => x.CreatedDate))
                                     .ThenInclude(x => x.Exercise)
-                                    .ThenInclude(x => x!.ExerciseQuestions.Where(n => !n.IsDeleted))
+                                    .ThenInclude(x => x!.ExerciseQuestions.Where(n => !n.IsDeleted).OrderBy(x => x.CreatedDate))
                                     .ThenInclude(x => x.Question)
 
-                                    .Include(x => x.LessonExtraPractices.Where(n => !n.IsDeleted))
+                                    .Include(x => x.LessonExtraPractices.Where(n => !n.IsDeleted).OrderBy(x => x.CreatedDate))
 
                                     .Include(x => x.Video)
-                                    .ThenInclude(x => x!.VideoTimeCodes.Where(x => !x.IsDeleted))
-                                    .ThenInclude(x => x.TimeCodeExercises.Where(x => !x.IsDeleted && x.Exercise != null))
+                                    .ThenInclude(x => x!.VideoTimeCodes.Where(x => !x.IsDeleted).OrderBy(x => x.CreatedDate))
+                                    .ThenInclude(x => x.TimeCodeExercises.Where(x => !x.IsDeleted && x.Exercise != null).OrderBy(x => x.CreatedDate))
                                     .ThenInclude(x => x.Exercise)
-                                    .ThenInclude(x => x!.ExerciseQuestions.Where(x => !x.IsDeleted))
+                                    .ThenInclude(x => x!.ExerciseQuestions.Where(x => !x.IsDeleted).OrderBy(x => x.CreatedDate))
                                     .ThenInclude(x => x.Question)
 
-                                    .Include(x => x.ExtraPracticeExercises)
+                                    .Include(x => x.ExtraPracticeExercises.OrderBy(x => x.CreatedDate))
                                     .ThenInclude(x => x.Exercise)
-                                    .ThenInclude(x => x!.ExerciseQuestions.Where(x => !x.IsDeleted))
+                                    .ThenInclude(x => x!.ExerciseQuestions.Where(x => !x.IsDeleted).OrderBy(x => x.CreatedDate))
                                     .ThenInclude(x => x.Question)
                                     .FirstOrDefaultAsync(x => x.Id == id);
             }
