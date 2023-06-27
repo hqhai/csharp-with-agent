@@ -30,7 +30,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             if (lessonResult != null && status == EnumResultStatus.Done)
             {
                 lessonResult.Status = EnumResultStatus.Done;
-                lessonResult.Percent += notification.Data.Percent * 18 / 100;
+                lessonResult.Percent += notification.Data.Percent * 40 / 100;
                 _lessonResultRepository.Update(lessonResult);
                 await _lessonResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
                 await _mediator.Publish(new EntityChangedEvent<LessonResult>(lessonResult), cancellationToken);

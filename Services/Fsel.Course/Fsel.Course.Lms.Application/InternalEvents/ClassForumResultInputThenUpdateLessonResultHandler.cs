@@ -9,7 +9,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using MediatR;
-
+    using Microsoft.EntityFrameworkCore;
 
     public class ClassForumResultInputThenUpdateLessonResultHandler :
         INotificationHandler<EntityChangedEvent<ClassForumResult>>
@@ -24,12 +24,13 @@ namespace Fsel.Course.Lms.Application.InternalEvents
         public async Task Handle(EntityChangedEvent<ClassForumResult> notification, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(notification);
-            var lessonResult = await _lessonResultRepository.GetByIdAsync(notification.Data.LessonResultId);
+            var lessonResult = await _lessonResultRepository.Queryable.Include(x => x.ClassForumResults).ThenInclude(x => x.ClassForumScores)
+                                        .FirstOrDefaultAsync(x => x.Id == notification.Data.LessonResultId, cancellationToken);
             var status = notification.Data.Status;
-            if (lessonResult != null)
+            if (lessonResult != null && notification.Data.Status == EnumClassForumResultStatus.Graded)
             {
                 lessonResult.Status = EnumResultStatus.Done;
-                lessonResult.Percent += notification.Data. * 18 / 100;
+                lessonResult.Percent += (double)notification.Data.ClassForumScores.FirstOrDefault()!.Score * 30 / 100;
                 _lessonResultRepository.Update(lessonResult);
                 await _lessonResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
             }
