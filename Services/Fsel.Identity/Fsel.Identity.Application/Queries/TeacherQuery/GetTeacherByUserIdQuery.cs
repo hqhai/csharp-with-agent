@@ -31,7 +31,7 @@ namespace Fsel.Identity.Application.Queries.TeacherQuery
             ArgumentNullException.ThrowIfNull(request);
 
             MethodResult<TeacherModel> methodResult = new MethodResult<TeacherModel>();
-            var teacher = await _teacherRepository.GetIncludeByIdAsync(request.UserId);
+            var teacher = await _teacherRepository.GetIncludeByUserIdAsync(request.UserId);
             methodResult.Result = _mapper.Map<TeacherModel>(teacher);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;

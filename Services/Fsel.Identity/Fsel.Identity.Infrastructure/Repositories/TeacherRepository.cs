@@ -19,7 +19,7 @@ namespace Fsel.Identity.Infrastructure.Repositories
             {
                 return await Queryable
                 .Include(x => x.Human)
-                .FirstOrDefaultAsync(x => x.Human!.UserId == id.ToString());
+                .FirstOrDefaultAsync(x => x.Id == id);
             }
             catch (Exception)
             {
@@ -35,6 +35,20 @@ namespace Fsel.Identity.Infrastructure.Repositories
                 .Include(x => x.Human)
                 .Where(x => ids.Contains(x.Id))
                 .ToListAsync();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<Teacher?> GetIncludeByUserIdAsync(Guid userId, int? siteId = null)
+        {
+            try
+            {
+                return await Queryable
+                .Include(x => x.Human)
+                .FirstOrDefaultAsync(x => x.Human!.UserId == userId.ToString());
             }
             catch (Exception)
             {
