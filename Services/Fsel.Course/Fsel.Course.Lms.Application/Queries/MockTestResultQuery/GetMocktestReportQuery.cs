@@ -16,25 +16,25 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class GetMocktestReportQuery : IRequest<MethodResult<IList<MockTestResultModel>>>
+    public class GetMockTestReportQuery : IRequest<MethodResult<IList<MockTestResultModel>>>
     {
         public Guid? MockTestResultId { get; set; }
     }
 
-    public class GetMocktestReportQueryHandler : IRequestHandler<GetMocktestReportQuery, MethodResult<IList<MockTestResultModel>>>
+    public class GetMockTestReportQueryHandler : IRequestHandler<GetMockTestReportQuery, MethodResult<IList<MockTestResultModel>>>
     {
         private readonly IMockTestResultRepository _mockTestResultRepository;
         private readonly AuthContext _authContext;
         private readonly IUserService _userService;
 
-        public GetMocktestReportQueryHandler(IMockTestResultRepository mockTestResultRepository, AuthContext authContext, IUserService userService)
+        public GetMockTestReportQueryHandler(IMockTestResultRepository mockTestResultRepository, AuthContext authContext, IUserService userService)
         {
             _mockTestResultRepository = mockTestResultRepository;
             _authContext = authContext;
             _userService = userService;
         }
 
-        public async Task<MethodResult<IList<MockTestResultModel>>> Handle(GetMocktestReportQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<IList<MockTestResultModel>>> Handle(GetMockTestReportQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<IList<MockTestResultModel>> methodResult = new MethodResult<IList<MockTestResultModel>>();
