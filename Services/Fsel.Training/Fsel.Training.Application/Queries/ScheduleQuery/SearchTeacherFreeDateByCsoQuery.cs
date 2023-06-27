@@ -9,7 +9,6 @@ namespace Fsel.Training.Application.Queries.ScheduleQuery
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
     using Fsel.Training.Application.Services.SystemServices;
-    using Fsel.Training.Application.Services.UserServices;
     using Fsel.Training.Domain.IRepositories;
     using Fsel.Training.Domain.Models.EntityModels;
     using Fsel.Training.Domain.Models.QueryModels;
@@ -25,12 +24,10 @@ namespace Fsel.Training.Application.Queries.ScheduleQuery
     {
         private readonly ITeacherFreeTimeRepository _teacherFreeTimeRepository;
         private readonly ISystemService _systemService;
-        private readonly IUserService _userService;
 
-        public SearchTeacherFreeDateByCsoQueryHandler(ISystemService systemService, IUserService userService, ITeacherFreeTimeRepository teacherFreeTimeRepository)
+        public SearchTeacherFreeDateByCsoQueryHandler(ISystemService systemService, ITeacherFreeTimeRepository teacherFreeTimeRepository)
         {
             _systemService = systemService;
-            _userService = userService;
             _teacherFreeTimeRepository = teacherFreeTimeRepository;
         }
 
@@ -43,8 +40,8 @@ namespace Fsel.Training.Application.Queries.ScheduleQuery
             var teacherFreeTimeQuery = _teacherFreeTimeRepository.Queryable
                                     .Include(x => x.TeacherFreeDate)
                                     .Where(x => request.TeacherId.HasValue && x.TeacherFreeDate!.TeacherId == request.TeacherId)
-                                    .Where(x => request.StartTime.HasValue && x.TeacherFreeDate!.StartTime.Date <= request.StartTime.Value.Date)
-                                    .Where(x => request.EndTime.HasValue && x.TeacherFreeDate!.EndTime.Date >= request.EndTime.Value.Date)
+                                    .Where(x => request.StartDate.HasValue && x.TeacherFreeDate!.StartDate.Date <= request.StartDate.Value.Date)
+                                    .Where(x => request.EndDate.HasValue && x.TeacherFreeDate!.EndDate.Date >= request.EndDate.Value.Date)
                                     .Select(x => new TeacherFreeTimeModel
                                     {
                                         Id = x.Id,

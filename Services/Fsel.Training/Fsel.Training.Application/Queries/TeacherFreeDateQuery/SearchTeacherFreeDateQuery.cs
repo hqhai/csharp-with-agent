@@ -46,8 +46,8 @@ namespace Fsel.Training.Application.Queries.TeacherFreeDateQuery
                                     .Select(x => new TeacherFreeDateModel
                                     {
                                         Id = x.Id,
-                                        StartTime = x.StartTime,
-                                        EndTime = x.EndTime,
+                                        StartDate = x.StartDate,
+                                        EndDate = x.EndDate,
                                         TeacherId = x.TeacherId,
                                         CreatedDate = x.CreatedDate,
                                     });

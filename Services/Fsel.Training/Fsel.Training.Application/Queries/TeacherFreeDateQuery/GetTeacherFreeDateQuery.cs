@@ -7,6 +7,7 @@ namespace Fsel.Training.Application.Queries.TeacherFreeDateQuery
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base;
+    using Fsel.Training.Application.Services.SystemServices;
     using Fsel.Training.Application.Services.UserServices;
     using Fsel.Training.Domain.Enums.ErrorCodes;
     using Fsel.Training.Domain.IRepositories;
@@ -26,13 +27,15 @@ namespace Fsel.Training.Application.Queries.TeacherFreeDateQuery
         private readonly AuthContext _authContext;
         private readonly IUserService _userService;
         private readonly IMapper _mapper;
+        private readonly ISystemService _systemService;
 
-        public GetTeacherFreeDateQueryHandler(ITeacherFreeDateRepository teacherFreeDateRepository, AuthContext authContext, IUserService userService, IMapper mapper)
+        public GetTeacherFreeDateQueryHandler(ITeacherFreeDateRepository teacherFreeDateRepository, AuthContext authContext, IUserService userService, IMapper mapper, ISystemService systemService)
         {
             _teacherFreeDateRepository = teacherFreeDateRepository;
             _authContext = authContext;
             _userService = userService;
             _mapper = mapper;
+            _systemService = systemService;
         }
 
         public async Task<MethodResult<TeacherFreeDateModel>> Handle(GetTeacherFreeDateQuery request, CancellationToken cancellationToken)
@@ -48,7 +51,20 @@ namespace Fsel.Training.Application.Queries.TeacherFreeDateQuery
             }
             var teacherId = teacher.Content?.Result?.Id;
             var teacherFreeDate = await _teacherFreeDateRepository.Queryable.Include(x => x.TeacherFreeTimes).FirstOrDefaultAsync(x => x.TeacherId == teacherId, cancellationToken);
-            methodResult.Result = _mapper.Map<TeacherFreeDateModel>(teacherFreeDate);
+            var teacherFreeDateModel = _mapper.Map<TeacherFreeDateModel>(teacherFreeDate);
+            var timeFramesResult = await _systemService.GetLiveTimeFramesAsync();
+            var timeFrames = timeFramesResult.Content?.Result;
+            if (teacherFreeDateModel.TeacherFreeTimes != null)
+            {
+                foreach (var item in teacherFreeDateModel.TeacherFreeTimes)
+                {
+                    var timeFrame = timeFrames?.FirstOrDefault(x => x.Id == item.LiveTimeFrameId);
+                    item.StartTime = timeFrame?.StartTime;
+                    item.EndTime = timeFrame?.EndTime;
+                }
+            }
+
+            methodResult.Result = teacherFreeDateModel;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }

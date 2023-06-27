@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fsel.Training.Infrastructure.Migrations
 {
     [DbContext(typeof(TrainingDbContext))]
-    [Migration("20230623110500_CreateTableTeacherFreeTimeAndTeacherFreeDate")]
+    [Migration("20230627063135_CreateTableTeacherFreeTimeAndTeacherFreeDate")]
     partial class CreateTableTeacherFreeTimeAndTeacherFreeDate
     {
         /// <inheritdoc />
@@ -298,14 +298,14 @@ namespace Fsel.Training.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(103);
 
-                    b.Property<DateTime>("EndTime")
+                    b.Property<DateTime>("EndDate")
                         .HasColumnType("datetime2");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit")
                         .HasColumnOrder(110);
 
-                    b.Property<DateTime>("StartTime")
+                    b.Property<DateTime>("StartDate")
                         .HasColumnType("datetime2");
 
                     b.Property<Guid>("TeacherId")

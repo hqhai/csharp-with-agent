@@ -19,5 +19,10 @@ namespace Fsel.Training.Domain.Enums.ErrorCodes
         /// StartDate already exists
         /// </summary>
         StartDateAlreadyExists,
+
+        /// <summary>
+        /// EndDate already exists
+        /// </summary>
+        EndDateAlreadyExists,
     }
 }

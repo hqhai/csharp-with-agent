@@ -43,8 +43,8 @@ namespace Fsel.Training.Application.Queries.ClassQuery.Admin
                 Code = classes.Code,
                 Name = classes.Name,
                 Status = classes.Status,
-                StartDate = classes.StartDate,
-                EndDate = classes.EndDate,
+                StartTime = classes.StartTime,
+                EndTime = classes.EndTime,
                 CourseId = classes.CourseId,
             };
             methodResult.Result = classModel;

@@ -7,12 +7,10 @@ namespace Fsel.Training.Domain.Models.EntityModels
 
     public class TeacherFreeDateModel : BaseModel
     {
-        public DateTime EndTime { get; set; }
-        public DateTime StartTime { get; set; }
+        public DateTime EndDate { get; set; }
+        public DateTime StartDate { get; set; }
         public Guid TeacherId { get; set; }
         public string? TeacherName { get; set; }
         public IList<TeacherFreeTimeModel>? TeacherFreeTimes { get; set; }
-        public DateTime? TimeFrameEndTime { get; set; }
-        public DateTime? TimeFrameStartTime { get; set; }
     }
 }

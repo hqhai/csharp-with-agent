@@ -52,16 +52,23 @@ namespace Fsel.Training.Application.Commands.TeacherFreeDateCmd
             }
             var teacherId = teacher.Content?.Result?.Id;
 
-            if (request.StartTime > request.EndTime)
+            if (request.StartDate > request.EndDate)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumTeacherFreeDateErrorCode.StartDateNotBiggerThanEndDate));
                 return methodResult;
             }
 
-            var isCheck = await _teacherFreeDateRepository.Queryable.AnyAsync(p => (p.StartTime >= request.StartTime || p.EndTime >= request.StartTime) && p.TeacherId == teacherId, cancellationToken);
-            if (isCheck)
+            var isCheckStart = await _teacherFreeDateRepository.Queryable.AnyAsync(p => (p.StartDate <= request.StartDate && p.EndDate >= request.StartDate) && p.TeacherId == teacherId, cancellationToken);
+            if (isCheckStart)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumTeacherFreeDateErrorCode.StartDateAlreadyExists));
+                return methodResult;
+            }
+
+            var isCheckEnd = await _teacherFreeDateRepository.Queryable.AnyAsync(p => (p.StartDate <= request.EndDate && p.EndDate >= request.EndDate) && p.TeacherId == teacherId, cancellationToken);
+            if (isCheckEnd)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumTeacherFreeDateErrorCode.EndDateAlreadyExists));
                 return methodResult;
             }
 
@@ -79,7 +86,7 @@ namespace Fsel.Training.Application.Commands.TeacherFreeDateCmd
             {
                 teacherFreeDate = _teacherFreeDateRepository.Add(teacherFreeDate);
                 await _teacherFreeDateRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
-                methodResult.StatusCode = StatusCodes.Status200OK;
+                methodResult.StatusCode = StatusCodes.Status201Created;
                 methodResult.Result = _mapper.Map<TeacherFreeDateModel>(teacherFreeDate);
                 return methodResult;
             });

@@ -7,7 +7,6 @@ namespace Fsel.Training.Application.Queries.ClassQuery
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
-    using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Core.Extensions;
@@ -28,13 +27,11 @@ namespace Fsel.Training.Application.Queries.ClassQuery
     {
         private readonly IClassLiveCalendarRepository _classLiveCalendarRepository;
         private readonly IUserService _userService;
-        private readonly IMapper _mapper;
 
-        public SearchClassLiveByCsoQueryHandler(IClassLiveCalendarRepository classLiveCalendarRepository, IUserService userService, IMapper mapper)
+        public SearchClassLiveByCsoQueryHandler(IClassLiveCalendarRepository classLiveCalendarRepository, IUserService userService)
         {
             _classLiveCalendarRepository = classLiveCalendarRepository;
             _userService = userService;
-            _mapper = mapper;
         }
 
         public async Task<MethodResult<PagingItemsModel<ClassLiveCalendarModel>>> Handle(SearchClassLiveByCsoQuery request, CancellationToken cancellationToken)
@@ -59,8 +56,8 @@ namespace Fsel.Training.Application.Queries.ClassQuery
                                                 Name = x.Class!.Name,
                                                 Code = x.Class!.Code,
                                                 TeacherId = x.Class!.TeacherId,
-                                                StartDate = x.Class!.StartDate,
-                                                EndDate = x.Class!.EndDate,
+                                                StartTime = x.Class!.StartTime,
+                                                EndTime = x.Class!.EndTime,
                                                 LiveDays = x.Class!.LiveDays,
                                             },
                                             CreatedDate = x.CreatedDate
