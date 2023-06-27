@@ -86,13 +86,14 @@ namespace Fsel.Training.Application.Queries.Cso
                     item.CourseLevel = result.CourseLevel;
                 }
             }
-            var timeFrameResult = await _systemService.GetTimeFramByIdsAsync(classQuery.Select(x => x.LiveTimeFrameId ?? default).ToList());
-            var timeFrames = timeFrameResult.Content?.Result;
+            var timeFramesResult = await _systemService.GetLiveTimeFramesAsync();
+            var timeFrames = timeFramesResult.Content?.Result;
 
             foreach (var item in lists)
             {
-                item.TimeFrameEndTime = timeFrames!.EndTime;
-                item.TimeFrameStartTime = timeFrames!.StartTime;
+                var timeFrame = timeFrames?.FirstOrDefault(x => x.Id == item.LiveTimeFrameId);
+                item.StartDate = timeFrame.StartTime;
+                item.EndDate = timeFrame.EndTime;
             }
 
             methodResult.Result = new PagingItemsModel<ClassModel>(lists, request, totalItem);

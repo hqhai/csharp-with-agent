@@ -2,6 +2,7 @@
 
 namespace Fsel.Training.Application.Queries.Cso
 {
+    using System.Collections;
     using System.Collections.Generic;
     using System.Threading;
     using System.Threading.Tasks;
@@ -40,6 +41,9 @@ namespace Fsel.Training.Application.Queries.Cso
             MethodResult<IList<ClassModel>> methodResult = new MethodResult<IList<ClassModel>>();
 
             var classQuery = await _classRepository.Queryable
+                                .Where(x => request.ClassId.HasValue && x.Id == request.ClassId)
+                                .Where(x => request.StartDate.HasValue && x.StartDate.Date <= request.StartDate.Value.Date)
+                                .Where(x => request.EndDate.HasValue && x.EndDate.Date >= request.EndDate.Value.Date)
                                 .Select(x => new ClassModel
 
                                 {
@@ -52,16 +56,12 @@ namespace Fsel.Training.Application.Queries.Cso
                                     CsoId = x.CsoId,
                                     Status = x.Status,
                                     LiveTimeFrameId = x.LiveTimeFrameId,
-                                    StartTime = x.StartTime,
+                                    StartDate = x.StartDate,
                                     LiveDays = x.LiveDays,
-                                    EndTime = x.EndTime,
+                                    EndDate = x.EndDate,
                                     PackageId = x.PackageId,
                                 }).ToListAsync(cancellationToken);
 
-            /*if (request.ClassCode != null)
-            {
-                classQuery = classQuery.Where(m => m.Code == request.ClassCode);
-            }*/
             var teacherResult = await _userService.GetTeacherByIdsAsync(new GetTeacherByIdsQueryModel { Ids = classQuery.Select(x => x.TeacherId ?? default).Distinct().ToList() });
             var teachers = teacherResult.Content?.Result;
 
@@ -70,13 +70,14 @@ namespace Fsel.Training.Application.Queries.Cso
                 var teacher = teachers!.FirstOrDefault(x => x.Id == item.TeacherId);
                 item.TeacherName = teacher?.Human?.FullName;
             }
-            var timeFrameResult = await _systemService.GetTimeFramByIdsAsync(classQuery.Select(x => x.LiveTimeFrameId ?? default).ToList());
-            var timeFrames = timeFrameResult.Content?.Result;
+            var timeFramesResult = await _systemService.GetLiveTimeFramesAsync();
+            var timeFrames = timeFramesResult.Content?.Result;
 
             foreach (var item in classQuery)
             {
-                item.TimeFrameEndTime = timeFrames!.EndTime;
-                item.TimeFrameStartTime = timeFrames!.StartTime;
+                var timeFrame = timeFrames?.FirstOrDefault(x => x.Id == item.LiveTimeFrameId);
+                item.StartDate = timeFrame.StartTime;
+                item.EndDate = timeFrame.EndTime;
             }
             methodResult.Result = classQuery;
             methodResult.StatusCode = StatusCodes.Status200OK;
