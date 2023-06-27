@@ -63,18 +63,6 @@ namespace Fsel.Training.Api.Controllers.Cso
             return commandResult.GetActionResult();
         }
 
-        /*  /// <summary>
-          /// Search class live
-          /// </summary>
-          [HttpGet("search-class-live")]
-          [ProducesResponseType(typeof(MethodResult<PagingItemsModel<ClassSearchModel>>), (int)HttpStatusCode.OK)]
-          [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-          public async Task<IActionResult> SearchClass([FromQuery] SearchClassByAdminQuery query)
-          {
-              MethodResult<PagingItemsModel<ClassSearchModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
-              return queryResult.GetActionResult();
-          }*/
-
         /// <summary>
         /// Get list class live
         /// </summary>
