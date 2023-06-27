@@ -121,7 +121,7 @@ namespace Fsel.Course.Infrastructure.Repositories
         {
             try
             {
-                return await Queryable.Include(x => x.ExtraPracticeChapters.Where(n => !n.IsDeleted).OrderBy(x => x.CreatedDate))
+                return await Queryable.Include(x => x.ExtraPracticeChapters.Where(n => !n.IsDeleted).OrderBy(x => x.PageNumber))
                                     .ThenInclude(x => x.ExtraPracticeExercises.Where(n => !n.IsDeleted).OrderBy(x => x.CreatedDate))
                                     .ThenInclude(x => x.Exercise)
                                     .ThenInclude(x => x!.ExerciseQuestions.Where(n => !n.IsDeleted).OrderBy(x => x.CreatedDate))
