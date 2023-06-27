@@ -18,12 +18,24 @@ namespace Fsel.Course.Lms.Application.InternalEvents
         private readonly IUnitRepository _unitRepository;
         private readonly IUnitResultRepository _unitResultRepository;
         private readonly ILessonResultRepository _lessonResultRepository;
+        private readonly IVideoResultRepository _videoResultRepository;
+        private readonly IHomeWorkResultRepository _homeWorkResultRepository;
+        private readonly IClassForumResultRepository _classForumResultRepository;
 
-        public LessonResultInputThenUpdateUnitResultHandler(IUnitRepository unitRepository, IUnitResultRepository unitResultRepository, ILessonResultRepository lessonResultRepository)
+        public LessonResultInputThenUpdateUnitResultHandler(IUnitRepository unitRepository
+            , IUnitResultRepository unitResultRepository
+            , ILessonResultRepository lessonResultRepository
+            , IVideoResultRepository videoResultRepository
+            , IHomeWorkResultRepository homeWorkResultRepository
+            , IClassForumResultRepository classForumResultRepository
+            )
         {
             _unitRepository = unitRepository;
             _unitResultRepository = unitResultRepository;
             _lessonResultRepository = lessonResultRepository;
+            _videoResultRepository = videoResultRepository;
+            _homeWorkResultRepository = homeWorkResultRepository;
+            _classForumResultRepository = classForumResultRepository;
         }
 
         public async Task Handle(EntityChangedEvent<LessonResult> notification, CancellationToken cancellationToken)
@@ -45,19 +57,14 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                     List<SkillScores> unitTestSkillScores = new List<SkillScores>();
                     foreach (var item in unit.LessonResults)
                     {
-                        var lesssonResult = await _lessonResultRepository.Queryable.Include(x => x.VideoResult)
-                                                                             .Include(x => x.HomeWorkResults)
-                                                                             .Include(x => x.ClassForumResults)
-                                                                             .ThenInclude(x => x.ClassForum)
-                                                                             .Include(x => x.ClassForumResults)
-                                                                             .ThenInclude(x => x.ClassForumScores)
-                                                                             .FirstOrDefaultAsync(x => x.Id == item.Id, cancellationToken);
-                        if (lesssonResult != null)
+                        var lesssonResult = await _lessonResultRepository.Queryable.FirstOrDefaultAsync(x => x.Id == item.Id, cancellationToken);
+                        if (lesssonResult != null && lesssonResult.VideoResult != null)
                         {
-                            videoSkillScores.AddRange(await VideoSkillScores(lesssonResult.VideoResult));
-                            unitTestSkillScores.AddRange(lesssonResult.VideoResult.VideoSkillScores!.Where(x => x.Type == EnumTimeCodeType.SkillTest).SelectMany(x => x.SkillScores!).ToList());
-                            skillTestSkillScores.AddRange(lesssonResult.VideoResult.VideoSkillScores!.Where(x => x.Type == EnumTimeCodeType.UnitTest).SelectMany(x => x.SkillScores!).ToList());
-                            homeSkillScores.AddRange(lesssonResult.HomeWorkResults.SelectMany(x => x.SkillScores!).ToList());
+                            videoSkillScores.AddRange(await VideoSkillScores(lesssonResult.Id));
+                            unitTestSkillScores.AddRange(await UnitTestSkillScores(lesssonResult.Id));
+                            skillTestSkillScores.AddRange(await SkillTestSkillScores(lesssonResult.Id));
+                            homeSkillScores.AddRange(await HomeWordsSkillScores(lesssonResult.Id));
+                            classForumSkillScores.Add(await ClassForumSkillScores(lesssonResult.Id));
                         }
                     }
 
@@ -69,12 +76,71 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             }
         }
 
-        public async Task<List<SkillScores>> VideoSkillScores(VideoResult? videoResult)
+        public async Task<List<SkillScores>> VideoSkillScores(Guid? lessonResultid)
         {
-            ArgumentNullException.ThrowIfNull(videoResult);
+            ArgumentNullException.ThrowIfNull(lessonResultid);
             List<SkillScores> skillScores = new List<SkillScores>();
-            skillScores = videoResult.VideoSkillScores!.Where(x => x.Type == EnumTimeCodeType.Standalone).SelectMany(x => x.SkillScores!).ToList();
-            skillScores = skillScores.Where(x => x.TotalCount == 0 && x.CorrectCount == 0).ToList();
+            var videoResult = await _videoResultRepository.Queryable.FirstOrDefaultAsync(x => x.LessonResultId == lessonResultid);
+            if (videoResult != null && videoResult.VideoSkillScores != null)
+            {
+                skillScores = videoResult.VideoSkillScores.Where(x => x.Type == EnumTimeCodeType.Standalone).SelectMany(x => x.SkillScores!).Where(x => x.TotalCount != 0 && x.CorrectCount != 0).ToList();
+            }
+            return skillScores;
+        }
+
+        public async Task<List<SkillScores>> UnitTestSkillScores(Guid? lessonResultid)
+        {
+            ArgumentNullException.ThrowIfNull(lessonResultid);
+            List<SkillScores> skillScores = new List<SkillScores>();
+            var videoResult = await _videoResultRepository.Queryable.FirstOrDefaultAsync(x => x.LessonResultId == lessonResultid);
+            if (videoResult != null && videoResult.VideoSkillScores != null)
+            {
+                skillScores = videoResult.VideoSkillScores.Where(x => x.Type == EnumTimeCodeType.UnitTest).SelectMany(x => x.SkillScores!).Where(x => x.TotalCount != 0 && x.CorrectCount != 0).ToList();
+            }
+            return skillScores;
+        }
+
+        public async Task<List<SkillScores>> SkillTestSkillScores(Guid? lessonResultid)
+        {
+            ArgumentNullException.ThrowIfNull(lessonResultid);
+            List<SkillScores> skillScores = new List<SkillScores>();
+            var videoResult = await _videoResultRepository.Queryable.FirstOrDefaultAsync(x => x.LessonResultId == lessonResultid);
+            if (videoResult != null && videoResult.VideoSkillScores != null)
+            {
+                skillScores = videoResult.VideoSkillScores.Where(x => x.Type == EnumTimeCodeType.SkillTest).SelectMany(x => x.SkillScores!).Where(x => x.TotalCount != 0 && x.CorrectCount != 0).ToList();
+            }
+            return skillScores;
+        }
+
+        public async Task<SkillScores> ClassForumSkillScores(Guid? lessonResultid)
+        {
+            ArgumentNullException.ThrowIfNull(lessonResultid);
+            SkillScores skillScores = new SkillScores();
+            var classForumResult = await _classForumResultRepository.Queryable.Include(x => x.ClassForum).Include(x => x.ClassForumScores).FirstOrDefaultAsync(x => x.LessonResultId == lessonResultid);
+            if (classForumResult != null && classForumResult.ClassForumScores != null && classForumResult.ClassForum != null)
+            {
+                skillScores.Skill = classForumResult.ClassForum.CourseSkill;
+                skillScores.TotalCount = 36;
+                skillScores.CorrectCount = classForumResult.ClassForumScores.Sum(x => x.Score);
+            }
+            return skillScores;
+        }
+
+        public async Task<List<SkillScores>> HomeWordsSkillScores(Guid? lessonResultid)
+        {
+            ArgumentNullException.ThrowIfNull(lessonResultid);
+            List<SkillScores> skillScores = new List<SkillScores>();
+            var homeWorkResults = await _homeWorkResultRepository.Queryable.Where(x => x.LessonResultId == lessonResultid).ToArrayAsync();
+            if (homeWorkResults != null)
+            {
+                foreach (var item in homeWorkResults)
+                {
+                    if (item.SkillScores != null)
+                    {
+                        skillScores.AddRange(item.SkillScores.Where(x => x.TotalCount != 0 && x.CorrectCount != 0).ToList());
+                    }
+                }
+            }
             return skillScores;
         }
     }
