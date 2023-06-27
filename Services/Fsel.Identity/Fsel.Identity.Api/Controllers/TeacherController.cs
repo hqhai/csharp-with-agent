@@ -4,7 +4,6 @@ using System.Net;
 using Fsel.Common.ActionResults;
 using Fsel.Common.Constants;
 using Fsel.Core.Base.BaseModels;
-using Fsel.Identity.Application.Queries.StudentQuery;
 using Fsel.Identity.Application.Queries.TeacherQuery;
 using Fsel.Identity.Domain.Models.EntityModels;
 using MediatR;
@@ -50,14 +49,14 @@ namespace Fsel.Identity.Api.Controllers
         }
 
         /// <summary>
-        /// Get Student by UserId
+        /// Get teacher by UserId
         /// </summary>
         [HttpGet("get-by-user-id/{id}")]
         [ProducesResponseType(typeof(MethodResult<TeacherModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetByUserId([FromRoute] Guid id)
         {
-            MethodResult<TeacherModel> commandResult = await _mediator.Send(new GetTeacherByUserIdQuery { Id = id }).ConfigureAwait(false);
+            MethodResult<TeacherModel> commandResult = await _mediator.Send(new GetTeacherByUserIdQuery { UserId = id }).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
 

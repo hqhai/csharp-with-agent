@@ -16,7 +16,7 @@ namespace Fsel.Identity.Application.Queries.TeacherQuery
 
     public class GetTeacherByUserIdQuery : IRequest<MethodResult<TeacherModel>>
     {
-        public Guid Id { get; set; }
+        public Guid UserId { get; set; }
     }
 
     public class GetTeacherByUserIdQueryHandler : IRequestHandler<GetTeacherByUserIdQuery, MethodResult<TeacherModel>>
@@ -33,17 +33,9 @@ namespace Fsel.Identity.Application.Queries.TeacherQuery
         public async Task<MethodResult<TeacherModel>> Handle(GetTeacherByUserIdQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            var methodResult = new MethodResult<TeacherModel>();
-            var teacher = await _teacherRepository.Queryable
-                                        .Include(i => i.Human)
-                                        .FirstOrDefaultAsync(i => i.Human != null && i.Human.UserId == request.Id.ToString(), cancellationToken);
 
-            if (teacher == null)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumTeacherErrorCode.TeacherNotExist));
-                return methodResult;
-            }
-
+            MethodResult<TeacherModel> methodResult = new MethodResult<TeacherModel>();
+            var teacher = await _teacherRepository.GetIncludeByUserIdAsync(request.UserId);
             methodResult.Result = _mapper.Map<TeacherModel>(teacher);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
