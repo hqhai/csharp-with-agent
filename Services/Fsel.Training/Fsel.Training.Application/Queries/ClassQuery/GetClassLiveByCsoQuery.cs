@@ -21,12 +21,12 @@ namespace Fsel.Training.Application.Queries.ClassQuery
 
     public class GetClassLiveByCsoQueryHandler : IRequestHandler<GetClassLiveByCsoQuery, MethodResult<ClassLiveCalendarModel>>
     {
-        private readonly IClassLiveCalendarRepository _classLiveCalenderRepository;
+        private readonly IClassLiveCalendarRepository _classLiveCalendarRepository;
         private readonly IUserService _userService;
 
-        public GetClassLiveByCsoQueryHandler(IClassLiveCalendarRepository classLiveCalenderRepository, IUserService userService)
+        public GetClassLiveByCsoQueryHandler(IClassLiveCalendarRepository classLiveCalendarRepository, IUserService userService)
         {
-            _classLiveCalenderRepository = classLiveCalenderRepository;
+            _classLiveCalendarRepository = classLiveCalendarRepository;
             _userService = userService;
         }
 
@@ -36,7 +36,7 @@ namespace Fsel.Training.Application.Queries.ClassQuery
 
             MethodResult<ClassLiveCalendarModel> methodResult = new MethodResult<ClassLiveCalendarModel>();
 
-            var classLiveModel = await _classLiveCalenderRepository.Queryable
+            var classLiveModel = await _classLiveCalendarRepository.Queryable
                                     .Include(x => x.Class)
                                     .ThenInclude(x => x.ClassStudents)
                                     .Where(x => x.Id == request.Id)
@@ -45,23 +45,27 @@ namespace Fsel.Training.Application.Queries.ClassQuery
                                         Id = x.Id,
                                         AccessLink = x.AccessLink,
                                         Note = x.Note,
-                                        TeacherId = x.Class!.TeacherId,
-                                        ClassName = x.Class.Name,
-                                        ClassCode = x.Class.Code,
-                                        ClassStudents = x.Class.ClassStudents.Select(x => new ClassStudentModel
+                                        Class = new ClassModel
                                         {
-                                            StudentId = x.StudentId
-                                        }).ToList()
+                                            Id = x.Class!.Id,
+                                            TeacherId = x.Class!.TeacherId,
+                                            Code = x.Class!.Code,
+                                            Name = x.Class!.Name,
+                                            ClassStudents = x.Class!.ClassStudents.Select(x => new ClassStudentModel
+                                            {
+                                                StudentId = x.StudentId
+                                            }).ToList()
+                                        }
                                     }).FirstOrDefaultAsync(cancellationToken);
-            var teacherResult = await _userService.GetTeacherByIdAsync(classLiveModel!.TeacherId ?? default);
+            var teacherResult = await _userService.GetTeacherByIdAsync(classLiveModel!.Class?.TeacherId ?? default);
             var teacher = teacherResult.Content?.Result;
-            classLiveModel.TeacherName = teacher?.Human?.FullName;
+            classLiveModel.Class!.TeacherName = teacher?.Human?.FullName;
 
-            var studentResult = await _userService.GetStudentsByStudentIdsAsync(classLiveModel.ClassStudents!.Select(x => x.StudentId).ToList());
+            var studentResult = await _userService.GetStudentsByStudentIdsAsync(classLiveModel.Class.ClassStudents!.Select(x => x.StudentId).ToList());
             var students = studentResult.Content?.Result;
-            if (classLiveModel.ClassStudents != null)
+            if (classLiveModel.Class.ClassStudents != null)
             {
-                foreach (var item in classLiveModel.ClassStudents)
+                foreach (var item in classLiveModel.Class!.ClassStudents)
                 {
                     var student = students?.FirstOrDefault(x => x.Id == item.StudentId);
                     item.StudentName = student?.Human?.FullName;

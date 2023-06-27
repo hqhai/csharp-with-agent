@@ -93,7 +93,7 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestQuery
             var results = new List<SectionGroupModel>();
             var placementTests = await query.Include(x => x.PlacementTestSections)
                                             .ThenInclude(x => x.SectionGroup)
-                                            .ThenInclude(x => x!.Sections)
+                                            .ThenInclude(x => x!.Sections.OrderBy(x => x.DisplayOrder))
                                             .ThenInclude(x => x!.SectionQuestions)
                                             .ThenInclude(x => x.Question)
                                             .ToListAsync(cancellationToken);
@@ -106,6 +106,7 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestQuery
             {
                 var sectionGroup = sectionGroups.Where(x => x!.CourseSkill == skill).OrderBy(x => random.Next()).FirstOrDefault();
                 var sectionGroupModel = _sectionConverter.GetSectionGroupModel(sectionGroup);
+                sectionGroupModel.Sections = sectionGroupModel.Sections?.OrderBy(x => x.DisplayOrder).ToList();
                 if (sectionGroupModel != null)
                 {
                     results.Add(sectionGroupModel);
@@ -123,7 +124,7 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestQuery
             var results = new List<SectionGroupModel>();
             var placementTests = await query.Include(x => x.PlacementTestSections)
                                     .ThenInclude(x => x.SectionGroup)
-                                    .ThenInclude(x => x!.Sections)
+                                    .ThenInclude(x => x!.Sections.OrderBy(x => x.DisplayOrder))
                                     .ThenInclude(x => x.SectionParts)
                                     .ThenInclude(x => x!.SectionQuestions)
                                     .ThenInclude(x => x.Question)
@@ -147,7 +148,7 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestQuery
 
                 var sectionGroupModel = _sectionConverter.GetSectionGroupModel(new SectionGroup
                 {
-                    Sections = sectionsResult,
+                    Sections = sectionsResult.OrderBy(x => x.DisplayOrder).ToList(),
                     CourseSkill = skill,
                     ExecutionTime = skill == EnumCourseSkill.Listening ? PlacementTestSettings.ListeningExecutionTime : PlacementTestSettings.ReadingExecutionTime,
                 });
