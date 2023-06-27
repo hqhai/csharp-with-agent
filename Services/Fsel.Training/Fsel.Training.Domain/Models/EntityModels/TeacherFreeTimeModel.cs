@@ -4,7 +4,6 @@ namespace Fsel.Training.Domain.Models.EntityModels
 {
     using System;
     using Fsel.Core.Base.BaseModels;
-    using Fsel.Shared.Enums;
 
     public class TeacherFreeTimeModel : BaseModel
     {
@@ -17,15 +16,14 @@ namespace Fsel.Training.Domain.Models.EntityModels
         public bool Priority { get; set; }
         public TeacherFreeDateModel? TeacherFreeDate { get; set; }
 
-        public DateTime EndTime { get; set; }
+        public DateTime? EndTime { get; set; }
 
-        public DateTime StartTime { get; set; }
+        public DateTime? StartTime { get; set; }
 
         public Guid TeacherId { get; set; }
 
         public string? TeacherName { get; set; }
 
-        public DateTime? TimeFrameEndTime { get; set; }
-        public DateTime? TimeFrameStartTime { get; set; }
+        public string? TeacherCode { get; set; }
     }
 }

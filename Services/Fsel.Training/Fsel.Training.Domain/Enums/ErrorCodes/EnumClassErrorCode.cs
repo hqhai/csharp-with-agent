@@ -56,7 +56,32 @@ namespace Fsel.Training.Domain.Enums.ErrorCodes
         /// <summary>
         /// Code Class Already Exist
         /// </summary>
-        CodeClassAlreadyExist
+        CodeClassAlreadyExist,
+
+        /// <summary>
+        /// Status Of Class is not New
+        /// </summary>
+        StatusOfClassIsNotNew,
+
+        /// <summary>
+        /// Course Time not installed
+        /// </summary>
+        CourseTimeNotInstalled,
+
+        /// <summary>
+        /// Package Not Exist
+        /// </summary>
+        PackageNotExist,
+
+        /// <summary>
+        /// Student not exist in class
+        /// </summary>
+        StudentNotExistInClass,
+
+        /// <summary>
+        /// Student Is Already In The Class
+        /// </summary>
+        StudentIsAlreadyInTheClass
 ,
     }
 }

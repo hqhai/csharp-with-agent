@@ -3,12 +3,10 @@
 namespace Fsel.System.Api.Controllers
 {
     using Fsel.Common.ActionResults;
-
     using Fsel.Common.Constants;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
     using global::System.Net;
-    using Fsel.System.Application.Querys.LiveTimeFrames;
     using Fsel.System.Application.Commands.LiveTimeFrameCmd;
     using Fsel.System.Domain.Models.EntityModels;
     using Fsel.System.Application.Querys.LiveTimeFrameQuery;
@@ -38,21 +36,9 @@ namespace Fsel.System.Api.Controllers
         }
 
         /// <summary>
-        ///  Get get list live time frame
-        /// </summary>
-        [HttpGet("get-list-live-time-frame-by-ids")]
-        [ProducesResponseType(typeof(MethodResult<IList<LiveTimeFrameModel>>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetListTimeFrameByIds([FromRoute] IList<Guid> ids)
-        {
-            var commandResult = await _mediator.Send(new GetListLiveTimeFrameByIdsQuery { Ids = ids }).ConfigureAwait(false);
-            return commandResult.GetActionResult();
-        }
-
-        /// <summary>
         /// Save list live time frame
         /// </summary>
-        [HttpPost("save-list-live-time-frame")]
+        [HttpPost]
         [ProducesResponseType(typeof(MethodResult<IList<LiveTimeFrameModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> SaveList([FromBody] SaveListLiveTimeFrameCommand command)

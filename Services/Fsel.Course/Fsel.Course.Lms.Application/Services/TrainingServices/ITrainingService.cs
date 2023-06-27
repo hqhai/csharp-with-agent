@@ -12,7 +12,7 @@ namespace Fsel.Course.Lms.Application.Services.TrainingServices
 
     public interface ITrainingService
     {
-        [Get("/class/get-class-list-status-new")]
+        [Post("/class/get-class-list-status-new")]
         Task<IApiResponse<MethodResult<IList<CourseClassModel>>>> GetClassListStatusNewAsync([Body] GetClassListStatusNewModel command);
 
         [Get("/class/get-new-class-code")]

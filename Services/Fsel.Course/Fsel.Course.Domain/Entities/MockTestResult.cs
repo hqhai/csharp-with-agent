@@ -5,11 +5,11 @@ namespace Fsel.Course.Domain.Entities
     using System;
     using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations;
-    using System.Linq;
-    using System.Text;
-    using System.Threading.Tasks;
+    using System.ComponentModel.DataAnnotations.Schema;
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Common.Helpers;
     using Fsel.Core.Entities;
+    using Fsel.Course.Domain.Entities.SkillScoresConfigs;
     using Fsel.Course.Domain.Enums;
 
     public class MockTestResult : Entity
@@ -45,6 +45,15 @@ namespace Fsel.Course.Domain.Entities
         /// Trạng thái
         /// </summary>
         public EnumResultStatus Status { get; set; }
+
+        public string? SkillScoresStr { get; set; }
+
+        [NotMapped]
+        public IList<SkillScores>? SkillScores
+        {
+            get { return ConvertHelper.Deserialize<IList<SkillScores>>(SkillScoresStr); }
+            set { SkillScoresStr = ConvertHelper.Serialize(value); }
+        }
 
         public Course? Course { get; set; }
 

@@ -11,8 +11,9 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public string? Code { get; set; }
         public string? Name { get; set; }
         public string? InstructionContent { get; set; }
-        public string? FilePathsStr { get; set; }
-        public object? FilePaths { get; set; }
+        public string? BookFilePath { get; set; }
+        public string? BookCoverPath { get; set; }
+        public string? BookBackgroundPath { get; set; }
         public string? Author { get; set; }
         public string? Abstract { get; set; }
         public bool IsActive { get; set; }

@@ -1,12 +1,10 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Training.Application.Queries.Schedule
+namespace Fsel.Training.Application.Queries.ScheduleQuery
 {
     using System;
-    using System.Collections;
     using System.Collections.Generic;
     using System.Linq;
-    using System.Text;
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
@@ -49,38 +47,32 @@ namespace Fsel.Training.Application.Queries.Schedule
                 return methodResult;
             }
 
-            var priorityCalenderQuery = _teacherFreeTimeRepository.Queryable
+            var teacherFreeTimeQuery = _teacherFreeTimeRepository.Queryable
                                     .Include(x => x.TeacherFreeDate)
+                                    .Where(x => request.StartTime == null || x.TeacherFreeDate!.StartTime <= request.StartTime.Value.Date)
+                                    .Where(x => request.EndTime == null || x.TeacherFreeDate!.EndTime >= request.EndTime.Value.Date)
+                                    .Where(x => request.DayOfWeek == null || x.DayOfWeek == request.DayOfWeek)
+                                    .Where(x => request.Priority == null || x.Priority == request.Priority)
+                                    .Where(x => request.LiveTimeFrameId == null || x.LiveTimeFrameId == request.LiveTimeFrameId)
                                     .Select(x => new TeacherFreeTimeModel
                                     {
                                         Id = x.Id,
-                                        TeacherFreeDateId = x.TeacherFreeDateId,
                                         CreatedDate = x.CreatedDate,
-                                        DayOfWeek = x.DayOfWeek,
                                         Priority = x.Priority,
                                         TeacherId = x.TeacherFreeDate!.TeacherId,
-                                        StartTime = x.TeacherFreeDate.StartTime,
-                                        EndTime = x.TeacherFreeDate.EndTime,
                                     });
-            if (request.StartTime != null)
-            {
-                priorityCalenderQuery = priorityCalenderQuery.Where(m => m.StartTime == request.StartTime);
-            }
-            if (request.EndTime != null)
-            {
-                priorityCalenderQuery = priorityCalenderQuery.Where(m => m.EndTime == request.EndTime);
-            }
-            if (request.Priority != null)
-            {
-                priorityCalenderQuery = priorityCalenderQuery.Where(m => m.Priority == request.Priority);
-            }
-            if (request.DayOfWeek != null)
-            {
-                priorityCalenderQuery = priorityCalenderQuery.Where(m => m.DayOfWeek == request.DayOfWeek);
-            }
 
-            int totalItem = await priorityCalenderQuery.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
-            var lists = await priorityCalenderQuery
+            int totalItem = await teacherFreeTimeQuery.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
+            var lists = await GetDatas(teacherFreeTimeQuery, request, cancellationToken);
+
+            methodResult.Result = new PagingItemsModel<TeacherFreeTimeModel>(lists, request, totalItem);
+            methodResult.StatusCode = StatusCodes.Status200OK;
+            return methodResult;
+        }
+
+        public async Task<IList<TeacherFreeTimeModel>> GetDatas(IQueryable<TeacherFreeTimeModel> teacherFreeTimeQuery, SearchTeacherFreeTimeByCsoQuery request, CancellationToken cancellationToken)
+        {
+            var lists = await teacherFreeTimeQuery
                     .ApplySortAndPaging(request)
                     .AsNoTracking()
                     .ToListAsync(cancellationToken: cancellationToken)
@@ -92,23 +84,10 @@ namespace Fsel.Training.Application.Queries.Schedule
             {
                 var teacher = teachers!.FirstOrDefault(x => x.Id == item.TeacherId);
                 item.TeacherName = teacher?.Human?.FullName;
-            }
-            var timeFrameResult = await _systemService.GetTimeFramByIdsAsync(priorityCalenderQuery.Select(x => x.LiveTimeFrameId).ToList());
-            var timeFrames = timeFrameResult.Content?.Result;
-
-            foreach (var item in lists)
-            {
-                item.TimeFrameEndTime = timeFrames!.EndTime;
-                item.TimeFrameStartTime = timeFrames!.StartTime;
+                item.TeacherCode = teacher?.Human?.Code;
             }
 
-            /*if (request.TimeFrameStartTime != null)
-            {
-                timeFrames = .Where(m => m.StartTime == request.StartTime);
-            }*/
-            methodResult.Result = new PagingItemsModel<TeacherFreeTimeModel>(lists, request, totalItem);
-            methodResult.StatusCode = StatusCodes.Status200OK;
-            return methodResult;
+            return lists;
         }
     }
 }
