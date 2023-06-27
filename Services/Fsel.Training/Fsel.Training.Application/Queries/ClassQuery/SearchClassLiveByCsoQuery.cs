@@ -56,8 +56,8 @@ namespace Fsel.Training.Application.Queries.ClassQuery
                                                 Name = x.Class!.Name,
                                                 Code = x.Class!.Code,
                                                 TeacherId = x.Class!.TeacherId,
-                                                StartTime = x.Class!.StartTime,
-                                                EndTime = x.Class!.EndTime,
+                                                StartDate = x.Class!.StartDate,
+                                                EndDate = x.Class!.EndDate,
                                                 LiveDays = x.Class!.LiveDays,
                                             },
                                             CreatedDate = x.CreatedDate

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
@@ -11,6 +11,16 @@ namespace Fsel.Training.Infrastructure.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.RenameColumn(
+                name: "StartTime",
+                table: "Classes",
+                newName: "StartDate");
+
+            migrationBuilder.RenameColumn(
+                name: "EndTime",
+                table: "Classes",
+                newName: "EndDate");
+
             migrationBuilder.CreateTable(
                 name: "TeacherFreeDates",
                 columns: table => new
@@ -80,6 +90,16 @@ namespace Fsel.Training.Infrastructure.Migrations
 
             migrationBuilder.DropTable(
                 name: "TeacherFreeDates");
+
+            migrationBuilder.RenameColumn(
+                name: "StartDate",
+                table: "Classes",
+                newName: "StartTime");
+
+            migrationBuilder.RenameColumn(
+                name: "EndDate",
+                table: "Classes",
+                newName: "EndTime");
         }
     }
 }
