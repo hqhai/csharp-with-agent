@@ -123,8 +123,8 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
                                     InstructionContent = x.InstructionContent,
                                     IsActive = x.UnitLessons.Any(),
                                     VideoId = x.LessonVideos.Where(x => x.Video != null).Select(x => x.Video).FirstOrDefault()!.Id,
-                                    DisplayOrder = x.UnitLessons.Where(n => n.UnitId == request.UnitId).Select(x => x.DisplayOrder).FirstOrDefault(),
-                                    LessonInstructions = _mapper.Map<IList<LessonInstructionModel>>(x.LessonInstructions),
+                                    DisplayOrder = x.UnitLessons.Where(n => n.UnitId == request.UnitId && n.LessonId == x.Id).Select(x => x.DisplayOrder).FirstOrDefault(),
+                                    LessonInstructions = _mapper.Map<IList<LessonInstructionModel>>(x.LessonInstructions.OrderBy(x => x.CreatedDate).ToList()),
                                     LessonResult = _mapper.Map<LessonResultModel>(x.LessonResults.Where(y => y.UnitId == request.UnitId && y.CourseId == request.CourseId && y.StudentId == studentId).FirstOrDefault(y => y.LessonId == x.Id)),
                                 }).OrderBy(x => x.DisplayOrder).ToListAsync(cancellationToken: cancellationToken);
 
@@ -149,7 +149,7 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
                                     Id = x.Id,
                                     Name = x.Name,
                                     TotalQuestion = x.MockTestSections.Select(x => x.SectionGroup).SelectMany(x => x!.Sections).SelectMany(x => x.SectionParts).SelectMany(x => x.SectionQuestions).Select(x => x.Question).Select(x => x!.CorrectTotal).Sum(),
-                                    SectionGroups = x.MockTestSections.Select(x => x.SectionGroup).Select(x => new SectionGroupModel
+                                    SectionGroups = x.MockTestSections.Select(x => x.SectionGroup).OrderBy(x => x.CreatedDate).Select(x => new SectionGroupModel
                                     {
                                         Id = x!.Id,
                                         CourseSkill = x.CourseSkill,

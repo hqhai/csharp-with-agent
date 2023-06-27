@@ -28,7 +28,6 @@ namespace Fsel.Course.Lms.Application.Queries.FinalTestQuery
         private readonly IUserService _userService;
         private readonly IMapper _mapper;
         private readonly AuthContext _authContext;
-        private readonly IFinalTestResultRepository _finalTestResultRepository;
         private readonly IFinalTestRepository _finalTestRepository;
 
         public GetFinalTestQueryHandler(
@@ -36,14 +35,12 @@ namespace Fsel.Course.Lms.Application.Queries.FinalTestQuery
             , IUserService userService
             , IMapper mapper
             , AuthContext authContext
-            , IFinalTestResultRepository finalTestResultRepository
             , IFinalTestRepository finalTestRepository)
         {
             _questionTypeConverter = questionTypeConverter;
             _userService = userService;
             _mapper = mapper;
             _authContext = authContext;
-            _finalTestResultRepository = finalTestResultRepository;
             _finalTestRepository = finalTestRepository;
         }
 
@@ -85,7 +82,7 @@ namespace Fsel.Course.Lms.Application.Queries.FinalTestQuery
                 CreatedDate = finalTest.CreatedDate,
                 CreatedFullName = finalTest.CreatedFullName,
                 ExecutionTime = finalTest.ExecutionTime,
-                TotalQuestion = finalTest.FinalTestSections.Select(x => x.SectionGroup).SelectMany(x => x.Sections).SelectMany(x => x.SectionQuestions).Select(x => x.Question).Select(x => x.CorrectTotal).Sum(),
+                TotalQuestion = finalTest.FinalTestSections.Select(x => x.SectionGroup).SelectMany(x => x!.Sections).SelectMany(x => x.SectionQuestions).Select(x => x.Question).Select(x => x!.CorrectTotal).Sum(),
                 SectionGroups = finalTest.FinalTestSections.Select(x => x.SectionGroup).OrderBy(x => x!.CreatedDate).Select(x => new SectionGroupModel
                 {
                     Id = x!.Id,
@@ -99,7 +96,7 @@ namespace Fsel.Course.Lms.Application.Queries.FinalTestQuery
                         VideoFilePath = x.VideoFilePath,
                         DisplayOrder = x.DisplayOrder,
                         TargetWord = x.TargetWord,
-                        Questions = x.SectionQuestions.Select(x => x.Question).OrderBy(x => x!.CreatedDate).Select(x => new QuestionModel
+                        Questions = x.SectionQuestions.OrderBy(x => x.CreatedDate).Select(x => x.Question).OrderBy(x => x!.CreatedDate).Select(x => new QuestionModel
                         {
                             Id = x!.Id,
                             QuestionType = x.QuestionType,
