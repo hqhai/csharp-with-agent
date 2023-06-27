@@ -4,22 +4,19 @@ namespace Fsel.Training.Domain.Entities
 {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
-    using System.Threading.Tasks;
     using Fsel.Core.Entities;
 
     public class TeacherFreeDate : Entity
     {
         /// <summary>
-        /// End Time
+        /// End Date
         /// </summary>
-        public DateTime EndTime { get; set; }
+        public DateTime EndDate { get; set; }
 
         /// <summary>
-        /// Start Time
+        /// Start Date
         /// </summary>
-        public DateTime StartTime { get; set; }
+        public DateTime StartDate { get; set; }
 
         public Guid TeacherId { get; set; }
         public ICollection<TeacherFreeTime> TeacherFreeTimes { get; set; } = new List<TeacherFreeTime>();

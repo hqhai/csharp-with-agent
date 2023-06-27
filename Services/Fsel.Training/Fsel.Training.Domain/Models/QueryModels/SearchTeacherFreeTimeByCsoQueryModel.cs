@@ -6,9 +6,9 @@ namespace Fsel.Training.Domain.Models.QueryModels
 
     public class SearchTeacherFreeTimeByCsoQueryModel : BaseQueryModel
     {
-        public DateTime? EndTime { get; set; }
+        public DateTime? EndDate { get; set; }
 
-        public DateTime? StartTime { get; set; }
+        public DateTime? StartDate { get; set; }
 
         public DayOfWeek? DayOfWeek { get; set; }
 

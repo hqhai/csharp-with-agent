@@ -11,7 +11,6 @@ namespace Fsel.Training.Application.Queries.ScheduleQuery
     using Fsel.Core.Base.BaseModels;
     using Fsel.Core.Extensions;
     using Fsel.Course.Application.Services.UserServices.Models;
-    using Fsel.Training.Application.Services.SystemServices;
     using Fsel.Training.Application.Services.UserServices;
     using Fsel.Training.Domain.IRepositories;
     using Fsel.Training.Domain.Models.EntityModels;
@@ -28,13 +27,11 @@ namespace Fsel.Training.Application.Queries.ScheduleQuery
     {
         private readonly ITeacherFreeTimeRepository _teacherFreeTimeRepository;
         private readonly IUserService _userService;
-        private readonly ISystemService _systemService;
 
-        public SearchTeacherFreeTimeByCsoQueryHandler(ITeacherFreeTimeRepository teacherFreeTimeRepository, IUserService userService, ISystemService systemService)
+        public SearchTeacherFreeTimeByCsoQueryHandler(ITeacherFreeTimeRepository teacherFreeTimeRepository, IUserService userService)
         {
             _teacherFreeTimeRepository = teacherFreeTimeRepository;
             _userService = userService;
-            _systemService = systemService;
         }
 
         public async Task<MethodResult<PagingItemsModel<TeacherFreeTimeModel>>> Handle(SearchTeacherFreeTimeByCsoQuery request, CancellationToken cancellationToken)
@@ -49,8 +46,8 @@ namespace Fsel.Training.Application.Queries.ScheduleQuery
 
             var teacherFreeTimeQuery = _teacherFreeTimeRepository.Queryable
                                     .Include(x => x.TeacherFreeDate)
-                                    .Where(x => request.StartTime == null || x.TeacherFreeDate!.StartTime <= request.StartTime.Value.Date)
-                                    .Where(x => request.EndTime == null || x.TeacherFreeDate!.EndTime >= request.EndTime.Value.Date)
+                                    .Where(x => request.StartDate == null || x.TeacherFreeDate!.StartDate <= request.StartDate.Value.Date)
+                                    .Where(x => request.EndDate == null || x.TeacherFreeDate!.EndDate >= request.EndDate.Value.Date)
                                     .Where(x => request.DayOfWeek == null || x.DayOfWeek == request.DayOfWeek)
                                     .Where(x => request.Priority == null || x.Priority == request.Priority)
                                     .Where(x => request.LiveTimeFrameId == null || x.LiveTimeFrameId == request.LiveTimeFrameId)
