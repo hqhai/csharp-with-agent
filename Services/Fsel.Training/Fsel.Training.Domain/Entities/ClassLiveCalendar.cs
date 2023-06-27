@@ -17,7 +17,7 @@ namespace Fsel.Training.Domain.Entities
         public string? Note { get; set; }
         public EnumClassLiveCalendarStatus Status { get; set; }
         public Guid ClassId { get; set; }
-
+     
         public Class? Class { get; set; }
     }
 }

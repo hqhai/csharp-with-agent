@@ -1,6 +1,5 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-using Fsel.Common.ValueSettings;
 using Fsel.Core.Extensions;
 using Fsel.Training.Application.Services.CourseServices;
 using Fsel.Training.Application.Services.OrderServices;

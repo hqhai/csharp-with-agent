@@ -55,10 +55,10 @@ namespace Fsel.Training.Application.Queries.ClassQuery
                                             ClassName = x.Class!.Name,
                                             ClassCode = x.Class.Code,
                                             TeacherId = x.Class.TeacherId,
-                                            StartTime = x.Class.StartTime,
-                                            EndTime = x.Class.EndTime,
+                                            StartTime = x.Class.StartTime ?? default,
+                                            EndTime = x.Class.EndTime ?? default,
                                             CreatedDate = x.Class.CreatedDate,
-                                            LiveDays = x.Class.LiveDays
+                                            LiveDays = x.Class.LiveDays.FirstOrDefault()
                                         });
             if (!string.IsNullOrEmpty(request.Keyword))
             {

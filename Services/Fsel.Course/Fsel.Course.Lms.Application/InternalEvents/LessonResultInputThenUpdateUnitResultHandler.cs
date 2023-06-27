@@ -68,13 +68,35 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                         }
                     }
 
+                    List<SkillScores> mergedSkillScores = videoSkillScores
+                                                            .Concat(homeSkillScores)
+                                                            .Concat(classForumSkillScores)
+                                                            .Concat(skillTestSkillScores)
+                                                            .Concat(unitTestSkillScores)
+                                                            .ToList();
+                    List<SkillScores> groupedSkillScores = mergedSkillScores
+                                        .GroupBy(x => x.Skill)
+                                        .Select(group => new SkillScores
+                                        {
+                                            Skill = group.Key,
+                                            Scores = group.Sum(x => x.Scores),
+                                            TotalCount = group.Sum(x => x.TotalCount),
+                                            CorrectCount = group.Sum(x => x.CorrectCount)
+                                        })
+                                        .ToList();
+
+                    unitResult.CorrectCount = (int)groupedSkillScores.Sum(x => x.CorrectCount);
+                    unitResult.CorrectTotal = (int)groupedSkillScores.Sum(x => x.TotalCount);
                     unitResult.Status = EnumResultStatus.Done;
-                    unitResult.Percent += notification.Data.Percent * 18 / 100;
+                    unitResult.Percent = await PercentUnit(videoSkillScores, 18) + await PercentUnit(homeSkillScores, 22) + await PercentUnit(classForumSkillScores, 20) + await PercentUnit(skillTestSkillScores, 10) + await PercentUnit(unitTestSkillScores, 30);
+                    unitResult.SkillScores = groupedSkillScores;
                     _unitResultRepository.Update(unitResult);
                     await _unitResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
                 }
             }
         }
+
+        #region Get Skill Scores
 
         public async Task<List<SkillScores>> VideoSkillScores(Guid? lessonResultid)
         {
@@ -143,5 +165,33 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             }
             return skillScores;
         }
+
+        #endregion Get Skill Scores
+
+        #region Tinh Diem Unit
+
+        public async Task<double> PercentUnit(IList<SkillScores>? skillScores, int percentSkill)
+        {
+            ArgumentNullException.ThrowIfNull(skillScores);
+            double percent = 0;
+            List<SkillScores> unitkillScores = skillScores
+                                     .GroupBy(x => x.Skill)
+                                     .Select(group => new SkillScores
+                                     {
+                                         Skill = group.Key,
+                                         Scores = group.Sum(x => x.Scores),
+                                         TotalCount = group.Sum(x => x.TotalCount),
+                                         CorrectCount = group.Sum(x => x.CorrectCount)
+                                     })
+                                     .ToList();
+            int dem = unitkillScores.Count;
+            foreach (var item in unitkillScores)
+            {
+                percent += (item.CorrectCount / item.TotalCount) * (percentSkill / dem);
+            }
+            return percent;
+        }
+
+        #endregion Tinh Diem Unit
     }
 }
