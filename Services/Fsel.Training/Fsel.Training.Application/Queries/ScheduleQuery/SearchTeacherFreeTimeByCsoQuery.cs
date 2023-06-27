@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Training.Application.Queries.Schedule
+namespace Fsel.Training.Application.Queries.ScheduleQuery
 {
     using System;
     using System.Collections.Generic;
@@ -12,7 +12,6 @@ namespace Fsel.Training.Application.Queries.Schedule
     using Fsel.Core.Extensions;
     using Fsel.Course.Application.Services.UserServices.Models;
     using Fsel.Training.Application.Services.SystemServices;
-    using Fsel.Training.Application.Services.SystemServices.Model;
     using Fsel.Training.Application.Services.UserServices;
     using Fsel.Training.Domain.IRepositories;
     using Fsel.Training.Domain.Models.EntityModels;

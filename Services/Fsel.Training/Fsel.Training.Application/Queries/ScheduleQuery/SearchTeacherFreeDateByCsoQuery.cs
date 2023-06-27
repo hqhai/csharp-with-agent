@@ -1,20 +1,14 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Training.Application.Queries.Schedule
+namespace Fsel.Training.Application.Queries.ScheduleQuery
 {
     using System;
-    using System.Collections;
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
-    using AutoMapper;
     using Fsel.Common.ActionResults;
-    using Fsel.Core.Base.BaseModels;
-    using Fsel.Core.Extensions;
-    using Fsel.Course.Application.Services.UserServices.Models;
     using Fsel.Training.Application.Services.SystemServices;
-    using Fsel.Training.Application.Services.SystemServices.Model;
     using Fsel.Training.Application.Services.UserServices;
     using Fsel.Training.Domain.IRepositories;
     using Fsel.Training.Domain.Models.EntityModels;
@@ -64,7 +58,7 @@ namespace Fsel.Training.Application.Queries.Schedule
                     .ToListAsync(cancellationToken: cancellationToken)
                     .ConfigureAwait(false);
 
-            var timeFramesResult = await _systemService.GetTimeFrameByIdsAsync(new GetTimeFrameByIdsModel { Ids = teacherFreeTimeQuery.Select(x => x.LiveTimeFrameId).ToList() });
+            var timeFramesResult = await _systemService.GetLiveTimeFramesAsync();
             var timeFrames = timeFramesResult.Content?.Result;
 
             foreach (var item in lists)

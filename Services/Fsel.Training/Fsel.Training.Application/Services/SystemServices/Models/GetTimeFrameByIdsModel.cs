@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Training.Application.Services.SystemServices.Model
+namespace Fsel.Training.Application.Services.SystemServices.Models
 {
     using System;
     using System.Collections.Generic;

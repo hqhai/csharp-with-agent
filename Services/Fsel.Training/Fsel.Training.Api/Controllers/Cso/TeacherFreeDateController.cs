@@ -6,7 +6,7 @@ namespace Fsel.Training.Api.Controllers.Cso
     using System.Net;
     using Fsel.Common.Constants;
     using Fsel.Core.Base.BaseModels;
-    using Fsel.Training.Application.Queries.Schedule;
+    using Fsel.Training.Application.Queries.ScheduleQuery;
     using Fsel.Training.Domain.Models.EntityModels;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;

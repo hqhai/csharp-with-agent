@@ -60,13 +60,13 @@ namespace Fsel.Training.Application.Commands.ClassCmd
                 methodResult.AddErrorBadRequest(nameof(EnumClassErrorCode.CourseTimeNotInstalled));
                 return methodResult;
             }
-            classes.StartTime = DateTime.Now;
-            classes.EndTime = DateTime.Now.AddMonths(endTime.DurationMonth);
+            classes.StartDate = DateTime.Now;
+            classes.EndDate = DateTime.Now.AddMonths(endTime.DurationMonth);
             classes.Status = EnumClassType.Active;
 
             if (classes.LiveTimeFrameId.HasValue && classes.LiveDays != null)
             {
-                for (DateTime date = DateTime.Now; date <= classes.EndTime; date = date.AddDays(1))
+                for (DateTime date = DateTime.Now; date <= classes.EndDate; date = date.AddDays(1))
                 {
                     if (classes.LiveDays!.Contains(date.DayOfWeek))
                     {
