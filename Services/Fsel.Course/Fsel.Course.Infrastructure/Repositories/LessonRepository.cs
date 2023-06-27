@@ -18,17 +18,16 @@ namespace Fsel.Course.Infrastructure.Repositories
             try
             {
                 return await Queryable.Include(e => e.UnitLessons.Where(n => !n.IsDeleted))
-                                 .Include(e => e.UnitLessons.Where(n => !n.IsDeleted))
                                  .Include(e => e.ClassForum)
-                                 .ThenInclude(e => e!.ClassForumFiles)
-                                 .Include(x => x.LessonResults.Where(n => !n.IsDeleted))
-                                 .Include(e => e.LessonHomeWorks.Where(n => !n.IsDeleted))
+                                 .ThenInclude(e => e!.ClassForumFiles.OrderBy(x => x.CreatedDate))
+                                 .Include(x => x.LessonResults.Where(n => !n.IsDeleted).OrderBy(x => x.CreatedDate))
+                                 .Include(e => e.LessonHomeWorks.Where(n => !n.IsDeleted).OrderBy(x => x.CreatedDate))
                                  .ThenInclude(e => e.HomeWork)
-                                 .Include(e => e.LessonExtraPractices.Where(n => !n.IsDeleted))
-                                 .Include(e => e.LessonInstructions.Where(n => !n.IsDeleted))
-                                 .Include(e => e.LessonVideos.Where(n => !n.IsDeleted))
+                                 .Include(e => e.LessonExtraPractices.Where(n => !n.IsDeleted).OrderBy(x => x.CreatedDate))
+                                 .Include(e => e.LessonInstructions.Where(n => !n.IsDeleted).OrderBy(x => x.CreatedDate))
+                                 .Include(e => e.LessonVideos.Where(n => !n.IsDeleted).OrderBy(x => x.CreatedDate))
                                  .ThenInclude(x => x.Video)
-                                 .ThenInclude(x => x!.VideoTimeCodes.Where(n => !n.IsDeleted))
+                                 .ThenInclude(x => x!.VideoTimeCodes.Where(n => !n.IsDeleted).OrderBy(x => x.CreatedDate))
                                  .AsNoTracking()
                                  .FirstOrDefaultAsync(x => x.Id == id);
             }
@@ -42,18 +41,17 @@ namespace Fsel.Course.Infrastructure.Repositories
         {
             try
             {
-                return await Queryable.Include(e => e.UnitLessons.Where(n => !n.IsDeleted))
-                                 .Include(e => e.UnitLessons.Where(n => !n.IsDeleted))
+                return await Queryable.Include(e => e.UnitLessons.Where(n => !n.IsDeleted).OrderBy(x => x.CreatedDate))
                                  .Include(e => e.ClassForum)
-                                 .ThenInclude(e => e!.ClassForumFiles)
-                                 .Include(x => x.LessonResults.Where(n => !n.IsDeleted))
-                                 .Include(e => e.LessonHomeWorks.Where(n => !n.IsDeleted))
+                                 .ThenInclude(e => e!.ClassForumFiles.OrderBy(x => x.CreatedDate))
+                                 .Include(x => x.LessonResults.Where(n => !n.IsDeleted).OrderBy(x => x.CreatedDate))
+                                 .Include(e => e.LessonHomeWorks.Where(n => !n.IsDeleted).OrderBy(x => x.CreatedDate))
                                  .ThenInclude(e => e.HomeWork)
-                                 .Include(e => e.LessonExtraPractices.Where(n => !n.IsDeleted))
-                                 .Include(e => e.LessonInstructions.Where(n => !n.IsDeleted))
-                                 .Include(e => e.LessonVideos.Where(n => !n.IsDeleted))
+                                 .Include(e => e.LessonExtraPractices.Where(n => !n.IsDeleted).OrderBy(x => x.CreatedDate))
+                                 .Include(e => e.LessonInstructions.Where(n => !n.IsDeleted).OrderBy(x => x.CreatedDate))
+                                 .Include(e => e.LessonVideos.Where(n => !n.IsDeleted).OrderBy(x => x.CreatedDate))
                                  .ThenInclude(x => x.Video)
-                                 .ThenInclude(x => x!.VideoTimeCodes.Where(n => !n.IsDeleted))
+                                 .ThenInclude(x => x!.VideoTimeCodes.Where(n => !n.IsDeleted).OrderBy(x => x.CreatedDate))
                                  .FirstOrDefaultAsync(x => x.Id == id);
             }
             catch (Exception)
