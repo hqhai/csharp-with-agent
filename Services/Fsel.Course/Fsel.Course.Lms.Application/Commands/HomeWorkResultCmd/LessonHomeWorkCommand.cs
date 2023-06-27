@@ -4,10 +4,12 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkResultCmd
 {
     using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Course.Domain.Entities.SkillScoresConfigs;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -45,27 +47,50 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkResultCmd
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<HomeWorkResultModel> methodResult = new MethodResult<HomeWorkResultModel>();
-
             var homeWorkResult = await _homeWorkResultRepository.Queryable.FirstOrDefaultAsync(x => x.LessonResultId == request.LessonResulttId, cancellationToken: cancellationToken);
             if (homeWorkResult == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumHomeWorkResultErrorCode.HomeWorkResultNotExist), nameof(request.LessonResulttId), request.LessonResulttId);
                 return methodResult;
             }
+            var answerQuery = from hwr in _homeWorkResultRepository.Queryable
+                              join hw in _homeWorkRepository.Queryable on hwr.HomeWorkId equals hw.Id
+                              join hwas in _homeWorkAnswerRepository.Queryable on hwr.Id equals hwas.HomeWorkResultId
+                              where hwr.LessonResultId == request.LessonResulttId
+                              group new { hw, hwas } by hw.CourseSkill into g
+                              select new
+                              {
+                                  Skill = g.Key,
+                                  CorrectCount = g.Sum(x => x.hwas.CorrectCount)
+                              };
 
-            var answerQuery = from vtca in _homeWorkAnswerRepository.Queryable
-                              where vtca.HomeWorkResultId == homeWorkResult.Id
-                              select vtca.CorrectCount;
-
-            var questionQuery = from h in _homeWorkRepository.Queryable
-                                join hq in _homeWorkQuestionRepository.Queryable on h.Id equals hq.HomeWorkId
+            var questionQuery = from hw in _homeWorkRepository.Queryable
+                                join hq in _homeWorkQuestionRepository.Queryable on hw.Id equals hq.HomeWorkId
                                 join q in _questionRepository.Queryable on hq.QuestionId equals q.Id
-                                where h.Id == homeWorkResult.HomeWorkId
-                                select q.CorrectTotal;
-
-            homeWorkResult.CorrectCount = await answerQuery.SumAsync(cancellationToken);
-            homeWorkResult.CorrectTotal = await questionQuery.SumAsync(cancellationToken);
+                                where hw.Id == homeWorkResult.HomeWorkId
+                                group new { hw, q } by hw.CourseSkill into g
+                                select new
+                                {
+                                    Skill = g.Key,
+                                    TotalCount = g.Sum(x => x.q.CorrectTotal)
+                                };
+            var questions = await questionQuery.ToListAsync(cancellationToken);
+            var skills = Enum.GetValues(typeof(EnumCourseSkill)).Cast<EnumCourseSkill>();
+            var scoreQuery = from skill in skills
+                             join questionTimeCodeQ in questions on skill equals questionTimeCodeQ.Skill into questionTimeCodeQ_jointable
+                             from questionTimeCodeQJ in questionTimeCodeQ_jointable.DefaultIfEmpty()
+                             join answerTimeCodeQ in answerQuery on skill equals answerTimeCodeQ.Skill into answerTimeCodeQ_jointable
+                             from answerTimeCodeQJ in answerTimeCodeQ_jointable.DefaultIfEmpty()
+                             select new SkillScores
+                             {
+                                 Skill = skill,
+                                 TotalCount = questionTimeCodeQJ != null ? questionTimeCodeQJ.TotalCount : default,
+                                 CorrectCount = answerTimeCodeQJ != null ? answerTimeCodeQJ.CorrectCount : default,
+                             };
+            homeWorkResult.CorrectCount = await answerQuery.SumAsync(x => x.CorrectCount, cancellationToken);
+            homeWorkResult.CorrectTotal = await questionQuery.SumAsync(x => x.TotalCount, cancellationToken);
             homeWorkResult.Status = EnumResultStatus.Done;
+            homeWorkResult.SkillScores = scoreQuery.ToList();
             homeWorkResult.Percent = (double)homeWorkResult.CorrectCount / homeWorkResult.CorrectTotal * 100;
 
             await _homeWorkResultRepository.ExecuteTransactionAsync(async () =>

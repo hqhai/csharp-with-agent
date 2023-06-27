@@ -3,8 +3,11 @@
 namespace Fsel.Course.Domain.Entities
 {
     using System.ComponentModel.DataAnnotations;
+    using System.ComponentModel.DataAnnotations.Schema;
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Common.Helpers;
     using Fsel.Core.Entities;
+    using Fsel.Course.Domain.Entities.SkillScoresConfigs;
     using Fsel.Course.Domain.Enums;
 
     public class HomeWorkResult : Entity
@@ -28,6 +31,14 @@ namespace Fsel.Course.Domain.Entities
         [Range(1, 10000_0000, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
         public int CorrectTotal { get; set; }
 
+        public string? SkillScoresStr { get; set; }
+
+        [NotMapped]
+        public IList<SkillScores>? SkillScores
+        {
+            get { return ConvertHelper.Deserialize<IList<SkillScores>>(SkillScoresStr); }
+            set { SkillScoresStr = ConvertHelper.Serialize(value); }
+        }
         /// <summary>
         /// Trạng thái
         /// </summary>
