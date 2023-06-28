@@ -115,16 +115,14 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd
                             }).FirstOrDefaultAsync(cancellationToken);
             if (skillScore != null && skillScore.QuestionCompleted + Convert.ToInt32(skillScores.Count) == skillScore.QuestionTotal)
             {
-                homeWorkResult.CorrectCount = homeWorkResult.CorrectCount + Convert.ToInt32(skillScores.Sum(x => x.CorrectCount));
-                homeWorkResult.CorrectTotal = homeWorkResult.CorrectTotal + Convert.ToInt32(skillScores.Sum(x => x.TotalCount));
+                homeWorkResult.CorrectCount += Convert.ToInt32(skillScores.Sum(x => x.CorrectCount));
                 homeWorkResult.Status = EnumResultStatus.Done;
                 homeWorkResult.Percent = homeWorkResult.CorrectTotal > 0 ? ((double)homeWorkResult.CorrectCount / homeWorkResult.CorrectTotal * 100) : 0;
             }
             else
             {
                 homeWorkResult.Status = EnumResultStatus.Process;
-                homeWorkResult.CorrectCount = homeWorkResult.CorrectCount + Convert.ToInt32(skillScores.Sum(x => x.CorrectCount));
-                homeWorkResult.CorrectTotal = homeWorkResult.CorrectTotal + Convert.ToInt32(skillScores.Sum(x => x.TotalCount));
+                homeWorkResult.CorrectCount += Convert.ToInt32(skillScores.Sum(x => x.CorrectCount));
             }
 
             #endregion Validation

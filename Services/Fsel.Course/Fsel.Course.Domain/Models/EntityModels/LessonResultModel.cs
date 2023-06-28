@@ -22,9 +22,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public Guid LessonId { get; set; }
 
         public Guid StudentId { get; set; }
-
         public IList<VideoResultModel>? VideoResults { get; set; }
-
         public IList<LessonNoteModel>? LessonNotes { get; set; }
     }
 }

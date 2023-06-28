@@ -3,7 +3,6 @@
 namespace Fsel.Course.Domain.Models.EntityModels
 {
     using System;
-    using System.Collections.Generic;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Course.Domain.Enums;
 
@@ -15,7 +14,6 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public EnumResultStatus Status { get; set; }
         public double NumberOfStars { get; set; }
         public string? Feedback { get; set; }
-        public LessonResultModel? LessonResult { get; set; }
         public Guid LessonResultId { get; set; }
         public Guid VideoId { get; set; }
         public Guid StudentId { get; set; }
