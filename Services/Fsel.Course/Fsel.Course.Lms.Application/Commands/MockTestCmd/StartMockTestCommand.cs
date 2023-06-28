@@ -103,7 +103,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
             }
             else
             {
-                mockTestResult.Status = EnumResultStatus.Unfinished;
+                mockTestResult.Status = EnumResultStatus.Process;
                 _mockTestResultRepository.Update(mockTestResult);
                 await _mockTestResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
             }

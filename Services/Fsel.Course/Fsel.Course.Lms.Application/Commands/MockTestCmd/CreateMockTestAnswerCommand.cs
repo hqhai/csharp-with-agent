@@ -147,7 +147,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
 
             mockTestResult.CorrectCount = correctCountStudent;
             mockTestResult.CorrectTotal = await questionQuery.SumAsync(cancellationToken);
-            mockTestResult.Percent = (double)mockTestResult.CorrectCount / mockTestResult.CorrectTotal * 100;
+            mockTestResult.Percent = mockTestResult.CorrectTotal != 0 ? (double)mockTestResult.CorrectCount / mockTestResult.CorrectTotal * 100 : 0;
             mockTestResult.Status = EnumResultStatus.Done;
             await _mockTestAnswerRepository.ExecuteTransactionAsync(async () =>
             {

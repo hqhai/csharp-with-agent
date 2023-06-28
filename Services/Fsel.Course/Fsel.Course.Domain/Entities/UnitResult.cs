@@ -3,21 +3,19 @@
 namespace Fsel.Course.Domain.Entities
 {
     using System;
-    using Fsel.Common.Enums.ErrorCodes;
     using System.ComponentModel.DataAnnotations;
-    using Fsel.Core.Entities;
-    using Fsel.Course.Domain.Enums;
-    using Fsel.Common.Helpers;
     using System.ComponentModel.DataAnnotations.Schema;
+    using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Common.Helpers;
+    using Fsel.Core.Entities;
     using Fsel.Course.Domain.Entities.SkillScoresConfigs;
+    using Fsel.Course.Domain.Enums;
 
     public class UnitResult : Entity
     {
         /// <summary>
         /// Phần trăm câu trả lời đúng
         /// </summary>
-        private double _percent;
-
         [Range(0, 100, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
         public double Percent { get; set; }
 

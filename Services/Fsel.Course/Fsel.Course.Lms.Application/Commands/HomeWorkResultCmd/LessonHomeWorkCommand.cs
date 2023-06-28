@@ -91,7 +91,7 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkResultCmd
             homeWorkResult.CorrectTotal = await questionQuery.SumAsync(x => x.TotalCount, cancellationToken);
             homeWorkResult.Status = EnumResultStatus.Done;
             homeWorkResult.SkillScores = scoreQuery.ToList();
-            homeWorkResult.Percent = (double)homeWorkResult.CorrectCount / homeWorkResult.CorrectTotal * 100;
+            homeWorkResult.Percent = homeWorkResult.CorrectTotal != 0 ? (double)homeWorkResult.CorrectCount / homeWorkResult.CorrectTotal * 100 : 0;
 
             await _homeWorkResultRepository.ExecuteTransactionAsync(async () =>
             {

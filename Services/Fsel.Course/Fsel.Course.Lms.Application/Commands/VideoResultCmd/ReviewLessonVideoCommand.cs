@@ -4,8 +4,6 @@ namespace Fsel.Course.Lms.Application.Commands.VideoResultCmd
 {
     using AutoMapper;
     using Fsel.Common.ActionResults;
-    using Fsel.Core.Applications.InternalEvents;
-    using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Entities.SkillScoresConfigs;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.Enums.ErrorCodes;
@@ -128,7 +126,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoResultCmd
             videoResult.CorrectCount = (int)scoreQuery.Where(x => x.Type == EnumTimeCodeType.Standalone).SelectMany(x => x.SkillScores!).Sum(x => x.CorrectCount);
             videoResult.CorrectTotal = (int)scoreQuery.Where(x => x.Type == EnumTimeCodeType.Standalone).SelectMany(x => x.SkillScores!).Sum(x => x.TotalCount);
             videoResult.Status = EnumResultStatus.Done;
-            videoResult.Percent = (double)videoResult.CorrectCount / videoResult.CorrectTotal * 100;
+            videoResult.Percent = videoResult.CorrectTotal != 0 ? (double)videoResult.CorrectCount / videoResult.CorrectTotal * 100 : 0;
             videoResult.VideoSkillScores = scoreQuery.ToList();
             await _videoResultRepository.ExecuteTransactionAsync(async () =>
             {
