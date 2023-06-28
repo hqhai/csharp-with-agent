@@ -8,6 +8,8 @@ namespace Fsel.Course.Domain.Models.CommandModels.CourseTeachers
     {
         public Guid TeacherId { get; set; }
 
+        public string? AvatarPath { get; set; }
+
         public string? Nationality { get; set; }
 
         public string? Deggree { get; set; }

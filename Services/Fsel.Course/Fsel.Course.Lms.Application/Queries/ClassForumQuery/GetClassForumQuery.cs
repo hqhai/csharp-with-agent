@@ -9,7 +9,6 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumQuery
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base;
-    using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
@@ -104,6 +103,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumQuery
                         var action = actions.FirstOrDefault(x => x.ObjectId == item.Id);
                         item.CommentNumber = action?.CommentNumber;
                         item.LikeNumber = action?.LikeNumber;
+                        item.IsLiked = action?.IsLiked;
                     }
                 }
 

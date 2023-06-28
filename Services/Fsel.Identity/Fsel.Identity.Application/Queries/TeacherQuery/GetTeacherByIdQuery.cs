@@ -6,7 +6,6 @@ namespace Fsel.Identity.Application.Queries.TeacherQuery
     using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Common.ActionResults;
-    using Fsel.Identity.Domain.Enums.ErrorCodes;
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Domain.Models.EntityModels;
     using MediatR;
@@ -33,9 +32,7 @@ namespace Fsel.Identity.Application.Queries.TeacherQuery
             ArgumentNullException.ThrowIfNull(request);
 
             MethodResult<TeacherModel> methodResult = new MethodResult<TeacherModel>();
-
             var teacher = await _teacherRepository.GetByIdAsync(request.Id);
-           
             methodResult.Result = _mapper.Map<TeacherModel>(teacher);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;

@@ -3,6 +3,7 @@
 using Fsel.Core.Extensions;
 using Fsel.Training.Application.Services.CourseServices;
 using Fsel.Training.Application.Services.OrderServices;
+using Fsel.Training.Application.Services.SystemServices;
 using Fsel.Training.Application.Services.UserServices;
 using Fsel.Training.Domain.IRepositories;
 using Fsel.Training.Infrastructure;
@@ -26,9 +27,13 @@ builder.AddDbContexts<TrainingDbContext>();
 builder.Services.AddScoped<IClassRepository, ClassRepository>();
 builder.Services.AddScoped<IClassStudentRepository, ClassStudentRepository>();
 builder.Services.AddScoped<IClassLiveCalendarRepository, ClassLiveCalendarRepository>();
+builder.Services.AddScoped<ITeacherFreeDateRepository, TeacherFreeDateRepository>();
+builder.Services.AddScoped<ITeacherFreeTimeRepository, TeacherFreeTimeRepository>();
+
 builder.AddRefitClients(typeof(IUserService), appSetting?.Services?.UserApiUrl);
 builder.AddRefitClients(typeof(ICourseService), appSetting?.Services?.CourseApiUrl);
 builder.AddRefitClients(typeof(IOrderService), appSetting?.Services?.OrderApiUrl);
+builder.AddRefitClients(typeof(ISystemService), appSetting?.Services?.SystemApiUrl);
 
 var app = builder.Build();
 

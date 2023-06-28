@@ -3,7 +3,6 @@
 namespace Fsel.Course.Domain.Models.EntityModels
 {
     using Fsel.Core.Base.BaseModels;
-    using Fsel.Course.Domain.Entities;
 
     public class MockTestAnswerModel : BaseModel
     {
@@ -11,9 +10,9 @@ namespace Fsel.Course.Domain.Models.EntityModels
 
         public int CorrectCount { get; set; }
 
-        public SectionQuestion? HomeWorkQuestion { get; set; }
+        public SectionQuestionModel? HomeWorkQuestion { get; set; }
 
-        public MockTestResult? HomeWorkResult { get; set; }
+        public MockTestResultModel? HomeWorkResult { get; set; }
 
         public Guid SectionQuestionId { get; set; }
 

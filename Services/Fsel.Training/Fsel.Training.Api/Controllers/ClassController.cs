@@ -32,7 +32,7 @@ namespace Fsel.Training.Api.Controllers
         /// <summary>
         /// get class list status new
         /// </summary>
-        [HttpGet("get-class-list-status-new")]
+        [HttpPost("get-class-list-status-new")]
         [ProducesResponseType(typeof(MethodResult<IList<CourseClassModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.BadRequest)]
         public async Task<IActionResult> GetClassListStatusNew([FromBody] GetClassByStatusNewQuery query)
@@ -84,7 +84,7 @@ namespace Fsel.Training.Api.Controllers
         [HttpGet]
         [ProducesResponseType(typeof(MethodResult<PagingItemsModel<ClassModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> Search([FromQuery] SearchClassQuery query)
+        public async Task<IActionResult> Search([FromQuery] Application.Queries.ClassQuery.SearchClassQuery query)
         {
             MethodResult<PagingItemsModel<ClassModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
@@ -120,7 +120,7 @@ namespace Fsel.Training.Api.Controllers
         [HttpGet("search-class")]
         [ProducesResponseType(typeof(MethodResult<PagingItemsModel<ClassSearchModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> SearchClass([FromQuery] SearchClassByAdminQuery query)
+        public async Task<IActionResult> SearchClass([FromQuery] Application.Queries.ClassQuery.Admin.SearchClassQuery query)
         {
             MethodResult<PagingItemsModel<ClassSearchModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();

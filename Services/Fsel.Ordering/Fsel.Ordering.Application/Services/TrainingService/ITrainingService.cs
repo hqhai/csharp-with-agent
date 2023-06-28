@@ -18,5 +18,9 @@ namespace Fsel.Ordering.Application.Services.TrainingService
 
         [Get("/class/get-new-class-by-student-id/{id}")]
         Task<IApiResponse<MethodResult<ClassModel>>> GetNewClassByStudentId([FromRoute] Guid id);
+
+        [Put("/admin/class/active-class/{id}")]
+        Task<IApiResponse<MethodResult<bool>>> ActiveClass([FromRoute] Guid id);
+
     }
 }

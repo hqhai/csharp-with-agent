@@ -20,9 +20,11 @@ services:
             - Otp__StepTime=3
             - Otp__StepDayWithAdmin=7
             - ConstantUrl__ConfirmOtpUrl=https://lms-admin-dev.fsel.edu.vn/login/first-login?otp={0}
-            - SERVICES_SenderApiUrl=http://202.134.19.161:5206/api/v1
-            - SERVICES_InteractionApiUrl=http://202.134.19.161:5208/api/
-            - SERVICES_ClassApiUrl=http://202.134.19.161:5207/api/v1
+            - SERVICES_SenderApiUrl=http://42.96.58.145:5206/api/v1
+            - SERVICES_InteractionApiUrl=http://42.96.58.145:5208/api/
+            - SERVICES_ClassApiUrl=http://42.96.58.145:5207/api/v1
+            - SERVICES_OrderApiUrl=http://42.96.58.145:5209/api/v1
+            - SERVICES_CourseApiUrl=http://42.96.58.145:5204/api/v1
         ports:
             - 5201:80
             - 7201:443
@@ -46,9 +48,11 @@ services:
             - Otp__StepTime=3
             - Otp__StepDayWithAdmin=7
             - ConstantUrl__ConfirmOtpUrl=https://lms-admin-dev.fsel.edu.vn/login/first-login?otp={0}
-            - SERVICES_SenderApiUrl=http://202.134.19.161:5206/api/v1
-            - SERVICES_InteractionApiUrl=http://202.134.19.161:5208/api/
-            - SERVICES_ClassApiUrl=http://202.134.19.161:5207/api/v1
+            - SERVICES_SenderApiUrl=http://42.96.58.145:5206/api/v1
+            - SERVICES_InteractionApiUrl=http://42.96.58.145:5208/api/
+            - SERVICES_ClassApiUrl=http://42.96.58.145:5207/api/v1
+            - SERVICES_OrderApiUrl=http://42.96.58.145:5209/api/v1
+            - SERVICES_CourseApiUrl=http://42.96.58.145:5204/api/v1
         ports:
             - 5202:80
             - 7202:443

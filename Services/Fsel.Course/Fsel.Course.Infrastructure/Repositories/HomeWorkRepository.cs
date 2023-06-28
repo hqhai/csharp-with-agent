@@ -37,7 +37,7 @@ namespace Fsel.Course.Infrastructure.Repositories
                         IsActive = x.LessonHomeWorks.Any(),
                         CourseLevel = x.CourseLevel,
                         CourseSkill = x.CourseSkill,
-                        Questions = x.HomeWorkQuestions.Where(m => m.Question != null && !m.IsDeleted).Select(m => m.Question).OrderBy(x => x.CreatedDate).Select(m => new QuestionModel()
+                        Questions = x.HomeWorkQuestions.Where(m => m.Question != null && !m.IsDeleted).Select(m => m.Question).OrderBy(x => x!.CreatedDate).Select(m => new QuestionModel()
                         {
                             Id = m!.Id,
                             QuestionType = m.QuestionType,
