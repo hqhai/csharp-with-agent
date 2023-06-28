@@ -58,7 +58,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                     foreach (var item in unit.LessonResults)
                     {
                         var lesssonResult = await _lessonResultRepository.Queryable.FirstOrDefaultAsync(x => x.Id == item.Id, cancellationToken);
-                        if (lesssonResult != null && lesssonResult.VideoResult != null)
+                        if (lesssonResult != null)
                         {
                             videoSkillScores.AddRange(await VideoSkillScores(lesssonResult.Id));
                             unitTestSkillScores.AddRange(await UnitTestSkillScores(lesssonResult.Id));
@@ -102,7 +102,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
         {
             ArgumentNullException.ThrowIfNull(lessonResultid);
             List<SkillScores> skillScores = new List<SkillScores>();
-            var videoResult = await _videoResultRepository.Queryable.FirstOrDefaultAsync(x => x.LessonResultId == lessonResultid);
+            var videoResult = await _videoResultRepository.Queryable.FirstOrDefaultAsync(x => x.Status == EnumResultStatus.Done && x.LessonResultId == lessonResultid);
             if (videoResult != null && videoResult.VideoSkillScores != null)
             {
                 skillScores = videoResult.VideoSkillScores.Where(x => x.Type == EnumTimeCodeType.Standalone).SelectMany(x => x.SkillScores!).Where(x => x.TotalCount != 0 && x.CorrectCount != 0).ToList();
@@ -114,7 +114,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
         {
             ArgumentNullException.ThrowIfNull(lessonResultid);
             List<SkillScores> skillScores = new List<SkillScores>();
-            var videoResult = await _videoResultRepository.Queryable.FirstOrDefaultAsync(x => x.LessonResultId == lessonResultid);
+            var videoResult = await _videoResultRepository.Queryable.FirstOrDefaultAsync(x => x.Status == EnumResultStatus.Done && x.LessonResultId == lessonResultid);
             if (videoResult != null && videoResult.VideoSkillScores != null)
             {
                 skillScores = videoResult.VideoSkillScores.Where(x => x.Type == EnumTimeCodeType.UnitTest).SelectMany(x => x.SkillScores!).Where(x => x.TotalCount != 0 && x.CorrectCount != 0).ToList();
@@ -126,7 +126,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
         {
             ArgumentNullException.ThrowIfNull(lessonResultid);
             List<SkillScores> skillScores = new List<SkillScores>();
-            var videoResult = await _videoResultRepository.Queryable.FirstOrDefaultAsync(x => x.LessonResultId == lessonResultid);
+            var videoResult = await _videoResultRepository.Queryable.FirstOrDefaultAsync(x => x.Status == EnumResultStatus.Done && x.LessonResultId == lessonResultid);
             if (videoResult != null && videoResult.VideoSkillScores != null)
             {
                 skillScores = videoResult.VideoSkillScores.Where(x => x.Type == EnumTimeCodeType.SkillTest).SelectMany(x => x.SkillScores!).Where(x => x.TotalCount != 0 && x.CorrectCount != 0).ToList();
@@ -138,7 +138,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
         {
             ArgumentNullException.ThrowIfNull(lessonResultid);
             SkillScores skillScores = new SkillScores();
-            var classForumResult = await _classForumResultRepository.Queryable.Include(x => x.ClassForum).Include(x => x.ClassForumScores).FirstOrDefaultAsync(x => x.LessonResultId == lessonResultid);
+            var classForumResult = await _classForumResultRepository.Queryable.Include(x => x.ClassForum).Include(x => x.ClassForumScores).FirstOrDefaultAsync(x => x.Status == EnumClassForumResultStatus.Graded && x.LessonResultId == lessonResultid);
             if (classForumResult != null && classForumResult.ClassForumScores != null && classForumResult.ClassForum != null)
             {
                 skillScores.Skill = classForumResult.ClassForum.CourseSkill;
@@ -152,7 +152,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
         {
             ArgumentNullException.ThrowIfNull(lessonResultid);
             List<SkillScores> skillScores = new List<SkillScores>();
-            var homeWorkResults = await _homeWorkResultRepository.Queryable.Where(x => x.LessonResultId == lessonResultid).ToArrayAsync();
+            var homeWorkResults = await _homeWorkResultRepository.Queryable.Where(x => x.Status == EnumResultStatus.Done && x.LessonResultId == lessonResultid).ToArrayAsync();
             if (homeWorkResults != null)
             {
                 foreach (var item in homeWorkResults)
@@ -165,6 +165,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             }
             return skillScores;
         }
+
 
         #endregion Get Skill Scores
 
@@ -187,7 +188,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             int dem = unitkillScores.Count;
             foreach (var item in unitkillScores)
             {
-                percent += (item.CorrectCount / item.TotalCount) * (percentSkill / dem);
+                percent += item.TotalCount == 0 ? 0 : (item.CorrectCount / item.TotalCount) * (percentSkill / dem);
             }
             return percent;
         }

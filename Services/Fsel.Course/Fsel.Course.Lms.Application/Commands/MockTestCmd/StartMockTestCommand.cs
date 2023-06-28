@@ -94,10 +94,17 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
                     MockTestId = request.MockTestId,
                     UnitId = request.UnitId,
                     CourseId = request.CourseId,
-                    StudentId = studentId ?? default
+                    StudentId = studentId ?? default,
+                    Status = EnumResultStatus.Unfinished
                 };
 
                 _mockTestResultRepository.Add(mockTestResult);
+                await _mockTestResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+            }
+            else
+            {
+                mockTestResult.Status = EnumResultStatus.Unfinished;
+                _mockTestResultRepository.Update(mockTestResult);
                 await _mockTestResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
             }
 

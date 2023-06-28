@@ -81,6 +81,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoResultCmd
                               join e in _exerciseRepository.Queryable on vtca.ExerciseId equals e.Id
                               join te in _timeCodeExerciseRepository.Queryable on e.Id equals te.ExerciseId
                               join vt in _videoTimeCodeRepository.Queryable on te.VideoTimeCodeId equals vt.Id
+                              where baseQ.Id == videoResult.Id
                               group new { vt, vtca } by new { vt.TimeCodeType, e.CourseSkill } into g
                               select new
                               {
@@ -96,6 +97,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoResultCmd
                                 join e in _exerciseRepository.Queryable on te.ExerciseId equals e.Id
                                 join eq in _exerciseQuestionRepository.Queryable on e.Id equals eq.ExerciseId
                                 join q in _questionRepository.Queryable on eq.QuestionId equals q.Id
+                                where baseQ.Id == videoResult.Id
                                 group new { vt, q } by new { vt.TimeCodeType, e.CourseSkill } into g
                                 select new
                                 {
@@ -132,7 +134,6 @@ namespace Fsel.Course.Lms.Application.Commands.VideoResultCmd
             {
                 videoResult = _videoResultRepository.Update(videoResult);
                 await _videoResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
-                await _mediator.Publish(new EntityChangedEvent<VideoResult>(videoResult), cancellationToken);
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 methodResult.Result = _mapper.Map<VideoResultModel>(videoResult);
                 return methodResult;

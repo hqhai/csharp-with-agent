@@ -27,7 +27,6 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             var lessonResult = await _lessonResultRepository.Queryable.Include(x => x.HomeWorkResults).FirstOrDefaultAsync(x => x.Id == notification.Data.LessonResultId, cancellationToken);
             if (lessonResult != null && lessonResult.HomeWorkResults.All(x => x.Status == EnumResultStatus.Done))
             {
-                lessonResult.Status = EnumResultStatus.Done;
                 lessonResult.Percent += (notification.Data.CorrectCount / notification.Data.CorrectTotal) * 30 / 100;
                 _lessonResultRepository.Update(lessonResult);
                 await _lessonResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);

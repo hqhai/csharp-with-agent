@@ -33,7 +33,6 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 lessonResult.Percent += notification.Data.Percent * 40 / 100;
                 _lessonResultRepository.Update(lessonResult);
                 await _lessonResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
-                await _mediator.Publish(new EntityChangedEvent<LessonResult>(lessonResult), cancellationToken);
             }
         }
     }
