@@ -56,7 +56,7 @@ namespace Fsel.Training.Application.Queries.CalendarQuery
                 return methodResult;
             }
 
-            var teacherReq = _userService.GetTeacherByUserIdAsync(_authContext.CurrentUserId);
+            var teacherReq = _userService.GetCsoByUserIdAsync(_authContext.CurrentUserId);
             var coursesReq = _courseService.GetCoursesByLevelFromTeacherAsync(request.Level);
 
             await Task.WhenAll(teacherReq, coursesReq);
