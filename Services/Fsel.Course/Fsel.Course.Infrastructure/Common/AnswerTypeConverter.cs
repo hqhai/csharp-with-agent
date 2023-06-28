@@ -237,10 +237,9 @@ namespace Fsel.Course.Infrastructure.Common
             if (words[index].IndexOf('|', StringComparison.Ordinal) != -1)
             {
                 string[] questionWords = words[index].Split('|');
-                string[] answerWords = word.Split(' ');
                 foreach (var item in questionWords)
                 {
-                    if (answerWords.Any(x => x == item))
+                    if (word == item)
                     {
                         return true;
                     }
