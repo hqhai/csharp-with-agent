@@ -239,13 +239,13 @@ namespace Fsel.Course.Infrastructure.Common
                 string[] questionWords = words[index].Split('|');
                 foreach (var item in questionWords)
                 {
-                    if (word == item)
+                    if (word.Trim() == item.Trim())
                     {
                         return true;
                     }
                 }
             }
-            else if (words[index] == word)
+            else if (words[index].Trim() == word.Trim())
             {
                 return true;
             }
