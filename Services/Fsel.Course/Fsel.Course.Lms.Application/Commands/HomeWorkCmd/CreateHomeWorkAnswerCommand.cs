@@ -49,7 +49,7 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd
 
             #region Validation
 
-            var homeWorkResult = await _homeWorkResultRepository.Queryable.Include(x => x.HomeWorkAnswers).FirstOrDefaultAsync(x => x.Id == request.HomeWorkResultId, cancellationToken);
+            var homeWorkResult = await _homeWorkResultRepository.Queryable.Include(x => x.HomeWork).FirstOrDefaultAsync(x => x.Id == request.HomeWorkResultId, cancellationToken);
             if (homeWorkResult == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumHomeWorkResultErrorCode.HomeWorkResultNotExist));
@@ -110,21 +110,22 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd
                                 Name = h.HomeWork.Name,
                                 CourseSkill = h.HomeWork.CourseSkill,
                                 CourseLevel = h.HomeWork.CourseLevel,
-                                QuestionTotal = h.HomeWork.HomeWorkQuestions.Select(x => x.Question).Count(),
+                                QuestionTotal = h.HomeWork.HomeWorkQuestions.Where(x => !x.IsDeleted).Select(x => x.Question).Count(),
                                 QuestionCompleted = h.HomeWorkAnswers.Count()
                             }).FirstOrDefaultAsync(cancellationToken);
             if (skillScore != null && skillScore.QuestionCompleted + Convert.ToInt32(skillScores.Count) == skillScore.QuestionTotal)
             {
-                homeWorkResult.CorrectCount = homeWorkResult.CorrectCount + Convert.ToInt32(skillScores.Sum(x => x.CorrectCount));
-                homeWorkResult.CorrectTotal = homeWorkResult.CorrectTotal + Convert.ToInt32(skillScores.Sum(x => x.TotalCount));
+                homeWorkResult.CorrectCount += Convert.ToInt32(skillScores.Sum(x => x.CorrectCount));
+                homeWorkResult.CorrectTotal += Convert.ToInt32(skillScores.Sum(x => x.TotalCount));
                 homeWorkResult.Status = EnumResultStatus.Done;
+                homeWorkResult.SkillScores?.Add(new SkillScores { CorrectCount = homeWorkResult.CorrectCount, TotalCount = homeWorkResult.CorrectTotal, Skill = homeWorkResult.HomeWork?.CourseSkill ?? default });
                 homeWorkResult.Percent = homeWorkResult.CorrectTotal > 0 ? ((double)homeWorkResult.CorrectCount / homeWorkResult.CorrectTotal * 100) : 0;
             }
             else
             {
                 homeWorkResult.Status = EnumResultStatus.Process;
-                homeWorkResult.CorrectCount = homeWorkResult.CorrectCount + Convert.ToInt32(skillScores.Sum(x => x.CorrectCount));
-                homeWorkResult.CorrectTotal = homeWorkResult.CorrectTotal + Convert.ToInt32(skillScores.Sum(x => x.TotalCount));
+                homeWorkResult.CorrectCount += Convert.ToInt32(skillScores.Sum(x => x.CorrectCount));
+                homeWorkResult.CorrectTotal += Convert.ToInt32(skillScores.Sum(x => x.TotalCount));
             }
 
             #endregion Validation
