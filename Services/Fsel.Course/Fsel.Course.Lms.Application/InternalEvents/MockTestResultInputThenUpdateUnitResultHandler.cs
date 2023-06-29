@@ -108,7 +108,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             var videoResult = await _videoResultRepository.Queryable.FirstOrDefaultAsync(x => x.Status == EnumResultStatus.Done && x.LessonResultId == lessonResultid);
             if (videoResult != null && videoResult.VideoSkillScores != null)
             {
-                skillScores = videoResult.VideoSkillScores.Where(x => x.Type == EnumTimeCodeType.Standalone).SelectMany(x => x.SkillScores!).Where(x => x.TotalCount != 0 && x.CorrectCount != 0).ToList();
+                skillScores = videoResult.VideoSkillScores.Where(x => x.Type == EnumTimeCodeType.Standalone).SelectMany(x => x.SkillScores!).Where(x => x.TotalCount != 0).ToList();
             }
             return skillScores;
         }
@@ -120,7 +120,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             var videoResult = await _videoResultRepository.Queryable.FirstOrDefaultAsync(x => x.Status == EnumResultStatus.Done && x.LessonResultId == lessonResultid);
             if (videoResult != null && videoResult.VideoSkillScores != null)
             {
-                skillScores = videoResult.VideoSkillScores.Where(x => x.Type == EnumTimeCodeType.UnitTest).SelectMany(x => x.SkillScores!).Where(x => x.TotalCount != 0 && x.CorrectCount != 0).ToList();
+                skillScores = videoResult.VideoSkillScores.Where(x => x.Type == EnumTimeCodeType.UnitTest).SelectMany(x => x.SkillScores!).Where(x => x.TotalCount != 0).ToList();
             }
             return skillScores;
         }
@@ -132,7 +132,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             var videoResult = await _videoResultRepository.Queryable.FirstOrDefaultAsync(x => x.Status == EnumResultStatus.Done && x.LessonResultId == lessonResultid);
             if (videoResult != null && videoResult.VideoSkillScores != null)
             {
-                skillScores = videoResult.VideoSkillScores.Where(x => x.Type == EnumTimeCodeType.SkillTest).SelectMany(x => x.SkillScores!).Where(x => x.TotalCount != 0 && x.CorrectCount != 0).ToList();
+                skillScores = videoResult.VideoSkillScores.Where(x => x.Type == EnumTimeCodeType.SkillTest).SelectMany(x => x.SkillScores!).Where(x => x.TotalCount != 0).ToList();
             }
             return skillScores;
         }
