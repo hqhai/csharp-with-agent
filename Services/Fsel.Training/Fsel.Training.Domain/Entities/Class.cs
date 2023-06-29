@@ -55,8 +55,6 @@ namespace Fsel.Training.Domain.Entities
         /// </summary>
         public string? LiveDaysStr { get; set; }
 
-        public EnumTeacherApprovalStatus? TeacherApprovalStatus { get; set; }
-
         [NotMapped]
         public IList<DayOfWeek>? LiveDays
         {

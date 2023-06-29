@@ -38,7 +38,7 @@ namespace Fsel.Training.Application.Commands.ClassCmd
                 methodResult.AddErrorBadRequest(nameof(EnumClassErrorCode.ClassesNotExits));
                 return methodResult;
             }
-            if (@class.TeacherApprovalStatus == Domain.Enums.EnumTeacherApprovalStatus.Approve)
+            if (@class.TeacherApprovalStatus == Shared.Enums.EnumTeacherApprovalStatus.Approved)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumClassErrorCode.TeacherApproveStatusIsApprove));
                 return methodResult;
@@ -46,7 +46,7 @@ namespace Fsel.Training.Application.Commands.ClassCmd
             _mapper.Map(request, @class);
             await _classRepository.ExecuteTransactionAsync(async () =>
             {
-                @class.TeacherApprovalStatus = Domain.Enums.EnumTeacherApprovalStatus.Pendding;
+                @class.TeacherApprovalStatus = Shared.Enums.EnumTeacherApprovalStatus.Pending;
                 _classRepository.Update(@class);
                 await _classRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
                 methodResult.StatusCode = StatusCodes.Status200OK;
