@@ -41,5 +41,8 @@ namespace Fsel.Training.Application.Services.UserServices
 
         [Post("/cso/admin")]
         Task<IApiResponse<MethodResult<IList<HumanModel>>>> GetCSOByIds([Body] IList<Guid>? ids);
+
+        [Get("/cso/get-by-user-id/{id}")]
+        Task<IApiResponse<MethodResult<CsoModel>>> GetCsoByUserIdAsync([FromRoute] Guid id);
     }
 }

@@ -11,12 +11,18 @@ namespace Fsel.Training.Domain.Entities
     {
         public DateTime LiveDate { get; set; }
         public Guid LiveTimeFrameId { get; set; }
+
         [MaxLength(500, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? AccessLink { get; set; }
+
         [MaxLength(500, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? Note { get; set; }
+
         public EnumClassLiveCalendarStatus Status { get; set; }
+
         public Guid ClassId { get; set; }
+
+        public Guid? TeacherId { get; set; }
 
         public Class? Class { get; set; }
     }

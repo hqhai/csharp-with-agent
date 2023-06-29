@@ -7,5 +7,6 @@ namespace Fsel.Identity.Domain.IRepositories
 
     public interface ICSORepository : IRepository<CSO>
     {
+        Task<CSO?> GetIncludeByUserIdAsync(Guid userId);
     }
 }
