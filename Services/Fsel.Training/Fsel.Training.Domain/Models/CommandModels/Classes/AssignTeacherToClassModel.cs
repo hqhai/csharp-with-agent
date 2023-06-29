@@ -3,11 +3,10 @@
 namespace Fsel.Training.Domain.Models.CommandModels.Classes
 {
     using System;
-    using Fsel.Core.Base.BaseModels;
-    using Fsel.Training.Domain.Enums;
 
-    public class AssignTeacherToClassModel : BaseCommandModel
+    public class AssignTeacherToClassModel
     {
+        public Guid Id { get; set; }
         public Guid TeacherId { get; set; }
     }
 }
