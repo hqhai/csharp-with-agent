@@ -12,6 +12,7 @@ namespace Fsel.Training.Api.Controllers.Cso
     using Fsel.Training.Domain.Models.EntityModels;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
+    using Refit;
 
     [ApiVersion(Settings.APIVersion)]
     [Route(Settings.APIDefaultRoute + "/cso/class-live")]
@@ -70,9 +71,9 @@ namespace Fsel.Training.Api.Controllers.Cso
         [HttpGet("list-class-live")]
         [ProducesResponseType(typeof(MethodResult<IList<ClassModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetListClassLive([FromQuery] GetListClassLiveManageQuery query)
+        public async Task<IActionResult> GetListClassLive()
         {
-            MethodResult<IList<ClassModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            MethodResult<IList<ClassModel>> queryResult = await _mediator.Send(new GetListClassByCsoQuery { }).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
 
@@ -82,7 +83,7 @@ namespace Fsel.Training.Api.Controllers.Cso
         [HttpPut("assign-teacher-to-class")]
         [ProducesResponseType(typeof(MethodResult<ClassModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> UpdateClassLiveStatus([FromBody] AssignTeacherToClass command)
+        public async Task<IActionResult> UpdateClassLiveStatus([FromBody] AssignTeacherToClassCommand command)
         {
             ArgumentNullException.ThrowIfNull(command);
             MethodResult<ClassModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);

@@ -13,22 +13,22 @@ namespace Fsel.Training.Application.Commands.ClassCmd
     using MediatR;
     using Microsoft.AspNetCore.Http;
 
-    public class AssignTeacherToClass : AssignTeacherToClassModel, IRequest<MethodResult<ClassModel>>
+    public class AssignTeacherToClassCommand : AssignTeacherToClassCommandModel, IRequest<MethodResult<ClassModel>>
     {
     }
 
-    public class UpdateClassLiveStatusCommandHandler : IRequestHandler<AssignTeacherToClass, MethodResult<ClassModel>>
+    public class AssignTeacherToClassCommandHandler : IRequestHandler<AssignTeacherToClassCommand, MethodResult<ClassModel>>
     {
         private readonly IClassRepository _classRepository;
         private readonly IMapper _mapper;
 
-        public UpdateClassLiveStatusCommandHandler(IClassRepository classRepository, IMapper mapper)
+        public AssignTeacherToClassCommandHandler(IClassRepository classRepository, IMapper mapper)
         {
             _classRepository = classRepository;
             _mapper = mapper;
         }
 
-        public async Task<MethodResult<ClassModel>> Handle(AssignTeacherToClass request, CancellationToken cancellationToken)
+        public async Task<MethodResult<ClassModel>> Handle(AssignTeacherToClassCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<ClassModel> methodResult = new MethodResult<ClassModel>();

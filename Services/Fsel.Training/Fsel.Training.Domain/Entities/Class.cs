@@ -30,12 +30,12 @@ namespace Fsel.Training.Domain.Entities
         /// <summary>
         /// End Date
         /// </summary>
-        public DateTime EndDate { get; set; }
+        public DateTime? EndDate { get; set; }
 
         /// <summary>
         /// Start Date
         /// </summary>
-        public DateTime StartDate { get; set; }
+        public DateTime? StartDate { get; set; }
 
         /// <summary>
         /// Status

@@ -4,7 +4,7 @@ namespace Fsel.Training.Domain.Models.CommandModels.Classes
 {
     using System;
 
-    public class AssignTeacherToClassModel
+    public class AssignTeacherToClassCommandModel
     {
         public Guid Id { get; set; }
         public Guid TeacherId { get; set; }

@@ -2,12 +2,12 @@
 
 namespace Fsel.Training.Application.Queries.ScheduleQuery
 {
-    using System;
-    using System.Linq;
+    using System.Collections.Generic;
     using System.Threading;
     using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Course.Application.Services.UserServices.Models;
     using Fsel.Training.Application.Services.UserServices;
     using Fsel.Training.Domain.Enums.ErrorCodes;
     using Fsel.Training.Domain.IRepositories;
@@ -17,18 +17,18 @@ namespace Fsel.Training.Application.Queries.ScheduleQuery
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class GetTeacherLiveDateQuery : GetTeacherLiveDateQueryModel, IRequest<MethodResult<TeacherFreeDateModel>>
+    public class GetListTeacherLiveDateByClassIdQuery : GetTeacherLiveDateByClassIdQueryModel, IRequest<MethodResult<IList<TeacherFreeDateModel>>>
     {
     }
 
-    public class GetTeacherLiveDateQueryHandler : IRequestHandler<GetTeacherLiveDateQuery, MethodResult<TeacherFreeDateModel>>
+    public class GetListTeacherLiveDateByClassIdQueryHandler : IRequestHandler<GetListTeacherLiveDateByClassIdQuery, MethodResult<IList<TeacherFreeDateModel>>>
     {
         private readonly ITeacherFreeDateRepository _teacherFreeDateRepository;
         private readonly IClassRepository _classRepository;
         private readonly IUserService _userService;
         private readonly IMapper _mapper;
 
-        public GetTeacherLiveDateQueryHandler(ITeacherFreeDateRepository teacherFreeDateRepository
+        public GetListTeacherLiveDateByClassIdQueryHandler(ITeacherFreeDateRepository teacherFreeDateRepository
             , IClassRepository classRepository
             , IUserService userService
             , IMapper mapper)
@@ -39,10 +39,10 @@ namespace Fsel.Training.Application.Queries.ScheduleQuery
             _mapper = mapper;
         }
 
-        public async Task<MethodResult<TeacherFreeDateModel>> Handle(GetTeacherLiveDateQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<IList<TeacherFreeDateModel>>> Handle(GetListTeacherLiveDateByClassIdQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            MethodResult<TeacherFreeDateModel> methodResult = new MethodResult<TeacherFreeDateModel>();
+            MethodResult<IList<TeacherFreeDateModel>> methodResult = new MethodResult<IList<TeacherFreeDateModel>>();
 
             var @class = await _classRepository.GetByIdAsync(request.ClassId);
 
@@ -56,11 +56,11 @@ namespace Fsel.Training.Application.Queries.ScheduleQuery
                 methodResult.AddErrorBadRequest(nameof(EnumClassErrorCode.TeacherIsAlreadyInTheClass), nameof(@class.TeacherId));
                 return methodResult;
             }
-            /*if (@class.StartDate == null || @class.EndDate == null)
+            if (@class.StartDate == null || @class.EndDate == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumClassErrorCode.ClassesNotExits), nameof(@class));
                 return methodResult;
-            }*/
+            }
             if (@class.LiveDays == null || @class.LiveDays.Count == 0)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumClassErrorCode.ClassLiveDayIsNull), nameof(@class.LiveDays));
@@ -69,15 +69,20 @@ namespace Fsel.Training.Application.Queries.ScheduleQuery
 
             var teacherFreeDates = await _teacherFreeDateRepository.Queryable
                                     .Include(x => x.TeacherFreeTimes)
-                                    .Where(x => x.StartDate.Date <= @class.StartDate.Date && x.EndDate.Date >= @class.EndDate.Date)
+                                    .Where(x => x.StartDate.Date <= @class.StartDate.Value.Date && x.EndDate.Date >= @class.EndDate.Value.Date)
                                     .ToArrayAsync(cancellationToken);
 
-            var teacherFreeDate = teacherFreeDates.FirstOrDefault(x => x.TeacherFreeTimes.All(n => @class.LiveDays.Contains(n.DayOfWeek) && @class.LiveTimeFrameId == n.LiveTimeFrameId));
-            var teacherFreeDateModel = _mapper.Map<TeacherFreeDateModel>(teacherFreeDate);
+            var teacherFreeDate = teacherFreeDates.Where(x => x.TeacherFreeTimes.All(n => @class.LiveDays.Contains(n.DayOfWeek) && @class.LiveTimeFrameId == n.LiveTimeFrameId)).ToList();
+            var teacherFreeDateModel = _mapper.Map<IList<TeacherFreeDateModel>>(teacherFreeDate);
 
-            var teacherResult = await _userService.GetTeacherByIdAsync(teacherFreeDateModel.TeacherId);
+            var teacherResult = await _userService.GetTeacherByIdsAsync(new GetTeacherByIdsQueryModel { Ids = teacherFreeDateModel.Select(x => x.TeacherId).ToList() });
+
             var teacher = teacherResult.Content?.Result;
-            teacherFreeDateModel.TeacherName = teacher?.Human?.FullName;
+            foreach (var item in teacherFreeDateModel)
+            {
+                item.TeacherName = teacher?.FirstOrDefault(x => x.Id == item.TeacherId)?.Human?.FullName;
+                item.TeacherCode = teacher?.FirstOrDefault(x => x.Id == item.TeacherId)?.Human?.Code;
+            }
 
             methodResult.Result = teacherFreeDateModel;
             methodResult.StatusCode = StatusCodes.Status200OK;

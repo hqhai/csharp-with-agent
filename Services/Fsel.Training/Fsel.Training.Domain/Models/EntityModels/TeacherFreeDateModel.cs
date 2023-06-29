@@ -11,6 +11,7 @@ namespace Fsel.Training.Domain.Models.EntityModels
         public DateTime StartDate { get; set; }
         public Guid TeacherId { get; set; }
         public string? TeacherName { get; set; }
+        public string? TeacherCode { get; set; }
         public IList<TeacherFreeTimeModel>? TeacherFreeTimes { get; set; }
     }
 }
