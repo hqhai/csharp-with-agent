@@ -38,7 +38,7 @@ namespace Fsel.Training.Application.Queries.ClassQuery
 
             var @class = await _classRepository.Queryable
                                             .Include(x => x.ClassStudents.Where(n => !n.IsDeleted))
-                                            .Where(e => e.Status != EnumClassType.Done && e.ClassStudents.Select(n => n.StudentId).Contains(request.StudentId))
+                                            .Where(e => e.Status != EnumStatusClass.Done && e.ClassStudents.Select(n => n.StudentId).Contains(request.StudentId))
                                             .FirstOrDefaultAsync(cancellationToken: cancellationToken);
 
             methodResult.Result = _mapper.Map<ClassModel>(@class);

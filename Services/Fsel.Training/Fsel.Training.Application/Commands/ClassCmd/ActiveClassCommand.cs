@@ -40,7 +40,7 @@ namespace Fsel.Training.Application.Commands.ClassCmd
                 methodResult.AddErrorBadRequest(nameof(EnumClassErrorCode.ClassesNotExits));
                 return methodResult;
             }
-            if (classes.Status != EnumClassType.New)
+            if (classes.Status != EnumStatusClass.New)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumClassErrorCode.StatusOfClassIsNotNew));
                 return methodResult;
@@ -62,7 +62,7 @@ namespace Fsel.Training.Application.Commands.ClassCmd
             }
             classes.StartTime = DateTime.Now;
             classes.EndTime = DateTime.Now.AddMonths(endTime.DurationMonth);
-            classes.Status = EnumClassType.Active;
+            classes.Status = EnumStatusClass.Active;
 
             if (classes.LiveTimeFrameId.HasValue && classes.LiveDays != null)
             {
