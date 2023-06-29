@@ -29,7 +29,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             var status = notification.Data.Status;
             if (lessonResult != null && notification.Data.Status == EnumClassForumResultStatus.Graded)
             {
-                lessonResult.Percent += (double)notification.Data.ClassForumScores.FirstOrDefault()!.Score * 30 / 100;
+                lessonResult.Percent += ((double)notification.Data.ClassForumScores.Sum(x => x.Score) / 36) * 30 / 100;
                 _lessonResultRepository.Update(lessonResult);
                 await _lessonResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
             }

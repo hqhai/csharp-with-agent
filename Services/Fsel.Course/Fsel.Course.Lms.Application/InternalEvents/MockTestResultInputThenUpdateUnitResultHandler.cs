@@ -45,7 +45,8 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             ArgumentNullException.ThrowIfNull(notification);
             var mockTest = await _mockTestRepository.GetByIdAsync(notification.Data.MockTestId);
             var unit = await _unitRepository.Queryable.Include(x => x.UnitLessons)
-                                                   .Include(x => x.LessonResults.Where(x => x.Status == EnumResultStatus.Done && x.StudentId == notification.Data.StudentId && x.CourseId == notification.Data.CourseId))
+                                                   .Include(x => x.LessonResults)
+                                                   .Where(x => x.LessonResults.Any(x => x.Status == EnumResultStatus.Done && x.StudentId == notification.Data.StudentId && x.CourseId == notification.Data.CourseId))
                                                    .FirstOrDefaultAsync(x => x.Id == notification.Data.UnitId, cancellationToken);
             if (mockTest != null && mockTest.MockTestType == EnumMockTestType.SkillMockTest && unit != null && notification.Data.Status == EnumResultStatus.Done)
             {

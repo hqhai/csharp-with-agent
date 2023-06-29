@@ -41,9 +41,10 @@ namespace Fsel.Course.Lms.Application.InternalEvents
         public async Task Handle(EntityChangedEvent<LessonResult> notification, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(notification);
-            var unit = await _unitRepository.Queryable.Include(x => x.LessonResults.Where(x => x.Status == EnumResultStatus.Done && x.StudentId == notification.Data.StudentId && x.CourseId == notification.Data.CourseId))
+            var unit = await _unitRepository.Queryable.Include(x => x.LessonResults)
                                                     .Include(x => x.UnitLessons)
                                                     .Include(x => x.UnitSkillMockTests)
+                                                    .Where(x => x.LessonResults.Any(x => x.Status == EnumResultStatus.Done && x.StudentId == notification.Data.StudentId && x.CourseId == notification.Data.CourseId))
                                                     .FirstOrDefaultAsync(x => x.Id == notification.Data.UnitId, cancellationToken);
             if (unit != null)
             {
@@ -165,7 +166,6 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             }
             return skillScores;
         }
-
 
         #endregion Get Skill Scores
 

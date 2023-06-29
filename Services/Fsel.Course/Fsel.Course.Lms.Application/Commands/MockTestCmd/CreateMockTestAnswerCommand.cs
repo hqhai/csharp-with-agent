@@ -7,8 +7,8 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
     using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Common.ActionResults;
-    using Fsel.Core.Applications.InternalEvents;
     using Fsel.Course.Domain.Entities;
+    using Fsel.Course.Domain.Entities.SkillScoresConfigs;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
@@ -26,7 +26,6 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
     public class CreateMockTestAnswerCommandHandler : IRequestHandler<CreateMockTestAnswerCommand, MethodResult<MockTestResultModel>>
     {
         private readonly AnswerTypeConverter _answerTypeConverter;
-        private readonly IMediator _mediator;
         private readonly IQuestionRepository _questionRepository;
         private readonly IMockTestAnswerRepository _mockTestAnswerRepository;
         private readonly IMockTestResultRepository _mockTestResultRepository;
@@ -39,7 +38,6 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
         private readonly IMapper _mapper;
 
         public CreateMockTestAnswerCommandHandler(AnswerTypeConverter answerTypeConverter
-            , IMediator mediator
             , IQuestionRepository questionRepository
             , IMockTestAnswerRepository mockTestAnswerRepository
             , IMockTestResultRepository mockTestResultRepository
@@ -52,7 +50,6 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
             , IMapper mapper)
         {
             _answerTypeConverter = answerTypeConverter;
-            _mediator = mediator;
             _questionRepository = questionRepository;
             _mockTestAnswerRepository = mockTestAnswerRepository;
             _mockTestResultRepository = mockTestResultRepository;
@@ -148,6 +145,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
             mockTestResult.CorrectCount = correctCountStudent;
             mockTestResult.CorrectTotal = await questionQuery.SumAsync(cancellationToken);
             mockTestResult.Percent = mockTestResult.CorrectTotal != 0 ? (double)mockTestResult.CorrectCount / mockTestResult.CorrectTotal * 100 : 0;
+            mockTestResult.SkillScores = new List<SkillScores>();
             mockTestResult.Status = EnumResultStatus.Done;
             await _mockTestAnswerRepository.ExecuteTransactionAsync(async () =>
             {
