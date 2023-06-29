@@ -145,7 +145,7 @@ namespace Fsel.Course.Infrastructure.Common
             var dataQuestion = configQuestion.Deserialize<ListingQuestion>();
             int number = 0;
 
-            if (dataQuestion != null && dataAnswer != null && dataAnswer.Answers != null && dataAnswer.Answers.Count > 0 && dataQuestion.ExactWordCount == dataAnswer.Answers.Count)
+            if (dataQuestion != null && dataAnswer != null && dataAnswer.Answers != null && dataAnswer.Answers.Count > 0 && dataAnswer.Answers.Count >= dataQuestion.ExactWordCount )
             {
                 dataAnswer.IsExact = true;
                 number++;
@@ -185,7 +185,7 @@ namespace Fsel.Course.Infrastructure.Common
         {
             var p = question.ToLower(CultureInfo.CurrentCulture);
             var s = answer.ToLower(CultureInfo.CurrentCulture);
-            if (p == s)
+            if (p.Replace('’', '\'') == s.Replace('’', '\''))
             {
                 return true;
             }
@@ -250,13 +250,13 @@ namespace Fsel.Course.Infrastructure.Common
                 string[] questionWords = words[index].Split('|');
                 foreach (var item in questionWords)
                 {
-                    if (word.Trim() == item.Trim())
+                    if (word.Trim().Replace('’', '\'') == item.Trim().Replace('’', '\''))
                     {
                         return true;
                     }
                 }
             }
-            else if (words[index].Trim() == word.Trim())
+            else if (words[index].Trim().Replace('’', '\'') == word.Trim().Replace('’', '\''))
             {
                 return true;
             }

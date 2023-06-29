@@ -67,6 +67,7 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkQuery
                                             CourseLevel = h.HomeWork.CourseLevel,
                                             QuestionTotal = h.HomeWork.HomeWorkQuestions.Select(x => x.Question).Count(),
                                             QuestionCompleted = h.HomeWorkAnswers.Count(),
+                                            HomeWorkResult = _mapper.Map<HomeWorkResultModel>(h)
                                         });
 
             methodResult.Result = await lessonSkillScoreQuery.OrderBy(x => x.CreatedDate).ToListAsync(cancellationToken);
