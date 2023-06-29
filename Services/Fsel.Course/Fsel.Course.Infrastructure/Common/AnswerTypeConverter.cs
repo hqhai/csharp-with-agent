@@ -181,6 +181,17 @@ namespace Fsel.Course.Infrastructure.Common
             return number;
         }
 
+        private static bool IsShortAnswer(string question, string answer)
+        {
+            var p = question.ToLower(CultureInfo.CurrentCulture);
+            var s = answer.ToLower(CultureInfo.CurrentCulture);
+            if (p == s)
+            {
+                return true;
+            }
+            return false;
+        }
+
         private static int GetTotalCorrectTypeShortAnswerWordBase(ref object? configAnswer, object? configQuestion)
         {
             var dataAnswer = configAnswer.Deserialize<ShortAnswerWordBaseAnswer>();
@@ -189,7 +200,7 @@ namespace Fsel.Course.Infrastructure.Common
 
             if (dataAnswer != null && dataAnswer.Answers != null && dataQuestion != null && dataQuestion.Contents != null && dataQuestion.Contents.Count > 0)
             {
-                if (dataQuestion.Contents.Any(p => p.ToLower(CultureInfo.CurrentCulture) == dataAnswer.Answers.ToLower(CultureInfo.CurrentCulture)))
+                if (dataQuestion.Contents.Any(p => IsShortAnswer(p, dataAnswer.Answers)))
                 {
                     dataAnswer.IsExact = true;
                     number++;

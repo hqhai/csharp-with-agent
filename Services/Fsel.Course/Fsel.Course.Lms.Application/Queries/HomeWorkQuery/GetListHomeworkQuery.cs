@@ -57,20 +57,19 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkQuery
                                         .ThenInclude(x => x.Question)
                                         .Include(x => x.HomeWorkAnswers.Where(x => !x.IsDeleted).OrderBy(x => x.CreatedDate))
                                         .Where(x => x.HomeWork != null && x.LessonResultId == request.LessonResultId)
-                                        .OrderBy(x => x.CreatedDate)
                                         .Select(h => new LessonHomeWorkResultModel
                                         {
                                             Id = h.HomeWork!.Id,
+                                            CreatedDate = h.HomeWork.CreatedDate,
                                             Code = h.HomeWork.Code,
                                             Name = h.HomeWork.Name,
                                             CourseSkill = h.HomeWork.CourseSkill,
                                             CourseLevel = h.HomeWork.CourseLevel,
                                             QuestionTotal = h.HomeWork.HomeWorkQuestions.Select(x => x.Question).Count(),
                                             QuestionCompleted = h.HomeWorkAnswers.Count(),
-                                            HomeWorkResult = _mapper.Map<HomeWorkResultModel>(h)
                                         });
 
-            methodResult.Result = await lessonSkillScoreQuery.ToListAsync(cancellationToken);
+            methodResult.Result = await lessonSkillScoreQuery.OrderBy(x => x.CreatedDate).ToListAsync(cancellationToken);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }

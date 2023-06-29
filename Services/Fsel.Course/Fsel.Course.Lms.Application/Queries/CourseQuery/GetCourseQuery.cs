@@ -70,8 +70,9 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
             }
 
             var course = await _courseRepository.Queryable
-                             .Include(x => x.CourseResults.Where(y => y.StudentId == student.Id))
+                             .Include(x => x.CourseResults)
                              .Include(x => x.CourseUnitMockTests)
+                             .Where(x => x.CourseResults.Any(y => y.StudentId == student.Id))
                              .FirstOrDefaultAsync(x => x.Id == @class.CourseId, cancellationToken);
 
             if (course == null)
