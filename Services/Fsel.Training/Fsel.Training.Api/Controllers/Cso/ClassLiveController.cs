@@ -8,6 +8,7 @@ namespace Fsel.Training.Api.Controllers.Cso
     using Fsel.Core.Base.BaseModels;
     using Fsel.Training.Application.Commands.ClassCmd;
     using Fsel.Training.Application.Queries.ClassQuery;
+    using Fsel.Training.Application.Queries.Cso;
     using Fsel.Training.Domain.Models.EntityModels;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
@@ -59,6 +60,32 @@ namespace Fsel.Training.Api.Controllers.Cso
             ArgumentNullException.ThrowIfNull(command);
             command.Id = id;
             MethodResult<ClassLiveCalendarModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Get list class live
+        /// </summary>
+
+        [HttpGet("list-class-live")]
+        [ProducesResponseType(typeof(MethodResult<IList<ClassModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetListClassLive([FromQuery] GetListClassLiveManageQuery query)
+        {
+            MethodResult<IList<ClassModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Update a class live
+        /// </summary>
+        [HttpPut("assign-teacher-to-class")]
+        [ProducesResponseType(typeof(MethodResult<ClassModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> UpdateClassLiveStatus([FromBody] AssignTeacherToClass command)
+        {
+            ArgumentNullException.ThrowIfNull(command);
+            MethodResult<ClassModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
     }
