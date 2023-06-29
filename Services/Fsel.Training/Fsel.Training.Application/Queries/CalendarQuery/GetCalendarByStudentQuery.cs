@@ -99,7 +99,7 @@ namespace Fsel.Training.Application.Queries.CalendarQuery
             var coursesReq = _courseService.GetCourseByIdsFromTeacherAsync(lists.Select(x => x.Class!.CourseId).ToList());
             var teachersReq = _userService.GetTeacherByIdsAsync(new GetTeacherByIdsQueryModel { Ids = lists.Select(x => x.TeacherId ?? default).ToList() });
             var liveTimeFramesReq = _systemService.GetLiveTimeFramesAsync();
-            await Task.WhenAll(teachersReq, liveTimeFramesReq);
+            await Task.WhenAll(coursesReq, teachersReq, liveTimeFramesReq);
 
             var coursesResult = coursesReq.GetAwaiter().GetResult();
             var teachersResult = teachersReq.GetAwaiter().GetResult();
