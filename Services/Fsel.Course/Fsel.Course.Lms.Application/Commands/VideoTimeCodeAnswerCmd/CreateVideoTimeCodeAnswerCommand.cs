@@ -64,7 +64,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
 
             if (videoResult == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumVideoResultErrorCode.VideoResultNull), nameof(videoResult), videoResult);
+                methodResult.AddErrorBadRequest(nameof(EnumVideoResultErrorCode.VideoResultNull), nameof(videoResult));
                 return methodResult;
             }
 
