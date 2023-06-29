@@ -75,7 +75,8 @@ namespace Fsel.Training.Application.Commands.ClassCmd
                             LiveTimeFrameId = classes.LiveTimeFrameId ?? default,
                             LiveDate = date,
                             Status = EnumClassLiveCalendarStatus.NotStudied,
-                            ClassId = classes.Id
+                            ClassId = classes.Id,
+                            TeacherId = classes.TeacherApprovalStatus == EnumTeacherApprovalStatus.Approved ? classes.TeacherId : default,
                         };
                         classes.ClassLiveCalendars.Add(classLiveCalendar);
                     }

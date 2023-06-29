@@ -80,6 +80,7 @@ namespace Fsel.Training.Application.Queries.CalendarQuery
                         .Include(x => x.Class)
                         .Where(x => x.LiveDate.Date >= request.StartDate.Value.Date &&
                                     x.LiveDate.Date <= request.EndDate.Value.Date)
+                        .Where(x => x.TeacherId == teacher.Id)
                         .Select(x => new ClassLiveCalendarModel
                         {
                             Id = x.Id,
@@ -122,7 +123,8 @@ namespace Fsel.Training.Application.Queries.CalendarQuery
 
             lists.ForEach(item =>
             {
-                item.Class!.TeacherName = teacher.Human?.FullName;
+                item.TeacherName = teacher.Human?.FullName;
+                item.TeacherAvatar = teacher.Human?.AvatarPath;
 
                 var course = courses?.FirstOrDefault(x => x.Id == item.Class?.CourseId);
                 item.Class!.CourseLevel = course?.CourseLevel;
