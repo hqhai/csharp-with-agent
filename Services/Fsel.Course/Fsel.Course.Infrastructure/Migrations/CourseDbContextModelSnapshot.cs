@@ -865,6 +865,15 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.Property<string>("Author")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("BookBackgroundPath")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("BookCoverPath")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("BookFilePath")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Code")
                         .IsRequired()
                         .HasMaxLength(250)
@@ -901,10 +910,6 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.Property<Guid?>("DeletedUserId")
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(103);
-
-                    b.Property<string>("FilePathsStr")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("InstructionContent")
                         .HasColumnType("nvarchar(max)");
@@ -2390,6 +2395,9 @@ namespace Fsel.Course.Infrastructure.Migrations
 
                     b.Property<double>("Percent")
                         .HasColumnType("float");
+
+                    b.Property<string>("SkillScoresStr")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Status")
                         .IsRequired()

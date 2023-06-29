@@ -27,19 +27,21 @@ namespace Fsel.Training.Domain.Entities
         public string? Name { get; set; }
 
         /// <summary>
-        /// End Time
+        /// End Date
         /// </summary>
-        public DateTime? EndTime { get; set; }
+        public DateTime? EndDate { get; set; }
 
         /// <summary>
-        /// Start Time
+        /// Start Date
         /// </summary>
-        public DateTime? StartTime { get; set; }
+        public DateTime? StartDate { get; set; }
 
         /// <summary>
         /// Status
         /// </summary>
         public EnumStatusClass Status { get; set; }
+
+        public EnumTeacherApprovalStatus? TeacherApprovalStatus { get; set; }
 
         public Guid PackageId { get; set; }
 

@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Training.Application.Commands.ClassCmd
+namespace Fsel.Training.Application.Queries.ClassQuery.Admin
 {
     using System.Threading;
     using System.Threading.Tasks;
@@ -37,14 +37,14 @@ namespace Fsel.Training.Application.Commands.ClassCmd
                 methodResult.AddErrorBadRequest(nameof(EnumClassErrorCode.ClassNotFound));
                 return methodResult;
             }
-            ClassModel classModel = new ClassModel()
+            var classModel = new ClassModel()
             {
                 Id = classes.Id,
                 Code = classes.Code,
                 Name = classes.Name,
                 Status = classes.Status,
-                StartTime = classes.StartTime,
-                EndTime = classes.EndTime,
+                StartDate = classes.StartDate,
+                EndDate = classes.EndDate,
                 CourseId = classes.CourseId,
             };
             methodResult.Result = classModel;
