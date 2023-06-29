@@ -11,6 +11,7 @@ namespace Fsel.Training.Api.Controllers.Cso
     using Microsoft.AspNetCore.Mvc;
     using Fsel.Training.Application.Queries.ClassQuery.Admin;
     using Fsel.Training.Application.Queries.Cso;
+    using System.Collections.Generic;
 
     [ApiVersion(Settings.APIVersion)]
     [Route(Settings.APIDefaultRoute + "/cso/teacher-free-date")]
@@ -41,12 +42,25 @@ namespace Fsel.Training.Api.Controllers.Cso
         /// Get class live priority
         /// </summary>
 
-        [HttpGet("get-list-techer-date")]
+        [HttpGet("get-techer-date")]
         [ProducesResponseType(typeof(MethodResult<TeacherFreeDateModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetTeacherDate([FromQuery] GetTeacherLiveDateQuery query)
+        public async Task<IActionResult> GetListTeacherDate([FromQuery] GetTeacherLiveDateQuery query)
         {
             MethodResult<TeacherFreeDateModel> queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Get class live priority
+        /// </summary>
+
+        [HttpGet("get-list-techer-date")]
+        [ProducesResponseType(typeof(MethodResult<IList<TeacherFreeDateModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetTeacherDate([FromQuery] GetListTeacherLiveDateQuery query)
+        {
+            MethodResult<IList<TeacherFreeDateModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
     }

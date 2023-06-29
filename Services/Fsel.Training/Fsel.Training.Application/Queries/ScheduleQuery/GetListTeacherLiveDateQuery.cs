@@ -76,9 +76,12 @@ namespace Fsel.Training.Application.Queries.ScheduleQuery
             var teacherFreeDateModel = _mapper.Map<IList<TeacherFreeDateModel>>(teacherFreeDate);
 
             var teacherResult = await _userService.GetTeacherByIdsAsync(new GetTeacherByIdsQueryModel { Ids = teacherFreeDateModel.Select(x => x.TeacherId).ToList() });
-            /*var teacherResult = await _userService.GetTeacherByIdsAsync(teacherFreeDateModel.Select(x => x.TeacherId ));*/
+
             var teacher = teacherResult.Content?.Result;
-            teacherFreeDateModel.TeacherName = teacher?.Human?.FullName;
+            foreach (var item in teacherFreeDateModel)
+            {
+                item.TeacherName = teacher?.FirstOrDefault(x => x.Id == item.TeacherId)?.Human?.FullName;
+            }
 
             methodResult.Result = teacherFreeDateModel;
             methodResult.StatusCode = StatusCodes.Status200OK;
