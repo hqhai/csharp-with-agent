@@ -7,6 +7,7 @@ namespace Fsel.Training.Infrastructure.Configs
     using Fsel.Training.Domain.Entities;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.Metadata.Builders;
+    using Fsel.Training.Domain.Enums;
 
     public class ClassEntityTypeConfiguration : IEntityTypeConfiguration<Class>
     {
@@ -19,6 +20,12 @@ namespace Fsel.Training.Infrastructure.Configs
                 .HasConversion(
                     v => v.ToString(),
                     v => v.EnumParse<EnumClassType>());
+
+            builder.Property(e => e.TeacherApprovalStatus)
+                .HasMaxLength(100)
+                .HasConversion(
+                    v => v.HasValue ? v.ToString() : null,
+                    v => !string.IsNullOrEmpty(v) ? v.EnumParse<EnumTeacherApprovalStatus>() : null);
         }
     }
 }

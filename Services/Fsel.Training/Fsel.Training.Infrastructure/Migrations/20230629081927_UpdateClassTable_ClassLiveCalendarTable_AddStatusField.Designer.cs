@@ -4,6 +4,7 @@ using Fsel.Training.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fsel.Training.Infrastructure.Migrations
 {
     [DbContext(typeof(TrainingDbContext))]
-    partial class TrainingDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230629081927_UpdateClassTable_ClassLiveCalendarTable_AddStatusField")]
+    partial class UpdateClassTable_ClassLiveCalendarTable_AddStatusField
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -202,86 +205,6 @@ namespace Fsel.Training.Infrastructure.Migrations
                     b.HasIndex("ClassId");
 
                     b.ToTable("ClassLiveCalendars");
-                });
-
-            modelBuilder.Entity("Fsel.Training.Domain.Entities.ClassLiveWorkFlow", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier")
-                        .HasColumnOrder(0);
-
-                    b.Property<Guid>("ClassLiveCalendarId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2")
-                        .HasColumnOrder(107);
-
-                    b.Property<string>("CreatedFullName")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)")
-                        .HasColumnOrder(104);
-
-                    b.Property<Guid>("CreatedUserId")
-                        .HasColumnType("uniqueidentifier")
-                        .HasColumnOrder(101);
-
-                    b.Property<Guid?>("CsoId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime?>("DeletedDate")
-                        .HasColumnType("datetime2")
-                        .HasColumnOrder(109);
-
-                    b.Property<string>("DeletedFullName")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)")
-                        .HasColumnOrder(106);
-
-                    b.Property<Guid?>("DeletedUserId")
-                        .HasColumnType("uniqueidentifier")
-                        .HasColumnOrder(103);
-
-                    b.Property<string>("Description")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit")
-                        .HasColumnOrder(110);
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<Guid?>("TeacherId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Type")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<DateTime?>("UpdatedDate")
-                        .HasColumnType("datetime2")
-                        .HasColumnOrder(108);
-
-                    b.Property<string>("UpdatedFullName")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)")
-                        .HasColumnOrder(105);
-
-                    b.Property<Guid?>("UpdatedUserId")
-                        .HasColumnType("uniqueidentifier")
-                        .HasColumnOrder(102);
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ClassLiveCalendarId");
-
-                    b.ToTable("ClassLiveWorkFlows");
                 });
 
             modelBuilder.Entity("Fsel.Training.Domain.Entities.ClassStudent", b =>
@@ -494,17 +417,6 @@ namespace Fsel.Training.Infrastructure.Migrations
                     b.Navigation("Class");
                 });
 
-            modelBuilder.Entity("Fsel.Training.Domain.Entities.ClassLiveWorkFlow", b =>
-                {
-                    b.HasOne("Fsel.Training.Domain.Entities.ClassLiveCalendar", "ClassLiveCalendar")
-                        .WithMany("ClassLiveWorkFlows")
-                        .HasForeignKey("ClassLiveCalendarId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("ClassLiveCalendar");
-                });
-
             modelBuilder.Entity("Fsel.Training.Domain.Entities.ClassStudent", b =>
                 {
                     b.HasOne("Fsel.Training.Domain.Entities.Class", "Class")
@@ -532,11 +444,6 @@ namespace Fsel.Training.Infrastructure.Migrations
                     b.Navigation("ClassLiveCalendars");
 
                     b.Navigation("ClassStudents");
-                });
-
-            modelBuilder.Entity("Fsel.Training.Domain.Entities.ClassLiveCalendar", b =>
-                {
-                    b.Navigation("ClassLiveWorkFlows");
                 });
 
             modelBuilder.Entity("Fsel.Training.Domain.Entities.TeacherFreeDate", b =>
