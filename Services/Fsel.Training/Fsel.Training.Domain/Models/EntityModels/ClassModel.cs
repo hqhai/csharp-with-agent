@@ -11,9 +11,9 @@ namespace Fsel.Training.Domain.Models.EntityModels
 
         public string? Name { get; set; }
 
-        public DateTime? EndDate { get; set; }
+        public DateTime EndDate { get; set; }
 
-        public DateTime? StartDate { get; set; }
+        public DateTime StartDate { get; set; }
 
         public EnumClassType Status { get; set; }
 
@@ -33,6 +33,8 @@ namespace Fsel.Training.Domain.Models.EntityModels
         public EnumCourseLevel? CourseLevel { get; set; }
 
         public Guid? CsoId { get; set; }
+        public DateTime? TimeFrameEndTime { get; set; }
+        public DateTime? TimeFrameStartTime { get; set; }
 
         public IList<ClassStudentModel>? ClassStudents { get; set; }
         public IList<ClassLiveCalendarModel>? ClassLiveCalendars { get; set; }
