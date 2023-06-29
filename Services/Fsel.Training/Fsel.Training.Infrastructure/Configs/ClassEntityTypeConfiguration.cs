@@ -24,8 +24,8 @@ namespace Fsel.Training.Infrastructure.Configs
             builder.Property(e => e.TeacherApprovalStatus)
                 .HasMaxLength(100)
                 .HasConversion(
-                    v => v.ToString(),
-                    v => v.EnumParse<EnumTeacherApprovalStatus>());
+                    v => v.HasValue ? v.ToString() : null,
+                    v => !string.IsNullOrEmpty(v) ? v.EnumParse<EnumTeacherApprovalStatus>() : null);
         }
     }
 }

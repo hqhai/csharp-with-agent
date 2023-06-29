@@ -13,6 +13,7 @@ namespace Fsel.Course.Lms.Application.Services.TrainingServices.Models
         public DateTime TimeStart { get; set; }
         public DateTime TimeEnd { get; set; }
         public EnumClassType Status { get; set; }
+        public EnumTeacherApprovalStatus TeacherApprovalStatus { get; set; }
         public Guid CourseId { get; set; }
     }
 }
