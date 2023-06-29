@@ -4,11 +4,11 @@ namespace Fsel.Training.Infrastructure
 {
     using Fsel.Common.Constants;
     using Fsel.Core.Base;
+    using Fsel.Training.Domain.Entities;
     using Fsel.Training.Infrastructure.Configs;
     using MediatR;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Configuration;
-    using Fsel.Training.Domain.Entities;
 
     public class TrainingDbContext : BaseDbContext
     {
@@ -25,6 +25,7 @@ namespace Fsel.Training.Infrastructure
             modelBuilder.ApplyConfiguration(new ClassLiveCalendarEntityTypeConfiguaration());
             modelBuilder.ApplyConfiguration(new TeacherFreeTimeEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new TeacherFreeDateEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new ClassLiveWorkFlowEntityTypeConfiguration());
             base.OnModelCreating(modelBuilder);
         }
 
@@ -33,6 +34,7 @@ namespace Fsel.Training.Infrastructure
         public DbSet<ClassLiveCalendar> ClassLiveCalendars { get; set; }
         public DbSet<TeacherFreeTime> TeacherFreeTimes { get; set; }
         public DbSet<TeacherFreeDate> TeacherFreeDates { get; set; }
+        public DbSet<ClassLiveWorkFlow> ClassLiveWorkFlows { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {

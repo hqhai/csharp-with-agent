@@ -3,10 +3,10 @@
 namespace Fsel.Training.Infrastructure.Maps
 {
     using AutoMapper;
-    using Fsel.Training.Domain.Models.EntityModels;
     using Fsel.Core.Extensions;
     using Fsel.Training.Domain.Entities;
     using Fsel.Training.Domain.Models.CommandModels.Classes;
+    using Fsel.Training.Domain.Models.EntityModels;
 
     public class ClassProfile : Profile
     {
@@ -15,6 +15,7 @@ namespace Fsel.Training.Infrastructure.Maps
             CreateMap<Class, ClassModel>().IgnoreAllNonExisting();
             CreateMap<Class, CourseClassModel>().IgnoreAllNonExisting();
             CreateMap<CreateClassCommandModel, Class>().IgnoreAllNonExisting();
+            CreateMap<ClassLiveWorkFlow, ClassLiveWorkFlowModel>().IgnoreAllNonExisting();
         }
     }
 }

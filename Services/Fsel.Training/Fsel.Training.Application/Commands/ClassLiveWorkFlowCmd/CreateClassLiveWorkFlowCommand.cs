@@ -1,0 +1,103 @@
+// Copyright (c) Atlantic. All rights reserved.
+
+namespace Fsel.Training.Application.Commands.ClassLiveWorkFlowCmd
+{
+    using System;
+    using System.Threading.Tasks;
+    using AutoMapper;
+    using Fsel.Common.ActionResults;
+    using Fsel.Core.Base;
+    using Fsel.Training.Application.Services.UserServices;
+    using Fsel.Training.Domain.Entities;
+    using Fsel.Training.Domain.Enums;
+    using Fsel.Training.Domain.Enums.ErrorCodes;
+    using Fsel.Training.Domain.IRepositories;
+    using Fsel.Training.Domain.Models.CommandModels.ClassLiveWorkFlows;
+    using Fsel.Training.Domain.Models.EntityModels;
+    using MediatR;
+    using Microsoft.AspNetCore.Http;
+    using Microsoft.EntityFrameworkCore;
+
+    public class CreateClassLiveWorkFlowCommand : CreateClassLiveWorkFlowCommandModel, IRequest<MethodResult<ClassLiveWorkFlowModel>>
+    {
+    }
+
+    public class CreateClassLiveWorkFlowCommandHandler : IRequestHandler<CreateClassLiveWorkFlowCommand, MethodResult<ClassLiveWorkFlowModel>>
+    {
+        private readonly IClassLiveWorkFlowRepository _classLiveWorkFlowRepository;
+        private readonly IClassLiveCalendarRepository _classLiveCalendarRepository;
+        private readonly AuthContext _authContext;
+        private readonly IUserService _userService;
+        private readonly IMapper _mapper;
+
+        public CreateClassLiveWorkFlowCommandHandler(IClassLiveWorkFlowRepository classLiveWorkFlowRepository,
+            IClassLiveCalendarRepository classLiveCalendarRepository,
+            AuthContext authContext,
+            IUserService userService,
+            IMapper mapper)
+        {
+            _classLiveWorkFlowRepository = classLiveWorkFlowRepository;
+            _classLiveCalendarRepository = classLiveCalendarRepository;
+            _authContext = authContext;
+            _userService = userService;
+            _mapper = mapper;
+        }
+
+        public async Task<MethodResult<ClassLiveWorkFlowModel>> Handle(CreateClassLiveWorkFlowCommand request, CancellationToken cancellationToken)
+        {
+            var methodResult = new MethodResult<ClassLiveWorkFlowModel>();
+            ArgumentNullException.ThrowIfNull(request);
+
+            var teacherResult = await _userService.GetTeacherByUserIdAsync(_authContext.CurrentUserId);
+            if (!teacherResult.IsSuccessStatusCode)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumClassLiveWorkFlowErrorCode.TeacherNotExits));
+                return methodResult;
+            }
+            var teacher = teacherResult.Content?.Result;
+
+            var classLiveCalendar = _classLiveCalendarRepository.GetByIdAsync(request.ClassLiveCalendarId);
+            if (classLiveCalendar == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumClassLiveCalendarErrorCode.ClassLiveCalendarNotExits), nameof(request.ClassLiveCalendarId), request.ClassLiveCalendarId);
+                return methodResult;
+            }
+            var classLiveWorkFlow = await _classLiveWorkFlowRepository.Queryable.FirstOrDefaultAsync(x => x.TeacherId == teacher!.Id && x.Id == request.ClassLiveCalendarId, cancellationToken);
+            if (classLiveWorkFlow != null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumClassLiveWorkFlowErrorCode.ClassLiveWorkFlowAlreadyExist));
+                return methodResult;
+            }
+            else
+            {
+                if (request.WorkFlows == null || request.WorkFlows.Count == 0)
+                {
+                    classLiveWorkFlow = new ClassLiveWorkFlow
+                    {
+                        ClassLiveCalendarId = request.ClassLiveCalendarId,
+                        Status = EnumWorkFlowStatus.SubstitutionRequest,
+                        Type = EnumWorkFlow.CancelSchedule
+                    };
+                }
+                else
+                {
+                    classLiveWorkFlow = new ClassLiveWorkFlow
+                    {
+                        ClassLiveCalendarId = request.ClassLiveCalendarId,
+                        Status = EnumWorkFlowStatus.SubstitutionRequest,
+                        Type = EnumWorkFlow.SubtitutionRequest
+                    };
+                }
+            }
+            await _classLiveWorkFlowRepository.ExecuteTransactionAsync(async () =>
+            {
+                classLiveWorkFlow = _classLiveWorkFlowRepository.Add(classLiveWorkFlow);
+                await _classLiveWorkFlowRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+                methodResult.StatusCode = StatusCodes.Status201Created;
+                methodResult.Result = _mapper.Map<ClassLiveWorkFlowModel>(classLiveWorkFlow);
+                return methodResult;
+            });
+            return methodResult;
+        }
+    }
+}
