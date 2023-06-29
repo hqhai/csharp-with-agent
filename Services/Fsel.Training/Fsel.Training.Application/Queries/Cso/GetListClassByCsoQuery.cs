@@ -21,14 +21,14 @@ namespace Fsel.Training.Application.Queries.Cso
     {
     }
 
-    public class GetListClassLiveManageQueryHandler : IRequestHandler<GetListClassByCsoQuery, MethodResult<IList<ClassModel>>>
+    public class GetListClassByCsoQueryHandler : IRequestHandler<GetListClassByCsoQuery, MethodResult<IList<ClassModel>>>
     {
         private readonly IClassRepository _classRepository;
         private readonly ISystemService _systemService;
         private readonly IUserService _userService;
         private readonly AuthContext _authContext;
 
-        public GetListClassLiveManageQueryHandler(IClassRepository classRepository, ISystemService systemService, IUserService userService, AuthContext authContext)
+        public GetListClassByCsoQueryHandler(IClassRepository classRepository, ISystemService systemService, IUserService userService, AuthContext authContext)
         {
             _classRepository = classRepository;
             _systemService = systemService;
