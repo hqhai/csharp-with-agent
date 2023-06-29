@@ -20,6 +20,8 @@ namespace Fsel.Training.Application.Queries.CalendarQuery
     using Microsoft.EntityFrameworkCore;
     using Microsoft.AspNetCore.Http;
     using Fsel.Training.Domain.Models.QueryModels;
+    using Fsel.Training.Domain.Enums.ErrorCodes;
+    using Fsel.Course.Application.Services.UserServices.Models;
 
     public class GetCalendarByStudentQuery : GetCalendarQueryModel, IRequest<MethodResult<IList<ClassLiveCalendarModel>>>
     {
@@ -56,31 +58,24 @@ namespace Fsel.Training.Application.Queries.CalendarQuery
                 return methodResult;
             }
 
-            var teacherReq = _userService.GetTeacherByUserIdAsync(_authContext.CurrentUserId);
-            var coursesReq = _courseService.GetCoursesByLevelFromTeacherAsync(request.Level);
-
-            await Task.WhenAll(teacherReq, coursesReq);
-            var teacherResult = teacherReq.GetAwaiter().GetResult();
-            var coursesResult = coursesReq.GetAwaiter().GetResult();
-
-            if (!teacherResult.IsSuccessStatusCode || !coursesResult.IsSuccessStatusCode)
+            var studentResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
+            if (!studentResult.IsSuccessStatusCode)
             {
-                methodResult.AddError(teacherResult.Error);
-                methodResult.AddError(coursesResult.Error);
+                methodResult.AddError(studentResult.Error);
                 return methodResult;
             }
-            var teacher = teacherResult.Content?.Result;
-            if (teacher == null)
+            var student = studentResult.Content?.Result;
+            if (student == null)
             {
+                methodResult.AddErrorBadRequest(nameof(EnumClassErrorCode.StudentsNotExits));
                 return methodResult;
             }
-            var courses = coursesResult.Content?.Result;
 
             var query = _classLiveCalendarRepository.Queryable
                         .Include(x => x.Class)
                         .Where(x => x.LiveDate.Date >= request.StartDate.Value.Date &&
                                     x.LiveDate.Date <= request.EndDate.Value.Date)
-                        .Where(x => x.TeacherId == teacher.Id)
+                        .Where(x => x.ClassId == student.ClassId)
                         .Select(x => new ClassLiveCalendarModel
                         {
                             Id = x.Id,
@@ -96,35 +91,29 @@ namespace Fsel.Training.Application.Queries.CalendarQuery
                             Class = _mapper.Map<ClassModel>(x.Class)
                         });
 
-            if (request.Level.HasValue)
-            {
-                query = query.Where(m => courses != null && courses.Select(x => x.Id).Contains(m.Class!.CourseId));
-            }
-
-            if (request.ClassId.HasValue)
-            {
-                query = query.Where(m => m.ClassId == request.ClassId.Value);
-            }
-
             var lists = await query
                     .AsNoTracking()
                     .ToListAsync(cancellationToken: cancellationToken)
                     .ConfigureAwait(false);
 
-            coursesReq = _courseService.GetCourseByIdsFromTeacherAsync(lists.Select(x => x.Class!.CourseId).ToList());
+            var coursesReq = _courseService.GetCourseByIdsFromTeacherAsync(lists.Select(x => x.Class!.CourseId).ToList());
+            var teachersReq = _userService.GetTeacherByIdsAsync(new GetTeacherByIdsQueryModel { Ids = lists.Select(x => x.TeacherId ?? default).ToList() });
             var liveTimeFramesReq = _systemService.GetLiveTimeFramesAsync();
-            await Task.WhenAll(teacherReq, liveTimeFramesReq);
+            await Task.WhenAll(teachersReq, liveTimeFramesReq);
 
-            coursesResult = coursesReq.GetAwaiter().GetResult();
+            var coursesResult = coursesReq.GetAwaiter().GetResult();
+            var teachersResult = teachersReq.GetAwaiter().GetResult();
             var liveTimeFramesResult = liveTimeFramesReq.GetAwaiter().GetResult();
 
-            courses = coursesResult.Content?.Result;
+            var courses = coursesResult.Content?.Result;
+            var teachers = teachersResult.Content?.Result;
             var liveTimeFrames = liveTimeFramesResult.Content?.Result;
 
             lists.ForEach(item =>
             {
-                item.TeacherName = teacher.Human?.FullName;
-                item.TeacherAvatar = teacher.Human?.AvatarPath;
+                var teacher = teachers?.FirstOrDefault(x => x.Id == item.TeacherId);
+                item.TeacherName = teacher?.Human?.FullName;
+                item.TeacherAvatar = teacher?.Human?.AvatarPath;
 
                 var course = courses?.FirstOrDefault(x => x.Id == item.Class?.CourseId);
                 item.Class!.CourseLevel = course?.CourseLevel;
