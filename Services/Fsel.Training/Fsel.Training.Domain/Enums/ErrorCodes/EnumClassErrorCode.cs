@@ -48,6 +48,7 @@ namespace Fsel.Training.Domain.Enums.ErrorCodes
         /// Delete Class In Student Not Success
         /// </summary>
         DeleteClassInStudentNotSuccess,
+
         /// <summary>
         /// class not found
         /// </summary>
@@ -81,7 +82,23 @@ namespace Fsel.Training.Domain.Enums.ErrorCodes
         /// <summary>
         /// Student Is Already In The Class
         /// </summary>
-        StudentIsAlreadyInTheClass
+        StudentIsAlreadyInTheClass,
+
+        /// <summary>
+        /// Teacher Is Already In The Class
+        /// </summary>
+        TeacherIsAlreadyInTheClass,
+
+        /// <summary>
+        /// Class Live day is null
+        /// </summary>
+        ClassLiveDayIsNull,
+
+        /// <summary>
+        /// Teacher Approve Status Is Approve
+        /// </summary>
+        TeacherApproveStatusIsApprove
+
 ,
     }
 }

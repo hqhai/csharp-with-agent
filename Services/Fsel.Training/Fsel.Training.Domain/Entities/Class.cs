@@ -9,6 +9,7 @@ namespace Fsel.Training.Domain.Entities
     using Fsel.Common.Helpers;
     using Fsel.Core.Entities;
     using Fsel.Shared.Enums;
+    using Fsel.Training.Domain.Enums;
 
     public class Class : Entity
     {
@@ -51,6 +52,8 @@ namespace Fsel.Training.Domain.Entities
         /// LiveDays
         /// </summary>
         public string? LiveDaysStr { get; set; }
+
+        public EnumTeacherApprovalStatus? TeacherApprovalStatus { get; set; }
 
         [NotMapped]
         public IList<DayOfWeek>? LiveDays
