@@ -42,7 +42,7 @@ namespace Fsel.Training.Api.Controllers.Cso
         /// Get class live priority
         /// </summary>
 
-        [HttpGet("get-techer-date")]
+        [HttpGet("get-teacher-date")]
         [ProducesResponseType(typeof(MethodResult<TeacherFreeDateModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetListTeacherDate([FromQuery] GetTeacherLiveDateQuery query)
@@ -55,7 +55,7 @@ namespace Fsel.Training.Api.Controllers.Cso
         /// Get class live priority
         /// </summary>
 
-        [HttpGet("get-list-techer-date")]
+        [HttpGet("get-list-teacher-date")]
         [ProducesResponseType(typeof(MethodResult<IList<TeacherFreeDateModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetTeacherDate([FromQuery] GetListTeacherLiveDateQuery query)
