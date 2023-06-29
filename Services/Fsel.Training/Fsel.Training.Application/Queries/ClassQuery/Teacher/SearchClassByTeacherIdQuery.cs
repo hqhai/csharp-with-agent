@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Training.Application.Queries.CalendarQuery
+namespace Fsel.Training.Application.Queries.ClassQuery.Teacher
 {
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base;
@@ -17,11 +17,11 @@ namespace Fsel.Training.Application.Queries.CalendarQuery
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class SearchCalendarByTeacherIdQuery : SearchCalendarByTeacherIdQueryModel, IRequest<MethodResult<PagingItemsModel<ClassLiveCalendarSearchModel>>>
+    public class SearchClassByTeacherIdQuery : SearchCalendarByTeacherIdQueryModel, IRequest<MethodResult<PagingItemsModel<ClassLiveCalendarSearchModel>>>
     {
     }
 
-    public class SearchCalendarByTeacherIdQueryHandler : IRequestHandler<SearchCalendarByTeacherIdQuery, MethodResult<PagingItemsModel<ClassLiveCalendarSearchModel>>>
+    public class SearchCalendarByTeacherIdQueryHandler : IRequestHandler<SearchClassByTeacherIdQuery, MethodResult<PagingItemsModel<ClassLiveCalendarSearchModel>>>
     {
         private readonly IClassLiveCalendarRepository _classLiveCalendarRepository;
         private readonly AuthContext _authContext;
@@ -42,7 +42,7 @@ namespace Fsel.Training.Application.Queries.CalendarQuery
             _systemService = systemService;
         }
 
-        public async Task<MethodResult<PagingItemsModel<ClassLiveCalendarSearchModel>>> Handle(SearchCalendarByTeacherIdQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<PagingItemsModel<ClassLiveCalendarSearchModel>>> Handle(SearchClassByTeacherIdQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<PagingItemsModel<ClassLiveCalendarSearchModel>>();
