@@ -6,43 +6,50 @@ namespace Fsel.Training.Application.Queries.Cso
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
+    using Fsel.Core.Base;
     using Fsel.Course.Application.Services.UserServices.Models;
     using Fsel.Training.Application.Services.SystemServices;
     using Fsel.Training.Application.Services.UserServices;
+    using Fsel.Training.Domain.Enums.ErrorCodes;
     using Fsel.Training.Domain.IRepositories;
     using Fsel.Training.Domain.Models.EntityModels;
-    using Fsel.Training.Domain.Models.QueryModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class GetListClassLiveManageQuery : GetListClassLiveManageQueryModel, IRequest<MethodResult<IList<ClassModel>>>
+    public class GetListClassByCsoQuery : IRequest<MethodResult<IList<ClassModel>>>
     {
     }
 
-    public class GetListClassLiveManageQueryHandler : IRequestHandler<GetListClassLiveManageQuery, MethodResult<IList<ClassModel>>>
+    public class GetListClassByCsoQueryHandler : IRequestHandler<GetListClassByCsoQuery, MethodResult<IList<ClassModel>>>
     {
         private readonly IClassRepository _classRepository;
         private readonly ISystemService _systemService;
         private readonly IUserService _userService;
+        private readonly AuthContext _authContext;
 
-        public GetListClassLiveManageQueryHandler(IClassRepository classRepository, ISystemService systemService, IUserService userService)
+        public GetListClassByCsoQueryHandler(IClassRepository classRepository, ISystemService systemService, IUserService userService, AuthContext authContext)
         {
             _classRepository = classRepository;
             _systemService = systemService;
             _userService = userService;
+            _authContext = authContext;
         }
 
-        public async Task<MethodResult<IList<ClassModel>>> Handle(GetListClassLiveManageQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<IList<ClassModel>>> Handle(GetListClassByCsoQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
 
             MethodResult<IList<ClassModel>> methodResult = new MethodResult<IList<ClassModel>>();
-
+            var cso = await _userService.GetCsoByUserIdAsync(_authContext.CurrentUserId);
+            if (!cso.IsSuccessStatusCode)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumClassErrorCode.CsoNotExits), nameof(cso), _authContext.CurrentUserId.ToString());
+                return methodResult;
+            }
+            var csoId = cso?.Content?.Result?.Id;
             var classQuery = await _classRepository.Queryable
-                                .Where(x => request.ClassId.HasValue && x.Id == request.ClassId)
-                                .Where(x => request.StartDate.HasValue && x.StartDate.Date <= request.StartDate.Value.Date)
-                                .Where(x => request.EndDate.HasValue && x.EndDate.Date >= request.EndDate.Value.Date)
+                                .Where(x => x.CsoId == csoId)
                                 .Select(x => new ClassModel
 
                                 {
@@ -55,9 +62,9 @@ namespace Fsel.Training.Application.Queries.Cso
                                     CsoId = x.CsoId,
                                     Status = x.Status,
                                     LiveTimeFrameId = x.LiveTimeFrameId,
-                                    StartDate = x.StartDate,
+                                    StartDate = x.StartDate!.Value,
                                     LiveDays = x.LiveDays,
-                                    EndDate = x.EndDate,
+                                    EndDate = x.EndDate!.Value,
                                     PackageId = x.PackageId,
                                 }).ToListAsync(cancellationToken);
 

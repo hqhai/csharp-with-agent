@@ -4,7 +4,7 @@ namespace Fsel.Training.Domain.Models.QueryModels
 {
     using System;
 
-    public class GetTeacherLiveDateQueryModel
+    public class GetTeacherLiveDateByClassIdQueryModel
     {
         public Guid ClassId { get; set; }
     }

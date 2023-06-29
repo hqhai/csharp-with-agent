@@ -15,6 +15,11 @@ namespace Fsel.Training.Domain.Enums.ErrorCodes
         StudentsNotExits,
 
         /// <summary>
+        /// Cso Does not exits
+        /// </summary>
+        CsoNotExits,
+
+        /// <summary>
         /// User Does not exits
         /// </summary>
         UserNotExits,
@@ -107,7 +112,12 @@ namespace Fsel.Training.Domain.Enums.ErrorCodes
         /// <summary>
         /// Teacher Approve Status Is Approve
         /// </summary>
-        TeacherApproveStatusIsApprove
+        TeacherApproveStatusIsApprove,
+
+        /// <summary>
+        /// Class End Date And Start Date Is Null
+        /// </summary>
+        ClassEndDateAndStartDateIsNull
 
 ,
     }
