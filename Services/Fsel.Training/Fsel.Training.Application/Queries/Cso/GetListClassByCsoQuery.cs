@@ -10,6 +10,7 @@ namespace Fsel.Training.Application.Queries.Cso
     using Fsel.Course.Application.Services.UserServices.Models;
     using Fsel.Training.Application.Services.SystemServices;
     using Fsel.Training.Application.Services.UserServices;
+    using Fsel.Training.Domain.Enums.ErrorCodes;
     using Fsel.Training.Domain.IRepositories;
     using Fsel.Training.Domain.Models.EntityModels;
     using MediatR;
@@ -40,9 +41,15 @@ namespace Fsel.Training.Application.Queries.Cso
             ArgumentNullException.ThrowIfNull(request);
 
             MethodResult<IList<ClassModel>> methodResult = new MethodResult<IList<ClassModel>>();
-
+            var cso = await _userService.GetCsoByUserIdAsync(_authContext.CurrentUserId);
+            if (!cso.IsSuccessStatusCode)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumClassErrorCode.CsoNotExits), nameof(cso), _authContext.CurrentUserId.ToString());
+                return methodResult;
+            }
+            var csoId = cso?.Content?.Result?.Id;
             var classQuery = await _classRepository.Queryable
-                                .Where(x => x.CsoId == _authContext.CurrentUserId)
+                                .Where(x => x.CsoId == csoId)
                                 .Select(x => new ClassModel
 
                                 {

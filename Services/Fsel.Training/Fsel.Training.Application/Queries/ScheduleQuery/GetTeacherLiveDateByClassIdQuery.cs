@@ -58,7 +58,7 @@ namespace Fsel.Training.Application.Queries.ScheduleQuery
             }
             if (@class.StartDate == null || @class.EndDate == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumClassErrorCode.ClassesNotExits), nameof(@class));
+                methodResult.AddErrorBadRequest(nameof(EnumClassErrorCode.ClassEndDateAndStartDateIsNull), nameof(@class));
                 return methodResult;
             }
             if (@class.LiveDays == null || @class.LiveDays.Count == 0)
