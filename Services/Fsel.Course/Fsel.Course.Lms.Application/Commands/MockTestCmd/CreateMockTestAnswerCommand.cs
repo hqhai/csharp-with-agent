@@ -143,13 +143,18 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
                             mockTestAnswers.Add(mockTestAnswer);
                         }
                     }
-
+                    var sectionGroup = sectionGroups.FirstOrDefault(x => x.Id == item.SectionGroupId);
+                    if (sectionGroup == null)
+                    {
+                        methodResult.AddErrorBadRequest(nameof(EnumSectionGroupErrorCode.SectionGroupsNull), nameof(item.SectionGroupId), item.SectionGroupId);
+                        return methodResult;
+                    }
                     var skillScore = new SkillScores
                     {
-                        Skill = sectionGroups.FirstOrDefault(x => x.Id == item.SectionGroupId)!.CourseSkill,
+                        Skill = sectionGroup.CourseSkill,
                         TotalCount = questions.Sum(x => x.CorrectTotal),
                         CorrectCount = count,
-                        Scores = count.GetIeltsScore(sectionGroups.FirstOrDefault(x => x.Id == item.SectionGroupId)!.CourseSkill)
+                        Scores = count.GetIeltsScore(sectionGroup.CourseSkill)
                     };
                     skillScores.Add(skillScore);
                 }
