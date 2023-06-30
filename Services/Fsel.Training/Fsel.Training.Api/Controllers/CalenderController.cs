@@ -7,7 +7,6 @@ namespace Fsel.Training.Api.Controllers
     using Fsel.Core.Base.BaseModels;
     using Fsel.Training.Application.Queries.CalendarQuery;
     using Fsel.Training.Application.Queries.ClassLiveWorkFlowQuery;
-    using Fsel.Training.Application.Queries.ClassQuery.Teacher;
     using Fsel.Training.Domain.Models.EntityModels;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
@@ -38,24 +37,21 @@ namespace Fsel.Training.Api.Controllers
         }
 
         /// <summary>
+<<<<<<< HEAD
         /// Search ClassLiveCalendar
         /// </summary>
         [HttpGet]
         [ProducesResponseType(typeof(MethodResult<PagingItemsModel<ClassLiveCalendarSearchModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> Search([FromQuery] SearchClassByTeacherIdQuery query)
-        {
-            var queryResult = await _mediator.Send(query).ConfigureAwait(false);
-            return queryResult.GetActionResult();
-        }
-
-        /// <summary>
+        public async Task<IActionResult> Search([FromQuery] SearchClassLiveCalendarByTeacherIdQuery query)
+=======
         /// Get Calendar by cso
         /// </summary>
         [HttpGet("cso")]
         [ProducesResponseType(typeof(MethodResult<IList<ClassLiveCalendarModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> Get([FromQuery] GetCalendarByCsoQuery query)
+>>>>>>> develop
         {
             var queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();

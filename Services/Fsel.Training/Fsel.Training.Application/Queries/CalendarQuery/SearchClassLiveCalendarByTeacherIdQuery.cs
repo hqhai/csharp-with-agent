@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Training.Application.Queries.ClassQuery.Teacher
+namespace Fsel.Training.Application.Queries.CalendarQuery
 {
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base;
@@ -17,11 +17,11 @@ namespace Fsel.Training.Application.Queries.ClassQuery.Teacher
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class SearchClassByTeacherIdQuery : SearchCalendarByTeacherIdQueryModel, IRequest<MethodResult<PagingItemsModel<ClassLiveCalendarSearchModel>>>
+    public class SearchClassLiveCalendarByTeacherIdQuery : SearchCalendarByTeacherIdQueryModel, IRequest<MethodResult<PagingItemsModel<ClassLiveCalendarSearchModel>>>
     {
     }
 
-    public class SearchCalendarByTeacherIdQueryHandler : IRequestHandler<SearchClassByTeacherIdQuery, MethodResult<PagingItemsModel<ClassLiveCalendarSearchModel>>>
+    public class SearchCalendarByTeacherIdQueryHandler : IRequestHandler<SearchClassLiveCalendarByTeacherIdQuery, MethodResult<PagingItemsModel<ClassLiveCalendarSearchModel>>>
     {
         private readonly IClassLiveCalendarRepository _classLiveCalendarRepository;
         private readonly AuthContext _authContext;
@@ -42,7 +42,7 @@ namespace Fsel.Training.Application.Queries.ClassQuery.Teacher
             _systemService = systemService;
         }
 
-        public async Task<MethodResult<PagingItemsModel<ClassLiveCalendarSearchModel>>> Handle(SearchClassByTeacherIdQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<PagingItemsModel<ClassLiveCalendarSearchModel>>> Handle(SearchClassLiveCalendarByTeacherIdQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<PagingItemsModel<ClassLiveCalendarSearchModel>>();
@@ -96,24 +96,5 @@ namespace Fsel.Training.Application.Queries.ClassQuery.Teacher
                 LiveDate = classLiveCalendar.LiveDate
             };
         }
-
-        //public ClassLiveCalendarSearchModel GetByWorkFlow(ClassLiveCalendar classLiveCalendar)
-        //{
-        //    ArgumentNullException.ThrowIfNull(classLiveCalendar);
-        //    var @class = classLiveCalendar.Class;
-        //    return new ClassLiveCalendarSearchModel
-        //    {
-        //        Id = classLiveCalendar.Id,
-        //        CreatedDate = classLiveCalendar.CreatedDate,
-        //        CourseId = @class?.CourseId ?? default,
-        //        Code = @class?.Code,
-        //        AccessLink = classLiveCalendar.AccessLink,
-        //        DayOfWeeks = @class?.LiveDays,
-        //        StartDate = @class?.StartDate,
-        //        EndDate = @class?.EndDate,
-        //        LiveTimeFrameId = @class?.LiveTimeFrameId ?? default,
-        //        LiveDate = classLiveCalendar.LiveDate
-        //    };
-        //}
     }
 }
