@@ -47,7 +47,7 @@ namespace Fsel.Training.Domain.Entities
         public Guid PackageId { get; set; }
 
         public Guid CourseId { get; set; }
-        public EnumTeacherReviewStatus? TeacherReviewStatus { get; set; }
+
         public Guid? LiveTimeFrameId { get; set; }
 
         /// <summary>

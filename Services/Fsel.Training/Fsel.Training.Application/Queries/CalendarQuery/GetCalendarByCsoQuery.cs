@@ -21,6 +21,7 @@ namespace Fsel.Training.Application.Queries.CalendarQuery
     using Microsoft.EntityFrameworkCore;
     using Microsoft.AspNetCore.Http;
     using Fsel.Course.Application.Services.UserServices.Models;
+    using Fsel.Training.Domain.Enums.ErrorCodes;
 
     public class GetCalendarByCsoQuery : GetCalendarByCsoQueryModel, IRequest<MethodResult<IList<ClassLiveCalendarModel>>>
     {
@@ -73,6 +74,7 @@ namespace Fsel.Training.Application.Queries.CalendarQuery
             var cso = csoResult.Content?.Result;
             if (cso == null)
             {
+                methodResult.AddErrorBadRequest(nameof(EnumClassErrorCode.CsoNotExits));
                 return methodResult;
             }
             var courses = coursesResult.Content?.Result;
