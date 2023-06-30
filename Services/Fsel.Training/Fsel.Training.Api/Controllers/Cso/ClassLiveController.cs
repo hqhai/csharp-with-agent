@@ -8,11 +8,9 @@ namespace Fsel.Training.Api.Controllers.Cso
     using Fsel.Core.Base.BaseModels;
     using Fsel.Training.Application.Commands.ClassCmd;
     using Fsel.Training.Application.Queries.ClassQuery;
-    using Fsel.Training.Application.Queries.Cso;
     using Fsel.Training.Domain.Models.EntityModels;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
-    using Refit;
 
     [ApiVersion(Settings.APIVersion)]
     [Route(Settings.APIDefaultRoute + "/cso/class-live")]

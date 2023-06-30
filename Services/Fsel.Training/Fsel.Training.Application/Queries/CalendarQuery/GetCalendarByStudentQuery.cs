@@ -16,18 +16,18 @@ namespace Fsel.Training.Application.Queries.CalendarQuery
     using Fsel.Training.Application.Services.UserServices;
     using Fsel.Training.Domain.IRepositories;
     using Fsel.Training.Domain.Models.EntityModels;
-    using Fsel.Training.Domain.Models.QueryModels;
     using MediatR;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.AspNetCore.Http;
-    using Fsel.Course.Application.Services.UserServices.Models;
+    using Fsel.Training.Domain.Models.QueryModels;
     using Fsel.Training.Domain.Enums.ErrorCodes;
+    using Fsel.Course.Application.Services.UserServices.Models;
 
-    public class GetCalendarByCsoQuery : GetCalendarByCsoQueryModel, IRequest<MethodResult<IList<ClassLiveCalendarModel>>>
+    public class GetCalendarByStudentQuery : GetCalendarQueryModel, IRequest<MethodResult<IList<ClassLiveCalendarModel>>>
     {
     }
 
-    public class GetCalendarByCsoQueryHandler : IRequestHandler<GetCalendarByCsoQuery, MethodResult<IList<ClassLiveCalendarModel>>>
+    public class GetCalendarByStudentQueryHandler : IRequestHandler<GetCalendarByStudentQuery, MethodResult<IList<ClassLiveCalendarModel>>>
     {
         private readonly IClassLiveCalendarRepository _classLiveCalendarRepository;
         private readonly ICourseService _courseService;
@@ -36,7 +36,7 @@ namespace Fsel.Training.Application.Queries.CalendarQuery
         private readonly IMapper _mapper;
         private readonly AuthContext _authContext;
 
-        public GetCalendarByCsoQueryHandler(IClassLiveCalendarRepository classLiveCalendarRepository, IUserService userService, IMapper mapper, AuthContext authContext, ICourseService courseService, ISystemService systemService)
+        public GetCalendarByStudentQueryHandler(IClassLiveCalendarRepository classLiveCalendarRepository, IUserService userService, IMapper mapper, AuthContext authContext, ICourseService courseService, ISystemService systemService)
         {
             _classLiveCalendarRepository = classLiveCalendarRepository;
             _userService = userService;
@@ -46,7 +46,7 @@ namespace Fsel.Training.Application.Queries.CalendarQuery
             _systemService = systemService;
         }
 
-        public async Task<MethodResult<IList<ClassLiveCalendarModel>>> Handle(GetCalendarByCsoQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<IList<ClassLiveCalendarModel>>> Handle(GetCalendarByStudentQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
 
@@ -58,32 +58,24 @@ namespace Fsel.Training.Application.Queries.CalendarQuery
                 return methodResult;
             }
 
-            var csoReq = _userService.GetCsoByUserIdAsync(_authContext.CurrentUserId);
-            var coursesReq = _courseService.GetCoursesByLevelAsync(request.Level);
-
-            await Task.WhenAll(csoReq, coursesReq);
-            var csoResult = csoReq.GetAwaiter().GetResult();
-            var coursesResult = coursesReq.GetAwaiter().GetResult();
-
-            if (!csoResult.IsSuccessStatusCode || !coursesResult.IsSuccessStatusCode)
+            var studentResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
+            if (!studentResult.IsSuccessStatusCode)
             {
-                methodResult.AddError(csoResult.Error);
-                methodResult.AddError(coursesResult.Error);
+                methodResult.AddError(studentResult.Error);
                 return methodResult;
             }
-            var cso = csoResult.Content?.Result;
-            if (cso == null)
+            var student = studentResult.Content?.Result;
+            if (student == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumClassErrorCode.CsoNotExits));
+                methodResult.AddErrorBadRequest(nameof(EnumClassErrorCode.StudentsNotExits));
                 return methodResult;
             }
-            var courses = coursesResult.Content?.Result;
 
             var query = _classLiveCalendarRepository.Queryable
                         .Include(x => x.Class)
                         .Where(x => x.LiveDate.Date >= request.StartDate.Value.Date &&
                                     x.LiveDate.Date <= request.EndDate.Value.Date)
-                        .Where(x => x.Class!.CsoId == cso.Id)
+                        .Where(x => x.ClassId == student.ClassId)
                         .Select(x => new ClassLiveCalendarModel
                         {
                             Id = x.Id,
@@ -96,43 +88,26 @@ namespace Fsel.Training.Application.Queries.CalendarQuery
                             Note = x.Note,
                             Status = x.Status,
                             ClassId = x.ClassId,
-                            TeacherId = x.TeacherId,
                             Class = _mapper.Map<ClassModel>(x.Class)
                         });
-
-            if (request.Level.HasValue)
-            {
-                query = query.Where(m => courses != null && courses.Select(x => x.Id).Contains(m.Class!.CourseId));
-            }
-
-            if (request.TeacherId.HasValue)
-            {
-                query = query.Where(m => m.TeacherId == request.TeacherId.Value);
-            }
-
-            if (request.ClassId.HasValue)
-            {
-                query = query.Where(m => m.ClassId == request.ClassId.Value);
-            }
 
             var lists = await query
                     .AsNoTracking()
                     .ToListAsync(cancellationToken: cancellationToken)
                     .ConfigureAwait(false);
 
-            coursesReq = _courseService.GetCourseByIdsFromTeacherAsync(lists.Select(x => x.Class!.CourseId).ToList());
-            var liveTimeFramesReq = _systemService.GetLiveTimeFramesAsync();
+            var coursesReq = _courseService.GetCourseByIdsFromTeacherAsync(lists.Select(x => x.Class!.CourseId).ToList());
             var teachersReq = _userService.GetTeacherByIdsAsync(new GetTeacherByIdsQueryModel { Ids = lists.Select(x => x.TeacherId ?? default).ToList() });
+            var liveTimeFramesReq = _systemService.GetLiveTimeFramesAsync();
+            await Task.WhenAll(coursesReq, teachersReq, liveTimeFramesReq);
 
-            await Task.WhenAll(teachersReq, liveTimeFramesReq, coursesReq);
-
-            coursesResult = coursesReq.GetAwaiter().GetResult();
-            var liveTimeFramesResult = liveTimeFramesReq.GetAwaiter().GetResult();
+            var coursesResult = coursesReq.GetAwaiter().GetResult();
             var teachersResult = teachersReq.GetAwaiter().GetResult();
+            var liveTimeFramesResult = liveTimeFramesReq.GetAwaiter().GetResult();
 
-            courses = coursesResult.Content?.Result;
-            var liveTimeFrames = liveTimeFramesResult.Content?.Result;
+            var courses = coursesResult.Content?.Result;
             var teachers = teachersResult.Content?.Result;
+            var liveTimeFrames = liveTimeFramesResult.Content?.Result;
 
             lists.ForEach(item =>
             {
