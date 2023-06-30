@@ -15,6 +15,11 @@ namespace Fsel.Training.Domain.Enums.ErrorCodes
         StudentsNotExits,
 
         /// <summary>
+        /// Teachers Does not exits
+        /// </summary>
+        TeachersNotExits,
+
+        /// <summary>
         /// Cso Does not exits
         /// </summary>
         CsoNotExits,

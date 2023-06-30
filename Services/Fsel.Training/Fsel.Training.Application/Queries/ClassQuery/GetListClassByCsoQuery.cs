@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Training.Application.Queries.Cso
+namespace Fsel.Training.Application.Queries.ClassQuery
 {
     using System.Collections.Generic;
     using System.Threading;
@@ -40,7 +40,7 @@ namespace Fsel.Training.Application.Queries.Cso
         {
             ArgumentNullException.ThrowIfNull(request);
 
-            MethodResult<IList<ClassModel>> methodResult = new MethodResult<IList<ClassModel>>();
+            var methodResult = new MethodResult<IList<ClassModel>>();
             var cso = await _userService.GetCsoByUserIdAsync(_authContext.CurrentUserId);
             if (!cso.IsSuccessStatusCode)
             {
