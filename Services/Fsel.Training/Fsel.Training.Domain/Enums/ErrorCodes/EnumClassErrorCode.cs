@@ -90,6 +90,16 @@ namespace Fsel.Training.Domain.Enums.ErrorCodes
         StudentIsAlreadyInTheClass,
 
         /// <summary>
+        /// Class Already Has Cso
+        /// </summary>
+        ClassAlreadyHasCso,
+
+        /// <summary>
+        /// Cso Already In Class
+        /// </summary>
+        CsoAlreadyInClass,
+
+        /// <summary>
         /// Teacher Is Already In The Class
         /// </summary>
         TeacherIsAlreadyInTheClass,

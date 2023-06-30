@@ -15,7 +15,7 @@ namespace Fsel.Training.Domain.Models.EntityModels
 
         public DateTime StartDate { get; set; }
 
-        public EnumClassType Status { get; set; }
+        public EnumStatusClass Status { get; set; }
 
         public EnumTeacherApprovalStatus TeacherApprovalStatus { get; set; }
 
