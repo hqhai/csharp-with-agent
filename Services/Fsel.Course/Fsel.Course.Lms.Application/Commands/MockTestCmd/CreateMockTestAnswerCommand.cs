@@ -82,7 +82,12 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
             var mockTestAnswers = new List<MockTestAnswer>();
             var skillScores = new List<SkillScores>();
             int correctCountStudent = 0;
-
+            var sectionGroups = await _sectionGroupRepository.Queryable.Where(x => request.SectionGroups.Select(x => x.SectionGroupId).Contains(x.Id)).ToListAsync(cancellationToken);
+            if (sectionGroups == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSectionGroupErrorCode.SectionGroupsNull), nameof(sectionGroups));
+                return methodResult;
+            }
             foreach (var item in request.SectionGroups)
             {
                 if (item.Answers != null)
@@ -138,32 +143,18 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
                             mockTestAnswers.Add(mockTestAnswer);
                         }
                     }
-                    var sectionGroup = await _sectionGroupRepository.GetByIdAsync(item.SectionGroupId);
-                    if (sectionGroup == null)
-                    {
-                        methodResult.AddErrorBadRequest(nameof(EnumSectionGroupErrorCode.SectionGroupsNull), nameof(sectionGroup));
-                        return methodResult;
-                    }
+
                     var skillScore = new SkillScores
                     {
-                        Skill = sectionGroup.CourseSkill,
+                        Skill = sectionGroups.FirstOrDefault(x => x.Id == item.SectionGroupId)!.CourseSkill,
                         TotalCount = questions.Sum(x => x.CorrectTotal),
                         CorrectCount = count,
-                        Scores = count.GetIeltsScore(sectionGroup.CourseSkill)
+                        Scores = count.GetIeltsScore(sectionGroups.FirstOrDefault(x => x.Id == item.SectionGroupId)!.CourseSkill)
                     };
                     skillScores.Add(skillScore);
                 }
             }
-            IQueryable<int>? questionQuery = from p in _mockTestRepository.Queryable
-                                             join ps in _mockTestSectionRepository.Queryable on p.Id equals ps.MockTestId
-                                             join sg in _sectionGroupRepository.Queryable on ps.SectionGroupId equals sg.Id
-                                             join s in _sectionRepository.Queryable on sg.Id equals s.SectionGroupId
-                                             join sp in _sectionPartRepository.Queryable on s.Id equals sp.SectionId
-                                             join sq in _sectionQuestionRepository.Queryable on sp.Id equals sq.SectionPartId
-                                             join q in _questionRepository.Queryable on sq.QuestionId equals q.Id
-                                             where p.Id == mockTestResult.MockTestId
-                                             select q.CorrectTotal;
-            var count1 = await questionQuery.SumAsync(cancellationToken);
+
             mockTestResult.CorrectCount = correctCountStudent;
             mockTestResult.CorrectTotal = (int)skillScores.Sum(x => x.TotalCount);
             mockTestResult.Percent = (double)mockTestResult.CorrectCount / mockTestResult.CorrectTotal * 100;
