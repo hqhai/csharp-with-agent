@@ -108,7 +108,7 @@ namespace Fsel.Course.Lms.Application.Commands.LessonCmd
                                                 .Where(x => x.LessonHomeWorks.Any(x => x.LessonId == request.LessonId))
                                                 .ToListAsync(cancellationToken);
 
-            var lessonResult = await _lessonResultRepository.Queryable.FirstOrDefaultAsync(x => x.LessonId == request.LessonId && x.UnitId == request.UnitId && x.CourseId == request.CourseId && x.Id == request.LessonResultId, cancellationToken);
+            var lessonResult = await _lessonResultRepository.Queryable.FirstOrDefaultAsync(x => x.Id == request.LessonResultId, cancellationToken);
             if (lessonResult != null && lessonResult.Status == EnumResultStatus.Unfinished)
             {
                 lessonResult.VideoResult = new VideoResult
