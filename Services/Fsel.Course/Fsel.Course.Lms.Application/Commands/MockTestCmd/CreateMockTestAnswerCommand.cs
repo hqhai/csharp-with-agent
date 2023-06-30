@@ -81,7 +81,6 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
 
             var mockTestAnswers = new List<MockTestAnswer>();
             var skillScores = new List<SkillScores>();
-            int correctCountStudent = 0;
             var sectionGroups = await _sectionGroupRepository.Queryable.Where(x => request.SectionGroups.Select(x => x.SectionGroupId).Contains(x.Id)).ToListAsync(cancellationToken);
             if (sectionGroups == null)
             {
@@ -133,7 +132,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
                                 methodResult.AddErrorBadRequest(nameof(EnumMockTestAnswerErrorCode.AnswerIsInTheWrongFormat), nameof(answer.Answer), answer.Answer);
                                 return methodResult;
                             }
-                            correctCountStudent += correctCount;
+                            count += correctCount;
                             mockTestAnswer = new MockTestAnswer
                             {
                                 Answer = answerConfig,
@@ -160,7 +159,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
                 }
             }
 
-            mockTestResult.CorrectCount = correctCountStudent;
+            mockTestResult.CorrectCount = (int)skillScores.Sum(x => x.CorrectCount);
             mockTestResult.CorrectTotal = (int)skillScores.Sum(x => x.TotalCount);
             mockTestResult.Percent = (double)mockTestResult.CorrectCount / mockTestResult.CorrectTotal * 100;
             mockTestResult.Status = EnumResultStatus.Done;
