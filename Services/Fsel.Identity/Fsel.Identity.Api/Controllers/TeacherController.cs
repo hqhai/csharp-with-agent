@@ -84,5 +84,17 @@ namespace Fsel.Identity.Api.Controllers
             MethodResult<IList<TeacherModel>> commandResult = await _mediator.Send(new GetAllTeacherQuery { }).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
+
+        /// <summary>
+        /// get by ids and keyword
+        /// </summary>
+        [HttpGet("get-teachers-by-keyword/{keyword}")]
+        [ProducesResponseType(typeof(MethodResult<IList<TeacherModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetByIdsAndKeyword([FromRoute] string? keyword)
+        {
+            MethodResult<IList<TeacherModel>> commandResult = await _mediator.Send(new GetTeachersByKeywordQuery { Keyword = keyword }).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
     }
 }

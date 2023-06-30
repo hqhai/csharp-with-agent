@@ -50,5 +50,7 @@ namespace Fsel.Training.Application.Services.UserServices
 
         [Get("/teacher/get-all")]
         Task<IApiResponse<MethodResult<IList<TeacherModel>>>> GetAllTeacher();
+        [Get("/teacher/get-teachers-by-keyword/{keyword}")]
+        Task<IApiResponse<MethodResult<IList<TeacherModel>>>> GetTeachersByKeyword([FromRoute] string? keyword);
     }
 }
