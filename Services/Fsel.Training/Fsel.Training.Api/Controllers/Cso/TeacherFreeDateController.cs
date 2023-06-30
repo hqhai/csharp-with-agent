@@ -9,6 +9,9 @@ namespace Fsel.Training.Api.Controllers.Cso
     using Fsel.Training.Domain.Models.EntityModels;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
+    using Fsel.Training.Application.Queries.ClassQuery.Admin;
+    using Fsel.Training.Application.Queries.Cso;
+    using System.Collections.Generic;
 
     [ApiVersion(Settings.APIVersion)]
     [Route(Settings.APIDefaultRoute + "/cso/teacher-free-date")]
@@ -32,6 +35,32 @@ namespace Fsel.Training.Api.Controllers.Cso
         public async Task<IActionResult> SearchClassLive([FromQuery] SearchTeacherFreeDateByCsoQuery query)
         {
             MethodResult<IList<TeacherFreeTimeModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Get class live priority
+        /// </summary>
+
+        [HttpGet("get-teacher-free-by-class-id")]
+        [ProducesResponseType(typeof(MethodResult<TeacherFreeDateModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetListTeacherDate([FromQuery] GetTeacherLiveDateByClassIdQuery query)
+        {
+            MethodResult<TeacherFreeDateModel> queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Get class live priority
+        /// </summary>
+
+        [HttpGet("get-list-teacher-free-by-class-id")]
+        [ProducesResponseType(typeof(MethodResult<IList<TeacherFreeDateModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetTeacherDate([FromQuery] GetListTeacherLiveDateByClassIdQuery query)
+        {
+            MethodResult<IList<TeacherFreeDateModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
     }

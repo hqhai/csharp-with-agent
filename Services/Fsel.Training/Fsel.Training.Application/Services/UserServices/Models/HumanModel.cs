@@ -11,5 +11,6 @@ namespace Fsel.Training.Application.Services.UserServices.Models
         public string? Email { get; set; }
         public string? PhoneNumber { get; set; }
         public string? Code { get; set; }
+        public string? AvatarPath { get; set; }
     }
 }

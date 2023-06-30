@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Identity.Api.Controllers
+namespace Fsel.Identity.Api.Controllers.Admin
 {
     using System.Net;
     using Fsel.Common.ActionResults;
