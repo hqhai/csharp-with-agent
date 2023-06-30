@@ -9,12 +9,18 @@ namespace Fsel.Course.Domain.Models.CommandModels.MockTestAnswers
     {
         public Guid MockTestResultId { get; set; }
 
-        public IList<MockTestAnswerQuestionModel>? Answers { get; set; }
+        public IList<MockTestSectionGroupAnswerModel>? SectionGroups { get; set; }
     }
 
     public class MockTestAnswerQuestionModel
     {
         public Guid QuestionId { get; set; }
         public object? Answer { get; set; }
+    }
+
+    public class MockTestSectionGroupAnswerModel
+    {
+        public Guid SectionGroupId { get; set; }
+        public IList<MockTestAnswerQuestionModel>? Answers { get; set; }
     }
 }
