@@ -40,14 +40,14 @@ namespace Fsel.Training.Domain.Entities
         /// <summary>
         /// Status
         /// </summary>
-        public EnumClassType Status { get; set; }
+        public EnumStatusClass Status { get; set; }
 
         public EnumTeacherApprovalStatus? TeacherApprovalStatus { get; set; }
 
         public Guid PackageId { get; set; }
 
         public Guid CourseId { get; set; }
-
+        public EnumTeacherReviewStatus? TeacherReviewStatus { get; set; }
         public Guid? LiveTimeFrameId { get; set; }
 
         /// <summary>

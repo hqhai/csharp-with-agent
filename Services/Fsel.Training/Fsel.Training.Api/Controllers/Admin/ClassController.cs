@@ -115,5 +115,28 @@ namespace Fsel.Training.Api.Controllers.Admin
             MethodResult<IList<ClassStudentModel>?> commandResult = await _mediator.Send(new GetStudentsByClassIdQuery { ClassId = id }).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
+
+        /// <summary>
+        /// Assign Teacher To Class
+        /// </summary>
+        [HttpPut("assign-teacher-to-class")]
+        [ProducesResponseType(typeof(MethodResult<ClassModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> AssignTeacherToClass([FromBody] AssignTeacherToClass command)
+        {
+            ArgumentNullException.ThrowIfNull(command);
+            MethodResult<ClassModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+
+        [HttpPut("assign-cso-to-class")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> AssignCsoToClass([FromBody] AssignCsoToClassCommand command)
+        {
+            MethodResult<bool> commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
     }
 }
