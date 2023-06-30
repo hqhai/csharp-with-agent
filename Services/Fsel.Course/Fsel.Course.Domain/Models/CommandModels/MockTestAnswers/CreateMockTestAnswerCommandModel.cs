@@ -9,7 +9,7 @@ namespace Fsel.Course.Domain.Models.CommandModels.MockTestAnswers
     {
         public Guid MockTestResultId { get; set; }
 
-        public IList<MockTestAnswerSkillQuestionModel>? Skills { get; set; }
+        public IList<MockTestSectionGroupAnswerModel>? SectionGroups { get; set; }
     }
 
     public class MockTestAnswerQuestionModel
@@ -18,7 +18,7 @@ namespace Fsel.Course.Domain.Models.CommandModels.MockTestAnswers
         public object? Answer { get; set; }
     }
 
-    public class MockTestAnswerSkillQuestionModel
+    public class MockTestSectionGroupAnswerModel
     {
         public Guid SectionGroupId { get; set; }
         public IList<MockTestAnswerQuestionModel>? Answers { get; set; }

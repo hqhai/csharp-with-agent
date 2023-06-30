@@ -67,9 +67,9 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<MockTestResultModel> methodResult = new MethodResult<MockTestResultModel>();
-            if (request.Skills == null || request.Skills.Count == 0)
+            if (request.SectionGroups == null || request.SectionGroups.Count == 0)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumMockTestAnswerErrorCode.SkillNull), nameof(request.Skills), request.Skills);
+                methodResult.AddErrorBadRequest(nameof(EnumMockTestAnswerErrorCode.SkillNull), nameof(request.SectionGroups), request.SectionGroups);
                 return methodResult;
             }
             var mockTestResult = await _mockTestResultRepository.Queryable.FirstOrDefaultAsync(x => x.Id == request.MockTestResultId, cancellationToken);
@@ -83,16 +83,16 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
             var skillScores = new List<SkillScores>();
             int correctCountStudent = 0;
 
-            foreach (var item in request.Skills)
+            foreach (var item in request.SectionGroups)
             {
                 if (item.Answers != null)
                 {
                     if (item.Answers == null || item.Answers.Count == 0)
                     {
-                        methodResult.AddErrorBadRequest(nameof(EnumMockTestAnswerErrorCode.AnswerNull), nameof(request.Skills), request.Skills);
+                        methodResult.AddErrorBadRequest(nameof(EnumMockTestAnswerErrorCode.AnswerNull), nameof(request.SectionGroups), request.SectionGroups);
                         return methodResult;
                     }
-                    var questionIds = request.Skills.SelectMany(x => x.Answers).Select(x => x.QuestionId).ToList();
+                    var questionIds = request.SectionGroups.SelectMany(x => x.Answers!).Select(x => x.QuestionId).ToList();
                     var questions = await _questionRepository.GetIncludeSectionByIdAsync(questionIds);
                     if (questions == null || questions.Count == 0)
                     {
