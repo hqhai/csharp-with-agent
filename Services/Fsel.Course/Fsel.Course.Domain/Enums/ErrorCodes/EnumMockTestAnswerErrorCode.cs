@@ -12,6 +12,11 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         /// <summary>
         /// Answer Is In The Wrong Format
         /// </summary>
-        AnswerIsInTheWrongFormat
+        AnswerIsInTheWrongFormat,
+
+        /// <summary>
+        /// skill Is Null
+        /// </summary>
+        SkillNull,
     }
 }
