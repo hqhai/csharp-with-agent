@@ -25,5 +25,6 @@ namespace Fsel.Training.Domain.Entities
         public Guid? TeacherId { get; set; }
 
         public Class? Class { get; set; }
+        public ICollection<ClassLiveWorkFlow> ClassLiveWorkFlows { get; set; } = new List<ClassLiveWorkFlow>();
     }
 }
