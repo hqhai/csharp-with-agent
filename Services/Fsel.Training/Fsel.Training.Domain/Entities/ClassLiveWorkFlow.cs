@@ -11,15 +11,18 @@ namespace Fsel.Training.Domain.Entities
         /// Luong
         /// </summary>
         public EnumWorkFlow Type { get; set; }
+
         public EnumWorkFlowStatus Status { get; set; }
 
         /// <summary>
         /// Noi dung
         /// </summary>
         public string? Description { get; set; }
+
         public Guid? TeacherId { get; set; }
         public Guid? CsoId { get; set; }
         public ClassLiveCalendar? ClassLiveCalendar { get; set; }
         public Guid ClassLiveCalendarId { get; set; }
+        public Guid? WorkFlowParentId { get; set; }
     }
 }

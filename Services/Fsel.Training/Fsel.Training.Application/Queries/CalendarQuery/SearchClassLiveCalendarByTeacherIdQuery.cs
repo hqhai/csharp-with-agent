@@ -9,7 +9,6 @@ namespace Fsel.Training.Application.Queries.CalendarQuery
     using Fsel.Training.Application.Services.CourseServices;
     using Fsel.Training.Application.Services.SystemServices;
     using Fsel.Training.Application.Services.UserServices;
-    using Fsel.Training.Domain.Entities;
     using Fsel.Training.Domain.IRepositories;
     using Fsel.Training.Domain.Models.EntityModels;
     using Fsel.Training.Domain.Models.QueryModels.CalendarQuery;
@@ -52,11 +51,21 @@ namespace Fsel.Training.Application.Queries.CalendarQuery
                 return methodResult;
             }
             var teacherResult = await _userService.GetTeacherByUserIdAsync(_authContext.CurrentUserId);
-            var teacher = teacherResult.Content?.Result;
+            var teacherId = teacherResult.Content?.Result?.Id;
             var query = _classLiveCalendarRepository.Queryable
                                     .Include(x => x.Class)
-                                    .Where(x => x.Class!.TeacherId == teacher!.Id)
-                                    .Select(x => GetByClass(x));
+                                    .Where(x => x.Class != null && x.TeacherId == teacherId)
+                                    .AsNoTracking()
+                                    .Select(x => new ClassLiveCalendarSearchModel
+                                    {
+                                        Id = x.Id,
+                                        CreatedDate = x.CreatedDate,
+                                        CourseId = x.Class!.CourseId,
+                                        Code = x.Class!.Code,
+                                        AccessLink = x.AccessLink,
+                                        LiveTimeFrameId = x.Class!.LiveTimeFrameId,
+                                        LiveDate = x.LiveDate
+                                    });
 
             int totalItem = await query.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
             var lists = await query
@@ -64,7 +73,7 @@ namespace Fsel.Training.Application.Queries.CalendarQuery
                     .AsNoTracking()
                     .ToListAsync(cancellationToken: cancellationToken)
                     .ConfigureAwait(false);
-            var courseIds = lists.Select(x => x.CourseId).ToList();
+            var courseIds = lists.Select(x => x.CourseId).Distinct().ToList();
             var courseResults = await _courseService.GetListCourseByIds(courseIds);
             var courses = courseResults.Content?.Result;
             var timeFramesResult = await _systemService.GetLiveTimeFramesAsync();
@@ -81,20 +90,20 @@ namespace Fsel.Training.Application.Queries.CalendarQuery
             return methodResult;
         }
 
-        public ClassLiveCalendarSearchModel GetByClass(ClassLiveCalendar classLiveCalendar)
-        {
-            ArgumentNullException.ThrowIfNull(classLiveCalendar);
-            var @class = classLiveCalendar.Class;
-            return new ClassLiveCalendarSearchModel
-            {
-                Id = classLiveCalendar.Id,
-                CreatedDate = classLiveCalendar.CreatedDate,
-                CourseId = @class?.CourseId ?? default,
-                Code = @class?.Code,
-                AccessLink = classLiveCalendar.AccessLink,
-                LiveTimeFrameId = @class?.LiveTimeFrameId ?? default,
-                LiveDate = classLiveCalendar.LiveDate
-            };
-        }
+        //public ClassLiveCalendarSearchModel GetByClass(ClassLiveCalendar classLiveCalendar)
+        //{
+        //    ArgumentNullException.ThrowIfNull(classLiveCalendar);
+        //    var @class = classLiveCalendar.Class;
+        //    return new ClassLiveCalendarSearchModel
+        //    {
+        //        Id = classLiveCalendar.Id,
+        //        CreatedDate = classLiveCalendar.CreatedDate,
+        //        CourseId = @class?.CourseId ?? default,
+        //        Code = @class?.Code,
+        //        AccessLink = classLiveCalendar.AccessLink,
+        //        LiveTimeFrameId = @class?.LiveTimeFrameId ?? default,
+        //        LiveDate = classLiveCalendar.LiveDate
+        //    };
+        //}
     }
 }

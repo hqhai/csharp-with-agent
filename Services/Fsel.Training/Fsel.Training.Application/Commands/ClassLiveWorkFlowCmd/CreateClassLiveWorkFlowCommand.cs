@@ -54,15 +54,15 @@ namespace Fsel.Training.Application.Commands.ClassLiveWorkFlowCmd
                 methodResult.AddErrorBadRequest(nameof(EnumClassLiveWorkFlowErrorCode.TeacherNotExits));
                 return methodResult;
             }
-            var teacher = teacherResult.Content?.Result;
+            var teacherId = teacherResult.Content?.Result?.Id;
 
-            var classLiveCalendar = _classLiveCalendarRepository.GetByIdAsync(request.ClassLiveCalendarId);
+            var classLiveCalendar = await _classLiveCalendarRepository.GetByIdAsync(request.ClassLiveCalendarId);
             if (classLiveCalendar == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumClassLiveCalendarErrorCode.ClassLiveCalendarNotExits), nameof(request.ClassLiveCalendarId), request.ClassLiveCalendarId);
                 return methodResult;
             }
-            var classLiveWorkFlow = await _classLiveWorkFlowRepository.Queryable.FirstOrDefaultAsync(x => x.TeacherId == teacher!.Id && x.Id == request.ClassLiveCalendarId, cancellationToken);
+            var classLiveWorkFlow = await _classLiveWorkFlowRepository.Queryable.FirstOrDefaultAsync(x => x.TeacherId == teacherId && x.ClassLiveCalendarId == request.ClassLiveCalendarId, cancellationToken);
             if (classLiveWorkFlow != null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumClassLiveWorkFlowErrorCode.ClassLiveWorkFlowAlreadyExist));
@@ -76,7 +76,8 @@ namespace Fsel.Training.Application.Commands.ClassLiveWorkFlowCmd
                     {
                         ClassLiveCalendarId = request.ClassLiveCalendarId,
                         Status = EnumWorkFlowStatus.SubstitutionRequest,
-                        Type = EnumWorkFlow.CancelSchedule
+                        Type = EnumWorkFlow.CancelSchedule,
+                        TeacherId = teacherId
                     };
                 }
                 else
@@ -85,7 +86,8 @@ namespace Fsel.Training.Application.Commands.ClassLiveWorkFlowCmd
                     {
                         ClassLiveCalendarId = request.ClassLiveCalendarId,
                         Status = EnumWorkFlowStatus.SubstitutionRequest,
-                        Type = EnumWorkFlow.SubtitutionRequest
+                        Type = EnumWorkFlow.SubtitutionRequest,
+                        TeacherId = teacherId
                     };
                 }
             }

@@ -11,7 +11,7 @@ namespace Fsel.Training.Domain.Models.EntityModels
         public Guid CourseId { get; set; }
         public EnumCourseLevel CourseLevel { get; set; }
         public DateTime LiveDate { get; set; }
-        public Guid LiveTimeFrameId { get; set; }
+        public Guid? LiveTimeFrameId { get; set; }
         public DateTime? StartTime { get; set; }
         public DateTime? EndTime { get; set; }
         public string? AccessLink { get; set; }

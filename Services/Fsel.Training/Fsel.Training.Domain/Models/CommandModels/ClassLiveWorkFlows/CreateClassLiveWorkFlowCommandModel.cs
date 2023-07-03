@@ -8,6 +8,7 @@ namespace Fsel.Training.Domain.Models.CommandModels.ClassLiveWorkFlows
         public string? Description { get; set; }
         public IList<CreateClassWorkFlowCommandModel>? WorkFlows { get; set; }
     }
+
     public class CreateClassWorkFlowCommandModel
     {
         public Guid LiveTimeFrameId { get; set; }
