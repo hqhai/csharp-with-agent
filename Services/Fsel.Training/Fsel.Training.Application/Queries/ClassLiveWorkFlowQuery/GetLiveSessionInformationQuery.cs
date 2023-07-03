@@ -1,0 +1,85 @@
+// Copyright (c) Atl1antic. All rights reserved.
+
+namespace Fsel.Training.Application.Queries.ClassLiveWorkFlowQuery
+{
+    using System.Threading;
+    using System.Threading.Tasks;
+    using Fsel.Common.ActionResults;
+    using Fsel.Course.Application.Services.UserServices.Models;
+    using Fsel.Training.Application.Services.UserServices;
+    using Fsel.Training.Application.Services.UserServices.Models;
+    using Fsel.Training.Domain.Enums.ErrorCodes;
+    using Fsel.Training.Domain.IRepositories;
+    using Fsel.Training.Domain.Models.EntityModels;
+    using MediatR;
+    using Microsoft.AspNetCore.Http;
+
+    public class GetLiveSessionInformationQuery : IRequest<MethodResult<LiveSessionInformationModel>>
+    {
+        public Guid Id { get; set; }
+    }
+
+    public class GetLiveSessionInformationQueryHandler : IRequestHandler<GetLiveSessionInformationQuery, MethodResult<LiveSessionInformationModel>>
+    {
+        private readonly IClassLiveWorkFlowRepository _classLiveWorkFlowRepository;
+        private readonly IUserService _userService;
+
+        public GetLiveSessionInformationQueryHandler(IClassLiveWorkFlowRepository classLiveWorkFlowRepository, IUserService userService)
+        {
+            _classLiveWorkFlowRepository = classLiveWorkFlowRepository;
+            _userService = userService;
+        }
+
+        public async Task<MethodResult<LiveSessionInformationModel>> Handle(GetLiveSessionInformationQuery request, CancellationToken cancellationToken)
+        {
+            ArgumentNullException.ThrowIfNull(request);
+
+            var methodResult = new MethodResult<LiveSessionInformationModel>();
+            var liveSessionInformation = new LiveSessionInformationModel();
+            var classLiveWorkFlow = await _classLiveWorkFlowRepository.GetIncludeByIdAsync(request.Id);
+            if (classLiveWorkFlow == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumClassLiveWorkFlowErrorCode.ClassLiveWorkFlowNotExits));
+                return methodResult;
+            }
+            var studentIds = classLiveWorkFlow.ClassLiveCalendar?.Class?.ClassStudents.Select(p => p.StudentId).ToList();
+            IList<StudentModel>? students = new List<StudentModel>();
+            if (studentIds!.Count > 0)
+            {
+                var studentsResult = await _userService.GetStudentsByStudentIdsAsync(studentIds!);
+                if (!studentsResult.IsSuccessStatusCode)
+                {
+                    methodResult.AddError(studentsResult.Error);
+                    return methodResult;
+                }
+                students = studentsResult.Content?.Result?.ToList();
+            }
+            if (students!.Count > 0)
+            {
+                liveSessionInformation.Students = students?.Select(x => new InforStudentModel
+                {
+                    StudentName = x.Human?.FullName,
+                    PhoneNumber = x.Human?.PhoneNumber,
+                    Email = x.Human?.Email,
+                }).ToList();
+            }
+            liveSessionInformation.ClassName = classLiveWorkFlow.ClassLiveCalendar?.Class?.Name;
+            liveSessionInformation.Description = classLiveWorkFlow.Description;
+            TeacherModel? teacher = new TeacherModel();
+            if (classLiveWorkFlow.TeacherId.HasValue)
+            {
+                var teacherResult = await _userService.GetTeacherByIdAsync(classLiveWorkFlow.TeacherId ?? default);
+                if (!teacherResult.IsSuccessStatusCode)
+                {
+                    methodResult.AddError(teacherResult.Error);
+                    return methodResult;
+                }
+                teacher = teacherResult.Content?.Result;
+            }
+            liveSessionInformation.TeacherName = teacher?.Human?.FullName;
+            methodResult.Result = liveSessionInformation;
+            methodResult.StatusCode = StatusCodes.Status200OK;
+            return methodResult;
+        }
+    }
+}
