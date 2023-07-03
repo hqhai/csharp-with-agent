@@ -70,9 +70,10 @@ namespace Fsel.Training.Application.Queries.ClassLiveQuery
                      CreatedDate = x.CreatedDate,
                      StartDate = x.StartDate,
                      EndDate = x.EndDate,
-                     LiveDaysStr = x.LiveDaysStr,
+                     LiveDays = x.LiveDays,
                      LiveTimeFrameId = x.LiveTimeFrameId
-                 });
+                 })
+                 .AsEnumerable();
 
             var r2 = _classLiveCalendarRepository.Queryable
                 .Where(x => x.Class != null && x.TeacherId == teacherId)
@@ -86,12 +87,14 @@ namespace Fsel.Training.Application.Queries.ClassLiveQuery
                     CreatedDate = x.CreatedDate,
                     StartDate = x.LiveDate,
                     EndDate = x.LiveDate,
+                    LiveDays = new List<DayOfWeek> { x.LiveDate.DayOfWeek },
                     LiveTimeFrameId = x.LiveTimeFrameId
-                });
+                })
+                .AsEnumerable();
 
             var query = r1.Union(r2);
-            int totalItem = await query.CountAsync(cancellationToken).ConfigureAwait(false);
-            var lists = await query.ApplySortAndPaging(request).ToListAsync(cancellationToken).ConfigureAwait(false);
+            int totalItem = query.Count();
+            var lists = query.Skip((request!.Page - 1) * request!.PageSize).Take(request!.PageSize).ToList();
 
             var courseIds = lists.Select(x => x.CourseId).ToList();
             var courseResults = await _courseService.GetListCourseByIds(courseIds);

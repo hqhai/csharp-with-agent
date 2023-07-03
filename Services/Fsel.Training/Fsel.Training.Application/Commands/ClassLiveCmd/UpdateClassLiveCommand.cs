@@ -87,25 +87,38 @@ namespace Fsel.Training.Application.Commands.ClassLiveCmd
                         _classLiveWorkFlowRepository.Update(classLiveWorkFlow);
                         await _classLiveWorkFlowRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
                     }
-                }
-                else if (@class != null && @class.TeacherApprovalStatus == EnumTeacherApprovalStatus.Approved)
-                {
-                    if (request.IsActice)
+                    else
                     {
-                        @class.TeacherApprovalStatus = EnumTeacherApprovalStatus.Pending;
+                        methodResult.AddErrorBadRequest(nameof(EnumClassLiveWorkFlowErrorCode.ClassLiveWorkFlowStatusAssignTeacher));
+                        return methodResult;
+                    }
+                }
+                else if (@class != null)
+                {
+                    if (@class.TeacherApprovalStatus == EnumTeacherApprovalStatus.Approved)
+                    {
+                        if (request.IsActice)
+                        {
+                            @class.TeacherApprovalStatus = EnumTeacherApprovalStatus.Pending;
+                        }
+                        else
+                        {
+                            @class.TeacherApprovalStatus = default;
+                            @class.TeacherId = default;
+                        }
+                        if (!@class.IsValid())
+                        {
+                            methodResult.AddErrorBadRequest(@class.ErrorMessages);
+                            return methodResult;
+                        }
+                        _classRepository.Update(@class);
+                        await _classRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
                     }
                     else
                     {
-                        @class.TeacherApprovalStatus = default;
-                        @class.TeacherId = default;
-                    }
-                    if (!@class.IsValid())
-                    {
-                        methodResult.AddErrorBadRequest(@class.ErrorMessages);
+                        methodResult.AddErrorBadRequest(nameof(EnumClassLiveWorkFlowErrorCode.ClassNotStatusApproved));
                         return methodResult;
                     }
-                    _classRepository.Update(@class);
-                    await _classRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
                 }
             }
             else
