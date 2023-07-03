@@ -2,9 +2,10 @@
 
 namespace Fsel.Training.Domain.Enums
 {
-    public enum EnumWorkFlow
+    public enum EnumWorkFlowType
     {
-        SubtitutionRequest,
+        ChangeTeacher,
+        AssignTeacher,
         CancelSchedule
     }
 }

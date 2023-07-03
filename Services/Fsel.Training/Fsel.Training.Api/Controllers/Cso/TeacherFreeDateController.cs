@@ -2,6 +2,7 @@
 
 namespace Fsel.Training.Api.Controllers.Cso
 {
+    using System.Collections.Generic;
     using System.Net;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;

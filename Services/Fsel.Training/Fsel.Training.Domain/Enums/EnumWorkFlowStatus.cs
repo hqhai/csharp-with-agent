@@ -2,11 +2,24 @@
 
 namespace Fsel.Training.Domain.Enums
 {
-    public enum EnumWorkFlowStatus
+    public enum EnumWorkFlowChangeTeacherStatus
     {
-        SubstitutionRequest,
+        RequestChangeTeacher,
+        WaitConfirm,
+        DoneScheduled
+    }
+
+    public enum EnumWorkFlowAssignTeacherStatus
+    {
         Pending,
-        Planed,
-        Assign
+        Approved,
+        Reject
+    }
+
+    public enum EnumWorkFlowCancelScheduleStatus
+    {
+        RequestCancel,
+        WaitVote,
+        DoneScheduled
     }
 }

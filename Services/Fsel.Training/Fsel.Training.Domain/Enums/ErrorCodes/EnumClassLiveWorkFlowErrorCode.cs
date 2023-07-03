@@ -17,6 +17,16 @@ namespace Fsel.Training.Domain.Enums.ErrorCodes
         /// <summary>
         /// ClassLiveWorkFlow Already exist
         /// </summary>
-        ClassLiveWorkFlowAlreadyExist
+        ClassLiveWorkFlowAlreadyExist,
+
+        /// <summary>
+        /// Class Not Status Approved
+        /// </summary>
+        ClassNotStatusApproved,
+
+        /// <summary>
+        /// ClassLiveWorkFlow Not Status AssignTeacher
+        /// </summary>
+        ClassLiveWorkFlowStatusAssignTeacher
     }
 }
