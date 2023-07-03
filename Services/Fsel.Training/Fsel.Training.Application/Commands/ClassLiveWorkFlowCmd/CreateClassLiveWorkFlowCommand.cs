@@ -84,6 +84,7 @@ namespace Fsel.Training.Application.Commands.ClassLiveWorkFlowCmd
                     ClassLiveCalendarId = request.ClassLiveCalendarId,
                     Status = status,
                     Type = request.Type,
+                    Description = request.Description,
                     TeacherId = teacherId
                 };
             }
