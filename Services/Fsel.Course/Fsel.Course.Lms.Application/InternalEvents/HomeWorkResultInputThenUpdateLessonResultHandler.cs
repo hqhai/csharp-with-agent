@@ -24,17 +24,17 @@ namespace Fsel.Course.Lms.Application.InternalEvents
         public async Task Handle(EntityChangedEvent<HomeWorkResult> notification, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(notification);
+            var homeWorkResult = notification.Data;
             var lessonResult = await _lessonResultRepository.Queryable.Include(x => x.VideoResult).Include(x => x.HomeWorkResults).Include(x => x.ClassForumResults).ThenInclude(x => x.ClassForumScores)
-                                         .FirstOrDefaultAsync(x => x.Id == notification.Data.LessonResultId, cancellationToken);
-            var status = notification.Data.Status;
-            if (lessonResult != null && lessonResult.VideoResult != null && lessonResult.HomeWorkResults != null && status == EnumResultStatus.Done)
+                                         .FirstOrDefaultAsync(x => x.Id == homeWorkResult.LessonResultId, cancellationToken);
+            if (lessonResult != null && lessonResult.VideoResult != null && lessonResult.HomeWorkResults != null && homeWorkResult.Status == EnumResultStatus.Done)
             {
                 if (lessonResult.HomeWorkResults.All(x => x.Status == EnumResultStatus.Done))
                 {
                     if (lessonResult.VideoResult.Status == EnumResultStatus.Done)
                     {
                         var classForumResult = lessonResult.ClassForumResults.FirstOrDefault();
-                        var percentHomeWork = (double)lessonResult.HomeWorkResults.Sum(x => x.CorrectCount) / lessonResult.HomeWorkResults.Sum(x => x.CorrectTotal) * 30;
+                        var percentHomeWork = (double)lessonResult.HomeWorkResults.Average(x => x.Percent) * 30;
                         var percentClassForum = classForumResult?.Status == EnumClassForumResultStatus.Graded ? ((double)classForumResult.ClassForumScores.Sum(x => x.Score) / 36) * 30 : 0;
                         var percentVideo = lessonResult.VideoResult.Percent * 40;
                         var percent = (percentClassForum + percentHomeWork + percentVideo) / 100;

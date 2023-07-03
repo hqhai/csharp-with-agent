@@ -24,16 +24,16 @@ namespace Fsel.Course.Lms.Application.InternalEvents
         public async Task Handle(EntityChangedEvent<VideoResult> notification, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(notification);
+            var videoResult = notification.Data;
             var lessonResult = await _lessonResultRepository.Queryable.Include(x => x.VideoResult).Include(x => x.HomeWorkResults).Include(x => x.ClassForumResults).ThenInclude(x => x.ClassForumScores)
-                                         .FirstOrDefaultAsync(x => x.Id == notification.Data.LessonResultId, cancellationToken);
-            var status = notification.Data.Status;
+                                         .FirstOrDefaultAsync(x => x.Id == videoResult.LessonResultId, cancellationToken);
             if (lessonResult != null && lessonResult.VideoResult != null && lessonResult.HomeWorkResults != null && lessonResult.ClassForumResults != null)
             {
-                if (status == EnumResultStatus.Done)
+                if (videoResult.Status == EnumResultStatus.Done)
                 {
                     var isCheckHomeWork = lessonResult.HomeWorkResults.All(x => x.Status == EnumResultStatus.Done);
                     var isCheckClassForum = lessonResult.ClassForumResults.FirstOrDefault()?.Status == EnumClassForumResultStatus.Graded;
-                    var percentHomeWork = isCheckHomeWork ? (double)lessonResult.HomeWorkResults.Sum(x => x.CorrectCount) / lessonResult.HomeWorkResults.Sum(x => x.CorrectTotal) * 30 : 0;
+                    var percentHomeWork = isCheckHomeWork ? (double)lessonResult.HomeWorkResults.Average(x => x.Percent) * 30 : 0;
                     var percentClassForum = isCheckClassForum ? ((double)lessonResult.ClassForumResults.SelectMany(x => x.ClassForumScores).Sum(x => x.Score) / 36) * 30 : 0;
                     var percentVideo = lessonResult.VideoResult.Percent * 40;
                     var percent = (percentClassForum + percentHomeWork + percentVideo) / 100;
