@@ -2,7 +2,7 @@
 
 namespace Fsel.Shared.Enums
 {
-    public enum EnumClassType
+    public enum EnumStatusClass
     {
         New,
         Active,

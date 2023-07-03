@@ -10,6 +10,7 @@ namespace Fsel.Training.Api.Controllers.Cso
     using Fsel.Training.Domain.Models.EntityModels;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
+    using System.Collections.Generic;
 
     [ApiVersion(Settings.APIVersion)]
     [Route(Settings.APIDefaultRoute + "/cso/teacher-free-date")]

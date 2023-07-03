@@ -63,7 +63,7 @@ namespace Fsel.Training.Application.Queries.ClassQuery.Admin
             }
             var courseLevel = courseLevelResult.Content?.Result;
 
-            var classes= await _classRepository.Queryable.Where(p => courseLevel!.Select(x => x.Id).Contains(p.CourseId) && p.Status == EnumClassType.New && p.PackageId == @class.PackageId && p.Id != request.ClassId).Select(i => new ClassModel
+            var classes= await _classRepository.Queryable.Where(p => courseLevel!.Select(x => x.Id).Contains(p.CourseId) && p.Status == EnumStatusClass.New && p.PackageId == @class.PackageId && p.Id != request.ClassId).Select(i => new ClassModel
             {
                 Id = i.Id,
                 Code = i.Code,
