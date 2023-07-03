@@ -15,9 +15,6 @@ namespace Fsel.Training.Domain.Models.EntityModels
         public Guid? LiveTimeFrameId { get; set; }
         public DateTime? StartTime { get; set; }
         public DateTime? EndTime { get; set; }
-
         public IList<DayOfWeek>? LiveDays { get; set; }
-        //public string? LiveDaysStr { get; set; }
-        //public DayOfWeek? LiveDay { get; set; }
     }
 }

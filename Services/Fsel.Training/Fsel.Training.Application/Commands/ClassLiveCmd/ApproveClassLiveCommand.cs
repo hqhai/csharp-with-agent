@@ -16,11 +16,11 @@ namespace Fsel.Training.Application.Commands.ClassLiveCmd
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class UpdateClassLiveCommand : UpdateClassLiveCommandModel, IRequest<MethodResult<bool>>
+    public class ApproveClassLiveCommand : ApproveClassLiveCommandModel, IRequest<MethodResult<bool>>
     {
     }
 
-    public class UpdateClassLiveCommandHandler : IRequestHandler<UpdateClassLiveCommand, MethodResult<bool>>
+    public class ApproveClassLiveCommandHandler : IRequestHandler<ApproveClassLiveCommand, MethodResult<bool>>
     {
         private readonly IClassLiveCalendarRepository _classLiveCalendarRepository;
         private readonly IClassLiveWorkFlowRepository _classLiveWorkFlowRepository;
@@ -28,7 +28,7 @@ namespace Fsel.Training.Application.Commands.ClassLiveCmd
         private readonly AuthContext _authContext;
         private readonly IUserService _userService;
 
-        public UpdateClassLiveCommandHandler(
+        public ApproveClassLiveCommandHandler(
             IClassLiveCalendarRepository classLiveCalendarRepository,
             IClassLiveWorkFlowRepository classLiveWorkFlowRepository,
             IClassRepository classRepository,
@@ -42,7 +42,7 @@ namespace Fsel.Training.Application.Commands.ClassLiveCmd
             _userService = userService;
         }
 
-        public async Task<MethodResult<bool>> Handle(UpdateClassLiveCommand request, CancellationToken cancellationToken)
+        public async Task<MethodResult<bool>> Handle(ApproveClassLiveCommand request, CancellationToken cancellationToken)
         {
             var methodResult = new MethodResult<bool>();
             ArgumentNullException.ThrowIfNull(request);
@@ -66,7 +66,7 @@ namespace Fsel.Training.Application.Commands.ClassLiveCmd
                     var classLiveWorkFlow = classLiveCalendar.ClassLiveWorkFlows.FirstOrDefault(x => x.TeacherId == teacherId);
                     if (classLiveWorkFlow != null && classLiveWorkFlow.Type == EnumWorkFlowType.AssignTeacher)
                     {
-                        if (request.IsActice)
+                        if (request.IsAcept)
                         {
                             classLiveCalendar.TeacherId = teacherId;
                             classLiveWorkFlow.Status = EnumWorkFlowAssignTeacherStatus.Approved.ToString();
@@ -97,7 +97,7 @@ namespace Fsel.Training.Application.Commands.ClassLiveCmd
                 {
                     if (@class.TeacherApprovalStatus == EnumTeacherApprovalStatus.Approved)
                     {
-                        if (request.IsActice)
+                        if (request.IsAcept)
                         {
                             @class.TeacherApprovalStatus = EnumTeacherApprovalStatus.Pending;
                         }

@@ -11,16 +11,15 @@ namespace Fsel.Training.Application.Queries.CalendarQuery
     using Fsel.Training.Application.Services.UserServices;
     using Fsel.Training.Domain.IRepositories;
     using Fsel.Training.Domain.Models.EntityModels;
-    using Fsel.Training.Domain.Models.QueryModels.CalendarQuery;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class SearchClassLiveCalendarByTeacherIdQuery : SearchCalendarByTeacherIdQueryModel, IRequest<MethodResult<PagingItemsModel<ClassLiveCalendarSearchModel>>>
+    public class SearchClassLiveCalendarQuery : BaseQueryModel, IRequest<MethodResult<PagingItemsModel<ClassLiveCalendarSearchModel>>>
     {
     }
 
-    public class SearchCalendarByTeacherIdQueryHandler : IRequestHandler<SearchClassLiveCalendarByTeacherIdQuery, MethodResult<PagingItemsModel<ClassLiveCalendarSearchModel>>>
+    public class SearchClassLiveCalendarQueryHandler : IRequestHandler<SearchClassLiveCalendarQuery, MethodResult<PagingItemsModel<ClassLiveCalendarSearchModel>>>
     {
         private readonly IClassLiveCalendarRepository _classLiveCalendarRepository;
         private readonly AuthContext _authContext;
@@ -28,7 +27,7 @@ namespace Fsel.Training.Application.Queries.CalendarQuery
         private readonly ICourseService _courseService;
         private readonly ISystemService _systemService;
 
-        public SearchCalendarByTeacherIdQueryHandler(IClassLiveCalendarRepository classLiveCalendarRepository,
+        public SearchClassLiveCalendarQueryHandler(IClassLiveCalendarRepository classLiveCalendarRepository,
             AuthContext authContext,
             IUserService userService,
             ICourseService courseService,
@@ -41,7 +40,7 @@ namespace Fsel.Training.Application.Queries.CalendarQuery
             _systemService = systemService;
         }
 
-        public async Task<MethodResult<PagingItemsModel<ClassLiveCalendarSearchModel>>> Handle(SearchClassLiveCalendarByTeacherIdQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<PagingItemsModel<ClassLiveCalendarSearchModel>>> Handle(SearchClassLiveCalendarQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<PagingItemsModel<ClassLiveCalendarSearchModel>>();

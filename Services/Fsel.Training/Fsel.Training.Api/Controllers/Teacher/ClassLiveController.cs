@@ -32,22 +32,22 @@ namespace Fsel.Training.Api.Controllers.Teacher
         /// <summary>
         /// Create ClassLiveWorkFlow
         /// </summary>
-        [HttpPost]
+        [HttpPost("teacher-request")]
         [ProducesResponseType(typeof(MethodResult<ClassLiveWorkFlowModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> Create([FromBody] CreateClassLiveWorkFlowCommand command)
+        public async Task<IActionResult> TeacherRequest([FromBody] CreateClassLiveWorkFlowCommand command)
         {
             var queryResult = await _mediator.Send(command).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
 
         /// <summary>
-        /// Update ClassLive
+        /// Approve teacher
         /// </summary>
-        [HttpPut("{id}")]
+        [HttpPut("approve/{id}")]
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> Update([FromRoute] Guid id, [FromBody] UpdateClassLiveCommand command)
+        public async Task<IActionResult> Approve([FromRoute] Guid id, [FromBody] ApproveClassLiveCommand command)
         {
             ArgumentNullException.ThrowIfNull(command);
             command.Id = id;
@@ -58,10 +58,10 @@ namespace Fsel.Training.Api.Controllers.Teacher
         ///  <summary>
         ///  Search ClassLive
         ///  </summary>
-        [HttpGet]
+        [HttpGet("assignments")]
         [ProducesResponseType(typeof(MethodResult<PagingItemsModel<ClassLiveModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> Search([FromQuery] SearchClassLiveByTeacherIdQuery query)
+        public async Task<IActionResult> Search([FromQuery] SearchClassLiveAssignmentsQuery query)
         {
             var queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
@@ -70,10 +70,10 @@ namespace Fsel.Training.Api.Controllers.Teacher
         /// <summary>
         /// Search ClassLiveCalendar
         /// </summary>
-        [HttpGet("calendar")]
+        [HttpGet]
         [ProducesResponseType(typeof(MethodResult<PagingItemsModel<ClassLiveCalendarSearchModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> SearchClassLiveCalendar([FromQuery] SearchClassLiveCalendarByTeacherIdQuery query)
+        public async Task<IActionResult> SearchClassLiveCalendar([FromQuery] SearchClassLiveCalendarQuery query)
         {
             var queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();

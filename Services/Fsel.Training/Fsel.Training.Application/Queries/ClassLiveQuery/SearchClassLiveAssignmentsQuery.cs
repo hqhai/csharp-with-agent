@@ -6,25 +6,22 @@ namespace Fsel.Training.Application.Queries.ClassLiveQuery
     using System.Linq;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
-    using Fsel.Common.Helpers;
     using Fsel.Core.Base;
     using Fsel.Core.Base.BaseModels;
-    using Fsel.Core.Extensions;
     using Fsel.Training.Application.Services.CourseServices;
     using Fsel.Training.Application.Services.SystemServices;
     using Fsel.Training.Application.Services.UserServices;
     using Fsel.Training.Domain.IRepositories;
     using Fsel.Training.Domain.Models.EntityModels;
-    using Fsel.Training.Domain.Models.QueryModels.ClassLiveQuery;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class SearchClassLiveByTeacherIdQuery : SearchClassLiveByTeacherIdQueryModel, IRequest<MethodResult<PagingItemsModel<ClassLiveModel>>>
+    public class SearchClassLiveAssignmentsQuery : BaseQueryModel, IRequest<MethodResult<PagingItemsModel<ClassLiveModel>>>
     {
     }
 
-    public class SearchClassLiveWorkFlowByTeacherIdQueryHandler : IRequestHandler<SearchClassLiveByTeacherIdQuery, MethodResult<PagingItemsModel<ClassLiveModel>>>
+    public class SearchClassLiveAssignmentsQueryHandler : IRequestHandler<SearchClassLiveAssignmentsQuery, MethodResult<PagingItemsModel<ClassLiveModel>>>
     {
         private readonly AuthContext _authContext;
         private readonly IClassLiveCalendarRepository _classLiveCalendarRepository;
@@ -33,7 +30,7 @@ namespace Fsel.Training.Application.Queries.ClassLiveQuery
         private readonly ICourseService _courseService;
         private readonly ISystemService _systemService;
 
-        public SearchClassLiveWorkFlowByTeacherIdQueryHandler(AuthContext authContext,
+        public SearchClassLiveAssignmentsQueryHandler(AuthContext authContext,
             IClassLiveCalendarRepository classLiveCalendarRepository,
             IClassRepository classRepository,
             IUserService userService,
@@ -48,7 +45,7 @@ namespace Fsel.Training.Application.Queries.ClassLiveQuery
             _systemService = systemService;
         }
 
-        public async Task<MethodResult<PagingItemsModel<ClassLiveModel>>> Handle(SearchClassLiveByTeacherIdQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<PagingItemsModel<ClassLiveModel>>> Handle(SearchClassLiveAssignmentsQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<PagingItemsModel<ClassLiveModel>>();

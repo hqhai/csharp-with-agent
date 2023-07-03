@@ -14,5 +14,6 @@ namespace Fsel.Training.Domain.Models.EntityModels
         public Guid? TeacherId { get; set; }
         public Guid? CsoId { get; set; }
         public Guid ClassLiveCalendarId { get; set; }
+        public Guid? WorkFlowParentId { get; set; }
     }
 }
