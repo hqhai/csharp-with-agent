@@ -25,7 +25,6 @@ namespace Fsel.Course.Lms.Application.InternalEvents
         {
             ArgumentNullException.ThrowIfNull(notification);
             var classFormResult = notification.Data;
-
             var lessonResult = await _lessonResultRepository.Queryable.Include(x => x.VideoResult).Include(x => x.HomeWorkResults).Include(x => x.ClassForumResults).ThenInclude(x => x.ClassForumScores)
                                         .FirstOrDefaultAsync(x => x.Id == classFormResult.LessonResultId, cancellationToken);
             if (lessonResult != null && lessonResult.VideoResult != null && lessonResult.HomeWorkResults != null && classFormResult.Status == EnumClassForumResultStatus.Graded)

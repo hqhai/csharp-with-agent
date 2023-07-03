@@ -34,8 +34,9 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                     if (lessonResult.VideoResult.Status == EnumResultStatus.Done)
                     {
                         var classForumResult = lessonResult.ClassForumResults.FirstOrDefault();
+                        var isCheckclassForum = classForumResult?.Status == EnumClassForumResultStatus.Graded;
                         var percentHomeWork = (double)lessonResult.HomeWorkResults.Average(x => x.Percent) * 30;
-                        var percentClassForum = classForumResult?.Status == EnumClassForumResultStatus.Graded ? ((double)classForumResult.ClassForumScores.Sum(x => x.Score) / 36) * 30 : 0;
+                        var percentClassForum = (isCheckclassForum && classForumResult != null) ? ((double)classForumResult.ClassForumScores.Sum(x => x.Score) / 36) * 30 : 0;
                         var percentVideo = lessonResult.VideoResult.Percent * 40;
                         var percent = (percentClassForum + percentHomeWork + percentVideo) / 100;
                         lessonResult.Percent = percent;
