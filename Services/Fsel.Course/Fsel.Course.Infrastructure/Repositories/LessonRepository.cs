@@ -20,7 +20,6 @@ namespace Fsel.Course.Infrastructure.Repositories
                 return await Queryable.Include(e => e.UnitLessons.Where(n => !n.IsDeleted))
                                  .Include(e => e.ClassForum)
                                  .ThenInclude(e => e!.ClassForumFiles.OrderBy(x => x.CreatedDate))
-                                 .Include(x => x.LessonResults.Where(n => !n.IsDeleted).OrderBy(x => x.CreatedDate))
                                  .Include(e => e.LessonHomeWorks.Where(n => !n.IsDeleted).OrderBy(x => x.CreatedDate))
                                  .ThenInclude(e => e.HomeWork)
                                  .Include(e => e.LessonExtraPractices.Where(n => !n.IsDeleted).OrderBy(x => x.CreatedDate))
