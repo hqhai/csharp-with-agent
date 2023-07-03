@@ -82,9 +82,18 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
             var mockTestAnswers = new List<MockTestAnswer>();
             var skillScores = new List<SkillScores>();
             var sectionGroups = await _sectionGroupRepository.Queryable.Where(x => request.SectionGroups.Select(x => x.SectionGroupId).Contains(x.Id)).ToListAsync(cancellationToken);
+
             if (sectionGroups == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSectionGroupErrorCode.SectionGroupsNull), nameof(sectionGroups));
+                return methodResult;
+            }
+
+            var questionIds = request.SectionGroups.SelectMany(x => x.Answers!).Select(x => x.QuestionId).ToList();
+            var questions = await _questionRepository.GetIncludeSectionByIdAsync(questionIds);
+            if (questions == null || questions.Count == 0)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumQuestionErrorCode.QuestionsNotExist), nameof(questionIds), questionIds);
                 return methodResult;
             }
             foreach (var item in request.SectionGroups)
@@ -96,14 +105,9 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
                         methodResult.AddErrorBadRequest(nameof(EnumMockTestAnswerErrorCode.AnswerNull), nameof(request.SectionGroups), request.SectionGroups);
                         return methodResult;
                     }
-                    var questionIds = request.SectionGroups.SelectMany(x => x.Answers!).Select(x => x.QuestionId).ToList();
-                    var questions = await _questionRepository.GetIncludeSectionByIdAsync(questionIds);
-                    if (questions == null || questions.Count == 0)
-                    {
-                        methodResult.AddErrorBadRequest(nameof(EnumQuestionErrorCode.QuestionsNotExist), nameof(questionIds), questionIds);
-                        return methodResult;
-                    }
+
                     double count = 0;
+                    double questionCount = 0;
                     foreach (var answer in item.Answers)
                     {
                         var question = questions.FirstOrDefault(x => x.Id == answer.QuestionId);
@@ -133,6 +137,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
                                 return methodResult;
                             }
                             count += correctCount;
+                            questionCount += question.CorrectTotal;
                             mockTestAnswer = new MockTestAnswer
                             {
                                 Answer = answerConfig,
@@ -151,19 +156,21 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
                     var skillScore = new SkillScores
                     {
                         Skill = sectionGroup.CourseSkill,
-                        TotalCount = questions.Sum(x => x.CorrectTotal),
+                        TotalCount = questionCount,
                         CorrectCount = count,
                         Scores = count.GetIeltsScore(sectionGroup.CourseSkill)
                     };
                     skillScores.Add(skillScore);
                 }
             }
-
-            mockTestResult.CorrectCount = (int)skillScores.Sum(x => x.CorrectCount);
-            mockTestResult.CorrectTotal = (int)skillScores.Sum(x => x.TotalCount);
-            mockTestResult.Percent = (double)mockTestResult.CorrectCount / mockTestResult.CorrectTotal * 100;
-            mockTestResult.Status = EnumResultStatus.Done;
-            mockTestResult.SkillScores = skillScores;
+            if (mockTestAnswers.Count > 0)
+            {
+                mockTestResult.CorrectCount = (int)skillScores.Sum(x => x.CorrectCount);
+                mockTestResult.CorrectTotal = (int)skillScores.Sum(x => x.TotalCount);
+                mockTestResult.Percent = mockTestResult.CorrectTotal > 0 ? (double)mockTestResult.CorrectCount / mockTestResult.CorrectTotal * 100 : 0;
+                mockTestResult.Status = EnumResultStatus.Done;
+                mockTestResult.SkillScores = skillScores;
+            }
 
             await _mockTestAnswerRepository.ExecuteTransactionAsync(async () =>
             {
