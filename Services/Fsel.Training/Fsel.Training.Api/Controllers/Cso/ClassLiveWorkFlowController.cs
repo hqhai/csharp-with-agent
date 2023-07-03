@@ -34,5 +34,17 @@ namespace Fsel.Training.Api.Controllers.Cso
             MethodResult<PagingItemsModel<AlternativeCalendarModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
+
+        /// <summary>
+        /// get alternative calendar
+        /// </summary>
+        [HttpGet("id")]
+        [ProducesResponseType(typeof(MethodResult<ClassLiveWorkFlowInfoModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> Get([FromRoute] Guid id)
+        {
+            MethodResult<ClassLiveWorkFlowInfoModel> queryResult = await _mediator.Send(new GetClassLiveWorkFlowInfoQuery { Id = id}).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
     }
 }
