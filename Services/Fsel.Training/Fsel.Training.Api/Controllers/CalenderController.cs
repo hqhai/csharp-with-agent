@@ -2,13 +2,13 @@
 
 namespace Fsel.Training.Api.Controllers
 {
+    using System.Net;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
     using Fsel.Training.Application.Queries.CalendarQuery;
     using Fsel.Training.Domain.Models.EntityModels;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
-    using System.Net;
 
     [ApiVersion(Settings.APIVersion)]
     [Route(Settings.APIDefaultRoute + "/calendar")]
@@ -41,6 +41,18 @@ namespace Fsel.Training.Api.Controllers
         [ProducesResponseType(typeof(MethodResult<IList<ClassLiveCalendarModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> Get([FromQuery] GetCalendarByCsoQuery query)
+        {
+            var queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Get Calendar by cso
+        /// </summary>
+        [HttpGet("student")]
+        [ProducesResponseType(typeof(MethodResult<IList<ClassLiveCalendarModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> Get([FromQuery] GetCalendarByStudentQuery query)
         {
             var queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();

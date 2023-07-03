@@ -29,6 +29,7 @@ builder.Services.AddScoped<IClassStudentRepository, ClassStudentRepository>();
 builder.Services.AddScoped<IClassLiveCalendarRepository, ClassLiveCalendarRepository>();
 builder.Services.AddScoped<ITeacherFreeDateRepository, TeacherFreeDateRepository>();
 builder.Services.AddScoped<ITeacherFreeTimeRepository, TeacherFreeTimeRepository>();
+builder.Services.AddScoped<IClassLiveWorkFlowRepository, ClassLiveWorkFlowRepository>();
 
 builder.AddRefitClients(typeof(IUserService), appSetting?.Services?.UserApiUrl);
 builder.AddRefitClients(typeof(ICourseService), appSetting?.Services?.CourseApiUrl);

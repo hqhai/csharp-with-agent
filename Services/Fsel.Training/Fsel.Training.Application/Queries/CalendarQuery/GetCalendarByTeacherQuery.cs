@@ -20,6 +20,7 @@ namespace Fsel.Training.Application.Queries.CalendarQuery
     using MediatR;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.AspNetCore.Http;
+    using Fsel.Training.Domain.Enums.ErrorCodes;
 
     public class GetCalendarByTeacherQuery : GetCalendarByTeacherQueryModel, IRequest<MethodResult<IList<ClassLiveCalendarModel>>>
     {
@@ -72,8 +73,10 @@ namespace Fsel.Training.Application.Queries.CalendarQuery
             var teacher = teacherResult.Content?.Result;
             if (teacher == null)
             {
+                methodResult.AddErrorBadRequest(nameof(EnumClassErrorCode.TeachersNotExits));
                 return methodResult;
             }
+
             var courses = coursesResult.Content?.Result;
 
             var query = _classLiveCalendarRepository.Queryable

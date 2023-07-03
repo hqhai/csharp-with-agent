@@ -2,8 +2,8 @@
 
 namespace Fsel.Training.Api.Controllers.Cso
 {
-    using Fsel.Common.ActionResults;
     using System.Net;
+    using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Training.Application.Queries.ScheduleQuery;

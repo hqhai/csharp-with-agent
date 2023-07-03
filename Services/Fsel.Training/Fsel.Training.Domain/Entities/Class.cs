@@ -9,7 +9,6 @@ namespace Fsel.Training.Domain.Entities
     using Fsel.Common.Helpers;
     using Fsel.Core.Entities;
     using Fsel.Shared.Enums;
-    using Fsel.Training.Domain.Enums;
 
     public class Class : Entity
     {
@@ -40,7 +39,7 @@ namespace Fsel.Training.Domain.Entities
         /// <summary>
         /// Status
         /// </summary>
-        public EnumClassType Status { get; set; }
+        public EnumStatusClass Status { get; set; }
 
         public EnumTeacherApprovalStatus? TeacherApprovalStatus { get; set; }
 

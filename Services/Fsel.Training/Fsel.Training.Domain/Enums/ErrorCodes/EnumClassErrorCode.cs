@@ -15,6 +15,11 @@ namespace Fsel.Training.Domain.Enums.ErrorCodes
         StudentsNotExits,
 
         /// <summary>
+        /// Teachers Does not exits
+        /// </summary>
+        TeachersNotExits,
+
+        /// <summary>
         /// Cso Does not exits
         /// </summary>
         CsoNotExits,
@@ -88,6 +93,16 @@ namespace Fsel.Training.Domain.Enums.ErrorCodes
         /// Student Is Already In The Class
         /// </summary>
         StudentIsAlreadyInTheClass,
+
+        /// <summary>
+        /// Class Already Has Cso
+        /// </summary>
+        ClassAlreadyHasCso,
+
+        /// <summary>
+        /// Cso Already In Class
+        /// </summary>
+        CsoAlreadyInClass,
 
         /// <summary>
         /// Teacher Is Already In The Class

@@ -63,11 +63,11 @@ namespace Fsel.Training.Application.Queries.ClassQuery
             if (package.Code == EnumPackageCode.PREMIUM)
             {
                 var liveDaysStr = ConvertHelper.Serialize(request.LiveDays);
-                classes = await _classRepository.Queryable.Include(i => i.ClassStudents).Where(e => e.Status == EnumClassType.New && request.Courses.Select(x => x.CourseId).Contains(e.CourseId) && e.PackageId == request.PackageId && e.ClassStudents.Count < 12 && e.LiveTimeFrameId == request.LiveTimeFrameId && liveDaysStr == e.LiveDaysStr).ToListAsync(cancellationToken: cancellationToken);
+                classes = await _classRepository.Queryable.Include(i => i.ClassStudents).Where(e => e.Status == EnumStatusClass.New && request.Courses.Select(x => x.CourseId).Contains(e.CourseId) && e.PackageId == request.PackageId && e.ClassStudents.Count < 12 && e.LiveTimeFrameId == request.LiveTimeFrameId && liveDaysStr == e.LiveDaysStr).ToListAsync(cancellationToken: cancellationToken);
             }
             else
             {
-                classes = await _classRepository.Queryable.Include(i => i.ClassStudents).Where(e => e.Status == EnumClassType.New && request.Courses.Select(x => x.CourseId).Contains(e.CourseId) && e.PackageId == request.PackageId && e.ClassStudents.Count < 12).ToListAsync(cancellationToken: cancellationToken);
+                classes = await _classRepository.Queryable.Include(i => i.ClassStudents).Where(e => e.Status == EnumStatusClass.New && request.Courses.Select(x => x.CourseId).Contains(e.CourseId) && e.PackageId == request.PackageId && e.ClassStudents.Count < 12).ToListAsync(cancellationToken: cancellationToken);
             }
             IList<CourseClassModel>? courseClassModels = new List<CourseClassModel>();
             foreach (var item in request.Courses)

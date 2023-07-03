@@ -52,7 +52,7 @@ namespace Fsel.Training.Application.Commands.ClassCmd
                 var newClass = _mapper.Map<Class>(request);
                 newClass.Code = generateClassCode.Result;
                 newClass.Name = generateClassCode.Result;
-                newClass.Status = EnumClassType.New;
+                newClass.Status = EnumStatusClass.New;
                 if (!newClass.IsValid())
                 {
                     methodResult.AddErrorBadRequest(newClass.ErrorMessages);
