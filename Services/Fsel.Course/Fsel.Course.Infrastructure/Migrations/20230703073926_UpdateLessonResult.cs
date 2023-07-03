@@ -5,7 +5,7 @@
 namespace Fsel.Course.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class Update_Unit : Migration
+    public partial class UpdateLessonResult : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

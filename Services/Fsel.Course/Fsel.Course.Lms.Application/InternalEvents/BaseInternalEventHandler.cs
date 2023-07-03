@@ -2,6 +2,7 @@
 
 namespace Fsel.Course.Lms.Application.InternalEvents
 {
+    using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Entities.SkillScoresConfigs;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
@@ -11,14 +12,20 @@ namespace Fsel.Course.Lms.Application.InternalEvents
     {
         private readonly IVideoResultRepository _videoResultRepository;
         private readonly IClassForumResultRepository _classForumResultRepository;
+        private readonly IUnitResultRepository _unitResultRepository;
+        private readonly ILessonResultRepository _lessonResultRepository;
         private readonly IHomeWorkResultRepository _homeWorkResultRepository;
 
         public BaseInternalEventHandler(IVideoResultRepository videoResultRepository,
             IClassForumResultRepository classForumResultRepository,
+            IUnitResultRepository unitResultRepository,
+            ILessonResultRepository lessonResultRepository,
             IHomeWorkResultRepository homeWorkResultRepository)
         {
             _videoResultRepository = videoResultRepository;
             _classForumResultRepository = classForumResultRepository;
+            _unitResultRepository = unitResultRepository;
+            _lessonResultRepository = lessonResultRepository;
             _homeWorkResultRepository = homeWorkResultRepository;
         }
 
@@ -119,5 +126,53 @@ namespace Fsel.Course.Lms.Application.InternalEvents
         }
 
         #endregion Tinh Diem Unit
+
+        public async Task UpdateUnit(IList<LessonResult>? lessonResults, UnitResult? unitResult, CancellationToken cancellationToken)
+        {
+            ArgumentNullException.ThrowIfNull(lessonResults);
+            ArgumentNullException.ThrowIfNull(unitResult);
+            List<SkillScores> videoSkillScores = new List<SkillScores>();
+            List<SkillScores> homeSkillScores = new List<SkillScores>();
+            List<SkillScores> classForumSkillScores = new List<SkillScores>();
+            List<SkillScores> skillTestSkillScores = new List<SkillScores>();
+            List<SkillScores> unitTestSkillScores = new List<SkillScores>();
+            foreach (var item in lessonResults)
+            {
+                var lesssonResult = await _lessonResultRepository.Queryable.FirstOrDefaultAsync(x => x.Id == item.Id, cancellationToken);
+                if (lesssonResult != null)
+                {
+                    videoSkillScores.AddRange(await VideoSkillScores(lesssonResult.Id));
+                    unitTestSkillScores.AddRange(await UnitTestSkillScores(lesssonResult.Id));
+                    skillTestSkillScores.AddRange(await SkillTestSkillScores(lesssonResult.Id));
+                    homeSkillScores.AddRange(await HomeWordsSkillScores(lesssonResult.Id));
+                    classForumSkillScores.Add(await ClassForumSkillScores(lesssonResult.Id));
+                }
+            }
+
+            List<SkillScores> mergedSkillScores = videoSkillScores
+                                                    .Concat(homeSkillScores)
+                                                    .Concat(classForumSkillScores)
+                                                    .Concat(skillTestSkillScores)
+                                                    .Concat(unitTestSkillScores)
+                                                    .ToList();
+            List<SkillScores> groupedSkillScores = mergedSkillScores
+                                .GroupBy(x => x.Skill)
+                                .Select(group => new SkillScores
+                                {
+                                    Skill = group.Key,
+                                    Scores = group.Sum(x => x.Scores),
+                                    TotalCount = group.Sum(x => x.TotalCount),
+                                    CorrectCount = group.Sum(x => x.CorrectCount)
+                                })
+                                .ToList();
+
+            unitResult.CorrectCount = (int)groupedSkillScores.Sum(x => x.CorrectCount);
+            unitResult.CorrectTotal = (int)groupedSkillScores.Sum(x => x.TotalCount);
+            unitResult.Status = EnumResultStatus.Done;
+            unitResult.Percent = await PercentUnit(videoSkillScores, 18) + await PercentUnit(homeSkillScores, 22) + await PercentUnit(classForumSkillScores, 20) + await PercentUnit(skillTestSkillScores, 10) + await PercentUnit(unitTestSkillScores, 30);
+            unitResult.SkillScores = groupedSkillScores;
+            _unitResultRepository.Update(unitResult);
+            await _unitResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+        }
     }
 }

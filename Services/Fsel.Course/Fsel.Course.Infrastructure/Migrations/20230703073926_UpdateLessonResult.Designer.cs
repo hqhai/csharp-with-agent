@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fsel.Course.Infrastructure.Migrations
 {
     [DbContext(typeof(CourseDbContext))]
-    [Migration("20230629074413_Update_Unit")]
-    partial class Update_Unit
+    [Migration("20230703073926_UpdateLessonResult")]
+    partial class UpdateLessonResult
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

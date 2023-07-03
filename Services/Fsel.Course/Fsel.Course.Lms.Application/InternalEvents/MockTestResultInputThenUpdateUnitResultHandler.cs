@@ -6,7 +6,6 @@ namespace Fsel.Course.Lms.Application.InternalEvents
     using System.Threading.Tasks;
     using Fsel.Core.Applications.InternalEvents;
     using Fsel.Course.Domain.Entities;
-    using Fsel.Course.Domain.Entities.SkillScoresConfigs;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using MediatR;
@@ -17,7 +16,6 @@ namespace Fsel.Course.Lms.Application.InternalEvents
     {
         private readonly IUnitRepository _unitRepository;
         private readonly IUnitResultRepository _unitResultRepository;
-        private readonly ILessonResultRepository _lessonResultRepository;
         private readonly IMockTestRepository _mockTestRepository;
 
         public MockTestResultInputThenUpdateUnitResultHandler(IUnitRepository unitRepository
@@ -26,69 +24,28 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             , IVideoResultRepository videoResultRepository
             , IClassForumResultRepository classForumResultRepository
             , IHomeWorkResultRepository homeWorkResultRepository
-            , IMockTestRepository mockTestRepository) : base(videoResultRepository, classForumResultRepository, homeWorkResultRepository)
+            , IMockTestRepository mockTestRepository
+            ) : base(videoResultRepository, classForumResultRepository, unitResultRepository, lessonResultRepository, homeWorkResultRepository)
         {
             _unitRepository = unitRepository;
             _unitResultRepository = unitResultRepository;
-            _lessonResultRepository = lessonResultRepository;
             _mockTestRepository = mockTestRepository;
         }
 
         public async Task Handle(EntityChangedEvent<MockTestResult> notification, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(notification);
+            var mockTestResult = notification.Data;
             var mockTest = await _mockTestRepository.GetByIdAsync(notification.Data.MockTestId);
             var unit = await _unitRepository.Queryable.Include(x => x.UnitLessons)
-                                                   .Include(x => x.LessonResults)
-                                                   .Where(x => x.LessonResults.Any(x => x.Status == EnumResultStatus.Done && x.StudentId == notification.Data.StudentId && x.CourseId == notification.Data.CourseId))
-                                                   .FirstOrDefaultAsync(x => x.Id == notification.Data.UnitId, cancellationToken);
-            if (mockTest != null && mockTest.MockTestType == EnumMockTestType.SkillMockTest && unit != null && notification.Data.Status == EnumResultStatus.Done)
+                                                   .Include(x => x.LessonResults.Where(x => x.Status == EnumResultStatus.Done && x.StudentId == mockTestResult.StudentId && x.CourseId == notification.Data.CourseId))
+                                                   .FirstOrDefaultAsync(x => x.Id == mockTestResult.UnitId, cancellationToken);
+            if (unit != null && mockTest != null && mockTest.MockTestType == EnumMockTestType.SkillMockTest && mockTestResult.Status == EnumResultStatus.Done)
             {
-                var unitResult = await _unitResultRepository.Queryable.FirstOrDefaultAsync(x => x.UnitId == notification.Data.UnitId && x.StudentId == notification.Data.StudentId && x.CourseId == notification.Data.CourseId, cancellationToken);
+                var unitResult = await _unitResultRepository.Queryable.FirstOrDefaultAsync(x => x.UnitId == mockTestResult.UnitId && x.StudentId == mockTestResult.StudentId && x.CourseId == notification.Data.CourseId, cancellationToken);
                 if (unitResult != null && unit.LessonResults.Count == unit.UnitLessons.Count)
                 {
-                    List<SkillScores> videoSkillScores = new List<SkillScores>();
-                    List<SkillScores> homeSkillScores = new List<SkillScores>();
-                    List<SkillScores> classForumSkillScores = new List<SkillScores>();
-                    List<SkillScores> skillTestSkillScores = new List<SkillScores>();
-                    List<SkillScores> unitTestSkillScores = new List<SkillScores>();
-                    foreach (var item in unit.LessonResults)
-                    {
-                        var lesssonResult = await _lessonResultRepository.Queryable.FirstOrDefaultAsync(x => x.Id == item.Id, cancellationToken);
-                        if (lesssonResult != null)
-                        {
-                            videoSkillScores.AddRange(await VideoSkillScores(lesssonResult.Id));
-                            unitTestSkillScores.AddRange(await UnitTestSkillScores(lesssonResult.Id));
-                            skillTestSkillScores.AddRange(await SkillTestSkillScores(lesssonResult.Id));
-                            homeSkillScores.AddRange(await HomeWordsSkillScores(lesssonResult.Id));
-                            classForumSkillScores.Add(await ClassForumSkillScores(lesssonResult.Id));
-                        }
-                    }
-
-                    List<SkillScores> mergedSkillScores = videoSkillScores
-                                                            .Concat(homeSkillScores)
-                                                            .Concat(classForumSkillScores)
-                                                            .Concat(skillTestSkillScores)
-                                                            .Concat(unitTestSkillScores)
-                                                            .ToList();
-                    List<SkillScores> groupedSkillScores = mergedSkillScores
-                                        .GroupBy(x => x.Skill)
-                                        .Select(group => new SkillScores
-                                        {
-                                            Skill = group.Key,
-                                            Scores = group.Sum(x => x.Scores),
-                                            TotalCount = group.Sum(x => x.TotalCount),
-                                            CorrectCount = group.Sum(x => x.CorrectCount)
-                                        })
-                                        .ToList();
-
-                    unitResult.CorrectCount = (int)groupedSkillScores.Sum(x => x.CorrectCount);
-                    unitResult.CorrectTotal = (int)groupedSkillScores.Sum(x => x.TotalCount);
-                    unitResult.Status = EnumResultStatus.Done;
-                    unitResult.Percent = await PercentUnit(videoSkillScores, 18) + await PercentUnit(homeSkillScores, 22) + await PercentUnit(classForumSkillScores, 20) + await PercentUnit(skillTestSkillScores, 10) + await PercentUnit(unitTestSkillScores, 30);
-                    unitResult.SkillScores = groupedSkillScores;
-                    _unitResultRepository.Update(unitResult);
-                    await _unitResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+                    await UpdateUnit(unit.LessonResults.ToList(), unitResult, cancellationToken);
                 }
             }
         }

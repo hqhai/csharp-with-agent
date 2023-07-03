@@ -31,12 +31,11 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             {
                 if (lessonResult.HomeWorkResults.All(x => x.Status == EnumResultStatus.Done))
                 {
-                    var classForumResult = lessonResult.ClassForumResults.FirstOrDefault();
-                    var percentHomeWork = (double)lessonResult.HomeWorkResults.Sum(x => x.CorrectCount) / lessonResult.HomeWorkResults.Sum(x => x.CorrectTotal) * 30;
-                    var percentClassForum = classForumResult?.Status == EnumClassForumResultStatus.Graded ? ((double)lessonResult.ClassForumResults.SelectMany(x => x.ClassForumScores).Sum(x => x.Score) / 36) * 30 : 0;
-                    var isCheck = lessonResult.VideoResult.Status == EnumResultStatus.Done;
-                    if (isCheck)
+                    if (lessonResult.VideoResult.Status == EnumResultStatus.Done)
                     {
+                        var classForumResult = lessonResult.ClassForumResults.FirstOrDefault();
+                        var percentHomeWork = (double)lessonResult.HomeWorkResults.Sum(x => x.CorrectCount) / lessonResult.HomeWorkResults.Sum(x => x.CorrectTotal) * 30;
+                        var percentClassForum = classForumResult?.Status == EnumClassForumResultStatus.Graded ? ((double)classForumResult.ClassForumScores.Sum(x => x.Score) / 36) * 30 : 0;
                         var percentVideo = lessonResult.VideoResult.Percent * 40;
                         var percent = (percentClassForum + percentHomeWork + percentVideo) / 100;
                         lessonResult.Percent = percent;
