@@ -10,9 +10,9 @@ namespace Fsel.Training.Domain.Entities
         /// <summary>
         /// Luong
         /// </summary>
-        public EnumWorkFlow Type { get; set; }
+        public EnumWorkFlowType Type { get; set; }
 
-        public EnumWorkFlowStatus Status { get; set; }
+        public string? Status { get; set; }
 
         /// <summary>
         /// Noi dung

@@ -64,17 +64,19 @@ namespace Fsel.Training.Application.Commands.ClassLiveCmd
                 if (classLiveCalendar != null)
                 {
                     var classLiveWorkFlow = classLiveCalendar.ClassLiveWorkFlows.FirstOrDefault(x => x.TeacherId == teacherId);
-                    if (classLiveWorkFlow != null && classLiveWorkFlow.Status == EnumWorkFlowStatus.Assign)
+                    if (classLiveWorkFlow != null && classLiveWorkFlow.Type == EnumWorkFlowType.AssignTeacher)
                     {
                         if (request.IsActice)
                         {
                             classLiveCalendar.TeacherId = teacherId;
-                            classLiveWorkFlow.Status = EnumWorkFlowStatus.Planed;
+                            classLiveWorkFlow.Status = EnumWorkFlowAssignTeacherStatus.Approved.ToString();
                             classLiveWorkFlow.Description = request.Description;
+                            _classLiveCalendarRepository.Update(classLiveCalendar);
+                            await _classLiveCalendarRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
                         }
                         else
                         {
-                            classLiveWorkFlow.Status = EnumWorkFlowStatus.SubstitutionRequest;
+                            classLiveWorkFlow.Status = EnumWorkFlowAssignTeacherStatus.Reject.ToString();
                             classLiveWorkFlow.Description = request.Description;
                         }
                         if (!classLiveWorkFlow.IsValid())
@@ -82,14 +84,8 @@ namespace Fsel.Training.Application.Commands.ClassLiveCmd
                             methodResult.AddErrorBadRequest(classLiveWorkFlow.ErrorMessages);
                             return methodResult;
                         }
-                        _classLiveCalendarRepository.Update(classLiveCalendar);
-                        await _classLiveCalendarRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
                         _classLiveWorkFlowRepository.Update(classLiveWorkFlow);
                         await _classLiveWorkFlowRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-                    }
-                    else
-                    {
-
                     }
                 }
                 else if (@class != null && @class.TeacherApprovalStatus == EnumTeacherApprovalStatus.Approved)

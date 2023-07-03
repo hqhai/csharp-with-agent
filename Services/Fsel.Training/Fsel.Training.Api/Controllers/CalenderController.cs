@@ -5,7 +5,6 @@ namespace Fsel.Training.Api.Controllers
     using System.Net;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
-    using Fsel.Core.Base.BaseModels;
     using Fsel.Training.Application.Queries.CalendarQuery;
     using Fsel.Training.Domain.Models.EntityModels;
     using MediatR;

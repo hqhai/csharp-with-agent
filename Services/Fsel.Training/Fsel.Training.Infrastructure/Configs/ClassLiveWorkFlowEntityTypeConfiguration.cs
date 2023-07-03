@@ -14,17 +14,11 @@ namespace Fsel.Training.Infrastructure.Configs
         {
             ArgumentNullException.ThrowIfNull(builder);
 
-            builder.Property(e => e.Status)
-                .HasMaxLength(100)
-                .HasConversion(
-                    v => v.ToString(),
-                    v => v.EnumParse<EnumWorkFlowStatus>());
-
             builder.Property(e => e.Type)
                .HasMaxLength(100)
                .HasConversion(
                    v => v.ToString(),
-                   v => v.EnumParse<EnumWorkFlow>());
+                   v => v.EnumParse<EnumWorkFlowType>());
 
             builder.HasOne(a => a.ClassLiveCalendar)
                      .WithMany(b => b.ClassLiveWorkFlows)

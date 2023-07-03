@@ -70,26 +70,22 @@ namespace Fsel.Training.Application.Commands.ClassLiveWorkFlowCmd
             }
             else
             {
-                if (request.WorkFlows == null || request.WorkFlows.Count == 0)
+                var status = string.Empty;
+                if (request.Type == EnumWorkFlowType.ChangeTeacher)
                 {
-                    classLiveWorkFlow = new ClassLiveWorkFlow
-                    {
-                        ClassLiveCalendarId = request.ClassLiveCalendarId,
-                        Status = EnumWorkFlowStatus.SubstitutionRequest,
-                        Type = EnumWorkFlow.CancelSchedule,
-                        TeacherId = teacherId
-                    };
+                    status = EnumWorkFlowChangeTeacherStatus.RequestChangeTeacher.ToString();
                 }
-                else
+                else if (request.Type == EnumWorkFlowType.CancelSchedule)
                 {
-                    classLiveWorkFlow = new ClassLiveWorkFlow
-                    {
-                        ClassLiveCalendarId = request.ClassLiveCalendarId,
-                        Status = EnumWorkFlowStatus.SubstitutionRequest,
-                        Type = EnumWorkFlow.SubtitutionRequest,
-                        TeacherId = teacherId
-                    };
+                    status = EnumWorkFlowCancelScheduleStatus.RequestCancel.ToString();
                 }
+                classLiveWorkFlow = new ClassLiveWorkFlow
+                {
+                    ClassLiveCalendarId = request.ClassLiveCalendarId,
+                    Status = status,
+                    Type = request.Type,
+                    TeacherId = teacherId
+                };
             }
             await _classLiveWorkFlowRepository.ExecuteTransactionAsync(async () =>
             {

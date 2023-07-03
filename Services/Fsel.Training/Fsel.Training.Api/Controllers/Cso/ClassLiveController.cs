@@ -12,7 +12,6 @@ namespace Fsel.Training.Api.Controllers.Cso
     using Fsel.Training.Domain.Models.EntityModels;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
-    using Refit;
 
     [ApiVersion(Settings.APIVersion)]
     [Route(Settings.APIDefaultRoute + "/cso/class-live")]
