@@ -39,11 +39,11 @@ namespace Fsel.Training.Api.Controllers.Cso
         /// get alternative calendar
         /// </summary>
         [HttpGet("id")]
-        [ProducesResponseType(typeof(MethodResult<LiveSessionInformationModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(MethodResult<ClassLiveWorkFlowInfoModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> Get([FromRoute] Guid id)
         {
-            MethodResult<LiveSessionInformationModel> queryResult = await _mediator.Send(new GetLiveSessionInformationQuery { Id = id}).ConfigureAwait(false);
+            MethodResult<ClassLiveWorkFlowInfoModel> queryResult = await _mediator.Send(new GetClassLiveWorkFlowInfoQuery { Id = id}).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
     }

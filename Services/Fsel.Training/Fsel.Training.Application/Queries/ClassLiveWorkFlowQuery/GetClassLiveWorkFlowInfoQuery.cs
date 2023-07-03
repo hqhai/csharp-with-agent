@@ -14,28 +14,28 @@ namespace Fsel.Training.Application.Queries.ClassLiveWorkFlowQuery
     using MediatR;
     using Microsoft.AspNetCore.Http;
 
-    public class GetLiveSessionInformationQuery : IRequest<MethodResult<LiveSessionInformationModel>>
+    public class GetClassLiveWorkFlowInfoQuery : IRequest<MethodResult<ClassLiveWorkFlowInfoModel>>
     {
         public Guid Id { get; set; }
     }
 
-    public class GetLiveSessionInformationQueryHandler : IRequestHandler<GetLiveSessionInformationQuery, MethodResult<LiveSessionInformationModel>>
+    public class GetClassLiveWorkFlowInfoQueryHandler : IRequestHandler<GetClassLiveWorkFlowInfoQuery, MethodResult<ClassLiveWorkFlowInfoModel>>
     {
         private readonly IClassLiveWorkFlowRepository _classLiveWorkFlowRepository;
         private readonly IUserService _userService;
 
-        public GetLiveSessionInformationQueryHandler(IClassLiveWorkFlowRepository classLiveWorkFlowRepository, IUserService userService)
+        public GetClassLiveWorkFlowInfoQueryHandler(IClassLiveWorkFlowRepository classLiveWorkFlowRepository, IUserService userService)
         {
             _classLiveWorkFlowRepository = classLiveWorkFlowRepository;
             _userService = userService;
         }
 
-        public async Task<MethodResult<LiveSessionInformationModel>> Handle(GetLiveSessionInformationQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<ClassLiveWorkFlowInfoModel>> Handle(GetClassLiveWorkFlowInfoQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
 
-            var methodResult = new MethodResult<LiveSessionInformationModel>();
-            var liveSessionInformation = new LiveSessionInformationModel();
+            var methodResult = new MethodResult<ClassLiveWorkFlowInfoModel>();
+            var liveSessionInformation = new ClassLiveWorkFlowInfoModel();
             var classLiveWorkFlow = await _classLiveWorkFlowRepository.GetIncludeByIdAsync(request.Id);
             if (classLiveWorkFlow == null)
             {
@@ -56,9 +56,9 @@ namespace Fsel.Training.Application.Queries.ClassLiveWorkFlowQuery
             }
             if (students!.Count > 0)
             {
-                liveSessionInformation.Students = students?.Select(x => new InforStudentModel
+                liveSessionInformation.Students = students?.Select(x => new StudentInfoModel
                 {
-                    StudentName = x.Human?.FullName,
+                    FullName = x.Human?.FullName,
                     PhoneNumber = x.Human?.PhoneNumber,
                     Email = x.Human?.Email,
                 }).ToList();
