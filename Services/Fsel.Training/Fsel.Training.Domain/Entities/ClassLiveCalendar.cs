@@ -19,11 +19,9 @@ namespace Fsel.Training.Domain.Entities
         public string? Note { get; set; }
 
         public EnumClassLiveCalendarStatus Status { get; set; }
-
         public Guid ClassId { get; set; }
-
         public Guid? TeacherId { get; set; }
-
         public Class? Class { get; set; }
+        public ICollection<ClassLiveWorkFlow> ClassLiveWorkFlows { get; set; } = new List<ClassLiveWorkFlow>();
     }
 }
