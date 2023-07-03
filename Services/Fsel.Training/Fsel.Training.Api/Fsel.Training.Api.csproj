@@ -10,8 +10,4 @@
     <ProjectReference Include="..\Fsel.Training.Application\Fsel.Training.Application.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Controllers\Teacher\" />
-  </ItemGroup>
-
 </Project>
