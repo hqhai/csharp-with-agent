@@ -5,6 +5,7 @@ namespace Fsel.Ordering.Domain.Entities
     using System;
     using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations;
+    using System.Diagnostics.Eventing.Reader;
     using System.Linq;
     using System.Text;
     using System.Threading.Tasks;
@@ -29,6 +30,8 @@ namespace Fsel.Ordering.Domain.Entities
         public string? ContentFilePath { get; set; }
 
         public bool IsGlobal { get; set; }
+
+        public bool IsActive { get; set; }
         public EnumCustomerType CustomerType { get; set; }
         public EnumCourseLevel CourseLevel { get; set; }
         public ICollection<VoucherPackage> VoucherPackages { get; set; } = new List<VoucherPackage>();

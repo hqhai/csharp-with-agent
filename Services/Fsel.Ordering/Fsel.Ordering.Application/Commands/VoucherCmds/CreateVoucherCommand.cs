@@ -65,6 +65,7 @@ namespace Fsel.Ordering.Application.Commands.VoucherCmds
 
             await _voucherRepository.ExecuteTransactionAsync(async () =>
             {
+                request.IsGlobal = true;
                 voucher = _voucherRepository.Add(voucher);
                 await _voucherRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 

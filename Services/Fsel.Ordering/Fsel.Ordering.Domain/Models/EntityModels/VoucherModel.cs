@@ -18,6 +18,7 @@ namespace Fsel.Ordering.Domain.Models.EntityModels
         public string? ContentFilePath { get; set; }
 
         public bool IsGlobal { get; set; }
+        public bool IsActive { get; set; }
         public EnumCustomerType CustomerType { get; set; }
         public EnumCourseLevel CourseLevel { get; set; }
         public IList<VoucherPackage>? VoucherPackages { get; set; }

@@ -19,8 +19,9 @@ namespace Fsel.Ordering.Domain.Models.CommandModels.Vouchers
 
         public DateTime? EndDate { get; set; }
 
-        public string? ContentFilePath { get; set; } 
+        public string? ContentFilePath { get; set; }
         public bool IsGlobal { get; set; }
+        public bool IsActive { get; set; }
         public EnumCustomerType CustomerType { get; set; }
         public EnumCourseLevel CourseLevel { get; set; }
         public IList<VoucherPacketModel>? VoucherPackets { get; set; }
