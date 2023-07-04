@@ -71,5 +71,6 @@ namespace Fsel.Ordering.Domain.Entities
         public Package? Package { get; set; }
         public Guid PackageId { get; set; }
         public Guid UserId { get; set; }
+        public Guid ClassId { get; set; }
     }
 }

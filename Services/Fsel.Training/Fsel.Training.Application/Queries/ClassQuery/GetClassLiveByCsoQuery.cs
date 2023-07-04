@@ -3,73 +3,69 @@
 namespace Fsel.Training.Application.Queries.ClassQuery
 {
     using System;
-    using System.Collections;
-    using System.Collections.Generic;
     using System.Linq;
-    using System.Text;
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
-    using Fsel.Course.Application.Services.UserServices.Models;
     using Fsel.Training.Application.Services.UserServices;
-    using Fsel.Training.Domain.Entities;
     using Fsel.Training.Domain.IRepositories;
     using Fsel.Training.Domain.Models.EntityModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class GetClassLiveByCsoQuery : IRequest<MethodResult<ClassModel>>
+    public class GetClassLiveByCsoQuery : IRequest<MethodResult<ClassLiveCalendarModel>>
     {
         public Guid? Id { get; set; }
     }
 
-    public class GetClassLiveByCsoQueryHandler : IRequestHandler<GetClassLiveByCsoQuery, MethodResult<ClassModel>>
+    public class GetClassLiveByCsoQueryHandler : IRequestHandler<GetClassLiveByCsoQuery, MethodResult<ClassLiveCalendarModel>>
     {
-        private readonly IClassRepository _classRepository;
+        private readonly IClassLiveCalendarRepository _classLiveCalendarRepository;
         private readonly IUserService _userService;
 
-        public GetClassLiveByCsoQueryHandler(IClassRepository classRepository, IUserService userService)
+        public GetClassLiveByCsoQueryHandler(IClassLiveCalendarRepository classLiveCalendarRepository, IUserService userService)
         {
-            _classRepository = classRepository;
+            _classLiveCalendarRepository = classLiveCalendarRepository;
             _userService = userService;
         }
 
-        public async Task<MethodResult<ClassModel>> Handle(GetClassLiveByCsoQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<ClassLiveCalendarModel>> Handle(GetClassLiveByCsoQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
 
-            MethodResult<ClassModel> methodResult = new MethodResult<ClassModel>();
+            MethodResult<ClassLiveCalendarModel> methodResult = new MethodResult<ClassLiveCalendarModel>();
 
-            var classLiveModel = await _classRepository.Queryable
-                                    .Include(x => x.ClassStudents)
-                                    .Include(x => x.ClassLiveCalendars)
+            var classLiveModel = await _classLiveCalendarRepository.Queryable
+                                    .Include(x => x.Class)
+                                    .ThenInclude(x => x.ClassStudents)
                                     .Where(x => x.Id == request.Id)
-                                    .Select(x => new ClassModel
+                                    .Select(x => new ClassLiveCalendarModel
                                     {
                                         Id = x.Id,
-                                        Name = x.Name,
-                                        TeacherId = x.TeacherId,
-                                        Code = x.Code,
-                                        ClassStudents = x.ClassStudents.Select(x => new ClassStudentModel
+                                        AccessLink = x.AccessLink,
+                                        Note = x.Note,
+                                        Class = new ClassModel
                                         {
-                                            StudentId = x.StudentId,
-                                        }).ToList(),
-                                        ClassLiveCalendars = x.ClassLiveCalendars.Select(x => new ClassLiveCalendarModel
-                                        {
-                                            AccessLink = x.AccessLink,
-                                            Note = x.Note,
-                                        }).ToList(),
+                                            Id = x.Class!.Id,
+                                            TeacherId = x.Class!.TeacherId,
+                                            Code = x.Class!.Code,
+                                            Name = x.Class!.Name,
+                                            ClassStudents = x.Class!.ClassStudents.Select(x => new ClassStudentModel
+                                            {
+                                                StudentId = x.StudentId
+                                            }).ToList()
+                                        }
                                     }).FirstOrDefaultAsync(cancellationToken);
-            var teacherResult = await _userService.GetTeacherByIdAsync(classLiveModel!.TeacherId ?? default);
+            var teacherResult = await _userService.GetTeacherByIdAsync(classLiveModel!.Class?.TeacherId ?? default);
             var teacher = teacherResult.Content?.Result;
-            classLiveModel.TeacherName = teacher?.Human?.FullName;
+            classLiveModel.Class!.TeacherName = teacher?.Human?.FullName;
 
-            var studentResult = await _userService.GetStudentByUserIdsAsync(classLiveModel.ClassStudents!.Select(x => x.StudentId).ToList());
+            var studentResult = await _userService.GetStudentsByStudentIdsAsync(classLiveModel.Class.ClassStudents!.Select(x => x.StudentId).ToList());
             var students = studentResult.Content?.Result;
-            if (classLiveModel.ClassStudents != null)
+            if (classLiveModel.Class.ClassStudents != null)
             {
-                foreach (var item in classLiveModel.ClassStudents)
+                foreach (var item in classLiveModel.Class!.ClassStudents)
                 {
                     var student = students?.FirstOrDefault(x => x.Id == item.StudentId);
                     item.StudentName = student?.Human?.FullName;

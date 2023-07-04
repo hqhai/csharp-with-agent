@@ -1,9 +1,7 @@
 // Copyright (c) Atlantic. All rights reserved.
 
 using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 using Fsel.Common.Enums.ErrorCodes;
-using Fsel.Common.Helpers;
 using Fsel.Core.Entities;
 using Fsel.Course.Domain.Enums;
 using Fsel.Shared.Enums;
@@ -34,14 +32,9 @@ namespace Fsel.Course.Domain.Entities
         /// <summary>
         /// Đường dẫn tệp
         /// </summary>
-        public string? FilePathsStr { get; set; }
-
-        [NotMapped]
-        public object? FilePaths
-        {
-            get { return ConvertHelper.Deserialize<object>(FilePathsStr); }
-            set { FilePathsStr = ConvertHelper.Serialize(value); }
-        }
+        public string? BookFilePath { get; set; }
+        public string? BookCoverPath { get; set; }
+        public string? BookBackgroundPath { get; set; }
 
         /// <summary>
         /// Tác giả
@@ -73,6 +66,7 @@ namespace Fsel.Course.Domain.Entities
         /// Trình độ Level
         /// </summary>
         public EnumCourseLevel CourseLevel { get; set; }
+
         public Guid? VideoId { get; set; }
         public Video? Video { get; set; }
         public Guid? PlacementTestId { get; set; }

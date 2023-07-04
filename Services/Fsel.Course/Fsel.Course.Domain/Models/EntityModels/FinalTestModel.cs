@@ -9,13 +9,10 @@ namespace Fsel.Course.Domain.Models.EntityModels
     public class FinalTestModel : BaseModel
     {
         public string? Name { get; set; }
-
         public bool IsActive { get; set; }
-
-        public int ExecutionTime { get; set; }
+        public double ExecutionTime { get; set; }
         public long TotalQuestion { get; set; }
         public EnumFinalTestLevel FinalTestLevel { get; set; }
-
         public IList<SectionGroupModel>? SectionGroups { get; set; }
         public FinalTestResultModel? FinalTestResult { get; set; }
     }

@@ -5,7 +5,6 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
-    using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Shared.Enums;
@@ -36,6 +35,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
                                 .Select(x => new CourseModel
                                 {
                                     Id = x.Id,
+                                    Name = x.Name,
                                     CourseLevel = x.CourseLevel,
                                     CreatedDate = x.CreatedDate,
                                 }).ToListAsync(cancellationToken);

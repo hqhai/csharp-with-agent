@@ -1,4 +1,4 @@
-namespace Fsel.System.Application.Querys.LiveTimeFrames
+namespace Fsel.System.Application.Querys.LiveTimeFrameQuery
 {
     using Fsel.Common.ActionResults;
     using Fsel.System.Domain.IRepositories;

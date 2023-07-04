@@ -17,6 +17,7 @@ services:
             - JWT__SUBJECT=baseWebApiSubject
             - JWT__TOKENVALIDITYINMINUTES=1440
             - JWT__REFRESHTOKENVALIDITYINDAYS=7
+            - SERVICES_UserApiUrl=http://42.96.58.145:5202/api/v1
         ports:
             - 5208:80
             - 7208:443

@@ -79,8 +79,8 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.Property<string>("MediaPost")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<long>("TaggetTimeLimit")
-                        .HasColumnType("bigint");
+                    b.Property<double>("TaggetTimeLimit")
+                        .HasColumnType("float");
 
                     b.Property<long>("TaggetWordLimit")
                         .HasColumnType("bigint");
@@ -217,6 +217,10 @@ namespace Fsel.Course.Infrastructure.Migrations
 
                     b.Property<int?>("FeedBackStars")
                         .HasColumnType("int");
+
+                    b.Property<string>("FilePath")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
 
                     b.Property<Guid?>("GradingTeacherId")
                         .HasColumnType("uniqueidentifier");
@@ -376,7 +380,7 @@ namespace Fsel.Course.Infrastructure.Migrations
                         .HasColumnType("bit")
                         .HasColumnOrder(110);
 
-                    b.Property<long?>("Score")
+                    b.Property<long>("Score")
                         .HasColumnType("bigint");
 
                     b.Property<DateTime?>("UpdatedDate")
@@ -556,6 +560,10 @@ namespace Fsel.Course.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(0);
+
+                    b.Property<string>("AvatarPath")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
 
                     b.Property<Guid>("CourseId")
                         .HasColumnType("uniqueidentifier");
@@ -857,6 +865,15 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.Property<string>("Author")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("BookBackgroundPath")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("BookCoverPath")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("BookFilePath")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Code")
                         .IsRequired()
                         .HasMaxLength(250)
@@ -893,10 +910,6 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.Property<Guid?>("DeletedUserId")
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(103);
-
-                    b.Property<string>("FilePathsStr")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("InstructionContent")
                         .HasColumnType("nvarchar(max)");
@@ -1122,8 +1135,8 @@ namespace Fsel.Course.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(103);
 
-                    b.Property<int>("ExecutionTime")
-                        .HasColumnType("int");
+                    b.Property<double>("ExecutionTime")
+                        .HasColumnType("float");
 
                     b.Property<string>("FinalTestLevel")
                         .IsRequired()
@@ -1658,6 +1671,9 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.Property<double>("Percent")
                         .HasColumnType("float");
 
+                    b.Property<string>("SkillScoresStr")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Status")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -2076,6 +2092,9 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.Property<double>("Percent")
                         .HasColumnType("float");
 
+                    b.Property<string>("SkillScoresStr")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Status")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -2382,6 +2401,9 @@ namespace Fsel.Course.Infrastructure.Migrations
 
                     b.Property<double>("Percent")
                         .HasColumnType("float");
+
+                    b.Property<string>("SkillScoresStr")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Status")
                         .IsRequired()
@@ -2818,8 +2840,8 @@ namespace Fsel.Course.Infrastructure.Migrations
                         .HasColumnOrder(103);
 
                     b.Property<string>("Explanation")
-                        .HasMaxLength(250)
-                        .HasColumnType("nvarchar(250)");
+                        .HasMaxLength(3000)
+                        .HasColumnType("nvarchar(3000)");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit")
@@ -3042,8 +3064,8 @@ namespace Fsel.Course.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(103);
 
-                    b.Property<long>("ExecutionTime")
-                        .HasColumnType("bigint");
+                    b.Property<double>("ExecutionTime")
+                        .HasColumnType("float");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit")
@@ -3238,11 +3260,11 @@ namespace Fsel.Course.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(103);
 
-                    b.Property<long>("DisplayTime")
-                        .HasColumnType("bigint");
+                    b.Property<double>("DisplayTime")
+                        .HasColumnType("float");
 
-                    b.Property<long>("ExecutionTime")
-                        .HasColumnType("bigint");
+                    b.Property<double>("ExecutionTime")
+                        .HasColumnType("float");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit")
@@ -3800,6 +3822,9 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.Property<Guid>("VideoId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<string>("VideoSkillScoresStr")
+                        .HasColumnType("nvarchar(max)");
+
                     b.HasKey("Id");
 
                     b.HasIndex("LessonResultId");
@@ -3843,11 +3868,11 @@ namespace Fsel.Course.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(103);
 
-                    b.Property<long>("DisplayTime")
-                        .HasColumnType("bigint");
+                    b.Property<double>("DisplayTime")
+                        .HasColumnType("float");
 
-                    b.Property<long>("ExecutionTime")
-                        .HasColumnType("bigint");
+                    b.Property<double>("ExecutionTime")
+                        .HasColumnType("float");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit")

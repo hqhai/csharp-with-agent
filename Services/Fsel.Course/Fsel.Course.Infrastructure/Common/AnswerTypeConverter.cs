@@ -1,9 +1,8 @@
-// Copyright (c) Atlantic. All rights reserved.
+    // Copyright (c) Atlantic. All rights reserved.
 
 namespace Fsel.Course.Infrastructure.Common
 {
     using System;
-    using System.CodeDom;
     using System.Globalization;
     using System.Linq;
     using Fsel.Common.Helpers;
@@ -179,7 +178,7 @@ namespace Fsel.Course.Infrastructure.Common
             if (dataAnswer != null && dataAnswer.Answers != null && dataQuestion != null)
             {
                 var answerStrs = dataAnswer.Answers.Split(' ');
-                if (answerStrs != null && dataQuestion.ExactWordCount == answerStrs.Length)
+                if (answerStrs != null && answerStrs.Length >= dataQuestion.ExactWordCount)
                 {
                     dataAnswer.IsExact = true;
                     number++;
@@ -227,7 +226,7 @@ namespace Fsel.Course.Infrastructure.Common
                     var question = dataQuestion.Contents.FirstOrDefault(c => c.Id == item.Id);
                     if (question != null && question.Words != null && question.Words.Count > 0 && item.Answer != null && item.Answer.Count > 0)
                     {
-                        var isExacts = item.Answer.Select(w => question.Words.Contains(w)).ToList();
+                        var isExacts = item.Answer.Select((word, index) => CheckAnswer(question.Words, word, index)).ToList();
                         item.IsExacts = isExacts;
                         if (isExacts.All(x => x))
                         {
@@ -244,6 +243,28 @@ namespace Fsel.Course.Infrastructure.Common
             return number;
         }
 
+        private static bool CheckAnswer(IList<string> words, string word, int index)
+        {
+            if (words[index].IndexOf('|', StringComparison.Ordinal) != -1)
+            {
+                string[] questionWords = words[index].Split('|');
+                string[] answerWords = word.Split(' ');
+                foreach (var item in questionWords)
+                {
+                    if (answerWords.Any(x => x == item))
+                    {
+                        return true;
+                    }
+                }
+            }
+            else if (words[index] == word)
+            {
+                return true;
+            }
+
+            return false;
+        }
+
         private static int GetTotalCorrectTypeGapFillGapAnswer(ref object? configAnswer, object? configQuestion)
         {
             var dataAnswer = configAnswer.Deserialize<GapFillAnswer>();
@@ -256,7 +277,7 @@ namespace Fsel.Course.Infrastructure.Common
                     var question = dataQuestion.Contents.FirstOrDefault(c => c.Id == item.Id);
                     if (question != null && question.Words != null && question.Words.Count > 0 && item.Answer != null && item.Answer.Count > 0)
                     {
-                        var isExacts = item.Answer.Select(w => question.Words.Contains(w)).ToList();
+                        var isExacts = item.Answer.Select((word, index) => CheckAnswer(question.Words, word, index)).ToList();
                         item.IsExacts = isExacts;
                         number += isExacts.Count(x => x);
                     }

@@ -4,7 +4,10 @@ namespace Fsel.Training.Application.Queries.ClassQuery
 {
     using System.Collections.Generic;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Helpers;
+    using Fsel.Ordering.Domain.Enums;
     using Fsel.Shared.Enums;
+    using Fsel.Training.Application.Services.OrderServices;
     using Fsel.Training.Domain.Entities;
     using Fsel.Training.Domain.Enums.ErrorCodes;
     using Fsel.Training.Domain.IRepositories;
@@ -18,17 +21,21 @@ namespace Fsel.Training.Application.Queries.ClassQuery
         public IList<CourseClassModel>? Courses { get; set; }
         public EnumCourseLevel? CourseLevel { get; set; }
         public Guid PackageId { get; set; }
+        public Guid? LiveTimeFrameId { get; set; }
+        public IList<DayOfWeek>? LiveDays { get; set; }
     }
 
     public class GetClassByStatusNewQueryHandler : IRequestHandler<GetClassByStatusNewQuery, MethodResult<IList<CourseClassModel>>>
     {
         private readonly IClassRepository _classRepository;
         private readonly IMediator _mediator;
+        private readonly IOrderService _orderService;
 
-        public GetClassByStatusNewQueryHandler(IClassRepository classRepository, IMediator mediator)
+        public GetClassByStatusNewQueryHandler(IClassRepository classRepository, IMediator mediator, IOrderService orderService)
         {
             _classRepository = classRepository;
             _mediator = mediator;
+            _orderService = orderService;
         }
 
         public async Task<MethodResult<IList<CourseClassModel>>> Handle(GetClassByStatusNewQuery request, CancellationToken cancellationToken)
@@ -40,9 +47,28 @@ namespace Fsel.Training.Application.Queries.ClassQuery
                 methodResult.AddErrorBadRequest(nameof(EnumClassErrorCode.CoursesNull), nameof(request.Courses), request.Courses);
                 return methodResult;
             }
-
-            List<Class> classes = await _classRepository.Queryable.Where(e => e.Status == EnumClassType.New && request.Courses.Select(x => x.CourseId).Contains(e.CourseId) && e.PackageId == request.PackageId).ToListAsync(cancellationToken: cancellationToken);
-
+            var packagesResult = await _orderService.GetPackages();
+            if (!packagesResult.IsSuccessStatusCode)
+            {
+                methodResult.AddError(packagesResult.Error?.Content, packagesResult.StatusCode);
+                return methodResult;
+            }
+            var package = packagesResult.Content?.Result?.FirstOrDefault(p => p.Id == request.PackageId);
+            if (package == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumClassErrorCode.PackageNotExist), nameof(request.PackageId), request.PackageId);
+                return methodResult;
+            }
+            List<Class> classes = new List<Class>();
+            if (package.Code == EnumPackageCode.PREMIUM)
+            {
+                var liveDaysStr = ConvertHelper.Serialize(request.LiveDays);
+                classes = await _classRepository.Queryable.Include(i => i.ClassStudents).Where(e => e.Status == EnumStatusClass.New && request.Courses.Select(x => x.CourseId).Contains(e.CourseId) && e.PackageId == request.PackageId && e.ClassStudents.Count < 12 && e.LiveTimeFrameId == request.LiveTimeFrameId && liveDaysStr == e.LiveDaysStr).ToListAsync(cancellationToken: cancellationToken);
+            }
+            else
+            {
+                classes = await _classRepository.Queryable.Include(i => i.ClassStudents).Where(e => e.Status == EnumStatusClass.New && request.Courses.Select(x => x.CourseId).Contains(e.CourseId) && e.PackageId == request.PackageId && e.ClassStudents.Count < 12).ToListAsync(cancellationToken: cancellationToken);
+            }
             IList<CourseClassModel>? courseClassModels = new List<CourseClassModel>();
             foreach (var item in request.Courses)
             {

@@ -32,8 +32,6 @@ namespace Fsel.Course.Lms.Application.Commands.LessonCmd
         private readonly AuthContext _authContext;
         private readonly ILessonRepository _lessonRepository;
         private readonly ILessonResultRepository _lessonResultRepository;
-        private readonly IUnitResultRepository _unitResultRepository;
-        private readonly ICourseResultRepository _courseResultRepository;
         private readonly IHomeWorkRepository _homeWorkRepository;
 
         public StartLessonCommandHandler(ICourseRepository courseRepository
@@ -43,9 +41,7 @@ namespace Fsel.Course.Lms.Application.Commands.LessonCmd
             , AuthContext authContext
             , ILessonRepository lessonRepository
             , ILessonResultRepository lessonResultRepository
-            , IUnitResultRepository unitResultRepository
-            , IHomeWorkRepository homeWorkRepository
-            , ICourseResultRepository courseResultRepository)
+            , IHomeWorkRepository homeWorkRepository)
         {
             _courseRepository = courseRepository;
             _unitRepository = unitRepository;
@@ -54,8 +50,6 @@ namespace Fsel.Course.Lms.Application.Commands.LessonCmd
             _authContext = authContext;
             _lessonRepository = lessonRepository;
             _lessonResultRepository = lessonResultRepository;
-            _unitResultRepository = unitResultRepository;
-            _courseResultRepository = courseResultRepository;
             _homeWorkRepository = homeWorkRepository;
         }
 
@@ -65,6 +59,14 @@ namespace Fsel.Course.Lms.Application.Commands.LessonCmd
             MethodResult<LessonResultModel> methodResult = new MethodResult<LessonResultModel>();
 
             #region Validation
+
+            var student = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
+            if (!student.IsSuccessStatusCode)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumLessonErrorCode.UserNotExist), nameof(student), _authContext.CurrentUserId.ToString());
+                return methodResult;
+            }
+            var studentId = student?.Content?.Result?.Id;
 
             var course = await _courseRepository.GetByIdAsync(request.CourseId);
             if (course == null)
@@ -77,11 +79,17 @@ namespace Fsel.Course.Lms.Application.Commands.LessonCmd
                 methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.CourseIsNewStateCantStartLesson), nameof(course.Status), course.Status);
                 return methodResult;
             }
-
-            var unit = await _unitRepository.GetByIdAsync(request.UnitId);
+            var unit = await _unitRepository.Queryable.Include(x => x.LessonResults.Where(x => x.LessonId == request.LessonId && x.UnitId == request.UnitId && x.CourseId == request.CourseId && x.StudentId == studentId))
+                                             .FirstOrDefaultAsync(x => x.Id == request.UnitId, cancellationToken);
             if (unit == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumUnitErrorCode.UnitNotExist), nameof(request.UnitId), request.UnitId);
+                return methodResult;
+            }
+
+            if (unit.LessonResults.Any(x => x.Status == EnumResultStatus.Process))
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumLessonResultErrorCode.LessonResultAlreadyExistStatusProcess));
                 return methodResult;
             }
 
@@ -92,74 +100,33 @@ namespace Fsel.Course.Lms.Application.Commands.LessonCmd
                 return methodResult;
             }
 
-            var student = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
-            if (!student.IsSuccessStatusCode)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumLessonErrorCode.UserNotExist), nameof(student), _authContext.CurrentUserId.ToString());
-                return methodResult;
-            }
-
             #endregion Validation
 
-            var studentId = student?.Content?.Result?.Id;
-
-            var courseResult = _courseResultRepository.Queryable.Where(x => x!.CourseId == request.CourseId && x.StudentId == studentId).FirstOrDefault();
-            if (courseResult == null)
-            {
-                courseResult = new CourseResult
-                {
-                    StudentId = studentId ?? default,
-                    CourseId = course.Id
-                };
-
-                _courseResultRepository.Add(courseResult);
-                await _courseResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
-            }
-
-            var unitResult = _unitResultRepository.Queryable.Where(x => x!.CourseId == request.CourseId && x!.UnitId == request.UnitId && x.StudentId == studentId).FirstOrDefault();
-            if (unitResult == null)
-            {
-                unitResult = new UnitResult
-                {
-                    StudentId = studentId ?? default,
-                    CourseId = course.Id,
-                    UnitId = unit.Id,
-                };
-
-                _unitResultRepository.Add(unitResult);
-                await _unitResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
-            }
-
             var homeWorks = await _homeWorkRepository.Queryable.Include(x => x.LessonHomeWorks.Where(n => !n.IsDeleted))
-                                                .Where(x => x.LessonHomeWorks.Select(n => n.LessonId).Contains(request.LessonId))
+                                                .Where(x => x.LessonHomeWorks.Any(x => x.LessonId == request.LessonId))
                                                 .ToListAsync(cancellationToken);
 
-            var lessonResult = _lessonResultRepository.Queryable.Where(x => x!.LessonId == request.LessonId && x!.UnitId == request.UnitId && x!.CourseId == request.CourseId && x.StudentId == studentId).FirstOrDefault();
-            if (lessonResult == null)
+            var lessonResult = await _lessonResultRepository.Queryable.FirstOrDefaultAsync(x => x.LessonId == request.LessonId && x.UnitId == request.UnitId && x.CourseId == request.CourseId && x.StudentId == x.StudentId , cancellationToken);
+            if (lessonResult != null && lessonResult.Status == EnumResultStatus.Unfinished)
             {
-                lessonResult = new LessonResult
+                lessonResult.VideoResult = new VideoResult
                 {
+                    VideoId = lesson.LessonVideos.FirstOrDefault()!.VideoId,
+                    Status = EnumResultStatus.Process,
                     StudentId = studentId ?? default,
-                    CourseId = course.Id,
-                    UnitId = unit.Id,
-                    LessonId = request.LessonId,
-                    VideoResult = new VideoResult
-                    {
-                        VideoId = lesson.LessonVideos.FirstOrDefault()!.VideoId,
-                        StudentId = studentId ?? default,
-                    },
-                    HomeWorkResults = homeWorks.Select(x => new HomeWorkResult
-                    {
-                        HomeWorkId = x.Id,
-                        Status = EnumResultStatus.Unfinished,
-                        StudentId = studentId ?? default,
-                    }).ToList()
                 };
-                _lessonResultRepository.Add(lessonResult);
-                await _lessonResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+                lessonResult.HomeWorkResults = homeWorks.Select(x => new HomeWorkResult
+                {
+                    HomeWorkId = x.Id,
+                    Status = EnumResultStatus.Unfinished,
+                    StudentId = studentId ?? default,
+                }).ToList();
+                lessonResult.Status = EnumResultStatus.Process;
+                lessonResult = _lessonResultRepository.Update(lessonResult);
+                await _lessonResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             }
 
-            methodResult.StatusCode = StatusCodes.Status201Created;
+            methodResult.StatusCode = StatusCodes.Status200OK;
             methodResult.Result = _mapper.Map<LessonResultModel>(lessonResult);
             return methodResult;
         }

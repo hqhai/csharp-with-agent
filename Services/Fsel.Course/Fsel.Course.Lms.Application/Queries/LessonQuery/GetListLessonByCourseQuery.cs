@@ -5,8 +5,8 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
-    using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
+    using Fsel.Course.Domain.Models.EntityModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -18,12 +18,10 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
 
     public class GetListLessonByCourseQueryHandler : IRequestHandler<GetListLessonByCourseQuery, MethodResult<object>>
     {
-        private readonly ILessonRepository _lessonRepository;
         private readonly IUnitRepository _unitRepository;
 
-        public GetListLessonByCourseQueryHandler(ILessonRepository lessonRepository, IUnitRepository unitRepository)
+        public GetListLessonByCourseQueryHandler(IUnitRepository unitRepository)
         {
-            _lessonRepository = lessonRepository;
             _unitRepository = unitRepository;
         }
 
@@ -34,13 +32,15 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
             var unitQuery = await _unitRepository.Queryable
                                                      .Include(x => x.UnitLessons.Where(n => !n.IsDeleted))
                                                      .ThenInclude(x => x.Lesson)
+                                                     .Include(x => x.CourseUnitMockTests.Where(x => x.CourseId == request.CourseId).OrderBy(x => x.DisplayOrder))
                                                      .Include(x => x.CourseUnitMockTests.Where(x => x.CourseId == request.CourseId))
-                                                     .Select(x => new
+                                                     .AsNoTracking()
+                                                     .Select(x => new UnitModel
                                                      {
                                                          Id = x.Id,
                                                          Name = x.Name,
                                                          Code = x.Code,
-                                                         Lessons = x.UnitLessons.Select(x => x.Lesson).Select(x => new
+                                                         Lessons = x.UnitLessons.OrderBy(x => x.DisplayOrder).Select(x => x.Lesson).Select(x => new LessonModel
                                                          {
                                                              Id = x!.Id,
                                                              Name = x.Name,

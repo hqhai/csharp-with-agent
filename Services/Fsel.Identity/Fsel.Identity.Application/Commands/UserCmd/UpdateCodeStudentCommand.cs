@@ -53,9 +53,14 @@ namespace Fsel.Identity.Application.Commands.UserCmd
             var currentDate = DateTime.Now;
             var weekNumber = (currentDate.DayOfYear - 1) / 7 + 1;
             var lastDigitOfYear = currentDate.Year % 10;
-            var lastOfYear = request.Birthday.Year % 100;
+            var lastOfBirthDay = request.Birthday.Year % 100;
             var number = request.Gender == EnumGender.Male ? 0 : request.Gender == EnumGender.Female ? 1 : 2;
-            user.Human!.Code = $"HN_{weekNumber}{lastDigitOfYear}{number}{lastOfYear}{stt:000}";
+            var code = $"HN_{weekNumber}{lastDigitOfYear}{number}{lastOfBirthDay}{stt:000}";
+            if (await _studentRepository.Queryable.Include(x => x.Human).AnyAsync(x => x!.Human!.Code == code, cancellationToken))
+            {
+                code = $"HN_{weekNumber}{lastDigitOfYear}{number}{2}{lastOfBirthDay}{stt:000}";
+            }
+            user.Human!.Code = code;
             _mapper.Map(request, user.Human);
             await _userManager.UpdateAsync(user);
 

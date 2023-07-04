@@ -22,21 +22,21 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
     {
         private readonly IVideoTimeCodeAnswerRepository _videoTimeCodeAnswerRepository;
         private readonly ILessonResultRepository _lessonResultRepository;
-        private readonly IQuestionRepository _questionRepository;
         private readonly IMapper _mapper;
+        private readonly IQuestionRepository _questionRepository;
         private readonly AnswerTypeConverter _answerTypeConverter;
 
         public CreateVideoTimeCodeAnswerCommandHandler(
              IVideoTimeCodeAnswerRepository videoTimeCodeAnswerRepository
             , ILessonResultRepository lessonResultRepository
-            , IQuestionRepository questionRepository
             , IMapper mapper
+            , IQuestionRepository questionRepository
             , AnswerTypeConverter answerTypeConverter)
         {
             _videoTimeCodeAnswerRepository = videoTimeCodeAnswerRepository;
             _lessonResultRepository = lessonResultRepository;
-            _questionRepository = questionRepository;
             _mapper = mapper;
+            _questionRepository = questionRepository;
             _answerTypeConverter = answerTypeConverter;
         }
 
@@ -117,7 +117,6 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
                     };
                     videoTimeCodeAnswers.Add(answer);
                 }
-
                 var questionModel = _mapper.Map<QuestionModel>(question);
                 questionModel.ResultAnswer = _mapper.Map<VideoTimeCodeAnswerModel>(answer);
                 questionModels.Add(questionModel);
@@ -131,9 +130,12 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
                 {
                     await _videoTimeCodeAnswerRepository.AddList(videoTimeCodeAnswers);
                     await _videoTimeCodeAnswerRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                    methodResult.StatusCode = StatusCodes.Status201Created;
                 }
-
-                methodResult.StatusCode = StatusCodes.Status201Created;
+                else
+                {
+                    methodResult.StatusCode = StatusCodes.Status200OK;
+                }
                 methodResult.Result = questionModels;
                 return methodResult;
             });

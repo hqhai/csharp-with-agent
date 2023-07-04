@@ -21,13 +21,13 @@ namespace Fsel.Course.Domain.Entities
         /// Thời gian bắt đầu xuất hiện TimeCode
         /// </summary>
         [Range(1, 10000_0000, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
-        public long DisplayTime { get; set; }
+        public double DisplayTime { get; set; }
 
         /// <summary>
-        /// Thời gian hiện làm bài
+        /// Thời gian làm bài
         /// </summary>
         [Range(1, 10000_0000, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
-        public long ExecutionTime { get; set; }
+        public double ExecutionTime { get; set; }
 
         [NotMapped]
         public TimeSpan DisplayTimeSpan

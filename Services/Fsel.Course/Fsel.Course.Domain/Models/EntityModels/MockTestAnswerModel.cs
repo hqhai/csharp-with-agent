@@ -10,6 +10,10 @@ namespace Fsel.Course.Domain.Models.EntityModels
 
         public int CorrectCount { get; set; }
 
+        public SectionQuestionModel? HomeWorkQuestion { get; set; }
+
+        public MockTestResultModel? HomeWorkResult { get; set; }
+
         public Guid SectionQuestionId { get; set; }
 
         public Guid MockTestResultId { get; set; }

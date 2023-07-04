@@ -2,10 +2,8 @@
 
 namespace Fsel.Course.Domain.Models.EntityModels
 {
-    using System.Collections.Generic;
     using Fsel.Shared.Enums;
     using Fsel.Core.Base.BaseModels;
-    using Fsel.Course.Domain.Entities;
 
     public class HomeWorkSearchModel : BaseModel
     {
@@ -20,7 +18,5 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public EnumCourseLevel CourseLevel { get; set; }
 
         public EnumCourseSkill CourseSkill { get; set; }
-
-        public IList<LessonHomeWork>? LessonHomeWorks { get; set; }
     }
 }

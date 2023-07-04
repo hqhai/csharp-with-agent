@@ -30,7 +30,7 @@ namespace Fsel.Course.Domain.Entities
         /// <summary>
         /// Lưu câu giải thích
         /// </summary>
-        [MaxLength(250, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
+        [MaxLength(3000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? Explanation { get; set; }
 
         /// <summary>

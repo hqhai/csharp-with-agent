@@ -18,7 +18,6 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
     public class ChangePasswordCommandHandler : IRequestHandler<ChangePasswordCommand, MethodResult<bool>>
     {
         private readonly UserManager<User> _userManager;
-
         private readonly AuthContext _authContext;
         private readonly SignInManager<User> _signInManager;
 
@@ -47,7 +46,6 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             }
 
             var user = await _userManager.FindByIdAsync(_authContext.CurrentUserId.ToString());
-
             if (user == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumAuthErrorCode.EmailNotExist));

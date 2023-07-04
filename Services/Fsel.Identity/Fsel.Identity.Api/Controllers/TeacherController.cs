@@ -49,6 +49,18 @@ namespace Fsel.Identity.Api.Controllers
         }
 
         /// <summary>
+        /// Get teacher by UserId
+        /// </summary>
+        [HttpGet("get-by-user-id/{id}")]
+        [ProducesResponseType(typeof(MethodResult<TeacherModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetByUserId([FromRoute] Guid id)
+        {
+            MethodResult<TeacherModel> commandResult = await _mediator.Send(new GetTeacherByUserIdQuery { UserId = id }).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
         /// Search Teacher
         /// </summary>
         [HttpGet]
@@ -59,6 +71,30 @@ namespace Fsel.Identity.Api.Controllers
         {
             MethodResult<PagingItemsModel<TeacherModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// get all teacher
+        /// </summary>
+        [HttpGet("get-all")]
+        [ProducesResponseType(typeof(MethodResult<IList<TeacherModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetAllTeacher()
+        {
+            MethodResult<IList<TeacherModel>> commandResult = await _mediator.Send(new GetAllTeacherQuery { }).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// get teachers by keyword
+        /// </summary>
+        [HttpGet("get-teachers-by-keyword/{keyword}")]
+        [ProducesResponseType(typeof(MethodResult<IList<TeacherModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetTeachersByKeyword([FromRoute] string? keyword)
+        {
+            MethodResult<IList<TeacherModel>> commandResult = await _mediator.Send(new GetTeachersByKeywordQuery { Keyword = keyword }).ConfigureAwait(false);
+            return commandResult.GetActionResult();
         }
     }
 }

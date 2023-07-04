@@ -4,7 +4,7 @@ using Fsel.Shared.Enums;
 
 namespace Fsel.Course.Domain.Models.EntityModels
 {
-    public class ExerciseModel 
+    public class ExerciseModel
     {
         public Guid Id { get; set; }
         public string? Name { get; set; }

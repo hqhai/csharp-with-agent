@@ -19,24 +19,24 @@ namespace Fsel.Training.Application.Queries.ClassQuery
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class SearchClassLiveByCsoQuery : SearchClassLiveByCsoQueryModel, IRequest<MethodResult<PagingItemsModel<ClassModel>>>
+    public class SearchClassLiveByCsoQuery : SearchClassLiveByCsoQueryModel, IRequest<MethodResult<PagingItemsModel<ClassLiveCalendarModel>>>
     {
     }
 
-    public class SearchClassLiveByCsoQueryHandler : IRequestHandler<SearchClassLiveByCsoQuery, MethodResult<PagingItemsModel<ClassModel>>>
+    public class SearchClassLiveByCsoQueryHandler : IRequestHandler<SearchClassLiveByCsoQuery, MethodResult<PagingItemsModel<ClassLiveCalendarModel>>>
     {
-        private readonly IClassRepository _classRepository;
+        private readonly IClassLiveCalendarRepository _classLiveCalendarRepository;
         private readonly IUserService _userService;
 
-        public SearchClassLiveByCsoQueryHandler(IClassRepository classRepository, IUserService userService)
+        public SearchClassLiveByCsoQueryHandler(IClassLiveCalendarRepository classLiveCalendarRepository, IUserService userService)
         {
-            _classRepository = classRepository;
+            _classLiveCalendarRepository = classLiveCalendarRepository;
             _userService = userService;
         }
 
-        public async Task<MethodResult<PagingItemsModel<ClassModel>>> Handle(SearchClassLiveByCsoQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<PagingItemsModel<ClassLiveCalendarModel>>> Handle(SearchClassLiveByCsoQuery request, CancellationToken cancellationToken)
         {
-            var methodResult = new MethodResult<PagingItemsModel<ClassModel>>();
+            var methodResult = new MethodResult<PagingItemsModel<ClassLiveCalendarModel>>();
             ArgumentNullException.ThrowIfNull(request);
             if (request.PageSize > 100)
             {
@@ -44,19 +44,33 @@ namespace Fsel.Training.Application.Queries.ClassQuery
                 return methodResult;
             }
 
-            var classLiveQuery = _classRepository.Queryable
-                                        .Select(x => new ClassModel
+            var classLiveQuery = _classLiveCalendarRepository.Queryable
+                                        .Include(x => x.Class)
+                                        .Select(x => new ClassLiveCalendarModel
                                         {
                                             Id = x.Id,
-                                            StartTime = x.StartTime,
-                                            EndTime = x.EndTime,
-                                            TeacherId = x.TeacherId,
-                                            CreatedDate = x.CreatedDate,
-                                            Status = x.Status,
-                                            Code = x.Code,
-                                            CourseId = x.CourseId,
+                                            ClassId = x.ClassId,
+                                            Class = new ClassModel
+                                            {
+                                                Id = x.Class!.Id,
+                                                Name = x.Class!.Name,
+                                                Code = x.Class!.Code,
+                                                TeacherId = x.Class!.TeacherId,
+                                                StartDate = x.Class!.StartDate.Value,
+                                                EndDate = x.Class!.EndDate.Value,
+                                                LiveDays = x.Class!.LiveDays,
+                                            },
+                                            CreatedDate = x.CreatedDate
                                         });
+            if (!string.IsNullOrEmpty(request.Keyword))
+            {
+                classLiveQuery = classLiveQuery.Where(m => m.Id.ToString() == request.Keyword || (m.Class!.Name ?? string.Empty).Contains(request.Keyword));
+            }
 
+            if (request.ClassCode != null)
+            {
+                classLiveQuery = classLiveQuery.Where(m => m.Class!.Code == request.ClassCode);
+            }
             int totalItem = await classLiveQuery.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
             var lists = await classLiveQuery
                     .ApplySortAndPaging(request)
@@ -64,16 +78,16 @@ namespace Fsel.Training.Application.Queries.ClassQuery
                     .ToListAsync(cancellationToken: cancellationToken)
                     .ConfigureAwait(false);
 
-            var teacherResult = await _userService.GetTeacherByIdsAsync(new GetTeacherByIdsQueryModel { Ids = lists.Select(x => x.TeacherId ?? default).Distinct().ToList() });
+            var teacherResult = await _userService.GetTeacherByIdsAsync(new GetTeacherByIdsQueryModel { Ids = lists.Select(x => x.Class!.TeacherId ?? default).Distinct().ToList() });
             var teachers = teacherResult.Content?.Result;
 
             foreach (var item in lists)
             {
-                var teacher = teachers!.FirstOrDefault(x => x.Id == item.TeacherId);
-                item.TeacherName = teacher?.Human?.FullName;
+                var teacher = teachers!.FirstOrDefault(x => x.Id == item.Class!.TeacherId);
+                item.Class!.TeacherName = teacher?.Human?.FullName;
             }
 
-            methodResult.Result = new PagingItemsModel<ClassModel>(lists, request, totalItem);
+            methodResult.Result = new PagingItemsModel<ClassLiveCalendarModel>(lists, request, totalItem);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }

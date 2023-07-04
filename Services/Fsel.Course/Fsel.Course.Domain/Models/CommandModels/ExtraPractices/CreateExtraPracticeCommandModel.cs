@@ -12,22 +12,19 @@ namespace Fsel.Course.Domain.Models.CommandModels.ExtraPractices
     public class CreateExtraPracticeCommandModel
     {
         public string? Name { get; set; }
-
         [Required]
         public string? Code { get; set; }
-
         public string? InstructionContent { get; set; }
-        public IList<string>? FilePaths { get; set; }
+        public string? BookFilePath { get; set; }
+        public string? BookCoverPath { get; set; }
+        public string? BookBackgroundPath { get; set; }
         public string? VideoLink { get; set; }
         public string? Author { get; set; }
         public string? Abstract { get; set; }
-
         [Required]
         public EnumExtraPracticeType Type { get; set; }
-
         [Required]
         public EnumCourseLevel CourseLevel { get; set; }
-
         public IList<CreateExtraPracticeChapterCommandModel>? ExtraPracticeChapters { get; set; }
         public IList<CreateExerciseCommandModel>? Exercises { get; set; } //Type : Video Embed,Exercise
         public Guid? MockTestId { get; set; } //Type : MockTest

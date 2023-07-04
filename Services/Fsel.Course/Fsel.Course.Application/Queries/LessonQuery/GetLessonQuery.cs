@@ -30,7 +30,7 @@ namespace Fsel.Course.Application.Queries.LessonQuery
         {
             MethodResult<LessonModel> methodResult = new MethodResult<LessonModel>();
             ArgumentNullException.ThrowIfNull(request);
-            var lesson = await _lessonRepository.GetIncludeByIdAsync(request.Id);
+            var lesson = await _lessonRepository.GetIncludeByIdNoTrackingAsync(request.Id);
 
             if (lesson == null)
             {
@@ -43,7 +43,7 @@ namespace Fsel.Course.Application.Queries.LessonQuery
             var lessonModel = _mapper.Map<LessonModel>(lesson);
             lessonModel.Video = _mapper.Map<VideoModel>(video);
             lessonModel.VideoId = video?.Id;
-            lessonModel.HomeWorks = _mapper.Map<IList<HomeWorkModel>>(lesson.LessonHomeWorks.Select(x => x.HomeWork));
+            lessonModel.HomeWorks = _mapper.Map<IList<HomeWorkModel>>(lesson.LessonHomeWorks.Select(x => x.HomeWork).OrderBy(x => x!.CreatedDate));
             lessonModel.ClassForum = _mapper.Map<ClassForumModel>(lesson.ClassForum);
             lessonModel.IsActive = lesson.UnitLessons.Any();
             methodResult.Result = lessonModel;

@@ -3,7 +3,6 @@
 namespace Fsel.Course.Lms.Application.Queries.LessonQuery
 {
     using System;
-    using System.Collections.Generic;
     using System.Linq;
     using System.Linq.Dynamic.Core;
     using System.Threading;
@@ -12,6 +11,7 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base;
     using Fsel.Course.Domain.Entities;
+    using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
@@ -33,16 +33,22 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
         private readonly IUnitRepository _unitRepository;
         private readonly IUserService _userService;
         private readonly IMapper _mapper;
+        private readonly IMockTestResultRepository _mockTestResultRepository;
+        private readonly ILessonResultRepository _lessonResultRepository;
         private readonly AuthContext _authContext;
 
         public GetLessonQueryHandler(ILessonRepository lessonRepository,
             AuthContext authContext,
             IMapper mapper,
+            IMockTestResultRepository mockTestResultRepository,
+            ILessonResultRepository lessonResultRepository,
             IUserService userService,
             IUnitRepository unitRepository)
         {
             _lessonRepository = lessonRepository;
             _mapper = mapper;
+            _mockTestResultRepository = mockTestResultRepository;
+            _lessonResultRepository = lessonResultRepository;
             _authContext = authContext;
             _userService = userService;
             _unitRepository = unitRepository;
@@ -62,13 +68,51 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
             }
             var studentId = studentsResult.Content!.Result!.Id;
 
+            var unit = await _unitRepository.Queryable.Include(x => x.UnitSkillMockTests)
+                                                      .Include(x => x.UnitLessons)
+                                                      .FirstOrDefaultAsync(x => x.Id == request.UnitId, cancellationToken);
+            if (unit == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumUnitErrorCode.UnitNotExist), nameof(request.UnitId), request.UnitId);
+                return methodResult;
+            }
+
+            var lessonResults = await _lessonResultRepository.Queryable.Where(x => x.UnitId == request.UnitId && x.CourseId == request.CourseId && x.StudentId == studentId).ToListAsync(cancellationToken);
+            if (lessonResults == null || lessonResults.Count == 0)
+            {
+                lessonResults = unit.UnitLessons.OrderBy(x => x.DisplayOrder).Select(x => new LessonResult
+                {
+                    UnitId = x.UnitId,
+                    LessonId = x.LessonId,
+                    CourseId = request.CourseId,
+                    Status = EnumResultStatus.Unfinished,
+                    StudentId = studentId
+                }).ToList();
+                await _lessonResultRepository.AddList(lessonResults);
+                await _lessonResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+            }
+
+            var mockTestResults = await _mockTestResultRepository.Queryable.Where(x => x.UnitId == request.UnitId && x.CourseId == request.CourseId && x.StudentId == studentId).ToListAsync(cancellationToken);
+            if (mockTestResults == null || mockTestResults.Count == 0)
+            {
+                mockTestResults = unit.UnitSkillMockTests.Select(x => new MockTestResult
+                {
+                    UnitId = x.UnitId,
+                    MockTestId = x.MockTestId,
+                    StudentId = studentId,
+                    Status = EnumResultStatus.Unfinished,
+                    CourseId = request.CourseId
+                }).ToList();
+                await _mockTestResultRepository.AddList(mockTestResults);
+                await _mockTestResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+            }
             var lessons = await _lessonRepository.Queryable
-                                .Include(x => x.LessonInstructions.Where(x => !x.IsDeleted))
-                                .Include(x => x.LessonResults.Where(y => !y.IsDeleted))
-                                .Include(x => x.UnitLessons.Where(x => !x.IsDeleted))
-                                .Include(x => x.LessonVideos.Where(y => !y.IsDeleted))
+                                .Include(x => x.LessonInstructions)
+                                .Include(x => x.LessonResults)
+                                .Include(x => x.UnitLessons)
+                                .Include(x => x.LessonVideos)
                                 .ThenInclude(x => x.Video)
-                                .Where(x => x.UnitLessons.Select(x => x.UnitId).Contains(request.UnitId))
+                                .Where(x => x.UnitLessons.Any(x => x.UnitId == request.UnitId))
                                 .Where(x => !request.LessonId.HasValue || x.Id == request.LessonId)
                                 .AsNoTracking()
                                 .Select(x => new LessonModel
@@ -79,9 +123,9 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
                                     InstructionContent = x.InstructionContent,
                                     IsActive = x.UnitLessons.Any(),
                                     VideoId = x.LessonVideos.Where(x => x.Video != null).Select(x => x.Video).FirstOrDefault()!.Id,
-                                    DisplayOrder = x.UnitLessons.Where(n => n.UnitId == request.UnitId).Select(x => x.DisplayOrder).FirstOrDefault(),
-                                    LessonInstructions = _mapper.Map<IList<LessonInstructionModel>>(x.LessonInstructions),
-                                    LessonResult = _mapper.Map<LessonResultModel>(x.LessonResults.FirstOrDefault(y => y.UnitId == request.UnitId && y.CourseId == request.CourseId && y.StudentId == studentId)),
+                                    DisplayOrder = x.UnitLessons.Where(n => n.UnitId == request.UnitId && n.LessonId == x.Id).Select(x => x.DisplayOrder).FirstOrDefault(),
+                                    LessonInstructions = _mapper.Map<IList<LessonInstructionModel>>(x.LessonInstructions.OrderBy(x => x.CreatedDate).ToList()),
+                                    LessonResult = _mapper.Map<LessonResultModel>(x.LessonResults.Where(y => y.UnitId == request.UnitId && y.CourseId == request.CourseId && y.StudentId == studentId).FirstOrDefault(y => y.LessonId == x.Id)),
                                 }).OrderBy(x => x.DisplayOrder).ToListAsync(cancellationToken: cancellationToken);
 
             if (lessons.Count == 0)
@@ -91,11 +135,13 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
             }
 
             var mocktest = await _unitRepository.Queryable
-                                .Include(x => x.UnitSkillMockTests)
+                                .Include(x => x.UnitSkillMockTests.Where(y => !y.IsDeleted))
                                 .ThenInclude(x => x.MockTest)
-                                .ThenInclude(x => x!.MockTestSections)
+                                .ThenInclude(x => x!.MockTestSections.Where(y => !y.IsDeleted))
                                 .ThenInclude(x => x.SectionGroup)
+                                .Include(x => x.MockTestResults.Where(y => y.UnitId == request.UnitId && y.CourseId == request.CourseId && y.StudentId == studentId))
                                 .Where(x => x.Id == request.UnitId)
+                                .AsNoTracking()
                                 .SelectMany(x => x.UnitSkillMockTests)
                                 .Select(x => x.MockTest)
                                 .Select(x => new MockTestModel
@@ -104,13 +150,14 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
                                     Id = x.Id,
                                     Name = x.Name,
                                     TotalQuestion = x.MockTestSections.Select(x => x.SectionGroup).SelectMany(x => x!.Sections).SelectMany(x => x.SectionParts).SelectMany(x => x.SectionQuestions).Select(x => x.Question).Select(x => x!.CorrectTotal).Sum(),
-                                    SectionGroups = x.MockTestSections.Select(x => x.SectionGroup).Select(x => new SectionGroupModel
+                                    SectionGroups = x.MockTestSections.Select(x => x.SectionGroup).OrderBy(x => x.CreatedDate).Select(x => new SectionGroupModel
                                     {
                                         Id = x!.Id,
-                                        CourseSkill = x.CourseSkill
+                                        CourseSkill = x.CourseSkill,
+                                        ExecutionTime = x!.ExecutionTime,
                                     }).ToList(),
-                                })
-                                .FirstOrDefaultAsync(cancellationToken);
+                                    MockTestResult = _mapper.Map<MockTestResultModel>(x.MockTestResults.FirstOrDefault(y => y.MockTestId == x.Id)),
+                                }).FirstOrDefaultAsync(cancellationToken);
 
             methodResult.Result = new LessonsMockTestModel
             {

@@ -13,22 +13,45 @@ namespace Fsel.Course.Infrastructure.Repositories
         {
         }
 
-        public override async Task<Lesson?> GetIncludeByIdAsync(Guid id, int? siteId = null)
+        public async Task<Lesson?> GetIncludeByIdNoTrackingAsync(Guid id, int? siteId = null)
         {
             try
             {
                 return await Queryable.Include(e => e.UnitLessons.Where(n => !n.IsDeleted))
-                                 .Include(e => e.UnitLessons.Where(n => !n.IsDeleted))
                                  .Include(e => e.ClassForum)
-                                 .ThenInclude(e => e!.ClassForumFiles)
-                                 .Include(x => x.LessonResults.Where(n => !n.IsDeleted))
-                                 .Include(e => e.LessonHomeWorks.Where(n => !n.IsDeleted))
+                                 .ThenInclude(e => e!.ClassForumFiles.OrderBy(x => x.CreatedDate))
+                                 .Include(x => x.LessonResults.Where(n => !n.IsDeleted).OrderBy(x => x.CreatedDate))
+                                 .Include(e => e.LessonHomeWorks.Where(n => !n.IsDeleted).OrderBy(x => x.CreatedDate))
                                  .ThenInclude(e => e.HomeWork)
-                                 .Include(e => e.LessonExtraPractices.Where(n => !n.IsDeleted))
-                                 .Include(e => e.LessonInstructions.Where(n => !n.IsDeleted))
-                                 .Include(e => e.LessonVideos.Where(n => !n.IsDeleted))
+                                 .Include(e => e.LessonExtraPractices.Where(n => !n.IsDeleted).OrderBy(x => x.CreatedDate))
+                                 .Include(e => e.LessonInstructions.Where(n => !n.IsDeleted).OrderBy(x => x.CreatedDate))
+                                 .Include(e => e.LessonVideos.Where(n => !n.IsDeleted).OrderBy(x => x.CreatedDate))
                                  .ThenInclude(x => x.Video)
-                                 .ThenInclude(x => x!.VideoTimeCodes.Where(n => !n.IsDeleted))
+                                 .ThenInclude(x => x!.VideoTimeCodes.Where(n => !n.IsDeleted).OrderBy(x => x.CreatedDate))
+                                 .AsNoTracking()
+                                 .FirstOrDefaultAsync(x => x.Id == id);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public override async Task<Lesson?> GetIncludeByIdAsync(Guid id, int? siteId = null)
+        {
+            try
+            {
+                return await Queryable.Include(e => e.UnitLessons.Where(n => !n.IsDeleted).OrderBy(x => x.CreatedDate))
+                                 .Include(e => e.ClassForum)
+                                 .ThenInclude(e => e!.ClassForumFiles.OrderBy(x => x.CreatedDate))
+                                 .Include(x => x.LessonResults.Where(n => !n.IsDeleted).OrderBy(x => x.CreatedDate))
+                                 .Include(e => e.LessonHomeWorks.Where(n => !n.IsDeleted).OrderBy(x => x.CreatedDate))
+                                 .ThenInclude(e => e.HomeWork)
+                                 .Include(e => e.LessonExtraPractices.Where(n => !n.IsDeleted).OrderBy(x => x.CreatedDate))
+                                 .Include(e => e.LessonInstructions.Where(n => !n.IsDeleted).OrderBy(x => x.CreatedDate))
+                                 .Include(e => e.LessonVideos.Where(n => !n.IsDeleted).OrderBy(x => x.CreatedDate))
+                                 .ThenInclude(x => x.Video)
+                                 .ThenInclude(x => x!.VideoTimeCodes.Where(n => !n.IsDeleted).OrderBy(x => x.CreatedDate))
                                  .FirstOrDefaultAsync(x => x.Id == id);
             }
             catch (Exception)

@@ -4,7 +4,6 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
 {
     using System.Threading;
     using System.Threading.Tasks;
-    using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;

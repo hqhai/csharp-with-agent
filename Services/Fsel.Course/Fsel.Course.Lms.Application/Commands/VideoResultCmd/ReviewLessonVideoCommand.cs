@@ -4,11 +4,13 @@ namespace Fsel.Course.Lms.Application.Commands.VideoResultCmd
 {
     using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Course.Domain.Entities.SkillScoresConfigs;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.CommandModels.VideoResults;
     using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -22,6 +24,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoResultCmd
         private readonly IVideoResultRepository _videoResultRepository;
         private readonly IVideoTimeCodeAnswerRepository _videoTimeCodeAnswerRepository;
         private readonly IVideoRepository _videoRepository;
+        private readonly IMediator _mediator;
         private readonly IVideoTimeCodeRepository _videoTimeCodeRepository;
         private readonly ITimeCodeExerciseRepository _timeCodeExerciseRepository;
         private readonly IExerciseRepository _exerciseRepository;
@@ -35,6 +38,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoResultCmd
             ITimeCodeExerciseRepository timeCodeExerciseRepository,
             IExerciseRepository exerciseRepository,
             IVideoRepository videoRepository,
+            IMediator mediator,
             IVideoTimeCodeRepository videoTimeCodeRepository,
             IExerciseQuestionRepository exerciseQuestionRepository,
             IQuestionRepository questionRepository)
@@ -43,6 +47,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoResultCmd
             _timeCodeExerciseRepository = timeCodeExerciseRepository;
             _exerciseRepository = exerciseRepository;
             _videoRepository = videoRepository;
+            _mediator = mediator;
             _videoTimeCodeRepository = videoTimeCodeRepository;
             _exerciseQuestionRepository = exerciseQuestionRepository;
             _questionRepository = questionRepository;
@@ -69,23 +74,60 @@ namespace Fsel.Course.Lms.Application.Commands.VideoResultCmd
                 return methodResult;
             }
 
-            var answerQuery = from vtca in _videoTimeCodeAnswerRepository.Queryable
-                              where vtca.VideoResultId == videoResult.Id
-                              select vtca.CorrectCount;
+            var answerQuery = from baseQ in _videoResultRepository.Queryable
+                              join vtca in _videoTimeCodeAnswerRepository.Queryable on baseQ.Id equals vtca.VideoResultId
+                              join e in _exerciseRepository.Queryable on vtca.ExerciseId equals e.Id
+                              join te in _timeCodeExerciseRepository.Queryable on e.Id equals te.ExerciseId
+                              join vt in _videoTimeCodeRepository.Queryable on te.VideoTimeCodeId equals vt.Id
+                              where baseQ.Id == videoResult.Id
+                              group new { vt, vtca } by new { vt.TimeCodeType, e.CourseSkill } into g
+                              select new
+                              {
+                                  Type = g.Key.TimeCodeType,
+                                  Skill = g.Key.CourseSkill,
+                                  CorrectCount = g.Sum(x => x.vtca.CorrectCount)
+                              };
 
-            var questionQuery = from v in _videoRepository.Queryable
+            var questionQuery = from baseQ in _videoResultRepository.Queryable
+                                join v in _videoRepository.Queryable on baseQ.VideoId equals v.Id
                                 join vt in _videoTimeCodeRepository.Queryable on v.Id equals vt.VideoId
                                 join te in _timeCodeExerciseRepository.Queryable on vt.Id equals te.VideoTimeCodeId
                                 join e in _exerciseRepository.Queryable on te.ExerciseId equals e.Id
                                 join eq in _exerciseQuestionRepository.Queryable on e.Id equals eq.ExerciseId
                                 join q in _questionRepository.Queryable on eq.QuestionId equals q.Id
-                                where v.Id == videoResult.VideoId
-                                select q.CorrectTotal;
-
-            videoResult.CorrectCount = await answerQuery.SumAsync(cancellationToken);
-            videoResult.CorrectTotal = await questionQuery.SumAsync(cancellationToken);
+                                where baseQ.Id == videoResult.Id
+                                group new { vt, q } by new { vt.TimeCodeType, e.CourseSkill } into g
+                                select new
+                                {
+                                    Type = g.Key.TimeCodeType,
+                                    Skill = g.Key.CourseSkill,
+                                    TotalCount = g.Sum(x => x.q.CorrectTotal)
+                                };
+            var questions = await questionQuery.ToListAsync(cancellationToken);
+            var skills = Enum.GetValues(typeof(EnumCourseSkill)).Cast<EnumCourseSkill>();
+            var types = Enum.GetValues(typeof(EnumTimeCodeType)).Cast<EnumTimeCodeType>();
+            var scoreQuery = from type in types
+                             select new VideoSkillScores
+                             {
+                                 Type = type,
+                                 SkillScores = (from skill in skills
+                                                join questionTimeCodeQ in questions on skill equals questionTimeCodeQ.Skill into questionTimeCodeQ_jointable
+                                                from questionTimeCodeQJ in questionTimeCodeQ_jointable.DefaultIfEmpty()
+                                                join answerTimeCodeQ in answerQuery on skill equals answerTimeCodeQ.Skill into answerTimeCodeQ_jointable
+                                                from answerTimeCodeQJ in answerTimeCodeQ_jointable.DefaultIfEmpty()
+                                                where questionTimeCodeQJ != null && answerTimeCodeQJ != null && questionTimeCodeQJ.Type == type && answerTimeCodeQJ.Type == type
+                                                select new SkillScores
+                                                {
+                                                    Skill = skill,
+                                                    TotalCount = questionTimeCodeQJ != null ? questionTimeCodeQJ.TotalCount : default,
+                                                    CorrectCount = answerTimeCodeQJ != null ? answerTimeCodeQJ.CorrectCount : default,
+                                                }).ToList()
+                             };
+            videoResult.CorrectCount = (int)scoreQuery.Where(x => x.Type == EnumTimeCodeType.Standalone).SelectMany(x => x.SkillScores!).Sum(x => x.CorrectCount);
+            videoResult.CorrectTotal = (int)scoreQuery.Where(x => x.Type == EnumTimeCodeType.Standalone).SelectMany(x => x.SkillScores!).Sum(x => x.TotalCount);
             videoResult.Status = EnumResultStatus.Done;
-            videoResult.Percent = (double)videoResult.CorrectCount / videoResult.CorrectTotal * 100;
+            videoResult.Percent = videoResult.CorrectTotal != 0 ? (double)videoResult.CorrectCount / videoResult.CorrectTotal * 100 : 0;
+            videoResult.VideoSkillScores = scoreQuery.ToList();
             await _videoResultRepository.ExecuteTransactionAsync(async () =>
             {
                 videoResult = _videoResultRepository.Update(videoResult);
