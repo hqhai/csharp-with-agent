@@ -308,7 +308,7 @@ namespace Fsel.Course.Infrastructure.Common
                                                                       .ThenInclude(x => x.Exercise)
                                                                       .ThenInclude(x => x!.ExerciseQuestions.Where(x => !x.IsDeleted))
                                                                       .ThenInclude(x => x.Question)
-                                                                      .ThenInclude(x => x.ExtraPracticeAnswers.Where(y => !y.IsDeleted))
+                                                                      .ThenInclude(x => x!.ExtraPracticeAnswers.Where(y => !y.IsDeleted))
                                                                   .Include(x => x.ExtraPracticeChapters.Where(y => !y.IsDeleted))
                                                                       .ThenInclude(x => x.ExtraPracticeExercises.Where(y => !y.IsDeleted))
                                                                       .ThenInclude(x => x.ExtraPracticeExerciseResults.Where(y => !y.IsDeleted && y.StudentId == studentId))
@@ -322,7 +322,9 @@ namespace Fsel.Course.Infrastructure.Common
                 Author = extraPractice.Author,
                 Code = extraPractice.Code,
                 CourseLevel = extraPractice.CourseLevel,
-                FilePaths = extraPractice.FilePaths,
+                BookBackgroundPath = extraPractice.BookBackgroundPath,
+                BookCoverPath = extraPractice.BookCoverPath,
+                BookFilePath = extraPractice.BookFilePath,
                 InstructionContent = extraPractice.InstructionContent,
                 IsActive = extraPractice.IsActive,
                 Name = extraPractice.Name,
@@ -404,7 +406,7 @@ namespace Fsel.Course.Infrastructure.Common
                                                                         .ThenInclude(x => x.Exercise)
                                                                         .ThenInclude(x => x!.ExerciseQuestions.Where(x => !x.IsDeleted))
                                                                         .ThenInclude(x => x.Question)
-                                                                        .ThenInclude(x => x.ExtraPracticeAnswers.Where(y => !y.IsDeleted))
+                                                                        .ThenInclude(x => x!.ExtraPracticeAnswers.Where(y => !y.IsDeleted))
                                                                         .AsNoTracking()
                                                                   .FirstOrDefaultAsync(x => x.Id == id);
 
@@ -415,7 +417,9 @@ namespace Fsel.Course.Infrastructure.Common
                 Author = extraPractice.Author,
                 Code = extraPractice.Code,
                 CourseLevel = extraPractice.CourseLevel,
-                FilePaths = extraPractice.FilePaths,
+                BookBackgroundPath = extraPractice.BookBackgroundPath,
+                BookCoverPath = extraPractice.BookCoverPath,
+                BookFilePath = extraPractice.BookFilePath,
                 InstructionContent = extraPractice.InstructionContent,
                 IsActive = extraPractice.IsActive,
                 Name = extraPractice.Name,
@@ -477,7 +481,7 @@ namespace Fsel.Course.Infrastructure.Common
                                                                         .ThenInclude(x => x.Exercise)
                                                                         .ThenInclude(x => x!.ExerciseQuestions.Where(x => !x.IsDeleted))
                                                                         .ThenInclude(x => x.Question)
-                                                                        .ThenInclude(x => x.ExtraPracticeAnswers.Where(x => !x.IsDeleted))
+                                                                        .ThenInclude(x => x!.ExtraPracticeAnswers.Where(x => !x.IsDeleted))
                                                                  .Include(x => x.ExtraPracticeExercises.Where(y => !y.IsDeleted))
                                                                       .ThenInclude(x => x.ExtraPracticeExerciseResults.Where(y => !y.IsDeleted && y.StudentId == studentId))
                                                                         .AsNoTracking()
@@ -490,7 +494,9 @@ namespace Fsel.Course.Infrastructure.Common
                 Author = extraPractice.Author,
                 Code = extraPractice.Code,
                 CourseLevel = extraPractice.CourseLevel,
-                FilePaths = extraPractice.FilePaths,
+                BookFilePath = extraPractice.BookFilePath,
+                BookCoverPath = extraPractice.BookCoverPath,
+                BookBackgroundPath = extraPractice.BookBackgroundPath,
                 InstructionContent = extraPractice.InstructionContent,
                 IsActive = extraPractice.IsActive,
                 Name = extraPractice.Name,
@@ -570,7 +576,7 @@ namespace Fsel.Course.Infrastructure.Common
                                                                   .ThenInclude(x => x.SectionParts.Where(x => !x.IsDeleted))
                                                                   .ThenInclude(x => x.SectionQuestions.Where(x => !x.IsDeleted))
                                                                   .ThenInclude(x => x.Question)
-                                                                  .ThenInclude(x => x.ExtraPracticeAnswers.Where(x => x.ExtraPracticeResultId == extraPracticeResult!.Id && !x.IsDeleted))
+                                                                  .ThenInclude(x => x!.ExtraPracticeAnswers.Where(x => x.ExtraPracticeResultId == extraPracticeResult!.Id && !x.IsDeleted))
                                                                   .AsNoTracking()
                                                                   .FirstOrDefaultAsync(x => x.Id == id);
 
@@ -581,7 +587,9 @@ namespace Fsel.Course.Infrastructure.Common
                 Author = extraPractice.Author,
                 Code = extraPractice.Code,
                 CourseLevel = extraPractice.CourseLevel,
-                FilePaths = extraPractice.FilePaths,
+                BookFilePath = extraPractice.BookFilePath,
+                BookCoverPath = extraPractice.BookCoverPath,
+                BookBackgroundPath = extraPractice.BookBackgroundPath,
                 InstructionContent = extraPractice.InstructionContent,
                 IsActive = extraPractice.IsActive,
                 Name = extraPractice.Name,
@@ -653,7 +661,7 @@ namespace Fsel.Course.Infrastructure.Common
                                                                   .ThenInclude(x => x!.Sections.Where(x => !x.IsDeleted))
                                                                   .ThenInclude(x => x.SectionQuestions.Where(x => !x.IsDeleted))
                                                                   .ThenInclude(x => x.Question)
-                                                                  .ThenInclude(x => x.ExtraPracticeAnswers.Where(x => x.ExtraPracticeResultId == extraPracticeResult!.Id && !x.IsDeleted))
+                                                                  .ThenInclude(x => x!.ExtraPracticeAnswers.Where(x => x.ExtraPracticeResultId == extraPracticeResult!.Id && !x.IsDeleted))
                                                                   .AsNoTracking()
                                                                   .FirstOrDefaultAsync(x => x.Id == id);
 
@@ -664,7 +672,9 @@ namespace Fsel.Course.Infrastructure.Common
                 Author = extraPractice.Author,
                 Code = extraPractice.Code,
                 CourseLevel = extraPractice.CourseLevel,
-                FilePaths = extraPractice.FilePaths,
+                BookFilePath = extraPractice.BookFilePath,
+                BookCoverPath = extraPractice.BookCoverPath,
+                BookBackgroundPath = extraPractice.BookBackgroundPath,
                 InstructionContent = extraPractice.InstructionContent,
                 IsActive = extraPractice.IsActive,
                 Name = extraPractice.Name,
@@ -731,7 +741,7 @@ namespace Fsel.Course.Infrastructure.Common
                                                                         .ThenInclude(x => x.SectionParts.Where(x => !x.IsDeleted))
                                                                         .ThenInclude(x => x.SectionQuestions.Where(x => !x.IsDeleted))
                                                                         .ThenInclude(x => x.Question)
-                                                                        .ThenInclude(x => x.ExtraPracticeAnswers.Where(x => x.ExtraPracticeResultId == extraPracticeResult!.Id && !x.IsDeleted))
+                                                                        .ThenInclude(x => x!.ExtraPracticeAnswers.Where(x => x.ExtraPracticeResultId == extraPracticeResult!.Id && !x.IsDeleted))
                                                                    .Include(x => x.MockTest)
                                                                         .ThenInclude(x => x!.MockTestSections.Where(x => !x.IsDeleted))
                                                                         .ThenInclude(x => x.SectionGroup)
@@ -752,7 +762,9 @@ namespace Fsel.Course.Infrastructure.Common
                 Author = extraPractice.Author,
                 Code = extraPractice.Code,
                 CourseLevel = extraPractice.CourseLevel,
-                FilePaths = extraPractice.FilePaths,
+                BookFilePath = extraPractice.BookFilePath,
+                BookCoverPath = extraPractice.BookCoverPath,
+                BookBackgroundPath = extraPractice.BookBackgroundPath,
                 InstructionContent = extraPractice.InstructionContent,
                 IsActive = extraPractice.IsActive,
                 Name = extraPractice.Name,
@@ -800,7 +812,9 @@ namespace Fsel.Course.Infrastructure.Common
                 Author = extraPractice.Author,
                 Code = extraPractice.Code,
                 CourseLevel = extraPractice.CourseLevel,
-                FilePaths = extraPractice.FilePaths,
+                BookFilePath = extraPractice.BookFilePath,
+                BookCoverPath = extraPractice.BookCoverPath,
+                BookBackgroundPath = extraPractice.BookBackgroundPath,
                 InstructionContent = extraPractice.InstructionContent,
                 IsActive = extraPractice.IsActive,
                 Name = extraPractice.Name,

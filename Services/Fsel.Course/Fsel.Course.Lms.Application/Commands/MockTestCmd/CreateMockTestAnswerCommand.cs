@@ -34,6 +34,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
         private readonly ISectionRepository _sectionRepository;
         private readonly ISectionPartRepository _sectionPartRepository;
         private readonly IMockTestRepository _mockTestRepository;
+        private readonly ISectionTimeCodeRepository _sectionTimeCodeRepository;
         private readonly IMockTestSectionRepository _mockTestSectionRepository;
         private readonly IMapper _mapper;
 
@@ -46,6 +47,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
             , ISectionRepository sectionRepository
             , ISectionPartRepository sectionPartRepository
             , IMockTestRepository mockTestRepository
+            , ISectionTimeCodeRepository sectionTimeCodeRepository
             , IMockTestSectionRepository mockTestSectionRepository
             , IMapper mapper)
         {
@@ -58,6 +60,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
             _sectionRepository = sectionRepository;
             _sectionPartRepository = sectionPartRepository;
             _mockTestRepository = mockTestRepository;
+            _sectionTimeCodeRepository = sectionTimeCodeRepository;
             _mockTestSectionRepository = mockTestSectionRepository;
             _mapper = mapper;
         }
@@ -78,7 +81,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
                 return methodResult;
             }
 
-            var questionIds = request.Answers.Select(x => x.QuestionId).ToList();
+            var questionIds = request.Answers.Select(x => x.QuestionId ?? default).ToList();
             var questions = await _questionRepository.GetIncludeSectionByIdAsync(questionIds);
             if (questions == null || questions.Count == 0)
             {
@@ -92,7 +95,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
             {
                 if (item.Answer != null)
                 {
-                    var question = await _questionRepository.GetByIdAsync(item.QuestionId);
+                    var question = await _questionRepository.GetByIdAsync(item.QuestionId ?? default);
                     if (question == null)
                     {
                         methodResult.AddErrorBadRequest(nameof(EnumQuestionErrorCode.QuestionNotExist), nameof(item.QuestionId), item.QuestionId);
@@ -110,26 +113,6 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
                     }
                     var sectionQuestionId = question.SectionQuestions.FirstOrDefault()!.Id;
 
-                    var mockTestAnswer = await _mockTestAnswerRepository.Queryable.FirstOrDefaultAsync(x => x.MockTestResultId == mockTestResult.Id && x.SectionQuestionId == sectionQuestionId, cancellationToken);
-                    if (mockTestAnswer == null)
-                    {
-                        var (answerConfig, correctCount) = _answerTypeConverter.GetTotalCorrectByAsnwerType(item.Answer, question.Config, question.QuestionType);
-                        if (answerConfig == null)
-                        {
-                            methodResult.AddErrorBadRequest(nameof(EnumMockTestAnswerErrorCode.AnswerIsInTheWrongFormat), nameof(item.Answer), item.Answer);
-                            return methodResult;
-                        }
-                        correctCountStudent += correctCount;
-                        mockTestAnswer = new MockTestAnswer
-                        {
-                            Answer = answerConfig,
-                            MockTestResultId = mockTestResult.Id,
-                            SectionQuestionId = sectionQuestionId
-                        };
-                        mockTestAnswers.Add(mockTestAnswer);
-                    }
-                }
-            }
                     var mockTestAnswer = await _mockTestAnswerRepository.Queryable.FirstOrDefaultAsync(x => x.MockTestResultId == mockTestResult.Id && x.SectionQuestionId == sectionQuestionId, cancellationToken);
                     if (mockTestAnswer == null)
                     {
@@ -202,6 +185,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
                     }
                 }
             }
+
             IQueryable<int>? questionQuery = null;
 
             questionQuery = from p in _mockTestRepository.Queryable

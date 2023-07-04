@@ -75,7 +75,9 @@ namespace Fsel.Course.Lms.Application.Queries.ExtraPracticeQuery
                 Name = x.Name,
                 CreatedDate = x.CreatedDate,
                 Type = x.Type,
-                FilePaths = x.FilePaths,
+                BookFilePath = x.BookFilePath,
+                BookCoverPath = x.BookCoverPath,
+                BookBackgroundPath = x.BookBackgroundPath,
                 CourseLevel = x.CourseLevel,
                 CourseSkills = x.ExtraPracticeChapters != null ? x.ExtraPracticeChapters.Where(n => !n.IsDeleted)
                     .SelectMany(e => e.ExtraPracticeExercises.Where(n => n.Exercise != null && !n.IsDeleted))
