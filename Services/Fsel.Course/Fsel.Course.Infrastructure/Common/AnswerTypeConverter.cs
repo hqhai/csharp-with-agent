@@ -145,7 +145,7 @@ namespace Fsel.Course.Infrastructure.Common
             var dataQuestion = configQuestion.Deserialize<ListingQuestion>();
             int number = 0;
 
-            if (dataQuestion != null && dataAnswer != null && dataAnswer.Answers != null && dataAnswer.Answers.Count > 0 && dataQuestion.ExactWordCount == dataAnswer.Answers.Count)
+            if (dataQuestion != null && dataAnswer != null && dataAnswer.Answers != null && dataAnswer.Answers.Count > 0 && dataAnswer.Answers.Count >= dataQuestion.ExactWordCount )
             {
                 dataAnswer.IsExact = true;
                 number++;
@@ -181,6 +181,17 @@ namespace Fsel.Course.Infrastructure.Common
             return number;
         }
 
+        private static bool IsShortAnswer(string question, string answer)
+        {
+            var p = question.ToLower(CultureInfo.CurrentCulture);
+            var s = answer.ToLower(CultureInfo.CurrentCulture);
+            if (p.Replace('’', '\'') == s.Replace('’', '\''))
+            {
+                return true;
+            }
+            return false;
+        }
+
         private static int GetTotalCorrectTypeShortAnswerWordBase(ref object? configAnswer, object? configQuestion)
         {
             var dataAnswer = configAnswer.Deserialize<ShortAnswerWordBaseAnswer>();
@@ -189,7 +200,7 @@ namespace Fsel.Course.Infrastructure.Common
 
             if (dataAnswer != null && dataAnswer.Answers != null && dataQuestion != null && dataQuestion.Contents != null && dataQuestion.Contents.Count > 0)
             {
-                if (dataQuestion.Contents.Any(p => p.ToLower(CultureInfo.CurrentCulture) == dataAnswer.Answers.ToLower(CultureInfo.CurrentCulture)))
+                if (dataQuestion.Contents.Any(p => IsShortAnswer(p, dataAnswer.Answers)))
                 {
                     dataAnswer.IsExact = true;
                     number++;
@@ -237,16 +248,15 @@ namespace Fsel.Course.Infrastructure.Common
             if (words[index].IndexOf('|', StringComparison.Ordinal) != -1)
             {
                 string[] questionWords = words[index].Split('|');
-                string[] answerWords = word.Split(' ');
                 foreach (var item in questionWords)
                 {
-                    if (answerWords.Any(x => x == item))
+                    if (word.Trim().Replace('’', '\'') == item.Trim().Replace('’', '\''))
                     {
                         return true;
                     }
                 }
             }
-            else if (words[index] == word)
+            else if (words[index].Trim().Replace('’', '\'') == word.Trim().Replace('’', '\''))
             {
                 return true;
             }
