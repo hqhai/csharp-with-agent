@@ -4,8 +4,11 @@ namespace Fsel.Course.Domain.Entities
 {
     using System;
     using System.ComponentModel.DataAnnotations;
+    using System.ComponentModel.DataAnnotations.Schema;
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Common.Helpers;
     using Fsel.Core.Entities;
+    using Fsel.Course.Domain.Entities.SkillScoresConfigs;
     using Fsel.Course.Domain.Enums;
 
     public class LessonResult : Entity
@@ -26,6 +29,15 @@ namespace Fsel.Course.Domain.Entities
         /// </summary>
         [MaxLength(2000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? SummaryNote { get; set; }
+
+        public string? SkillScoresStr { get; set; }
+
+        [NotMapped]
+        public IList<SkillScores>? SkillScores
+        {
+            get { return ConvertHelper.Deserialize<IList<SkillScores>>(SkillScoresStr); }
+            set { SkillScoresStr = ConvertHelper.Serialize(value); }
+        }
 
         public Course? Course { get; set; }
 

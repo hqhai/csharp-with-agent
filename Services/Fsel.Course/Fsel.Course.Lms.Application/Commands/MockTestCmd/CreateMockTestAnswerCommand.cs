@@ -8,6 +8,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Course.Domain.Entities;
+    using Fsel.Course.Domain.Entities.SkillScoresConfigs;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
@@ -143,7 +144,8 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
 
             mockTestResult.CorrectCount = correctCountStudent;
             mockTestResult.CorrectTotal = await questionQuery.SumAsync(cancellationToken);
-            mockTestResult.Percent = (double)mockTestResult.CorrectCount / mockTestResult.CorrectTotal * 100;
+            mockTestResult.Percent = mockTestResult.CorrectTotal != 0 ? (double)mockTestResult.CorrectCount / mockTestResult.CorrectTotal * 100 : 0;
+            mockTestResult.SkillScores = new List<SkillScores>();
             mockTestResult.Status = EnumResultStatus.Done;
             await _mockTestAnswerRepository.ExecuteTransactionAsync(async () =>
             {
@@ -155,7 +157,6 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
 
                 _mockTestResultRepository.Update(mockTestResult);
                 await _mockTestResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
-
                 methodResult.StatusCode = StatusCodes.Status201Created;
                 methodResult.Result = _mapper.Map<MockTestResultModel>(mockTestResult);
                 return methodResult;
