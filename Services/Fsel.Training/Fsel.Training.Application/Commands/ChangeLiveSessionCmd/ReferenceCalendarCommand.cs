@@ -4,6 +4,8 @@ namespace Fsel.Training.Application.Commands.ChangeLiveSessionCmd
 {
     using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Core.Base;
+    using Fsel.Training.Application.Services.UserServices;
     using Fsel.Training.Domain.Enums;
     using Fsel.Training.Domain.Enums.ErrorCodes;
     using Fsel.Training.Domain.IRepositories;
@@ -20,12 +22,18 @@ namespace Fsel.Training.Application.Commands.ChangeLiveSessionCmd
     public class ReferenceCalendarCommandHandler : IRequestHandler<ReferenceCalendarCommand, MethodResult<ClassLiveWorkFlowPlanModel>>
     {
         private readonly IClassLiveWorkFlowRepository _classLiveWorkFlowRepository;
+        private readonly AuthContext _authContext;
+        private readonly IUserService _userService;
         private readonly IMapper _mapper;
 
         public ReferenceCalendarCommandHandler(IClassLiveWorkFlowRepository classLiveWorkFlowRepository
+            , AuthContext authContext
+            , IUserService userService
             , IMapper mapper)
         {
             _classLiveWorkFlowRepository = classLiveWorkFlowRepository;
+            _authContext = authContext;
+            _userService = userService;
             _mapper = mapper;
         }
 
@@ -37,6 +45,14 @@ namespace Fsel.Training.Application.Commands.ChangeLiveSessionCmd
                                                 .Include(x => x.ClassLiveWorkFlowPlans)
                                                 .Include(x => x.ClassLiveCalendar)
                                                 .FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
+
+            var csoResult = await _userService.GetCsoByUserIdAsync(_authContext.CurrentUserId);
+            if (!csoResult.IsSuccessStatusCode)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumClassLiveWorkFlowErrorCode.CSONotExits));
+                return methodResult;
+            }
+            var cso = csoResult.Content?.Result;
             if (classLiveWorkFlow == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumClassLiveWorkFlowErrorCode.ClassLiveWorkFlowNotExits));
@@ -55,10 +71,12 @@ namespace Fsel.Training.Application.Commands.ChangeLiveSessionCmd
             }
             if (classLiveWorkFlow.Status == EnumWorkFlowCancelScheduleStatus.RequestCancel.ToString())
             {
+                classLiveWorkFlow.CsoId = cso?.Id;
                 classLiveWorkFlow.Status = EnumWorkFlowCancelScheduleStatus.WaitVote.ToString();
             }
             else if (classLiveWorkFlow.Status == EnumWorkFlowCancelScheduleStatus.RequestCancel.ToString() && classLiveWorkFlow.ClassLiveCalendar != null)
             {
+                classLiveWorkFlow.CsoId = cso?.Id;
                 classLiveWorkFlow.Status = EnumWorkFlowCancelScheduleStatus.DoneScheduled.ToString();
                 var classLiveCalendar = request.ClassWordFlowPlans!.FirstOrDefault(x => x.IsActive);
                 classLiveWorkFlow.ClassLiveCalendar.LiveDate = classLiveCalendar!.LiveDate;
