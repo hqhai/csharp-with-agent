@@ -1,0 +1,27 @@
+// Copyright (c) Atlantic. All rights reserved.
+
+namespace Fsel.Interaction.Domain.Models.CommandModels.Posts.StudentPost
+{
+    using System;
+    using Fsel.Core.Base.BaseModels;
+    using Fsel.Shared.Enums;
+
+    public class UpdatePostCommandModel : BaseModel
+    {
+        public string? Title { get; set; }
+
+        public string? Content { get; set; }
+
+        public EnumPostStatus Status { get; set; }
+
+        public EnumCourseLevel CourseLevel { get; set; }
+
+        public Guid UserId { get; set; }
+
+        public string? AvatarPath { get; set; }
+
+        public string? FullName { get; set; }
+
+        public IList<string>? FilePaths { get; set; }
+    }
+}

@@ -33,6 +33,9 @@ namespace Fsel.Ordering.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<Guid>("ClassId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<string>("Code")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -199,7 +202,7 @@ namespace Fsel.Ordering.Infrastructure.Migrations
                         {
                             Id = new Guid("42d7ddb2-9f36-4f86-badc-67dc16bb722b"),
                             Code = "BASIC",
-                            CreatedDate = new DateTime(2023, 6, 7, 9, 6, 15, 722, DateTimeKind.Local).AddTicks(4916),
+                            CreatedDate = new DateTime(2023, 6, 23, 13, 24, 14, 971, DateTimeKind.Local).AddTicks(7825),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             DescriptionStr = "[{\"content\":\"B\\u00E0i gi\\u1EA3ng , b\\u00E0i t\\u1EADp t\\u00EAn n\\u1EC1n t\\u1EA3ng E-learning\",\"status\":true},{\"content\":\"Truy c\\u1EADp b\\u00E0i t\\u1EADp h\\u01B0\\u1EDBng d\\u1EABn, v\\u00E0 b\\u00E0i thi Unit\",\"status\":true},{\"content\":\"Di\\u1EC5n \\u0111\\u00E0n\",\"status\":true},{\"content\":\"Gi\\u1EA3ng vi\\u00EAn nh\\u1EADn x\\u00E9t\",\"status\":false},{\"content\":\"Truy c\\u1EADp ti\\u1EBFt h\\u1ECDc tr\\u1EF1c tuy\\u1EBFn cho k\\u1EF9 n\\u0103ng n\\u00F3i v\\u1EDBi Gi\\u1EA3ng vi\\u00EAn\",\"status\":false}]",
@@ -210,7 +213,7 @@ namespace Fsel.Ordering.Infrastructure.Migrations
                         {
                             Id = new Guid("daa6fc87-6461-49d4-b3a5-c9e4cc30bc59"),
                             Code = "STANDARD",
-                            CreatedDate = new DateTime(2023, 6, 7, 9, 6, 15, 741, DateTimeKind.Local).AddTicks(2833),
+                            CreatedDate = new DateTime(2023, 6, 23, 13, 24, 14, 973, DateTimeKind.Local).AddTicks(3622),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             DescriptionStr = "[{\"content\":\"B\\u00E0i gi\\u1EA3ng , b\\u00E0i t\\u1EADp t\\u00EAn n\\u1EC1n t\\u1EA3ng E-learning\",\"status\":true},{\"content\":\"Truy c\\u1EADp b\\u00E0i t\\u1EADp h\\u01B0\\u1EDBng d\\u1EABn, v\\u00E0 b\\u00E0i thi Unit\",\"status\":true},{\"content\":\"Di\\u1EC5n \\u0111\\u00E0n\",\"status\":true},{\"content\":\"Gi\\u1EA3ng vi\\u00EAn nh\\u1EADn x\\u00E9t\",\"status\":true},{\"content\":\"Truy c\\u1EADp ti\\u1EBFt h\\u1ECDc tr\\u1EF1c tuy\\u1EBFn cho k\\u1EF9 n\\u0103ng n\\u00F3i v\\u1EDBi Gi\\u1EA3ng vi\\u00EAn\",\"status\":false}]",
@@ -221,7 +224,7 @@ namespace Fsel.Ordering.Infrastructure.Migrations
                         {
                             Id = new Guid("d13ee4ab-785a-425c-bd70-b74b61df42eb"),
                             Code = "PREMIUM",
-                            CreatedDate = new DateTime(2023, 6, 7, 9, 6, 15, 741, DateTimeKind.Local).AddTicks(8989),
+                            CreatedDate = new DateTime(2023, 6, 23, 13, 24, 14, 973, DateTimeKind.Local).AddTicks(5322),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             DescriptionStr = "[{\"content\":\"B\\u00E0i gi\\u1EA3ng , b\\u00E0i t\\u1EADp t\\u00EAn n\\u1EC1n t\\u1EA3ng E-learning\",\"status\":true},{\"content\":\"Truy c\\u1EADp b\\u00E0i t\\u1EADp h\\u01B0\\u1EDBng d\\u1EABn, v\\u00E0 b\\u00E0i thi Unit\",\"status\":true},{\"content\":\"Di\\u1EC5n \\u0111\\u00E0n\",\"status\":true},{\"content\":\"Gi\\u1EA3ng vi\\u00EAn nh\\u1EADn x\\u00E9t\",\"status\":true},{\"content\":\"Truy c\\u1EADp ti\\u1EBFt h\\u1ECDc tr\\u1EF1c tuy\\u1EBFn cho k\\u1EF9 n\\u0103ng n\\u00F3i v\\u1EDBi Gi\\u1EA3ng vi\\u00EAn\",\"status\":true}]",

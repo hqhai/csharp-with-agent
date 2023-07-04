@@ -2,10 +2,11 @@
 
 namespace Fsel.Shared.Enums
 {
-    public enum EnumClassType
+    public enum EnumPostType
     {
-        New,
-        Active,
-        Done
+        Trending,
+        Recent,
+        Top,
+        Relevant
     }
 }

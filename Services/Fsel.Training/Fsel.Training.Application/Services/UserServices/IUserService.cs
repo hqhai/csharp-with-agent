@@ -30,10 +30,27 @@ namespace Fsel.Training.Application.Services.UserServices
         [Post("/teacher/get-by-ids")]
         Task<IApiResponse<MethodResult<IList<TeacherModel>>>> GetTeacherByIdsAsync([Body] GetTeacherByIdsQueryModel command);
 
+        [Get("/teacher/get-by-user-id/{id}")]
+        Task<IApiResponse<MethodResult<TeacherModel>>> GetTeacherByUserIdAsync([FromRoute] Guid id);
+
         [Get("/teacher/get-by-id/{id}")]
         Task<IApiResponse<MethodResult<TeacherModel>>> GetTeacherByIdAsync([FromRoute] Guid id);
 
         [Post("/student/get-by-student-ids")]
-        Task<IApiResponse<MethodResult<IList<StudentModel>>>> GetStudentByUserIdsAsync([Body] IList<Guid> studentIds);
+        Task<IApiResponse<MethodResult<IList<StudentModel>>>> GetStudentsByStudentIdsAsync([Body] IList<Guid> studentIds);
+
+        [Post("/cso/admin")]
+        Task<IApiResponse<MethodResult<IList<HumanModel>>>> GetCSOByIds([Body] IList<Guid>? ids);
+
+        [Get("/cso/get-by-user-id/{id}")]
+        Task<IApiResponse<MethodResult<CsoModel>>> GetCsoByUserIdAsync([FromRoute] Guid id);
+
+        [Get("/cso/admin/get-all")]
+        Task<IApiResponse<MethodResult<IList<CsoModel>>>> GetAllCSO();
+
+        [Get("/teacher/get-all")]
+        Task<IApiResponse<MethodResult<IList<TeacherModel>>>> GetAllTeacher();
+        [Get("/teacher/get-teachers-by-keyword/{keyword}")]
+        Task<IApiResponse<MethodResult<IList<TeacherModel>>>> GetTeachersByKeyword([FromRoute] string? keyword);
     }
 }

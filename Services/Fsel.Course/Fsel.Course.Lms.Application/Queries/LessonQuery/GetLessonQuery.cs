@@ -135,12 +135,13 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
             }
 
             var mocktest = await _unitRepository.Queryable
-                                .Include(x => x.UnitSkillMockTests)
+                                .Include(x => x.UnitSkillMockTests.Where(y => !y.IsDeleted))
                                 .ThenInclude(x => x.MockTest)
-                                .ThenInclude(x => x!.MockTestSections)
+                                .ThenInclude(x => x!.MockTestSections.Where(y => !y.IsDeleted))
                                 .ThenInclude(x => x.SectionGroup)
                                 .Include(x => x.MockTestResults.Where(y => y.UnitId == request.UnitId && y.CourseId == request.CourseId && y.StudentId == studentId))
                                 .Where(x => x.Id == request.UnitId)
+                                .AsNoTracking()
                                 .SelectMany(x => x.UnitSkillMockTests)
                                 .Select(x => x.MockTest)
                                 .Select(x => new MockTestModel

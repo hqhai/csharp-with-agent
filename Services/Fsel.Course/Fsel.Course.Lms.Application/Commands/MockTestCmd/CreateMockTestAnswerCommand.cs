@@ -182,7 +182,6 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
 
                 _mockTestResultRepository.Update(mockTestResult);
                 await _mockTestResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
-
                 methodResult.StatusCode = StatusCodes.Status201Created;
                 methodResult.Result = _mapper.Map<MockTestResultModel>(mockTestResult);
                 return methodResult;
