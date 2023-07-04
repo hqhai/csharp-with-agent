@@ -165,6 +165,8 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
             if (totalCount != 0)
             {
                 lessonScore.Percent = (correctCount / (double)totalCount) * 100;
+                lessonScore.TotalCount = totalCount;
+                lessonScore.CorrectCount = correctCount;
             }
 
             lessonScore.LessonSkillScores = scoreQuery.ToList();
