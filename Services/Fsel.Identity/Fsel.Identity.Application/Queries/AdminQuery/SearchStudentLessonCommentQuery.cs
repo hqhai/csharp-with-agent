@@ -3,33 +3,28 @@
 namespace Fsel.Identity.Application.Queries.AdminQuery
 {
     using Fsel.Common.ActionResults;
-    using Fsel.Identity.Application.Services.InteractionService;
     using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.Enums.ErrorCodes;
     using Fsel.Identity.Domain.Models.EntityModels;
-    using Fsel.Shared.Enums.ErrorCodes;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Identity;
-    using Microsoft.EntityFrameworkCore;
 
-    public class GetStudentSurveyQuestionQuery : IRequest<MethodResult<IList<StudentSurveyQuestionModel>>>
+    public class SearchStudentLessonCommentQuery : IRequest<MethodResult<IList<Student>>>
     {
         public Guid StudentId { get; set; }
     }
 
-    public class GetStudentSurveyQuestionQueryHandler : IRequestHandler<GetStudentSurveyQuestionQuery, MethodResult<IList<StudentSurveyQuestionModel>>>
+    public class GetstudentCourseQueryHandler : IRequestHandler<SearchStudentCourseQuery, MethodResult<IList<StudentSurveyQuestionModel>>>
     {
         private readonly UserManager<User> _userManager;
-        private readonly IInteractionService _interactionService;
 
-        public GetStudentSurveyQuestionQueryHandler(UserManager<User> userManager, IInteractionService interactionService)
+        public GetstudentCourseQueryHandler(UserManager<User> userManager)
         {
             _userManager = userManager;
-            _interactionService = interactionService;
         }
 
-        public async Task<MethodResult<IList<StudentSurveyQuestionModel>>> Handle(GetStudentSurveyQuestionQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<IList<StudentSurveyQuestionModel>>> Handle(SearchStudentCourseQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<IList<StudentSurveyQuestionModel>> methodResult = new MethodResult<IList<StudentSurveyQuestionModel>>();
@@ -42,11 +37,8 @@ namespace Fsel.Identity.Application.Queries.AdminQuery
                 methodResult.AddErrorBadRequest(nameof(EnumStudentErrorCode.StudentNotExist));
                 return methodResult;
             }
-            var surveyQuestions = await _interactionService.SurveyQuestionsByUserId(user.Id.ToString());
-            if (!surveyQuestions.IsSuccessStatusCode)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallInteractionServiceError));
-            }
+
+
             methodResult.Result = surveyQuestions?.Content?.Result;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;

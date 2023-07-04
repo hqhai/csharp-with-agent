@@ -10,6 +10,7 @@ namespace Fsel.Training.Api.Controllers
     using Fsel.Shared.Enums;
     using Fsel.Training.Application.Commands.ClassCmd;
     using Fsel.Training.Application.Commands.ClassStudentCmd;
+    using Fsel.Training.Application.Queries.Admins;
     using Fsel.Training.Application.Queries.ClassQuery;
     using Fsel.Training.Application.Queries.ClassQuery.Admin;
     using Fsel.Training.Domain.Models.EntityModels;
@@ -123,6 +124,18 @@ namespace Fsel.Training.Api.Controllers
         public async Task<IActionResult> SearchClass([FromQuery] Application.Queries.ClassQuery.Admin.SearchClassQuery query)
         {
             MethodResult<PagingItemsModel<ClassSearchModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Class Course by StudentId
+        /// </summary>
+        [HttpGet("class-course-student/{studentId}")]
+        [ProducesResponseType(typeof(MethodResult<IList<ClassStudentInfoModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetClassCourseStudent([FromRoute] Guid studentId)
+        {
+            MethodResult<IList<ClassStudentInfoModel>> queryResult = await _mediator.Send(new GetClassStudentInfoQuery { StudentId = studentId }).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
     }
