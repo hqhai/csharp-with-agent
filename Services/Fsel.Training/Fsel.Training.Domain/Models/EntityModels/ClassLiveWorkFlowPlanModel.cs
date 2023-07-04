@@ -1,0 +1,18 @@
+// Copyright (c) Atlantic. All rights reserved.
+
+namespace Fsel.Training.Domain.Models.EntityModels
+{
+    using Fsel.Core.Base.BaseModels;
+
+    public class ClassLiveWorkFlowPlanModel : BaseModel
+    {
+        public DateTime? LiveDate { get; set; }
+        public int VoteNumber { get; set; }
+        public double Percent { get; set; }
+        public bool IsActive { get; set; }
+        public Guid LiveTimeFrameId { get; set; }
+        public Guid ClassLiveWorkFlowId { get; set; }
+        public DateTime? StartTime { get; set; }
+        public DateTime? EndTime { get; set; }
+    }
+}

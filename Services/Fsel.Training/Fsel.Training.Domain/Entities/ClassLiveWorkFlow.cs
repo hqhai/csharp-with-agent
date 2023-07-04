@@ -24,5 +24,6 @@ namespace Fsel.Training.Domain.Entities
         public ClassLiveCalendar? ClassLiveCalendar { get; set; }
         public Guid ClassLiveCalendarId { get; set; }
         public Guid? WorkFlowParentId { get; set; }
+        public ICollection<ClassLiveWorkFlowPlan> ClassLiveWorkFlowPlans { get; set; } = new List<ClassLiveWorkFlowPlan>();
     }
 }
