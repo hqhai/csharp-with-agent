@@ -3,31 +3,33 @@
 namespace Fsel.Identity.Application.Queries.AdminQuery
 {
     using Fsel.Common.ActionResults;
+    using Fsel.Core.Base.BaseModels;
     using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.Enums.ErrorCodes;
     using Fsel.Identity.Domain.Models.EntityModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Identity;
+    using Microsoft.EntityFrameworkCore;
 
-    public class SearchStudentLessonCommentQuery : IRequest<MethodResult<IList<Student>>>
+    public class SearchStudentLessonCommentQuery : IRequest<MethodResult<PagingItemsModel<StudentSurveyQuestionModel>>>
     {
         public Guid StudentId { get; set; }
     }
 
-    public class GetstudentCourseQueryHandler : IRequestHandler<SearchStudentCourseQuery, MethodResult<IList<StudentSurveyQuestionModel>>>
+    public class SearchStudentLessonCommentQueryHandler : IRequestHandler<SearchStudentLessonCommentQuery, MethodResult<PagingItemsModel<StudentSurveyQuestionModel>>>
     {
         private readonly UserManager<User> _userManager;
 
-        public GetstudentCourseQueryHandler(UserManager<User> userManager)
+        public SearchStudentLessonCommentQueryHandler(UserManager<User> userManager)
         {
             _userManager = userManager;
         }
 
-        public async Task<MethodResult<IList<StudentSurveyQuestionModel>>> Handle(SearchStudentCourseQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<PagingItemsModel<StudentSurveyQuestionModel>>> Handle(SearchStudentLessonCommentQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            MethodResult<IList<StudentSurveyQuestionModel>> methodResult = new MethodResult<IList<StudentSurveyQuestionModel>>();
+            MethodResult<PagingItemsModel<StudentSurveyQuestionModel>> methodResult = new MethodResult<PagingItemsModel<StudentSurveyQuestionModel>>();
 
             var user = await _userManager.Users.Include(x => x.Human)
                                         .ThenInclude(x => x!.Student)

@@ -13,4 +13,8 @@
     <ProjectReference Include="..\Fsel.Course.Lms.Application\Fsel.Course.Lms.Application.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Controllers\Student\" />
+  </ItemGroup>
+
 </Project>

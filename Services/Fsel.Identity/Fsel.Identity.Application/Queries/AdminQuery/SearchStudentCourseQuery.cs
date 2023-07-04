@@ -3,6 +3,7 @@
 namespace Fsel.Identity.Application.Queries.AdminQuery
 {
     using Fsel.Common.ActionResults;
+    using Fsel.Core.Base.BaseModels;
     using Fsel.Identity.Application.Services.TrainingService;
     using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.Enums.ErrorCodes;
@@ -12,12 +13,12 @@ namespace Fsel.Identity.Application.Queries.AdminQuery
     using Microsoft.AspNetCore.Identity;
     using Microsoft.EntityFrameworkCore;
 
-    public class SearchStudentCourseQuery : IRequest<MethodResult<IList<StudentCourseModel>>>
+    public class SearchStudentCourseQuery : BaseQueryModel, IRequest<MethodResult<PagingItemsModel<StudentCourseModel>>>
     {
         public Guid StudentId { get; set; }
     }
 
-    public class SearchStudentCourseQueryHandler : IRequestHandler<SearchStudentCourseQuery, MethodResult<IList<StudentCourseModel>>>
+    public class SearchStudentCourseQueryHandler : IRequestHandler<SearchStudentCourseQuery, MethodResult<PagingItemsModel<StudentCourseModel>>>
     {
         private readonly UserManager<User> _userManager;
         private readonly ITrainingService _trainingService;
@@ -28,10 +29,10 @@ namespace Fsel.Identity.Application.Queries.AdminQuery
             _trainingService = trainingService;
         }
 
-        public async Task<MethodResult<IList<StudentCourseModel>>> Handle(SearchStudentCourseQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<PagingItemsModel<StudentCourseModel>>> Handle(SearchStudentCourseQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            MethodResult<IList<StudentCourseModel>> methodResult = new MethodResult<IList<StudentCourseModel>>();
+            MethodResult<PagingItemsModel<StudentCourseModel>> methodResult = new MethodResult<PagingItemsModel<StudentCourseModel>>();
 
             var user = await _userManager.Users.Include(x => x.Human)
                                         .ThenInclude(x => x!.Student)
@@ -43,7 +44,11 @@ namespace Fsel.Identity.Application.Queries.AdminQuery
             }
             var studentCourseResults = await _trainingService.GetClassCourseStudentAsync(request.StudentId);
             var studentCourses = studentCourseResults.Content?.Result;
-            methodResult.Result = studentCourses;
+            var query = studentCourses!.AsEnumerable();
+            int totalItem = query.Count();
+            var lists = query.Skip((request!.Page - 1) * request!.PageSize).Take(request!.PageSize).ToList();
+
+            methodResult.Result = new PagingItemsModel<StudentCourseModel>(lists, request, totalItem);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }
