@@ -2,32 +2,34 @@
 
 namespace Fsel.Interaction.Application.Queries.CustomerSurveyQuery
 {
-    using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
     using Fsel.Interaction.Domain.IRepositories;
+    using Fsel.Interaction.Domain.Models.EntityModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class GetIsSurveyByStudentIdQuery : IRequest<MethodResult<bool>>
+    public class GetSurveyQuestionsByUserIdQuery : IRequest<MethodResult<IList<SurveyQuestionInfoModel>>>
     {
         public Guid Id { get; set; }
     }
 
-    public class GetIsSurveyByStudentIdQueryHandler : IRequestHandler<GetIsSurveyByStudentIdQuery, MethodResult<bool>>
+    public class GetSurveyQuestionsByUserIdQueryHandler : IRequestHandler<GetSurveyQuestionsByUserIdQuery, MethodResult<IList<SurveyQuestionInfoModel>>>
     {
         private readonly ICustomerSurveyRepository _customerSurveyRepository;
 
-        public GetIsSurveyByStudentIdQueryHandler(ICustomerSurveyRepository customerSurveyRepository)
+        public GetSurveyQuestionsByUserIdQueryHandler(ICustomerSurveyRepository customerSurveyRepository)
         {
             _customerSurveyRepository = customerSurveyRepository;
         }
 
-        public async Task<MethodResult<bool>> Handle(GetIsSurveyByStudentIdQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<IList<SurveyQuestionInfoModel>>> Handle(GetSurveyQuestionsByUserIdQuery request, CancellationToken cancellationToken)
         {
-            var methodResult = new MethodResult<bool>();
+            var methodResult = new MethodResult<IList<SurveyQuestionInfoModel>>();
+
             var isSurveyQuestion = await _customerSurveyRepository.Queryable.AnyAsync(x => x.UserId == request.Id.ToString(), cancellationToken);
-            methodResult.Result = isSurveyQuestion;
+
+            methodResult.Result = new List<SurveyQuestionInfoModel>();
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }

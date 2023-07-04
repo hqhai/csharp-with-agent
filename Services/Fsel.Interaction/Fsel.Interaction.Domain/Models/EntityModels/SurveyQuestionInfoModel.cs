@@ -2,18 +2,16 @@
 
 namespace Fsel.Interaction.Domain.Models.EntityModels
 {
-    using Fsel.Shared.Enums;
     using Fsel.Core.Base.BaseModels;
-    using Fsel.Interaction.Domain.Entities;
+    using Fsel.Shared.Enums;
 
-    public class SurveyQuestionModel : BaseModel
+    public class SurveyQuestionInfoModel : BaseModel
     {
         public string? Question { get; set; }
         public string? Description { get; set; }
         public string? Icon { get; set; }
         public int DisplayOrder { get; set; }
         public EnumSurveyQuestion Type { get; set; }
-        public object? Answers { get; set; }
-        public IList<CustomerSurvey>? CustomerSurveys { get; set; }
+        public object? Answer { get; set; }
     }
 }
