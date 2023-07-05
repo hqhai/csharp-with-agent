@@ -1,15 +1,11 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Training.Domain.Entities
+namespace Fsel.Training.Domain.Models.EntityModels
 {
     using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
-    using System.Threading.Tasks;
-    using Fsel.Core.Entities;
+    using Fsel.Core.Base.BaseModels;
 
-    public class ClassLiveWorkFlowPlan : Entity
+    public class ClassLiveWorkFlowPlanModel : BaseModel
     {
         public Guid LiveTimeFrameId { get; set; }
 
@@ -21,6 +17,6 @@ namespace Fsel.Training.Domain.Entities
 
         public Guid ClassLiveWorkFlowId { get; set; }
 
-        public ClassLiveWorkFlow? ClassLiveWorkFlow { get; set; }
+        public ClassLiveWorkFlowModel? ClassLiveWorkFlow { get; set; }
     }
 }

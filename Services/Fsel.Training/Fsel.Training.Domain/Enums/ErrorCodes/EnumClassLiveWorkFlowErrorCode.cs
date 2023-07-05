@@ -27,6 +27,11 @@ namespace Fsel.Training.Domain.Enums.ErrorCodes
         /// <summary>
         /// ClassLiveWorkFlow Not Status AssignTeacher
         /// </summary>
-        ClassLiveWorkFlowStatusAssignTeacher
+        ClassLiveWorkFlowStatusAssignTeacher,
+
+        /// <summary>
+        /// Can Not cancel live time
+        /// </summary>
+        CanNotCancelLiveTime
     }
 }
