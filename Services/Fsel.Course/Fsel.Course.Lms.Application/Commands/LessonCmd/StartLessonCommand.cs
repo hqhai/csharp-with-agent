@@ -103,10 +103,12 @@ namespace Fsel.Course.Lms.Application.Commands.LessonCmd
             #endregion Validation
 
             var homeWorks = await _homeWorkRepository.Queryable.Include(x => x.LessonHomeWorks.Where(n => !n.IsDeleted))
+                                                .Include(x => x.HomeWorkQuestions)
+                                                .ThenInclude(x => x.Question)
                                                 .Where(x => x.LessonHomeWorks.Any(x => x.LessonId == request.LessonId))
                                                 .ToListAsync(cancellationToken);
 
-            var lessonResult = await _lessonResultRepository.Queryable.FirstOrDefaultAsync(x => x.LessonId == request.LessonId && x.UnitId == request.UnitId && x.CourseId == request.CourseId, cancellationToken);
+            var lessonResult = await _lessonResultRepository.Queryable.FirstOrDefaultAsync(x => x.Id == request.LessonResultId, cancellationToken);
             if (lessonResult != null && lessonResult.Status == EnumResultStatus.Unfinished)
             {
                 lessonResult.VideoResult = new VideoResult
@@ -115,11 +117,13 @@ namespace Fsel.Course.Lms.Application.Commands.LessonCmd
                     Status = EnumResultStatus.Process,
                     StudentId = studentId ?? default,
                 };
+
                 lessonResult.HomeWorkResults = homeWorks.Select(x => new HomeWorkResult
                 {
                     HomeWorkId = x.Id,
                     Status = EnumResultStatus.Unfinished,
                     StudentId = studentId ?? default,
+                    CorrectTotal = x.HomeWorkQuestions.Select(x => x.Question).Sum(x => x!.CorrectTotal)
                 }).ToList();
                 lessonResult.Status = EnumResultStatus.Process;
                 lessonResult = _lessonResultRepository.Update(lessonResult);
