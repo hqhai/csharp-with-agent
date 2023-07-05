@@ -45,7 +45,11 @@ namespace Fsel.Training.Application.Commands.ChangeLiveSessionCmd
                                                 .Include(x => x.ClassLiveWorkFlowPlans)
                                                 .Include(x => x.ClassLiveCalendar)
                                                 .FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
-
+            if (classLiveWorkFlow == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumClassLiveWorkFlowErrorCode.ClassLiveWorkFlowNotExits));
+                return methodResult;
+            }
             var csoResult = await _userService.GetCsoByUserIdAsync(_authContext.CurrentUserId);
             if (!csoResult.IsSuccessStatusCode)
             {
@@ -53,11 +57,7 @@ namespace Fsel.Training.Application.Commands.ChangeLiveSessionCmd
                 return methodResult;
             }
             var cso = csoResult.Content?.Result;
-            if (classLiveWorkFlow == null)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumClassLiveWorkFlowErrorCode.ClassLiveWorkFlowNotExits));
-                return methodResult;
-            }
+
             if (request.ClassWordFlowPlans != null)
             {
                 foreach (var item in request.ClassWordFlowPlans)
@@ -74,13 +74,13 @@ namespace Fsel.Training.Application.Commands.ChangeLiveSessionCmd
                 classLiveWorkFlow.CsoId = cso?.Id;
                 classLiveWorkFlow.Status = EnumWorkFlowCancelScheduleStatus.WaitVote.ToString();
             }
-            else if (classLiveWorkFlow.Status == EnumWorkFlowCancelScheduleStatus.RequestCancel.ToString() && classLiveWorkFlow.ClassLiveCalendar != null)
+            else if (classLiveWorkFlow.Status == EnumWorkFlowCancelScheduleStatus.WaitVote.ToString() && classLiveWorkFlow.ClassLiveCalendar != null && request.ClassWordFlowPlans != null)
             {
                 classLiveWorkFlow.CsoId = cso?.Id;
                 classLiveWorkFlow.Status = EnumWorkFlowCancelScheduleStatus.DoneScheduled.ToString();
-                var classLiveCalendar = request.ClassWordFlowPlans!.FirstOrDefault(x => x.IsActive);
+                var classLiveCalendar = request.ClassWordFlowPlans.FirstOrDefault(x => x.IsActive);
                 classLiveWorkFlow.ClassLiveCalendar.LiveDate = classLiveCalendar!.LiveDate;
-                classLiveWorkFlow.ClassLiveCalendar.LiveTimeFrameId = classLiveCalendar!.LiveTimeFrameId;
+                classLiveWorkFlow.ClassLiveCalendar.LiveTimeFrameId = classLiveCalendar.LiveTimeFrameId;
             }
 
             await _classLiveWorkFlowRepository.ExecuteTransactionAsync(async () =>

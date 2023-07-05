@@ -7,9 +7,9 @@ namespace Fsel.Training.Application.Queries.ClassQuery
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base;
-    using Fsel.Course.Application.Services.UserServices.Models;
     using Fsel.Training.Application.Services.SystemServices;
     using Fsel.Training.Application.Services.UserServices;
+    using Fsel.Training.Application.Services.UserServices.Models;
     using Fsel.Training.Domain.Enums.ErrorCodes;
     using Fsel.Training.Domain.IRepositories;
     using Fsel.Training.Domain.Models.EntityModels;
