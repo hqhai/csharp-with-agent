@@ -15,6 +15,7 @@ namespace Fsel.Course.Lms.Application.Commands.LessonCmd
     using Fsel.Course.Domain.Models.CommandModels.Lessons;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Services.UserServices;
+    using Fsel.Shared.Enums.ErrorCodes;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -32,6 +33,7 @@ namespace Fsel.Course.Lms.Application.Commands.LessonCmd
         private readonly AuthContext _authContext;
         private readonly ILessonRepository _lessonRepository;
         private readonly ILessonResultRepository _lessonResultRepository;
+        private readonly ICourseResultRepository _courseResultRepository;
         private readonly IHomeWorkRepository _homeWorkRepository;
 
         public StartLessonCommandHandler(ICourseRepository courseRepository
@@ -41,6 +43,7 @@ namespace Fsel.Course.Lms.Application.Commands.LessonCmd
             , AuthContext authContext
             , ILessonRepository lessonRepository
             , ILessonResultRepository lessonResultRepository
+            , ICourseResultRepository courseResultRepository
             , IHomeWorkRepository homeWorkRepository)
         {
             _courseRepository = courseRepository;
@@ -50,6 +53,7 @@ namespace Fsel.Course.Lms.Application.Commands.LessonCmd
             _authContext = authContext;
             _lessonRepository = lessonRepository;
             _lessonResultRepository = lessonResultRepository;
+            _courseResultRepository = courseResultRepository;
             _homeWorkRepository = homeWorkRepository;
         }
 
@@ -60,15 +64,15 @@ namespace Fsel.Course.Lms.Application.Commands.LessonCmd
 
             #region Validation
 
-            var student = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
-            if (!student.IsSuccessStatusCode)
+            var studentResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
+            if (!studentResult.IsSuccessStatusCode)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumLessonErrorCode.UserNotExist), nameof(student), _authContext.CurrentUserId.ToString());
+                methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError));
                 return methodResult;
             }
-            var studentId = student?.Content?.Result?.Id;
+            var studentId = studentResult?.Content?.Result?.Id;
 
-            var course = await _courseRepository.GetByIdAsync(request.CourseId);
+            var course = await _courseRepository.Queryable.Include(x => x.CourseResults.Where(x => x.StudentId == studentId)).FirstOrDefaultAsync(x => x.Id == request.CourseId, cancellationToken);
             if (course == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.CourseNotExist), nameof(request.CourseId), request.CourseId);
@@ -79,15 +83,22 @@ namespace Fsel.Course.Lms.Application.Commands.LessonCmd
                 methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.CourseIsNewStateCantStartLesson), nameof(course.Status), course.Status);
                 return methodResult;
             }
-            var unit = await _unitRepository.Queryable.Include(x => x.LessonResults.Where(x => x.LessonId == request.LessonId && x.UnitId == request.UnitId && x.CourseId == request.CourseId && x.StudentId == studentId))
-                                             .FirstOrDefaultAsync(x => x.Id == request.UnitId, cancellationToken);
+            var courseResult = course.CourseResults.FirstOrDefault();
+            if (courseResult != null && courseResult.Status == EnumCourseStatus.New)
+            {
+                courseResult.Status = EnumCourseStatus.Active;
+                _courseResultRepository.Update(courseResult);
+                await _courseResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+            }
+
+            var unit = await _unitRepository.Queryable.Include(x => x.LessonResults).FirstOrDefaultAsync(x => x.Id == request.UnitId, cancellationToken);
             if (unit == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumUnitErrorCode.UnitNotExist), nameof(request.UnitId), request.UnitId);
                 return methodResult;
             }
-
-            if (unit.LessonResults.Any(x => x.Status == EnumResultStatus.Process))
+            var isCheckLessonProcess = unit.LessonResults.Where(x => x.LessonId == request.LessonId && x.UnitId == request.UnitId && x.CourseId == request.CourseId && x.StudentId == studentId).Any(x => x.Status == EnumResultStatus.Process);
+            if (isCheckLessonProcess)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumLessonResultErrorCode.LessonResultAlreadyExistStatusProcess));
                 return methodResult;
