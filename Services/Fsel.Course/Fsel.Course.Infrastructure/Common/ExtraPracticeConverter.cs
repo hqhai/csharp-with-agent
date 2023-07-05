@@ -183,7 +183,8 @@ namespace Fsel.Course.Infrastructure.Common
             }
             else if (request.Type == EnumExtraPracticeType.InteractiveVideo)
             {
-                var video = await _videoRepository.GetIncludeByIdAsync(request.VideoId ?? default);
+
+                var video = await _videoRepository.GetIncludeByIdAsync(request.VideoId ?? Guid.Empty);
                 if (request.Video == null || request.VideoId == null)
                 {
                     methodResult.AddErrorBadRequest(nameof(EnumVideoErrorCode.VideoNull));
@@ -195,13 +196,6 @@ namespace Fsel.Course.Infrastructure.Common
                     return methodResult;
                 }
                 request.Video.Id = video.Id;
-                //var method = await _videoConverter.DeleteExerciseToVideo(video);
-                //if (!method.IsOK)
-                //{
-                //    methodResult.AddErrorBadRequest(method.ErrorMessages);
-                //    return methodResult;
-                //}
-
                 _mapper.Map(request.Video, video);
                 var methodUpdate = await _videoConverter.UpdateTimeCodeToVideo(video, request.Video);
                 if (!methodUpdate.IsOK)
@@ -211,6 +205,7 @@ namespace Fsel.Course.Infrastructure.Common
                 }
                 extraPractice.Video = video;
             }
+            _mapper.Map(request, extraPractice);
             if (extraPracticeExercises.Count > 0)
             {
                 extraPractice.ExtraPracticeExercises.Clear();

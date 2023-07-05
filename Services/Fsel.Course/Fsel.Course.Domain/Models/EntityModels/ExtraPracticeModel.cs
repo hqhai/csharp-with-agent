@@ -20,7 +20,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public string? VideoLink { get; set; }
         public EnumExtraPracticeType Type { get; set; }
         public EnumCourseLevel CourseLevel { get; set; }
-        public Guid VideoId { get; set; }
+        public Guid? VideoId { get; set; }
         public IList<ExtraPracticeChapterModel>? ExtraPracticeChapters { get; set; }
         public VideoModel? Video { get; set; }
         public IList<ExerciseModel>? Exercises { get; set; }
