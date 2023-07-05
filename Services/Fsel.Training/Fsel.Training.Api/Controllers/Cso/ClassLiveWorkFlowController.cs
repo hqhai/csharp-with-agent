@@ -38,7 +38,7 @@ namespace Fsel.Training.Api.Controllers.Cso
         /// <summary>
         /// get alternative calendar
         /// </summary>
-        [HttpGet("id")]
+        [HttpGet("{id}")]
         [ProducesResponseType(typeof(MethodResult<ClassLiveWorkFlowInfoModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> Get([FromRoute] Guid id)
