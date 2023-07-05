@@ -3,7 +3,6 @@
 namespace Fsel.Identity.Domain.Models.CommandModels.Students
 {
     using Fsel.Identity.Domain.Enums;
-    using Fsel.Identity.Domain.Models.CommandModels.Parents;
 
     public class UpdateStudentProfileCommandModel
     {
@@ -15,6 +14,6 @@ namespace Fsel.Identity.Domain.Models.CommandModels.Students
         public string? Address { get; set; }
         public string? Occupation { get; set; }
         public string? School { get; set; }
-        public UpdateParentCommandModel? Parent { get; set; }
+
     }
 }
