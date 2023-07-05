@@ -45,7 +45,7 @@ namespace Fsel.Ordering.Application.Queries.VoucherQuery
                                 Name = x.Name,
                                 StartDate = x.StartDate,
                                 EndDate = x.EndDate,
-                                IsActive = x.IsActive,
+                                IsActive = (x.IsActive != null || (x.StartDate >= DateTime.Now && DateTime.Now <= x.EndDate)) ? x.IsActive : false,
                                 CustomerType = x.CustomerType,
                                 CreatedDate = x.CreatedDate,
                             });
@@ -60,24 +60,6 @@ namespace Fsel.Ordering.Application.Queries.VoucherQuery
                     .AsNoTracking()
                     .ToListAsync(cancellationToken: cancellationToken)
                     .ConfigureAwait(false);
-            foreach (var item in lists)
-            {
-                if (item.IsActive != null)
-                {
-                    item.IsActive = true;
-                }
-                else
-                {
-                    if (item.StartDate >= DateTime.Now && DateTime.Now <= item.EndDate)
-                    {
-                        item.IsActive = true;
-                    }
-                    else
-                    {
-                        item.IsActive = false;
-                    }
-                }
-            }
             methodResult.Result = new PagingItemsModel<VoucherModel>(lists, request, totalItem);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;

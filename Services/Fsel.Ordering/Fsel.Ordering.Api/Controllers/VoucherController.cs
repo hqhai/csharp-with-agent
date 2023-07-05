@@ -91,10 +91,10 @@ namespace Fsel.Ordering.Api.Controllers
         /// <summary>
         /// Update voucher status
         /// </summary>
-        [HttpPut("status/{id}")]
+        [HttpPut("change-status/{id}")]
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> Flag([FromRoute] Guid id)
+        public async Task<IActionResult> ChangeStatus([FromRoute] Guid id)
         {
             MethodResult<bool> commandResult = await _mediator.Send(new UpdateVoucherStatusCommand { Id = id }).ConfigureAwait(false);
             return commandResult.GetActionResult();
