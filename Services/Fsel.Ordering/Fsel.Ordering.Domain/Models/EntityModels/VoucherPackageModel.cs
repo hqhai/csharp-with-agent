@@ -8,8 +8,11 @@ namespace Fsel.Ordering.Domain.Models.EntityModels
     public class VoucherPackageModel : BaseModel
     {
         public double Percentage { get; set; }
-
+        public double DiscountedPrice { get; set; }
         public Guid PackageId { get; set; }
         public Guid VoucherId { get; set; }
+
+        public double Price { get; set; }
+        public PackageModel? Package { get; set; }
     }
 }
