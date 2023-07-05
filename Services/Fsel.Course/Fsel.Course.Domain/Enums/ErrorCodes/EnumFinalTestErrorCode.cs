@@ -2,12 +2,6 @@
 
 namespace Fsel.Course.Domain.Enums.ErrorCodes
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
-    using System.Threading.Tasks;
-
     public enum EnumFinalTestErrorCode
     {
         /// <summary>
@@ -19,5 +13,10 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         /// FinalTest  is in active state
         /// </summary>
         FinalTestInActiveState,
+
+        /// <summary>
+        /// FinalTest already exist
+        /// </summary>
+        FinalTestNameAlreadyExist,
     }
 }

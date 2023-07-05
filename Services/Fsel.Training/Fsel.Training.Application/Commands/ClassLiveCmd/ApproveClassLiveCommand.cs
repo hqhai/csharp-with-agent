@@ -8,6 +8,7 @@ namespace Fsel.Training.Application.Commands.ClassLiveCmd
     using Fsel.Core.Base;
     using Fsel.Shared.Enums;
     using Fsel.Training.Application.Services.UserServices;
+    using Fsel.Training.Domain.Entities;
     using Fsel.Training.Domain.Enums;
     using Fsel.Training.Domain.Enums.ErrorCodes;
     using Fsel.Training.Domain.IRepositories;
@@ -64,11 +65,15 @@ namespace Fsel.Training.Application.Commands.ClassLiveCmd
                 if (classLiveCalendar != null)
                 {
                     var classLiveWorkFlow = classLiveCalendar.ClassLiveWorkFlows.FirstOrDefault(x => x.TeacherId == teacherId);
-                    if (classLiveWorkFlow != null && classLiveWorkFlow.Type == EnumWorkFlowType.AssignTeacher)
+                    var classLiveWorkFlowParent = await _classLiveWorkFlowRepository.GetByIdAsync(classLiveWorkFlow?.WorkFlowParentId ?? default);
+                    if (classLiveWorkFlow != null && classLiveWorkFlow.Type == EnumWorkFlowType.AssignTeacher && classLiveWorkFlowParent != null)
                     {
                         if (request.IsAcept)
                         {
+                            classLiveWorkFlowParent.Status = EnumWorkFlowChangeTeacherStatus.DoneScheduled.ToString();
+
                             classLiveCalendar.TeacherId = teacherId;
+
                             classLiveWorkFlow.Status = EnumWorkFlowAssignTeacherStatus.Approved.ToString();
                             classLiveWorkFlow.Description = request.Description;
                             _classLiveCalendarRepository.Update(classLiveCalendar);
@@ -84,7 +89,7 @@ namespace Fsel.Training.Application.Commands.ClassLiveCmd
                             methodResult.AddErrorBadRequest(classLiveWorkFlow.ErrorMessages);
                             return methodResult;
                         }
-                        _classLiveWorkFlowRepository.Update(classLiveWorkFlow);
+                        _classLiveWorkFlowRepository.UpdateList(new List<ClassLiveWorkFlow> { classLiveWorkFlow, classLiveWorkFlowParent });
                         await _classLiveWorkFlowRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
                     }
                     else

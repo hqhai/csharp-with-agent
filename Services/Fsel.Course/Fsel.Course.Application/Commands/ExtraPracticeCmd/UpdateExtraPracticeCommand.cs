@@ -48,19 +48,19 @@ namespace Fsel.Course.Application.Commands.ExtraPracticeCmd
                 return methodResult;
             }
 
-            var method = await _extraPracticeConverter.UpdateExtraPractice(extraPractice, request);
-            if (!method.IsOK)
-            {
-                methodResult.AddErrorBadRequest(method.ErrorMessages);
-                return methodResult;
-            }
-
             await _extraPracticeRepository.ExecuteTransactionAsync(async () =>
             {
                 var method = await _extraPracticeConverter.DeleteExtraPractice(extraPractice, cancellationToken);
                 if (!method.IsOK)
                 {
                     methodResult.AddErrorBadRequest(method.ErrorMessages);
+                    return methodResult;
+                }
+
+                var methodUpdate = await _extraPracticeConverter.UpdateExtraPractice(extraPractice, request);
+                if (!methodUpdate.IsOK)
+                {
+                    methodResult.AddErrorBadRequest(methodUpdate.ErrorMessages);
                     return methodResult;
                 }
 

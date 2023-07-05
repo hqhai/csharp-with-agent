@@ -121,17 +121,17 @@ namespace Fsel.System.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(103);
 
-                    b.Property<DateTime?>("EndTime")
+                    b.Property<double?>("EndTime")
                         .IsRequired()
-                        .HasColumnType("datetime2");
+                        .HasColumnType("float");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit")
                         .HasColumnOrder(110);
 
-                    b.Property<DateTime?>("StartTime")
+                    b.Property<double?>("StartTime")
                         .IsRequired()
-                        .HasColumnType("datetime2");
+                        .HasColumnType("float");
 
                     b.Property<DateTime?>("UpdatedDate")
                         .HasColumnType("datetime2")
