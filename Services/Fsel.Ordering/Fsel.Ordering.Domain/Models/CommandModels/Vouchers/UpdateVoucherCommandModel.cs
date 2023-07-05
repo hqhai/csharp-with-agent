@@ -19,7 +19,6 @@ namespace Fsel.Ordering.Domain.Models.CommandModels.Vouchers
 
         public string? ContentFilePath { get; set; }
 
-        public bool IsActive { get; set; }
         public EnumCustomerType CustomerType { get; set; }
         public IList<EnumCourseLevel>? CourseLevels { get; set; }
         public IList<CreateVoucherPackageModel>? VoucherPackages { get; set; }

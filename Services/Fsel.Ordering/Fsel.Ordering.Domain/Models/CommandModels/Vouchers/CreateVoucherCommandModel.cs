@@ -16,7 +16,6 @@ namespace Fsel.Ordering.Domain.Models.CommandModels.Vouchers
         public DateTime? EndDate { get; set; }
 
         public string? ContentFilePath { get; set; }
-        public bool IsActive { get; set; }
 
         public IList<CreateVoucherPackageModel>? VoucherPackages { get; set; }
         public EnumCustomerType CustomerType { get; set; }

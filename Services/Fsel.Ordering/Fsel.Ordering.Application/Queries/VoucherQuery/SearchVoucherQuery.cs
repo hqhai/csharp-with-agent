@@ -53,13 +53,31 @@ namespace Fsel.Ordering.Application.Queries.VoucherQuery
             {
                 voucherQuery = voucherQuery.Where(m => m.Id.ToString() == request.Keyword || (m.Name ?? string.Empty).Contains(request.Keyword));
             }
+
             int totalItem = await voucherQuery.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
             var lists = await voucherQuery
                     .ApplySortAndPaging(request)
                     .AsNoTracking()
                     .ToListAsync(cancellationToken: cancellationToken)
                     .ConfigureAwait(false);
-
+            foreach (var item in lists)
+            {
+                if (item.IsActive != null)
+                {
+                    item.IsActive = true;
+                }
+                else
+                {
+                    if (item.StartDate >= DateTime.Now && DateTime.Now <= item.EndDate)
+                    {
+                        item.IsActive = true;
+                    }
+                    else
+                    {
+                        item.IsActive = false;
+                    }
+                }
+            }
             methodResult.Result = new PagingItemsModel<VoucherModel>(lists, request, totalItem);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;

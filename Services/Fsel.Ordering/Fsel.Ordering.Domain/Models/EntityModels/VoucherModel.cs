@@ -17,7 +17,8 @@ namespace Fsel.Ordering.Domain.Models.EntityModels
         public string? ContentFilePath { get; set; }
 
         public bool IsGlobal { get; set; }
-        public bool IsActive { get; set; }
+        public bool? IsActive { get; set; }
+
         public EnumCustomerType CustomerType { get; set; }
         public IList<EnumCourseLevel>? CourseLevels { get; set; }
     }

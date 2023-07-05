@@ -62,14 +62,6 @@ namespace Fsel.Ordering.Application.Commands.VoucherCmds
                     PackageId = x.PackageId
                 }).ToList();
             }
-            if (request.StartDate >= DateTime.Now && DateTime.Now <= request.EndDate)
-            {
-                voucher.IsActive = true;
-            }
-            else
-            {
-                voucher.IsActive = false;
-            }
 
             await _voucherRepository.ExecuteTransactionAsync(async () =>
             {

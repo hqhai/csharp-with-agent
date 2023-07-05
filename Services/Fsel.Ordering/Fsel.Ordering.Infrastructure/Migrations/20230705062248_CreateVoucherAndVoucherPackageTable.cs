@@ -31,7 +31,7 @@ namespace Fsel.Ordering.Infrastructure.Migrations
                     EndDate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     ContentFilePath = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     IsGlobal = table.Column<bool>(type: "bit", nullable: false),
-                    IsActive = table.Column<bool>(type: "bit", nullable: false),
+                    IsActive = table.Column<bool>(type: "bit", nullable: true),
                     CustomerType = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     CourseLevelsStr = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
@@ -81,21 +81,21 @@ namespace Fsel.Ordering.Infrastructure.Migrations
                 keyColumn: "Id",
                 keyValue: new Guid("42d7ddb2-9f36-4f86-badc-67dc16bb722b"),
                 column: "CreatedDate",
-                value: new DateTime(2023, 7, 5, 10, 44, 46, 35, DateTimeKind.Local).AddTicks(8885));
+                value: new DateTime(2023, 7, 5, 13, 22, 48, 175, DateTimeKind.Local).AddTicks(860));
 
             migrationBuilder.UpdateData(
                 table: "Packages",
                 keyColumn: "Id",
                 keyValue: new Guid("d13ee4ab-785a-425c-bd70-b74b61df42eb"),
                 column: "CreatedDate",
-                value: new DateTime(2023, 7, 5, 10, 44, 46, 37, DateTimeKind.Local).AddTicks(3878));
+                value: new DateTime(2023, 7, 5, 13, 22, 48, 176, DateTimeKind.Local).AddTicks(5651));
 
             migrationBuilder.UpdateData(
                 table: "Packages",
                 keyColumn: "Id",
                 keyValue: new Guid("daa6fc87-6461-49d4-b3a5-c9e4cc30bc59"),
                 column: "CreatedDate",
-                value: new DateTime(2023, 7, 5, 10, 44, 46, 37, DateTimeKind.Local).AddTicks(2255));
+                value: new DateTime(2023, 7, 5, 13, 22, 48, 176, DateTimeKind.Local).AddTicks(4248));
 
             migrationBuilder.CreateIndex(
                 name: "IX_VoucherPackages_PackageId",

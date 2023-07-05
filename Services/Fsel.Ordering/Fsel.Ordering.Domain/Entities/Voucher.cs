@@ -33,7 +33,7 @@ namespace Fsel.Ordering.Domain.Entities
 
         public bool IsGlobal { get; set; }
 
-        public bool IsActive { get; set; }
+        public bool? IsActive { get; set; }
         public EnumCustomerType CustomerType { get; set; }
         public string? CourseLevelsStr { get; set; }
 

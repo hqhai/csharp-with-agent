@@ -10,7 +10,6 @@ namespace Fsel.Ordering.Application.Commands.VoucherCmds
     using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Common.ActionResults;
-    using Fsel.Ordering.Domain.Entities;
     using Fsel.Ordering.Domain.Enums.ErrorCodes;
     using Fsel.Ordering.Domain.IRepositories;
     using Fsel.Ordering.Domain.Models.CommandModels.Vouchers;
@@ -18,27 +17,26 @@ namespace Fsel.Ordering.Application.Commands.VoucherCmds
     using MediatR;
     using Microsoft.AspNetCore.Http;
 
-    public class UpdateVoucherCommand : UpdateVoucherCommandModel, IRequest<MethodResult<VoucherModel>>
+    public class UpdateVoucherStatusCommand : IRequest<MethodResult<bool>>
     {
+        public Guid Id { get; set; }
     }
 
-    public class UpdateVoucherCommandHandler : IRequestHandler<UpdateVoucherCommand, MethodResult<VoucherModel>>
+    public class UpdateVoucherStatusCommandHandler : IRequestHandler<UpdateVoucherStatusCommand, MethodResult<bool>>
     {
         private readonly IVoucherRepository _voucherRepository;
-        private readonly IPackageRepository _packageRepository;
         private readonly IMapper _mapper;
 
-        public UpdateVoucherCommandHandler(IVoucherRepository voucherRepository, IPackageRepository packageRepository, IMapper mapper)
+        public UpdateVoucherStatusCommandHandler(IVoucherRepository voucherRepository, IMapper mapper)
         {
             _voucherRepository = voucherRepository;
-            _packageRepository = packageRepository;
             _mapper = mapper;
         }
 
-        public async Task<MethodResult<VoucherModel>> Handle(UpdateVoucherCommand request, CancellationToken cancellationToken)
+        public async Task<MethodResult<bool>> Handle(UpdateVoucherStatusCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            MethodResult<VoucherModel> methodResult = new MethodResult<VoucherModel>();
+            MethodResult<bool> methodResult = new MethodResult<bool>();
 
             #region Validation
 
@@ -53,36 +51,17 @@ namespace Fsel.Ordering.Application.Commands.VoucherCmds
                 methodResult.AddErrorBadRequest(voucher.ErrorMessages);
                 return methodResult;
             }
-            if (voucher.IsActive != null)
-            {
-                voucher.IsActive = true;
-            }
-            else
-            {
-                if (request.StartDate >= DateTime.Now && DateTime.Now <= request.EndDate)
-                {
-                    voucher.IsActive = true;
-                }
-                else
-                {
-                    voucher.IsActive = false;
-                }
-            }
 
             #endregion Validation
 
-            voucher.VoucherPackages = request.VoucherPackages!.Select((x) => new VoucherPackage
-            {
-                Percentage = x.Percentage,
-                PackageId = x.PackageId
-            }).ToList();
             await _voucherRepository.ExecuteTransactionAsync(async () =>
             {
+                voucher.IsActive = true;
                 voucher = _voucherRepository.Update(voucher);
                 await _voucherRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
                 methodResult.StatusCode = StatusCodes.Status200OK;
-                methodResult.Result = _mapper.Map<VoucherModel>(voucher);
+                methodResult.Result = true;
                 return methodResult;
             });
 
