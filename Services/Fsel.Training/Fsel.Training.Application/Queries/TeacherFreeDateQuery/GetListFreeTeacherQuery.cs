@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Training.Application.Queries.ScheduleQuery
+namespace Fsel.Training.Application.Queries.TeacherFreeDateQuery
 {
     using System.Collections.Generic;
     using System.Threading;
@@ -13,18 +13,16 @@ namespace Fsel.Training.Application.Queries.ScheduleQuery
     using Fsel.Training.Domain.Enums.ErrorCodes;
     using Fsel.Training.Domain.IRepositories;
     using Fsel.Training.Domain.Models.EntityModels;
-    using Fsel.Training.Domain.Models.QueryModels;
-    using Fsel.Training.Infrastructure.Repositories;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class GetListFreeTeacherQuery : IRequest<MethodResult<IList<TeacherFreeDateModel>>>
+    public class GetListFreeTeacherByCalendarQuery : IRequest<MethodResult<IList<TeacherFreeDateModel>>>
     {
         public Guid ClassLiveCalendarId { get; set; }
     }
 
-    public class GetListFreeTeacherQueryHandler : IRequestHandler<GetListFreeTeacherQuery, MethodResult<IList<TeacherFreeDateModel>>>
+    public class GetListFreeTeacherByCalendarQueryHandler : IRequestHandler<GetListFreeTeacherByCalendarQuery, MethodResult<IList<TeacherFreeDateModel>>>
     {
         private readonly ITeacherFreeDateRepository _teacherFreeDateRepository;
         private readonly IClassLiveCalendarRepository _classLiveCalendarRepository;
@@ -32,7 +30,7 @@ namespace Fsel.Training.Application.Queries.ScheduleQuery
         private readonly IMapper _mapper;
         private readonly ISystemService _systemService;
 
-        public GetListFreeTeacherQueryHandler(ITeacherFreeDateRepository teacherFreeDateRepository
+        public GetListFreeTeacherByCalendarQueryHandler(ITeacherFreeDateRepository teacherFreeDateRepository
             , IClassLiveCalendarRepository classLiveCalendarRepository
             , IUserService userService
             , ISystemService systemService
@@ -46,10 +44,10 @@ namespace Fsel.Training.Application.Queries.ScheduleQuery
 
         }
 
-        public async Task<MethodResult<IList<TeacherFreeDateModel>>> Handle(GetListFreeTeacherQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<IList<TeacherFreeDateModel>>> Handle(GetListFreeTeacherByCalendarQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            MethodResult<IList<TeacherFreeDateModel>> methodResult = new MethodResult<IList<TeacherFreeDateModel>>();
+            var methodResult = new MethodResult<IList<TeacherFreeDateModel>>();
             var classLiveLesson = await _classLiveCalendarRepository.GetByIdAsync(request.ClassLiveCalendarId);
 
             if (classLiveLesson == null)
@@ -78,7 +76,7 @@ namespace Fsel.Training.Application.Queries.ScheduleQuery
 
             var teacherFreeDateModel = _mapper.Map<IList<TeacherFreeDateModel>>(teacherFreeDate);
             var teacherResult = await _userService.GetTeacherByIdsAsync(new GetTeacherByIdsQueryModel { Ids = teacherFreeDateModel.Select(x => x.TeacherId).ToList() });
-             var teacher = teacherResult.Content?.Result;
+            var teacher = teacherResult.Content?.Result;
             foreach (var item in teacherFreeDateModel)
             {
                 item.TeacherName = teacher?.FirstOrDefault(x => x.Id == item.TeacherId)?.Human?.FullName;

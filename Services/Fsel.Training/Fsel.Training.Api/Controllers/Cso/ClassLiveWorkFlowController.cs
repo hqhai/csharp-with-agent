@@ -8,7 +8,7 @@ namespace Fsel.Training.Api.Controllers.Cso
     using Fsel.Core.Base.BaseModels;
     using Fsel.Training.Application.Commands.ClassCmd;
     using Fsel.Training.Application.Queries.ClassLiveWorkFlowQuery;
-    using Fsel.Training.Application.Queries.ScheduleQuery;
+    using Fsel.Training.Application.Queries.TeacherFreeDateQuery;
     using Fsel.Training.Domain.Models.EntityModels;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
@@ -61,7 +61,7 @@ namespace Fsel.Training.Api.Controllers.Cso
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetListFreeTeacher([FromRoute] Guid id)
         {
-            MethodResult<IList<TeacherFreeDateModel>> commandResult = await _mediator.Send(new GetListFreeTeacherQuery { ClassLiveCalendarId = id }).ConfigureAwait(false);
+            MethodResult<IList<TeacherFreeDateModel>> commandResult = await _mediator.Send(new GetListFreeTeacherByCalendarQuery { ClassLiveCalendarId = id }).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
 

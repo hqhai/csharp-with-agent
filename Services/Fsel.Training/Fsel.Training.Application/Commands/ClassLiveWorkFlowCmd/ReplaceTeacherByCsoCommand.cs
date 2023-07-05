@@ -45,7 +45,9 @@ namespace Fsel.Training.Application.Commands.ClassCmd
 
             await _classLiveCalendarRepository.ExecuteTransactionAsync(async () =>
             {
-                if (lessonNeedToChange != null && lessonNeedToChange.Type == EnumWorkFlowType.ChangeTeacher && lessonNeedToChange.WorkFlowParentId == null)
+                if (lessonNeedToChange != null
+                    && lessonNeedToChange.Type == EnumWorkFlowType.ChangeTeacher
+                    && lessonNeedToChange.WorkFlowParentId == null)
                 {
 
                     lessonNeedToChange = new ClassLiveWorkFlow()
@@ -62,7 +64,9 @@ namespace Fsel.Training.Application.Commands.ClassCmd
 
 
                 }
-                else if (lessonNeedToChange != null && lessonNeedToChange.WorkFlowParentId != null)
+                else if (lessonNeedToChange != null
+                        && lessonNeedToChange.WorkFlowParentId != null
+                        && lessonNeedToChange.Type == EnumWorkFlowType.ChangeTeacher)
                 {
                     var changeTeacher = await _classLiveWorkFlowRepository.Queryable.Where(x => x.WorkFlowParentId == lessonNeedToChange.Id)
                                                                                     .FirstOrDefaultAsync(cancellationToken);
