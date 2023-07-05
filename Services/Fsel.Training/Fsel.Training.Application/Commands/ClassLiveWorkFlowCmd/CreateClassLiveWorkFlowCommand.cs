@@ -78,6 +78,7 @@ namespace Fsel.Training.Application.Commands.ClassLiveWorkFlowCmd
                 else if (request.Type == EnumWorkFlowType.CancelSchedule)
                 {
                     status = EnumWorkFlowCancelScheduleStatus.RequestCancel.ToString();
+                    /*request.WorkFlows = new ClassLiveWorkFlowPlan*/
                 }
                 classLiveWorkFlow = new ClassLiveWorkFlow
                 {
