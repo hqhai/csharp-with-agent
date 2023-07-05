@@ -33,8 +33,8 @@ namespace Fsel.Training.Domain.Models.EntityModels
         public EnumCourseLevel? CourseLevel { get; set; }
 
         public Guid? CsoId { get; set; }
-        public DateTime? TimeFrameEndTime { get; set; }
-        public DateTime? TimeFrameStartTime { get; set; }
+        public double? TimeFrameEndTime { get; set; }
+        public double? TimeFrameStartTime { get; set; }
 
         public IList<ClassStudentModel>? ClassStudents { get; set; }
         public IList<ClassLiveCalendarModel>? ClassLiveCalendars { get; set; }
