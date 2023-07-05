@@ -2,14 +2,13 @@
 
 namespace Fsel.Identity.Domain.Models.CommandModels.Students
 {
-    using Fsel.Identity.Domain.Enums;
+    using Fsel.Core.Base.BaseModels;
     using Fsel.Identity.Domain.Models.CommandModels.Parents;
 
-    public class UpdateStudentByAdminCommandModel
+    public class UpdateStudentByAdminCommandModel : BaseCommandModel
     {
         public string? FullName { get; set; }
         public DateTime Birthday { get; set; }
-        public EnumGender? Gender { get; set; }
         public string? School { get; set; }
         public string? Address { get; set; }
         public string? Occupation { get; set; }

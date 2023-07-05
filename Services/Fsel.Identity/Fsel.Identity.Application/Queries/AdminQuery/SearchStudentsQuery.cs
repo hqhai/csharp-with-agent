@@ -43,7 +43,10 @@ namespace Fsel.Identity.Application.Queries.AdminQuery
                 FullName = x.Human.FullName,
                 Type = x.CourseLevel.GetEnumCourseType()
             });
-
+            if (!string.IsNullOrEmpty(request.Keyword))
+            {
+                query = query.Where(m => m.Id.ToString() == request.Keyword || (m.FullName ?? string.Empty).Contains(request.Keyword));
+            }
             int totalItem = await query.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
             var lists = await query
                     .ApplySortAndPaging(request)

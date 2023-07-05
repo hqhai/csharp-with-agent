@@ -14,12 +14,12 @@ namespace Fsel.Identity.Application.Queries.AdminQuery
     using Microsoft.AspNetCore.Identity;
     using Microsoft.EntityFrameworkCore;
 
-    public class GetStudentProfileQuery : IRequest<MethodResult<UserProfileModel>>
+    public class GetStudentProfileQuery : IRequest<MethodResult<UserStudentModel>>
     {
         public Guid StudentId { get; set; }
     }
 
-    public class GetStudentProfileQueryHandler : IRequestHandler<GetStudentProfileQuery, MethodResult<UserProfileModel>>
+    public class GetStudentProfileQueryHandler : IRequestHandler<GetStudentProfileQuery, MethodResult<UserStudentModel>>
     {
         private readonly IMapper _mapper;
         private readonly UserManager<User> _userManager;
@@ -34,10 +34,10 @@ namespace Fsel.Identity.Application.Queries.AdminQuery
             _orderService = orderService;
         }
 
-        public async Task<MethodResult<UserProfileModel>> Handle(GetStudentProfileQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<UserStudentModel>> Handle(GetStudentProfileQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            MethodResult<UserProfileModel> methodResult = new MethodResult<UserProfileModel>();
+            MethodResult<UserStudentModel> methodResult = new MethodResult<UserStudentModel>();
 
             var userView = await _userManager.Users.Include(x => x.Human)
                                                    .ThenInclude(x => x!.Student)
@@ -50,7 +50,7 @@ namespace Fsel.Identity.Application.Queries.AdminQuery
             }
             var student = userView.Human?.Student;
             var parentStudent = student?.ParentStudents.FirstOrDefault();
-            if (student != null && student.CreatedByParent == false && parentStudent != null)
+            if (student != null && parentStudent != null)
             {
                 userView = await _userManager.Users.Include(x => x.Human)
                                               .ThenInclude(x => x!.Student)
@@ -61,23 +61,25 @@ namespace Fsel.Identity.Application.Queries.AdminQuery
                 student = userView?.Human?.Student;
                 parentStudent = student?.ParentStudents.FirstOrDefault();
             }
-            var userModel = _mapper.Map<UserProfileModel>(userView);
+            var userModel = _mapper.Map<UserStudentModel>(userView);
             _mapper.Map(userView?.Human, userModel);
             _mapper.Map(student, userModel);
-            if (student?.CreatedByParent == false && parentStudent != null)
+            if (parentStudent != null)
             {
-                userModel.Parent = _mapper.Map<ParentProfileModel>(parentStudent.Parent);
+                userModel.Parent = _mapper.Map<ParentInfoModel>(parentStudent.Parent);
             }
             var classStudent = await _trainingService.GetClassByStudentId(student?.Id ?? default);
-            if (classStudent.Content?.Result != null)
+            var @class = classStudent?.Content?.Result;
+            if (@class != null)
             {
                 userModel.CodeClass = classStudent?.Content?.Result?.Code;
+                var package = await _orderService.GetPackages();
+                if (package.IsSuccessStatusCode)
+                {
+                    userModel.Membership = package.Content?.Result?.FirstOrDefault(p => p.Id == @class.PackageId)?.Code;
+                }
             }
-            var package = await _orderService.GetPackages();
-            if (package.IsSuccessStatusCode)
-            {
-                userModel.Membership = package.Content?.Result?.FirstOrDefault(p => p.Id == userModel.PackageId)?.Code;
-            }
+
             methodResult.Result = userModel;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;

@@ -1,4 +1,4 @@
-    // Copyright (c) Atlantic. All rights reserved.
+// Copyright (c) Atlantic. All rights reserved.
 
 using AutoMapper;
 using Fsel.Core.Extensions;
@@ -23,6 +23,7 @@ namespace Fsel.Identity.Infrastructure.Maps
             CreateMap<SignUpCommandModel, User>().IgnoreAllNonExisting();
             CreateMap<UpdateUserProfileCommandModel, User>().IgnoreAllNonExisting();
             CreateMap<UpdateStudentProfileCommandModel, User>().IgnoreAllNonExisting();
+            CreateMap<User, UserStudentModel>().IgnoreAllNonExisting();
         }
     }
 }
