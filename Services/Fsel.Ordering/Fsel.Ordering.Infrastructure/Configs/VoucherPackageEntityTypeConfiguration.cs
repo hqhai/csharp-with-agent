@@ -11,9 +11,9 @@ namespace Fsel.Ordering.Infrastructure.Configs
         public void Configure(EntityTypeBuilder<VoucherPackage> builder)
         {
             ArgumentNullException.ThrowIfNull(builder);
-            builder.HasOne(a => a.Packet)
+            builder.HasOne(a => a.Package)
                .WithMany(b => b.VoucherPackages)
-               .HasForeignKey(b => b.PacketId)
+               .HasForeignKey(b => b.PackageId)
                .OnDelete(DeleteBehavior.Cascade);
 
             builder.HasOne(a => a.Voucher)

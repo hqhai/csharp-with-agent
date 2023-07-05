@@ -4,10 +4,10 @@ namespace Fsel.Ordering.Domain.Models.EntityModels
 {
     using System;
 
-    public class VoucherPacketModel
+    public class VoucherPackageModel
     {
         public double Percentage { get; set; }
 
-        public Guid PacketId { get; set; }
+        public Guid PackageId { get; set; }
     }
 }

@@ -5,11 +5,13 @@ namespace Fsel.Ordering.Domain.Entities
     using System;
     using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations;
+    using System.ComponentModel.DataAnnotations.Schema;
     using System.Diagnostics.Eventing.Reader;
     using System.Linq;
     using System.Text;
     using System.Threading.Tasks;
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Common.Helpers;
     using Fsel.Core.Entities;
     using Fsel.Ordering.Domain.Enums;
     using Fsel.Shared.Enums;
@@ -33,7 +35,15 @@ namespace Fsel.Ordering.Domain.Entities
 
         public bool IsActive { get; set; }
         public EnumCustomerType CustomerType { get; set; }
-        public EnumCourseLevel CourseLevel { get; set; }
+        public string? CourseLevelsStr { get; set; }
+
+        [NotMapped]
+        public IList<EnumCourseLevel>? CourseLevels
+        {
+            get { return ConvertHelper.Deserialize<IList<EnumCourseLevel>>(CourseLevelsStr); }
+            set { CourseLevelsStr = ConvertHelper.Serialize(value); }
+        }
+
         public ICollection<VoucherPackage> VoucherPackages { get; set; } = new List<VoucherPackage>();
     }
 }

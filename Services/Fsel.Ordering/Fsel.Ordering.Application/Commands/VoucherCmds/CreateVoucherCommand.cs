@@ -49,23 +49,31 @@ namespace Fsel.Ordering.Application.Commands.VoucherCmds
                 methodResult.AddErrorBadRequest(voucher.ErrorMessages);
                 return methodResult;
             }
-            if (request.VoucherPackets != null && request.VoucherPackets.Count > 0)
+            if (request.VoucherPackages != null && request.VoucherPackages.Count > 0)
             {
-                if (_packageRepository.IsIdsInValid(request.VoucherPackets.Select(x => x.PacketId).ToList()))
+                if (_packageRepository.IsIdsInValid(request.VoucherPackages.Select(x => x.PackageId).ToList()))
                 {
                     methodResult.AddErrorBadRequest(nameof(EnumPackageErrorCode.PackageNotExist));
                     return methodResult;
                 }
-                voucher.VoucherPackages = request.VoucherPackets!.Select((x) => new VoucherPackage
+                voucher.VoucherPackages = request.VoucherPackages!.Select((x) => new VoucherPackage
                 {
                     Percentage = x.Percentage,
-                    PacketId = x.PacketId
+                    PackageId = x.PackageId
                 }).ToList();
+            }
+            if (request.StartDate >= DateTime.Now && DateTime.Now <= request.EndDate)
+            {
+                voucher.IsActive = true;
+            }
+            else
+            {
+                voucher.IsActive = false;
             }
 
             await _voucherRepository.ExecuteTransactionAsync(async () =>
             {
-                request.IsGlobal = true;
+                voucher.IsGlobal = true;
                 voucher = _voucherRepository.Add(voucher);
                 await _voucherRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 

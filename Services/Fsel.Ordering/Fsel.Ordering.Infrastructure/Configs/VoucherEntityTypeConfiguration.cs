@@ -3,14 +3,9 @@
 namespace Fsel.Ordering.Infrastructure.Configs
 {
     using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
-    using System.Threading.Tasks;
     using Fsel.Common.Helpers;
     using Fsel.Ordering.Domain.Entities;
     using Fsel.Ordering.Domain.Enums;
-    using Fsel.Shared.Enums;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -24,12 +19,6 @@ namespace Fsel.Ordering.Infrastructure.Configs
                 .HasConversion(
                     v => v.ToString(),
                     v => v.EnumParse<EnumCustomerType>());
-
-            builder.Property(e => e.CourseLevel)
-                .HasMaxLength(100)
-                .HasConversion(
-                    v => v.ToString(),
-                    v => v.EnumParse<EnumCourseLevel>());
         }
     }
 }

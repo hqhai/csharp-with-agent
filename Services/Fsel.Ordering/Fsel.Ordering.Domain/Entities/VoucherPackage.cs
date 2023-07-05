@@ -8,11 +8,11 @@ namespace Fsel.Ordering.Domain.Entities
     {
         public double Percentage { get; set; }
 
-        public Guid PacketId { get; set; }
+        public Guid PackageId { get; set; }
 
         public Guid VoucherId { get; set; }
 
-        public Package? Packet { get; set; }
+        public Package? Package { get; set; }
 
         public Voucher? Voucher { get; set; }
     }

@@ -5,10 +5,8 @@ namespace Fsel.Ordering.Domain.Models.CommandModels.Vouchers
     using System;
     using System.Collections.Generic;
     using Fsel.Core.Base.BaseModels;
-    using Fsel.Ordering.Domain.Entities;
     using Fsel.Ordering.Domain.Enums;
-    using Fsel.Ordering.Domain.Models.CommandModels.Packages;
-    using Fsel.Ordering.Domain.Models.EntityModels;
+    using Fsel.Ordering.Domain.Models.CommandModels.VoucherPackages;
     using Fsel.Shared.Enums;
 
     public class UpdateVoucherCommandModel : BaseCommandModel
@@ -20,10 +18,10 @@ namespace Fsel.Ordering.Domain.Models.CommandModels.Vouchers
         public DateTime? EndDate { get; set; }
 
         public string? ContentFilePath { get; set; }
-        public bool IsGlobal { get; set; }
+
         public bool IsActive { get; set; }
         public EnumCustomerType CustomerType { get; set; }
-        public EnumCourseLevel CourseLevel { get; set; }
-        public IList<VoucherPacketModel>? VoucherPackets { get; set; }
+        public IList<EnumCourseLevel>? CourseLevels { get; set; }
+        public IList<CreateVoucherPackageModel>? VoucherPackages { get; set; }
     }
 }

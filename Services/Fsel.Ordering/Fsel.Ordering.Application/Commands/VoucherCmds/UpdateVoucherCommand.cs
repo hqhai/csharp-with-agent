@@ -56,10 +56,10 @@ namespace Fsel.Ordering.Application.Commands.VoucherCmds
 
             #endregion Validation
 
-            voucher.VoucherPackages = request.VoucherPackets!.Select((x) => new VoucherPackage
+            voucher.VoucherPackages = request.VoucherPackages!.Select((x) => new VoucherPackage
             {
                 Percentage = x.Percentage,
-                PacketId = x.PacketId
+                PackageId = x.PackageId
             }).ToList();
             await _voucherRepository.ExecuteTransactionAsync(async () =>
             {

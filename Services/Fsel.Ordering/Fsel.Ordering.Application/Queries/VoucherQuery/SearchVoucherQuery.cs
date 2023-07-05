@@ -45,7 +45,7 @@ namespace Fsel.Ordering.Application.Queries.VoucherQuery
                                 Name = x.Name,
                                 StartDate = x.StartDate,
                                 EndDate = x.EndDate,
-                                IsGlobal = x.IsGlobal,
+                                IsActive = x.IsActive,
                                 CustomerType = x.CustomerType,
                                 CreatedDate = x.CreatedDate,
                             });
