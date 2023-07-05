@@ -14,7 +14,7 @@ namespace Fsel.Ordering.Application.Services.TrainingService.Models
         public EnumTeacherApprovalStatus TeacherApprovalStatus { get; set; }
         public EnumStatusClass Status { get; set; }
         public Guid CourseId { get; set; }
-        public EnumCourseLevel CourseLevel { get; set; }
+        public EnumCourseLevel? CourseLevel { get; set; }
         public Guid? LiveTimeFrameId { get; set; }
 
         public IList<DayOfWeek>? LiveDays { get; set; }
