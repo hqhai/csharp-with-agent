@@ -53,6 +53,14 @@ namespace Fsel.Ordering.Application.Commands.VoucherCmds
                 methodResult.AddErrorBadRequest(voucher.ErrorMessages);
                 return methodResult;
             }
+            if (request.StartDate >= DateTime.Now && DateTime.Now <= request.EndDate)
+            {
+                voucher.IsActive = true;
+            }
+            else
+            {
+                voucher.IsActive = false;
+            }
 
             #endregion Validation
 
