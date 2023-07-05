@@ -90,7 +90,6 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd
                 return methodResult;
             }
 
-
             var finalTestResult = await _finalTestResultRepository.Queryable
                     .FirstOrDefaultAsync(x => x.FinalTestId == request.FinalTestId && x.StudentId == studentId && x.CourseId == request.CourseId && x.Status == EnumResultStatus.Process, cancellationToken);
             if (finalTestResult == null)
