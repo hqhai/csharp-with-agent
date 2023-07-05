@@ -57,16 +57,17 @@ namespace Fsel.Identity.Application.Queries.AdminQuery
                                               .ThenInclude(x => x!.ParentStudents)
                                               .ThenInclude(x => x.Parent)
                                               .ThenInclude(x => x!.Human)
-                                              .FirstOrDefaultAsync(x => x.Id == userView.Id, cancellationToken);
+                                              .FirstOrDefaultAsync(x => x.Human != null && x.Human.Student != null && x.Human.Student.Id == request.StudentId, cancellationToken);
                 student = userView?.Human?.Student;
                 parentStudent = student?.ParentStudents.FirstOrDefault();
             }
             var userModel = _mapper.Map<UserStudentModel>(userView);
             _mapper.Map(userView?.Human, userModel);
             _mapper.Map(student, userModel);
-            if (parentStudent != null)
+            if (parentStudent != null && parentStudent.Parent !=null)
             {
                 userModel.Parent = _mapper.Map<ParentInfoModel>(parentStudent.Parent);
+                userModel.Parent = _mapper.Map<ParentInfoModel>(parentStudent.Parent.Human);
             }
             var classStudent = await _trainingService.GetClassByStudentId(student?.Id ?? default);
             var @class = classStudent?.Content?.Result;

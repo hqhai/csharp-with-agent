@@ -4,7 +4,6 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
 {
     using AutoMapper;
     using Fsel.Common.ActionResults;
-    using Fsel.Core.Base;
     using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.Enums.ErrorCodes;
     using Fsel.Identity.Domain.IRepositories;
@@ -23,17 +22,14 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
     {
         private readonly UserManager<User> _userManager;
         private readonly IMapper _mapper;
-        private readonly AuthContext _authContext;
         private readonly IHumanRepository _humanRepository;
 
         public UpdateStudentByAdminCommandHandler(UserManager<User> userManager,
             IMapper mapper,
-            AuthContext authContext,
             IHumanRepository humanRepository)
         {
             _userManager = userManager;
             _mapper = mapper;
-            _authContext = authContext;
             _humanRepository = humanRepository;
         }
 
@@ -44,7 +40,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
             var userView = await _userManager.Users.Include(x => x.Human)
                                                    .ThenInclude(x => x!.Student)
                                                    .ThenInclude(x => x!.ParentStudents)
-                                                   .FirstOrDefaultAsync(x => x.Human!.Student!.Id == request.Id, cancellationToken);
+                                                   .FirstOrDefaultAsync(x => x.Human != null && x.Human.Student != null && x.Human.Student.Id == request.Id, cancellationToken);
             if (userView == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumUserErrorCode.UserNotExist));
@@ -77,7 +73,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
                                                .ThenInclude(x => x!.ParentStudents)
                                                .ThenInclude(x => x.Parent)
                                                .ThenInclude(x => x!.Human)
-                                               .FirstOrDefaultAsync(x => x.Id == _authContext.CurrentUserId.ToString(), cancellationToken);
+                                               .FirstOrDefaultAsync(x => x.Human != null && x.Human.Student != null && x.Human.Student.Id == request.Id, cancellationToken);
                     var human = userView?.Human?.Student?.ParentStudents.FirstOrDefault()?.Parent?.Human;
                     if (human != null)
                     {
@@ -87,10 +83,6 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
                         await _humanRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
                     }
                 }
-            }
-            else
-            {
-                userView.Human?.Student?.ParentStudents.Clear();
             }
             if (userView != null)
             {
