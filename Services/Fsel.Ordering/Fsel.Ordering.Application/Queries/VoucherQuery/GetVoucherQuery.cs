@@ -37,7 +37,26 @@ namespace Fsel.Ordering.Application.Queries.VoucherQuery
 
             var voucherQuery = await _voucherRepository.Queryable
                                     .Include(x => x.VoucherPackages)
-                                    .FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
+                                    .Select(x => new VoucherModel
+                                    {
+                                        Id = x.Id,
+                                        Name = x.Name,
+                                        StartDate = x.StartDate,
+                                        EndDate = x.EndDate,
+                                        CustomerType = x.CustomerType,
+                                        CreatedDate = x.CreatedDate,
+                                        IsActive = (x.IsActive == null ? (x.StartDate <= DateTime.Now && DateTime.Now <= x.EndDate) : x.IsActive),
+                                        ContentFilePath = x.ContentFilePath,
+                                        CourseLevels = x.CourseLevels,
+                                        CreatedFullName = x.CreatedFullName,
+                                        VoucherPackages = x.VoucherPackages.Select(x => new VoucherPackageModel
+                                        {
+                                            Id = x.Id,
+                                            PackageId = x.PackageId,
+                                            Percentage = x.Percentage,
+                                            VoucherId = x.VoucherId,
+                                        }).ToList(),
+                                    }).FirstOrDefaultAsync(cancellationToken);
 
             if (voucherQuery == null)
             {
