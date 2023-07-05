@@ -234,15 +234,6 @@ namespace Fsel.Course.Infrastructure.Common
                 exercises = extraPracticeExercises.Select(x => x.Exercise ?? new Exercise()).ToList();
                 questions = exercises.SelectMany(x => x.ExerciseQuestions).Select(x => x.Question ?? new Question()).ToList();
             }
-            if (extraPracticeExercises != null)
-            {
-                foreach (var item in extraPracticeExercises)
-                {
-                    await _extraPracticeExerciseRepository.DeleteAsync(item);
-                }
-                await _extraPracticeExerciseRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-            }
-
             if (exercises != null)
             {
                 foreach (var item in exercises)
@@ -256,6 +247,14 @@ namespace Fsel.Course.Infrastructure.Common
                     await _questionRepository.DeleteAsync(item);
                 }
                 await _questionRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+            }
+            if (extraPracticeExercises != null)
+            {
+                foreach (var item in extraPracticeExercises)
+                {
+                    await _extraPracticeExerciseRepository.DeleteAsync(item);
+                }
+                await _extraPracticeExerciseRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             }
             return methodResult;
         }
