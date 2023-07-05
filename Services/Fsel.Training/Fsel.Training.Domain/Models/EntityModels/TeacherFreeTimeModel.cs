@@ -14,8 +14,8 @@ namespace Fsel.Training.Domain.Models.EntityModels
         public DayOfWeek DayOfWeek { get; set; }
 
         public bool Priority { get; set; }
-        public DateTime? EndTime { get; set; }
-        public DateTime? StartTime { get; set; }
+        public double? EndTime { get; set; }
+        public double? StartTime { get; set; }
         public Guid TeacherId { get; set; }
 
         public string? TeacherName { get; set; }

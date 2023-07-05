@@ -17,12 +17,14 @@ namespace Fsel.Course.Infrastructure.Common
         private readonly IExtraPracticeRepository _extraPracticeRepository;
         private readonly IMapper _mapper;
         private readonly VideoConverter _videoConverter;
+        private readonly IVideoRepository _videoRepository;
         private readonly IExtraPracticeExerciseRepository _extraPracticeExerciseRepository;
         private readonly IExerciseRepository _exerciseRepository;
         private readonly IQuestionRepository _questionRepository;
 
         public ExtraPracticeConverter(IExtraPracticeRepository extraPracticeRepository, IMapper mapper
             , VideoConverter videoConverter
+            , IVideoRepository videoRepository
             , IExtraPracticeExerciseRepository extraPracticeExerciseRepository
             , IExerciseRepository exerciseRepository
             , IQuestionRepository questionRepository
@@ -31,6 +33,7 @@ namespace Fsel.Course.Infrastructure.Common
             _extraPracticeRepository = extraPracticeRepository;
             _mapper = mapper;
             _videoConverter = videoConverter;
+            _videoRepository = videoRepository;
             _extraPracticeExerciseRepository = extraPracticeExerciseRepository;
             _exerciseRepository = exerciseRepository;
             _questionRepository = questionRepository;
@@ -180,16 +183,30 @@ namespace Fsel.Course.Infrastructure.Common
             }
             else if (request.Type == EnumExtraPracticeType.InteractiveVideo)
             {
-                if (request.Video == null)
+                var video = await _videoRepository.GetIncludeByIdAsync(request.VideoId ?? default);
+                if (request.Video == null || request.VideoId == null)
                 {
                     methodResult.AddErrorBadRequest(nameof(EnumVideoErrorCode.VideoNull));
                     return methodResult;
                 }
-                Video video = _mapper.Map<Video>(request.Video);
-                var method = await _videoConverter.CreateTimeCodeToVideo(video, request.Video);
-                if (!method.IsOK)
+                if (video == null)
                 {
-                    methodResult.AddErrorBadRequest(method.ErrorMessages);
+                    methodResult.AddErrorBadRequest(nameof(EnumVideoErrorCode.VideoNotExist), nameof(request.Id), request.Id);
+                    return methodResult;
+                }
+                request.Video.Id = video.Id;
+                //var method = await _videoConverter.DeleteExerciseToVideo(video);
+                //if (!method.IsOK)
+                //{
+                //    methodResult.AddErrorBadRequest(method.ErrorMessages);
+                //    return methodResult;
+                //}
+
+                _mapper.Map(request.Video, video);
+                var methodUpdate = await _videoConverter.UpdateTimeCodeToVideo(video, request.Video);
+                if (!methodUpdate.IsOK)
+                {
+                    methodResult.AddErrorBadRequest(methodUpdate.ErrorMessages);
                     return methodResult;
                 }
                 extraPractice.Video = video;
@@ -234,6 +251,15 @@ namespace Fsel.Course.Infrastructure.Common
                 exercises = extraPracticeExercises.Select(x => x.Exercise ?? new Exercise()).ToList();
                 questions = exercises.SelectMany(x => x.ExerciseQuestions).Select(x => x.Question ?? new Question()).ToList();
             }
+            if (extraPracticeExercises != null)
+            {
+                foreach (var item in extraPracticeExercises)
+                {
+                    await _extraPracticeExerciseRepository.DeleteAsync(item);
+                }
+                await _extraPracticeExerciseRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+            }
+
             if (exercises != null)
             {
                 foreach (var item in exercises)
@@ -247,14 +273,6 @@ namespace Fsel.Course.Infrastructure.Common
                     await _questionRepository.DeleteAsync(item);
                 }
                 await _questionRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-            }
-            if (extraPracticeExercises != null)
-            {
-                foreach (var item in extraPracticeExercises)
-                {
-                    await _extraPracticeExerciseRepository.DeleteAsync(item);
-                }
-                await _extraPracticeExerciseRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             }
             return methodResult;
         }
