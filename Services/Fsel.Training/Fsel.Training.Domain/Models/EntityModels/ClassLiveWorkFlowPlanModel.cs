@@ -9,7 +9,7 @@ namespace Fsel.Training.Domain.Models.EntityModels
     {
         public Guid LiveTimeFrameId { get; set; }
 
-        public DayOfWeek LiveDate { get; set; }
+        public DateTime LiveDate { get; set; }
 
         public int VoteNumber { get; set; }
 
