@@ -285,6 +285,79 @@ namespace Fsel.Training.Infrastructure.Migrations
                 b.ToTable("ClassLiveWorkFlows");
             });
 
+            modelBuilder.Entity("Fsel.Training.Domain.Entities.ClassLiveWorkFlowPlan", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(0);
+
+                    b.Property<Guid>("ClassLiveWorkFlowId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(107);
+
+                    b.Property<string>("CreatedFullName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(104);
+
+                    b.Property<Guid>("CreatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(101);
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(109);
+
+                    b.Property<string>("DeletedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(106);
+
+                    b.Property<Guid?>("DeletedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(103);
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit")
+                        .HasColumnOrder(110);
+
+                    b.Property<DateTime>("LiveDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("LiveTimeFrameId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(108);
+
+                    b.Property<string>("UpdatedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(105);
+
+                    b.Property<Guid?>("UpdatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(102);
+
+                    b.Property<int>("VoteNumber")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ClassLiveWorkFlowId");
+
+                    b.ToTable("ClassLiveWorkFlowPlans");
+                });
+
             modelBuilder.Entity("Fsel.Training.Domain.Entities.ClassStudent", b =>
             {
                 b.Property<Guid>("Id")
@@ -506,6 +579,17 @@ namespace Fsel.Training.Infrastructure.Migrations
                 b.Navigation("ClassLiveCalendar");
             });
 
+            modelBuilder.Entity("Fsel.Training.Domain.Entities.ClassLiveWorkFlowPlan", b =>
+                {
+                    b.HasOne("Fsel.Training.Domain.Entities.ClassLiveWorkFlow", "ClassLiveWorkFlow")
+                        .WithMany("ClassLiveWorkFlowPlans")
+                        .HasForeignKey("ClassLiveWorkFlowId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ClassLiveWorkFlow");
+                });
+
             modelBuilder.Entity("Fsel.Training.Domain.Entities.ClassStudent", b =>
             {
                 b.HasOne("Fsel.Training.Domain.Entities.Class", "Class")
@@ -539,6 +623,11 @@ namespace Fsel.Training.Infrastructure.Migrations
             {
                 b.Navigation("ClassLiveWorkFlows");
             });
+
+            modelBuilder.Entity("Fsel.Training.Domain.Entities.ClassLiveWorkFlow", b =>
+                {
+                    b.Navigation("ClassLiveWorkFlowPlans");
+                });
 
             modelBuilder.Entity("Fsel.Training.Domain.Entities.TeacherFreeDate", b =>
             {

@@ -18,6 +18,7 @@ namespace Fsel.Course.Application.Commands.FinalTestCmd
     using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Http;
+    using Microsoft.EntityFrameworkCore;
 
     public class UpdateFinalTestCommand : UpdateFinalTestCommandModel, IRequest<MethodResult<FinalTestModel>>
     {
@@ -27,23 +28,14 @@ namespace Fsel.Course.Application.Commands.FinalTestCmd
     {
         private readonly IMapper _mapper;
         private readonly IFinalTestRepository _finalTestRepository;
-        private readonly IQuestionRepository _questionRepository;
-        private readonly ISectionGroupRepository _sectionGroupRepository;
-        private readonly ISectionQuestionRepository _sectionQuestionRepository;
         private readonly SectionConverter _sectionConverter;
 
         public UpdateFinalTestCommandHandler(IMapper mapper
             , IFinalTestRepository finalTestRepository
-            , IQuestionRepository questionRepository
-            , ISectionGroupRepository sectionGroupRepository
-            , ISectionQuestionRepository sectionQuestionRepository
             , SectionConverter sectionConverter)
         {
             _mapper = mapper;
             _finalTestRepository = finalTestRepository;
-            _questionRepository = questionRepository;
-            _sectionGroupRepository = sectionGroupRepository;
-            _sectionQuestionRepository = sectionQuestionRepository;
             _sectionConverter = sectionConverter;
         }
 
@@ -65,7 +57,11 @@ namespace Fsel.Course.Application.Commands.FinalTestCmd
                 methodResult.AddErrorBadRequest(nameof(EnumFinalTestErrorCode.FinalTestInActiveState), nameof(finalTest.IsActive), finalTest.IsActive);
                 return methodResult;
             }
-
+            if (await _finalTestRepository.Queryable.AnyAsync(x => x.Id != request.Id && x.Name == request.Name, cancellationToken))
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumFinalTestErrorCode.FinalTestNameAlreadyExist), nameof(request.Name), request.Name);
+                return methodResult;
+            }
             if (request.SectionGroups == null || request.SectionGroups.Count == 0)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumExerciseErrorCode.ExercisesNull), nameof(request.SectionGroups));

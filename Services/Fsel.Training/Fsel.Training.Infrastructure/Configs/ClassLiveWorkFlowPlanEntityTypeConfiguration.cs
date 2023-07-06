@@ -14,9 +14,9 @@ namespace Fsel.Training.Infrastructure.Configs
             ArgumentNullException.ThrowIfNull(builder);
 
             builder.HasOne(a => a.ClassLiveWorkFlow)
-                     .WithMany(b => b.ClassLiveWorkFlowPlans)
-                     .HasForeignKey(b => b.ClassLiveWorkFlowId)
-                     .OnDelete(DeleteBehavior.Cascade);
+               .WithMany(b => b.ClassLiveWorkFlowPlans)
+               .HasForeignKey(b => b.ClassLiveWorkFlowId)
+               .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

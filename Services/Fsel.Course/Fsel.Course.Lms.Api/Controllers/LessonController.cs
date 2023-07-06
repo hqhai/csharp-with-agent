@@ -42,7 +42,7 @@ namespace Fsel.Course.Lms.Api.Controllers
         /// Get Lesson score
         /// </summary>
         [HttpGet("get-lesson-score")]
-        [ProducesResponseType(typeof(MethodResult<LessonModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(MethodResult<LessonScoreModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetLessonScore([FromQuery] GetLessonScoreQuery query)
         {

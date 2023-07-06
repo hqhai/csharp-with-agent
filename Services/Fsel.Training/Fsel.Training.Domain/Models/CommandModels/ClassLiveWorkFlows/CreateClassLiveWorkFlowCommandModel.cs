@@ -3,18 +3,13 @@
 namespace Fsel.Training.Domain.Models.CommandModels.ClassLiveWorkFlows
 {
     using Fsel.Training.Domain.Enums;
+    using Fsel.Training.Domain.Models.CommandModels.ClassLiveWorkFlowPlans;
 
     public class CreateClassLiveWorkFlowCommandModel
     {
         public Guid ClassLiveCalendarId { get; set; }
         public string? Description { get; set; }
-        public IList<CreateClassWorkFlowCommandModel>? WorkFlows { get; set; }
+        public IList<CreateClassLiveWorkFlowPlanCommandModel>? ClassLiveWorkFlowPlans { get; set; }
         public EnumWorkFlowType Type { get; set; }
-    }
-
-    public class CreateClassWorkFlowCommandModel
-    {
-        public Guid LiveTimeFrameId { get; set; }
-        public DateTime LiveDate { get; set; }
     }
 }

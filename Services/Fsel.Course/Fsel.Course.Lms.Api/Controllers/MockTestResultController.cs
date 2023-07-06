@@ -31,7 +31,7 @@ namespace Fsel.Course.Lms.Api.Controllers
         [HttpGet]
         [ProducesResponseType(typeof(MethodResult<IList<MockTestResultModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetListLessonByUnitId([FromQuery] GetMockTestReportQuery query)
+        public async Task<IActionResult> GetListMockTestResultById([FromQuery] GetMockTestReportQuery query)
         {
             MethodResult<IList<MockTestResultModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();

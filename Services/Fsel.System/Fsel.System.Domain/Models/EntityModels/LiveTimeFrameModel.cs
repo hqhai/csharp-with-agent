@@ -6,8 +6,8 @@ namespace Fsel.System.Domain.Models.EntityModels
 
     public class LiveTimeFrameModel : BaseModel
     {
-        public DateTime? StartTime { get; set; }
+        public double? StartTime { get; set; }
 
-        public DateTime? EndTime { get; set; }
+        public double? EndTime { get; set; }
     }
 }

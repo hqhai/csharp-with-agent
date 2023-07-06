@@ -26,6 +26,7 @@ namespace Fsel.Training.Infrastructure
             modelBuilder.ApplyConfiguration(new TeacherFreeTimeEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new TeacherFreeDateEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new ClassLiveWorkFlowEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new ClassLiveWorkFlowPlanEntityTypeConfiguration());
             base.OnModelCreating(modelBuilder);
         }
 

@@ -18,12 +18,10 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
 
     public class GetListLessonByCourseQueryHandler : IRequestHandler<GetListLessonByCourseQuery, MethodResult<object>>
     {
-        private readonly ILessonRepository _lessonRepository;
         private readonly IUnitRepository _unitRepository;
 
-        public GetListLessonByCourseQueryHandler(ILessonRepository lessonRepository, IUnitRepository unitRepository)
+        public GetListLessonByCourseQueryHandler(IUnitRepository unitRepository)
         {
-            _lessonRepository = lessonRepository;
             _unitRepository = unitRepository;
         }
 
@@ -35,6 +33,8 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
                                                      .Include(x => x.UnitLessons.Where(n => !n.IsDeleted))
                                                      .ThenInclude(x => x.Lesson)
                                                      .Include(x => x.CourseUnitMockTests.Where(x => x.CourseId == request.CourseId).OrderBy(x => x.DisplayOrder))
+                                                     .Include(x => x.CourseUnitMockTests.Where(x => x.CourseId == request.CourseId))
+                                                     .AsNoTracking()
                                                      .Select(x => new UnitModel
                                                      {
                                                          Id = x.Id,

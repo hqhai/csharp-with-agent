@@ -380,7 +380,7 @@ namespace Fsel.Course.Infrastructure.Migrations
                         .HasColumnType("bit")
                         .HasColumnOrder(110);
 
-                    b.Property<long?>("Score")
+                    b.Property<long>("Score")
                         .HasColumnType("bigint");
 
                     b.Property<DateTime?>("UpdatedDate")
@@ -1671,6 +1671,9 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.Property<double>("Percent")
                         .HasColumnType("float");
 
+                    b.Property<string>("SkillScoresStr")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Status")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -2088,6 +2091,9 @@ namespace Fsel.Course.Infrastructure.Migrations
 
                     b.Property<double>("Percent")
                         .HasColumnType("float");
+
+                    b.Property<string>("SkillScoresStr")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Status")
                         .IsRequired()
@@ -3815,6 +3821,9 @@ namespace Fsel.Course.Infrastructure.Migrations
 
                     b.Property<Guid>("VideoId")
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("VideoSkillScoresStr")
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 

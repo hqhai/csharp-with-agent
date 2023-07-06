@@ -51,7 +51,6 @@ namespace Fsel.Course.Application.Commands.ExtraPracticeCmd
                 }
                 var result = await _extraPracticeRepository.DeleteAsync(extraPractice);
                 await _extraPracticeRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
-
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 methodResult.Result = result;
                 return methodResult;

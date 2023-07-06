@@ -82,8 +82,8 @@ namespace Fsel.Training.Application.Queries.ClassQuery
             foreach (var item in classQuery)
             {
                 var timeFrame = timeFrames?.FirstOrDefault(x => x.Id == item.LiveTimeFrameId);
-                item.StartDate = timeFrame.StartTime.HasValue ? timeFrame.StartTime.Value : default;
-                item.EndDate = timeFrame.EndTime.HasValue ? timeFrame.EndTime.Value : default;
+                item.TimeFrameStartTime = timeFrame?.StartTime;
+                item.TimeFrameEndTime = timeFrame?.EndTime;
             }
             methodResult.Result = classQuery;
             methodResult.StatusCode = StatusCodes.Status200OK;

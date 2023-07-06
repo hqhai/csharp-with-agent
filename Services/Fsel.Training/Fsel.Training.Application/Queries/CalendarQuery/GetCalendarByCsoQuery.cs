@@ -146,8 +146,8 @@ namespace Fsel.Training.Application.Queries.CalendarQuery
                 var liveTimeFrame = liveTimeFrames?.FirstOrDefault(x => x.Id == item.LiveTimeFrameId);
                 if (liveTimeFrame != null)
                 {
-                    item.StartTime = liveTimeFrame.StartTime.ToStringTime();
-                    item.EndTime = liveTimeFrame.EndTime.ToStringTime();
+                    item.StartTime = liveTimeFrame.StartTime;
+                    item.EndTime = liveTimeFrame.EndTime;
                 }
             });
 

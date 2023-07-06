@@ -3,8 +3,11 @@
 namespace Fsel.Course.Domain.Entities
 {
     using System.ComponentModel.DataAnnotations;
+    using System.ComponentModel.DataAnnotations.Schema;
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Common.Helpers;
     using Fsel.Core.Entities;
+    using Fsel.Course.Domain.Entities.SkillScoresConfigs;
     using Fsel.Course.Domain.Enums;
 
     public class VideoResult : Entity
@@ -52,6 +55,14 @@ namespace Fsel.Course.Domain.Entities
         /// Thời gian hiện làm bài
         /// </summary>
         public EnumResultStatus Status { get; set; }
+        public string? VideoSkillScoresStr { get; set; }
+
+        [NotMapped]
+        public IList<VideoSkillScores>? VideoSkillScores
+        {
+            get { return ConvertHelper.Deserialize<IList<VideoSkillScores>>(VideoSkillScoresStr); }
+            set { VideoSkillScoresStr = ConvertHelper.Serialize(value); }
+        }
 
         public LessonResult? LessonResult { get; set; }
 

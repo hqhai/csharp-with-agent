@@ -4,6 +4,7 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
 {
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base;
+    using Fsel.Course.Domain.Entities.SkillScoresConfigs;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
@@ -96,7 +97,7 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
                               };
 
             var answerTimeCodeQuery = answerQuery.Where(x => x.Type != EnumTimeCodeType.Standalone);
-            var answerStaderlonQuery = answerQuery.Where(x => x.Type == EnumTimeCodeType.Standalone);
+            var answerStandaloneQuery = answerQuery.Where(x => x.Type == EnumTimeCodeType.Standalone);
 
             var questionQuery = from baseQ in baseQuery
                                 join v in _videoRepository.Queryable on baseQ.VideoId equals v.Id
@@ -121,9 +122,9 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
             var scoreQuery = from skill in skills
                              join questionQ in questions on skill equals questionQ.Skill into questionQ_jointable
                              from questionQJ in questionQ_jointable.DefaultIfEmpty()
-                             join answerQ in answerStaderlonQuery on skill equals answerQ.Skill into answerQ_jointable
+                             join answerQ in answerStandaloneQuery on skill equals answerQ.Skill into answerQ_jointable
                              from answerQJ in answerQ_jointable.DefaultIfEmpty()
-                             select new LessonSkillScoreModel
+                             select new SkillScores
                              {
                                  Skill = skill,
                                  TotalCount = questionQJ != null ? questionQJ.TotalCount : default,
@@ -140,7 +141,7 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
                                                         join answerTimeCodeQ in answerTimeCodeQuery on skill equals answerTimeCodeQ.Skill into answerTimeCodeQ_jointable
                                                         from answerTimeCodeQJ in answerTimeCodeQ_jointable.DefaultIfEmpty()
                                                         where questionTimeCodeQJ != null && answerTimeCodeQJ != null && questionTimeCodeQJ.Type == type && answerTimeCodeQJ.Type == type
-                                                        select new LessonSkillScoreModel
+                                                        select new SkillScores
                                                         {
                                                             Skill = skill,
                                                             TotalCount = questionTimeCodeQJ != null ? questionTimeCodeQJ.TotalCount : default,
@@ -165,9 +166,11 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
             if (totalCount != 0)
             {
                 lessonScore.Percent = (correctCount / (double)totalCount) * 100;
+                lessonScore.TotalCount = totalCount;
+                lessonScore.CorrectCount = correctCount;
             }
 
-            lessonScore.LessonSkillScores = scoreQuery.ToList();
+            lessonScore.SkillScores = scoreQuery.ToList();
             lessonScore.TimeCodeScores = timeCodeScores;
             methodResult.Result = lessonScore;
             methodResult.StatusCode = StatusCodes.Status200OK;

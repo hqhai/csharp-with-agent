@@ -66,7 +66,7 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
                 methodResult.AddErrorBadRequest(nameof(EnumLessonErrorCode.UserNotExist));
                 return methodResult;
             }
-            var studentId = studentsResult.Content!.Result!.Id;
+            var studentId = studentsResult.Content?.Result?.Id;
 
             var unit = await _unitRepository.Queryable.Include(x => x.UnitSkillMockTests)
                                                       .Include(x => x.UnitLessons)
@@ -86,7 +86,7 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
                     LessonId = x.LessonId,
                     CourseId = request.CourseId,
                     Status = EnumResultStatus.Unfinished,
-                    StudentId = studentId
+                    StudentId = studentId ?? default
                 }).ToList();
                 await _lessonResultRepository.AddList(lessonResults);
                 await _lessonResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
@@ -99,7 +99,7 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
                 {
                     UnitId = x.UnitId,
                     MockTestId = x.MockTestId,
-                    StudentId = studentId,
+                    StudentId = studentId ?? default,
                     Status = EnumResultStatus.Unfinished,
                     CourseId = request.CourseId
                 }).ToList();
@@ -135,21 +135,22 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
             }
 
             var mocktest = await _unitRepository.Queryable
-                                .Include(x => x.UnitSkillMockTests)
+                                .Include(x => x.UnitSkillMockTests.Where(y => !y.IsDeleted))
                                 .ThenInclude(x => x.MockTest)
-                                .ThenInclude(x => x!.MockTestSections)
+                                .ThenInclude(x => x!.MockTestSections.Where(y => !y.IsDeleted))
                                 .ThenInclude(x => x.SectionGroup)
                                 .Include(x => x.MockTestResults.Where(y => y.UnitId == request.UnitId && y.CourseId == request.CourseId && y.StudentId == studentId))
                                 .Where(x => x.Id == request.UnitId)
+                                .AsNoTracking()
                                 .SelectMany(x => x.UnitSkillMockTests)
                                 .Select(x => x.MockTest)
                                 .Select(x => new MockTestModel
                                 {
+                                    Id = x!.Id,
                                     CourseType = x!.CourseType,
-                                    Id = x.Id,
                                     Name = x.Name,
                                     TotalQuestion = x.MockTestSections.Select(x => x.SectionGroup).SelectMany(x => x!.Sections).SelectMany(x => x.SectionParts).SelectMany(x => x.SectionQuestions).Select(x => x.Question).Select(x => x!.CorrectTotal).Sum(),
-                                    SectionGroups = x.MockTestSections.Select(x => x.SectionGroup).OrderBy(x => x.CreatedDate).Select(x => new SectionGroupModel
+                                    SectionGroups = x.MockTestSections.Select(x => x.SectionGroup).OrderBy(x => x!.CreatedDate).Select(x => new SectionGroupModel
                                     {
                                         Id = x!.Id,
                                         CourseSkill = x.CourseSkill,
