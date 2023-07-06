@@ -70,6 +70,13 @@ namespace Fsel.Training.Application.Commands.ClassLiveWorkFlowCmd
             }
             else
             {
+                classLiveWorkFlow = new ClassLiveWorkFlow
+                {
+                    ClassLiveCalendarId = request.ClassLiveCalendarId,
+                    Type = request.Type,
+                    Description = request.Description,
+                    TeacherId = teacherId
+                };
                 var status = string.Empty;
                 if (request.Type == EnumWorkFlowType.ChangeTeacher)
                 {
@@ -80,25 +87,29 @@ namespace Fsel.Training.Application.Commands.ClassLiveWorkFlowCmd
                     status = EnumWorkFlowCancelScheduleStatus.RequestCancel.ToString();
 
                     DateTime dateTime = DateTime.Now;
-                    var minCancelTime = classLiveCalendar.LiveDate.AddHours(24);
-                    var maxCancelTime = classLiveCalendar.LiveDate.AddHours(1);
 
-                    if (dateTime < maxCancelTime || minCancelTime < dateTime)
+                    var learnAgainDate = classLiveCalendar.LiveDate.AddDays(2);
+                    var cancelTime = classLiveCalendar.LiveDate.AddDays(-1);
+                    /*var isCheck = !(cancelTime.Day == dateTime.Day && cancelTime.Month == dateTime.Month && cancelTime.Year == dateTime.Year);*/
+                    if (dateTime > learnAgainDate || cancelTime.Date != dateTime.Date)
                     {
                         methodResult.AddErrorBadRequest(nameof(EnumClassLiveWorkFlowErrorCode.CanNotCancelLiveTime));
                         return methodResult;
                     }
-                    classLiveWorkFlow!.ClassLiveWorkFlowPlans = _mapper.Map<IList<ClassLiveWorkFlowPlan>>(request.ClassLiveWorkFlowPlans);
+                    classLiveWorkFlow.ClassLiveWorkFlowPlans = _mapper.Map<IList<ClassLiveWorkFlowPlan>>(request.ClassLiveWorkFlowPlans);
                 }
-
-                classLiveWorkFlow = new ClassLiveWorkFlow
+                else if (request.Type == EnumWorkFlowType.AssignTeacher)
                 {
-                    ClassLiveCalendarId = request.ClassLiveCalendarId,
-                    Status = status,
-                    Type = request.Type,
-                    Description = request.Description,
-                    TeacherId = teacherId
-                };
+                    status = EnumWorkFlowAssignTeacherStatus.Pending.ToString();
+                    DateTime dateTime = DateTime.Now;
+                    var assignTeacher = classLiveCalendar.LiveDate.AddDays(-1);
+                    if (assignTeacher.Date == dateTime.Date)
+                    {
+                        methodResult.AddErrorBadRequest(nameof(EnumClassLiveWorkFlowErrorCode.CanNotAssignTeacher));
+                        return methodResult;
+                    }
+                }
+                classLiveWorkFlow.Status = status;
             }
             await _classLiveWorkFlowRepository.ExecuteTransactionAsync(async () =>
             {

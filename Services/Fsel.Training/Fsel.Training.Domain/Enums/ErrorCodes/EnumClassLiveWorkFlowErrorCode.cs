@@ -32,6 +32,11 @@ namespace Fsel.Training.Domain.Enums.ErrorCodes
         /// <summary>
         /// Can Not cancel live time
         /// </summary>
-        CanNotCancelLiveTime
+        CanNotCancelLiveTime,
+
+        /// <summary>
+        /// Can Not assign teacher
+        /// </summary>
+        CanNotAssignTeacher
     }
 }
