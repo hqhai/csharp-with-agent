@@ -92,20 +92,16 @@ namespace Fsel.Training.Application.Commands.ClassLiveWorkFlowCmd
                 else if (request.Type == EnumWorkFlowType.CancelSchedule)
                 {
                     status = EnumWorkFlowCancelScheduleStatus.RequestCancel.ToString();
-
                     DateTime dateTime = DateTime.Now;
-
-                    var learnAgainDate = classLiveCalendar.LiveDate.AddDays(2);
-                    var cancelTime = classLiveCalendar.LiveDate.AddDays(-1);
-
-                    if (dateTime > learnAgainDate || cancelTime.Date != dateTime.Date)
+                    var learnAgainDate = classLiveCalendar.LiveDate.AddDays(2);// 5 7/7/2023   12 7/7/2023
+                    var check = dateTime > classLiveCalendar.LiveDate.AddHours(-24) && dateTime < classLiveCalendar.LiveDate.AddHours(-1);
+                    if (dateTime > learnAgainDate || !check)
                     {
                         methodResult.AddErrorBadRequest(nameof(EnumClassLiveWorkFlowErrorCode.CanNotCancelLiveTime));
                         return methodResult;
                     }
                     classLiveWorkFlow.ClassLiveWorkFlowPlans = _mapper.Map<IList<ClassLiveWorkFlowPlan>>(request.ClassLiveWorkFlowPlans);
                 }
-
                 classLiveWorkFlow.Status = status;
             }
             await _classLiveWorkFlowRepository.ExecuteTransactionAsync(async () =>
