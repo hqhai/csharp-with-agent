@@ -329,8 +329,8 @@ namespace Fsel.Training.Infrastructure.Migrations
                         .HasColumnType("bit")
                         .HasColumnOrder(110);
 
-                    b.Property<int>("LiveDate")
-                        .HasColumnType("int");
+                    b.Property<DateTime>("LiveDate")
+                        .HasColumnType("datetime2");
 
                     b.Property<Guid>("LiveTimeFrameId")
                         .HasColumnType("uniqueidentifier");

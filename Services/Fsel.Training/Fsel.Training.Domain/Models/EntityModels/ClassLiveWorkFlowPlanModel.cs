@@ -16,7 +16,5 @@ namespace Fsel.Training.Domain.Models.EntityModels
         public bool IsActive { get; set; }
 
         public Guid ClassLiveWorkFlowId { get; set; }
-
-        public ClassLiveWorkFlowModel? ClassLiveWorkFlow { get; set; }
     }
 }

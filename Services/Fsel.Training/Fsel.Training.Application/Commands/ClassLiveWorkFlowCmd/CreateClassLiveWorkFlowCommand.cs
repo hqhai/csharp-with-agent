@@ -78,15 +78,16 @@ namespace Fsel.Training.Application.Commands.ClassLiveWorkFlowCmd
                 else if (request.Type == EnumWorkFlowType.CancelSchedule)
                 {
                     status = EnumWorkFlowCancelScheduleStatus.RequestCancel.ToString();
-                }
-                DateTime dateTime = DateTime.Now;
-                var liveTimeStart = classLiveCalendar.LiveDate.AddHours(24);
-                var liveTimeEnd = classLiveCalendar.LiveDate.AddHours(1);
+                    classLiveWorkFlow!.ClassLiveWorkFlowPlans = _mapper.Map<IList<ClassLiveWorkFlowPlan>>(request.ClassLiveWorkFlowPlans);
+                    DateTime dateTime = DateTime.Now;
+                    var minCancelTime = classLiveCalendar.LiveDate.AddHours(24);
+                    var maxCancelTime = classLiveCalendar.LiveDate.AddHours(1);
 
-                if (dateTime <= liveTimeEnd && liveTimeStart <= dateTime)
-                {
-                    methodResult.AddErrorBadRequest(nameof(EnumClassLiveWorkFlowErrorCode.CanNotCancelLiveTime));
-                    return methodResult;
+                    if (dateTime < maxCancelTime || minCancelTime < dateTime)
+                    {
+                        methodResult.AddErrorBadRequest(nameof(EnumClassLiveWorkFlowErrorCode.CanNotCancelLiveTime));
+                        return methodResult;
+                    }
                 }
 
                 classLiveWorkFlow = new ClassLiveWorkFlow
@@ -97,7 +98,6 @@ namespace Fsel.Training.Application.Commands.ClassLiveWorkFlowCmd
                     Description = request.Description,
                     TeacherId = teacherId
                 };
-                classLiveWorkFlow.ClassLiveWorkFlowPlans = _mapper.Map<IList<ClassLiveWorkFlowPlan>>(request.ClassLiveWorkFlowPlans);
             }
             await _classLiveWorkFlowRepository.ExecuteTransactionAsync(async () =>
             {

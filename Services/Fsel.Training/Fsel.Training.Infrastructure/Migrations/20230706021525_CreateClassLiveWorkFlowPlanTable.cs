@@ -27,7 +27,7 @@ namespace Fsel.Training.Infrastructure.Migrations
                     DeletedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false),
                     LiveTimeFrameId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    LiveDate = table.Column<int>(type: "int", nullable: false),
+                    LiveDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     VoteNumber = table.Column<int>(type: "int", nullable: false),
                     IsActive = table.Column<bool>(type: "bit", nullable: false),
                     ClassLiveWorkFlowId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
