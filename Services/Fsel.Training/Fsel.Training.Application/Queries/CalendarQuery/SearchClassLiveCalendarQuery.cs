@@ -62,7 +62,7 @@ namespace Fsel.Training.Application.Queries.CalendarQuery
                                         CourseId = x.Class!.CourseId,
                                         Code = x.Class!.Code,
                                         AccessLink = x.AccessLink,
-                                        LiveTimeFrameId = x.Class!.LiveTimeFrameId,
+                                        LiveTimeFrameId = x.LiveTimeFrameId,
                                         LiveDate = x.LiveDate
                                     });
 

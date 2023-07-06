@@ -7,9 +7,9 @@ namespace Fsel.Training.Application.Queries.TeacherFreeDateQuery
     using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Common.ActionResults;
-    using Fsel.Course.Application.Services.UserServices.Models;
     using Fsel.Training.Application.Services.SystemServices;
     using Fsel.Training.Application.Services.UserServices;
+    using Fsel.Training.Application.Services.UserServices.Models;
     using Fsel.Training.Domain.Enums.ErrorCodes;
     using Fsel.Training.Domain.IRepositories;
     using Fsel.Training.Domain.Models.EntityModels;
@@ -41,7 +41,6 @@ namespace Fsel.Training.Application.Queries.TeacherFreeDateQuery
             _userService = userService;
             _mapper = mapper;
             _systemService = systemService;
-
         }
 
         public async Task<MethodResult<IList<TeacherFreeDateModel>>> Handle(GetListFreeTeacherByCalendarQuery request, CancellationToken cancellationToken)

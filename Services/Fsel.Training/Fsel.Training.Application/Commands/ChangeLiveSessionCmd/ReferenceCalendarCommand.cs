@@ -15,11 +15,11 @@ namespace Fsel.Training.Application.Commands.ChangeLiveSessionCmd
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class ReferenceCalendarCommand : ChangeLiveSessionCommandModel, IRequest<MethodResult<ClassLiveWorkFlowPlanModel>>
+    public class ReferenceCalendarCommand : ChangeLiveSessionCommandModel, IRequest<MethodResult<ClassLiveWorkFlowModel>>
     {
     }
 
-    public class ReferenceCalendarCommandHandler : IRequestHandler<ReferenceCalendarCommand, MethodResult<ClassLiveWorkFlowPlanModel>>
+    public class ReferenceCalendarCommandHandler : IRequestHandler<ReferenceCalendarCommand, MethodResult<ClassLiveWorkFlowModel>>
     {
         private readonly IClassLiveWorkFlowRepository _classLiveWorkFlowRepository;
         private readonly AuthContext _authContext;
@@ -37,10 +37,10 @@ namespace Fsel.Training.Application.Commands.ChangeLiveSessionCmd
             _mapper = mapper;
         }
 
-        public async Task<MethodResult<ClassLiveWorkFlowPlanModel>> Handle(ReferenceCalendarCommand request, CancellationToken cancellationToken)
+        public async Task<MethodResult<ClassLiveWorkFlowModel>> Handle(ReferenceCalendarCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            MethodResult<ClassLiveWorkFlowPlanModel> methodResult = new MethodResult<ClassLiveWorkFlowPlanModel>();
+            MethodResult<ClassLiveWorkFlowModel> methodResult = new MethodResult<ClassLiveWorkFlowModel>();
             var classLiveWorkFlow = await _classLiveWorkFlowRepository.Queryable
                                                 .Include(x => x.ClassLiveWorkFlowPlans)
                                                 .Include(x => x.ClassLiveCalendar)
@@ -88,7 +88,7 @@ namespace Fsel.Training.Application.Commands.ChangeLiveSessionCmd
                 _classLiveWorkFlowRepository.Update(classLiveWorkFlow);
                 await _classLiveWorkFlowRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
                 methodResult.StatusCode = StatusCodes.Status200OK;
-                methodResult.Result = _mapper.Map<ClassLiveWorkFlowPlanModel>(classLiveWorkFlow);
+                methodResult.Result = _mapper.Map<ClassLiveWorkFlowModel>(classLiveWorkFlow);
                 return methodResult;
             });
             return methodResult;

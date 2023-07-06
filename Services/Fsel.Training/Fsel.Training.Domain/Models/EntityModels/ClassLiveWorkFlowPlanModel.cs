@@ -16,7 +16,7 @@ namespace Fsel.Training.Domain.Models.EntityModels
         public bool IsActive { get; set; }
 
         public Guid ClassLiveWorkFlowId { get; set; }
-        public DateTime? StartTime { get; set; }
-        public DateTime? EndTime { get; set; }
+        public double? StartTime { get; set; }
+        public double? EndTime { get; set; }
     }
 }

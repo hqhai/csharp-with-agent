@@ -70,6 +70,13 @@ namespace Fsel.Training.Application.Commands.ClassLiveWorkFlowCmd
             }
             else
             {
+                classLiveWorkFlow = new ClassLiveWorkFlow
+                {
+                    ClassLiveCalendarId = request.ClassLiveCalendarId,
+                    Type = request.Type,
+                    Description = request.Description,
+                    TeacherId = teacherId
+                };
                 var status = string.Empty;
                 if (request.Type == EnumWorkFlowType.ChangeTeacher)
                 {
@@ -78,26 +85,18 @@ namespace Fsel.Training.Application.Commands.ClassLiveWorkFlowCmd
                 else if (request.Type == EnumWorkFlowType.CancelSchedule)
                 {
                     status = EnumWorkFlowCancelScheduleStatus.RequestCancel.ToString();
-                    classLiveWorkFlow!.ClassLiveWorkFlowPlans = _mapper.Map<IList<ClassLiveWorkFlowPlan>>(request.ClassLiveWorkFlowPlans);
+                    classLiveWorkFlow.ClassLiveWorkFlowPlans = _mapper.Map<IList<ClassLiveWorkFlowPlan>>(request.ClassLiveWorkFlowPlans);
                     DateTime dateTime = DateTime.Now;
                     var minCancelTime = classLiveCalendar.LiveDate.AddHours(24);
                     var maxCancelTime = classLiveCalendar.LiveDate.AddHours(1);
 
-                    if (dateTime < maxCancelTime || minCancelTime < dateTime)
-                    {
-                        methodResult.AddErrorBadRequest(nameof(EnumClassLiveWorkFlowErrorCode.CanNotCancelLiveTime));
-                        return methodResult;
-                    }
+                    //if (dateTime < maxCancelTime || minCancelTime < dateTime)
+                    //{
+                    //    methodResult.AddErrorBadRequest(nameof(EnumClassLiveWorkFlowErrorCode.CanNotCancelLiveTime));
+                    //    return methodResult;
+                    //}
                 }
-
-                classLiveWorkFlow = new ClassLiveWorkFlow
-                {
-                    ClassLiveCalendarId = request.ClassLiveCalendarId,
-                    Status = status,
-                    Type = request.Type,
-                    Description = request.Description,
-                    TeacherId = teacherId
-                };
+                classLiveWorkFlow.Status = status;
             }
             await _classLiveWorkFlowRepository.ExecuteTransactionAsync(async () =>
             {

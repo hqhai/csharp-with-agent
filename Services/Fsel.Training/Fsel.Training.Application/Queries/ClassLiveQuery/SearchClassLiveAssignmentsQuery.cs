@@ -55,7 +55,7 @@ namespace Fsel.Training.Application.Queries.ClassLiveQuery
                 return methodResult;
             }
             var teacherResult = await _userService.GetTeacherByUserIdAsync(_authContext.CurrentUserId);
-            var teacherId = teacherResult.Content?.Result?.Id;
+                var teacherId = teacherResult.Content?.Result?.Id;
             var r1 = _classRepository.Queryable
                  .Where(x => x != null && x.TeacherId == teacherId)
                  .AsNoTracking()

@@ -48,6 +48,8 @@ namespace Fsel.Training.Application.Queries.ChangeLiveSessionQuery
                 methodResult.AddErrorBadRequest(nameof(EnumClassLiveWorkFlowErrorCode.ClassLiveWorkFlowNotExits));
                 return methodResult;
             }
+            _mapper.Map(classLiveWorkFlow, liveSessionInformation);
+            liveSessionInformation.AccessLink = classLiveWorkFlow.ClassLiveCalendar?.AccessLink;
             var @class = classLiveWorkFlow.ClassLiveCalendar?.Class;
             var studentIds = @class?.ClassStudents.Select(p => p.StudentId).ToList();
             IList<StudentModel>? students = new List<StudentModel>();
@@ -70,7 +72,6 @@ namespace Fsel.Training.Application.Queries.ChangeLiveSessionQuery
                     }).ToList();
                 }
             }
-
             liveSessionInformation.ClassName = @class?.Name;
             liveSessionInformation.Description = classLiveWorkFlow.Description;
             TeacherModel? teacher = new TeacherModel();
@@ -92,7 +93,7 @@ namespace Fsel.Training.Application.Queries.ChangeLiveSessionQuery
             foreach (var item in classWorkFlowPlansModel)
             {
                 var isCheck = classWorkFlowPlans.Sum(x => x.VoteNumber) != 0 && item.VoteNumber != 0;
-                item.Percent = isCheck ? item.VoteNumber / classWorkFlowPlans.Sum(x => x.VoteNumber) : 0;
+                item.Percent = isCheck ? (double)item.VoteNumber / classWorkFlowPlans.Sum(x => x.VoteNumber) * 100 : 0;
                 var liveTimeFrame = timeFrames?.FirstOrDefault(x => x.Id == item.LiveTimeFrameId);
                 item.StartTime = liveTimeFrame?.StartTime;
                 item.EndTime = liveTimeFrame?.EndTime;

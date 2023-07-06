@@ -42,7 +42,7 @@ namespace Fsel.Training.Api.Controllers.Cso
         /// <summary>
         /// Get Change Live Session
         /// </summary>
-        [HttpGet("id")]
+        [HttpGet("{id}")]
         [ProducesResponseType(typeof(MethodResult<ChangeLiveSessionInfoModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> Get([FromRoute] Guid id)
@@ -55,11 +55,11 @@ namespace Fsel.Training.Api.Controllers.Cso
         /// Reference Calendar
         /// </summary>
         [HttpPost]
-        [ProducesResponseType(typeof(MethodResult<ClassLiveWorkFlowPlanModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(MethodResult<ClassLiveWorkFlowModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> ReferenceCalendar([FromBody] ReferenceCalendarCommand command)
         {
-            MethodResult<ClassLiveWorkFlowPlanModel> queryResult = await _mediator.Send(command).ConfigureAwait(false);
+            MethodResult<ClassLiveWorkFlowModel> queryResult = await _mediator.Send(command).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
     }

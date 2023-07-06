@@ -10,8 +10,8 @@ namespace Fsel.Training.Domain.Models.EntityModels
         public Guid TeacherId { get; set; }
         public string? TeacherName { get; set; }
         public Guid LiveTimeFrameId { get; set; }
-        public DateTime? StartTime { get; set; }
-        public DateTime? EndTime { get; set; }
+        public double? StartTime { get; set; }
+        public double? EndTime { get; set; }
         public DateTime LiveDate { get; set; }
         public string? Status { get; set; }
     }

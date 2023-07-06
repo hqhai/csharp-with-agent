@@ -52,6 +52,7 @@ namespace Fsel.Training.Application.Queries.ChangeLiveSessionQuery
                             Id = x.Id,
                             ClassName = x.ClassLiveCalendar!.Class!.Name,
                             CreatedDate = x.CreatedDate,
+                            TeacherId = x.TeacherId ?? default,
                             LiveTimeFrameId = x.ClassLiveCalendar.LiveTimeFrameId,
                             Status = x.Status
                         });
@@ -68,7 +69,7 @@ namespace Fsel.Training.Application.Queries.ChangeLiveSessionQuery
                     .ToListAsync(cancellationToken: cancellationToken)
                     .ConfigureAwait(false);
 
-            var teacherResult = await _userService.GetTeacherByIdsAsync(new GetTeacherByIdsQueryModel { Ids = lists.Select(x => x.Id).Distinct().ToList() });
+            var teacherResult = await _userService.GetTeacherByIdsAsync(new GetTeacherByIdsQueryModel { Ids = lists.Select(x => x.TeacherId).Distinct().ToList() });
             var teachers = teacherResult.Content?.Result;
             var timeFramesResult = await _systemService.GetLiveTimeFramesAsync();
             var timeFrames = timeFramesResult.Content?.Result;
