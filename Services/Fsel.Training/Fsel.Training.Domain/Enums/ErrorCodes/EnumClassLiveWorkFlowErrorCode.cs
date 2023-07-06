@@ -37,6 +37,6 @@ namespace Fsel.Training.Domain.Enums.ErrorCodes
         /// <summary>
         /// Can Not assign teacher
         /// </summary>
-        CanNotAssignTeacher
+        CanNotChangeTeacher
     }
 }
