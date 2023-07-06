@@ -103,7 +103,7 @@ namespace Fsel.Training.Application.Commands.ClassLiveWorkFlowCmd
                     status = EnumWorkFlowAssignTeacherStatus.Pending.ToString();
                     DateTime dateTime = DateTime.Now;
                     var assignTeacher = classLiveCalendar.LiveDate.AddDays(-1);
-                    if (assignTeacher.Date == dateTime.Date)
+                    if (assignTeacher.Date < dateTime.Date)
                     {
                         methodResult.AddErrorBadRequest(nameof(EnumClassLiveWorkFlowErrorCode.CanNotAssignTeacher));
                         return methodResult;
