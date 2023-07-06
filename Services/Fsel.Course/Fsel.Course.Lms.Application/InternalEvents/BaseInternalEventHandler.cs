@@ -127,6 +127,8 @@ namespace Fsel.Course.Lms.Application.InternalEvents
 
         #endregion Tinh Diem Unit
 
+        #region Update Unit
+
         public async Task UpdateUnit(IList<LessonResult>? lessonResults, UnitResult? unitResult, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(lessonResults);
@@ -172,7 +174,9 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             unitResult.Percent = await PercentUnit(videoSkillScores, 18) + await PercentUnit(homeSkillScores, 22) + await PercentUnit(classForumSkillScores, 20) + await PercentUnit(skillTestSkillScores, 10) + await PercentUnit(unitTestSkillScores, 30);
             unitResult.SkillScores = groupedSkillScores;
             _unitResultRepository.Update(unitResult);
-            await _unitResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+            await _unitResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         }
+
+        #endregion Update Unit
     }
 }

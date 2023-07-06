@@ -118,7 +118,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
                     videoTimeCodeAnswers.Add(answer);
                 }
                 var questionModel = _mapper.Map<QuestionModel>(question);
-                questionModel.ResultAnswer = _mapper.Map<VideoTimeCodeAnswerModel>(answer);
+                questionModel.ResultAnswer = _mapper.Map<AnswerModel>(answer);
                 questionModels.Add(questionModel);
             }
 

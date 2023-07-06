@@ -100,6 +100,8 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd
                     StudentId = studentId ?? default,
                     CourseId = request.CourseId,
                 };
+                finalTestResult = _finalTestResultRepository.Add(finalTestResult);
+                await _finalTestResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             }
             var skillScores = new List<SkillScores>();
             foreach (var item in request.FinalTestAnswers)
@@ -169,7 +171,7 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd
                 finalTestResult.SkillScores = skillScores;
                 finalTestResult.Percent = finalTestResult.CorrectTotal > 0 ? ((double)finalTestResult.CorrectCount / finalTestResult.CorrectTotal * 100) : 0;
 
-                finalTestResult = _finalTestResultRepository.Add(finalTestResult);
+                finalTestResult = _finalTestResultRepository.Update(finalTestResult);
                 await _finalTestResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
                 methodResult.StatusCode = StatusCodes.Status201Created;

@@ -12,6 +12,6 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public bool Ungraded { get; set; }
         public string? Explanation { get; set; }
         public object? Config { get; set; }
-        public object? ResultAnswer { get; set; }
+        public AnswerModel? ResultAnswer { get; set; }
     }
 }
