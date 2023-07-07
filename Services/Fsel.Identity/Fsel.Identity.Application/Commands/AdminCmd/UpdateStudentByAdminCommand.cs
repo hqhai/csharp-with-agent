@@ -96,8 +96,8 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
                     var human = userView?.Human?.Student?.ParentStudents.FirstOrDefault()?.Parent?.Human;
                     if (human != null)
                     {
-                        _mapper.Map(request.Parent, human);
                         _mapper.Map(request.Parent, human.Parent);
+                        _mapper.Map(request.Parent, human);
                         _humanRepository.Update(human);
                         await _humanRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
                     }
