@@ -26,11 +26,10 @@ namespace Fsel.Course.Domain.Entities
         /// Loại MockTest
         /// </summary>
         public EnumMockTestType MockTestType { get; set; }
-
+        public ExtraPractice? ExtraPractice { get; set; }
         public ICollection<MockTestSection> MockTestSections { get; set; } = new List<MockTestSection>();
         public ICollection<CourseUnitMockTest> CourseUnitMockTests { get; set; } = new List<CourseUnitMockTest>();
         public ICollection<MockTestResult> MockTestResults { get; set; } = new List<MockTestResult>();
-
         public ICollection<UnitSkillMockTest> UnitSkillMockTests { get; set; } = new List<UnitSkillMockTest>();
     }
 }

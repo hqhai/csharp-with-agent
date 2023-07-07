@@ -4,16 +4,12 @@ namespace Fsel.Course.Application.Queries.MockTestQuery
 {
     using System.Threading;
     using System.Threading.Tasks;
-    using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Core.Extensions;
-    using Fsel.Course.Application.Queries.PlacementTestQuery;
-    using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Domain.Models.QueryModels.MockTests;
-    using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -24,12 +20,10 @@ namespace Fsel.Course.Application.Queries.MockTestQuery
 
     public class SearchMockTestQueryHandler : IRequestHandler<SearchMockTestQuery, MethodResult<PagingItemsModel<MockTestSearchModel>>>
     {
-        private readonly IMapper _mapper;
         private readonly IMockTestRepository _mockTestRepository;
 
-        public SearchMockTestQueryHandler(IMapper mapper, IMockTestRepository mockTestRepository)
+        public SearchMockTestQueryHandler(IMockTestRepository mockTestRepository)
         {
-            _mapper = mapper;
             _mockTestRepository = mockTestRepository;
         }
 

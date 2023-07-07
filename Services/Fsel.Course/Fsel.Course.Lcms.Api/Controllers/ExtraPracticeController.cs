@@ -28,6 +28,18 @@ namespace Fsel.Course.Lcms.Api.Controllers
         }
 
         /// <summary>
+        /// Update Status ExtraPractice
+        /// </summary>
+        [HttpPost("active")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> ActiveExtraPractice([FromBody] UpdateStatusExtraPracticeCommand command)
+        {
+            MethodResult<bool> queryResult = await _mediator.Send(command).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
         /// Create a ExtraPractice
         /// </summary>
         [HttpPost]
@@ -74,6 +86,18 @@ namespace Fsel.Course.Lcms.Api.Controllers
         public async Task<IActionResult> Get([FromRoute] Guid id)
         {
             MethodResult<ExtraPracticeModel> commandResult = await _mediator.Send(new GetExtraPracticeQuery { Id = id }).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Get MockTests Not ExtraPratice
+        /// </summary>
+        [HttpGet("mock-tests")]
+        [ProducesResponseType(typeof(MethodResult<IList<MockTestSearchModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetMockTests()
+        {
+            MethodResult<IList<MockTestSearchModel>> commandResult = await _mediator.Send(new GetMockTestsByExtraPracticeQuery()).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
 

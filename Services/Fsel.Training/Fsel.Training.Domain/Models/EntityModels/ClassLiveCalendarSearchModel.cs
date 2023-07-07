@@ -9,6 +9,8 @@ namespace Fsel.Training.Domain.Models.EntityModels
     {
         public string? Code { get; set; }
         public Guid CourseId { get; set; }
+        public bool IsActiveWorkFlow { get; set; }
+        public bool IsActiveWorkPlan { get; set; }
         public EnumCourseLevel CourseLevel { get; set; }
         public DateTime LiveDate { get; set; }
         public Guid? LiveTimeFrameId { get; set; }

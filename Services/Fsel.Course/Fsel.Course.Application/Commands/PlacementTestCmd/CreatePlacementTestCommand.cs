@@ -3,14 +3,17 @@
 using AutoMapper;
 using Fsel.Common.ActionResults;
 using Fsel.Course.Domain.Entities;
+using Fsel.Course.Domain.Enums;
 using Fsel.Course.Domain.Enums.ErrorCodes;
 using Fsel.Course.Domain.IRepositories;
 using Fsel.Course.Domain.Models.CommandModels.PlacementTests;
 using Fsel.Course.Domain.Models.EntityModels;
 using Fsel.Course.Infrastructure.Common;
 using Fsel.Shared.Enums;
+using Fsel.Shared.Helpers;
 using MediatR;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 
 namespace Fsel.Course.Application.Commands.PlacementTestCmd
 {
@@ -45,9 +48,12 @@ namespace Fsel.Course.Application.Commands.PlacementTestCmd
                 methodResult.AddErrorBadRequest(nameof(EnumSectionGroupErrorCode.SectionGroupsNull), nameof(request.SectionGroups));
                 return methodResult;
             }
-
+            if (await _placementTestRepository.Queryable.AnyAsync(x => x.Name == request.Name, cancellationToken))
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumPlacementTestErrorCode.NameAlreadyExists), nameof(request.Name), request.Name);
+                return methodResult;
+            }
             PlacementTest placementTest = _mapper.Map<PlacementTest>(request);
-            placementTest.IsActive = false;
             if (!placementTest.IsValid())
             {
                 methodResult.AddErrorBadRequest(placementTest.ErrorMessages);
@@ -96,6 +102,16 @@ namespace Fsel.Course.Application.Commands.PlacementTestCmd
 
             await _placementTestRepository.ExecuteTransactionAsync(async () =>
             {
+                placementTest.ExtraPractice = new ExtraPractice
+                {
+                    Code = placementTest.Name,
+                    Name = placementTest.Name,
+                    IsActive = placementTest.IsActive,
+                    InstructionContent = placementTest.InstructionContent,
+                    Type = EnumExtraPracticeType.MockTest,
+                    CourseLevel = placementTest.Level.GetCourseLevelByPlacementTestLevel()
+                };
+
                 placementTest = _placementTestRepository.Add(placementTest);
                 await _placementTestRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
