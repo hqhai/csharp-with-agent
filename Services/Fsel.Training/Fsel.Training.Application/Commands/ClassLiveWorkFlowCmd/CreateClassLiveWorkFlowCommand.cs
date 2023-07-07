@@ -125,10 +125,10 @@ namespace Fsel.Training.Application.Commands.ClassLiveWorkFlowCmd
                         {
                             switch (true)
                             {
-                                case var value when value == (listLiveTimeFramePlan.StartTime <= listLiveTimeFrameCalendar.StartTime && classLiveCalendar.LiveDate.AddDays(3) <= workFlowPlan.LiveDate):
+                                case var solutionOne when solutionOne == (listLiveTimeFramePlan.StartTime <= listLiveTimeFrameCalendar.StartTime && classLiveCalendar.LiveDate.AddDays(3) <= workFlowPlan.LiveDate):
                                     break;
 
-                                case var value when value == (listLiveTimeFramePlan.StartTime >= listLiveTimeFrameCalendar.StartTime && classLiveCalendar.LiveDate.AddDays(2) <= workFlowPlan.LiveDate):
+                                case var solutionTwo when solutionTwo == (listLiveTimeFramePlan.StartTime >= listLiveTimeFrameCalendar.StartTime && classLiveCalendar.LiveDate.AddDays(2) <= workFlowPlan.LiveDate):
                                     break;
 
                                 default:
