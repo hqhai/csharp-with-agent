@@ -10,7 +10,6 @@ namespace Fsel.Course.Domain.Models.EntityModels
     public class MockTestSearchModel : BaseModel
     {
         public string? Name { get; set; }
-        public string? Code { get; set; }
         public bool IsActive { get; set; }
 
         public EnumCourseType CourseType { get; set; }
