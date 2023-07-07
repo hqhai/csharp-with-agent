@@ -133,7 +133,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
                     var param = new SendOtpTemplateModel
                     {
                         OtpCode = userOtpCode.OTPCode,
-                        AccessLink = "",
+                        AccessLink = string.Format(CultureInfo.InvariantCulture, _appSetting!.ConstantUrl!.ConfirmOtpUrl!, userOtpCode.OTPCode),
                         OtpValidTime = string.Format(CultureInfo.InvariantCulture, SenderSettings.OtpValidDay, _appSetting!.Otp!.StepDayWithAdmin)
                     };
                     var subject = string.Format(CultureInfo.InvariantCulture, SenderSettings.SendOtpSubjectFullName, userView.FullName);
@@ -158,6 +158,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
                 _mapper.Map(request, userView.Human);
                 await _userManager.UpdateAsync(userView);
             }
+
             methodResult.StatusCode = StatusCodes.Status200OK;
             methodResult.Result = _mapper.Map<UserModel>(userView);
             return methodResult;

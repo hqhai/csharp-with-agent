@@ -44,7 +44,7 @@ namespace Fsel.Identity.Application.Queries.AdminQuery
                 return methodResult;
             }
             var lessonCommentResult = await _courseService.GetLessonCommentByStudent(request.StudentId);
-            if (lessonCommentResult.IsSuccessStatusCode)
+            if (!lessonCommentResult.IsSuccessStatusCode)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallCourseServiceError));
                 return methodResult;

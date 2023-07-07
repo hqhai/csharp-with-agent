@@ -42,7 +42,7 @@ namespace Fsel.Identity.Application.Queries.AdminQuery
                 methodResult.AddErrorBadRequest(nameof(EnumStudentErrorCode.StudentNotExist));
                 return methodResult;
             }
-            var surveyQuestions = await _interactionService.SurveyQuestionsByUserId(user.Id.ToString());
+            var surveyQuestions = await _interactionService.SurveyQuestionsByUserId(user.Id);
             if (!surveyQuestions.IsSuccessStatusCode)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallInteractionServiceError));

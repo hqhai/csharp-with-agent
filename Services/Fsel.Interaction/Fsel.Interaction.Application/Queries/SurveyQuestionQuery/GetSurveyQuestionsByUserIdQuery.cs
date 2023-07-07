@@ -27,7 +27,7 @@ namespace Fsel.Interaction.Application.Queries.SurveyQuestionQuery
         {
             var methodResult = new MethodResult<IList<SurveyQuestionInfoModel>>();
 
-            var surveyQuestions = await _surveyQuestionRepository.Queryable.Include(x => x.CustomerSurveys)
+            var surveyQuestions = await _surveyQuestionRepository.Queryable.Include(x => x.CustomerSurveys).OrderBy(x => x.DisplayOrder)
                                                                             .Select(x => new SurveyQuestionInfoModel
                                                                             {
                                                                                 Id = x.Id,
