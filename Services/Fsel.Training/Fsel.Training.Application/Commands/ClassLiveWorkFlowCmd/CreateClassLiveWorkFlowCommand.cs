@@ -7,6 +7,7 @@ namespace Fsel.Training.Application.Commands.ClassLiveWorkFlowCmd
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base;
+    using Fsel.Training.Application.Services.SystemServices;
     using Fsel.Training.Application.Services.UserServices;
     using Fsel.Training.Domain.Entities;
     using Fsel.Training.Domain.Enums;
@@ -28,17 +29,20 @@ namespace Fsel.Training.Application.Commands.ClassLiveWorkFlowCmd
         private readonly IClassLiveCalendarRepository _classLiveCalendarRepository;
         private readonly AuthContext _authContext;
         private readonly IUserService _userService;
+        private readonly ISystemService _systemService;
         private readonly IMapper _mapper;
 
         public CreateClassLiveWorkFlowCommandHandler(IClassLiveWorkFlowRepository classLiveWorkFlowRepository,
             IClassLiveCalendarRepository classLiveCalendarRepository,
             AuthContext authContext,
+            ISystemService systemService,
             IUserService userService,
             IMapper mapper)
         {
             _classLiveWorkFlowRepository = classLiveWorkFlowRepository;
             _classLiveCalendarRepository = classLiveCalendarRepository;
             _authContext = authContext;
+            _systemService = systemService;
             _userService = userService;
             _mapper = mapper;
         }
@@ -89,26 +93,51 @@ namespace Fsel.Training.Application.Commands.ClassLiveWorkFlowCmd
                         return methodResult;
                     }
                 }
-                else if (request.Type == EnumWorkFlowType.CancelSchedule)
+                else if (request.Type == EnumWorkFlowType.CancelSchedule && request.ClassLiveWorkFlowPlans != null)
                 {
                     status = EnumWorkFlowCancelScheduleStatus.RequestCancel.ToString();
                     DateTime dateTime = DateTime.Now;
                     var learnAgainDate = classLiveCalendar.LiveDate.AddDays(2);
-                    var check = dateTime > classLiveCalendar.LiveDate.AddHours(-24) && dateTime < classLiveCalendar.LiveDate.AddHours(-1);
+                    var t2 = classLiveCalendar.LiveDate.AddHours(-1);
+                    var t1 = classLiveCalendar.LiveDate.AddHours(-23);
+                    var check = dateTime > t1 && dateTime < t2;
+
                     if (!check)
                     {
                         methodResult.AddErrorBadRequest(nameof(EnumClassLiveWorkFlowErrorCode.CanNotCancelLiveTime));
                         return methodResult;
                     }
-                    if (classLiveCalendar.LiveDate < learnAgainDate)
+
+                    var listLiveTimeFrameResults = await _systemService.GetLiveTimeFramesAsync();
+                    var classLiveCalendars = await _classLiveCalendarRepository.Queryable.Where(x => x.TeacherId == teacherId).ToListAsync(cancellationToken);
+
+                    var liveTimeFrames = listLiveTimeFrameResults.Content?.Result;
+                    foreach (var workFlowPlan in request.ClassLiveWorkFlowPlans)
                     {
-                        methodResult.AddErrorBadRequest(nameof(EnumClassLiveWorkFlowErrorCode.CanNotChangeLiveTime));
-                        return methodResult;
+                        if (classLiveCalendars.Any(x => x.LiveTimeFrameId == workFlowPlan.LiveTimeFrameId && x.LiveDate == workFlowPlan.LiveDate))
+                        {
+                            methodResult.AddErrorBadRequest(nameof(EnumClassLiveWorkFlowErrorCode.CanNotCancelLiveTime));
+                            return methodResult;
+                        }
+                        var listLiveTimeFrameCalendar = liveTimeFrames?.FirstOrDefault(x => x.Id == classLiveCalendar.LiveTimeFrameId);
+                        var listLiveTimeFramePlan = liveTimeFrames?.FirstOrDefault(x => x.Id == workFlowPlan.LiveTimeFrameId);
+                        if (listLiveTimeFramePlan != null && listLiveTimeFrameCalendar != null)
+                        {
+                            switch (true)
+                            {
+                                case var value when value == (listLiveTimeFramePlan.StartTime <= listLiveTimeFrameCalendar.StartTime && classLiveCalendar.LiveDate.AddDays(3) <= workFlowPlan.LiveDate):
+                                    break;
+
+                                case var value when value == (listLiveTimeFramePlan.StartTime >= listLiveTimeFrameCalendar.StartTime && classLiveCalendar.LiveDate.AddDays(2) <= workFlowPlan.LiveDate):
+                                    break;
+
+                                default:
+                                    methodResult.AddErrorBadRequest(nameof(EnumClassLiveWorkFlowErrorCode.CanNotCancelLiveTime));
+                                    return methodResult;
+                            }
+                        }
                     }
-                    else
-                    {
-                        classLiveWorkFlow.ClassLiveWorkFlowPlans = _mapper.Map<IList<ClassLiveWorkFlowPlan>>(request.ClassLiveWorkFlowPlans);
-                    }
+                    classLiveWorkFlow.ClassLiveWorkFlowPlans = _mapper.Map<IList<ClassLiveWorkFlowPlan>>(request.ClassLiveWorkFlowPlans);
                 }
                 classLiveWorkFlow.Status = status;
             }
