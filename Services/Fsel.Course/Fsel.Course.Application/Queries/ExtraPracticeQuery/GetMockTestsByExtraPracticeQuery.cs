@@ -38,7 +38,7 @@ namespace Fsel.Course.Application.Queries.ExtraPracticeQuery
                                       .ThenInclude(x => x.SectionGroup)
                                       .Include(x => x.CourseUnitMockTests)
                                       .Include(x => x.UnitSkillMockTests)
-                                      .Where(y => y.ExtraPractice == null && !request.Type.HasValue || y.MockTestType == request.Type)
+                                      .Where(y => y.ExtraPractice == null && (!request.Type.HasValue || y.MockTestType == request.Type))
                                       .Select(x => new MockTestSearchModel
                                       {
                                           Id = x.Id,
