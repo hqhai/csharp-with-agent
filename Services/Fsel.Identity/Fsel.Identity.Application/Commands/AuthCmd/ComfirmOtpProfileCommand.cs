@@ -48,35 +48,39 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             var methodResult = new MethodResult<bool>();
             var user = await _userManager.FindByIdAsync(_authContext.CurrentUserId.ToString());
 
-            var userOtpCode = await _userOtpCodeRepository.Queryable
+            if (user != null)
+            {
+                var userOtpCode = await _userOtpCodeRepository.Queryable
                         .FirstOrDefaultAsync(x => x.UserId == user!.Id && x.Status == EnumStatusUser.New && !x.IsDeleted && x.OTPCode == request.OTP, cancellationToken);
-            if (userOtpCode == null)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumAuthErrorCode.InvalidOTP), nameof(request.OTP), request.OTP);
-                return methodResult;
-            }
+                if (userOtpCode == null)
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumAuthErrorCode.InvalidOTP), nameof(request.OTP), request.OTP);
+                    return methodResult;
+                }
 
-            if (DateTime.Compare(DateTime.Now, userOtpCode.ExpiredTime) > 0)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumAuthErrorCode.OTPExpired), nameof(request.OTP), request.OTP);
-                return methodResult;
-            }
+                if (DateTime.Compare(DateTime.Now, userOtpCode.ExpiredTime) > 0)
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumAuthErrorCode.OTPExpired), nameof(request.OTP), request.OTP);
+                    return methodResult;
+                }
 
-            userOtpCode.Status = EnumStatusUser.Verified;
-            _userOtpCodeRepository.Update(userOtpCode);
-            await _userOtpCodeRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+                userOtpCode.Status = EnumStatusUser.Verified;
+                _userOtpCodeRepository.Update(userOtpCode);
+                await _userOtpCodeRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
-            if (!string.IsNullOrEmpty(request.Email))
-            {
-                user!.Email = request.Email;
-                await _userManager.UpdateAsync(user);
+                if (!string.IsNullOrEmpty(request.Email))
+                {
+                    user.Email = request.Email;
+                    user.EmailConfirmed = true;
+                    await _userManager.UpdateAsync(user);
+                }
+                else if (!string.IsNullOrEmpty(request.PhoneNumber))
+                {
+                    user.PhoneNumber = request.PhoneNumber;
+                    user.EmailConfirmed = true;
+                    await _userManager.UpdateAsync(user);
+                }
             }
-            else if (!string.IsNullOrEmpty(request.PhoneNumber))
-            {
-                user!.PhoneNumber = request.PhoneNumber;
-                await _userManager.UpdateAsync(user);
-            }
-
             methodResult.Result = true;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;

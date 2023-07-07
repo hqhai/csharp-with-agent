@@ -2,17 +2,27 @@
 
 namespace Fsel.Identity.Application.Commands.AdminCmd
 {
+    using System.Globalization;
+    using System.Text;
     using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Helpers;
+    using Fsel.Identity.Application.Commands.AuthCmd;
     using Fsel.Identity.Domain.Entities;
+    using Fsel.Identity.Domain.Enums;
     using Fsel.Identity.Domain.Enums.ErrorCodes;
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Domain.Models.CommandModels.Students;
     using Fsel.Identity.Domain.Models.EntityModels;
+    using Fsel.Identity.Infrastructure.ValueSettings;
+    using Fsel.Shared.Constants;
+    using Fsel.Shared.Enums;
+    using Fsel.Shared.Models.SenderTemplates;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Identity;
     using Microsoft.EntityFrameworkCore;
+    using OtpNet;
 
     public class UpdateStudentByAdminCommand : UpdateStudentByAdminCommandModel, IRequest<MethodResult<UserModel>>
     {
@@ -22,14 +32,23 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
     {
         private readonly UserManager<User> _userManager;
         private readonly IMapper _mapper;
+        private readonly AppSetting _appSetting;
+        private readonly IMediator _mediator;
+        private readonly IUserOtpCodeRepository _userOtpCodeRepository;
         private readonly IHumanRepository _humanRepository;
 
         public UpdateStudentByAdminCommandHandler(UserManager<User> userManager,
             IMapper mapper,
+            AppSetting appSetting,
+            IMediator mediator,
+            IUserOtpCodeRepository userOtpCodeRepository,
             IHumanRepository humanRepository)
         {
             _userManager = userManager;
             _mapper = mapper;
+            _appSetting = appSetting;
+            _mediator = mediator;
+            _userOtpCodeRepository = userOtpCodeRepository;
             _humanRepository = humanRepository;
         }
 
@@ -86,6 +105,53 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
             }
             if (userView != null)
             {
+                var isCheckEmail = userView.Email != request.Email;
+                var isCheckPhone = userView.PhoneNumber != request.PhoneNumber;
+                if (isCheckEmail || isCheckPhone)
+                {
+                    userView.EmailConfirmed = false;
+                    userView.UserName = isCheckEmail ? request.Email : isCheckPhone ? request.PhoneNumber : userView.UserName;
+
+                    var userOtpCode = await _userOtpCodeRepository.Queryable.FirstOrDefaultAsync(x => x.UserId == userView.Id && x.Status == EnumStatusUser.New && !x.IsDeleted, cancellationToken);
+                    if (userOtpCode == null)
+                    {
+                        var randomSecure = new RandomSecureHelper();
+                        var totp = new Totp(Encoding.UTF8.GetBytes(randomSecure.Secretstrings()));
+                        var otp = totp.ComputeTotp();
+
+                        userOtpCode = new UserOtpCode
+                        {
+                            UserId = userView.Id,
+                            OTPCode = otp,
+                            Status = EnumStatusUser.New,
+                            ExpiredTime = DateTime.Now.AddDays(_appSetting!.Otp!.StepDayWithAdmin)
+                        };
+                        _userOtpCodeRepository.Add(userOtpCode);
+                        await _userOtpCodeRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                    }
+
+                    var param = new SendOtpTemplateModel
+                    {
+                        OtpCode = userOtpCode.OTPCode,
+                        OtpValidTime = string.Format(CultureInfo.InvariantCulture, SenderSettings.OtpValidDay, _appSetting!.Otp!.StepDayWithAdmin)
+                    };
+                    var subject = string.Format(CultureInfo.InvariantCulture, SenderSettings.SendOtpSubjectFullName, userView.FullName);
+                    var sendResult = new MethodResult<bool>();
+                    if (isCheckEmail)
+                    {
+                        sendResult = await _mediator.Send(new SenderCommand { Email = request.Email, Subject = subject, Params = param, Template = EnumSenderTemplate.SendOtp }, cancellationToken).ConfigureAwait(false);
+                    }
+                    else if (isCheckPhone)
+                    {
+                        sendResult = await _mediator.Send(new SenderCommand { Email = userView.Email, Subject = subject, Params = param, Template = EnumSenderTemplate.SendOtp }, cancellationToken).ConfigureAwait(false);
+                    }
+
+                    if (!sendResult.IsOK)
+                    {
+                        methodResult.AddErrorBadRequest(sendResult?.ErrorMessages);
+                        return methodResult;
+                    }
+                }
                 _mapper.Map(request, userView.Human?.Student);
                 _mapper.Map(request, userView);
                 _mapper.Map(request, userView.Human);
