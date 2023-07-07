@@ -23,5 +23,10 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         /// ExtraPractice is in active state
         /// </summary>
         ExtraPracticeInActiveState,
+
+        /// <summary>
+        /// code already exists
+        /// </summary>
+        CodeAlreadyExists,
     }
 }

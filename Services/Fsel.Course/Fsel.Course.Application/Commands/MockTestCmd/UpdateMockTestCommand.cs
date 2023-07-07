@@ -17,6 +17,7 @@ namespace Fsel.Course.Application.Commands.MockTestCmd
     using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Http;
+    using Microsoft.EntityFrameworkCore;
 
     public class UpdateMockTestCommand : UpdateMockTestCommandModel, IRequest<MethodResult<MockTestModel>>
     {
@@ -49,6 +50,11 @@ namespace Fsel.Course.Application.Commands.MockTestCmd
             if (request.SectionGroups == null || request.SectionGroups.Count == 0)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSectionGroupErrorCode.SectionGroupsNull), nameof(request.SectionGroups));
+                return methodResult;
+            }
+            if (await _mockTestRepository.Queryable.AnyAsync(x => x.Id != request.Id && x.Name == request.Name, cancellationToken))
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumMockTestErrorCode.NameAlreadyExists), nameof(request.Name), request.Name);
                 return methodResult;
             }
 
