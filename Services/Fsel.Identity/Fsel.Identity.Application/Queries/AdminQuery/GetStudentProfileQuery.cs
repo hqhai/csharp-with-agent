@@ -64,11 +64,10 @@ namespace Fsel.Identity.Application.Queries.AdminQuery
             var userModel = _mapper.Map<UserStudentModel>(userView);
             _mapper.Map(userView?.Human, userModel);
             _mapper.Map(student, userModel);
-            if (parentStudent != null && parentStudent.Parent !=null)
+            if (parentStudent != null && parentStudent.Parent != null)
             {
                 userModel.Parent = _mapper.Map<ParentInfoModel>(parentStudent.Parent.Human);
-                userModel.Parent = _mapper.Map<ParentInfoModel>(parentStudent.Parent);
-
+                userModel.Parent.Occupation = parentStudent.Parent.Occupation;
             }
             var classStudent = await _trainingService.GetClassByStudentId(student?.Id ?? default);
             var @class = classStudent?.Content?.Result;

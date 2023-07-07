@@ -71,13 +71,11 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                 if (!string.IsNullOrEmpty(request.Email))
                 {
                     user.Email = request.Email;
-                    user.EmailConfirmed = true;
                     await _userManager.UpdateAsync(user);
                 }
                 else if (!string.IsNullOrEmpty(request.PhoneNumber))
                 {
                     user.PhoneNumber = request.PhoneNumber;
-                    user.EmailConfirmed = true;
                     await _userManager.UpdateAsync(user);
                 }
             }

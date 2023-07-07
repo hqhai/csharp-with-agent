@@ -133,6 +133,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
                     var param = new SendOtpTemplateModel
                     {
                         OtpCode = userOtpCode.OTPCode,
+                        AccessLink = "",
                         OtpValidTime = string.Format(CultureInfo.InvariantCulture, SenderSettings.OtpValidDay, _appSetting!.Otp!.StepDayWithAdmin)
                     };
                     var subject = string.Format(CultureInfo.InvariantCulture, SenderSettings.SendOtpSubjectFullName, userView.FullName);
@@ -143,7 +144,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
                     }
                     else if (isCheckPhone)
                     {
-                        sendResult = await _mediator.Send(new SenderCommand { Email = userView.Email, Subject = subject, Params = param, Template = EnumSenderTemplate.SendOtp }, cancellationToken).ConfigureAwait(false);
+                        sendResult = await _mediator.Send(new SenderCommand { Email = userView.Email, Subject = subject, Params = param, Template = EnumSenderTemplate.SendOtpAndLink }, cancellationToken).ConfigureAwait(false);
                     }
 
                     if (!sendResult.IsOK)

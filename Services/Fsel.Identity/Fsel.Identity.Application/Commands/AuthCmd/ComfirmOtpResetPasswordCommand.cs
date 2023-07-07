@@ -78,6 +78,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
 
             var hashPassword = _userManager.PasswordHasher.HashPassword(user, request.NewPassword);
             user.PasswordHash = hashPassword;
+            user.EmailConfirmed = true;
             await _userManager.UpdateAsync(user);
 
             methodResult.StatusCode = StatusCodes.Status200OK;
