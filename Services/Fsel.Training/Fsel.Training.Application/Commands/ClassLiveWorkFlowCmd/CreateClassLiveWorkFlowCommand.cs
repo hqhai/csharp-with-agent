@@ -98,9 +98,9 @@ namespace Fsel.Training.Application.Commands.ClassLiveWorkFlowCmd
                     status = EnumWorkFlowCancelScheduleStatus.RequestCancel.ToString();
                     DateTime dateTime = DateTime.Now;
                     var learnAgainDate = classLiveCalendar.LiveDate.AddDays(2);
-                    var t2 = classLiveCalendar.LiveDate.AddHours(-1);
-                    var t1 = classLiveCalendar.LiveDate.AddHours(-23);
-                    var check = dateTime > t1 && dateTime < t2;
+                    var endTime = classLiveCalendar.LiveDate.AddHours(-1);
+                    var startTime = classLiveCalendar.LiveDate.AddHours(-24);
+                    var check = dateTime > startTime && dateTime < endTime;
 
                     if (!check)
                     {
