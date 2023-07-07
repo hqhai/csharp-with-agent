@@ -54,6 +54,7 @@ namespace Fsel.Course.Infrastructure.Repositories
                                             Exercises = x.ExtraPracticeExercises.Where(n => n.Exercise != null && !n.IsDeleted).Select(n => n.Exercise).OrderBy(x => x!.CreatedDate).Select(n => new ExerciseModel
                                             {
                                                 Id = n!.Id,
+                                                Name = n.Name,
                                                 MediaPost = n.MediaPost,
                                                 CourseSkill = n.CourseSkill,
                                                 Questions = n.ExerciseQuestions.Where(m => m.Question != null && !m.IsDeleted).Select(m => m.Question).OrderBy(x => x!.CreatedDate).Select(m => new QuestionModel()
@@ -85,6 +86,7 @@ namespace Fsel.Course.Infrastructure.Repositories
                                                 Exercises = x.TimeCodeExercises.Where(n => n.Exercise != null && !n.IsDeleted).Select(n => n.Exercise).OrderBy(x => x!.CreatedDate).Select(n => new ExerciseModel
                                                 {
                                                     Id = n!.Id,
+                                                    Name = n.Name,
                                                     MediaPost = n.MediaPost,
                                                     CourseSkill = n.CourseSkill,
                                                     Questions = n.ExerciseQuestions.Where(m => m.Question != null && !m.IsDeleted).Select(m => m.Question).OrderBy(x => x!.CreatedDate).Select(m => new QuestionModel()
@@ -102,6 +104,7 @@ namespace Fsel.Course.Infrastructure.Repositories
                                         Exercises = x.ExtraPracticeExercises.Where(n => n.Exercise != null && !n.IsDeleted).Select(n => n.Exercise).OrderBy(x => x!.CreatedDate).Select(n => new ExerciseModel
                                         {
                                             Id = n!.Id,
+                                            Name = n.Name,
                                             MediaPost = n.MediaPost,
                                             CourseSkill = n.CourseSkill,
                                             Questions = n.ExerciseQuestions.Where(m => m.Question != null && !m.IsDeleted).Select(m => m.Question).OrderBy(x => x!.CreatedDate).Select(m => new QuestionModel()
@@ -126,16 +129,13 @@ namespace Fsel.Course.Infrastructure.Repositories
                                     .ThenInclude(x => x.Exercise)
                                     .ThenInclude(x => x!.ExerciseQuestions.Where(n => !n.IsDeleted).OrderBy(x => x.CreatedDate))
                                     .ThenInclude(x => x.Question)
-
                                     .Include(x => x.LessonExtraPractices.Where(n => !n.IsDeleted).OrderBy(x => x.CreatedDate))
-
                                     .Include(x => x.Video)
                                     .ThenInclude(x => x!.VideoTimeCodes.Where(x => !x.IsDeleted).OrderBy(x => x.CreatedDate))
                                     .ThenInclude(x => x.TimeCodeExercises.Where(x => !x.IsDeleted && x.Exercise != null).OrderBy(x => x.CreatedDate))
                                     .ThenInclude(x => x.Exercise)
                                     .ThenInclude(x => x!.ExerciseQuestions.Where(x => !x.IsDeleted).OrderBy(x => x.CreatedDate))
                                     .ThenInclude(x => x.Question)
-
                                     .Include(x => x.ExtraPracticeExercises.OrderBy(x => x.CreatedDate))
                                     .ThenInclude(x => x.Exercise)
                                     .ThenInclude(x => x!.ExerciseQuestions.Where(x => !x.IsDeleted).OrderBy(x => x.CreatedDate))

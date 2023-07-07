@@ -4,6 +4,7 @@ using System.Net;
 using Fsel.Common.ActionResults;
 using Fsel.Common.Constants;
 using Fsel.Course.Domain.Models.EntityModels;
+using Fsel.Course.Lms.Application.Commands.CourseResultCmd;
 using Fsel.Course.Lms.Application.Queries.CourseQuery;
 using Fsel.Shared.Enums;
 using MediatR;
@@ -34,6 +35,18 @@ namespace Fsel.Course.Lms.Api.Controllers
         public async Task<IActionResult> Get()
         {
             MethodResult<CourseModel> commandResult = await _mediator.Send(new GetCourseQuery()).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Start Course Result
+        /// </summary>
+        [HttpPost("start/{courseResultId}")]
+        [ProducesResponseType(typeof(MethodResult<CourseResultModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> StartCourseResult([FromRoute] Guid courseResultId)
+        {
+            MethodResult<CourseResultModel> commandResult = await _mediator.Send(new StartCourseResultCommand { CourseResultId = courseResultId }).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
     }
