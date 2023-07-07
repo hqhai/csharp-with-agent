@@ -5,6 +5,7 @@ namespace Fsel.Course.Application.Queries.ExtraPracticeQuery
     using System.Collections.Generic;
     using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using MediatR;
@@ -13,6 +14,7 @@ namespace Fsel.Course.Application.Queries.ExtraPracticeQuery
 
     public class GetMockTestsByExtraPracticeQuery : IRequest<MethodResult<IList<MockTestSearchModel>>>
     {
+        public EnumMockTestType? Type { get; set; }
     }
 
     public class GetMockTestsByExtraPracticeQueryHandler : IRequestHandler<GetMockTestsByExtraPracticeQuery, MethodResult<IList<MockTestSearchModel>>>
@@ -36,7 +38,7 @@ namespace Fsel.Course.Application.Queries.ExtraPracticeQuery
                                       .ThenInclude(x => x.SectionGroup)
                                       .Include(x => x.CourseUnitMockTests)
                                       .Include(x => x.UnitSkillMockTests)
-                                      .Where(y => y.ExtraPractice == null)
+                                      .Where(y => y.ExtraPractice == null && !request.Type.HasValue || y.MockTestType == request.Type)
                                       .Select(x => new MockTestSearchModel
                                       {
                                           Id = x.Id,

@@ -8,6 +8,7 @@ namespace Fsel.Course.Lcms.Api.Controllers
     using Fsel.Core.Base.BaseModels;
     using Fsel.Course.Application.Commands.ExtraPracticeCmd;
     using Fsel.Course.Application.Queries.ExtraPracticeQuery;
+    using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Shared.Enums;
     using MediatR;
@@ -95,9 +96,9 @@ namespace Fsel.Course.Lcms.Api.Controllers
         [HttpGet("mock-tests")]
         [ProducesResponseType(typeof(MethodResult<IList<MockTestSearchModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetMockTests()
+        public async Task<IActionResult> GetMockTests([FromQuery] EnumMockTestType? type)
         {
-            MethodResult<IList<MockTestSearchModel>> commandResult = await _mediator.Send(new GetMockTestsByExtraPracticeQuery()).ConfigureAwait(false);
+            MethodResult<IList<MockTestSearchModel>> commandResult = await _mediator.Send(new GetMockTestsByExtraPracticeQuery { Type = type }).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
 
