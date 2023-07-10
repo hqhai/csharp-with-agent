@@ -3,14 +3,13 @@
 namespace Fsel.Identity.Domain.Models.EntityModels
 {
     using Fsel.Core.Base.BaseModels;
+    using Fsel.Shared.Enums;
 
-    public class ParentProfileModel : BaseModel
+    public class StudentSearchAdminModel : BaseModel
     {
         public string? FullName { get; set; }
         public DateTime? Birthday { get; set; }
-        public string? PhoneNumber { get; set; }
-        public string? Address { get; set; }
-        public string? Email { get; set; }
-        public string? Occupation { get; set; }
+        public EnumCourseType Type { get; set; }
+        public EnumCourseLevel CourseLevel { get; set; }
     }
 }

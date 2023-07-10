@@ -13,11 +13,11 @@ namespace Fsel.Identity.Infrastructure.Maps
     {
         public ParentProfile()
         {
-            CreateMap<Parent, ParentModel>().IgnoreAllNonExisting();
             CreateMap<UpdateParentCommandModel, Parent>().IgnoreAllNonExisting();
             CreateMap<UpdateUserProfileCommandModel, Parent>().IgnoreAllNonExisting();
             CreateMap<Parent, UserProfileModel>().ForMember(m => m.Id, opt => opt.Ignore()).IgnoreAllNonExisting();
             CreateMap<Parent, ParentProfileModel>().IgnoreAllNonExisting();
+            CreateMap<Parent, ParentInfoModel>().IgnoreAllNonExisting();
         }
     }
 }
