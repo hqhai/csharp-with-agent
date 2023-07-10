@@ -44,13 +44,13 @@ namespace Fsel.Identity.Api.Controllers.Admin
         /// Update User Student
         /// </summary>
         [HttpPut("{studentId}")]
-        [ProducesResponseType(typeof(MethodResult<UserModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(MethodResult<StudentModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> UpdateStudent([FromRoute] Guid studentId, [FromBody] UpdateStudentByAdminCommand command)
         {
             ArgumentNullException.ThrowIfNull(command);
             command.Id = studentId;
-            MethodResult<UserModel> queryResult = await _mediator.Send(command).ConfigureAwait(false);
+            MethodResult<StudentModel> queryResult = await _mediator.Send(command).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
 
@@ -58,11 +58,11 @@ namespace Fsel.Identity.Api.Controllers.Admin
         /// Get Profile Student
         /// </summary>
         [HttpGet("profile/{studentId}")]
-        [ProducesResponseType(typeof(MethodResult<UserStudentModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(MethodResult<StudentModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetProfileStudent([FromRoute] Guid studentId)
         {
-            MethodResult<UserStudentModel> queryResult = await _mediator.Send(new GetStudentProfileQuery { StudentId = studentId }).ConfigureAwait(false);
+            MethodResult<StudentModel> queryResult = await _mediator.Send(new GetStudentProfileQuery { StudentId = studentId }).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
 

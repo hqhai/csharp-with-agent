@@ -14,12 +14,12 @@ namespace Fsel.Identity.Application.Queries.AdminQuery
     using Microsoft.AspNetCore.Identity;
     using Microsoft.EntityFrameworkCore;
 
-    public class GetStudentProfileQuery : IRequest<MethodResult<UserStudentModel>>
+    public class GetStudentProfileQuery : IRequest<MethodResult<StudentModel>>
     {
         public Guid StudentId { get; set; }
     }
 
-    public class GetStudentProfileQueryHandler : IRequestHandler<GetStudentProfileQuery, MethodResult<UserStudentModel>>
+    public class GetStudentProfileQueryHandler : IRequestHandler<GetStudentProfileQuery, MethodResult<StudentModel>>
     {
         private readonly IMapper _mapper;
         private readonly UserManager<User> _userManager;
@@ -34,10 +34,10 @@ namespace Fsel.Identity.Application.Queries.AdminQuery
             _orderService = orderService;
         }
 
-        public async Task<MethodResult<UserStudentModel>> Handle(GetStudentProfileQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<StudentModel>> Handle(GetStudentProfileQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            MethodResult<UserStudentModel> methodResult = new MethodResult<UserStudentModel>();
+            MethodResult<StudentModel> methodResult = new MethodResult<StudentModel>();
 
             var userView = await _userManager.Users.Include(x => x.Human)
                                                    .ThenInclude(x => x!.Student)
@@ -61,12 +61,12 @@ namespace Fsel.Identity.Application.Queries.AdminQuery
                 student = userView?.Human?.Student;
                 parentStudent = student?.ParentStudents.FirstOrDefault();
             }
-            var userModel = _mapper.Map<UserStudentModel>(userView);
+            var userModel = _mapper.Map<StudentModel>(userView);
             _mapper.Map(userView?.Human, userModel);
             _mapper.Map(student, userModel);
             if (parentStudent != null && parentStudent.Parent != null)
             {
-                userModel.Parent = _mapper.Map<ParentInfoModel>(parentStudent.Parent.Human);
+                userModel.Parent = _mapper.Map<ParentProfileModel>(parentStudent.Parent.Human);
                 userModel.Parent.Occupation = parentStudent.Parent.Occupation;
             }
             var classStudent = await _trainingService.GetClassByStudentId(student?.Id ?? default);

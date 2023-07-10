@@ -8,6 +8,8 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
     using Fsel.Common.ActionResults;
     using Fsel.Common.Helpers;
     using Fsel.Identity.Application.Commands.AuthCmd;
+    using Fsel.Identity.Application.Services.OrderService;
+    using Fsel.Identity.Application.Services.TrainingService;
     using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.Enums;
     using Fsel.Identity.Domain.Enums.ErrorCodes;
@@ -24,14 +26,16 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
     using Microsoft.EntityFrameworkCore;
     using OtpNet;
 
-    public class UpdateStudentByAdminCommand : UpdateStudentByAdminCommandModel, IRequest<MethodResult<UserModel>>
+    public class UpdateStudentByAdminCommand : UpdateStudentByAdminCommandModel, IRequest<MethodResult<StudentModel>>
     {
     }
 
-    public class UpdateStudentByAdminCommandHandler : IRequestHandler<UpdateStudentByAdminCommand, MethodResult<UserModel>>
+    public class UpdateStudentByAdminCommandHandler : IRequestHandler<UpdateStudentByAdminCommand, MethodResult<StudentModel>>
     {
         private readonly UserManager<User> _userManager;
         private readonly IMapper _mapper;
+        private readonly ITrainingService _trainingService;
+        private readonly IOrderService _orderService;
         private readonly AppSetting _appSetting;
         private readonly IMediator _mediator;
         private readonly IUserOtpCodeRepository _userOtpCodeRepository;
@@ -39,6 +43,8 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
 
         public UpdateStudentByAdminCommandHandler(UserManager<User> userManager,
             IMapper mapper,
+            ITrainingService trainingService,
+            IOrderService orderService,
             AppSetting appSetting,
             IMediator mediator,
             IUserOtpCodeRepository userOtpCodeRepository,
@@ -46,16 +52,18 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
         {
             _userManager = userManager;
             _mapper = mapper;
+            _trainingService = trainingService;
+            _orderService = orderService;
             _appSetting = appSetting;
             _mediator = mediator;
             _userOtpCodeRepository = userOtpCodeRepository;
             _humanRepository = humanRepository;
         }
 
-        public async Task<MethodResult<UserModel>> Handle(UpdateStudentByAdminCommand request, CancellationToken cancellationToken)
+        public async Task<MethodResult<StudentModel>> Handle(UpdateStudentByAdminCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            var methodResult = new MethodResult<UserModel>();
+            var methodResult = new MethodResult<StudentModel>();
             var userView = await _userManager.Users.Include(x => x.Human)
                                                    .ThenInclude(x => x!.Student)
                                                    .ThenInclude(x => x!.ParentStudents)
@@ -65,8 +73,8 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
                 methodResult.AddErrorBadRequest(nameof(EnumUserErrorCode.UserNotExist));
                 return methodResult;
             }
-            var student = userView.Human!.Student!;
-            if (request.Parent != null)
+            var student = userView.Human?.Student;
+            if (request.Parent != null && student != null)
             {
                 if (student.ParentStudents == null || student.ParentStudents.Count == 0)
                 {
@@ -158,9 +166,29 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
                 _mapper.Map(request, userView.Human);
                 await _userManager.UpdateAsync(userView);
             }
-
+            student = userView?.Human?.Student;
+            var parentStudent = student?.ParentStudents?.FirstOrDefault();
+            var userModel = _mapper.Map<StudentModel>(userView);
+            _mapper.Map(userView?.Human, userModel.Human);
+            _mapper.Map(student, userModel);
+            if (parentStudent != null && parentStudent.Parent != null)
+            {
+                userModel.Parent = _mapper.Map<ParentProfileModel>(parentStudent.Parent.Human);
+                userModel.Parent.Occupation = parentStudent.Parent.Occupation;
+            }
+            var classStudent = await _trainingService.GetClassByStudentId(student?.Id ?? default);
+            var @class = classStudent?.Content?.Result;
+            if (@class != null)
+            {
+                userModel.CodeClass = classStudent?.Content?.Result?.Code;
+                var package = await _orderService.GetPackages();
+                if (package.IsSuccessStatusCode)
+                {
+                    userModel.Membership = package.Content?.Result?.FirstOrDefault(p => p.Id == @class.PackageId)?.Code;
+                }
+            }
             methodResult.StatusCode = StatusCodes.Status200OK;
-            methodResult.Result = _mapper.Map<UserModel>(userView);
+            methodResult.Result = userModel;
             return methodResult;
         }
     }

@@ -18,6 +18,6 @@ namespace Fsel.Identity.Domain.Models.EntityModels
         public TeacherModel? Teacher { get; set; }
         public CSOModel? CSO { get; set; }
         public StudentModel? Student { get; set; }
-        public ParentModel? Parent { get; set; }
+        public ParentProfileModel? Parent { get; set; }
     }
 }

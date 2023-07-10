@@ -13,9 +13,9 @@ namespace Fsel.Identity.Domain.Models.EntityModels
         public string? School { get; set; }
         public HumanProfileModel? Human { get; set; }
         public EnumCourseLevel CourseLevel { get; set; }
+        public string? Membership { get; set; }
         public Guid? ClassId { get; set; }
-        public Guid HumanId { get; set; }
-        public string? UserId { get; set; }
+        public string? CodeClass { get; set; }
         public ParentProfileModel? Parent { get; set; }
     }
 }
