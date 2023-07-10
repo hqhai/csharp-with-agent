@@ -8,9 +8,11 @@ namespace Fsel.Training.Application.Queries.ClassLiveQuery
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base;
     using Fsel.Core.Base.BaseModels;
+    using Fsel.Shared.Enums;
     using Fsel.Training.Application.Services.CourseServices;
     using Fsel.Training.Application.Services.SystemServices;
     using Fsel.Training.Application.Services.UserServices;
+    using Fsel.Training.Domain.Enums;
     using Fsel.Training.Domain.IRepositories;
     using Fsel.Training.Domain.Models.EntityModels;
     using MediatR;
@@ -26,6 +28,7 @@ namespace Fsel.Training.Application.Queries.ClassLiveQuery
         private readonly AuthContext _authContext;
         private readonly IClassLiveCalendarRepository _classLiveCalendarRepository;
         private readonly IClassRepository _classRepository;
+        private readonly IClassLiveWorkFlowRepository _classLiveWorkFlowRepository;
         private readonly IUserService _userService;
         private readonly ICourseService _courseService;
         private readonly ISystemService _systemService;
@@ -33,6 +36,7 @@ namespace Fsel.Training.Application.Queries.ClassLiveQuery
         public SearchClassLiveAssignmentsQueryHandler(AuthContext authContext,
             IClassLiveCalendarRepository classLiveCalendarRepository,
             IClassRepository classRepository,
+            IClassLiveWorkFlowRepository classLiveWorkFlowRepository,
             IUserService userService,
             ICourseService courseService,
             ISystemService systemService)
@@ -40,6 +44,7 @@ namespace Fsel.Training.Application.Queries.ClassLiveQuery
             _authContext = authContext;
             _classLiveCalendarRepository = classLiveCalendarRepository;
             _classRepository = classRepository;
+            _classLiveWorkFlowRepository = classLiveWorkFlowRepository;
             _userService = userService;
             _courseService = courseService;
             _systemService = systemService;
@@ -57,7 +62,7 @@ namespace Fsel.Training.Application.Queries.ClassLiveQuery
             var teacherResult = await _userService.GetTeacherByUserIdAsync(_authContext.CurrentUserId);
             var teacherId = teacherResult.Content?.Result?.Id;
             var r1 = _classRepository.Queryable
-                 .Where(x => x != null && x.TeacherId == teacherId)
+                 .Where(x => x != null && x.TeacherId == teacherId && x.TeacherApprovalStatus == EnumTeacherApprovalStatus.Pending)
                  .AsNoTracking()
                  .Select(x => new ClassLiveModel
                  {
@@ -73,8 +78,9 @@ namespace Fsel.Training.Application.Queries.ClassLiveQuery
                  .AsEnumerable();
 
             var r2 = _classLiveCalendarRepository.Queryable
-                .Where(x => x.Class != null && x.TeacherId == teacherId)
                 .Include(x => x.Class)
+                .Include(x => x.ClassLiveWorkFlows)
+                .Where(x => x.Class != null && x.ClassLiveWorkFlows.Any(x => x.Type == EnumWorkFlowType.AssignTeacher && x.Status == EnumWorkFlowAssignTeacherStatus.Pending.ToString() && x.TeacherId == teacherId))
                 .AsNoTracking()
                 .Select(x => new ClassLiveModel
                 {
@@ -98,12 +104,37 @@ namespace Fsel.Training.Application.Queries.ClassLiveQuery
             var courses = courseResults.Content?.Result;
             var timeFramesResult = await _systemService.GetLiveTimeFramesAsync();
             var timeFrames = timeFramesResult.Content?.Result;
+            IList<Guid> ids = new List<Guid>();
             foreach (var item in lists)
             {
                 var liveTimeFrame = timeFrames?.FirstOrDefault(x => x.Id == item.LiveTimeFrameId);
                 item.CourseLevel = courses?.FirstOrDefault(x => x.Id == item.CourseId)?.CourseLevel ?? default;
                 item.StartTime = liveTimeFrame?.StartTime;
                 item.EndTime = liveTimeFrame?.EndTime;
+                DateTime dateTime = DateTime.Now;
+                var assignTeacher = item.StartDate!.Value.AddDays(-1);
+                item.IsStatus = assignTeacher.Date < dateTime.Date;
+                if (item.IsStatus)
+                {
+                    ids.Add(item.Id);
+                }
+            }
+            if (ids.Count > 0)
+            {
+                var classLiveWordFlows = await _classLiveWorkFlowRepository.Queryable.Where(x => ids.Contains(x.ClassLiveCalendarId)).ToListAsync(cancellationToken);
+                var classes = await _classRepository.Queryable.Where(x => ids.Contains(x.Id)).ToListAsync(cancellationToken);
+                if (classes.Count > 0)
+                {
+                    classes.ForEach(x => x.TeacherApprovalStatus = EnumTeacherApprovalStatus.Approved);
+                    _classRepository.UpdateList(classes);
+                    await _classRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+                }
+                if (classLiveWordFlows.Count > 0)
+                {
+                    classLiveWordFlows.ForEach(x => x.Status = EnumWorkFlowAssignTeacherStatus.Approved.ToString());
+                    _classLiveWorkFlowRepository.UpdateList(classLiveWordFlows);
+                    await _classLiveWorkFlowRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+                }
             }
 
             methodResult.Result = new PagingItemsModel<ClassLiveModel>(lists, request, totalItem);
