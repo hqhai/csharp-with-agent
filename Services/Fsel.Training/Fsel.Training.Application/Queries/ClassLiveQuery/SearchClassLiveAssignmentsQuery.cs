@@ -59,6 +59,8 @@ namespace Fsel.Training.Application.Queries.ClassLiveQuery
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 return methodResult;
             }
+            var timeFramesResult = await _systemService.GetLiveTimeFramesAsync();
+            var timeFrames = timeFramesResult.Content?.Result;
             var teacherResult = await _userService.GetTeacherByUserIdAsync(_authContext.CurrentUserId);
             var teacherId = teacherResult.Content?.Result?.Id;
             var r1 = _classRepository.Queryable
@@ -96,39 +98,26 @@ namespace Fsel.Training.Application.Queries.ClassLiveQuery
                     LiveTimeFrameId = x.LiveTimeFrameId
                 })
                 .AsEnumerable();
-
             var query = r1.Union(r2);
-            int totalItem = query.Count();
-            var lists = query.Skip((request!.Page - 1) * request!.PageSize).Take(request!.PageSize).ToList();
-
-            var courseIds = lists.Select(x => x.CourseId).ToList();
-            var courseResults = await _courseService.GetListCourseByIds(courseIds);
-            var courses = courseResults.Content?.Result;
-            var timeFramesResult = await _systemService.GetLiveTimeFramesAsync();
-            var timeFrames = timeFramesResult.Content?.Result;
             IList<Guid> ids = new List<Guid>();
-            foreach (var item in lists)
+            foreach (var item in query.ToList())
             {
-                if (item != null)
+                var liveTimeFrame = timeFrames?.FirstOrDefault(x => x.Id == item.LiveTimeFrameId);
+                item.StartTime = liveTimeFrame?.StartTime ?? default;
+                if (item.StartDate != null)
                 {
-                    var liveTimeFrame = timeFrames?.FirstOrDefault(x => x.Id == item.LiveTimeFrameId);
-                    item.CourseLevel = courses?.FirstOrDefault(x => x.Id == item.CourseId)?.CourseLevel ?? default;
-                    item.StartTime = liveTimeFrame?.StartTime ?? default;
-                    item.EndTime = liveTimeFrame?.EndTime ?? default;
-                    if (item.StartDate != null)
+                    DateTime dateTime = DateTime.Now;
+                    double totalHours = item.StartTime % 24;
+                    int hours = (int)totalHours;
+                    var assignTeacher = item.StartDate.Value.Date.AddHours(hours);
+                    item.IsStatus = assignTeacher < dateTime.AddDays(1);
+                    if (item.IsStatus)
                     {
-                        DateTime dateTime = DateTime.Now;
-                        double totalHours = item.StartTime % 24;
-                        int hours = (int)totalHours;
-                        var assignTeacher = item.StartDate.Value.Date.AddHours(hours);
-                        item.IsStatus = assignTeacher < dateTime;
-                        if (item.IsStatus)
-                        {
-                            ids.Add(item.Id);
-                        }
+                        ids.Add(item.Id);
                     }
                 }
             }
+
             if (ids.Count > 0)
             {
                 var classLiveWordFlows = await _classLiveWorkFlowRepository.Queryable.Where(x => ids.Contains(x.ClassLiveCalendarId)).ToListAsync(cancellationToken);
@@ -144,6 +133,24 @@ namespace Fsel.Training.Application.Queries.ClassLiveQuery
                     classLiveWordFlows.ForEach(x => x.Status = EnumWorkFlowAssignTeacherStatus.Approved.ToString());
                     _classLiveWorkFlowRepository.UpdateList(classLiveWordFlows);
                     await _classLiveWorkFlowRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+                }
+            }
+
+            int totalItem = query.Count();
+            var lists = query.Skip((request!.Page - 1) * request!.PageSize).Take(request!.PageSize).ToList();
+
+            var courseIds = lists.Select(x => x.CourseId).ToList();
+            var courseResults = await _courseService.GetListCourseByIds(courseIds);
+            var courses = courseResults.Content?.Result;
+
+            foreach (var item in lists)
+            {
+                if (item != null)
+                {
+                    var liveTimeFrame = timeFrames?.FirstOrDefault(x => x.Id == item.LiveTimeFrameId);
+                    item.CourseLevel = courses?.FirstOrDefault(x => x.Id == item.CourseId)?.CourseLevel ?? default;
+                    item.StartTime = liveTimeFrame?.StartTime ?? default;
+                    item.EndTime = liveTimeFrame?.EndTime ?? default;
                 }
             }
 
