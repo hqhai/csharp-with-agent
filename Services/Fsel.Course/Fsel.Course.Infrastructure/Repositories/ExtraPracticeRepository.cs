@@ -42,8 +42,10 @@ namespace Fsel.Course.Infrastructure.Repositories
                                         IsActive = x.IsActive,
                                         Name = x.Name,
                                         Type = x.Type,
-                                        VideoId = x.VideoId ?? default,
+                                        VideoId = x.VideoId,
                                         VideoLink = x.VideoLink,
+                                        MockTestId = x.MockTestId,
+                                        PlacementTestId = x.PlacementTestId,
                                         ExtraPracticeChapters = x.ExtraPracticeChapters.Where(n => !n.IsDeleted).OrderBy(x => x!.PageNumber).Select(x => new ExtraPracticeChapterModel
                                         {
                                             Id = x.Id,

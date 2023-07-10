@@ -41,7 +41,6 @@ namespace Fsel.Training.Application.Queries.TeacherFreeDateQuery
             _userService = userService;
             _mapper = mapper;
             _systemService = systemService;
-
         }
 
         public async Task<MethodResult<IList<TeacherFreeDateModel>>> Handle(GetListFreeTeacherByCalendarQuery request, CancellationToken cancellationToken)

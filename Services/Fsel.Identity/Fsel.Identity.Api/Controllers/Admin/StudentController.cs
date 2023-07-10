@@ -6,6 +6,8 @@ namespace Fsel.Identity.Api.Controllers.Admin
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
     using Fsel.Core.Base.BaseModels;
+    using Fsel.Identity.Application.Commands.AdminCmd;
+    using Fsel.Identity.Application.Queries.AdminQuery;
     using Fsel.Identity.Application.Queries.StudentQuery;
     using Fsel.Identity.Domain.Models.EntityModels;
     using Fsel.Shared.Enums;
@@ -35,6 +37,80 @@ namespace Fsel.Identity.Api.Controllers.Admin
         public async Task<IActionResult> Search([FromQuery] SearchStudentsInClassQuery query)
         {
             MethodResult<PagingItemsModel<SearchStudentsInClassModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Update User Student
+        /// </summary>
+        [HttpPut("{studentId}")]
+        [ProducesResponseType(typeof(MethodResult<StudentModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> UpdateStudent([FromRoute] Guid studentId, [FromBody] UpdateStudentByAdminCommand command)
+        {
+            ArgumentNullException.ThrowIfNull(command);
+            command.Id = studentId;
+            MethodResult<StudentModel> queryResult = await _mediator.Send(command).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Get Profile Student
+        /// </summary>
+        [HttpGet("profile/{studentId}")]
+        [ProducesResponseType(typeof(MethodResult<StudentModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetProfileStudent([FromRoute] Guid studentId)
+        {
+            MethodResult<StudentModel> queryResult = await _mediator.Send(new GetStudentProfileQuery { StudentId = studentId }).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Get Survey Student
+        /// </summary>
+        [HttpGet("survey/{studentId}")]
+        [ProducesResponseType(typeof(MethodResult<IList<StudentSurveyQuestionModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetSurveyStudent([FromRoute] Guid studentId)
+        {
+            MethodResult<IList<StudentSurveyQuestionModel>> queryResult = await _mediator.Send(new GetStudentSurveyQuestionQuery { StudentId = studentId }).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Search Course Student
+        /// </summary>
+        [HttpGet("course")]
+        [ProducesResponseType(typeof(MethodResult<PagingItemsModel<StudentCourseModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> SearchStudentCourse([FromQuery] SearchStudentCourseQuery query)
+        {
+            MethodResult<PagingItemsModel<StudentCourseModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Search Student Lesson Comment
+        /// </summary>
+        [HttpGet("lesson-comment")]
+        [ProducesResponseType(typeof(MethodResult<PagingItemsModel<StudentLessonCommentModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> SearchStudentLessonComment([FromQuery] SearchStudentLessonCommentQuery query)
+        {
+            MethodResult<PagingItemsModel<StudentLessonCommentModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Search Student
+        /// </summary>
+        [HttpGet("management")]
+        [ProducesResponseType(typeof(MethodResult<PagingItemsModel<StudentSearchAdminModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> SearchStudent([FromQuery] SearchStudentsQuery query)
+        {
+            MethodResult<PagingItemsModel<StudentSearchAdminModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
     }

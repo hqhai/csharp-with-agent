@@ -15,5 +15,6 @@ namespace Fsel.Identity.Application.Services.TrainingService.Models
         public EnumStatusClass Status { get; set; }
         public EnumTeacherApprovalStatus TeacherApprovalStatus { get; set; }
         public Guid CourseId { get; set; }
+        public Guid PackageId { get; set; }
     }
 }

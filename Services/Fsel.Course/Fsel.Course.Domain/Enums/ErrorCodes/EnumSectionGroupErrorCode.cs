@@ -13,5 +13,7 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         /// SectionGroup is null
         /// </summary>
         SectionGroupNull,
+
+     
     }
 }
