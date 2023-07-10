@@ -20,7 +20,5 @@ namespace Fsel.Training.Domain.Models.EntityModels
         public double? StartTime { get; set; }
         public double? EndTime { get; set; }
         public Guid? CourseId { get; set; }
-
-        /* public ClassLiveCalendarModel? ClassLiveCalendar { get; set; }*/
     }
 }
