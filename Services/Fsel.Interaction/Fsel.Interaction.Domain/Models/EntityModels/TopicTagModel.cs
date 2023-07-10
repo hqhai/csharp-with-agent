@@ -7,7 +7,7 @@ namespace Fsel.Interaction.Domain.Models.EntityModels
     public class TopicTagModel : BaseModel
     {
         public string? Name { get; set; }
-
         public string? Color { get; set; }
+        public int? PostCount { get; set; }
     }
 }

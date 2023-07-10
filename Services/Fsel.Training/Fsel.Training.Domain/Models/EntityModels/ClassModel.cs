@@ -11,23 +11,30 @@ namespace Fsel.Training.Domain.Models.EntityModels
 
         public string? Name { get; set; }
 
-        public DateTime EndTime { get; set; }
+        public DateTime? EndDate { get; set; }
 
-        public DateTime StartTime { get; set; }
+        public DateTime? StartDate { get; set; }
 
-        public EnumClassType Status { get; set; }
+        public EnumStatusClass Status { get; set; }
+
+        public EnumTeacherApprovalStatus TeacherApprovalStatus { get; set; }
 
         public Guid CourseId { get; set; }
 
         public Guid PackageId { get; set; }
+        public Guid? LiveTimeFrameId { get; set; }
 
-        public DayOfWeek LiveDays { get; set; }
+        public IList<DayOfWeek>? LiveDays { get; set; }
 
         public Guid? TeacherId { get; set; }
 
-        public EnumCourseLevel CourseLevel { get; set; }
+        public string? TeacherName { get; set; }
+
+        public EnumCourseLevel? CourseLevel { get; set; }
 
         public Guid? CsoId { get; set; }
+        public double? TimeFrameEndTime { get; set; }
+        public double? TimeFrameStartTime { get; set; }
 
         public IList<ClassStudentModel>? ClassStudents { get; set; }
         public IList<ClassLiveCalendarModel>? ClassLiveCalendars { get; set; }

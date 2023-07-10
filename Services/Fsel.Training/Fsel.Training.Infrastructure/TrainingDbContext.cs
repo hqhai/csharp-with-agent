@@ -4,11 +4,11 @@ namespace Fsel.Training.Infrastructure
 {
     using Fsel.Common.Constants;
     using Fsel.Core.Base;
+    using Fsel.Training.Domain.Entities;
     using Fsel.Training.Infrastructure.Configs;
     using MediatR;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Configuration;
-    using Fsel.Training.Domain.Entities;
 
     public class TrainingDbContext : BaseDbContext
     {
@@ -23,12 +23,20 @@ namespace Fsel.Training.Infrastructure
             modelBuilder.ApplyConfiguration(new ClassEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new ClassStudentEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new ClassLiveCalendarEntityTypeConfiguaration());
+            modelBuilder.ApplyConfiguration(new TeacherFreeTimeEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new TeacherFreeDateEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new ClassLiveWorkFlowEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new ClassLiveWorkFlowPlanEntityTypeConfiguration());
             base.OnModelCreating(modelBuilder);
         }
 
         public DbSet<Class> Classes { get; set; }
         public DbSet<ClassStudent> ClassStudents { get; set; }
         public DbSet<ClassLiveCalendar> ClassLiveCalendars { get; set; }
+        public DbSet<TeacherFreeTime> TeacherFreeTimes { get; set; }
+        public DbSet<TeacherFreeDate> TeacherFreeDates { get; set; }
+        public DbSet<ClassLiveWorkFlow> ClassLiveWorkFlows { get; set; }
+        public DbSet<ClassLiveWorkFlowPlan> ClassLiveWorkFlowPlans { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {

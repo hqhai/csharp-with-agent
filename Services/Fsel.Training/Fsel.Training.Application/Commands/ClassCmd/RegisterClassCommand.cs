@@ -58,13 +58,9 @@ namespace Fsel.Training.Application.Commands.ClassCmd
 
                 if (classnew == null)
                 {
-                    classnew = await CreateClassAsync(request.Code, request.CourseId,request.PackageId);
+                    classnew = await CreateClassAsync(request.Code, request.CourseId, request.PackageId, request.LiveTimeFrameId, request.LiveDays);
                 }
-                else if (classnew.ClassStudents.Count == 11)
-                {
-                    classnew = await UpdateClassStatusAsync(classnew);
-                }
-                else if (classnew.ClassStudents.Count > 11 || classnew.Status == EnumClassType.Active)
+                else if (classnew.ClassStudents.Count > 11 || classnew.Status == EnumStatusClass.Active)
                 {
                     var code = await _mediator.Send(new GetNewClassCodeQuery { CourseLevel = request.CourseLevel }, cancellationToken).ConfigureAwait(false);
                     methodResult.Result = new ClassModel { Code = code.Result };
@@ -98,31 +94,18 @@ namespace Fsel.Training.Application.Commands.ClassCmd
             return methodResult;
         }
 
-        private async Task<Class> CreateClassAsync(string? code, Guid courseId, Guid PackageId)
+        private async Task<Class> CreateClassAsync(string? code, Guid courseId, Guid PackageId, Guid? LiveTimeFrameId, IList<DayOfWeek>? LiveDays)
         {
             var newClass = new Class();
             newClass.Code = code;
             newClass.Name = code;
             newClass.CourseId = courseId;
-            newClass.PackageId  = PackageId;
+            newClass.PackageId = PackageId;
+            newClass.LiveTimeFrameId = LiveTimeFrameId;
+            newClass.LiveDays = LiveDays;
             _classRepository.Add(newClass);
             await _classRepository.UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
             return newClass;
-        }
-
-        private async Task<Class> UpdateClassStatusAsync(Class classToUpdate)
-        {
-            try
-            {
-                classToUpdate.Status = EnumClassType.Active;
-                _classRepository.Update(classToUpdate);
-                await _classRepository.UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
-                return classToUpdate;
-            }
-            catch (Exception ex)
-            {
-                throw new Exception("An error occurred while updating the class object.", ex);
-            }
         }
 
         private async Task<Class> UpdateClassAsync(Class classToUpdate, Guid studentId)

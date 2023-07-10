@@ -2,7 +2,6 @@
 
 namespace Fsel.Training.Domain.Models.CommandModels.Classes
 {
-    using Fsel.Ordering.Domain.Enums;
     using Fsel.Shared.Enums;
 
     public class RegisterClassCommandModel
@@ -11,5 +10,8 @@ namespace Fsel.Training.Domain.Models.CommandModels.Classes
         public Guid CourseId { get; set; }
         public string? Code { get; set; }
         public EnumCourseLevel CourseLevel { get; set; }
+        public Guid? LiveTimeFrameId { get; set; }
+
+        public IList<DayOfWeek>? LiveDays { get; set; }
     }
 }

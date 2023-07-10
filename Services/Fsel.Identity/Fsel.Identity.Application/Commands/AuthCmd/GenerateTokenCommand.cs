@@ -5,7 +5,7 @@ using System.Security.Claims;
 using System.Text;
 using Fsel.Common.ActionResults;
 using Fsel.Common.Helpers;
-using Fsel.Identity.Application.Services.CourseService;
+using Fsel.Identity.Application.Services.LmsCourseService;
 using Fsel.Identity.Application.Services.InteractionService;
 using Fsel.Identity.Application.Services.TrainingService;
 using Fsel.Identity.Domain.Entities;
@@ -32,7 +32,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
         private readonly UserManager<User> _userManager;
         private readonly IInteractionService _interactionService;
         private readonly ITrainingService _trainingService;
-        private readonly ICourseService _courseService;
+        private readonly ILmsCourseService _lmsCourseService;
         private readonly IUserTokenRepository _userTokenRepository;
         private readonly IHumanRepository _humanRepository;
         private readonly AppSetting _appSetting;
@@ -40,7 +40,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
         public GenerateTokenCommandHandler(UserManager<User> userManager,
             IInteractionService interactionService,
             ITrainingService trainingService,
-            ICourseService courseService,
+            ILmsCourseService lmsCourseService,
             IUserTokenRepository userTokenRepository,
             IHumanRepository humanRepository,
             AppSetting appSetting)
@@ -48,7 +48,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             _userManager = userManager;
             _interactionService = interactionService;
             _trainingService = trainingService;
-            _courseService = courseService;
+            _lmsCourseService = lmsCourseService;
             _userTokenRepository = userTokenRepository;
             _humanRepository = humanRepository;
             _appSetting = appSetting;
@@ -119,7 +119,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                 tokenLogin.ClassId = await GetClassId(user.Id);
                 var classStudent = await _trainingService.GetClassByStudentId(user.Human?.Student?.Id ?? default);
                 tokenLogin.ClassCode = classStudent?.Content?.Result?.Code;
-                var isPlacementTest = await _courseService.IsPlacementTestAsync(user.Human?.Student?.Id ?? default);
+                var isPlacementTest = await _lmsCourseService.IsPlacementTestAsync(user.Human?.Student?.Id ?? default);
                 tokenLogin.IsPlacementTest = isPlacementTest?.Content?.Result;
                 var isSurvey = await _interactionService.IsSurveyCompleted(Guid.Parse(request.Id ?? string.Empty));
                 if (isSurvey.IsSuccessStatusCode)

@@ -13,7 +13,6 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd
     using Fsel.Course.Domain.Models.CommandModels.FinalTestAnswers;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Infrastructure.Common;
-    using Fsel.Course.Infrastructure.Repositories;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using MediatR;
     using Microsoft.AspNetCore.Http;
@@ -90,7 +89,6 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd
                 methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.CourseNotExist), nameof(request.CourseId), request.CourseId);
                 return methodResult;
             }
-
 
             var finalTestResult = await _finalTestResultRepository.Queryable
                     .FirstOrDefaultAsync(x => x.FinalTestId == request.FinalTestId && x.StudentId == studentId && x.CourseId == request.CourseId && x.Status == EnumResultStatus.Process, cancellationToken);

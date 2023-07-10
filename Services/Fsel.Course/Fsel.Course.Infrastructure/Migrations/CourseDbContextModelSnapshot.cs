@@ -380,7 +380,7 @@ namespace Fsel.Course.Infrastructure.Migrations
                         .HasColumnType("bit")
                         .HasColumnOrder(110);
 
-                    b.Property<long?>("Score")
+                    b.Property<long>("Score")
                         .HasColumnType("bigint");
 
                     b.Property<DateTime?>("UpdatedDate")
@@ -921,10 +921,16 @@ namespace Fsel.Course.Infrastructure.Migrations
                         .HasColumnType("bit")
                         .HasColumnOrder(110);
 
+                    b.Property<Guid?>("MockTestId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(250)
                         .HasColumnType("nvarchar(250)");
+
+                    b.Property<Guid?>("PlacementTestId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Type")
                         .IsRequired()
@@ -951,6 +957,10 @@ namespace Fsel.Course.Infrastructure.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("MockTestId");
+
+                    b.HasIndex("PlacementTestId");
 
                     b.HasIndex("VideoId");
 
@@ -1671,6 +1681,9 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.Property<double>("Percent")
                         .HasColumnType("float");
 
+                    b.Property<string>("SkillScoresStr")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Status")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -2088,6 +2101,9 @@ namespace Fsel.Course.Infrastructure.Migrations
 
                     b.Property<double>("Percent")
                         .HasColumnType("float");
+
+                    b.Property<string>("SkillScoresStr")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Status")
                         .IsRequired()
@@ -3816,6 +3832,9 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.Property<Guid>("VideoId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<string>("VideoSkillScoresStr")
+                        .HasColumnType("nvarchar(max)");
+
                     b.HasKey("Id");
 
                     b.HasIndex("LessonResultId");
@@ -4117,10 +4136,24 @@ namespace Fsel.Course.Infrastructure.Migrations
 
             modelBuilder.Entity("Fsel.Course.Domain.Entities.ExtraPractice", b =>
                 {
+                    b.HasOne("Fsel.Course.Domain.Entities.MockTest", "MockTest")
+                        .WithOne("ExtraPractice")
+                        .HasForeignKey("Fsel.Course.Domain.Entities.ExtraPractice", "MockTestId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("Fsel.Course.Domain.Entities.PlacementTest", "PlacementTest")
+                        .WithOne("ExtraPractice")
+                        .HasForeignKey("Fsel.Course.Domain.Entities.ExtraPractice", "PlacementTestId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
                     b.HasOne("Fsel.Course.Domain.Entities.Video", "Video")
                         .WithOne("ExtraPractice")
                         .HasForeignKey("Fsel.Course.Domain.Entities.ExtraPractice", "VideoId")
                         .OnDelete(DeleteBehavior.Cascade);
+
+                    b.Navigation("MockTest");
+
+                    b.Navigation("PlacementTest");
 
                     b.Navigation("Video");
                 });
@@ -4814,6 +4847,8 @@ namespace Fsel.Course.Infrastructure.Migrations
                 {
                     b.Navigation("CourseUnitMockTests");
 
+                    b.Navigation("ExtraPractice");
+
                     b.Navigation("MockTestResults");
 
                     b.Navigation("MockTestSections");
@@ -4828,6 +4863,8 @@ namespace Fsel.Course.Infrastructure.Migrations
 
             modelBuilder.Entity("Fsel.Course.Domain.Entities.PlacementTest", b =>
                 {
+                    b.Navigation("ExtraPractice");
+
                     b.Navigation("PlacementTestSections");
                 });
 

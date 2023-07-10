@@ -27,6 +27,11 @@ namespace Fsel.Identity.Domain.Enums.ErrorCodes
         /// <summary>
         /// Teacher Bank Account already exist
         /// </summary>
-        TeacherBankAccountAlreadyExist
+        TeacherBankAccountAlreadyExist,
+
+        /// <summary>
+        /// Ids null
+        /// </summary>
+        IdsNull,
     }
 }

@@ -2,6 +2,7 @@
 
 namespace Fsel.Training.Api.Controllers.Cso
 {
+    using System.Net;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
     using Fsel.Core.Base.BaseModels;
@@ -10,7 +11,6 @@ namespace Fsel.Training.Api.Controllers.Cso
     using Fsel.Training.Domain.Models.EntityModels;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
-    using System.Net;
 
     [ApiVersion(Settings.APIVersion)]
     [Route(Settings.APIDefaultRoute + "/cso/class-live")]
@@ -25,7 +25,7 @@ namespace Fsel.Training.Api.Controllers.Cso
         }
 
         /// <summary>
-        /// Search Course
+        /// Search  class live by cso
         /// </summary>
         [HttpGet]
         [ProducesResponseType(typeof(MethodResult<PagingItemsModel<ClassLiveCalendarModel>>), (int)HttpStatusCode.OK)]
@@ -37,7 +37,7 @@ namespace Fsel.Training.Api.Controllers.Cso
         }
 
         /// <summary>
-        /// Get Course
+        /// Get class live
         /// </summary>
         [HttpGet("{id}")]
         [ProducesResponseType(typeof(MethodResult<ClassLiveCalendarModel>), (int)HttpStatusCode.OK)]
@@ -59,6 +59,32 @@ namespace Fsel.Training.Api.Controllers.Cso
             ArgumentNullException.ThrowIfNull(command);
             command.Id = id;
             MethodResult<ClassLiveCalendarModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Get list class live
+        /// </summary>
+
+        [HttpGet("list-class-live")]
+        [ProducesResponseType(typeof(MethodResult<IList<ClassModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetListClassLive()
+        {
+            MethodResult<IList<ClassModel>> queryResult = await _mediator.Send(new GetListClassByCsoQuery { }).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Update a class live
+        /// </summary>
+        [HttpPut("assign-teacher-to-class")]
+        [ProducesResponseType(typeof(MethodResult<ClassModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> UpdateClassLiveStatus([FromBody] AssignTeacherToClassCommand command)
+        {
+            ArgumentNullException.ThrowIfNull(command);
+            MethodResult<ClassModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
     }

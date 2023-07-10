@@ -2,11 +2,15 @@
 
 namespace Fsel.Training.Application.Services.UserServices.Models
 {
-    public class HumanModel
+    using Fsel.Core.Base.BaseModels;
+
+    public class HumanModel : BaseModel
     {
         public string? FullName { get; set; }
         public string? Birthday { get; set; }
         public string? Email { get; set; }
         public string? PhoneNumber { get; set; }
+        public string? Code { get; set; }
+        public string? AvatarPath { get; set; }
     }
 }

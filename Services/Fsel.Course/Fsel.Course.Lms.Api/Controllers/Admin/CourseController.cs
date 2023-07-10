@@ -9,15 +9,12 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
     using Fsel.Course.Application.Queries.CourseQuery;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Queries.CourseQuery;
-    using Fsel.Shared.Enums;
     using MediatR;
-    using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
 
     [ApiVersion(Settings.APIVersion)]
     [Route(Settings.APIDefaultRoute + "/admin/course")]
     [ApiController]
-    [Authorize(Roles = nameof(EnumRole.MasterAdmin))]
     public class CourseController : ControllerBase
     {
         private readonly IMediator _mediator;

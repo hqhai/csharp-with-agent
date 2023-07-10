@@ -11,18 +11,23 @@ namespace Fsel.Course.Infrastructure.Common
     using Fsel.Course.Domain.Models.CommandModels.Exercises;
     using Fsel.Course.Domain.Models.CommandModels.ExtraPractices;
     using Fsel.Course.Domain.Models.CommandModels.ExtraPractiveChapters;
+    using Microsoft.EntityFrameworkCore;
 
     public class ExtraPracticeConverter
     {
         private readonly IExtraPracticeRepository _extraPracticeRepository;
         private readonly IMapper _mapper;
         private readonly VideoConverter _videoConverter;
+        private readonly IMockTestRepository _mockTestRepository;
+        private readonly IVideoRepository _videoRepository;
         private readonly IExtraPracticeExerciseRepository _extraPracticeExerciseRepository;
         private readonly IExerciseRepository _exerciseRepository;
         private readonly IQuestionRepository _questionRepository;
 
         public ExtraPracticeConverter(IExtraPracticeRepository extraPracticeRepository, IMapper mapper
             , VideoConverter videoConverter
+            , IMockTestRepository mockTestRepository
+            , IVideoRepository videoRepository
             , IExtraPracticeExerciseRepository extraPracticeExerciseRepository
             , IExerciseRepository exerciseRepository
             , IQuestionRepository questionRepository
@@ -31,6 +36,8 @@ namespace Fsel.Course.Infrastructure.Common
             _extraPracticeRepository = extraPracticeRepository;
             _mapper = mapper;
             _videoConverter = videoConverter;
+            _mockTestRepository = mockTestRepository;
+            _videoRepository = videoRepository;
             _extraPracticeExerciseRepository = extraPracticeExerciseRepository;
             _exerciseRepository = exerciseRepository;
             _questionRepository = questionRepository;
@@ -104,11 +111,20 @@ namespace Fsel.Course.Infrastructure.Common
         {
             ArgumentNullException.ThrowIfNull(request);
             VoidMethodResult methodResult = new VoidMethodResult();
-
+            if (await _extraPracticeRepository.Queryable.AnyAsync(x => x.Code == request.Code))
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumExtraPracticeErrorCode.CodeAlreadyExists), nameof(request.Code), request.Code);
+                return methodResult;
+            }
             List<ExtraPracticeExercise> extraPracticeExercises = new List<ExtraPracticeExercise>();
             List<ExtraPracticeChapter> extraPracticeChapters = new List<ExtraPracticeChapter>();
-            if (request.Type == EnumExtraPracticeType.Book && request.ExtraPracticeChapters != null && request.ExtraPracticeChapters.Count > 0)
+            if (request.Type == EnumExtraPracticeType.Book)
             {
+                if (request.ExtraPracticeChapters == null || request.ExtraPracticeChapters.Count == 0)
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumExtraPracticeChapterErrorCode.ExtraPracticeChaptersNull));
+                    return methodResult;
+                }
                 var method = AddExtraPracticeChapterExercise(extraPracticeChapters, request.ExtraPracticeChapters);
                 if (!method.IsOK)
                 {
@@ -118,6 +134,11 @@ namespace Fsel.Course.Infrastructure.Common
             }
             else if (request.Type == EnumExtraPracticeType.VideoEmbed || request.Type == EnumExtraPracticeType.Exercise)
             {
+                if (request.Exercises == null || request.Exercises.Count == 0)
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumExerciseErrorCode.ExercisesNull));
+                    return methodResult;
+                }
                 var method = AddExerciseToExtraPractice(extraPracticeExercises, request.Exercises);
                 if (!method.IsOK)
                 {
@@ -140,6 +161,24 @@ namespace Fsel.Course.Infrastructure.Common
                     return methodResult;
                 }
                 extraPractice.Video = video;
+            }
+            else if (request.Type == EnumExtraPracticeType.MockTest)
+            {
+                if (request.MockTestId == null)
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumMockTestErrorCode.MockTestIdNotNull));
+                    return methodResult;
+                }
+                var isCheck = await _mockTestRepository.Queryable.AnyAsync(x => x.Id == request.MockTestId) && !(await _extraPracticeRepository.Queryable.AnyAsync(x => x.MockTestId == request.MockTestId));
+                if (isCheck)
+                {
+                    extraPractice.MockTestId = request.MockTestId;
+                }
+                else
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumMockTestErrorCode.MockTestAlreadyExistToExtraPractice));
+                    return methodResult;
+                }
             }
             if (extraPracticeExercises.Count > 0)
             {
@@ -157,7 +196,11 @@ namespace Fsel.Course.Infrastructure.Common
         {
             ArgumentNullException.ThrowIfNull(request);
             VoidMethodResult methodResult = new VoidMethodResult();
-
+            if (await _extraPracticeRepository.Queryable.AnyAsync(x => x.Id != request.Id && x.Code == request.Code))
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumExtraPracticeErrorCode.CodeAlreadyExists), nameof(request.Code), request.Code);
+                return methodResult;
+            }
             List<ExtraPracticeExercise> extraPracticeExercises = new List<ExtraPracticeExercise>();
             List<ExtraPracticeChapter> extraPracticeChapters = new List<ExtraPracticeChapter>();
             if (request.Type == EnumExtraPracticeType.Book && request.ExtraPracticeChapters != null && request.ExtraPracticeChapters.Count > 0)
@@ -180,20 +223,40 @@ namespace Fsel.Course.Infrastructure.Common
             }
             else if (request.Type == EnumExtraPracticeType.InteractiveVideo)
             {
-                if (request.Video == null)
+                var video = await _videoRepository.GetIncludeByIdAsync(request.VideoId ?? Guid.Empty);
+                if (request.Video == null || request.VideoId == null)
                 {
                     methodResult.AddErrorBadRequest(nameof(EnumVideoErrorCode.VideoNull));
                     return methodResult;
                 }
-                Video video = _mapper.Map<Video>(request.Video);
-                var method = await _videoConverter.CreateTimeCodeToVideo(video, request.Video);
-                if (!method.IsOK)
+                if (video == null)
                 {
-                    methodResult.AddErrorBadRequest(method.ErrorMessages);
+                    methodResult.AddErrorBadRequest(nameof(EnumVideoErrorCode.VideoNotExist), nameof(request.Id), request.Id);
+                    return methodResult;
+                }
+                request.Video.Id = video.Id;
+                _mapper.Map(request.Video, video);
+                var methodUpdate = await _videoConverter.UpdateTimeCodeToVideo(video, request.Video);
+                if (!methodUpdate.IsOK)
+                {
+                    methodResult.AddErrorBadRequest(methodUpdate.ErrorMessages);
                     return methodResult;
                 }
                 extraPractice.Video = video;
             }
+            else if (request.Type == EnumExtraPracticeType.MockTest)
+            {
+                if (request.MockTestId == null)
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumMockTestErrorCode.MockTestIdNotNull));
+                    return methodResult;
+                }
+                if (await _mockTestRepository.Queryable.AnyAsync(x => x.Id == request.MockTestId))
+                {
+                    extraPractice.MockTestId = request.MockTestId;
+                }
+            }
+            _mapper.Map(request, extraPractice);
             if (extraPracticeExercises.Count > 0)
             {
                 extraPractice.ExtraPracticeExercises.Clear();

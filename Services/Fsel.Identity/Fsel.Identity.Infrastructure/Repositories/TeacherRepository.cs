@@ -41,5 +41,19 @@ namespace Fsel.Identity.Infrastructure.Repositories
                 throw;
             }
         }
+
+        public async Task<Teacher?> GetIncludeByUserIdAsync(Guid userId, int? siteId = null)
+        {
+            try
+            {
+                return await Queryable
+                .Include(x => x.Human)
+                .FirstOrDefaultAsync(x => x.Human!.UserId == userId.ToString());
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
     }
 }

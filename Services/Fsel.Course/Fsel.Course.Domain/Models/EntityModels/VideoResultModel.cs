@@ -4,6 +4,8 @@ namespace Fsel.Course.Domain.Models.EntityModels
 {
     using System;
     using Fsel.Core.Base.BaseModels;
+    using Fsel.Course.Domain.Entities;
+    using Fsel.Course.Domain.Entities.SkillScoresConfigs;
     using Fsel.Course.Domain.Enums;
 
     public class VideoResultModel : BaseModel
@@ -17,5 +19,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public Guid LessonResultId { get; set; }
         public Guid VideoId { get; set; }
         public Guid StudentId { get; set; }
+        public IList<VideoSkillScores>? VideoSkillScores { get; set; }
+        public IList<VideoTimeCodeAnswerModel>? VideoTimeCodeAnswers { get; set; }
     }
 }

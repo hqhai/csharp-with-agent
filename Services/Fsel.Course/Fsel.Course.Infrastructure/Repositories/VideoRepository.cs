@@ -72,6 +72,7 @@ namespace Fsel.Course.Infrastructure.Repositories
                                         Exercises = x.TimeCodeExercises.Where(n => n.Exercise != null && !n.IsDeleted).Select(n => n.Exercise).OrderBy(x => x!.CreatedDate).Select(n => new ExerciseModel
                                         {
                                             Id = n!.Id,
+                                            Name = n.Name,
                                             MediaPost = n.MediaPost,
                                             CourseSkill = n.CourseSkill,
                                             Questions = n.ExerciseQuestions.Where(m => m.Question != null && !m.IsDeleted).Select(m => m.Question).OrderBy(x => x!.CreatedDate).Select(m => new QuestionModel()

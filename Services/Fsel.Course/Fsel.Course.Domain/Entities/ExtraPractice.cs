@@ -69,6 +69,10 @@ namespace Fsel.Course.Domain.Entities
 
         public Guid? VideoId { get; set; }
         public Video? Video { get; set; }
+        public Guid? PlacementTestId { get; set; }
+        public PlacementTest? PlacementTest { get; set; }
+        public Guid? MockTestId { get; set; }
+        public MockTest? MockTest { get; set; }
         public ICollection<LessonExtraPractice> LessonExtraPractices { get; set; } = new List<LessonExtraPractice>();
         public ICollection<ExtraPracticeChapter> ExtraPracticeChapters { get; set; } = new List<ExtraPracticeChapter>();
         public ICollection<ExtraPracticeExercise> ExtraPracticeExercises { get; set; } = new List<ExtraPracticeExercise>();

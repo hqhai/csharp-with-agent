@@ -35,6 +35,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
                                 .Select(x => new CourseModel
                                 {
                                     Id = x.Id,
+                                    Name = x.Name,
                                     CourseLevel = x.CourseLevel,
                                     CreatedDate = x.CreatedDate,
                                 }).ToListAsync(cancellationToken);

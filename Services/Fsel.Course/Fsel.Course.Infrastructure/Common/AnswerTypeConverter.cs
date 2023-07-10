@@ -145,7 +145,7 @@ namespace Fsel.Course.Infrastructure.Common
             var dataQuestion = configQuestion.Deserialize<ListingQuestion>();
             int number = 0;
 
-            if (dataQuestion != null && dataAnswer != null && dataAnswer.Answers != null && dataAnswer.Answers.Count > 0 && dataAnswer.Answers.Count >= dataQuestion.ExactWordCount )
+            if (dataQuestion != null && dataAnswer != null && dataAnswer.Answers != null && dataAnswer.Answers.Count > 0 && dataAnswer.Answers.Count >= dataQuestion.ExactWordCount)
             {
                 dataAnswer.IsExact = true;
                 number++;
@@ -183,12 +183,20 @@ namespace Fsel.Course.Infrastructure.Common
 
         private static bool IsShortAnswer(string question, string answer)
         {
-            var p = question.ToLower(CultureInfo.CurrentCulture);
-            var s = answer.ToLower(CultureInfo.CurrentCulture);
-            if (p.Replace('’', '\'') == s.Replace('’', '\''))
+            var q = question.ToLower(CultureInfo.CurrentCulture);
+            string[] answerWords = answer.Split(' ');
+            if (answerWords != null)
             {
-                return true;
+                foreach (var word in answerWords)
+                {
+                    var a = word.ToLower(CultureInfo.CurrentCulture);
+                    if (q.Replace('’', '\'') == a.Replace('’', '\''))
+                    {
+                        return true;
+                    }
+                }
             }
+
             return false;
         }
 
