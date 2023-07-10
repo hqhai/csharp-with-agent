@@ -17,6 +17,11 @@ namespace Fsel.Shared.Enums.ErrorCodes
         /// <summary>
         /// Call to service TrainingService error
         /// </summary>
-        CallTrainingServiceError
+        CallTrainingServiceError,
+
+        /// <summary>
+        /// Call to service InteractionService error
+        /// </summary>
+        CallInteractionServiceError
     }
 }
