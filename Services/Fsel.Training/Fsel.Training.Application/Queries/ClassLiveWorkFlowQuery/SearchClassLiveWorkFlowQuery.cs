@@ -70,15 +70,9 @@ namespace Fsel.Training.Application.Queries.ClassLiveWorkFlowQuery
             var courseIds = lists.Select(x => x.CourseId ?? default).Distinct().ToList();
             var courseResults = await _courseService.GetListCourseByIds(courseIds);
             var courses = courseResults.Content?.Result;
-            var teachersReq = _userService.GetTeacherByIdsAsync(new GetTeacherByIdsQueryModel { Ids = lists.Select(x => x.TeacherId ?? default).ToList() });
-            var teachersResult = teachersReq.GetAwaiter().GetResult();
+            var teachersResult = await _userService.GetTeacherByIdsAsync(new GetTeacherByIdsQueryModel { Ids = lists.Select(x => x.TeacherId ?? default).ToList() });
             var teachers = teachersResult.Content?.Result;
             var liveTimeFramesResult = await _systemService.GetLiveTimeFramesAsync();
-            if (!liveTimeFramesResult.IsSuccessStatusCode)
-            {
-                methodResult.AddError(liveTimeFramesResult.Error);
-                return methodResult;
-            }
             var liveTimeFrames = liveTimeFramesResult.Content?.Result;
 
             foreach (var item in lists)
