@@ -67,11 +67,19 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                             break;
 
                         case var value when value == (courseUnitMockTest.FinalTestId == null):
-
+                            var finalTestResultNext = await _unitResultRepository.Queryable.FirstOrDefaultAsync(x => x.StudentId == unitResult.StudentId && x.UnitId == courseUnitMockTest.UnitId, cancellationToken);
+                            if (finalTestResultNext != null)
+                            {
+                                finalTestResultNext.Status = EnumResultStatus.Process;
+                            }
                             break;
 
                         case var value when value == (courseUnitMockTest.MockTestId == null):
-
+                            var mockTestResultNext = await _unitResultRepository.Queryable.FirstOrDefaultAsync(x => x.StudentId == unitResult.StudentId && x.UnitId == courseUnitMockTest.UnitId, cancellationToken);
+                            if (mockTestResultNext != null)
+                            {
+                                mockTestResultNext.Status = EnumResultStatus.Process;
+                            }
                             break;
 
                         default:
