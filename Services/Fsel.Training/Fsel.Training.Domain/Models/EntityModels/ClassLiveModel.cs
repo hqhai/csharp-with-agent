@@ -14,8 +14,9 @@ namespace Fsel.Training.Domain.Models.EntityModels
         public DateTime? EndDate { get; set; }
         public Guid? LiveTimeFrameId { get; set; }
         public bool IsStatus { get; set; }
-        public double? StartTime { get; set; }
-        public double? EndTime { get; set; }
+        public string? Status { get; set; }
+        public double StartTime { get; set; }
+        public double EndTime { get; set; }
         public IList<DayOfWeek>? LiveDays { get; set; }
     }
 }

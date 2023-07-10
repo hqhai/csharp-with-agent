@@ -60,7 +60,7 @@ namespace Fsel.Training.Application.Queries.ClassLiveQuery
                 return methodResult;
             }
             var teacherResult = await _userService.GetTeacherByUserIdAsync(_authContext.CurrentUserId);
-                var teacherId = teacherResult.Content?.Result?.Id;
+            var teacherId = teacherResult.Content?.Result?.Id;
             var r1 = _classRepository.Queryable
                  .Where(x => x != null && x.TeacherId == teacherId && x.TeacherApprovalStatus == EnumTeacherApprovalStatus.Pending)
                  .AsNoTracking()
@@ -68,6 +68,7 @@ namespace Fsel.Training.Application.Queries.ClassLiveQuery
                  {
                      Id = x.Id,
                      Code = x.Code,
+                     Status = x.TeacherApprovalStatus.ToString(),
                      CourseId = x.CourseId,
                      CreatedDate = x.CreatedDate,
                      StartDate = x.StartDate,
@@ -86,6 +87,7 @@ namespace Fsel.Training.Application.Queries.ClassLiveQuery
                 {
                     Id = x.Id,
                     Code = x.Class!.Code,
+                    Status = x.ClassLiveWorkFlows.FirstOrDefault(x => x.Type == EnumWorkFlowType.AssignTeacher && x.Status == EnumWorkFlowAssignTeacherStatus.Pending.ToString() && x.TeacherId == teacherId)!.Status,
                     CourseId = x.Class!.CourseId,
                     CreatedDate = x.CreatedDate,
                     StartDate = x.LiveDate,
@@ -107,16 +109,24 @@ namespace Fsel.Training.Application.Queries.ClassLiveQuery
             IList<Guid> ids = new List<Guid>();
             foreach (var item in lists)
             {
-                var liveTimeFrame = timeFrames?.FirstOrDefault(x => x.Id == item.LiveTimeFrameId);
-                item.CourseLevel = courses?.FirstOrDefault(x => x.Id == item.CourseId)?.CourseLevel ?? default;
-                item.StartTime = liveTimeFrame?.StartTime;
-                item.EndTime = liveTimeFrame?.EndTime;
-                DateTime dateTime = DateTime.Now;
-                var assignTeacher = item.StartDate!.Value.AddDays(-1);
-                item.IsStatus = assignTeacher.Date < dateTime.Date;
-                if (item.IsStatus)
+                if (item != null)
                 {
-                    ids.Add(item.Id);
+                    var liveTimeFrame = timeFrames?.FirstOrDefault(x => x.Id == item.LiveTimeFrameId);
+                    item.CourseLevel = courses?.FirstOrDefault(x => x.Id == item.CourseId)?.CourseLevel ?? default;
+                    item.StartTime = liveTimeFrame?.StartTime ?? default;
+                    item.EndTime = liveTimeFrame?.EndTime ?? default;
+                    if (item.StartDate != null)
+                    {
+                        DateTime dateTime = DateTime.Now;
+                        double totalHours = item.StartTime % 24;
+                        int hours = (int)totalHours;
+                        var assignTeacher = item.StartDate.Value.Date.AddHours(hours);
+                        item.IsStatus = assignTeacher < dateTime;
+                        if (item.IsStatus)
+                        {
+                            ids.Add(item.Id);
+                        }
+                    }
                 }
             }
             if (ids.Count > 0)
