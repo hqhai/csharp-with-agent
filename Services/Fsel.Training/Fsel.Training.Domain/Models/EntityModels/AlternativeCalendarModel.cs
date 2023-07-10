@@ -15,5 +15,6 @@ namespace Fsel.Training.Domain.Models.EntityModels
         public string? Status { get; set; }
         public Guid? TeacherId { get; set; }
         public Guid? LiveTimeFrameId { get; set; }
+        public Guid ClassLiveCalendarId { get; set; }
     }
 }

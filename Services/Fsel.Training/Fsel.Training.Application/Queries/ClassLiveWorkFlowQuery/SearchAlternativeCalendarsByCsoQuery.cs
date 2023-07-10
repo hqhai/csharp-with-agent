@@ -61,7 +61,8 @@ namespace Fsel.Training.Application.Queries.ClassLiveWorkFlowQuery
                 LiveTimeFrameId = ac.ClassLiveCalendar.LiveTimeFrameId,
                 Status = ac.Status,
                 LiveDate = ac.ClassLiveCalendar.LiveDate,
-                CreatedDate = ac.CreatedDate
+                CreatedDate = ac.CreatedDate,
+                ClassLiveCalendarId = ac.ClassLiveCalendarId
             });
             if (!string.IsNullOrEmpty(request.Keyword))
             {
