@@ -15,7 +15,6 @@ namespace Fsel.Course.Lms.Application.InternalEvents
         INotificationHandler<EntityChangedEvent<LessonResult>>
     {
         private readonly IUnitRepository _unitRepository;
-        private readonly IUnitResultRepository _unitResultRepository;
 
         public LessonResultInputThenUpdateUnitResultHandler(IUnitRepository unitRepository
             , IUnitResultRepository unitResultRepository
@@ -23,10 +22,19 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             , IVideoResultRepository videoResultRepository
             , IClassForumResultRepository classForumResultRepository
             , IHomeWorkResultRepository homeWorkResultRepository
-            ) : base(videoResultRepository, classForumResultRepository, unitResultRepository, lessonResultRepository, homeWorkResultRepository)
+            , ICourseRepository courseRepository
+            , IMockTestResultRepository mockTestResultRepository
+            , IFinalTestResultRepository finalTestResultRepository
+            ) : base(videoResultRepository,
+                classForumResultRepository,
+                unitResultRepository,
+                lessonResultRepository,
+                courseRepository,
+                finalTestResultRepository,
+                mockTestResultRepository,
+                homeWorkResultRepository)
         {
             _unitRepository = unitRepository;
-            _unitResultRepository = unitResultRepository;
         }
 
         public async Task Handle(EntityChangedEvent<LessonResult> notification, CancellationToken cancellationToken)
@@ -40,11 +48,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
 
             if (unit != null && lessonResult.Status == EnumResultStatus.Done)
             {
-                var unitResult = await _unitResultRepository.Queryable.FirstOrDefaultAsync(x => x.UnitId == lessonResult.UnitId && x.StudentId == lessonResult.StudentId && x.CourseId == lessonResult.CourseId, cancellationToken);
-                if (unitResult != null && unit.LessonResults.Count == unit.UnitLessons.Count && unit.UnitSkillMockTests.Count == 0)
-                {
-                    await UpdateUnit(unit.LessonResults.ToList(), unitResult, cancellationToken);
-                }
+                await UpdateUnit(unit.LessonResults.ToList(), unit, lessonResult.CourseId, lessonResult.StudentId, cancellationToken);
             }
         }
     }

@@ -19,13 +19,23 @@ namespace Fsel.Course.Lms.Application.InternalEvents
         private readonly IMockTestRepository _mockTestRepository;
 
         public MockTestResultInputThenUpdateUnitResultHandler(IUnitRepository unitRepository
-            , IUnitResultRepository unitResultRepository
             , ILessonResultRepository lessonResultRepository
             , IVideoResultRepository videoResultRepository
             , IClassForumResultRepository classForumResultRepository
             , IHomeWorkResultRepository homeWorkResultRepository
+            , ICourseRepository courseRepository
             , IMockTestRepository mockTestRepository
-            ) : base(videoResultRepository, classForumResultRepository, unitResultRepository, lessonResultRepository, homeWorkResultRepository)
+            , IUnitResultRepository unitResultRepository
+            , IMockTestResultRepository mockTestResultRepository
+            , IFinalTestResultRepository finalTestResultRepository
+            ) : base(videoResultRepository,
+                classForumResultRepository,
+                unitResultRepository,
+                lessonResultRepository,
+                courseRepository,
+                finalTestResultRepository,
+                mockTestResultRepository,
+                homeWorkResultRepository)
         {
             _unitRepository = unitRepository;
             _unitResultRepository = unitResultRepository;
@@ -37,16 +47,24 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             ArgumentNullException.ThrowIfNull(notification);
             var mockTestResult = notification.Data;
             var mockTest = await _mockTestRepository.GetByIdAsync(mockTestResult.MockTestId);
-            var unit = await _unitRepository.Queryable.Include(x => x.UnitLessons)
+
+            if (mockTest != null && mockTest.MockTestType == EnumMockTestType.SkillMockTest && mockTestResult.Status == EnumResultStatus.Done)
+            {
+                var unit = await _unitRepository.Queryable.Include(x => x.UnitLessons)
                                                    .Include(x => x.LessonResults.Where(x => x.Status == EnumResultStatus.Done && x.StudentId == mockTestResult.StudentId && x.CourseId == mockTestResult.CourseId))
                                                    .FirstOrDefaultAsync(x => x.Id == mockTestResult.UnitId, cancellationToken);
-            if (unit != null && mockTest != null && mockTest.MockTestType == EnumMockTestType.SkillMockTest && mockTestResult.Status == EnumResultStatus.Done)
-            {
-                var unitResult = await _unitResultRepository.Queryable.FirstOrDefaultAsync(x => x.UnitId == mockTestResult.UnitId && x.StudentId == mockTestResult.StudentId && x.CourseId == mockTestResult.CourseId, cancellationToken);
-                if (unitResult != null && unit.LessonResults.Count == unit.UnitLessons.Count)
+                if (unit != null)
                 {
-                    await UpdateUnit(unit.LessonResults.ToList(), unitResult, cancellationToken);
+                    var unitResult = await _unitResultRepository.Queryable.FirstOrDefaultAsync(x => x.UnitId == mockTestResult.UnitId && x.StudentId == mockTestResult.StudentId && x.CourseId == mockTestResult.CourseId, cancellationToken);
+                    if (unitResult != null && unit.LessonResults.Count == unit.UnitLessons.Count)
+                    {
+                        await UpdateUnit(unit.LessonResults.ToList(), unit, mockTestResult.CourseId, mockTestResult.StudentId,cancellationToken);
+                    }
                 }
+            }
+            else if (mockTest != null && mockTest.MockTestType == EnumMockTestType.SkillMockTest && mockTestResult.Status == EnumResultStatus.Done)
+            {
+                await UpdateProcessMockTest(mockTestResult, cancellationToken);
             }
         }
     }
