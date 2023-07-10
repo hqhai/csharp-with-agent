@@ -8,6 +8,6 @@ namespace Fsel.Training.Domain.Models.CommandModels.ClassLiveWorkFlowPlans
     {
         public Guid LiveTimeFrameId { get; set; }
 
-        public DayOfWeek LiveDate { get; set; }
+        public DateTime LiveDate { get; set; }
     }
 }

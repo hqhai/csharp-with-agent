@@ -2,9 +2,9 @@
 
 using Fsel.Common.ActionResults;
 using Fsel.Shared.Enums;
+using Fsel.Shared.Helpers;
 using MediatR;
 using Microsoft.AspNetCore.Http;
-using Fsel.Shared.Helpers;
 
 namespace Fsel.Course.Application.Queries.CategoryQuery
 {

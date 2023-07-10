@@ -14,7 +14,7 @@ namespace Fsel.Course.Infrastructure.Maps
         {
             CreateMap<ExtraPractice, ExtraPracticeModel>().IgnoreAllNonExisting();
             CreateMap<CreateExtraPracticeCommandModel, ExtraPractice>().IgnoreAllNonExisting();
-            CreateMap<UpdateExtraPracticeCommandModel, ExtraPractice>().IgnoreAllNonExisting();
+            CreateMap<UpdateExtraPracticeCommandModel, ExtraPractice>().ForMember(m => m.Video, opt => opt.Ignore()).IgnoreAllNonExisting();
         }
     }
 }

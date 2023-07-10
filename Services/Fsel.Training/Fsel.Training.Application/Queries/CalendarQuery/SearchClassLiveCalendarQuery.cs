@@ -77,32 +77,23 @@ namespace Fsel.Training.Application.Queries.CalendarQuery
             var courses = courseResults.Content?.Result;
             var timeFramesResult = await _systemService.GetLiveTimeFramesAsync();
             var timeFrames = timeFramesResult.Content?.Result;
+
             foreach (var item in lists)
             {
                 var liveTimeFrame = timeFrames?.FirstOrDefault(x => x.Id == item.LiveTimeFrameId);
                 item.CourseLevel = courses?.FirstOrDefault(x => x.Id == item.CourseId)?.CourseLevel ?? default;
                 item.StartTime = liveTimeFrame?.StartTime;
                 item.EndTime = liveTimeFrame?.EndTime;
+                DateTime dateTime = DateTime.Now;
+                var assignTeacher = item.LiveDate.AddDays(-1);
+                var endTime = item.LiveDate.AddHours(-1);
+                var startTime = item.LiveDate.AddHours(-24);
+                item.IsActiveWorkPlan = dateTime > startTime && dateTime < endTime;
+                item.IsActiveWorkFlow = assignTeacher.Date < dateTime.Date;
             }
             methodResult.Result = new PagingItemsModel<ClassLiveCalendarSearchModel>(lists, request, totalItem);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }
-
-        //public ClassLiveCalendarSearchModel GetByClass(ClassLiveCalendar classLiveCalendar)
-        //{
-        //    ArgumentNullException.ThrowIfNull(classLiveCalendar);
-        //    var @class = classLiveCalendar.Class;
-        //    return new ClassLiveCalendarSearchModel
-        //    {
-        //        Id = classLiveCalendar.Id,
-        //        CreatedDate = classLiveCalendar.CreatedDate,
-        //        CourseId = @class?.CourseId ?? default,
-        //        Code = @class?.Code,
-        //        AccessLink = classLiveCalendar.AccessLink,
-        //        LiveTimeFrameId = @class?.LiveTimeFrameId ?? default,
-        //        LiveDate = classLiveCalendar.LiveDate
-        //    };
-        //}
     }
 }

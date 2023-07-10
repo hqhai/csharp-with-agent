@@ -2,6 +2,7 @@
 
 namespace Fsel.Training.Domain.Models.CommandModels.ClassLiveWorkFlows
 {
+    using System.Text.Json.Serialization;
     using Fsel.Training.Domain.Enums;
     using Fsel.Training.Domain.Models.CommandModels.ClassLiveWorkFlowPlans;
 
@@ -9,6 +10,10 @@ namespace Fsel.Training.Domain.Models.CommandModels.ClassLiveWorkFlows
     {
         public Guid ClassLiveCalendarId { get; set; }
         public string? Description { get; set; }
+
+        [JsonIgnore]
+        public bool IsActive { get; set; } = true;
+
         public IList<CreateClassLiveWorkFlowPlanCommandModel>? ClassLiveWorkFlowPlans { get; set; }
         public EnumWorkFlowType Type { get; set; }
     }
