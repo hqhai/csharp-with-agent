@@ -52,13 +52,13 @@ namespace Fsel.Training.Application.Queries.ClassLiveWorkFlowQuery
                                                 .Select(x => new SearchClassLiveWorkFlowModel
                                                 {
                                                     Id = x.Id,
-                                                    ClassLiveCalendarId = x.ClassLiveCalendarId,
                                                     CreatedDate = x.CreatedDate,
                                                     Status = x.Status,
                                                     LiveTimeFrameId = x.ClassLiveCalendar!.LiveTimeFrameId,
                                                     ClassName = x.ClassLiveCalendar.Class!.Name,
                                                     ClassCode = x.ClassLiveCalendar.Class.Code,
                                                     LiveDays = x.ClassLiveCalendar.Class.LiveDays,
+                                                    CourseId = x.ClassLiveCalendar.Class.CourseId,
                                                     TeacherId = x.TeacherId
                                                 });
             int totalItem = await classLiveWorkFlowQuery.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
