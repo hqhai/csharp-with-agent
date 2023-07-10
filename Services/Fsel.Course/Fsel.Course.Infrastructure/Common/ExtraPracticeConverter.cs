@@ -120,7 +120,7 @@ namespace Fsel.Course.Infrastructure.Common
             List<ExtraPracticeChapter> extraPracticeChapters = new List<ExtraPracticeChapter>();
             if (request.Type == EnumExtraPracticeType.Book)
             {
-                if (request.ExtraPracticeChapters == null || request.ExtraPracticeChapters.Count > 0)
+                if (request.ExtraPracticeChapters == null || request.ExtraPracticeChapters.Count == 0)
                 {
                     methodResult.AddErrorBadRequest(nameof(EnumExtraPracticeChapterErrorCode.ExtraPracticeChaptersNull));
                     return methodResult;
