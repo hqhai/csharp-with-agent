@@ -19,6 +19,9 @@ namespace Fsel.Course.Domain.Enums
         Exercise,
 
         [Description("Articles")]
-        Articles
+        Articles,
+
+        [Description("MockTest")]
+        MockTest
     }
 }

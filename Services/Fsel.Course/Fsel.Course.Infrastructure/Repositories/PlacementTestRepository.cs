@@ -29,6 +29,7 @@ namespace Fsel.Course.Infrastructure.Repositories
                                 .ThenInclude(x => x.SectionParts)
                                 .ThenInclude(x => x.SectionQuestions.Where(n => n.Question != null))
                                 .ThenInclude(x => x.Question)
+                                .Include(x => x.ExtraPractice)
                                 .FirstOrDefaultAsync(x => x.Id == id);
                 }
                 else
@@ -39,6 +40,7 @@ namespace Fsel.Course.Infrastructure.Repositories
                                 .ThenInclude(x => x!.Sections)
                                 .ThenInclude(x => x.SectionQuestions.Where(n => n.Question != null))
                                 .ThenInclude(x => x.Question)
+                                .Include(x => x.ExtraPractice)
                                 .FirstOrDefaultAsync(x => x.Id == id);
                 }
 
