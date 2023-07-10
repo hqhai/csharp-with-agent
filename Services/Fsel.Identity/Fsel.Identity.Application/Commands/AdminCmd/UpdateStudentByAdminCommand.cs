@@ -140,7 +140,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
                     var sendResult = new MethodResult<bool>();
                     if (isCheckEmail)
                     {
-                        sendResult = await _mediator.Send(new SenderCommand { Email = request.Email, Subject = subject, Params = param, Template = EnumSenderTemplate.SendOtp }, cancellationToken).ConfigureAwait(false);
+                        sendResult = await _mediator.Send(new SenderCommand { Email = request.Email, Subject = subject, Params = param, Template = EnumSenderTemplate.SendOtpAndLink }, cancellationToken).ConfigureAwait(false);
                     }
                     else if (isCheckPhone)
                     {
