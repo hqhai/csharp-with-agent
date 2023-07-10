@@ -32,7 +32,7 @@ namespace Fsel.Course.Lms.Application.Queries.Students
                                 .Include(x => x.Unit)
                                 .Include(x => x.Lesson)
                                 .Include(x => x.VideoResult)
-                                .Where(x => x.VideoResult != null && x.StudentId == request.StudentId && x.VideoResult.Status == EnumResultStatus.Done)
+                                .Where(x => x.VideoResult != null && x.StudentId == request.StudentId && x.VideoResult.StudentId == request.StudentId && x.VideoResult.Status == EnumResultStatus.Done)
                                 .AsNoTracking()
                                 .Select(x => new LessonCommentByStudentModel
                                 {

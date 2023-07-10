@@ -29,9 +29,9 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
         [HttpGet("{studentId}")]
         [ProducesResponseType(typeof(MethodResult<PagingItemsModel<CourseSearchModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> Get([FromQuery] Guid studentId)
+        public async Task<IActionResult> Get([FromRoute] Guid studentId)
         {
-            MethodResult<IList<LessonCommentByStudentModel>> queryResult = await _mediator.Send(new GetLessonCommentByStudentQuery { StudentId = studentId}).ConfigureAwait(false);
+            MethodResult<IList<LessonCommentByStudentModel>> queryResult = await _mediator.Send(new GetLessonCommentByStudentQuery { StudentId = studentId }).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
     }
