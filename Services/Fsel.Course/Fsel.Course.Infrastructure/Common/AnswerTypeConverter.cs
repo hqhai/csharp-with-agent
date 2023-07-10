@@ -183,13 +183,13 @@ namespace Fsel.Course.Infrastructure.Common
 
         private static bool IsShortAnswer(string question, string answer)
         {
-            var q = question.ToLower(CultureInfo.CurrentCulture);
+            var q = question.Trim().ToLower(CultureInfo.CurrentCulture);
             string[] answerWords = answer.Split(' ');
             if (answerWords != null)
             {
                 foreach (var word in answerWords)
                 {
-                    var a = word.ToLower(CultureInfo.CurrentCulture);
+                    var a = word.Trim().ToLower(CultureInfo.CurrentCulture);
                     if (q.Replace('’', '\'') == a.Replace('’', '\''))
                     {
                         return true;
