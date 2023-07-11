@@ -14,6 +14,7 @@ namespace Fsel.Training.Infrastructure.Maps
         {
             CreateMap<ClassLiveWorkFlowPlan, ClassLiveWorkFlowPlanModel>().IgnoreAllNonExisting();
             CreateMap<CreateClassLiveWorkFlowPlanCommandModel, ClassLiveWorkFlowPlan>().IgnoreAllNonExisting();
+            CreateMap<ClassLiveWorkFlow, ChangeLiveSessionInfoModel>().IgnoreAllNonExisting();
         }
     }
 }

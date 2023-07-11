@@ -7,8 +7,8 @@ namespace Fsel.Training.Application.Queries.ScheduleQuery
     using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Common.ActionResults;
-    using Fsel.Course.Application.Services.UserServices.Models;
     using Fsel.Training.Application.Services.UserServices;
+    using Fsel.Training.Application.Services.UserServices.Models;
     using Fsel.Training.Domain.Enums.ErrorCodes;
     using Fsel.Training.Domain.IRepositories;
     using Fsel.Training.Domain.Models.EntityModels;
