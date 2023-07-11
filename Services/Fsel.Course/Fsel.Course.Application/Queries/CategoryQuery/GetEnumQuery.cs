@@ -65,6 +65,9 @@ namespace Fsel.Course.Application.Queries.CategoryQuery
                 case EnumCourseSourceData.SubscriptionClass:
                     methodResult.Result = ConvertHelper.EnumToListModel<EnumSubscriptionClass>();
                     break;
+                case EnumCourseSourceData.CurrentStatus:
+                    methodResult.Result = ConvertHelper.EnumToListModel<EnumCurrentStatus>();
+                    break;
             }
 
             methodResult.StatusCode = StatusCodes.Status200OK;

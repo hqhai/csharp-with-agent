@@ -41,6 +41,7 @@ namespace Fsel.Training.Application.Queries.ClassLiveWorkFlowQuery
                 methodResult.AddErrorBadRequest(nameof(EnumClassLiveWorkFlowErrorCode.ClassLiveWorkFlowNotExits));
                 return methodResult;
             }
+            liveSessionInformation.Type = classLiveWorkFlow.Type;
             var studentIds = classLiveWorkFlow.ClassLiveCalendar?.Class?.ClassStudents.Select(p => p.StudentId).ToList();
             IList<StudentModel>? students = new List<StudentModel>();
             if (studentIds!.Count > 0)
