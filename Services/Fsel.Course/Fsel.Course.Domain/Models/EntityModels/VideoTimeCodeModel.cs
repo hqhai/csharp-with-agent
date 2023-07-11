@@ -11,7 +11,8 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public long DisplayTimeTicks { get; set; }
 
         public long ExecutionTimeTicks { get; set; }
-
+        public int CorrectTotal { get; set; }
+        public int CorrectCount { get; set; }
         public EnumTimeCodeType TimeCodeType { get; set; }
 
         public Guid VideoId { get; set; }
