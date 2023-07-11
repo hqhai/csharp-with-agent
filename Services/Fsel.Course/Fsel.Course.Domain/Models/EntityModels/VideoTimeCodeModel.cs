@@ -2,6 +2,7 @@
 
 using Fsel.Core.Base.BaseModels;
 using Fsel.Course.Domain.Enums;
+using Fsel.Shared.Enums;
 
 namespace Fsel.Course.Domain.Models.EntityModels
 {
@@ -15,7 +16,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public EnumTimeCodeType TimeCodeType { get; set; }
 
         public Guid VideoId { get; set; }
-
+        public EnumCurrentStatus? Status { get; set; }
         public double DisplayTime { get; set; }
 
         public double ExecutionTime { get; set; }

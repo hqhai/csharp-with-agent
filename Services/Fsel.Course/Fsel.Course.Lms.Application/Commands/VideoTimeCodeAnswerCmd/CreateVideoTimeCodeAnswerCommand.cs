@@ -5,6 +5,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Course.Domain.Entities;
+    using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.CommandModels.VideoTimeCodeAnswers;
@@ -99,11 +100,12 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
 
                 var exercise = question.ExerciseQuestions.Select(x => x.Exercise).FirstOrDefault();
                 var exerciseId = exercise?.Id;
-                var videoTimeCodeId = exercise?.TimeCodeExercises.Select(x => x.VideoTimeCodeId).FirstOrDefault();
-                videoResult.CurrentVideoTimeCodeId = videoTimeCodeId;
+                var videoTimeCode = exercise?.TimeCodeExercises.Select(x => x.VideoTimeCode).FirstOrDefault();
+                var videoTimeCodeId = videoTimeCode?.Id;
+                videoResult.CurrentVideoTimeCodeId = videoTimeCode?.Id;
                 var answer = await _videoTimeCodeAnswerRepository.GetAsync(videoResult.Id, question.Id, exerciseId, videoTimeCodeId);
 
-                if (answer == null)
+                if (answer == null && videoTimeCode != null && videoTimeCode.TimeCodeType == EnumTimeCodeType.Standalone)
                 {
                     var (answerConfig, correctCount) = _answerTypeConverter.GetTotalCorrectByAsnwerType(item.Answer, question.Config, question.QuestionType);
                     if (answerConfig == null)
@@ -124,7 +126,28 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
                     };
                     videoTimeCodeAnswers.Add(answer);
                 }
-                else if (answer.Status == EnumCurrentStatus.Process)
+                else if (answer == null && videoTimeCode != null && videoTimeCode.TimeCodeType != EnumTimeCodeType.Standalone)
+                {
+                    var (answerConfig, correctCount) = _answerTypeConverter.GetTotalCorrectByAsnwerType(item.Answer, question.Config, question.QuestionType);
+                    if (answerConfig == null)
+                    {
+                        methodResult.AddErrorBadRequest(nameof(EnumVideoTimeCodeAnswerErrorCode.AnswerIsInTheWrongFormat), nameof(item.Answer), item.Answer);
+                        return methodResult;
+                    }
+
+                    answer = new VideoTimeCodeAnswer
+                    {
+                        Answer = answerConfig,
+                        VideoTimeCodeId = videoTimeCodeId ?? Guid.Empty,
+                        ExerciseId = exerciseId ?? Guid.Empty,
+                        QuestionId = question.Id,
+                        VideoResultId = videoResult.Id,
+                        CorrectCount = question.Ungraded ? default : correctCount,
+                        Status = EnumCurrentStatus.Done
+                    };
+                    videoTimeCodeAnswers.Add(answer);
+                }
+                else if (answer != null && answer.Status == EnumCurrentStatus.Process)
                 {
                     var (answerConfig, correctCount) = _answerTypeConverter.GetTotalCorrectByAsnwerType(item.Answer, question.Config, question.QuestionType);
                     if (answerConfig == null)
@@ -144,8 +167,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
             }
             var correctQuestion = questionModels.Sum(x => x.CorrectTotal);
             var correctAnswer = questionModels.Select(x => x.ResultAnswer).Sum(x => x!.CorrectCount);
-            var isCheck = correctAnswer == correctQuestion;
-            if (isCheck && questionModels.All(x => x.ResultAnswer != null && x.ResultAnswer.Status == EnumCurrentStatus.Process))
+            if (correctAnswer == correctQuestion && questionModels.All(x => x.ResultAnswer != null && x.ResultAnswer.Status == EnumCurrentStatus.Process))
             {
                 questionModels.ForEach(x => { if (x.ResultAnswer != null) { x.ResultAnswer.Status = EnumCurrentStatus.Done; } });
                 videoTimeCodeAnswers.ForEach(x => x.Status = EnumCurrentStatus.Done);
