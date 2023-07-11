@@ -148,7 +148,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
             if (isCheck && questionModels.All(x => x.ResultAnswer != null && x.ResultAnswer.Status == EnumCurrentStatus.Process))
             {
                 questionModels.ForEach(x => { if (x.ResultAnswer != null) { x.ResultAnswer.Status = EnumCurrentStatus.Done; } });
-                updateVideoTimeCodeAnswers.ForEach(x => x.Status = EnumCurrentStatus.Done);
+                videoTimeCodeAnswers.ForEach(x => x.Status = EnumCurrentStatus.Done);
             }
 
             #endregion Validation
