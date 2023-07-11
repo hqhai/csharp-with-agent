@@ -12,6 +12,7 @@ namespace Fsel.Course.Infrastructure.Maps
         public HomeWorkAnswerProfile()
         {
             CreateMap<HomeWorkAnswer, HomeWorkAnswerModel>().IgnoreAllNonExisting();
+            CreateMap<HomeWorkAnswer, AnswerModel>().IgnoreAllNonExisting();
         }
     }
 }
