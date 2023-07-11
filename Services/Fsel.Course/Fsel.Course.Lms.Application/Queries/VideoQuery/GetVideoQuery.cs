@@ -125,6 +125,7 @@ namespace Fsel.Course.Lms.Application.Queries.VideoQuery
                     CorrectCount = x.CorrectCount,
                     CorrectTotal = x.CorrectTotal,
                     Feedback = x.Feedback,
+                    CurrentVideoTimeCodeId = x.CurrentVideoTimeCodeId,
                     NumberOfStars = x.NumberOfStars,
                     Percent = x.Percent,
                     Status = x.Status,

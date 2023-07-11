@@ -2,14 +2,15 @@
 
 namespace Fsel.Training.Domain.Models.EntityModels
 {
-    using Fsel.Training.Domain.Enums;
+    using Fsel.Core.Base.BaseModels;
 
-    public class ClassLiveWorkFlowInfoModel
+    public class ChangeLiveSessionInfoModel : BaseModel
     {
         public string? ClassName { get; set; }
         public string? TeacherName { get; set; }
+        public string? AccessLink { get; set; }
         public string? Description { get; set; }
-        public EnumWorkFlowType Type { get; set; }
         public IList<StudentInfoModel>? Students { get; set; }
+        public IList<ClassLiveWorkFlowPlanModel>? ClassLiveWorkFlowPlans{ get; set; }
     }
 }

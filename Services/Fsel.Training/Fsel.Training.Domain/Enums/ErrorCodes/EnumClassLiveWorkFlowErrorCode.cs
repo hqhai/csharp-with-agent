@@ -15,6 +15,11 @@ namespace Fsel.Training.Domain.Enums.ErrorCodes
         TeacherNotExits,
 
         /// <summary>
+        /// CSO Does not exits
+        /// </summary>
+        CSONotExits,
+
+        /// <summary>
         /// ClassLiveWorkFlow Already exist
         /// </summary>
         ClassLiveWorkFlowAlreadyExist,

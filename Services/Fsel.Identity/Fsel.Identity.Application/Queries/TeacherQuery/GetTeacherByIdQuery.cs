@@ -10,6 +10,7 @@ namespace Fsel.Identity.Application.Queries.TeacherQuery
     using Fsel.Identity.Domain.Models.EntityModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
+    using Microsoft.EntityFrameworkCore;
 
     public class GetTeacherByIdQuery : IRequest<MethodResult<TeacherModel>>
     {
@@ -32,7 +33,7 @@ namespace Fsel.Identity.Application.Queries.TeacherQuery
             ArgumentNullException.ThrowIfNull(request);
 
             MethodResult<TeacherModel> methodResult = new MethodResult<TeacherModel>();
-            var teacher = await _teacherRepository.GetByIdAsync(request.Id);
+            var teacher = await _teacherRepository.Queryable.Include(x => x.Human).FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
             methodResult.Result = _mapper.Map<TeacherModel>(teacher);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;

@@ -10,6 +10,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
     using Fsel.Course.Domain.Models.CommandModels.VideoTimeCodeAnswers;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Infrastructure.Common;
+    using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -21,6 +22,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
     public class CreateVideoTimeCodeAnswerCommandHandler : IRequestHandler<CreateVideoTimeCodeAnswerCommand, MethodResult<IList<QuestionModel>>>
     {
         private readonly IVideoTimeCodeAnswerRepository _videoTimeCodeAnswerRepository;
+        private readonly IVideoResultRepository _videoResultRepository;
         private readonly ILessonResultRepository _lessonResultRepository;
         private readonly IMapper _mapper;
         private readonly IQuestionRepository _questionRepository;
@@ -28,12 +30,14 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
 
         public CreateVideoTimeCodeAnswerCommandHandler(
              IVideoTimeCodeAnswerRepository videoTimeCodeAnswerRepository
+            , IVideoResultRepository videoResultRepository
             , ILessonResultRepository lessonResultRepository
             , IMapper mapper
             , IQuestionRepository questionRepository
             , AnswerTypeConverter answerTypeConverter)
         {
             _videoTimeCodeAnswerRepository = videoTimeCodeAnswerRepository;
+            _videoResultRepository = videoResultRepository;
             _lessonResultRepository = lessonResultRepository;
             _mapper = mapper;
             _questionRepository = questionRepository;
@@ -77,6 +81,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
             }
 
             var videoTimeCodeAnswers = new List<VideoTimeCodeAnswer>();
+            var updateVideoTimeCodeAnswers = new List<VideoTimeCodeAnswer>();
             var questionModels = new List<QuestionModel>();
             foreach (var item in request.Answers)
             {
@@ -95,6 +100,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
                 var exercise = question.ExerciseQuestions.Select(x => x.Exercise).FirstOrDefault();
                 var exerciseId = exercise?.Id;
                 var videoTimeCodeId = exercise?.TimeCodeExercises.Select(x => x.VideoTimeCodeId).FirstOrDefault();
+                videoResult.CurrentVideoTimeCodeId = videoTimeCodeId;
                 var answer = await _videoTimeCodeAnswerRepository.GetAsync(videoResult.Id, question.Id, exerciseId, videoTimeCodeId);
 
                 if (answer == null)
@@ -113,13 +119,36 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
                         ExerciseId = exerciseId ?? Guid.Empty,
                         QuestionId = question.Id,
                         VideoResultId = videoResult.Id,
-                        CorrectCount = question.Ungraded ? default : correctCount
+                        CorrectCount = question.Ungraded ? default : correctCount,
+                        Status = EnumCurrentStatus.Process
                     };
                     videoTimeCodeAnswers.Add(answer);
+                }
+                else if (answer.Status == EnumCurrentStatus.Process)
+                {
+                    var (answerConfig, correctCount) = _answerTypeConverter.GetTotalCorrectByAsnwerType(item.Answer, question.Config, question.QuestionType);
+                    if (answerConfig == null)
+                    {
+                        methodResult.AddErrorBadRequest(nameof(EnumVideoTimeCodeAnswerErrorCode.AnswerIsInTheWrongFormat), nameof(item.Answer), item.Answer);
+                        return methodResult;
+                    }
+
+                    answer.Answer = answerConfig;
+                    answer.CorrectCount = question.Ungraded ? default : correctCount;
+                    answer.Status = EnumCurrentStatus.Done;
+                    updateVideoTimeCodeAnswers.Add(answer);
                 }
                 var questionModel = _mapper.Map<QuestionModel>(question);
                 questionModel.ResultAnswer = _mapper.Map<AnswerModel>(answer);
                 questionModels.Add(questionModel);
+            }
+            var correctQuestion = questionModels.Sum(x => x.CorrectTotal);
+            var correctAnswer = questionModels.Select(x => x.ResultAnswer).Sum(x => x!.CorrectCount);
+            var isCheck = correctAnswer == correctQuestion;
+            if (isCheck && questionModels.All(x => x.ResultAnswer != null && x.ResultAnswer.Status == EnumCurrentStatus.Process))
+            {
+                questionModels.ForEach(x => { if (x.ResultAnswer != null) { x.ResultAnswer.Status = EnumCurrentStatus.Done; } });
+                videoTimeCodeAnswers.ForEach(x => x.Status = EnumCurrentStatus.Done);
             }
 
             #endregion Validation
@@ -130,10 +159,18 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
                 {
                     await _videoTimeCodeAnswerRepository.AddList(videoTimeCodeAnswers);
                     await _videoTimeCodeAnswerRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+
+                    _videoResultRepository.Update(videoResult);
+                    await _videoResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
                     methodResult.StatusCode = StatusCodes.Status201Created;
                 }
-                else
+                else if (updateVideoTimeCodeAnswers.Count > 0)
                 {
+                    _videoResultRepository.Update(videoResult);
+                    await _videoResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+
+                    _videoTimeCodeAnswerRepository.UpdateList(updateVideoTimeCodeAnswers);
+                    await _videoTimeCodeAnswerRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
                     methodResult.StatusCode = StatusCodes.Status200OK;
                 }
                 methodResult.Result = questionModels;

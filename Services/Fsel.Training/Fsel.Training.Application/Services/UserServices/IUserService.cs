@@ -5,7 +5,6 @@ namespace Fsel.Training.Application.Services.UserServices
     using System.Collections.Generic;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
-    using Fsel.Course.Application.Services.UserServices.Models;
     using Fsel.Training.Application.Services.UserServices.Models;
     using Microsoft.AspNetCore.Mvc;
     using Refit;
@@ -50,6 +49,7 @@ namespace Fsel.Training.Application.Services.UserServices
 
         [Get("/teacher/get-all")]
         Task<IApiResponse<MethodResult<IList<TeacherModel>>>> GetAllTeacher();
+
         [Get("/teacher/get-teachers-by-keyword/{keyword}")]
         Task<IApiResponse<MethodResult<IList<TeacherModel>>>> GetTeachersByKeyword([FromRoute] string? keyword);
     }
