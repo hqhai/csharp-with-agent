@@ -59,7 +59,7 @@ namespace Fsel.Training.Application.Queries.ClassLiveWorkFlowQuery
                                                     ClassCode = x.ClassLiveCalendar.Class.Code,
                                                     LiveDays = x.ClassLiveCalendar.Class.LiveDays,
                                                     CourseId = x.ClassLiveCalendar.Class.CourseId,
-                                                    TeacherId = x.TeacherId
+                                                    TeacherId = x.ClassLiveCalendar.TeacherId
                                                 });
             int totalItem = await classLiveWorkFlowQuery.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
             var lists = await classLiveWorkFlowQuery
