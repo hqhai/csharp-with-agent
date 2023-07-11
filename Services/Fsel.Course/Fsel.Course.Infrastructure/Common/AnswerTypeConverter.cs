@@ -183,13 +183,13 @@ namespace Fsel.Course.Infrastructure.Common
 
         private static bool IsShortAnswer(string question, string answer)
         {
-            var q = question.ToLower(CultureInfo.CurrentCulture);
+            var q = question.Trim().ToLower(CultureInfo.CurrentCulture);
             string[] answerWords = answer.Split(' ');
             if (answerWords != null)
             {
                 foreach (var word in answerWords)
                 {
-                    var a = word.ToLower(CultureInfo.CurrentCulture);
+                    var a = word.Trim().ToLower(CultureInfo.CurrentCulture);
                     if (q.Replace('’', '\'') == a.Replace('’', '\''))
                     {
                         return true;
@@ -258,13 +258,13 @@ namespace Fsel.Course.Infrastructure.Common
                 string[] questionWords = words[index].Split('|');
                 foreach (var item in questionWords)
                 {
-                    if (word.Trim().Replace('’', '\'') == item.Trim().Replace('’', '\''))
+                    if (word.Trim().ToLower(CultureInfo.CurrentCulture).Replace('’', '\'') == item.Trim().ToLower(CultureInfo.CurrentCulture).Replace('’', '\''))
                     {
                         return true;
                     }
                 }
             }
-            else if (words[index].Trim().Replace('’', '\'') == word.Trim().Replace('’', '\''))
+            else if (words[index].Trim().ToLower(CultureInfo.CurrentCulture).Replace('’', '\'') == word.Trim().ToLower(CultureInfo.CurrentCulture).Replace('’', '\''))
             {
                 return true;
             }

@@ -94,15 +94,15 @@ namespace Fsel.Training.Application.Commands.ClassCmd
             return methodResult;
         }
 
-        private async Task<Class> CreateClassAsync(string? code, Guid courseId, Guid PackageId, Guid? LiveTimeFrameId, IList<DayOfWeek>? LiveDays)
+        private async Task<Class> CreateClassAsync(string? code, Guid courseId, Guid packageId, Guid? liveTimeFrameId, IList<DayOfWeek>? liveDays)
         {
             var newClass = new Class();
             newClass.Code = code;
             newClass.Name = code;
             newClass.CourseId = courseId;
-            newClass.PackageId = PackageId;
-            newClass.LiveTimeFrameId = LiveTimeFrameId;
-            newClass.LiveDays = LiveDays;
+            newClass.PackageId = packageId;
+            newClass.LiveTimeFrameId = liveTimeFrameId;
+            newClass.LiveDays = liveDays;
             _classRepository.Add(newClass);
             await _classRepository.UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
             return newClass;
