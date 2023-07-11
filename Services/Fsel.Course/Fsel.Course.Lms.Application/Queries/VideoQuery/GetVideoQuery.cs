@@ -14,6 +14,7 @@ namespace Fsel.Course.Lms.Application.Queries.VideoQuery
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Infrastructure.Common;
     using Fsel.Course.Lms.Application.Services.UserServices;
+    using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -72,6 +73,8 @@ namespace Fsel.Course.Lms.Application.Queries.VideoQuery
                                     .ThenInclude(x => x!.ExerciseQuestions.Where(x => !x.IsDeleted))
                                     .ThenInclude(x => x.Question)
                                     .ThenInclude(x => x!.VideoTimeCodeAnswers!.Where(x => videoResult != null && x.VideoResultId == videoResult.Id))
+                                .Include(i => i.VideoTimeCodes.Where(x => !x.IsDeleted))
+                                .ThenInclude(x => x!.VideoTimeCodeAnswers!.Where(x => videoResult != null && x.VideoResultId == videoResult.Id))
                                 .Include(i => i.VideoResults.Where(x => !x.IsDeleted))
                                 .Where(x => x.Id == request.VideoId)
                                 .AsNoTracking()
