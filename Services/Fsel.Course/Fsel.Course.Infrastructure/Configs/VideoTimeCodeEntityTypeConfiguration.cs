@@ -12,6 +12,7 @@ namespace Fsel.Course.Infrastructure.Configs
     {
         public void Configure(EntityTypeBuilder<VideoTimeCode> builder)
         {
+            ArgumentNullException.ThrowIfNull(builder);
             builder.Property(e => e.TimeCodeType)
                   .HasMaxLength(100)
                   .HasConversion(

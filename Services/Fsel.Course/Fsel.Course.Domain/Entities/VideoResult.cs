@@ -55,6 +55,7 @@ namespace Fsel.Course.Domain.Entities
         /// Thời gian hiện làm bài
         /// </summary>
         public EnumResultStatus Status { get; set; }
+
         public string? VideoSkillScoresStr { get; set; }
 
         [NotMapped]
@@ -69,6 +70,7 @@ namespace Fsel.Course.Domain.Entities
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         public Guid LessonResultId { get; set; }
 
+        public Guid? CurrentVideoTimeCodeId { get; set; }
         public Video? Video { get; set; }
 
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
