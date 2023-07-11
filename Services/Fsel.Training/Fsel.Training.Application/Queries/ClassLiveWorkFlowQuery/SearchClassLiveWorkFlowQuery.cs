@@ -12,6 +12,7 @@ namespace Fsel.Training.Application.Queries.ClassLiveWorkFlowQuery
     using Fsel.Training.Application.Services.CourseServices;
     using Fsel.Training.Application.Services.SystemServices;
     using Fsel.Training.Application.Services.UserServices;
+    using Fsel.Training.Domain.Enums;
     using Fsel.Training.Domain.IRepositories;
     using Fsel.Training.Domain.Models.EntityModels;
     using Fsel.Training.Domain.Models.QueryModels;
@@ -48,7 +49,8 @@ namespace Fsel.Training.Application.Queries.ClassLiveWorkFlowQuery
             var teacherId = teacherInfo.Content?.Result?.Id;
             var classLiveWorkFlowQuery = _classLiveWorkFlowRepository.Queryable
                                                 .Include(x => x.ClassLiveCalendar)
-                                                .Where(x => x.TeacherId == teacherId)
+                                                .Where(x => x.TeacherId == teacherId && x.Type == EnumWorkFlowType.ChangeTeacher)
+                                                .AsNoTracking()
                                                 .Select(x => new SearchClassLiveWorkFlowModel
                                                 {
                                                     Id = x.Id,
@@ -57,7 +59,7 @@ namespace Fsel.Training.Application.Queries.ClassLiveWorkFlowQuery
                                                     LiveTimeFrameId = x.ClassLiveCalendar!.LiveTimeFrameId,
                                                     ClassName = x.ClassLiveCalendar.Class!.Name,
                                                     ClassCode = x.ClassLiveCalendar.Class.Code,
-                                                    LiveDays = x.ClassLiveCalendar.Class.LiveDays,
+                                                    LiveDate = x.ClassLiveCalendar.LiveDate,
                                                     CourseId = x.ClassLiveCalendar.Class.CourseId,
                                                     TeacherId = x.ClassLiveCalendar.TeacherId
                                                 });
