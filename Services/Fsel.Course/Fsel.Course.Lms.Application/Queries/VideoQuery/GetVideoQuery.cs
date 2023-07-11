@@ -74,7 +74,7 @@ namespace Fsel.Course.Lms.Application.Queries.VideoQuery
                                     .ThenInclude(x => x.Question)
                                     .ThenInclude(x => x!.VideoTimeCodeAnswers!.Where(x => videoResult != null && x.VideoResultId == videoResult.Id))
                                 .Include(i => i.VideoTimeCodes.Where(x => !x.IsDeleted))
-                                    .ThenInclude(x => x!.VideoTimeCodeAnswers!.Where(x => videoResult != null && x.VideoResultId == videoResult.Id))
+                                .ThenInclude(x => x!.VideoTimeCodeAnswers!.Where(x => videoResult != null && x.VideoResultId == videoResult.Id))
                                 .Include(i => i.VideoResults.Where(x => !x.IsDeleted))
                                 .Where(x => x.Id == request.VideoId)
                                 .AsNoTracking()
@@ -105,7 +105,9 @@ namespace Fsel.Course.Lms.Application.Queries.VideoQuery
                     ExecutionTime = x.ExecutionTime,
                     TimeCodeType = x.TimeCodeType,
                     VideoId = x.VideoId,
-                    Status = x.VideoTimeCodeAnswers.All(x => videoResult != null && x.VideoResultId == videoResult.Id && x.Status == EnumCurrentStatus.Done) ? EnumCurrentStatus.Done : EnumCurrentStatus.Process,
+                    CorrectCount = x.VideoTimeCodeAnswers.Count > 0 ? x.VideoTimeCodeAnswers.Sum(x => x.CorrectCount) : 0,
+                    CorrectTotal = x.TimeCodeExercises.Select(x => x.Exercise).SelectMany(x => x!.ExerciseQuestions).Select(x => x.Question).Sum(x => x!.CorrectTotal),
+                    Status = (x.VideoTimeCodeAnswers.Count > 0 && x.VideoTimeCodeAnswers.All(y => videoResult != null && y.VideoResultId == videoResult.Id && y.Status == EnumCurrentStatus.Done)) ? EnumCurrentStatus.Done : EnumCurrentStatus.Process,
                     Exercises = x.TimeCodeExercises.Where(n => !n.IsDeleted && n.Exercise != null).OrderBy(x => x!.CreatedDate).Select(n => n.Exercise).Select(n => new ExerciseModel
                     {
                         Id = n!.Id,
