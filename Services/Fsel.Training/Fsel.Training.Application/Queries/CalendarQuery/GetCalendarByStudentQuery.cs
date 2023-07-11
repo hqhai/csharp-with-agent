@@ -14,14 +14,14 @@ namespace Fsel.Training.Application.Queries.CalendarQuery
     using Fsel.Training.Application.Services.CourseServices;
     using Fsel.Training.Application.Services.SystemServices;
     using Fsel.Training.Application.Services.UserServices;
+    using Fsel.Training.Application.Services.UserServices.Models;
+    using Fsel.Training.Domain.Enums.ErrorCodes;
     using Fsel.Training.Domain.IRepositories;
     using Fsel.Training.Domain.Models.EntityModels;
-    using MediatR;
-    using Microsoft.EntityFrameworkCore;
-    using Microsoft.AspNetCore.Http;
     using Fsel.Training.Domain.Models.QueryModels;
-    using Fsel.Training.Domain.Enums.ErrorCodes;
-    using Fsel.Course.Application.Services.UserServices.Models;
+    using MediatR;
+    using Microsoft.AspNetCore.Http;
+    using Microsoft.EntityFrameworkCore;
 
     public class GetCalendarByStudentQuery : GetCalendarQueryModel, IRequest<MethodResult<IList<ClassLiveCalendarModel>>>
     {
