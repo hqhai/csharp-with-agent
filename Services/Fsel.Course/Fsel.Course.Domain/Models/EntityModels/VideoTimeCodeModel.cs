@@ -17,11 +17,8 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public EnumTimeCodeType TimeCodeType { get; set; }
         public EnumCurrentStatus Status { get; set; }
         public Guid VideoId { get; set; }
-        public EnumCurrentStatus? Status { get; set; }
         public double DisplayTime { get; set; }
-
         public double ExecutionTime { get; set; }
-
         public ICollection<ExerciseModel>? Exercises { get; set; }
     }
 }
