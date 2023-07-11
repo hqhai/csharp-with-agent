@@ -2,7 +2,9 @@
 
 namespace Fsel.Course.Infrastructure.Configs
 {
+    using Fsel.Common.Helpers;
     using Fsel.Course.Domain.Entities;
+    using Fsel.Shared.Enums;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -11,7 +13,11 @@ namespace Fsel.Course.Infrastructure.Configs
         public void Configure(EntityTypeBuilder<VideoTimeCodeAnswer> builder)
         {
             ArgumentNullException.ThrowIfNull(builder);
-
+            builder.Property(e => e.Status)
+                  .HasMaxLength(100)
+                  .HasConversion(
+                      v => v.ToString(),
+                      v => v.EnumParse<EnumCurrentStatus>());
             builder.HasOne(a => a.VideoResult)
               .WithMany(b => b.VideoTimeCodeAnswers)
               .HasForeignKey(b => b.VideoResultId)
