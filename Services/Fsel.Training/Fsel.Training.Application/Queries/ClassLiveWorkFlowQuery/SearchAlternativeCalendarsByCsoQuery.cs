@@ -7,9 +7,9 @@ namespace Fsel.Training.Application.Queries.ClassLiveWorkFlowQuery
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Core.Extensions;
+    using Fsel.Shared.Enums;
     using Fsel.Training.Application.Services.SystemServices;
     using Fsel.Training.Application.Services.UserServices;
-    using Fsel.Training.Domain.Enums;
     using Fsel.Training.Domain.IRepositories;
     using Fsel.Training.Domain.Models.EntityModels;
     using MediatR;
