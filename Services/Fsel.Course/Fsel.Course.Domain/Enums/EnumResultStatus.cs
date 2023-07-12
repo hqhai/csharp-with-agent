@@ -6,6 +6,7 @@ namespace Fsel.Course.Domain.Enums
     {
         Process,
         Done,
-        Unfinished
+        Unfinished,
+        New
     }
 }

@@ -11,9 +11,9 @@ namespace Fsel.Course.Domain.Entities.QuestionTypeConfigs.Answers
 
     public class MatchingTypeAnswers
     {
-        public long FromId { get; set; }
+        public long? FromId { get; set; }
 
-        public long ToId { get; set; }
+        public long? ToId { get; set; }
 
         public bool IsExact { get; set; }
     }
