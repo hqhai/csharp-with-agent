@@ -46,7 +46,7 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
                 return methodResult;
             }
             var studentId = student?.Content?.Result?.Id;
-            var mockTestResultQuery = await _mockTestResultRepository.Queryable
+            var mockTestResultQuery = await _mockTestResultRepository.Queryable.OrderBy(x => x.CreatedDate)
                                     .Where(x => x.Id == request.MockTestResultId)
                                     .Select(x => new MockTestResultModel
                                     {

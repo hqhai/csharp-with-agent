@@ -30,6 +30,7 @@ namespace Fsel.Course.Lms.Application.Commands.LessonCmd
         private readonly IUnitRepository _unitRepository;
         private readonly IUserService _userService;
         private readonly IMapper _mapper;
+        private readonly IUnitResultRepository _unitResultRepository;
         private readonly AuthContext _authContext;
         private readonly ILessonRepository _lessonRepository;
         private readonly ILessonResultRepository _lessonResultRepository;
@@ -40,6 +41,7 @@ namespace Fsel.Course.Lms.Application.Commands.LessonCmd
             , IUnitRepository unitRepository
             , IUserService userService
             , IMapper mapper
+            , IUnitResultRepository unitResultRepository
             , AuthContext authContext
             , ILessonRepository lessonRepository
             , ILessonResultRepository lessonResultRepository
@@ -50,6 +52,7 @@ namespace Fsel.Course.Lms.Application.Commands.LessonCmd
             _unitRepository = unitRepository;
             _userService = userService;
             _mapper = mapper;
+            _unitResultRepository = unitResultRepository;
             _authContext = authContext;
             _lessonRepository = lessonRepository;
             _lessonResultRepository = lessonResultRepository;
@@ -91,7 +94,7 @@ namespace Fsel.Course.Lms.Application.Commands.LessonCmd
                 await _courseResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             }
 
-            var unit = await _unitRepository.Queryable.Include(x => x.LessonResults).FirstOrDefaultAsync(x => x.Id == request.UnitId, cancellationToken);
+            var unit = await _unitRepository.Queryable.Include(x => x.LessonResults).Include(x => x.UnitResults).FirstOrDefaultAsync(x => x.Id == request.UnitId, cancellationToken);
             if (unit == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumUnitErrorCode.UnitNotExist), nameof(request.UnitId), request.UnitId);
@@ -122,6 +125,13 @@ namespace Fsel.Course.Lms.Application.Commands.LessonCmd
             var lessonResult = await _lessonResultRepository.Queryable.FirstOrDefaultAsync(x => x.Id == request.LessonResultId, cancellationToken);
             if (lessonResult != null && lessonResult.Status == EnumResultStatus.Unfinished)
             {
+                var unitResult = unit.UnitResults.FirstOrDefault(x => x.UnitId == unit.Id && x.StudentId == studentId);
+                if (unitResult != null && unitResult.Status == EnumResultStatus.New)
+                {
+                    unitResult.Status = EnumResultStatus.Process;
+                    _unitResultRepository.Update(unitResult);
+                    await _unitResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                }
                 lessonResult.VideoResult = new VideoResult
                 {
                     VideoId = lesson.LessonVideos.FirstOrDefault()!.VideoId,

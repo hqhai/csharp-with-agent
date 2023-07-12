@@ -83,6 +83,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
 
             var videoTimeCodeAnswers = new List<VideoTimeCodeAnswer>();
             var updateVideoTimeCodeAnswers = new List<VideoTimeCodeAnswer>();
+            var isCheckTimeType = false;
             var questionModels = new List<QuestionModel>();
             foreach (var item in request.Answers)
             {
@@ -107,6 +108,28 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
 
                 if (answer == null && videoTimeCode != null && videoTimeCode.TimeCodeType == EnumTimeCodeType.Standalone)
                 {
+                    var (answerConfig, correctCount) = _answerTypeConverter.GetTotalCorrectByAsnwerType(item.Answer, question.Config, question.QuestionType);
+                    if (answerConfig == null)
+                    {
+                        methodResult.AddErrorBadRequest(nameof(EnumVideoTimeCodeAnswerErrorCode.AnswerIsInTheWrongFormat), nameof(item.Answer), item.Answer);
+                        return methodResult;
+                    }
+
+                    answer = new VideoTimeCodeAnswer
+                    {
+                        Answer = answerConfig,
+                        VideoTimeCodeId = videoTimeCodeId ?? Guid.Empty,
+                        ExerciseId = exerciseId ?? Guid.Empty,
+                        QuestionId = question.Id,
+                        VideoResultId = videoResult.Id,
+                        CorrectCount = question.Ungraded ? default : correctCount,
+                        Status = EnumCurrentStatus.Process
+                    };
+                    videoTimeCodeAnswers.Add(answer);
+                }
+                else if (answer == null && videoTimeCode != null && videoTimeCode.TimeCodeType == EnumTimeCodeType.Ungraded)
+                {
+                    isCheckTimeType = true;
                     var (answerConfig, correctCount) = _answerTypeConverter.GetTotalCorrectByAsnwerType(item.Answer, question.Config, question.QuestionType);
                     if (answerConfig == null)
                     {
@@ -168,6 +191,11 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
             var correctQuestion = questionModels.Sum(x => x.CorrectTotal);
             var correctAnswer = questionModels.Select(x => x.ResultAnswer).Sum(x => x!.CorrectCount);
             if (correctAnswer == correctQuestion && questionModels.All(x => x.ResultAnswer != null && x.ResultAnswer.Status == EnumCurrentStatus.Process))
+            {
+                questionModels.ForEach(x => { if (x.ResultAnswer != null) { x.ResultAnswer.Status = EnumCurrentStatus.Done; } });
+                videoTimeCodeAnswers.ForEach(x => x.Status = EnumCurrentStatus.Done);
+            }
+            if (isCheckTimeType && questionModels.All(x => x.ResultAnswer != null && x.ResultAnswer.Status == EnumCurrentStatus.Process))
             {
                 questionModels.ForEach(x => { if (x.ResultAnswer != null) { x.ResultAnswer.Status = EnumCurrentStatus.Done; } });
                 videoTimeCodeAnswers.ForEach(x => x.Status = EnumCurrentStatus.Done);

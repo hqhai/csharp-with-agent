@@ -79,7 +79,7 @@ namespace Fsel.Course.Infrastructure.Common
                 foreach (var item in dataAnswer.Answers)
                 {
                     var question = dataQuestion.Contents.FirstOrDefault(x => x.Id == item.Id);
-                    if (question?.Answers != null && question.Answers.Count > 0 && question.Answers.Any(n => n.Id == item.AnswerId && n.IsCorrect == true))
+                    if (question?.Answers != null && question.Answers.Count > 0 && question.Answers.Any(n => (item.AnswerId.HasValue && n.Id == item.AnswerId) && n.IsCorrect == true))
                     {
                         number++;
                         item.IsExact = true;
@@ -103,7 +103,7 @@ namespace Fsel.Course.Infrastructure.Common
             {
                 foreach (var item in dataAnswer.Answers)
                 {
-                    if (dataQuestion.Link.Any(x => x.FromId == item.FromId && x.ToId == item.ToId))
+                    if (dataQuestion.Link.Any(x => x.FromId == item.FromId && (item.ToId.HasValue && x.ToId == item.ToId)))
                     {
                         number++;
                         item.IsExact = true;

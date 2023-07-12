@@ -76,7 +76,7 @@ namespace Fsel.Course.Infrastructure.Repositories
                                           CreatedDate = x.CreatedDate,
                                           IsActive = x.UnitSkillMockTests.Any() || x.CourseUnitMockTests.Any(),
                                           MockTestType = x.MockTestType,
-                                          SectionGroups = x.MockTestSections.Select(x => x.SectionGroup).OrderBy(x => x!.CreatedDate).Select(x => new SectionGroupModel
+                                          SectionGroups = x.MockTestSections.Select(x => x.SectionGroup).OrderBy(x => x!.ExecutionTime).Select(x => new SectionGroupModel
                                           {
                                               Id = x!.Id,
                                               ExecutionTime = x.ExecutionTime,
