@@ -128,11 +128,11 @@ namespace Fsel.Training.Application.Commands.ClassLiveWorkFlowCmd
                                 case var solutionOne when solutionOne == (listLiveTimeFramePlan.StartTime <= listLiveTimeFrameCalendar.StartTime && classLiveCalendar.LiveDate.AddDays(3) <= workFlowPlan.LiveDate):
                                     break;
 
-                                case var solutionTwo when solutionTwo == (listLiveTimeFramePlan.StartTime >= listLiveTimeFrameCalendar.StartTime && classLiveCalendar.LiveDate.AddDays(2) <= workFlowPlan.LiveDate):
+                                case var solutionTwo when solutionTwo == (listLiveTimeFramePlan.StartTime <= listLiveTimeFrameCalendar.StartTime && classLiveCalendar.LiveDate.AddDays(2) <= workFlowPlan.LiveDate):
                                     break;
 
                                 default:
-                                    methodResult.AddErrorBadRequest(nameof(EnumClassLiveWorkFlowErrorCode.CanNotCancelLiveTime));
+                                    methodResult.AddErrorBadRequest(nameof(EnumClassLiveWorkFlowErrorCode.LiveDateInvalid));
                                     return methodResult;
                             }
                         }
