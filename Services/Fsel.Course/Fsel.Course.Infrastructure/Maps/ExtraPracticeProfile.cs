@@ -3,6 +3,7 @@
 using AutoMapper;
 using Fsel.Core.Extensions;
 using Fsel.Course.Domain.Entities;
+using Fsel.Course.Domain.Models.CommandModels.Exercises;
 using Fsel.Course.Domain.Models.CommandModels.ExtraPractices;
 using Fsel.Course.Domain.Models.EntityModels;
 

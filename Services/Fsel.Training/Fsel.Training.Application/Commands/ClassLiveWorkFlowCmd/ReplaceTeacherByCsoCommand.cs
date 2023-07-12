@@ -6,8 +6,8 @@ namespace Fsel.Training.Application.Commands.ClassCmd
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base;
+    using Fsel.Shared.Enums;
     using Fsel.Training.Domain.Entities;
-    using Fsel.Training.Domain.Enums;
     using Fsel.Training.Domain.Enums.ErrorCodes;
     using Fsel.Training.Domain.IRepositories;
     using Fsel.Training.Domain.Models.CommandModels.ClassLiveWorkFlows;

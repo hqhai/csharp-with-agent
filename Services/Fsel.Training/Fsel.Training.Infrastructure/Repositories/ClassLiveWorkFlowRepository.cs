@@ -12,9 +12,15 @@ namespace Fsel.Training.Infrastructure.Repositories
         public ClassLiveWorkFlowRepository(TrainingDbContext dbContext, AuthContext authContext) : base(dbContext, authContext)
         {
         }
+
         public override async Task<ClassLiveWorkFlow?> GetIncludeByIdAsync(Guid id, int? siteId = null)
         {
-            return await Queryable.Include(x => x.ClassLiveCalendar).ThenInclude(p => p!.Class ?? null).ThenInclude(i => i!.ClassStudents ?? null).FirstOrDefaultAsync(x => x.Id == id);
+            return await Queryable.Include(x => x.ClassLiveCalendar)
+                                    .ThenInclude(p => p!.Class)
+                                    .ThenInclude(i => i!.ClassStudents)
+                                    .Include(x => x.ClassLiveWorkFlowPlans)
+                                    .AsNoTracking()
+                                    .FirstOrDefaultAsync(x => x.Id == id);
         }
     }
 }

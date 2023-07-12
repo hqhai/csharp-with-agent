@@ -7,10 +7,10 @@ namespace Fsel.Training.Application.Commands.ClassLiveWorkFlowCmd
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base;
+    using Fsel.Shared.Enums;
     using Fsel.Training.Application.Services.SystemServices;
     using Fsel.Training.Application.Services.UserServices;
     using Fsel.Training.Domain.Entities;
-    using Fsel.Training.Domain.Enums;
     using Fsel.Training.Domain.Enums.ErrorCodes;
     using Fsel.Training.Domain.IRepositories;
     using Fsel.Training.Domain.Models.CommandModels.ClassLiveWorkFlows;
@@ -66,7 +66,7 @@ namespace Fsel.Training.Application.Commands.ClassLiveWorkFlowCmd
                 methodResult.AddErrorBadRequest(nameof(EnumClassLiveCalendarErrorCode.ClassLiveCalendarNotExits), nameof(request.ClassLiveCalendarId), request.ClassLiveCalendarId);
                 return methodResult;
             }
-            var classLiveWorkFlow = await _classLiveWorkFlowRepository.Queryable.FirstOrDefaultAsync(x => x.TeacherId == teacherId && x.ClassLiveCalendarId == request.ClassLiveCalendarId, cancellationToken);
+            var classLiveWorkFlow = await _classLiveWorkFlowRepository.Queryable.FirstOrDefaultAsync(x => x.TeacherId == teacherId && x.ClassLiveCalendarId == request.ClassLiveCalendarId && x.Status == EnumWorkFlowAssignTeacherStatus.Pending.ToString(), cancellationToken);
             if (classLiveWorkFlow != null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumClassLiveWorkFlowErrorCode.ClassLiveWorkFlowAlreadyExist));
@@ -128,11 +128,11 @@ namespace Fsel.Training.Application.Commands.ClassLiveWorkFlowCmd
                                 case var solutionOne when solutionOne == (listLiveTimeFramePlan.StartTime <= listLiveTimeFrameCalendar.StartTime && classLiveCalendar.LiveDate.AddDays(3) <= workFlowPlan.LiveDate):
                                     break;
 
-                                case var solutionTwo when solutionTwo == (listLiveTimeFramePlan.StartTime >= listLiveTimeFrameCalendar.StartTime && classLiveCalendar.LiveDate.AddDays(2) <= workFlowPlan.LiveDate):
+                                case var solutionTwo when solutionTwo == (listLiveTimeFramePlan.StartTime <= listLiveTimeFrameCalendar.StartTime && classLiveCalendar.LiveDate.AddDays(2) <= workFlowPlan.LiveDate):
                                     break;
 
                                 default:
-                                    methodResult.AddErrorBadRequest(nameof(EnumClassLiveWorkFlowErrorCode.CanNotCancelLiveTime));
+                                    methodResult.AddErrorBadRequest(nameof(EnumClassLiveWorkFlowErrorCode.LiveDateInvalid));
                                     return methodResult;
                             }
                         }

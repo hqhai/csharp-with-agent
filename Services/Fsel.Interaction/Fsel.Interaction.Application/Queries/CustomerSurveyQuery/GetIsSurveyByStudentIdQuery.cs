@@ -11,7 +11,7 @@ namespace Fsel.Interaction.Application.Queries.CustomerSurveyQuery
 
     public class GetIsSurveyByStudentIdQuery : IRequest<MethodResult<bool>>
     {
-        public Guid? Id { get; set; }
+        public Guid Id { get; set; }
     }
 
     public class GetIsSurveyByStudentIdQueryHandler : IRequestHandler<GetIsSurveyByStudentIdQuery, MethodResult<bool>>
@@ -26,9 +26,7 @@ namespace Fsel.Interaction.Application.Queries.CustomerSurveyQuery
         public async Task<MethodResult<bool>> Handle(GetIsSurveyByStudentIdQuery request, CancellationToken cancellationToken)
         {
             var methodResult = new MethodResult<bool>();
-
             var isSurveyQuestion = await _customerSurveyRepository.Queryable.AnyAsync(x => x.UserId == request.Id.ToString(), cancellationToken);
-
             methodResult.Result = isSurveyQuestion;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;

@@ -2,17 +2,16 @@
 
 namespace Fsel.Training.Api.Controllers.Teacher
 {
-    using Fsel.Common.ActionResults;
     using System.Net;
+    using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Shared.Enums;
-    using Fsel.Training.Application.Queries.TeacherFreeDateQuery;
+    using Fsel.Training.Application.Queries.ClassLiveWorkFlowQuery;
     using Fsel.Training.Domain.Models.EntityModels;
     using MediatR;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
-    using Fsel.Training.Application.Queries.ClassLiveWorkFlowQuery;
 
     [ApiVersion(Settings.APIVersion)]
     [Route(Settings.APIDefaultRoute + "/teacher/cLass-live-work")]

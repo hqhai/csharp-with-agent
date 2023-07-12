@@ -12,6 +12,7 @@ namespace Fsel.Training.Infrastructure.Configs
         public void Configure(EntityTypeBuilder<ClassLiveWorkFlowPlan> builder)
         {
             ArgumentNullException.ThrowIfNull(builder);
+
             builder.HasOne(a => a.ClassLiveWorkFlow)
                .WithMany(b => b.ClassLiveWorkFlowPlans)
                .HasForeignKey(b => b.ClassLiveWorkFlowId)

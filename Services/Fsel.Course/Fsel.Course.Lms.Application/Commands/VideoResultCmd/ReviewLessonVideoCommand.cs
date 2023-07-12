@@ -24,7 +24,6 @@ namespace Fsel.Course.Lms.Application.Commands.VideoResultCmd
         private readonly IVideoResultRepository _videoResultRepository;
         private readonly IVideoTimeCodeAnswerRepository _videoTimeCodeAnswerRepository;
         private readonly IVideoRepository _videoRepository;
-        private readonly IMediator _mediator;
         private readonly IVideoTimeCodeRepository _videoTimeCodeRepository;
         private readonly ITimeCodeExerciseRepository _timeCodeExerciseRepository;
         private readonly IExerciseRepository _exerciseRepository;
@@ -38,7 +37,6 @@ namespace Fsel.Course.Lms.Application.Commands.VideoResultCmd
             ITimeCodeExerciseRepository timeCodeExerciseRepository,
             IExerciseRepository exerciseRepository,
             IVideoRepository videoRepository,
-            IMediator mediator,
             IVideoTimeCodeRepository videoTimeCodeRepository,
             IExerciseQuestionRepository exerciseQuestionRepository,
             IQuestionRepository questionRepository)
@@ -47,7 +45,6 @@ namespace Fsel.Course.Lms.Application.Commands.VideoResultCmd
             _timeCodeExerciseRepository = timeCodeExerciseRepository;
             _exerciseRepository = exerciseRepository;
             _videoRepository = videoRepository;
-            _mediator = mediator;
             _videoTimeCodeRepository = videoTimeCodeRepository;
             _exerciseQuestionRepository = exerciseQuestionRepository;
             _questionRepository = questionRepository;

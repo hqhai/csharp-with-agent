@@ -9,7 +9,6 @@ namespace Fsel.Training.Application.Commands.ClassLiveCmd
     using Fsel.Shared.Enums;
     using Fsel.Training.Application.Services.UserServices;
     using Fsel.Training.Domain.Entities;
-    using Fsel.Training.Domain.Enums;
     using Fsel.Training.Domain.Enums.ErrorCodes;
     using Fsel.Training.Domain.IRepositories;
     using Fsel.Training.Domain.Models.CommandModels.ClassLives;
@@ -64,7 +63,7 @@ namespace Fsel.Training.Application.Commands.ClassLiveCmd
             {
                 if (classLiveCalendar != null)
                 {
-                    var classLiveWorkFlow = classLiveCalendar.ClassLiveWorkFlows.FirstOrDefault(x => x.TeacherId == teacherId);
+                    var classLiveWorkFlow = classLiveCalendar.ClassLiveWorkFlows.FirstOrDefault(x => x.Status == EnumWorkFlowAssignTeacherStatus.Pending.ToString() && x.TeacherId == teacherId);
                     var classLiveWorkFlowParent = await _classLiveWorkFlowRepository.GetByIdAsync(classLiveWorkFlow?.WorkFlowParentId ?? default);
                     if (classLiveWorkFlow != null && classLiveWorkFlow.Type == EnumWorkFlowType.AssignTeacher && classLiveWorkFlowParent != null)
                     {

@@ -6,12 +6,12 @@ namespace Fsel.Course.Lcms.Api.Controllers
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
-    using Fsel.Shared.Enums;
+    using Fsel.Common.Models;
     using Fsel.Course.Application.Queries.CategoryQuery;
+    using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
-    using Fsel.Common.Models;
 
     [ApiVersion(Settings.APIVersion)]
     [Route(Settings.APIDefaultRoute + "/category")]
@@ -62,7 +62,17 @@ namespace Fsel.Course.Lcms.Api.Controllers
             return queryResult.GetActionResult();
         }
 
-
+        /// <summary>
+        /// Search Course Source Data
+        /// </summary>
+        [HttpGet("all-work-flow")]
+        [ProducesResponseType(typeof(MethodResult<IList<EnumModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetEnumWorkFlowDatesAsync([FromQuery] GetEnumWorkFlowQuery query)
+        {
+            var queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
 
         /// <summary>
         /// Search Course Source Data
