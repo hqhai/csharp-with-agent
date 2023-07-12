@@ -53,7 +53,8 @@ namespace Fsel.Training.Application.Queries.CalendarQuery
             var teacherId = teacherResult.Content?.Result?.Id;
             var query = _classLiveCalendarRepository.Queryable
                                     .Include(x => x.Class)
-                                    .Where(x => x.Class != null && x.TeacherId == teacherId)
+                                    .Include(x => x.ClassLiveWorkFlows)
+                                    .Where(x => x.Class != null && x.TeacherId == teacherId && (x.ClassLiveWorkFlows == null || x.ClassLiveWorkFlows.Count == 0))
                                     .AsNoTracking()
                                     .Select(x => new ClassLiveCalendarSearchModel
                                     {

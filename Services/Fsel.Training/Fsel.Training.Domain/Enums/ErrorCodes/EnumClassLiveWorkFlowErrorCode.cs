@@ -47,6 +47,11 @@ namespace Fsel.Training.Domain.Enums.ErrorCodes
         /// <summary>
         /// Can Not Change live time
         /// </summary>
-        CanNotChangeLiveTime
+        CanNotChangeLiveTime,
+
+        /// <summary>
+        /// live date is invalid
+        /// </summary>
+        LiveDateInvalid
     }
 }
