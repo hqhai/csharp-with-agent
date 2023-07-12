@@ -5,8 +5,8 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
     public enum EnumFinalTestResultErrorCode
     {
         /// <summary>
-        /// FinalTest Answers is Null
+        /// FinalTest Results Done
         /// </summary>
-        FinalTestAnswersNull
+        FinalTestResultsDone
     }
 }

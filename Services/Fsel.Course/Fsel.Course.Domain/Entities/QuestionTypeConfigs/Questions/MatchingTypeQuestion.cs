@@ -30,8 +30,8 @@ namespace Fsel.Course.Domain.Entities.QuestionTypeConfigs.Questions
 
     public class MatchingTypeQuestionLink
     {
-        public long FromId { get; set; }
+        public long? FromId { get; set; }
 
-        public long ToId { get; set; }
+        public long? ToId { get; set; }
     }
 }
