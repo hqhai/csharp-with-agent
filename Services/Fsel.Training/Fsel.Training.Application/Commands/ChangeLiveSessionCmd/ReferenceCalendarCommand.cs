@@ -5,8 +5,8 @@ namespace Fsel.Training.Application.Commands.ChangeLiveSessionCmd
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base;
+    using Fsel.Shared.Enums;
     using Fsel.Training.Application.Services.UserServices;
-    using Fsel.Training.Domain.Enums;
     using Fsel.Training.Domain.Enums.ErrorCodes;
     using Fsel.Training.Domain.IRepositories;
     using Fsel.Training.Domain.Models.CommandModels.ChangeLiveSessions;

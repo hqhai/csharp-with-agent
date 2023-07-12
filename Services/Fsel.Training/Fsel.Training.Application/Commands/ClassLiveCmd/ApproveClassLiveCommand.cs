@@ -9,7 +9,6 @@ namespace Fsel.Training.Application.Commands.ClassLiveCmd
     using Fsel.Shared.Enums;
     using Fsel.Training.Application.Services.UserServices;
     using Fsel.Training.Domain.Entities;
-    using Fsel.Training.Domain.Enums;
     using Fsel.Training.Domain.Enums.ErrorCodes;
     using Fsel.Training.Domain.IRepositories;
     using Fsel.Training.Domain.Models.CommandModels.ClassLives;

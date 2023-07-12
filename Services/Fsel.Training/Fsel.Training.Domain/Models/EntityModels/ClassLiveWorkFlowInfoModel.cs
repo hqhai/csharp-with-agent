@@ -2,7 +2,7 @@
 
 namespace Fsel.Training.Domain.Models.EntityModels
 {
-    using Fsel.Training.Domain.Enums;
+    using Fsel.Shared.Enums;
 
     public class ClassLiveWorkFlowInfoModel
     {

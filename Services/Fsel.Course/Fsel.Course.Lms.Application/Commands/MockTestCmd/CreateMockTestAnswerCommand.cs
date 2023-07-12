@@ -30,36 +30,21 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
         private readonly IQuestionRepository _questionRepository;
         private readonly IMockTestAnswerRepository _mockTestAnswerRepository;
         private readonly IMockTestResultRepository _mockTestResultRepository;
-        private readonly ISectionQuestionRepository _sectionQuestionRepository;
         private readonly ISectionGroupRepository _sectionGroupRepository;
-        private readonly ISectionRepository _sectionRepository;
-        private readonly ISectionPartRepository _sectionPartRepository;
-        private readonly IMockTestRepository _mockTestRepository;
-        private readonly IMockTestSectionRepository _mockTestSectionRepository;
         private readonly IMapper _mapper;
 
         public CreateMockTestAnswerCommandHandler(AnswerTypeConverter answerTypeConverter
             , IQuestionRepository questionRepository
             , IMockTestAnswerRepository mockTestAnswerRepository
             , IMockTestResultRepository mockTestResultRepository
-            , ISectionQuestionRepository sectionQuestionRepository
             , ISectionGroupRepository sectionGroupRepository
-            , ISectionRepository sectionRepository
-            , ISectionPartRepository sectionPartRepository
-            , IMockTestRepository mockTestRepository
-            , IMockTestSectionRepository mockTestSectionRepository
             , IMapper mapper)
         {
             _answerTypeConverter = answerTypeConverter;
             _questionRepository = questionRepository;
             _mockTestAnswerRepository = mockTestAnswerRepository;
             _mockTestResultRepository = mockTestResultRepository;
-            _sectionQuestionRepository = sectionQuestionRepository;
             _sectionGroupRepository = sectionGroupRepository;
-            _sectionRepository = sectionRepository;
-            _sectionPartRepository = sectionPartRepository;
-            _mockTestRepository = mockTestRepository;
-            _mockTestSectionRepository = mockTestSectionRepository;
             _mapper = mapper;
         }
 

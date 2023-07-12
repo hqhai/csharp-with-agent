@@ -7,10 +7,10 @@ namespace Fsel.Training.Application.Commands.ClassLiveWorkFlowCmd
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base;
+    using Fsel.Shared.Enums;
     using Fsel.Training.Application.Services.SystemServices;
     using Fsel.Training.Application.Services.UserServices;
     using Fsel.Training.Domain.Entities;
-    using Fsel.Training.Domain.Enums;
     using Fsel.Training.Domain.Enums.ErrorCodes;
     using Fsel.Training.Domain.IRepositories;
     using Fsel.Training.Domain.Models.CommandModels.ClassLiveWorkFlows;
