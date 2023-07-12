@@ -3,7 +3,6 @@
 namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
 {
     using System;
-    using System.Collections.Generic;
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
@@ -16,12 +15,12 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class GetMockTestReportQuery : IRequest<MethodResult<IList<MockTestResultModel>>>
+    public class GetMockTestReportQuery : IRequest<MethodResult<MockTestResultModel>>
     {
-        public Guid? MockTestResultId { get; set; }
+        public Guid MockTestResultId { get; set; }
     }
 
-    public class GetMockTestReportQueryHandler : IRequestHandler<GetMockTestReportQuery, MethodResult<IList<MockTestResultModel>>>
+    public class GetMockTestReportQueryHandler : IRequestHandler<GetMockTestReportQuery, MethodResult<MockTestResultModel>>
     {
         private readonly IMockTestResultRepository _mockTestResultRepository;
         private readonly AuthContext _authContext;
@@ -34,10 +33,10 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
             _userService = userService;
         }
 
-        public async Task<MethodResult<IList<MockTestResultModel>>> Handle(GetMockTestReportQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<MockTestResultModel>> Handle(GetMockTestReportQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            MethodResult<IList<MockTestResultModel>> methodResult = new MethodResult<IList<MockTestResultModel>>();
+            MethodResult<MockTestResultModel> methodResult = new MethodResult<MockTestResultModel>();
 
             var student = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
             if (!student.IsSuccessStatusCode)
@@ -46,7 +45,7 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
                 return methodResult;
             }
             var studentId = student?.Content?.Result?.Id;
-            var mockTestResultQuery = await _mockTestResultRepository.Queryable.OrderBy(x => x.CreatedDate)
+            var mockTestResult = await _mockTestResultRepository.Queryable.OrderBy(x => x.CreatedDate)
                                     .Where(x => x.Id == request.MockTestResultId)
                                     .Select(x => new MockTestResultModel
                                     {
@@ -59,9 +58,13 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
                                         SkillScores = x.SkillScores,
                                         Status = x.Status,
                                         StudentId = x.StudentId,
-                                    }).ToListAsync(cancellationToken);
-
-            methodResult.Result = mockTestResultQuery;
+                                        MockTestId = x.MockTestId
+                                    }).FirstOrDefaultAsync(cancellationToken);
+            if (mockTestResult != null && mockTestResult.SkillScores != null)
+            {
+                mockTestResult.Scores = mockTestResult.SkillScores.Average(x => x.Scores);
+            }
+            methodResult.Result = mockTestResult;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }
