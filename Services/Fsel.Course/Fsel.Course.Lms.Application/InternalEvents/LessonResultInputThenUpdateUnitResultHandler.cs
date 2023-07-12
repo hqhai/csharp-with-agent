@@ -23,12 +23,14 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             , IClassForumResultRepository classForumResultRepository
             , IHomeWorkResultRepository homeWorkResultRepository
             , ICourseRepository courseRepository
+            , ICourseResultRepository courseResultRepository
             , IMockTestResultRepository mockTestResultRepository
             , IFinalTestResultRepository finalTestResultRepository
             ) : base(videoResultRepository,
                 classForumResultRepository,
                 unitResultRepository,
                 lessonResultRepository,
+                courseResultRepository,
                 courseRepository,
                 finalTestResultRepository,
                 mockTestResultRepository,

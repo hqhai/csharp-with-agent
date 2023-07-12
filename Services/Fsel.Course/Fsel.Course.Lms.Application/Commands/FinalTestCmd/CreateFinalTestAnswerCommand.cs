@@ -91,7 +91,8 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd
             }
 
             var finalTestResult = await _finalTestResultRepository.Queryable
-                    .FirstOrDefaultAsync(x => x.FinalTestId == request.FinalTestId && x.StudentId == studentId && x.CourseId == request.CourseId && x.Status == EnumResultStatus.Process, cancellationToken);
+                    .FirstOrDefaultAsync(x => x.FinalTestId == request.FinalTestId && x.StudentId == studentId && x.CourseId == request.CourseId, cancellationToken);
+
             if (finalTestResult == null)
             {
                 finalTestResult = new FinalTestResult
@@ -102,6 +103,11 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd
                 };
                 finalTestResult = _finalTestResultRepository.Add(finalTestResult);
                 await _finalTestResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+            }
+            else if (finalTestResult.Status == EnumResultStatus.Done)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumFinalTestResultErrorCode.FinalTestResultsDone));
+                return methodResult;
             }
             var skillScores = new List<SkillScores>();
             foreach (var item in request.FinalTestAnswers)

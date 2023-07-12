@@ -24,6 +24,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             , IClassForumResultRepository classForumResultRepository
             , IHomeWorkResultRepository homeWorkResultRepository
             , ICourseRepository courseRepository
+            , ICourseResultRepository courseResultRepository
             , IMockTestRepository mockTestRepository
             , IUnitResultRepository unitResultRepository
             , IMockTestResultRepository mockTestResultRepository
@@ -32,6 +33,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 classForumResultRepository,
                 unitResultRepository,
                 lessonResultRepository,
+                courseResultRepository,
                 courseRepository,
                 finalTestResultRepository,
                 mockTestResultRepository,
@@ -58,7 +60,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                     var unitResult = await _unitResultRepository.Queryable.FirstOrDefaultAsync(x => x.UnitId == mockTestResult.UnitId && x.StudentId == mockTestResult.StudentId && x.CourseId == mockTestResult.CourseId, cancellationToken);
                     if (unitResult != null && unit.LessonResults.Count == unit.UnitLessons.Count)
                     {
-                        await UpdateUnit(unit.LessonResults.ToList(), unit, mockTestResult.CourseId, mockTestResult.StudentId,cancellationToken);
+                        await UpdateUnit(unit.LessonResults.ToList(), unit, mockTestResult.CourseId, mockTestResult.StudentId, cancellationToken);
                     }
                 }
             }

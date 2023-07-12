@@ -17,6 +17,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
         private readonly IClassForumResultRepository _classForumResultRepository;
         private readonly IUnitResultRepository _unitResultRepository;
         private readonly ILessonResultRepository _lessonResultRepository;
+        private readonly ICourseResultRepository _courseResultRepository;
         private readonly ICourseRepository _courseRepository;
         private readonly IFinalTestResultRepository _finalTestResultRepository;
         private readonly IMockTestResultRepository _mockTestResultRepository;
@@ -26,6 +27,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             IClassForumResultRepository classForumResultRepository,
             IUnitResultRepository unitResultRepository,
             ILessonResultRepository lessonResultRepository,
+            ICourseResultRepository courseResultRepository,
             ICourseRepository courseRepository,
             IFinalTestResultRepository finalTestResultRepository,
             IMockTestResultRepository mockTestResultRepository,
@@ -35,6 +37,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             _classForumResultRepository = classForumResultRepository;
             _unitResultRepository = unitResultRepository;
             _lessonResultRepository = lessonResultRepository;
+            _courseResultRepository = courseResultRepository;
             _courseRepository = courseRepository;
             _finalTestResultRepository = finalTestResultRepository;
             _mockTestResultRepository = mockTestResultRepository;
@@ -189,7 +192,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 unitResult.Percent = await PercentUnit(videoSkillScores, 18) + await PercentUnit(homeSkillScores, 22) + await PercentUnit(classForumSkillScores, 20) + await PercentUnit(skillTestSkillScores, 10) + await PercentUnit(unitTestSkillScores, 30);
                 unitResult.SkillScores = groupedSkillScores;
                 _unitResultRepository.Update(unitResult);
-                await _unitResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                await _unitResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
             }
         }
 
@@ -228,6 +231,10 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                     {
                         await UpdateStatusProcess(courseUnitMockTest, unitResult.StudentId, cancellationToken);
                     }
+                    else
+                    {
+                        await UpdateCourseResult(courseId, unitResult.StudentId, cancellationToken);
+                    }
                 }
             }
         }
@@ -264,6 +271,10 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                     if (!isCheckDone && courseUnitMockTest != null)
                     {
                         await UpdateStatusProcess(courseUnitMockTest, mockTestResult.StudentId, cancellationToken);
+                    }
+                    else
+                    {
+                        await UpdateCourseResult(courseId, mockTestResult.StudentId, cancellationToken);
                     }
                 }
             }
@@ -302,7 +313,22 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                     {
                         await UpdateStatusProcess(courseUnitMockTest, finalTestResult.StudentId, cancellationToken);
                     }
+                    else
+                    {
+                        await UpdateCourseResult(courseId, finalTestResult.StudentId, cancellationToken);
+                    }
                 }
+            }
+        }
+
+        public async Task UpdateCourseResult(Guid courseId, Guid studentId, CancellationToken cancellationToken)
+        {
+            var courseResult = await _courseResultRepository.Queryable.FirstOrDefaultAsync(x => x.CourseId == courseId && x.StudentId == studentId, cancellationToken);
+            if (courseResult != null)
+            {
+                courseResult.Status = EnumCourseStatus.InActive;
+                _courseResultRepository.Update(courseResult);
+                await _courseResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
             }
         }
 
@@ -318,27 +344,27 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                     var unitResultNext = await _unitResultRepository.Queryable.FirstOrDefaultAsync(x => x.StudentId == studentId && x.UnitId == courseUnitMockTest.UnitId, cancellationToken);
                     if (unitResultNext != null)
                     {
-                        unitResultNext.Status = EnumResultStatus.Process;
+                        unitResultNext.Status = EnumResultStatus.New;
                         _unitResultRepository.Update(unitResultNext);
                         await _unitResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
                     }
                     break;
 
                 case var value when value == (courseUnitMockTest.FinalTestId == null):
-                    var finalTestResultNext = await _finalTestResultRepository.Queryable.FirstOrDefaultAsync(x => x.StudentId == studentId && x.Id == courseUnitMockTest.FinalTestId, cancellationToken);
+                    var finalTestResultNext = await _finalTestResultRepository.Queryable.FirstOrDefaultAsync(x => x.StudentId == studentId && x.FinalTestId == courseUnitMockTest.FinalTestId, cancellationToken);
                     if (finalTestResultNext != null)
                     {
-                        finalTestResultNext.Status = EnumResultStatus.Process;
+                        finalTestResultNext.Status = EnumResultStatus.New;
                         _finalTestResultRepository.Update(finalTestResultNext);
                         await _finalTestResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
                     }
                     break;
 
                 case var value when value == (courseUnitMockTest.MockTestId == null):
-                    var mockTestResultNext = await _mockTestResultRepository.Queryable.FirstOrDefaultAsync(x => x.StudentId == studentId && x.Id == courseUnitMockTest.MockTestId, cancellationToken);
+                    var mockTestResultNext = await _mockTestResultRepository.Queryable.FirstOrDefaultAsync(x => x.StudentId == studentId && x.MockTestId == courseUnitMockTest.MockTestId, cancellationToken);
                     if (mockTestResultNext != null)
                     {
-                        mockTestResultNext.Status = EnumResultStatus.Process;
+                        mockTestResultNext.Status = EnumResultStatus.New;
                         _mockTestResultRepository.Update(mockTestResultNext);
                         await _mockTestResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
                     }

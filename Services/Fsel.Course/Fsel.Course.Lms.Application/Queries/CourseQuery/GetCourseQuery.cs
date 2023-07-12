@@ -80,13 +80,13 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
             }
-            if (course.CourseResults.FirstOrDefault(x => x.StudentId == studentId) == null)
+            if (course.CourseResults.FirstOrDefault(x => x.CourseId == course.Id && x.StudentId == studentId) == null)
             {
                 course.CourseResults.Add(new CourseResult
                 {
                     StudentId = studentId ?? default,
                     CourseId = @class.CourseId,
-                    Status = EnumCourseStatus.New
+                    Status = EnumCourseStatus.Active
                 });
                 var unitIds = course.CourseUnitMockTests.Where(x => x.UnitId != null).OrderBy(x => x.DisplayOrder).Select(x => x.UnitId).ToList();
                 var finalTestIds = course.CourseUnitMockTests.Where(x => x.FinalTestId != null).Select(x => x.FinalTestId).ToList();
@@ -97,7 +97,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
                     {
                         UnitId = x ?? default,
                         StudentId = studentId ?? default,
-                        Status = index == 0 ? EnumResultStatus.Process : EnumResultStatus.Unfinished
+                        Status = index == 0 ? EnumResultStatus.New : EnumResultStatus.Unfinished
                     }).ToList();
                 }
                 if (finalTestIds.Count > 0)
