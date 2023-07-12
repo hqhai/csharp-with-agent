@@ -9,6 +9,7 @@ namespace Fsel.Training.Application.Queries.CalendarQuery
     using Fsel.Training.Application.Services.CourseServices;
     using Fsel.Training.Application.Services.SystemServices;
     using Fsel.Training.Application.Services.UserServices;
+    using Fsel.Training.Domain.Enums;
     using Fsel.Training.Domain.IRepositories;
     using Fsel.Training.Domain.Models.EntityModels;
     using MediatR;
@@ -54,7 +55,13 @@ namespace Fsel.Training.Application.Queries.CalendarQuery
             var query = _classLiveCalendarRepository.Queryable
                                     .Include(x => x.Class)
                                     .Include(x => x.ClassLiveWorkFlows)
-                                    .Where(x => x.Class != null && x.TeacherId == teacherId && (x.ClassLiveWorkFlows == null || x.ClassLiveWorkFlows.Count == 0))
+                                    .Where(x => x.Class != null && x.TeacherId == teacherId
+                                            && (x.ClassLiveWorkFlows == null
+                                            || x.ClassLiveWorkFlows.Count == 0
+                                            || x.ClassLiveWorkFlows.Any(y => y.Type != EnumWorkFlowType.CancelSchedule)
+                                            || x.ClassLiveWorkFlows.Any(y => y.Type != EnumWorkFlowType.ChangeTeacher)
+                                                )
+                                            )
                                     .AsNoTracking()
                                     .Select(x => new ClassLiveCalendarSearchModel
                                     {
