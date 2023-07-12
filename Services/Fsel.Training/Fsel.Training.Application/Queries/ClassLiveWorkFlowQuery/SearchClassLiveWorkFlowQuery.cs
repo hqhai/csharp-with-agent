@@ -8,6 +8,7 @@ namespace Fsel.Training.Application.Queries.ClassLiveWorkFlowQuery
     using Fsel.Core.Base;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Core.Extensions;
+    using Fsel.Shared.Enums;
     using Fsel.Training.Application.Services.CourseServices;
     using Fsel.Training.Application.Services.SystemServices;
     using Fsel.Training.Application.Services.UserServices;
@@ -48,12 +49,13 @@ namespace Fsel.Training.Application.Queries.ClassLiveWorkFlowQuery
             var teacherId = teacherInfo.Content?.Result?.Id;
             var classLiveWorkFlowQuery = _classLiveWorkFlowRepository.Queryable
                                                 .Include(x => x.ClassLiveCalendar)
-                                                .Where(x => x.TeacherId == teacherId && x.Type == EnumWorkFlowType.ChangeTeacher)
+                                                .Where(x => x.ClassLiveCalendar != null && x.TeacherId == teacherId && x.Type == EnumWorkFlowType.ChangeTeacher)
                                                 .AsNoTracking()
                                                 .Select(x => new SearchClassLiveWorkFlowModel
                                                 {
                                                     Id = x.Id,
                                                     CreatedDate = x.CreatedDate,
+                                                    Type = x.Type,
                                                     Status = x.Status,
                                                     LiveTimeFrameId = x.ClassLiveCalendar!.LiveTimeFrameId,
                                                     ClassName = x.ClassLiveCalendar.Class!.Name,

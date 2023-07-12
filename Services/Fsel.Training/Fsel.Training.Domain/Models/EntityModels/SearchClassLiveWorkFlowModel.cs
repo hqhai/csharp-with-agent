@@ -4,7 +4,6 @@ namespace Fsel.Training.Domain.Models.EntityModels
 {
     using Fsel.Core.Base.BaseModels;
     using Fsel.Shared.Enums;
-    using Fsel.Training.Domain.Enums;
 
     public class SearchClassLiveWorkFlowModel : BaseModel
     {
