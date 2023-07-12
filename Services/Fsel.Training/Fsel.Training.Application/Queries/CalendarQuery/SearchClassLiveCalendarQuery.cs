@@ -58,8 +58,8 @@ namespace Fsel.Training.Application.Queries.CalendarQuery
                                     .Where(x => x.Class != null && x.TeacherId == teacherId
                                             && (x.ClassLiveWorkFlows == null
                                             || x.ClassLiveWorkFlows.Count == 0
-                                            || x.ClassLiveWorkFlows.Any(y => y.Type != EnumWorkFlowType.CancelSchedule)
-                                            || x.ClassLiveWorkFlows.Any(y => y.Type != EnumWorkFlowType.ChangeTeacher)
+                                            || (x.ClassLiveWorkFlows.Any(y => y.Type != EnumWorkFlowType.CancelSchedule)
+                                            && x.ClassLiveWorkFlows.Any(y => y.Type != EnumWorkFlowType.ChangeTeacher))
                                                 )
                                             )
                                     .AsNoTracking()
