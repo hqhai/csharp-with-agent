@@ -3,7 +3,7 @@
 namespace Fsel.Training.Domain.Entities
 {
     using Fsel.Core.Entities;
-    using Fsel.Training.Domain.Enums;
+    using Fsel.Shared.Enums;
 
     public class ClassLiveWorkFlow : Entity
     {

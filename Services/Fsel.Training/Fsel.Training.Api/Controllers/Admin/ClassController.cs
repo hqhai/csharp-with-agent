@@ -84,6 +84,7 @@ namespace Fsel.Training.Api.Controllers.Admin
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> UpdateClass([FromRoute] Guid id, [FromBody] UpdateClassCommand command)
         {
+            ArgumentNullException.ThrowIfNull(command);
             command.Id = id;
             MethodResult<ClassModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();

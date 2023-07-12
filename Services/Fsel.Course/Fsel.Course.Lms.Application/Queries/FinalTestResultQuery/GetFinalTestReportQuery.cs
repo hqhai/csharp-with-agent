@@ -3,7 +3,6 @@
 namespace Fsel.Course.Lms.Application.Queries.FinalTestResultQuery
 {
     using System;
-    using System.Collections.Generic;
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
@@ -16,12 +15,12 @@ namespace Fsel.Course.Lms.Application.Queries.FinalTestResultQuery
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class GetFinalTestReportQuery : IRequest<MethodResult<IList<FinalTestResultModel>>>
+    public class GetFinalTestReportQuery : IRequest<MethodResult<FinalTestResultModel>>
     {
         public Guid? FinalTestResultId { get; set; }
     }
 
-    public class GetFinalTestReportQueryHandler : IRequestHandler<GetFinalTestReportQuery, MethodResult<IList<FinalTestResultModel>>>
+    public class GetFinalTestReportQueryHandler : IRequestHandler<GetFinalTestReportQuery, MethodResult<FinalTestResultModel>>
     {
         private readonly IFinalTestResultRepository _finalTestResultRepository;
         private readonly AuthContext _authContext;
@@ -34,10 +33,10 @@ namespace Fsel.Course.Lms.Application.Queries.FinalTestResultQuery
             _userService = userService;
         }
 
-        public async Task<MethodResult<IList<FinalTestResultModel>>> Handle(GetFinalTestReportQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<FinalTestResultModel>> Handle(GetFinalTestReportQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            MethodResult<IList<FinalTestResultModel>> methodResult = new MethodResult<IList<FinalTestResultModel>>();
+            MethodResult<FinalTestResultModel> methodResult = new MethodResult<FinalTestResultModel>();
 
             var student = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
             if (!student.IsSuccessStatusCode)
@@ -46,7 +45,7 @@ namespace Fsel.Course.Lms.Application.Queries.FinalTestResultQuery
                 return methodResult;
             }
             var studentId = student?.Content?.Result?.Id;
-            var finalTestResultQuery = await _finalTestResultRepository.Queryable
+            var finalTestResult = await _finalTestResultRepository.Queryable
                                         .Where(x => x.Id == request.FinalTestResultId)
                                         .Select(x => new FinalTestResultModel
                                         {
@@ -60,8 +59,8 @@ namespace Fsel.Course.Lms.Application.Queries.FinalTestResultQuery
                                             SkillScores = x.SkillScores,
                                             Status = x.Status,
                                             StudentId = x.StudentId,
-                                        }).ToListAsync(cancellationToken);
-            methodResult.Result = finalTestResultQuery;
+                                        }).FirstOrDefaultAsync(cancellationToken);
+            methodResult.Result = finalTestResult;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }

@@ -15,6 +15,7 @@ namespace Fsel.Shared.Enums
         FinalTestLevel,
         SubscriptionClass,
         RoleLive,
-        CurrentStatus
+        CurrentStatus,
+        WorkFlowType
     }
 }

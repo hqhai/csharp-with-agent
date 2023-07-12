@@ -3,7 +3,7 @@
 namespace Fsel.Training.Domain.Models.CommandModels.ClassLiveWorkFlows
 {
     using System.Text.Json.Serialization;
-    using Fsel.Training.Domain.Enums;
+    using Fsel.Shared.Enums;
     using Fsel.Training.Domain.Models.CommandModels.ClassLiveWorkFlowPlans;
 
     public class CreateClassLiveWorkFlowCommandModel
