@@ -6,7 +6,6 @@ namespace Fsel.Course.Domain.Enums
     {
         Standalone,
         UnitTest,
-        SkillTest,
-        Ungraded
+        SkillTest
     }
 }

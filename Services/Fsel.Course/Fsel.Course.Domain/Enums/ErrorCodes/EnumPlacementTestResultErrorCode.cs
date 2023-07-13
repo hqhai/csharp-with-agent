@@ -13,5 +13,10 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         /// Ids Null
         /// </summary>
         IdsNull,
+
+        /// <summary>
+        /// PlacementTest Result Done
+        /// </summary>
+        PlacementTestResultDone,
     }
 }

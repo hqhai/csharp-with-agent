@@ -9,9 +9,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
     public class VideoTimeCodeModel : BaseModel
     {
         public int TotalCount { get; set; }
-        public long DisplayTimeTicks { get; set; }
-
-        public long ExecutionTimeTicks { get; set; }
+        public bool Ungraded { get; set; }
         public int CorrectTotal { get; set; }
         public int CorrectCount { get; set; }
         public EnumTimeCodeType TimeCodeType { get; set; }
