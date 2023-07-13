@@ -15,7 +15,6 @@ namespace Fsel.Interaction.Api.Controllers
     [ApiVersion(Settings.APIVersion)]
     [Route(Settings.APIDefaultRoute + "/customerSurvey")]
     [ApiController]
-
     public class CustomerSurveyController : ControllerBase
     {
         private readonly IMediator _mediator;

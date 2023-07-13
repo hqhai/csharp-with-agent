@@ -25,12 +25,18 @@ namespace Fsel.Ordering.Infrastructure
 
             modelBuilder.ApplyConfiguration(new OrderEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new PackageEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new VoucherEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new VoucherPackageEntityTypeConfiguration());
             base.OnModelCreating(modelBuilder);
         }
 
         public DbSet<Order> Orders { get; set; }
 
         public DbSet<Package> Packages { get; set; }
+
+        public DbSet<Voucher> Vouchers { get; set; }
+
+        public DbSet<VoucherPackage> VoucherPackages { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {

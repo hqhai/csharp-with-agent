@@ -69,7 +69,17 @@ namespace Fsel.Shared.Helpers
                 CourseLevels = x.Select(n => n.Value).ToArray()
             });
         }
-
+        public static EnumCourseLevel GetCourseLevelByPlacementTestLevel(this EnumPlacementTestLevel level)
+        {
+            foreach (var item in ConvertHelper.EnumToList<EnumCourseLevel>())
+            {
+                if (item.ToString() == level.ToString())
+                {
+                    return item;
+                }
+            }
+            return EnumCourseLevel.MS3;
+        }
         public static IList<EnumCourseLevel> GetEnumCourseLevels(this EnumCourseType? courseType)
         {
             var courseLevels = new List<EnumCourseLevel>();

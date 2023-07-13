@@ -104,7 +104,7 @@ namespace Fsel.Course.Lms.Application.Queries.FinalTestQuery
                             Ungraded = x.Ungraded,
                             CorrectTotal = x.CorrectTotal,
                             Config = _questionTypeConverter.QuestionTypeConverterObject(x.Config, x.QuestionType, isDisableAnswers: !checkDone).Item1,
-                            ResultAnswer = _mapper.Map<FinalTestAnswerModel>(x.SectionQuestions.FirstOrDefault(y => y.QuestionId == x.Id)?.FinalTestAnswers.FirstOrDefault())
+                            ResultAnswer = _mapper.Map<AnswerModel>(x.SectionQuestions.FirstOrDefault(y => y.QuestionId == x.Id)?.FinalTestAnswers.FirstOrDefault())
                         }).ToList()
                     }).ToList(),
                 }).ToList(),

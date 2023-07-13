@@ -15,6 +15,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
     using Fsel.Course.Domain.Models.CommandModels.MockTestAnswers;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Infrastructure.Common;
+    using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -29,39 +30,21 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
         private readonly IQuestionRepository _questionRepository;
         private readonly IMockTestAnswerRepository _mockTestAnswerRepository;
         private readonly IMockTestResultRepository _mockTestResultRepository;
-        private readonly ISectionQuestionRepository _sectionQuestionRepository;
         private readonly ISectionGroupRepository _sectionGroupRepository;
-        private readonly ISectionRepository _sectionRepository;
-        private readonly ISectionPartRepository _sectionPartRepository;
-        private readonly IMockTestRepository _mockTestRepository;
-        private readonly ISectionTimeCodeRepository _sectionTimeCodeRepository;
-        private readonly IMockTestSectionRepository _mockTestSectionRepository;
         private readonly IMapper _mapper;
 
         public CreateMockTestAnswerCommandHandler(AnswerTypeConverter answerTypeConverter
             , IQuestionRepository questionRepository
             , IMockTestAnswerRepository mockTestAnswerRepository
             , IMockTestResultRepository mockTestResultRepository
-            , ISectionQuestionRepository sectionQuestionRepository
             , ISectionGroupRepository sectionGroupRepository
-            , ISectionRepository sectionRepository
-            , ISectionPartRepository sectionPartRepository
-            , IMockTestRepository mockTestRepository
-            , ISectionTimeCodeRepository sectionTimeCodeRepository
-            , IMockTestSectionRepository mockTestSectionRepository
             , IMapper mapper)
         {
             _answerTypeConverter = answerTypeConverter;
             _questionRepository = questionRepository;
             _mockTestAnswerRepository = mockTestAnswerRepository;
             _mockTestResultRepository = mockTestResultRepository;
-            _sectionQuestionRepository = sectionQuestionRepository;
             _sectionGroupRepository = sectionGroupRepository;
-            _sectionRepository = sectionRepository;
-            _sectionPartRepository = sectionPartRepository;
-            _mockTestRepository = mockTestRepository;
-            _sectionTimeCodeRepository = sectionTimeCodeRepository;
-            _mockTestSectionRepository = mockTestSectionRepository;
             _mapper = mapper;
         }
 
@@ -69,9 +52,9 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<MockTestResultModel> methodResult = new MethodResult<MockTestResultModel>();
-            if (request.Answers == null || request.Answers.Count == 0)
+            if (request.SectionGroups == null || request.SectionGroups.Count == 0)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumMockTestAnswerErrorCode.AnswerNull), nameof(request.Answers), request.Answers);
+                methodResult.AddErrorBadRequest(nameof(EnumMockTestAnswerErrorCode.SkillNull), nameof(request.SectionGroups), request.SectionGroups);
                 return methodResult;
             }
             var mockTestResult = await _mockTestResultRepository.Queryable.FirstOrDefaultAsync(x => x.Id == request.MockTestResultId, cancellationToken);
@@ -81,128 +64,99 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
                 return methodResult;
             }
 
-            var questionIds = request.Answers.Select(x => x.QuestionId ?? default).ToList();
+            var mockTestAnswers = new List<MockTestAnswer>();
+            var skillScores = new List<SkillScores>();
+            var sectionGroups = await _sectionGroupRepository.Queryable.Where(x => request.SectionGroups.Select(x => x.SectionGroupId).Contains(x.Id)).ToListAsync(cancellationToken);
+
+            if (sectionGroups == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSectionGroupErrorCode.SectionGroupsNull), nameof(sectionGroups));
+                return methodResult;
+            }
+
+            var questionIds = request.SectionGroups.SelectMany(x => x.Answers!).Select(x => x.QuestionId).ToList();
             var questions = await _questionRepository.GetIncludeSectionByIdAsync(questionIds);
             if (questions == null || questions.Count == 0)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumQuestionErrorCode.QuestionsNotExist), nameof(questionIds), questionIds);
                 return methodResult;
             }
-            var mockTestAnswers = new List<MockTestAnswer>();
-            int correctCountStudent = 0;
-
-            foreach (var item in request.Answers)
+            foreach (var item in request.SectionGroups)
             {
-                if (item.Answer != null)
+                if (item.Answers != null)
                 {
-                    var question = await _questionRepository.GetByIdAsync(item.QuestionId ?? default);
-                    if (question == null)
+                    if (item.Answers == null || item.Answers.Count == 0)
                     {
-                        methodResult.AddErrorBadRequest(nameof(EnumQuestionErrorCode.QuestionNotExist), nameof(item.QuestionId), item.QuestionId);
+                        methodResult.AddErrorBadRequest(nameof(EnumMockTestAnswerErrorCode.AnswerNull), nameof(request.SectionGroups), request.SectionGroups);
                         return methodResult;
                     }
-                    else if (question.Config == null)
-                    {
-                        methodResult.AddErrorBadRequest(nameof(EnumQuestionErrorCode.QuestionConfigNull), nameof(question), question);
-                        return methodResult;
-                    }
-                    else if (question.SectionQuestions == null || question.SectionQuestions.Count == 0)
-                    {
-                        methodResult.AddErrorBadRequest(nameof(EnumSectionQuestionErrorCode.SectionQuestionsNotExist), nameof(question.SectionQuestions));
-                        return methodResult;
-                    }
-                    var sectionQuestionId = question.SectionQuestions.FirstOrDefault()!.Id;
 
-                    var mockTestAnswer = await _mockTestAnswerRepository.Queryable.FirstOrDefaultAsync(x => x.MockTestResultId == mockTestResult.Id && x.SectionQuestionId == sectionQuestionId, cancellationToken);
-                    if (mockTestAnswer == null)
+                    double count = 0;
+                    double questionCount = 0;
+                    foreach (var answer in item.Answers)
                     {
-                        var (answerConfig, correctCount) = _answerTypeConverter.GetTotalCorrectByAsnwerType(item.Answer, question.Config, question.QuestionType);
-                        if (answerConfig == null)
+                        var question = questions.FirstOrDefault(x => x.Id == answer.QuestionId);
+                        if (question == null)
                         {
-                            methodResult.AddErrorBadRequest(nameof(EnumMockTestAnswerErrorCode.AnswerIsInTheWrongFormat), nameof(item.Answer), item.Answer);
+                            methodResult.AddErrorBadRequest(nameof(EnumQuestionErrorCode.QuestionNotExist), nameof(answer.QuestionId), answer.QuestionId);
                             return methodResult;
                         }
-                        correctCountStudent += correctCount;
-                        mockTestAnswer = new MockTestAnswer
+                        else if (question.Config == null)
                         {
-                            Answer = answerConfig,
-                            MockTestResultId = mockTestResult.Id,
-                            SectionQuestionId = sectionQuestionId
-                        };
-                        mockTestAnswers.Add(mockTestAnswer);
+                            methodResult.AddErrorBadRequest(nameof(EnumQuestionErrorCode.QuestionConfigNull), nameof(question), question);
+                            return methodResult;
+                        }
+                        else if (question.SectionQuestions == null || question.SectionQuestions.Count == 0)
+                        {
+                            methodResult.AddErrorBadRequest(nameof(EnumSectionQuestionErrorCode.SectionQuestionsNotExist), nameof(question.SectionQuestions));
+                            return methodResult;
+                        }
+                        var sectionQuestionId = question.SectionQuestions.FirstOrDefault()!.Id;
+                        var mockTestAnswer = await _mockTestAnswerRepository.Queryable.FirstOrDefaultAsync(x => x.MockTestResultId == mockTestResult.Id && x.SectionQuestionId == sectionQuestionId, cancellationToken);
+                        if (mockTestAnswer == null)
+                        {
+                            var (answerConfig, correctCount) = _answerTypeConverter.GetTotalCorrectByAsnwerType(answer.Answer, question.Config, question.QuestionType);
+                            if (answerConfig == null)
+                            {
+                                methodResult.AddErrorBadRequest(nameof(EnumMockTestAnswerErrorCode.AnswerIsInTheWrongFormat), nameof(answer.Answer), answer.Answer);
+                                return methodResult;
+                            }
+                            count += correctCount;
+                            questionCount += question.CorrectTotal;
+                            mockTestAnswer = new MockTestAnswer
+                            {
+                                Answer = answerConfig,
+                                MockTestResultId = mockTestResult.Id,
+                                SectionQuestionId = sectionQuestionId
+                            };
+                            mockTestAnswers.Add(mockTestAnswer);
+                        }
                     }
-                }
-                else if (item.SectionTimeCodeId != null)
-                {
-                    var sectionTimeCode = await _sectionTimeCodeRepository.Queryable.FirstOrDefaultAsync(x => x.Id == item.SectionTimeCodeId!, cancellationToken);
-                    if (sectionTimeCode == null)
+                    var sectionGroup = sectionGroups.FirstOrDefault(x => x.Id == item.SectionGroupId);
+                    if (sectionGroup == null)
                     {
-                        methodResult.AddErrorBadRequest(nameof(EnumSectionTimeCodeErrorCode.SectionTimeCodeNotExist), nameof(item.SectionTimeCodeId), item.SectionTimeCodeId);
+                        methodResult.AddErrorBadRequest(nameof(EnumSectionGroupErrorCode.SectionGroupsNull), nameof(item.SectionGroupId), item.SectionGroupId);
                         return methodResult;
                     }
-                    var mockTestAnswer = await _mockTestAnswerRepository.Queryable.FirstOrDefaultAsync(x => x.MockTestResultId == mockTestResult.Id && x.SectionTimeCodeId == sectionTimeCode.Id, cancellationToken);
-                    if (mockTestAnswer == null)
+                    var skillScore = new SkillScores
                     {
-                        var (answerConfig, correctCount) = _answerTypeConverter.GetTotalCorrectByAsnwerType(item.Answer, null, EnumQuestionType.BaseContent);
-                        if (answerConfig == null)
-                        {
-                            methodResult.AddErrorBadRequest(nameof(EnumMockTestAnswerErrorCode.AnswerIsInTheWrongFormat), nameof(item.Answer), item.Answer);
-                            return methodResult;
-                        }
-                        mockTestAnswer = new MockTestAnswer
-                        {
-                            Answer = answerConfig,
-                            MockTestResultId = mockTestResult.Id,
-                            SectionTimeCodeId = sectionTimeCode.Id
-                        };
-                        mockTestAnswers.Add(mockTestAnswer);
-                    }
-                }
-                else if (item.SectionId != null)
-                {
-                    var section = await _sectionRepository.Queryable.FirstOrDefaultAsync(x => x.Id == item.SectionId!, cancellationToken);
-                    if (section == null)
-                    {
-                        methodResult.AddErrorBadRequest(nameof(EnumSectionErrorCode.SectionNotExist), nameof(item.SectionId), item.SectionId);
-                        return methodResult;
-                    }
-                    var mockTestAnswer = await _mockTestAnswerRepository.Queryable.FirstOrDefaultAsync(x => x.MockTestResultId == mockTestResult.Id && x.SectionId == section.Id, cancellationToken);
-                    if (mockTestAnswer == null)
-                    {
-                        var (answerConfig, correctCount) = _answerTypeConverter.GetTotalCorrectByAsnwerType(item.Answer, null, EnumQuestionType.BaseContent);
-                        if (answerConfig == null)
-                        {
-                            methodResult.AddErrorBadRequest(nameof(EnumMockTestAnswerErrorCode.AnswerIsInTheWrongFormat), nameof(item.Answer), item.Answer);
-                            return methodResult;
-                        }
-                        mockTestAnswer = new MockTestAnswer
-                        {
-                            Answer = answerConfig,
-                            MockTestResultId = mockTestResult.Id,
-                            SectionId = section.Id
-                        };
-                        mockTestAnswers.Add(mockTestAnswer);
-                    }
+                        Skill = sectionGroup.CourseSkill,
+                        TotalCount = questionCount,
+                        CorrectCount = count,
+                        Scores = count.GetIeltsScore(sectionGroup.CourseSkill)
+                    };
+                    skillScores.Add(skillScore);
                 }
             }
+            if (mockTestAnswers.Count > 0)
+            {
+                mockTestResult.CorrectCount = (int)skillScores.Sum(x => x.CorrectCount);
+                mockTestResult.CorrectTotal = (int)skillScores.Sum(x => x.TotalCount);
+                mockTestResult.Percent = mockTestResult.CorrectTotal > 0 ? (double)mockTestResult.CorrectCount / mockTestResult.CorrectTotal * 100 : 0;
+                mockTestResult.Status = EnumResultStatus.Done;
+                mockTestResult.SkillScores = skillScores;
+            }
 
-            IQueryable<int>? questionQuery = null;
-
-            questionQuery = from p in _mockTestRepository.Queryable
-                            join ps in _mockTestSectionRepository.Queryable on p.Id equals ps.MockTestId
-                            join sg in _sectionGroupRepository.Queryable on ps.SectionGroupId equals sg.Id
-                            join s in _sectionRepository.Queryable on sg.Id equals s.SectionGroupId
-                            join sp in _sectionPartRepository.Queryable on s.Id equals sp.SectionId
-                            join sq in _sectionQuestionRepository.Queryable on sp.Id equals sq.SectionPartId
-                            join q in _questionRepository.Queryable on sq.QuestionId equals q.Id
-                            where p.Id == mockTestResult.MockTestId
-                            select q.CorrectTotal;
-
-            mockTestResult.CorrectCount = correctCountStudent;
-            mockTestResult.CorrectTotal = await questionQuery.SumAsync(cancellationToken);
-            mockTestResult.Percent = mockTestResult.CorrectTotal != 0 ? (double)mockTestResult.CorrectCount / mockTestResult.CorrectTotal * 100 : 0;
-            mockTestResult.SkillScores = new List<SkillScores>();
-            mockTestResult.Status = EnumResultStatus.Done;
             await _mockTestAnswerRepository.ExecuteTransactionAsync(async () =>
             {
                 if (mockTestAnswers.Count > 0)

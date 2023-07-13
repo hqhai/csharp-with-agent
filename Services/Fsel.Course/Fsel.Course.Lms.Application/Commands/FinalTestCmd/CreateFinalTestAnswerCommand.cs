@@ -13,7 +13,6 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd
     using Fsel.Course.Domain.Models.CommandModels.FinalTestAnswers;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Infrastructure.Common;
-    using Fsel.Course.Infrastructure.Repositories;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using MediatR;
     using Microsoft.AspNetCore.Http;
@@ -91,9 +90,9 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd
                 return methodResult;
             }
 
-
             var finalTestResult = await _finalTestResultRepository.Queryable
-                    .FirstOrDefaultAsync(x => x.FinalTestId == request.FinalTestId && x.StudentId == studentId && x.CourseId == request.CourseId && x.Status == EnumResultStatus.Process, cancellationToken);
+                    .FirstOrDefaultAsync(x => x.FinalTestId == request.FinalTestId && x.StudentId == studentId && x.CourseId == request.CourseId, cancellationToken);
+
             if (finalTestResult == null)
             {
                 finalTestResult = new FinalTestResult
@@ -102,6 +101,13 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd
                     StudentId = studentId ?? default,
                     CourseId = request.CourseId,
                 };
+                finalTestResult = _finalTestResultRepository.Add(finalTestResult);
+                await _finalTestResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+            }
+            else if (finalTestResult.Status == EnumResultStatus.Done)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumFinalTestResultErrorCode.FinalTestResultsDone));
+                return methodResult;
             }
             var skillScores = new List<SkillScores>();
             foreach (var item in request.FinalTestAnswers)
@@ -171,7 +177,7 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd
                 finalTestResult.SkillScores = skillScores;
                 finalTestResult.Percent = finalTestResult.CorrectTotal > 0 ? ((double)finalTestResult.CorrectCount / finalTestResult.CorrectTotal * 100) : 0;
 
-                finalTestResult = _finalTestResultRepository.Add(finalTestResult);
+                finalTestResult = _finalTestResultRepository.Update(finalTestResult);
                 await _finalTestResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
                 methodResult.StatusCode = StatusCodes.Status201Created;

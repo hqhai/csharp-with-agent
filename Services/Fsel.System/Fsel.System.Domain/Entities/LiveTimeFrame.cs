@@ -7,9 +7,9 @@ namespace Fsel.System.Domain.Entities
     public class LiveTimeFrame : Entity
     {
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
-        public DateTime? StartTime { get; set; }
+        public double? StartTime { get; set; }
 
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
-        public DateTime? EndTime { get; set; }
+        public double? EndTime { get; set; }
     }
 }

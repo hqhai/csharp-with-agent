@@ -2,15 +2,15 @@
 
 namespace Fsel.Course.Lms.Api.Controllers
 {
-    using Fsel.Common.ActionResults;
     using System.Net;
+    using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
     using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Course.Lms.Application.Queries.MockTestResultQuery;
     using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
-    using Fsel.Course.Lms.Application.Queries.MockTestResultQuery;
 
     [ApiVersion(Settings.APIVersion)]
     [Route(Settings.APIDefaultRoute + "/mock-test-result")]
@@ -25,15 +25,15 @@ namespace Fsel.Course.Lms.Api.Controllers
             _mediator = mediator;
         }
 
-        /// <summary>
-        /// Get List Mock tesk result
+        /// <summary>s
+        /// Get Mock tesk result
         /// </summary>
-        [HttpGet]
-        [ProducesResponseType(typeof(MethodResult<IList<MockTestResultModel>>), (int)HttpStatusCode.OK)]
+        [HttpGet("{mockTestResultId}")]
+        [ProducesResponseType(typeof(MethodResult<MockTestResultModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetListLessonByUnitId([FromQuery] GetMockTestReportQuery query)
+        public async Task<IActionResult> GetMockTestResultById([FromRoute] Guid mockTestResultId)
         {
-            MethodResult<IList<MockTestResultModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            MethodResult<MockTestResultModel> queryResult = await _mediator.Send(new GetMockTestReportQuery { MockTestResultId = mockTestResultId }).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
     }

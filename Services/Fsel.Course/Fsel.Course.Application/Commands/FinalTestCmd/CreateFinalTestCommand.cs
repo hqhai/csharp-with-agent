@@ -16,6 +16,7 @@ namespace Fsel.Course.Application.Commands.FinalTestCmd
     using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Http;
+    using Microsoft.EntityFrameworkCore;
 
     public class CreateFinalTestCommand : CreateFinalTestCommandModel, IRequest<MethodResult<FinalTestModel>>
     {
@@ -41,6 +42,11 @@ namespace Fsel.Course.Application.Commands.FinalTestCmd
             if (request.SectionGroups == null || request.SectionGroups.Count == 0)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSectionGroupErrorCode.SectionGroupsNull), nameof(request.SectionGroups));
+                return methodResult;
+            }
+            if (await _finalTestRepository.Queryable.AnyAsync(x => x.Name == request.Name, cancellationToken))
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumFinalTestErrorCode.FinalTestNameAlreadyExist), nameof(request.Name), request.Name);
                 return methodResult;
             }
             FinalTest finalTest = _mapper.Map<FinalTest>(request);

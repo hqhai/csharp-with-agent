@@ -23,5 +23,10 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         ///  must have the correct score
         /// </summary>
         MustCorrectScore,
+
+        /// <summary>
+        /// Name Already Exists
+        /// </summary>
+        NameAlreadyExists
     }
 }

@@ -12,6 +12,7 @@ namespace Fsel.Shared.Helpers
             ReadingScore = readingScore;
             ListeningScore = listeningScore;
         }
+
         public int Number { get; set; }
         public double ReadingScore { get; set; }
         public double ListeningScore { get; set; }
@@ -19,7 +20,6 @@ namespace Fsel.Shared.Helpers
 
     public static class IeltsScoreHelper
     {
-
         private static IList<IeltsScoreConfig> s_ieltsScoreConfigs = new List<IeltsScoreConfig>
         {
             new IeltsScoreConfig(0, 0, 0),
@@ -56,14 +56,13 @@ namespace Fsel.Shared.Helpers
 
         public static double GetIeltsScore(this double number, EnumCourseSkill skill)
         {
-            var config = s_ieltsScoreConfigs.OrderBy(x => x.Number).FirstOrDefault(x => x.Number <= number);
+            var config = s_ieltsScoreConfigs.OrderBy(x => x.Number).FirstOrDefault(x => x.Number == number);
             if (config != null)
             {
-                return skill == EnumCourseSkill.Listening ? config.ListeningScore : config.ListeningScore;
+                return skill == EnumCourseSkill.Listening ? config.ListeningScore : config.ReadingScore;
             }
             return default;
         }
-
 
         public static EnumCourseLevel? GetLevelInScore(this EnumPlacementTestLevel enumPlacementTestLevel, double? value = 0)
         {

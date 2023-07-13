@@ -9,8 +9,8 @@ namespace Fsel.Training.Domain.Models.EntityModels
     {
         public DateTime LiveDate { get; set; }
         public Guid LiveTimeFrameId { get; set; }
-        public string? StartTime { get; set; }
-        public string? EndTime { get; set; }
+        public double? StartTime { get; set; }
+        public double? EndTime { get; set; }
         public string? AccessLink { get; set; }
         public string? Note { get; set; }
         public EnumClassLiveCalendarStatus Status { get; set; }

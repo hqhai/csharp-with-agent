@@ -4,13 +4,9 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
 {
     using AutoMapper;
     using Fsel.Common.ActionResults;
-    using Fsel.Interaction.Domain.Entities;
     using Fsel.Interaction.Domain.Enums.ErrorCodes;
     using Fsel.Interaction.Domain.IRepositories;
     using Fsel.Interaction.Domain.Models.CommandModels.Comments;
-
-    using Fsel.Interaction.Domain.Models.CommandModels.Comments;
-
     using Fsel.Interaction.Domain.Models.EntityModels;
     using Fsel.Shared.Enums;
     using MediatR;

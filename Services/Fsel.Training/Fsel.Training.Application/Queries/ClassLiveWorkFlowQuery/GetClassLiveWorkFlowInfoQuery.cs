@@ -5,7 +5,6 @@ namespace Fsel.Training.Application.Queries.ClassLiveWorkFlowQuery
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
-    using Fsel.Course.Application.Services.UserServices.Models;
     using Fsel.Training.Application.Services.UserServices;
     using Fsel.Training.Application.Services.UserServices.Models;
     using Fsel.Training.Domain.Enums.ErrorCodes;
@@ -42,6 +41,7 @@ namespace Fsel.Training.Application.Queries.ClassLiveWorkFlowQuery
                 methodResult.AddErrorBadRequest(nameof(EnumClassLiveWorkFlowErrorCode.ClassLiveWorkFlowNotExits));
                 return methodResult;
             }
+            liveSessionInformation.Type = classLiveWorkFlow.Type;
             var studentIds = classLiveWorkFlow.ClassLiveCalendar?.Class?.ClassStudents.Select(p => p.StudentId).ToList();
             IList<StudentModel>? students = new List<StudentModel>();
             if (studentIds!.Count > 0)

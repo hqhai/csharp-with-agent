@@ -10,8 +10,8 @@ namespace Fsel.Training.Application.Queries.ClassQuery
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Core.Extensions;
-    using Fsel.Course.Application.Services.UserServices.Models;
     using Fsel.Training.Application.Services.UserServices;
+    using Fsel.Training.Application.Services.UserServices.Models;
     using Fsel.Training.Domain.IRepositories;
     using Fsel.Training.Domain.Models.EntityModels;
     using Fsel.Training.Domain.Models.QueryModels;
@@ -56,8 +56,8 @@ namespace Fsel.Training.Application.Queries.ClassQuery
                                                 Name = x.Class!.Name,
                                                 Code = x.Class!.Code,
                                                 TeacherId = x.Class!.TeacherId,
-                                                StartDate = x.Class!.StartDate.Value,
-                                                EndDate = x.Class!.EndDate.Value,
+                                                StartDate = x.Class!.StartDate.HasValue ? x.Class!.StartDate.Value : default,
+                                                EndDate = x.Class!.EndDate.HasValue ? x.Class!.EndDate.Value : default,
                                                 LiveDays = x.Class!.LiveDays,
                                             },
                                             CreatedDate = x.CreatedDate

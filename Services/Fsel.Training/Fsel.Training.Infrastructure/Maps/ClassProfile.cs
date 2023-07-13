@@ -17,6 +17,7 @@ namespace Fsel.Training.Infrastructure.Maps
             CreateMap<CreateClassCommandModel, Class>().IgnoreAllNonExisting();
             CreateMap<AssignTeacherToClassCommandModel, Class>().IgnoreAllNonExisting();
             CreateMap<ClassLiveWorkFlow, ClassLiveWorkFlowModel>().IgnoreAllNonExisting();
+            CreateMap<ClassLiveWorkFlowPlan, ClassLiveWorkFlowPlanModel>().IgnoreAllNonExisting();
         }
     }
 }

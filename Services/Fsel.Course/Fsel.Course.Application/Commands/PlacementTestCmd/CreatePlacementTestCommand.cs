@@ -13,6 +13,7 @@ using Fsel.Shared.Enums;
 using Fsel.Shared.Helpers;
 using MediatR;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 
 namespace Fsel.Course.Application.Commands.PlacementTestCmd
 {
@@ -47,9 +48,12 @@ namespace Fsel.Course.Application.Commands.PlacementTestCmd
                 methodResult.AddErrorBadRequest(nameof(EnumSectionGroupErrorCode.SectionGroupsNull), nameof(request.SectionGroups));
                 return methodResult;
             }
-
+            if (await _placementTestRepository.Queryable.AnyAsync(x => x.Name == request.Name, cancellationToken))
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumPlacementTestErrorCode.NameAlreadyExists), nameof(request.Name), request.Name);
+                return methodResult;
+            }
             PlacementTest placementTest = _mapper.Map<PlacementTest>(request);
-            placementTest.IsActive = false;
             if (!placementTest.IsValid())
             {
                 methodResult.AddErrorBadRequest(placementTest.ErrorMessages);

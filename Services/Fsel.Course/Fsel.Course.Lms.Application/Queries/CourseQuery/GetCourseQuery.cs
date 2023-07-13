@@ -49,14 +49,14 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
             var methodResult = new MethodResult<CourseModel>();
 
             var studentResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
-            var student = studentResult?.Content?.Result;
-            if (studentResult == null || student == null)
+            if (!studentResult.IsSuccessStatusCode)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.StudentNull));
                 return methodResult;
             }
+            var studentId = studentResult?.Content?.Result?.Id;
 
-            var classResult = await _trainingService.GetClassByStudentId(student.Id);
+            var classResult = await _trainingService.GetClassByStudentId(studentId ?? default);
             if (!classResult.IsSuccessStatusCode)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.StudentNotInClass));
@@ -70,7 +70,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
             }
 
             var course = await _courseRepository.Queryable
-                             .Include(x => x.CourseResults.Where(y => y.StudentId == student.Id))
+                             .Include(x => x.CourseResults)
                              .Include(x => x.CourseUnitMockTests)
                              .FirstOrDefaultAsync(x => x.Id == @class.CourseId, cancellationToken);
 
@@ -80,11 +80,11 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
             }
-            if (course.CourseResults.Count == 0)
+            if (course.CourseResults.FirstOrDefault(x => x.CourseId == course.Id && x.StudentId == studentId) == null)
             {
                 course.CourseResults.Add(new CourseResult
                 {
-                    StudentId = student.Id,
+                    StudentId = studentId ?? default,
                     CourseId = @class.CourseId,
                     Status = EnumCourseStatus.Active
                 });
@@ -96,8 +96,8 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
                     course.UnitResults = unitIds.Select((x, index) => new UnitResult
                     {
                         UnitId = x ?? default,
-                        StudentId = student.Id,
-                        Status = index == 0 ? EnumResultStatus.Process : EnumResultStatus.Unfinished
+                        StudentId = studentId ?? default,
+                        Status = index == 0 ? EnumResultStatus.New : EnumResultStatus.Unfinished
                     }).ToList();
                 }
                 if (finalTestIds.Count > 0)
@@ -105,7 +105,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
                     course.FinalTestResults = finalTestIds.Select(x => new FinalTestResult
                     {
                         FinalTestId = x ?? default,
-                        StudentId = student.Id,
+                        StudentId = studentId ?? default,
                         Status = EnumResultStatus.Unfinished
                     }).ToList();
                 }
@@ -114,7 +114,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
                     course.MockTestResults = mockTestIds.Select(x => new MockTestResult
                     {
                         MockTestId = x ?? default,
-                        StudentId = student.Id,
+                        StudentId = studentId ?? default,
                         Status = EnumResultStatus.Unfinished
                     }).ToList();
                 }
@@ -122,16 +122,16 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
                 await _courseRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
             }
             course = await _courseRepository.Queryable
-                        .Include(x => x.CourseResults.Where(y => y.StudentId == student.Id))
+                        .Include(x => x.CourseResults.Where(y => y.StudentId == studentId))
                         .Include(x => x.CourseUnitMockTests)
                         .ThenInclude(x => x.Unit)
-                        .ThenInclude(x => x!.UnitResults.Where(y => y.StudentId == student.Id))
+                        .ThenInclude(x => x!.UnitResults.Where(y => y.StudentId == studentId))
                         .Include(x => x.CourseUnitMockTests)
                         .ThenInclude(x => x.MockTest)
-                        .ThenInclude(x => x!.MockTestResults.Where(y => y.StudentId == student.Id))
+                        .ThenInclude(x => x!.MockTestResults.Where(y => y.StudentId == studentId))
                         .Include(x => x.CourseUnitMockTests)
                         .ThenInclude(x => x.FinalTest)
-                        .ThenInclude(x => x!.FinalTestResults.Where(y => y.StudentId == student.Id))
+                        .ThenInclude(x => x!.FinalTestResults.Where(y => y.StudentId == studentId))
                         .Include(x => x.CourseTeachers)
                         .Where(x => x.Id == @class.CourseId)
                         .AsNoTracking()
@@ -141,6 +141,9 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
                 Id = course!.Id,
                 Name = course.Name,
                 Code = course.Code,
+                Status = course.Status,
+                CourseType = course.CourseType,
+                CreatedDate = course.CreatedDate,
                 InstructionContent = course.InstructionContent,
                 CourseLevel = course.CourseLevel,
                 CourseUnitMockTests = course.CourseUnitMockTests.OrderBy(x => x!.DisplayOrder).Select(x => new CourseUnitMockTestModel

@@ -1,4 +1,4 @@
-    // Copyright (c) Atlantic. All rights reserved.
+// Copyright (c) Atlantic. All rights reserved.
 
 namespace Fsel.Course.Infrastructure.Common
 {
@@ -84,7 +84,7 @@ namespace Fsel.Course.Infrastructure.Common
                 foreach (var item in dataAnswer.Answers)
                 {
                     var question = dataQuestion.Contents.FirstOrDefault(x => x.Id == item.Id);
-                    if (question?.Answers != null && question.Answers.Count > 0 && question.Answers.Any(n => n.Id == item.AnswerId && n.IsCorrect == true))
+                    if (question?.Answers != null && question.Answers.Count > 0 && question.Answers.Any(n => (item.AnswerId.HasValue && n.Id == item.AnswerId) && n.IsCorrect == true))
                     {
                         number++;
                         item.IsExact = true;
@@ -114,7 +114,7 @@ namespace Fsel.Course.Infrastructure.Common
             {
                 foreach (var item in dataAnswer.Answers)
                 {
-                    if (dataQuestion.Link.Any(x => x.FromId == item.FromId && x.ToId == item.ToId))
+                    if (dataQuestion.Link.Any(x => x.FromId == item.FromId && (item.ToId.HasValue && x.ToId == item.ToId)))
                     {
                         number++;
                         item.IsExact = true;
@@ -156,7 +156,7 @@ namespace Fsel.Course.Infrastructure.Common
             var dataQuestion = configQuestion.Deserialize<ListingQuestion>();
             int number = 0;
 
-            if (dataQuestion != null && dataAnswer != null && dataAnswer.Answers != null && dataAnswer.Answers.Count > 0 && dataQuestion.ExactWordCount == dataAnswer.Answers.Count)
+            if (dataQuestion != null && dataAnswer != null && dataAnswer.Answers != null && dataAnswer.Answers.Count > 0 && dataAnswer.Answers.Count >= dataQuestion.ExactWordCount)
             {
                 dataAnswer.IsExact = true;
                 number++;
@@ -192,6 +192,25 @@ namespace Fsel.Course.Infrastructure.Common
             return number;
         }
 
+        private static bool IsShortAnswer(string question, string answer)
+        {
+            var q = question.Trim().ToLower(CultureInfo.CurrentCulture);
+            string[] answerWords = answer.Split(' ');
+            if (answerWords != null)
+            {
+                foreach (var word in answerWords)
+                {
+                    var a = word.Trim().ToLower(CultureInfo.CurrentCulture);
+                    if (q.Replace('’', '\'') == a.Replace('’', '\''))
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
         private static int GetTotalCorrectTypeShortAnswerWordBase(ref object? configAnswer, object? configQuestion)
         {
             var dataAnswer = configAnswer.Deserialize<ShortAnswerWordBaseAnswer>();
@@ -200,7 +219,7 @@ namespace Fsel.Course.Infrastructure.Common
 
             if (dataAnswer != null && dataAnswer.Answers != null && dataQuestion != null && dataQuestion.Contents != null && dataQuestion.Contents.Count > 0)
             {
-                if (dataQuestion.Contents.Any(p => p.ToLower(CultureInfo.CurrentCulture) == dataAnswer.Answers.ToLower(CultureInfo.CurrentCulture)))
+                if (dataQuestion.Contents.Any(p => IsShortAnswer(p, dataAnswer.Answers)))
                 {
                     dataAnswer.IsExact = true;
                     number++;
@@ -248,16 +267,15 @@ namespace Fsel.Course.Infrastructure.Common
             if (words[index].IndexOf('|', StringComparison.Ordinal) != -1)
             {
                 string[] questionWords = words[index].Split('|');
-                string[] answerWords = word.Split(' ');
                 foreach (var item in questionWords)
                 {
-                    if (answerWords.Any(x => x == item))
+                    if (word.Trim().ToLower(CultureInfo.CurrentCulture).Replace('’', '\'') == item.Trim().ToLower(CultureInfo.CurrentCulture).Replace('’', '\''))
                     {
                         return true;
                     }
                 }
             }
-            else if (words[index] == word)
+            else if (words[index].Trim().ToLower(CultureInfo.CurrentCulture).Replace('’', '\'') == word.Trim().ToLower(CultureInfo.CurrentCulture).Replace('’', '\''))
             {
                 return true;
             }

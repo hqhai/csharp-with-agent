@@ -43,7 +43,7 @@ namespace Fsel.Course.Infrastructure.Common
 
         public IList<SectionModel>? GetSectionModels(IList<Section>? sections, bool isDisableAnswers = false)
         {
-            return sections?.Select(x => new SectionModel
+            return sections?.OrderBy(x => x.CreatedDate).Select(x => new SectionModel
             {
                 Id = x.Id,
                 Name = x.Name,
@@ -52,7 +52,7 @@ namespace Fsel.Course.Infrastructure.Common
                 DisplayOrder = x.DisplayOrder,
                 SubFilePath = x.SubFilePath,
                 VideoFilePath = x.VideoFilePath,
-                SectionParts = GetSectionPartModels(x.SectionParts.ToList()),
+                SectionParts = GetSectionPartModels(x.SectionParts.ToList(), isDisableAnswers),
                 Questions = GetQuestionModels(x.SectionQuestions.ToList(), isDisableAnswers),
                 SectionTimeCodes = GetSectionTimeCodeModels(x.SectionTimeCodes.ToList()),
                 ExtraPracticeAnswer = x!.ExtraPracticeAnswers.Count > 0 ? _mapper.Map<ExtraPracticeAnswerModel>(x.ExtraPracticeAnswers.FirstOrDefault()) : null,
@@ -62,7 +62,7 @@ namespace Fsel.Course.Infrastructure.Common
 
         public IList<SectionPartModel> GetSectionPartModels(IList<SectionPart> sectionParts, bool isDisableAnswers = false)
         {
-            return sectionParts.Select(x => new SectionPartModel
+            return sectionParts.OrderBy(x => x.CreatedDate).Select(x => new SectionPartModel
             {
                 Id = x.Id,
                 PartName = x.PartName,
@@ -71,9 +71,9 @@ namespace Fsel.Course.Infrastructure.Common
             }).ToList();
         }
 
-        public IList<SectionTimeCodeModel> GetSectionTimeCodeModels(IList<SectionTimeCode> sectionParts)
+        public IList<SectionTimeCodeModel> GetSectionTimeCodeModels(IList<SectionTimeCode> sectionTimeCodes)
         {
-            return sectionParts.Select(x => new SectionTimeCodeModel
+            return sectionTimeCodes.OrderBy(x => x.ExecutionTime).Select(x => new SectionTimeCodeModel
             {
                 Id = x.Id,
                 DisplayTime = x.DisplayTime,
@@ -86,15 +86,15 @@ namespace Fsel.Course.Infrastructure.Common
 
         public IList<QuestionModel> GetQuestionModels(IList<SectionQuestion> sectionQuestions, bool isDisableAnswers = false)
         {
-            return sectionQuestions.Select(x => x.Question).OrderBy(x => x!.CreatedDate).Select(x => new QuestionModel
+            return sectionQuestions.OrderBy(x => x.CreatedDate).Select(x => new QuestionModel
             {
-                Id = x!.Id,
-                QuestionType = x!.QuestionType,
-                Explanation = x!.Explanation,
-                Ungraded = x!.Ungraded,
-                CorrectTotal = x!.CorrectTotal,
-                Config = _questionTypeConverter.QuestionTypeConverterObject(x!.Config, x!.QuestionType, isDisableAnswers: isDisableAnswers).Item1,
-                ResultAnswer = x!.ExtraPracticeAnswers.Count > 0 ? x.ExtraPracticeAnswers.FirstOrDefault() : null
+                Id = x.Question!.Id,
+                QuestionType = x.Question.QuestionType,
+                Explanation = x.Question.Explanation,
+                Ungraded = x.Question.Ungraded,
+                CorrectTotal = x.Question.CorrectTotal,
+                Config = _questionTypeConverter.QuestionTypeConverterObject(x.Question.Config, x.Question.QuestionType, isDisableAnswers: isDisableAnswers).Item1,
+                ResultAnswer = _mapper.Map<AnswerModel>(x.MockTestAnswers.FirstOrDefault())
             }).ToList();
         }
 

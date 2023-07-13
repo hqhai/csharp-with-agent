@@ -7,9 +7,9 @@ namespace Fsel.Training.Application.Queries.ClassQuery
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base;
-    using Fsel.Course.Application.Services.UserServices.Models;
     using Fsel.Training.Application.Services.SystemServices;
     using Fsel.Training.Application.Services.UserServices;
+    using Fsel.Training.Application.Services.UserServices.Models;
     using Fsel.Training.Domain.Enums.ErrorCodes;
     using Fsel.Training.Domain.IRepositories;
     using Fsel.Training.Domain.Models.EntityModels;
@@ -82,8 +82,8 @@ namespace Fsel.Training.Application.Queries.ClassQuery
             foreach (var item in classQuery)
             {
                 var timeFrame = timeFrames?.FirstOrDefault(x => x.Id == item.LiveTimeFrameId);
-                item.StartDate = timeFrame.StartTime.HasValue ? timeFrame.StartTime.Value : default;
-                item.EndDate = timeFrame.EndTime.HasValue ? timeFrame.EndTime.Value : default;
+                item.TimeFrameStartTime = timeFrame?.StartTime;
+                item.TimeFrameEndTime = timeFrame?.EndTime;
             }
             methodResult.Result = classQuery;
             methodResult.StatusCode = StatusCodes.Status200OK;

@@ -12,6 +12,7 @@ namespace Fsel.Course.Infrastructure.Maps
         public VideoTimeCodeAnswerProfile()
         {
             CreateMap<VideoTimeCodeAnswer, VideoTimeCodeAnswerModel>().IgnoreAllNonExisting();
+            CreateMap<VideoTimeCodeAnswer, AnswerModel>().IgnoreAllNonExisting();
         }
     }
 }
