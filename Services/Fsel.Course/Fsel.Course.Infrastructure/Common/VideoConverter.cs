@@ -58,7 +58,7 @@ namespace Fsel.Course.Infrastructure.Common
                     Exercise = newExercise,
                     Question = newQuestion
                 });
-                var (config, correctTotal) = _questionTypeConverter.QuestionTypeConverterObject(question!.Config, question.QuestionType, isShowCorrectTotal: !question.Ungraded, false);
+                var (config, correctTotal) = _questionTypeConverter.QuestionTypeConverterObject(question!.Config, question.QuestionType, isShowCorrectTotal: true, false);
                 if (config == null)
                 {
                     methodResult.AddErrorBadRequest(nameof(EnumVideoErrorCode.ConfigIsInTheWrongFormat), nameof(question.Config), question.Config);
@@ -211,6 +211,7 @@ namespace Fsel.Course.Infrastructure.Common
             }
             return methodResult;
         }
+
         public async Task<VoidMethodResult> DeleteExerciseToVideo(Video video)
         {
             ArgumentNullException.ThrowIfNull(video);

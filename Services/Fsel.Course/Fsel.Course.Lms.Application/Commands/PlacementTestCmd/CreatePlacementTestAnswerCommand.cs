@@ -85,6 +85,11 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
                     StudentId = studentId ?? default
                 };
             }
+            else if (placementTestResult.Status == EnumResultStatus.Done)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumPlacementTestResultErrorCode.PlacementTestResultDone));
+                return methodResult;
+            }
 
             var placementTestAnswers = new List<PlacementTestAnswer>();
             var skillScores = new List<SkillScores>();
