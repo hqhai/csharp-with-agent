@@ -12,6 +12,11 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         /// <summary>
         /// Answers Is Null
         /// </summary>
-        AnswersNull
+        AnswersNull,
+
+        /// <summary>
+        /// AnswersDone
+        /// </summary>
+        AnswersDone
     }
 }
