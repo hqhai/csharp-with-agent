@@ -55,6 +55,11 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd
                 methodResult.AddErrorBadRequest(nameof(EnumHomeWorkResultErrorCode.HomeWorkResultNotExist));
                 return methodResult;
             }
+            else if (homeWorkResult.Status == EnumResultStatus.Done)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumHomeWorkResultErrorCode.HomeWorkResultDone));
+                return methodResult;
+            }
             var skillScores = new List<SkillScores>();
             foreach (var item in request.Answers)
             {

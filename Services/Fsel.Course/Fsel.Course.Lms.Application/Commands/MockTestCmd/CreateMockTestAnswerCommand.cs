@@ -63,6 +63,11 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
                 methodResult.AddErrorBadRequest(nameof(EnumMockTestResultErrorCode.MockTestResultNotExist), nameof(request.MockTestResultId), request.MockTestResultId);
                 return methodResult;
             }
+            else if (mockTestResult.Status == EnumResultStatus.Done)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumMockTestResultErrorCode.MockTestResultDone), nameof(request.MockTestResultId), request.MockTestResultId);
+                return methodResult;
+            }
 
             var mockTestAnswers = new List<MockTestAnswer>();
             var skillScores = new List<SkillScores>();
