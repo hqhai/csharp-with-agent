@@ -42,6 +42,11 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         /// <summary>
         /// ExtraPracticeExercises Does Not Exist
         /// </summary>
-        ExtraPracticeResultNotExist
+        ExtraPracticeResultNotExist,
+
+        /// <summary>
+        /// Code Already Exists
+        /// </summary>
+        CodeAlreadyExists
     }
 }

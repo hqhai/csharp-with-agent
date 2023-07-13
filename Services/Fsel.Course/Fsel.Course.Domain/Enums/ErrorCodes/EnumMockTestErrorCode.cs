@@ -62,7 +62,7 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         /// <summary>
         /// Name Already Exists
         /// </summary>
-        NameAlreadyExists
+        NameAlreadyExists,
 
 
         /// <summary>

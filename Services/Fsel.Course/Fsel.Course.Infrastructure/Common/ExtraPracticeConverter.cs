@@ -22,6 +22,7 @@ namespace Fsel.Course.Infrastructure.Common
         private readonly VideoConverter _videoConverter;
         private readonly IMockTestRepository _mockTestRepository;
         private readonly IVideoRepository _videoRepository;
+        private readonly SectionConverter _sectionConverter;
         private readonly IExtraPracticeExerciseRepository _extraPracticeExerciseRepository;
         private readonly IExerciseRepository _exerciseRepository;
         private readonly IExtraPracticeResultRepository _extraPracticeResultRepository;
@@ -33,7 +34,6 @@ namespace Fsel.Course.Infrastructure.Common
             , IMockTestRepository mockTestRepository
             , IVideoRepository videoRepository
             , SectionConverter sectionConverter
-            , IMockTestRepository mockTestRepository
             , IExtraPracticeExerciseRepository extraPracticeExerciseRepository
             , IExerciseRepository exerciseRepository
             , IExtraPracticeResultRepository extraPracticeResultRepository
@@ -44,9 +44,10 @@ namespace Fsel.Course.Infrastructure.Common
             _extraPracticeRepository = extraPracticeRepository;
             _mapper = mapper;
             _videoConverter = videoConverter;
-            _sectionConverter = sectionConverter;
             _mockTestRepository = mockTestRepository;
+            _sectionConverter = sectionConverter;
             _videoRepository = videoRepository;
+            _sectionConverter = sectionConverter;
             _extraPracticeExerciseRepository = extraPracticeExerciseRepository;
             _exerciseRepository = exerciseRepository;
             _extraPracticeResultRepository = extraPracticeResultRepository;
@@ -399,7 +400,7 @@ namespace Fsel.Course.Infrastructure.Common
                                 Explanation = m!.Explanation,
                                 Ungraded = m!.Ungraded,
                                 Config = _questionTypeConverter.QuestionTypeConverterObject(m!.Config, m!.QuestionType, isDisableAnswers: !checkDone).Item1,
-                                ResultAnswer = _mapper.Map<ExtraPracticeAnswerModel>(m.ExtraPracticeAnswers!.FirstOrDefault())
+                                ResultAnswer = _mapper.Map<AnswerModel>(m.ExtraPracticeAnswers!.FirstOrDefault())
                             }).ToList(),
                         },
                         ExtraPracticeExerciseResult = x.ExtraPracticeExerciseResults.Select(x => new ExtraPracticeExerciseResultModel
@@ -490,7 +491,7 @@ namespace Fsel.Course.Infrastructure.Common
                                 Explanation = m!.Explanation,
                                 Ungraded = m!.Ungraded,
                                 Config = _questionTypeConverter.QuestionTypeConverterObject(m!.Config, m!.QuestionType, isDisableAnswers: !false).Item1,
-                                ResultAnswer = _mapper.Map<ExtraPracticeAnswerModel>(m.ExtraPracticeAnswers!.FirstOrDefault())
+                                ResultAnswer = _mapper.Map<AnswerModel>(m.ExtraPracticeAnswers!.FirstOrDefault())
                             }).ToList(),
                         }).ToList(),
                     }).ToList(),
@@ -558,7 +559,7 @@ namespace Fsel.Course.Infrastructure.Common
                             Explanation = m!.Explanation,
                             Ungraded = m!.Ungraded,
                             Config = _questionTypeConverter.QuestionTypeConverterObject(m!.Config, m!.QuestionType, isDisableAnswers: !false).Item1,
-                            ResultAnswer = _mapper.Map<ExtraPracticeAnswerModel>(m.ExtraPracticeAnswers!.FirstOrDefault())
+                            ResultAnswer = _mapper.Map<AnswerModel>(m.ExtraPracticeAnswers!.FirstOrDefault())
                         }).ToList(),
                     },
                     ExtraPracticeExerciseResult = x.ExtraPracticeExerciseResults.Select(x => new ExtraPracticeExerciseResultModel
@@ -667,7 +668,7 @@ namespace Fsel.Course.Infrastructure.Common
                                     Explanation = m!.Explanation,
                                     Ungraded = m!.Ungraded,
                                     Config = _questionTypeConverter.QuestionTypeConverterObject(m!.Config, m!.QuestionType, isDisableAnswers: !false).Item1,
-                                    ResultAnswer = _mapper.Map<ExtraPracticeAnswerModel>(m.ExtraPracticeAnswers!.FirstOrDefault())
+                                    ResultAnswer = _mapper.Map<AnswerModel>(m.ExtraPracticeAnswers!.FirstOrDefault())
                                 }).ToList(),
                             }).ToList(),
                         }).ToList(),
@@ -747,7 +748,7 @@ namespace Fsel.Course.Infrastructure.Common
                                 Explanation = m!.Explanation,
                                 Ungraded = m!.Ungraded,
                                 Config = _questionTypeConverter.QuestionTypeConverterObject(m!.Config, m!.QuestionType, isDisableAnswers: !false).Item1,
-                                ResultAnswer = _mapper.Map<ExtraPracticeAnswerModel>(m.ExtraPracticeAnswers.FirstOrDefault())
+                                ResultAnswer = _mapper.Map<AnswerModel>(m.ExtraPracticeAnswers.FirstOrDefault())
                             }).ToList(),
                         }).ToList(),
                     }).ToList(),

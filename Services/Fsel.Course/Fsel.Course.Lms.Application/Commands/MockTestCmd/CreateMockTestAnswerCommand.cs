@@ -79,7 +79,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
                 return methodResult;
             }
 
-            var questionIds = request.SectionGroups.SelectMany(x => x.Answers!).Select(x => x.QuestionId).ToList();
+            var questionIds = request.SectionGroups.Where(x => x.Answers != null).SelectMany(x => x.Answers!).Select(x => x.QuestionId ?? default).ToList();
             var questions = await _questionRepository.GetIncludeSectionByIdAsync(questionIds);
             if (questions == null || questions.Count == 0)
             {
