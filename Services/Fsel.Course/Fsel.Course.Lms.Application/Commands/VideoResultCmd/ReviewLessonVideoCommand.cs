@@ -101,6 +101,12 @@ namespace Fsel.Course.Lms.Application.Commands.VideoResultCmd
                                     TotalCount = g.Sum(x => x.q.CorrectTotal)
                                 };
             var questions = await questionQuery.ToListAsync(cancellationToken);
+            var answers = await answerQuery.ToListAsync(cancellationToken);
+            if (questions.Count != answers.Count)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumVideoResultErrorCode.NotEnoughQuestions));
+                return methodResult;
+            }
             var skills = Enum.GetValues(typeof(EnumCourseSkill)).Cast<EnumCourseSkill>();
             var types = Enum.GetValues(typeof(EnumTimeCodeType)).Cast<EnumTimeCodeType>();
             var scoreQuery = from type in types

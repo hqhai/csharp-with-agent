@@ -123,7 +123,7 @@ namespace Fsel.Course.Lms.Application.Commands.LessonCmd
                                                 .ToListAsync(cancellationToken);
 
             var lessonResult = await _lessonResultRepository.Queryable.FirstOrDefaultAsync(x => x.Id == request.LessonResultId, cancellationToken);
-            if (lessonResult != null && lessonResult.Status == EnumResultStatus.Unfinished)
+            if (lessonResult != null && lessonResult.Status == EnumResultStatus.New)
             {
                 var unitResult = unit.UnitResults.FirstOrDefault(x => x.UnitId == unit.Id && x.StudentId == studentId);
                 if (unitResult != null && unitResult.Status == EnumResultStatus.New)

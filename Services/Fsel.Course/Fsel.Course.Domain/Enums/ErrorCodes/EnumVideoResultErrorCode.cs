@@ -12,6 +12,11 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         /// <summary>
         /// VideoResult Is Null
         /// </summary>
-        VideoResultNull
+        VideoResultNull,
+
+        /// <summary>
+        /// You didn't do enough questions
+        /// </summary>
+        NotEnoughQuestions,
     }
 }

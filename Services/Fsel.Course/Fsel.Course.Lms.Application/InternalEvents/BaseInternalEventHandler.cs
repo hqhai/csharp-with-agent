@@ -213,7 +213,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 default:
                     break;
             }
-            var mockTestId = unit.UnitSkillMockTests.FirstOrDefault()?.Id;
+            var mockTestId = unit.UnitSkillMockTests.FirstOrDefault()?.MockTestId;
             var displayOrder = unit.UnitLessons.FirstOrDefault(x => x.LessonId == lessonResult.LessonId)!.DisplayOrder;
             var lesson = unit.UnitLessons.FirstOrDefault(x => x.DisplayOrder == displayOrder + 1)?.Lesson;
             if (lesson != null)

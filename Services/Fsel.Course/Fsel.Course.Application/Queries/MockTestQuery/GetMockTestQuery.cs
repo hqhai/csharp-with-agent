@@ -5,7 +5,6 @@ namespace Fsel.Course.Application.Queries.MockTestQuery
     using System;
     using System.Threading;
     using System.Threading.Tasks;
-    using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
@@ -20,12 +19,10 @@ namespace Fsel.Course.Application.Queries.MockTestQuery
 
     public class GetMockTestQueryHandler : IRequestHandler<GetMockTestQuery, MethodResult<MockTestModel>>
     {
-        private readonly IMapper _mapper;
         private readonly IMockTestRepository _mockTestRepository;
 
-        public GetMockTestQueryHandler(IMapper mapper, IMockTestRepository mockTestRepository)
+        public GetMockTestQueryHandler(IMockTestRepository mockTestRepository)
         {
-            _mapper = mapper;
             _mockTestRepository = mockTestRepository;
         }
 

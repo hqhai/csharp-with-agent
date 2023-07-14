@@ -9,12 +9,16 @@ namespace Fsel.Course.Infrastructure.Repositories
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Course.Infrastructure.Common;
     using Microsoft.EntityFrameworkCore;
 
     public class MockTestRepository : BaseRepository<MockTest>, IMockTestRepository
     {
-        public MockTestRepository(CourseDbContext dbContext, AuthContext authContext) : base(dbContext, authContext)
+        private readonly SectionConverter _sectionConverter;
+
+        public MockTestRepository(CourseDbContext dbContext, AuthContext authContext, SectionConverter sectionConverter) : base(dbContext, authContext)
         {
+            _sectionConverter = sectionConverter;
         }
 
         public async Task<bool> IsUnitSkillMockTest(Guid id)
@@ -60,61 +64,33 @@ namespace Fsel.Course.Infrastructure.Repositories
         {
             try
             {
-                return await Queryable.Include(x => x.MockTestSections.Where(y => !y.IsDeleted))
-                                      .ThenInclude(x => x.SectionGroup)
-                                      .ThenInclude(x => x!.Sections.Where(y => !y.IsDeleted))
-                                      .ThenInclude(x => x.SectionParts.Where(y => !y.IsDeleted))
-                                      .ThenInclude(x => x.SectionQuestions.Where(y => !y.IsDeleted))
-                                      .Include(x => x.CourseUnitMockTests.Where(y => !y.IsDeleted))
-                                      .Include(x => x.UnitSkillMockTests.Where(y => !y.IsDeleted))
-                                      .Where(x => x.Id == id)
-                                      .Select(x => new MockTestModel
-                                      {
-                                          Id = x.Id,
-                                          Name = x.Name,
-                                          CourseType = x.CourseType,
-                                          CreatedDate = x.CreatedDate,
-                                          IsActive = x.UnitSkillMockTests.Any() || x.CourseUnitMockTests.Any(),
-                                          MockTestType = x.MockTestType,
-                                          SectionGroups = x.MockTestSections.Select(x => x.SectionGroup).OrderBy(x => x!.CreatedDate).Select(x => new SectionGroupModel
-                                          {
-                                              Id = x!.Id,
-                                              ExecutionTime = x.ExecutionTime,
-                                              CourseSkill = x.CourseSkill,
-                                              Sections = x.Sections.OrderBy(x => x.DisplayOrder).Select(x => new SectionModel
-                                              {
-                                                  Id = x.Id,
-                                                  Name = x.Name,
-                                                  MediaPost = x.MediaPost,
-                                                  VideoFilePath = x.VideoFilePath,
-                                                  DisplayOrder = x.DisplayOrder,
-                                                  TargetWord = x.TargetWord,
-                                                  SectionTimeCodes = x.SectionTimeCodes.OrderBy(x => x!.CreatedDate).Select(x => new SectionTimeCodeModel
-                                                  {
-                                                      Id = x.Id,
-                                                      Name = x.Name,
-                                                      DisplayTime = x.DisplayTime,
-                                                      ExecutionTime = x.ExecutionTime,
-                                                      SectionId = x.SectionId,
-                                                  }).ToList(),
-                                                  SectionParts = x.SectionParts.OrderBy(x => x!.CreatedDate).Select(x => new SectionPartModel
-                                                  {
-                                                      Id = x.Id,
-                                                      PartName = x.PartName,
-                                                      SectionId = x.SectionId,
-                                                      Questions = x.SectionQuestions.Select(x => x.Question).OrderBy(x => x!.CreatedDate).Select(x => new QuestionModel
-                                                      {
-                                                          Id = x!.Id,
-                                                          QuestionType = x.QuestionType,
-                                                          Explanation = x.Explanation,
-                                                          Ungraded = x.Ungraded,
-                                                          CorrectTotal = x.CorrectTotal,
-                                                          Config = x.Config
-                                                      }).ToList()
-                                                  }).ToList(),
-                                              }).ToList(),
-                                          }).ToList(),
-                                      }).FirstOrDefaultAsync();
+                return await Queryable.Include(x => x.MockTestSections.Where(n => n.SectionGroup != null))
+                                       .ThenInclude(x => x.SectionGroup)
+                                       .ThenInclude(x => x!.Sections.Where(y => !y.IsDeleted))
+                                       .ThenInclude(x => x.SectionTimeCodes.Where(y => !y.IsDeleted))
+                                       .Include(x => x.MockTestSections.Where(n => n.SectionGroup != null))
+                                       .ThenInclude(x => x.SectionGroup)
+                                       .ThenInclude(x => x!.Sections.Where(y => !y.IsDeleted))
+                                       .ThenInclude(x => x.SectionParts.Where(y => !y.IsDeleted))
+                                       .ThenInclude(x => x.SectionQuestions.Where(n => n.Question != null))
+                                       .ThenInclude(x => x.Question)
+                                       .Include(x => x.CourseUnitMockTests.Where(y => !y.IsDeleted))
+                                       .Include(x => x.UnitSkillMockTests.Where(y => !y.IsDeleted))
+                                       .OrderBy(x => x!.CreatedDate)
+                                       .Where(x => x.Id == id)
+                                       .AsNoTracking()
+                                       .Select(x => new MockTestModel
+                                       {
+                                           Id = x.Id,
+                                           Name = x.Name,
+                                           CourseType = x.CourseType,
+                                           CreatedDate = x.CreatedDate,
+                                           IsActive = x.UnitSkillMockTests.Any() || x.CourseUnitMockTests.Any(),
+                                           MockTestType = x.MockTestType,
+                                           SectionGroups = x.MockTestSections.Where(x => x.SectionGroup != null)
+                                             .Select(x => x.SectionGroup).OrderBy(x => x!.CreatedDate)
+                                             .Select(x => _sectionConverter.GetSectionGroupModel(x, false)).ToList(),
+                                       }).FirstOrDefaultAsync();
             }
             catch (Exception)
             {
