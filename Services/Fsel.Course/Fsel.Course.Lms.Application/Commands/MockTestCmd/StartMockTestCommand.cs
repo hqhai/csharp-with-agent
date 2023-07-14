@@ -121,7 +121,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
                                                 .ThenInclude(x => x!.Sections.Where(x => !x.IsDeleted))
                                                 .ThenInclude(x => x.SectionParts.Where(x => !x.IsDeleted))
                                                 .ThenInclude(x => x.SectionQuestions.Where(x => !x.IsDeleted))
-                                                .ThenInclude(x => x.MockTestAnswers.Where(x => !x.IsDeleted))
+                                                .ThenInclude(x => x.MockTestAnswers.Where(x => !x.IsDeleted && x.MockTestResultId == mockTestResult.Id))
                                                 .Where(x => x.Id == request.MockTestId)
                                                 .AsNoTracking()
                                                 .FirstOrDefaultAsync(cancellationToken: cancellationToken);
@@ -148,9 +148,10 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
                 CreatedUserId = mockTest.CreatedUserId,
                 IsActive = mockTest.UnitSkillMockTests.Any() || mockTest.CourseUnitMockTests.Any(),
                 SectionGroups = mockTest.MockTestSections.Where(x => x.SectionGroup != null)
-                         .Select(x => x.SectionGroup).OrderBy(x => x!.ExecutionTime)
+                         .Select(x => x.SectionGroup).OrderBy(x => x!.CreatedDate)
                          .Select(x => _sectionConverter.GetSectionGroupModel(x, !checkDone)).ToList(),
-                MockTestResult = mockTest.MockTestResults.Select(x => new MockTestResultModel
+                MockTestResult = mockTest.MockTestResults.Where(x => x.MockTestId == request.MockTestId && x.CourseId == request.CourseId && x.StudentId == studentId && (request.UnitId == null || x.UnitId == request.UnitId))
+                .Select(x => new MockTestResultModel
                 {
                     Id = x.Id,
                     CorrectCount = x.CorrectCount,
