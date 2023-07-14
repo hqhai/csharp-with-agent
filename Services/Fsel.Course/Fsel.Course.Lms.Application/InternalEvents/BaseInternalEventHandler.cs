@@ -149,7 +149,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             ArgumentNullException.ThrowIfNull(lessonResults);
             ArgumentNullException.ThrowIfNull(unit);
             var unitResult = await _unitResultRepository.Queryable.FirstOrDefaultAsync(x => x.UnitId == unit.Id && x.StudentId == studentId && x.CourseId == courseId, cancellationToken);
-            if (unit != null && unitResult != null && unit.LessonResults.Count == unit.UnitLessons.Count && unit.UnitSkillMockTests.Count == 0)
+            if (unit != null && unitResult != null)
             {
                 List<SkillScores> videoSkillScores = new List<SkillScores>();
                 List<SkillScores> homeSkillScores = new List<SkillScores>();
@@ -193,6 +193,48 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 unitResult.SkillScores = groupedSkillScores;
                 _unitResultRepository.Update(unitResult);
                 await _unitResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+            }
+        }
+
+        public async Task UpdateTheNextLesson(Unit? unit, LessonResult lessonResult, CancellationToken cancellationToken)
+        {
+            ArgumentNullException.ThrowIfNull(unit);
+            var isCheckDone = true;
+            switch (unit.CourseLevel.GetEnumCourseType())
+            {
+                case EnumCourseType.Ielts:
+                    isCheckDone = false;
+                    break;
+
+                case EnumCourseType.Academic:
+                    isCheckDone = true;
+                    break;
+
+                default:
+                    break;
+            }
+            var mockTestId = unit.UnitSkillMockTests.FirstOrDefault()?.Id;
+            var displayOrder = unit.UnitLessons.FirstOrDefault(x => x.LessonId == lessonResult.LessonId)!.DisplayOrder;
+            var lesson = unit.UnitLessons.FirstOrDefault(x => x.DisplayOrder == displayOrder + 1)?.Lesson;
+            if (lesson != null)
+            {
+                var lessonResultNext = await _lessonResultRepository.Queryable.FirstOrDefaultAsync(x => x.CourseId == lessonResult.CourseId && x.UnitId == lessonResult.UnitId && x.StudentId == lessonResult.StudentId && x.LessonId == lesson.Id, cancellationToken);
+                if (lessonResultNext != null)
+                {
+                    lessonResultNext.Status = EnumResultStatus.New;
+                    _lessonResultRepository.Update(lessonResultNext);
+                    await _lessonResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+                }
+            }
+            else if (!isCheckDone && mockTestId.HasValue)
+            {
+                var mockTestResult = await _mockTestResultRepository.Queryable.FirstOrDefaultAsync(x => x.CourseId == lessonResult.CourseId && x.UnitId == lessonResult.UnitId && x.StudentId == lessonResult.StudentId && x.MockTestId == mockTestId.Value, cancellationToken);
+                if (mockTestResult != null)
+                {
+                    mockTestResult.Status = EnumResultStatus.New;
+                    _mockTestResultRepository.Update(mockTestResult);
+                    await _mockTestResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+                }
             }
         }
 
