@@ -195,19 +195,11 @@ namespace Fsel.Course.Infrastructure.Common
         private static bool IsShortAnswer(string question, string answer)
         {
             var q = question.Trim().ToLower(CultureInfo.CurrentCulture);
-            string[] answerWords = answer.Split(' ');
-            if (answerWords != null)
+            var a = answer.Trim().ToLower(CultureInfo.CurrentCulture);
+            if (q.Replace('’', '\'') == a.Replace('’', '\''))
             {
-                foreach (var word in answerWords)
-                {
-                    var a = word.Trim().ToLower(CultureInfo.CurrentCulture);
-                    if (q.Replace('’', '\'') == a.Replace('’', '\''))
-                    {
-                        return true;
-                    }
-                }
+                return true;
             }
-
             return false;
         }
 

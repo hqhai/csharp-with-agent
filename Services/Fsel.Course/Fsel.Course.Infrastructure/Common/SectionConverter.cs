@@ -73,7 +73,7 @@ namespace Fsel.Course.Infrastructure.Common
 
         public IList<SectionTimeCodeModel> GetSectionTimeCodeModels(IList<SectionTimeCode> sectionTimeCodes)
         {
-            return sectionTimeCodes.OrderBy(x => x.ExecutionTime).Select(x => new SectionTimeCodeModel
+            return sectionTimeCodes.OrderBy(x => x.DisplayTime).Select(x => new SectionTimeCodeModel
             {
                 Id = x.Id,
                 DisplayTime = x.DisplayTime,

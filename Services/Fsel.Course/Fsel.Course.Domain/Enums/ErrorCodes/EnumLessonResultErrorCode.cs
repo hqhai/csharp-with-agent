@@ -15,9 +15,8 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         LessonResultNotExist,
 
         /// <summary>
-        /// Lesson Result already exist Status Process
+        /// Lesson Result Not Exist New
         /// </summary>
-        LessonResultAlreadyExistStatusProcess,
-        
+        LessonResultNotExistNew,
     }
 }
