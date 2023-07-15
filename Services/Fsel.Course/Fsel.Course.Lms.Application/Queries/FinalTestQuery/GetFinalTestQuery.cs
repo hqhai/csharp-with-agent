@@ -65,7 +65,9 @@ namespace Fsel.Course.Lms.Application.Queries.FinalTestQuery
                                                         .ThenInclude(x => x.Question)
                                                         .ThenInclude(x => x!.SectionQuestions)
                                                         .ThenInclude(x => x.FinalTestAnswers)
-                                                        .FirstOrDefaultAsync(x => x.Id == request.FinalTestId, cancellationToken);
+                                                        .Where(x => x.Id == request.FinalTestId)
+                                                        .AsNoTracking()
+                                                        .FirstOrDefaultAsync(cancellationToken);
 
             if (finalTest == null)
             {
