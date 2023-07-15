@@ -8,7 +8,6 @@ namespace Fsel.Course.Lms.Application.Queries.VideoQuery
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base;
-    using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
@@ -86,7 +85,6 @@ namespace Fsel.Course.Lms.Application.Queries.VideoQuery
                 return methodResult;
             }
 
-            var checkDone = videoResult != null && videoResult.Status == EnumResultStatus.Done;
             var videoModel = new VideoModel
             {
                 Id = video.Id,
@@ -121,7 +119,7 @@ namespace Fsel.Course.Lms.Application.Queries.VideoQuery
                             CorrectTotal = m.CorrectTotal,
                             Explanation = m.Explanation,
                             Ungraded = m.Ungraded,
-                            Config = _questionTypeConverter.QuestionTypeConverterObject(m.Config, m.QuestionType, isDisableAnswers: !checkDone).Item1,
+                            Config = _questionTypeConverter.QuestionTypeConverterObject(m.Config, m.QuestionType, isDisableAnswers: !(m.VideoTimeCodeAnswers.FirstOrDefault()?.Status == EnumCurrentStatus.Done)).Item1,
                             ResultAnswer = _mapper.Map<AnswerModel>(m.VideoTimeCodeAnswers!.FirstOrDefault())
                         }).ToList()
                     }).ToList(),
