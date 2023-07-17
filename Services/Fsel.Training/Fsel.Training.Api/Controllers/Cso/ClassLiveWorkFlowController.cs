@@ -6,7 +6,7 @@ namespace Fsel.Training.Api.Controllers.Cso
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
     using Fsel.Core.Base.BaseModels;
-    using Fsel.Training.Application.Commands.ClassCmd;
+    using Fsel.Training.Application.Commands.ClassLiveWorkFlowCmd;
     using Fsel.Training.Application.Queries.ClassLiveWorkFlowQuery;
     using Fsel.Training.Application.Queries.TeacherFreeDateQuery;
     using Fsel.Training.Domain.Models.EntityModels;
