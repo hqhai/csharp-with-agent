@@ -399,7 +399,7 @@ namespace Fsel.Course.Infrastructure.Common
                                 CorrectTotal = m!.CorrectTotal,
                                 Explanation = m!.Explanation,
                                 Ungraded = m!.Ungraded,
-                                Config = _questionTypeConverter.QuestionTypeConverterObject(m!.Config, m!.QuestionType, isDisableAnswers: !checkDone).Item1,
+                                Config = _questionTypeConverter.QuestionTypeConverterObject(m!.Config, m!.QuestionType, isDisableAnswers: true).Item1,
                                 ResultAnswer = _mapper.Map<AnswerModel>(m.ExtraPracticeAnswers!.FirstOrDefault())
                             }).ToList(),
                         },
@@ -445,8 +445,9 @@ namespace Fsel.Course.Infrastructure.Common
                                                                         .ThenInclude(x => x!.ExerciseQuestions.Where(x => !x.IsDeleted))
                                                                         .ThenInclude(x => x.Question)
                                                                         .ThenInclude(x => x!.ExtraPracticeAnswers.Where(y => !y.IsDeleted))
+                                                                  .Where(x => x.Id == id)
                                                                         .AsNoTracking()
-                                                                  .FirstOrDefaultAsync(x => x.Id == id);
+                                                                  .FirstOrDefaultAsync();
             var checkDone = extraPractice != null && extraPracticeResult != null && extraPracticeResult.Status == EnumResultStatus.Done;
             var extraPracticeModel = new ExtraPracticeModel
             {
@@ -490,7 +491,7 @@ namespace Fsel.Course.Infrastructure.Common
                                 CorrectTotal = m!.CorrectTotal,
                                 Explanation = m!.Explanation,
                                 Ungraded = m!.Ungraded,
-                                Config = _questionTypeConverter.QuestionTypeConverterObject(m!.Config, m!.QuestionType, isDisableAnswers: !false).Item1,
+                                Config = _questionTypeConverter.QuestionTypeConverterObject(m!.Config, m!.QuestionType, isDisableAnswers: true).Item1,
                                 ResultAnswer = _mapper.Map<AnswerModel>(m.ExtraPracticeAnswers!.FirstOrDefault())
                             }).ToList(),
                         }).ToList(),
@@ -523,8 +524,9 @@ namespace Fsel.Course.Infrastructure.Common
                                                                         .ThenInclude(x => x!.ExtraPracticeAnswers.Where(x => !x.IsDeleted))
                                                                  .Include(x => x.ExtraPracticeExercises.Where(y => !y.IsDeleted))
                                                                       .ThenInclude(x => x.ExtraPracticeExerciseResults.Where(y => !y.IsDeleted && y.StudentId == studentId))
+                                                                   .Where(x => x.Id == id)
                                                                         .AsNoTracking()
-                                                                  .FirstOrDefaultAsync(x => x.Id == id);
+                                                                  .FirstOrDefaultAsync();
             var checkDone = extraPractice != null && extraPracticeResult != null && extraPracticeResult.Status == EnumResultStatus.Done;
             var extraPracticeModel = new ExtraPracticeModel
             {
@@ -558,7 +560,7 @@ namespace Fsel.Course.Infrastructure.Common
                             CorrectTotal = m!.CorrectTotal,
                             Explanation = m!.Explanation,
                             Ungraded = m!.Ungraded,
-                            Config = _questionTypeConverter.QuestionTypeConverterObject(m!.Config, m!.QuestionType, isDisableAnswers: !false).Item1,
+                            Config = _questionTypeConverter.QuestionTypeConverterObject(m!.Config, m!.QuestionType, isDisableAnswers: true).Item1,
                             ResultAnswer = _mapper.Map<AnswerModel>(m.ExtraPracticeAnswers!.FirstOrDefault())
                         }).ToList(),
                     },
@@ -667,14 +669,14 @@ namespace Fsel.Course.Infrastructure.Common
                                     CorrectTotal = m!.CorrectTotal,
                                     Explanation = m!.Explanation,
                                     Ungraded = m!.Ungraded,
-                                    Config = _questionTypeConverter.QuestionTypeConverterObject(m!.Config, m!.QuestionType, isDisableAnswers: !false).Item1,
+                                    Config = _questionTypeConverter.QuestionTypeConverterObject(m!.Config, m!.QuestionType, isDisableAnswers: true).Item1,
                                     ResultAnswer = _mapper.Map<AnswerModel>(m.ExtraPracticeAnswers!.FirstOrDefault())
                                 }).ToList(),
                             }).ToList(),
                         }).ToList(),
                     }).ToList(),
                 },
-                ExtraPracticeResult = extraPractice.ExtraPracticeResults.Where(m => !m.IsDeleted && m.StudentId == studentId).Select(x => new ExtraPraticeResultModel
+                ExtraPracticeResult = extraPractice.ExtraPracticeResults.Where(m => m.StudentId == studentId).Select(x => new ExtraPraticeResultModel
                 {
                     Id = x.Id,
                     CorrectCount = x.CorrectCount,
@@ -701,8 +703,9 @@ namespace Fsel.Course.Infrastructure.Common
                                                                   .ThenInclude(x => x.SectionQuestions.Where(x => !x.IsDeleted))
                                                                   .ThenInclude(x => x.Question)
                                                                   .ThenInclude(x => x!.ExtraPracticeAnswers.Where(x => x.ExtraPracticeResultId == extraPracticeResult!.Id && !x.IsDeleted))
+                                                                  .Where(x => x.Id == id)
                                                                   .AsNoTracking()
-                                                                  .FirstOrDefaultAsync(x => x.Id == id);
+                                                                  .FirstOrDefaultAsync();
 
             var extraPracticeModel = new ExtraPracticeModel
             {
@@ -747,7 +750,7 @@ namespace Fsel.Course.Infrastructure.Common
                                 CorrectTotal = m!.CorrectTotal,
                                 Explanation = m!.Explanation,
                                 Ungraded = m!.Ungraded,
-                                Config = _questionTypeConverter.QuestionTypeConverterObject(m!.Config, m!.QuestionType, isDisableAnswers: !false).Item1,
+                                Config = _questionTypeConverter.QuestionTypeConverterObject(m!.Config, m!.QuestionType, isDisableAnswers: true).Item1,
                                 ResultAnswer = _mapper.Map<AnswerModel>(m.ExtraPracticeAnswers.FirstOrDefault())
                             }).ToList(),
                         }).ToList(),
@@ -778,20 +781,22 @@ namespace Fsel.Course.Infrastructure.Common
                                                                         .ThenInclude(x => x.SectionParts.Where(x => !x.IsDeleted))
                                                                         .ThenInclude(x => x.SectionQuestions.Where(x => !x.IsDeleted))
                                                                         .ThenInclude(x => x.Question)
-                                                                        .ThenInclude(x => x!.ExtraPracticeAnswers.Where(x => x.ExtraPracticeResultId == extraPracticeResult!.Id && !x.IsDeleted))
+                                                                        .ThenInclude(x => x!.ExtraPracticeAnswers.Where(x => x.ExtraPracticeResultId == extraPracticeResult!.Id))
                                                                    .Include(x => x.MockTest)
                                                                         .ThenInclude(x => x!.MockTestSections.Where(x => !x.IsDeleted))
                                                                         .ThenInclude(x => x.SectionGroup)
                                                                         .ThenInclude(x => x!.Sections.Where(x => !x.IsDeleted))
                                                                         .ThenInclude(x => x.SectionTimeCodes.Where(x => !x.IsDeleted))
-                                                                        .ThenInclude(x => x.ExtraPracticeAnswers.Where(x => x.ExtraPracticeResultId == extraPracticeResult!.Id && !x.IsDeleted))
+                                                                        .ThenInclude(x => x.ExtraPracticeAnswers.Where(x => x.ExtraPracticeResultId == extraPracticeResult!.Id))
                                                                   .Include(x => x.MockTest)
                                                                         .ThenInclude(x => x!.MockTestSections.Where(x => !x.IsDeleted))
                                                                         .ThenInclude(x => x.SectionGroup)
                                                                         .ThenInclude(x => x!.Sections.Where(x => !x.IsDeleted))
-                                                                        .ThenInclude(x => x.ExtraPracticeAnswers.Where(x => x.ExtraPracticeResultId == extraPracticeResult!.Id && !x.IsDeleted))
+                                                                        .ThenInclude(x => x.ExtraPracticeAnswers.Where(x => x.ExtraPracticeResultId == extraPracticeResult!.Id))
+                                                                  .Include(x => x!.ExtraPracticeResults)
+                                                                  .Where(x => x.Id == id)
                                                                         .AsNoTracking()
-                                                                  .FirstOrDefaultAsync(x => x.Id == id);
+                                                                  .FirstOrDefaultAsync();
             var extraPracticeModel = new ExtraPracticeModel
             {
                 Id = extraPractice!.Id,
@@ -819,9 +824,9 @@ namespace Fsel.Course.Infrastructure.Common
                     IsActive = extraPractice.MockTest.UnitSkillMockTests.Any() || extraPractice.MockTest.CourseUnitMockTests.Any(),
                     SectionGroups = extraPractice.MockTest.MockTestSections.Where(x => x.SectionGroup != null)
                          .Select(x => x.SectionGroup).OrderBy(x => x!.CreatedDate)
-                         .Select(x => _sectionConverter.GetSectionGroupModel(x, !true)).ToList(),
+                         .Select(x => _sectionConverter.GetSectionGroupModel(x, true)).ToList(),
                 },
-                ExtraPracticeResult = extraPractice.ExtraPracticeResults.Where(m => !m.IsDeleted && m.StudentId == studentId).Select(x => new ExtraPraticeResultModel
+                ExtraPracticeResult = extraPractice.ExtraPracticeResults.Where(m => m.StudentId == studentId).Select(x => new ExtraPraticeResultModel
                 {
                     Id = x.Id,
                     CorrectCount = x.CorrectCount,
@@ -839,8 +844,7 @@ namespace Fsel.Course.Infrastructure.Common
         public async Task<ExtraPracticeModel> GetExtraPracticeInArticles(Guid id, Guid studentId)
         {
             var extraPractice = await _extraPracticeRepository.Queryable
-                .Include(x => x.ExtraPracticeResults.Where(y => !y.IsDeleted && y.StudentId == studentId))
-                                                                  .FirstOrDefaultAsync(x => x.Id == id);
+                .Include(x => x.ExtraPracticeResults.Where(y => y.StudentId == studentId)).FirstOrDefaultAsync(x => x.Id == id);
 
             var extraPracticeModel = new ExtraPracticeModel
             {

@@ -3,11 +3,12 @@
 namespace Fsel.Course.Lms.Application.Queries.ExtraPracticeQuery
 {
     using System.Linq;
-    using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Core.Extensions;
+    using Fsel.Course.Domain.Entities;
+    using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
@@ -18,32 +19,32 @@ namespace Fsel.Course.Lms.Application.Queries.ExtraPracticeQuery
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class SearchExtraPracticeQuery : SearchExtraPracticeLmsQueryModel, IRequest<MethodResult<PagingItemsModel<ExtraPracticeModel>>>
+    public class SearchExtraPracticeQuery : SearchExtraPracticeLmsQueryModel, IRequest<MethodResult<PagingItemsModel<ExtraPracticeSearchModel>>>
     {
     }
 
-    public class SearchExtraPracticeQueryHandler : IRequestHandler<SearchExtraPracticeQuery, MethodResult<PagingItemsModel<ExtraPracticeModel>>>
+    public class SearchExtraPracticeQueryHandler : IRequestHandler<SearchExtraPracticeQuery, MethodResult<PagingItemsModel<ExtraPracticeSearchModel>>>
     {
         private readonly IExtraPracticeRepository _extraPracticeRepository;
-        private readonly IMapper _mapper;
+        private readonly ILessonRepository _lessonRepository;
         private readonly IUserService _userService;
         private readonly AuthContext _authContext;
 
         public SearchExtraPracticeQueryHandler(IExtraPracticeRepository extraPracticeRepository
-            , IMapper mapper
+            , ILessonRepository lessonRepository
             , IUserService userService
             , AuthContext authContext)
         {
             _extraPracticeRepository = extraPracticeRepository;
-            _mapper = mapper;
+            _lessonRepository = lessonRepository;
             _userService = userService;
             _authContext = authContext;
         }
 
-        public async Task<MethodResult<PagingItemsModel<ExtraPracticeModel>>> Handle(SearchExtraPracticeQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<PagingItemsModel<ExtraPracticeSearchModel>>> Handle(SearchExtraPracticeQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            var methodResult = new MethodResult<PagingItemsModel<ExtraPracticeModel>>();
+            var methodResult = new MethodResult<PagingItemsModel<ExtraPracticeSearchModel>>();
             var studentsResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
             if (studentsResult == null)
             {
@@ -53,50 +54,38 @@ namespace Fsel.Course.Lms.Application.Queries.ExtraPracticeQuery
             var studentId = studentsResult.Content!.Result!.Id;
 
             var extraPracticeQuery = _extraPracticeRepository.Queryable
-                        .Include(x => x.PlacementTest)
-                        .Include(x => x.LessonExtraPractices.Where(n => !n.IsDeleted && n.Lesson != null))
+                        .Include(x => x.ExtraPracticeResults)
+                        .Include(x => x.LessonExtraPractices)
                             .ThenInclude(x => x.Lesson)
-                            .ThenInclude(x => x!.UnitLessons.Where(n => !n.IsDeleted))
+                                .ThenInclude(x => x!.UnitLessons)
+                        .Include(x => x.PlacementTest)
+                            .ThenInclude(x => x!.PlacementTestSections)
+                            .ThenInclude(x => x.SectionGroup)
+                        .Include(x => x.MockTest)
+                            .ThenInclude(x => x!.MockTestSections)
+                            .ThenInclude(x => x.SectionGroup)
                         .Include(x => x.ExtraPracticeChapters.Where(n => !n.IsDeleted))
                             .ThenInclude(x => x.ExtraPracticeExercises.Where(n => !n.IsDeleted))
-                            .ThenInclude(x => x.Exercise)
+                                .ThenInclude(x => x.Exercise)
                         .Include(x => x.ExtraPracticeExercises.Where(n => !n.IsDeleted && n.Exercise != null))
                             .ThenInclude(x => x.Exercise)
                         .Include(x => x.Video)
-                        .ThenInclude(x => x!.VideoTimeCodes.Where(n => !n.IsDeleted))
-                            .ThenInclude(x => x.TimeCodeExercises.Where(n => !n.IsDeleted && n.Exercise != null))
-                                .ThenInclude(x => x.Exercise)
+                            .ThenInclude(x => x!.VideoTimeCodes.Where(n => !n.IsDeleted))
+                                .ThenInclude(x => x.TimeCodeExercises.Where(n => !n.IsDeleted && n.Exercise != null))
+                                    .ThenInclude(x => x.Exercise)
                         .Where(x => x.IsActive)
                         .AsNoTracking()
-            .Select(x => new ExtraPracticeModel
+            .Select(x => new ExtraPracticeSearchModel
             {
                 Id = x.Id,
                 Code = x.Code,
                 Name = x.Name,
                 CreatedDate = x.CreatedDate,
                 Type = x.Type,
-                BookFilePath = x.BookFilePath,
-                BookCoverPath = x.BookCoverPath,
-                BookBackgroundPath = x.BookBackgroundPath,
                 CourseLevel = x.CourseLevel,
-                CourseSkills = x.ExtraPracticeChapters != null ? x.ExtraPracticeChapters.Where(n => !n.IsDeleted)
-                    .SelectMany(e => e.ExtraPracticeExercises.Where(n => n.Exercise != null && !n.IsDeleted))
-                        .Select(e => e.Exercise!.CourseSkill).Distinct().ToList()
-                    : x.ExtraPracticeExercises != null ? x.ExtraPracticeExercises.Where(n => n.Exercise != null && !n.IsDeleted)
-                        .Select(e => e.Exercise!.CourseSkill).Distinct().ToList()
-                    : x.Video != null ? x.Video.VideoTimeCodes.SelectMany(v => v.TimeCodeExercises.Where(n => n.Exercise != null && !n.IsDeleted))
-                        .Select(v => v.Exercise!.CourseSkill).Distinct().ToList()
-                    : x.PlacementTest != null ? x.PlacementTest.PlacementTestSections.Where(n => n.SectionGroup != null && !n.IsDeleted)
-                        .Select(p => p.SectionGroup!.CourseSkill).Distinct().ToList()
-                    : null,
-                PlacementTest = x.PlacementTest != null ? _mapper.Map<PlacementTestModel>(x.PlacementTest) : null,
-                MockTest = x.MockTest != null ? _mapper.Map<MockTestModel>(x.MockTest) : null,
-                UnitId = x.LessonExtraPractices.Where(n => !n.IsDeleted && n.Lesson != null)
-                    .Select(x => x.Lesson)
-                    .SelectMany(x => x!.UnitLessons)
-                    .Select(x => x.UnitId)
-                    .FirstOrDefault(),
-                Percent = x.ExtraPracticeResults.FirstOrDefault(y => y != null && y.ExtraPracticeId == x.Id && y.StudentId == studentId)!.Percent,
+                CourseSkills = GetCourseSkills(x),
+                UnitId = x.LessonExtraPractices.Select(x => x.Lesson).SelectMany(x => x!.UnitLessons).FirstOrDefault() != null ? x.LessonExtraPractices.Select(x => x.Lesson).SelectMany(x => x!.UnitLessons).FirstOrDefault()!.UnitId : null,
+                Percent = x.ExtraPracticeResults.FirstOrDefault(y => y.ExtraPracticeId == x.Id && y.StudentId == studentId) != null ? x.ExtraPracticeResults.FirstOrDefault(y => y.ExtraPracticeId == x.Id && y.StudentId == studentId)!.Percent : null,
                 AccessCount = x.ExtraPracticeResults.Count
             });
 
@@ -117,7 +106,9 @@ namespace Fsel.Course.Lms.Application.Queries.ExtraPracticeQuery
 
             if (request.CourseSkills != null && request.CourseSkills.Count > 0)
             {
-                extraPracticeQuery = extraPracticeQuery.Where(x => x.CourseSkills != null && request.CourseSkills.All(cs => x.CourseSkills.Contains(cs)));
+                var extraPractices = await extraPracticeQuery.ToListAsync(cancellationToken);
+                var extraPracticeModels = extraPractices.Where(x => x.CourseSkills != null && request.CourseSkills.All(cs => x.CourseSkills.Any(x => x == cs))).ToList();
+                extraPracticeQuery = extraPracticeQuery.Where(x => extraPracticeModels.Select(y => y.Id).Contains(x.Id));
             }
 
             if (request.SortFilter != null)
@@ -172,9 +163,49 @@ namespace Fsel.Course.Lms.Application.Queries.ExtraPracticeQuery
                     .ToListAsync(cancellationToken: cancellationToken)
                     .ConfigureAwait(false);
 
-            methodResult.Result = new PagingItemsModel<ExtraPracticeModel>(lists, request, totalItem);
+            methodResult.Result = new PagingItemsModel<ExtraPracticeSearchModel>(lists, request, totalItem);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
+        }
+
+        private static IList<EnumCourseSkill>? GetCourseSkills(ExtraPractice extraPractice)
+        {
+            ArgumentNullException.ThrowIfNull(extraPractice);
+            var courseSkills = new List<EnumCourseSkill>();
+            switch (extraPractice.Type)
+            {
+                case EnumExtraPracticeType.Book:
+                    courseSkills = extraPractice.ExtraPracticeChapters.SelectMany(x => x.ExtraPracticeExercises).Select(x => x.Exercise).Distinct().Select(x => x!.CourseSkill).ToList();
+                    break;
+
+                case EnumExtraPracticeType.VideoEmbed:
+                    courseSkills = extraPractice.ExtraPracticeExercises.Select(x => x.Exercise).Select(x => x!.CourseSkill).Distinct().ToList();
+                    break;
+
+                case EnumExtraPracticeType.InteractiveVideo:
+                    courseSkills = extraPractice.Video != null ? extraPractice.Video.VideoTimeCodes.SelectMany(x => x!.TimeCodeExercises).Select(x => x.Exercise).Select(x => x!.CourseSkill).Distinct().ToList() : null;
+                    break;
+
+                case EnumExtraPracticeType.MockTest:
+                    if (extraPractice.MockTestId != null)
+                    {
+                        courseSkills = extraPractice.MockTest?.MockTestSections.Select(x => x.SectionGroup).Select(x => x!.CourseSkill).Distinct().ToList();
+                    }
+                    else
+                    {
+                        courseSkills = extraPractice.PlacementTest?.PlacementTestSections.Select(x => x.SectionGroup).Select(x => x!.CourseSkill).Distinct().ToList();
+                    }
+                    break;
+
+                case EnumExtraPracticeType.Exercise:
+                    courseSkills = extraPractice.ExtraPracticeExercises.Select(x => x.Exercise).Select(x => x!.CourseSkill).Distinct().ToList();
+                    break;
+
+                case EnumExtraPracticeType.Articles:
+                    courseSkills = null;
+                    break;
+            }
+            return courseSkills;
         }
     }
 }

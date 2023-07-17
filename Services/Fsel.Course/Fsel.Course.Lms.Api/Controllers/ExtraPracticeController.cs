@@ -55,11 +55,11 @@ namespace Fsel.Course.Lms.Api.Controllers
         /// Search ExtraPractice
         /// </summary>
         [HttpGet()]
-        [ProducesResponseType(typeof(MethodResult<PagingItemsModel<ExtraPracticeModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(MethodResult<PagingItemsModel<ExtraPracticeSearchModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> Search([FromQuery] SearchExtraPracticeQuery query)
         {
-            MethodResult<PagingItemsModel<ExtraPracticeModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            MethodResult<PagingItemsModel<ExtraPracticeSearchModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
 
