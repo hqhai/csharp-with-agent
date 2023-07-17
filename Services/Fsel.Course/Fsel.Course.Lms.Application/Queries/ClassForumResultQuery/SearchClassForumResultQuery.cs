@@ -6,15 +6,12 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
-    using Fsel.Core.Base;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Core.Extensions;
-    using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Domain.Models.QueryModels.ClassForumResults;
     using Fsel.Course.Lms.Application.Services.TrainingServices;
-    using Fsel.Course.Lms.Application.Services.UserServices;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -26,24 +23,12 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
     public class SearchClassForumResultQueryHandler : IRequestHandler<SearchClassForumResultQuery, MethodResult<PagingItemsModel<ClassForumResultSearchModel>>>
     {
         private readonly IClassForumResultRepository _classForumResultRepository;
-        private readonly IClassForumRepository _classForumRepository;
-        private readonly ILessonRepository _lessonRepository;
-        private readonly IUserService _userService;
-        private readonly AuthContext _authContext;
         private readonly ITrainingService _trainingService;
 
         public SearchClassForumResultQueryHandler(IClassForumResultRepository classForumResultRepository
-            , IClassForumRepository classForumRepository
-            , ILessonRepository lessonRepository
-            , IUserService userService
-            , AuthContext authContext
             , ITrainingService trainingService)
         {
             _classForumResultRepository = classForumResultRepository;
-            _classForumRepository = classForumRepository;
-            _lessonRepository = lessonRepository;
-            _userService = userService;
-            _authContext = authContext;
             _trainingService = trainingService;
         }
 

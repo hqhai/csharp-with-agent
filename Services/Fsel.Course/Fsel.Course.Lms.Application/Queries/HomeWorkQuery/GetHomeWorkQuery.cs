@@ -90,7 +90,7 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkQuery
                 CourseLevel = homeWork.CourseLevel,
                 CourseSkill = homeWork.CourseSkill,
                 IsActive = homeWork.LessonHomeWorks.Any(),
-                Questions = homeWork.HomeWorkQuestions.Where(x => x.Question != null).OrderBy(x => x!.CreatedDate).Select(n => new QuestionModel
+                Questions = homeWork.HomeWorkQuestions.OrderBy(x => x!.CreatedDate).Select(n => new QuestionModel
                 {
                     Id = n.Question!.Id,
                     CorrectTotal = n.Question!.CorrectTotal,

@@ -44,7 +44,9 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
             var classForumResult = await _classForumResultRepository.Queryable
                 .Include(x => x.ClassForumResultFiles)
                 .Include(x => x.ClassForumScores)
-                .Where(x => x.Id == request.ClassForumResultId).FirstOrDefaultAsync(cancellationToken);
+                .Where(x => x.Id == request.ClassForumResultId)
+                .AsNoTracking()
+                .FirstOrDefaultAsync(cancellationToken);
 
             if (classForumResult == null)
             {
