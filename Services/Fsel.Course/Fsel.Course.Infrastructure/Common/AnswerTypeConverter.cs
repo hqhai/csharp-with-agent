@@ -6,7 +6,6 @@ namespace Fsel.Course.Infrastructure.Common
     using System.Globalization;
     using System.Linq;
     using Fsel.Common.Helpers;
-    using Fsel.Core.Base.BaseModels;
     using Fsel.Course.Domain.Entities.QuestionTypeConfigs.Answers;
     using Fsel.Course.Domain.Entities.QuestionTypeConfigs.Questions;
     using Fsel.Course.Domain.Enums;
@@ -98,6 +97,7 @@ namespace Fsel.Course.Infrastructure.Common
             configAnswer = dataAnswer;
             return number;
         }
+
         private static int GetTotalCorrectTypeBaseContentAnswer(ref object? configAnswer)
         {
             int number = 0;
@@ -194,13 +194,9 @@ namespace Fsel.Course.Infrastructure.Common
 
         private static bool IsShortAnswer(string question, string answer)
         {
-            var q = question.Trim().ToLower(CultureInfo.CurrentCulture);
-            var a = answer.Trim().ToLower(CultureInfo.CurrentCulture);
-            if (q.Replace('’', '\'') == a.Replace('’', '\''))
-            {
-                return true;
-            }
-            return false;
+            string q = question.Trim().ToLower(CultureInfo.CurrentCulture).Replace('’', '\'').ToString();
+            string a = answer.Trim().ToLower(CultureInfo.CurrentCulture).Replace('’', '\'').ToString();
+            return a.Contains(q, StringComparison.OrdinalIgnoreCase);
         }
 
         private static int GetTotalCorrectTypeShortAnswerWordBase(ref object? configAnswer, object? configQuestion)

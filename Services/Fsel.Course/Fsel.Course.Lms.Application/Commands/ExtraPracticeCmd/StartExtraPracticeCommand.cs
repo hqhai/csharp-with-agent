@@ -7,6 +7,7 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base;
     using Fsel.Course.Domain.Entities;
+    using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
@@ -66,7 +67,8 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
             {
                 extraPractice.ExtraPracticeResults.Add(new ExtraPracticeResult
                 {
-                    StudentId = studentId ?? default
+                    StudentId = studentId ?? default,
+                    CorrectTotal = await GetCorrectTotal(extraPractice)
                 });
                 _extraPracticeRepository.Update(extraPractice);
                 await _extraPracticeRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
@@ -75,6 +77,105 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
             methodResult.StatusCode = StatusCodes.Status200OK;
             methodResult.Result = await _extraPracticeConverter.SwitchExtraPractice(extraPractice, studentId ?? default);
             return methodResult;
+        }
+
+        private async Task<int> GetCorrectTotal(ExtraPractice extraPractice)
+        {
+            int correctTotal = 0;
+            switch (extraPractice.Type)
+            {
+                case EnumExtraPracticeType.VideoEmbed:
+                    correctTotal = await GetCorrectTotalVideoEmbed(extraPractice.Id);
+                    break;
+
+                case EnumExtraPracticeType.MockTest:
+                    correctTotal = await GetCorrectTotalMockTest(extraPractice.Id);
+                    break;
+
+                case EnumExtraPracticeType.Exercise:
+                    correctTotal = await GetCorrectTotalVideoEmbed(extraPractice.Id);
+                    break;
+
+                case EnumExtraPracticeType.InteractiveVideo:
+                    correctTotal = await GetCorrectTotalInteractiveVideo(extraPractice.Id);
+                    break;
+
+                case EnumExtraPracticeType.Book:
+                    correctTotal = await GetCorrectTotalBook(extraPractice.Id);
+                    break;
+
+                case EnumExtraPracticeType.Articles:
+                    correctTotal = 0;
+                    break;
+            }
+            return correctTotal;
+        }
+
+        private async Task<int> GetCorrectTotalVideoEmbed(Guid id)
+        {
+            var extraPractice = await _extraPracticeRepository.Queryable.Include(x => x.ExtraPracticeExercises)
+                                .ThenInclude(x => x.Exercise)
+                                .ThenInclude(x => x!.ExerciseQuestions)
+                                .ThenInclude(x => x.Question)
+                                .FirstOrDefaultAsync(x => x.Id == id);
+            if (extraPractice != null)
+            {
+                var correctCount = extraPractice.ExtraPracticeExercises.Select(x => x.Exercise).SelectMany(x => x!.ExerciseQuestions).Select(x => x.Question).Sum(x => x!.CorrectTotal);
+                return correctCount;
+            }
+            return 0;
+        }
+
+        private async Task<int> GetCorrectTotalMockTest(Guid id)
+        {
+            var extraPractice = await _extraPracticeRepository.Queryable.Include(x => x.ExtraPracticeExercises)
+                                .ThenInclude(x => x.Exercise)
+                                .ThenInclude(x => x!.ExerciseQuestions)
+                                .ThenInclude(x => x.Question)
+                                .FirstOrDefaultAsync(x => x.Id == id);
+            if (extraPractice != null)
+            {
+                var correctCount = extraPractice.ExtraPracticeExercises.Select(x => x.Exercise).SelectMany(x => x!.ExerciseQuestions).Select(x => x.Question).Sum(x => x!.CorrectTotal);
+                return correctCount;
+            }
+            return 0;
+        }
+
+        private async Task<int> GetCorrectTotalInteractiveVideo(Guid id)
+        {
+            var extraPractice = await _extraPracticeRepository.Queryable.Include(x => x.Video)
+                                .ThenInclude(x => x!.VideoTimeCodes)
+                                .ThenInclude(x => x.TimeCodeExercises)
+                                .ThenInclude(x => x.Exercise)
+                                .ThenInclude(x => x!.ExerciseQuestions)
+                                .ThenInclude(x => x.Question)
+                                .FirstOrDefaultAsync(x => x.Id == id);
+            if (extraPractice != null)
+            {
+                var correctCount = extraPractice.ExtraPracticeExercises.Select(x => x.Exercise).SelectMany(x => x!.ExerciseQuestions).Select(x => x.Question).Sum(x => x!.CorrectTotal);
+                return correctCount;
+            }
+            return 0;
+        }
+
+        private async Task<int> GetCorrectTotalBook(Guid id)
+        {
+            var extraPractice = await _extraPracticeRepository.Queryable.Include(x => x.ExtraPracticeChapters)
+                                .ThenInclude(x => x.ExtraPracticeExercises)
+                                .ThenInclude(x => x.Exercise)
+                                .ThenInclude(x => x!.ExerciseQuestions)
+                                .ThenInclude(x => x.Question)
+                                .FirstOrDefaultAsync(x => x.Id == id);
+            if (extraPractice != null)
+            {
+                var correctCount = extraPractice.ExtraPracticeChapters.SelectMany(x => x.ExtraPracticeExercises)
+                                                                        .Select(x => x.Exercise)
+                                                                        .SelectMany(x => x!.ExerciseQuestions)
+                                                                        .Select(x => x.Question)
+                                                                        .Sum(x => x!.CorrectTotal);
+                return correctCount;
+            }
+            return 0;
         }
     }
 }

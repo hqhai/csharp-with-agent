@@ -978,7 +978,7 @@ namespace Fsel.Course.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("CorrectTotal")
+                    b.Property<int>("CorrectCount")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("CreatedDate")

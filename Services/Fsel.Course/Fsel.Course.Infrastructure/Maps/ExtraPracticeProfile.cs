@@ -3,7 +3,6 @@
 using AutoMapper;
 using Fsel.Core.Extensions;
 using Fsel.Course.Domain.Entities;
-using Fsel.Course.Domain.Models.CommandModels.Exercises;
 using Fsel.Course.Domain.Models.CommandModels.ExtraPractices;
 using Fsel.Course.Domain.Models.EntityModels;
 
@@ -19,6 +18,8 @@ namespace Fsel.Course.Infrastructure.Maps
             CreateMap<ExtraPracticeExerciseResult, ExtraPracticeExerciseResultModel>().IgnoreAllNonExisting();
             CreateMap<ExtraPracticeAnswer, ExtraPracticeAnswerModel>().IgnoreAllNonExisting();
             CreateMap<UpdateExtraPracticeCommandModel, ExtraPractice>().ForMember(m => m.Video, opt => opt.Ignore()).IgnoreAllNonExisting();
+            CreateMap<ExtraPracticeAnswer, AnswerModel>().IgnoreAllNonExisting();
+
         }
     }
 }

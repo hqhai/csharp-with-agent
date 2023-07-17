@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fsel.Course.Infrastructure.Migrations
 {
     [DbContext(typeof(CourseDbContext))]
-    [Migration("20230715092556_UpdateExtraPracticeResult")]
+    [Migration("20230717090953_UpdateExtraPracticeResult")]
     partial class UpdateExtraPracticeResult
     {
         /// <inheritdoc />
@@ -981,7 +981,7 @@ namespace Fsel.Course.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("CorrectTotal")
+                    b.Property<int>("CorrectCount")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("CreatedDate")

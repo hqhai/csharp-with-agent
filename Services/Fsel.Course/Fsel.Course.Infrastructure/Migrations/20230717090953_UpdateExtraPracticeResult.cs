@@ -122,7 +122,7 @@ namespace Fsel.Course.Infrastructure.Migrations
                     DeletedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false),
                     AnswerStr = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    CorrectTotal = table.Column<int>(type: "int", nullable: false),
+                    CorrectCount = table.Column<int>(type: "int", nullable: false),
                     ExtraPracticeResultId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     ExtraPracticeExerciseResultId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     SectionTimeCodeId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
