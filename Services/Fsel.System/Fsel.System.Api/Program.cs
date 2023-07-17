@@ -17,6 +17,7 @@ builder.AddDbContexts<SystemDbContext>();
 
 builder.Services.AddScoped<ILiveTimeFrameRepository, LiveTimeFrameRepository>();
 builder.Services.AddScoped<ICourseTimeConfigRepository, CourseTimeConfigRepository>();
+builder.Services.AddScoped<IForbiddenWordRepository, ForbiddenWordRepository>();
 
 /*builder.AddRefitClients(typeof(IUserService), appSetting?.Services?.UserApiUrl);*/
 var app = builder.Build();

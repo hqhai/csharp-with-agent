@@ -24,6 +24,7 @@ namespace Fsel.System.Infrastructure
 
         public DbSet<LiveTimeFrame> LiveTimeFrames { get; set; }
         public DbSet<CourseTimeConfig> CourseTimeConfigs { get; set; }
+        public DbSet<ForbiddenWord> ForbiddenWords { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {

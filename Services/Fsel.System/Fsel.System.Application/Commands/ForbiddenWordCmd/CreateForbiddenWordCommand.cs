@@ -33,12 +33,9 @@ namespace Fsel.System.Application.Commands.ForbiddenWordCmd
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<ForbiddenWordModel> methodResult = new MethodResult<ForbiddenWordModel>();
 
-            #region Validation
-
             ForbiddenWord forbiddenWord = _mapper.Map<ForbiddenWord>(request);
             await _forbiddenWordRepository.ExecuteTransactionAsync(async () =>
             {
-
                 forbiddenWord = _forbiddenWordRepository.Add(forbiddenWord);
                 await _forbiddenWordRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 

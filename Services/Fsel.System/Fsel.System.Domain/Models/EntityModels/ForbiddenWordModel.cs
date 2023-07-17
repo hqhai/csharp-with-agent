@@ -2,7 +2,9 @@
 
 namespace Fsel.System.Domain.Models.EntityModels
 {
-    public class ForbiddenWordModel
+    using Fsel.Core.Base.BaseModels;
+
+    public class ForbiddenWordModel : BaseModel
     {
         public string? Word { get; set; }
 

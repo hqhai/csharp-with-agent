@@ -9,9 +9,6 @@ namespace Fsel.System.Application.Commands.ForbiddenWordCmd
     using Fsel.System.Domain.Models.CommandModels.ForbiddenWords;
     using Fsel.System.Domain.Models.EntityModels;
     using global::System;
-    using global::System.Collections.Generic;
-    using global::System.Linq;
-    using global::System.Text;
     using global::System.Threading.Tasks;
     using MediatR;
     using Microsoft.AspNetCore.Http;
@@ -19,6 +16,7 @@ namespace Fsel.System.Application.Commands.ForbiddenWordCmd
     public class UpdateForbiddenWordCommand : UpdateForbiddenWordCommandModel, IRequest<MethodResult<ForbiddenWordModel>>
     {
     }
+
     public class UpdateForbiddenWordCommandHandler : IRequestHandler<UpdateForbiddenWordCommand, MethodResult<ForbiddenWordModel>>
     {
         private readonly IMapper _mapper;
@@ -34,15 +32,19 @@ namespace Fsel.System.Application.Commands.ForbiddenWordCmd
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<ForbiddenWordModel> methodResult = new MethodResult<ForbiddenWordModel>();
-            var forbiddenWord = _forbiddenWordRepository.GetByIdAsync(request.Id);
+            var forbiddenWord = await _forbiddenWordRepository.GetByIdAsync(request.Id);
+
             #region Validation
+
             if (forbiddenWord == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumForbiddenWordErrorCode.ForbiddenWordsNotExist));
                 return methodResult;
             }
-            await _mapper.Map(request, forbiddenWord);
-            #endregion
+            _mapper.Map(request, forbiddenWord);
+
+            #endregion Validation
+
             await _forbiddenWordRepository.ExecuteTransactionAsync(async () =>
             {
                 forbiddenWord = _forbiddenWordRepository.Update(forbiddenWord);
