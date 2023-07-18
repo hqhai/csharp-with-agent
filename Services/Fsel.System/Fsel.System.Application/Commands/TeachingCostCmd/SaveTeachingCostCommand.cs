@@ -40,7 +40,7 @@ namespace Fsel.System.Application.Commands.TeachingCostCmd
                     _mapper.Map(request, teachingCost);
                     teachingCost = _teachingCostRepository.Update(teachingCost);
                 }
-                if (teachingCost == null)
+                else
                 {
                     teachingCost = _mapper.Map<TeachingCost>(request);
                     teachingCost = _teachingCostRepository.Add(teachingCost);

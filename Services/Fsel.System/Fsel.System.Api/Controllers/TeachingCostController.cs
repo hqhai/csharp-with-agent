@@ -4,7 +4,6 @@ namespace Fsel.System.Api.Controllers
 {
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
-    using Fsel.System.Application.Commands.LiveTimeFrameCmd;
     using Fsel.System.Application.Commands.TeachingCostCmd;
     using Fsel.System.Application.Queries.TeachingCostQuery;
     using Fsel.System.Domain.Models.EntityModels;
@@ -24,16 +23,15 @@ namespace Fsel.System.Api.Controllers
             _mediator = mediator;
         }
 
-
         /// <summary>
         /// Get Teaching Cost by level
         /// </summary>
         [HttpGet("get-by-level")]
-        [ProducesResponseType(typeof(MethodResult<IList<TeachingCostModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(MethodResult<TeachingCostModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetTeachingCostByLevel([FromQuery] GetListTeachingCostByCourseLevel query)
         {
-            MethodResult<IList<TeachingCostModel>> commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            MethodResult<TeachingCostModel> commandResult = await _mediator.Send(query).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
 

@@ -4,21 +4,19 @@ namespace Fsel.System.Application.Queries.TeachingCostQuery
 {
     using Fsel.Common.ActionResults;
     using Fsel.Shared.Enums;
-    using Fsel.System.Application.Querys.LiveTimeFrameQuery;
     using Fsel.System.Domain.IRepositories;
     using Fsel.System.Domain.Models.EntityModels;
-    using Fsel.System.Infrastructure.Repositories;
     using global::System;
-    using global::System.Collections.Generic;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class GetListTeachingCostByCourseLevel : IRequest<MethodResult<IList<TeachingCostModel>>>
+    public class GetListTeachingCostByCourseLevel : IRequest<MethodResult<TeachingCostModel>>
     {
         public EnumCourseLevel CourseLevel { get; set; }
     }
-    public class GetListTeachingCostByCourseLevelHandler : IRequestHandler<GetListTeachingCostByCourseLevel, MethodResult<IList<TeachingCostModel>>>
+
+    public class GetListTeachingCostByCourseLevelHandler : IRequestHandler<GetListTeachingCostByCourseLevel, MethodResult<TeachingCostModel>>
     {
         private readonly ITeachingCostRepository _teachingCostRepository;
 
@@ -27,10 +25,10 @@ namespace Fsel.System.Application.Queries.TeachingCostQuery
             _teachingCostRepository = teachingCostRepository;
         }
 
-        public async Task<MethodResult<IList<TeachingCostModel>>> Handle(GetListTeachingCostByCourseLevel request, CancellationToken cancellationToken)
+        public async Task<MethodResult<TeachingCostModel>> Handle(GetListTeachingCostByCourseLevel request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            var methodResult = new MethodResult<IList<TeachingCostModel>>();
+            var methodResult = new MethodResult<TeachingCostModel>();
 
             var teachingCost = await _teachingCostRepository.Queryable
                                     .Where(x => x.CourseLevel == request.CourseLevel)
@@ -42,7 +40,7 @@ namespace Fsel.System.Application.Queries.TeachingCostQuery
                                         WritingCost = x.WritingCost,
                                         SpeapkingCost = x.SpeapkingCost,
                                         LiveLessonCost = x.LiveLessonCost,
-                                    }).ToListAsync(cancellationToken);
+                                    }).FirstOrDefaultAsync(cancellationToken);
             methodResult.Result = teachingCost;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
