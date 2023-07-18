@@ -6,14 +6,11 @@ namespace Fsel.System.Api.Controllers
     using Fsel.Common.Constants;
     using Fsel.Core.Base.BaseModels;
     using Fsel.System.Application.Commands.CourseTimeConfigCmd;
-    using Fsel.System.Application.Commands.LiveTimeFrameCmd;
-    using Fsel.System.Application.Querys;
     using Fsel.System.Application.Querys.CourseTimeConfigQuery;
-    using Fsel.System.Domain.Models;
-    using Fsel.System.Domain.Models.EntityModels;
-    using global::System.Net;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
+    using global::System.Net;
+    using Fsel.System.Domain.Models.EntityModels;
 
     [ApiVersion(Settings.APIVersion)]
     [Route(Settings.APIDefaultRoute + "/course-time-config")]
@@ -35,7 +32,7 @@ namespace Fsel.System.Api.Controllers
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> Search([FromQuery] GetListCourseTimeConfigQuery query)
         {
-            MethodResult<PagingItemsModel<CourseTimeConfigModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            var queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
 

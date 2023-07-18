@@ -1,15 +1,12 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.System.Application.Querys
+namespace Fsel.System.Application.Querys.CourseTimeConfigQuery
 {
-    using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Core.Extensions;
     using Fsel.System.Domain.IRepositories;
-    using Fsel.System.Domain.Models;
-    using global::System;
-    using global::System.Threading.Tasks;
+    using Fsel.System.Domain.Models.EntityModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -21,12 +18,10 @@ namespace Fsel.System.Application.Querys
     public class GetListCourseTimeConfigQueryHandler : IRequestHandler<GetListCourseTimeConfigQuery, MethodResult<PagingItemsModel<CourseTimeConfigModel>>>
     {
         private readonly ICourseTimeConfigRepository _courseTimeConfigRepository;
-        private readonly IMapper _mapper;
 
-        public GetListCourseTimeConfigQueryHandler(ICourseTimeConfigRepository courseTimeConfigRepository, IMapper mapper)
+        public GetListCourseTimeConfigQueryHandler(ICourseTimeConfigRepository courseTimeConfigRepository)
         {
             _courseTimeConfigRepository = courseTimeConfigRepository;
-            _mapper = mapper;
         }
 
         public async Task<MethodResult<PagingItemsModel<CourseTimeConfigModel>>> Handle(GetListCourseTimeConfigQuery request, CancellationToken cancellationToken)

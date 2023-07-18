@@ -1,3 +1,5 @@
+// Copyright (c) Atlantic. All rights reserved.
+
 namespace Fsel.System.Application.Querys.LiveTimeFrameQuery
 {
     using Fsel.Common.ActionResults;
@@ -26,7 +28,6 @@ namespace Fsel.System.Application.Querys.LiveTimeFrameQuery
             var methodResult = new MethodResult<IList<LiveTimeFrameModel>>();
 
             var liveTimeFrame = await _liveTimeFrameRepository.Queryable
-
                                     .Select(x => new LiveTimeFrameModel
                                     {
                                         Id = x.Id,

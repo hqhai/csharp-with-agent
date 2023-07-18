@@ -91,8 +91,7 @@ namespace Fsel.Training.Application.Queries.ClassLiveQuery
                 if (item.StartDate != null)
                 {
                     DateTime dateTime = DateTime.Now;
-                    double totalHours = item.StartTime % 24;
-                    int hours = (int)totalHours;
+                    double hours = item.StartTime;
                     var assignTeacher = item.StartDate.Value.Date.AddHours(hours);
                     item.IsStatus = assignTeacher < dateTime.AddDays(1);
                     if (item.IsStatus)
@@ -106,7 +105,7 @@ namespace Fsel.Training.Application.Queries.ClassLiveQuery
 
             if (ids.Count > 0)
             {
-                var classLiveWordFlows = await _classLiveWorkFlowRepository.Queryable.Where(x => ids.Contains(x.Id)).ToListAsync(cancellationToken);
+                var classLiveWordFlows = await _classLiveWorkFlowRepository.Queryable.Include(x => x.ClassLiveCalendar).Where(x => ids.Contains(x.Id)).ToListAsync(cancellationToken);
                 var classes = await _classRepository.Queryable.Where(x => ids.Contains(x.Id)).ToListAsync(cancellationToken);
                 if (classes.Count > 0)
                 {
@@ -133,8 +132,10 @@ namespace Fsel.Training.Application.Queries.ClassLiveQuery
                 }
             }
 
+            #region Search
+
             var a1 = _classRepository.Queryable
-                 .Where(x => x.LiveTimeFrameId != null && x.TeacherId == teacherId && x.TeacherApprovalStatus == EnumTeacherApprovalStatus.Pending)
+                 .Where(x => x.LiveTimeFrameId != null && x.TeacherId == teacherId && x.Status == EnumStatusClass.New && x.TeacherApprovalStatus == EnumTeacherApprovalStatus.Pending)
                  .AsNoTracking()
                  .Select(x => new ClassLiveModel
                  {
@@ -172,6 +173,8 @@ namespace Fsel.Training.Application.Queries.ClassLiveQuery
             int totalItem = query.Count();
             var lists = query.Skip((request!.Page - 1) * request!.PageSize).Take(request!.PageSize).ToList();
 
+            #endregion Search
+
             var courseIds = lists.Select(x => x.CourseId).ToList();
             var courseResults = await _courseService.GetListCourseByIds(courseIds);
             var courses = courseResults.Content?.Result;
@@ -184,6 +187,7 @@ namespace Fsel.Training.Application.Queries.ClassLiveQuery
                     item.CourseLevel = courses?.FirstOrDefault(x => x.Id == item.CourseId)?.CourseLevel ?? default;
                     item.StartTime = liveTimeFrame?.StartTime ?? default;
                     item.EndTime = liveTimeFrame?.EndTime ?? default;
+                    item.IsStatus = item.StartDate!.Value.Date.AddDays(-1) > DateTime.Now.Date;
                 }
             }
 

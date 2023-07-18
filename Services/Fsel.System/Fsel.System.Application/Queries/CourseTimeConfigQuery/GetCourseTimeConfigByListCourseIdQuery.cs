@@ -2,10 +2,9 @@
 
 namespace Fsel.System.Application.Querys.CourseTimeConfigQuery
 {
-    using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.System.Domain.IRepositories;
-    using Fsel.System.Domain.Models;
+    using Fsel.System.Domain.Models.EntityModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -18,12 +17,10 @@ namespace Fsel.System.Application.Querys.CourseTimeConfigQuery
     public class GetCourseTimeConfigByCourseIdQueryHandler : IRequestHandler<GetCourseTimeConfigByListCourseIdQuery, MethodResult<IList<CourseTimeConfigModel>>>
     {
         private readonly ICourseTimeConfigRepository _courseTimeConfigRepository;
-        private readonly IMapper _mapper;
 
-        public GetCourseTimeConfigByCourseIdQueryHandler(ICourseTimeConfigRepository courseTimeConfigRepository, IMapper mapper)
+        public GetCourseTimeConfigByCourseIdQueryHandler(ICourseTimeConfigRepository courseTimeConfigRepository)
         {
             _courseTimeConfigRepository = courseTimeConfigRepository;
-            _mapper = mapper;
         }
 
         public async Task<MethodResult<IList<CourseTimeConfigModel>>> Handle(GetCourseTimeConfigByListCourseIdQuery request, CancellationToken cancellationToken)
