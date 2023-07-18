@@ -4,12 +4,12 @@ namespace Fsel.System.Api.Controllers
 {
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
+    using Fsel.System.Application.Commands.LiveTimeFrameCmd;
+    using Fsel.System.Application.Querys.LiveTimeFrameQuery;
+    using Fsel.System.Domain.Models.EntityModels;
+    using global::System.Net;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
-    using global::System.Net;
-    using Fsel.System.Application.Commands.LiveTimeFrameCmd;
-    using Fsel.System.Domain.Models.EntityModels;
-    using Fsel.System.Application.Querys.LiveTimeFrameQuery;
 
     [ApiVersion(Settings.APIVersion)]
     [Route(Settings.APIDefaultRoute + "/live-time-frame")]
@@ -31,7 +31,7 @@ namespace Fsel.System.Api.Controllers
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> Get()
         {
-            var commandResult = await _mediator.Send(new GetListLiveTimeFrameQuery { }).ConfigureAwait(false);
+            MethodResult<IList<LiveTimeFrameModel>> commandResult = await _mediator.Send(new GetListLiveTimeFrameQuery()).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
 

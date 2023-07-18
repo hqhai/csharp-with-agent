@@ -1,0 +1,72 @@
+// Copyright (c) Atlantic. All rights reserved.
+
+namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
+{
+    using System;
+    using System.Threading;
+    using System.Threading.Tasks;
+    using Fsel.Common.ActionResults;
+    using Fsel.Course.Domain.Enums;
+    using Fsel.Course.Domain.IRepositories;
+    using MediatR;
+    using Microsoft.AspNetCore.Http;
+    using Microsoft.EntityFrameworkCore;
+
+    public class DeleteVideoTimeCodeAnswersCommand : IRequest<MethodResult<bool>>
+    {
+        public Guid VideoResultId { get; set; }
+        public Guid LessonResultId { get; set; }
+    }
+
+    public class DeleteVideoTimeCodeAnswersCommandHandler : IRequestHandler<DeleteVideoTimeCodeAnswersCommand, MethodResult<bool>>
+    {
+        private readonly IVideoTimeCodeAnswerRepository _videoTimeCodeAnswerRepository;
+        private readonly IVideoResultRepository _videoResultRepository;
+        private readonly ILessonResultRepository _lessonResultRepository;
+
+        public DeleteVideoTimeCodeAnswersCommandHandler(IVideoTimeCodeAnswerRepository videoTimeCodeAnswerRepository, IVideoResultRepository videoResultRepository, ILessonResultRepository lessonResultRepository)
+        {
+            _videoTimeCodeAnswerRepository = videoTimeCodeAnswerRepository;
+            _videoResultRepository = videoResultRepository;
+            _lessonResultRepository = lessonResultRepository;
+        }
+
+        public async Task<MethodResult<bool>> Handle(DeleteVideoTimeCodeAnswersCommand request, CancellationToken cancellationToken)
+        {
+            ArgumentNullException.ThrowIfNull(request);
+            MethodResult<bool> methodResult = new MethodResult<bool>();
+
+            await _videoTimeCodeAnswerRepository.ExecuteTransactionAsync(async () =>
+            {
+                var videoTimeCodeAnswers = await _videoTimeCodeAnswerRepository.Queryable.Where(p => p.VideoResultId == request.VideoResultId).ToListAsync(cancellationToken);
+                if (videoTimeCodeAnswers.Count > 0)
+                {
+                    foreach (var item in videoTimeCodeAnswers)
+                    {
+                        await _videoTimeCodeAnswerRepository.DeleteAsync(item);
+                    }
+                    await _videoTimeCodeAnswerRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+                }
+                var videoResult = await _videoResultRepository.GetByIdAsync(request.VideoResultId);
+                if (videoResult != null)
+                {
+                    videoResult.Status = EnumResultStatus.Process;
+                    _videoResultRepository.Update(videoResult);
+                    await _videoResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+                }
+
+                var lessonResult = await _lessonResultRepository.GetByIdAsync(request.LessonResultId);
+                if (lessonResult != null)
+                {
+                    lessonResult.Status = EnumResultStatus.Process;
+                    _lessonResultRepository.Update(lessonResult);
+                    await _lessonResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+                }
+                methodResult.Result = true;
+                methodResult.StatusCode = StatusCodes.Status200OK;
+                return methodResult;
+            });
+            return methodResult;
+        }
+    }
+}

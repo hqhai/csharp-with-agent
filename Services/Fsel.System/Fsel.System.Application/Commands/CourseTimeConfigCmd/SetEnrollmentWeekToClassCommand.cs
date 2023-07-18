@@ -5,8 +5,8 @@ namespace Fsel.System.Application.Commands.CourseTimeConfigCmd
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.System.Domain.IRepositories;
-    using Fsel.System.Domain.Models;
     using Fsel.System.Domain.Models.CommandModels.CourseTimeConfigs;
+    using Fsel.System.Domain.Models.EntityModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;

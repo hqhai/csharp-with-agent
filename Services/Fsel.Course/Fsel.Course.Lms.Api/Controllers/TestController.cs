@@ -3,6 +3,7 @@
 using System.Net;
 using Fsel.Common.ActionResults;
 using Fsel.Common.Constants;
+using Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd;
 using Fsel.Shared.Enums;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -13,7 +14,6 @@ namespace Fsel.Course.Lms.Api.Controllers
     [ApiVersion(Settings.APIVersion)]
     [Route(Settings.APIDefaultRoute + "/test")]
     [ApiController]
-    [Authorize(Roles = nameof(EnumRole.Student))]
     public class TestController : ControllerBase
     {
         private readonly IMediator _mediator;
@@ -32,6 +32,18 @@ namespace Fsel.Course.Lms.Api.Controllers
         public IActionResult Search()
         {
             MethodResult<string> queryResult = new MethodResult<string> { Result = nameof(Search) };
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Delete Video Time Code Answers
+        /// </summary>
+        [HttpPut("delete-video-time-code-answers")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> Delete([FromQuery] DeleteVideoTimeCodeAnswersCommand command)
+        {
+            MethodResult<bool> queryResult = await _mediator.Send(command).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
     }

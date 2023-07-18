@@ -17,13 +17,13 @@ namespace Fsel.System.Api.Controllers
     [ApiController]
     public class ForbiddenWordController : ControllerBase
     {
-
         private readonly IMediator _mediator;
 
         public ForbiddenWordController(IMediator mediator)
         {
             _mediator = mediator;
         }
+
         /// <summary>
         /// Search Forbidden Word
         /// </summary>
