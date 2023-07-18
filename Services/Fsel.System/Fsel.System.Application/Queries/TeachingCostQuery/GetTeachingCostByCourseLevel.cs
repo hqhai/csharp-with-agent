@@ -11,12 +11,12 @@ namespace Fsel.System.Application.Queries.TeachingCostQuery
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class GetListTeachingCostByCourseLevel : IRequest<MethodResult<TeachingCostModel>>
+    public class GetTeachingCostByCourseLevel : IRequest<MethodResult<TeachingCostModel>>
     {
         public EnumCourseLevel CourseLevel { get; set; }
     }
 
-    public class GetListTeachingCostByCourseLevelHandler : IRequestHandler<GetListTeachingCostByCourseLevel, MethodResult<TeachingCostModel>>
+    public class GetListTeachingCostByCourseLevelHandler : IRequestHandler<GetTeachingCostByCourseLevel, MethodResult<TeachingCostModel>>
     {
         private readonly ITeachingCostRepository _teachingCostRepository;
 
@@ -25,7 +25,7 @@ namespace Fsel.System.Application.Queries.TeachingCostQuery
             _teachingCostRepository = teachingCostRepository;
         }
 
-        public async Task<MethodResult<TeachingCostModel>> Handle(GetListTeachingCostByCourseLevel request, CancellationToken cancellationToken)
+        public async Task<MethodResult<TeachingCostModel>> Handle(GetTeachingCostByCourseLevel request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<TeachingCostModel>();

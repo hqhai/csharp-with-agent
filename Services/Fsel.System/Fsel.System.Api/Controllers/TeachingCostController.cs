@@ -29,7 +29,7 @@ namespace Fsel.System.Api.Controllers
         [HttpGet("get-by-level")]
         [ProducesResponseType(typeof(MethodResult<TeachingCostModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetTeachingCostByLevel([FromQuery] GetListTeachingCostByCourseLevel query)
+        public async Task<IActionResult> GetTeachingCostByLevel([FromQuery] GetTeachingCostByCourseLevel query)
         {
             MethodResult<TeachingCostModel> commandResult = await _mediator.Send(query).ConfigureAwait(false);
             return commandResult.GetActionResult();
