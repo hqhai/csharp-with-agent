@@ -65,7 +65,7 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
             var extraPracticeResult = await _extraPracticeResultRepository.Queryable.FirstOrDefaultAsync(x => x.StudentId == studentId && x.ExtraPracticeId == request.ExtraPracticeId, cancellationToken);
             if (extraPracticeResult == null)
             {
-                var a = await GetCorrectTotal(extraPractice);
+                var a = await GetCorrectTotal(extraPractice, studentId ?? default);
                 extraPractice.ExtraPracticeResults.Add(new ExtraPracticeResult
                 {
                     StudentId = studentId ?? default,
@@ -81,14 +81,14 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
             return methodResult;
         }
 
-        private async Task<(int, IList<ExtraPracticeExerciseResult>?)> GetCorrectTotal(ExtraPractice extraPractice)
+        private async Task<(int, IList<ExtraPracticeExerciseResult>?)> GetCorrectTotal(ExtraPractice extraPractice, Guid studentId)
         {
             int correctTotal = 0;
             IList<ExtraPracticeExerciseResult>? extraPracticeExerciseResults = null;
             switch (extraPractice.Type)
             {
                 case EnumExtraPracticeType.VideoEmbed:
-                    (correctTotal, extraPracticeExerciseResults) = await GetCorrectTotalVideoEmbed(extraPractice.Id);
+                    (correctTotal, extraPracticeExerciseResults) = await GetCorrectTotalVideoEmbed(extraPractice.Id, studentId);
                     break;
 
                 case EnumExtraPracticeType.MockTest:
@@ -104,7 +104,7 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
                     break;
 
                 case EnumExtraPracticeType.Book:
-                    (correctTotal, extraPracticeExerciseResults) = await GetCorrectTotalBook(extraPractice.Id);
+                    (correctTotal, extraPracticeExerciseResults) = await GetCorrectTotalBook(extraPractice.Id, studentId);
                     break;
 
                 case EnumExtraPracticeType.Articles:
@@ -114,7 +114,7 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
             return (correctTotal, extraPracticeExerciseResults);
         }
 
-        private async Task<(int, IList<ExtraPracticeExerciseResult>?)> GetCorrectTotalVideoEmbed(Guid id)
+        private async Task<(int, IList<ExtraPracticeExerciseResult>?)> GetCorrectTotalVideoEmbed(Guid id, Guid studentId)
         {
             var extraPractice = await _extraPracticeRepository.Queryable.Include(x => x.ExtraPracticeExercises)
                                 .ThenInclude(x => x.Exercise)
@@ -130,6 +130,7 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
                        CorrectTotal = x.Exercise!.ExerciseQuestions.Select(x => x.Question).Sum(x => x!.CorrectTotal),
                        CourseSkill = x.Exercise.CourseSkill,
                        ExtraPracticeExerciseId = x.Id,
+                       StudentId = studentId,
                        Status = EnumResultStatus.Unfinished
                    }).ToList();
                 return (correctTotal, extraPracticeExerciseResults);
@@ -184,7 +185,7 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
             return (0, null);
         }
 
-        private async Task<(int, IList<ExtraPracticeExerciseResult>?)> GetCorrectTotalBook(Guid id)
+        private async Task<(int, IList<ExtraPracticeExerciseResult>?)> GetCorrectTotalBook(Guid id, Guid studentId)
         {
             var extraPractice = await _extraPracticeRepository.Queryable.Include(x => x.ExtraPracticeChapters)
                                 .ThenInclude(x => x.ExtraPracticeExercises)
@@ -206,6 +207,7 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
                         CorrectTotal = x.Exercise!.ExerciseQuestions.Select(x => x.Question).Sum(x => x!.CorrectTotal),
                         CourseSkill = x.Exercise.CourseSkill,
                         ExtraPracticeExerciseId = x.Id,
+                        StudentId = studentId,
                         Status = EnumResultStatus.Unfinished
                     }).ToList();
                 return (correctTotal, extraPracticeExerciseResults);

@@ -403,7 +403,7 @@ namespace Fsel.Course.Infrastructure.Common
                                 ResultAnswer = _mapper.Map<AnswerModel>(m.ExtraPracticeAnswers!.FirstOrDefault())
                             }).ToList(),
                         },
-                        ExtraPracticeExerciseResult = x.ExtraPracticeExerciseResults.Where(x=>x.StudentId == studentId && x.ExtraPracticeExerciseId == ).Select(x => new ExtraPracticeExerciseResultModel
+                        ExtraPracticeExerciseResult = x.ExtraPracticeExerciseResults.Where(y => y.StudentId == studentId && y.ExtraPracticeExerciseId == x.Id).Select(x => new ExtraPracticeExerciseResultModel
                         {
                             Id = x.Id,
                             CorrectCount = x.CorrectCount,

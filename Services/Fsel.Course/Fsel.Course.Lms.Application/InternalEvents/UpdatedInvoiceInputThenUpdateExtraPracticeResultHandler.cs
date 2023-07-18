@@ -51,12 +51,13 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                     var exerciseCount = extraPractice!.ExtraPracticeChapters.SelectMany(x => x.ExtraPracticeExercises).Select(x => x.Exercise).Count();
                     var extraPracticeExerciseResultCount = extraPractice.ExtraPracticeChapters.SelectMany(x => x.ExtraPracticeExercises).Select(x => x.ExtraPracticeExerciseResults).Count();
                     extraPracticeResult.CorrectCount = extraPracticeExerciseResults.Sum(x => x.CorrectCount);
-                    extraPracticeResult.CorrectTotal = extraPracticeExerciseResults.Sum(x => x.CorrectTotal);
-
                     if (exerciseCount == extraPracticeExerciseResultCount)
                     {
                         extraPracticeResult.Status = EnumResultStatus.Done;
                         extraPracticeResult.Percent = 100;
+                    }
+                    else
+                    {
                     }
 
                     _extraPracticeResultRepository.Update(extraPracticeResult);
@@ -72,7 +73,6 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                     var exerciseCount = extraPractice!.ExtraPracticeExercises.Select(x => x.Exercise).Count();
                     var extraPracticeExerciseResultCount = extraPractice.ExtraPracticeExercises.Select(x => x.ExtraPracticeExerciseResults).Count();
                     extraPracticeResult.CorrectCount = extraPracticeExerciseResults.Sum(x => x.CorrectCount);
-                    extraPracticeResult.CorrectTotal = extraPracticeExerciseResults.Sum(x => x.CorrectTotal);
 
                     if (exerciseCount == extraPracticeExerciseResultCount)
                     {
