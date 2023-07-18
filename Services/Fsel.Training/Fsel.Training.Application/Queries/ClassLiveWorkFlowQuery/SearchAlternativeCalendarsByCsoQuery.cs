@@ -51,7 +51,7 @@ namespace Fsel.Training.Application.Queries.ClassLiveWorkFlowQuery
                     methodResult.Result = null;
                     return methodResult;
                 }
-                teacherIds = teachersResult.Content.Result.Select(x => x.Id).ToList();
+                teacherIds = teachersResult.Content.Result.Select(x => x.Id).Distinct().ToList();
             }
             var classLiveWorkFlows = _classLiveWorkFlowRepository.Queryable.Where(p => p.Type == EnumWorkFlowType.ChangeTeacher).Include(cld => cld.ClassLiveCalendar).ThenInclude(c => c!.Class).Select(ac => new AlternativeCalendarModel
             {

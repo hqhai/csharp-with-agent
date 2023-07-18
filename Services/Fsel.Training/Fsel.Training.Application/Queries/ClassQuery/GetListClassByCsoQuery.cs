@@ -49,7 +49,7 @@ namespace Fsel.Training.Application.Queries.ClassQuery
             }
             var csoId = cso?.Content?.Result?.Id;
             var classQuery = await _classRepository.Queryable
-                                .Where(x => x.CsoId == csoId)
+                                .Where(x => x.CsoId == csoId && x.LiveTimeFrameId != null)
                                 .Select(x => new ClassModel
 
                                 {

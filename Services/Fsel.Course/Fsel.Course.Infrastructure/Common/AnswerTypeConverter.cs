@@ -183,13 +183,9 @@ namespace Fsel.Course.Infrastructure.Common
 
         private static bool IsShortAnswer(string question, string answer)
         {
-            var q = question.Trim().ToLower(CultureInfo.CurrentCulture);
-            var a = answer.Trim().ToLower(CultureInfo.CurrentCulture);
-            if (q.Replace('’', '\'') == a.Replace('’', '\''))
-            {
-                return true;
-            }
-            return false;
+            string q = " " + question.Trim().ToLower(CultureInfo.CurrentCulture).Replace('’', '\'').ToString() + " ";
+            string a = " " + answer.Trim().ToLower(CultureInfo.CurrentCulture).Replace('’', '\'').ToString() + " ";
+            return a.Contains(q, StringComparison.OrdinalIgnoreCase);
         }
 
         private static int GetTotalCorrectTypeShortAnswerWordBase(ref object? configAnswer, object? configQuestion)
