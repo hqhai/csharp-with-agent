@@ -101,16 +101,13 @@ namespace Fsel.Training.Application.Commands.ClassLiveWorkFlowCmd
                     var endTime = classLiveCalendar.LiveDate.AddHours(-1);
                     var startTime = classLiveCalendar.LiveDate.AddHours(-24);
                     var check = dateTime > startTime && dateTime < endTime;
-
                     if (!check)
                     {
                         methodResult.AddErrorBadRequest(nameof(EnumClassLiveWorkFlowErrorCode.CanNotCancelLiveTime));
                         return methodResult;
                     }
-
                     var listLiveTimeFrameResults = await _systemService.GetLiveTimeFramesAsync();
                     var classLiveCalendars = await _classLiveCalendarRepository.Queryable.Where(x => x.TeacherId == teacherId).ToListAsync(cancellationToken);
-
                     var liveTimeFrames = listLiveTimeFrameResults.Content?.Result;
                     foreach (var workFlowPlan in request.ClassLiveWorkFlowPlans)
                     {

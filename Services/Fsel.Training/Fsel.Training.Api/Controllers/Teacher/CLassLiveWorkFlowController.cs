@@ -14,7 +14,7 @@ namespace Fsel.Training.Api.Controllers.Teacher
     using Microsoft.AspNetCore.Mvc;
 
     [ApiVersion(Settings.APIVersion)]
-    [Route(Settings.APIDefaultRoute + "/teacher/cLass-live-work")]
+    [Route(Settings.APIDefaultRoute + "/teacher/class-live-work")]
     [ApiController]
     [Authorize(Roles = nameof(EnumRole.Teacher))]
     public class CLassLiveWorkFlowController : ControllerBase
