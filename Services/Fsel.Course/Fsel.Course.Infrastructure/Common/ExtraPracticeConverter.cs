@@ -347,7 +347,7 @@ namespace Fsel.Course.Infrastructure.Common
                                                                       .ThenInclude(x => x!.ExtraPracticeAnswers.Where(y => !y.IsDeleted))
                                                                   .Include(x => x.ExtraPracticeChapters.Where(y => !y.IsDeleted))
                                                                       .ThenInclude(x => x.ExtraPracticeExercises.Where(y => !y.IsDeleted))
-                                                                      .ThenInclude(x => x.ExtraPracticeExerciseResults.Where(y => !y.IsDeleted && y.StudentId == studentId))
+                                                                      .ThenInclude(x => x.ExtraPracticeExerciseResults)
                                                                       .AsNoTracking()
                                                                   .FirstOrDefaultAsync(x => x.Id == id);
             var extraPracticeResult = extraPractice != null ? extraPractice.ExtraPracticeResults.FirstOrDefault(y => y.StudentId == studentId) : null;
@@ -403,7 +403,7 @@ namespace Fsel.Course.Infrastructure.Common
                                 ResultAnswer = _mapper.Map<AnswerModel>(m.ExtraPracticeAnswers!.FirstOrDefault())
                             }).ToList(),
                         },
-                        ExtraPracticeExerciseResult = x.ExtraPracticeExerciseResults.Select(x => new ExtraPracticeExerciseResultModel
+                        ExtraPracticeExerciseResult = x.ExtraPracticeExerciseResults.Where(x=>x.StudentId == studentId && x.ExtraPracticeExerciseId == ).Select(x => new ExtraPracticeExerciseResultModel
                         {
                             Id = x.Id,
                             CorrectCount = x.CorrectCount,
