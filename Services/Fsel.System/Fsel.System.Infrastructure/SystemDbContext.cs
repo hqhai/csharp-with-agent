@@ -1,6 +1,5 @@
 using Fsel.Common.Constants;
 using Fsel.Core.Base;
-using Fsel.Shared.Enums;
 using Fsel.System.Domain.Entities;
 using MediatR;
 using Microsoft.EntityFrameworkCore;

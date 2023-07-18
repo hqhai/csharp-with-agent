@@ -11,6 +11,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public string? Description { get; set; }
         public int PageNumber { get; set; }
         public Guid ExtraPracticeId { get; set; }
+        public bool IsStatus { get; set; }
         public IList<ExtraPracticeExerciseModel>? ExtraPracticeExercises { get; set; }
     }
 }

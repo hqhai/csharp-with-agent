@@ -382,6 +382,7 @@ namespace Fsel.Course.Infrastructure.Common
                     Name = x.Name,
                     ExtraPracticeId = x.ExtraPracticeId,
                     PageNumber = x.PageNumber,
+                    IsStatus = x.ExtraPracticeExercises.SelectMany(x => x.ExtraPracticeExerciseResults).All(x => x.Status == EnumResultStatus.Done),
                     ExtraPracticeExercises = x.ExtraPracticeExercises.OrderBy(x => x!.CreatedDate).Select(x => new ExtraPracticeExerciseModel
                     {
                         Id = x.Id,
@@ -548,6 +549,7 @@ namespace Fsel.Course.Infrastructure.Common
                     Id = x.Id,
                     CreatedDate = x.CreatedDate,
                     TotalCount = x.Exercise!.ExerciseQuestions.Select(x => x.Question).Sum(x => x!.CorrectTotal),
+                    IsStatus = x.ExtraPracticeExerciseResults.All(x => x.Status == EnumResultStatus.Done),
                     Exercise = new ExerciseModel
                     {
                         Id = x.Exercise!.Id,

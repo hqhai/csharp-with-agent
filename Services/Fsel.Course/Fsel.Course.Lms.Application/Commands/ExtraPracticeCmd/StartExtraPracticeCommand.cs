@@ -125,13 +125,13 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
             {
                 var correctTotal = extraPractice.ExtraPracticeExercises.Select(x => x.Exercise).SelectMany(x => x!.ExerciseQuestions).Select(x => x.Question).Sum(x => x!.CorrectTotal);
                 IList<ExtraPracticeExerciseResult> extraPracticeExerciseResults = extraPractice.ExtraPracticeExercises.OrderBy(x => x.CreatedDate)
-                   .Select(x => new ExtraPracticeExerciseResult
+                   .Select((x, index) => new ExtraPracticeExerciseResult
                    {
                        CorrectTotal = x.Exercise!.ExerciseQuestions.Select(x => x.Question).Sum(x => x!.CorrectTotal),
                        CourseSkill = x.Exercise.CourseSkill,
                        ExtraPracticeExerciseId = x.Id,
                        StudentId = studentId,
-                       Status = EnumResultStatus.Unfinished
+                       Status = index == 0 ? EnumResultStatus.New : EnumResultStatus.Unfinished
                    }).ToList();
                 return (correctTotal, extraPracticeExerciseResults);
             }
@@ -202,14 +202,14 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
                                                                         .Sum(x => x!.CorrectTotal);
                 IList<ExtraPracticeExerciseResult> extraPracticeExerciseResults = extraPractice.ExtraPracticeChapters
                     .SelectMany(x => x.ExtraPracticeExercises).OrderBy(x => x.CreatedDate)
-                    .Select(x => new ExtraPracticeExerciseResult
-                    {
-                        CorrectTotal = x.Exercise!.ExerciseQuestions.Select(x => x.Question).Sum(x => x!.CorrectTotal),
-                        CourseSkill = x.Exercise.CourseSkill,
-                        ExtraPracticeExerciseId = x.Id,
-                        StudentId = studentId,
-                        Status = EnumResultStatus.Unfinished
-                    }).ToList();
+                   .Select((x, index) => new ExtraPracticeExerciseResult
+                   {
+                       CorrectTotal = x.Exercise!.ExerciseQuestions.Select(x => x.Question).Sum(x => x!.CorrectTotal),
+                       CourseSkill = x.Exercise.CourseSkill,
+                       ExtraPracticeExerciseId = x.Id,
+                       StudentId = studentId,
+                       Status = index == 0 ? EnumResultStatus.New : EnumResultStatus.Unfinished
+                   }).ToList();
                 return (correctTotal, extraPracticeExerciseResults);
             }
             return (0, null);
