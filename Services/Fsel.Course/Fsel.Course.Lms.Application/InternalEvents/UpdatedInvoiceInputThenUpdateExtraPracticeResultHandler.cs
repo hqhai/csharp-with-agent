@@ -56,9 +56,6 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                         extraPracticeResult.Status = EnumResultStatus.Done;
                         extraPracticeResult.Percent = 100;
                     }
-                    else
-                    {
-                    }
 
                     _extraPracticeResultRepository.Update(extraPracticeResult);
                     await _extraPracticeResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
