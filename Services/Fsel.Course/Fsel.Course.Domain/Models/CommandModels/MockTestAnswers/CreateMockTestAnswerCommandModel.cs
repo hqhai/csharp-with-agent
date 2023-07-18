@@ -4,7 +4,6 @@ namespace Fsel.Course.Domain.Models.CommandModels.MockTestAnswers
 {
     using System;
     using System.Collections.Generic;
-    using Fsel.Shared.Enums;
 
     public class CreateMockTestAnswerCommandModel
     {

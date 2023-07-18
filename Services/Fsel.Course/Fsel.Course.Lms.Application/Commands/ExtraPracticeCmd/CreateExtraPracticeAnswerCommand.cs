@@ -381,18 +381,11 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
             var extraPracticeAnswer = await _extraPracticeAnswerRepository.Queryable.FirstOrDefaultAsync(x => x.ExtraPracticeResultId == extraPracticeResult.Id && x.SectionTimeCodeId == sectionTimeCode.Id, cancellationToken);
             if (extraPracticeAnswer == null)
             {
-                var (answerConfig, correctCount) = _answerTypeConverter.GetTotalCorrectByAsnwerType(extraPractice.Answer, null, EnumQuestionType.BaseContent);
-                if (answerConfig == null)
-                {
-                    methodResult.AddErrorBadRequest(nameof(EnumMockTestAnswerErrorCode.AnswerIsInTheWrongFormat), nameof(extraPractice.Answer), extraPractice.Answer);
-                    return methodResult;
-                }
                 extraPracticeResult.ExtraPracticeAnswers.Add(new ExtraPracticeAnswer
                 {
-                    Answer = answerConfig,
-                    CorrectCount = correctCount,
+                    Answer = extraPractice.Answer,
                     ExtraPracticeResultId = extraPracticeResult.Id,
-                    SectionTimeCodeId = extraPractice.SectionTimeCodeId
+                    SectionTimeCodeId = extraPractice.SectionTimeCodeId!
                 });
             }
             return methodResult;
@@ -412,16 +405,9 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
             var extraPracticeAnswer = await _extraPracticeAnswerRepository.Queryable.FirstOrDefaultAsync(x => x.ExtraPracticeResultId == extraPracticeResult.Id && x.SectionId == section.Id, cancellationToken);
             if (extraPracticeAnswer == null)
             {
-                var (answerConfig, correctCount) = _answerTypeConverter.GetTotalCorrectByAsnwerType(extraPractice.Answer, null, EnumQuestionType.BaseContent);
-                if (answerConfig == null)
-                {
-                    methodResult.AddErrorBadRequest(nameof(EnumMockTestAnswerErrorCode.AnswerIsInTheWrongFormat), nameof(extraPractice.Answer), extraPractice.Answer);
-                    return methodResult;
-                }
                 extraPracticeResult.ExtraPracticeAnswers.Add(new ExtraPracticeAnswer
                 {
-                    Answer = answerConfig,
-                    CorrectCount = correctCount,
+                    Answer = extraPractice.Answer,
                     ExtraPracticeResultId = extraPracticeResult.Id,
                     SectionId = extraPractice.SectionId!
                 });
