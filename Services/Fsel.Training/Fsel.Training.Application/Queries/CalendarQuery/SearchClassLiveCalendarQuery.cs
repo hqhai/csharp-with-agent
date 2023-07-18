@@ -66,7 +66,9 @@ namespace Fsel.Training.Application.Queries.CalendarQuery
                                                 ) && x.Status == EnumClassLiveCalendarStatus.NotStudied
                                             )
                                     .AsNoTracking()
-                                    .Where(x => x.LiveDate.Date.AddHours(timeFrames!.FirstOrDefault(y => y.Id == x.LiveTimeFrameId)!.EndTime ?? 0) > DateTime.Now)
+                                    .AsEnumerable()
+                                    .Where(x => timeFrames != null && timeFrames.FirstOrDefault(y => y.Id == x.LiveTimeFrameId) != null &&
+                                    x.LiveDate.Date.AddHours(timeFrames.FirstOrDefault(y => y.Id == x.LiveTimeFrameId)!.EndTime ?? 0) > DateTime.Now)
                                     .Select(x => new ClassLiveCalendarSearchModel
                                     {
                                         Id = x.Id,
@@ -78,13 +80,8 @@ namespace Fsel.Training.Application.Queries.CalendarQuery
                                         LiveDate = x.LiveDate
                                     });
 
-            int totalItem = await query.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
-            var lists = await query
-                    .ApplySortAndPaging(request)
-                    .OrderBy(x => x.LiveDate)
-                    .AsNoTracking()
-                    .ToListAsync(cancellationToken: cancellationToken)
-                    .ConfigureAwait(false);
+            int totalItem = query.Count();
+            var lists = query.Skip((request!.Page - 1) * request!.PageSize).Take(request!.PageSize).OrderBy(x => x.LiveDate).ToList();
             var courseIds = lists.Select(x => x.CourseId).Distinct().ToList();
             var courseResults = await _courseService.GetListCourseByIds(courseIds);
             var courses = courseResults.Content?.Result;
@@ -104,7 +101,7 @@ namespace Fsel.Training.Application.Queries.CalendarQuery
 
                 item.IsActiveWorkFlow = assignTeacher > dateTimeNow.AddHours(24);
                 item.IsActiveWorkPlan = dateTimeNow > assignTeacher.AddHours(-24) && dateTimeNow < endTime;
-                item.IsActiveCalendar = dateTimeNow >= assignTeacher.AddHours(-1) && dateTimeNow < assignTeacher;
+                item.IsActiveCalendar = dateTimeNow >= assignTeacher && dateTimeNow < assignTeacher.AddHours(1);
             }
             methodResult.Result = new PagingItemsModel<ClassLiveCalendarSearchModel>(lists, request, totalItem);
             methodResult.StatusCode = StatusCodes.Status200OK;

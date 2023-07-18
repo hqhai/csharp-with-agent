@@ -3,9 +3,9 @@
 namespace Fsel.Course.Domain.Models.EntityModels
 {
     using System;
-    using Fsel.Shared.Enums;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Course.Domain.Enums;
+    using Fsel.Shared.Enums;
 
     public class CourseSearchModel : BaseModel
     {
