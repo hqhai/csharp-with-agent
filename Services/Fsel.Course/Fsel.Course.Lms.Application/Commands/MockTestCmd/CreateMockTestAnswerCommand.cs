@@ -30,6 +30,8 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
         private readonly IQuestionRepository _questionRepository;
         private readonly IMockTestAnswerRepository _mockTestAnswerRepository;
         private readonly IMockTestResultRepository _mockTestResultRepository;
+        private readonly ISectionRepository _sectionRepository;
+        private readonly ISectionTimeCodeRepository _sectionTimeCodeRepository;
         private readonly ISectionGroupRepository _sectionGroupRepository;
         private readonly IMapper _mapper;
 
@@ -37,6 +39,8 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
             , IQuestionRepository questionRepository
             , IMockTestAnswerRepository mockTestAnswerRepository
             , IMockTestResultRepository mockTestResultRepository
+            , ISectionRepository sectionRepository
+            , ISectionTimeCodeRepository sectionTimeCodeRepository
             , ISectionGroupRepository sectionGroupRepository
             , IMapper mapper)
         {
@@ -44,6 +48,8 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
             _questionRepository = questionRepository;
             _mockTestAnswerRepository = mockTestAnswerRepository;
             _mockTestResultRepository = mockTestResultRepository;
+            _sectionRepository = sectionRepository;
+            _sectionTimeCodeRepository = sectionTimeCodeRepository;
             _sectionGroupRepository = sectionGroupRepository;
             _mapper = mapper;
         }
@@ -100,41 +106,86 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
                     double questionCount = 0;
                     foreach (var answer in item.Answers)
                     {
-                        var question = questions.FirstOrDefault(x => x.Id == answer.QuestionId);
-                        if (question == null)
+                        if (answer.QuestionId != null)
                         {
-                            methodResult.AddErrorBadRequest(nameof(EnumQuestionErrorCode.QuestionNotExist), nameof(answer.QuestionId), answer.QuestionId);
-                            return methodResult;
-                        }
-                        else if (question.Config == null)
-                        {
-                            methodResult.AddErrorBadRequest(nameof(EnumQuestionErrorCode.QuestionConfigNull), nameof(question), question);
-                            return methodResult;
-                        }
-                        else if (question.SectionQuestions == null || question.SectionQuestions.Count == 0)
-                        {
-                            methodResult.AddErrorBadRequest(nameof(EnumSectionQuestionErrorCode.SectionQuestionsNotExist), nameof(question.SectionQuestions));
-                            return methodResult;
-                        }
-                        var sectionQuestionId = question.SectionQuestions.FirstOrDefault()!.Id;
-                        var mockTestAnswer = await _mockTestAnswerRepository.Queryable.FirstOrDefaultAsync(x => x.MockTestResultId == mockTestResult.Id && x.SectionQuestionId == sectionQuestionId, cancellationToken);
-                        if (mockTestAnswer == null)
-                        {
-                            var (answerConfig, correctCount) = _answerTypeConverter.GetTotalCorrectByAsnwerType(answer.Answer, question.Config, question.QuestionType);
-                            if (answerConfig == null)
+                            var question = questions.FirstOrDefault(x => x.Id == answer.QuestionId);
+                            if (question == null)
                             {
-                                methodResult.AddErrorBadRequest(nameof(EnumMockTestAnswerErrorCode.AnswerIsInTheWrongFormat), nameof(answer.Answer), answer.Answer);
+                                methodResult.AddErrorBadRequest(nameof(EnumQuestionErrorCode.QuestionNotExist), nameof(answer.QuestionId), answer.QuestionId);
                                 return methodResult;
                             }
-                            count += correctCount;
-                            questionCount += question.CorrectTotal;
-                            mockTestAnswer = new MockTestAnswer
+                            else if (question.Config == null)
                             {
-                                Answer = answerConfig,
-                                MockTestResultId = mockTestResult.Id,
-                                SectionQuestionId = sectionQuestionId
-                            };
-                            mockTestAnswers.Add(mockTestAnswer);
+                                methodResult.AddErrorBadRequest(nameof(EnumQuestionErrorCode.QuestionConfigNull), nameof(question), question);
+                                return methodResult;
+                            }
+                            else if (question.SectionQuestions == null || question.SectionQuestions.Count == 0)
+                            {
+                                methodResult.AddErrorBadRequest(nameof(EnumSectionQuestionErrorCode.SectionQuestionsNotExist), nameof(question.SectionQuestions));
+                                return methodResult;
+                            }
+                            var sectionQuestionId = question.SectionQuestions.FirstOrDefault()!.Id;
+                            var mockTestAnswer = await _mockTestAnswerRepository.Queryable.FirstOrDefaultAsync(x => x.MockTestResultId == mockTestResult.Id && x.SectionQuestionId == sectionQuestionId, cancellationToken);
+                            if (mockTestAnswer == null)
+                            {
+                                var (answerConfig, correctCount) = _answerTypeConverter.GetTotalCorrectByAsnwerType(answer.Answer, question.Config, question.QuestionType);
+                                if (answerConfig == null)
+                                {
+                                    methodResult.AddErrorBadRequest(nameof(EnumMockTestAnswerErrorCode.AnswerIsInTheWrongFormat), nameof(answer.Answer), answer.Answer);
+                                    return methodResult;
+                                }
+                                count += correctCount;
+                                questionCount += question.CorrectTotal;
+                                mockTestAnswer = new MockTestAnswer
+                                {
+                                    Answer = answerConfig,
+                                    MockTestResultId = mockTestResult.Id,
+                                    SectionQuestionId = sectionQuestionId
+                                };
+                                mockTestAnswers.Add(mockTestAnswer);
+                            }
+                        }
+                        else if (answer.SectionId != null)
+                        {
+                            var sectionId = answer.SectionId;
+                            var section = await _sectionRepository.Queryable.FirstOrDefaultAsync(x => x.Id == sectionId, cancellationToken);
+                            if (section == null)
+                            {
+                                methodResult.AddErrorBadRequest(nameof(EnumSectionErrorCode.SectionNotExist), nameof(answer.SectionId), answer.SectionId);
+                                return methodResult;
+                            }
+                            var mockTestAnswer = await _mockTestAnswerRepository.Queryable.FirstOrDefaultAsync(x => x.MockTestResultId == mockTestResult.Id && x.SectionId == sectionId, cancellationToken);
+                            if (mockTestAnswer == null)
+                            {
+                                mockTestAnswer = new MockTestAnswer
+                                {
+                                    Answer = answer.Answer,
+                                    MockTestResultId = mockTestResult.Id,
+                                    SectionId = sectionId
+                                };
+                                mockTestAnswers.Add(mockTestAnswer);
+                            }
+                        }
+                        else
+                        {
+                            var sectionTimeCodeId = answer.SectionTimeCodeId;
+                            var sectionTimeCode = await _sectionTimeCodeRepository.Queryable.FirstOrDefaultAsync(x => x.Id == sectionTimeCodeId, cancellationToken);
+                            if (sectionTimeCode == null)
+                            {
+                                methodResult.AddErrorBadRequest(nameof(EnumSectionTimeCodeErrorCode.SectionTimeCodeNotExist), nameof(answer.SectionTimeCodeId), answer.SectionTimeCodeId);
+                                return methodResult;
+                            }
+                            var mockTestAnswer = await _mockTestAnswerRepository.Queryable.FirstOrDefaultAsync(x => x.MockTestResultId == mockTestResult.Id && x.SectionTimeCodeId == sectionTimeCodeId, cancellationToken);
+                            if (mockTestAnswer == null)
+                            {
+                                mockTestAnswer = new MockTestAnswer
+                                {
+                                    Answer = answer.Answer,
+                                    MockTestResultId = mockTestResult.Id,
+                                    SectionTimeCodeId = sectionTimeCodeId
+                                };
+                                mockTestAnswers.Add(mockTestAnswer);
+                            }
                         }
                     }
                     var sectionGroup = sectionGroups.FirstOrDefault(x => x.Id == item.SectionGroupId);
