@@ -11,14 +11,14 @@ namespace Fsel.Course.Lms.Application.InternalEvents
     using MediatR;
     using Microsoft.EntityFrameworkCore;
 
-    public class UpdatedInvoiceInputThenUpdateExtraPracticeResultHandler :
+    public class UpdatedExtraPracticeExerciseResultThenUpdateExtraPracticeResultHandler :
             INotificationHandler<EntityChangedEvent<ExtraPracticeExerciseResult>>
     {
         private readonly IExtraPracticeResultRepository _extraPracticeResultRepository;
         private readonly IExtraPracticeExerciseResultRepository _extraPracticeExerciseResultRepository;
         private readonly IExtraPracticeRepository _extraPracticeRepository;
 
-        public UpdatedInvoiceInputThenUpdateExtraPracticeResultHandler(
+        public UpdatedExtraPracticeExerciseResultThenUpdateExtraPracticeResultHandler(
             IExtraPracticeResultRepository extraPracticeResultRepository,
             IExtraPracticeExerciseResultRepository extraPracticeExerciseResultRepository,
             IExtraPracticeRepository extraPracticeRepository)

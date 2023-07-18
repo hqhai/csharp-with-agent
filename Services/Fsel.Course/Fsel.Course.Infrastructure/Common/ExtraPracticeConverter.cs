@@ -47,7 +47,6 @@ namespace Fsel.Course.Infrastructure.Common
             _mockTestRepository = mockTestRepository;
             _sectionConverter = sectionConverter;
             _videoRepository = videoRepository;
-            _sectionConverter = sectionConverter;
             _extraPracticeExerciseRepository = extraPracticeExerciseRepository;
             _exerciseRepository = exerciseRepository;
             _extraPracticeResultRepository = extraPracticeResultRepository;

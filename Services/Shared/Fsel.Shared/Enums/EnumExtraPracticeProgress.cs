@@ -10,7 +10,7 @@ namespace Fsel.Shared.Enums
         Completed,
         [Description("In Progress")]
         InProgress,
-        [Description("Unopened")]
-        Unopened
+        [Description("Un Opened")]
+        UnOpened
     }
 }
