@@ -65,10 +65,12 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
             var extraPracticeResult = await _extraPracticeResultRepository.Queryable.FirstOrDefaultAsync(x => x.StudentId == studentId && x.ExtraPracticeId == request.ExtraPracticeId, cancellationToken);
             if (extraPracticeResult == null)
             {
+                var a = await GetCorrectTotal(extraPractice);
                 extraPractice.ExtraPracticeResults.Add(new ExtraPracticeResult
                 {
                     StudentId = studentId ?? default,
-                    CorrectTotal = await GetCorrectTotal(extraPractice)
+                    CorrectTotal = a.Item1,
+                    ExtraPracticeExerciseResults = a.Item2 != null ? a.Item2 : new List<ExtraPracticeExerciseResult>()
                 });
                 _extraPracticeRepository.Update(extraPractice);
                 await _extraPracticeRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
@@ -79,39 +81,40 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
             return methodResult;
         }
 
-        private async Task<int> GetCorrectTotal(ExtraPractice extraPractice)
+        private async Task<(int, IList<ExtraPracticeExerciseResult>?)> GetCorrectTotal(ExtraPractice extraPractice)
         {
             int correctTotal = 0;
+            IList<ExtraPracticeExerciseResult>? extraPracticeExerciseResults = null;
             switch (extraPractice.Type)
             {
                 case EnumExtraPracticeType.VideoEmbed:
-                    correctTotal = await GetCorrectTotalVideoEmbed(extraPractice.Id);
+                    (correctTotal, extraPracticeExerciseResults) = await GetCorrectTotalVideoEmbed(extraPractice.Id);
                     break;
 
                 case EnumExtraPracticeType.MockTest:
-                    correctTotal = await GetCorrectTotalMockTest(extraPractice.Id);
+                    (correctTotal, extraPracticeExerciseResults) = await GetCorrectTotalMockTest(extraPractice.Id);
                     break;
 
                 case EnumExtraPracticeType.Exercise:
-                    correctTotal = await GetCorrectTotalVideoEmbed(extraPractice.Id);
+                    (correctTotal, extraPracticeExerciseResults) = await GetCorrectTotalExercise(extraPractice.Id);
                     break;
 
                 case EnumExtraPracticeType.InteractiveVideo:
-                    correctTotal = await GetCorrectTotalInteractiveVideo(extraPractice.Id);
+                    (correctTotal, extraPracticeExerciseResults) = await GetCorrectTotalInteractiveVideo(extraPractice.Id);
                     break;
 
                 case EnumExtraPracticeType.Book:
-                    correctTotal = await GetCorrectTotalBook(extraPractice.Id);
+                    (correctTotal, extraPracticeExerciseResults) = await GetCorrectTotalBook(extraPractice.Id);
                     break;
 
                 case EnumExtraPracticeType.Articles:
-                    correctTotal = 0;
+                    (correctTotal, extraPracticeExerciseResults) = (0, null);
                     break;
             }
-            return correctTotal;
+            return (correctTotal, extraPracticeExerciseResults);
         }
 
-        private async Task<int> GetCorrectTotalVideoEmbed(Guid id)
+        private async Task<(int, IList<ExtraPracticeExerciseResult>?)> GetCorrectTotalVideoEmbed(Guid id)
         {
             var extraPractice = await _extraPracticeRepository.Queryable.Include(x => x.ExtraPracticeExercises)
                                 .ThenInclude(x => x.Exercise)
@@ -120,13 +123,21 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
                                 .FirstOrDefaultAsync(x => x.Id == id);
             if (extraPractice != null)
             {
-                var correctCount = extraPractice.ExtraPracticeExercises.Select(x => x.Exercise).SelectMany(x => x!.ExerciseQuestions).Select(x => x.Question).Sum(x => x!.CorrectTotal);
-                return correctCount;
+                var correctTotal = extraPractice.ExtraPracticeExercises.Select(x => x.Exercise).SelectMany(x => x!.ExerciseQuestions).Select(x => x.Question).Sum(x => x!.CorrectTotal);
+                IList<ExtraPracticeExerciseResult> extraPracticeExerciseResults = extraPractice.ExtraPracticeExercises.OrderBy(x => x.CreatedDate)
+                   .Select(x => new ExtraPracticeExerciseResult
+                   {
+                       CorrectTotal = x.Exercise!.ExerciseQuestions.Select(x => x.Question).Sum(x => x!.CorrectTotal),
+                       CourseSkill = x.Exercise.CourseSkill,
+                       ExtraPracticeExerciseId = x.Id,
+                       Status = EnumResultStatus.Unfinished
+                   }).ToList();
+                return (correctTotal, extraPracticeExerciseResults);
             }
-            return 0;
+            return (0, null);
         }
 
-        private async Task<int> GetCorrectTotalMockTest(Guid id)
+        private async Task<(int, IList<ExtraPracticeExerciseResult>?)> GetCorrectTotalExercise(Guid id)
         {
             var extraPractice = await _extraPracticeRepository.Queryable.Include(x => x.ExtraPracticeExercises)
                                 .ThenInclude(x => x.Exercise)
@@ -135,13 +146,28 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
                                 .FirstOrDefaultAsync(x => x.Id == id);
             if (extraPractice != null)
             {
-                var correctCount = extraPractice.ExtraPracticeExercises.Select(x => x.Exercise).SelectMany(x => x!.ExerciseQuestions).Select(x => x.Question).Sum(x => x!.CorrectTotal);
-                return correctCount;
+                var correctTotal = extraPractice.ExtraPracticeExercises.Select(x => x.Exercise).SelectMany(x => x!.ExerciseQuestions).Select(x => x.Question).Sum(x => x!.CorrectTotal);
+                return (correctTotal, null);
             }
-            return 0;
+            return (0, null);
         }
 
-        private async Task<int> GetCorrectTotalInteractiveVideo(Guid id)
+        private async Task<(int, IList<ExtraPracticeExerciseResult>?)> GetCorrectTotalMockTest(Guid id)
+        {
+            var extraPractice = await _extraPracticeRepository.Queryable.Include(x => x.ExtraPracticeExercises)
+                                .ThenInclude(x => x.Exercise)
+                                .ThenInclude(x => x!.ExerciseQuestions)
+                                .ThenInclude(x => x.Question)
+                                .FirstOrDefaultAsync(x => x.Id == id);
+            if (extraPractice != null)
+            {
+                var correctTotal = extraPractice.ExtraPracticeExercises.Select(x => x.Exercise).SelectMany(x => x!.ExerciseQuestions).Select(x => x.Question).Sum(x => x!.CorrectTotal);
+                return (correctTotal, null);
+            }
+            return (0, null);
+        }
+
+        private async Task<(int, IList<ExtraPracticeExerciseResult>?)> GetCorrectTotalInteractiveVideo(Guid id)
         {
             var extraPractice = await _extraPracticeRepository.Queryable.Include(x => x.Video)
                                 .ThenInclude(x => x!.VideoTimeCodes)
@@ -152,13 +178,13 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
                                 .FirstOrDefaultAsync(x => x.Id == id);
             if (extraPractice != null)
             {
-                var correctCount = extraPractice.ExtraPracticeExercises.Select(x => x.Exercise).SelectMany(x => x!.ExerciseQuestions).Select(x => x.Question).Sum(x => x!.CorrectTotal);
-                return correctCount;
+                var correctTotal = extraPractice.ExtraPracticeExercises.Select(x => x.Exercise).SelectMany(x => x!.ExerciseQuestions).Select(x => x.Question).Sum(x => x!.CorrectTotal);
+                return (correctTotal, null);
             }
-            return 0;
+            return (0, null);
         }
 
-        private async Task<int> GetCorrectTotalBook(Guid id)
+        private async Task<(int, IList<ExtraPracticeExerciseResult>?)> GetCorrectTotalBook(Guid id)
         {
             var extraPractice = await _extraPracticeRepository.Queryable.Include(x => x.ExtraPracticeChapters)
                                 .ThenInclude(x => x.ExtraPracticeExercises)
@@ -168,14 +194,23 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
                                 .FirstOrDefaultAsync(x => x.Id == id);
             if (extraPractice != null)
             {
-                var correctCount = extraPractice.ExtraPracticeChapters.SelectMany(x => x.ExtraPracticeExercises)
+                var correctTotal = extraPractice.ExtraPracticeChapters.SelectMany(x => x.ExtraPracticeExercises).OrderBy(x => x.CreatedDate)
                                                                         .Select(x => x.Exercise)
                                                                         .SelectMany(x => x!.ExerciseQuestions)
                                                                         .Select(x => x.Question)
                                                                         .Sum(x => x!.CorrectTotal);
-                return correctCount;
+                IList<ExtraPracticeExerciseResult> extraPracticeExerciseResults = extraPractice.ExtraPracticeChapters
+                    .SelectMany(x => x.ExtraPracticeExercises).OrderBy(x => x.CreatedDate)
+                    .Select(x => new ExtraPracticeExerciseResult
+                    {
+                        CorrectTotal = x.Exercise!.ExerciseQuestions.Select(x => x.Question).Sum(x => x!.CorrectTotal),
+                        CourseSkill = x.Exercise.CourseSkill,
+                        ExtraPracticeExerciseId = x.Id,
+                        Status = EnumResultStatus.Unfinished
+                    }).ToList();
+                return (correctTotal, extraPracticeExerciseResults);
             }
-            return 0;
+            return (0, null);
         }
     }
 }
