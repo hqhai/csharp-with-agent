@@ -26,7 +26,7 @@ namespace Fsel.System.Infrastructure.Migrations
                     UpdatedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     DeletedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false),
-                    CourseLevel = table.Column<int>(type: "int", nullable: false),
+                    CourseLevel = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     WritingCost = table.Column<double>(type: "float", nullable: false),
                     SpeapkingCost = table.Column<double>(type: "float", nullable: false),
                     LiveLessonCost = table.Column<double>(type: "float", nullable: false)
