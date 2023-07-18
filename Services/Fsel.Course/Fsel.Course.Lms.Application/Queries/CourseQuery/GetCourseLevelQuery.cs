@@ -29,7 +29,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
         {
             var methodResult = new MethodResult<CourseModel>();
 
-            var course = await _courseRepository.Queryable.Select(x => new CourseModel
+            var course = await _courseRepository.Queryable.Where(x => x.Id == request.CourseId).Select(x => new CourseModel
             {
                 Id = x.Id,
                 CourseLevel = x.CourseLevel,

@@ -5,6 +5,7 @@ namespace Fsel.Training.Application.Queries.ChangeLiveSessionQuery
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Core.Extensions;
+    using Fsel.Shared.Enums;
     using Fsel.Training.Application.Services.SystemServices;
     using Fsel.Training.Application.Services.UserServices;
     using Fsel.Training.Application.Services.UserServices.Models;
@@ -46,6 +47,7 @@ namespace Fsel.Training.Application.Queries.ChangeLiveSessionQuery
             var query = _classLiveWorkFlowRepository.Queryable
                         .Include(x => x.ClassLiveCalendar)
                         .ThenInclude(x => x!.Class)
+                        .Where(x => x.Type == EnumWorkFlowType.CancelSchedule)
                         .AsNoTracking()
                         .Select(x => new ChangeLiveSessionModel
                         {

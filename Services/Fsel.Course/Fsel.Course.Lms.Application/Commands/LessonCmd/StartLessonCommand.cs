@@ -75,7 +75,7 @@ namespace Fsel.Course.Lms.Application.Commands.LessonCmd
             }
             var studentId = studentResult?.Content?.Result?.Id;
 
-            var course = await _courseRepository.Queryable.Include(x => x.CourseResults.Where(x => x.StudentId == studentId)).FirstOrDefaultAsync(x => x.Id == request.CourseId, cancellationToken);
+            var course = await _courseRepository.Queryable.Include(x => x.CourseResults).FirstOrDefaultAsync(x => x.Id == request.CourseId, cancellationToken);
             if (course == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.CourseNotExist), nameof(request.CourseId), request.CourseId);
@@ -86,7 +86,7 @@ namespace Fsel.Course.Lms.Application.Commands.LessonCmd
                 methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.CourseIsNewStateCantStartLesson), nameof(course.Status), course.Status);
                 return methodResult;
             }
-            var courseResult = course.CourseResults.FirstOrDefault();
+            var courseResult = course.CourseResults.FirstOrDefault(x => x.StudentId == studentId && x.CourseId == request.CourseId);
             if (courseResult != null && courseResult.Status == EnumCourseStatus.New)
             {
                 courseResult.Status = EnumCourseStatus.Active;

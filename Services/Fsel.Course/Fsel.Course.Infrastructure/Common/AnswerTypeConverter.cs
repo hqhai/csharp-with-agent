@@ -59,10 +59,6 @@ namespace Fsel.Course.Infrastructure.Common
                     totalCorrect = GetTotalCorrectTypeMultipleOptionAnswer(ref configAnswer, configQuestion);
                     break;
 
-                case EnumQuestionType.BaseContent:
-                    totalCorrect = GetTotalCorrectTypeBaseContentAnswer(ref configAnswer);
-                    break;
-
                 case EnumQuestionType.ExercisePreparation:
                     break;
 
@@ -95,13 +91,6 @@ namespace Fsel.Course.Infrastructure.Common
                 }
             }
             configAnswer = dataAnswer;
-            return number;
-        }
-
-        private static int GetTotalCorrectTypeBaseContentAnswer(ref object? configAnswer)
-        {
-            int number = 0;
-            configAnswer = configAnswer.Deserialize<BaseContentAnswer>();
             return number;
         }
 
@@ -194,8 +183,8 @@ namespace Fsel.Course.Infrastructure.Common
 
         private static bool IsShortAnswer(string question, string answer)
         {
-            string q = question.Trim().ToLower(CultureInfo.CurrentCulture).Replace('’', '\'').ToString();
-            string a = answer.Trim().ToLower(CultureInfo.CurrentCulture).Replace('’', '\'').ToString();
+            string q = " " + question.Trim().ToLower(CultureInfo.CurrentCulture).Replace('’', '\'').ToString() + " ";
+            string a = " " + answer.Trim().ToLower(CultureInfo.CurrentCulture).Replace('’', '\'').ToString() + " ";
             return a.Contains(q, StringComparison.OrdinalIgnoreCase);
         }
 

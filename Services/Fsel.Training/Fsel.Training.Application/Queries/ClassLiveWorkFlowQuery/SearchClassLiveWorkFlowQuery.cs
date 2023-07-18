@@ -8,6 +8,7 @@ namespace Fsel.Training.Application.Queries.ClassLiveWorkFlowQuery
     using Fsel.Core.Base;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Core.Extensions;
+    using Fsel.Shared.Enums;
     using Fsel.Training.Application.Services.CourseServices;
     using Fsel.Training.Application.Services.SystemServices;
     using Fsel.Training.Application.Services.UserServices;
@@ -48,18 +49,20 @@ namespace Fsel.Training.Application.Queries.ClassLiveWorkFlowQuery
             var teacherId = teacherInfo.Content?.Result?.Id;
             var classLiveWorkFlowQuery = _classLiveWorkFlowRepository.Queryable
                                                 .Include(x => x.ClassLiveCalendar)
-                                                .Where(x => x.TeacherId == teacherId)
+                                                .Where(x => x.ClassLiveCalendar != null && x.TeacherId == teacherId && x.Type == EnumWorkFlowType.ChangeTeacher)
+                                                .AsNoTracking()
                                                 .Select(x => new SearchClassLiveWorkFlowModel
                                                 {
                                                     Id = x.Id,
-                                                    ClassLiveCalendarId = x.ClassLiveCalendarId,
                                                     CreatedDate = x.CreatedDate,
+                                                    Type = x.Type,
                                                     Status = x.Status,
                                                     LiveTimeFrameId = x.ClassLiveCalendar!.LiveTimeFrameId,
                                                     ClassName = x.ClassLiveCalendar.Class!.Name,
                                                     ClassCode = x.ClassLiveCalendar.Class.Code,
-                                                    LiveDays = x.ClassLiveCalendar.Class.LiveDays,
-                                                    TeacherId = x.TeacherId
+                                                    LiveDate = x.ClassLiveCalendar.LiveDate,
+                                                    CourseId = x.ClassLiveCalendar.Class.CourseId,
+                                                    TeacherId = x.ClassLiveCalendar.TeacherId
                                                 });
             int totalItem = await classLiveWorkFlowQuery.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
             var lists = await classLiveWorkFlowQuery
@@ -70,15 +73,9 @@ namespace Fsel.Training.Application.Queries.ClassLiveWorkFlowQuery
             var courseIds = lists.Select(x => x.CourseId ?? default).Distinct().ToList();
             var courseResults = await _courseService.GetListCourseByIds(courseIds);
             var courses = courseResults.Content?.Result;
-            var teachersReq = _userService.GetTeacherByIdsAsync(new GetTeacherByIdsQueryModel { Ids = lists.Select(x => x.TeacherId ?? default).ToList() });
-            var teachersResult = teachersReq.GetAwaiter().GetResult();
+            var teachersResult = await _userService.GetTeacherByIdsAsync(new GetTeacherByIdsQueryModel { Ids = lists.Select(x => x.TeacherId ?? default).ToList() });
             var teachers = teachersResult.Content?.Result;
             var liveTimeFramesResult = await _systemService.GetLiveTimeFramesAsync();
-            if (!liveTimeFramesResult.IsSuccessStatusCode)
-            {
-                methodResult.AddError(liveTimeFramesResult.Error);
-                return methodResult;
-            }
             var liveTimeFrames = liveTimeFramesResult.Content?.Result;
 
             foreach (var item in lists)

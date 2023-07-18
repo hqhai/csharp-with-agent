@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Training.Application.Commands.ClassCmd
+namespace Fsel.Training.Application.Commands.ClassLiveWorkFlowCmd
 {
     using System.Threading;
     using System.Threading.Tasks;
@@ -18,23 +18,20 @@ namespace Fsel.Training.Application.Commands.ClassCmd
     public class ReplaceTeacherByCsoCommand : AssignNewTeacherToLessonCommandModel, IRequest<MethodResult<bool>>
     {
     }
+
     public class ReplaceTeacherByCsoCommandHandler : IRequestHandler<ReplaceTeacherByCsoCommand, MethodResult<bool>>
     {
-        private readonly IClassRepository _classRepository;
         private readonly IClassLiveCalendarRepository _classLiveCalendarRepository;
         private readonly IClassLiveWorkFlowRepository _classLiveWorkFlowRepository;
         private readonly AuthContext _authContext;
 
-        public ReplaceTeacherByCsoCommandHandler(IClassRepository classRepository,
-                                                 IClassLiveCalendarRepository classLiveCalendarRepository,
+        public ReplaceTeacherByCsoCommandHandler(IClassLiveCalendarRepository classLiveCalendarRepository,
                                                  IClassLiveWorkFlowRepository classLiveWorkFlowRepository,
                                                  AuthContext authContext)
         {
-            _classRepository = classRepository;
             _classLiveCalendarRepository = classLiveCalendarRepository;
             _classLiveWorkFlowRepository = classLiveWorkFlowRepository;
             _authContext = authContext;
-
         }
 
         public async Task<MethodResult<bool>> Handle(ReplaceTeacherByCsoCommand request, CancellationToken cancellationToken)
@@ -49,46 +46,46 @@ namespace Fsel.Training.Application.Commands.ClassCmd
                     && lessonNeedToChange.Type == EnumWorkFlowType.ChangeTeacher
                     && lessonNeedToChange.WorkFlowParentId == null)
                 {
-
-                    lessonNeedToChange = new ClassLiveWorkFlow()
+                    var lessonNeedToAssign = new ClassLiveWorkFlow()
                     {
                         ClassLiveCalendarId = lessonNeedToChange.ClassLiveCalendarId,
-                        Status = EnumWorkFlowChangeTeacherStatus.WaitConfirm.ToString(),
+                        Status = EnumWorkFlowAssignTeacherStatus.Pending.ToString(),
                         Type = EnumWorkFlowType.AssignTeacher,
                         Description = lessonNeedToChange.Description,
                         TeacherId = request.TeacherId,
                         CsoId = _authContext.CurrentUserId,
                         WorkFlowParentId = request.ClassLiveWorkId
                     };
-                    _classLiveWorkFlowRepository.Add(lessonNeedToChange);
+                    lessonNeedToChange.Status = EnumWorkFlowChangeTeacherStatus.WaitConfirm.ToString();
 
+                    _classLiveWorkFlowRepository.Add(lessonNeedToAssign);
+                    await _classLiveWorkFlowRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
+                    _classLiveWorkFlowRepository.Update(lessonNeedToChange);
+                    await _classLiveWorkFlowRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
                 }
                 else if (lessonNeedToChange != null
                         && lessonNeedToChange.WorkFlowParentId != null
-                        && lessonNeedToChange.Type == EnumWorkFlowType.ChangeTeacher)
+                        && lessonNeedToChange.Type == EnumWorkFlowType.AssignTeacher)
                 {
-                    var changeTeacher = await _classLiveWorkFlowRepository.Queryable.Where(x => x.WorkFlowParentId == lessonNeedToChange.Id)
+                    var assignTeacher = await _classLiveWorkFlowRepository.Queryable.Where(x => x.WorkFlowParentId == lessonNeedToChange.Id)
                                                                                     .FirstOrDefaultAsync(cancellationToken);
-
-                    if (changeTeacher == null)
+                    if (assignTeacher == null)
                     {
                         methodResult.AddErrorBadRequest(nameof(EnumClassLiveWorkFlowErrorCode.ClassLiveWorkFlowNotExits));
                         return methodResult;
                     }
 
-                    changeTeacher.TeacherId = request?.TeacherId;
-                    changeTeacher.Type = EnumWorkFlowType.AssignTeacher;
-                    _classLiveWorkFlowRepository.Update(changeTeacher);
+                    assignTeacher.TeacherId = request?.TeacherId;
+                    _classLiveWorkFlowRepository.Update(assignTeacher);
+                    await _classLiveWorkFlowRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
                 }
                 else
                 {
-
                     methodResult.AddErrorBadRequest(nameof(EnumClassLiveWorkFlowErrorCode.ClassLiveWorkFlowNotExits));
                     return methodResult;
                 }
 
-                await _classRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 methodResult.Result = true;
                 return methodResult;

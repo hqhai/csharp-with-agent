@@ -52,6 +52,17 @@ namespace Fsel.Shared.Helpers
             new IeltsScoreConfig(27, 6.5, 6.5),
             new IeltsScoreConfig(28, 6.5, 6.5),
             new IeltsScoreConfig(29, 6.5, 6.5),
+            new IeltsScoreConfig(30, 6.5, 6.5),
+            new IeltsScoreConfig(31, 6.5, 6.5),
+            new IeltsScoreConfig(32, 6.5, 6.5),
+            new IeltsScoreConfig(33, 6.5, 6.5),
+            new IeltsScoreConfig(34, 6.5, 6.5),
+            new IeltsScoreConfig(35, 6.5, 6.5),
+            new IeltsScoreConfig(36, 6.5, 6.5),
+            new IeltsScoreConfig(37, 6.5, 6.5),
+            new IeltsScoreConfig(38, 6.5, 6.5),
+            new IeltsScoreConfig(39, 6.5, 6.5),
+            new IeltsScoreConfig(40, 6.5, 6.5),
         };
 
         public static double GetIeltsScore(this double number, EnumCourseSkill skill)

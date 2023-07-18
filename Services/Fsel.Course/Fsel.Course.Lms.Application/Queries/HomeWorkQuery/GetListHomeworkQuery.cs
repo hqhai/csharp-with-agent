@@ -51,12 +51,13 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkQuery
             }
             var studentId = student?.Content?.Result?.Id;
 
-            var lessonSkillScoreQuery = _homeWorkResultRepository.Queryable
+            var lessonSkillScoreQuery = await _homeWorkResultRepository.Queryable
                                         .Include(x => x.HomeWork)
                                         .ThenInclude(x => x!.HomeWorkQuestions.Where(x => !x.IsDeleted).OrderBy(x => x.CreatedDate))
                                         .ThenInclude(x => x.Question)
                                         .Include(x => x.HomeWorkAnswers.Where(x => !x.IsDeleted).OrderBy(x => x.CreatedDate))
                                         .Where(x => x.HomeWork != null && x.LessonResultId == request.LessonResultId)
+                                        .AsNoTracking()
                                         .Select(h => new LessonHomeWorkResultModel
                                         {
                                             Id = h.HomeWork!.Id,
@@ -68,9 +69,9 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkQuery
                                             QuestionTotal = h.HomeWork.HomeWorkQuestions.Select(x => x.Question).Count(),
                                             QuestionCompleted = h.HomeWorkAnswers.Count(),
                                             HomeWorkResult = _mapper.Map<HomeWorkResultModel>(h)
-                                        });
+                                        }).OrderBy(x => x.CreatedDate).ToListAsync(cancellationToken);
 
-            methodResult.Result = await lessonSkillScoreQuery.OrderBy(x => x.CreatedDate).ToListAsync(cancellationToken);
+            methodResult.Result = lessonSkillScoreQuery;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }
