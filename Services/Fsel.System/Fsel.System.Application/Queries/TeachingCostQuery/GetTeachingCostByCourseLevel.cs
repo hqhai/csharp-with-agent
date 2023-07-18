@@ -16,11 +16,11 @@ namespace Fsel.System.Application.Queries.TeachingCostQuery
         public EnumCourseLevel CourseLevel { get; set; }
     }
 
-    public class GetListTeachingCostByCourseLevelHandler : IRequestHandler<GetTeachingCostByCourseLevel, MethodResult<TeachingCostModel>>
+    public class GetTeachingCostByCourseLevelHandler : IRequestHandler<GetTeachingCostByCourseLevel, MethodResult<TeachingCostModel>>
     {
         private readonly ITeachingCostRepository _teachingCostRepository;
 
-        public GetListTeachingCostByCourseLevelHandler(ITeachingCostRepository teachingCostRepository)
+        public GetTeachingCostByCourseLevelHandler(ITeachingCostRepository teachingCostRepository)
         {
             _teachingCostRepository = teachingCostRepository;
         }
