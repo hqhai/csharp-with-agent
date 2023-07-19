@@ -26,17 +26,14 @@ namespace Fsel.Course.Lms.Application.Queries.ExtraPracticeQuery
     public class SearchExtraPracticeQueryHandler : IRequestHandler<SearchExtraPracticeQuery, MethodResult<PagingItemsModel<ExtraPracticeSearchModel>>>
     {
         private readonly IExtraPracticeRepository _extraPracticeRepository;
-        private readonly ILessonRepository _lessonRepository;
         private readonly IUserService _userService;
         private readonly AuthContext _authContext;
 
         public SearchExtraPracticeQueryHandler(IExtraPracticeRepository extraPracticeRepository
-            , ILessonRepository lessonRepository
             , IUserService userService
             , AuthContext authContext)
         {
             _extraPracticeRepository = extraPracticeRepository;
-            _lessonRepository = lessonRepository;
             _userService = userService;
             _authContext = authContext;
         }
@@ -150,7 +147,7 @@ namespace Fsel.Course.Lms.Application.Queries.ExtraPracticeQuery
             if (request.Progresses != null && request.Progresses.Count != 0)
             {
                 extraPracticeQuery = extraPracticeQuery.Where(x =>
-                    (request.Progresses.Contains(EnumExtraPracticeProgress.Unopened) && x.Percent == 0) ||
+                    (request.Progresses.Contains(EnumExtraPracticeProgress.UnOpened) && x.Percent == 0) ||
                     (request.Progresses.Contains(EnumExtraPracticeProgress.InProgress) && x.Percent <= 100 && x.Percent >= 0) ||
                     (request.Progresses.Contains(EnumExtraPracticeProgress.Completed) && x.Percent == 100)
                 );

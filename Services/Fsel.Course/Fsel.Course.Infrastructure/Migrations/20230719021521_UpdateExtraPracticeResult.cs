@@ -31,6 +31,56 @@ namespace Fsel.Course.Infrastructure.Migrations
                 type: "uniqueidentifier",
                 nullable: true);
 
+            migrationBuilder.AlterColumn<string>(
+                name: "VideoLink",
+                table: "ExtraPractices",
+                type: "nvarchar(1000)",
+                maxLength: 1000,
+                nullable: true,
+                oldClrType: typeof(string),
+                oldType: "nvarchar(max)",
+                oldNullable: true);
+
+            migrationBuilder.AlterColumn<string>(
+                name: "BookFilePath",
+                table: "ExtraPractices",
+                type: "nvarchar(1000)",
+                maxLength: 1000,
+                nullable: true,
+                oldClrType: typeof(string),
+                oldType: "nvarchar(max)",
+                oldNullable: true);
+
+            migrationBuilder.AlterColumn<string>(
+                name: "BookCoverPath",
+                table: "ExtraPractices",
+                type: "nvarchar(1000)",
+                maxLength: 1000,
+                nullable: true,
+                oldClrType: typeof(string),
+                oldType: "nvarchar(max)",
+                oldNullable: true);
+
+            migrationBuilder.AlterColumn<string>(
+                name: "BookBackgroundPath",
+                table: "ExtraPractices",
+                type: "nvarchar(1000)",
+                maxLength: 1000,
+                nullable: true,
+                oldClrType: typeof(string),
+                oldType: "nvarchar(max)",
+                oldNullable: true);
+
+            migrationBuilder.AlterColumn<string>(
+                name: "Author",
+                table: "ExtraPractices",
+                type: "nvarchar(1000)",
+                maxLength: 1000,
+                nullable: true,
+                oldClrType: typeof(string),
+                oldType: "nvarchar(max)",
+                oldNullable: true);
+
             migrationBuilder.CreateTable(
                 name: "ExtraPracticeResults",
                 columns: table => new
@@ -273,6 +323,56 @@ namespace Fsel.Course.Infrastructure.Migrations
                 defaultValue: new Guid("00000000-0000-0000-0000-000000000000"),
                 oldClrType: typeof(Guid),
                 oldType: "uniqueidentifier",
+                oldNullable: true);
+
+            migrationBuilder.AlterColumn<string>(
+                name: "VideoLink",
+                table: "ExtraPractices",
+                type: "nvarchar(max)",
+                nullable: true,
+                oldClrType: typeof(string),
+                oldType: "nvarchar(1000)",
+                oldMaxLength: 1000,
+                oldNullable: true);
+
+            migrationBuilder.AlterColumn<string>(
+                name: "BookFilePath",
+                table: "ExtraPractices",
+                type: "nvarchar(max)",
+                nullable: true,
+                oldClrType: typeof(string),
+                oldType: "nvarchar(1000)",
+                oldMaxLength: 1000,
+                oldNullable: true);
+
+            migrationBuilder.AlterColumn<string>(
+                name: "BookCoverPath",
+                table: "ExtraPractices",
+                type: "nvarchar(max)",
+                nullable: true,
+                oldClrType: typeof(string),
+                oldType: "nvarchar(1000)",
+                oldMaxLength: 1000,
+                oldNullable: true);
+
+            migrationBuilder.AlterColumn<string>(
+                name: "BookBackgroundPath",
+                table: "ExtraPractices",
+                type: "nvarchar(max)",
+                nullable: true,
+                oldClrType: typeof(string),
+                oldType: "nvarchar(1000)",
+                oldMaxLength: 1000,
+                oldNullable: true);
+
+            migrationBuilder.AlterColumn<string>(
+                name: "Author",
+                table: "ExtraPractices",
+                type: "nvarchar(max)",
+                nullable: true,
+                oldClrType: typeof(string),
+                oldType: "nvarchar(1000)",
+                oldMaxLength: 1000,
                 oldNullable: true);
         }
     }
