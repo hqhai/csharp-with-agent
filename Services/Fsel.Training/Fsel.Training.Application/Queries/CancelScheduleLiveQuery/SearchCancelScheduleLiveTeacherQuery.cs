@@ -20,24 +20,24 @@ namespace Fsel.Training.Application.Queries.ChangeLiveSessionQuery
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class SearchChangeLiveSessionTeacherQuery : BaseQueryModel, IRequest<MethodResult<PagingItemsModel<CancelScheduleLiveModel>>>
+    public class SearchCancelScheduleLiveTeacherQuery : BaseQueryModel, IRequest<MethodResult<PagingItemsModel<CancelScheduleLiveModel>>>
     {
     }
 
-    public class SearchChangeLiveSessionTeacherQueryHandler : IRequestHandler<SearchChangeLiveSessionTeacherQuery, MethodResult<PagingItemsModel<CancelScheduleLiveModel>>>
+    public class SearchCancelScheduleLiveTeacherQueryHandler : IRequestHandler<SearchCancelScheduleLiveTeacherQuery, MethodResult<PagingItemsModel<CancelScheduleLiveModel>>>
     {
         private readonly IClassLiveWorkFlowRepository _classLiveWorkFlowRepository;
         private readonly IUserService _userService;
         private readonly ISystemService _systemService;
 
-        public SearchChangeLiveSessionTeacherQueryHandler(IClassLiveWorkFlowRepository classLiveWorkFlowRepository, IUserService userService, ISystemService systemService)
+        public SearchCancelScheduleLiveTeacherQueryHandler(IClassLiveWorkFlowRepository classLiveWorkFlowRepository, IUserService userService, ISystemService systemService)
         {
             _classLiveWorkFlowRepository = classLiveWorkFlowRepository;
             _userService = userService;
             _systemService = systemService;
         }
 
-        public async Task<MethodResult<PagingItemsModel<CancelScheduleLiveModel>>> Handle(SearchChangeLiveSessionTeacherQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<PagingItemsModel<CancelScheduleLiveModel>>> Handle(SearchCancelScheduleLiveTeacherQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<PagingItemsModel<CancelScheduleLiveModel>>();

@@ -17,11 +17,11 @@ namespace Fsel.Training.Api.Controllers.Teacher
     [Route(Settings.APIDefaultRoute + "/teacher/cancel-schedule")]
     [ApiController]
     [Authorize(Roles = nameof(EnumRole.Teacher))]
-    public class ChangeLiveSessionController
+    public class CancelScheduleLiveController
     {
         private readonly IMediator _mediator;
 
-        public ChangeLiveSessionController(IMediator mediator)
+        public CancelScheduleLiveController(IMediator mediator)
         {
             _mediator = mediator;
         }
@@ -31,7 +31,7 @@ namespace Fsel.Training.Api.Controllers.Teacher
         [HttpGet]
         [ProducesResponseType(typeof(MethodResult<PagingItemsModel<CancelScheduleLiveModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> Search([FromQuery] SearchChangeLiveSessionTeacherQuery query)
+        public async Task<IActionResult> Search([FromQuery] SearchCancelScheduleLiveTeacherQuery query)
         {
             MethodResult<PagingItemsModel<CancelScheduleLiveModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
