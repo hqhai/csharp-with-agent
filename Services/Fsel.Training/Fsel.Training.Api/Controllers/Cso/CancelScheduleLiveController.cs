@@ -7,22 +7,22 @@ namespace Fsel.Training.Api.Controllers.Cso
     using Fsel.Common.Constants;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Shared.Enums;
-    using Fsel.Training.Application.Commands.ChangeLiveSessionCmd;
-    using Fsel.Training.Application.Queries.ChangeLiveSessionQuery;
+    using Fsel.Training.Application.Commands.CancelScheduleLiveCmd;
+    using Fsel.Training.Application.Queries.CancelScheduleLiveQuery;
     using Fsel.Training.Domain.Models.EntityModels;
     using MediatR;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
 
     [ApiVersion(Settings.APIVersion)]
-    [Route(Settings.APIDefaultRoute + "/cso/change-live")]
+    [Route(Settings.APIDefaultRoute + "/cso/cancel-schedule")]
     [ApiController]
     [Authorize(Roles = nameof(EnumRole.CSO))]
-    public class ChangeLiveSessionController : ControllerBase
+    public class CancelScheduleLiveController : ControllerBase
     {
         private readonly IMediator _mediator;
 
-        public ChangeLiveSessionController(IMediator mediator)
+        public CancelScheduleLiveController(IMediator mediator)
         {
             _mediator = mediator;
         }
@@ -31,11 +31,11 @@ namespace Fsel.Training.Api.Controllers.Cso
         /// Search Change Live Session
         /// </summary>
         [HttpGet]
-        [ProducesResponseType(typeof(MethodResult<PagingItemsModel<ChangeLiveSessionModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(MethodResult<PagingItemsModel<CancelScheduleLiveModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> Search([FromQuery] SearchChangeLiveSessionCSOQuery query)
+        public async Task<IActionResult> Search([FromQuery] SearchCancelScheduleLiveCSOQuery query)
         {
-            MethodResult<PagingItemsModel<ChangeLiveSessionModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            MethodResult<PagingItemsModel<CancelScheduleLiveModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
 
@@ -43,11 +43,11 @@ namespace Fsel.Training.Api.Controllers.Cso
         /// Get Change Live Session
         /// </summary>
         [HttpGet("{id}")]
-        [ProducesResponseType(typeof(MethodResult<ChangeLiveSessionInfoModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(MethodResult<CancelScheduleLiveInfoModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> Get([FromRoute] Guid id)
         {
-            MethodResult<ChangeLiveSessionInfoModel> queryResult = await _mediator.Send(new GetChangeLiveSessionQuery { Id = id }).ConfigureAwait(false);
+            MethodResult<CancelScheduleLiveInfoModel> queryResult = await _mediator.Send(new GetCancelScheduleLiveQuery { Id = id }).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
 

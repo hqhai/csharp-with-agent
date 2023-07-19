@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Training.Application.Queries.ChangeLiveSessionQuery
+namespace Fsel.Training.Application.Queries.CancelScheduleLiveQuery
 {
     using AutoMapper;
     using Fsel.Common.ActionResults;
@@ -13,19 +13,19 @@ namespace Fsel.Training.Application.Queries.ChangeLiveSessionQuery
     using MediatR;
     using Microsoft.AspNetCore.Http;
 
-    public class GetChangeLiveSessionQuery : IRequest<MethodResult<ChangeLiveSessionInfoModel>>
+    public class GetCancelScheduleLiveQuery : IRequest<MethodResult<CancelScheduleLiveInfoModel>>
     {
         public Guid Id { get; set; }
     }
 
-    public class GetChangeLiveSessionQueryHandler : IRequestHandler<GetChangeLiveSessionQuery, MethodResult<ChangeLiveSessionInfoModel>>
+    public class GetCancelScheduleLiveQueryHandler : IRequestHandler<GetCancelScheduleLiveQuery, MethodResult<CancelScheduleLiveInfoModel>>
     {
         private readonly IClassLiveWorkFlowRepository _classLiveWorkFlowRepository;
         private readonly IMapper _mapper;
         private readonly ISystemService _systemService;
         private readonly IUserService _userService;
 
-        public GetChangeLiveSessionQueryHandler(IClassLiveWorkFlowRepository classLiveWorkFlowRepository
+        public GetCancelScheduleLiveQueryHandler(IClassLiveWorkFlowRepository classLiveWorkFlowRepository
             , IMapper mapper
             , ISystemService systemService
             , IUserService userService)
@@ -36,12 +36,12 @@ namespace Fsel.Training.Application.Queries.ChangeLiveSessionQuery
             _userService = userService;
         }
 
-        public async Task<MethodResult<ChangeLiveSessionInfoModel>> Handle(GetChangeLiveSessionQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<CancelScheduleLiveInfoModel>> Handle(GetCancelScheduleLiveQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
 
-            var methodResult = new MethodResult<ChangeLiveSessionInfoModel>();
-            var liveSessionInformation = new ChangeLiveSessionInfoModel();
+            var methodResult = new MethodResult<CancelScheduleLiveInfoModel>();
+            var liveSessionInformation = new CancelScheduleLiveInfoModel();
             var classLiveWorkFlow = await _classLiveWorkFlowRepository.GetIncludeByIdAsync(request.Id);
             if (classLiveWorkFlow == null)
             {

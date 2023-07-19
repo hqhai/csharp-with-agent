@@ -60,7 +60,7 @@ namespace Fsel.Training.Application.Commands.ClassLiveWorkFlowCmd
             }
             var teacherId = teacherResult.Content?.Result?.Id;
 
-            var classLiveCalendar = await _classLiveCalendarRepository.GetByIdAsync(request.ClassLiveCalendarId);
+            var classLiveCalendar = await _classLiveCalendarRepository.Queryable.Include(x => x.Class).FirstOrDefaultAsync(x => x.Id == request.ClassLiveCalendarId, cancellationToken);
             if (classLiveCalendar == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumClassLiveCalendarErrorCode.ClassLiveCalendarNotExits), nameof(request.ClassLiveCalendarId), request.ClassLiveCalendarId);
@@ -78,6 +78,7 @@ namespace Fsel.Training.Application.Commands.ClassLiveWorkFlowCmd
                 {
                     ClassLiveCalendarId = request.ClassLiveCalendarId,
                     Type = request.Type,
+                    CsoId = classLiveCalendar.Class?.CsoId,
                     Description = request.Description,
                     TeacherId = teacherId
                 };

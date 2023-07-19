@@ -29,11 +29,11 @@ namespace Fsel.Training.Api.Controllers.Cso
         /// search alternative calendar
         /// </summary>
         [HttpGet]
-        [ProducesResponseType(typeof(MethodResult<PagingItemsModel<AlternativeCalendarModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(MethodResult<PagingItemsModel<ChangeTeacherLiveModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> Search([FromQuery] SearchAlternativeCalendarsByCsoQuery query)
+        public async Task<IActionResult> Search([FromQuery] SearchChangeTeacherLivesByCsoQuery query)
         {
-            MethodResult<PagingItemsModel<AlternativeCalendarModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            MethodResult<PagingItemsModel<ChangeTeacherLiveModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
 
