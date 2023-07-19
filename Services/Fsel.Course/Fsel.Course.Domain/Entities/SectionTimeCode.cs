@@ -43,5 +43,7 @@ namespace Fsel.Course.Domain.Entities
 
         public Section? Section { get; set; }
         public Guid SectionId { get; set; }
+        public ICollection<ExtraPracticeAnswer> ExtraPracticeAnswers { get; set; } = new List<ExtraPracticeAnswer>();
+        public ICollection<MockTestAnswer> MockTestAnswers { get; set; } = new List<MockTestAnswer>();
     }
 }

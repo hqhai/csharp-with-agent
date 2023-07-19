@@ -54,7 +54,9 @@ namespace Fsel.Course.Infrastructure.Common
                 VideoFilePath = x.VideoFilePath,
                 SectionParts = GetSectionPartModels(x.SectionParts.ToList(), isDisableAnswers),
                 Questions = GetQuestionModels(x.SectionQuestions.ToList(), isDisableAnswers),
-                SectionTimeCodes = GetSectionTimeCodeModels(x.SectionTimeCodes.ToList())
+                SectionTimeCodes = GetSectionTimeCodeModels(x.SectionTimeCodes.ToList()),
+                ExtraPracticeAnswer = x!.ExtraPracticeAnswers.Count > 0 ? _mapper.Map<ExtraPracticeAnswerModel>(x.ExtraPracticeAnswers.FirstOrDefault()) : null,
+                MockTestAnswer = x!.MockTestAnswers.Count > 0 ? _mapper.Map<MockTestAnswerModel>(x.MockTestAnswers.FirstOrDefault()) : null
             }).ToList();
         }
 
@@ -77,6 +79,8 @@ namespace Fsel.Course.Infrastructure.Common
                 DisplayTime = x.DisplayTime,
                 ExecutionTime = x.ExecutionTime,
                 Name = x.Name,
+                ExtraPracticeAnswer = x!.ExtraPracticeAnswers.Count > 0 ? _mapper.Map<ExtraPracticeAnswerModel>(x.ExtraPracticeAnswers.FirstOrDefault()) : null,
+                MockTestAnswer = x!.MockTestAnswers.Count > 0 ? _mapper.Map<MockTestAnswerModel>(x.MockTestAnswers.FirstOrDefault()) : null
             }).ToList();
         }
 

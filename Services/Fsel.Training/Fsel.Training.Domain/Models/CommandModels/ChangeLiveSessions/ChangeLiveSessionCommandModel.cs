@@ -1,8 +1,8 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Training.Domain.Models.CommandModels.ChangeLiveSessions
+namespace Fsel.Training.Domain.Models.CommandModels.CancelScheduleLives
 {
-    public class ChangeLiveSessionCommandModel
+    public class CancelScheduleLiveCommandModel
     {
         public Guid Id { get; set; }
         public IList<ChangeClassWordFlowPlanCommandModel>? ClassWordFlowPlans { get; set; }

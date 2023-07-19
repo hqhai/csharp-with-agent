@@ -16,6 +16,8 @@ namespace Fsel.Shared.Enums
         SubscriptionClass,
         RoleLive,
         CurrentStatus,
-        WorkFlowType
+        WorkFlowType,
+        ExtraPracticeProgress,
+        SortFilter
     }
 }

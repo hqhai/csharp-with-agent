@@ -27,6 +27,7 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         /// <summary>
         /// Questions Is Null
         /// </summary>
-        QuestionsNull
+        QuestionsNull,
+
     }
 }

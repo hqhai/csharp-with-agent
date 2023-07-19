@@ -1,4 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+// Copyright (c) Atlantic. All rights reserved.
+
+using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 

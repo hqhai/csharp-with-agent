@@ -4,7 +4,7 @@ namespace Fsel.Training.Domain.Models.EntityModels
 {
     using Fsel.Core.Base.BaseModels;
 
-    public class ChangeLiveSessionInfoModel : BaseModel
+    public class CancelScheduleLiveInfoModel : BaseModel
     {
         public string? ClassName { get; set; }
         public string? TeacherName { get; set; }

@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Training.Application.Queries.ChangeLiveSessionQuery
+namespace Fsel.Training.Application.Queries.CancelScheduleLiveQuery
 {
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base.BaseModels;
@@ -15,17 +15,17 @@ namespace Fsel.Training.Application.Queries.ChangeLiveSessionQuery
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class SearchChangeLiveSessionCSOQuery : BaseQueryModel, IRequest<MethodResult<PagingItemsModel<ChangeLiveSessionModel>>>
+    public class SearchCancelScheduleLiveCSOQuery : BaseQueryModel, IRequest<MethodResult<PagingItemsModel<CancelScheduleLiveModel>>>
     {
     }
 
-    public class SearchChangeLiveSessionCSOQueryHandler : IRequestHandler<SearchChangeLiveSessionCSOQuery, MethodResult<PagingItemsModel<ChangeLiveSessionModel>>>
+    public class SearchCancelScheduleLiveCSOQueryHandler : IRequestHandler<SearchCancelScheduleLiveCSOQuery, MethodResult<PagingItemsModel<CancelScheduleLiveModel>>>
     {
         private readonly IClassLiveWorkFlowRepository _classLiveWorkFlowRepository;
         private readonly IUserService _userService;
         private readonly ISystemService _systemService;
 
-        public SearchChangeLiveSessionCSOQueryHandler(
+        public SearchCancelScheduleLiveCSOQueryHandler(
             IClassLiveWorkFlowRepository classLiveWorkFlowRepository,
             IUserService userService,
             ISystemService systemService)
@@ -35,10 +35,10 @@ namespace Fsel.Training.Application.Queries.ChangeLiveSessionQuery
             _systemService = systemService;
         }
 
-        public async Task<MethodResult<PagingItemsModel<ChangeLiveSessionModel>>> Handle(SearchChangeLiveSessionCSOQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<PagingItemsModel<CancelScheduleLiveModel>>> Handle(SearchCancelScheduleLiveCSOQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            var methodResult = new MethodResult<PagingItemsModel<ChangeLiveSessionModel>>();
+            var methodResult = new MethodResult<PagingItemsModel<CancelScheduleLiveModel>>();
             if (request.PageSize > 100)
             {
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
@@ -49,7 +49,7 @@ namespace Fsel.Training.Application.Queries.ChangeLiveSessionQuery
                         .ThenInclude(x => x!.Class)
                         .Where(x => x.Type == EnumWorkFlowType.CancelSchedule)
                         .AsNoTracking()
-                        .Select(x => new ChangeLiveSessionModel
+                        .Select(x => new CancelScheduleLiveModel
                         {
                             Id = x.Id,
                             ClassName = x.ClassLiveCalendar!.Class!.Name,
@@ -83,7 +83,7 @@ namespace Fsel.Training.Application.Queries.ChangeLiveSessionQuery
                 item.TeacherName = teachers?.FirstOrDefault(x => x.Id == item.TeacherId)?.Human?.FullName;
             }
 
-            methodResult.Result = new PagingItemsModel<ChangeLiveSessionModel>(lists, request, totalItem);
+            methodResult.Result = new PagingItemsModel<CancelScheduleLiveModel>(lists, request, totalItem);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }

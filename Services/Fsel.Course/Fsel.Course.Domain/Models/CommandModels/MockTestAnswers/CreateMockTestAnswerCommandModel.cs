@@ -14,7 +14,9 @@ namespace Fsel.Course.Domain.Models.CommandModels.MockTestAnswers
 
     public class MockTestAnswerQuestionModel
     {
-        public Guid QuestionId { get; set; }
+        public Guid? SectionTimeCodeId { get; set; }
+        public Guid? SectionId { get; set; }
+        public Guid? QuestionId { get; set; }
         public object? Answer { get; set; }
     }
 
