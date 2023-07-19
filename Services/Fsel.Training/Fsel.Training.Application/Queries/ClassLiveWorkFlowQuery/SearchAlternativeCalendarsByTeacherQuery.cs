@@ -23,7 +23,7 @@ namespace Fsel.Training.Application.Queries.ClassLiveWorkFlowQuery
     {
     }
 
-    public class SearchAlternativeCalendarsByTeacherQueryHandler : IRequestHandler<SearchAlternativeCalendarsByCsoQuery, MethodResult<PagingItemsModel<AlternativeCalendarModel>>>
+    public class SearchAlternativeCalendarsByTeacherQueryHandler : IRequestHandler<SearchAlternativeCalendarsByTeacherQuery, MethodResult<PagingItemsModel<AlternativeCalendarModel>>>
     {
         private readonly IClassLiveWorkFlowRepository _classLiveWorkFlowRepository;
         private readonly ISystemService _systemService;
@@ -36,7 +36,7 @@ namespace Fsel.Training.Application.Queries.ClassLiveWorkFlowQuery
             _userService = userService;
         }
 
-        public async Task<MethodResult<PagingItemsModel<AlternativeCalendarModel>>> Handle(SearchAlternativeCalendarsByCsoQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<PagingItemsModel<AlternativeCalendarModel>>> Handle(SearchAlternativeCalendarsByTeacherQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<PagingItemsModel<AlternativeCalendarModel>>();
@@ -61,7 +61,7 @@ namespace Fsel.Training.Application.Queries.ClassLiveWorkFlowQuery
                             .Where(p => p.Type == EnumWorkFlowType.ChangeTeacher)
                             .Include(cld => cld.ClassLiveCalendar)
                             .ThenInclude(c => c!.Class)
-                            .Where(x => x.TeacherId == teacherIds.First())
+                            
                             .Select(ac => new AlternativeCalendarModel
                             {
                                 Id = ac.Id,
