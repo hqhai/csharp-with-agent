@@ -4,9 +4,10 @@ namespace Fsel.Interaction.Domain.Entities
 {
     using System.ComponentModel.DataAnnotations;
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Core.Entities;
     using Fsel.Interaction.Domain.Enums;
 
-    public class StudentReviewDetail
+    public class StudentReviewDetail : Entity
     {
         /// <summary>
         /// Loai Cau Hoi

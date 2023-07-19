@@ -18,6 +18,7 @@ namespace Fsel.Interaction.Application.Queries.StudentReviewQuery
 
     public class GetReviewStudentsByStudentQuery : IRequest<MethodResult<IList<StudentReviewInfoModel>>>
     {
+        public Guid? Id { get; set; }
     }
 
     public class GetReviewStudentsByStudentQueryHandler : IRequestHandler<GetReviewStudentsByStudentQuery, MethodResult<IList<StudentReviewInfoModel>>>
@@ -46,6 +47,7 @@ namespace Fsel.Interaction.Application.Queries.StudentReviewQuery
 
         public async Task<MethodResult<IList<StudentReviewInfoModel>>> Handle(GetReviewStudentsByStudentQuery request, CancellationToken cancellationToken)
         {
+            ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<IList<StudentReviewInfoModel>>();
             var studentResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
             if (!studentResult.IsSuccessStatusCode)
@@ -74,7 +76,7 @@ namespace Fsel.Interaction.Application.Queries.StudentReviewQuery
                 courses = courseResults.Content?.Result?.ToList();
             }
 
-            var studentReviews = await _studentReviewRepository.Queryable.Include(x => x.StudentReviewDetails).Select(x => new StudentReviewInfoModel
+            var studentReviews = await _studentReviewRepository.Queryable.Include(x => x.StudentReviewDetails).Where(x => !request.Id.HasValue || x.Id == request.Id!.Value).Select(x => new StudentReviewInfoModel
             {
                 Id = x.Id,
                 ReviewType = x.ReviewType,

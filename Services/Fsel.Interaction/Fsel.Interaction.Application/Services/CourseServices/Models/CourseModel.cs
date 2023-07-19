@@ -17,4 +17,4 @@ namespace Fsel.Interaction.Application.Services.CourseServices.Models
 
         public EnumCourseType CourseType { get; set; }
     }
-}`
+}

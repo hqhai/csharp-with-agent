@@ -1,3 +1,5 @@
+// Copyright (c) Atlantic. All rights reserved.
+
 using Fsel.Common.Constants;
 using Fsel.Common.Helpers;
 using Fsel.Core.Base;
@@ -27,6 +29,8 @@ namespace Fsel.Interaction.Infrastructure
             modelBuilder.ApplyConfiguration(new CommentEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new PostEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new PostTagEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new StudentReviewDetailEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new StudentReviewEntityTypeConfiguration());
             base.OnModelCreating(modelBuilder);
         }
 
@@ -37,6 +41,8 @@ namespace Fsel.Interaction.Infrastructure
         public DbSet<Post> Posts { get; set; }
         public DbSet<PostTag> PostTags { get; set; }
         public DbSet<TopicTag> TopicTags { get; set; }
+        public DbSet<StudentReview> StudentReviews { get; set; }
+        public DbSet<StudentReviewDetail> StudentReviewDetails { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
