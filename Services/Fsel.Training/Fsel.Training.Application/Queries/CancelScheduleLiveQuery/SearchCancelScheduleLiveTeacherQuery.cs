@@ -2,6 +2,11 @@
 
 namespace Fsel.Training.Application.Queries.CancelScheduleLiveQuery
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Threading;
+    using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base;
     using Fsel.Core.Base.BaseModels;
@@ -17,19 +22,18 @@ namespace Fsel.Training.Application.Queries.CancelScheduleLiveQuery
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class SearchCancelScheduleLiveCSOQuery : BaseQueryModel, IRequest<MethodResult<PagingItemsModel<CancelScheduleLiveModel>>>
+    public class SearchCancelScheduleLiveTeacherQuery : BaseQueryModel, IRequest<MethodResult<PagingItemsModel<CancelScheduleLiveModel>>>
     {
     }
 
-    public class SearchCancelScheduleLiveCSOQueryHandler : IRequestHandler<SearchCancelScheduleLiveCSOQuery, MethodResult<PagingItemsModel<CancelScheduleLiveModel>>>
+    public class SearchCancelScheduleLiveTeacherQueryHandler : IRequestHandler<SearchCancelScheduleLiveTeacherQuery, MethodResult<PagingItemsModel<CancelScheduleLiveModel>>>
     {
         private readonly IClassLiveWorkFlowRepository _classLiveWorkFlowRepository;
         private readonly IUserService _userService;
         private readonly ISystemService _systemService;
         private readonly AuthContext _authContext;
 
-        public SearchCancelScheduleLiveCSOQueryHandler(IClassLiveWorkFlowRepository classLiveWorkFlowRepository, IUserService userService, ISystemService systemService, AuthContext authContext)
-
+        public SearchCancelScheduleLiveTeacherQueryHandler(IClassLiveWorkFlowRepository classLiveWorkFlowRepository, IUserService userService, ISystemService systemService, AuthContext authContext)
         {
             _classLiveWorkFlowRepository = classLiveWorkFlowRepository;
             _userService = userService;
@@ -37,7 +41,7 @@ namespace Fsel.Training.Application.Queries.CancelScheduleLiveQuery
             _authContext = authContext;
         }
 
-        public async Task<MethodResult<PagingItemsModel<CancelScheduleLiveModel>>> Handle(SearchCancelScheduleLiveCSOQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<PagingItemsModel<CancelScheduleLiveModel>>> Handle(SearchCancelScheduleLiveTeacherQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<PagingItemsModel<CancelScheduleLiveModel>>();
@@ -46,17 +50,17 @@ namespace Fsel.Training.Application.Queries.CancelScheduleLiveQuery
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 return methodResult;
             }
-            var csoResult = await _userService.GetCsoByUserIdAsync(_authContext.CurrentUserId);
-            if (!csoResult.IsSuccessStatusCode)
+            var teacherIdResult = await _userService.GetTeacherByUserIdAsync(_authContext.CurrentUserId);
+            if (!teacherIdResult.IsSuccessStatusCode)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError));
                 return methodResult;
             }
-            var csoId = csoResult.Content?.Result?.Id;
+            var teacherId = teacherIdResult.Content?.Result?.Id;
             var query = _classLiveWorkFlowRepository.Queryable
                         .Include(x => x.ClassLiveCalendar)
                         .ThenInclude(x => x!.Class)
-                        .Where(x => x.Type == EnumWorkFlowType.CancelSchedule && x.CsoId == csoId)
+                        .Where(x => x.Type == EnumWorkFlowType.CancelSchedule && x.TeacherId == teacherId)
                         .AsNoTracking()
                         .Select(x => new CancelScheduleLiveModel
                         {
