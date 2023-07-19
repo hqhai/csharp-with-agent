@@ -26,7 +26,7 @@ namespace Fsel.Training.Api.Controllers.Teacher
             _mediator = mediator;
         }
         /// <summary>
-        /// Search Change Live Session
+        /// Search Cancel Schedule Live
         /// </summary>
         [HttpGet]
         [ProducesResponseType(typeof(MethodResult<PagingItemsModel<CancelScheduleLiveModel>>), (int)HttpStatusCode.OK)]
@@ -34,6 +34,18 @@ namespace Fsel.Training.Api.Controllers.Teacher
         public async Task<IActionResult> Search([FromQuery] SearchCancelScheduleLiveTeacherQuery query)
         {
             MethodResult<PagingItemsModel<CancelScheduleLiveModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Get Cancel Schedule Live
+        /// </summary>
+        [HttpGet("{id}")]
+        [ProducesResponseType(typeof(MethodResult<CancelScheduleLiveInfoModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> Get([FromRoute] Guid id)
+        {
+            MethodResult<CancelScheduleLiveInfoModel> queryResult = await _mediator.Send(new GetCancelScheduleLiveQuery { Id = id }).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
     }
