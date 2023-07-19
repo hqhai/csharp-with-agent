@@ -54,7 +54,7 @@ namespace Fsel.Training.Application.Commands.ClassCmd
                 return methodResult;
             }
             var courseTimeConfig = courseTimeConfigResult.Content?.Result;
-            var endTime = courseTimeConfig!.FirstOrDefault(p => p.CourseId == classes.Id);
+            var endTime = courseTimeConfig!.FirstOrDefault(p => p.CourseId == classes.CourseId);
             if (endTime == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumClassErrorCode.CourseTimeNotInstalled));

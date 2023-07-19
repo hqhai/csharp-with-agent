@@ -49,14 +49,6 @@ namespace Fsel.Shared.Helpers
             return results;
         }
 
-        public static object GetEnumCourseLevels()
-        {
-            return s_courseTypeLevel.GroupBy(x => x.Key).Select(x => new
-            {
-                CourseType = x.Key,
-                CourseLevels = x.Select(n => n.Value).ToArray()
-            });
-        }
         public static EnumCourseLevel GetCourseLevelByPlacementTestLevel(this EnumPlacementTestLevel level)
         {
             foreach (var item in ConvertHelper.EnumToList<EnumCourseLevel>())
@@ -68,6 +60,16 @@ namespace Fsel.Shared.Helpers
             }
             return EnumCourseLevel.MS3;
         }
+
+        public static object GetEnumCourseLevels()
+        {
+            return s_courseTypeLevel.GroupBy(x => x.Key).Select(x => new
+            {
+                CourseType = x.Key,
+                CourseLevels = x.Select(n => n.Value).ToArray()
+            });
+        }
+
         public static IList<EnumCourseLevel> GetEnumCourseLevels(this EnumCourseType? courseType)
         {
             var courseLevels = new List<EnumCourseLevel>();

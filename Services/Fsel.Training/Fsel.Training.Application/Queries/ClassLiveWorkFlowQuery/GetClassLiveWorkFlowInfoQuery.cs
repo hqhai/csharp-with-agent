@@ -1,11 +1,10 @@
-// Copyright (c) Atl1antic. All rights reserved.
+// Copyright (c) Atlantic. All rights reserved.
 
 namespace Fsel.Training.Application.Queries.ClassLiveWorkFlowQuery
 {
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
-    using Fsel.Course.Application.Services.UserServices.Models;
     using Fsel.Training.Application.Services.UserServices;
     using Fsel.Training.Application.Services.UserServices.Models;
     using Fsel.Training.Domain.Enums.ErrorCodes;
@@ -42,26 +41,26 @@ namespace Fsel.Training.Application.Queries.ClassLiveWorkFlowQuery
                 methodResult.AddErrorBadRequest(nameof(EnumClassLiveWorkFlowErrorCode.ClassLiveWorkFlowNotExits));
                 return methodResult;
             }
-            var studentIds = classLiveWorkFlow.ClassLiveCalendar?.Class?.ClassStudents.Select(p => p.StudentId).ToList();
-            IList<StudentModel>? students = new List<StudentModel>();
-            if (studentIds!.Count > 0)
+            liveSessionInformation.Type = classLiveWorkFlow.Type;
+            var studentIds = classLiveWorkFlow.ClassLiveCalendar?.Class?.ClassStudents.Select(p => p.StudentId).Distinct().ToList();
+            if (studentIds != null && studentIds.Count > 0)
             {
-                var studentsResult = await _userService.GetStudentsByStudentIdsAsync(studentIds!);
+                var studentsResult = await _userService.GetStudentsByStudentIdsAsync(studentIds);
                 if (!studentsResult.IsSuccessStatusCode)
                 {
                     methodResult.AddError(studentsResult.Error);
                     return methodResult;
                 }
-                students = studentsResult.Content?.Result?.ToList();
-            }
-            if (students!.Count > 0)
-            {
-                liveSessionInformation.Students = students?.Select(x => new StudentInfoModel
+                var students = studentsResult.Content?.Result?.ToList();
+                if (students != null && students.Count > 0)
                 {
-                    FullName = x.Human?.FullName,
-                    PhoneNumber = x.Human?.PhoneNumber,
-                    Email = x.Human?.Email,
-                }).ToList();
+                    liveSessionInformation.Students = students.Select(x => new StudentInfoModel
+                    {
+                        FullName = x.Human?.FullName,
+                        PhoneNumber = x.Human?.PhoneNumber,
+                        Email = x.Human?.Email,
+                    }).ToList();
+                }
             }
             liveSessionInformation.ClassName = classLiveWorkFlow.ClassLiveCalendar?.Class?.Name;
             liveSessionInformation.Description = classLiveWorkFlow.Description;

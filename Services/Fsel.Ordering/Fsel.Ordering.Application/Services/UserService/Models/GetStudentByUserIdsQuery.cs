@@ -6,6 +6,6 @@ namespace Fsel.Ordering.Application.Services.UserService.Models
 
     public class GetStudentByUserIdsQuery
     {
-        public IList<string> UserIds { get; set; }
+        public IList<string>? UserIds { get; set; }
     }
 }

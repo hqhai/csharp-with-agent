@@ -1,0 +1,56 @@
+// Copyright (c) Atlantic. All rights reserved.
+
+namespace Fsel.Identity.Application.Queries.AdminQuery
+{
+    using Fsel.Common.ActionResults;
+    using Fsel.Core.Base.BaseModels;
+    using Fsel.Identity.Application.Services.TrainingService;
+    using Fsel.Identity.Domain.Entities;
+    using Fsel.Identity.Domain.Enums.ErrorCodes;
+    using Fsel.Identity.Domain.Models.EntityModels;
+    using MediatR;
+    using Microsoft.AspNetCore.Http;
+    using Microsoft.AspNetCore.Identity;
+    using Microsoft.EntityFrameworkCore;
+
+    public class SearchStudentCourseQuery : BaseQueryModel, IRequest<MethodResult<PagingItemsModel<StudentCourseModel>>>
+    {
+        public Guid StudentId { get; set; }
+    }
+
+    public class SearchStudentCourseQueryHandler : IRequestHandler<SearchStudentCourseQuery, MethodResult<PagingItemsModel<StudentCourseModel>>>
+    {
+        private readonly UserManager<User> _userManager;
+        private readonly ITrainingService _trainingService;
+
+        public SearchStudentCourseQueryHandler(UserManager<User> userManager, ITrainingService trainingService)
+        {
+            _userManager = userManager;
+            _trainingService = trainingService;
+        }
+
+        public async Task<MethodResult<PagingItemsModel<StudentCourseModel>>> Handle(SearchStudentCourseQuery request, CancellationToken cancellationToken)
+        {
+            ArgumentNullException.ThrowIfNull(request);
+            MethodResult<PagingItemsModel<StudentCourseModel>> methodResult = new MethodResult<PagingItemsModel<StudentCourseModel>>();
+
+            var user = await _userManager.Users.Include(x => x.Human)
+                                        .ThenInclude(x => x!.Student)
+                                        .FirstOrDefaultAsync(x => x.Human != null && x.Human.Student != null && x.Human.Student.Id == request.StudentId, cancellationToken);
+            if (user == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumStudentErrorCode.StudentNotExist));
+                return methodResult;
+            }
+            var studentCourseResults = await _trainingService.GetClassCourseStudentAsync(request.StudentId);
+            var studentCourses = studentCourseResults.Content?.Result;
+            var query = studentCourses!.AsEnumerable();
+            int totalItem = query.Count();
+            var lists = query.Skip((request!.Page - 1) * request!.PageSize).Take(request!.PageSize).ToList();
+
+            methodResult.Result = new PagingItemsModel<StudentCourseModel>(lists, request, totalItem);
+            methodResult.StatusCode = StatusCodes.Status200OK;
+            return methodResult;
+        }
+    }
+}

@@ -8,12 +8,12 @@ namespace Fsel.Course.Lms.Application.Queries.VideoQuery
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base;
-    using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Infrastructure.Common;
     using Fsel.Course.Lms.Application.Services.UserServices;
+    using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -72,6 +72,8 @@ namespace Fsel.Course.Lms.Application.Queries.VideoQuery
                                     .ThenInclude(x => x!.ExerciseQuestions.Where(x => !x.IsDeleted))
                                     .ThenInclude(x => x.Question)
                                     .ThenInclude(x => x!.VideoTimeCodeAnswers!.Where(x => videoResult != null && x.VideoResultId == videoResult.Id))
+                                .Include(i => i.VideoTimeCodes.Where(x => !x.IsDeleted))
+                                .ThenInclude(x => x!.VideoTimeCodeAnswers!.Where(x => videoResult != null && x.VideoResultId == videoResult.Id))
                                 .Include(i => i.VideoResults.Where(x => !x.IsDeleted))
                                 .Where(x => x.Id == request.VideoId)
                                 .AsNoTracking()
@@ -83,7 +85,6 @@ namespace Fsel.Course.Lms.Application.Queries.VideoQuery
                 return methodResult;
             }
 
-            var checkDone = videoResult != null && videoResult.Status == EnumResultStatus.Done;
             var videoModel = new VideoModel
             {
                 Id = video.Id,
@@ -97,25 +98,30 @@ namespace Fsel.Course.Lms.Application.Queries.VideoQuery
                 VideoTimeCodes = video.VideoTimeCodes.OrderBy(x => x!.DisplayTime).Select(x => new VideoTimeCodeModel
                 {
                     Id = x.Id,
-                    TotalCount = x.TimeCodeExercises.Where(x => !x.IsDeleted && x.Exercise != null).Select(x => x.Exercise).SelectMany(x => x!.ExerciseQuestions.Where(x => !x.IsDeleted && x.Question != null)).OrderBy(x => x!.CreatedDate).Select(m => m.Question).Count(),
+                    TotalCount = x.TimeCodeExercises.Where(x => !x.IsDeleted && x.Exercise != null).Select(x => x.Exercise).SelectMany(x => x!.ExerciseQuestions.Where(x => !x.IsDeleted && x.Question != null)).Select(m => m.Question).Count(),
                     DisplayTime = x.DisplayTime,
                     ExecutionTime = x.ExecutionTime,
                     TimeCodeType = x.TimeCodeType,
                     VideoId = x.VideoId,
-                    Exercises = x.TimeCodeExercises.Where(n => !n.IsDeleted && n.Exercise != null).OrderBy(x => x!.CreatedDate).Select(n => n.Exercise).Select(n => new ExerciseModel
+                    Ungraded = x.TimeCodeExercises.Select(x => x.Exercise).SelectMany(x => x!.ExerciseQuestions).Select(x => x.Question).FirstOrDefault()?.Ungraded ?? default,
+                    CorrectCount = x.VideoTimeCodeAnswers.Count > 0 ? x.VideoTimeCodeAnswers.Sum(x => x.CorrectCount) : 0,
+                    CorrectTotal = x.TimeCodeExercises.Select(x => x.Exercise).SelectMany(x => x!.ExerciseQuestions).Select(x => x.Question).Sum(x => x!.CorrectTotal),
+                    Status = (x.VideoTimeCodeAnswers.Count > 0 && x.VideoTimeCodeAnswers.All(y => videoResult != null && y.VideoResultId == videoResult.Id && y.Status == EnumCurrentStatus.Done)) ? EnumCurrentStatus.Done : EnumCurrentStatus.Process,
+                    Exercises = x.TimeCodeExercises.OrderBy(x => x!.CreatedDate).Select(n => n.Exercise).Select(n => new ExerciseModel
                     {
                         Id = n!.Id,
                         MediaPost = n.MediaPost,
+                        Name = n.Name,
                         CourseSkill = n.CourseSkill,
-                        Questions = n.ExerciseQuestions.Where(m => m.Question != null).OrderBy(x => x!.CreatedDate).Select(m => m.Question).Select(m => new QuestionModel()
+                        Questions = n.ExerciseQuestions.OrderBy(x => x!.CreatedDate).Select(m => m.Question).Select(m => new QuestionModel()
                         {
                             Id = m!.Id,
                             QuestionType = m.QuestionType,
                             CorrectTotal = m.CorrectTotal,
                             Explanation = m.Explanation,
                             Ungraded = m.Ungraded,
-                            Config = _questionTypeConverter.QuestionTypeConverterObject(m.Config, m.QuestionType, isDisableAnswers: !checkDone).Item1,
-                            ResultAnswer = _mapper.Map<VideoTimeCodeAnswerModel>(m.VideoTimeCodeAnswers!.FirstOrDefault())
+                            Config = _questionTypeConverter.QuestionTypeConverterObject(m.Config, m.QuestionType, isDisableAnswers: !(m.VideoTimeCodeAnswers.FirstOrDefault()?.Status == EnumCurrentStatus.Done)).Item1,
+                            ResultAnswer = _mapper.Map<AnswerModel>(m.VideoTimeCodeAnswers!.FirstOrDefault())
                         }).ToList()
                     }).ToList(),
                 }).ToList(),
@@ -125,6 +131,7 @@ namespace Fsel.Course.Lms.Application.Queries.VideoQuery
                     CorrectCount = x.CorrectCount,
                     CorrectTotal = x.CorrectTotal,
                     Feedback = x.Feedback,
+                    CurrentVideoTimeCodeId = x.CurrentVideoTimeCodeId,
                     NumberOfStars = x.NumberOfStars,
                     Percent = x.Percent,
                     Status = x.Status,

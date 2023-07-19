@@ -5,8 +5,8 @@ namespace Fsel.System.Infrastructure.Maps
     using AutoMapper;
     using Fsel.Core.Extensions;
     using Fsel.System.Domain.Entities;
-    using Fsel.System.Domain.Models;
     using Fsel.System.Domain.Models.CommandModels.CourseTimeConfigs;
+    using Fsel.System.Domain.Models.EntityModels;
 
     public class CourseTimeConfigProfile : Profile
     {

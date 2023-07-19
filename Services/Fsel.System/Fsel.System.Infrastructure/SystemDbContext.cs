@@ -1,7 +1,7 @@
 using Fsel.Common.Constants;
 using Fsel.Core.Base;
-using Fsel.Shared.Enums;
 using Fsel.System.Domain.Entities;
+using Fsel.System.Infrastructure.Configs;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -18,12 +18,14 @@ namespace Fsel.System.Infrastructure
         {
             ArgumentNullException.ThrowIfNull(modelBuilder);
             SeedCourselevel(modelBuilder);
-
+            modelBuilder.ApplyConfiguration(new TeachingCostEntityTypeConfiguration());
             base.OnModelCreating(modelBuilder);
         }
 
         public DbSet<LiveTimeFrame> LiveTimeFrames { get; set; }
         public DbSet<CourseTimeConfig> CourseTimeConfigs { get; set; }
+        public DbSet<ForbiddenWord> ForbiddenWords { get; set; }
+        public DbSet<TeachingCost> TeachingCosts { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {

@@ -79,7 +79,7 @@ namespace Fsel.Course.Infrastructure.Common
                 foreach (var item in dataAnswer.Answers)
                 {
                     var question = dataQuestion.Contents.FirstOrDefault(x => x.Id == item.Id);
-                    if (question?.Answers != null && question.Answers.Count > 0 && question.Answers.Any(n => n.Id == item.AnswerId && n.IsCorrect == true))
+                    if (question?.Answers != null && question.Answers.Count > 0 && question.Answers.Any(n => (item.AnswerId.HasValue && n.Id == item.AnswerId) && n.IsCorrect == true))
                     {
                         number++;
                         item.IsExact = true;
@@ -103,7 +103,7 @@ namespace Fsel.Course.Infrastructure.Common
             {
                 foreach (var item in dataAnswer.Answers)
                 {
-                    if (dataQuestion.Link.Any(x => x.FromId == item.FromId && x.ToId == item.ToId))
+                    if (dataQuestion.Link.Any(x => x.FromId == item.FromId && (item.ToId.HasValue && x.ToId == item.ToId)))
                     {
                         number++;
                         item.IsExact = true;
@@ -183,21 +183,9 @@ namespace Fsel.Course.Infrastructure.Common
 
         private static bool IsShortAnswer(string question, string answer)
         {
-            var q = question.ToLower(CultureInfo.CurrentCulture);
-            string[] answerWords = answer.Split(' ');
-            if (answerWords != null)
-            {
-                foreach (var word in answerWords)
-                {
-                    var a = word.ToLower(CultureInfo.CurrentCulture);
-                    if (q.Replace('’', '\'') == a.Replace('’', '\''))
-                    {
-                        return true;
-                    }
-                }
-            }
-
-            return false;
+            string q = " " + question.Trim().ToLower(CultureInfo.CurrentCulture).Replace('’', '\'').ToString() + " ";
+            string a = " " + answer.Trim().ToLower(CultureInfo.CurrentCulture).Replace('’', '\'').ToString() + " ";
+            return a.Contains(q, StringComparison.OrdinalIgnoreCase);
         }
 
         private static int GetTotalCorrectTypeShortAnswerWordBase(ref object? configAnswer, object? configQuestion)
@@ -258,13 +246,13 @@ namespace Fsel.Course.Infrastructure.Common
                 string[] questionWords = words[index].Split('|');
                 foreach (var item in questionWords)
                 {
-                    if (word.Trim().Replace('’', '\'') == item.Trim().Replace('’', '\''))
+                    if (word.Trim().ToLower(CultureInfo.CurrentCulture).Replace('’', '\'') == item.Trim().ToLower(CultureInfo.CurrentCulture).Replace('’', '\''))
                     {
                         return true;
                     }
                 }
             }
-            else if (words[index].Trim().Replace('’', '\'') == word.Trim().Replace('’', '\''))
+            else if (words[index].Trim().ToLower(CultureInfo.CurrentCulture).Replace('’', '\'') == word.Trim().ToLower(CultureInfo.CurrentCulture).Replace('’', '\''))
             {
                 return true;
             }

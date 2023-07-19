@@ -1,11 +1,10 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Course.Application.Services.UserServices.Models
+namespace Fsel.Training.Application.Services.UserServices.Models
 {
     using System;
-    using Fsel.Shared.Enums;
     using Fsel.Core.Base.BaseModels;
-    using Fsel.Training.Application.Services.UserServices.Models;
+    using Fsel.Shared.Enums;
 
     public class StudentModel : BaseModel
     {

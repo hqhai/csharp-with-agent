@@ -6,7 +6,7 @@ namespace Fsel.Training.Api.Controllers.Cso
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
     using Fsel.Core.Base.BaseModels;
-    using Fsel.Training.Application.Commands.ClassCmd;
+    using Fsel.Training.Application.Commands.ClassLiveWorkFlowCmd;
     using Fsel.Training.Application.Queries.ClassLiveWorkFlowQuery;
     using Fsel.Training.Application.Queries.TeacherFreeDateQuery;
     using Fsel.Training.Domain.Models.EntityModels;
@@ -50,7 +50,6 @@ namespace Fsel.Training.Api.Controllers.Cso
             return commandResult.GetActionResult();
         }
 
-
         /// <summary>
         /// Get List free Teacher
         /// </summary>
@@ -65,7 +64,6 @@ namespace Fsel.Training.Api.Controllers.Cso
             return commandResult.GetActionResult();
         }
 
-
         /// <summary>
         /// get alternative calendar
         /// </summary>
@@ -74,7 +72,7 @@ namespace Fsel.Training.Api.Controllers.Cso
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> Get([FromRoute] Guid id)
         {
-            MethodResult<ClassLiveWorkFlowInfoModel> queryResult = await _mediator.Send(new GetClassLiveWorkFlowInfoQuery { Id = id}).ConfigureAwait(false);
+            MethodResult<ClassLiveWorkFlowInfoModel> queryResult = await _mediator.Send(new GetClassLiveWorkFlowInfoQuery { Id = id }).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
     }

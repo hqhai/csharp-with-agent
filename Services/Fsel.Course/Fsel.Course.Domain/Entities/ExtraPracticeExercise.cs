@@ -12,7 +12,7 @@ namespace Fsel.Course.Domain.Entities
         public Guid? ExtraPracticeChapterId { get; set; }
         public Guid? ExtraPracticeId { get; set; }
         public Guid? ExerciseId { get; set; }
-        //public ICollection<ExtraPracticeExerciseAnswer> ExtraPracticeExerciseAnswers { get; set; } = new List<ExtraPracticeExerciseAnswer>();
+        public ICollection<ExtraPracticeExerciseResult> ExtraPracticeExerciseResults { get; set; } = new List<ExtraPracticeExerciseResult>();
 
     }
 }

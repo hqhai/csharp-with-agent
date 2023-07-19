@@ -72,7 +72,7 @@ namespace Fsel.Identity.Application.Queries.UserQuery
                                                    .ThenInclude(x => x!.ParentStudents)
                                                    .FirstOrDefaultAsync(x => x.Id == _authContext.CurrentUserId.ToString(), cancellationToken);
                 var student = userView!.Human!.Student!;
-                if (student != null && userView!.Human!.Student!.CreatedByParent == false && student.ParentStudents != null && student.ParentStudents.Count > 0)
+                if (student != null && student.ParentStudents != null && student.ParentStudents.Count > 0)
                 {
                     userView = await _userManager.Users.Include(x => x.Human)
                                                   .ThenInclude(x => x!.Student)

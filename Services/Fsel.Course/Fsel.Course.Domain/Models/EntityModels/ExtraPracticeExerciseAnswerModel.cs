@@ -7,9 +7,9 @@ namespace Fsel.Course.Domain.Models.EntityModels
     public class ExtraPracticeExerciseAnswerModel : BaseModel
     {
         public object? Answer { get; set; }
-        public Guid ExtraPracticeVideoId { get; set; }
-        public Guid ExtraPracticeExerciseId { get; set; }
-        public Guid ExerciseQuestionId { get; set; }
+        public Guid? ExtraPracticeVideoId { get; set; }
+        public Guid? ExtraPracticeExerciseId { get; set; }
+        public Guid? ExerciseQuestionId { get; set; }
         public Guid StudentId { get; set; }
     }
 }

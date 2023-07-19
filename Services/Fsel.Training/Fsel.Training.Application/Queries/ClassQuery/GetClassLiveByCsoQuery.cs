@@ -38,7 +38,7 @@ namespace Fsel.Training.Application.Queries.ClassQuery
 
             var classLiveModel = await _classLiveCalendarRepository.Queryable
                                     .Include(x => x.Class)
-                                    .ThenInclude(x => x.ClassStudents)
+                                    .ThenInclude(x => x!.ClassStudents)
                                     .Where(x => x.Id == request.Id)
                                     .Select(x => new ClassLiveCalendarModel
                                     {

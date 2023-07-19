@@ -50,9 +50,7 @@ namespace Fsel.Identity.Application.Queries.StudentQuery
                 School = p.School,
                 CourseLevel = p.CourseLevel,
                 ClassId = p.ClassId,
-                HumanId = p.HumanId,
-                UserId = p.Human!.UserId
-            }).Where(i => humans.Contains(i.HumanId)).ToListAsync(cancellationToken);
+            }).Where(i => i.Human != null && humans.Contains(i.Human.Id)).ToListAsync(cancellationToken);
 
             methodResult.Result = students;
             methodResult.StatusCode = StatusCodes.Status200OK;

@@ -14,6 +14,10 @@ namespace Fsel.Shared.Enums
         PlacementTestLevel,
         FinalTestLevel,
         SubscriptionClass,
-        RoleLive
+        RoleLive,
+        CurrentStatus,
+        WorkFlowType,
+        ExtraPracticeProgress,
+        SortFilter
     }
 }

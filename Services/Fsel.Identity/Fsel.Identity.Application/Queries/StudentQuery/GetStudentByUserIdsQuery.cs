@@ -41,14 +41,12 @@ namespace Fsel.Identity.Application.Queries.StudentQuery
                                         .Select(x => new StudentModel
                                         {
                                             Id = x.Id,
-                                            PackageId = x.PackageId,
                                             ClassId = x.ClassId,
+                                            Occupation = x.Occupation,
                                             CourseLevel = x.CourseLevel,
                                             CreatedDate = x.CreatedDate,
-                                            HumanId = x.HumanId,
                                             School = x.School,
-                                            Human = _mapper.Map<HumanProfileModel>(x.Human),
-                                            UserId = x.Human!.UserId,
+                                            Human = _mapper.Map<HumanProfileModel>(x.Human)
                                         }).ToListAsync(cancellationToken);
 
             /*if (students == null)

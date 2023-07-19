@@ -7,7 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Configs\" />
     <Folder Include="Migrations\" />
   </ItemGroup>
 

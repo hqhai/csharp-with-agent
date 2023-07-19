@@ -52,6 +52,6 @@ namespace Fsel.Course.Domain.Enums
         MultipleOptionSentenceCompletion,
 
         [Description("Exercise preparation")]
-        ExercisePreparation,
+        ExercisePreparation
     }
 }

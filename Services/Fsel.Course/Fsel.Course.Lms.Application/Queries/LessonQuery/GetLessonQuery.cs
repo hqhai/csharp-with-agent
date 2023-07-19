@@ -80,12 +80,12 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
             var lessonResults = await _lessonResultRepository.Queryable.Where(x => x.UnitId == request.UnitId && x.CourseId == request.CourseId && x.StudentId == studentId).ToListAsync(cancellationToken);
             if (lessonResults == null || lessonResults.Count == 0)
             {
-                lessonResults = unit.UnitLessons.OrderBy(x => x.DisplayOrder).Select(x => new LessonResult
+                lessonResults = unit.UnitLessons.OrderBy(x => x.DisplayOrder).Select((x, index) => new LessonResult
                 {
                     UnitId = x.UnitId,
                     LessonId = x.LessonId,
                     CourseId = request.CourseId,
-                    Status = EnumResultStatus.Unfinished,
+                    Status = index == 0 ? EnumResultStatus.New : EnumResultStatus.Unfinished,
                     StudentId = studentId ?? default
                 }).ToList();
                 await _lessonResultRepository.AddList(lessonResults);
@@ -139,7 +139,7 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
                                 .ThenInclude(x => x.MockTest)
                                 .ThenInclude(x => x!.MockTestSections.Where(y => !y.IsDeleted))
                                 .ThenInclude(x => x.SectionGroup)
-                                .Include(x => x.MockTestResults.Where(y => y.UnitId == request.UnitId && y.CourseId == request.CourseId && y.StudentId == studentId))
+                                .Include(x => x.MockTestResults)
                                 .Where(x => x.Id == request.UnitId)
                                 .AsNoTracking()
                                 .SelectMany(x => x.UnitSkillMockTests)
@@ -156,7 +156,7 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
                                         CourseSkill = x.CourseSkill,
                                         ExecutionTime = x!.ExecutionTime,
                                     }).ToList(),
-                                    MockTestResult = _mapper.Map<MockTestResultModel>(x.MockTestResults.FirstOrDefault(y => y.MockTestId == x.Id)),
+                                    MockTestResult = _mapper.Map<MockTestResultModel>(x.MockTestResults.FirstOrDefault(y => y.MockTestId == x.Id && y.UnitId == request.UnitId && y.CourseId == request.CourseId && y.StudentId == studentId)),
                                 }).FirstOrDefaultAsync(cancellationToken);
 
             methodResult.Result = new LessonsMockTestModel

@@ -15,14 +15,19 @@ namespace Fsel.Training.Domain.Enums.ErrorCodes
         TeacherNotExits,
 
         /// <summary>
+        /// CSO Does not exits
+        /// </summary>
+        CSONotExits,
+
+        /// <summary>
         /// ClassLiveWorkFlow Already exist
         /// </summary>
         ClassLiveWorkFlowAlreadyExist,
 
         /// <summary>
-        /// Class Not Status Approved
+        /// Class Not Status Pedding
         /// </summary>
-        ClassNotStatusApproved,
+        ClassNotStatusPedding,
 
         /// <summary>
         /// ClassLiveWorkFlow Not Status AssignTeacher
@@ -42,6 +47,11 @@ namespace Fsel.Training.Domain.Enums.ErrorCodes
         /// <summary>
         /// Can Not Change live time
         /// </summary>
-        CanNotChangeLiveTime
+        CanNotChangeLiveTime,
+
+        /// <summary>
+        /// live date is invalid
+        /// </summary>
+        LiveDateInvalid
     }
 }

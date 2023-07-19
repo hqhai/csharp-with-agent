@@ -30,6 +30,7 @@ namespace Fsel.Course.Lms.Application.Commands.LessonCmd
         private readonly IUnitRepository _unitRepository;
         private readonly IUserService _userService;
         private readonly IMapper _mapper;
+        private readonly IUnitResultRepository _unitResultRepository;
         private readonly AuthContext _authContext;
         private readonly ILessonRepository _lessonRepository;
         private readonly ILessonResultRepository _lessonResultRepository;
@@ -40,6 +41,7 @@ namespace Fsel.Course.Lms.Application.Commands.LessonCmd
             , IUnitRepository unitRepository
             , IUserService userService
             , IMapper mapper
+            , IUnitResultRepository unitResultRepository
             , AuthContext authContext
             , ILessonRepository lessonRepository
             , ILessonResultRepository lessonResultRepository
@@ -50,6 +52,7 @@ namespace Fsel.Course.Lms.Application.Commands.LessonCmd
             _unitRepository = unitRepository;
             _userService = userService;
             _mapper = mapper;
+            _unitResultRepository = unitResultRepository;
             _authContext = authContext;
             _lessonRepository = lessonRepository;
             _lessonResultRepository = lessonResultRepository;
@@ -72,7 +75,7 @@ namespace Fsel.Course.Lms.Application.Commands.LessonCmd
             }
             var studentId = studentResult?.Content?.Result?.Id;
 
-            var course = await _courseRepository.Queryable.Include(x => x.CourseResults.Where(x => x.StudentId == studentId)).FirstOrDefaultAsync(x => x.Id == request.CourseId, cancellationToken);
+            var course = await _courseRepository.Queryable.Include(x => x.CourseResults).FirstOrDefaultAsync(x => x.Id == request.CourseId, cancellationToken);
             if (course == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.CourseNotExist), nameof(request.CourseId), request.CourseId);
@@ -83,7 +86,7 @@ namespace Fsel.Course.Lms.Application.Commands.LessonCmd
                 methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.CourseIsNewStateCantStartLesson), nameof(course.Status), course.Status);
                 return methodResult;
             }
-            var courseResult = course.CourseResults.FirstOrDefault();
+            var courseResult = course.CourseResults.FirstOrDefault(x => x.StudentId == studentId && x.CourseId == request.CourseId);
             if (courseResult != null && courseResult.Status == EnumCourseStatus.New)
             {
                 courseResult.Status = EnumCourseStatus.Active;
@@ -91,16 +94,16 @@ namespace Fsel.Course.Lms.Application.Commands.LessonCmd
                 await _courseResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             }
 
-            var unit = await _unitRepository.Queryable.Include(x => x.LessonResults).FirstOrDefaultAsync(x => x.Id == request.UnitId, cancellationToken);
+            var unit = await _unitRepository.Queryable.Include(x => x.LessonResults).Include(x => x.UnitResults).FirstOrDefaultAsync(x => x.Id == request.UnitId, cancellationToken);
             if (unit == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumUnitErrorCode.UnitNotExist), nameof(request.UnitId), request.UnitId);
                 return methodResult;
             }
-            var isCheckLessonProcess = unit.LessonResults.Where(x => x.LessonId == request.LessonId && x.UnitId == request.UnitId && x.CourseId == request.CourseId && x.StudentId == studentId).Any(x => x.Status == EnumResultStatus.Process);
-            if (isCheckLessonProcess)
+            var lessonResultNew = unit.LessonResults.FirstOrDefault(x => x.LessonId == request.LessonId && x.UnitId == request.UnitId && x.CourseId == request.CourseId && x.StudentId == studentId && x.Status == EnumResultStatus.New);
+            if (lessonResultNew == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumLessonResultErrorCode.LessonResultAlreadyExistStatusProcess));
+                methodResult.AddErrorBadRequest(nameof(EnumLessonResultErrorCode.LessonResultNotExistNew));
                 return methodResult;
             }
 
@@ -120,8 +123,15 @@ namespace Fsel.Course.Lms.Application.Commands.LessonCmd
                                                 .ToListAsync(cancellationToken);
 
             var lessonResult = await _lessonResultRepository.Queryable.FirstOrDefaultAsync(x => x.Id == request.LessonResultId, cancellationToken);
-            if (lessonResult != null && lessonResult.Status == EnumResultStatus.Unfinished)
+            if (lessonResult != null && lessonResult.Status == EnumResultStatus.New)
             {
+                var unitResult = unit.UnitResults.FirstOrDefault(x => x.UnitId == unit.Id && x.StudentId == studentId);
+                if (unitResult != null && unitResult.Status == EnumResultStatus.New)
+                {
+                    unitResult.Status = EnumResultStatus.Process;
+                    _unitResultRepository.Update(unitResult);
+                    await _unitResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                }
                 lessonResult.VideoResult = new VideoResult
                 {
                     VideoId = lesson.LessonVideos.FirstOrDefault()!.VideoId,

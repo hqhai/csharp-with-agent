@@ -24,5 +24,10 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         /// Time code can not null
         /// </summary>
         TimeCodeCanNotNull,
+
+        /// <summary>
+        /// SectionTimeCode Does Not Exist
+        /// </summary>
+        SectionTimeCodeNotExist
     }
 }
