@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Training.Application.Queries.ChangeLiveSessionQuery
+namespace Fsel.Training.Application.Queries.CancelScheduleLiveQuery
 {
     using System;
     using System.Collections.Generic;

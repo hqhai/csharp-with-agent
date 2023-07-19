@@ -9,7 +9,6 @@ namespace Fsel.Training.Api.Controllers.Cso
     using Fsel.Shared.Enums;
     using Fsel.Training.Application.Commands.CancelScheduleLiveCmd;
     using Fsel.Training.Application.Queries.CancelScheduleLiveQuery;
-    using Fsel.Training.Application.Queries.ChangeLiveSessionQuery;
     using Fsel.Training.Domain.Models.EntityModels;
     using MediatR;
     using Microsoft.AspNetCore.Authorization;
