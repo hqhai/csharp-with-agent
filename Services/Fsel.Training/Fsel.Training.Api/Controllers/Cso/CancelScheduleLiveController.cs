@@ -28,7 +28,7 @@ namespace Fsel.Training.Api.Controllers.Cso
         }
 
         /// <summary>
-        /// Search Change Live Session
+        /// Search Cancel Schedule Live
         /// </summary>
         [HttpGet]
         [ProducesResponseType(typeof(MethodResult<PagingItemsModel<CancelScheduleLiveModel>>), (int)HttpStatusCode.OK)]
@@ -40,7 +40,7 @@ namespace Fsel.Training.Api.Controllers.Cso
         }
 
         /// <summary>
-        /// Get Change Live Session
+        /// Get Cancel Schedule Live
         /// </summary>
         [HttpGet("{id}")]
         [ProducesResponseType(typeof(MethodResult<CancelScheduleLiveInfoModel>), (int)HttpStatusCode.OK)]
