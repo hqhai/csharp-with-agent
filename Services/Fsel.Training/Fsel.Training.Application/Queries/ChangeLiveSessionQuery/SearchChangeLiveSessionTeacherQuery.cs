@@ -2,6 +2,11 @@
 
 namespace Fsel.Training.Application.Queries.ChangeLiveSessionQuery
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Threading;
+    using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Core.Extensions;
@@ -15,27 +20,24 @@ namespace Fsel.Training.Application.Queries.ChangeLiveSessionQuery
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class SearchCancelScheduleLiveCSOQuery : BaseQueryModel, IRequest<MethodResult<PagingItemsModel<CancelScheduleLiveModel>>>
+    public class SearchChangeLiveSessionTeacherQuery : BaseQueryModel, IRequest<MethodResult<PagingItemsModel<CancelScheduleLiveModel>>>
     {
     }
 
-    public class SearchCancelScheduleLiveCSOQueryHandler : IRequestHandler<SearchCancelScheduleLiveCSOQuery, MethodResult<PagingItemsModel<CancelScheduleLiveModel>>>
+    public class SearchChangeLiveSessionTeacherQueryHandler : IRequestHandler<SearchChangeLiveSessionTeacherQuery, MethodResult<PagingItemsModel<CancelScheduleLiveModel>>>
     {
         private readonly IClassLiveWorkFlowRepository _classLiveWorkFlowRepository;
         private readonly IUserService _userService;
         private readonly ISystemService _systemService;
 
-        public SearchCancelScheduleLiveCSOQueryHandler(
-            IClassLiveWorkFlowRepository classLiveWorkFlowRepository,
-            IUserService userService,
-            ISystemService systemService)
+        public SearchChangeLiveSessionTeacherQueryHandler(IClassLiveWorkFlowRepository classLiveWorkFlowRepository, IUserService userService, ISystemService systemService)
         {
             _classLiveWorkFlowRepository = classLiveWorkFlowRepository;
             _userService = userService;
             _systemService = systemService;
         }
 
-        public async Task<MethodResult<PagingItemsModel<CancelScheduleLiveModel>>> Handle(SearchCancelScheduleLiveCSOQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<PagingItemsModel<CancelScheduleLiveModel>>> Handle(SearchChangeLiveSessionTeacherQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<PagingItemsModel<CancelScheduleLiveModel>>();
