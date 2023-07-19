@@ -5,7 +5,7 @@ namespace Fsel.Training.Domain.Models.EntityModels
     using System;
     using Fsel.Core.Base.BaseModels;
 
-    public class AlternativeCalendarModel : BaseModel
+    public class ChangeTeacherLiveModel : BaseModel
     {
         public string? ClassName { get; set; }
         public string? TeacherName { get; set; }
