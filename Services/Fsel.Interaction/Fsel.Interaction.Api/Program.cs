@@ -23,6 +23,7 @@ builder.Services.AddScoped<IInteractionActionRepository, InteractionActionReposi
 builder.Services.AddScoped<IPostRepository, PostRepository>();
 builder.Services.AddScoped<IPostTagRepository, PostTagRepository>();
 builder.Services.AddScoped<ITopicTagRepository, TopicTagRepository>();
+builder.Services.AddScoped<IStudentReviewRepository, StudentReviewRepository>();
 
 builder.AddRefitClients(typeof(IUserService), appSetting?.Services?.UserApiUrl);
 var app = builder.Build();
