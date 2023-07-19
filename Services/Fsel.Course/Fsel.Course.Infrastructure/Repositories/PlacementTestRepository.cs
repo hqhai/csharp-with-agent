@@ -23,7 +23,8 @@ namespace Fsel.Course.Infrastructure.Repositories
 
                 if (query != null && query.Level == EnumPlacementTestLevel.IELTS)
                 {
-                    query = await Queryable.Include(x => x.PlacementTestSections.Where(n => n.SectionGroup != null))
+                    query = await Queryable.Include(x => x.ExtraPractice)
+                                .Include(x => x.PlacementTestSections.Where(n => n.SectionGroup != null))
                                 .ThenInclude(x => x.SectionGroup)
                                 .ThenInclude(x => x!.Sections)
                                 .ThenInclude(x => x.SectionParts)

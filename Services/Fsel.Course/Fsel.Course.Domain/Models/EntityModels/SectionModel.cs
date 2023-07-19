@@ -12,8 +12,10 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public string? SubFilePath { get; set; }
         public int DisplayOrder { get; set; }
         public IList<SectionPartModel>? SectionParts { get; set; }
-
+        public IList<SectionQuestionModel>? SectionQuestions { get; set; }
         public IList<SectionTimeCodeModel>? SectionTimeCodes { get; set; }
         public IList<QuestionModel>? Questions { get; set; }
+        public ExtraPracticeAnswerModel? ExtraPracticeAnswer { get; set; }
+        public MockTestAnswerModel? MockTestAnswer { get; set; }
     }
 }

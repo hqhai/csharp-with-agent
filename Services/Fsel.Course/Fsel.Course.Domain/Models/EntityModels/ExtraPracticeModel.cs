@@ -24,7 +24,20 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public Guid? MockTestId { get; set; }
         public Guid? PlacementTestId { get; set; }
         public IList<ExtraPracticeChapterModel>? ExtraPracticeChapters { get; set; }
+        public IList<ExtraPracticeExerciseModel>? ExtraPracticeExercises { get; set; }
+        public IList<EnumCourseSkill>? CourseSkills { get; set; }
         public VideoModel? Video { get; set; }
+        public PlacementTestModel? PlacementTest { get; set; }
         public IList<ExerciseModel>? Exercises { get; set; }
+        public ExtraPraticeResultModel? ExtraPracticeResult { get; set; }
+        public MockTestModel? MockTest { get; set; }
+        public Guid? UnitId { get; set; }
+        public string? NameUnit { get; set; }
+        public long? AccessCount { get; set; }
+        public double? Percent { get; set; }
+        public int? ChapterCount { get; set; }
+        public int? ChapterTotal { get; set; }
+        public int? QuizzesCount { get; set; }
+        public int? QuizzesTotal { get; set; }
     }
 }

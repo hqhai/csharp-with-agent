@@ -1,12 +1,12 @@
 // Copyright (c) Atlantic. All rights reserved.
 
 using Fsel.Common.ActionResults;
-using Fsel.Shared.Enums;
 using Fsel.Common.Helpers;
+using Fsel.Common.Models;
 using Fsel.Course.Domain.Enums;
+using Fsel.Shared.Enums;
 using MediatR;
 using Microsoft.AspNetCore.Http;
-using Fsel.Common.Models;
 
 namespace Fsel.Course.Application.Queries.CategoryQuery
 {
@@ -31,6 +31,7 @@ namespace Fsel.Course.Application.Queries.CategoryQuery
                 case EnumCourseSourceData.CourseType:
                     methodResult.Result = ConvertHelper.EnumToListModel<EnumCourseType>();
                     break;
+
                 case EnumCourseSourceData.CourseLevel:
                     methodResult.Result = ConvertHelper.EnumToListModel<EnumCourseLevel>();
                     break;
@@ -62,14 +63,25 @@ namespace Fsel.Course.Application.Queries.CategoryQuery
                 case EnumCourseSourceData.FinalTestLevel:
                     methodResult.Result = ConvertHelper.EnumToListModel<EnumFinalTestLevel>();
                     break;
+
                 case EnumCourseSourceData.SubscriptionClass:
                     methodResult.Result = ConvertHelper.EnumToListModel<EnumSubscriptionClass>();
                     break;
+
                 case EnumCourseSourceData.CurrentStatus:
                     methodResult.Result = ConvertHelper.EnumToListModel<EnumCurrentStatus>();
                     break;
+
                 case EnumCourseSourceData.WorkFlowType:
                     methodResult.Result = ConvertHelper.EnumToListModel<EnumWorkFlowType>();
+                    break;
+
+                case EnumCourseSourceData.ExtraPracticeProgress:
+                    methodResult.Result = ConvertHelper.EnumToListModel<EnumExtraPracticeProgress>();
+                    break;
+
+                case EnumCourseSourceData.SortFilter:
+                    methodResult.Result = ConvertHelper.EnumToListModel<EnumSortFilter>();
                     break;
             }
 

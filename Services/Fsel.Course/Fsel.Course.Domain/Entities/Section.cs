@@ -41,5 +41,7 @@ namespace Fsel.Course.Domain.Entities
         public ICollection<SectionPart> SectionParts { get; set; } = new List<SectionPart>();
         public ICollection<SectionTimeCode> SectionTimeCodes { get; set; } = new List<SectionTimeCode>();
         public ICollection<SectionQuestion> SectionQuestions { get; set; } = new List<SectionQuestion>();
+        public ICollection<ExtraPracticeAnswer> ExtraPracticeAnswers { get; set; } = new List<ExtraPracticeAnswer>();
+        public ICollection<MockTestAnswer> MockTestAnswers { get; set; } = new List<MockTestAnswer>();
     }
 }

@@ -18,5 +18,10 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         /// Only one of two SectionParts or Questions
         /// </summary>
         OnlyOneOfTwoSectionPartsOrQuestions,
+
+        /// <summary>
+        /// Section Does Not Exist
+        /// </summary>
+        SectionNotExist
     }
 }

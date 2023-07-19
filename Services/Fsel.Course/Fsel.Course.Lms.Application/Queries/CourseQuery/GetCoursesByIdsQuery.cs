@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Course.Application.Queries.CourseQuery
+namespace Fsel.Course.Lms.Application.Queries.CourseQuery
 {
     using System;
     using System.Collections.Generic;

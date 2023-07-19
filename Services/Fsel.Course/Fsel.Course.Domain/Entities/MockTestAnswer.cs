@@ -30,11 +30,16 @@ namespace Fsel.Course.Domain.Entities
         [Range(0, 10000_0000, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
         public int CorrectCount { get; set; }
 
-        public Guid SectionQuestionId { get; set; }
+        public Guid? SectionQuestionId { get; set; }
 
         public SectionQuestion? SectionQuestion { get; set; }
 
         public Guid MockTestResultId { get; set; }
         public MockTestResult? MockTestResult { get; set; }
+        public Guid? SectionTimeCodeId { get; set; }
+        public SectionTimeCode? SectionTimeCode { get; set; }
+        public Guid? SectionId { get; set; }
+        public Section? Section { get; set; }
+
     }
 }

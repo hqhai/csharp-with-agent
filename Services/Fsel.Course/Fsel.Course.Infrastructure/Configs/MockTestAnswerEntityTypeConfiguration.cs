@@ -15,6 +15,16 @@ namespace Fsel.Course.Infrastructure.Configs
                 .HasForeignKey(b => b.SectionQuestionId)
                 .OnDelete(DeleteBehavior.Cascade);
 
+            builder.HasOne(a => a.Section)
+                .WithMany(b => b.MockTestAnswers)
+                .HasForeignKey(b => b.SectionId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            builder.HasOne(a => a.SectionTimeCode)
+             .WithMany(b => b.MockTestAnswers)
+             .HasForeignKey(b => b.SectionTimeCodeId)
+             .OnDelete(DeleteBehavior.Cascade);
+
             builder.HasOne(a => a.MockTestResult)
                 .WithMany(b => b.MockTestAnswers)
                 .HasForeignKey(b => b.MockTestResultId)
