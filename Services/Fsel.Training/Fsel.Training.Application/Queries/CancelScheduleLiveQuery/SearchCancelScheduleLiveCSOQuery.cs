@@ -3,9 +3,11 @@
 namespace Fsel.Training.Application.Queries.CancelScheduleLiveQuery
 {
     using Fsel.Common.ActionResults;
+    using Fsel.Core.Base;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Core.Extensions;
     using Fsel.Shared.Enums;
+    using Fsel.Shared.Enums.ErrorCodes;
     using Fsel.Training.Application.Services.SystemServices;
     using Fsel.Training.Application.Services.UserServices;
     using Fsel.Training.Application.Services.UserServices.Models;
@@ -24,15 +26,15 @@ namespace Fsel.Training.Application.Queries.CancelScheduleLiveQuery
         private readonly IClassLiveWorkFlowRepository _classLiveWorkFlowRepository;
         private readonly IUserService _userService;
         private readonly ISystemService _systemService;
+        private readonly AuthContext _authContext;
 
-        public SearchCancelScheduleLiveCSOQueryHandler(
-            IClassLiveWorkFlowRepository classLiveWorkFlowRepository,
-            IUserService userService,
-            ISystemService systemService)
+        public SearchCancelScheduleLiveCSOQueryHandler(IClassLiveWorkFlowRepository classLiveWorkFlowRepository, IUserService userService, ISystemService systemService, AuthContext authContext)
+
         {
             _classLiveWorkFlowRepository = classLiveWorkFlowRepository;
             _userService = userService;
             _systemService = systemService;
+            _authContext = authContext;
         }
 
         public async Task<MethodResult<PagingItemsModel<CancelScheduleLiveModel>>> Handle(SearchCancelScheduleLiveCSOQuery request, CancellationToken cancellationToken)
@@ -44,10 +46,17 @@ namespace Fsel.Training.Application.Queries.CancelScheduleLiveQuery
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 return methodResult;
             }
+            var csoResult = await _userService.GetCsoByUserIdAsync(_authContext.CurrentUserId);
+            if (!csoResult.IsSuccessStatusCode)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError));
+                return methodResult;
+            }
+            var csoId = csoResult.Content?.Result?.Id;
             var query = _classLiveWorkFlowRepository.Queryable
                         .Include(x => x.ClassLiveCalendar)
                         .ThenInclude(x => x!.Class)
-                        .Where(x => x.Type == EnumWorkFlowType.CancelSchedule)
+                        .Where(x => x.Type == EnumWorkFlowType.CancelSchedule && x.CsoId == csoId)
                         .AsNoTracking()
                         .Select(x => new CancelScheduleLiveModel
                         {
