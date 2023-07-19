@@ -32,13 +32,19 @@ namespace Fsel.Course.Domain.Entities
         /// <summary>
         /// Đường dẫn tệp
         /// </summary>
+        [MaxLength(1000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? BookFilePath { get; set; }
+
+        [MaxLength(1000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? BookCoverPath { get; set; }
+
+        [MaxLength(1000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? BookBackgroundPath { get; set; }
 
         /// <summary>
         /// Tác giả
         /// </summary>
+        [MaxLength(1000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? Author { get; set; }
 
         /// <summary>
@@ -55,6 +61,7 @@ namespace Fsel.Course.Domain.Entities
         /// <summary>
         /// VideoLink
         /// </summary>
+        [MaxLength(1000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? VideoLink { get; set; }
 
         /// <summary>
@@ -76,5 +83,6 @@ namespace Fsel.Course.Domain.Entities
         public ICollection<LessonExtraPractice> LessonExtraPractices { get; set; } = new List<LessonExtraPractice>();
         public ICollection<ExtraPracticeChapter> ExtraPracticeChapters { get; set; } = new List<ExtraPracticeChapter>();
         public ICollection<ExtraPracticeExercise> ExtraPracticeExercises { get; set; } = new List<ExtraPracticeExercise>();
+        public ICollection<ExtraPracticeResult> ExtraPracticeResults { get; set; } = new List<ExtraPracticeResult>();
     }
 }

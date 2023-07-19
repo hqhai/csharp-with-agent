@@ -25,8 +25,28 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         ExtraPracticeInActiveState,
 
         /// <summary>
-        /// code already exists
+        /// Student is Null
         /// </summary>
-        CodeAlreadyExists,
+        StudentNull,
+
+        /// <summary>
+        /// Answer Is In The Wrong Formatl
+        /// </summary>
+        AnswerIsInTheWrongFormat,
+
+        /// <summary>
+        /// ExtraPracticeExercises NUll
+        /// </summary>
+        ExtraPracticeExercisesNull,
+
+        /// <summary>
+        /// ExtraPracticeExercises Does Not Exist
+        /// </summary>
+        ExtraPracticeResultNotExist,
+
+        /// <summary>
+        /// Code Already Exists
+        /// </summary>
+        CodeAlreadyExists
     }
 }
