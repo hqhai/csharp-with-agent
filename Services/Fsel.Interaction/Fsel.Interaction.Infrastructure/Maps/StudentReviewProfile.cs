@@ -14,10 +14,10 @@ namespace Fsel.Interaction.Infrastructure.Maps
         public StudentReviewProfile()
         {
             CreateMap<StudentReview, StudentReviewModel>().IgnoreAllNonExisting();
-            CreateMap<UpdateStudentReviewCommandModel, StudentReview>().IgnoreAllNonExisting();
+            CreateMap<SaveStudentReviewCommandModel, StudentReview>().IgnoreAllNonExisting();
 
             CreateMap<StudentReviewDetail, StudentReviewDetailModel>().IgnoreAllNonExisting();
-            CreateMap<UpdateStudentReviewDetailCommandModel, StudentReviewDetail>().IgnoreAllNonExisting();
+            CreateMap<SaveStudentReviewDetailCommandModel, StudentReviewDetail>().IgnoreAllNonExisting();
         }
     }
 }

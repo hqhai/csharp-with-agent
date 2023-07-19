@@ -4,7 +4,7 @@ namespace Fsel.Interaction.Domain.Models.CommandModels.StudentReviewDetails
 {
     using Fsel.Shared.Enums;
 
-    public class UpdateStudentReviewDetailCommandModel
+    public class SaveStudentReviewDetailCommandModel
     {
         public EnumReviewQuestionType QuestionType { get; set; }
         public double VoteStars { get; set; }

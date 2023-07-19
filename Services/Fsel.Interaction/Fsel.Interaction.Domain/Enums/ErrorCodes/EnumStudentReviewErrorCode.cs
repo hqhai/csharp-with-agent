@@ -14,5 +14,15 @@ namespace Fsel.Interaction.Domain.Enums.ErrorCodes
         /// </summary>
         StudentReviewNotExist,
 
+        /// <summary>
+        /// Student Review Id Not Exist
+        /// </summary>
+        StudentReviewIdNotExist,
+
+        /// <summary>
+        /// Course Not Exsit
+        /// </summary>
+        CourseNotExsit,
+
     }
 }

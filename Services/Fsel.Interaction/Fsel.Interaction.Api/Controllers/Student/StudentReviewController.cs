@@ -27,15 +27,13 @@ namespace Fsel.Interaction.Api.Controllers.Student
         }
 
         /// <summary>
-        /// Update Student Review
+        /// Save Student Review
         /// </summary>
-        [HttpPut("{id}")]
+        [HttpPost]
         [ProducesResponseType(typeof(MethodResult<StudentReviewModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> Update([FromRoute] Guid id, [FromBody] UpdateStudentReviewCommand command)
+        public async Task<IActionResult> Save([FromBody] SaveStudentReviewCommand command)
         {
-            ArgumentNullException.ThrowIfNull(command);
-            command.Id = id;
             MethodResult<StudentReviewModel> queryResult = await _mediator.Send(command).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
@@ -46,9 +44,9 @@ namespace Fsel.Interaction.Api.Controllers.Student
         [HttpGet]
         [ProducesResponseType(typeof(MethodResult<IList<StudentReviewInfoModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> Get([FromQuery] GetReviewStudentsByStudentQuery query)
+        public async Task<IActionResult> Get()
         {
-            MethodResult<IList<StudentReviewInfoModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            MethodResult<IList<StudentReviewInfoModel>> queryResult = await _mediator.Send(new GetReviewStudentsByStudentQuery()).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
     }

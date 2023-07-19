@@ -10,10 +10,8 @@ namespace Fsel.Interaction.Application.Queries.StudentReviewQuery
     using Fsel.Interaction.Application.Services.CourseServices.Models;
     using Fsel.Interaction.Application.Services.TrainingService;
     using Fsel.Interaction.Application.Services.UserServices;
-    using Fsel.Interaction.Domain.Entities;
     using Fsel.Interaction.Domain.IRepositories;
     using Fsel.Interaction.Domain.Models.EntityModels;
-    using Fsel.Shared.Enums;
     using Fsel.Shared.Enums.ErrorCodes;
     using MediatR;
     using Microsoft.AspNetCore.Http;
@@ -21,7 +19,6 @@ namespace Fsel.Interaction.Application.Queries.StudentReviewQuery
 
     public class GetReviewStudentsByStudentQuery : IRequest<MethodResult<IList<StudentReviewInfoModel>>>
     {
-        public Guid? Id { get; set; }
     }
 
     public class GetReviewStudentsByStudentQueryHandler : IRequestHandler<GetReviewStudentsByStudentQuery, MethodResult<IList<StudentReviewInfoModel>>>
@@ -77,31 +74,9 @@ namespace Fsel.Interaction.Application.Queries.StudentReviewQuery
                     return methodResult;
                 }
                 courses = courseResults.Content?.Result?.ToList();
-                var listStudentReview = await _studentReviewRepository.Queryable.Where(x => x.StudentId == studentId).ToListAsync(cancellationToken);
-                var studentPlatform = listStudentReview.FirstOrDefault(x => x.ReviewType == EnumReviewType.Platform);
-                var courseStudentIds = courseIds.Except(listStudentReview.Where(x => x.ReviewType == EnumReviewType.Course && x.CourseId != null).Select(x => x.CourseId ?? default)).ToList();
-
-                if (courseStudentIds != null && courseStudentIds.Count > 0)
-                {
-                    if (studentPlatform == null)
-                    {
-                        _studentReviewRepository.Add(new StudentReview
-                        {
-                            StudentId = studentId ?? default,
-                            ReviewType = EnumReviewType.Platform
-                        });
-                    }
-                    await _studentReviewRepository.AddList(courseStudentIds.Select(x => new StudentReview
-                    {
-                        StudentId = studentId ?? default,
-                        ReviewType = EnumReviewType.Course,
-                        CourseId = x
-                    }));
-                    await _studentReviewRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
-                }
             }
 
-            var studentReviews = await _studentReviewRepository.Queryable.Include(x => x.StudentReviewDetails).Where(x => !request.Id.HasValue || x.Id == request.Id!.Value).Select(x => new StudentReviewInfoModel
+            var studentReviews = await _studentReviewRepository.Queryable.Include(x => x.StudentReviewDetails).Select(x => new StudentReviewInfoModel
             {
                 Id = x.Id,
                 ReviewType = x.ReviewType,
