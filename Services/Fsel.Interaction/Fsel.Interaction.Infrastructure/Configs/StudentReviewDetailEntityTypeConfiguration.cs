@@ -2,11 +2,11 @@
 
 namespace Fsel.Interaction.Infrastructure.Configs
 {
-    using Fsel.Interaction.Domain.Entities;
-    using Microsoft.EntityFrameworkCore.Metadata.Builders;
-    using Microsoft.EntityFrameworkCore;
     using Fsel.Common.Helpers;
-    using Fsel.Interaction.Domain.Enums;
+    using Fsel.Interaction.Domain.Entities;
+    using Fsel.Shared.Enums;
+    using Microsoft.EntityFrameworkCore;
+    using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
     public class StudentReviewDetailEntityTypeConfiguration : IEntityTypeConfiguration<StudentReviewDetail>
     {

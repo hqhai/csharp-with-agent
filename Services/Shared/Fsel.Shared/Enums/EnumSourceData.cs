@@ -18,6 +18,7 @@ namespace Fsel.Shared.Enums
         CurrentStatus,
         WorkFlowType,
         ExtraPracticeProgress,
-        SortFilter
+        SortFilter,
+        ReviewType
     }
 }

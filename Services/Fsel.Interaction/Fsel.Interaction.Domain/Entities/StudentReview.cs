@@ -3,7 +3,7 @@
 namespace Fsel.Interaction.Domain.Entities
 {
     using Fsel.Core.Entities;
-    using Fsel.Interaction.Domain.Enums;
+    using Fsel.Shared.Enums;
 
     public class StudentReview : Entity
     {

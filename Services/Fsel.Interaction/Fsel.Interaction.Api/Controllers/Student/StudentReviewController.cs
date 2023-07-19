@@ -8,12 +8,15 @@ namespace Fsel.Interaction.Api.Controllers.Student
     using Fsel.Interaction.Application.Commands.StudentReviewCmd;
     using Fsel.Interaction.Application.Queries.StudentReviewQuery;
     using Fsel.Interaction.Domain.Models.EntityModels;
+    using Fsel.Shared.Enums;
     using MediatR;
+    using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
 
     [ApiVersion(Settings.APIVersion)]
     [Route(Settings.APIDefaultRoute + "/student/review")]
     [ApiController]
+    [Authorize(Roles = nameof(EnumRole.Student))]
     public class StudentReviewController : ControllerBase
     {
         private readonly IMediator _mediator;
@@ -24,25 +27,15 @@ namespace Fsel.Interaction.Api.Controllers.Student
         }
 
         /// <summary>
-        /// Create Student Review
-        /// </summary>
-        [HttpPost]
-        [ProducesResponseType(typeof(MethodResult<StudentReviewModel>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> Create([FromBody] CreateStudentReviewCommand command)
-        {
-            MethodResult<StudentReviewModel> queryResult = await _mediator.Send(command).ConfigureAwait(false);
-            return queryResult.GetActionResult();
-        }
-
-        /// <summary>
         /// Update Student Review
         /// </summary>
-        [HttpPut]
+        [HttpPut("{id}")]
         [ProducesResponseType(typeof(MethodResult<StudentReviewModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> Update([FromBody] UpdateStudentReviewCommand command)
+        public async Task<IActionResult> Update([FromRoute] Guid id, [FromBody] UpdateStudentReviewCommand command)
         {
+            ArgumentNullException.ThrowIfNull(command);
+            command.Id = id;
             MethodResult<StudentReviewModel> queryResult = await _mediator.Send(command).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }

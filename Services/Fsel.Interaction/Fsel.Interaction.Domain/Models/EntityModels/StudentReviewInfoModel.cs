@@ -3,7 +3,7 @@
 namespace Fsel.Interaction.Domain.Models.EntityModels
 {
     using Fsel.Core.Base.BaseModels;
-    using Fsel.Interaction.Domain.Enums;
+    using Fsel.Shared.Enums;
 
     public class StudentReviewInfoModel : BaseModel
     {

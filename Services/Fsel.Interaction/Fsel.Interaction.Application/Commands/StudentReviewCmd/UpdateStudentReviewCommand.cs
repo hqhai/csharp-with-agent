@@ -45,7 +45,7 @@ namespace Fsel.Interaction.Application.Commands.StudentReviewCmd
                 return methodResult;
             }
             var studentId = studentResult.Content?.Result?.Id;
-            var studentReview = await _studentReviewRepository.Queryable.Include(x => x.StudentReviewDetails).FirstOrDefaultAsync(x => x.StudentId == studentId && x.ReviewType == request.ReviewType && (!x.CourseId.HasValue || x.CourseId == request.CourseId), cancellationToken);
+            var studentReview = await _studentReviewRepository.Queryable.Include(x => x.StudentReviewDetails).FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
             if (studentReview == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumStudentReviewErrorCode.StudentReviewNotExist));

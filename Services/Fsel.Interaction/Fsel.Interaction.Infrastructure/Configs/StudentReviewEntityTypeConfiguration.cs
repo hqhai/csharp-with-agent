@@ -4,7 +4,7 @@ namespace Fsel.Interaction.Infrastructure.Configs
 {
     using Fsel.Common.Helpers;
     using Fsel.Interaction.Domain.Entities;
-    using Fsel.Interaction.Domain.Enums;
+    using Fsel.Shared.Enums;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.Metadata.Builders;
 

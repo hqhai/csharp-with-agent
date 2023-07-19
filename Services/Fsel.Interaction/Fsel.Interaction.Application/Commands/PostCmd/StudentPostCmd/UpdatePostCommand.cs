@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Interaction.Application.Commands.ActionCmd
+namespace Fsel.Interaction.Application.Commands.PostCmd.StudentPostCmd
 {
     using System.Threading;
     using System.Threading.Tasks;
