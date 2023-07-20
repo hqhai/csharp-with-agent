@@ -7,8 +7,7 @@ namespace Fsel.Course.Domain.Models.QueryModels.MockTests
 
     public class SearchMockTestByTeacherQueryModel : BaseQueryModel
     {
-        public string? UnitName { get; set; }
-        public string? MockTestName { get; set; }
         public EnumMockTestFilter? MockTestFilter { get; set; }
+        public IList<Guid>? CourseIds { get; set; }
     }
 }
