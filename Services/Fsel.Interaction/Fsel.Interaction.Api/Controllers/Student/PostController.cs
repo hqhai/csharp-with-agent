@@ -2,16 +2,17 @@
 
 namespace Fsel.Interaction.Api.Controllers.Student
 {
-    using Fsel.Common.ActionResults;
     using System.Net;
+    using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
+    using Fsel.Core.Base.BaseModels;
+    using Fsel.Interaction.Application.Commands.ActionCmd;
+    using Fsel.Interaction.Application.Commands.PostCmd.StudentPostCmd;
+    using Fsel.Interaction.Application.Queries.PostQuery;
+    using Fsel.Interaction.Domain.Models.EntityModels;
+    using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
-    using Fsel.Interaction.Application.Commands.ActionCmd;
-    using Fsel.Interaction.Domain.Models.EntityModels;
-    using Fsel.Interaction.Application.Queries.PostQuery;
-    using Fsel.Core.Base.BaseModels;
-    using Fsel.Shared.Enums;
 
     [ApiVersion(Settings.APIVersion)]
     [Route(Settings.APIDefaultRoute + "/student/post")]

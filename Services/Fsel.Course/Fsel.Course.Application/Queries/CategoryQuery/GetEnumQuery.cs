@@ -83,6 +83,10 @@ namespace Fsel.Course.Application.Queries.CategoryQuery
                 case EnumCourseSourceData.SortFilter:
                     methodResult.Result = ConvertHelper.EnumToListModel<EnumSortFilter>();
                     break;
+
+                case EnumCourseSourceData.ReviewType:
+                    methodResult.Result = ConvertHelper.EnumToListModel<EnumReviewType>();
+                    break;
             }
 
             methodResult.StatusCode = StatusCodes.Status200OK;
