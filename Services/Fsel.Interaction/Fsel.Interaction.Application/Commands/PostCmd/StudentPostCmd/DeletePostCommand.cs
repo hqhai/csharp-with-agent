@@ -1,10 +1,9 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Interaction.Application.Commands.ActionCmd
+namespace Fsel.Interaction.Application.Commands.PostCmd.StudentPostCmd
 {
     using System.Threading;
     using System.Threading.Tasks;
-    using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Interaction.Domain.Enums.ErrorCodes;
     using Fsel.Interaction.Domain.IRepositories;
@@ -19,12 +18,10 @@ namespace Fsel.Interaction.Application.Commands.ActionCmd
 
     public class DeletePostCommandHandler : IRequestHandler<DeletePostCommand, MethodResult<bool>>
     {
-        private readonly IMapper _mapper;
         private readonly IPostRepository _iPostRepository;
 
-        public DeletePostCommandHandler(IMapper mapper, IPostRepository iPostRepository)
+        public DeletePostCommandHandler(IPostRepository iPostRepository)
         {
-            _mapper = mapper;
             _iPostRepository = iPostRepository;
         }
 
@@ -32,8 +29,6 @@ namespace Fsel.Interaction.Application.Commands.ActionCmd
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<bool> methodResult = new MethodResult<bool>();
-
-
 
             var studentPosts = await _iPostRepository.Queryable
                                     .Include(e => e.PostTags.Where(n => !n.IsDeleted))
@@ -47,8 +42,6 @@ namespace Fsel.Interaction.Application.Commands.ActionCmd
 
             await _iPostRepository.ExecuteTransactionAsync(async () =>
             {
-
-
                 var result = await _iPostRepository.DeleteAsync(studentPosts);
                 await _iPostRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
@@ -61,4 +54,3 @@ namespace Fsel.Interaction.Application.Commands.ActionCmd
         }
     }
 }
-
