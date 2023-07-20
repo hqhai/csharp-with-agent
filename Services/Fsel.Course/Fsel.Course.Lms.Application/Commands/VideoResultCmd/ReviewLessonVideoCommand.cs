@@ -70,30 +70,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoResultCmd
                 methodResult.AddErrorBadRequest(videoResult.ErrorMessages);
                 return methodResult;
             }
-            var answerCountQuery = from baseQ in _videoResultRepository.Queryable
-                                   join vtca in _videoTimeCodeAnswerRepository.Queryable on baseQ.Id equals vtca.VideoResultId
-                                   join e in _exerciseRepository.Queryable on vtca.ExerciseId equals e.Id
-                                   join te in _timeCodeExerciseRepository.Queryable on e.Id equals te.ExerciseId
-                                   join vt in _videoTimeCodeRepository.Queryable on te.VideoTimeCodeId equals vt.Id
-                                   where baseQ.Id == videoResult.Id
-                                   select vtca;
 
-            var questionCountQuery = from baseQ in _videoResultRepository.Queryable
-                                     join v in _videoRepository.Queryable on baseQ.VideoId equals v.Id
-                                     join vt in _videoTimeCodeRepository.Queryable on v.Id equals vt.VideoId
-                                     join te in _timeCodeExerciseRepository.Queryable on vt.Id equals te.VideoTimeCodeId
-                                     join e in _exerciseRepository.Queryable on te.ExerciseId equals e.Id
-                                     join eq in _exerciseQuestionRepository.Queryable on e.Id equals eq.ExerciseId
-                                     join q in _questionRepository.Queryable on eq.QuestionId equals q.Id
-                                     where baseQ.Id == videoResult.Id && q.QuestionType != EnumQuestionType.ExercisePreparation
-                                     select q;
-            var questionCounts = await questionCountQuery.ToListAsync(cancellationToken);
-            var answerCounts = await answerCountQuery.ToListAsync(cancellationToken);
-            if (questionCounts.Count != answerCounts.Count)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumVideoResultErrorCode.NotEnoughQuestions));
-                return methodResult;
-            }
             var answerQuery = from baseQ in _videoResultRepository.Queryable
                               join vtca in _videoTimeCodeAnswerRepository.Queryable on baseQ.Id equals vtca.VideoResultId
                               join e in _exerciseRepository.Queryable on vtca.ExerciseId equals e.Id
@@ -105,7 +82,8 @@ namespace Fsel.Course.Lms.Application.Commands.VideoResultCmd
                               {
                                   Type = g.Key.TimeCodeType,
                                   Skill = g.Key.CourseSkill,
-                                  CorrectCount = g.Sum(x => x.vtca.CorrectCount)
+                                  CorrectCount = g.Sum(x => x.vtca.CorrectCount),
+                                  TotalAnswer = g.Select(x => x.vtca).Count()
                               };
 
             var questionQuery = from baseQ in _videoResultRepository.Queryable
@@ -121,9 +99,16 @@ namespace Fsel.Course.Lms.Application.Commands.VideoResultCmd
                                 {
                                     Type = g.Key.TimeCodeType,
                                     Skill = g.Key.CourseSkill,
-                                    TotalCount = g.Sum(x => x.q.CorrectTotal)
+                                    TotalCount = g.Sum(x => x.q.CorrectTotal),
+                                    TotalQuestion = g.Select(x => x.q).Count()
                                 };
             var questions = await questionQuery.ToListAsync(cancellationToken);
+            var answers = await answerQuery.ToListAsync(cancellationToken);
+            if (questions.Sum(x => x.TotalQuestion) != answers.Sum(x => x.TotalAnswer))
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumVideoResultErrorCode.NotEnoughQuestions));
+                return methodResult;
+            }
             var skills = Enum.GetValues(typeof(EnumCourseSkill)).Cast<EnumCourseSkill>();
             var types = Enum.GetValues(typeof(EnumTimeCodeType)).Cast<EnumTimeCodeType>();
             var scoreQuery = from type in types
