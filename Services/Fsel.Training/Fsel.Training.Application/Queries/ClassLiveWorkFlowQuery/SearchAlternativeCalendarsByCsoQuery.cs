@@ -16,27 +16,27 @@ namespace Fsel.Training.Application.Queries.ClassLiveWorkFlowQuery
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class SearchAlternativeCalendarsByCsoQuery : BaseQueryModel, IRequest<MethodResult<PagingItemsModel<AlternativeCalendarModel>>>
+    public class SearchChangeTeacherLivesByCsoQuery : BaseQueryModel, IRequest<MethodResult<PagingItemsModel<ChangeTeacherLiveModel>>>
     {
     }
 
-    public class SearchAlternativeCalendarByCsoQueryHandler : IRequestHandler<SearchAlternativeCalendarsByCsoQuery, MethodResult<PagingItemsModel<AlternativeCalendarModel>>>
+    public class SearchChangeTeacherLiveByCsoQueryHandler : IRequestHandler<SearchChangeTeacherLivesByCsoQuery, MethodResult<PagingItemsModel<ChangeTeacherLiveModel>>>
     {
         private readonly IClassLiveWorkFlowRepository _classLiveWorkFlowRepository;
         private readonly ISystemService _systemService;
         private readonly IUserService _userService;
 
-        public SearchAlternativeCalendarByCsoQueryHandler(IClassLiveWorkFlowRepository classLiveWorkFlowRepository, ISystemService systemService, IUserService userService)
+        public SearchChangeTeacherLiveByCsoQueryHandler(IClassLiveWorkFlowRepository classLiveWorkFlowRepository, ISystemService systemService, IUserService userService)
         {
             _classLiveWorkFlowRepository = classLiveWorkFlowRepository;
             _systemService = systemService;
             _userService = userService;
         }
 
-        public async Task<MethodResult<PagingItemsModel<AlternativeCalendarModel>>> Handle(SearchAlternativeCalendarsByCsoQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<PagingItemsModel<ChangeTeacherLiveModel>>> Handle(SearchChangeTeacherLivesByCsoQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            var methodResult = new MethodResult<PagingItemsModel<AlternativeCalendarModel>>();
+            var methodResult = new MethodResult<PagingItemsModel<ChangeTeacherLiveModel>>();
             IList<Guid>? teacherIds = new List<Guid>();
             if (!string.IsNullOrEmpty(request.Keyword))
             {
@@ -53,7 +53,7 @@ namespace Fsel.Training.Application.Queries.ClassLiveWorkFlowQuery
                 }
                 teacherIds = teachersResult.Content.Result.Select(x => x.Id).Distinct().ToList();
             }
-            var classLiveWorkFlows = _classLiveWorkFlowRepository.Queryable.Where(p => p.Type == EnumWorkFlowType.ChangeTeacher).Include(cld => cld.ClassLiveCalendar).ThenInclude(c => c!.Class).Select(ac => new AlternativeCalendarModel
+            var classLiveWorkFlows = _classLiveWorkFlowRepository.Queryable.Where(p => p.Type == EnumWorkFlowType.ChangeTeacher).Include(cld => cld.ClassLiveCalendar).ThenInclude(c => c!.Class).Select(ac => new ChangeTeacherLiveModel
             {
                 Id = ac.Id,
                 ClassName = ac.ClassLiveCalendar!.Class!.Name,
@@ -93,7 +93,7 @@ namespace Fsel.Training.Application.Queries.ClassLiveWorkFlowQuery
                 item.StartTime = liveTimeFrame?.StartTime;
                 item.EndTime = liveTimeFrame?.EndTime;
             }
-            methodResult.Result = new PagingItemsModel<AlternativeCalendarModel>(lists, request, totalItem);
+            methodResult.Result = new PagingItemsModel<ChangeTeacherLiveModel>(lists, request, totalItem);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }

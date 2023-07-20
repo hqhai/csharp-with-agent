@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Training.Application.Commands.ChangeLiveSessionCmd
+namespace Fsel.Training.Application.Commands.CancelScheduleLiveCmd
 {
     using AutoMapper;
     using Fsel.Common.ActionResults;
@@ -9,13 +9,13 @@ namespace Fsel.Training.Application.Commands.ChangeLiveSessionCmd
     using Fsel.Training.Application.Services.UserServices;
     using Fsel.Training.Domain.Enums.ErrorCodes;
     using Fsel.Training.Domain.IRepositories;
-    using Fsel.Training.Domain.Models.CommandModels.ChangeLiveSessions;
+    using Fsel.Training.Domain.Models.CommandModels.CancelScheduleLives;
     using Fsel.Training.Domain.Models.EntityModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class ReferenceCalendarCommand : ChangeLiveSessionCommandModel, IRequest<MethodResult<ClassLiveWorkFlowModel>>
+    public class ReferenceCalendarCommand : CancelScheduleLiveCommandModel, IRequest<MethodResult<ClassLiveWorkFlowModel>>
     {
     }
 
