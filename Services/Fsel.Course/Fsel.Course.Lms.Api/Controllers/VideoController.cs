@@ -5,10 +5,10 @@ namespace Fsel.Course.Lms.Api.Controllers
     using System.Net;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
-    using Fsel.Shared.Enums;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd;
     using Fsel.Course.Lms.Application.Queries.VideoQuery;
+    using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
@@ -35,6 +35,30 @@ namespace Fsel.Course.Lms.Api.Controllers
         public async Task<IActionResult> Get([FromQuery] GetVideoQuery query)
         {
             MethodResult<VideoModel> commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Get Video Time Code
+        /// </summary>
+        [HttpGet("time-code")]
+        [ProducesResponseType(typeof(MethodResult<VideoModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetTimeCode([FromQuery] GetVideoTimeCodeQuery query)
+        {
+            MethodResult<VideoModel> commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Get Video Time Code Detail
+        /// </summary>
+        [HttpGet("time-code-detail")]
+        [ProducesResponseType(typeof(MethodResult<VideoTimeCodeModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetTimeCodeDetail([FromQuery] GetTimeCodeDetailQuery query)
+        {
+            MethodResult<VideoTimeCodeModel> commandResult = await _mediator.Send(query).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
 
