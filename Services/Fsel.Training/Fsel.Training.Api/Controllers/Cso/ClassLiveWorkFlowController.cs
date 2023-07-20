@@ -56,11 +56,11 @@ namespace Fsel.Training.Api.Controllers.Cso
         /// <param name="command"></param>
         /// <returns></returns>
         [HttpGet("free-teacher/{id}")]
-        [ProducesResponseType(typeof(MethodResult<IList<TeacherFreeDateModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(MethodResult<IList<TeacherFreeTimeModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetListFreeTeacher([FromRoute] Guid id)
         {
-            MethodResult<IList<TeacherFreeDateModel>> commandResult = await _mediator.Send(new GetListFreeTeacherByCalendarQuery { ClassLiveCalendarId = id }).ConfigureAwait(false);
+            MethodResult<IList<TeacherFreeTimeModel>> commandResult = await _mediator.Send(new GetListFreeTeacherByCalendarQuery { ClassLiveCalendarId = id }).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
 

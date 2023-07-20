@@ -10,7 +10,6 @@ namespace Fsel.Training.Application.Queries.CalendarQuery
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base;
-    using Fsel.Shared.Helpers;
     using Fsel.Training.Application.Services.CourseServices;
     using Fsel.Training.Application.Services.SystemServices;
     using Fsel.Training.Application.Services.UserServices;
@@ -96,6 +95,7 @@ namespace Fsel.Training.Application.Queries.CalendarQuery
                             Note = x.Note,
                             Status = x.Status,
                             ClassId = x.ClassId,
+                            ClassCode = x.Class!.Code,
                             TeacherId = x.TeacherId,
                             Class = _mapper.Map<ClassModel>(x.Class)
                         });
