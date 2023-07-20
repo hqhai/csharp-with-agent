@@ -82,7 +82,8 @@ namespace Fsel.Course.Lms.Application.Commands.VideoResultCmd
                               {
                                   Type = g.Key.TimeCodeType,
                                   Skill = g.Key.CourseSkill,
-                                  CorrectCount = g.Sum(x => x.vtca.CorrectCount)
+                                  CorrectCount = g.Sum(x => x.vtca.CorrectCount),
+                                  TotalAnswer = g.Select(x => x.vtca).Count()
                               };
 
             var questionQuery = from baseQ in _videoResultRepository.Queryable
@@ -92,17 +93,18 @@ namespace Fsel.Course.Lms.Application.Commands.VideoResultCmd
                                 join e in _exerciseRepository.Queryable on te.ExerciseId equals e.Id
                                 join eq in _exerciseQuestionRepository.Queryable on e.Id equals eq.ExerciseId
                                 join q in _questionRepository.Queryable on eq.QuestionId equals q.Id
-                                where baseQ.Id == videoResult.Id
+                                where baseQ.Id == videoResult.Id && q.QuestionType != EnumQuestionType.ExercisePreparation
                                 group new { vt, q } by new { vt.TimeCodeType, e.CourseSkill } into g
                                 select new
                                 {
                                     Type = g.Key.TimeCodeType,
                                     Skill = g.Key.CourseSkill,
-                                    TotalCount = g.Sum(x => x.q.CorrectTotal)
+                                    TotalCount = g.Sum(x => x.q.CorrectTotal),
+                                    TotalQuestion = g.Select(x => x.q).Count()
                                 };
             var questions = await questionQuery.ToListAsync(cancellationToken);
             var answers = await answerQuery.ToListAsync(cancellationToken);
-            if (questions.Count != answers.Count)
+            if (questions.Sum(x => x.TotalQuestion) != answers.Sum(x => x.TotalAnswer))
             {
                 methodResult.AddErrorBadRequest(nameof(EnumVideoResultErrorCode.NotEnoughQuestions));
                 return methodResult;
