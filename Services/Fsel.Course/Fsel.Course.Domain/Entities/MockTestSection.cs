@@ -17,6 +17,5 @@ namespace Fsel.Course.Domain.Entities
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         public Guid SectionGroupId { get; set; }
 
-        public IList<MockTestScore>? MockTestScores { get; set; }
     }
 }
