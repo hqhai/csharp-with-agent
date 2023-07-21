@@ -140,6 +140,7 @@ namespace Fsel.Training.Application.Commands.ClassLiveWorkFlowCmd
                         }
                     }
                     classLiveWorkFlow.ClassLiveWorkFlowPlans = _mapper.Map<IList<ClassLiveWorkFlowPlan>>(request.ClassLiveWorkFlowPlans);
+                    classLiveWorkFlow.ClassLiveWorkFlowPlans.ForEach(x => x.IsActive = true);
                 }
                 classLiveWorkFlow.Status = status;
             }
