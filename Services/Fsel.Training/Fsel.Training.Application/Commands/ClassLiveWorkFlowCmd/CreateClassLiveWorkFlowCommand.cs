@@ -74,6 +74,15 @@ namespace Fsel.Training.Application.Commands.ClassLiveWorkFlowCmd
             }
             else
             {
+                var listLiveTimeFrameResults = await _systemService.GetLiveTimeFramesAsync();
+                var liveTimeFrames = listLiveTimeFrameResults.Content?.Result;
+
+                var liveTimeFrameCalendar = liveTimeFrames?.FirstOrDefault(x => x.Id == classLiveCalendar.LiveTimeFrameId);
+                var startTime = liveTimeFrameCalendar?.StartTime;
+                var endTime = liveTimeFrameCalendar?.EndTime;
+
+                var liveDate = classLiveCalendar.LiveDate.Date.AddHours(startTime ?? 0);
+                var startTimeLive = liveDate.AddHours(-24);
                 classLiveWorkFlow = new ClassLiveWorkFlow
                 {
                     ClassLiveCalendarId = request.ClassLiveCalendarId,
@@ -87,8 +96,7 @@ namespace Fsel.Training.Application.Commands.ClassLiveWorkFlowCmd
                 {
                     status = EnumWorkFlowChangeTeacherStatus.RequestChangeTeacher.ToString();
                     DateTime dateTime = DateTime.Now;
-                    var assignTeacher = classLiveCalendar.LiveDate.AddDays(-1);
-                    if (assignTeacher.Date < dateTime.Date)
+                    if (startTimeLive < dateTime)
                     {
                         methodResult.AddErrorBadRequest(nameof(EnumClassLiveWorkFlowErrorCode.CanNotChangeTeacher));
                         return methodResult;
@@ -97,19 +105,18 @@ namespace Fsel.Training.Application.Commands.ClassLiveWorkFlowCmd
                 else if (request.Type == EnumWorkFlowType.CancelSchedule && request.ClassLiveWorkFlowPlans != null)
                 {
                     status = EnumWorkFlowCancelScheduleStatus.RequestCancel.ToString();
+
                     DateTime dateTime = DateTime.Now;
-                    var learnAgainDate = classLiveCalendar.LiveDate.AddDays(2);
-                    var endTime = classLiveCalendar.LiveDate.AddHours(-1);
-                    var startTime = classLiveCalendar.LiveDate.AddHours(-24);
-                    var check = dateTime > startTime && dateTime < endTime;
+                    var learnAgainDate = liveDate.AddHours(startTime ?? 0).AddDays(2);
+                    var endTimeLive = liveDate.AddHours(startTime ?? 0).AddHours(-1);
+                    var check = dateTime > startTimeLive && dateTime < endTimeLive;
                     if (!check)
                     {
                         methodResult.AddErrorBadRequest(nameof(EnumClassLiveWorkFlowErrorCode.CanNotCancelLiveTime));
                         return methodResult;
                     }
-                    var listLiveTimeFrameResults = await _systemService.GetLiveTimeFramesAsync();
                     var classLiveCalendars = await _classLiveCalendarRepository.Queryable.Where(x => x.TeacherId == teacherId).ToListAsync(cancellationToken);
-                    var liveTimeFrames = listLiveTimeFrameResults.Content?.Result;
+
                     foreach (var workFlowPlan in request.ClassLiveWorkFlowPlans)
                     {
                         if (classLiveCalendars.Any(x => x.LiveTimeFrameId == workFlowPlan.LiveTimeFrameId && x.LiveDate == workFlowPlan.LiveDate))
@@ -117,16 +124,13 @@ namespace Fsel.Training.Application.Commands.ClassLiveWorkFlowCmd
                             methodResult.AddErrorBadRequest(nameof(EnumClassLiveWorkFlowErrorCode.CanNotCancelLiveTime));
                             return methodResult;
                         }
-                        var listLiveTimeFrameCalendar = liveTimeFrames?.FirstOrDefault(x => x.Id == classLiveCalendar.LiveTimeFrameId);
                         var listLiveTimeFramePlan = liveTimeFrames?.FirstOrDefault(x => x.Id == workFlowPlan.LiveTimeFrameId);
-                        if (listLiveTimeFramePlan != null && listLiveTimeFrameCalendar != null)
+                        if (listLiveTimeFramePlan != null && liveTimeFrameCalendar != null)
                         {
+                            var livePlan = workFlowPlan.LiveDate.Date.AddHours(listLiveTimeFramePlan.StartTime ?? 0);
                             switch (true)
                             {
-                                case var solutionOne when solutionOne == (listLiveTimeFramePlan.StartTime <= listLiveTimeFrameCalendar.StartTime && classLiveCalendar.LiveDate.AddDays(3) <= workFlowPlan.LiveDate):
-                                    break;
-
-                                case var solutionTwo when solutionTwo == (listLiveTimeFramePlan.StartTime <= listLiveTimeFrameCalendar.StartTime && classLiveCalendar.LiveDate.AddDays(2) <= workFlowPlan.LiveDate):
+                                case var solutionTwo when solutionTwo == liveDate.AddDays(2) <= livePlan:
                                     break;
 
                                 default:
