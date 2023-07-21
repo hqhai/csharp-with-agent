@@ -7,6 +7,7 @@ namespace Fsel.Course.Lms.Api.Controllers.Teacher
     using Fsel.Common.Constants;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Course.Lms.Application.Commands.MockTestResultCmd;
     using Fsel.Course.Lms.Application.Queries.MockTestResultQuery;
     using Fsel.Shared.Enums;
     using MediatR;
@@ -47,6 +48,18 @@ namespace Fsel.Course.Lms.Api.Controllers.Teacher
         public async Task<IActionResult> GetCourses()
         {
             var commandResult = await _mediator.Send(new GetCoursesByMockTestResultQuery()).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Grade MockTestResu;t
+        /// </summary>
+        [HttpPost("grade")]
+        [ProducesResponseType(typeof(MethodResult<IList<CourseModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GradeMockTest([FromBody] GradeMockTestResultCommand command)
+        {
+            var commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
 

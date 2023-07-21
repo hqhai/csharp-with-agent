@@ -40,10 +40,10 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestResultCmd
                 methodResult.AddErrorBadRequest(nameof(EnumMockTestResultErrorCode.MockTestScoresNull));
                 return methodResult;
             }
-            var mockTestResult = await _mockTestResultRepository.Queryable.Where(e => e.Id == request.MockTestResultId).FirstOrDefaultAsync(cancellationToken);
+            var mockTestResult = await _mockTestResultRepository.Queryable.Include(x => x.MockTestScores).Where(e => e.Id == request.MockTestResultId).FirstOrDefaultAsync(cancellationToken);
             if (mockTestResult == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumClassForumResultErrorCode.ClassForumResultNotExist));
+                methodResult.AddErrorBadRequest(nameof(EnumMockTestResultErrorCode.MockTestResultNotExist));
                 return methodResult;
             }
             var sectionGroupIds = request.MockTestScores.Select(y => y.SectionGroupId).Distinct().ToList();

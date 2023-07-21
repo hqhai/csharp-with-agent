@@ -15,6 +15,8 @@ namespace Fsel.Course.Domain.Entities
         public string? FeedBack { get; set; }
 
         public long Score { get; set; }
+        public SectionGroup? SectionGroup { get; set; }
+        public Guid SectionGroupId { get; set; }
         public MockTestResult? MockTestResult { get; set; }
         public Guid MockTestResultId { get; set; }
     }

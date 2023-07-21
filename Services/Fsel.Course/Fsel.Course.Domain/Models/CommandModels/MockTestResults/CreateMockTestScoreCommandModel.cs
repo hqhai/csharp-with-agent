@@ -6,7 +6,7 @@ namespace Fsel.Course.Domain.Models.CommandModels.MockTestResults
 
     public class CreateMockTestScoreCommandModel
     {
-        public string? Feedback { get; set; }
+        public string? FeedBack { get; set; }
         public long Score { get; set; }
         public Guid SectionGroupId { get; set; }
         public EnumClassForumScoreCriteria Criteria { get; set; }

@@ -6,6 +6,7 @@ namespace Fsel.Course.Infrastructure.Maps
     using Fsel.Core.Extensions;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Models.CommandModels.MockTestAnswers;
+    using Fsel.Course.Domain.Models.CommandModels.MockTestResults;
     using Fsel.Course.Domain.Models.CommandModels.MockTests;
     using Fsel.Course.Domain.Models.EntityModels;
 
@@ -19,6 +20,7 @@ namespace Fsel.Course.Infrastructure.Maps
 
             CreateMap<CreateMockTestAnswerCommandModel, MockTestAnswer>().IgnoreAllNonExisting();
             CreateMap<MockTestScore, MockTestScoreModel>().IgnoreAllNonExisting();
+            CreateMap<CreateMockTestScoreCommandModel, MockTestScore>().IgnoreAllNonExisting();
         }
     }
 }

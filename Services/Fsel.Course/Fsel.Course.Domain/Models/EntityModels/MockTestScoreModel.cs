@@ -8,12 +8,10 @@ namespace Fsel.Course.Domain.Models.EntityModels
 
     public class MockTestScoreModel : BaseModel
     {
-        public string? Feedback { get; set; }
-
-        public Guid ClassForumResultId { get; set; }
-
+        public string? FeedBack { get; set; }
+        public Guid MockTestResultId { get; set; }
         public long? Score { get; set; }
-
+        public Guid SectionGroupId { get; set; }
         public EnumClassForumScoreCriteria Criteria { get; set; }
     }
 }
