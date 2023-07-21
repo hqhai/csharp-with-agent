@@ -52,6 +52,9 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
                                         .ThenInclude(x => x.SectionGroup)
                                         .ThenInclude(x => x!.Sections)
                                         .ThenInclude(x => x.MockTestAnswers)
+                                     .Include(x => x!.MockTestSections)
+                                        .ThenInclude(x => x.SectionGroup)
+                                        .ThenInclude(x => x!.MockTestScores)
                                     .Where(x => x.Id == mockTestResult.MockTestId)
                                     .AsNoTracking()
                                     .FirstOrDefaultAsync(cancellationToken);
