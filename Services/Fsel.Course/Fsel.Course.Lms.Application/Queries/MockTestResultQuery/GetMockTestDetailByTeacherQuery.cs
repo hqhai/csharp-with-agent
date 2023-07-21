@@ -3,10 +3,12 @@
 namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
 {
     using Fsel.Common.ActionResults;
+    using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Infrastructure.Common;
+    using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -53,7 +55,7 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
                                     .Where(x => x.Id == mockTestResult.MockTestId)
                                     .AsNoTracking()
                                     .FirstOrDefaultAsync(cancellationToken);
-
+            var isCheckFull = mockTest!.MockTestType == EnumMockTestType.FullMockTest;
             var mockTestModel = new MockTestModel
             {
                 Id = mockTest!.Id,
@@ -65,7 +67,10 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
                 CreatedUserId = mockTest.CreatedUserId,
                 IsActive = mockTest.UnitSkillMockTests.Any() || mockTest.CourseUnitMockTests.Any(),
                 SectionGroups = mockTest.MockTestSections.Where(x => x.SectionGroup != null)
-                         .Select(x => x.SectionGroup).OrderBy(x => x!.CreatedDate)
+                         .Select(x => x.SectionGroup)
+                         .Where(x => !isCheckFull || (x!.CourseSkill != EnumCourseSkill.Reading || x.CourseSkill != EnumCourseSkill.Listening))
+                         .Where(x => x!.CourseSkill == EnumCourseSkill.Speaking || x.CourseSkill == EnumCourseSkill.Writing)
+                         .OrderBy(x => x!.CreatedDate)
                          .Select(x => _sectionConverter.GetSectionGroupModel(x, false)).ToList(),
                 MockTestResult = mockTest.MockTestResults.Where(x => x.Id == mockTestResult.Id)
                 .Select(x => new MockTestResultModel

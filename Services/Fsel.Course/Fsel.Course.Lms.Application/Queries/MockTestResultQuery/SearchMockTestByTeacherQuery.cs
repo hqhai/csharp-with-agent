@@ -57,7 +57,7 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
                                                                             Type = x.MockTest!.MockTestType,
                                                                             CourseSkill = x.MockTest.MockTestSections.Select(x => x.SectionGroup).Select(x => x!.CourseSkill).FirstOrDefault()
                                                                         });
-
+            mockTestResultQuery = mockTestResultQuery.Where(x => x.CourseSkill == EnumCourseSkill.Speaking || x.CourseSkill == EnumCourseSkill.Writing || x.Type == EnumMockTestType.FullMockTest);
             //Keyword
             if (!string.IsNullOrEmpty(request.Keyword))
             {
