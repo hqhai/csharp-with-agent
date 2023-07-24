@@ -14,22 +14,22 @@ namespace Fsel.Interaction.Application.Commands.SupportCategoryCmd
     using MediatR;
     using Microsoft.AspNetCore.Http;
 
-    public class UpdateSupportCategoryCommand : UpdateSupportCategoryCommandModel, IRequest<MethodResult<SupportCategoryModel>>
+    public class UpdateStatusSupportCategoryCommand : UpdateStatusSupportCategoryCommandModel, IRequest<MethodResult<SupportCategoryModel>>
     {
     }
 
-    public class UpdateSupportCategoryCommandHandler : IRequestHandler<UpdateSupportCategoryCommand, MethodResult<SupportCategoryModel>>
+    public class UpdateStatusSupportCategoryCommandHandler : IRequestHandler<UpdateStatusSupportCategoryCommand, MethodResult<SupportCategoryModel>>
     {
         private readonly IMapper _mapper;
         private readonly ISupportCategoryRepository _supportCategoryRepository;
 
-        public UpdateSupportCategoryCommandHandler(IMapper mapper, ISupportCategoryRepository supportCategoryRepository)
+        public UpdateStatusSupportCategoryCommandHandler(IMapper mapper, ISupportCategoryRepository supportCategoryRepository)
         {
             _mapper = mapper;
             _supportCategoryRepository = supportCategoryRepository;
         }
 
-        public async Task<MethodResult<SupportCategoryModel>> Handle(UpdateSupportCategoryCommand request, CancellationToken cancellationToken)
+        public async Task<MethodResult<SupportCategoryModel>> Handle(UpdateStatusSupportCategoryCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<SupportCategoryModel> methodResult = new MethodResult<SupportCategoryModel>();
@@ -39,7 +39,7 @@ namespace Fsel.Interaction.Application.Commands.SupportCategoryCmd
 
             if (supportCategory == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSupportCategoryErrorCode.SupportCategoryNotExist));
+                methodResult.AddErrorBadRequest(nameof(EnumSupportQuestionErrorCode.SupportQuestionNotExist));
                 return methodResult;
             }
             _mapper.Map(request, supportCategory);

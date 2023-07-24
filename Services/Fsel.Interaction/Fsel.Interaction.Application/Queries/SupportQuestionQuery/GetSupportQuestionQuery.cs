@@ -3,18 +3,13 @@
 namespace Fsel.Interaction.Application.Queries.SupportQuestionQuery
 {
     using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
     using System.Threading;
     using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Common.ActionResults;
-    using Fsel.Interaction.Application.Queries.SupportCategoryQuery;
     using Fsel.Interaction.Domain.Enums.ErrorCodes;
     using Fsel.Interaction.Domain.IRepositories;
     using Fsel.Interaction.Domain.Models.EntityModels;
-    using Fsel.Interaction.Infrastructure.Repositories;
     using MediatR;
     using Microsoft.AspNetCore.Http;
 
@@ -22,6 +17,7 @@ namespace Fsel.Interaction.Application.Queries.SupportQuestionQuery
     {
         public Guid Id { get; set; }
     }
+
     public class GetSupportQuestionQueryHandler : IRequestHandler<GetSupportQuestionQuery, MethodResult<SupportQuestionModel>>
     {
         private readonly IMapper _mapper;

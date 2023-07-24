@@ -10,7 +10,6 @@ namespace Fsel.Interaction.Application.Queries.SupportTicketQuery
     using Fsel.Interaction.Domain.Enums.ErrorCodes;
     using Fsel.Interaction.Domain.IRepositories;
     using Fsel.Interaction.Domain.Models.EntityModels;
-    using Fsel.Interaction.Infrastructure.Repositories;
     using MediatR;
     using Microsoft.AspNetCore.Http;
 

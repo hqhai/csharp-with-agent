@@ -9,7 +9,5 @@ namespace Fsel.Interaction.Domain.Models.CommandModels.SupportCategorys
         public string? Name { get; set; }
 
         public string? IconPath { get; set; }
-
-        public bool IsActive { get; set; }
     }
 }

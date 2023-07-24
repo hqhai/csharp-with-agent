@@ -12,8 +12,6 @@ namespace Fsel.Interaction.Domain.Models.CommandModels.SupportQuestions
 
         public string? Content { get; set; }
 
-        public bool IsActive { get; set; }
-
         public Guid SupportCategoryId { get; set; }
     }
 }

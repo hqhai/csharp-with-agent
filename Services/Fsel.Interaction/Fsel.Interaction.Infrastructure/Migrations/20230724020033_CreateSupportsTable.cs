@@ -111,7 +111,7 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                     UserCode = table.Column<string>(type: "nvarchar(250)", maxLength: 250, nullable: false),
                     Email = table.Column<string>(type: "nvarchar(250)", maxLength: 250, nullable: false),
                     Content = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: false),
-                    FilePaths = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: false),
+                    FilePathsStr = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: false),
                     OtherProblem = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: false),
                     Status = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     SupportCategoryId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),

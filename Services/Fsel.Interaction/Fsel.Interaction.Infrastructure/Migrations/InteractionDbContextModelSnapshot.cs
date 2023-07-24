@@ -712,7 +712,7 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                         .HasMaxLength(250)
                         .HasColumnType("nvarchar(250)");
 
-                    b.Property<string>("FilePaths")
+                    b.Property<string>("FilePathsStr")
                         .IsRequired()
                         .HasMaxLength(1000)
                         .HasColumnType("nvarchar(1000)");

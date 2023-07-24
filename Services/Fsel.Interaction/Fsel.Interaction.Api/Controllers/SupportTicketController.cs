@@ -41,10 +41,10 @@ namespace Fsel.Interaction.Api.Controllers
         /// <summary>
         /// Update a Support Ticket
         /// </summary>
-        [HttpPut("{id}")]
+        [HttpPut("update-status/{id}")]
         [ProducesResponseType(typeof(MethodResult<SupportTicketModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> Update([FromRoute] Guid id, [FromBody] UpdateStatusSupportTicketCommand command)
+        public async Task<IActionResult> UpdateStatus([FromRoute] Guid id, [FromBody] UpdateStatusSupportTicketCommand command)
         {
             ArgumentNullException.ThrowIfNull(command);
             command.Id = id;

@@ -3,9 +3,6 @@
 namespace Fsel.Interaction.Application.Commands.SupportCategoryCmd
 {
     using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
@@ -18,6 +15,7 @@ namespace Fsel.Interaction.Application.Commands.SupportCategoryCmd
     {
         public Guid Id { get; set; }
     }
+
     public class DeleteSupportCategoryCommandHandler : IRequestHandler<DeleteSupportCategoryCommand, MethodResult<bool>>
     {
         private readonly ISupportCategoryRepository _supportCategoryRepository;

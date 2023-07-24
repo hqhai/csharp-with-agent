@@ -3,9 +3,6 @@
 namespace Fsel.Interaction.Application.Queries.SupportCategoryQuery
 {
     using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
     using System.Threading;
     using System.Threading.Tasks;
     using AutoMapper;
@@ -20,6 +17,7 @@ namespace Fsel.Interaction.Application.Queries.SupportCategoryQuery
     {
         public Guid Id { get; set; }
     }
+
     public class GetSupportCategoryQueryHandler : IRequestHandler<GetSupportCategoryQuery, MethodResult<SupportCategoryModel>>
     {
         private readonly IMapper _mapper;

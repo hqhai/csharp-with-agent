@@ -6,6 +6,8 @@ namespace Fsel.Interaction.Domain.Entities
     using System.ComponentModel.DataAnnotations;
     using Fsel.Core.Entities;
     using Fsel.Shared.Enums;
+    using Fsel.Common.Helpers;
+    using System.ComponentModel.DataAnnotations.Schema;
 
     public class SupportTicket : Entity
     {
@@ -50,7 +52,14 @@ namespace Fsel.Interaction.Domain.Entities
         /// </summary>
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         [MaxLength(1000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
-        public string? FilePaths { get; set; }
+        public string? FilePathsStr { get; set; }
+
+        [NotMapped]
+        public IList<string>? FilePaths
+        {
+            get { return ConvertHelper.Deserialize<IList<string>>(FilePathsStr); }
+            set { FilePathsStr = ConvertHelper.Serialize(value); }
+        }
         /// <summary>
         /// Vấn đề khác 
         /// </summary>

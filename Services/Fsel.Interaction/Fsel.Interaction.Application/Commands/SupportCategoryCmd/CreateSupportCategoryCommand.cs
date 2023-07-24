@@ -3,9 +3,6 @@
 namespace Fsel.Interaction.Application.Commands.SupportCategoryCmd
 {
     using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
     using System.Threading;
     using System.Threading.Tasks;
     using AutoMapper;
@@ -20,6 +17,7 @@ namespace Fsel.Interaction.Application.Commands.SupportCategoryCmd
     public class CreateSupportCategoryCommand : CreateSupportCategoryCommandModel, IRequest<MethodResult<SupportCategoryModel>>
     {
     }
+
     public class CreateSupportCategoryCommandHandler : IRequestHandler<CreateSupportCategoryCommand, MethodResult<SupportCategoryModel>>
     {
         private readonly IMapper _mapper;
@@ -39,6 +37,7 @@ namespace Fsel.Interaction.Application.Commands.SupportCategoryCmd
             SupportCategory supportCategory = _mapper.Map<SupportCategory>(request);
             await _supportCategoryRepository.ExecuteTransactionAsync(async () =>
             {
+                supportCategory.IsActive = true;
                 supportCategory = _supportCategoryRepository.Add(supportCategory);
                 await _supportCategoryRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 

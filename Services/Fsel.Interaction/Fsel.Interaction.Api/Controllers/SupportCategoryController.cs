@@ -11,6 +11,7 @@ namespace Fsel.Interaction.Api.Controllers
     using Fsel.Interaction.Domain.Models.EntityModels;
     using Fsel.Interaction.Application.Queries.SupportCategoryQuery;
     using Fsel.Interaction.Application.Commands.SupportCategoryCmd;
+    using Fsel.Interaction.Application.Commands.SupportQuetionCmd;
 
     [ApiVersion(Settings.APIVersion)]
     [Route(Settings.APIDefaultRoute + "/support-category")]
@@ -82,6 +83,20 @@ namespace Fsel.Interaction.Api.Controllers
         public async Task<IActionResult> Get([FromRoute] Guid id)
         {
             MethodResult<SupportCategoryModel> commandResult = await _mediator.Send(new GetSupportCategoryQuery { Id = id }).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Update a Support Category
+        /// </summary>
+        [HttpPut("update-status/{id}")]
+        [ProducesResponseType(typeof(MethodResult<SupportCategoryModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> UpdateStatus([FromRoute] Guid id, [FromBody] UpdateStatusSupportCategoryCommand command)
+        {
+            ArgumentNullException.ThrowIfNull(command);
+            command.Id = id;
+            MethodResult<SupportCategoryModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
     }

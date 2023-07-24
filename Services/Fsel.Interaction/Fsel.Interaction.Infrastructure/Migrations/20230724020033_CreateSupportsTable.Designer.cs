@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fsel.Interaction.Infrastructure.Migrations
 {
     [DbContext(typeof(InteractionDbContext))]
-    [Migration("20230721102121_CreateSupportsTable")]
+    [Migration("20230724020033_CreateSupportsTable")]
     partial class CreateSupportsTable
     {
         /// <inheritdoc />
@@ -715,7 +715,7 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                         .HasMaxLength(250)
                         .HasColumnType("nvarchar(250)");
 
-                    b.Property<string>("FilePaths")
+                    b.Property<string>("FilePathsStr")
                         .IsRequired()
                         .HasMaxLength(1000)
                         .HasColumnType("nvarchar(1000)");

@@ -14,22 +14,22 @@ namespace Fsel.Interaction.Application.Commands.SupportQuetionCmd
     using MediatR;
     using Microsoft.AspNetCore.Http;
 
-    public class UpdateSupportQuestionComand : UpdateSupportQuestionCommandModel, IRequest<MethodResult<SupportQuestionModel>>
+    public class UpdateStatusSupportQuestionCommand : UpdateStatusSupportQuestionCommandModel, IRequest<MethodResult<SupportQuestionModel>>
     {
     }
 
-    public class UpdateSupportQuestionComandHandler : IRequestHandler<UpdateSupportQuestionComand, MethodResult<SupportQuestionModel>>
+    public class UpdateStatusSupportQuestionCommandHandler : IRequestHandler<UpdateStatusSupportQuestionCommand, MethodResult<SupportQuestionModel>>
     {
         private readonly IMapper _mapper;
         private readonly ISupportQuestionRepository _supportQuestionRepository;
 
-        public UpdateSupportQuestionComandHandler(IMapper mapper, ISupportQuestionRepository supportQuestionRepository)
+        public UpdateStatusSupportQuestionCommandHandler(IMapper mapper, ISupportQuestionRepository supportQuestionRepository)
         {
             _mapper = mapper;
             _supportQuestionRepository = supportQuestionRepository;
         }
 
-        public async Task<MethodResult<SupportQuestionModel>> Handle(UpdateSupportQuestionComand request, CancellationToken cancellationToken)
+        public async Task<MethodResult<SupportQuestionModel>> Handle(UpdateStatusSupportQuestionCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<SupportQuestionModel> methodResult = new MethodResult<SupportQuestionModel>();

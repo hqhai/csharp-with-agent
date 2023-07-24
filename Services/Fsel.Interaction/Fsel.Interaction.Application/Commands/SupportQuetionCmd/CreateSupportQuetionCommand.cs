@@ -11,7 +11,6 @@ namespace Fsel.Interaction.Application.Commands.SupportQuetionCmd
     using Fsel.Interaction.Domain.IRepositories;
     using Fsel.Interaction.Domain.Models.CommandModels.SupportQuestions;
     using Fsel.Interaction.Domain.Models.EntityModels;
-    using Fsel.Interaction.Infrastructure.Repositories;
     using MediatR;
     using Microsoft.AspNetCore.Http;
 
@@ -36,7 +35,7 @@ namespace Fsel.Interaction.Application.Commands.SupportQuetionCmd
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<SupportQuestionModel> methodResult = new MethodResult<SupportQuestionModel>();
-            
+
             SupportQuestion supportQuestion = _mapper.Map<SupportQuestion>(request);
             if (!await _supportCategoryRepository.AnyAsync(request.SupportCategoryId))
             {
@@ -46,6 +45,7 @@ namespace Fsel.Interaction.Application.Commands.SupportQuetionCmd
 
             await _supportQuetionRepository.ExecuteTransactionAsync(async () =>
             {
+                supportQuestion.IsActive = true;
                 supportQuestion = _supportQuetionRepository.Add(supportQuestion);
                 await _supportQuetionRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 

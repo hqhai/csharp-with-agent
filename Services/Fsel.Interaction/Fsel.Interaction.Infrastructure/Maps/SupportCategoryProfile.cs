@@ -15,6 +15,7 @@ namespace Fsel.Interaction.Infrastructure.Maps
             CreateMap<SupportCategory, SupportCategoryModel>().IgnoreAllNonExisting();
             CreateMap<CreateSupportCategoryCommandModel, SupportCategory>().IgnoreAllNonExisting();
             CreateMap<UpdateSupportCategoryCommandModel, SupportCategory>().IgnoreAllNonExisting();
+            CreateMap<UpdateStatusSupportCategoryCommandModel, SupportCategory>().IgnoreAllNonExisting();
         }
     }
 }

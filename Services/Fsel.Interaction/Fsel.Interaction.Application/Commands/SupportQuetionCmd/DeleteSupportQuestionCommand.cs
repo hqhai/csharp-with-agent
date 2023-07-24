@@ -3,13 +3,9 @@
 namespace Fsel.Interaction.Application.Commands.SupportQuetionCmd
 {
     using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
-    using Fsel.Interaction.Application.Commands.SupportCategoryCmd;
     using Fsel.Interaction.Domain.Enums.ErrorCodes;
     using Fsel.Interaction.Domain.IRepositories;
     using MediatR;
@@ -19,6 +15,7 @@ namespace Fsel.Interaction.Application.Commands.SupportQuetionCmd
     {
         public Guid Id { get; set; }
     }
+
     public class DeleteSupportQuestionCommandHandler : IRequestHandler<DeleteSupportQuestionCommand, MethodResult<bool>>
     {
         private readonly ISupportQuestionRepository _supportQuetionRepository;

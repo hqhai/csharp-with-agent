@@ -19,7 +19,7 @@ namespace Fsel.Interaction.Domain.Models.EntityModels
 
         public string? Content { get; set; }
 
-        public string? FilePaths { get; set; }
+        public IList<string>? FilePaths { get; set; }
 
         public string? OtherProblem { get; set; }
 
