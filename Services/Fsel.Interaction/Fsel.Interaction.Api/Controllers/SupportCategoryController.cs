@@ -2,16 +2,15 @@
 
 namespace Fsel.Interaction.Api.Controllers
 {
-    using Fsel.Common.ActionResults;
     using System.Net;
+    using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
     using Fsel.Core.Base.BaseModels;
+    using Fsel.Interaction.Application.Commands.SupportCategoryCmd;
+    using Fsel.Interaction.Application.Queries.SupportCategoryQuery;
+    using Fsel.Interaction.Domain.Models.EntityModels;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
-    using Fsel.Interaction.Domain.Models.EntityModels;
-    using Fsel.Interaction.Application.Queries.SupportCategoryQuery;
-    using Fsel.Interaction.Application.Commands.SupportCategoryCmd;
-    using Fsel.Interaction.Application.Commands.SupportQuetionCmd;
 
     [ApiVersion(Settings.APIVersion)]
     [Route(Settings.APIDefaultRoute + "/support-category")]
@@ -24,6 +23,7 @@ namespace Fsel.Interaction.Api.Controllers
         {
             _mediator = mediator;
         }
+
         /// <summary>
         /// Search Support Category
         /// </summary>
@@ -97,6 +97,18 @@ namespace Fsel.Interaction.Api.Controllers
             ArgumentNullException.ThrowIfNull(command);
             command.Id = id;
             MethodResult<SupportCategoryModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Get Support Category
+        /// </summary>
+        [HttpGet("list-support-category")]
+        [ProducesResponseType(typeof(MethodResult<IList<SupportCategoryModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> Get()
+        {
+            MethodResult<IList<SupportCategoryModel>> commandResult = await _mediator.Send(new GetListSupportCategoryQuery()).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
     }

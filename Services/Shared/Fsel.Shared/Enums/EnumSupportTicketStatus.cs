@@ -4,6 +4,6 @@ namespace Fsel.Shared.Enums
 {
     public enum EnumSupportTicketStatus
     {
-        Seen, Solved, All, NotSeen
+        NotSeen, Seen, Solved
     }
 }

@@ -2,17 +2,15 @@
 
 namespace Fsel.Interaction.Api.Controllers
 {
-    using Fsel.Common.ActionResults;
     using System.Net;
+    using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
     using Fsel.Core.Base.BaseModels;
-    using Fsel.Interaction.Application.Queries.SupportQuestionQuery;
+    using Fsel.Interaction.Application.Commands.SupportTicketCmd;
+    using Fsel.Interaction.Application.Queries.SupportTicketQuery;
     using Fsel.Interaction.Domain.Models.EntityModels;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
-    using Fsel.Interaction.Application.Commands.SupportQuetionCmd;
-    using Fsel.Interaction.Application.Queries.SupportTicketQuery;
-    using Fsel.Interaction.Application.Commands.SupportTicketCmd;
 
     [ApiVersion(Settings.APIVersion)]
     [Route(Settings.APIDefaultRoute + "/support-ticket")]
@@ -25,6 +23,7 @@ namespace Fsel.Interaction.Api.Controllers
         {
             _mediator = mediator;
         }
+
         /// <summary>
         /// Search Support Ticket
         /// </summary>
@@ -36,7 +35,6 @@ namespace Fsel.Interaction.Api.Controllers
             MethodResult<PagingItemsModel<SupportTicketModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
-
 
         /// <summary>
         /// Update a Support Ticket
@@ -51,6 +49,7 @@ namespace Fsel.Interaction.Api.Controllers
             MethodResult<SupportTicketModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
+
         /// <summary>
         /// Get Support Ticket
         /// </summary>
@@ -61,6 +60,18 @@ namespace Fsel.Interaction.Api.Controllers
         {
             MethodResult<SupportTicketModel> commandResult = await _mediator.Send(new GetSupportTicketQuery { Id = id }).ConfigureAwait(false);
             return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Create a Support Ticket
+        /// </summary>
+        [HttpPost]
+        [ProducesResponseType(typeof(MethodResult<SupportTicketModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> Create([FromBody] CreateSupportTicketCommand command)
+        {
+            MethodResult<SupportTicketModel> queryResult = await _mediator.Send(command).ConfigureAwait(false);
+            return queryResult.GetActionResult();
         }
     }
 }
