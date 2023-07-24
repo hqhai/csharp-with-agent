@@ -18,6 +18,7 @@ namespace Fsel.Course.Domain.Models.CommandModels.ExtraPractices
         public string? BookFilePath { get; set; }
         public string? BookCoverPath { get; set; }
         public string? BookBackgroundPath { get; set; }
+        public string? ImagePath { get; set; }
         public string? VideoLink { get; set; }
         public string? Author { get; set; }
         public string? Abstract { get; set; }

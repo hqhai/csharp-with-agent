@@ -58,7 +58,11 @@ namespace Fsel.Course.Lms.Application.Queries.VideoQuery
 
             var video = await _videoRepository.Queryable
                                 .Include(x => x.LessonVideos.Where(y => !y.IsDeleted))
-                                .Include(i => i.VideoTimeCodes.Where(x => !x.IsDeleted))
+                                     .Include(i => i.VideoTimeCodes.Where(x => !x.IsDeleted))
+                                     .ThenInclude(x => x.TimeCodeExercises)
+                                     .ThenInclude(x => x.Exercise)
+                                     .ThenInclude(x => x.ExerciseQuestions)
+                                     .ThenInclude(x => x.Question)
                                 .Include(i => i.VideoResults.Where(x => !x.IsDeleted))
                                 .Where(x => x.Id == request.VideoId)
                                 .AsNoTracking()

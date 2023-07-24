@@ -334,7 +334,7 @@ namespace Fsel.Course.Infrastructure.Common
             return methodResult;
         }
 
-        public async Task<ExtraPracticeModel> GetExtraPracticeInChapter(Guid id, Guid studentId)
+        public async Task<ExtraPracticeModel> GetExtraPracticeInChapter(Guid id, Guid extraPracticeResultId)
         {
             var extraPractice = await _extraPracticeRepository.Queryable
                                                                   .Include(x => x.ExtraPracticeResults.Where(y => !y.IsDeleted))
@@ -349,8 +349,6 @@ namespace Fsel.Course.Infrastructure.Common
                                                                       .ThenInclude(x => x.ExtraPracticeExerciseResults)
                                                                       .AsNoTracking()
                                                                   .FirstOrDefaultAsync(x => x.Id == id);
-            var extraPracticeResult = extraPractice != null ? extraPractice.ExtraPracticeResults.FirstOrDefault(y => y.StudentId == studentId) : null;
-            var checkDone = extraPractice != null && extraPracticeResult != null && extraPracticeResult.Status == EnumResultStatus.Done;
             var extraPracticeModel = new ExtraPracticeModel
             {
                 Id = extraPractice!.Id,
@@ -403,7 +401,8 @@ namespace Fsel.Course.Infrastructure.Common
                                 ResultAnswer = _mapper.Map<AnswerModel>(m.ExtraPracticeAnswers!.FirstOrDefault())
                             }).ToList(),
                         },
-                        ExtraPracticeExerciseResult = x.ExtraPracticeExerciseResults.Where(y => y.StudentId == studentId && y.ExtraPracticeExerciseId == x.Id).Select(x => new ExtraPracticeExerciseResultModel
+                        ExtraPracticeExerciseResult = x.ExtraPracticeExerciseResults.Where(y => y.ExtraPracticeResultId == extraPracticeResultId && y.ExtraPracticeExerciseId == x.Id)
+                        .Select(x => new ExtraPracticeExerciseResultModel
                         {
                             Id = x.Id,
                             CorrectCount = x.CorrectCount,
@@ -416,22 +415,23 @@ namespace Fsel.Course.Infrastructure.Common
                         }).FirstOrDefault()
                     }).ToList(),
                 }).ToList(),
-                ExtraPracticeResult = extraPracticeResult != null ? new ExtraPraticeResultModel
+                ExtraPracticeResult = extraPractice.ExtraPracticeResults.Where(x => x.Id == extraPracticeResultId).Select(x => new ExtraPraticeResultModel
                 {
-                    Id = extraPracticeResult.Id,
-                    CorrectCount = extraPracticeResult.CorrectCount,
-                    CorrectTotal = extraPracticeResult.CorrectTotal,
-                    SkillScores = extraPracticeResult.SkillScores,
-                    Percent = extraPracticeResult.Percent,
-                    Status = extraPracticeResult.Status,
-                    StudentId = extraPracticeResult.StudentId,
-                    ExtraPracticeId = extraPracticeResult.ExtraPracticeId
-                } : null
+                    Id = x.Id,
+                    CorrectCount = x.CorrectCount,
+                    CorrectTotal = x.CorrectTotal,
+                    SkillScores = x.SkillScores,
+                    Percent = x.Percent,
+                    Status = x.Status,
+                    StudentId = x.StudentId,
+                    ExtraPracticeId = x.ExtraPracticeId
+                }).FirstOrDefault()
             };
+
             return extraPracticeModel;
         }
 
-        public async Task<ExtraPracticeModel> GetExtraPracticeInVideo(Guid id, Guid studentId)
+        public async Task<VideoModel> GetExtraPracticeInVideo(Guid id, Guid studentId)
         {
             var extraPracticeResult = await _extraPracticeResultRepository.Queryable.FirstOrDefaultAsync(x => x.StudentId == studentId && x.ExtraPracticeId == id);
             var extraPractice = await _extraPracticeRepository.Queryable
@@ -512,9 +512,8 @@ namespace Fsel.Course.Infrastructure.Common
             return extraPracticeModel;
         }
 
-        public async Task<ExtraPracticeModel> GetExtraPracticeInExercise(Guid id, Guid studentId)
+        public async Task<ExtraPracticeModel> GetExerciseInExtraPractice(Guid id, Guid extraPracticeResultId)
         {
-            var extraPracticeResult = await _extraPracticeResultRepository.Queryable.FirstOrDefaultAsync(x => x.StudentId == studentId && x.ExtraPracticeId == id);
             var extraPractice = await _extraPracticeRepository.Queryable
                                                                   .Include(x => x.ExtraPracticeResults.Where(y => !y.IsDeleted))
                                                                   .Include(x => x!.ExtraPracticeExercises.Where(x => !x.IsDeleted))
@@ -523,11 +522,10 @@ namespace Fsel.Course.Infrastructure.Common
                                                                         .ThenInclude(x => x.Question)
                                                                         .ThenInclude(x => x!.ExtraPracticeAnswers.Where(x => !x.IsDeleted))
                                                                  .Include(x => x.ExtraPracticeExercises.Where(y => !y.IsDeleted))
-                                                                      .ThenInclude(x => x.ExtraPracticeExerciseResults.Where(y => !y.IsDeleted && y.StudentId == studentId))
+                                                                      .ThenInclude(x => x.ExtraPracticeExerciseResults.Where(y => y.ExtraPracticeResultId == extraPracticeResultId))
                                                                    .Where(x => x.Id == id)
                                                                         .AsNoTracking()
                                                                   .FirstOrDefaultAsync();
-            var checkDone = extraPractice != null && extraPracticeResult != null && extraPracticeResult.Status == EnumResultStatus.Done;
             var extraPracticeModel = new ExtraPracticeModel
             {
                 Id = extraPractice!.Id,
@@ -554,18 +552,9 @@ namespace Fsel.Course.Infrastructure.Common
                         Id = x.Exercise!.Id,
                         MediaPost = x.Exercise.MediaPost,
                         CourseSkill = x.Exercise.CourseSkill,
-                        Questions = x.Exercise.ExerciseQuestions.Select(x => x.Question).OrderBy(x => x!.CreatedDate).Select(m => new QuestionModel()
-                        {
-                            Id = m!.Id,
-                            QuestionType = m!.QuestionType,
-                            CorrectTotal = m!.CorrectTotal,
-                            Explanation = m!.Explanation,
-                            Ungraded = m!.Ungraded,
-                            Config = _questionTypeConverter.QuestionTypeConverterObject(m!.Config, m!.QuestionType, isDisableAnswers: true).Item1,
-                            ResultAnswer = _mapper.Map<AnswerModel>(m.ExtraPracticeAnswers!.FirstOrDefault())
-                        }).ToList(),
                     },
-                    ExtraPracticeExerciseResult = x.ExtraPracticeExerciseResults.Select(x => new ExtraPracticeExerciseResultModel
+                    ExtraPracticeExerciseResult = x.ExtraPracticeExerciseResults.Where(y => y.ExtraPracticeResultId == extraPracticeResultId && y.ExtraPracticeExerciseId == x.Id)
+                    .Select(x => new ExtraPracticeExerciseResultModel
                     {
                         Id = x.Id,
                         CorrectCount = x.CorrectCount,
@@ -577,7 +566,7 @@ namespace Fsel.Course.Infrastructure.Common
                         ExtraPracticeExerciseId = x.ExtraPracticeExerciseId,
                     }).FirstOrDefault()
                 }).ToList(),
-                ExtraPracticeResult = extraPractice.ExtraPracticeResults.Where(m => !m.IsDeleted && m.StudentId == studentId).Select(x => new ExtraPraticeResultModel
+                ExtraPracticeResult = extraPractice.ExtraPracticeResults.Where(m => m.Id == extraPracticeResultId).Select(x => new ExtraPraticeResultModel
                 {
                     Id = x.Id,
                     CorrectCount = x.CorrectCount,
@@ -607,9 +596,8 @@ namespace Fsel.Course.Infrastructure.Common
             return extraPracticeModel;
         }
 
-        public async Task<ExtraPracticeModel> GetExtraPracticeInPlacementTestIelst(Guid id, Guid studentId)
+        public async Task<ExtraPracticeModel> GetExtraPracticeInPlacementTestIelst(Guid id, Guid extraPracticeResultId)
         {
-            var extraPracticeResult = await _extraPracticeResultRepository.Queryable.FirstOrDefaultAsync(x => x.StudentId == studentId && x.ExtraPracticeId == id);
             var extraPractice = await _extraPracticeRepository.Queryable.Include(x => x.ExtraPracticeResults.Where(x => !x.IsDeleted))
                                                                   .Include(x => x.PlacementTest)
                                                                   .ThenInclude(x => x!.PlacementTestSections.Where(x => !x.IsDeleted))
@@ -618,7 +606,7 @@ namespace Fsel.Course.Infrastructure.Common
                                                                   .ThenInclude(x => x.SectionParts.Where(x => !x.IsDeleted))
                                                                   .ThenInclude(x => x.SectionQuestions.Where(x => !x.IsDeleted))
                                                                   .ThenInclude(x => x.Question)
-                                                                  .ThenInclude(x => x!.ExtraPracticeAnswers.Where(x => x.ExtraPracticeResultId == extraPracticeResult!.Id && !x.IsDeleted))
+                                                                  .ThenInclude(x => x!.ExtraPracticeAnswers.Where(x => x.ExtraPracticeResultId == extraPracticeResultId))
                                                                   .AsNoTracking()
                                                                   .FirstOrDefaultAsync(x => x.Id == id);
 
@@ -677,7 +665,7 @@ namespace Fsel.Course.Infrastructure.Common
                         }).ToList(),
                     }).ToList(),
                 },
-                ExtraPracticeResult = extraPractice.ExtraPracticeResults.Where(m => m.StudentId == studentId).Select(x => new ExtraPraticeResultModel
+                ExtraPracticeResult = extraPractice.ExtraPracticeResults.Where(m => m.Id == extraPracticeResultId).Select(x => new ExtraPraticeResultModel
                 {
                     Id = x.Id,
                     CorrectCount = x.CorrectCount,
@@ -692,10 +680,8 @@ namespace Fsel.Course.Infrastructure.Common
             return extraPracticeModel;
         }
 
-        public async Task<ExtraPracticeModel> GetExtraPracticeInPlacementTestAcademic(Guid id, Guid studentId)
+        public async Task<ExtraPracticeModel> GetExtraPracticeInPlacementTestAcademic(Guid id, Guid extraPracticeResultId)
         {
-            var extraPracticeResult = await _extraPracticeResultRepository.Queryable.FirstOrDefaultAsync(x => x.StudentId == studentId && x.ExtraPracticeId == id);
-
             var extraPractice = await _extraPracticeRepository.Queryable.Include(x => x.ExtraPracticeResults.Where(x => !x.IsDeleted))
                                                                   .Include(x => x.PlacementTest)
                                                                   .ThenInclude(x => x!.PlacementTestSections.Where(x => !x.IsDeleted))
@@ -703,7 +689,7 @@ namespace Fsel.Course.Infrastructure.Common
                                                                   .ThenInclude(x => x!.Sections.Where(x => !x.IsDeleted))
                                                                   .ThenInclude(x => x.SectionQuestions.Where(x => !x.IsDeleted))
                                                                   .ThenInclude(x => x.Question)
-                                                                  .ThenInclude(x => x!.ExtraPracticeAnswers.Where(x => x.ExtraPracticeResultId == extraPracticeResult!.Id && !x.IsDeleted))
+                                                                  .ThenInclude(x => x!.ExtraPracticeAnswers.Where(x => x.ExtraPracticeResultId == extraPracticeResultId))
                                                                   .Where(x => x.Id == id)
                                                                   .AsNoTracking()
                                                                   .FirstOrDefaultAsync();
@@ -757,7 +743,7 @@ namespace Fsel.Course.Infrastructure.Common
                         }).ToList(),
                     }).ToList(),
                 },
-                ExtraPracticeResult = extraPractice.ExtraPracticeResults.Where(m => !m.IsDeleted && m.StudentId == studentId).Select(x => new ExtraPraticeResultModel
+                ExtraPracticeResult = extraPractice.ExtraPracticeResults.Where(m => m.Id == extraPracticeResultId).Select(x => new ExtraPraticeResultModel
                 {
                     Id = x.Id,
                     CorrectCount = x.CorrectCount,
@@ -772,80 +758,34 @@ namespace Fsel.Course.Infrastructure.Common
             return extraPracticeModel;
         }
 
-        public async Task<ExtraPracticeModel> GetExtraPracticeInMockTest(Guid id, Guid studentId)
+        public async Task<MockTestModel> GetMockTestModel(Guid id)
         {
-            var extraPracticeResult = await _extraPracticeResultRepository.Queryable.FirstOrDefaultAsync(x => x.StudentId == studentId && x.ExtraPracticeId == id);
             var extraPractice = await _extraPracticeRepository.Queryable.Include(x => x.MockTest)
                                                                         .ThenInclude(x => x!.MockTestSections)
                                                                         .ThenInclude(x => x.SectionGroup)
-                                                                        .ThenInclude(x => x!.Sections.Where(x => !x.IsDeleted))
-                                                                        .ThenInclude(x => x.SectionParts.Where(x => !x.IsDeleted))
-                                                                        .ThenInclude(x => x.SectionQuestions.Where(x => !x.IsDeleted))
-                                                                        .ThenInclude(x => x.Question)
-                                                                        .ThenInclude(x => x!.ExtraPracticeAnswers.Where(x => x.ExtraPracticeResultId == extraPracticeResult!.Id))
-                                                                   .Include(x => x.MockTest)
-                                                                        .ThenInclude(x => x!.MockTestSections.Where(x => !x.IsDeleted))
-                                                                        .ThenInclude(x => x.SectionGroup)
-                                                                        .ThenInclude(x => x!.Sections.Where(x => !x.IsDeleted))
-                                                                        .ThenInclude(x => x.SectionTimeCodes.Where(x => !x.IsDeleted))
-                                                                        .ThenInclude(x => x.ExtraPracticeAnswers.Where(x => x.ExtraPracticeResultId == extraPracticeResult!.Id))
-                                                                  .Include(x => x.MockTest)
-                                                                        .ThenInclude(x => x!.MockTestSections.Where(x => !x.IsDeleted))
-                                                                        .ThenInclude(x => x.SectionGroup)
-                                                                        .ThenInclude(x => x!.Sections.Where(x => !x.IsDeleted))
-                                                                        .ThenInclude(x => x.ExtraPracticeAnswers.Where(x => x.ExtraPracticeResultId == extraPracticeResult!.Id))
-                                                                  .Include(x => x!.ExtraPracticeResults)
-                                                                  .Where(x => x.Id == id)
-                                                                        .AsNoTracking()
-                                                                  .FirstOrDefaultAsync();
-            var extraPracticeModel = new ExtraPracticeModel
+                                                                        .FirstOrDefaultAsync(x => x.Id == id);
+            var mockTestModel = new MockTestModel
             {
-                Id = extraPractice!.Id,
-                Abstract = extraPractice.Abstract,
-                Author = extraPractice.Author,
-                Code = extraPractice.Code,
-                CourseLevel = extraPractice.CourseLevel,
-                BookFilePath = extraPractice.BookFilePath,
-                BookCoverPath = extraPractice.BookCoverPath,
-                BookBackgroundPath = extraPractice.BookBackgroundPath,
-                InstructionContent = extraPractice.InstructionContent,
-                IsActive = extraPractice.IsActive,
-                Name = extraPractice.Name,
-                Type = extraPractice.Type,
-                VideoLink = extraPractice.VideoLink,
-                MockTest = new MockTestModel
-                {
-                    Id = extraPractice.MockTest!.Id,
-                    Name = extraPractice.MockTest.Name,
-                    MockTestType = extraPractice.MockTest.MockTestType,
-                    CourseType = extraPractice.MockTest.CourseType,
-                    CreatedDate = extraPractice.MockTest.CreatedDate,
-                    CreatedFullName = extraPractice.MockTest.CreatedFullName,
-                    CreatedUserId = extraPractice.MockTest.CreatedUserId,
-                    IsActive = extraPractice.MockTest.UnitSkillMockTests.Any() || extraPractice.MockTest.CourseUnitMockTests.Any(),
-                    SectionGroups = extraPractice.MockTest.MockTestSections.Where(x => x.SectionGroup != null)
+                Id = extraPractice.MockTest!.Id,
+                Name = extraPractice.MockTest.Name,
+                MockTestType = extraPractice.MockTest.MockTestType,
+                CourseType = extraPractice.MockTest.CourseType,
+                CreatedDate = extraPractice.MockTest.CreatedDate,
+                CreatedFullName = extraPractice.MockTest.CreatedFullName,
+                CreatedUserId = extraPractice.MockTest.CreatedUserId,
+                IsActive = extraPractice.MockTest.UnitSkillMockTests.Any() || extraPractice.MockTest.CourseUnitMockTests.Any(),
+                SectionGroups = extraPractice.MockTest.MockTestSections.Where(x => x.SectionGroup != null)
                          .Select(x => x.SectionGroup).OrderBy(x => x!.CreatedDate)
                          .Select(x => _sectionConverter.GetSectionGroupModel(x, true)).ToList(),
-                },
-                ExtraPracticeResult = extraPractice.ExtraPracticeResults.Where(m => m.StudentId == studentId).Select(x => new ExtraPraticeResultModel
-                {
-                    Id = x.Id,
-                    CorrectCount = x.CorrectCount,
-                    CorrectTotal = x.CorrectTotal,
-                    SkillScores = x.SkillScores,
-                    Percent = x.Percent,
-                    Status = x.Status,
-                    StudentId = x.StudentId,
-                    ExtraPracticeId = x.ExtraPracticeId
-                }).FirstOrDefault()
             };
-            return extraPracticeModel;
+            return mockTestModel;
         }
 
-        public async Task<ExtraPracticeModel> GetExtraPracticeInArticles(Guid id, Guid studentId)
+        public async Task<ExtraPracticeModel> GetExtraPracticeModel(Guid id, Guid extraPracticeResultId)
         {
             var extraPractice = await _extraPracticeRepository.Queryable
-                .Include(x => x.ExtraPracticeResults.Where(y => y.StudentId == studentId)).FirstOrDefaultAsync(x => x.Id == id);
+                            .Include(x => x.ExtraPracticeResults)
+                            .FirstOrDefaultAsync(x => x.Id == id);
 
             var extraPracticeModel = new ExtraPracticeModel
             {
@@ -857,12 +797,14 @@ namespace Fsel.Course.Infrastructure.Common
                 BookFilePath = extraPractice.BookFilePath,
                 BookCoverPath = extraPractice.BookCoverPath,
                 BookBackgroundPath = extraPractice.BookBackgroundPath,
+                ImagePath = extraPractice.ImagePath,
                 InstructionContent = extraPractice.InstructionContent,
                 IsActive = extraPractice.IsActive,
                 Name = extraPractice.Name,
                 Type = extraPractice.Type,
                 VideoLink = extraPractice.VideoLink,
-                ExtraPracticeResult = extraPractice.ExtraPracticeResults.Where(m => !m.IsDeleted).Select(x => new ExtraPraticeResultModel
+                ExtraPracticeResult = extraPractice.ExtraPracticeResults.Where(m => m.Id == extraPracticeResultId)
+                .Select(x => new ExtraPraticeResultModel
                 {
                     Id = x.Id,
                     CorrectCount = x.CorrectCount,
@@ -881,42 +823,49 @@ namespace Fsel.Course.Infrastructure.Common
         {
             ArgumentNullException.ThrowIfNull(extraPractice);
             ExtraPracticeModel extraPracticeModel = new ExtraPracticeModel();
-            switch (extraPractice.Type)
+            var extraPracticeResult = await _extraPracticeResultRepository.Queryable.FirstOrDefaultAsync(x => x.StudentId == studentId && x.ExtraPracticeId == extraPractice.Id);
+            if (extraPracticeResult != null)
             {
-                case EnumExtraPracticeType.Book:
-                    extraPracticeModel = await GetExtraPracticeInChapter(extraPractice.Id, studentId);
-                    break;
+                extraPracticeModel = await GetExtraPracticeModel(extraPractice.Id, extraPracticeResult.Id);
+                switch (extraPractice.Type)
+                {
+                    case EnumExtraPracticeType.Book:
 
-                case EnumExtraPracticeType.Exercise:
-                    extraPracticeModel = await GetExtraPracticeInExercise(extraPractice.Id, studentId);
-                    break;
+                        extraPracticeModel = await GetExtraPracticeInChapter(extraPractice.Id, studentId);
+                        break;
 
-                case EnumExtraPracticeType.InteractiveVideo:
-                    extraPracticeModel = await GetExtraPracticeInVideo(extraPractice.Id, studentId);
-                    break;
+                    case EnumExtraPracticeType.Exercise:
+                        extraPracticeModel = await GetExtraPracticeInExercise(extraPractice.Id, studentId);
+                        break;
 
-                case EnumExtraPracticeType.VideoEmbed:
-                    extraPracticeModel = await GetExtraPracticeInExercise(extraPractice.Id, studentId);
-                    break;
+                    case EnumExtraPracticeType.InteractiveVideo:
+                        extraPracticeModel = await GetExtraPracticeInVideo(extraPractice.Id, studentId);
+                        break;
 
-                case EnumExtraPracticeType.Articles:
-                    extraPracticeModel = await GetExtraPracticeInArticles(extraPractice.Id, studentId);
-                    break;
+                    case EnumExtraPracticeType.VideoEmbed:
+                        extraPracticeModel = await GetExtraPracticeModel(extraPractice.Id, extraPracticeResult.Id);
+                        extraPracticeModel = await GetExtraPracticeInExercise(extraPractice.Id, studentId);
+                        break;
 
-                case EnumExtraPracticeType.MockTest:
-                    if (extraPractice.MockTestId != null)
-                    {
-                        extraPracticeModel = await GetExtraPracticeInMockTest(extraPractice.Id, studentId);
-                    }
-                    else
-                    {
-                        extraPracticeModel = await GetExtraPracticeInPlacementTest(extraPractice.Id, studentId);
-                    }
-                    break;
+                    case EnumExtraPracticeType.Articles:
+                        break;
 
-                default:
-                    break;
+                    case EnumExtraPracticeType.MockTest:
+                        if (extraPractice.MockTestId != null)
+                        {
+                            extraPracticeModel = await GetExtraPracticeInMockTest(extraPractice.Id, studentId);
+                        }
+                        else
+                        {
+                            extraPracticeModel = await GetExtraPracticeInPlacementTest(extraPractice.Id, studentId);
+                        }
+                        break;
+
+                    default:
+                        break;
+                }
             }
+
             return extraPracticeModel;
         }
     }

@@ -12,11 +12,11 @@ namespace Fsel.Course.Lms.Application.Queries.ExtraPracticeQuery
     {
     }
 
-    public class GetFilterExtraPracticeQueryHandler : IRequestHandler<GetListLevelByUnitQuery, MethodResult<object>>
+    public class GetListLevelByUnitQueryHandler : IRequestHandler<GetListLevelByUnitQuery, MethodResult<object>>
     {
         private readonly IUnitRepository _unitRepository;
 
-        public GetFilterExtraPracticeQueryHandler(IUnitRepository unitRepository)
+        public GetListLevelByUnitQueryHandler(IUnitRepository unitRepository)
         {
             _unitRepository = unitRepository;
         }
