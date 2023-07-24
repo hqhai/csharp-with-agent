@@ -24,21 +24,21 @@ namespace Fsel.Course.Lms.Application.Queries.ExtraPracticeQuery
     {
         private readonly IExtraPracticeRepository _extraPracticeRepository;
         private readonly IExtraPracticeResultRepository _extraPracticeResultRepository;
-        private readonly IMockTestRepository _mockTestRepository;
+        private readonly IExtraPracticeExerciseRepository _extraPracticeExerciseRepository;
         private readonly IVideoRepository _videoRepository;
         private readonly AuthContext _authContext;
         private readonly IUserService _userService;
 
         public GetExtraPracticeDetailQueryHandler(IExtraPracticeRepository extraPracticeRepository,
             IExtraPracticeResultRepository extraPracticeResultRepository,
-            IMockTestRepository mockTestRepository,
+            IExtraPracticeExerciseRepository extraPracticeExerciseRepository,
             IVideoRepository videoRepository,
             AuthContext authContext,
             IUserService userService)
         {
             _extraPracticeRepository = extraPracticeRepository;
             _extraPracticeResultRepository = extraPracticeResultRepository;
-            _mockTestRepository = mockTestRepository;
+            _extraPracticeExerciseRepository = extraPracticeExerciseRepository;
             _videoRepository = videoRepository;
             _authContext = authContext;
             _userService = userService;
@@ -109,14 +109,15 @@ namespace Fsel.Course.Lms.Application.Queries.ExtraPracticeQuery
 
             return extraPracticeModel;
         }
-        public async Task<VideoModel> GetVideoModel(Guid id)
+
+        public async Task<VideoModel> GetTypeVideoModel(Guid id)
         {
             var videoModel = new VideoModel();
             var video = await _videoRepository.Queryable.Include(x => x.LessonVideos.Where(y => !y.IsDeleted))
                                      .Include(i => i.VideoTimeCodes.Where(x => !x.IsDeleted))
                                      .ThenInclude(x => x.TimeCodeExercises)
                                      .ThenInclude(x => x.Exercise)
-                                     .ThenInclude(x => x.ExerciseQuestions)
+                                     .ThenInclude(x => x!.ExerciseQuestions)
                                      .ThenInclude(x => x.Question)
                                 .Include(i => i.VideoResults.Where(x => !x.IsDeleted))
                                 .Where(x => x.Id == id)
@@ -147,7 +148,38 @@ namespace Fsel.Course.Lms.Application.Queries.ExtraPracticeQuery
             }
             return videoModel;
         }
-        public async Task<ExtraPracticeModel> GetExtraPracticeChapterModel(Guid id, Guid extraPracticeResultId)
+
+        public async Task<IList<ExtraPracticeExerciseModel>> GetTypeExerciseModel(Guid id)
+        {
+            var extraPracticeExerciseModels = new List<ExtraPracticeExerciseModel>();
+            var extraPracticeExercise = await _extraPracticeExerciseRepository.Queryable
+                                     .Include(i => i.Exercise)
+                                     .ThenInclude(x => x!.ExerciseQuestions)
+                                     .ThenInclude(x => x.Question)
+                                     .Where(x => x.ExtraPracticeId == id)
+                                     .AsNoTracking()
+                                     .FirstOrDefaultAsync();
+            if (extraPracticeExercise != null)
+            {
+                var extraPracticeExerciseModel = new ExtraPracticeExerciseModel
+                {
+                    Id = extraPracticeExercise.Id,
+                    CreatedDate = extraPracticeExercise.CreatedDate,
+                    TotalCount = extraPracticeExercise.Exercise!.ExerciseQuestions.Select(x => x.Question).Count(),
+                    Exercise = new ExerciseModel
+                    {
+                        Id = extraPracticeExercise.Exercise!.Id,
+                        Name = extraPracticeExercise.Exercise.Name,
+                        MediaPost = extraPracticeExercise.Exercise.MediaPost,
+                        CourseSkill = extraPracticeExercise.Exercise.CourseSkill,
+                    },
+                };
+                extraPracticeExerciseModels.Add(extraPracticeExerciseModel);
+            }
+            return extraPracticeExerciseModels;
+        }
+
+        public async Task<ExtraPracticeModel> GetTypeBookModel(Guid id, Guid extraPracticeResultId)
         {
             var extraPracticeModel = new ExtraPracticeModel();
             var extraPractice = await _extraPracticeRepository.Queryable.Include(x => x.ExtraPracticeResults.Where(y => !y.IsDeleted))
@@ -209,29 +241,6 @@ namespace Fsel.Course.Lms.Application.Queries.ExtraPracticeQuery
             return extraPracticeModel;
         }
 
-        public async Task<MockTestModel> GetMockTestModel(Guid id)
-        {
-            var extraPractice = await _mockTestRepository.Queryable.Include(x => x!.MockTestSections)
-                                                                    .ThenInclude(x => x.SectionGroup)
-                                                                    .ThenInclude(x => x.Sections)
-                                                                    .ThenInclude(x => x.SectionGroup)
-                                                                    .ThenInclude(x => x.SectionGroup)
-                                                                    .FirstOrDefaultAsync(x => x.Id == id);
-            var mockTestModel = new MockTestModel
-            {
-                Id = extraPractice.MockTest!.Id,
-                Name = extraPractice.MockTest.Name,
-                MockTestType = extraPractice.MockTest.MockTestType,
-                CourseType = extraPractice.MockTest.CourseType,
-                CreatedDate = extraPractice.MockTest.CreatedDate,
-                CreatedFullName = extraPractice.MockTest.CreatedFullName,
-                CreatedUserId = extraPractice.MockTest.CreatedUserId,
-                IsActive = extraPractice.MockTest.UnitSkillMockTests.Any() || extraPractice.MockTest.CourseUnitMockTests.Any(),
-                ExecutionTime = extraPractice.
-            };
-            return mockTestModel;
-        }
-
         public async Task<ExtraPracticeModel> SwitchExtraPractice(ExtraPractice? extraPractice, Guid studentId)
         {
             ArgumentNullException.ThrowIfNull(extraPractice);
@@ -243,33 +252,19 @@ namespace Fsel.Course.Lms.Application.Queries.ExtraPracticeQuery
                 switch (extraPractice.Type)
                 {
                     case EnumExtraPracticeType.Book:
-                        extraPracticeModel = await GetExtraPracticeChapterModel(extraPractice.Id, extraPracticeResult.Id);
+                        extraPracticeModel = await GetTypeBookModel(extraPractice.Id, extraPracticeResult.Id);
                         break;
 
                     case EnumExtraPracticeType.Exercise:
-                        extraPracticeModel = await GetExtraPracticeInExercise(extraPractice.Id, studentId);
+                        extraPracticeModel.ExtraPracticeExercises = await GetTypeExerciseModel(extraPractice.Id);
                         break;
 
                     case EnumExtraPracticeType.InteractiveVideo:
-                        extraPracticeModel.Video = await GetVideoModel(extraPractice.Id);
-                        break;
-
-                    case EnumExtraPracticeType.VideoEmbed:
-                        extraPracticeModel = await GetExtraPracticeInExercise(extraPractice.Id, studentId);
+                        extraPracticeModel.Video = await GetTypeVideoModel(extraPractice.Id);
                         break;
 
                     case EnumExtraPracticeType.Articles:
-                        break;
-
-                    case EnumExtraPracticeType.MockTest:
-                        if (extraPractice.MockTestId != null)
-                        {
-                            extraPracticeModel = await GetExtraPracticeInMockTest(extraPractice.Id, studentId);
-                        }
-                        else
-                        {
-                            extraPracticeModel = await GetExtraPracticeInPlacementTest(extraPractice.Id, studentId);
-                        }
+                    case EnumExtraPracticeType.VideoEmbed:
                         break;
 
                     default:

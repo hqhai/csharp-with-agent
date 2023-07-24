@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Course.Lms.Application.Queries.VideoQuery
+namespace Fsel.Course.Lms.Application.Queries.ExtraPracticeQuery
 {
     using System;
     using System.Linq;
@@ -18,38 +18,38 @@ namespace Fsel.Course.Lms.Application.Queries.VideoQuery
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class GetTimeCodeDetailQuery : IRequest<MethodResult<VideoTimeCodeModel>>
+    public class GetTimeCodeDetailByExtraPracticeQuery : IRequest<MethodResult<VideoTimeCodeModel>>
     {
+        public Guid ExtraPracticeId { get; set; }
         public Guid VideoId { get; set; }
         public Guid VideoTimeCodeId { get; set; }
-        public Guid? LessonResultId { get; set; }
     }
 
-    public class GetTimeCodeDetailQueryHandler : IRequestHandler<GetTimeCodeDetailQuery, MethodResult<VideoTimeCodeModel>>
+    public class GetTimeCodeDetailByExtraPracticeQueryHandler : IRequestHandler<GetTimeCodeDetailByExtraPracticeQuery, MethodResult<VideoTimeCodeModel>>
     {
         private readonly IVideoTimeCodeRepository _videoTimeCodeRepository;
-        private readonly IVideoResultRepository _videoResultRepository;
+        private readonly IExtraPracticeResultRepository _extraPracticeResultRepository;
         private readonly QuestionTypeConverter _questionTypeConverter;
         private readonly AuthContext _authContext;
         private readonly IUserService _userService;
         private readonly IMapper _mapper;
 
-        public GetTimeCodeDetailQueryHandler(IVideoTimeCodeRepository videoTimeCodeRepository,
+        public GetTimeCodeDetailByExtraPracticeQueryHandler(IVideoTimeCodeRepository videoTimeCodeRepository,
+            IExtraPracticeResultRepository extraPracticeResultRepository,
             QuestionTypeConverter questionTypeConverter,
-            IVideoResultRepository videoResultRepository,
             AuthContext authContext,
             IUserService userService,
             IMapper mapper)
         {
             _videoTimeCodeRepository = videoTimeCodeRepository;
-            _videoResultRepository = videoResultRepository;
+            _extraPracticeResultRepository = extraPracticeResultRepository;
             _questionTypeConverter = questionTypeConverter;
             _authContext = authContext;
             _userService = userService;
             _mapper = mapper;
         }
 
-        public async Task<MethodResult<VideoTimeCodeModel>> Handle(GetTimeCodeDetailQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<VideoTimeCodeModel>> Handle(GetTimeCodeDetailByExtraPracticeQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<VideoTimeCodeModel> methodResult = new MethodResult<VideoTimeCodeModel>();
@@ -62,16 +62,14 @@ namespace Fsel.Course.Lms.Application.Queries.VideoQuery
             }
             var studentId = studentsResult.Content?.Result?.Id;
 
-            var videoResult = await _videoResultRepository.Queryable.Where(x => !request.LessonResultId.HasValue || x.LessonResultId == request.LessonResultId)
-                .FirstOrDefaultAsync(x => x.VideoId == request.VideoId && x.StudentId == studentId, cancellationToken);
+            var extraPracticeResult = await _extraPracticeResultRepository.Queryable.FirstOrDefaultAsync(x => x.ExtraPracticeId == request.ExtraPracticeId && x.StudentId == studentId, cancellationToken);
 
             var videoTimeCode = await _videoTimeCodeRepository.Queryable
                                     .Include(x => x.TimeCodeExercises.Where(x => !x.IsDeleted && x.Exercise != null))
                                     .ThenInclude(x => x.Exercise)
                                     .ThenInclude(x => x!.ExerciseQuestions.Where(x => !x.IsDeleted))
                                     .ThenInclude(x => x.Question)
-                                    .ThenInclude(x => x!.VideoTimeCodeAnswers!.Where(x => videoResult != null && x.VideoResultId == videoResult.Id))
-                                .Include(x => x!.VideoTimeCodeAnswers!.Where(x => videoResult != null && x.VideoResultId == videoResult.Id))
+                                    .ThenInclude(x => x!.ExtraPracticeAnswers!.Where(x => extraPracticeResult != null && x.ExtraPracticeResultId == extraPracticeResult.Id))
                                 .Where(x => x.Id == request.VideoTimeCodeId && x.VideoId == request.VideoId)
                                 .AsNoTracking()
                                 .FirstOrDefaultAsync(cancellationToken: cancellationToken);
@@ -93,7 +91,6 @@ namespace Fsel.Course.Lms.Application.Queries.VideoQuery
                 Ungraded = videoTimeCode.TimeCodeExercises.Select(x => x.Exercise).SelectMany(x => x!.ExerciseQuestions).Select(x => x.Question).FirstOrDefault()?.Ungraded ?? default,
                 CorrectCount = videoTimeCode.VideoTimeCodeAnswers.Count > 0 ? videoTimeCode.VideoTimeCodeAnswers.Sum(x => x.CorrectCount) : 0,
                 CorrectTotal = videoTimeCode.TimeCodeExercises.Select(x => x.Exercise).SelectMany(x => x!.ExerciseQuestions).Select(x => x.Question).Sum(x => x!.CorrectTotal),
-                Status = (videoTimeCode.VideoTimeCodeAnswers.Count > 0 && videoTimeCode.VideoTimeCodeAnswers.All(y => videoResult != null && y.VideoResultId == videoResult.Id && y.Status == EnumCurrentStatus.Done)) ? EnumCurrentStatus.Done : EnumCurrentStatus.Process,
                 Exercises = videoTimeCode.TimeCodeExercises.OrderBy(x => x!.CreatedDate).Select(n => n.Exercise).Select(n => new ExerciseModel
                 {
                     Id = n!.Id,
@@ -108,7 +105,7 @@ namespace Fsel.Course.Lms.Application.Queries.VideoQuery
                         Explanation = m.Explanation,
                         Ungraded = m.Ungraded,
                         Config = _questionTypeConverter.QuestionTypeConverterObject(m.Config, m.QuestionType, isDisableAnswers: !(m.VideoTimeCodeAnswers.FirstOrDefault()?.Status == EnumCurrentStatus.Done)).Item1,
-                        ResultAnswer = _mapper.Map<AnswerModel>(m.VideoTimeCodeAnswers!.FirstOrDefault())
+                        ResultAnswer = _mapper.Map<AnswerModel>(m.ExtraPracticeAnswers!.FirstOrDefault())
                     }).ToList()
                 }).ToList(),
             };
