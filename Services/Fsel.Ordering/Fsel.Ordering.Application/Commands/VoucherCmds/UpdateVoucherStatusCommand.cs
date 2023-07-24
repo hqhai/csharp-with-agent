@@ -42,12 +42,11 @@ namespace Fsel.Ordering.Application.Commands.VoucherCmds
                 return methodResult;
             }
 
-            voucher.IsActive = request.IsActive;
-
             #endregion Validation
 
             await _voucherRepository.ExecuteTransactionAsync(async () =>
             {
+                voucher.IsActive = request.IsActive;
                 voucher = _voucherRepository.Update(voucher);
                 await _voucherRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
