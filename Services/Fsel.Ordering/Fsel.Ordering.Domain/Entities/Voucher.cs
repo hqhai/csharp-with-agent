@@ -6,10 +6,6 @@ namespace Fsel.Ordering.Domain.Entities
     using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations;
     using System.ComponentModel.DataAnnotations.Schema;
-    using System.Diagnostics.Eventing.Reader;
-    using System.Linq;
-    using System.Text;
-    using System.Threading.Tasks;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Common.Helpers;
     using Fsel.Core.Entities;
@@ -33,8 +29,16 @@ namespace Fsel.Ordering.Domain.Entities
 
         public bool IsGlobal { get; set; }
 
-        public bool? IsActive { get; set; }
-        public EnumCustomerType CustomerType { get; set; }
+        public bool IsActive { get; set; }
+
+        public string? CustomerTypesStr { get; set; }
+        [NotMapped]
+        public IList<EnumCustomerType>? CustomerTypes
+        {
+            get { return ConvertHelper.Deserialize<IList<EnumCustomerType>>(CustomerTypesStr); }
+            set { CustomerTypesStr = ConvertHelper.Serialize(value); }
+        }
+
         public string? CourseLevelsStr { get; set; }
 
         [NotMapped]

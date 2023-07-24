@@ -39,7 +39,7 @@ namespace Fsel.Ordering.Application.Commands.VoucherCmds
             MethodResult<VoucherModel> methodResult = new MethodResult<VoucherModel>();
 
             Voucher voucher = _mapper.Map<Voucher>(request);
-            if (request.StartDate < request.EndDate)
+            if (request.StartDate > request.EndDate)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumVoucherErrorCode.VoucherStartTimeMustSoonerThanEndTime), nameof(request.EndDate), request.EndDate);
                 return methodResult;
