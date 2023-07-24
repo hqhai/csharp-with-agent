@@ -38,6 +38,7 @@ namespace Fsel.Ordering.Application.Queries.VoucherQuery
             var voucherQuery = await _voucherRepository.Queryable
                                     .Include(x => x.VoucherPackages)
                                     .ThenInclude(x => x.Package)
+                                    .Where(x => x.Id == request.Id)
                                     .Select(x => new VoucherModel
                                     {
                                         Id = x.Id,
