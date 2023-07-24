@@ -4,12 +4,9 @@ namespace Fsel.Interaction.Domain.Models.CommandModels.SupportTickets
 {
     using System;
     using System.Collections.Generic;
-    using Fsel.Shared.Enums;
 
     public class CreateSupportTicketCommandModel
     {
-        public string? Code { get; set; }
-
         public string? FullName { get; set; }
 
         public string? PhoneNumber { get; set; }
@@ -23,8 +20,6 @@ namespace Fsel.Interaction.Domain.Models.CommandModels.SupportTickets
         public IList<string>? FilePaths { get; set; }
 
         public string? OtherProblem { get; set; }
-
-        public EnumSupportTicketStatus Status { get; set; }
 
         public Guid? SupportCategoryId { get; set; }
 

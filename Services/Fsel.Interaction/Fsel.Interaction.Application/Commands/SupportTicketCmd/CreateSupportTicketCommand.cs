@@ -11,6 +11,8 @@ namespace Fsel.Interaction.Application.Commands.SupportTicketCmd
     using Fsel.Interaction.Domain.IRepositories;
     using Fsel.Interaction.Domain.Models.CommandModels.SupportTickets;
     using Fsel.Interaction.Domain.Models.EntityModels;
+    using Fsel.Shared.Enums;
+    using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.AspNetCore.Http;
 
@@ -39,6 +41,11 @@ namespace Fsel.Interaction.Application.Commands.SupportTicketCmd
             MethodResult<SupportTicketModel> methodResult = new MethodResult<SupportTicketModel>();
 
             SupportTicket supportTicket = _mapper.Map<SupportTicket>(request);
+            if (!supportTicket.IsValid())
+            {
+                methodResult.AddErrorBadRequest(supportTicket.ErrorMessages);
+                return methodResult;
+            }
             if (!await _supportCategoryRepository.AnyAsync(request.SupportCategoryId ?? default))
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSupportQuestionErrorCode.SupportCategoryIdNotExist), nameof(request.SupportCategoryId), request.SupportCategoryId);
@@ -51,8 +58,11 @@ namespace Fsel.Interaction.Application.Commands.SupportTicketCmd
                 return methodResult;
             }
 
+
             await _supportTicketRepository.ExecuteTransactionAsync(async () =>
             {
+                supportTicket.Code = NumberHelper.GenerateCodeNumber(8);
+                supportTicket.Status = EnumSupportTicketStatus.NotSeen;
                 supportTicket = _supportTicketRepository.Add(supportTicket);
                 await _supportTicketRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
