@@ -19,7 +19,7 @@ namespace Fsel.Ordering.Domain.Models.EntityModels
         public bool IsGlobal { get; set; }
         public bool? IsActive { get; set; }
 
-        public EnumCustomerType CustomerType { get; set; }
+        public IList<EnumCustomerType>? CustomerTypes { get; set; }
         public IList<EnumCourseLevel>? CourseLevels { get; set; }
 
         public IList<VoucherPackageModel>? VoucherPackages { get; set; }
