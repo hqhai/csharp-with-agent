@@ -14,6 +14,8 @@ namespace Fsel.Interaction.Infrastructure.Maps
         {
             CreateMap<SupportTicket, SupportTicketModel>().IgnoreAllNonExisting();
             CreateMap<UpdateStatusSupportTicketCommandModel, SupportTicket>().IgnoreAllNonExisting();
+            CreateMap<CreateSupportTicketCommandModel, SupportTicket>().IgnoreAllNonExisting();
+
         }
     }
 }
