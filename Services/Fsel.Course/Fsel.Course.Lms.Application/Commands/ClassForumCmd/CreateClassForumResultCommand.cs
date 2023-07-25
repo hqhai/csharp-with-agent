@@ -14,6 +14,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
     using Fsel.Course.Domain.Models.CommandModels.ClassForumResults;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Services.UserServices;
+    using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -90,6 +91,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
             }
             else if (classForumResult.Status == EnumClassForumResultStatus.Draft || classForumResult.Status == EnumClassForumResultStatus.Denied)
             {
+                _mapper.Map(request, classForumResult);
                 classForumResult.Status = request.IsSubmit ? EnumClassForumResultStatus.Pending : EnumClassForumResultStatus.Draft;
             }
             else
@@ -110,12 +112,13 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
 
             classForumResult.Status = EnumClassForumResultStatus.Graded;
             var score = 0;
+            
 
             if (classForum.CourseSkill == Shared.Enums.EnumCourseSkill.Speaking && request.TimeLimit >= classForum.TaggetWordLimit)
             {
                 score = 100;
             }
-            else if (classForum.CourseSkill == Shared.Enums.EnumCourseSkill.Writing && classForumResult.Content!.Length >= classForum.TaggetWordLimit)
+            else if (classForum.CourseSkill == Shared.Enums.EnumCourseSkill.Writing && RemoveHtmlHelper.RemoveHTMLTags(classForumResult.Content!)!.Length >= classForum.TaggetWordLimit)
             {
                 score = 100;
             }
