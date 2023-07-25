@@ -9,9 +9,9 @@ namespace Fsel.Course.Infrastructure.Configs
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-    public class ClassForumScoreEntityTypeConfiguration : IEntityTypeConfiguration<ClassForumScore>
+    public class MockTestScoreEntityTypeConfiguration : IEntityTypeConfiguration<MockTestScore>
     {
-        public void Configure(EntityTypeBuilder<ClassForumScore> builder)
+        public void Configure(EntityTypeBuilder<MockTestScore> builder)
         {
             ArgumentNullException.ThrowIfNull(builder);
             builder.Property(e => e.Criteria)
@@ -20,10 +20,15 @@ namespace Fsel.Course.Infrastructure.Configs
                     v => v.ToString(),
                     v => v.EnumParse<EnumClassForumScoreCriteria>());
 
-            builder.HasOne(a => a.ClassForumResult)
-                 .WithMany(b => b.ClassForumScores)
-                 .HasForeignKey(p => p.ClassForumResultId)
+            builder.HasOne(a => a.MockTestResult)
+                 .WithMany(b => b.MockTestScores)
+                 .HasForeignKey(p => p.MockTestResultId)
                  .OnDelete(DeleteBehavior.Cascade);
+
+            builder.HasOne(a => a.SectionGroup)
+                .WithMany(b => b.MockTestScores)
+                .HasForeignKey(p => p.MockTestResultId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

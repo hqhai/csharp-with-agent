@@ -12,6 +12,21 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         /// <summary>
         /// Mock Test Result Done
         /// </summary>
-        MockTestResultDone
+        MockTestResultDone,
+
+        /// <summary>
+        /// MockTestScoresNull
+        /// </summary>
+        MockTestScoresNull,
+
+        /// <summary>
+        /// ScoreMustLessThan9
+        /// </summary>
+        ScoreMustLessThan9,
+
+        /// <summary>
+        /// SectionGroups Not Exist
+        /// </summary>
+        SectionGroupsNotExist
     }
 }

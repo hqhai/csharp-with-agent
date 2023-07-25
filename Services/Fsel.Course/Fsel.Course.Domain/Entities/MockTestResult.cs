@@ -71,5 +71,6 @@ namespace Fsel.Course.Domain.Entities
         public Guid StudentId { get; set; }
 
         public ICollection<MockTestAnswer> MockTestAnswers { get; set; } = new List<MockTestAnswer>();
+        public ICollection<MockTestScore> MockTestScores { get; set; } = new List<MockTestScore>();
     }
 }
