@@ -23,26 +23,29 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkQuery
     public class GetListHomeworkQueryHandler : IRequestHandler<GetListHomeworkQuery, MethodResult<IList<LessonHomeWorkResultModel>>>
     {
         private readonly IUserService _userService;
+        private readonly ILessonResultRepository _lessonResultRepository;
         private readonly IHomeWorkResultRepository _homeWorkResultRepository;
         private readonly IMapper _mapper;
         private readonly AuthContext _authContext;
 
         public GetListHomeworkQueryHandler(AuthContext authContext,
             IUserService userService,
+            ILessonResultRepository lessonResultRepository,
             IHomeWorkResultRepository homeWorkResultRepository,
             IMapper mapper
             )
         {
             _authContext = authContext;
             _userService = userService;
+            _lessonResultRepository = lessonResultRepository;
             _homeWorkResultRepository = homeWorkResultRepository;
             _mapper = mapper;
         }
 
         public async Task<MethodResult<IList<LessonHomeWorkResultModel>>> Handle(GetListHomeworkQuery request, CancellationToken cancellationToken)
         {
+            ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<IList<LessonHomeWorkResultModel>>();
-
             var student = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
             if (!student.IsSuccessStatusCode)
             {
@@ -50,8 +53,15 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkQuery
                 return methodResult;
             }
             var studentId = student?.Content?.Result?.Id;
-
+            var lessonResult = await _lessonResultRepository.GetByIdAsync(request.LessonResultId);
+            if (lessonResult == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumLessonResultErrorCode.LessonResultNotExist));
+                return methodResult;
+            }
             var lessonSkillScoreQuery = await _homeWorkResultRepository.Queryable
+                                        .Include(x => x.HomeWork)
+                                        .ThenInclude(x => x!.LessonHomeWorks)
                                         .Include(x => x.HomeWork)
                                         .ThenInclude(x => x!.HomeWorkQuestions.Where(x => !x.IsDeleted).OrderBy(x => x.CreatedDate))
                                         .ThenInclude(x => x.Question)
@@ -61,7 +71,7 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkQuery
                                         .Select(h => new LessonHomeWorkResultModel
                                         {
                                             Id = h.HomeWork!.Id,
-                                            CreatedDate = h.HomeWork.CreatedDate,
+                                            CreatedDate = h.HomeWork.LessonHomeWorks.FirstOrDefault(x => x.HomeWorkId == h.HomeWorkId && x.LessonId == lessonResult.LessonId)!.CreatedDate,
                                             Code = h.HomeWork.Code,
                                             Name = h.HomeWork.Name,
                                             CourseSkill = h.HomeWork.CourseSkill,

@@ -15,7 +15,6 @@ namespace Fsel.Ordering.Application.Commands.VoucherCmds
 
     public class UpdateVoucherStatusCommand : UpdateVoucherStatusCommandModel, IRequest<MethodResult<bool>>
     {
-        public Guid Id { get; set; }
     }
 
     public class UpdateVoucherStatusCommandHandler : IRequestHandler<UpdateVoucherStatusCommand, MethodResult<bool>>
@@ -36,15 +35,10 @@ namespace Fsel.Ordering.Application.Commands.VoucherCmds
 
             #region Validation
 
-            var voucher = await _voucherRepository.GetIncludeByIdAsync(request.Id);
+            var voucher = await _voucherRepository.GetByIdAsync(request.Id);
             if (voucher == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumVoucherErrorCode.VoucherNotExist), nameof(request.Id), request.Id);
-                return methodResult;
-            }
-            if (!voucher.IsValid())
-            {
-                methodResult.AddErrorBadRequest(voucher.ErrorMessages);
                 return methodResult;
             }
 

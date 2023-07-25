@@ -26,6 +26,9 @@ builder.Services.AddScoped<IPostRepository, PostRepository>();
 builder.Services.AddScoped<IPostTagRepository, PostTagRepository>();
 builder.Services.AddScoped<ITopicTagRepository, TopicTagRepository>();
 builder.Services.AddScoped<IStudentReviewRepository, StudentReviewRepository>();
+builder.Services.AddScoped<ISupportCategoryRepository, SupportCategoryRepository>();
+builder.Services.AddScoped<ISupportQuestionRepository, SupportQuestionRepository>();
+builder.Services.AddScoped<ISupportTicketRepository, SupportTicketRepository>();
 
 builder.AddRefitClients(typeof(IUserService), appSetting?.Services?.UserApiUrl);
 builder.AddRefitClients(typeof(ITrainingService), appSetting?.Services?.TrainingApiUrl);

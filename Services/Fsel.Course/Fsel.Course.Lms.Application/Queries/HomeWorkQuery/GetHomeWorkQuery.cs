@@ -50,8 +50,8 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkQuery
 
         public async Task<MethodResult<HomeWorkModel>> Handle(GetHomeWorkQuery request, CancellationToken cancellationToken)
         {
+            ArgumentNullException.ThrowIfNull(request);
             MethodResult<HomeWorkModel> methodResult = new MethodResult<HomeWorkModel>();
-
             var studentsResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
             if (studentsResult == null)
             {
