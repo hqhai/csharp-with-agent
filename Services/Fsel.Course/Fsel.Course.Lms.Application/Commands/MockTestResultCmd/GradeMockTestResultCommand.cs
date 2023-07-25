@@ -53,7 +53,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestResultCmd
                 methodResult.AddErrorBadRequest(nameof(EnumMockTestResultErrorCode.SectionGroupsNotExist));
                 return methodResult;
             }
-
+            IList<MockTestScore> mockTestScores = new List<MockTestScore>();
             foreach (var item in request.MockTestScores)
             {
                 if (item.Score > 9)
@@ -70,8 +70,9 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestResultCmd
                     methodResult.AddErrorBadRequest(mockTestScore.ErrorMessages);
                     return methodResult;
                 }
-                mockTestResult.MockTestScores.Add(mockTestScore);
+                mockTestScores.Add(mockTestScore);
             }
+            mockTestResult.MockTestScores = mockTestScores;
 
             await _mockTestResultRepository.ExecuteTransactionAsync(async () =>
             {
