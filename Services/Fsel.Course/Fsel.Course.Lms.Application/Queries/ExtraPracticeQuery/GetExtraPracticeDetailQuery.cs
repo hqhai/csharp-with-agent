@@ -110,7 +110,7 @@ namespace Fsel.Course.Lms.Application.Queries.ExtraPracticeQuery
             return extraPracticeModel;
         }
 
-        public async Task<VideoModel> GetTypeVideoModel(Guid id)
+        public async Task<VideoModel> GetTypeVideoModel(Guid? id)
         {
             var videoModel = new VideoModel();
             var video = await _videoRepository.Queryable.Include(x => x.LessonVideos.Where(y => !y.IsDeleted))
@@ -132,7 +132,7 @@ namespace Fsel.Course.Lms.Application.Queries.ExtraPracticeQuery
                     VideoFilePath = video.VideoFilePath,
                     IsActive = video.LessonVideos.Any(),
                     TotalQuestion = video.VideoTimeCodes.SelectMany(x => x.TimeCodeExercises).Select(x => x.Exercise).SelectMany(x => x!.ExerciseQuestions).Select(x => x.Question).Count(),
-                    TeacherId = video.TeacherId,
+                    TeacherId = video.TeacherId ?? null,
                     CourseLevel = video.CourseLevel,
                     SubFilePath = video.SubFilePath,
                     Type = video.Type,
@@ -261,7 +261,7 @@ namespace Fsel.Course.Lms.Application.Queries.ExtraPracticeQuery
                         break;
 
                     case EnumExtraPracticeType.InteractiveVideo:
-                        extraPracticeModel.Video = await GetTypeVideoModel(extraPractice.Id);
+                        extraPracticeModel.Video = await GetTypeVideoModel(extraPractice.VideoId);
                         break;
 
                     case EnumExtraPracticeType.Articles:

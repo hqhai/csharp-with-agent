@@ -66,12 +66,12 @@ namespace Fsel.Course.Lms.Api.Controllers
         /// <summary>
         /// Get ExtraPractice Detail
         /// </summary>
-        [HttpGet("detail")]
+        [HttpGet("detail/{id}")]
         [ProducesResponseType(typeof(MethodResult<ExtraPracticeModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetExtraPracticeDetail([FromRoute] GetExtraPracticeDetailQuery query)
+        public async Task<IActionResult> GetExtraPracticeDetail([FromRoute] Guid id)
         {
-            MethodResult<ExtraPracticeModel> queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            MethodResult<ExtraPracticeModel> queryResult = await _mediator.Send(new GetExtraPracticeDetailQuery { ExtraPracticeId = id }).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
 
@@ -81,7 +81,7 @@ namespace Fsel.Course.Lms.Api.Controllers
         [HttpGet("detail-mocktest")]
         [ProducesResponseType(typeof(MethodResult<ExtraPracticeModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetExtraPracticeDetailMockTest([FromRoute] GetMockTestByExtraPracticeQuery query)
+        public async Task<IActionResult> GetExtraPracticeDetailMockTest([FromQuery] GetMockTestByExtraPracticeQuery query)
         {
             MethodResult<ExtraPracticeModel> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
@@ -93,7 +93,7 @@ namespace Fsel.Course.Lms.Api.Controllers
         [HttpGet("detail-placementtest")]
         [ProducesResponseType(typeof(MethodResult<ExtraPracticeModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetExtraPracticeDetailPlacementTest([FromRoute] GetPlacementTestByExtraPracticeQuery query)
+        public async Task<IActionResult> GetExtraPracticeDetailPlacementTest([FromQuery] GetPlacementTestByExtraPracticeQuery query)
         {
             MethodResult<ExtraPracticeModel> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
@@ -105,7 +105,7 @@ namespace Fsel.Course.Lms.Api.Controllers
         [HttpGet("timecodes")]
         [ProducesResponseType(typeof(MethodResult<VideoTimeCodeModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetTimeCodeByExtraPractice([FromRoute] GetTimeCodeDetailByExtraPracticeQuery query)
+        public async Task<IActionResult> GetTimeCodeByExtraPractice([FromQuery] GetTimeCodeDetailByExtraPracticeQuery query)
         {
             MethodResult<VideoTimeCodeModel> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
@@ -117,7 +117,7 @@ namespace Fsel.Course.Lms.Api.Controllers
         [HttpGet("exercises")]
         [ProducesResponseType(typeof(MethodResult<IList<ExtraPracticeExerciseModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetExerciseByExtraPractice([FromRoute] GetExerciseByExtraPracticeQuery query)
+        public async Task<IActionResult> GetExerciseByExtraPractice([FromQuery] GetExerciseByExtraPracticeQuery query)
         {
             MethodResult<IList<ExtraPracticeExerciseModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
@@ -129,7 +129,7 @@ namespace Fsel.Course.Lms.Api.Controllers
         [HttpGet("questions")]
         [ProducesResponseType(typeof(MethodResult<ExerciseModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetExtraPracticeDetailQuestions([FromRoute] GetQuestionByExtraPracticeQuery query)
+        public async Task<IActionResult> GetExtraPracticeDetailQuestions([FromQuery] GetQuestionByExtraPracticeQuery query)
         {
             MethodResult<ExerciseModel> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
@@ -141,7 +141,7 @@ namespace Fsel.Course.Lms.Api.Controllers
         [HttpGet("report-test")]
         [ProducesResponseType(typeof(MethodResult<ExtraPracticeResultModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetReportTest([FromRoute] GetReportTestExtraPracticeQuery query)
+        public async Task<IActionResult> GetReportTest([FromQuery] GetReportTestExtraPracticeQuery query)
         {
             MethodResult<ExtraPracticeResultModel> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();

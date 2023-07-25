@@ -67,7 +67,7 @@ namespace Fsel.Course.Lms.Application.Queries.ExtraPracticeQuery
             var extraPracticeExerciseModels = new List<ExtraPracticeExerciseModel>();
             var extraPracticeExercises = await _extraPracticeExerciseRepository.Queryable.Include(x => x.Exercise)
                                      .Include(i => i.ExtraPracticeExerciseResults)
-                                     .Where(x => x.ExtraPracticeChapterId == extraPracticeChapterId && x.ExtraPracticeId == extraPracticeId)
+                                     .Where(x => x.ExtraPracticeChapterId == extraPracticeChapterId)
                                      .AsNoTracking()
                                      .ToListAsync();
             if (extraPracticeExercises != null && extraPracticeExercises.Count > 0)
