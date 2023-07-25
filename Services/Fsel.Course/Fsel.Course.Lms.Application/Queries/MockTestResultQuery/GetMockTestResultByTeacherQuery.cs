@@ -13,25 +13,25 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class GetMockTestDetailByTeacherQuery : IRequest<MethodResult<MockTestModel>>
+    public class GetMockTestResultByTeacherQuery : IRequest<MethodResult<MockTestModel>>
     {
         public Guid MockTestResultId { get; set; }
     }
 
-    public class GetMockTestDetailByTeacherQueryHandler : IRequestHandler<GetMockTestDetailByTeacherQuery, MethodResult<MockTestModel>>
+    public class GetMockTestResultByTeacherQueryHandler : IRequestHandler<GetMockTestResultByTeacherQuery, MethodResult<MockTestModel>>
     {
         private readonly IMockTestResultRepository _mockTestResultRepository;
         private readonly IMockTestRepository _mockTestRepository;
         private readonly SectionConverter _sectionConverter;
 
-        public GetMockTestDetailByTeacherQueryHandler(IMockTestResultRepository mockTestResultRepository, IMockTestRepository mockTestRepository, SectionConverter sectionConverter)
+        public GetMockTestResultByTeacherQueryHandler(IMockTestResultRepository mockTestResultRepository, IMockTestRepository mockTestRepository, SectionConverter sectionConverter)
         {
             _mockTestResultRepository = mockTestResultRepository;
             _mockTestRepository = mockTestRepository;
             _sectionConverter = sectionConverter;
         }
 
-        public async Task<MethodResult<MockTestModel>> Handle(GetMockTestDetailByTeacherQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<MockTestModel>> Handle(GetMockTestResultByTeacherQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<MockTestModel> methodResult = new MethodResult<MockTestModel>();

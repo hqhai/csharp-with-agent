@@ -66,12 +66,12 @@ namespace Fsel.Course.Lms.Api.Controllers.Teacher
         /// <summary>
         /// Get MockTest Detail
         /// </summary>
-        [HttpGet("{mockTestResultId}")]
+        [HttpGet("{id}")]
         [ProducesResponseType(typeof(MethodResult<IList<CourseModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> Get([FromRoute] Guid mockTestResultId)
+        public async Task<IActionResult> Get([FromRoute] Guid id)
         {
-            var commandResult = await _mediator.Send(new GetMockTestDetailByTeacherQuery { MockTestResultId = mockTestResultId }).ConfigureAwait(false);
+            var commandResult = await _mediator.Send(new GetMockTestResultByTeacherQuery { MockTestResultId = id }).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
     }
