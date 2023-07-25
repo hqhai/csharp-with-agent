@@ -47,6 +47,11 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         /// <summary>
         /// Code Already Exists
         /// </summary>
-        CodeAlreadyExists
+        CodeAlreadyExists,
+
+        /// <summary>
+        /// Answers Null
+        /// </summary>
+        AnswersNull,
     }
 }

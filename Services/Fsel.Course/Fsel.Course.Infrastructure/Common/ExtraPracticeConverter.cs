@@ -402,7 +402,7 @@ namespace Fsel.Course.Infrastructure.Common
                             }).ToList(),
                         },
                         ExtraPracticeExerciseResult = x.ExtraPracticeExerciseResults.Where(y => y.ExtraPracticeResultId == extraPracticeResultId && y.ExtraPracticeExerciseId == x.Id)
-                        .Select(x => new ExtraPracticeExerciseResultModel
+                        .Select(x => new ExtraPracticeResultModel
                         {
                             Id = x.Id,
                             CorrectCount = x.CorrectCount,
@@ -554,7 +554,7 @@ namespace Fsel.Course.Infrastructure.Common
                         CourseSkill = x.Exercise.CourseSkill,
                     },
                     ExtraPracticeExerciseResult = x.ExtraPracticeExerciseResults.Where(y => y.ExtraPracticeResultId == extraPracticeResultId && y.ExtraPracticeExerciseId == x.Id)
-                    .Select(x => new ExtraPracticeExerciseResultModel
+                    .Select(x => new ExtraPracticeResultModel
                     {
                         Id = x.Id,
                         CorrectCount = x.CorrectCount,

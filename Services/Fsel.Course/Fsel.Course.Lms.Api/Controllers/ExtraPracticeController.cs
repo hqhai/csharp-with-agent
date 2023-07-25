@@ -67,11 +67,11 @@ namespace Fsel.Course.Lms.Api.Controllers
         /// Create ExtraPractice Answer
         /// </summary>
         [HttpPost("create-extraPractice-answer")]
-        [ProducesResponseType(typeof(MethodResult<ExtraPracticeExerciseResultModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(MethodResult<ExtraPracticeResultModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> CreateAnswer([FromBody] CreateExtraPracticeAnswerCommand command)
         {
-            MethodResult<ExtraPracticeExerciseResultModel> queryResult = await _mediator.Send(command).ConfigureAwait(false);
+            MethodResult<ExtraPracticeResultModel> queryResult = await _mediator.Send(command).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
     }
