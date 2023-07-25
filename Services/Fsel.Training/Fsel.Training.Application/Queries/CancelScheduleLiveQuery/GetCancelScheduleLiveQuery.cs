@@ -4,6 +4,7 @@ namespace Fsel.Training.Application.Queries.CancelScheduleLiveQuery
 {
     using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Shared.Enums;
     using Fsel.Training.Application.Services.SystemServices;
     using Fsel.Training.Application.Services.UserServices;
     using Fsel.Training.Application.Services.UserServices.Models;
@@ -70,6 +71,13 @@ namespace Fsel.Training.Application.Queries.CancelScheduleLiveQuery
                         PhoneNumber = x.Human?.PhoneNumber,
                         Email = x.Human?.Email,
                     }).ToList();
+                }
+            }
+            if (classLiveWorkFlow.Status == EnumWorkFlowCancelScheduleStatus.WaitVote.ToString())
+            {
+                if (classLiveWorkFlow.UpdatedDate != null && classLiveWorkFlow.UpdatedDate.Value.AddDays(2) <= DateTime.Now)
+                {
+                    liveSessionInformation.IsWaitVote = true;
                 }
             }
             liveSessionInformation.ClassName = @class?.Name;
