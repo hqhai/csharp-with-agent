@@ -18,12 +18,12 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class StartExtraPracticeCommand : IRequest<MethodResult<ExtraPraticeResultModel>>
+    public class StartExtraPracticeCommand : IRequest<MethodResult<ExtraPracticeResultModel>>
     {
         public Guid ExtraPracticeId { get; set; }
     }
 
-    public class StartExtraPracticeCommandHandler : IRequestHandler<StartExtraPracticeCommand, MethodResult<ExtraPraticeResultModel>>
+    public class StartExtraPracticeCommandHandler : IRequestHandler<StartExtraPracticeCommand, MethodResult<ExtraPracticeResultModel>>
     {
         private readonly IExtraPracticeRepository _extraPracticeRepository;
         private readonly IMapper _mapper;
@@ -44,10 +44,10 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
             _extraPracticeResultRepository = extraPracticeResultRepository;
         }
 
-        public async Task<MethodResult<ExtraPraticeResultModel>> Handle(StartExtraPracticeCommand request, CancellationToken cancellationToken)
+        public async Task<MethodResult<ExtraPracticeResultModel>> Handle(StartExtraPracticeCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            var methodResult = new MethodResult<ExtraPraticeResultModel>();
+            var methodResult = new MethodResult<ExtraPracticeResultModel>();
 
             var extraPractice = await _extraPracticeRepository.GetByIdAsync(request.ExtraPracticeId);
             if (extraPractice == null)
@@ -79,7 +79,7 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
                 await _extraPracticeRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
             }
             methodResult.StatusCode = StatusCodes.Status200OK;
-            methodResult.Result = _mapper.Map<ExtraPraticeResultModel>(extraPracticeResult);
+            methodResult.Result = _mapper.Map<ExtraPracticeResultModel>(extraPracticeResult);
             return methodResult;
         }
 

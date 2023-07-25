@@ -93,7 +93,7 @@ namespace Fsel.Course.Lms.Application.Queries.ExtraPracticeQuery
                     Type = extraPractice.Type,
                     VideoLink = extraPractice.VideoLink,
                     ExtraPracticeResult = extraPractice.ExtraPracticeResults.Where(m => m.Id == extraPracticeResultId)
-                    .Select(x => new ExtraPraticeResultModel
+                    .Select(x => new ExtraPracticeResultModel
                     {
                         Id = x.Id,
                         CorrectCount = x.CorrectCount,
@@ -131,6 +131,7 @@ namespace Fsel.Course.Lms.Application.Queries.ExtraPracticeQuery
                     Name = video.Name,
                     VideoFilePath = video.VideoFilePath,
                     IsActive = video.LessonVideos.Any(),
+                    TotalQuestion = video.VideoTimeCodes.SelectMany(x => x.TimeCodeExercises).Select(x => x.Exercise).SelectMany(x => x!.ExerciseQuestions).Select(x => x.Question).Count(),
                     TeacherId = video.TeacherId,
                     CourseLevel = video.CourseLevel,
                     SubFilePath = video.SubFilePath,
@@ -225,7 +226,7 @@ namespace Fsel.Course.Lms.Application.Queries.ExtraPracticeQuery
                         PageNumber = x.PageNumber,
                         IsStatus = x.ExtraPracticeExercises.SelectMany(x => x.ExtraPracticeExerciseResults).All(x => x.Status == EnumResultStatus.Done || x.ExecuteCount > 0),
                     }).ToList(),
-                    ExtraPracticeResult = extraPractice.ExtraPracticeResults.Where(x => x.Id == extraPracticeResultId).Select(x => new ExtraPraticeResultModel
+                    ExtraPracticeResult = extraPractice.ExtraPracticeResults.Where(x => x.Id == extraPracticeResultId).Select(x => new ExtraPracticeResultModel
                     {
                         Id = x.Id,
                         CorrectCount = x.CorrectCount,

@@ -14,6 +14,9 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         /// </summary>
         SectionGroupNull,
 
-     
+        /// <summary>
+        /// SectionGroupNotExist
+        /// </summary>
+        SectionGroupNotExist,
     }
 }

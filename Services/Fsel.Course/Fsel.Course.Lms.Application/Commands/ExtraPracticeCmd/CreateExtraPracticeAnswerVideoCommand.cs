@@ -21,18 +21,15 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class CreateExtraPracticeAnswerVideoCommand : CreateExtraPracticeAnswerVideoCommandModel, IRequest<MethodResult<ExtraPraticeResultModel>>
+    public class CreateExtraPracticeAnswerVideoCommand : CreateExtraPracticeAnswerVideoCommandModel, IRequest<MethodResult<ExtraPracticeResultModel>>
     {
     }
 
-    public class CreateExtraPracticeAnswerVideoCommandHandler : IRequestHandler<CreateExtraPracticeAnswerVideoCommand, MethodResult<ExtraPraticeResultModel>>
+    public class CreateExtraPracticeAnswerVideoCommandHandler : IRequestHandler<CreateExtraPracticeAnswerVideoCommand, MethodResult<ExtraPracticeResultModel>>
     {
         private readonly AuthContext _authContext;
         private readonly IUserService _userService;
-        private readonly ISectionTimeCodeRepository _sectionTimeCodeRepository;
         private readonly IMapper _mapper;
-        private readonly IMediator _mediator;
-        private readonly ISectionRepository _sectionRepository;
         private readonly IExtraPracticeAnswerRepository _extraPracticeAnswerRepository;
         private readonly AnswerTypeConverter _answerTypeConverter;
         private readonly IQuestionRepository _questionRepository;
@@ -41,10 +38,7 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
 
         public CreateExtraPracticeAnswerVideoCommandHandler(AuthContext authContext
             , IUserService userService
-            , ISectionTimeCodeRepository sectionTimeCodeRepository
             , IMapper mapper
-            , IMediator mediator
-            , ISectionRepository sectionRepository
             , IExtraPracticeAnswerRepository extraPracticeAnswerRepository
             , AnswerTypeConverter answerTypeConverter
             , IQuestionRepository questionRepository
@@ -53,10 +47,7 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
         {
             _authContext = authContext;
             _userService = userService;
-            _sectionTimeCodeRepository = sectionTimeCodeRepository;
             _mapper = mapper;
-            _mediator = mediator;
-            _sectionRepository = sectionRepository;
             _extraPracticeAnswerRepository = extraPracticeAnswerRepository;
             _answerTypeConverter = answerTypeConverter;
             _questionRepository = questionRepository;
@@ -64,10 +55,10 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
             _extraPracticeExerciseResultRepository = extraPracticeExerciseResultRepository;
         }
 
-        public async Task<MethodResult<ExtraPraticeResultModel>> Handle(CreateExtraPracticeAnswerVideoCommand request, CancellationToken cancellationToken)
+        public async Task<MethodResult<ExtraPracticeResultModel>> Handle(CreateExtraPracticeAnswerVideoCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            MethodResult<ExtraPraticeResultModel> methodResult = new MethodResult<ExtraPraticeResultModel>();
+            MethodResult<ExtraPracticeResultModel> methodResult = new MethodResult<ExtraPracticeResultModel>();
 
             #region Validate
 
@@ -104,15 +95,12 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
             if (request.Answers != null && request.Answers.Count != 0)
             {
                 var questionIds = request.Answers.Where(x => x.QuestionId != null).Select(x => x.QuestionId ?? default).ToList();
-                var questions = await _questionRepository.GetByIdsAsync(questionIds);
-                foreach (var item in request.Answers)
+                var questions = await _questionRepository.GetIncludeTimeCodeByIdAsync(questionIds);
+                var method = await AddExtraPracticeResult(extraPracticeResult, questions, request, cancellationToken);
+                if (!method.IsOK)
                 {
-                    var method = await AddExtraPracticeResult(extraPracticeResult, questions.ToList(), request, cancellationToken);
-                    if (!method.IsOK)
-                    {
-                        methodResult.AddErrorBadRequest(method.ErrorMessages);
-                        return methodResult;
-                    }
+                    methodResult.AddErrorBadRequest(method.ErrorMessages);
+                    return methodResult;
                 }
                 if (extraPracticeResult.Status == EnumResultStatus.Done)
                 {
@@ -135,7 +123,7 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
             {
                 _extraPracticeResultRepository.Update(extraPracticeResult);
                 await _extraPracticeResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
-                methodResult.Result = _mapper.Map<ExtraPraticeResultModel>(extraPracticeResult);
+                methodResult.Result = _mapper.Map<ExtraPracticeResultModel>(extraPracticeResult);
                 methodResult.StatusCode = StatusCodes.Status201Created;
                 return methodResult;
             });
@@ -163,6 +151,9 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
                         methodResult.AddErrorBadRequest(nameof(EnumQuestionErrorCode.QuestionConfigNull), nameof(question), question);
                         return methodResult;
                     }
+                    var exercise = question.ExerciseQuestions.Select(x => x.Exercise).FirstOrDefault();
+                    var videoTimeCodeQuestion = exercise?.TimeCodeExercises.Select(x => x.VideoTimeCode).FirstOrDefault();
+                    extraPracticeResult.CurrentVideoTimeCodeId = videoTimeCodeQuestion?.Id;
                     var method = await AddTypeExercise(extraPracticeResult, item, question, cancellationToken);
                     if (!method.IsOK)
                     {

@@ -40,9 +40,14 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         ExtraPracticeExercisesNull,
 
         /// <summary>
-        /// ExtraPracticeExercises Does Not Exist
+        /// ExtraPracticeResult Does Not Exist
         /// </summary>
         ExtraPracticeResultNotExist,
+
+        /// <summary>
+        /// ExtraPracticeResult Not Status Done
+        /// </summary>
+        ExtraPracticeResultNotStatusDone,
 
         /// <summary>
         /// Code Already Exists

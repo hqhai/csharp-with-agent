@@ -117,7 +117,7 @@ namespace Fsel.Course.Lms.Application.Queries.ExtraPracticeQuery
                         }).ToList(),
                     }).ToList(),
                 },
-                ExtraPracticeResult = extraPractice.ExtraPracticeResults.Where(m => m.Id == extraPracticeResult.Id).Select(x => new ExtraPraticeResultModel
+                ExtraPracticeResult = extraPractice.ExtraPracticeResults.Where(m => m.Id == extraPracticeResult.Id).Select(x => new ExtraPracticeResultModel
                 {
                     Id = x.Id,
                     CorrectCount = x.CorrectCount,

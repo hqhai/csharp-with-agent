@@ -78,6 +78,7 @@ namespace Fsel.Course.Lms.Application.Queries.ExtraPracticeQuery
                 Code = x.Code,
                 Name = x.Name,
                 CreatedDate = x.CreatedDate,
+                ImagePath = x.ImagePath,
                 Type = x.Type,
                 CourseLevel = x.CourseLevel,
                 CourseSkills = GetCourseSkills(x),

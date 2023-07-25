@@ -103,7 +103,7 @@ namespace Fsel.Course.Lms.Application.Queries.ExtraPracticeQuery
                          .Select(x => x.SectionGroup).OrderBy(x => x!.CreatedDate)
                          .Select(x => _sectionConverter.GetSectionGroupModel(x, true)).ToList(),
                 },
-                ExtraPracticeResult = extraPractice.ExtraPracticeResults.Where(m => m.Id == request.ExtraPracticeResultId).Select(x => new ExtraPraticeResultModel
+                ExtraPracticeResult = extraPractice.ExtraPracticeResults.Where(m => m.Id == request.ExtraPracticeResultId).Select(x => new ExtraPracticeResultModel
                 {
                     Id = x.Id,
                     CorrectCount = x.CorrectCount,
