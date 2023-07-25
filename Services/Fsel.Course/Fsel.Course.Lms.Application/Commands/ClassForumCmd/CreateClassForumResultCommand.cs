@@ -112,13 +112,12 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
 
             classForumResult.Status = EnumClassForumResultStatus.Graded;
             var score = 0;
-            
 
             if (classForum.CourseSkill == Shared.Enums.EnumCourseSkill.Speaking && request.TimeLimit >= classForum.TaggetWordLimit)
             {
                 score = 100;
             }
-            else if (classForum.CourseSkill == Shared.Enums.EnumCourseSkill.Writing && RemoveHtmlHelper.RemoveHTMLTags(classForumResult.Content!)!.Length >= classForum.TaggetWordLimit)
+            else if (classForum.CourseSkill == Shared.Enums.EnumCourseSkill.Writing && StringHelper.RemoveHTMLTags(classForumResult.Content!)!.Length >= classForum.TaggetWordLimit)
             {
                 score = 100;
             }
