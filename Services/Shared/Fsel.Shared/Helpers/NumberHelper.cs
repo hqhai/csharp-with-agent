@@ -32,5 +32,16 @@ namespace Fsel.Shared.Helpers
 
             return orderCode;
         }
+        public static string GenerateCodeNumber(int length)
+        {
+            string chars = "0123456789";
+
+            Random random = new Random();
+
+            string orderCode = new string(Enumerable.Repeat(chars, length)
+                                      .Select(s => s[random.Next(s.Length)]).ToArray());
+
+            return orderCode;
+        }
     }
 }

@@ -38,13 +38,14 @@ namespace Fsel.Ordering.Application.Queries.VoucherQuery
             var voucherQuery = await _voucherRepository.Queryable
                                     .Include(x => x.VoucherPackages)
                                     .ThenInclude(x => x.Package)
+                                    .Where(x => x.Id == request.Id)
                                     .Select(x => new VoucherModel
                                     {
                                         Id = x.Id,
                                         Name = x.Name,
                                         StartDate = x.StartDate,
                                         EndDate = x.EndDate,
-                                        CustomerType = x.CustomerType,
+                                        CustomerTypes = x.CustomerTypes,
                                         CreatedDate = x.CreatedDate,
                                         IsActive = (x.IsActive == null ? (x.StartDate <= DateTime.Now && DateTime.Now <= x.EndDate) : x.IsActive),
                                         ContentFilePath = x.ContentFilePath,

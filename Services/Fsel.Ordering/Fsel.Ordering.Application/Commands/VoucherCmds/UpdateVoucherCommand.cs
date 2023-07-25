@@ -3,9 +3,7 @@
 namespace Fsel.Ordering.Application.Commands.VoucherCmds
 {
     using System;
-    using System.Collections.Generic;
     using System.Linq;
-    using System.Text;
     using System.Threading;
     using System.Threading.Tasks;
     using AutoMapper;
@@ -41,6 +39,12 @@ namespace Fsel.Ordering.Application.Commands.VoucherCmds
             MethodResult<VoucherModel> methodResult = new MethodResult<VoucherModel>();
 
             #region Validation
+
+            if (request.StartDate > request.EndDate)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumVoucherErrorCode.VoucherStartTimeMustSoonerThanEndTime), nameof(request.EndDate), request.EndDate);
+                return methodResult;
+            }
 
             var voucher = await _voucherRepository.GetIncludeByIdAsync(request.Id);
             if (voucher == null)
