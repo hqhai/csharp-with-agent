@@ -5,6 +5,7 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
     using System;
     using System.Threading;
     using System.Threading.Tasks;
+    using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base;
     using Fsel.Course.Domain.Enums.ErrorCodes;
@@ -25,12 +26,14 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
         private readonly IMockTestResultRepository _mockTestResultRepository;
         private readonly AuthContext _authContext;
         private readonly IUserService _userService;
+        private readonly IMapper _mapper;
 
-        public GetMockTestReportQueryHandler(IMockTestResultRepository mockTestResultRepository, AuthContext authContext, IUserService userService)
+        public GetMockTestReportQueryHandler(IMockTestResultRepository mockTestResultRepository, AuthContext authContext, IUserService userService, IMapper mapper)
         {
             _mockTestResultRepository = mockTestResultRepository;
             _authContext = authContext;
             _userService = userService;
+            _mapper = mapper;
         }
 
         public async Task<MethodResult<MockTestResultModel>> Handle(GetMockTestReportQuery request, CancellationToken cancellationToken)
@@ -45,8 +48,9 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
                 return methodResult;
             }
             var studentId = student?.Content?.Result?.Id;
-            var mockTestResult = await _mockTestResultRepository.Queryable.OrderBy(x => x.CreatedDate)
-                                    .Where(x => x.Id == request.MockTestResultId)
+
+            var mockTestResult = await _mockTestResultRepository.Queryable.Include(x => x.MockTestScores).OrderBy(x => x.CreatedDate)
+                                    .Where(x => x.Id == request.MockTestResultId && x.StudentId == studentId)
                                     .AsNoTracking()
                                     .Select(x => new MockTestResultModel
                                     {
@@ -59,9 +63,16 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
                                         SkillScores = x.SkillScores,
                                         Status = x.Status,
                                         StudentId = x.StudentId,
-                                        MockTestId = x.MockTestId
+                                        MockTestId = x.MockTestId,
+                                        MockTestScores = _mapper.Map<IList<MockTestScoreModel>>(x.MockTestScores.OrderBy(x => x.CreatedDate))
                                     }).FirstOrDefaultAsync(cancellationToken);
-            if (mockTestResult != null && mockTestResult.SkillScores != null)
+            if (mockTestResult == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumMockTestResultErrorCode.MockTestResultNotExist));
+                return methodResult;
+            }
+
+            if (mockTestResult.SkillScores != null)
             {
                 mockTestResult.Scores = mockTestResult.SkillScores.Average(x => x.Scores);
             }

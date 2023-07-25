@@ -27,6 +27,12 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         /// <summary>
         /// SectionGroups Not Exist
         /// </summary>
-        SectionGroupsNotExist
+        SectionGroupsNotExist,
+
+        /// <summary>
+        /// Feedback Already Exist
+        /// </summary>
+        FeedbackAlreadyExist
+
     }
 }

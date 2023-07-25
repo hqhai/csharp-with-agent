@@ -8,6 +8,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Core.Extensions;
+    using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Domain.Models.QueryModels.ClassForumResults;
@@ -44,7 +45,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
 
             var classForumResultQuery = _classForumResultRepository.Queryable
                                     .Include(x => x.ClassForum)
-                                    .Where(x => x.Status == request.Status)
+                                    .Where(x => x.Status != EnumClassForumResultStatus.Graded)
                                     .Select(x => new ClassForumResultSearchModel
                                     {
                                         Id = x.Id,
