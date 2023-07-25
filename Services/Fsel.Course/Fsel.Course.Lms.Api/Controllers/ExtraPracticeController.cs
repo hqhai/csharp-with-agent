@@ -102,7 +102,7 @@ namespace Fsel.Course.Lms.Api.Controllers
         /// <summary>
         /// Get TimeCodes Detail by ExtraPractice
         /// </summary>
-        [HttpGet("timecodes")]
+        [HttpGet("detail-timecode")]
         [ProducesResponseType(typeof(MethodResult<VideoTimeCodeModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetTimeCodeByExtraPractice([FromQuery] GetTimeCodeDetailByExtraPracticeQuery query)
