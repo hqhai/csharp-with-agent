@@ -43,7 +43,8 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
             var mockTestResultQuery = _mockTestResultRepository.Queryable.Include(x => x.MockTest)
                                                                         .ThenInclude(x => x!.MockTestSections)
                                                                         .ThenInclude(x => x!.SectionGroup)
-                                                                        .Where(x => x.Status == EnumResultStatus.Done)
+                                                                        .Include(x => x.MockTestScores)
+                                                                        .Where(x => x.Status == EnumResultStatus.Done && x.MockTestScores == null)
                                                                         .AsNoTracking()
                                                                         .Select(x => new MockTestResultSearchModel
                                                                         {
