@@ -8,6 +8,6 @@ namespace Fsel.Course.Domain.Models.EntityModels
     {
         public string? FullName { get; set; }
         public string? Code { get; set; }
-        public double Scores { get; set; }
+        public double Starts { get; set; }
     }
 }

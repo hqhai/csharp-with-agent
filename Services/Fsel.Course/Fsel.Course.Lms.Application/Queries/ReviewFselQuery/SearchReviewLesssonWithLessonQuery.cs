@@ -4,7 +4,6 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
 {
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base.BaseModels;
-    using Fsel.Core.Extensions;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
@@ -13,7 +12,6 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
     using Fsel.Course.Lms.Application.Services.UserServices.Models;
     using MediatR;
     using Microsoft.AspNetCore.Http;
-    using Microsoft.EntityFrameworkCore;
 
     public class SearchReviewLesssonWithLessonQuery : SearchReviewLesssonWithLessonQueryModel, IRequest<MethodResult<ReviewLessonWithLessonSearchModel>>
     {
@@ -21,15 +19,35 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
 
     public class SearchReviewLesssonWithLessonQueryHandler : IRequestHandler<SearchReviewLesssonWithLessonQuery, MethodResult<ReviewLessonWithLessonSearchModel>>
     {
-        private readonly IUnitRepository _unitRepository;
+        private readonly ICourseRepository _courseRepository;
+        private readonly IVideoResultRepository _videoResultRepository;
         private readonly IUserService _userService;
+        private readonly ILessonVideoRepository _lessonVideoRepository;
         private readonly ILessonRepository _lessonRepository;
+        private readonly IUnitLessonRepository _unitLessonRepository;
+        private readonly IUnitRepository _unitRepository;
+        private readonly ICourseUnitMockTestRepository _courseUnitMockTestRepository;
+        private readonly IVideoRepository _videoRepository;
 
-        public SearchReviewLesssonWithLessonQueryHandler(IUnitRepository unitRepository, IUserService userService, ILessonRepository lessonRepository)
+        public SearchReviewLesssonWithLessonQueryHandler(ICourseRepository courseRepository
+            , IVideoResultRepository videoResultRepository
+            , IUserService userService
+            , ILessonVideoRepository lessonVideoRepository
+            , ILessonRepository lessonRepository
+            , IUnitLessonRepository unitLessonRepository
+            , IUnitRepository unitRepository
+            , ICourseUnitMockTestRepository courseUnitMockTestRepository
+            , IVideoRepository videoRepository)
         {
-            _unitRepository = unitRepository;
+            _courseRepository = courseRepository;
+            _videoResultRepository = videoResultRepository;
             _userService = userService;
+            _lessonVideoRepository = lessonVideoRepository;
             _lessonRepository = lessonRepository;
+            _unitLessonRepository = unitLessonRepository;
+            _unitRepository = unitRepository;
+            _courseUnitMockTestRepository = courseUnitMockTestRepository;
+            _videoRepository = videoRepository;
         }
 
         public async Task<MethodResult<ReviewLessonWithLessonSearchModel>> Handle(SearchReviewLesssonWithLessonQuery request, CancellationToken cancellationToken)
@@ -49,33 +67,48 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
             }
-            var lessonQuery = _lessonRepository.Queryable.Include(x => x.LessonVideos)
-                                                        .ThenInclude(x => x.Video)
-                                                        .Include(x => x.UnitLessons)
-                                                        .Include(x => x.LessonResults)
-                                                        .ThenInclude(x => x.VideoResult)
-                                                        .Where(x => x.UnitLessons.Any(x => x.UnitId == request.UnitId))
-                                                        .Select(x => new ReviewLessonWithLessonModel
-                                                        {
-                                                            Id = x.Id,
-                                                            Name = x.Name,
-                                                            CreatedDate = x.CreatedDate,
-                                                            TeacherId = x.LessonVideos.FirstOrDefault(x => x.LessonId == x.Id)!.Video!.TeacherId,
-                                                            Scores = x.LessonResults.Select(x => x.VideoResult).Where(x => x!.Status == EnumResultStatus.Done).Average(x => x!.NumberOfStars)
-                                                        });
-
+            var lessonQuery = from baseQ in _videoResultRepository.Queryable
+                              join v in _videoRepository.Queryable on baseQ.VideoId equals v.Id
+                              join lv in _lessonVideoRepository.Queryable on v.Id equals lv.VideoId
+                              join l in _lessonRepository.Queryable on lv.LessonId equals l.Id
+                              join ul in _unitLessonRepository.Queryable on l.Id equals ul.LessonId
+                              join u in _unitRepository.Queryable on ul.UnitId equals u.Id
+                              join cum in _courseUnitMockTestRepository.Queryable on u.Id equals cum.UnitId
+                              join c in _courseRepository.Queryable on cum.CourseId equals c.Id
+                              where baseQ.Status == EnumResultStatus.Done && c.Id == request.CourseId && u.Id == request.UnitId
+                              select new
+                              {
+                                  Id = l.Id,
+                                  Name = l.Name,
+                                  CourseLevel = l.CourseLevel,
+                                  CreatedDate = l.CreatedDate,
+                                  Starts = baseQ.NumberOfStars,
+                                  TeacherId = v.TeacherId,
+                              };
+            var lessonStars = lessonQuery
+                .GroupBy(c => new { c.Id, c.Name, c.CreatedDate, c.TeacherId }) // Nhóm dữ liệu theo Id của khóa học
+                .Select(group => new ReviewLessonWithLessonModel
+                {
+                    Id = group.Key.Id,
+                    Name = group.Key.Name,
+                    CreatedDate = group.Key.CreatedDate,
+                    Starts = group.Select(x => x.Starts).Average(),
+                    TeacherId = group.Key.TeacherId,
+                    TotalStart = group.Sum(x => x.Starts),
+                    TotalResult = group.Select(x => x.Starts).Count()
+                })
+                .ToList();
             if (request.TeacherId != null)
             {
-                lessonQuery = lessonQuery.Where(x => x.TeacherId == request.TeacherId);
+                lessonStars = lessonStars.Where(x => x.TeacherId == request.TeacherId).ToList();
             }
-
-            var scores = await lessonQuery.AverageAsync(x => x.Scores, cancellationToken: cancellationToken).ConfigureAwait(false);
-            int totalItem = await lessonQuery.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
-            var lists = await lessonQuery
-                    .ApplySortAndPaging(request)
-                    .AsNoTracking()
-                    .ToListAsync(cancellationToken: cancellationToken)
-                    .ConfigureAwait(false);
+            var starts = 0.0;
+            if (lessonStars.Count > 0)
+            {
+                starts = lessonStars.Sum(x => x.TotalStart) / lessonStars.Sum(x => x.TotalResult);
+            }
+            int totalItem = lessonStars.Count;
+            var lists = lessonStars.Skip((request!.Page - 1) * request!.PageSize).Take(request!.PageSize).ToList();
 
             var teacherIds = lists.Select(x => x.TeacherId).Distinct().ToList();
             var teacherResults = await _userService.GetTeacherByIdsAsync(new GetTeacherByIdsQueryModel { Ids = teacherIds });
@@ -89,7 +122,7 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
                 }
             }
 
-            methodResult.Result = new ReviewLessonWithLessonSearchModel { Scores = scores, Code = unit.Code, PagingItemsModel = new PagingItemsModel<ReviewLessonWithLessonModel>(lists, request, totalItem) };
+            methodResult.Result = new ReviewLessonWithLessonSearchModel { Starts = starts, Code = unit.Code, PagingItemsModel = new PagingItemsModel<ReviewLessonWithLessonModel>(lists, request, totalItem) };
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }

@@ -46,17 +46,16 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
                 return methodResult;
             }
             var studentReviews = studentReviewResults?.Content?.Result?.ToList() ?? new List<StudentReviewModel>();
-            var scores = studentReviews.Where(x => x.StudentReviewDetails != null).SelectMany(x => x.StudentReviewDetails!).Average(x => x.VoteStars);
+            var starts = studentReviews.Where(x => x.StudentReviewDetails != null).SelectMany(x => x.StudentReviewDetails!).Average(x => x.VoteStars);
             var studentReviewQuery = studentReviews.Select(x => new ReviewCommunicationModel
             {
                 Id = x.Id,
                 CreatedDate = x.CreatedDate,
                 CreatedFullName = x.CreatedFullName,
                 CreatedUserId = x.CreatedUserId,
-                CourseId = x.CourseId,
                 ReviewType = x.ReviewType,
                 StudentId = x.StudentId,
-                Scores = x.StudentReviewDetails != null ? x.StudentReviewDetails.Average(x => x.VoteStars) : 0,
+                Starts = x.StudentReviewDetails != null ? x.StudentReviewDetails.Average(x => x.VoteStars) : 0,
                 StudentReviewDetails = x.StudentReviewDetails?.Select(x => new ReviewCommunicationStudentModel
                 {
                     Id = x.Id,
@@ -69,7 +68,7 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
             int totalItem = studentReviewQuery.Count();
             var lists = studentReviewQuery.Skip((request!.Page - 1) * request!.PageSize).Take(request!.PageSize).ToList();
 
-            methodResult.Result = new ReviewCommunicationSearchModel { Scores = scores, PagingItemsModel = new PagingItemsModel<ReviewCommunicationModel>(lists, request, totalItem) };
+            methodResult.Result = new ReviewCommunicationSearchModel { Starts = starts, PagingItemsModel = new PagingItemsModel<ReviewCommunicationModel>(lists, request, totalItem) };
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }

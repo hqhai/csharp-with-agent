@@ -7,7 +7,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
     public class ReviewLessonWithLessonSearchModel
     {
         public string? Code { get; set; }
-        public double Scores { get; set; }
+        public double Starts { get; set; }
         public PagingItemsModel<ReviewLessonWithLessonModel> PagingItemsModel { get; set; } = new PagingItemsModel<ReviewLessonWithLessonModel>();
     }
 
@@ -16,6 +16,9 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public Guid TeacherId { get; set; }
         public string? FullName { get; set; }
         public string? Name { get; set; }
-        public double Scores { get; set; }
+        public double Starts { get; set; }
+        public double TotalStart { get; set; }
+
+        public int TotalResult { get; set; }
     }
 }

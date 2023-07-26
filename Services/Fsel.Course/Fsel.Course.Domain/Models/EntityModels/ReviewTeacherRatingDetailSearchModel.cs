@@ -14,7 +14,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
     {
         public string? Code { get; set; }
         public string? ReviewArea { get; set; }
-        public double Scores { get; set; }
+        public double Starts { get; set; }
         public string? Feedback { get; set; }
     }
 }

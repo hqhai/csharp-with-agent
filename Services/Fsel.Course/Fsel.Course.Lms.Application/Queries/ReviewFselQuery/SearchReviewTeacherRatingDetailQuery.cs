@@ -7,6 +7,7 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Core.Extensions;
+    using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Domain.Models.QueryModels.ReviewFsels;
@@ -24,11 +25,22 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
     {
         private readonly IUserService _userService;
         private readonly IVideoResultRepository _videoResultRepository;
+        private readonly IVideoRepository _videoRepository;
+        private readonly ILessonResultRepository _lessonResultRepository;
+        private readonly ICourseRepository _courseRepository;
 
-        public SearchReviewTeacherRatingDetailQueryHandler(IUserService userService, IVideoResultRepository videoResultRepository)
+        public SearchReviewTeacherRatingDetailQueryHandler(IUserService userService
+            , IVideoResultRepository videoResultRepository
+            , IVideoRepository videoRepository
+            , ILessonResultRepository lessonResultRepository
+            , ICourseRepository courseRepository
+            )
         {
             _userService = userService;
             _videoResultRepository = videoResultRepository;
+            _videoRepository = videoRepository;
+            _lessonResultRepository = lessonResultRepository;
+            _courseRepository = courseRepository;
         }
 
         public async Task<MethodResult<ReviewTeacherRatingDetailSearchModel>> Handle(SearchReviewTeacherRatingDetailQuery request, CancellationToken cancellationToken)
@@ -50,21 +62,22 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
             }
             var teacher = teacherResults.Content?.Result;
 
-            var videoResultQuery = _videoResultRepository.Queryable.Include(x => x.Video)
-                .Include(x => x.LessonResult)
-                .ThenInclude(x => x!.Course)
-                .Where(x => x.Video!.TeacherId == request.TeacherId)
-                .Select(x => new ReviewTeacherRatingDetailModel
-                {
-                    Id = x.Id,
-                    Code = x.LessonResult!.Course!.Code,
-                    CreatedDate = x.CreatedDate,
-                    CreatedFullName = x.CreatedFullName,
-                    CreatedUserId = x.CreatedUserId,
-                    Feedback = x.Feedback,
-                    ReviewArea = "Video Lesson",
-                    Scores = x.NumberOfStars
-                });
+            var videoResultQuery = from baseQ in _videoResultRepository.Queryable
+                                   join v in _videoRepository.Queryable on baseQ.VideoId equals v.Id
+                                   join lr in _lessonResultRepository.Queryable on baseQ.LessonResultId equals lr.Id
+                                   join c in _courseRepository.Queryable on lr.CourseId equals c.Id
+                                   where v.TeacherId == request.TeacherId && baseQ.Status == EnumResultStatus.Done
+                                   select new ReviewTeacherRatingDetailModel
+                                   {
+                                       Id = baseQ.Id,
+                                       Code = c.Code,
+                                       CreatedDate = baseQ.CreatedDate,
+                                       CreatedFullName = baseQ.CreatedFullName,
+                                       CreatedUserId = baseQ.CreatedUserId,
+                                       Feedback = baseQ.Feedback,
+                                       ReviewArea = "Video Lesson",
+                                       Starts = baseQ.NumberOfStars
+                                   };
 
             if (!string.IsNullOrEmpty(request.Keyword))
             {

@@ -55,11 +55,11 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
         /// Search Course Detail
         /// </summary>
         [HttpGet("course-detail")]
-        [ProducesResponseType(typeof(MethodResult<ReviewCourseSearchModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(MethodResult<ReviewCourseDetailSearchModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> SearchCourseDetail([FromQuery] SearchReviewCourseDetailQuery query)
         {
-            MethodResult<ReviewCourseSearchModel> queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            MethodResult<ReviewCourseDetailSearchModel> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
 

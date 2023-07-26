@@ -8,6 +8,7 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base.BaseModels;
+    using Fsel.Core.Extensions;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Domain.Models.QueryModels.ReviewFsels;
@@ -17,6 +18,7 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
     using Fsel.Shared.Enums.ErrorCodes;
     using MediatR;
     using Microsoft.AspNetCore.Http;
+    using Microsoft.EntityFrameworkCore;
 
     public class SearchReviewCourseQuery : SearchReviewCourseQueryModel, IRequest<MethodResult<ReviewCourseSearchModel>>
     {
@@ -51,49 +53,50 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
                 return methodResult;
             }
             var studentReviews = studentReviewResults?.Content?.Result?.ToList() ?? new List<StudentReviewModel>();
-            var scores = studentReviews.Where(x => x.StudentReviewDetails != null).SelectMany(x => x.StudentReviewDetails!).Average(x => x.VoteStars);
-
+            var starts = studentReviews.Where(x => x.StudentReviewDetails != null).SelectMany(x => x.StudentReviewDetails!).Average(x => x.VoteStars);
             var courseIds = studentReviews.Select(x => x.CourseId ?? Guid.Empty).Distinct().ToList();
-            var courses = await _courseRepository.GetByIdsAsync(courseIds);
-            foreach (var item in studentReviews)
-            {
-                var course = courses.FirstOrDefault(x => x.Id == item.CourseId);
-                if (course != null)
-                {
-                    item.Code = course.Code;
-                    item.CourseLevel = course.CourseLevel;
-                }
-            }
-            var studentReviewQuery = studentReviews.Select(x => new ReviewCourseModel
-            {
-                Id = x.Id,
-                CreatedDate = x.CreatedDate,
-                CreatedFullName = x.CreatedFullName,
-                CreatedUserId = x.CreatedUserId,
-                CourseId = x.CourseId,
-                ReviewType = x.ReviewType,
-                StudentId = x.StudentId,
-                Code = x.Code,
-                CourseLevel = x.CourseLevel,
-                Scores = x.StudentReviewDetails != null ? x.StudentReviewDetails.Average(x => x.VoteStars) : 0,
-                StudentReviewDetails = x.StudentReviewDetails?.Select(x => new ReviewCourseDetailModel
+
+            var courseQuery = _courseRepository.Queryable.Where(x => courseIds.Contains(x.Id))
+                .Select(x => new ReviewCourseModel
                 {
                     Id = x.Id,
-                    Content = x.Content,
-                    ReviewQuestionType = x.ReviewQuestionType,
-                    VoteStars = x.VoteStars,
-                }).ToList(),
-            }).AsEnumerable();
+                    CreatedDate = x.CreatedDate,
+                    CreatedFullName = x.CreatedFullName,
+                    CreatedUserId = x.CreatedUserId,
+                    UpdatedDate = x.UpdatedDate,
+                    UpdatedFullName = x.UpdatedFullName,
+                    UpdatedUserId = x.UpdatedUserId,
+                    Code = x.Code,
+                    CourseLevel = x.CourseLevel,
+                });
 
             if (request.CourseLevel != null)
             {
-                studentReviewQuery = studentReviewQuery.Where(x => x.CourseLevel == request.CourseLevel);
+                courseQuery = courseQuery.Where(x => x.CourseLevel == request.CourseLevel);
+                courseIds = await courseQuery.Select(x => x.Id).ToListAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
+                if (courseIds != null && courseIds.Count > 0)
+                {
+                    starts = studentReviews.Where(x => x.StudentReviewDetails != null && courseIds.Contains(x.CourseId ?? default)).SelectMany(x => x.StudentReviewDetails!).Average(x => x.VoteStars);
+                }
+                else
+                {
+                    starts = 0;
+                }
             }
 
-            int totalItem = studentReviewQuery.Count();
-            var lists = studentReviewQuery.Skip((request!.Page - 1) * request!.PageSize).Take(request!.PageSize).ToList();
+            int totalItem = await courseQuery.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
+            var lists = await courseQuery
+                    .ApplySortAndPaging(request)
+                    .AsNoTracking()
+                    .ToListAsync(cancellationToken: cancellationToken)
+                    .ConfigureAwait(false);
+            foreach (var item in lists)
+            {
+                var studentReview = studentReviews.FirstOrDefault(a => a.CourseId == item.Id);
+                item.Starts = studentReview?.StudentReviewDetails?.Average(x => x.VoteStars) ?? 0;
+            }
 
-            methodResult.Result = new ReviewCourseSearchModel { Scores = scores, PagingItemsModel = new PagingItemsModel<ReviewCourseModel>(lists, request, totalItem) };
+            methodResult.Result = new ReviewCourseSearchModel { Starts = starts, PagingItemsModel = new PagingItemsModel<ReviewCourseModel>(lists, request, totalItem) };
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }

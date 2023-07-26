@@ -6,6 +6,7 @@ namespace Fsel.Course.Domain.Models.QueryModels.ReviewFsels
 
     public class SearchReviewLesssonWithLessonQueryModel : BaseQueryModel
     {
+        public Guid CourseId { get; set; }
         public Guid UnitId { get; set; }
         public Guid? TeacherId { get; set; }
     }

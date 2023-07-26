@@ -58,10 +58,10 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
                                                             Id = x.Id,
                                                             StudentId = x.StudentId,
                                                             CreatedDate = x.CreatedDate,
-                                                            Scores = x.VideoResult!.NumberOfStars
+                                                            Starts = x.VideoResult!.NumberOfStars
                                                         });
 
-            var scores = await lessonResultQuery.AverageAsync(x => x.Scores, cancellationToken: cancellationToken).ConfigureAwait(false);
+            var starts = await lessonResultQuery.AverageAsync(x => x.Starts, cancellationToken: cancellationToken).ConfigureAwait(false);
             int totalItem = await lessonResultQuery.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
             var lists = await lessonResultQuery
                     .ApplySortAndPaging(request)
@@ -82,7 +82,7 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
                 item.Code = student?.Human?.Code;
                 item.ClassCode = classStudent?.Code;
             }
-            methodResult.Result = new ReviewLessonDetailSearchModel { Scores = scores, Name = lesson.Name, PagingItemsModel = new PagingItemsModel<ReviewLessonDetailModel>(lists, request, totalItem) };
+            methodResult.Result = new ReviewLessonDetailSearchModel { Starts = starts, Name = lesson.Name, PagingItemsModel = new PagingItemsModel<ReviewLessonDetailModel>(lists, request, totalItem) };
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }

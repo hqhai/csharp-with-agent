@@ -20,11 +20,11 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
     using MediatR;
     using Microsoft.AspNetCore.Http;
 
-    public class SearchReviewCourseDetailQuery : SearchReviewCourseDetailQueryModel, IRequest<MethodResult<ReviewCourseSearchModel>>
+    public class SearchReviewCourseDetailQuery : SearchReviewCourseDetailQueryModel, IRequest<MethodResult<ReviewCourseDetailSearchModel>>
     {
     }
 
-    public class SearchReviewCourseDetailQueryHandler : IRequestHandler<SearchReviewCourseDetailQuery, MethodResult<ReviewCourseSearchModel>>
+    public class SearchReviewCourseDetailQueryHandler : IRequestHandler<SearchReviewCourseDetailQuery, MethodResult<ReviewCourseDetailSearchModel>>
     {
         private readonly IInteractionService _interactionService;
         private readonly IUserService _userService;
@@ -39,10 +39,10 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
             _trainingService = trainingService;
         }
 
-        public async Task<MethodResult<ReviewCourseSearchModel>> Handle(SearchReviewCourseDetailQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<ReviewCourseDetailSearchModel>> Handle(SearchReviewCourseDetailQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            var methodResult = new MethodResult<ReviewCourseSearchModel>();
+            var methodResult = new MethodResult<ReviewCourseDetailSearchModel>();
 
             if (request.PageSize > 100)
             {
@@ -65,18 +65,19 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
                 return methodResult;
             }
             var studentReviews = studentReviewResults?.Content?.Result?.Where(x => x.CourseId == request.CourseId).ToList() ?? new List<StudentReviewModel>();
-            var scores = studentReviews.Where(x => x.StudentReviewDetails != null).SelectMany(x => x.StudentReviewDetails!).Average(x => x.VoteStars);
-            var studentReviewQuery = studentReviews.Select(x => new ReviewCourseModel
+            var starts = studentReviews.Where(x => x.StudentReviewDetails != null).SelectMany(x => x.StudentReviewDetails!).Average(x => x.VoteStars);
+            var studentReviewQuery = studentReviews.Select(x => new ReviewCourseDetailModel
             {
                 Id = x.Id,
                 CreatedDate = x.CreatedDate,
                 CreatedFullName = x.CreatedFullName,
                 CreatedUserId = x.CreatedUserId,
                 CourseId = x.CourseId,
+                CourseLevel = course.CourseLevel,
                 ReviewType = x.ReviewType,
                 StudentId = x.StudentId,
-                Scores = x.StudentReviewDetails != null ? x.StudentReviewDetails.Average(x => x.VoteStars) : 0,
-                StudentReviewDetails = x.StudentReviewDetails?.Select(x => new ReviewCourseDetailModel
+                Starts = x.StudentReviewDetails != null ? x.StudentReviewDetails.Average(x => x.VoteStars) : 0,
+                StudentReviewDetails = x.StudentReviewDetails?.Select(x => new ReviewCourseDetailInfoModel
                 {
                     Id = x.Id,
                     Content = x.Content,
@@ -98,11 +99,12 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
             {
                 var student = students?.FirstOrDefault(x => x.Id == item.StudentId);
                 var classStudent = classeStudents?.FirstOrDefault(x => x.StudentId == item.StudentId);
-                item.Code = student?.Human?.Code;
+                item.Code = course.Code;
+                item.CodeStudent = student?.Human?.Code;
                 item.ClassCode = classStudent?.Code;
             }
 
-            methodResult.Result = new ReviewCourseSearchModel { Scores = scores, Code = course.Code, PagingItemsModel = new PagingItemsModel<ReviewCourseModel>(lists, request, totalItem) };
+            methodResult.Result = new ReviewCourseDetailSearchModel { Starts = starts, Code = course.Code, PagingItemsModel = new PagingItemsModel<ReviewCourseDetailModel>(lists, request, totalItem) };
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }

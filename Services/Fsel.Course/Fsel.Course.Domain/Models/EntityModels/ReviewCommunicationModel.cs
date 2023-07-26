@@ -7,7 +7,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
 
     public class ReviewCommunicationSearchModel
     {
-        public double Scores { get; set; }
+        public double Starts { get; set; }
         public PagingItemsModel<ReviewCommunicationModel> PagingItemsModel { get; set; } = new PagingItemsModel<ReviewCommunicationModel>();
     }
 
@@ -15,11 +15,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
     {
         public EnumReviewType ReviewType { get; set; }
         public Guid StudentId { get; set; }
-        public Guid? CourseId { get; set; }
-        public string? Code { get; set; }
-        public string? CodeStudent { get; set; }
-        public EnumCourseLevel? CourseLevel { get; set; }
-        public double Scores { get; set; }
+        public double Starts { get; set; }
         public IList<ReviewCommunicationStudentModel>? StudentReviewDetails { get; set; }
     }
 

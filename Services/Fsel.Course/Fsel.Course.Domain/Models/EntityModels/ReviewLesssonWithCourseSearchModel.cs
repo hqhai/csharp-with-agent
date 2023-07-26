@@ -7,15 +7,14 @@ namespace Fsel.Course.Domain.Models.EntityModels
 
     public class ReviewLesssonWithCourseSearchModel
     {
-        public double Scores { get; set; }
+        public double Starts { get; set; }
         public PagingItemsModel<ReviewLesssonWithCourseModel> PagingItemsModel { get; set; } = new PagingItemsModel<ReviewLesssonWithCourseModel>();
     }
 
     public class ReviewLesssonWithCourseModel : BaseModel
     {
-        public Guid CourseId { get; set; }
         public string? Code { get; set; }
-        public EnumCourseLevel? CourseLevel { get; set; }
-        public double Scores { get; set; }
+        public EnumCourseLevel CourseLevel { get; set; }
+        public double Starts { get; set; }
     }
 }

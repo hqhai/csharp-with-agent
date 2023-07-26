@@ -4,6 +4,7 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
 {
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base.BaseModels;
+    using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Domain.Models.QueryModels.ReviewFsels;
@@ -68,8 +69,12 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
 
             foreach (var item in lists)
             {
-                var video = videos.FirstOrDefault(x => x.Id == item.Id);
-                item.Scores = video?.VideoResults.Average(x => x.NumberOfStars) ?? 0;
+                var listVideo = videos.Where(x => x.TeacherId == item.Id).ToList();
+                var videoResults = listVideo.Where(x => x.VideoResults.Count > 0).SelectMany(x => x.VideoResults).Where(x => x.Status == EnumResultStatus.Done).ToList();
+                if (videoResults.Sum(x => x.NumberOfStars) > 0)
+                {
+                    item.Starts = videoResults.Average(x => x.NumberOfStars);
+                }
             }
 
             methodResult.Result = new PagingItemsModel<ReviewTeacherRatingSearchModel>(lists, request, totalItem);

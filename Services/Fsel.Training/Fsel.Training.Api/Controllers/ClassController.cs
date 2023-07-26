@@ -142,7 +142,7 @@ namespace Fsel.Training.Api.Controllers
         /// <summary>
         /// Classes by StudentIds
         /// </summary>
-        [HttpGet("classes-by-studentids")]
+        [HttpPost("classes-by-studentids")]
         [ProducesResponseType(typeof(MethodResult<IList<ClassStudentDetailModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetClassByStudentIds([FromBody] IList<Guid> studentIds)
