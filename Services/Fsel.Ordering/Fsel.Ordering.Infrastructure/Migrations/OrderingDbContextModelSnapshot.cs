@@ -202,7 +202,7 @@ namespace Fsel.Ordering.Infrastructure.Migrations
                         {
                             Id = new Guid("42d7ddb2-9f36-4f86-badc-67dc16bb722b"),
                             Code = "BASIC",
-                            CreatedDate = new DateTime(2023, 7, 5, 13, 22, 48, 175, DateTimeKind.Local).AddTicks(860),
+                            CreatedDate = new DateTime(2023, 7, 24, 15, 42, 49, 752, DateTimeKind.Local).AddTicks(4373),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             DescriptionStr = "[{\"content\":\"B\\u00E0i gi\\u1EA3ng , b\\u00E0i t\\u1EADp t\\u00EAn n\\u1EC1n t\\u1EA3ng E-learning\",\"status\":true},{\"content\":\"Truy c\\u1EADp b\\u00E0i t\\u1EADp h\\u01B0\\u1EDBng d\\u1EABn, v\\u00E0 b\\u00E0i thi Unit\",\"status\":true},{\"content\":\"Di\\u1EC5n \\u0111\\u00E0n\",\"status\":true},{\"content\":\"Gi\\u1EA3ng vi\\u00EAn nh\\u1EADn x\\u00E9t\",\"status\":false},{\"content\":\"Truy c\\u1EADp ti\\u1EBFt h\\u1ECDc tr\\u1EF1c tuy\\u1EBFn cho k\\u1EF9 n\\u0103ng n\\u00F3i v\\u1EDBi Gi\\u1EA3ng vi\\u00EAn\",\"status\":false}]",
@@ -213,7 +213,7 @@ namespace Fsel.Ordering.Infrastructure.Migrations
                         {
                             Id = new Guid("daa6fc87-6461-49d4-b3a5-c9e4cc30bc59"),
                             Code = "STANDARD",
-                            CreatedDate = new DateTime(2023, 7, 5, 13, 22, 48, 176, DateTimeKind.Local).AddTicks(4248),
+                            CreatedDate = new DateTime(2023, 7, 24, 15, 42, 49, 752, DateTimeKind.Local).AddTicks(7637),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             DescriptionStr = "[{\"content\":\"B\\u00E0i gi\\u1EA3ng , b\\u00E0i t\\u1EADp t\\u00EAn n\\u1EC1n t\\u1EA3ng E-learning\",\"status\":true},{\"content\":\"Truy c\\u1EADp b\\u00E0i t\\u1EADp h\\u01B0\\u1EDBng d\\u1EABn, v\\u00E0 b\\u00E0i thi Unit\",\"status\":true},{\"content\":\"Di\\u1EC5n \\u0111\\u00E0n\",\"status\":true},{\"content\":\"Gi\\u1EA3ng vi\\u00EAn nh\\u1EADn x\\u00E9t\",\"status\":true},{\"content\":\"Truy c\\u1EADp ti\\u1EBFt h\\u1ECDc tr\\u1EF1c tuy\\u1EBFn cho k\\u1EF9 n\\u0103ng n\\u00F3i v\\u1EDBi Gi\\u1EA3ng vi\\u00EAn\",\"status\":false}]",
@@ -224,7 +224,7 @@ namespace Fsel.Ordering.Infrastructure.Migrations
                         {
                             Id = new Guid("d13ee4ab-785a-425c-bd70-b74b61df42eb"),
                             Code = "PREMIUM",
-                            CreatedDate = new DateTime(2023, 7, 5, 13, 22, 48, 176, DateTimeKind.Local).AddTicks(5651),
+                            CreatedDate = new DateTime(2023, 7, 24, 15, 42, 49, 752, DateTimeKind.Local).AddTicks(8790),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             DescriptionStr = "[{\"content\":\"B\\u00E0i gi\\u1EA3ng , b\\u00E0i t\\u1EADp t\\u00EAn n\\u1EC1n t\\u1EA3ng E-learning\",\"status\":true},{\"content\":\"Truy c\\u1EADp b\\u00E0i t\\u1EADp h\\u01B0\\u1EDBng d\\u1EABn, v\\u00E0 b\\u00E0i thi Unit\",\"status\":true},{\"content\":\"Di\\u1EC5n \\u0111\\u00E0n\",\"status\":true},{\"content\":\"Gi\\u1EA3ng vi\\u00EAn nh\\u1EADn x\\u00E9t\",\"status\":true},{\"content\":\"Truy c\\u1EADp ti\\u1EBFt h\\u1ECDc tr\\u1EF1c tuy\\u1EBFn cho k\\u1EF9 n\\u0103ng n\\u00F3i v\\u1EDBi Gi\\u1EA3ng vi\\u00EAn\",\"status\":true}]",
@@ -260,10 +260,8 @@ namespace Fsel.Ordering.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(101);
 
-                    b.Property<string>("CustomerType")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                    b.Property<string>("CustomerTypesStr")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime?>("DeletedDate")
                         .HasColumnType("datetime2")
@@ -281,7 +279,7 @@ namespace Fsel.Ordering.Infrastructure.Migrations
                     b.Property<DateTime?>("EndDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<bool?>("IsActive")
+                    b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
                     b.Property<bool>("IsDeleted")

@@ -36,6 +36,7 @@ namespace Fsel.Course.Infrastructure.Common
         public SectionGroupModel GetSectionGroupModel(SectionGroup? sectionGroup, bool isDisableAnswers = false)
         {
             var sectionGroupModel = _mapper.Map<SectionGroupModel>(sectionGroup);
+            sectionGroupModel.MockTestScores = _mapper.Map<IList<MockTestScoreModel>>(sectionGroup?.MockTestScores);
             sectionGroupModel.Sections = GetSectionModels(sectionGroup?.Sections.ToList(), isDisableAnswers);
             sectionGroupModel.TotalQuestion = sectionGroup!.Sections.Any(x => x.SectionParts != null && x.SectionParts.Count > 0) ? sectionGroup.Sections.SelectMany(x => x.SectionParts).SelectMany(x => x.SectionQuestions).Select(x => x.Question).Count() : 0;
             return sectionGroupModel;

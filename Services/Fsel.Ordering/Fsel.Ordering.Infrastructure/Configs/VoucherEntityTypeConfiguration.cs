@@ -14,11 +14,7 @@ namespace Fsel.Ordering.Infrastructure.Configs
         public void Configure(EntityTypeBuilder<Voucher> builder)
         {
             ArgumentNullException.ThrowIfNull(builder);
-            builder.Property(e => e.CustomerType)
-                .HasMaxLength(100)
-                .HasConversion(
-                    v => v.ToString(),
-                    v => v.EnumParse<EnumCustomerType>());
+            
         }
     }
 }
