@@ -7,5 +7,6 @@ namespace Fsel.Course.Lms.Application.Services.UserServices.Models
         public string? FullName { get; set; }
         public string? Birthday { get; set; }
         public string? AvatarPath { get; set; }
+        public string? Code { get; set; }
     }
 }

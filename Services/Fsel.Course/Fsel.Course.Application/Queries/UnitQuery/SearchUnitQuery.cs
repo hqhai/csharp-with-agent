@@ -61,7 +61,7 @@ namespace Fsel.Course.Application.Queries.UnitQuery
                                 TeacherIds = unit.UnitLessons.Select(l => l.Lesson)
                                                 .SelectMany(lv => lv!.LessonVideos.Where(n => !n.IsDeleted))
                                                 .Select(v => v.Video)
-                                                .Select(n => n!.TeacherId ?? Guid.Empty).ToList()
+                                                .Select(n => n!.TeacherId).ToList()
                             });
 
             if (!string.IsNullOrEmpty(request.Keyword))
