@@ -108,7 +108,7 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
                 starts = lessonStars.Sum(x => x.TotalStart) / lessonStars.Sum(x => x.TotalResult);
             }
             int totalItem = lessonStars.Count;
-            var lists = lessonStars.Skip((request!.Page - 1) * request!.PageSize).Take(request!.PageSize).ToList();
+            var lists = lessonStars.OrderBy(x => x.CreatedDate).Skip((request!.Page - 1) * request!.PageSize).Take(request!.PageSize).ToList();
 
             var teacherIds = lists.Select(x => x.TeacherId).Distinct().ToList();
             var teacherResults = await _userService.GetTeacherByIdsAsync(new GetTeacherByIdsQueryModel { Ids = teacherIds });

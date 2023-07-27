@@ -111,7 +111,7 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
                 starts = unitStars.Average(x => x.Starts);
             }
             int totalItem = unitStars.Count;
-            var lists = unitStars.Skip((request!.Page - 1) * request!.PageSize).Take(request!.PageSize).ToList();
+            var lists = unitStars.OrderBy(x => x.CreatedDate).Skip((request!.Page - 1) * request!.PageSize).Take(request!.PageSize).ToList();
 
             var teacherIds = lists.Where(x => x.TeacherIds != null && x.TeacherIds.Count > 0).SelectMany(x => x.TeacherIds!).Distinct().ToList();
             var teacherResults = await _userService.GetTeacherByIdsAsync(new GetTeacherByIdsQueryModel { Ids = teacherIds });

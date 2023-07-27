@@ -7,6 +7,7 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Core.Extensions;
+    using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
@@ -86,7 +87,7 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
                                        CreatedFullName = baseQ.CreatedFullName,
                                        CreatedUserId = baseQ.CreatedUserId,
                                        Feedback = baseQ.Feedback,
-                                       ReviewArea = "Video Lesson",
+                                       ReviewArea = nameof(Video),
                                        Starts = baseQ.NumberOfStars
                                    };
 
@@ -103,8 +104,8 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
                                      CreatedFullName = baseQ.CreatedFullName,
                                      CreatedUserId = baseQ.CreatedUserId,
                                      Feedback = baseQ.FeedBackNote,
-                                     ReviewArea = "ClassForum",
-                                     Starts = baseQ.FeedBackStars ?? 0.0
+                                     ReviewArea = nameof(ClassForum),
+                                     Starts = baseQ.FeedBackStars ?? default
                                  };
 
             var mockTestQuery = from baseQ in _mockTestResultRepository.Queryable
@@ -119,8 +120,8 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
                                     CreatedFullName = baseQ.CreatedFullName,
                                     CreatedUserId = baseQ.CreatedUserId,
                                     Feedback = baseQ.FeedBackNote,
-                                    ReviewArea = "MockTest",
-                                    Starts = baseQ.FeedBackStars ?? 0.0
+                                    ReviewArea = nameof(MockTest),
+                                    Starts = baseQ.FeedBackStars ?? default
                                 };
 
             var query = mockTestQuery.AsEnumerable().Union(classFormQuery.AsEnumerable()).Union(videoResultQuery.AsEnumerable());
@@ -128,9 +129,8 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
             {
                 query = query.Where(m => m.Id.ToString() == request.Keyword || (m.CreatedFullName != null && m.CreatedFullName.Contains(request.Keyword, StringComparison.CurrentCulture)));
             }
-            query = query.OrderBy(x => x.CreatedDate);
             int totalItem = query.Count();
-            var lists = query.Skip((request!.Page - 1) * request!.PageSize).Take(request!.PageSize).ToList();
+            var lists = query.OrderBy(x => x.CreatedDate).Skip((request!.Page - 1) * request!.PageSize).Take(request!.PageSize).ToList();
 
             methodResult.Result = new ReviewTeacherRatingDetailSearchModel { FullName = teacher?.Human?.FullName, PagingItemsModel = new PagingItemsModel<ReviewTeacherRatingDetailModel>(lists, request, totalItem) };
             methodResult.StatusCode = StatusCodes.Status200OK;

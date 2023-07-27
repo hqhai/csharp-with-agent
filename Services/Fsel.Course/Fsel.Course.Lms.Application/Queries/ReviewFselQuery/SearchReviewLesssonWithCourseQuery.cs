@@ -96,7 +96,7 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
             }
 
             int totalItem = courseStars.Count;
-            var lists = courseStars.Skip((request!.Page - 1) * request!.PageSize).Take(request!.PageSize).ToList();
+            var lists = courseStars.OrderBy(x => x.CreatedDate).Skip((request!.Page - 1) * request!.PageSize).Take(request!.PageSize).ToList();
 
             methodResult.Result = new ReviewLesssonWithCourseSearchModel { Starts = starts, PagingItemsModel = new PagingItemsModel<ReviewLesssonWithCourseModel>(lists, request, totalItem) };
             methodResult.StatusCode = StatusCodes.Status200OK;

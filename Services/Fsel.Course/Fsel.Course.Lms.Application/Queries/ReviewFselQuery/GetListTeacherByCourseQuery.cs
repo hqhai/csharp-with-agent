@@ -43,7 +43,7 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
                 return methodResult;
             }
 
-            var teacherIds = course.LessonResults.Select(x => x.VideoResult).Select(x => x!.Video).Select(x => x!.TeacherId).ToList();
+            var teacherIds = course.LessonResults.Where(x => x.VideoResult != null).Select(x => x.VideoResult).Where(x => x!.Video != null).Select(x => x!.Video).Select(x => x!.TeacherId).ToList();
             var teacherResults = await _userService.GetTeacherByIdsAsync(new GetTeacherByIdsQueryModel { Ids = teacherIds });
             if (!teacherResults.IsSuccessStatusCode)
             {
@@ -51,7 +51,7 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
                 return methodResult;
             }
             var teachers = teacherResults.Content?.Result;
-            methodResult.Result = teachers;
+            methodResult.Result = teachers?.OrderBy(x => x.CreatedDate).ToList();
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }
