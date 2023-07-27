@@ -6,7 +6,7 @@ namespace Fsel.Ordering.Domain.Entities
 
     public class UserReferral : Entity
     {
-        public Guid IndexNumber { get; set; }
+        public int IndexNumber { get; set; }
 
         public Guid SenderId { get; set; }
 
