@@ -23,11 +23,18 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
     {
         private readonly IUserService _userService;
         private readonly IVideoRepository _videoRepository;
+        private readonly IClassForumRepository _classForumRepository;
+        private readonly IMockTestRepository _mockTestRepository;
 
-        public SearchReviewTeacherRatingQueryHandler(IUserService userService, IVideoRepository videoRepository)
+        public SearchReviewTeacherRatingQueryHandler(IUserService userService
+            , IVideoRepository videoRepository
+            , IClassForumRepository classForumRepository
+            , IMockTestRepository mockTestRepository)
         {
             _userService = userService;
             _videoRepository = videoRepository;
+            _classForumRepository = classForumRepository;
+            _mockTestRepository = mockTestRepository;
         }
 
         public async Task<MethodResult<PagingItemsModel<ReviewTeacherRatingSearchModel>>> Handle(SearchReviewTeacherRatingQuery request, CancellationToken cancellationToken)
@@ -41,8 +48,15 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
                 return methodResult;
             }
 
-            var videos = await _videoRepository.Queryable.Include(x => x.VideoResults).ToListAsync(cancellationToken);
-            var teacherIds = videos.Select(x => x.TeacherId).Distinct().ToList();
+            var videos = await _videoRepository.Queryable.Include(x => x.VideoResults).Where(x => x.VideoResults.Count > 0).ToListAsync(cancellationToken);
+            var mockTests = await _mockTestRepository.Queryable.Include(x => x.MockTestResults).ToListAsync(cancellationToken);
+            var classForums = await _classForumRepository.Queryable.Include(x => x.ClassForumResults).ToListAsync(cancellationToken);
+
+            var teacherVideoIds = videos.Select(x => x.TeacherId).Distinct().AsEnumerable();
+            var teacherMockTestIds = mockTests.SelectMany(x => x.MockTestResults).Where(x => x.GradingTeacherId != null).Select(x => x.GradingTeacherId ?? default).Distinct().AsEnumerable();
+            var teacherClassForumIds = classForums.SelectMany(x => x.ClassForumResults).Where(x => x.GradingTeacherId != null).Select(x => x.GradingTeacherId ?? default).Distinct().AsEnumerable();
+
+            var teacherIds = teacherVideoIds.Union(teacherMockTestIds).Union(teacherClassForumIds).Distinct().ToList();
             var teacherResults = await _userService.GetTeacherByIdsAsync(new GetTeacherByIdsQueryModel { Ids = teacherIds });
             if (!teacherResults.IsSuccessStatusCode)
             {
@@ -71,10 +85,14 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
             {
                 var listVideo = videos.Where(x => x.TeacherId == item.Id).ToList();
                 var videoResults = listVideo.Where(x => x.VideoResults.Count > 0).SelectMany(x => x.VideoResults).Where(x => x.Status == EnumResultStatus.Done).ToList();
-                if (videoResults.Sum(x => x.NumberOfStars) > 0)
-                {
-                    item.Starts = videoResults.Average(x => x.NumberOfStars);
-                }
+                var listMockTest = mockTests.SelectMany(x => x.MockTestResults).Where(x => x.GradingTeacherId == item.Id && x.FeedBackStars.HasValue).ToList();
+                var listClassForum = classForums.SelectMany(x => x.ClassForumResults).Where(x => x.GradingTeacherId == item.Id && x.FeedBackStars.HasValue).ToList();
+
+                var starts = new List<double>();
+                starts.Add(videoResults.Any() ? videoResults.Average(x => x.NumberOfStars) : 0.0);
+                starts.Add(listMockTest.Any() ? listMockTest.Average(x => x.FeedBackStars ?? 0.0) : 0.0);
+                starts.Add(listClassForum.Any() ? listClassForum.Average(x => x.FeedBackStars ?? 0.0) : 0.0);
+                item.Starts = starts.Any() ? starts.Average() : 0.0;
             }
 
             methodResult.Result = new PagingItemsModel<ReviewTeacherRatingSearchModel>(lists, request, totalItem);

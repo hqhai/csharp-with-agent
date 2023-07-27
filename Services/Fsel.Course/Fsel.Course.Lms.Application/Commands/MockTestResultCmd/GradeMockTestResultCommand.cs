@@ -4,11 +4,14 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestResultCmd
 {
     using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Core.Base;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.CommandModels.MockTestResults;
     using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Course.Lms.Application.Services.UserServices;
+    using Fsel.Shared.Enums.ErrorCodes;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -22,12 +25,20 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestResultCmd
         private readonly IMapper _mapper;
         private readonly IMockTestResultRepository _mockTestResultRepository;
         private readonly ISectionGroupRepository _sectionGroupRepository;
+        private readonly IUserService _userService;
+        private readonly AuthContext _authContext;
 
-        public GradeMockTestResultCommandHandler(IMapper mapper, IMockTestResultRepository mockTestResultRepository, ISectionGroupRepository sectionGroupRepository)
+        public GradeMockTestResultCommandHandler(IMapper mapper,
+            IMockTestResultRepository mockTestResultRepository,
+            ISectionGroupRepository sectionGroupRepository,
+            IUserService userService,
+            AuthContext authContext)
         {
             _mapper = mapper;
             _mockTestResultRepository = mockTestResultRepository;
             _sectionGroupRepository = sectionGroupRepository;
+            _userService = userService;
+            _authContext = authContext;
         }
 
         public async Task<MethodResult<List<MockTestScoreModel>>> Handle(GradeMockTestResultCommand request, CancellationToken cancellationToken)
@@ -35,6 +46,13 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestResultCmd
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<List<MockTestScoreModel>> methodResult = new MethodResult<List<MockTestScoreModel>>();
 
+            var teacherResult = await _userService.GetTeacherByUserIdAsync(_authContext.CurrentUserId);
+            if (!teacherResult.IsSuccessStatusCode)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError));
+                return methodResult;
+            }
+            var teacherId = teacherResult.Content?.Result?.Id;
             if (request.MockTestScores == null || request.MockTestScores.Count == 0)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumMockTestResultErrorCode.MockTestScoresNull));
@@ -73,7 +91,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestResultCmd
                 mockTestScores.Add(mockTestScore);
             }
             mockTestResult.MockTestScores = mockTestScores;
-
+            mockTestResult.GradingTeacherId = teacherId;
             await _mockTestResultRepository.ExecuteTransactionAsync(async () =>
             {
                 _mockTestResultRepository.Update(mockTestResult);
