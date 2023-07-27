@@ -2,7 +2,6 @@
 
 namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
 {
-    using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Core.Extensions;
@@ -22,15 +21,12 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
     public class SearchMockTestByTeacherQueryHandler : IRequestHandler<SearchMockTestByTeacherQuery, MethodResult<PagingItemsModel<MockTestResultSearchModel>>>
     {
         private readonly IMockTestResultRepository _mockTestResultRepository;
-        private readonly IMapper _mapper;
         private readonly ICourseRepository _courseRepository;
 
         public SearchMockTestByTeacherQueryHandler(IMockTestResultRepository mockTestResultRepository,
-            IMapper mapper,
             ICourseRepository courseRepository)
         {
             _mockTestResultRepository = mockTestResultRepository;
-            _mapper = mapper;
             _courseRepository = courseRepository;
         }
 

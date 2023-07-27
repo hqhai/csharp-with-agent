@@ -50,13 +50,13 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestResultCmd
                 methodResult.AddErrorBadRequest(nameof(EnumMockTestResultErrorCode.MockTestResultNotExist));
                 return methodResult;
             }
-            if (mockTestResult.FeedbackStars > 0 && mockTestResult.FeedbackNote != null)
+            if (mockTestResult.FeedBackStars > 0 && mockTestResult.FeedBackNote != null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumMockTestResultErrorCode.FeedbackAlreadyExist));
                 return methodResult;
             }
-            mockTestResult.FeedbackNote = request.FeedbackNote;
-            mockTestResult.FeedbackStars = request.FeedbackStars;
+            mockTestResult.FeedBackNote = request.FeedBackNote;
+            mockTestResult.FeedBackStars = request.FeedBackStars;
             await _mockTestResultRepository.ExecuteTransactionAsync(async () =>
             {
                 _mockTestResultRepository.Update(mockTestResult);

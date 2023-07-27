@@ -33,7 +33,6 @@ namespace Fsel.Interaction.Infrastructure
             modelBuilder.ApplyConfiguration(new StudentReviewEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new SupportQuestionEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new SupportTicketEntityTypeConfiguration());
-
             base.OnModelCreating(modelBuilder);
         }
 
@@ -45,6 +44,7 @@ namespace Fsel.Interaction.Infrastructure
         public DbSet<PostTag> PostTags { get; set; }
         public DbSet<TopicTag> TopicTags { get; set; }
         public DbSet<StudentReview> StudentReviews { get; set; }
+        public DbSet<StudentReviewDetail> StudentReviewDetails { get; set; }
         public DbSet<SupportQuestion> SupportQuestions { get; set; }
         public DbSet<SupportTicket> SupportTickets { get; set; }
         public DbSet<SupportCategory> SupportCategorys { get; set; }

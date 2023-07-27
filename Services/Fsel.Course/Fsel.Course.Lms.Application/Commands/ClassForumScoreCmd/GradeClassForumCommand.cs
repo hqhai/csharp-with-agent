@@ -9,12 +9,15 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumScoreCmd
     using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Core.Base;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.CommandModels.ClassForumScores;
     using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Course.Lms.Application.Services.UserServices;
+    using Fsel.Shared.Enums.ErrorCodes;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -27,12 +30,20 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumScoreCmd
     {
         private readonly IMapper _mapper;
         private readonly IClassForumScoreRepository _classForumScoreRepository;
+        private readonly IUserService _userService;
+        private readonly AuthContext _authContext;
         private readonly IClassForumResultRepository _classForumResultRepository;
 
-        public GradeClassForumCommandHandler(IMapper mapper, IClassForumScoreRepository classForumScoreRepository, IClassForumResultRepository classForumResultRepository)
+        public GradeClassForumCommandHandler(IMapper mapper,
+            IClassForumScoreRepository classForumScoreRepository,
+            IUserService userService,
+            AuthContext authContext,
+            IClassForumResultRepository classForumResultRepository)
         {
             _mapper = mapper;
             _classForumScoreRepository = classForumScoreRepository;
+            _userService = userService;
+            _authContext = authContext;
             _classForumResultRepository = classForumResultRepository;
         }
 
@@ -41,6 +52,13 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumScoreCmd
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<List<ClassForumScoreModel>> methodResult = new MethodResult<List<ClassForumScoreModel>>();
 
+            var teacherResult = await _userService.GetTeacherByUserIdAsync(_authContext.CurrentUserId);
+            if (!teacherResult.IsSuccessStatusCode)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError));
+                return methodResult;
+            }
+            var teacherId = teacherResult.Content?.Result?.Id;
             List<ClassForumScore> classForumScores = new List<ClassForumScore>();
             if (request.ClassForumScores == null || request.ClassForumScores.Count == 0)
             {
@@ -98,6 +116,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumScoreCmd
             }
             await _classForumScoreRepository.ExecuteTransactionAsync(async () =>
             {
+                classForumResult.GradingTeacherId = teacherId;
                 classForumResult.Status = EnumClassForumResultStatus.Graded;
                 await _classForumScoreRepository.AddList(classForumScores);
                 await _classForumScoreRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);

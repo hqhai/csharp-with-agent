@@ -2677,11 +2677,14 @@ namespace Fsel.Course.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(103);
 
-                    b.Property<string>("FeedbackNote")
+                    b.Property<string>("FeedBackNote")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("FeedbackStars")
+                    b.Property<int?>("FeedBackStars")
                         .HasColumnType("int");
+
+                    b.Property<Guid?>("GradingTeacherId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit")
@@ -4078,7 +4081,7 @@ namespace Fsel.Course.Infrastructure.Migrations
                         .HasMaxLength(250)
                         .HasColumnType("nvarchar(250)");
 
-                    b.Property<Guid?>("TeacherId")
+                    b.Property<Guid>("TeacherId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Type")

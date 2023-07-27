@@ -59,13 +59,15 @@ namespace Fsel.Course.Domain.Entities
         /// Số sao
         /// </summary>
         [Range(0, 5, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
-        public int FeedbackStars { get; set; }
+        public int? FeedBackStars { get; set; }
+
+        public Guid? GradingTeacherId { get; set; }
 
         /// <summary>
         /// Trạng thái
         /// </summary>
         [Range(0, 10000, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
-        public string? FeedbackNote { get; set; }
+        public string? FeedBackNote { get; set; }
 
         public Course? Course { get; set; }
 
