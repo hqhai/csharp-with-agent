@@ -38,7 +38,9 @@ namespace Fsel.Ordering.Infrastructure
         public DbSet<Voucher> Vouchers { get; set; }
 
         public DbSet<VoucherPackage> VoucherPackages { get; set; }
+
         public DbSet<UserVoucher> UserVouchers { get; set; }
+
         public DbSet<UserReferral> UserReferrals { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
