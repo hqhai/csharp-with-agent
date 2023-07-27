@@ -12,5 +12,7 @@ namespace Fsel.Ordering.Domain.Models.EntityModels
         public Guid SenderId { get; set; }
 
         public Guid ReceiverId { get; set; }
+        public string? StudentName { get; set; }
+        public string? StudentCode { get; set; }
     }
 }
