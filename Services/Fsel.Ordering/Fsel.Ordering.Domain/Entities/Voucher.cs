@@ -49,5 +49,7 @@ namespace Fsel.Ordering.Domain.Entities
         }
 
         public ICollection<VoucherPackage> VoucherPackages { get; set; } = new List<VoucherPackage>();
+
+        public ICollection<UserVoucher> UserVouchers { get; set; } = new List<UserVoucher>();
     }
 }

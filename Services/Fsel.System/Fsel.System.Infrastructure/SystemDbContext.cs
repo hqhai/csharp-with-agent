@@ -19,6 +19,7 @@ namespace Fsel.System.Infrastructure
             ArgumentNullException.ThrowIfNull(modelBuilder);
             SeedCourselevel(modelBuilder);
             modelBuilder.ApplyConfiguration(new TeachingCostEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new ReferralDiscountConfigConfiguration());
             base.OnModelCreating(modelBuilder);
         }
 
@@ -26,7 +27,7 @@ namespace Fsel.System.Infrastructure
         public DbSet<CourseTimeConfig> CourseTimeConfigs { get; set; }
         public DbSet<ForbiddenWord> ForbiddenWords { get; set; }
         public DbSet<TeachingCost> TeachingCosts { get; set; }
-
+        public DbSet<ReferralDiscountConfig> ReferralDiscountConfigs { get; set; }
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             ArgumentNullException.ThrowIfNull(optionsBuilder);
