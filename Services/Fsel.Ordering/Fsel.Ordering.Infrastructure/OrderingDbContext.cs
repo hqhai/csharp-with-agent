@@ -27,6 +27,7 @@ namespace Fsel.Ordering.Infrastructure
             modelBuilder.ApplyConfiguration(new PackageEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new VoucherEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new VoucherPackageEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new UserVoucherEnityTypeConfiguration());
             base.OnModelCreating(modelBuilder);
         }
 
