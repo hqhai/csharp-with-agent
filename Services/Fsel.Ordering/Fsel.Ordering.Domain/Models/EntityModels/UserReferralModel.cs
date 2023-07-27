@@ -1,10 +1,11 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Ordering.Domain.Entities
+namespace Fsel.Ordering.Domain.Models.EntityModels
 {
-    using Fsel.Core.Entities;
+    using System;
+    using Fsel.Core.Base.BaseModels;
 
-    public class UserReferral : Entity
+    public class UserReferralModel : BaseModel
     {
         public int IndexNumber { get; set; }
 
