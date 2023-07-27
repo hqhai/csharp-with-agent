@@ -145,9 +145,9 @@ namespace Fsel.Training.Api.Controllers
         [HttpPost("classes-by-studentids")]
         [ProducesResponseType(typeof(MethodResult<IList<ClassStudentDetailModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetClassByStudentIds([FromBody] IList<Guid> studentIds)
+        public async Task<IActionResult> GetClassByStudentIds([FromBody] GetListClassByStudentIdsQuery query)
         {
-            MethodResult<IList<ClassStudentDetailModel>> queryResult = await _mediator.Send(new GetListClassByStudentIdsQuery { StudentIds = studentIds }).ConfigureAwait(false);
+            MethodResult<IList<ClassStudentDetailModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
     }

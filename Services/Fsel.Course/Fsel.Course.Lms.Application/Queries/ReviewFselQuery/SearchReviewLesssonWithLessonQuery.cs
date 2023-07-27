@@ -92,7 +92,7 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
                     Id = group.Key.Id,
                     Name = group.Key.Name,
                     CreatedDate = group.Key.CreatedDate,
-                    Starts = group.Select(x => x.Starts).Average(),
+                    Starts = Math.Round(group.Select(x => x.Starts).Average(), 1),
                     TeacherId = group.Key.TeacherId,
                     TotalStart = group.Sum(x => x.Starts),
                     TotalResult = group.Select(x => x.Starts).Count()
@@ -102,18 +102,13 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
             {
                 lessonStars = lessonStars.Where(x => x.TeacherId == request.TeacherId).ToList();
             }
-            var starts = 0.0;
-            if (lessonStars.Count > 0)
-            {
-                starts = lessonStars.Sum(x => x.TotalStart) / lessonStars.Sum(x => x.TotalResult);
-            }
+            var starts = lessonStars.Count > 0 ? Math.Round(lessonStars.Sum(x => x.TotalStart) / lessonStars.Sum(x => x.TotalResult), 1) : default;
             int totalItem = lessonStars.Count;
             var lists = lessonStars.OrderBy(x => x.CreatedDate).Skip((request!.Page - 1) * request!.PageSize).Take(request!.PageSize).ToList();
 
-            var teacherIds = lists.Select(x => x.TeacherId).Distinct().ToList();
-            var teacherResults = await _userService.GetTeacherByIdsAsync(new GetTeacherByIdsQueryModel { Ids = teacherIds });
+            var teacherResults = await _userService.GetTeacherByIdsAsync(new GetTeacherByIdsQueryModel { Ids = lists.Select(x => x.TeacherId).Distinct().ToList() });
             var teachers = teacherResults.Content?.Result;
-            if (teachers != null)
+            if (teachers != null && teachers.Count > 0)
             {
                 foreach (var item in lists)
                 {

@@ -73,15 +73,8 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
             if (request.CourseLevel != null)
             {
                 courseQuery = courseQuery.Where(x => x.CourseLevel == request.CourseLevel);
-                courseIds = await courseQuery.Select(x => x.Id).ToListAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
-                if (courseIds != null && courseIds.Count > 0)
-                {
-                    starts = studentReviews.Where(x => x.StudentReviewDetails != null && courseIds.Contains(x.CourseId ?? default)).SelectMany(x => x.StudentReviewDetails!).Average(x => x.VoteStars);
-                }
-                else
-                {
-                    starts = 0;
-                }
+                courseIds = await courseQuery.Select(x => x.Id).Distinct().ToListAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
+                starts = (courseIds != null && courseIds.Count > 0) ? Math.Round(studentReviews.Where(x => x.StudentReviewDetails != null && courseIds.Contains(x.CourseId ?? default)).SelectMany(x => x.StudentReviewDetails!).Average(x => x.VoteStars), 1) : default;
             }
 
             int totalItem = await courseQuery.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
@@ -93,7 +86,7 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
             foreach (var item in lists)
             {
                 var studentReview = studentReviews.FirstOrDefault(a => a.CourseId == item.Id);
-                item.Starts = studentReview?.StudentReviewDetails?.Average(x => x.VoteStars) ?? 0;
+                item.Starts = studentReview?.StudentReviewDetails?.Average(x => x.VoteStars) ?? default;
             }
 
             methodResult.Result = new ReviewCourseSearchModel { Starts = starts, PagingItemsModel = new PagingItemsModel<ReviewCourseModel>(lists, request, totalItem) };

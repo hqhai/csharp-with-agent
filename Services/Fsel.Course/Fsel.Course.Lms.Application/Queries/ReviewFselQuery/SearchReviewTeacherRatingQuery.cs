@@ -89,10 +89,10 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
                 var listClassForum = classForums.SelectMany(x => x.ClassForumResults).Where(x => x.GradingTeacherId == item.Id && x.FeedBackStars.HasValue).ToList();
 
                 var starts = new List<double>();
-                starts.Add(videoResults.Any() ? videoResults.Average(x => x.NumberOfStars) : 0.0);
-                starts.Add(listMockTest.Any() ? listMockTest.Average(x => x.FeedBackStars ?? 0.0) : 0.0);
-                starts.Add(listClassForum.Any() ? listClassForum.Average(x => x.FeedBackStars ?? 0.0) : 0.0);
-                item.Starts = starts.Any() ? starts.Average() : 0.0;
+                starts.Add(videoResults.Any() ? Math.Round(videoResults.Average(x => x.NumberOfStars), 1) : default);
+                starts.Add(listMockTest.Any() ? Math.Round(listMockTest.Average(x => x.FeedBackStars ?? default), 1) : default);
+                starts.Add(listClassForum.Any() ? Math.Round(listClassForum.Average(x => x.FeedBackStars ?? default), 1) : default);
+                item.Starts = starts.Any() ? Math.Round(starts.Average(), 1) : default;
             }
 
             methodResult.Result = new PagingItemsModel<ReviewTeacherRatingSearchModel>(lists, request, totalItem);

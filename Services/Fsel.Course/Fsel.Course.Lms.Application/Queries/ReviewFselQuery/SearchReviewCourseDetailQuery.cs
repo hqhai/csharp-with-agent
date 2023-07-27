@@ -14,6 +14,7 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
     using Fsel.Course.Lms.Application.Services.InteractionService;
     using Fsel.Course.Lms.Application.Services.InteractionService.Models;
     using Fsel.Course.Lms.Application.Services.TrainingServices;
+    using Fsel.Course.Lms.Application.Services.TrainingServices.Models;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Enums.ErrorCodes;
@@ -76,7 +77,7 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
                 CourseLevel = course.CourseLevel,
                 ReviewType = x.ReviewType,
                 StudentId = x.StudentId,
-                Starts = x.StudentReviewDetails != null ? x.StudentReviewDetails.Average(x => x.VoteStars) : 0,
+                Starts = x.StudentReviewDetails != null ? x.StudentReviewDetails.Average(x => x.VoteStars) : default,
                 StudentReviewDetails = x.StudentReviewDetails?.Select(x => new ReviewCourseDetailInfoModel
                 {
                     Id = x.Id,
@@ -93,7 +94,7 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
             var studentResults = await _userService.GetStudentsByStudentIdsAsync(studentIds);
             var students = studentResults.Content?.Result;
 
-            var classStudentResults = await _trainingService.GetClassByStudentIdsAsync(studentIds);
+            var classStudentResults = await _trainingService.GetClassByStudentIdsAsync(new GetClassListByStudentIdsModel { CourseId = request.CourseId, StudentIds = studentIds });
             var classeStudents = classStudentResults.Content?.Result;
             foreach (var item in lists)
             {

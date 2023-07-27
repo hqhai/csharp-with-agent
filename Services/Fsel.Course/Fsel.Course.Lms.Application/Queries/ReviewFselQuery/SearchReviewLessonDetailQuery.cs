@@ -10,6 +10,7 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Domain.Models.QueryModels.ReviewFsels;
     using Fsel.Course.Lms.Application.Services.TrainingServices;
+    using Fsel.Course.Lms.Application.Services.TrainingServices.Models;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using MediatR;
     using Microsoft.AspNetCore.Http;
@@ -69,11 +70,11 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
                     .ToListAsync(cancellationToken: cancellationToken)
                     .ConfigureAwait(false);
 
-            var studentIds = lists.Select(x => x.StudentId).ToList();
+            var studentIds = lists.Select(x => x.StudentId).Distinct().ToList();
             var studentResults = await _userService.GetStudentsByStudentIdsAsync(studentIds);
             var students = studentResults.Content?.Result;
 
-            var classStudentResults = await _trainingService.GetClassByStudentIdsAsync(studentIds);
+            var classStudentResults = await _trainingService.GetClassByStudentIdsAsync(new GetClassListByStudentIdsModel { StudentIds = studentIds });
             var classeStudents = classStudentResults.Content?.Result;
             foreach (var item in lists)
             {
@@ -82,7 +83,7 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
                 item.Code = student?.Human?.Code;
                 item.ClassCode = classStudent?.Code;
             }
-            methodResult.Result = new ReviewLessonDetailSearchModel { Starts = starts, Name = lesson.Name, PagingItemsModel = new PagingItemsModel<ReviewLessonDetailModel>(lists, request, totalItem) };
+            methodResult.Result = new ReviewLessonDetailSearchModel { Starts = Math.Round(starts, 1), Name = lesson.Name, PagingItemsModel = new PagingItemsModel<ReviewLessonDetailModel>(lists, request, totalItem) };
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }

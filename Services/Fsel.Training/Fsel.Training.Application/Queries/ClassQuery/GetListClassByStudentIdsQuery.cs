@@ -9,13 +9,13 @@ namespace Fsel.Training.Application.Queries.ClassQuery
     using Fsel.Common.ActionResults;
     using Fsel.Training.Domain.IRepositories;
     using Fsel.Training.Domain.Models.EntityModels;
+    using Fsel.Training.Domain.Models.QueryModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class GetListClassByStudentIdsQuery : IRequest<MethodResult<IList<ClassStudentDetailModel>>>
+    public class GetListClassByStudentIdsQuery : GetListClassByStudentIdsQueryModel, IRequest<MethodResult<IList<ClassStudentDetailModel>>>
     {
-        public IList<Guid>? StudentIds { get; set; }
     }
 
     public class GetListClassByStudentIdsQueryHandler : IRequestHandler<GetListClassByStudentIdsQuery, MethodResult<IList<ClassStudentDetailModel>>>
@@ -39,7 +39,7 @@ namespace Fsel.Training.Application.Queries.ClassQuery
                 return methodResult;
             }
             var classStudents = await _classStudentRepository.Queryable.Include(x => x.Class)
-                                            .Where(e => request.StudentIds.Contains(e.StudentId))
+                                            .Where(e => e.Class != null && request.StudentIds.Contains(e.StudentId) && (!request.CourseId.HasValue || e.Class.CourseId == request.CourseId))
                                             .Select(x => new ClassStudentDetailModel
                                             {
                                                 StudentId = x.StudentId,

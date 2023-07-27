@@ -55,7 +55,7 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
                 CreatedUserId = x.CreatedUserId,
                 ReviewType = x.ReviewType,
                 StudentId = x.StudentId,
-                Starts = x.StudentReviewDetails != null ? x.StudentReviewDetails.Average(x => x.VoteStars) : 0,
+                Starts = x.StudentReviewDetails != null ? Math.Round(x.StudentReviewDetails.Average(x => x.VoteStars), 1) : default,
                 StudentReviewDetails = x.StudentReviewDetails?.Select(x => new ReviewCommunicationStudentModel
                 {
                     Id = x.Id,
