@@ -10,6 +10,7 @@ namespace Fsel.System.Application.Commands.ReferralDiscountConfigCmd
     using Fsel.System.Domain.Models.EntityModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
+    using Microsoft.EntityFrameworkCore;
 
     public class SaveReferralDiscountConfigCommand : SaveReferralDiscountConfigCommandModel, IRequest<MethodResult<ReferralDiscountConfigModel>>
     {
@@ -33,7 +34,7 @@ namespace Fsel.System.Application.Commands.ReferralDiscountConfigCmd
 
             await _referralDiscountConfigRepository.ExecuteTransactionAsync(async () =>
             {
-                var referralDiscountConfig = await _referralDiscountConfigRepository.GetByIdAsync(request.Id);
+                var referralDiscountConfig = await _referralDiscountConfigRepository.Queryable.FirstOrDefaultAsync(x => x.IndexNumber == request.IndexNumber);
 
                 if (referralDiscountConfig != null)
                 {

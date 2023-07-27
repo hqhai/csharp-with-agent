@@ -13,8 +13,8 @@ namespace Fsel.System.Domain.Models.EntityModels
 
         public double? RecevierDiscountValue { get; set; }
 
-        public EnumRecevicerDiscountType? RecevicerDiscountType { get; set; }
+        public EnumDiscountType? RecevicerDiscountType { get; set; }
 
-        public EnumSenderDiscountType? SenderDiscountType { get; set; }
+        public EnumDiscountType? SenderDiscountType { get; set; }
     }
 }

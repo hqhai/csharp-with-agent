@@ -18,13 +18,13 @@ namespace Fsel.System.Infrastructure.Configs
                 .HasMaxLength(100)
                 .HasConversion(
                     v => v.ToString(),
-                    v => v.EnumParse<EnumRecevicerDiscountType>());
+                    v => v.EnumParse<EnumDiscountType>());
 
             builder.Property(e => e.SenderDiscountType)
                 .HasMaxLength(100)
                 .HasConversion(
                     v => v.ToString(),
-                    v => v.EnumParse<EnumSenderDiscountType>());
+                    v => v.EnumParse<EnumDiscountType>());
         }
     }
 }

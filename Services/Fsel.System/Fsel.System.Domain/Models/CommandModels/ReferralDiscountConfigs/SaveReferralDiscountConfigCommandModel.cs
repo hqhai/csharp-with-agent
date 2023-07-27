@@ -2,10 +2,9 @@
 
 namespace Fsel.System.Domain.Models.CommandModels.ReferralDiscountConfigs
 {
-    using Fsel.Core.Base.BaseModels;
     using Fsel.Shared.Enums;
 
-    public class SaveReferralDiscountConfigCommandModel : BaseCommandModel
+    public class SaveReferralDiscountConfigCommandModel
     {
         public int IndexNumber { get; set; }
 
@@ -13,8 +12,8 @@ namespace Fsel.System.Domain.Models.CommandModels.ReferralDiscountConfigs
 
         public double? RecevierDiscountValue { get; set; }
 
-        public EnumRecevicerDiscountType? RecevicerDiscountType { get; set; }
+        public EnumDiscountType? RecevicerDiscountType { get; set; }
 
-        public EnumSenderDiscountType? SenderDiscountType { get; set; }
+        public EnumDiscountType? SenderDiscountType { get; set; }
     }
 }

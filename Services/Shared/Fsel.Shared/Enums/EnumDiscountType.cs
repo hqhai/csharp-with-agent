@@ -2,7 +2,7 @@
 
 namespace Fsel.Shared.Enums
 {
-    public enum EnumSenderDiscountType
+    public enum EnumDiscountType
     {
         Voucher, token
     }
