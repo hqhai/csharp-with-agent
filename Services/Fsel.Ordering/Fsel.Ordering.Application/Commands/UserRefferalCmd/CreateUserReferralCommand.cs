@@ -111,7 +111,7 @@ namespace Fsel.Ordering.Application.Commands.UserRefferalCmd
                 CourseLevels = courseLevels,
                 VoucherPackages = await _packageRepository.Queryable.Select(x => new VoucherPackage
                 {
-                    Percentage = isReceiver ? (referralDiscountConfig.RecevierDiscountValue ?? default) : (referralDiscountConfig.SenderDiscountValue ?? default),
+                    Percentage = (isReceiver ? referralDiscountConfig.RecevierDiscountValue : referralDiscountConfig.SenderDiscountValue) ?? default,
                     PackageId = x.Id
                 }).ToListAsync(),
                 UserVouchers = new List<UserVoucher> { new UserVoucher { UserId = userId, Status = EnumUserVoucherStatus.NotUsed } }
