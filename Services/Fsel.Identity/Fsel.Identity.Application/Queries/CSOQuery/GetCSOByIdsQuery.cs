@@ -5,7 +5,7 @@ namespace Fsel.Identity.Application.Queries.CSOQuery
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
-    using Fsel.Identity.Domain.Enums.ErrorCodes;
+    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Domain.Models.EntityModels;
     using MediatR;
@@ -33,7 +33,7 @@ namespace Fsel.Identity.Application.Queries.CSOQuery
             var methodResult = new MethodResult<IList<HumanModel>>();
             if (request.Ids == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumTeacherErrorCode.IdsNull));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Ids));
                 return methodResult;
             }
             IList<HumanModel> human = new List<HumanModel>();

@@ -5,13 +5,12 @@ namespace Fsel.System.Api.Controllers
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
     using Fsel.System.Application.Commands.ReferralDiscountConfigCmd;
-    using Fsel.System.Application.Commands.TeachingCostCmd;
     using Fsel.System.Application.Queries.ReferralDiscountConfigQuery;
-    using Fsel.System.Application.Querys.LiveTimeFrameQuery;
     using Fsel.System.Domain.Models.EntityModels;
     using global::System.Net;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
+
     [ApiVersion(Settings.APIVersion)]
     [Route(Settings.APIDefaultRoute + "/referral-discount-config")]
     [ApiController]
@@ -23,6 +22,7 @@ namespace Fsel.System.Api.Controllers
         {
             _mediator = mediator;
         }
+
         /// <summary>
         /// Save Referral Discount Config
         /// </summary>

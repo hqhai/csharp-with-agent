@@ -11,6 +11,7 @@ namespace Fsel.Interaction.Domain.Entities
         /// Review Type
         /// </summary>
         public EnumReviewType ReviewType { get; set; }
+
         public Guid StudentId { get; set; }
         public Guid? CourseId { get; set; }
         public ICollection<StudentReviewDetail> StudentReviewDetails { get; set; } = new List<StudentReviewDetail>();

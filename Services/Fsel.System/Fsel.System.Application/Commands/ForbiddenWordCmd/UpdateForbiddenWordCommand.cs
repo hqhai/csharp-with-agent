@@ -4,7 +4,7 @@ namespace Fsel.System.Application.Commands.ForbiddenWordCmd
 {
     using AutoMapper;
     using Fsel.Common.ActionResults;
-    using Fsel.System.Domain.Enums.ErrorCodes;
+    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.System.Domain.IRepositories;
     using Fsel.System.Domain.Models.CommandModels.ForbiddenWords;
     using Fsel.System.Domain.Models.EntityModels;
@@ -38,7 +38,7 @@ namespace Fsel.System.Application.Commands.ForbiddenWordCmd
 
             if (forbiddenWord == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumForbiddenWordErrorCode.ForbiddenWordsNotExist));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(forbiddenWord));
                 return methodResult;
             }
             _mapper.Map(request, forbiddenWord);

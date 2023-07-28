@@ -6,7 +6,7 @@ namespace Fsel.Course.Application.Queries.ExtraPracticeQuery
     using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Common.ActionResults;
-    using Fsel.Course.Domain.Enums.ErrorCodes;
+    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using MediatR;
@@ -36,7 +36,7 @@ namespace Fsel.Course.Application.Queries.ExtraPracticeQuery
 
             if (extraPractice == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumExtraPracticeErrorCode.ExtraPracticeNotExist), nameof(request.Id), request.Id);
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Id));
                 return methodResult;
             }
 

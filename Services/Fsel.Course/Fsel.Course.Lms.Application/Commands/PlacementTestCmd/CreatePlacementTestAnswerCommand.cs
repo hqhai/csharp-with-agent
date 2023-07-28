@@ -4,6 +4,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
 {
     using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Entities.SkillScoresConfigs;
@@ -63,13 +64,13 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
 
             if (request.Skills == null || request.Skills.Any(x => x.Answers == null || x.Answers.Count == 0))
             {
-                methodResult.AddErrorBadRequest(nameof(EnumPlacementTestAnswerErrorCode.AnswerSkillsNull), nameof(request.Skills), request.Skills);
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Skills));
                 return methodResult;
             }
             var student = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
             if (!student.IsSuccessStatusCode)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumLessonErrorCode.UserNotExist), nameof(student), _authContext.CurrentUserId.ToString());
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student));
                 return methodResult;
             }
 
@@ -97,14 +98,14 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
             {
                 if (item.Answers == null || item.Answers.Count == 0)
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumPlacementTestAnswerErrorCode.AnswersNull), nameof(request.Skills), request.Skills);
+                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Skills));
                     return methodResult;
                 }
                 var questionIds = item.Answers.Select(x => x.QuestionId).ToList();
                 var questions = await _questionRepository.GetIncludeSectionByIdAsync(questionIds);
                 if (questions == null || questions.Count == 0)
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumQuestionErrorCode.QuestionsNotExist), nameof(questionIds), questionIds);
+                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(questionIds));
                     return methodResult;
                 }
                 int count = 0;
@@ -113,17 +114,17 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
                     var question = questions.FirstOrDefault(x => x.Id == answer.QuestionId);
                     if (question == null)
                     {
-                        methodResult.AddErrorBadRequest(nameof(EnumQuestionErrorCode.QuestionNull), nameof(answer.QuestionId), answer.QuestionId);
+                        methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(answer.QuestionId));
                         return methodResult;
                     }
                     else if (question.Config == null)
                     {
-                        methodResult.AddErrorBadRequest(nameof(EnumQuestionErrorCode.QuestionConfigNull), nameof(question), question);
+                        methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(question));
                         return methodResult;
                     }
                     else if (question.SectionQuestions == null || question.SectionQuestions.Count == 0)
                     {
-                        methodResult.AddErrorBadRequest(nameof(EnumSectionQuestionErrorCode.SectionQuestionsNotExist), nameof(question.SectionQuestions));
+                        methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(question.SectionQuestions));
                         return methodResult;
                     }
                     var sectionQuestionId = question.SectionQuestions.FirstOrDefault()!.Id;

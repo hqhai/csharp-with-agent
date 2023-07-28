@@ -7,8 +7,8 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
     using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
-    using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Services.UserServices;
@@ -44,7 +44,7 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
             var student = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
             if (!student.IsSuccessStatusCode)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumLessonErrorCode.UserNotExist));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student));
                 return methodResult;
             }
             var studentId = student?.Content?.Result?.Id;
@@ -68,7 +68,7 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
                                     }).FirstOrDefaultAsync(cancellationToken);
             if (mockTestResult == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumMockTestResultErrorCode.MockTestResultNotExist));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(mockTestResult));
                 return methodResult;
             }
 

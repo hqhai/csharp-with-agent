@@ -7,7 +7,7 @@ namespace Fsel.Training.Domain.Models.QueryModels
     public class SearchTeacherFreeDatesByCsoQueryModel : BaseQueryModel
     {
         public DateTime? EndDate { get; set; }
-        public DateTime? StartDate{ get; set; }
+        public DateTime? StartDate { get; set; }
         public Guid? TeacherId { get; set; }
     }
 }

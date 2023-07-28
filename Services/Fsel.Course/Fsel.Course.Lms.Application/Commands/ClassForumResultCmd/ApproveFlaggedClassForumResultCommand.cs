@@ -3,21 +3,20 @@
 namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
 {
     using System;
-    using System.Collections.Generic;
     using System.Linq;
-    using System.Text;
     using System.Threading;
     using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Common.ActionResults;
-    using Fsel.Course.Domain.Enums.ErrorCodes;
+    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Course.Domain.Enums;
+    using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.CommandModels.ClassForumResults;
     using Fsel.Course.Domain.Models.EntityModels;
     using MediatR;
-    using Microsoft.EntityFrameworkCore;
     using Microsoft.AspNetCore.Http;
+    using Microsoft.EntityFrameworkCore;
 
     public class ApproveFlaggedClassForumResultCommand : ApproveFlaggedClassForumResultCommandModel, IRequest<MethodResult<ClassForumResultModel>>
     {
@@ -43,7 +42,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
                                                                     .FirstOrDefaultAsync(cancellationToken: cancellationToken);
             if (classForumResult == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumClassForumResultErrorCode.ClassForumResultNotExist), nameof(request.ClassForumResultId), request.ClassForumResultId);
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.ClassForumResultId));
                 return methodResult;
             }
             if (classForumResult.Status != EnumClassForumResultStatus.Graded)

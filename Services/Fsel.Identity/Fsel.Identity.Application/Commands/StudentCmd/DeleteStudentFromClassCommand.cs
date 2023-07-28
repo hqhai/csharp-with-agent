@@ -10,7 +10,6 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
     using Fsel.Identity.Domain.IRepositories;
     using MediatR;
     using Microsoft.AspNetCore.Http;
-    using Microsoft.EntityFrameworkCore;
 
     public class DeleteStudentFromClassCommand : IRequest<MethodResult<bool>>
     {

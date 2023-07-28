@@ -5,7 +5,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
     using System;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
-    using Fsel.Identity.Domain.Enums.ErrorCodes;
+    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Shared.Enums;
     using MediatR;
@@ -37,7 +37,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
 
             if (student == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumStudentErrorCode.StudentNull), nameof(request.Id), request.Id);
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Id));
                 return methodResult;
             }
             student.CourseLevel = request.Level;

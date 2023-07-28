@@ -19,6 +19,7 @@ namespace Fsel.Storage.Application.Services.AmazonS3Services
         private readonly AmazonS3Client _amazonS3Client;
         private readonly TransferUtility _transferUtility;
         private readonly double _partSize = ByteSize.FromMegabytes(100).Bytes; // Size of each part (100 MB)
+
         private readonly Dictionary<EnumFolderType, double> _maximumCapacity = new Dictionary<EnumFolderType, double>
         {
             { EnumFolderType.Fsis, ByteSize.FromGigabytes(1).Bytes }, //maximum question size (1 GB)

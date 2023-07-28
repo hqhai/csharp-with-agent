@@ -4,6 +4,7 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd
 {
     using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Entities.SkillScoresConfigs;
@@ -65,13 +66,13 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd
 
             if (request.FinalTestAnswers == null || request.FinalTestAnswers.Any(x => x.Answers == null || x.Answers.Count == 0))
             {
-                methodResult.AddErrorBadRequest(nameof(EnumFinalTestAnswerErrorCode.FinalTestAnswersNull), nameof(request.FinalTestAnswers), request.FinalTestAnswers);
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.FinalTestAnswers));
                 return methodResult;
             }
             var student = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
             if (!student.IsSuccessStatusCode)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumLessonErrorCode.UserNotExist), nameof(student), _authContext.CurrentUserId.ToString());
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student));
                 return methodResult;
             }
             var studentId = student?.Content?.Result?.Id;
@@ -79,14 +80,14 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd
             var finalTest = await _finalTestRepository.GetByIdAsync(request.FinalTestId);
             if (finalTest == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumFinalTestErrorCode.FinalTestsNotExist), nameof(request.FinalTestId), request.FinalTestId);
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.FinalTestId));
                 return methodResult;
             }
 
             var course = await _courseRepository.GetByIdAsync(request.CourseId);
             if (course == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.CourseNotExist), nameof(request.CourseId), request.CourseId);
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.CourseId));
                 return methodResult;
             }
 
@@ -114,14 +115,14 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd
             {
                 if (item.Answers == null || item.Answers.Count == 0)
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumFinalTestAnswerErrorCode.AnswersNull));
+                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(item.Answers));
                     return methodResult;
                 }
                 var questionIds = item.Answers.Select(x => x.QuestionId).ToList();
                 var questions = await _questionRepository.GetIncludeSectionByIdAsync(questionIds);
                 if (questions == null || questions.Count == 0)
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumQuestionErrorCode.QuestionsNotExist), nameof(questionIds), questionIds);
+                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(questionIds));
                     return methodResult;
                 }
                 int count = 0;
@@ -130,17 +131,17 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd
                     var question = questions.FirstOrDefault(x => x.Id == answer.QuestionId);
                     if (question == null)
                     {
-                        methodResult.AddErrorBadRequest(nameof(EnumQuestionErrorCode.QuestionNull), nameof(answer.QuestionId), answer.QuestionId);
+                        methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(answer.QuestionId));
                         return methodResult;
                     }
                     else if (question.Config == null)
                     {
-                        methodResult.AddErrorBadRequest(nameof(EnumQuestionErrorCode.QuestionConfigNull), nameof(question), question);
+                        methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(question));
                         return methodResult;
                     }
                     else if (question.SectionQuestions == null || question.SectionQuestions.Count == 0)
                     {
-                        methodResult.AddErrorBadRequest(nameof(EnumSectionQuestionErrorCode.SectionQuestionsNotExist), nameof(question.SectionQuestions));
+                        methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(question.SectionQuestions));
                         return methodResult;
                     }
                     var sectionQuestionId = question.SectionQuestions.FirstOrDefault()!.Id;

@@ -2,9 +2,9 @@
 
 using AutoMapper;
 using Fsel.Common.ActionResults;
+using Fsel.Common.Enums.ErrorCodes;
 using Fsel.Course.Application.Services.UserServices;
 using Fsel.Course.Application.Services.UserServices.Models;
-using Fsel.Course.Domain.Enums.ErrorCodes;
 using Fsel.Course.Domain.IRepositories;
 using Fsel.Course.Domain.Models.CommandModels.Courses;
 using Fsel.Course.Domain.Models.EntityModels;
@@ -50,7 +50,7 @@ namespace Fsel.Course.Application.Commands.CourseCmd
             var teachers = await _userService.GetTeacherByIdsAsync(new GetTeacherByIdsQueryModel { Ids = course.CourseTeachers.Select(x => x.TeacherId).ToList() });
             if (!teachers.IsSuccessStatusCode)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.TeachersNotExist), nameof(teachers), course.CourseTeachers.Select(x => x.TeacherId).ToList());
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(teachers), course.CourseTeachers.Select(x => x.TeacherId).ToList());
                 return methodResult;
             }
             var method = await _courseHelper.Validate(course, request);

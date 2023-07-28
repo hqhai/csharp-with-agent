@@ -4,6 +4,7 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
 {
     using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Interaction.Domain.Enums.ErrorCodes;
     using Fsel.Interaction.Domain.IRepositories;
     using Fsel.Interaction.Domain.Models.CommandModels.Comments;
@@ -37,7 +38,7 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
             var comment = await _commentRepository.GetByIdAsync(request.CommentId);
             if (comment == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumCommentErrorCode.CommentNotExist), nameof(request.CommentId), request.CommentId);
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.CommentId));
                 return methodResult;
             }
 

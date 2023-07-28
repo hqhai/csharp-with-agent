@@ -6,6 +6,7 @@ namespace Fsel.Training.Application.Commands.ClassLiveWorkFlowCmd
     using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
     using Fsel.Shared.Enums;
     using Fsel.Training.Application.Services.SystemServices;
@@ -55,7 +56,7 @@ namespace Fsel.Training.Application.Commands.ClassLiveWorkFlowCmd
             var teacherResult = await _userService.GetTeacherByUserIdAsync(_authContext.CurrentUserId);
             if (!teacherResult.IsSuccessStatusCode)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumClassLiveWorkFlowErrorCode.TeacherNotExits));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(teacherResult));
                 return methodResult;
             }
             var teacherId = teacherResult.Content?.Result?.Id;
@@ -63,13 +64,13 @@ namespace Fsel.Training.Application.Commands.ClassLiveWorkFlowCmd
             var classLiveCalendar = await _classLiveCalendarRepository.Queryable.Include(x => x.Class).FirstOrDefaultAsync(x => x.Id == request.ClassLiveCalendarId, cancellationToken);
             if (classLiveCalendar == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumClassLiveCalendarErrorCode.ClassLiveCalendarNotExits), nameof(request.ClassLiveCalendarId), request.ClassLiveCalendarId);
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.ClassLiveCalendarId));
                 return methodResult;
             }
             var classLiveWorkFlow = await _classLiveWorkFlowRepository.Queryable.FirstOrDefaultAsync(x => x.TeacherId == teacherId && x.ClassLiveCalendarId == request.ClassLiveCalendarId && x.Status == EnumWorkFlowAssignTeacherStatus.Pending.ToString(), cancellationToken);
             if (classLiveWorkFlow != null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumClassLiveWorkFlowErrorCode.ClassLiveWorkFlowAlreadyExist));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(classLiveWorkFlow));
                 return methodResult;
             }
             else
@@ -130,7 +131,7 @@ namespace Fsel.Training.Application.Commands.ClassLiveWorkFlowCmd
                                     break;
 
                                 default:
-                                    methodResult.AddErrorBadRequest(nameof(EnumClassLiveWorkFlowErrorCode.LiveDateInvalid));
+                                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(listLiveTimeFramePlan));
                                     return methodResult;
                             }
                         }

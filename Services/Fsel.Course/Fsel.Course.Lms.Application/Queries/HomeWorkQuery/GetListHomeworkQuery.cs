@@ -6,8 +6,8 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkQuery
     using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
-    using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Services.UserServices;
@@ -49,14 +49,14 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkQuery
             var student = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
             if (!student.IsSuccessStatusCode)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumHomeWorkErrorCode.UserNotExist));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student));
                 return methodResult;
             }
             var studentId = student?.Content?.Result?.Id;
             var lessonResult = await _lessonResultRepository.GetByIdAsync(request.LessonResultId);
             if (lessonResult == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumLessonResultErrorCode.LessonResultNotExist));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(lessonResult));
                 return methodResult;
             }
             var lessonSkillScoreQuery = await _homeWorkResultRepository.Queryable

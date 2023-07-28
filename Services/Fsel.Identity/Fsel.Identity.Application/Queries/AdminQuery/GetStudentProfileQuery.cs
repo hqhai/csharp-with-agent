@@ -4,10 +4,10 @@ namespace Fsel.Identity.Application.Queries.AdminQuery
 {
     using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Identity.Application.Services.OrderService;
     using Fsel.Identity.Application.Services.TrainingService;
     using Fsel.Identity.Domain.Entities;
-    using Fsel.Identity.Domain.Enums.ErrorCodes;
     using Fsel.Identity.Domain.Models.EntityModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
@@ -45,7 +45,7 @@ namespace Fsel.Identity.Application.Queries.AdminQuery
                                                    .FirstOrDefaultAsync(x => x.Human != null && x.Human.Student != null && x.Human.Student.Id == request.StudentId, cancellationToken);
             if (userView == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumStudentErrorCode.StudentNotExist));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(userView));
                 return methodResult;
             }
             var student = userView.Human?.Student;

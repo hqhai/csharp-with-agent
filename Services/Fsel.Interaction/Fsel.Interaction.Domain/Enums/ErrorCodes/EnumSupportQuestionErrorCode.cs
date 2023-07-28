@@ -8,6 +8,7 @@ namespace Fsel.Interaction.Domain.Enums.ErrorCodes
         /// Support Question not exist
         /// </summary>
         SupportQuestionNotExist,
+
         /// <summary>
         /// Support category id  not exist
         /// </summary>

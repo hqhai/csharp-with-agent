@@ -5,9 +5,9 @@ namespace Fsel.Training.Application.Queries.ClassQuery.Admin
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Shared.Enums;
     using Fsel.Training.Application.Services.CourseServices;
-    using Fsel.Training.Domain.Enums.ErrorCodes;
     using Fsel.Training.Domain.IRepositories;
     using Fsel.Training.Domain.Models.EntityModels;
     using MediatR;
@@ -38,7 +38,7 @@ namespace Fsel.Training.Application.Queries.ClassQuery.Admin
             var @class = await _classRepository.GetByIdAsync(request.ClassId);
             if (@class == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumClassErrorCode.ClassesNotExits), nameof(request.ClassId), request.ClassId);
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.ClassId));
                 return methodResult;
             }
             IList<Guid> courseIds = new List<Guid>();
@@ -52,7 +52,7 @@ namespace Fsel.Training.Application.Queries.ClassQuery.Admin
             var course = coursesResult.Content?.Result?.FirstOrDefault(p => p.Id == @class.CourseId);
             if (course == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumClassErrorCode.CoursesNull), nameof(@class.CourseId), @class.CourseId);
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(@class.CourseId));
                 return methodResult;
             }
             var courseLevelResult = await _courseService.GetCoursesByLevelAsync(course.CourseLevel);
@@ -63,7 +63,7 @@ namespace Fsel.Training.Application.Queries.ClassQuery.Admin
             }
             var courseLevel = courseLevelResult.Content?.Result;
 
-            var classes= await _classRepository.Queryable.Where(p => courseLevel!.Select(x => x.Id).Contains(p.CourseId) && p.Status == EnumStatusClass.New && p.PackageId == @class.PackageId && p.Id != request.ClassId).Select(i => new ClassModel
+            var classes = await _classRepository.Queryable.Where(p => courseLevel!.Select(x => x.Id).Contains(p.CourseId) && p.Status == EnumStatusClass.New && p.PackageId == @class.PackageId && p.Id != request.ClassId).Select(i => new ClassModel
             {
                 Id = i.Id,
                 Code = i.Code,

@@ -2,11 +2,11 @@
 
 namespace Fsel.Course.Domain.Entities
 {
-    using Fsel.Common.Enums.ErrorCodes;
     using System.ComponentModel.DataAnnotations;
-    using Fsel.Core.Entities;
-    using Fsel.Common.Helpers;
     using System.ComponentModel.DataAnnotations.Schema;
+    using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Common.Helpers;
+    using Fsel.Core.Entities;
 
     public class HomeWorkAnswer : Entity
     {

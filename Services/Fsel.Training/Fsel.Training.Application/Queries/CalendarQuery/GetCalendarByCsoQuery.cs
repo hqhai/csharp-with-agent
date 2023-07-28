@@ -9,13 +9,12 @@ namespace Fsel.Training.Application.Queries.CalendarQuery
     using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
-    using Fsel.Shared.Helpers;
     using Fsel.Training.Application.Services.CourseServices;
     using Fsel.Training.Application.Services.SystemServices;
     using Fsel.Training.Application.Services.UserServices;
     using Fsel.Training.Application.Services.UserServices.Models;
-    using Fsel.Training.Domain.Enums.ErrorCodes;
     using Fsel.Training.Domain.IRepositories;
     using Fsel.Training.Domain.Models.EntityModels;
     using Fsel.Training.Domain.Models.QueryModels;
@@ -74,7 +73,7 @@ namespace Fsel.Training.Application.Queries.CalendarQuery
             var cso = csoResult.Content?.Result;
             if (cso == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumClassErrorCode.CsoNotExits));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(cso));
                 return methodResult;
             }
             var courses = coursesResult.Content?.Result;

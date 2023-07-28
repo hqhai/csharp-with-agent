@@ -3,7 +3,7 @@
 namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
 {
     using Fsel.Common.ActionResults;
-    using Fsel.Course.Domain.Enums.ErrorCodes;
+    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Course.Lms.Application.Services.UserServices.Models;
@@ -54,7 +54,7 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
 
             if (course == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.CourseNotExist));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(course));
                 return methodResult;
             }
 

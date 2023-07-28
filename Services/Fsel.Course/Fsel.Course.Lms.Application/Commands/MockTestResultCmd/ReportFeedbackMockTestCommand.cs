@@ -4,8 +4,8 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestResultCmd
 {
     using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
-    using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.CommandModels.MockTestResults;
     using Fsel.Course.Domain.Models.EntityModels;
@@ -40,19 +40,19 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestResultCmd
             var student = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
             if (!student.IsSuccessStatusCode)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumLessonErrorCode.UserNotExist));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student));
                 return methodResult;
             }
             var studentId = student?.Content?.Result?.Id;
             var mockTestResult = await _mockTestResultRepository.Queryable.Include(x => x.MockTestScores).Where(e => e.Id == request.MockTestResultId && e.StudentId == studentId).FirstOrDefaultAsync(cancellationToken);
             if (mockTestResult == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumMockTestResultErrorCode.MockTestResultNotExist));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(mockTestResult));
                 return methodResult;
             }
             if (mockTestResult.FeedBackStars > 0 && mockTestResult.FeedBackNote != null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumMockTestResultErrorCode.FeedbackAlreadyExist));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(mockTestResult.FeedBackStars));
                 return methodResult;
             }
             mockTestResult.FeedBackNote = request.FeedBackNote;

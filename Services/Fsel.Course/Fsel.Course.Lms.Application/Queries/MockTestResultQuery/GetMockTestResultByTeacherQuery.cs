@@ -3,8 +3,8 @@
 namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
 {
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Course.Domain.Enums;
-    using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Infrastructure.Common;
@@ -39,7 +39,7 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
             var mockTestResult = await _mockTestResultRepository.GetByIdAsync(request.MockTestResultId);
             if (mockTestResult == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumMockTestResultErrorCode.MockTestResultNotExist));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(mockTestResult));
                 return methodResult;
             }
             var mockTest = await _mockTestRepository.Queryable.Include(x => x.MockTestResults)

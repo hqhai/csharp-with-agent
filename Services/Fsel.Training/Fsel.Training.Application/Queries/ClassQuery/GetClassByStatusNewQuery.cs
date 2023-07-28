@@ -4,12 +4,12 @@ namespace Fsel.Training.Application.Queries.ClassQuery
 {
     using System.Collections.Generic;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Common.Helpers;
     using Fsel.Ordering.Domain.Enums;
     using Fsel.Shared.Enums;
     using Fsel.Training.Application.Services.OrderServices;
     using Fsel.Training.Domain.Entities;
-    using Fsel.Training.Domain.Enums.ErrorCodes;
     using Fsel.Training.Domain.IRepositories;
     using Fsel.Training.Domain.Models.EntityModels;
     using MediatR;
@@ -44,7 +44,7 @@ namespace Fsel.Training.Application.Queries.ClassQuery
             MethodResult<IList<CourseClassModel>> methodResult = new MethodResult<IList<CourseClassModel>>();
             if (request.Courses == null || request.Courses.Count == 0)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumClassErrorCode.CoursesNull), nameof(request.Courses), request.Courses);
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Courses));
                 return methodResult;
             }
             var packagesResult = await _orderService.GetPackages();
@@ -56,7 +56,7 @@ namespace Fsel.Training.Application.Queries.ClassQuery
             var package = packagesResult.Content?.Result?.FirstOrDefault(p => p.Id == request.PackageId);
             if (package == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumClassErrorCode.PackageNotExist), nameof(request.PackageId), request.PackageId);
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.PackageId));
                 return methodResult;
             }
             List<Class> classes = new List<Class>();

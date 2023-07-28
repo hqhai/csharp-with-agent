@@ -6,7 +6,6 @@ namespace Fsel.Interaction.Api.Controllers.Student
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
     using Fsel.Core.Base.BaseModels;
-    using Fsel.Interaction.Application.Commands.ActionCmd;
     using Fsel.Interaction.Application.Commands.PostCmd.StudentPostCmd;
     using Fsel.Interaction.Application.Queries.PostQuery;
     using Fsel.Interaction.Domain.Models.EntityModels;
@@ -72,7 +71,7 @@ namespace Fsel.Interaction.Api.Controllers.Student
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetPostsByStudent([FromRoute] EnumPostStatus status)
         {
-            var queryResult = await _mediator.Send(new GetPostsByStudentQuery {Status = status }).ConfigureAwait(false);
+            var queryResult = await _mediator.Send(new GetPostsByStudentQuery { Status = status }).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
 
@@ -105,7 +104,7 @@ namespace Fsel.Interaction.Api.Controllers.Student
         }
 
         /// <summary>
-        /// Get Top Post 
+        /// Get Top Post
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
@@ -131,7 +130,5 @@ namespace Fsel.Interaction.Api.Controllers.Student
             var queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
-
-
     }
 }

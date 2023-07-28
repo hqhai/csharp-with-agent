@@ -7,6 +7,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
     using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.Enums.ErrorCodes;
@@ -42,7 +43,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
             var student = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
             if (!student.IsSuccessStatusCode)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumLessonErrorCode.UserNotExist), nameof(student), _authContext.CurrentUserId.ToString());
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student));
                 return methodResult;
             }
             var studentId = student?.Content?.Result?.Id;
@@ -51,7 +52,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
 
             if (classForumResult == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumClassForumResultErrorCode.ClassForumResultNotExist), nameof(request.ClassForumResultId), request.ClassForumResultId);
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.ClassForumResultId));
                 return methodResult;
             }
             if (studentId != classForumResult.StudentId)

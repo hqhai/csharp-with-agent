@@ -19,7 +19,6 @@ namespace Fsel.Interaction.Infrastructure.Configs
                     v => v.ToString(),
                     v => v.EnumParse<EnumReviewQuestionType>());
 
-
             builder.HasOne(a => a.StudentReview)
                   .WithMany(b => b.StudentReviewDetails)
                   .HasForeignKey(b => b.StudentReviewId)

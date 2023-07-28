@@ -6,6 +6,5 @@ namespace Fsel.Course.Domain.Models.QueryModels.ReviewFsels
 
     public class SearchReviewCommunicationQueryModel : BaseQueryModel
     {
-
     }
 }

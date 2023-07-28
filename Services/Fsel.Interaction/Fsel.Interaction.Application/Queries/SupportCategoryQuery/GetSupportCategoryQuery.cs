@@ -7,7 +7,7 @@ namespace Fsel.Interaction.Application.Queries.SupportCategoryQuery
     using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Common.ActionResults;
-    using Fsel.Interaction.Domain.Enums.ErrorCodes;
+    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Interaction.Domain.IRepositories;
     using Fsel.Interaction.Domain.Models.EntityModels;
     using MediatR;
@@ -38,7 +38,7 @@ namespace Fsel.Interaction.Application.Queries.SupportCategoryQuery
 
             if (supportCategory == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSupportCategoryErrorCode.SupportCategoryNotExist), nameof(request.Id), request.Id);
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Id));
                 return methodResult;
             }
 

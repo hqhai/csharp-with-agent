@@ -2,8 +2,8 @@
 
 using AutoMapper;
 using Fsel.Common.ActionResults;
+using Fsel.Common.Enums.ErrorCodes;
 using Fsel.Course.Domain.Entities;
-using Fsel.Course.Domain.Enums.ErrorCodes;
 using Fsel.Course.Domain.IRepositories;
 using Fsel.Course.Domain.Models.CommandModels.Lessons;
 using Fsel.Course.Domain.Models.EntityModels;
@@ -46,25 +46,25 @@ namespace Fsel.Course.Application.Commands.LessonCmd
 
             if (request.HomeWorkIds == null || request.HomeWorkIds.Count == 0)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumHomeWorkErrorCode.HomeWorksNull), nameof(request.HomeWorkIds), request.HomeWorkIds);
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.HomeWorkIds));
                 return methodResult;
             }
 
             if (request.LessonInstructions == null || request.LessonInstructions.Count == 0)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumLessonInstructionErrorCode.LessonInstructionsNull), nameof(request.LessonInstructions), request.LessonInstructions);
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.LessonInstructions));
                 return methodResult;
             }
 
             if (request.VideoIds == null || request.VideoIds.Count == 0)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumVideoErrorCode.VideosNull), nameof(request.VideoIds), request.VideoIds);
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.VideoIds));
                 return methodResult;
             }
 
             if (request.ClassForum == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumClassForumErrorCode.ClassForumNull), nameof(request.ClassForum), request.ClassForum);
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.ClassForum));
                 return methodResult;
             }
 
@@ -73,28 +73,28 @@ namespace Fsel.Course.Application.Commands.LessonCmd
 
             if (_homeWorkRepository.IsIdsInValid(request.HomeWorkIds))
             {
-                methodResult.AddErrorBadRequest(nameof(EnumHomeWorkErrorCode.HomeworksNotExist), nameof(request.HomeWorkIds), request.HomeWorkIds);
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.HomeWorkIds));
                 return methodResult;
             }
             if (request.ExtraPracticeIds != null && request.ExtraPracticeIds.Count > 0)
             {
                 if (_extraPracticeRepository.IsIdsInValid(request.ExtraPracticeIds))
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumExtraPracticeErrorCode.ExtraPracticesNotExist), nameof(request.ExtraPracticeIds), request.ExtraPracticeIds);
+                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.ExtraPracticeIds));
                     return methodResult;
                 }
             }
 
             if (_videoRepository.IsIdsInValid(request.VideoIds))
             {
-                methodResult.AddErrorBadRequest(nameof(EnumVideoErrorCode.VideosNotExist), nameof(request.VideoIds), request.VideoIds);
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.VideoIds));
                 return methodResult;
             }
 
             var isExistName = await _lessonRepository.Queryable.AnyAsync(x => x.Name == request.Name, cancellationToken);
             if (isExistName)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumLessonErrorCode.LessonNameIsExist), nameof(request.Name), request.Name);
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Name));
                 return methodResult;
             }
 

@@ -1,10 +1,7 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-using System.Text.Json.Serialization;
-using Fsel.Shared.Enums;
-using Fsel.Common.Helpers;
 using Fsel.Course.Domain.Enums;
-using Fsel.Course.Domain.Models.EntityModels;
+using Fsel.Shared.Enums;
 
 namespace Fsel.Course.Domain.Models.CommandModels.ClassForums
 {

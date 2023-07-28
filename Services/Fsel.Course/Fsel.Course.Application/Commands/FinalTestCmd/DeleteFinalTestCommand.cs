@@ -6,6 +6,7 @@ namespace Fsel.Course.Application.Commands.FinalTestCmd
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
@@ -37,7 +38,7 @@ namespace Fsel.Course.Application.Commands.FinalTestCmd
             var finalTest = await _finalTestRepository.GetIncludeByIdAsync(request.Id);
             if (finalTest == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumFinalTestErrorCode.FinalTestsNotExist), nameof(request.Id), request?.Id);
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Id));
                 return methodResult;
             }
             if (finalTest.IsActive)

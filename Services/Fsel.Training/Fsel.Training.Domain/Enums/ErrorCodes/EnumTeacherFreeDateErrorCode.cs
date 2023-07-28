@@ -8,21 +8,5 @@ namespace Fsel.Training.Domain.Enums.ErrorCodes
         /// StartDate is not bigger than EndDate
         /// </summary>
         StartDateNotBiggerThanEndDate,
-
-
-        /// <summary>
-        /// Teacher Does not exits
-        /// </summary>
-        TeacherNotExits,
-
-        /// <summary>
-        /// StartDate already exists
-        /// </summary>
-        StartDateAlreadyExists,
-
-        /// <summary>
-        /// EndDate already exists
-        /// </summary>
-        EndDateAlreadyExists,
     }
 }

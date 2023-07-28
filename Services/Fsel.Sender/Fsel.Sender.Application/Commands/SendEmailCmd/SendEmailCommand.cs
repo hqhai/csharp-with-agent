@@ -1,7 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
 using Fsel.Common.ActionResults;
-using Fsel.Common.Constants;
 using Fsel.Common.Helpers;
 using Fsel.Sender.Domain.Models.Commands;
 using Fsel.Sender.Domain.Models.Entities;

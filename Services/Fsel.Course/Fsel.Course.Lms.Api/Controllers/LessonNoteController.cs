@@ -5,10 +5,10 @@ namespace Fsel.Course.Lms.Api.Controllers
     using System.Net;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
-    using Fsel.Shared.Enums;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Commands.LessonNoteCmd;
     using Fsel.Course.Lms.Application.Queries.LessonNoteQuery;
+    using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;

@@ -4,8 +4,8 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
 {
     using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Course.Domain.Enums;
-    using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Services.TrainingServices;
@@ -23,7 +23,6 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
         public Guid PackageId { get; set; }
         public Guid? LiveTimeFrameId { get; set; }
         public IList<DayOfWeek>? LiveDays { get; set; }
-
     }
 
     public class GetListCourseTeacherQueryHandler : IRequestHandler<GetListCourseTeacherQuery, MethodResult<IList<CourseModel>>>
@@ -71,7 +70,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
                               }).ToListAsync(cancellationToken: cancellationToken);
             if (courses == null || courses.Count == 0)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.CoursesNotExist));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(courses));
                 return methodResult;
             }
             var teachersResult = await _userService.GetTeacherByIdsAsync(new GetTeacherByIdsQueryModel
@@ -93,7 +92,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
 
             if (!classcourses.IsSuccessStatusCode || classcourses == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.ClassesNotExist));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(classcourses));
                 return methodResult;
             }
 

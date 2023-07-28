@@ -6,10 +6,10 @@ namespace Fsel.Training.Application.Queries.TeacherFreeDateQuery
     using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
     using Fsel.Training.Application.Services.SystemServices;
     using Fsel.Training.Application.Services.UserServices;
-    using Fsel.Training.Domain.Enums.ErrorCodes;
     using Fsel.Training.Domain.IRepositories;
     using Fsel.Training.Domain.Models.EntityModels;
     using MediatR;
@@ -46,7 +46,7 @@ namespace Fsel.Training.Application.Queries.TeacherFreeDateQuery
             var teacher = await _userService.GetTeacherByUserIdAsync(_authContext.CurrentUserId);
             if (!teacher.IsSuccessStatusCode)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumTeacherFreeDateErrorCode.TeacherNotExits));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(teacher));
                 return methodResult;
             }
             var teacherId = teacher.Content?.Result?.Id;

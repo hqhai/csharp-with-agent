@@ -4,6 +4,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
 {
     using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.Enums.ErrorCodes;
     using Fsel.Identity.Domain.IRepositories;
@@ -44,7 +45,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
                                                    .ThenInclude(x => x!.TeacherBankAccounts).FirstOrDefaultAsync(x => x.Id == request.Id.ToString(), cancellationToken);
             if (user == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumUserErrorCode.UserNotExist), nameof(request.Id), request.Id);
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Id));
                 return methodResult;
             }
             var sl = user.Human?.Teacher?.TeacherBankAccounts?.Count;

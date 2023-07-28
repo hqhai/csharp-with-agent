@@ -4,7 +4,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
 {
     using AutoMapper;
     using Fsel.Common.ActionResults;
-    using Fsel.Identity.Domain.Enums.ErrorCodes;
+    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Domain.Models.CommandModels.Students;
     using Fsel.Identity.Domain.Models.EntityModels;
@@ -39,7 +39,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
 
             if (student == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumStudentErrorCode.StudentNull), nameof(request.StudentId), request.StudentId);
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.StudentId));
                 return methodResult;
             }
             student.ClassId = request.ClassId;

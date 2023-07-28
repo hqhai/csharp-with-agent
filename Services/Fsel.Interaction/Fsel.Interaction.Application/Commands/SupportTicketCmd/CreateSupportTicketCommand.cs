@@ -58,7 +58,6 @@ namespace Fsel.Interaction.Application.Commands.SupportTicketCmd
                 return methodResult;
             }
 
-
             await _supportTicketRepository.ExecuteTransactionAsync(async () =>
             {
                 supportTicket.Code = NumberHelper.GenerateCodeNumber(8);

@@ -5,7 +5,7 @@ namespace Fsel.Course.Application.Commands.QuestionFormCmd
     using System;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
-    using Fsel.Course.Domain.Enums.ErrorCodes;
+    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
     using MediatR;
     using Microsoft.AspNetCore.Http;
@@ -34,7 +34,7 @@ namespace Fsel.Course.Application.Commands.QuestionFormCmd
             var questionForm = await _questionFormRepository.GetByIdAsync(request.Id);
             if (questionForm == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumQuestionFormErrorCode.QuestionFormNotExist), nameof(request.Id), request.Id);
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Id));
                 return methodResult;
             }
 

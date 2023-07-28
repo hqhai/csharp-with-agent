@@ -3,6 +3,7 @@
 namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd
 {
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Entities.SkillScoresConfigs;
     using Fsel.Course.Domain.Enums;
@@ -52,7 +53,7 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd
             var homeWorkResult = await _homeWorkResultRepository.Queryable.Include(x => x.HomeWork).FirstOrDefaultAsync(x => x.Id == request.HomeWorkResultId, cancellationToken);
             if (homeWorkResult == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumHomeWorkResultErrorCode.HomeWorkResultNotExist));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(homeWorkResult));
                 return methodResult;
             }
             else if (homeWorkResult.Status == EnumResultStatus.Done)
@@ -66,12 +67,12 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd
                 var question = await _questionRepository.GetByIdAsync(item.QuestionId);
                 if (question == null)
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumQuestionErrorCode.QuestionNotExist), nameof(item.QuestionId), item.QuestionId);
+                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(item.QuestionId));
                     return methodResult;
                 }
                 else if (question.Config == null)
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumQuestionErrorCode.QuestionConfigNull), nameof(question), question);
+                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(question));
                     return methodResult;
                 }
 
@@ -79,7 +80,7 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd
                                                                     .FirstOrDefaultAsync(cancellationToken: cancellationToken);
                 if (homeWorkQuestion == null)
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumHomeWorkQuestionErrorCode.HomeWorkQuestionNotExist), nameof(homeWorkQuestion), homeWorkResult.HomeWorkId, item.QuestionId);
+                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(homeWorkQuestion));
                     return methodResult;
                 }
                 var isHomeWorkAnswer = await _homeWorkAnswerRepository.Queryable.AnyAsync(x => x.HomeWorkQuestionId == homeWorkQuestion.Id && x.HomeWorkResultId == request.HomeWorkResultId, cancellationToken);

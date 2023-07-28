@@ -4,7 +4,7 @@ namespace Fsel.Course.Lms.Application.Commands.LessonNoteCmd
 {
     using AutoMapper;
     using Fsel.Common.ActionResults;
-    using Fsel.Course.Domain.Enums.ErrorCodes;
+    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.CommandModels.LessonNotes;
     using Fsel.Course.Domain.Models.EntityModels;
@@ -34,7 +34,7 @@ namespace Fsel.Course.Lms.Application.Commands.LessonNoteCmd
             var lessonNote = await _lessonNoteRepository.GetByIdAsync(request.Id);
             if (lessonNote == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumLessonNoteErrorCode.LessonNotesNotExist), nameof(request.Id), request.Id);
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Id));
                 return methodResult;
             }
 

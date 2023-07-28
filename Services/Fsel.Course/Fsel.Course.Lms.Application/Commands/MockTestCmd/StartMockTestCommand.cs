@@ -5,6 +5,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums;
@@ -59,7 +60,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
             var course = await _courseRepository.GetByIdAsync(request.CourseId);
             if (course == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.CourseNotExist), nameof(request.CourseId), request.CourseId);
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.CourseId));
                 return methodResult;
             }
             else if (course.Status == EnumCourseStatus.New)
@@ -73,14 +74,14 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
                 var unit = await _unitRepository.Queryable.FirstOrDefaultAsync(x => x.Id == request.UnitId, cancellationToken);
                 if (unit == null)
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumUnitErrorCode.UnitNotExist), nameof(request.UnitId), request.UnitId);
+                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.UnitId));
                     return methodResult;
                 }
             }
             var student = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
             if (!student.IsSuccessStatusCode)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumMockTestErrorCode.UserNotExist), nameof(student), _authContext.CurrentUserId.ToString());
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student));
                 return methodResult;
             }
             var studentId = student?.Content?.Result?.Id;
@@ -132,7 +133,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
                                                 .FirstOrDefaultAsync(cancellationToken: cancellationToken);
             if (mockTest == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumMockTestErrorCode.MockTestsNotExist), nameof(request.MockTestId), request.MockTestId);
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(mockTest));
                 return methodResult;
             }
             if (!(mockTest.CourseUnitMockTests.Any() || mockTest.UnitSkillMockTests.Any()))

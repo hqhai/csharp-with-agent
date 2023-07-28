@@ -8,6 +8,7 @@ namespace Fsel.Ordering.Application.Commands.VoucherCmds
     using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Ordering.Domain.Entities;
     using Fsel.Ordering.Domain.Enums.ErrorCodes;
     using Fsel.Ordering.Domain.IRepositories;
@@ -49,7 +50,7 @@ namespace Fsel.Ordering.Application.Commands.VoucherCmds
             var voucher = await _voucherRepository.GetIncludeByIdAsync(request.Id);
             if (voucher == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumVoucherErrorCode.VoucherNotExist), nameof(request.Id), request.Id);
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Id));
                 return methodResult;
             }
             if (!voucher.IsValid())

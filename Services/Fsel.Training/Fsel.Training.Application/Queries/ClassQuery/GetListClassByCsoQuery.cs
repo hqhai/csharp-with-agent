@@ -6,11 +6,11 @@ namespace Fsel.Training.Application.Queries.ClassQuery
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
     using Fsel.Training.Application.Services.SystemServices;
     using Fsel.Training.Application.Services.UserServices;
     using Fsel.Training.Application.Services.UserServices.Models;
-    using Fsel.Training.Domain.Enums.ErrorCodes;
     using Fsel.Training.Domain.IRepositories;
     using Fsel.Training.Domain.Models.EntityModels;
     using MediatR;
@@ -44,7 +44,7 @@ namespace Fsel.Training.Application.Queries.ClassQuery
             var cso = await _userService.GetCsoByUserIdAsync(_authContext.CurrentUserId);
             if (!cso.IsSuccessStatusCode)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumClassErrorCode.CsoNotExits), nameof(cso), _authContext.CurrentUserId.ToString());
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(cso));
                 return methodResult;
             }
             var csoId = cso?.Content?.Result?.Id;

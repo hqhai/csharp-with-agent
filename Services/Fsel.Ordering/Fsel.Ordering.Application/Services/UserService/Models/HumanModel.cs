@@ -8,6 +8,5 @@ namespace Fsel.Ordering.Application.Services.UserService.Models
         public string? Birthday { get; set; }
         public string? Code { get; set; }
         public string? UserId { get; set; }
-
     }
 }

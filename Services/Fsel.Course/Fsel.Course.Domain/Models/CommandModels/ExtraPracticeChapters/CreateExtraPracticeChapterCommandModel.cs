@@ -9,6 +9,7 @@ namespace Fsel.Course.Domain.Models.CommandModels.ExtraPractiveChapters
     {
         [Required]
         public string? Name { get; set; }
+
         public string? Description { get; set; }
         public int PageNumber { get; set; }
         public IList<CreateExerciseCommandModel>? Exercises { get; set; }
