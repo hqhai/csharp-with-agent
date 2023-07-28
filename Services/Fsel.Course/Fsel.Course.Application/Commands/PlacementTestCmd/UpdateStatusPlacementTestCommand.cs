@@ -34,7 +34,7 @@ namespace Fsel.Course.Application.Commands.PlacementTestCmd
             var placementTest = await _placementTestRepository.GetByIdAsync(request.Id);
             if (placementTest == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Id));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(placementTest));
                 return methodResult;
             }
             placementTest.IsActive = request.IsActive;

@@ -36,7 +36,7 @@ namespace Fsel.Course.Application.Queries.ExtraPracticeQuery
 
             if (extraPractice == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Id));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(extraPractice));
                 return methodResult;
             }
 

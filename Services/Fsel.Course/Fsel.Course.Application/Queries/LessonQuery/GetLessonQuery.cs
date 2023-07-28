@@ -34,7 +34,7 @@ namespace Fsel.Course.Application.Queries.LessonQuery
 
             if (lesson == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Id));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(lesson));
                 return methodResult;
             }
 

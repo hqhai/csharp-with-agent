@@ -49,7 +49,7 @@ namespace Fsel.Course.Application.Commands.HomeWorkCmd
                             .FirstOrDefaultAsync(e => e.Id == request.Id, cancellationToken: cancellationToken);
             if (homeWork == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Id));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(homeWork));
                 return methodResult;
             }
             var questionDeletes = homeWork.HomeWorkQuestions.Where(x => x.Question != null && !x.IsDeleted).Select(x => x.Question!);

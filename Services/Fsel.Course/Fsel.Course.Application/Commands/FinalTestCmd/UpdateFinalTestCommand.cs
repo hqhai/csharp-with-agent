@@ -50,7 +50,7 @@ namespace Fsel.Course.Application.Commands.FinalTestCmd
             var finalTest = await _finalTestRepository.GetIncludeByIdAsync(request.Id);
             if (finalTest == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Id));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(finalTest));
                 return methodResult;
             }
             if (finalTest.IsActive)

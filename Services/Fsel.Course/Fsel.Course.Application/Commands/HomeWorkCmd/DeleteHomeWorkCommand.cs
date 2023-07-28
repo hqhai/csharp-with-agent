@@ -37,7 +37,7 @@ namespace Fsel.Course.Application.Commands.HomeWorkCmd
 
             if (homeWork == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Id));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(homeWork));
                 return methodResult;
             }
 

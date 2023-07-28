@@ -34,7 +34,7 @@ namespace Fsel.Course.Application.Commands.QuestionFormCmd
             var questionForm = await _questionFormRepository.GetByIdAsync(request.Id);
             if (questionForm == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Id));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(questionForm));
                 return methodResult;
             }
 

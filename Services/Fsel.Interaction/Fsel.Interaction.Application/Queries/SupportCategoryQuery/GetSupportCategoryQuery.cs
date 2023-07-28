@@ -38,7 +38,7 @@ namespace Fsel.Interaction.Application.Queries.SupportCategoryQuery
 
             if (supportCategory == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Id));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(supportCategory));
                 return methodResult;
             }
 

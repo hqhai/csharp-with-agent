@@ -35,7 +35,7 @@ namespace Fsel.Interaction.Application.Commands.SupportQuetionCmd
             var supportQuestion = await _supportQuetionRepository.GetByIdAsync(request.Id);
             if (supportQuestion == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Id));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(supportQuestion));
                 return methodResult;
             }
 

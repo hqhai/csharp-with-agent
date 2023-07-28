@@ -38,7 +38,7 @@ namespace Fsel.Ordering.Application.Commands.VoucherCmds
             var voucher = await _voucherRepository.GetByIdAsync(request.Id);
             if (voucher == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Id));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(voucher));
                 return methodResult;
             }
 

@@ -35,7 +35,7 @@ namespace Fsel.Interaction.Application.Commands.SupportCategoryCmd
             var supportCategory = await _supportCategoryRepository.GetByIdAsync(request.Id);
             if (supportCategory == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Id));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(supportCategory));
                 return methodResult;
             }
 

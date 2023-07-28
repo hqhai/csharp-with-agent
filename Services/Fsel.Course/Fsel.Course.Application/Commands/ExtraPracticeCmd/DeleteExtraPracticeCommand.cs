@@ -33,7 +33,7 @@ namespace Fsel.Course.Application.Commands.ExtraPracticeCmd
             var extraPractice = await _extraPracticeRepository.GetIncludeByIdAsync(request.Id);
             if (extraPractice == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Id));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(extraPractice));
                 return methodResult;
             }
             if (extraPractice.IsActive)

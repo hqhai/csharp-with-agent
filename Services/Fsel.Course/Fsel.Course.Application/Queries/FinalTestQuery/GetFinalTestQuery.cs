@@ -34,7 +34,7 @@ namespace Fsel.Course.Application.Queries.FinalTestQuery
 
             if (finalTest == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Id));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(finalTest));
                 return methodResult;
             }
 

@@ -53,7 +53,7 @@ namespace Fsel.Course.Application.Commands.VideoCmd
             var video = await _videoRepository.GetIncludeByIdAsync(request.Id);
             if (video == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Id));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(video));
                 return methodResult;
             }
 

@@ -36,7 +36,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
             var user = await _userManager.FindByIdAsync(request.Id.ToString());
             if (user == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Id));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(user));
                 return methodResult;
             }
 

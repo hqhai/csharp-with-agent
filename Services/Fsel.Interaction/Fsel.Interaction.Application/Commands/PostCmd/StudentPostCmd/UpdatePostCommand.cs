@@ -42,7 +42,7 @@ namespace Fsel.Interaction.Application.Commands.PostCmd.StudentPostCmd
                                    .FirstOrDefaultAsync(e => e.Id == request.Id, cancellationToken: cancellationToken);
             if (studentPosts == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Id));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(studentPosts));
                 return methodResult;
             }
             _mapper.Map(request, studentPosts);

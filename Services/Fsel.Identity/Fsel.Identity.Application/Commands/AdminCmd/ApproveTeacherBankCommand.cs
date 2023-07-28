@@ -45,7 +45,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
                                                    .ThenInclude(x => x!.TeacherBankAccounts).FirstOrDefaultAsync(x => x.Id == request.Id.ToString(), cancellationToken);
             if (user == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Id));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(user));
                 return methodResult;
             }
             var sl = user.Human?.Teacher?.TeacherBankAccounts?.Count;

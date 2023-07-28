@@ -33,7 +33,7 @@ namespace Fsel.System.Application.Commands.ForbiddenWordCmd
             var forbiddenWord = await _forbiddenWordRepository.GetByIdAsync(request.Id);
             if (forbiddenWord == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Id));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(forbiddenWord));
                 return methodResult;
             }
 

@@ -64,7 +64,7 @@ namespace Fsel.Ordering.Application.Queries.VoucherQuery
 
             if (voucherQuery == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Id));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(voucherQuery));
                 return methodResult;
             }
             var voucherModel = _mapper.Map<VoucherModel>(voucherQuery);

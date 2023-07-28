@@ -64,7 +64,7 @@ namespace Fsel.Course.Infrastructure.Common
                 ExtraPracticeChapter extraPracticeChapter = _mapper.Map<ExtraPracticeChapter>(item);
                 if (item == null)
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(item));
+                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(extraPracticeChapter));
                     return methodResult;
                 }
                 if (item.Exercises != null && item.Exercises.Count > 0)
@@ -243,7 +243,7 @@ namespace Fsel.Course.Infrastructure.Common
                 }
                 if (video == null)
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Id));
+                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(video));
                     return methodResult;
                 }
                 request.Video.Id = video.Id;
