@@ -44,21 +44,19 @@ namespace Fsel.System.Application.Commands.ReferralDiscountConfigCmd
                         {
                             _mapper.Map(item, referralDiscountConfig);
                             referralDiscountConfig = _referralDiscountConfigRepository.Update(referralDiscountConfig);
-                            listReferralDiscountConfig.Add(referralDiscountConfig);
                         }
                         else
                         {
                             referralDiscountConfig = _mapper.Map<ReferralDiscountConfig>(item);
                             referralDiscountConfig = _referralDiscountConfigRepository.Add(referralDiscountConfig);
-                            listReferralDiscountConfig.Add(referralDiscountConfig);
                         }
                         if (!referralDiscountConfig.IsValid())
                         {
                             methodResult.AddErrorBadRequest(referralDiscountConfig.ErrorMessages);
                             return methodResult;
                         }
+                        listReferralDiscountConfig.Add(referralDiscountConfig);
                     }
-
                     await _referralDiscountConfigRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
                 }
 
