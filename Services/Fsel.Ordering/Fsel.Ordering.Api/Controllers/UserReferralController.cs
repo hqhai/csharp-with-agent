@@ -39,11 +39,11 @@ namespace Fsel.Ordering.Api.Controllers
         /// Create User Referral
         /// </summary>
         [HttpPost]
-        [ProducesResponseType(typeof(MethodResult<UserReferralModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> Create([FromBody] CreateUserReferralCommand command)
         {
-            MethodResult<UserReferralModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            MethodResult<bool> commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
     }

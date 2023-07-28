@@ -48,7 +48,7 @@ namespace Fsel.Ordering.Application.Commands.UserRefferalCmd
             var userReferral = await _userReferralRepository.Queryable.Where(x => x.SenderId == request.SenderId).OrderByDescending(item => item.IndexNumber).FirstOrDefaultAsync(cancellationToken);
 
             var userReferralReceivers = await _userReferralRepository.Queryable.Where(x => x.ReceiverId == request.ReceiverId).ToListAsync(cancellationToken);
-            if (userReferralReceivers.Count > 1)
+            if (userReferralReceivers.Count > 0)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumUserReferralErrorCode.UsedReferralCode));
                 return methodResult;
@@ -73,8 +73,8 @@ namespace Fsel.Ordering.Application.Commands.UserRefferalCmd
             var referralDiscountConfigs = referralDiscountConfigResults?.Content?.Result;
             if (referralDiscountConfigs != null && referralDiscountConfigs.Count > 0)
             {
-                await GetVoucher(userReferralCreate.IndexNumber, referralDiscountConfigs, request.SenderId);
-                await GetVoucher(1, referralDiscountConfigs, request.ReceiverId);
+                await AddVoucher(userReferralCreate.IndexNumber, referralDiscountConfigs, request.SenderId, false);
+                await AddVoucher(userReferralCreate.IndexNumber, referralDiscountConfigs, request.ReceiverId, true);
             }
             await _userReferralRepository.ExecuteTransactionAsync(async () =>
             {
@@ -87,25 +87,31 @@ namespace Fsel.Ordering.Application.Commands.UserRefferalCmd
             return methodResult;
         }
 
-        public async Task GetVoucher(int index, IList<ReferralDiscountConfigModel>? referralDiscountConfigs, Guid userId)
+        public async Task AddVoucher(int index, IList<ReferralDiscountConfigModel>? referralDiscountConfigs, Guid userId, bool isReceiver)
         {
             ArgumentNullException.ThrowIfNull(referralDiscountConfigs);
+
             var customerTypes = Enum.GetValues(typeof(EnumCustomerType)).Cast<EnumCustomerType>().ToList();
             var courseLevels = Enum.GetValues(typeof(EnumCourseLevel)).Cast<EnumCourseLevel>().ToList();
-            var referralDiscountConfig = referralDiscountConfigs.FirstOrDefault(x => x.IndexNumber == index);
+            var referralDiscountConfig = referralDiscountConfigs.OrderBy(x => x.IndexNumber).FirstOrDefault(x => index >= x.IndexNumber);
+
+            if (referralDiscountConfig == null)
+            {
+                return;
+            }
 
             var voucher = new Voucher
             {
                 Name = "ReferralCode",
-                StartDate = DateTime.Now,
-                EndDate = DateTime.Now.AddMonths(1),
+                StartDate = DateTime.Now.Date,
+                EndDate = DateTime.Now.Date.AddMonths(1),
                 IsGlobal = false,
                 IsActive = true,
                 CustomerTypes = customerTypes,
                 CourseLevels = courseLevels,
                 VoucherPackages = await _packageRepository.Queryable.Select(x => new VoucherPackage
                 {
-                    Percentage = referralDiscountConfig != null ? referralDiscountConfig.RecevierDiscountValue ?? default : default,
+                    Percentage = isReceiver ? (referralDiscountConfig.RecevierDiscountValue ?? default) : (referralDiscountConfig.SenderDiscountValue ?? default),
                     PackageId = x.Id
                 }).ToListAsync(),
                 UserVouchers = new List<UserVoucher> { new UserVoucher { UserId = userId, Status = EnumUserVoucherStatus.NotUsed } }

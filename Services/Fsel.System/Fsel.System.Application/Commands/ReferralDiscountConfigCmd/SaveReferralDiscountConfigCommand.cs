@@ -31,35 +31,31 @@ namespace Fsel.System.Application.Commands.ReferralDiscountConfigCmd
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<IList<ReferralDiscountConfigModel>>();
-
             await _referralDiscountConfigRepository.ExecuteTransactionAsync(async () =>
             {
-                var referralDiscountConfigs = await _referralDiscountConfigRepository.Queryable.ToListAsync(cancellationToken);
-
+                var referralDiscountConfigs = await _referralDiscountConfigRepository.Queryable.OrderBy(x => x.IndexNumber).ToListAsync(cancellationToken);
+                IList<ReferralDiscountConfig> listReferralDiscountConfig = new List<ReferralDiscountConfig>();
                 if (request.SaveReferralDiscountConfigs != null)
                 {
-                    var isCheck = referralDiscountConfigs != null && referralDiscountConfigs.Count > 0;
-                    referralDiscountConfigs?.Clear();
                     foreach (var item in request.SaveReferralDiscountConfigs)
                     {
-                        var referralDiscountConfig = new ReferralDiscountConfig();
-                        _mapper.Map(item, referralDiscountConfig);
-                        referralDiscountConfigs?.Add(referralDiscountConfig);
+                        var referralDiscountConfig = referralDiscountConfigs.FirstOrDefault(x => x.IndexNumber == item.IndexNumber);
+                        if (referralDiscountConfig != null)
+                        {
+                            _mapper.Map(item, referralDiscountConfig);
+                            referralDiscountConfig = _referralDiscountConfigRepository.Update(referralDiscountConfig);
+                            listReferralDiscountConfig.Add(referralDiscountConfig);
+                        }
+                        else
+                        {
+                            referralDiscountConfig = _mapper.Map<ReferralDiscountConfig>(item);
+                            referralDiscountConfig = _referralDiscountConfigRepository.Add(referralDiscountConfig);
+                            listReferralDiscountConfig.Add(referralDiscountConfig);
+                        }
                         if (!referralDiscountConfig.IsValid())
                         {
                             methodResult.AddErrorBadRequest(referralDiscountConfig.ErrorMessages);
                             return methodResult;
-                        }
-                    }
-                    if (referralDiscountConfigs != null)
-                    {
-                        if (isCheck)
-                        {
-                            _referralDiscountConfigRepository.UpdateList(referralDiscountConfigs);
-                        }
-                        else
-                        {
-                            await _referralDiscountConfigRepository.AddList(referralDiscountConfigs);
                         }
                     }
 
@@ -67,7 +63,7 @@ namespace Fsel.System.Application.Commands.ReferralDiscountConfigCmd
                 }
 
                 methodResult.StatusCode = StatusCodes.Status201Created;
-                methodResult.Result = _mapper.Map<IList<ReferralDiscountConfigModel>>(referralDiscountConfigs);
+                methodResult.Result = _mapper.Map<IList<ReferralDiscountConfigModel>>(listReferralDiscountConfig);
                 return methodResult;
             });
 
