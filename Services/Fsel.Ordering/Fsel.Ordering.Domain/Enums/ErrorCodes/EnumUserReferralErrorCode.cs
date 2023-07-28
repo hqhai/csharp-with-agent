@@ -5,8 +5,8 @@ namespace Fsel.Ordering.Domain.Enums.ErrorCodes
     public enum EnumUserReferralErrorCode
     {
         /// <summary>
-        /// User already exist
+        /// Used Referral Code
         /// </summary>
-        UserAlreadyExist,
+        UsedReferralCode,
     }
 }

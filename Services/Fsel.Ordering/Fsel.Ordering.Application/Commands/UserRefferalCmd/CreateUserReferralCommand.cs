@@ -4,7 +4,6 @@ namespace Fsel.Ordering.Application.Commands.UserRefferalCmd
 {
     using System;
     using System.Threading;
-    using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Ordering.Application.Services.SystemService;
     using Fsel.Ordering.Application.Services.SystemService.Models;
@@ -12,55 +11,51 @@ namespace Fsel.Ordering.Application.Commands.UserRefferalCmd
     using Fsel.Ordering.Domain.Enums;
     using Fsel.Ordering.Domain.Enums.ErrorCodes;
     using Fsel.Ordering.Domain.IRepositories;
-    using Fsel.Ordering.Domain.Models.EntityModels;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Enums.ErrorCodes;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class CreateUserReferralCommand : IRequest<MethodResult<UserReferralModel>>
+    public class CreateUserReferralCommand : IRequest<MethodResult<bool>>
     {
         public Guid SenderId { get; set; }
         public Guid ReceiverId { get; set; }
     }
 
-    public class CreateUserReferralCommandHandler : IRequestHandler<CreateUserReferralCommand, MethodResult<UserReferralModel>>
+    public class CreateUserReferralCommandHandler : IRequestHandler<CreateUserReferralCommand, MethodResult<bool>>
     {
         private readonly IUserReferralRepository _userReferralRepository;
-        private readonly IMapper _mapper;
         private readonly ISystemService _systemService;
         private readonly IVoucherRepository _voucherRepository;
         private readonly IPackageRepository _packageRepository;
 
         public CreateUserReferralCommandHandler(IUserReferralRepository userReferralRepository
-            , IMapper mapper
             , ISystemService systemService
             , IVoucherRepository voucherRepository
             , IPackageRepository packageRepository)
         {
             _userReferralRepository = userReferralRepository;
-            _mapper = mapper;
             _systemService = systemService;
             _voucherRepository = voucherRepository;
             _packageRepository = packageRepository;
         }
 
-        public async Task<MethodResult<UserReferralModel>> Handle(CreateUserReferralCommand request, CancellationToken cancellationToken)
+        public async Task<MethodResult<bool>> Handle(CreateUserReferralCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            MethodResult<UserReferralModel> methodResult = new MethodResult<UserReferralModel>();
+            MethodResult<bool> methodResult = new MethodResult<bool>();
             var userReferral = await _userReferralRepository.Queryable.Where(x => x.SenderId == request.SenderId).OrderByDescending(item => item.IndexNumber).FirstOrDefaultAsync(cancellationToken);
 
             var userReferralReceivers = await _userReferralRepository.Queryable.Where(x => x.ReceiverId == request.ReceiverId).ToListAsync(cancellationToken);
             if (userReferralReceivers.Count > 1)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumUserReferralErrorCode.UserAlreadyExist));
+                methodResult.AddErrorBadRequest(nameof(EnumUserReferralErrorCode.UsedReferralCode));
                 return methodResult;
             }
 
             UserReferral userReferralCreate = new UserReferral();
-            userReferralCreate.IndexNumber = userReferral != null ? userReferral.IndexNumber + 1 : 1;
+            userReferralCreate.IndexNumber = (userReferral?.IndexNumber ?? default) + 1;
             userReferralCreate.SenderId = request.SenderId;
             userReferralCreate.ReceiverId = request.ReceiverId;
             if (!userReferralCreate.IsValid())
@@ -68,7 +63,6 @@ namespace Fsel.Ordering.Application.Commands.UserRefferalCmd
                 methodResult.AddErrorBadRequest(userReferralCreate.ErrorMessages);
                 return methodResult;
             }
-            var userReferralInfo = _mapper.Map<UserReferralModel>(userReferralCreate);
 
             var referralDiscountConfigResults = await _systemService.GetReferralDiscountConfigAsync();
             if (!referralDiscountConfigResults.IsSuccessStatusCode)
@@ -87,7 +81,7 @@ namespace Fsel.Ordering.Application.Commands.UserRefferalCmd
                 _userReferralRepository.Add(userReferralCreate);
                 await _userReferralRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
                 methodResult.StatusCode = StatusCodes.Status201Created;
-                methodResult.Result = _mapper.Map<UserReferralModel>(userReferralCreate);
+                methodResult.Result = true;
                 return methodResult;
             });
             return methodResult;
@@ -102,7 +96,7 @@ namespace Fsel.Ordering.Application.Commands.UserRefferalCmd
 
             var voucher = new Voucher
             {
-                Name = "Voucher mã giới thiệu",
+                Name = "ReferralCode",
                 StartDate = DateTime.Now,
                 EndDate = DateTime.Now.AddMonths(1),
                 IsGlobal = false,

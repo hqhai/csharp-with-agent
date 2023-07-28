@@ -104,9 +104,9 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                                 _mapper.Map(request, user);
                                 user.UserName = request.Email;
                                 result = await _userManager.CreateAsync(user, request.Password ?? string.Empty);
-                                if (!string.IsNullOrEmpty(request.Code))
+                                if (!string.IsNullOrEmpty(request.ReferralCode))
                                 {
-                                    var userReferral = await _userManager.Users.Include(x => x.Human).FirstOrDefaultAsync(x => x.Human!.Code == request.Code, cancellationToken);
+                                    var userReferral = await _userManager.Users.Include(x => x.Human).FirstOrDefaultAsync(x => x.Human!.Code == request.ReferralCode, cancellationToken);
                                     if (userReferral == null)
                                     {
                                         methodResult.AddErrorBadRequest(nameof(EnumAuthErrorCode.UserNotExistByCode));

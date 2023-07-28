@@ -21,6 +21,6 @@ namespace Fsel.Identity.Domain.Models.CommandModels.Auths
         [Required]
         public EnumRoleRegister Role { get; set; }
 
-        public string? Code { get; set; }
+        public string? ReferralCode { get; set; }
     }
 }
