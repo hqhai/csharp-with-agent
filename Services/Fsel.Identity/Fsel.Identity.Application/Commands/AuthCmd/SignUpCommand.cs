@@ -6,6 +6,8 @@ using System.Transactions;
 using AutoMapper;
 using Fsel.Common.ActionResults;
 using Fsel.Common.Helpers;
+using Fsel.Identity.Application.Services.OrderService;
+using Fsel.Identity.Application.Services.OrderService.Model;
 using Fsel.Identity.Domain.Entities;
 using Fsel.Identity.Domain.Enums;
 using Fsel.Identity.Domain.Enums.ErrorCodes;
@@ -15,6 +17,7 @@ using Fsel.Identity.Domain.Models.EntityModels;
 using Fsel.Identity.Infrastructure.ValueSettings;
 using Fsel.Shared.Constants;
 using Fsel.Shared.Enums;
+using Fsel.Shared.Enums.ErrorCodes;
 using Fsel.Shared.Models.SenderTemplates;
 using MediatR;
 using Microsoft.AspNetCore.Http;
@@ -34,6 +37,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
         private readonly RoleManager<Role> _roleManager;
         private readonly IMapper _mapper;
         private readonly IMediator _mediator;
+        private readonly IOrderService _orderService;
         private readonly IUserOtpCodeRepository _userOtpCodeRepository;
         private readonly AppSetting _appSetting;
 
@@ -41,6 +45,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             RoleManager<Role> roleManager,
             IMapper mapper,
             IMediator mediator,
+            IOrderService orderService,
             IUserOtpCodeRepository userOtpCodeRepository,
             AppSetting appSetting)
         {
@@ -48,6 +53,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             _roleManager = roleManager;
             _mapper = mapper;
             _mediator = mediator;
+            _orderService = orderService;
             _userOtpCodeRepository = userOtpCodeRepository;
             _appSetting = appSetting;
         }
@@ -72,13 +78,13 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                         try
                         {
                             ArgumentNullException.ThrowIfNull(request);
-                            var role = await _roleManager.FindByNameAsync(request?.Role.ToString() ?? string.Empty);
+                            var role = await _roleManager.FindByNameAsync(request.Role.ToString() ?? string.Empty);
                             if (role == null)
                             {
                                 role = new Role
                                 {
-                                    Name = request?.Role.ToString(),
-                                    NormalizedName = request?.Role.ToString(),
+                                    Name = request.Role.ToString(),
+                                    NormalizedName = request.Role.ToString(),
                                 };
                                 await _roleManager.CreateAsync(role);
                             }
@@ -86,26 +92,41 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                             IdentityResult result;
                             if (user != null)
                             {
-                                var hashPassword = _userManager.PasswordHasher.HashPassword(user, request?.Password ?? string.Empty);
+                                var hashPassword = _userManager.PasswordHasher.HashPassword(user, request.Password ?? string.Empty);
                                 user.PasswordHash = hashPassword;
                                 _mapper.Map(request, user);
-                                user.UserName = request?.Email;
+                                user.UserName = request.Email;
                                 result = await _userManager.UpdateAsync(user);
                             }
                             else
                             {
                                 user = new();
                                 _mapper.Map(request, user);
-                                user.UserName = request?.Email;
-                                result = await _userManager.CreateAsync(user, request?.Password ?? string.Empty);
+                                user.UserName = request.Email;
+                                result = await _userManager.CreateAsync(user, request.Password ?? string.Empty);
+                                if (!string.IsNullOrEmpty(request.Code))
+                                {
+                                    var userReferral = await _userManager.Users.Include(x => x.Human).FirstOrDefaultAsync(x => x.Human!.Code == request.Code, cancellationToken);
+                                    if (userReferral == null)
+                                    {
+                                        methodResult.AddErrorBadRequest(nameof(EnumAuthErrorCode.UserNotExistByCode));
+                                        return methodResult;
+                                    }
+                                    var userReferralResult = await _orderService.CreateUserReferralAsync(new CreateUserReferralCommandModel { SenderId = new Guid(userReferral.Id), ReceiverId = new Guid(user.Id) });
+                                    if (!userReferralResult.IsSuccessStatusCode)
+                                    {
+                                        methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallOrderServiceError));
+                                        return methodResult;
+                                    }
+                                }
                             }
 
                             if (!result.Succeeded)
                             {
-                                methodResult.AddErrorBadRequest(nameof(EnumAuthErrorCode.UserFailToCreate), nameof(request.Password), request?.Password);
+                                methodResult.AddErrorBadRequest(nameof(EnumAuthErrorCode.UserFailToCreate), nameof(request.Password), request.Password);
                                 return methodResult;
                             }
-                            await _userManager.AddToRoleAsync(user, request?.Role.ToString() ?? string.Empty);
+                            await _userManager.AddToRoleAsync(user, request.Role.ToString() ?? string.Empty);
 
                             #region Send Code OTP
 

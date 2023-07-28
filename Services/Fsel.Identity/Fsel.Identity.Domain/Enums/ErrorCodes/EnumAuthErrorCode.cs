@@ -30,6 +30,11 @@ namespace Fsel.Identity.Domain.Enums.ErrorCodes
         UserNotExist,
 
         /// <summary>
+        /// User does not exist by code
+        /// </summary>
+        UserNotExistByCode,
+
+        /// <summary>
         /// Old password is incorrect
         /// </summary>
         OldPasswordIncorrect,

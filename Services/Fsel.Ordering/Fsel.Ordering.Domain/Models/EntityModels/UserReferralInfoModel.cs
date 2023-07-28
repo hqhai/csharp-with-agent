@@ -5,12 +5,12 @@ namespace Fsel.Ordering.Domain.Models.EntityModels
     using System;
     using Fsel.Core.Base.BaseModels;
 
-    public class UserReferralModel : BaseModel
+    public class UserReferralInfoModel : BaseModel
     {
         public int IndexNumber { get; set; }
         public Guid SenderId { get; set; }
         public Guid ReceiverId { get; set; }
-        public string? StudentName { get; set; }
-        public string? StudentCode { get; set; }
+        public int CountSender { get; set; }
+        public int CountReceiver { get; set; }
     }
 }

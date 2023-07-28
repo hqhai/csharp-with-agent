@@ -3,14 +3,11 @@
 namespace Fsel.System.Application.Queries.ReferralDiscountConfigQuery
 {
     using Fsel.Common.ActionResults;
-    using Fsel.System.Application.Querys.LiveTimeFrameQuery;
     using Fsel.System.Domain.IRepositories;
     using Fsel.System.Domain.Models.EntityModels;
-    using Fsel.System.Infrastructure.Repositories;
     using global::System;
     using global::System.Collections.Generic;
     using global::System.Linq;
-    using global::System.Text;
     using global::System.Threading.Tasks;
     using MediatR;
     using Microsoft.AspNetCore.Http;
@@ -19,6 +16,7 @@ namespace Fsel.System.Application.Queries.ReferralDiscountConfigQuery
     public class GetListReferralDiscountConfigQuery : IRequest<MethodResult<IList<ReferralDiscountConfigModel>>>
     {
     }
+
     public class GetListReferralDiscountConfigQueryHandler : IRequestHandler<GetListReferralDiscountConfigQuery, MethodResult<IList<ReferralDiscountConfigModel>>>
     {
         private readonly IReferralDiscountConfigRepository _referralDiscountConfigRepository;

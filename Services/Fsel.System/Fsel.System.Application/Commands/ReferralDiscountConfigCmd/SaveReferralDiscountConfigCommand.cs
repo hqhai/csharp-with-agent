@@ -12,11 +12,11 @@ namespace Fsel.System.Application.Commands.ReferralDiscountConfigCmd
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class SaveReferralDiscountConfigCommand : SaveReferralDiscountConfigCommandModel, IRequest<MethodResult<ReferralDiscountConfigModel>>
+    public class SaveReferralDiscountConfigCommand : SaveListReferralDiscountConfigCommandModel, IRequest<MethodResult<IList<ReferralDiscountConfigModel>>>
     {
     }
 
-    public class SaveReferralDiscountConfigCommandHandler : IRequestHandler<SaveReferralDiscountConfigCommand, MethodResult<ReferralDiscountConfigModel>>
+    public class SaveReferralDiscountConfigCommandHandler : IRequestHandler<SaveReferralDiscountConfigCommand, MethodResult<IList<ReferralDiscountConfigModel>>>
     {
         private readonly IMapper _mapper;
         private readonly IReferralDiscountConfigRepository _referralDiscountConfigRepository;
@@ -27,35 +27,47 @@ namespace Fsel.System.Application.Commands.ReferralDiscountConfigCmd
             _referralDiscountConfigRepository = referralDiscountConfigRepository;
         }
 
-        public async Task<MethodResult<ReferralDiscountConfigModel>> Handle(SaveReferralDiscountConfigCommand request, CancellationToken cancellationToken)
+        public async Task<MethodResult<IList<ReferralDiscountConfigModel>>> Handle(SaveReferralDiscountConfigCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            var methodResult = new MethodResult<ReferralDiscountConfigModel>();
+            var methodResult = new MethodResult<IList<ReferralDiscountConfigModel>>();
 
             await _referralDiscountConfigRepository.ExecuteTransactionAsync(async () =>
             {
-                var referralDiscountConfig = await _referralDiscountConfigRepository.Queryable.FirstOrDefaultAsync(x => x.IndexNumber == request.IndexNumber);
+                var referralDiscountConfigs = await _referralDiscountConfigRepository.Queryable.ToListAsync(cancellationToken);
 
-                if (referralDiscountConfig != null)
+                if (request.SaveReferralDiscountConfigs != null)
                 {
-                    _mapper.Map(request, referralDiscountConfig);
-                    referralDiscountConfig = _referralDiscountConfigRepository.Update(referralDiscountConfig);
-                }
-                else
-                {
-                    referralDiscountConfig = _mapper.Map<ReferralDiscountConfig>(request);
-                    referralDiscountConfig = _referralDiscountConfigRepository.Add(referralDiscountConfig);
-                }
-                if (!referralDiscountConfig.IsValid())
-                {
-                    methodResult.AddErrorBadRequest(referralDiscountConfig.ErrorMessages);
-                    return methodResult;
-                }
+                    var isCheck = referralDiscountConfigs != null && referralDiscountConfigs.Count > 0;
+                    referralDiscountConfigs?.Clear();
+                    foreach (var item in request.SaveReferralDiscountConfigs)
+                    {
+                        var referralDiscountConfig = new ReferralDiscountConfig();
+                        _mapper.Map(item, referralDiscountConfig);
+                        referralDiscountConfigs?.Add(referralDiscountConfig);
+                        if (!referralDiscountConfig.IsValid())
+                        {
+                            methodResult.AddErrorBadRequest(referralDiscountConfig.ErrorMessages);
+                            return methodResult;
+                        }
+                    }
+                    if (referralDiscountConfigs != null)
+                    {
+                        if (isCheck)
+                        {
+                            _referralDiscountConfigRepository.UpdateList(referralDiscountConfigs);
+                        }
+                        else
+                        {
+                            await _referralDiscountConfigRepository.AddList(referralDiscountConfigs);
+                        }
+                    }
 
-                await _referralDiscountConfigRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+                    await _referralDiscountConfigRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+                }
 
                 methodResult.StatusCode = StatusCodes.Status201Created;
-                methodResult.Result = _mapper.Map<ReferralDiscountConfigModel>(referralDiscountConfig);
+                methodResult.Result = _mapper.Map<IList<ReferralDiscountConfigModel>>(referralDiscountConfigs);
                 return methodResult;
             });
 
