@@ -27,6 +27,11 @@ namespace Fsel.Shared.Enums.ErrorCodes
         /// <summary>
         /// Call to service SystemService error
         /// </summary>
-        CallSystemServiceError
+        CallSystemServiceError,
+
+        /// <summary>
+        /// Call to service OrderService error
+        /// </summary>
+        CallOrderServiceError
     }
 }

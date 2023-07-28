@@ -27,11 +27,11 @@ namespace Fsel.System.Api.Controllers
         /// Save Referral Discount Config
         /// </summary>
         [HttpPost]
-        [ProducesResponseType(typeof(MethodResult<ReferralDiscountConfigModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(MethodResult<IList<ReferralDiscountConfigModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> Save([FromBody] SaveReferralDiscountConfigCommand command)
         {
-            MethodResult<ReferralDiscountConfigModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            MethodResult<IList<ReferralDiscountConfigModel>> commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
 

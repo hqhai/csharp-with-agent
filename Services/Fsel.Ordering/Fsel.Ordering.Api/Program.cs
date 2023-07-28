@@ -2,6 +2,7 @@
 
 using Fsel.Core.Extensions;
 using Fsel.Ordering.Application.Services.CourseService;
+using Fsel.Ordering.Application.Services.SystemService;
 using Fsel.Ordering.Application.Services.TrainingService;
 using Fsel.Ordering.Application.Services.UserService;
 using Fsel.Ordering.Domain.IRepositories;
@@ -29,6 +30,7 @@ builder.Services.AddScoped<IUserVoucherRepository, UserVoucherRepository>();
 builder.AddRefitClients(typeof(IUserService), appSetting?.Services?.UserApiUrl);
 builder.AddRefitClients(typeof(ILmsCourseService), appSetting?.Services?.LmsCourseApiUrl);
 builder.AddRefitClients(typeof(ITrainingService), appSetting?.Services?.ClassApiUrl);
+builder.AddRefitClients(typeof(ISystemService), appSetting?.Services?.SystemApiUrl);
 var app = builder.Build();
 
 app.UseServices();

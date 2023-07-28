@@ -31,7 +31,7 @@ namespace Fsel.System.Application.Queries.ReferralDiscountConfigQuery
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<IList<ReferralDiscountConfigModel>>();
 
-            var referralDiscountConfig = await _referralDiscountConfigRepository.Queryable
+            var referralDiscountConfig = await _referralDiscountConfigRepository.Queryable.OrderBy(x => x.IndexNumber)
                                     .Select(x => new ReferralDiscountConfigModel
                                     {
                                         Id = x.Id,
