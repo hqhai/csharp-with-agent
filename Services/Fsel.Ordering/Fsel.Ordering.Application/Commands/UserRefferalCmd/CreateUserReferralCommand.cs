@@ -93,7 +93,7 @@ namespace Fsel.Ordering.Application.Commands.UserRefferalCmd
 
             var customerTypes = Enum.GetValues(typeof(EnumCustomerType)).Cast<EnumCustomerType>().ToList();
             var courseLevels = Enum.GetValues(typeof(EnumCourseLevel)).Cast<EnumCourseLevel>().ToList();
-            var referralDiscountConfig = referralDiscountConfigs.OrderBy(x => x.IndexNumber).FirstOrDefault(x => index >= x.IndexNumber);
+            var referralDiscountConfig = referralDiscountConfigs.Where(x => x.RecevicerDiscountType == EnumDiscountType.Voucher && x.SenderDiscountType == EnumDiscountType.Voucher).OrderBy(x => x.IndexNumber).FirstOrDefault(x => index >= x.IndexNumber);
 
             if (referralDiscountConfig == null)
             {
