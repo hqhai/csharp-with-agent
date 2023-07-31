@@ -2,7 +2,6 @@
 
 namespace Fsel.Training.Application.Services.CourseServices.Models
 {
-    using System;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Shared.Enums;
 

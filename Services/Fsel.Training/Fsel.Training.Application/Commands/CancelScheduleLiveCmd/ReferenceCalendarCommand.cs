@@ -4,10 +4,10 @@ namespace Fsel.Training.Application.Commands.CancelScheduleLiveCmd
 {
     using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
     using Fsel.Shared.Enums;
     using Fsel.Training.Application.Services.UserServices;
-    using Fsel.Training.Domain.Enums.ErrorCodes;
     using Fsel.Training.Domain.IRepositories;
     using Fsel.Training.Domain.Models.CommandModels.CancelScheduleLives;
     using Fsel.Training.Domain.Models.EntityModels;
@@ -47,13 +47,13 @@ namespace Fsel.Training.Application.Commands.CancelScheduleLiveCmd
                                                 .FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
             if (classLiveWorkFlow == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumClassLiveWorkFlowErrorCode.ClassLiveWorkFlowNotExits));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(classLiveWorkFlow));
                 return methodResult;
             }
             var csoResult = await _userService.GetCsoByUserIdAsync(_authContext.CurrentUserId);
             if (!csoResult.IsSuccessStatusCode)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumClassLiveWorkFlowErrorCode.CSONotExits));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(csoResult));
                 return methodResult;
             }
             var cso = csoResult.Content?.Result;

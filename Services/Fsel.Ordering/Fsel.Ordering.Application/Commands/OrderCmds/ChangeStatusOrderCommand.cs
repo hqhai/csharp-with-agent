@@ -5,15 +5,14 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Ordering.Application.Services.TrainingService;
-    using Fsel.Ordering.Application.Services.TrainingService.Models;
     using Fsel.Ordering.Application.Services.UserService;
     using Fsel.Ordering.Application.Services.UserService.Models;
     using Fsel.Ordering.Domain.Enums;
     using Fsel.Ordering.Domain.Enums.ErrorCodes;
     using Fsel.Ordering.Domain.IRepositories;
     using Fsel.Ordering.Domain.Models.CommandModels.Orders;
-    using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -43,7 +42,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
             var order = await _orderRepository.GetByIdAsync(request.OrderId);
             if (order == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumOrderErrorCode.OrderNotExist));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(order));
                 return methodResult;
             }
             if (order.Status != EnumOrderStatus.New)
@@ -54,13 +53,13 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
             var student = await _userService.GetStudentByUserIdAsync(order.UserId);
             if (!student.IsSuccessStatusCode)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumOrderErrorCode.StudentNotExist));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student));
                 return methodResult;
             }
             var classes = await _trainingService.GetNewClassByStudentId(student.Content!.Result!.Id);
             if (!classes.IsSuccessStatusCode)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumOrderErrorCode.ClassNotFound));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(classes));
                 return methodResult;
             }
             await _orderRepository.ExecuteTransactionAsync(async () =>

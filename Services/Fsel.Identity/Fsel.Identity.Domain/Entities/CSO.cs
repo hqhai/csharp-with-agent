@@ -31,7 +31,6 @@ namespace Fsel.Identity.Domain.Entities
             set { CourseLevelsStr = ConvertHelper.Serialize(value); }
         }
 
-
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         public string? SubscriptionClassesStr { get; set; }
 

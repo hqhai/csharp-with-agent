@@ -9,6 +9,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumScoreCmd
     using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums;
@@ -62,21 +63,16 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumScoreCmd
             List<ClassForumScore> classForumScores = new List<ClassForumScore>();
             if (request.ClassForumScores == null || request.ClassForumScores.Count == 0)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumClassForumScoreErrorCode.ClassForumScoresNull), nameof(request.ClassForumScores), request.ClassForumScores);
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.ClassForumScores));
                 return methodResult;
             }
             var isClassForumResult = await _classForumResultRepository.AnyAsync(request.ClassForumResultId);
             if (!isClassForumResult)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumClassForumResultErrorCode.ClassForumResultNotExist));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(isClassForumResult));
                 return methodResult;
             }
-            /*var isClassForumResultStatus = _classForumResultRepository.Queryable.FirstOrDefault(x => x.Status == Domain.Enums.EnumClassForumResultStatus.PendingForGrading);
-            if (isClassForumResultStatus)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumClassForumResultErrorCode.ClassForumResultNotExist));
-                return methodResult;
-            }*/
+
             var listClassForumScore = request.ClassForumScores.Select(x => new
             {
                 x.Score,
@@ -106,7 +102,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumScoreCmd
             var classForumResult = await _classForumResultRepository.Queryable.Where(e => e.Id == request.ClassForumResultId).FirstOrDefaultAsync(cancellationToken);
             if (classForumResult == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumClassForumResultErrorCode.ClassForumResultNotExist), nameof(request.ClassForumResultId), request.ClassForumResultId);
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(classForumResult));
                 return methodResult;
             }
             if (classForumResult.Status != EnumClassForumResultStatus.PendingForGrading)

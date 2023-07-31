@@ -5,30 +5,10 @@ namespace Fsel.Identity.Domain.Enums.ErrorCodes
     public enum EnumAuthErrorCode
     {
         /// <summary>
-        /// Old Password cannot empty
-        /// </summary>
-        OldPassWordNotEmpty,
-
-        /// <summary>
-        /// Password cannot empty
-        /// </summary>
-        PasswordNotEmpty,
-
         /// <summary>
         /// Confirm Password cannot empty
         /// </summary>
         ConfirmPasswordNotEmpty,
-
-        /// <summary>
-        /// Email does not exist
-        /// </summary>
-        EmailNotExist,
-
-        /// <summary>
-        /// User does not exist
-        /// </summary>
-        UserNotExist,
-
         /// <summary>
         /// User does not exist by code
         /// </summary>
@@ -125,29 +105,9 @@ namespace Fsel.Identity.Domain.Enums.ErrorCodes
         OTPExpired,
 
         /// <summary>
-        /// Email is Null
-        /// </summary>
-        EmailNull,
-
-        /// <summary>
-        /// UserName already exist
-        /// </summary>
-        UserNameAlreadyExist,
-
-        /// <summary>
         /// Survey Called Error
         /// </summary>
         SurveyCalledError,
-
-        /// <summary>
-        /// Otp is null
-        /// </summary>
-        OtpNull,
-
-        /// <summary>
-        /// Otp does not exist
-        /// </summary>
-        OtpNotExist,
 
         /// <summary>
         /// Account has been locked

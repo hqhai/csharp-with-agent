@@ -5,21 +5,6 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
     public enum EnumClassForumResultErrorCode
     {
         /// <summary>
-        /// ClassForum Is Null
-        /// </summary>
-        ClassForumResultNull,
-
-        /// <summary>
-        /// Class Forum File Is Null
-        /// </summary>
-        ClassForumResultFileNull,
-
-        /// <summary>
-        /// Class Forum not exist
-        /// </summary>
-        ClassForumResultNotExist,
-
-        /// <summary>
         /// Class Forum result Status not pendding
         /// </summary>
         ClassForumResultStatusNotPendding,

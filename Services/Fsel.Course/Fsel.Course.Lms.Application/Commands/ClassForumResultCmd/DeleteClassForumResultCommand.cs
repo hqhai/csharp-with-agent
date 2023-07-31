@@ -6,6 +6,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
@@ -35,7 +36,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
 
             if (classForumResult == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumClassForumResultErrorCode.ClassForumResultNotExist), nameof(request.Id), request.Id);
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(classForumResult));
                 return methodResult;
             }
             if (classForumResult.Status != EnumClassForumResultStatus.PendingForGrading && classForumResult.Status != EnumClassForumResultStatus.Graded)

@@ -15,6 +15,7 @@ namespace Fsel.Course.Domain.Models.CommandModels.PlacementTestAnswers
         public Guid QuestionId { get; set; }
         public object? Answer { get; set; }
     }
+
     public class PlacementTestAnswerSkillQuestionModel
     {
         public EnumCourseSkill Skill { get; set; }

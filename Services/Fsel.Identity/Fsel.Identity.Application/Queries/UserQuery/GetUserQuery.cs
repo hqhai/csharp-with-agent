@@ -7,9 +7,9 @@ namespace Fsel.Identity.Application.Queries.UserQuery
     using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Identity.Application.Services.TrainingService;
     using Fsel.Identity.Domain.Entities;
-    using Fsel.Identity.Domain.Enums.ErrorCodes;
     using Fsel.Identity.Domain.Models.EntityModels;
     using Fsel.Shared.Enums;
     using MediatR;
@@ -44,7 +44,7 @@ namespace Fsel.Identity.Application.Queries.UserQuery
 
             if (user == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumUserErrorCode.UserNotExist));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(user));
                 return methodResult;
             }
 

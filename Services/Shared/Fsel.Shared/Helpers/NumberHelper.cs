@@ -21,6 +21,7 @@ namespace Fsel.Shared.Helpers
                 return Math.Round(number, 1, MidpointRounding.AwayFromZero);
             }
         }
+
         public static string GenerateCode(int length)
         {
             string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
@@ -32,6 +33,7 @@ namespace Fsel.Shared.Helpers
 
             return orderCode;
         }
+
         public static string GenerateCodeNumber(int length)
         {
             string chars = "0123456789";

@@ -1,6 +1,7 @@
 // Copyright (c) Atlantic. All rights reserved.
 
 using Fsel.Common.ActionResults;
+using Fsel.Common.Enums.ErrorCodes;
 using Fsel.Course.Domain.Entities;
 using Fsel.Course.Domain.Enums.ErrorCodes;
 using Fsel.Course.Domain.IRepositories;
@@ -38,7 +39,7 @@ namespace Fsel.Course.Application.Commands.PlacementTestCmd
             var placementTest = await _placementTestRepository.GetIncludeByIdAsync(request.Id);
             if (placementTest == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumPlacementTestErrorCode.PlacementTestNotExist), nameof(request.Id), request.Id);
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(placementTest));
                 return methodResult;
             }
 

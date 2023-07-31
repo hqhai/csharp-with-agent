@@ -6,8 +6,8 @@ namespace Fsel.Course.Lms.Application.Queries.VideoQuery
     using System.Linq;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
-    using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Services.UserServices;
@@ -48,7 +48,7 @@ namespace Fsel.Course.Lms.Application.Queries.VideoQuery
             var studentsResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
             if (studentsResult == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumVideoErrorCode.UserNotExist));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(studentsResult));
                 return methodResult;
             }
             var studentId = studentsResult.Content!.Result!.Id;
@@ -66,7 +66,7 @@ namespace Fsel.Course.Lms.Application.Queries.VideoQuery
 
             if (video == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumVideoErrorCode.VideoNotExist), nameof(request.VideoId), request.VideoId);
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(video));
                 return methodResult;
             }
 

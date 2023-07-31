@@ -4,10 +4,10 @@ namespace Fsel.Training.Application.Queries.CancelScheduleLiveQuery
 {
     using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Training.Application.Services.SystemServices;
     using Fsel.Training.Application.Services.UserServices;
     using Fsel.Training.Application.Services.UserServices.Models;
-    using Fsel.Training.Domain.Enums.ErrorCodes;
     using Fsel.Training.Domain.IRepositories;
     using Fsel.Training.Domain.Models.EntityModels;
     using MediatR;
@@ -45,7 +45,7 @@ namespace Fsel.Training.Application.Queries.CancelScheduleLiveQuery
             var classLiveWorkFlow = await _classLiveWorkFlowRepository.GetIncludeByIdAsync(request.Id);
             if (classLiveWorkFlow == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumClassLiveWorkFlowErrorCode.ClassLiveWorkFlowNotExits));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(classLiveWorkFlow));
                 return methodResult;
             }
             _mapper.Map(classLiveWorkFlow, liveSessionInformation);

@@ -3,8 +3,8 @@
 namespace Fsel.Identity.Application.Services.TrainingService.Models
 {
     using System;
-    using Fsel.Shared.Enums;
     using Fsel.Core.Base.BaseModels;
+    using Fsel.Shared.Enums;
 
     public class ClassModel : BaseModel
     {

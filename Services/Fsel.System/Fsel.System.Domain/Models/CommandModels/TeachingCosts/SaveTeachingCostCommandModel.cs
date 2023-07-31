@@ -7,7 +7,6 @@ namespace Fsel.System.Domain.Models.CommandModels.TeachingCosts
 
     public class SaveTeachingCostCommandModel : BaseCommandModel
     {
-      
         public EnumCourseLevel CourseLevel { get; set; }
 
         public double WritingCost { get; set; }

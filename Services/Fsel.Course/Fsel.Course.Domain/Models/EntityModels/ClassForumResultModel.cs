@@ -5,7 +5,6 @@ namespace Fsel.Course.Domain.Models.EntityModels
     using System;
     using System.Collections.Generic;
     using Fsel.Core.Base.BaseModels;
-    using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums;
     using Fsel.Shared.Enums;
 

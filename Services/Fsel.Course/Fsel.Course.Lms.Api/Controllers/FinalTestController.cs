@@ -13,7 +13,6 @@ namespace Fsel.Course.Lms.Api.Controllers
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
 
-
     [ApiVersion(Settings.APIVersion)]
     [Route(Settings.APIDefaultRoute + "/final-test")]
     [ApiController]

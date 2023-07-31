@@ -4,6 +4,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestResultCmd
 {
     using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums.ErrorCodes;
@@ -55,20 +56,20 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestResultCmd
             var teacherId = teacherResult.Content?.Result?.Id;
             if (request.MockTestScores == null || request.MockTestScores.Count == 0)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumMockTestResultErrorCode.MockTestScoresNull));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.MockTestScores));
                 return methodResult;
             }
             var mockTestResult = await _mockTestResultRepository.Queryable.Include(x => x.MockTestScores).Where(e => e.Id == request.MockTestResultId).FirstOrDefaultAsync(cancellationToken);
             if (mockTestResult == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumMockTestResultErrorCode.MockTestResultNotExist));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(mockTestResult));
                 return methodResult;
             }
             var sectionGroupIds = request.MockTestScores.Select(y => y.SectionGroupId).Distinct().ToList();
             var sectionGroups = await _sectionGroupRepository.Queryable.Where(x => sectionGroupIds.Contains(x.Id)).ToListAsync(cancellationToken);
             if (sectionGroups.Count != sectionGroupIds.Count)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumMockTestResultErrorCode.SectionGroupsNotExist));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(sectionGroups));
                 return methodResult;
             }
             IList<MockTestScore> mockTestScores = new List<MockTestScore>();

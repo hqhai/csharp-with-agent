@@ -16,6 +16,7 @@ namespace Fsel.Ordering.Infrastructure.ValueSettings
     {
         public string? ConfirmOtpUrl { get; set; }
     }
+
     public class Services : BaseServices
     {
         public string? LmsCourseApiUrl { get; set; }

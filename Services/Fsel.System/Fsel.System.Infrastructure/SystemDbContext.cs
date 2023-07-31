@@ -28,6 +28,7 @@ namespace Fsel.System.Infrastructure
         public DbSet<ForbiddenWord> ForbiddenWords { get; set; }
         public DbSet<TeachingCost> TeachingCosts { get; set; }
         public DbSet<ReferralDiscountConfig> ReferralDiscountConfigs { get; set; }
+
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             ArgumentNullException.ThrowIfNull(optionsBuilder);

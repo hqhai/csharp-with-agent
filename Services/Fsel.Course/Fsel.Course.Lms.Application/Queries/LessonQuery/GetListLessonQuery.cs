@@ -8,7 +8,7 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
-    using Fsel.Course.Domain.Enums.ErrorCodes;
+    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using MediatR;
@@ -48,7 +48,7 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
 
             if (lessonQuery.Count == 0)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumLessonErrorCode.LessonsNotExist));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(lessonQuery));
                 return methodResult;
             }
             methodResult.Result = lessonQuery;

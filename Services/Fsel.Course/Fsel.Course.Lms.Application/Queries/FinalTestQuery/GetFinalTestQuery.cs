@@ -6,9 +6,9 @@ namespace Fsel.Course.Lms.Application.Queries.FinalTestQuery
     using System.Threading;
     using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
     using Fsel.Course.Domain.Enums;
-    using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Infrastructure.Common;
@@ -52,7 +52,7 @@ namespace Fsel.Course.Lms.Application.Queries.FinalTestQuery
             var studentsResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
             if (studentsResult == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumVideoErrorCode.UserNotExist));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(studentsResult));
                 return methodResult;
             }
             var studentId = studentsResult.Content!.Result!.Id;
@@ -71,7 +71,7 @@ namespace Fsel.Course.Lms.Application.Queries.FinalTestQuery
 
             if (finalTest == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumFinalTestErrorCode.FinalTestsNotExist));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(finalTest));
                 return methodResult;
             }
             var checkDone = (finalTest.FinalTestResults != null && finalTest.FinalTestResults.Count > 1) && finalTest.FinalTestResults.All(x => x.Status == EnumResultStatus.Done);

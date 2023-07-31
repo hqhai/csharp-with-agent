@@ -6,6 +6,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
     using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums;
@@ -56,20 +57,20 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
             var student = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
             if (!student.IsSuccessStatusCode)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumLessonErrorCode.UserNotExist), nameof(student), _authContext.CurrentUserId.ToString());
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student));
                 return methodResult;
             }
             var lessonResult = await _lessonResultRepository.GetByIdAsync(request.LessonResultId);
             if (lessonResult == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumLessonResultErrorCode.LessonResultsNotExist), nameof(student), _authContext.CurrentUserId.ToString());
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student));
                 return methodResult;
             }
 
             var classForum = await _classForumRepository.Queryable.FirstOrDefaultAsync(x => x.LessonId == lessonResult.LessonId, cancellationToken);
             if (classForum == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumClassForumErrorCode.ClassForumNull), nameof(student), _authContext.CurrentUserId.ToString());
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(classForum));
                 return methodResult;
             }
             var studentId = student?.Content?.Result?.Id;

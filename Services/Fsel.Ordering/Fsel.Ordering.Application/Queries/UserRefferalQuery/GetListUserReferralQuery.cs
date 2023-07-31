@@ -10,7 +10,6 @@ namespace Fsel.Ordering.Application.Queries.UserRefferalQuery
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base;
     using Fsel.Ordering.Application.Services.UserService;
-    using Fsel.Ordering.Application.Services.UserService.Models;
     using Fsel.Ordering.Domain.IRepositories;
     using Fsel.Ordering.Domain.Models.EntityModels;
     using MediatR;
@@ -50,7 +49,7 @@ namespace Fsel.Ordering.Application.Queries.UserRefferalQuery
                                         ReceiverId = x.ReceiverId,
                                     }).ToListAsync(cancellationToken);
 
-            var listUser = await _userService.GetStudentsByIdsAsync(userReferral.Select(x => x.ReceiverId.ToString()).ToList() );
+            var listUser = await _userService.GetStudentsByIdsAsync(userReferral.Select(x => x.ReceiverId.ToString()).ToList());
             var userResult = listUser.Content?.Result;
 
             foreach (var item in userReferral)

@@ -7,7 +7,7 @@ namespace Fsel.Training.Application.Queries.ClassQuery
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
-    using Fsel.Training.Domain.Enums.ErrorCodes;
+    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Training.Domain.IRepositories;
     using MediatR;
     using Microsoft.AspNetCore.Http;
@@ -37,7 +37,7 @@ namespace Fsel.Training.Application.Queries.ClassQuery
             var classes = await _classRepository.GetByIdAsync(request.ClassId);
             if (classes == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumClassErrorCode.ClassesNotExits), nameof(request.ClassId), request.ClassId);
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(classes));
                 return methodResult;
             }
             var studentIds = await _classStudentRepository.Queryable.Where(p => p.ClassId == request.ClassId).Select(x => x.StudentId).ToListAsync(cancellationToken);

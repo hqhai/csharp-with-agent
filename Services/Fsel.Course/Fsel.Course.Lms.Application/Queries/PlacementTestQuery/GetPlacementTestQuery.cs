@@ -6,9 +6,9 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestQuery
     using System.Collections.Generic;
     using System.Threading;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
     using Fsel.Course.Domain.Entities;
-    using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Infrastructure.Common;
@@ -55,14 +55,14 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestQuery
 
             if (placementTests == null || placementTests.Count == 0)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumPlacementTestErrorCode.PlacementTestNotExist));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(placementTests));
                 return methodResult;
             }
 
             var student = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
             if (!student.IsSuccessStatusCode)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumLessonErrorCode.UserNotExist), nameof(student), _authContext.CurrentUserId.ToString());
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student));
                 return methodResult;
             }
             var studentId = student?.Content?.Result?.Id;

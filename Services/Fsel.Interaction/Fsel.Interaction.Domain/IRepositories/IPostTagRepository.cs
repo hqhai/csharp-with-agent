@@ -7,6 +7,5 @@ namespace Fsel.Interaction.Domain.IRepositories
 
     public interface IPostTagRepository : IRepository<PostTag>
     {
-
     }
 }
