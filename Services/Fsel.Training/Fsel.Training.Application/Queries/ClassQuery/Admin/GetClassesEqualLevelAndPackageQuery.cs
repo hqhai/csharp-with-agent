@@ -38,7 +38,7 @@ namespace Fsel.Training.Application.Queries.ClassQuery.Admin
             var @class = await _classRepository.GetByIdAsync(request.ClassId);
             if (@class == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.ClassId));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(@class));
                 return methodResult;
             }
             IList<Guid> courseIds = new List<Guid>();
@@ -52,7 +52,7 @@ namespace Fsel.Training.Application.Queries.ClassQuery.Admin
             var course = coursesResult.Content?.Result?.FirstOrDefault(p => p.Id == @class.CourseId);
             if (course == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(@class.CourseId));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(course));
                 return methodResult;
             }
             var courseLevelResult = await _courseService.GetCoursesByLevelAsync(course.CourseLevel);

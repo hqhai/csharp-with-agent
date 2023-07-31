@@ -64,7 +64,7 @@ namespace Fsel.Training.Application.Commands.ClassLiveWorkFlowCmd
             var classLiveCalendar = await _classLiveCalendarRepository.Queryable.Include(x => x.Class).FirstOrDefaultAsync(x => x.Id == request.ClassLiveCalendarId, cancellationToken);
             if (classLiveCalendar == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.ClassLiveCalendarId));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(classLiveCalendar));
                 return methodResult;
             }
             var classLiveWorkFlow = await _classLiveWorkFlowRepository.Queryable.FirstOrDefaultAsync(x => x.TeacherId == teacherId && x.ClassLiveCalendarId == request.ClassLiveCalendarId && x.Status == EnumWorkFlowAssignTeacherStatus.Pending.ToString(), cancellationToken);

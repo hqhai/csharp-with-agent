@@ -79,7 +79,7 @@ namespace Fsel.Course.Lms.Application.Commands.LessonCmd
             var course = await _courseRepository.Queryable.Include(x => x.CourseResults).FirstOrDefaultAsync(x => x.Id == request.CourseId, cancellationToken);
             if (course == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.CourseId));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(course));
                 return methodResult;
             }
             else if (course.Status == EnumCourseStatus.New)
@@ -98,7 +98,7 @@ namespace Fsel.Course.Lms.Application.Commands.LessonCmd
             var unit = await _unitRepository.Queryable.Include(x => x.LessonResults).Include(x => x.UnitResults).FirstOrDefaultAsync(x => x.Id == request.UnitId, cancellationToken);
             if (unit == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.UnitId));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(unit));
                 return methodResult;
             }
             var lessonResultNew = unit.LessonResults.FirstOrDefault(x => x.LessonId == request.LessonId && x.UnitId == request.UnitId && x.CourseId == request.CourseId && x.StudentId == studentId && x.Status == EnumResultStatus.New);

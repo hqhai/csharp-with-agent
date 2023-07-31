@@ -39,7 +39,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
 
             if (student == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.StudentId));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student));
                 return methodResult;
             }
             student.ClassId = request.ClassId;

@@ -73,7 +73,7 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
                                                       .FirstOrDefaultAsync(x => x.Id == request.UnitId, cancellationToken);
             if (unit == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.UnitId));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(unit));
                 return methodResult;
             }
 
@@ -130,7 +130,7 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
 
             if (lessons.Count == 0)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.LessonId));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(lessons.Count));
                 return methodResult;
             }
 

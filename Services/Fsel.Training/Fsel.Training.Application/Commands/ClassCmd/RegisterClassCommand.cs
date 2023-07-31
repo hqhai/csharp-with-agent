@@ -81,7 +81,7 @@ namespace Fsel.Training.Application.Commands.ClassCmd
                 var classStudent = await _classStudentRepository.Queryable.FirstOrDefaultAsync(x => x.StudentId == studentId && x.ClassId == classnew.Id, cancellationToken);
                 if (classStudent != null)
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(studentId));
+                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(classStudent));
                     return methodResult;
                 }
 

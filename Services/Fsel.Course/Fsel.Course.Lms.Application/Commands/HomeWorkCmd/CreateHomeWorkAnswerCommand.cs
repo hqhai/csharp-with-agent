@@ -67,7 +67,7 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd
                 var question = await _questionRepository.GetByIdAsync(item.QuestionId);
                 if (question == null)
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(item.QuestionId));
+                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(question));
                     return methodResult;
                 }
                 else if (question.Config == null)

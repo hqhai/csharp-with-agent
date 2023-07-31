@@ -94,7 +94,7 @@ namespace Fsel.Course.Application.Commands.LessonCmd
             var isExistName = await _lessonRepository.Queryable.AnyAsync(x => x.Name == request.Name, cancellationToken);
             if (isExistName)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Name));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(isExistName));
                 return methodResult;
             }
 

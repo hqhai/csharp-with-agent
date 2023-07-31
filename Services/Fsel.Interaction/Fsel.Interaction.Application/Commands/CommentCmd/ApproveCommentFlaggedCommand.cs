@@ -38,7 +38,7 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
             var comment = await _commentRepository.GetByIdAsync(request.CommentId);
             if (comment == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.CommentId));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(comment));
                 return methodResult;
             }
 

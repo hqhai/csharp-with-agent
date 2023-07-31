@@ -56,7 +56,7 @@ namespace Fsel.Training.Application.Queries.ClassQuery
             var package = packagesResult.Content?.Result?.FirstOrDefault(p => p.Id == request.PackageId);
             if (package == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.PackageId));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(package));
                 return methodResult;
             }
             List<Class> classes = new List<Class>();

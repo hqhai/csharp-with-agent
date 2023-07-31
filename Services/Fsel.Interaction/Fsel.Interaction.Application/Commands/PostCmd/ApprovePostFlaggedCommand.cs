@@ -39,7 +39,7 @@ namespace Fsel.Interaction.Application.Commands.PostCmd
                                                       .Where(e => e.Id == request.PostId).FirstOrDefaultAsync(cancellationToken: cancellationToken);
             if (post == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.PostId));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(post));
                 return methodResult;
             }
 

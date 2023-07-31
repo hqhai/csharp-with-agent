@@ -52,7 +52,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
 
             if (classForumResult == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.ClassForumResultId));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(classForumResult));
                 return methodResult;
             }
             if (studentId != classForumResult.StudentId)

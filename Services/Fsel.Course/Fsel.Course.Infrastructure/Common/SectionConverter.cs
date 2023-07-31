@@ -176,7 +176,7 @@ namespace Fsel.Course.Infrastructure.Common
                         {
                             if (sectionPart == null)
                             {
-                                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(sectionPart), sectionPart);
+                                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(sectionPart));
                                 return methodResult;
                             }
                             else

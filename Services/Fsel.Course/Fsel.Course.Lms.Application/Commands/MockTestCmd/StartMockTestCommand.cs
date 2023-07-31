@@ -60,7 +60,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
             var course = await _courseRepository.GetByIdAsync(request.CourseId);
             if (course == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.CourseId));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(course));
                 return methodResult;
             }
             else if (course.Status == EnumCourseStatus.New)
@@ -74,7 +74,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
                 var unit = await _unitRepository.Queryable.FirstOrDefaultAsync(x => x.Id == request.UnitId, cancellationToken);
                 if (unit == null)
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.UnitId));
+                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(unit));
                     return methodResult;
                 }
             }

@@ -86,7 +86,7 @@ namespace Fsel.Identity.Application.Commands.UserCmd
                                                    .FirstOrDefaultAsync(x => x.Id == _authContext.CurrentUserId.ToString(), cancellationToken);
                 if (userView == null)
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(user));
+                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(userView));
                     return methodResult;
                 }
                 _mapper.Map(request, userView!.Human!.CSO);
@@ -99,7 +99,7 @@ namespace Fsel.Identity.Application.Commands.UserCmd
                                                    .FirstOrDefaultAsync(x => x.Id == _authContext.CurrentUserId.ToString(), cancellationToken);
                 if (userView == null)
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(user));
+                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(userView));
                     return methodResult;
                 }
                 var student = userView.Human!.Student!;

@@ -35,7 +35,7 @@ namespace Fsel.Course.Lms.Application.Commands.LessonNoteCmd
 
             if (lessonResult == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.LessonResultId));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(lessonResult));
                 return methodResult;
             }
             await _lessonResultRepository.ExecuteTransactionAsync(async () =>

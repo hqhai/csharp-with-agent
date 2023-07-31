@@ -105,7 +105,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
                 var questions = await _questionRepository.GetIncludeSectionByIdAsync(questionIds);
                 if (questions == null || questions.Count == 0)
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(questionIds));
+                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(questions));
                     return methodResult;
                 }
                 int count = 0;
@@ -114,7 +114,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
                     var question = questions.FirstOrDefault(x => x.Id == answer.QuestionId);
                     if (question == null)
                     {
-                        methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(answer.QuestionId));
+                        methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(question));
                         return methodResult;
                     }
                     else if (question.Config == null)

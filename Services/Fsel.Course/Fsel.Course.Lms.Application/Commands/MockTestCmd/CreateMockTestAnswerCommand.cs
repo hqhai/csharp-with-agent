@@ -67,12 +67,12 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
             var mockTestResult = await _mockTestResultRepository.Queryable.FirstOrDefaultAsync(x => x.Id == request.MockTestResultId, cancellationToken);
             if (mockTestResult == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.MockTestResultId));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(mockTestResult));
                 return methodResult;
             }
             else if (mockTestResult.Status == EnumResultStatus.Done)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumMockTestResultErrorCode.MockTestResultDone), nameof(request.MockTestResultId), request.MockTestResultId);
+                methodResult.AddErrorBadRequest(nameof(EnumMockTestResultErrorCode.MockTestResultDone), nameof(mockTestResult.Status));
                 return methodResult;
             }
 
@@ -90,7 +90,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
             var questions = await _questionRepository.GetIncludeSectionByIdAsync(questionIds);
             if (questions == null || questions.Count == 0)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(questionIds));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(questions));
                 return methodResult;
             }
             foreach (var item in request.SectionGroups)
@@ -112,7 +112,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
                             var question = questions.FirstOrDefault(x => x.Id == answer.QuestionId);
                             if (question == null)
                             {
-                                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(answer.QuestionId));
+                                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(question));
                                 return methodResult;
                             }
                             else if (question.Config == null)
@@ -152,7 +152,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
                             var section = await _sectionRepository.Queryable.FirstOrDefaultAsync(x => x.Id == sectionId, cancellationToken);
                             if (section == null)
                             {
-                                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(answer.SectionId));
+                                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(section));
                                 return methodResult;
                             }
                             var mockTestAnswer = await _mockTestAnswerRepository.Queryable.FirstOrDefaultAsync(x => x.MockTestResultId == mockTestResult.Id && x.SectionId == sectionId, cancellationToken);
@@ -173,7 +173,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
                             var sectionTimeCode = await _sectionTimeCodeRepository.Queryable.FirstOrDefaultAsync(x => x.Id == sectionTimeCodeId, cancellationToken);
                             if (sectionTimeCode == null)
                             {
-                                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(answer.SectionTimeCodeId));
+                                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(sectionTimeCode));
                                 return methodResult;
                             }
                             var mockTestAnswer = await _mockTestAnswerRepository.Queryable.FirstOrDefaultAsync(x => x.MockTestResultId == mockTestResult.Id && x.SectionTimeCodeId == sectionTimeCodeId, cancellationToken);

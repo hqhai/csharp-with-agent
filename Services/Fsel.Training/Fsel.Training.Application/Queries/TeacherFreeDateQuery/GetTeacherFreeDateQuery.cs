@@ -52,6 +52,7 @@ namespace Fsel.Training.Application.Queries.TeacherFreeDateQuery
             var teacherId = teacher.Content?.Result?.Id;
             var teacherFreeDate = await _teacherFreeDateRepository.Queryable.Include(x => x.TeacherFreeTimes).FirstOrDefaultAsync(x => x.TeacherId == teacherId, cancellationToken);
             var teacherFreeDateModel = _mapper.Map<TeacherFreeDateModel>(teacherFreeDate);
+
             var timeFramesResult = await _systemService.GetLiveTimeFramesAsync();
             var timeFrames = timeFramesResult.Content?.Result;
             if (teacherFreeDateModel.TeacherFreeTimes != null)

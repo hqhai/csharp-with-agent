@@ -37,7 +37,7 @@ namespace Fsel.Training.Application.Queries.ClassQuery.Admin
             var classes = await _classRepository.GetByIdAsync(request.Id);
             if (classes == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Id));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(classes));
                 return methodResult;
             }
             methodResult.Result = _mapper.Map<ClassModel>(classes);

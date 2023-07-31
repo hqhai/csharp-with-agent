@@ -81,7 +81,7 @@ namespace Fsel.Course.Lms.Application.Queries.VideoQuery
 
             if (video == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.VideoId));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(video));
                 return methodResult;
             }
 

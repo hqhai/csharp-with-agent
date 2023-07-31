@@ -37,7 +37,7 @@ namespace Fsel.Interaction.Application.Commands.PostCmd
             var post = await _postRepository.GetByIdAsync(request.PostId);
             if (post == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.PostId));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(post));
                 return methodResult;
             }
             if (post.Status != EnumPostStatus.Pending)

@@ -42,7 +42,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
                                                                     .FirstOrDefaultAsync(cancellationToken: cancellationToken);
             if (classForumResult == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.ClassForumResultId));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(classForumResult));
                 return methodResult;
             }
             if (classForumResult.Status != EnumClassForumResultStatus.Graded)

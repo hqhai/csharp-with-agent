@@ -102,7 +102,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumScoreCmd
             var classForumResult = await _classForumResultRepository.Queryable.Where(e => e.Id == request.ClassForumResultId).FirstOrDefaultAsync(cancellationToken);
             if (classForumResult == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.ClassForumResultId));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(classForumResult));
                 return methodResult;
             }
             if (classForumResult.Status != EnumClassForumResultStatus.PendingForGrading)
