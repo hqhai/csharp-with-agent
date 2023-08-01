@@ -3,12 +3,12 @@ using System.Globalization;
 using System.Text;
 using AutoMapper;
 using Fsel.Common.ActionResults;
+using Fsel.Common.Enums.ErrorCodes;
 using Fsel.Common.Helpers;
 using Fsel.Identity.Application.Commands.AuthCmd;
 using Fsel.Identity.Application.Services.OrderService;
 using Fsel.Identity.Domain.Entities;
 using Fsel.Identity.Domain.Enums;
-using Fsel.Identity.Domain.Enums.ErrorCodes;
 using Fsel.Identity.Domain.IRepositories;
 using Fsel.Identity.Domain.Models.CommandModels.Users;
 using Fsel.Identity.Domain.Models.EntityModels;
@@ -21,6 +21,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using OtpNet;
+using EnumAuthErrorCode = Fsel.Identity.Domain.Enums.ErrorCodes.EnumAuthErrorCode;
 
 namespace Fsel.Identity.Application.Commands.AdminCmd
 {
@@ -68,6 +69,43 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<UserModel>();
+
+            #region validate
+
+            if (request.Role == EnumRoleRegisterWithAdmin.CSO)
+            {
+                if (request.PackageIds == null || request.PackageIds.Count == 0)
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.PackageIds));
+                    return methodResult;
+                }
+
+                var packageResults = await _orderService.GetPackages();
+                var packages = packageResults?.Content?.Result;
+                if (packages != null)
+                {
+                    var isCheck = request.PackageIds.All(x => packages.Select(y => y.Id).Contains(x));
+                    if (!isCheck)
+                    {
+                        methodResult.AddErrorBadRequest(nameof(EnumAuthErrorCode.PackageIdsEnteredIsIncorrect));
+                        return methodResult;
+                    }
+                }
+            }
+            if (request.CourseLevels == null || request.CourseLevels.Count == 0)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.CourseLevels));
+                return methodResult;
+            }
+
+            if ((request.CourseTypes == null || request.CourseTypes.Count == 0) && (request.LiveCourseTypes == null || request.LiveCourseTypes.Count == 0))
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.CourseTypes), nameof(request.LiveCourseTypes));
+                return methodResult;
+            }
+
+            #endregion validate
+
             var user = await _userManager.FindByEmailAsync(request.Email!);
             if (user != null)
             {
@@ -76,20 +114,6 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
             }
             else
             {
-                if (request.PackageIds != null && request.PackageIds.Count > 0)
-                {
-                    var packageResults = await _orderService.GetPackages();
-                    var packages = packageResults?.Content?.Result;
-                    if (packages != null)
-                    {
-                        var isCheck = request.PackageIds.All(x => packages.Select(y => y.Id).Contains(x));
-                        if (!isCheck)
-                        {
-                            methodResult.AddErrorBadRequest(nameof(EnumAuthErrorCode.PackageIdsEnteredIsIncorrect));
-                            return methodResult;
-                        }
-                    }
-                }
                 var role = await _roleManager.FindByNameAsync(request.Role.ToString() ?? string.Empty);
                 var newPassword = new PasswordGeneratorHelper(8, 10).Generate();
                 IdentityResult result;

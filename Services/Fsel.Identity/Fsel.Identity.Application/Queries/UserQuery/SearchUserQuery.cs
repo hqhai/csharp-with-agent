@@ -69,6 +69,7 @@ namespace Fsel.Identity.Application.Queries.UserQuery
                                 PhoneNumber = u.PhoneNumber,
                                 Role = EnumRoleRegisterWithAdmin.Teacher,
                                 LiveCourseTypesStr = t.LiveCourseTypesStr,
+                                CourseTypesStr = t.CourseTypesStr,
                                 Email = u.Email,
                                 TeacherId = t.Id,
                                 CreatedDate = i.CreatedDate,
@@ -76,19 +77,9 @@ namespace Fsel.Identity.Application.Queries.UserQuery
                             };
                 if (request.RoleTeachers != null)
                 {
-                    switch (true)
-                    {
-                        case var solutionOne when solutionOne == (request.RoleTeachers.Count == 2):
-                            break;
-
-                        case var solutionOne when solutionOne == (request.RoleTeachers.Any(x => x == EnumRoleTeacher.Teacher)):
-                            userQuery = userQuery.Where(y => y.LiveCourseTypesStr == null);
-                            break;
-
-                        case var solutionOne when solutionOne == (request.RoleTeachers.Any(x => x == EnumRoleTeacher.TeacherLive)):
-                            userQuery = userQuery.Where(y => y.LiveCourseTypesStr != null);
-                            break;
-                    }
+                    userQuery = (request.RoleTeachers.Count == 2) ? userQuery.Where(y => y.CourseTypesStr != null && y.LiveCourseTypesStr != null) :
+                                (request.RoleTeachers.Any(x => x == EnumRoleTeacher.Teacher)) ? userQuery.Where(y => y.CourseTypesStr != null) :
+                                (request.RoleTeachers.Any(x => x == EnumRoleTeacher.TeacherLive)) ? userQuery.Where(y => y.LiveCourseTypesStr != null) : default;
                 }
             }
             else if (request.Role == EnumRoleRegisterWithAdmin.CSO)
@@ -158,26 +149,14 @@ namespace Fsel.Identity.Application.Queries.UserQuery
                         {
                             var user = lists.FirstOrDefault(x => x.Id == item.Id);
                             var teacher = classes?.FirstOrDefault(x => x.Id == user?.TeacherId);
-                            var roleTeachers = new List<EnumRoleTeacher>();
-                            switch (true)
-                            {
-                                case var solutionTwo when solutionTwo == (teacherRoles?.Count == 2):
-                                    roleTeachers = item.LiveCourseTypesStr != null ? new List<EnumRoleTeacher> { EnumRoleTeacher.Teacher, EnumRoleTeacher.TeacherLive } : new List<EnumRoleTeacher> { EnumRoleTeacher.Teacher };
-                                    break;
-
-                                case var solutionTwo when solutionTwo == (teacherRoles?.Any(x => x == EnumRoleTeacher.Teacher)):
-                                    roleTeachers = new List<EnumRoleTeacher> { EnumRoleTeacher.Teacher };
-                                    break;
-
-                                case var solutionTwo when solutionTwo == (teacherRoles?.Any(x => x == EnumRoleTeacher.TeacherLive)):
-                                    roleTeachers = new List<EnumRoleTeacher> { EnumRoleTeacher.TeacherLive };
-                                    break;
-
-                                default:
-                                    roleTeachers = item.LiveCourseTypesStr != null ? new List<EnumRoleTeacher> { EnumRoleTeacher.Teacher, EnumRoleTeacher.TeacherLive } : new List<EnumRoleTeacher> { EnumRoleTeacher.Teacher };
-                                    break;
-                            }
-                            item.RoleTeachers = roleTeachers;
+                            item.RoleTeachers =
+                                 (teacherRoles?.Count == 2) ? new List<EnumRoleTeacher> { EnumRoleTeacher.Teacher, EnumRoleTeacher.TeacherLive } :
+                                 (teacherRoles?.Any(x => x == EnumRoleTeacher.Teacher) ?? default) ? new List<EnumRoleTeacher> { EnumRoleTeacher.Teacher } :
+                                 (teacherRoles?.Any(x => x == EnumRoleTeacher.TeacherLive) ?? default) ? new List<EnumRoleTeacher> { EnumRoleTeacher.TeacherLive } :
+                                 (teacherRoles == null ? (
+                                 (item.LiveCourseTypesStr != null && item.CourseTypesStr != null) ? new List<EnumRoleTeacher> { EnumRoleTeacher.Teacher, EnumRoleTeacher.TeacherLive } :
+                                 (item.LiveCourseTypesStr != null) ? new List<EnumRoleTeacher> { EnumRoleTeacher.TeacherLive } :
+                                 (item.CourseTypesStr != null) ? new List<EnumRoleTeacher> { EnumRoleTeacher.Teacher } : default) : default);
                             item.NumberClass = teacher?.TotalClass ?? default;
                         }
                         break;
