@@ -68,6 +68,7 @@ namespace Fsel.Identity.Application.Queries.UserQuery
                                 PhoneNumber = u.PhoneNumber,
                                 Role = EnumRoleRegisterWithAdmin.Teacher,
                                 Email = u.Email,
+                                TeacherId = t.Id,
                                 LiveCourseTypes = t.LiveCourseTypes,
                                 CreatedDate = i.CreatedDate,
                                 Status = u.LockoutEnabled,
@@ -86,6 +87,7 @@ namespace Fsel.Identity.Application.Queries.UserQuery
                                 PhoneNumber = u.PhoneNumber,
                                 Role = EnumRoleRegisterWithAdmin.Teacher,
                                 Email = u.Email,
+                                TeacherId = t.Id,
                                 LiveCourseTypes = t.LiveCourseTypes,
                                 CreatedDate = i.CreatedDate,
                                 Status = u.LockoutEnabled,
@@ -105,6 +107,7 @@ namespace Fsel.Identity.Application.Queries.UserQuery
                                 LiveCourseTypes = t.LiveCourseTypes,
                                 Role = EnumRoleRegisterWithAdmin.Teacher,
                                 Email = u.Email,
+                                TeacherId = t.Id,
                                 CreatedDate = i.CreatedDate,
                                 Status = u.LockoutEnabled,
                             };
@@ -122,6 +125,7 @@ namespace Fsel.Identity.Application.Queries.UserQuery
                                 PhoneNumber = u.PhoneNumber,
                                 Role = EnumRoleRegisterWithAdmin.CSO,
                                 Email = u.Email,
+                                CSOId = cso.Id,
                                 CreatedDate = i.CreatedDate,
                                 Status = u.LockoutEnabled,
                             };
@@ -169,16 +173,12 @@ namespace Fsel.Identity.Application.Queries.UserQuery
                 switch (true)
                 {
                     case var solutionOne when solutionOne == (role == EnumRoleRegisterWithAdmin.Teacher):
-                        var users = from u in _userManager.Users
-                                    join i in _humanRepository.Queryable on u.Id equals i.UserId
-                                    join t in _teacherRepository.Queryable on i.Id equals t.HumanId
-                                    where lists.Select(x => x.Id).Contains(u.Id)
-                                    select new { UserId = u.Id, TeacherId = t.Id };
-                        var classeResults = await _trainingService.GetUserClassByTeacherIds(await users.Select(x => x.TeacherId).Distinct().ToListAsync());
+
+                        var classeResults = await _trainingService.GetUserClassByTeacherIds(lists.Where(x => x.TeacherId != null).Select(x => x.TeacherId ?? default).Distinct().ToList());
                         var classes = classeResults.Content?.Result;
                         foreach (var item in lists)
                         {
-                            var user = await users.FirstOrDefaultAsync(x => x.UserId == item.Id);
+                            var user = lists.FirstOrDefault(x => x.Id == item.Id);
                             var teacher = classes?.FirstOrDefault(x => x.Id == user?.TeacherId);
                             item.RoleTeachers = item.LiveCourseTypes != null ? new List<EnumRoleTeacher> { EnumRoleTeacher.Teacher, EnumRoleTeacher.TeacherLive } : new List<EnumRoleTeacher> { EnumRoleTeacher.Teacher };
                             item.NumberClass = teacher?.TotalClass ?? default;
@@ -186,16 +186,11 @@ namespace Fsel.Identity.Application.Queries.UserQuery
                         break;
 
                     case var solutionOne when solutionOne == (role == EnumRoleRegisterWithAdmin.Teacher):
-                        var userTeachers = from u in _userManager.Users
-                                           join i in _humanRepository.Queryable on u.Id equals i.UserId
-                                           join t in _teacherRepository.Queryable on i.Id equals t.HumanId
-                                           where string.IsNullOrEmpty(t.LiveCourseTypesStr) && lists.Select(x => x.Id).Contains(u.Id)
-                                           select new { UserId = u.Id, TeacherId = t.Id };
-                        var classTeacherResults = await _trainingService.GetUserClassByTeacherIds(await userTeachers.Select(x => x.TeacherId).Distinct().ToListAsync());
+                        var classTeacherResults = await _trainingService.GetUserClassByTeacherIds(lists.Where(x => x.TeacherId != null).Select(x => x.TeacherId ?? default).Distinct().ToList());
                         var classTeachers = classTeacherResults.Content?.Result;
                         foreach (var item in lists)
                         {
-                            var user = await userTeachers.FirstOrDefaultAsync(x => x.UserId == item.Id);
+                            var user = lists.FirstOrDefault(x => x.Id == item.Id);
                             var teacher = classTeachers?.FirstOrDefault(x => x.Id == user?.TeacherId);
                             item.RoleTeachers = new List<EnumRoleTeacher> { EnumRoleTeacher.TeacherLive };
                             item.NumberClass = teacher?.TotalClass ?? default;
@@ -203,16 +198,12 @@ namespace Fsel.Identity.Application.Queries.UserQuery
                         break;
 
                     case var solutionOne when solutionOne == (role == EnumRoleRegisterWithAdmin.Teacher):
-                        var userTeacherLives = from u in _userManager.Users
-                                               join i in _humanRepository.Queryable on u.Id equals i.UserId
-                                               join t in _teacherRepository.Queryable on i.Id equals t.HumanId
-                                               where !string.IsNullOrEmpty(t.LiveCourseTypesStr) && lists.Select(x => x.Id).Contains(u.Id)
-                                               select new { UserId = u.Id, TeacherId = t.Id };
-                        var classeTeacherLiveResults = await _trainingService.GetUserClassByTeacherIds(await userTeacherLives.Select(x => x.TeacherId).Distinct().ToListAsync());
+
+                        var classeTeacherLiveResults = await _trainingService.GetUserClassByTeacherIds(lists.Where(x => x.TeacherId != null).Select(x => x.TeacherId ?? default).Distinct().ToList());
                         var classeTeacherLives = classeTeacherLiveResults.Content?.Result;
                         foreach (var item in lists)
                         {
-                            var user = await userTeacherLives.FirstOrDefaultAsync(x => x.UserId == item.Id);
+                            var user = lists.FirstOrDefault(x => x.Id == item.Id);
                             var teacher = classeTeacherLives?.FirstOrDefault(x => x.Id == user?.TeacherId);
                             item.RoleTeachers = new List<EnumRoleTeacher> { EnumRoleTeacher.TeacherLive, EnumRoleTeacher.Teacher };
                             item.NumberClass = teacher?.TotalClass ?? default;
@@ -220,17 +211,12 @@ namespace Fsel.Identity.Application.Queries.UserQuery
                         break;
 
                     case var solutionOne when solutionOne == (role == EnumRoleRegisterWithAdmin.CSO):
-                        var userCsos = from u in _userManager.Users
-                                       join i in _humanRepository.Queryable on u.Id equals i.UserId
-                                       join cso in _cSORepository.Queryable on i.Id equals cso.HumanId
-                                       where lists.Select(x => x.Id).Contains(u.Id)
-                                       select new { UserId = u.Id, CsoId = cso.Id };
-                        var classeCsoResults = await _trainingService.GetUserClassByTeacherIds(await userCsos.Select(x => x.CsoId).Distinct().ToListAsync());
+                        var classeCsoResults = await _trainingService.GetUserClassByTeacherIds(lists.Where(x => x.CSOId != null).Select(x => x.TeacherId ?? default).Distinct().ToList());
                         var classeCsos = classeCsoResults.Content?.Result;
                         foreach (var item in lists)
                         {
-                            var user = await userCsos.FirstOrDefaultAsync(x => x.UserId == item.Id);
-                            var teacher = classeCsos?.FirstOrDefault(x => x.Id == user?.CsoId);
+                            var user = lists.FirstOrDefault(x => x.Id == item.Id);
+                            var teacher = classeCsos?.FirstOrDefault(x => x.Id == user?.CSOId);
                             item.NumberClass = teacher?.TotalClass ?? default;
                         }
                         break;

@@ -16,5 +16,7 @@ namespace Fsel.Identity.Domain.Models.EntityModels
         public EnumRoleRegisterWithAdmin Role { get; set; }
         public bool Status { get; set; }
         public string? FullName { get; set; }
+        public Guid? TeacherId { get; set; }
+        public Guid? CSOId { get; set; }
     }
 }
