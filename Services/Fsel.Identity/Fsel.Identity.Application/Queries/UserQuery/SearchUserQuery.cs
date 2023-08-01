@@ -49,7 +49,7 @@ namespace Fsel.Identity.Application.Queries.UserQuery
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<PagingItemsModel<UserSearchModel>> methodResult = new MethodResult<PagingItemsModel<UserSearchModel>>();
 
-            if (request.PageSize > 100)
+            if (request.PageSize > 100 || request.Role == null)
             {
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 return methodResult;
@@ -71,7 +71,6 @@ namespace Fsel.Identity.Application.Queries.UserQuery
                                 LiveCourseTypesStr = t.LiveCourseTypesStr,
                                 Email = u.Email,
                                 TeacherId = t.Id,
-                                LiveCourseTypes = t.LiveCourseTypes,
                                 CreatedDate = i.CreatedDate,
                                 Status = u.LockoutEnabled,
                             };
@@ -146,51 +145,41 @@ namespace Fsel.Identity.Application.Queries.UserQuery
             return methodResult;
         }
 
-        private async Task GetRoles(IList<UserSearchModel>? lists, EnumRoleRegisterWithAdmin role, IList<EnumRoleTeacher>? teacherRoles)
+        private async Task GetRoles(IList<UserSearchModel>? lists, EnumRoleRegisterWithAdmin? role, IList<EnumRoleTeacher>? teacherRoles)
         {
             if (lists != null && lists.Count > 0)
             {
                 switch (true)
                 {
                     case var solutionOne when solutionOne == (role == EnumRoleRegisterWithAdmin.Teacher):
-                        if (teacherRoles != null && teacherRoles.Count > 0)
+                        var classeResults = await _trainingService.GetUserClassByTeacherIds(lists.Where(x => x.TeacherId != null).Select(x => x.TeacherId ?? default).Distinct().ToList());
+                        var classes = classeResults.Content?.Result;
+                        foreach (var item in lists)
                         {
-                            var classeResults = await _trainingService.GetUserClassByTeacherIds(lists.Where(x => x.TeacherId != null).Select(x => x.TeacherId ?? default).Distinct().ToList());
-                            var classes = classeResults.Content?.Result;
+                            var user = lists.FirstOrDefault(x => x.Id == item.Id);
+                            var teacher = classes?.FirstOrDefault(x => x.Id == user?.TeacherId);
+                            var roleTeachers = new List<EnumRoleTeacher>();
                             switch (true)
                             {
-                                case var solutionTwo when solutionTwo == (teacherRoles.Count == 2):
-                                    foreach (var item in lists)
-                                    {
-                                        var user = lists.FirstOrDefault(x => x.Id == item.Id);
-                                        var teacher = classes?.FirstOrDefault(x => x.Id == user?.TeacherId);
-                                        item.RoleTeachers = item.LiveCourseTypesStr != null ? new List<EnumRoleTeacher> { EnumRoleTeacher.Teacher, EnumRoleTeacher.TeacherLive } : new List<EnumRoleTeacher> { EnumRoleTeacher.Teacher };
-                                        item.NumberClass = teacher?.TotalClass ?? default;
-                                    }
+                                case var solutionTwo when solutionTwo == (teacherRoles?.Count == 2):
+                                    roleTeachers = item.LiveCourseTypesStr != null ? new List<EnumRoleTeacher> { EnumRoleTeacher.Teacher, EnumRoleTeacher.TeacherLive } : new List<EnumRoleTeacher> { EnumRoleTeacher.Teacher };
                                     break;
 
-                                case var solutionTwo when solutionTwo == (teacherRoles.Any(x => x == EnumRoleTeacher.Teacher)):
-                                    foreach (var item in lists)
-                                    {
-                                        var user = lists.FirstOrDefault(x => x.Id == item.Id);
-                                        var teacher = classes?.FirstOrDefault(x => x.Id == user?.TeacherId);
-                                        item.RoleTeachers = new List<EnumRoleTeacher> { EnumRoleTeacher.TeacherLive };
-                                        item.NumberClass = teacher?.TotalClass ?? default;
-                                    }
+                                case var solutionTwo when solutionTwo == (teacherRoles?.Any(x => x == EnumRoleTeacher.Teacher)):
+                                    roleTeachers = new List<EnumRoleTeacher> { EnumRoleTeacher.Teacher };
                                     break;
 
-                                case var solutionTwo when solutionTwo == (teacherRoles.Any(x => x == EnumRoleTeacher.TeacherLive)):
-                                    foreach (var item in lists)
-                                    {
-                                        var user = lists.FirstOrDefault(x => x.Id == item.Id);
-                                        var teacher = classes?.FirstOrDefault(x => x.Id == user?.TeacherId);
-                                        item.RoleTeachers = new List<EnumRoleTeacher> { EnumRoleTeacher.TeacherLive, EnumRoleTeacher.Teacher };
-                                        item.NumberClass = teacher?.TotalClass ?? default;
-                                    }
+                                case var solutionTwo when solutionTwo == (teacherRoles?.Any(x => x == EnumRoleTeacher.TeacherLive)):
+                                    roleTeachers = new List<EnumRoleTeacher> { EnumRoleTeacher.TeacherLive };
+                                    break;
+
+                                default:
+                                    roleTeachers = item.LiveCourseTypesStr != null ? new List<EnumRoleTeacher> { EnumRoleTeacher.Teacher, EnumRoleTeacher.TeacherLive } : new List<EnumRoleTeacher> { EnumRoleTeacher.Teacher };
                                     break;
                             }
+                            item.RoleTeachers = roleTeachers;
+                            item.NumberClass = teacher?.TotalClass ?? default;
                         }
-
                         break;
 
                     case var solutionOne when solutionOne == (role == EnumRoleRegisterWithAdmin.CSO):
@@ -201,13 +190,6 @@ namespace Fsel.Identity.Application.Queries.UserQuery
                             var user = lists.FirstOrDefault(x => x.Id == item.Id);
                             var teacher = classeCsos?.FirstOrDefault(x => x.Id == user?.CSOId);
                             item.NumberClass = teacher?.TotalClass ?? default;
-                        }
-                        break;
-
-                    case var solutionOne when solutionOne == (role == EnumRoleRegisterWithAdmin.Moderator):
-                        foreach (var item in lists)
-                        {
-                            item.NumberClass = default;
                         }
                         break;
                 }

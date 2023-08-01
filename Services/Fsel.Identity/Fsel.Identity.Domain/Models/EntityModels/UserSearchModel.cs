@@ -12,7 +12,6 @@ namespace Fsel.Identity.Domain.Models.EntityModels
         public string? PhoneNumber { get; set; }
         public int NumberClass { get; set; }
         public string? LiveCourseTypesStr { get; set; }
-        public IList<EnumCourseType>? LiveCourseTypes { get; set; }
         public IList<EnumRoleTeacher>? RoleTeachers { get; set; }
         public EnumRoleRegisterWithAdmin Role { get; set; }
         public bool Status { get; set; }
