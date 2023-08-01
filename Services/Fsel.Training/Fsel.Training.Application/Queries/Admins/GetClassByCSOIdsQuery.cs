@@ -15,7 +15,7 @@ namespace Fsel.Training.Application.Queries.Admins
 
     public class GetClassByCSOIdsQuery : IRequest<MethodResult<IList<UserClassModel>>>
     {
-        public IList<Guid>? TeacherIds { get; set; }
+        public IList<Guid>? CSOIds { get; set; }
     }
 
     public class GetClassByCSOIdsQueryHandler : IRequestHandler<GetClassByCSOIdsQuery, MethodResult<IList<UserClassModel>>>
@@ -33,7 +33,7 @@ namespace Fsel.Training.Application.Queries.Admins
 
             MethodResult<IList<UserClassModel>> methodResult = new MethodResult<IList<UserClassModel>>();
 
-            if (request.TeacherIds == null || request.TeacherIds.Count == 0)
+            if (request.CSOIds == null || request.CSOIds.Count == 0)
             {
                 methodResult.Result = null;
                 methodResult.StatusCode = StatusCodes.Status200OK;
@@ -41,8 +41,8 @@ namespace Fsel.Training.Application.Queries.Admins
             }
 
             var classStudents = await _classRepository.Queryable
-                                            .Where(c => c.TeacherId != null && request.TeacherIds!.Contains(c.TeacherId ?? default))
-                                            .GroupBy(c => c.TeacherId)
+                                            .Where(c => c.CsoId != null && request.CSOIds!.Contains(c.CsoId ?? default))
+                                            .GroupBy(c => c.CsoId)
                                             .Select(g => new UserClassModel
                                             {
                                                 Id = g.Key ?? default,

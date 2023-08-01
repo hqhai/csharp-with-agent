@@ -163,7 +163,7 @@ namespace Fsel.Training.Api.Controllers.Admin
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetUserClassByCSOIds([FromBody] IList<Guid> ids)
         {
-            MethodResult<IList<UserClassModel>> commandResult = await _mediator.Send(new GetClassByCSOIdsQuery { TeacherIds = ids }).ConfigureAwait(false);
+            MethodResult<IList<UserClassModel>> commandResult = await _mediator.Send(new GetClassByCSOIdsQuery { CSOIds = ids }).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
     }
