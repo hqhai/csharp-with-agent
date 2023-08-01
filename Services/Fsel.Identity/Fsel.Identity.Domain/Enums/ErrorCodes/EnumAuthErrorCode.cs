@@ -9,6 +9,7 @@ namespace Fsel.Identity.Domain.Enums.ErrorCodes
         /// Confirm Password cannot empty
         /// </summary>
         ConfirmPasswordNotEmpty,
+
         /// <summary>
         /// User does not exist by code
         /// </summary>
@@ -113,5 +114,10 @@ namespace Fsel.Identity.Domain.Enums.ErrorCodes
         /// Account has been locked
         /// </summary>
         AccountHasBeenLocked,
+
+        /// <summary>
+        /// Packageids entered is incorrect
+        /// </summary>
+        PackageIdsEnteredIsIncorrect,
     }
 }

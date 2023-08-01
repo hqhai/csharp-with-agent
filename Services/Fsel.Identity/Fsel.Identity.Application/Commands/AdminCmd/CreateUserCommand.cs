@@ -5,6 +5,7 @@ using AutoMapper;
 using Fsel.Common.ActionResults;
 using Fsel.Common.Helpers;
 using Fsel.Identity.Application.Commands.AuthCmd;
+using Fsel.Identity.Application.Services.OrderService;
 using Fsel.Identity.Domain.Entities;
 using Fsel.Identity.Domain.Enums;
 using Fsel.Identity.Domain.Enums.ErrorCodes;
@@ -32,6 +33,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
         private readonly UserManager<User> _userManager;
         private readonly RoleManager<Role> _roleManager;
         private readonly IMapper _mapper;
+        private readonly IOrderService _orderService;
         private readonly IMediator _mediator;
         private readonly IUserOtpCodeRepository _userOtpCodeRepository;
         private readonly AppSetting _appSetting;
@@ -42,6 +44,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
         public CreateUserCommandHandler(UserManager<User> userManager,
             RoleManager<Role> roleManager,
             IMapper mapper,
+            IOrderService orderService,
             IMediator mediator,
             IUserOtpCodeRepository userOtpCodeRepository,
             AppSetting appSetting,
@@ -52,6 +55,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
             _userManager = userManager;
             _roleManager = roleManager;
             _mapper = mapper;
+            _orderService = orderService;
             _mediator = mediator;
             _userOtpCodeRepository = userOtpCodeRepository;
             _appSetting = appSetting;
@@ -72,12 +76,12 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
             }
             else
             {
-                var role = await _roleManager.FindByNameAsync(request?.Role.ToString() ?? string.Empty);
+                var role = await _roleManager.FindByNameAsync(request.Role.ToString() ?? string.Empty);
                 var newPassword = new PasswordGeneratorHelper(8, 10).Generate();
                 IdentityResult result;
                 user = new();
                 _mapper.Map(request, user);
-                user.UserName = request?.Email;
+                user.UserName = request.Email;
                 result = await _userManager.CreateAsync(user, newPassword);
                 if (!result.Succeeded)
                 {
@@ -85,18 +89,24 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
                     return methodResult;
                 }
 
-                var human = await CreateHuman(request!, user);
-                human = _humanRepository.Add(human);
-                await _humanRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-                if (request!.Role == EnumRoleRegisterWithAdmin.Teacher)
+                if (request.PackageIds != null && request.PackageIds.Count > 0)
                 {
-                    var roleLives = human!.Teacher!.RoleLives;
-                    if (roleLives != null && roleLives.Count > 0)
+                    var packageResults = await _orderService.GetPackages();
+                    var packages = packageResults?.Content?.Result;
+                    if (packages != null)
                     {
-                        await _userManager.AddToRoleAsync(user, EnumRole.TeacherLive.ToString());
+                        var isCheck = packages.All(x => request.PackageIds.Contains(x.Id));
+                        if (!isCheck)
+                        {
+                            methodResult.AddErrorBadRequest(nameof(EnumAuthErrorCode.PackageIdsEnteredIsIncorrect));
+                            return methodResult;
+                        }
                     }
                 }
-                await _userManager.AddToRoleAsync(user, request!.Role.ToString());
+                var human = await CreateHuman(request, user);
+                human = _humanRepository.Add(human);
+                await _humanRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                await _userManager.AddToRoleAsync(user, request.Role.ToString());
 
                 #region Send Code OTP
 
@@ -156,8 +166,8 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
                 human.Teacher = new Teacher
                 {
                     HumanId = human.Id,
+                    LiveCourseTypes = request.LiveCourseTypes,
                     CourseLevels = request.CourseLevels,
-                    RoleLives = request.RoleLives,
                     CourseTypes = request.CourseTypes
                 };
                 human.Teacher.TeacherBankAccounts?.Add(new TeacherBankAccount
@@ -175,9 +185,9 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
                 human.CSO = new CSO
                 {
                     HumanId = human.Id,
-                    RoleLives = request.RoleLives,
+                    CourseTypes = request.CourseTypes,
                     CourseLevels = request.CourseLevels,
-                    SubscriptionClasses = request.SubscriptionClasses
+                    PackageIds = request.PackageIds,
                 };
                 human.Code = $"CSO_{stt:0000}";
             }

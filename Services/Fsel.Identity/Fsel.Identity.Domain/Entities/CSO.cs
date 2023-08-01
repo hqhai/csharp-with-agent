@@ -12,13 +12,13 @@ namespace Fsel.Identity.Domain.Entities
     public class CSO : Entity
     {
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
-        public string? RoleLivesStr { get; set; }
+        public string? CourseTypesStr { get; set; }
 
         [NotMapped]
-        public IList<EnumCourseType>? RoleLives
+        public IList<EnumCourseType>? CourseTypes
         {
-            get { return ConvertHelper.Deserialize<IList<EnumCourseType>>(RoleLivesStr); }
-            set { RoleLivesStr = ConvertHelper.Serialize(value); }
+            get { return ConvertHelper.Deserialize<IList<EnumCourseType>>(CourseTypesStr); }
+            set { CourseTypesStr = ConvertHelper.Serialize(value); }
         }
 
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
@@ -32,13 +32,13 @@ namespace Fsel.Identity.Domain.Entities
         }
 
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
-        public string? SubscriptionClassesStr { get; set; }
+        public string? PackageIdsStr { get; set; }
 
         [NotMapped]
-        public IList<EnumSubscriptionClass>? SubscriptionClasses
+        public IList<Guid>? PackageIds
         {
-            get { return ConvertHelper.Deserialize<IList<EnumSubscriptionClass>>(SubscriptionClassesStr); }
-            set { SubscriptionClassesStr = ConvertHelper.Serialize(value); }
+            get { return ConvertHelper.Deserialize<IList<Guid>>(PackageIdsStr); }
+            set { PackageIdsStr = ConvertHelper.Serialize(value); }
         }
 
         [MaxLength(1000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]

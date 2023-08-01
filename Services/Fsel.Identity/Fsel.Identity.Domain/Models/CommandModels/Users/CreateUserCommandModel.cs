@@ -21,10 +21,10 @@ namespace Fsel.Identity.Domain.Models.CommandModels.Users
         public DateTime Birthday { get; set; }
 
         public string? PhoneNumber { get; set; }
-        public IList<EnumCourseType>? RoleLives { get; set; }
+        public IList<EnumCourseType>? LiveCourseTypes { get; set; }
         public IList<EnumCourseType>? CourseTypes { get; set; }
         public IList<EnumCourseLevel>? CourseLevels { get; set; }
-        public IList<EnumSubscriptionClass>? SubscriptionClasses { get; set; }
+        public IList<Guid>? PackageIds { get; set; }
 
         [Required]
         public EnumRoleRegisterWithAdmin Role { get; set; }
