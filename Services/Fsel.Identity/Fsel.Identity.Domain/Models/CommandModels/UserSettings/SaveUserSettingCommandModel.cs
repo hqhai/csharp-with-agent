@@ -2,9 +2,7 @@
 
 namespace Fsel.Identity.Domain.Models.CommandModels.UserSettings
 {
-    using Fsel.Core.Base.BaseModels;
-
-    public class SaveUserSettingCommandModel : BaseCommandModel
+    public class SaveUserSettingCommandModel
     {
         public bool NotifiGame { get; set; }
 
@@ -15,5 +13,6 @@ namespace Fsel.Identity.Domain.Models.CommandModels.UserSettings
         public bool NotifiForum { get; set; }
 
         public string? Language { get; set; }
+
     }
 }

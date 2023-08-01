@@ -39,7 +39,7 @@ namespace Fsel.Identity.Application.Commands.UserSetttingCmd
 
             await _userSettingRepository.ExecuteTransactionAsync(async () =>
             {
-                var userSetting = await _userSettingRepository.GetByIdAsync(request.Id);
+                var userSetting = await _userSettingRepository.GetByIdAsync(_authContext.CurrentUserId);
 
                 if (userSetting != null)
                 {
