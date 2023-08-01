@@ -76,6 +76,20 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
             }
             else
             {
+                if (request.PackageIds != null && request.PackageIds.Count > 0)
+                {
+                    var packageResults = await _orderService.GetPackages();
+                    var packages = packageResults?.Content?.Result;
+                    if (packages != null)
+                    {
+                        var isCheck = request.PackageIds.All(x => packages.Select(y => y.Id).Contains(x));
+                        if (!isCheck)
+                        {
+                            methodResult.AddErrorBadRequest(nameof(EnumAuthErrorCode.PackageIdsEnteredIsIncorrect));
+                            return methodResult;
+                        }
+                    }
+                }
                 var role = await _roleManager.FindByNameAsync(request.Role.ToString() ?? string.Empty);
                 var newPassword = new PasswordGeneratorHelper(8, 10).Generate();
                 IdentityResult result;
@@ -87,21 +101,6 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
                 {
                     methodResult.AddErrorBadRequest(nameof(EnumAuthErrorCode.UserFailToCreate), nameof(newPassword), newPassword);
                     return methodResult;
-                }
-
-                if (request.PackageIds != null && request.PackageIds.Count > 0)
-                {
-                    var packageResults = await _orderService.GetPackages();
-                    var packages = packageResults?.Content?.Result;
-                    if (packages != null)
-                    {
-                        var isCheck = packages.All(x => request.PackageIds.Contains(x.Id));
-                        if (!isCheck)
-                        {
-                            methodResult.AddErrorBadRequest(nameof(EnumAuthErrorCode.PackageIdsEnteredIsIncorrect));
-                            return methodResult;
-                        }
-                    }
                 }
                 var human = await CreateHuman(request, user);
                 human = _humanRepository.Add(human);
