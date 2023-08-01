@@ -14,6 +14,7 @@ namespace Fsel.Identity.Application.Commands.UserSetttingCmd
     using Fsel.Identity.Domain.Models.EntityModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
+    using Microsoft.EntityFrameworkCore;
 
     public class SaveUserSettingCommand : SaveUserSettingCommandModel, IRequest<MethodResult<UserSettingModel>>
     {
@@ -39,7 +40,7 @@ namespace Fsel.Identity.Application.Commands.UserSetttingCmd
 
             await _userSettingRepository.ExecuteTransactionAsync(async () =>
             {
-                var userSetting = await _userSettingRepository.GetByIdAsync(_authContext.CurrentUserId);
+                var userSetting = await _userSettingRepository.Queryable.Where(x => x.UserId == _authContext.CurrentUserId.ToString()).FirstOrDefaultAsync(cancellationToken);
 
                 if (userSetting != null)
                 {
