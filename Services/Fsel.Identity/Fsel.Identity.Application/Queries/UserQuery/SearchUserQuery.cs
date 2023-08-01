@@ -3,6 +3,7 @@
 namespace Fsel.Identity.Application.Queries.UserQuery
 {
     using System;
+    using System.Data;
     using System.Linq;
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base.BaseModels;
@@ -55,7 +56,7 @@ namespace Fsel.Identity.Application.Queries.UserQuery
             }
             var usersByRole = await _userManager.GetUsersInRoleAsync(request.Role.ToString() ?? string.Empty);
             IQueryable<UserSearchModel>? userQuery = default;
-            if (request.Role == EnumRoleRegisterWithAdmin.Teacher && request.RoleTeachers?.Count == 2)
+            if (request.Role == EnumRoleRegisterWithAdmin.Teacher)
             {
                 userQuery = from u in _userManager.Users
                             join i in _humanRepository.Queryable on u.Id equals i.UserId
@@ -73,44 +74,22 @@ namespace Fsel.Identity.Application.Queries.UserQuery
                                 CreatedDate = i.CreatedDate,
                                 Status = u.LockoutEnabled,
                             };
-            }
-            else if (request.Role == EnumRoleRegisterWithAdmin.Teacher && request.RoleTeachers != null && request.RoleTeachers.Any(x => x == EnumRoleTeacher.Teacher))
-            {
-                userQuery = from u in _userManager.Users
-                            join i in _humanRepository.Queryable on u.Id equals i.UserId
-                            join t in _teacherRepository.Queryable on i.Id equals t.HumanId
-                            where string.IsNullOrEmpty(t.LiveCourseTypesStr) && usersByRole.Select(x => x.Id).Contains(u.Id)
-                            select new UserSearchModel
-                            {
-                                Id = u.Id,
-                                FullName = u.FullName,
-                                PhoneNumber = u.PhoneNumber,
-                                Role = EnumRoleRegisterWithAdmin.Teacher,
-                                Email = u.Email,
-                                TeacherId = t.Id,
-                                LiveCourseTypes = t.LiveCourseTypes,
-                                CreatedDate = i.CreatedDate,
-                                Status = u.LockoutEnabled,
-                            };
-            }
-            else if (request.Role == EnumRoleRegisterWithAdmin.Teacher && request.RoleTeachers != null && request.RoleTeachers.Any(x => x == EnumRoleTeacher.TeacherLive))
-            {
-                userQuery = from u in _userManager.Users
-                            join i in _humanRepository.Queryable on u.Id equals i.UserId
-                            join t in _teacherRepository.Queryable on i.Id equals t.HumanId
-                            where !string.IsNullOrEmpty(t.LiveCourseTypesStr) && usersByRole.Select(x => x.Id).Contains(u.Id)
-                            select new UserSearchModel
-                            {
-                                Id = u.Id,
-                                FullName = u.FullName,
-                                PhoneNumber = u.PhoneNumber,
-                                LiveCourseTypes = t.LiveCourseTypes,
-                                Role = EnumRoleRegisterWithAdmin.Teacher,
-                                Email = u.Email,
-                                TeacherId = t.Id,
-                                CreatedDate = i.CreatedDate,
-                                Status = u.LockoutEnabled,
-                            };
+                if (request.RoleTeachers != null)
+                {
+                    switch (true)
+                    {
+                        case var solutionOne when solutionOne == (request.RoleTeachers.Count == 2):
+                            break;
+
+                        case var solutionOne when solutionOne == (request.RoleTeachers.Any(x => x == EnumRoleTeacher.Teacher)):
+                            userQuery = userQuery.Where(y => y.LiveCourseTypes == null || y.LiveCourseTypes.Count == 0);
+                            break;
+
+                        case var solutionOne when solutionOne == (request.RoleTeachers.Any(x => x == EnumRoleTeacher.TeacherLive)):
+                            userQuery = userQuery.Where(y => y.LiveCourseTypes != null && y.LiveCourseTypes.Count > 0);
+                            break;
+                    }
+                }
             }
             else if (request.Role == EnumRoleRegisterWithAdmin.CSO)
             {
@@ -159,55 +138,58 @@ namespace Fsel.Identity.Application.Queries.UserQuery
                     .AsNoTracking()
                     .ToListAsync(cancellationToken: cancellationToken)
                     .ConfigureAwait(false) : default;
-            await GetRoles(lists, request.Role);
+            await GetRoles(lists, request.Role, request.RoleTeachers);
 
             methodResult.Result = new PagingItemsModel<UserSearchModel>(lists, request, totalItem);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }
 
-        private async Task GetRoles(IList<UserSearchModel>? lists, EnumRoleRegisterWithAdmin role)
+        private async Task GetRoles(IList<UserSearchModel>? lists, EnumRoleRegisterWithAdmin role, IList<EnumRoleTeacher>? teacherRoles)
         {
             if (lists != null && lists.Count > 0)
             {
                 switch (true)
                 {
                     case var solutionOne when solutionOne == (role == EnumRoleRegisterWithAdmin.Teacher):
-
-                        var classeResults = await _trainingService.GetUserClassByTeacherIds(lists.Where(x => x.TeacherId != null).Select(x => x.TeacherId ?? default).Distinct().ToList());
-                        var classes = classeResults.Content?.Result;
-                        foreach (var item in lists)
+                        if (teacherRoles != null && teacherRoles.Count > 0)
                         {
-                            var user = lists.FirstOrDefault(x => x.Id == item.Id);
-                            var teacher = classes?.FirstOrDefault(x => x.Id == user?.TeacherId);
-                            item.RoleTeachers = item.LiveCourseTypes != null ? new List<EnumRoleTeacher> { EnumRoleTeacher.Teacher, EnumRoleTeacher.TeacherLive } : new List<EnumRoleTeacher> { EnumRoleTeacher.Teacher };
-                            item.NumberClass = teacher?.TotalClass ?? default;
-                        }
-                        break;
+                            var classeResults = await _trainingService.GetUserClassByTeacherIds(lists.Where(x => x.TeacherId != null).Select(x => x.TeacherId ?? default).Distinct().ToList());
+                            var classes = classeResults.Content?.Result;
+                            switch (true)
+                            {
+                                case var solutionTwo when solutionTwo == (teacherRoles.Count == 2):
+                                    foreach (var item in lists)
+                                    {
+                                        var user = lists.FirstOrDefault(x => x.Id == item.Id);
+                                        var teacher = classes?.FirstOrDefault(x => x.Id == user?.TeacherId);
+                                        item.RoleTeachers = item.LiveCourseTypes != null ? new List<EnumRoleTeacher> { EnumRoleTeacher.Teacher, EnumRoleTeacher.TeacherLive } : new List<EnumRoleTeacher> { EnumRoleTeacher.Teacher };
+                                        item.NumberClass = teacher?.TotalClass ?? default;
+                                    }
+                                    break;
 
-                    case var solutionOne when solutionOne == (role == EnumRoleRegisterWithAdmin.Teacher):
-                        var classTeacherResults = await _trainingService.GetUserClassByTeacherIds(lists.Where(x => x.TeacherId != null).Select(x => x.TeacherId ?? default).Distinct().ToList());
-                        var classTeachers = classTeacherResults.Content?.Result;
-                        foreach (var item in lists)
-                        {
-                            var user = lists.FirstOrDefault(x => x.Id == item.Id);
-                            var teacher = classTeachers?.FirstOrDefault(x => x.Id == user?.TeacherId);
-                            item.RoleTeachers = new List<EnumRoleTeacher> { EnumRoleTeacher.TeacherLive };
-                            item.NumberClass = teacher?.TotalClass ?? default;
-                        }
-                        break;
+                                case var solutionTwo when solutionTwo == (teacherRoles.Any(x => x == EnumRoleTeacher.Teacher)):
+                                    foreach (var item in lists)
+                                    {
+                                        var user = lists.FirstOrDefault(x => x.Id == item.Id);
+                                        var teacher = classes?.FirstOrDefault(x => x.Id == user?.TeacherId);
+                                        item.RoleTeachers = new List<EnumRoleTeacher> { EnumRoleTeacher.TeacherLive };
+                                        item.NumberClass = teacher?.TotalClass ?? default;
+                                    }
+                                    break;
 
-                    case var solutionOne when solutionOne == (role == EnumRoleRegisterWithAdmin.Teacher):
-
-                        var classeTeacherLiveResults = await _trainingService.GetUserClassByTeacherIds(lists.Where(x => x.TeacherId != null).Select(x => x.TeacherId ?? default).Distinct().ToList());
-                        var classeTeacherLives = classeTeacherLiveResults.Content?.Result;
-                        foreach (var item in lists)
-                        {
-                            var user = lists.FirstOrDefault(x => x.Id == item.Id);
-                            var teacher = classeTeacherLives?.FirstOrDefault(x => x.Id == user?.TeacherId);
-                            item.RoleTeachers = new List<EnumRoleTeacher> { EnumRoleTeacher.TeacherLive, EnumRoleTeacher.Teacher };
-                            item.NumberClass = teacher?.TotalClass ?? default;
+                                case var solutionTwo when solutionTwo == (teacherRoles.Any(x => x == EnumRoleTeacher.TeacherLive)):
+                                    foreach (var item in lists)
+                                    {
+                                        var user = lists.FirstOrDefault(x => x.Id == item.Id);
+                                        var teacher = classes?.FirstOrDefault(x => x.Id == user?.TeacherId);
+                                        item.RoleTeachers = new List<EnumRoleTeacher> { EnumRoleTeacher.TeacherLive, EnumRoleTeacher.Teacher };
+                                        item.NumberClass = teacher?.TotalClass ?? default;
+                                    }
+                                    break;
+                            }
                         }
+
                         break;
 
                     case var solutionOne when solutionOne == (role == EnumRoleRegisterWithAdmin.CSO):
@@ -222,7 +204,6 @@ namespace Fsel.Identity.Application.Queries.UserQuery
                         break;
 
                     case var solutionOne when solutionOne == (role == EnumRoleRegisterWithAdmin.Moderator):
-
                         foreach (var item in lists)
                         {
                             item.NumberClass = default;
