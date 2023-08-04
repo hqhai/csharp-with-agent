@@ -1,0 +1,82 @@
+// Copyright (c) Atlantic. All rights reserved.
+
+namespace Fsel.System.Domain.Entities
+{
+    using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Core.Entities;
+    using Fsel.Shared.Enums;
+    using global::System.ComponentModel.DataAnnotations;
+
+    public class QuestBoard : Entity
+    {
+        /// <summary>
+        /// Tên nhiệm vụ
+        /// </summary>
+        [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
+        [MaxLength(250, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
+        public string? Name { get; set; }
+
+        /// <summary>
+        /// Mô tả chi tiết nhiệm vụ
+        /// </summary>
+        [MaxLength(1000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
+        public string? Description { get; set; }
+
+        /// <summary>
+        /// Link ảnh
+        /// </summary>
+        [MaxLength(1000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
+        public string? ImagePath { get; set; }
+
+        /// <summary>
+        /// Loại nhiệm vụ
+        /// </summary>
+        public EnumQuestBoardType Type { get; set; }
+
+        /// <summary>
+        /// Danh mục nhiệm vụ
+        /// </summary>
+        public EnumQuestBoardCategory Category { get; set; }
+
+        /// <summary>
+        /// Ngày băt đầu
+        /// </summary>
+        public DateTime StartDate { get; set; }
+
+        /// <summary>
+        /// Ngày kết thúc
+        /// </summary>
+        public DateTime EndDate { get; set; }
+
+        /// <summary>
+        /// Tổng số sao đạt được
+        /// </summary>
+        public int NumberOfStars { get; set; }
+
+        /// <summary>
+        /// Lặp lại theo
+        /// </summary>
+        public EnumRepeatType RepeatType { get; set; }
+
+        /// <summary>
+        /// Loại Package
+        /// </summary>
+        public IList<Guid>? PackageIds { get; set; }
+
+        /// <summary>
+        /// Yêu cầu bắt buộc
+        /// </summary>
+        public bool IsRequired { get; set; }
+
+        /// <summary>
+        /// Bật tắt nhiệm vụ
+        /// </summary>
+        public bool IsActice { get; set; }
+
+        /// <summary>
+        /// Nhiệm vụ phụ thuộc
+        /// </summary>
+        [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
+        public Guid DependentId { get; set; }
+    }
+}

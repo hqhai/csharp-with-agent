@@ -2,9 +2,8 @@
 
 namespace Fsel.Shared.Constants
 {
-    public static class SurveyQuestionSettings
+    public static class QuestBoardSettings
     {
-        public const string SurveyQuestionFileName = "Resources//SurveyQuestions.json";
         public const string QuestBoardFileName = "Resources//QuestBoardConfig.json";
     }
 }

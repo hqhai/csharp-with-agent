@@ -1,6 +1,7 @@
 using Fsel.Common.Constants;
 using Fsel.Core.Base;
 using Fsel.System.Domain.Entities;
+using Fsel.System.Domain.Entities.Configs;
 using Fsel.System.Infrastructure.Configs;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -43,6 +44,14 @@ namespace Fsel.System.Infrastructure
                     options => options.MigrationsAssembly(GetType().Assembly.GetName().Name));
             }
         }
+
+        //private static void SeedQuestBoards(ModelBuilder builder)
+        //{
+        //    var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, QuestBoardFileName.QuestBoardFileName);
+        //    var surveyQuestions = ConvertHelper.DeserializeFromFilePath<IList<SurveyQuestion>>(path);
+        //    ArgumentNullException.ThrowIfNull(surveyQuestions);
+        //    builder.Entity<SurveyQuestion>().HasData(surveyQuestions);
+        //}
 
         private static void SeedCourselevel(ModelBuilder builder)
         {
