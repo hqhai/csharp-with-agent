@@ -52,6 +52,7 @@ namespace Fsel.Course.Domain.Entities
 
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         public Guid StudentId { get; set; }
+
         public ExtraPracticeResult? ExtraPracticeResult { get; set; }
         public Guid ExtraPracticeResultId { get; set; }
         public ExtraPracticeExercise? ExtraPracticeExercise { get; set; }

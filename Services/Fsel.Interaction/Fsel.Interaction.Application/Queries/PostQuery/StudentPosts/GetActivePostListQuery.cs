@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Interaction.Application.Queries.PostQuery
+namespace Fsel.Interaction.Application.Queries.PostQuery.StudentPosts
 {
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
@@ -15,8 +15,6 @@ namespace Fsel.Interaction.Application.Queries.PostQuery
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
-    using Microsoft.Extensions.Hosting;
-    using Microsoft.VisualBasic;
 
     public class GetActivePostListQuery : GetActivePostListQueryModel, IRequest<MethodResult<PagingItemsModel<PostSearchModel>>>
     {
@@ -56,7 +54,7 @@ namespace Fsel.Interaction.Application.Queries.PostQuery
             var postQuery = _postRepository.Queryable.Where(post => !_interactionActionRepository.Queryable
                                                      .Any(interaction => interaction.ObjectId == post.Id &&
                                                       interaction.Type == EnumInteractionActionType.Disable &&
-                                                      interaction.UserId == _authContext.CurrentUserId));
+                                                      interaction.UserId == _authContext.CurrentUserId) && post.Status == EnumPostStatus.Active);
 
             IQueryable<Post> sortedQuery = postQuery;
             switch (request.PostType)
@@ -65,9 +63,11 @@ namespace Fsel.Interaction.Application.Queries.PostQuery
                     sortedQuery = postQuery.OrderByDescending(post => post.CreatedDate);
                     //sortedQuery2 = postQuery.Select(post=> new { Post = post}).OrderByDescending(item => item.CreatedDate);
                     break;
+
                 case EnumPostType.Relevant:
                     sortedQuery = postQuery.Where(post => post.CourseLevel == courseLevel).OrderByDescending(post => post.CreatedDate);
                     break;
+
                 case EnumPostType.Trending:
                     var date7DaysAgo = DateTime.Now.AddDays(-7);
                     //sortedQuery = from post in postQuery
@@ -79,8 +79,6 @@ namespace Fsel.Interaction.Application.Queries.PostQuery
                     //              group interaction by post into g
                     //              orderby g.Count() descending
                     //              select g.Key;
-
-
 
                     sortedQuery = postQuery.Select(post => new
                     {
@@ -107,14 +105,15 @@ namespace Fsel.Interaction.Application.Queries.PostQuery
                                             UpdatedUserId = item.Post.UpdatedUserId,
                                         });
 
-
                     break;
+
                 case EnumPostType.Top:
                     sortedQuery = postQuery
                             .Include(post => post.PostTags.Where(y => !y.IsDeleted))
                             .OrderByDescending(post => post.PostTags.Count)
                             .ThenByDescending(post => post.CreatedDate);
                     break;
+
                 default:
                     break;
             }
@@ -156,7 +155,5 @@ namespace Fsel.Interaction.Application.Queries.PostQuery
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }
-
-
     }
 }

@@ -5,10 +5,10 @@ namespace Fsel.Training.Application.Commands.ClassLiveWorkFlowCmd
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
     using Fsel.Shared.Enums;
     using Fsel.Training.Domain.Entities;
-    using Fsel.Training.Domain.Enums.ErrorCodes;
     using Fsel.Training.Domain.IRepositories;
     using Fsel.Training.Domain.Models.CommandModels.ClassLiveWorkFlows;
     using MediatR;
@@ -72,7 +72,7 @@ namespace Fsel.Training.Application.Commands.ClassLiveWorkFlowCmd
                                                                                     .FirstOrDefaultAsync(cancellationToken);
                     if (assignTeacher == null)
                     {
-                        methodResult.AddErrorBadRequest(nameof(EnumClassLiveWorkFlowErrorCode.ClassLiveWorkFlowNotExits));
+                        methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(assignTeacher));
                         return methodResult;
                     }
 
@@ -82,7 +82,7 @@ namespace Fsel.Training.Application.Commands.ClassLiveWorkFlowCmd
                 }
                 else
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumClassLiveWorkFlowErrorCode.ClassLiveWorkFlowNotExits));
+                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(lessonNeedToChange));
                     return methodResult;
                 }
 

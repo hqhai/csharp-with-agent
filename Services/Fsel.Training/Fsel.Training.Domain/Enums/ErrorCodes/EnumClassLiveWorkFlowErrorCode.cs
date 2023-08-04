@@ -5,26 +5,6 @@ namespace Fsel.Training.Domain.Enums.ErrorCodes
     public enum EnumClassLiveWorkFlowErrorCode
     {
         /// <summary>
-        /// ClassLiveWorkFlow Does not exits
-        /// </summary>
-        ClassLiveWorkFlowNotExits,
-
-        /// <summary>
-        /// Teacher Does not exits
-        /// </summary>
-        TeacherNotExits,
-
-        /// <summary>
-        /// CSO Does not exits
-        /// </summary>
-        CSONotExits,
-
-        /// <summary>
-        /// ClassLiveWorkFlow Already exist
-        /// </summary>
-        ClassLiveWorkFlowAlreadyExist,
-
-        /// <summary>
         /// Class Not Status Pedding
         /// </summary>
         ClassNotStatusPedding,
@@ -48,10 +28,5 @@ namespace Fsel.Training.Domain.Enums.ErrorCodes
         /// Can Not Change live time
         /// </summary>
         CanNotChangeLiveTime,
-
-        /// <summary>
-        /// live date is invalid
-        /// </summary>
-        LiveDateInvalid
     }
 }

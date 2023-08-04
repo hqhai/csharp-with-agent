@@ -7,12 +7,11 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
     using System.Text;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
-    using Fsel.Common.Constants;
+    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Common.Helpers;
     using Fsel.Core.Base;
     using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.Enums;
-    using Fsel.Identity.Domain.Enums.ErrorCodes;
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Infrastructure.ValueSettings;
     using Fsel.Shared.Constants;
@@ -58,7 +57,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             var user = await _userManager.FindByIdAsync(_authContext.CurrentUserId.ToString());
             if (user == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumUserErrorCode.UserNotExist));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(user));
                 return methodResult;
             }
             var userOtpCode = await _userOtpCodeRepository.Queryable

@@ -2,17 +2,17 @@
 
 namespace Fsel.Ordering.Api.Controllers.Admin
 {
-    using Fsel.Common.ActionResults;
     using System.Net;
+    using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
     using Fsel.Core.Base.BaseModels;
+    using Fsel.Ordering.Application.Commands.OrderCmds;
     using Fsel.Ordering.Application.Queries.OrderQuery;
     using Fsel.Ordering.Domain.Models.EntityModels;
     using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
-    using Fsel.Ordering.Application.Commands.OrderCmds;
 
     [ApiVersion(Settings.APIVersion)]
     [Route(Settings.APIDefaultRoute + "/admin/order")]
@@ -26,6 +26,7 @@ namespace Fsel.Ordering.Api.Controllers.Admin
         {
             _mediator = mediator;
         }
+
         /// <summary>
         /// Search Course
         /// </summary>

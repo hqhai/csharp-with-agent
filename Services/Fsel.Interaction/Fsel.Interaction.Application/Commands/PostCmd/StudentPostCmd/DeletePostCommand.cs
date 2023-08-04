@@ -5,7 +5,7 @@ namespace Fsel.Interaction.Application.Commands.PostCmd.StudentPostCmd
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
-    using Fsel.Interaction.Domain.Enums.ErrorCodes;
+    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Interaction.Domain.IRepositories;
     using MediatR;
     using Microsoft.AspNetCore.Http;
@@ -36,7 +36,7 @@ namespace Fsel.Interaction.Application.Commands.PostCmd.StudentPostCmd
 
             if (studentPosts == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumPostErrorCode.PostNotExist), nameof(request.Id), request.Id);
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(studentPosts));
                 return methodResult;
             }
 

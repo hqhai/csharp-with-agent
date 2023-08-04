@@ -509,7 +509,7 @@ namespace Fsel.Interaction.Infrastructure.Migrations
 
                     b.HasIndex("StudentReviewId");
 
-                    b.ToTable("StudentReviewDetail");
+                    b.ToTable("StudentReviewDetails");
                 });
 
             modelBuilder.Entity("Fsel.Interaction.Domain.Entities.SupportCategory", b =>

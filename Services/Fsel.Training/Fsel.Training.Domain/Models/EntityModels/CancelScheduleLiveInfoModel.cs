@@ -11,6 +11,6 @@ namespace Fsel.Training.Domain.Models.EntityModels
         public string? AccessLink { get; set; }
         public string? Description { get; set; }
         public IList<StudentInfoModel>? Students { get; set; }
-        public IList<ClassLiveWorkFlowPlanModel>? ClassLiveWorkFlowPlans{ get; set; }
+        public IList<ClassLiveWorkFlowPlanModel>? ClassLiveWorkFlowPlans { get; set; }
     }
 }

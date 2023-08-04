@@ -2,8 +2,8 @@
 
 namespace Fsel.Interaction.Domain.Entities
 {
-    using Fsel.Common.Enums.ErrorCodes;
     using System.ComponentModel.DataAnnotations;
+    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Entities;
 
     public class TopicTag : Entity

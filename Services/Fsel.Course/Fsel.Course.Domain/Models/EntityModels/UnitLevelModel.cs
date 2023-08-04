@@ -6,6 +6,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
     {
         public IList<CourseLevelUnitModel>? CourseLevelUnits { get; set; }
     }
+
     public class CourseLevelUnitModel
     {
         public string? CourseLevel { get; set; }

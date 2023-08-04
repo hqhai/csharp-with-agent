@@ -16,8 +16,6 @@ namespace Fsel.Course.Infrastructure.Maps
             CreateMap<CreateUnitCommandModel, Unit>().IgnoreAllNonExisting();
             CreateMap<UpdateUnitCommandModel, Unit>().IgnoreAllNonExisting();
             CreateMap<UnitResult, UnitResultModel>().IgnoreAllNonExisting();
-
-
         }
     }
 }

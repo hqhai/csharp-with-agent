@@ -59,7 +59,6 @@ namespace Fsel.Interaction.Application.Queries.PostQuery
                     UpdatedUserId = post.UpdatedUserId,
                 });
 
-
             int totalItem = await postQuery.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
 
             var lists = await postQuery
@@ -71,6 +70,5 @@ namespace Fsel.Interaction.Application.Queries.PostQuery
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }
-
     }
 }

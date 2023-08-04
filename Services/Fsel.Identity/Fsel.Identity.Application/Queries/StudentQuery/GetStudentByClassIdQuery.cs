@@ -4,7 +4,7 @@ namespace Fsel.Identity.Application.Queries.StudentQuery
 {
     using AutoMapper;
     using Fsel.Common.ActionResults;
-    using Fsel.Identity.Domain.Enums.ErrorCodes;
+    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Domain.Models.EntityModels;
     using MediatR;
@@ -36,7 +36,7 @@ namespace Fsel.Identity.Application.Queries.StudentQuery
             var student = await _studentRepository.Queryable.Where(x => x.ClassId == request.ClassId).ToListAsync(cancellationToken: cancellationToken);
             if (student == null || student.Count == 0)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumStudentErrorCode.StudentNull));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student));
                 return methodResult;
             }
             methodResult.Result = _mapper.Map<IList<StudentModel>>(student);

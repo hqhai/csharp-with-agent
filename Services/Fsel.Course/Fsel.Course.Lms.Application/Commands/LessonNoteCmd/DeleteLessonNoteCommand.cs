@@ -5,7 +5,7 @@ namespace Fsel.Course.Lms.Application.Commands.LessonNoteCmd
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
-    using Fsel.Course.Domain.Enums.ErrorCodes;
+    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
     using MediatR;
     using Microsoft.AspNetCore.Http;
@@ -33,7 +33,7 @@ namespace Fsel.Course.Lms.Application.Commands.LessonNoteCmd
 
             if (lessonNote == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumLessonNoteErrorCode.LessonNotesNotExist), nameof(request.Id), request.Id);
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(lessonNote));
                 return methodResult;
             }
 

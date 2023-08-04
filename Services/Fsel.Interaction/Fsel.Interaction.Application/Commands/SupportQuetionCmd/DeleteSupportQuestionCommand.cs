@@ -6,7 +6,7 @@ namespace Fsel.Interaction.Application.Commands.SupportQuetionCmd
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
-    using Fsel.Interaction.Domain.Enums.ErrorCodes;
+    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Interaction.Domain.IRepositories;
     using MediatR;
     using Microsoft.AspNetCore.Http;
@@ -35,7 +35,7 @@ namespace Fsel.Interaction.Application.Commands.SupportQuetionCmd
             var supportQuestion = await _supportQuetionRepository.GetByIdAsync(request.Id);
             if (supportQuestion == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSupportCategoryErrorCode.SupportCategoryNotExist), nameof(request.Id), request?.Id);
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(supportQuestion));
                 return methodResult;
             }
 
