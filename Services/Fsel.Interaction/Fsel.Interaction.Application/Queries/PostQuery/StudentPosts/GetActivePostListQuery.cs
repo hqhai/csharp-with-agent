@@ -130,6 +130,7 @@ namespace Fsel.Interaction.Application.Queries.PostQuery.StudentPosts
                 CreatedDate = post.CreatedDate,
                 UpdatedDate = post.UpdatedDate,
                 UpdatedUserId = post.UpdatedUserId,
+                FilePaths = post.FilePaths,
             });
 
             int totalItem = await sortedQuery.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
