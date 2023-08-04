@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Interaction.Application.Queries.PostQuery
+namespace Fsel.Interaction.Application.Queries.PostQuery.StudentPosts
 {
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
@@ -54,7 +54,7 @@ namespace Fsel.Interaction.Application.Queries.PostQuery
             var postQuery = _postRepository.Queryable.Where(post => !_interactionActionRepository.Queryable
                                                      .Any(interaction => interaction.ObjectId == post.Id &&
                                                       interaction.Type == EnumInteractionActionType.Disable &&
-                                                      interaction.UserId == _authContext.CurrentUserId));
+                                                      interaction.UserId == _authContext.CurrentUserId) && post.Status == EnumPostStatus.Active);
 
             IQueryable<Post> sortedQuery = postQuery;
             switch (request.PostType)
