@@ -53,7 +53,7 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkQuery
                 return methodResult;
             }
             var studentId = student?.Content?.Result?.Id;
-            var lessonResult = await _lessonResultRepository.GetByIdAsync(request.LessonResultId);
+            var lessonResult = await _lessonResultRepository.Queryable.FirstOrDefaultAsync(x => x.Id == request.LessonResultId && x.StudentId == studentId, cancellationToken);
             if (lessonResult == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(lessonResult));

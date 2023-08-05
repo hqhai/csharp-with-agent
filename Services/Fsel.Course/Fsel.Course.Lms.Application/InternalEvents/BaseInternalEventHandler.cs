@@ -183,8 +183,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                                         Scores = group.Sum(x => x.Scores),
                                         TotalCount = group.Sum(x => x.TotalCount),
                                         CorrectCount = group.Sum(x => x.CorrectCount)
-                                    })
-                                    .ToList();
+                                    }).ToList();
 
                 unitResult.CorrectCount = (int)groupedSkillScores.Sum(x => x.CorrectCount);
                 unitResult.CorrectTotal = (int)groupedSkillScores.Sum(x => x.TotalCount);

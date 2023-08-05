@@ -12,6 +12,11 @@ namespace Fsel.Course.Domain.Entities
     public class ClassForum : Entity
     {
         /// <summary>
+        /// Tiêu đề
+        /// </summary>
+        public string? Title { get; set; }
+
+        /// <summary>
         /// Cách chấm điểm
         /// </summary>
         public EnumGradingStyle GradingStyle { get; set; }

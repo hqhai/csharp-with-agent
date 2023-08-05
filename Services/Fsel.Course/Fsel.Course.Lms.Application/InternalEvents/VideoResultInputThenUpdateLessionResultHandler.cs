@@ -39,6 +39,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                     var percentVideo = lessonResult.VideoResult.Percent * 40;
                     var percent = (percentClassForum + percentHomeWork + percentVideo) / 100;
                     lessonResult.Percent = percent;
+                    lessonResult.SkillScores = videoResult.VideoSkillScores?.FirstOrDefault(x => x.Type == EnumTimeCodeType.Standalone)?.SkillScores;
                     lessonResult.Status = EnumResultStatus.Done;
                     _lessonResultRepository.Update(lessonResult);
                     await _lessonResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
