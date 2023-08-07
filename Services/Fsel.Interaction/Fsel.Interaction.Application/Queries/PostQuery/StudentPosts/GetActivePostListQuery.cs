@@ -60,12 +60,12 @@ namespace Fsel.Interaction.Application.Queries.PostQuery.StudentPosts
             switch (request.PostType)
             {
                 case EnumPostType.Recent:
-                    sortedQuery = postQuery.Include(post => post.PostTags.Where(y => !y.IsDeleted)).OrderByDescending(post => post.CreatedDate);
+                    sortedQuery = postQuery.Include(post => post.PostTags).OrderByDescending(post => post.CreatedDate);
                     //sortedQuery2 = postQuery.Select(post=> new { Post = post}).OrderByDescending(item => item.CreatedDate);
                     break;
 
                 case EnumPostType.Relevant:
-                    sortedQuery = postQuery.Include(post => post.PostTags.Where(y => !y.IsDeleted)).Where(post => post.CourseLevel == courseLevel).OrderByDescending(post => post.CreatedDate);
+                    sortedQuery = postQuery.Include(post => post.PostTags).Where(post => post.CourseLevel == courseLevel).OrderByDescending(post => post.CreatedDate);
                     break;
 
                 case EnumPostType.Trending:
@@ -81,7 +81,7 @@ namespace Fsel.Interaction.Application.Queries.PostQuery.StudentPosts
                     //              select g.Key;
 
                     sortedQuery = postQuery
-                        .Include(post => post.PostTags.Where(y => !y.IsDeleted)).Select(post => new
+                        .Include(post => post.PostTags).Select(post => new
                         {
                             Post = post,
                             InteractionCount = _interactionActionRepository.Queryable
@@ -110,7 +110,7 @@ namespace Fsel.Interaction.Application.Queries.PostQuery.StudentPosts
 
                 case EnumPostType.Top:
                     sortedQuery = postQuery
-                            .Include(post => post.PostTags.Where(y => !y.IsDeleted))
+                            .Include(post => post.PostTags)
                             .OrderByDescending(post => post.PostTags.Count)
                             .ThenByDescending(post => post.CreatedDate);
                     break;
