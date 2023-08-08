@@ -14,6 +14,7 @@ namespace Fsel.Course.Infrastructure.Common
     using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.CommandModels.Courses;
+    using Fsel.Shared.Helpers;
     using Microsoft.EntityFrameworkCore;
 
     public class CourseHelper
@@ -112,45 +113,64 @@ namespace Fsel.Course.Infrastructure.Common
 
             #endregion validate Unit
 
-            #region validate mockTest
-
-            var mocktestIds = request.CourseUnitMockTests.Where(e => e.MockTestId != null).Select(x => x.MockTestId).Distinct().ToList();
-            if (mocktestIds.Count > 2)
+            if (request.CourseLevel.GetEnumCourseType() == Shared.Enums.EnumCourseType.Ielts)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.MockTestIsUpToTwo), nameof(mocktestIds));
-                return methodResult;
+                #region validate mockTest
+
+                var mocktestIds = request.CourseUnitMockTests.Where(e => e.MockTestId != null).Select(x => x.MockTestId).Distinct().ToList();
+                if (mocktestIds.Count > 2)
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.MockTestIsUpToTwo), nameof(mocktestIds));
+                    return methodResult;
+                }
+
+                if (mocktestIds.Count == 0)
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(mocktestIds));
+                    return methodResult;
+                }
+
+                if (_mockTestRepository.IsIdsInValid(mocktestIds.Where(e => e.HasValue).Select(e => e!.Value)))
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(mocktestIds));
+                    return methodResult;
+                }
+
+                var mocktests = await _mockTestRepository.Queryable.Include(x => x.CourseUnitMockTests).Where(x => mocktestIds != null && mocktestIds.Contains(x.Id)).ToListAsync();
+                var checkMockTest = mocktests.All(x => x.MockTestType == EnumMockTestType.FullMockTest);
+                if (!checkMockTest)
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumMockTestErrorCode.MockTestExistsOtherThanTypeFullMockTest), nameof(mocktests), mocktests);
+                    return methodResult;
+                }
+
+                #endregion validate mockTest
             }
-            if (_mockTestRepository.IsIdsInValid(mocktestIds.Where(e => e.HasValue).Select(e => e!.Value)))
+            else
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(mocktestIds));
-                return methodResult;
+                #region validate finalTest
+
+                var finalTestIds = request.CourseUnitMockTests.Where(e => e.FinalTestId != null).Select(x => x.FinalTestId).Distinct().ToList();
+                if (_finalTestRepository.IsIdsInValid(finalTestIds.Where(e => e.HasValue).Select(e => e!.Value)))
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(finalTestIds));
+                    return methodResult;
+                }
+
+                if (finalTestIds.Count == 0)
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(finalTestIds));
+                    return methodResult;
+                }
+
+                if (finalTestIds.Count > 1)
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.FinalTestIsUpToOne), nameof(finalTestIds));
+                    return methodResult;
+                }
+
+                #endregion validate finalTest
             }
-
-            var mocktests = await _mockTestRepository.Queryable.Include(x => x.CourseUnitMockTests).Where(x => mocktestIds != null && mocktestIds.Contains(x.Id)).ToListAsync();
-            var checkMockTest = mocktests.All(x => x.MockTestType == EnumMockTestType.FullMockTest);
-            if (!checkMockTest)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumMockTestErrorCode.MockTestExistsOtherThanTypeFullMockTest), nameof(mocktests), mocktests);
-                return methodResult;
-            }
-
-            #endregion validate mockTest
-
-            #region validate finalTest
-
-            var finalTestIds = request.CourseUnitMockTests.Where(e => e.FinalTestId != null).Select(x => x.FinalTestId).Distinct().ToList();
-            if (_finalTestRepository.IsIdsInValid(finalTestIds.Where(e => e.HasValue).Select(e => e!.Value)))
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(finalTestIds));
-                return methodResult;
-            }
-            if (finalTestIds.Count > 1)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.FinalTestIsUpToOne), nameof(finalTestIds));
-                return methodResult;
-            }
-
-            #endregion validate finalTest
 
             return methodResult;
         }
