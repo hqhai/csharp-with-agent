@@ -79,12 +79,12 @@ namespace Fsel.Course.Infrastructure.Common
             #region validate Unit
 
             var unitIds = request.CourseUnitMockTests.Where(e => e.UnitId != null).Select(x => x.UnitId).ToList();
-            if (_unitRepository.IsIdsInValid(unitIds.Where(e => e.HasValue).Select(e => e!.Value)))
+            var units = await _unitRepository.Queryable.Where(x => unitIds.Contains(x.Id)).ToListAsync();
+            if (units == null || units.Count == 0)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(unitIds));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
                 return methodResult;
             }
-
             if (unitIds.Count != unitIds.Distinct().Count())
             {
                 methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.DuplicateUnitId));
@@ -97,7 +97,13 @@ namespace Fsel.Course.Infrastructure.Common
                 return methodResult;
             }
 
-            var isCheck = await _unitRepository.Queryable.AllAsync(x => unitIds.Any(y => !y.HasValue || y.Value == x.Id) && x.CourseLevel == request.CourseLevel);
+            if (units.Count != unitIds.Count)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(units));
+                return methodResult;
+            }
+
+            var isCheck = units.All(x => unitIds.Contains(x.Id) && x.CourseLevel == request.CourseLevel);
             if (!isCheck)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.AnotherLevelUnitExists));
