@@ -5,6 +5,7 @@ namespace Fsel.Training.Application.Commands.ClassLiveCmd
     using System;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
     using Fsel.Shared.Enums;
     using Fsel.Training.Application.Services.UserServices;
@@ -47,7 +48,7 @@ namespace Fsel.Training.Application.Commands.ClassLiveCmd
             var teacherResult = await _userService.GetTeacherByUserIdAsync(_authContext.CurrentUserId);
             if (!teacherResult.IsSuccessStatusCode)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumClassLiveWorkFlowErrorCode.TeacherNotExits));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(teacherResult));
                 return methodResult;
             }
             var teacherId = teacherResult.Content?.Result?.Id;
@@ -117,7 +118,7 @@ namespace Fsel.Training.Application.Commands.ClassLiveCmd
             }
             else
             {
-                methodResult.AddErrorBadRequest(nameof(EnumClassLiveCalendarErrorCode.ClassLiveCalendarNotExits));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(classLiveWorkFlow));
                 return methodResult;
             }
 

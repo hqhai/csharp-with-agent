@@ -39,6 +39,7 @@ namespace Fsel.Course.Domain.Entities
             get { return ConvertHelper.Deserialize<IList<SkillScores>>(SkillScoresStr); }
             set { SkillScoresStr = ConvertHelper.Serialize(value); }
         }
+
         /// <summary>
         /// Trạng thái
         /// </summary>

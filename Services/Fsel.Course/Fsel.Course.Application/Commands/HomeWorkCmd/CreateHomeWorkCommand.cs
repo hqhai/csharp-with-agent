@@ -6,6 +6,7 @@ namespace Fsel.Course.Application.Commands.HomeWorkCmd
     using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
@@ -43,7 +44,7 @@ namespace Fsel.Course.Application.Commands.HomeWorkCmd
 
             if (request.Questions == null || request.Questions.Count == 0)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumQuestionErrorCode.QuestionsNull), nameof(request.Questions), request.Questions);
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Questions));
                 return methodResult;
             }
 
@@ -51,7 +52,7 @@ namespace Fsel.Course.Application.Commands.HomeWorkCmd
             {
                 if (q == null)
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumQuestionErrorCode.QuestionNull), nameof(request.Questions), q);
+                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Questions));
                 }
                 else
                 {

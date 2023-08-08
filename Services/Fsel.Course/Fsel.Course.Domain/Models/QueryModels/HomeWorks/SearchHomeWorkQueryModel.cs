@@ -2,8 +2,8 @@
 
 namespace Fsel.Course.Domain.Models.QueryModels.HomeWorks
 {
-    using Fsel.Shared.Enums;
     using Fsel.Core.Base.BaseModels;
+    using Fsel.Shared.Enums;
 
     public class SearchHomeWorkQueryModel : BaseQueryModel
     {

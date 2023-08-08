@@ -3,7 +3,7 @@
 namespace Fsel.Course.Application.Commands.PlacementTestCmd
 {
     using Fsel.Common.ActionResults;
-    using Fsel.Course.Domain.Enums.ErrorCodes;
+    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
     using MediatR;
     using Microsoft.AspNetCore.Http;
@@ -34,7 +34,7 @@ namespace Fsel.Course.Application.Commands.PlacementTestCmd
             var placementTest = await _placementTestRepository.GetByIdAsync(request.Id);
             if (placementTest == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumPlacementTestErrorCode.PlacementTestNotExist), nameof(request.Id), request.Id);
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(placementTest));
                 return methodResult;
             }
             placementTest.IsActive = request.IsActive;

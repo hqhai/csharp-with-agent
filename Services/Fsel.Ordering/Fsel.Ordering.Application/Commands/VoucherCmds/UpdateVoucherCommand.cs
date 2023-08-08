@@ -3,13 +3,12 @@
 namespace Fsel.Ordering.Application.Commands.VoucherCmds
 {
     using System;
-    using System.Collections.Generic;
     using System.Linq;
-    using System.Text;
     using System.Threading;
     using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Ordering.Domain.Entities;
     using Fsel.Ordering.Domain.Enums.ErrorCodes;
     using Fsel.Ordering.Domain.IRepositories;
@@ -42,10 +41,16 @@ namespace Fsel.Ordering.Application.Commands.VoucherCmds
 
             #region Validation
 
+            if (request.StartDate > request.EndDate)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumVoucherErrorCode.VoucherStartTimeMustSoonerThanEndTime), nameof(request.EndDate), request.EndDate);
+                return methodResult;
+            }
+
             var voucher = await _voucherRepository.GetIncludeByIdAsync(request.Id);
             if (voucher == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumVoucherErrorCode.VoucherNotExist), nameof(request.Id), request.Id);
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(voucher));
                 return methodResult;
             }
             if (!voucher.IsValid())

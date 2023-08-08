@@ -31,6 +31,8 @@ namespace Fsel.Interaction.Infrastructure
             modelBuilder.ApplyConfiguration(new PostTagEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new StudentReviewDetailEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new StudentReviewEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new SupportQuestionEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new SupportTicketEntityTypeConfiguration());
             base.OnModelCreating(modelBuilder);
         }
 
@@ -43,6 +45,9 @@ namespace Fsel.Interaction.Infrastructure
         public DbSet<TopicTag> TopicTags { get; set; }
         public DbSet<StudentReview> StudentReviews { get; set; }
         public DbSet<StudentReviewDetail> StudentReviewDetails { get; set; }
+        public DbSet<SupportQuestion> SupportQuestions { get; set; }
+        public DbSet<SupportTicket> SupportTickets { get; set; }
+        public DbSet<SupportCategory> SupportCategorys { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -64,7 +69,7 @@ namespace Fsel.Interaction.Infrastructure
             var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, SurveyQuestionSettings.SurveyQuestionFileName);
             var surveyQuestions = ConvertHelper.DeserializeFromFilePath<IList<SurveyQuestion>>(path);
             ArgumentNullException.ThrowIfNull(surveyQuestions);
-            builder.Entity<SurveyQuestion>().HasData(surveyQuestions.ToArray());
+            builder.Entity<SurveyQuestion>().HasData(surveyQuestions);
         }
     }
 }

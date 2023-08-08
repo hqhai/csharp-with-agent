@@ -4,6 +4,7 @@ namespace Fsel.Training.Application.Commands.TeacherFreeDateCmd
 {
     using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
     using Fsel.Training.Application.Services.UserServices;
     using Fsel.Training.Domain.Entities;
@@ -47,7 +48,7 @@ namespace Fsel.Training.Application.Commands.TeacherFreeDateCmd
             var teacher = await _userService.GetTeacherByUserIdAsync(_authContext.CurrentUserId);
             if (!teacher.IsSuccessStatusCode)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumTeacherFreeDateErrorCode.TeacherNotExits));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(teacher));
                 return methodResult;
             }
             var teacherId = teacher.Content?.Result?.Id;
@@ -61,14 +62,14 @@ namespace Fsel.Training.Application.Commands.TeacherFreeDateCmd
             var isCheckStart = await _teacherFreeDateRepository.Queryable.AnyAsync(p => (p.StartDate <= request.StartDate && p.EndDate >= request.StartDate) && p.TeacherId == teacherId, cancellationToken);
             if (isCheckStart)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumTeacherFreeDateErrorCode.StartDateAlreadyExists));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(isCheckStart));
                 return methodResult;
             }
 
             var isCheckEnd = await _teacherFreeDateRepository.Queryable.AnyAsync(p => (p.StartDate <= request.EndDate && p.EndDate >= request.EndDate) && p.TeacherId == teacherId, cancellationToken);
             if (isCheckEnd)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumTeacherFreeDateErrorCode.EndDateAlreadyExists));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(isCheckEnd));
                 return methodResult;
             }
 

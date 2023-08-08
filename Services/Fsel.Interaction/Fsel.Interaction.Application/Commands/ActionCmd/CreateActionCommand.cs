@@ -4,7 +4,6 @@ namespace Fsel.Interaction.Application.Commands.ActionCmd
 {
     using System.Threading;
     using System.Threading.Tasks;
-    using System.Xml.Linq;
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base;

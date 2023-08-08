@@ -7,7 +7,7 @@ namespace Fsel.Identity.Infrastructure.Repositories
     using Fsel.Identity.Domain.IRepositories;
     using Microsoft.EntityFrameworkCore;
 
-    public class TeacherRepository : BaseIdentityRepository<Teacher, User>, ITeacherRepository
+    public class TeacherRepository : BaseRepository<Teacher>, ITeacherRepository
     {
         public TeacherRepository(UserDbContext dbContext, AuthContext authContext) : base(dbContext, authContext)
         {

@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Interaction.Application.Queries.PostQuery
+namespace Fsel.Interaction.Application.Queries.PostQuery.StudentPosts
 {
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
@@ -15,8 +15,6 @@ namespace Fsel.Interaction.Application.Queries.PostQuery
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
-    using Microsoft.Extensions.Hosting;
-    using Microsoft.VisualBasic;
 
     public class GetActivePostListQuery : GetActivePostListQueryModel, IRequest<MethodResult<PagingItemsModel<PostSearchModel>>>
     {
@@ -56,18 +54,20 @@ namespace Fsel.Interaction.Application.Queries.PostQuery
             var postQuery = _postRepository.Queryable.Where(post => !_interactionActionRepository.Queryable
                                                      .Any(interaction => interaction.ObjectId == post.Id &&
                                                       interaction.Type == EnumInteractionActionType.Disable &&
-                                                      interaction.UserId == _authContext.CurrentUserId));
+                                                      interaction.UserId == _authContext.CurrentUserId) && post.Status == EnumPostStatus.Active);
 
             IQueryable<Post> sortedQuery = postQuery;
             switch (request.PostType)
             {
                 case EnumPostType.Recent:
-                    sortedQuery = postQuery.OrderByDescending(post => post.CreatedDate);
+                    sortedQuery = postQuery.Include(post => post.PostTags).OrderByDescending(post => post.CreatedDate);
                     //sortedQuery2 = postQuery.Select(post=> new { Post = post}).OrderByDescending(item => item.CreatedDate);
                     break;
+
                 case EnumPostType.Relevant:
-                    sortedQuery = postQuery.Where(post => post.CourseLevel == courseLevel).OrderByDescending(post => post.CreatedDate);
+                    sortedQuery = postQuery.Include(post => post.PostTags).Where(post => post.CourseLevel == courseLevel).OrderByDescending(post => post.CreatedDate);
                     break;
+
                 case EnumPostType.Trending:
                     var date7DaysAgo = DateTime.Now.AddDays(-7);
                     //sortedQuery = from post in postQuery
@@ -80,16 +80,15 @@ namespace Fsel.Interaction.Application.Queries.PostQuery
                     //              orderby g.Count() descending
                     //              select g.Key;
 
-
-
-                    sortedQuery = postQuery.Select(post => new
-                    {
-                        Post = post,
-                        InteractionCount = _interactionActionRepository.Queryable
+                    sortedQuery = postQuery
+                        .Include(post => post.PostTags).Select(post => new
+                        {
+                            Post = post,
+                            InteractionCount = _interactionActionRepository.Queryable
                                         .Count(interaction => interaction.ObjectId == post.Id && interaction.Type == EnumInteractionActionType.Like),
-                        CommentCount = _commentRepository.Queryable
+                            CommentCount = _commentRepository.Queryable
                                         .Count(comment => comment.ObjectId == post.Id)
-                    })
+                        })
                                         .Where(item => item.InteractionCount > 0 && item.Post.CreatedDate >= date7DaysAgo)
                                         .OrderByDescending(item => item.InteractionCount)
                                         .ThenByDescending(item => item.CommentCount)
@@ -107,14 +106,15 @@ namespace Fsel.Interaction.Application.Queries.PostQuery
                                             UpdatedUserId = item.Post.UpdatedUserId,
                                         });
 
-
                     break;
+
                 case EnumPostType.Top:
                     sortedQuery = postQuery
-                            .Include(post => post.PostTags.Where(y => !y.IsDeleted))
+                            .Include(post => post.PostTags)
                             .OrderByDescending(post => post.PostTags.Count)
                             .ThenByDescending(post => post.CreatedDate);
                     break;
+
                 default:
                     break;
             }
@@ -131,6 +131,15 @@ namespace Fsel.Interaction.Application.Queries.PostQuery
                 CreatedDate = post.CreatedDate,
                 UpdatedDate = post.UpdatedDate,
                 UpdatedUserId = post.UpdatedUserId,
+                FilePaths = post.FilePaths,
+                PostTags = post.PostTags
+                               .Where(postTag => postTag.TopicTag != null)
+                               .Select(postTag => new TopicTagModel
+                               {
+                                   Name = postTag.TopicTag!.Name,
+                                   Color = postTag.TopicTag!.Color,
+                               }).ToList()
+
             });
 
             int totalItem = await sortedQuery.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
@@ -156,7 +165,5 @@ namespace Fsel.Interaction.Application.Queries.PostQuery
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }
-
-
     }
 }

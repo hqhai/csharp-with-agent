@@ -5,18 +5,8 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
     public enum EnumMockTestAnswerErrorCode
     {
         /// <summary>
-        /// Answer Is Null
-        /// </summary>
-        AnswerNull,
-
-        /// <summary>
         /// Answer Is In The Wrong Format
         /// </summary>
         AnswerIsInTheWrongFormat,
-
-        /// <summary>
-        /// skill Is Null
-        /// </summary>
-        SkillNull,
     }
 }

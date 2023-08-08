@@ -13,7 +13,6 @@ namespace Fsel.Identity.Api.Controllers.Admin
     [ApiVersion(Settings.APIVersion)]
     [Route(Settings.APIDefaultRoute + "/cso/admin")]
     [ApiController]
-    //[Authorize(Roles = nameof(EnumRole.Admin))]
     public class CSOController : ControllerBase
     {
         private readonly IMediator _mediator;

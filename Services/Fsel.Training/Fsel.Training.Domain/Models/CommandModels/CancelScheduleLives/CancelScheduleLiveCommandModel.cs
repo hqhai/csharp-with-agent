@@ -10,7 +10,7 @@ namespace Fsel.Training.Domain.Models.CommandModels.CancelScheduleLives
 
     public class ChangeClassWordFlowPlanCommandModel
     {
-        public Guid ClassWordFlowPlanId { get;set; }
+        public Guid ClassWordFlowPlanId { get; set; }
         public bool IsActive { get; set; }
         public Guid LiveTimeFrameId { get; set; }
         public DateTime LiveDate { get; set; }

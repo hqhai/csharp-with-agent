@@ -7,6 +7,7 @@ namespace Fsel.Training.Application.Queries.ScheduleQuery
     using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Training.Application.Services.UserServices;
     using Fsel.Training.Application.Services.UserServices.Models;
     using Fsel.Training.Domain.Enums.ErrorCodes;
@@ -48,7 +49,7 @@ namespace Fsel.Training.Application.Queries.ScheduleQuery
 
             if (@class == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumClassErrorCode.ClassesNotExits), nameof(@class));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(@class));
                 return methodResult;
             }
             if (@class.TeacherId.HasValue)
@@ -63,7 +64,7 @@ namespace Fsel.Training.Application.Queries.ScheduleQuery
             }
             if (@class.LiveDays == null || @class.LiveDays.Count == 0)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumClassErrorCode.ClassLiveDayIsNull), nameof(@class.LiveDays));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(@class.LiveDays));
                 return methodResult;
             }
 

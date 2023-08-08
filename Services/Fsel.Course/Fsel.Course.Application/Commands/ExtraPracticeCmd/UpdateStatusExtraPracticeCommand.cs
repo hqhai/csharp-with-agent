@@ -3,7 +3,7 @@
 namespace Fsel.Course.Application.Commands.ExtraPracticeCmd
 {
     using Fsel.Common.ActionResults;
-    using Fsel.Course.Domain.Enums.ErrorCodes;
+    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
     using MediatR;
     using Microsoft.AspNetCore.Http;
@@ -33,7 +33,7 @@ namespace Fsel.Course.Application.Commands.ExtraPracticeCmd
             var extraPractice = await _extraPracticeRepository.GetByIdAsync(request.Id);
             if (extraPractice == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumPlacementTestErrorCode.PlacementTestNotExist), nameof(request.Id), request.Id);
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(extraPractice));
                 return methodResult;
             }
             extraPractice.IsActive = request.IsActive;

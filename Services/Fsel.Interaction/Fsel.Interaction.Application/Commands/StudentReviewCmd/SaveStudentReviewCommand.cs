@@ -4,12 +4,12 @@ namespace Fsel.Interaction.Application.Commands.StudentReviewCmd
 {
     using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
     using Fsel.Interaction.Application.Services.CourseServices;
     using Fsel.Interaction.Application.Services.TrainingService;
     using Fsel.Interaction.Application.Services.UserServices;
     using Fsel.Interaction.Domain.Entities;
-    using Fsel.Interaction.Domain.Enums.ErrorCodes;
     using Fsel.Interaction.Domain.IRepositories;
     using Fsel.Interaction.Domain.Models.CommandModels.StudentReviews;
     using Fsel.Interaction.Domain.Models.EntityModels;
@@ -77,7 +77,7 @@ namespace Fsel.Interaction.Application.Commands.StudentReviewCmd
 
                 if (courseResult == null)
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumStudentReviewErrorCode.CourseNotExsit));
+                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(courseResult));
                     return methodResult;
                 }
             }
@@ -105,12 +105,12 @@ namespace Fsel.Interaction.Application.Commands.StudentReviewCmd
                         var isCheckPlatform = request.Id.HasValue && studentReview?.Id == request.Id;
                         if (!isCheckPlatform && request.Id.HasValue)
                         {
-                            methodResult.AddErrorBadRequest(nameof(EnumStudentReviewErrorCode.StudentReviewIdNotExist));
+                            methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(isCheckPlatform));
                             return methodResult;
                         }
                         else if (studentReview != null && !request.Id.HasValue)
                         {
-                            methodResult.AddErrorBadRequest(nameof(EnumStudentReviewErrorCode.StudentReviewAlreadyExist));
+                            methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(studentReview));
                             return methodResult;
                         }
                     }
@@ -119,12 +119,12 @@ namespace Fsel.Interaction.Application.Commands.StudentReviewCmd
                         var isCheckCourse = courseId.HasValue && studentReview?.CourseId == courseId && request.Id.HasValue && studentReview?.Id == request.Id;
                         if (!isCheckCourse && request.Id.HasValue)
                         {
-                            methodResult.AddErrorBadRequest(nameof(EnumStudentReviewErrorCode.StudentReviewIdNotExist));
+                            methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(isCheckCourse));
                             return methodResult;
                         }
                         else if (studentReview != null && !request.Id.HasValue)
                         {
-                            methodResult.AddErrorBadRequest(nameof(EnumStudentReviewErrorCode.StudentReviewAlreadyExist));
+                            methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(studentReview));
                             return methodResult;
                         }
                     }

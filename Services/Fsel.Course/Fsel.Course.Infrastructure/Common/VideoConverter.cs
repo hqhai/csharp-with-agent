@@ -5,6 +5,7 @@ namespace Fsel.Course.Infrastructure.Common
     using System.Linq;
     using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.Enums.ErrorCodes;
@@ -42,14 +43,14 @@ namespace Fsel.Course.Infrastructure.Common
 
             if (exercise.Questions == null || exercise.Questions.Count == 0)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumQuestionErrorCode.QuestionNull));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(exercise.Questions));
                 return methodResult;
             }
             foreach (var question in exercise.Questions)
             {
                 if (question == null)
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumQuestionErrorCode.QuestionNull));
+                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(question));
                     return methodResult;
                 }
                 var newQuestion = _mapper.Map<Question>(question);
@@ -96,20 +97,20 @@ namespace Fsel.Course.Infrastructure.Common
             {
                 if (timeCode == null)
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumVideoTimeCodeErrorCode.VideoTimeCodeNull));
+                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(timeCode));
                     return methodResult;
                 }
                 var newTimeCode = _mapper.Map<VideoTimeCode>(timeCode);
                 if (timeCode.Exercises == null || timeCode.Exercises.Count == 0)
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumExerciseErrorCode.ExercisesNull));
+                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(timeCode.Exercises));
                     return methodResult;
                 }
                 foreach (var exercise in timeCode.Exercises)
                 {
                     if (exercise == null)
                     {
-                        methodResult.AddErrorBadRequest(nameof(EnumExerciseErrorCode.ExerciseNull));
+                        methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(exercise));
                         return methodResult;
                     }
                     var newExercise = _mapper.Map<Exercise>(exercise);
@@ -150,7 +151,7 @@ namespace Fsel.Course.Infrastructure.Common
             VoidMethodResult methodResult = new VoidMethodResult();
             if (request.VideoTimeCodes == null || request.VideoTimeCodes.Count == 0)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumVideoTimeCodeErrorCode.VideoTimeCodesNull));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.VideoTimeCodes));
                 return methodResult;
             }
 
@@ -182,7 +183,7 @@ namespace Fsel.Course.Infrastructure.Common
 
             if (request.VideoTimeCodes == null || request.VideoTimeCodes.Count == 0)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumVideoTimeCodeErrorCode.VideoTimeCodesNull));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.VideoTimeCodes));
                 return methodResult;
             }
             var isVideoUsed = await _videoRepository.IsVideoUsed(request.Id);

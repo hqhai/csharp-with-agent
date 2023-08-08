@@ -2,10 +2,10 @@
 
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using Fsel.Shared.Enums;
 using Fsel.Common.Enums.ErrorCodes;
 using Fsel.Core.Entities;
 using Fsel.Course.Domain.Enums;
+using Fsel.Shared.Enums;
 
 namespace Fsel.Course.Domain.Entities
 {

@@ -4,6 +4,7 @@ namespace Fsel.Course.Infrastructure.Common
 {
     using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.Enums.ErrorCodes;
@@ -63,7 +64,7 @@ namespace Fsel.Course.Infrastructure.Common
                 ExtraPracticeChapter extraPracticeChapter = _mapper.Map<ExtraPracticeChapter>(item);
                 if (item == null)
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumExtraPracticeChapterErrorCode.ExtraPracticeChapterNull));
+                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(extraPracticeChapter));
                     return methodResult;
                 }
                 if (item.Exercises != null && item.Exercises.Count > 0)
@@ -72,7 +73,7 @@ namespace Fsel.Course.Infrastructure.Common
                     {
                         if (exercise == null)
                         {
-                            methodResult.AddErrorBadRequest(nameof(EnumExerciseErrorCode.ExerciseNull));
+                            methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(exercise));
                             return methodResult;
                         }
                         Exercise excerciseNew = _mapper.Map<Exercise>(exercise);
@@ -96,14 +97,14 @@ namespace Fsel.Course.Infrastructure.Common
             VoidMethodResult methodResult = new VoidMethodResult();
             if (exercises == null || exercises.Count == 0)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumExerciseErrorCode.ExercisesNull));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(exercises));
                 return methodResult;
             }
             foreach (var exercise in exercises)
             {
                 if (exercise == null)
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumExerciseErrorCode.ExerciseNull));
+                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(exercise));
                     return methodResult;
                 }
                 Exercise excerciseNew = _mapper.Map<Exercise>(exercise);
@@ -133,7 +134,7 @@ namespace Fsel.Course.Infrastructure.Common
             {
                 if (request.ExtraPracticeChapters == null || request.ExtraPracticeChapters.Count == 0)
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumExtraPracticeChapterErrorCode.ExtraPracticeChaptersNull));
+                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.ExtraPracticeChapters));
                     return methodResult;
                 }
                 var method = AddExtraPracticeChapterExercise(extraPracticeChapters, request.ExtraPracticeChapters);
@@ -147,7 +148,7 @@ namespace Fsel.Course.Infrastructure.Common
             {
                 if (request.Exercises == null || request.Exercises.Count == 0)
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumExerciseErrorCode.ExercisesNull));
+                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Exercises));
                     return methodResult;
                 }
                 var method = AddExerciseToExtraPractice(extraPracticeExercises, request.Exercises);
@@ -161,7 +162,7 @@ namespace Fsel.Course.Infrastructure.Common
             {
                 if (request.Video == null)
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumVideoErrorCode.VideoNull));
+                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Video));
                     return methodResult;
                 }
                 Video video = _mapper.Map<Video>(request.Video);
@@ -177,7 +178,7 @@ namespace Fsel.Course.Infrastructure.Common
             {
                 if (request.MockTestId == null)
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumMockTestErrorCode.MockTestIdNotNull));
+                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.MockTestId));
                     return methodResult;
                 }
                 var isCheck = await _mockTestRepository.Queryable.AnyAsync(x => x.Id == request.MockTestId) && !(await _extraPracticeRepository.Queryable.AnyAsync(x => x.MockTestId == request.MockTestId));
@@ -187,7 +188,7 @@ namespace Fsel.Course.Infrastructure.Common
                 }
                 else
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumMockTestErrorCode.MockTestAlreadyExistToExtraPractice));
+                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(isCheck));
                     return methodResult;
                 }
             }
@@ -237,12 +238,12 @@ namespace Fsel.Course.Infrastructure.Common
                 var video = await _videoRepository.GetIncludeByIdAsync(request.VideoId ?? Guid.Empty);
                 if (request.Video == null || request.VideoId == null)
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumVideoErrorCode.VideoNull));
+                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Video));
                     return methodResult;
                 }
                 if (video == null)
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumVideoErrorCode.VideoNotExist), nameof(request.Id), request.Id);
+                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(video));
                     return methodResult;
                 }
                 request.Video.Id = video.Id;
@@ -259,7 +260,7 @@ namespace Fsel.Course.Infrastructure.Common
             {
                 if (request.MockTestId == null)
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumMockTestErrorCode.MockTestIdNotNull));
+                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.MockTestId));
                     return methodResult;
                 }
                 if (await _mockTestRepository.Queryable.AnyAsync(x => x.Id == request.MockTestId))

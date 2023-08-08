@@ -6,7 +6,7 @@ namespace Fsel.Ordering.Application.Queries.VoucherQuery
     using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Common.ActionResults;
-    using Fsel.Ordering.Domain.Enums.ErrorCodes;
+    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Ordering.Domain.IRepositories;
     using Fsel.Ordering.Domain.Models.EntityModels;
     using MediatR;
@@ -38,13 +38,14 @@ namespace Fsel.Ordering.Application.Queries.VoucherQuery
             var voucherQuery = await _voucherRepository.Queryable
                                     .Include(x => x.VoucherPackages)
                                     .ThenInclude(x => x.Package)
+                                    .Where(x => x.Id == request.Id)
                                     .Select(x => new VoucherModel
                                     {
                                         Id = x.Id,
                                         Name = x.Name,
                                         StartDate = x.StartDate,
                                         EndDate = x.EndDate,
-                                        CustomerType = x.CustomerType,
+                                        CustomerTypes = x.CustomerTypes,
                                         CreatedDate = x.CreatedDate,
                                         IsActive = (x.IsActive == null ? (x.StartDate <= DateTime.Now && DateTime.Now <= x.EndDate) : x.IsActive),
                                         ContentFilePath = x.ContentFilePath,
@@ -63,7 +64,7 @@ namespace Fsel.Ordering.Application.Queries.VoucherQuery
 
             if (voucherQuery == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumVoucherErrorCode.VoucherNotExist), nameof(request.Id), request.Id);
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(voucherQuery));
                 return methodResult;
             }
             var voucherModel = _mapper.Map<VoucherModel>(voucherQuery);

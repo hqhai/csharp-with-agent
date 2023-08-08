@@ -21,9 +21,22 @@ namespace Fsel.Shared.Helpers
                 return Math.Round(number, 1, MidpointRounding.AwayFromZero);
             }
         }
+
         public static string GenerateCode(int length)
         {
             string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+
+            Random random = new Random();
+
+            string orderCode = new string(Enumerable.Repeat(chars, length)
+                                      .Select(s => s[random.Next(s.Length)]).ToArray());
+
+            return orderCode;
+        }
+
+        public static string GenerateCodeNumber(int length)
+        {
+            string chars = "0123456789";
 
             Random random = new Random();
 

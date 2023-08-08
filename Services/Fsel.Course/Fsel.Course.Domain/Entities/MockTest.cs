@@ -1,10 +1,10 @@
 // Copyright (c) Atlantic. All rights reserved.
 
 using System.ComponentModel.DataAnnotations;
-using Fsel.Shared.Enums;
 using Fsel.Common.Enums.ErrorCodes;
 using Fsel.Core.Entities;
 using Fsel.Course.Domain.Enums;
+using Fsel.Shared.Enums;
 
 namespace Fsel.Course.Domain.Entities
 {
@@ -26,6 +26,7 @@ namespace Fsel.Course.Domain.Entities
         /// Loại MockTest
         /// </summary>
         public EnumMockTestType MockTestType { get; set; }
+
         public ExtraPractice? ExtraPractice { get; set; }
         public ICollection<MockTestSection> MockTestSections { get; set; } = new List<MockTestSection>();
         public ICollection<CourseUnitMockTest> CourseUnitMockTests { get; set; } = new List<CourseUnitMockTest>();

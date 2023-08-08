@@ -5,9 +5,9 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
     using System;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.Enums;
-    using Fsel.Identity.Domain.Enums.ErrorCodes;
     using Fsel.Identity.Domain.IRepositories;
     using MediatR;
     using Microsoft.AspNetCore.Http;
@@ -41,7 +41,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
 
             if (user == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumAuthErrorCode.OtpNotExist), nameof(request.Otp), request.Otp);
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Otp));
                 return methodResult;
             }
 
@@ -49,13 +49,13 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                        .FirstOrDefaultAsync(x => x.UserId == user!.Id && x.Status == EnumStatusUser.New && !x.IsDeleted && x.OTPCode == request.Otp, cancellationToken);
             if (userOtpCode == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumAuthErrorCode.InvalidOTP), nameof(request.Otp), request.Otp);
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Otp));
                 return methodResult;
             }
 
             if (DateTime.Compare(DateTime.Now, userOtpCode.ExpiredTime) > 0)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumAuthErrorCode.OTPExpired), nameof(request.Otp), request.Otp);
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Otp));
                 return methodResult;
             }
 

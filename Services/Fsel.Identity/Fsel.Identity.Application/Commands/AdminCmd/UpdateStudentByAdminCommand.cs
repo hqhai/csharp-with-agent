@@ -6,13 +6,13 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
     using System.Text;
     using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Common.Helpers;
     using Fsel.Identity.Application.Commands.AuthCmd;
     using Fsel.Identity.Application.Services.OrderService;
     using Fsel.Identity.Application.Services.TrainingService;
     using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.Enums;
-    using Fsel.Identity.Domain.Enums.ErrorCodes;
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Domain.Models.CommandModels.Students;
     using Fsel.Identity.Domain.Models.EntityModels;
@@ -70,7 +70,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
                                                    .FirstOrDefaultAsync(x => x.Human != null && x.Human.Student != null && x.Human.Student.Id == request.Id, cancellationToken);
             if (userView == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumUserErrorCode.UserNotExist));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(userView));
                 return methodResult;
             }
             var student = userView.Human?.Student;
@@ -80,7 +80,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
                 {
                     if (string.IsNullOrEmpty(request.Parent.FullName))
                     {
-                        methodResult.AddErrorBadRequest(nameof(EnumParentErrorCode.ParentFullNameNotNull));
+                        methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Parent.FullName));
                         return methodResult;
                     }
 

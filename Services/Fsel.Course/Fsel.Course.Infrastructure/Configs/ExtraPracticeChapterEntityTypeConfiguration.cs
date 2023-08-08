@@ -15,7 +15,6 @@ namespace Fsel.Course.Infrastructure.Configs
                 .WithMany(b => b.ExtraPracticeChapters)
                 .HasForeignKey(b => b.ExtraPracticeId)
                 .OnDelete(DeleteBehavior.Cascade);
-
         }
     }
 }

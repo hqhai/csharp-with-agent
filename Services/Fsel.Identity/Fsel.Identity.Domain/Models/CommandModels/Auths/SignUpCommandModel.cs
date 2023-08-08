@@ -9,6 +9,7 @@ namespace Fsel.Identity.Domain.Models.CommandModels.Auths
     {
         [Required]
         public string? FullName { get; set; }
+
         public string? PhoneNumber { get; set; }
 
         [EmailAddress]
@@ -19,5 +20,7 @@ namespace Fsel.Identity.Domain.Models.CommandModels.Auths
 
         [Required]
         public EnumRoleRegister Role { get; set; }
+
+        public string? ReferralCode { get; set; }
     }
 }

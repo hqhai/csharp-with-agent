@@ -6,6 +6,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
     using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums;
@@ -14,6 +15,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
     using Fsel.Course.Domain.Models.CommandModels.ClassForumResults;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Services.UserServices;
+    using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -55,20 +57,20 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
             var student = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
             if (!student.IsSuccessStatusCode)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumLessonErrorCode.UserNotExist), nameof(student), _authContext.CurrentUserId.ToString());
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student));
                 return methodResult;
             }
             var lessonResult = await _lessonResultRepository.GetByIdAsync(request.LessonResultId);
             if (lessonResult == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumLessonResultErrorCode.LessonResultsNotExist), nameof(student), _authContext.CurrentUserId.ToString());
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student));
                 return methodResult;
             }
 
             var classForum = await _classForumRepository.Queryable.FirstOrDefaultAsync(x => x.LessonId == lessonResult.LessonId, cancellationToken);
             if (classForum == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumClassForumErrorCode.ClassForumNull), nameof(student), _authContext.CurrentUserId.ToString());
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(classForum));
                 return methodResult;
             }
             var studentId = student?.Content?.Result?.Id;
@@ -90,6 +92,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
             }
             else if (classForumResult.Status == EnumClassForumResultStatus.Draft || classForumResult.Status == EnumClassForumResultStatus.Denied)
             {
+                _mapper.Map(request, classForumResult);
                 classForumResult.Status = request.IsSubmit ? EnumClassForumResultStatus.Pending : EnumClassForumResultStatus.Draft;
             }
             else
@@ -115,7 +118,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
             {
                 score = 100;
             }
-            else if (classForum.CourseSkill == Shared.Enums.EnumCourseSkill.Writing && classForumResult.Content!.Length >= classForum.TaggetWordLimit)
+            else if (classForum.CourseSkill == Shared.Enums.EnumCourseSkill.Writing && StringHelper.RemoveHTMLTags(classForumResult.Content!)!.Length >= classForum.TaggetWordLimit)
             {
                 score = 100;
             }

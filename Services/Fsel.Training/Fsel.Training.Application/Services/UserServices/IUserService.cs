@@ -42,10 +42,10 @@ namespace Fsel.Training.Application.Services.UserServices
         Task<IApiResponse<MethodResult<IList<HumanModel>>>> GetCSOByIds([Body] IList<Guid>? ids);
 
         [Get("/cso/get-by-user-id/{id}")]
-        Task<IApiResponse<MethodResult<CsoModel>>> GetCsoByUserIdAsync([FromRoute] Guid id);
+        Task<IApiResponse<MethodResult<CSOModel>>> GetCsoByUserIdAsync([FromRoute] Guid id);
 
         [Get("/cso/admin/get-all")]
-        Task<IApiResponse<MethodResult<IList<CsoModel>>>> GetAllCSO();
+        Task<IApiResponse<MethodResult<IList<CSOModel>>>> GetAllCSO();
 
         [Get("/teacher/get-all")]
         Task<IApiResponse<MethodResult<IList<TeacherModel>>>> GetAllTeacher();

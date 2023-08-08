@@ -28,7 +28,7 @@ namespace Fsel.Interaction.Api.Controllers
         /// </summary>
         [HttpGet]
         [ProducesResponseType(typeof(MethodResult<IList<TopicTagModel>>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)] 
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> Get()
         {
             var queryResult = await _mediator.Send(new GetTopicTagsQuery()).ConfigureAwait(false);
