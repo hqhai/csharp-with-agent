@@ -5,7 +5,7 @@ namespace Fsel.Training.Domain.Models.CommandModels.CancelScheduleLives
     public class CancelScheduleLiveCommandModel
     {
         public Guid Id { get; set; }
-        public IList<ChangeClassWordFlowPlanCommandModel>? ClassWordFlowPlans { get; set; }
+        public IList<ChangeClassWordFlowPlanCommandModel>? ClassLiveWordFlowPlans { get; set; }
     }
 
     public class ChangeClassWordFlowPlanCommandModel
