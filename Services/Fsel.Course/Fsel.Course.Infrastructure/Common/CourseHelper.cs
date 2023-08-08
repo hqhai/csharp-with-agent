@@ -5,6 +5,7 @@ namespace Fsel.Course.Infrastructure.Common
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Linq.Dynamic.Core;
     using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Common.ActionResults;
@@ -47,6 +48,8 @@ namespace Fsel.Course.Infrastructure.Common
                 return methodResult;
             }
 
+            #region validate request
+
             if (request.CourseUnitMockTests == null || request.CourseUnitMockTests.Count == 0)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.CourseUnitMockTests));
@@ -71,24 +74,49 @@ namespace Fsel.Course.Infrastructure.Common
                 return methodResult;
             }
 
-            var units = request.CourseUnitMockTests.Where(e => e.UnitId != null).Select(x => x.UnitId).Distinct().ToList();
-            if (_unitRepository.IsIdsInValid(units.Where(e => e.HasValue).Select(e => e!.Value)))
+            #endregion validate request
+
+            #region validate Unit
+
+            var unitIds = request.CourseUnitMockTests.Where(e => e.UnitId != null).Select(x => x.UnitId).ToList();
+            if (_unitRepository.IsIdsInValid(unitIds.Where(e => e.HasValue).Select(e => e!.Value)))
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(units));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(unitIds));
                 return methodResult;
             }
 
+            if (unitIds.Count != unitIds.Distinct().Count())
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.DuplicateUnitId));
+                return methodResult;
+            }
+
+            if (unitIds.Distinct().Count() > 8)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.UnitTestIsUpToEight));
+                return methodResult;
+            }
+
+            var isCheck = await _unitRepository.Queryable.AllAsync(x => unitIds.Any(y => !y.HasValue || y.Value == x.Id) && x.CourseLevel == request.CourseLevel);
+            if (!isCheck)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.AnotherLevelUnitExists));
+                return methodResult;
+            }
+
+            #endregion validate Unit
+
+            #region validate mockTest
+
             var mocktestIds = request.CourseUnitMockTests.Where(e => e.MockTestId != null).Select(x => x.MockTestId).Distinct().ToList();
+            if (mocktestIds.Count > 2)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.MockTestIsUpToTwo), nameof(mocktestIds));
+                return methodResult;
+            }
             if (_mockTestRepository.IsIdsInValid(mocktestIds.Where(e => e.HasValue).Select(e => e!.Value)))
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(mocktestIds));
-                return methodResult;
-            }
-
-            var finalTestIds = request.CourseUnitMockTests.Where(e => e.FinalTestId != null).Select(x => x.FinalTestId).Distinct().ToList();
-            if (_finalTestRepository.IsIdsInValid(finalTestIds.Where(e => e.HasValue).Select(e => e!.Value)))
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(finalTestIds));
                 return methodResult;
             }
 
@@ -99,6 +127,24 @@ namespace Fsel.Course.Infrastructure.Common
                 methodResult.AddErrorBadRequest(nameof(EnumMockTestErrorCode.MockTestExistsOtherThanTypeFullMockTest), nameof(mocktests), mocktests);
                 return methodResult;
             }
+
+            #endregion validate mockTest
+
+            #region validate finalTest
+
+            var finalTestIds = request.CourseUnitMockTests.Where(e => e.FinalTestId != null).Select(x => x.FinalTestId).Distinct().ToList();
+            if (_finalTestRepository.IsIdsInValid(finalTestIds.Where(e => e.HasValue).Select(e => e!.Value)))
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(finalTestIds));
+                return methodResult;
+            }
+            if (finalTestIds.Count > 1)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.FinalTestIsUpToOne), nameof(finalTestIds));
+                return methodResult;
+            }
+
+            #endregion validate finalTest
 
             return methodResult;
         }
