@@ -4,6 +4,8 @@ namespace Fsel.Training.Application.Queries.CancelScheduleLiveQuery
 {
     using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Shared.Enums;
     using Fsel.Training.Application.Services.SystemServices;
     using Fsel.Training.Application.Services.UserServices;
     using Fsel.Training.Application.Services.UserServices.Models;
@@ -80,7 +82,7 @@ namespace Fsel.Training.Application.Queries.CancelScheduleLiveQuery
             }
             liveSessionInformation.ClassName = @class?.Name;
             liveSessionInformation.Description = classLiveWorkFlow.Description;
-            TeacherModel? teacher = new TeacherModel();
+            var teacher = new TeacherModel();
             if (classLiveWorkFlow.TeacherId.HasValue)
             {
                 var teacherResult = await _userService.GetTeacherByIdAsync(classLiveWorkFlow.TeacherId ?? default);

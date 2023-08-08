@@ -8,6 +8,7 @@ namespace Fsel.Training.Application.Commands.CancelScheduleLiveCmd
     using Fsel.Core.Base;
     using Fsel.Shared.Enums;
     using Fsel.Training.Application.Services.UserServices;
+    using Fsel.Training.Domain.Enums.ErrorCodes;
     using Fsel.Training.Domain.IRepositories;
     using Fsel.Training.Domain.Models.CommandModels.CancelScheduleLives;
     using Fsel.Training.Domain.Models.EntityModels;
