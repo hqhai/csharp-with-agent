@@ -63,7 +63,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgessQuery
                                         .Include(x => x.VideoTimeCodes)
                                         .ThenInclude(x => x.TimeCodeExercises)
                                         .ThenInclude(x => x.Exercise)
-                                        .ThenInclude(x => x!.VideoTimeCodeAnswers)
+                                        .ThenInclude(x => x!.VideoTimeCodeAnswers.Where(y => y.VideoResultId == videoResult.Id))
                                         .Where(x => x.Id == videoResult.VideoId)
                                         .AsNoTracking()
                                         .FirstOrDefaultAsync(cancellationToken);
@@ -78,12 +78,12 @@ namespace Fsel.Course.Lms.Application.Queries.ProgessQuery
             {
                 Skill = x.Key,
                 CountQuestion = x.SelectMany(x => x!.ExerciseQuestions).Select(x => x.Question).Count(),
-                TotalQuestion = x.SelectMany(x => x!.VideoTimeCodeAnswers).Where(y => y.VideoResultId == videoResult.Id).Count(),
-                CorrectCount = x.SelectMany(x => x!.VideoTimeCodeAnswers).Where(y => y.VideoResultId == videoResult.Id).Sum(x => x.CorrectCount),
+                TotalQuestion = x.SelectMany(x => x!.VideoTimeCodeAnswers).Count(),
+                CorrectCount = x.SelectMany(x => x!.VideoTimeCodeAnswers).Sum(x => x.CorrectCount),
                 TotalCount = x.SelectMany(x => x!.ExerciseQuestions).Select(x => x.Question).Sum(x => x!.CorrectTotal),
             }).ToList();
 
-            skillScores.ForEach(x => x.Percent = x.CorrectCount / x.TotalCount);
+            skillScores.ForEach(x => x.Percent = x.TotalCount > 0 ? x.CorrectCount / x.TotalCount * 100 : default);
             overallScoreReport.SkillScores = skillScores;
             overallScoreReport.CountQuestion = skillScores.Sum(x => x.CountQuestion);
             overallScoreReport.TotalQuestion = skillScores.Sum(x => x.TotalQuestion);

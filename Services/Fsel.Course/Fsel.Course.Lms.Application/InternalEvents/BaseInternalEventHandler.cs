@@ -180,9 +180,12 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                                     .Select(group => new SkillScores
                                     {
                                         Skill = group.Key,
-                                        Scores = group.Sum(x => x.Scores),
+                                        Scores = group.Average(x => x.Scores),
                                         TotalCount = group.Sum(x => x.TotalCount),
-                                        CorrectCount = group.Sum(x => x.CorrectCount)
+                                        CorrectCount = group.Sum(x => x.CorrectCount),
+                                        CountQuestion = group.Sum(x => x.CountQuestion),
+                                        TotalQuestion = group.Sum(x => x.TotalQuestion),
+                                        Percent = group.Average(x => x.Percent),
                                     }).ToList();
 
                 unitResult.CorrectCount = (int)groupedSkillScores.Sum(x => x.CorrectCount);

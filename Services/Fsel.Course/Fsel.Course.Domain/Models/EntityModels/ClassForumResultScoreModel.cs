@@ -10,6 +10,5 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public double CorrectCount { get; set; }
         public double TotalCorrect { get; set; }
         public EnumClassForumResultStatus Status { get; set; }
-        public IList<ClassForumScoreModel>? ClassForumScores { get; set; }
     }
 }

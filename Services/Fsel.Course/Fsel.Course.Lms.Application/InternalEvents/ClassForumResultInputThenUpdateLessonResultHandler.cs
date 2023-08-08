@@ -33,7 +33,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 {
                     var isCheckHomeWork = lessonResult.HomeWorkResults.All(x => x.Status == EnumResultStatus.Done);
                     var percentClassForum = ((double)classFormResult.ClassForumScores.Sum(x => x.Score) / 36) * 30;
-                    var percentHomeWork = isCheckHomeWork ? (double)lessonResult.HomeWorkResults.Average(x => x.Percent) * 30 : 0;
+                    var percentHomeWork = isCheckHomeWork ? (double)lessonResult.HomeWorkResults.Average(x => x.Percent) * 30 : default;
                     var percentVideo = lessonResult.VideoResult.Percent * 40;
                     var percent = (percentClassForum + percentHomeWork + percentVideo) / 100;
                     lessonResult.Percent = percent;

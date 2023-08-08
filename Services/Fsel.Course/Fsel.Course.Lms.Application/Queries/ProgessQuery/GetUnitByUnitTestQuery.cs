@@ -16,6 +16,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgessQuery
 
     public class GetUnitByUnitTestQuery : IRequest<MethodResult<OverallScoreReportModel>>
     {
+        public Guid CourseId { get; set; }
         public Guid UnitId { get; set; }
     }
 
@@ -52,15 +53,22 @@ namespace Fsel.Course.Lms.Application.Queries.ProgessQuery
                 return methodResult;
             }
             var studentId = studentResult?.Content?.Result?.Id;
-            var units = await _unitRepository.Queryable.Include(x => x.UnitLessons)
+            var unit = await _unitRepository.Queryable.Include(x => x.UnitLessons)
                               .ThenInclude(x => x.Lesson)
                               .ThenInclude(x => x!.LessonVideos)
-                              .Where(x => x.Id == request.UnitId)
-                              .ToListAsync(cancellationToken);
-            var videoIds = units.SelectMany(x => x.UnitLessons).Select(x => x.Lesson).SelectMany(x => x!.LessonVideos).Select(x => x!.VideoId).ToList();
+                              .Include(x => x.CourseUnitMockTests)
+                              .Where(x => x.CourseUnitMockTests.Any(x => x.UnitId == request.UnitId && x.CourseId == request.CourseId))
+                              .FirstOrDefaultAsync(x => x.Id == request.UnitId, cancellationToken);
+
+            if (unit == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(unit));
+                return methodResult;
+            }
+            var videoIds = unit.UnitLessons.Select(x => x.Lesson).SelectMany(x => x!.LessonVideos).Select(x => x!.VideoId).ToList();
             var videoResultIds = await _videoResultRepository.Queryable.Where(x => x.StudentId == studentId && videoIds.Contains(x.VideoId)).Select(x => x.Id).ToListAsync(cancellationToken);
             var videos = await _videoRepository.Queryable.Include(x => x.VideoTimeCodes)
-                                                        .ThenInclude(x => x.VideoTimeCodeAnswers)
+                                                        .ThenInclude(x => x.VideoTimeCodeAnswers.Where(y => videoResultIds.Contains(y.VideoResultId)))
                                                         .Include(x => x.VideoTimeCodes)
                                                         .ThenInclude(x => x.TimeCodeExercises)
                                                         .ThenInclude(x => x.Exercise)
@@ -68,7 +76,11 @@ namespace Fsel.Course.Lms.Application.Queries.ProgessQuery
                                                         .ThenInclude(x => x.Question)
                                                         .Where(x => videoIds.Contains(x.Id))
                                                         .ToListAsync(cancellationToken);
-
+            if (videos == null || videos.Count == 0)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(videos));
+                return methodResult;
+            }
             var videoTimeCodes = videos.SelectMany(x => x.VideoTimeCodes).Where(x => x.TimeCodeType == EnumTimeCodeType.UnitTest).ToList();
             var exercises = videoTimeCodes.SelectMany(x => x.TimeCodeExercises).Select(x => x.Exercise).ToList();
 
@@ -76,8 +88,8 @@ namespace Fsel.Course.Lms.Application.Queries.ProgessQuery
             {
                 Skill = x.Key,
                 CountQuestion = x.SelectMany(x => x!.ExerciseQuestions).Select(x => x.Question).Count(),
-                TotalQuestion = x.SelectMany(x => x!.VideoTimeCodeAnswers).Where(y => videoResultIds.Contains(y.VideoResultId)).Count(),
-                CorrectCount = x.SelectMany(x => x!.VideoTimeCodeAnswers).Where(y => videoResultIds.Contains(y.VideoResultId)).Sum(x => x.CorrectCount),
+                TotalQuestion = x.SelectMany(x => x!.VideoTimeCodeAnswers).Count(),
+                CorrectCount = x.SelectMany(x => x!.VideoTimeCodeAnswers).Sum(x => x.CorrectCount),
                 TotalCount = x.SelectMany(x => x!.ExerciseQuestions).Select(x => x.Question).Sum(x => x!.CorrectTotal),
             }).ToList();
             skillScores.ForEach(x => x.Percent = x.CorrectCount / x.TotalCount);

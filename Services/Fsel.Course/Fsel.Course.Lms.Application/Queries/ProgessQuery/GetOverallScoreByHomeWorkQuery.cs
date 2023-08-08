@@ -57,10 +57,23 @@ namespace Fsel.Course.Lms.Application.Queries.ProgessQuery
             }
             var studentId = studentResult?.Content?.Result?.Id;
 
-            var units = await _unitRepository.Queryable.Include(x => x.CourseUnitMockTests).Include(x => x.UnitLessons).Where(x => x.CourseUnitMockTests.Any(x => x.CourseId == request.CourseId)).ToListAsync(cancellationToken);
+            var units = await _unitRepository.Queryable.Include(x => x.CourseUnitMockTests)
+                                                        .Include(x => x.UnitLessons)
+                                                        .Where(x => x.CourseUnitMockTests.Any(x => x.CourseId == request.CourseId))
+                                                        .ToListAsync(cancellationToken);
+            if (units == null || units.Count == 0)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(units));
+                return methodResult;
+            }
             var lessonIds = units.SelectMany(x => x.UnitLessons).Select(x => x.LessonId).ToList();
 
             var lessonHomeWorks = await _lessonHomeWorkRepository.Queryable.Include(x => x.HomeWork).Where(x => lessonIds.Contains(x.LessonId)).ToListAsync(cancellationToken);
+            if (lessonHomeWorks == null || lessonHomeWorks.Count == 0)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(lessonHomeWorks));
+                return methodResult;
+            }
             var homeWorkLessons = lessonHomeWorks.Select(x => x.HomeWork ?? new HomeWork()).ToList();
             var homeWorkIds = homeWorkLessons.Select(x => x.Id).ToList();
             var homeWorks = await _homeWorkRepository.Queryable.Include(x => x.HomeWorkResults.Where(x => x.StudentId == studentId))
@@ -69,6 +82,11 @@ namespace Fsel.Course.Lms.Application.Queries.ProgessQuery
                                                                 .ThenInclude(x => x.Question)
                                                                 .Where(x => homeWorkIds.Contains(x.Id))
                                                                 .ToListAsync(cancellationToken);
+            if (homeWorks == null || homeWorks.Count == 0)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(homeWorks));
+                return methodResult;
+            }
             foreach (var item in homeWorkLessons)
             {
                 if (item != null)

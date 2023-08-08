@@ -55,8 +55,8 @@ namespace Fsel.Course.Lms.Application.Queries.ProgessQuery
             var studentId = student?.Id;
 
             var unitResults = await _unitResultRepository.Queryable.Include(x => x.Unit)
-                                                                    .Where(x => x.Unit!.CourseLevel == level && x.StudentId == studentId && x.Status == EnumResultStatus.Done && x.CourseId == request.CourseId)
-                                                                    .ToArrayAsync(cancellationToken);
+                                                            .Where(x => x.StudentId == studentId && x.Status == EnumResultStatus.Done && x.CourseId == request.CourseId)
+                                                            .ToArrayAsync(cancellationToken);
             if (unitResults != null && unitResults.Any())
             {
                 overallScoreModel.SkillScores = unitResults.Where(x => x.SkillScores != null && x.SkillScores.Any())
@@ -68,15 +68,18 @@ namespace Fsel.Course.Lms.Application.Queries.ProgessQuery
                         CorrectCount = x.Sum(x => x.CorrectCount),
                         TotalCount = x.Sum(x => x.TotalCount),
                         Scores = x.Average(x => x.Scores),
+                        CountQuestion = x.Sum(x => x.CountQuestion),
+                        TotalQuestion = x.Sum(x => x.TotalQuestion),
+                        Percent = x.Average(x => x.Percent)
                     }).ToList();
                 overallScoreModel.IsPlacement = false;
                 if ((level?.GetEnumCourseType() ?? default) == EnumCourseType.Academic)
                 {
-                    overallScoreModel.Percent = overallScoreModel.SkillScores.Average(x => x.CorrectCount / x.TotalCount) * 100;
+                    overallScoreModel.Percent = overallScoreModel.SkillScores != null ? overallScoreModel.SkillScores.Average(x => x.Percent) : default;
                 }
                 else
                 {
-                    overallScoreModel.Percent = overallScoreModel.SkillScores.Average(x => x.CorrectCount / x.TotalCount) * 100;
+                    overallScoreModel.Percent = overallScoreModel.SkillScores != null ? overallScoreModel.SkillScores.Average(x => x.Percent) : default;
                 }
             }
             else
@@ -91,11 +94,11 @@ namespace Fsel.Course.Lms.Application.Queries.ProgessQuery
                 overallScoreModel.IsPlacement = true;
                 if ((level?.GetEnumCourseType() ?? default) == EnumCourseType.Academic)
                 {
-                    overallScoreModel.Percent = (overallScoreModel.SkillScores?.Average(x => x.CorrectCount / x.TotalCount) ?? default) * 100;
+                    overallScoreModel.Percent = (overallScoreModel.SkillScores?.Average(x => x.Percent) ?? default);
                 }
                 else
                 {
-                    overallScoreModel.Percent = (overallScoreModel.SkillScores?.Average(x => x.CorrectCount / x.TotalCount) ?? default) * 100;
+                    overallScoreModel.Percent = (overallScoreModel.SkillScores?.Average(x => x.Percent) ?? default);
                 }
             }
             overallScoreModel.CourseLevel = level ?? default;

@@ -15,7 +15,8 @@ namespace Fsel.Course.Lms.Application.Queries.ProgessQuery
 
     public class GetUnitByLessonTotalQuery : IRequest<MethodResult<UnitResultModel>>
     {
-        public Guid UnitResultId { get; set; }
+        public Guid CourseId { get; set; }
+        public Guid UnitId { get; set; }
     }
 
     public class GetUnitByLessonTotalQueryHandler : IRequestHandler<GetUnitByLessonTotalQuery, MethodResult<UnitResultModel>>
@@ -48,7 +49,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgessQuery
                 return methodResult;
             }
             var studentId = studentResult?.Content?.Result?.Id;
-            var unitResult = await _unitResultRepository.Queryable.FirstOrDefaultAsync(x => x.StudentId == studentId && x.Id == request.UnitResultId, cancellationToken);
+            var unitResult = await _unitResultRepository.Queryable.FirstOrDefaultAsync(x => x.StudentId == studentId && x.UnitId == request.UnitId && x.CourseId == request.CourseId, cancellationToken);
             if (unitResult == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(unitResult));

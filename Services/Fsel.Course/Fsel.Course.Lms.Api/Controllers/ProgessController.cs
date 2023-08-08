@@ -31,12 +31,24 @@ namespace Fsel.Course.Lms.Api.Controllers
         /// <summary>
         /// get overall
         /// </summary>
-        [HttpGet("overall")]
+        [HttpGet("overall/{courseId}")]
         [ProducesResponseType(typeof(MethodResult<OverallScoreModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetOverallScore()
+        public async Task<IActionResult> GetOverallScore([FromRoute] Guid courseId)
         {
-            MethodResult<OverallScoreModel> queryResult = await _mediator.Send(new GetOverallScoreQuery()).ConfigureAwait(false);
+            MethodResult<OverallScoreModel> queryResult = await _mediator.Send(new GetOverallScoreQuery { CourseId = courseId }).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// get progess menu
+        /// </summary>
+        [HttpGet("progess-menu/{courseId}")]
+        [ProducesResponseType(typeof(MethodResult<ProgessMenuModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetProgessMenu([FromRoute] Guid courseId)
+        {
+            MethodResult<ProgessMenuModel> queryResult = await _mediator.Send(new GetProgessMenuQuery { CourseId = courseId }).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
 
@@ -77,6 +89,18 @@ namespace Fsel.Course.Lms.Api.Controllers
         }
 
         /// <summary>
+        /// get overall finalTest
+        /// </summary>
+        [HttpGet("overall-finaltest/{courseId}")]
+        [ProducesResponseType(typeof(MethodResult<OverallScoreReportModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetOverallScoreByFinalTest([FromRoute] Guid courseId)
+        {
+            MethodResult<OverallScoreReportModel> queryResult = await _mediator.Send(new GetOverallScoreByFinalTestQuery { CourseId = courseId }).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
         /// get overall lesson
         /// </summary>
         [HttpGet("overall-lesson/{courseId}")]
@@ -91,24 +115,96 @@ namespace Fsel.Course.Lms.Api.Controllers
         /// <summary>
         /// get overall lesson
         /// </summary>
-        [HttpGet("unit/class-forum/{unitId}")]
+        [HttpGet("overall-unit-test/{courseId}")]
+        [ProducesResponseType(typeof(MethodResult<OverallScoreReportModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetOverallScoreByUnitTest([FromRoute] Guid courseId)
+        {
+            MethodResult<OverallScoreReportModel> queryResult = await _mediator.Send(new GetOverallScoreByUnitTestQuery { CourseId = courseId }).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// get overall lesson
+        /// </summary>
+        [HttpGet("overall-class-forum/{courseId}")]
+        [ProducesResponseType(typeof(MethodResult<OverallScoreReportModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetOverallScoreByClassForum([FromRoute] Guid courseId)
+        {
+            MethodResult<OverallScoreReportModel> queryResult = await _mediator.Send(new GetOverallScoreByClassForumQuery { CourseId = courseId }).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// get unit by unit
+        /// </summary>
+        [HttpGet("unit/{courseId}")]
+        [ProducesResponseType(typeof(MethodResult<IList<UnitModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetUnitByUnit([FromRoute] Guid courseId)
+        {
+            MethodResult<IList<UnitModel>> queryResult = await _mediator.Send(new GetUnitByUnitQuery { CourseId = courseId }).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Get unit by unit Test
+        /// </summary>
+        [HttpGet("unit/unit-test")]
+        [ProducesResponseType(typeof(MethodResult<OverallScoreReportModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetUnitByUnitTest([FromQuery] GetUnitByUnitTestQuery query)
+        {
+            MethodResult<OverallScoreReportModel> queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// get unit class forum
+        /// </summary>
+        [HttpGet("unit/class-forum")]
         [ProducesResponseType(typeof(MethodResult<IList<ClassForumReportModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetUnitByClassForum([FromRoute] Guid unitId)
+        public async Task<IActionResult> GetUnitByClassForum([FromQuery] GetUnitByClassForumQuery query)
         {
-            MethodResult<IList<ClassForumReportModel>> queryResult = await _mediator.Send(new GetUnitByClassForumQuery { UnitId = unitId }).ConfigureAwait(false);
+            MethodResult<IList<ClassForumReportModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// get unit class forum detail
+        /// </summary>
+        [HttpGet("unit/class-forum-detail/{classForumId}")]
+        [ProducesResponseType(typeof(MethodResult<IList<ClassForumScoreModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetUnitByClassForumDetail([FromRoute] Guid classForumId)
+        {
+            MethodResult<IList<ClassForumScoreModel>> queryResult = await _mediator.Send(new GetUnitByClassForumDetailQuery { ClassForumId = classForumId }).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
 
         /// <summary>
         /// Get List lesson by unitId
         /// </summary>
-        [HttpGet("unit/lessons/{unitId}")]
+        [HttpGet("unit/lessons")]
         [ProducesResponseType(typeof(MethodResult<IList<LessonModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetLessonsByUnitId([FromRoute] Guid unitId)
+        public async Task<IActionResult> GetLessonsByUnitId([FromQuery] GetListLessonQuery query)
         {
-            MethodResult<IList<LessonModel>> queryResult = await _mediator.Send(new GetListLessonQuery { UnitId = unitId }).ConfigureAwait(false);
+            MethodResult<IList<LessonModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Get List lesson by unitId
+        /// </summary>
+        [HttpGet("unit/lessons-total")]
+        [ProducesResponseType(typeof(MethodResult<UnitResultModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetUnitByLessonTotal([FromQuery] GetUnitByLessonTotalQuery query)
+        {
+            MethodResult<UnitResultModel> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
 
@@ -116,30 +212,18 @@ namespace Fsel.Course.Lms.Api.Controllers
         /// Get List lesson by lessonResultId
         /// </summary>
         [HttpGet("unit/lessons/{lessonResultId}")]
-        [ProducesResponseType(typeof(MethodResult<LessonResultModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(MethodResult<OverallScoreReportModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetUnitByLesson([FromRoute] Guid lessonResultId)
         {
-            MethodResult<LessonResultModel> queryResult = await _mediator.Send(new GetUnitByLessonQuery { LessonResultId = lessonResultId }).ConfigureAwait(false);
-            return queryResult.GetActionResult();
-        }
-
-        /// <summary>
-        /// Get List lesson by unitId
-        /// </summary>
-        [HttpGet("unit/lessons-total/{unitResultId}")]
-        [ProducesResponseType(typeof(MethodResult<UnitResultModel>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetUnitByLessonTotal([FromRoute] Guid unitResultId)
-        {
-            MethodResult<UnitResultModel> queryResult = await _mediator.Send(new GetUnitByLessonTotalQuery { UnitResultId = unitResultId }).ConfigureAwait(false);
+            MethodResult<OverallScoreReportModel> queryResult = await _mediator.Send(new GetUnitByLessonQuery { LessonResultId = lessonResultId }).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
 
         /// <summary>
         /// Get lesson homework score
         /// </summary>
-        [HttpGet("unit/homeworks/{lessonResultId}")]
+        [HttpGet("unit/homework/{lessonResultId}")]
         [ProducesResponseType(typeof(MethodResult<IList<LessonHomeWorkResultModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetListHomeWork([FromRoute] Guid lessonResultId)

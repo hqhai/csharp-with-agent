@@ -10,9 +10,14 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         CourseNotInNewState,
 
         /// <summary>
-        /// Course Not Level IElts
+        /// Course Not Type IElts
         /// </summary>
         CourseNotTypeIElts,
+
+        /// <summary>
+        /// Course Not Type Academic
+        /// </summary>
+        CourseNotTypeAcademic,
 
         /// <summary>
         /// Student not in class

@@ -2,10 +2,11 @@
 
 namespace Fsel.Course.Lms.Application.Queries.ProgessQuery
 {
-    using AutoMapper;
+    using System.Linq;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
+    using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Services.UserServices;
@@ -13,36 +14,37 @@ namespace Fsel.Course.Lms.Application.Queries.ProgessQuery
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class GetProgessMenuQuery : IRequest<MethodResult<object>>
+    public class GetProgessMenuQuery : IRequest<MethodResult<ProgessMenuModel>>
     {
         public Guid CourseId { get; set; }
     }
 
-    public class GetProgessMenuQueryHandler : IRequestHandler<GetProgessMenuQuery, MethodResult<object>>
+    public class GetProgessMenuQueryHandler : IRequestHandler<GetProgessMenuQuery, MethodResult<ProgessMenuModel>>
     {
         private readonly AuthContext _authContext;
-        private readonly IMapper _mapper;
         private readonly IClassForumRepository _classForumRepository;
         private readonly IUnitRepository _unitRepository;
+        private readonly ILessonExtraPracticeRepository _lessonExtraPracticeRepository;
         private readonly IUserService _userService;
 
         public GetProgessMenuQueryHandler(AuthContext authContext
-            , IMapper mapper
             , IClassForumRepository classForumRepository
             , IUnitRepository unitRepository
+            , ILessonExtraPracticeRepository lessonExtraPracticeRepository
             , IUserService userService)
         {
             _authContext = authContext;
-            _mapper = mapper;
             _classForumRepository = classForumRepository;
             _unitRepository = unitRepository;
+            _lessonExtraPracticeRepository = lessonExtraPracticeRepository;
             _userService = userService;
         }
 
-        public async Task<MethodResult<object>> Handle(GetProgessMenuQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<ProgessMenuModel>> Handle(GetProgessMenuQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            MethodResult<object> methodResult = new MethodResult<object>();
+            MethodResult<ProgessMenuModel> methodResult = new MethodResult<ProgessMenuModel>();
+            ProgessMenuModel progessMenu = new ProgessMenuModel();
             var studentResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
             if (!studentResult.IsSuccessStatusCode)
             {
@@ -51,32 +53,37 @@ namespace Fsel.Course.Lms.Application.Queries.ProgessQuery
             }
             var studentId = studentResult?.Content?.Result?.Id;
 
-            var units = await _unitRepository.Queryable.Include(x => x.UnitLessons)
-                .ThenInclude(x => x.Lesson)
-                .ToListAsync(cancellationToken);
-            var lessonIds = units.SelectMany(x => x.UnitLessons).Select(x => x.Lesson).Select(x => x!.Id).ToList();
-            var classForumResultScores = new List<ClassForumResultScoreModel>();
-            var classForums = await _classForumRepository.Queryable
-                                            .Include(x => x.ClassForumResults)
-                                            .ThenInclude(x => x.ClassForumScores)
-                                            .Where(x => lessonIds.Contains(x.LessonId))
-                                            .ToListAsync(cancellationToken);
-            var classForumReports = classForums.Select(x => new ClassForumReportModel
+            var units = await _unitRepository.Queryable.Include(x => x.UnitResults.Where(x => x.CourseId == request.CourseId && x.StudentId == studentId))
+                                                        .Include(x => x.UnitLessons)
+                                                        .ToListAsync(cancellationToken);
+            if (units == null || units.Count == 0)
             {
-                Id = x.Id,
-                Title = x.Title,
-                CourseSkill = x.CourseSkill,
-                ClassForumResultScore = x.ClassForumResults.Where(x => x.StudentId == studentId).Select(x => new ClassForumResultScoreModel
-                {
-                    Id = x.Id,
-                    CorrectCount = x.ClassForumScores.Sum(x => x.Score),
-                    TotalCorrect = 30,
-                    Status = x.Status,
-                    ClassForumScores = _mapper.Map<IList<ClassForumScoreModel>>(x.ClassForumScores)
-                }).FirstOrDefault(),
-            }).ToList();
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(units));
+                return methodResult;
+            }
+            var numberOfUnitDone = units.SelectMany(x => x.UnitResults).Where(x => x.Status == EnumResultStatus.Done).Count();
+            var lessonIds = units.SelectMany(x => x.UnitLessons).Select(x => x.LessonId).ToList();
+
+            var lessonExtraPractices = await _lessonExtraPracticeRepository.Queryable.Include(x => x.ExtraPractice)
+                .ThenInclude(x => x!.ExtraPracticeResults)
+                .Where(x => lessonIds.Contains(x.LessonId))
+                .ToListAsync(cancellationToken);
+            var numberOfPracticesDone = lessonExtraPractices.Select(x => x.ExtraPractice)
+                                                            .Where(x => x!.ExtraPracticeResults.Count > 0)
+                                                            .SelectMany(x => x!.ExtraPracticeResults)
+                                                            .Where(x => x.Status == EnumResultStatus.Done)
+                                                            .Count();
+            var classForums = await _classForumRepository.Queryable.Include(x => x.ClassForumResults.Where(x => x.StudentId == studentId))
+                                                                   .Where(x => lessonIds.Contains(x.LessonId))
+                                                                   .ToListAsync(cancellationToken);
+            var numberOfPostsCreated = classForums.SelectMany(x => x.ClassForumResults)
+                                                    .Where(x => x.Status == EnumClassForumResultStatus.PendingForGrading || x.Status == EnumClassForumResultStatus.Graded)
+                                                    .Count();
+            progessMenu.NumberOfUnitDone = numberOfUnitDone;
+            progessMenu.NumberOfPostsCreated = numberOfPostsCreated;
+            progessMenu.NumberOfPracticesDone = numberOfPracticesDone;
             methodResult.StatusCode = StatusCodes.Status200OK;
-            methodResult.Result = classForumReports;
+            methodResult.Result = progessMenu;
             return methodResult;
         }
     }

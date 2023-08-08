@@ -6,6 +6,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgessQuery
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
+    using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
@@ -64,6 +65,12 @@ namespace Fsel.Course.Lms.Application.Queries.ProgessQuery
             if (mockTestResult == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(mockTestResult));
+                return methodResult;
+            }
+
+            if (mockTestResult.Status != EnumResultStatus.Done)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumMockTestResultErrorCode.MockTestResultNotStatusDone), nameof(mockTestResult.Status));
                 return methodResult;
             }
             var mockTest = await _mockTestRepository.Queryable.Include(x => x.MockTestSections).ThenInclude(x => x.SectionGroup).FirstOrDefaultAsync(x => x.Id == mockTestResult.MockTestId, cancellationToken);

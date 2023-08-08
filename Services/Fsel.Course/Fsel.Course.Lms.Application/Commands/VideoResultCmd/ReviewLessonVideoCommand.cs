@@ -128,7 +128,8 @@ namespace Fsel.Course.Lms.Application.Commands.VideoResultCmd
                                                     TotalCount = questionTimeCodeQJ.TotalCount,
                                                     CorrectCount = answerTimeCodeQJ.CorrectCount,
                                                     TotalQuestion = questionTimeCodeQJ.TotalQuestion,
-                                                    CountQuestion = answerTimeCodeQJ.TotalAnswer
+                                                    CountQuestion = answerTimeCodeQJ.TotalAnswer,
+                                                    Percent = questionTimeCodeQJ.TotalCount > 0 ? (double)answerTimeCodeQJ.CorrectCount / questionTimeCodeQJ.TotalCount * 100 : default
                                                 }).ToList()
                              };
             var skillScores = scoreQuery.Where(x => x.Type == EnumTimeCodeType.Standalone).SelectMany(x => x.SkillScores!).ToList();

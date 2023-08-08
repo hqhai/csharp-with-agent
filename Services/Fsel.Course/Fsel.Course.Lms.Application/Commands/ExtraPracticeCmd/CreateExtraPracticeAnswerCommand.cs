@@ -141,9 +141,9 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
 
                     if (extraPracticeExerciseResult.Status == EnumResultStatus.Done)
                     {
-                        extraPracticeExerciseResult.CorrectCount = 0;
+                        extraPracticeExerciseResult.CorrectCount = default;
                         extraPracticeExerciseResult.Status = EnumResultStatus.Process;
-                        extraPracticeExerciseResult.Percent = 0;
+                        extraPracticeExerciseResult.Percent = default;
                     }
                     extraPracticeExerciseResult.CorrectCount += extraPracticeExerciseResult.ExtraPracticeAnswers.Sum(x => x.CorrectCount);
                     if (request.IsActive)
@@ -170,9 +170,9 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
                     }
                     if (extraPracticeResult.Status == EnumResultStatus.Done)
                     {
-                        extraPracticeResult.CorrectCount = 0;
+                        extraPracticeResult.CorrectCount = default;
                         extraPracticeResult.Status = EnumResultStatus.Process;
-                        extraPracticeResult.Percent = 0;
+                        extraPracticeResult.Percent = default;
                     }
                     extraPracticeResult.CorrectCount = extraPracticeResult.ExtraPracticeAnswers.Sum(x => x.CorrectCount);
                     if (request.IsActive)

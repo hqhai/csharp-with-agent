@@ -2,7 +2,6 @@
 
 namespace Fsel.Course.Lms.Application.Queries.ProgessQuery
 {
-    using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
@@ -15,25 +14,23 @@ namespace Fsel.Course.Lms.Application.Queries.ProgessQuery
 
     public class GetUnitByClassForumQuery : IRequest<MethodResult<IList<ClassForumReportModel>>>
     {
+        public Guid CourseId { get; set; }
         public Guid UnitId { get; set; }
     }
 
     public class GetUnitByClassForumQueryHandler : IRequestHandler<GetUnitByClassForumQuery, MethodResult<IList<ClassForumReportModel>>>
     {
         private readonly AuthContext _authContext;
-        private readonly IMapper _mapper;
         private readonly IClassForumRepository _classForumRepository;
         private readonly IUnitRepository _unitRepository;
         private readonly IUserService _userService;
 
         public GetUnitByClassForumQueryHandler(AuthContext authContext
-            , IMapper mapper
             , IClassForumRepository classForumRepository
             , IUnitRepository unitRepository
             , IUserService userService)
         {
             _authContext = authContext;
-            _mapper = mapper;
             _classForumRepository = classForumRepository;
             _unitRepository = unitRepository;
             _userService = userService;
@@ -51,29 +48,42 @@ namespace Fsel.Course.Lms.Application.Queries.ProgessQuery
             }
             var studentId = studentResult?.Content?.Result?.Id;
 
-            var units = await _unitRepository.Queryable.Include(x => x.UnitLessons)
+            var unit = await _unitRepository.Queryable.Include(x => x.UnitLessons)
                 .ThenInclude(x => x.Lesson)
-                .Where(x => x.Id == request.UnitId)
-                .ToListAsync(cancellationToken);
-            var lessonIds = units.SelectMany(x => x.UnitLessons).Select(x => x.Lesson).Select(x => x!.Id).ToList();
+                .Include(x => x.CourseUnitMockTests)
+                .FirstOrDefaultAsync(x => x.Id == request.UnitId && x.CourseUnitMockTests.Any(x => x.CourseId == request.CourseId && x.UnitId == request.UnitId), cancellationToken);
+
+            if (unit == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(unit));
+                return methodResult;
+            }
+
+            var lessonIds = unit.UnitLessons.Select(x => x.Lesson).Select(x => x!.Id).ToList();
             var classForumResultScores = new List<ClassForumResultScoreModel>();
             var classForums = await _classForumRepository.Queryable
-                                            .Include(x => x.ClassForumResults)
+                                            .Include(x => x.Lesson)
+                                            .Include(x => x.ClassForumResults.Where(x => x.StudentId == studentId))
                                             .ThenInclude(x => x.ClassForumScores)
                                             .Where(x => lessonIds.Contains(x.LessonId))
                                             .ToListAsync(cancellationToken);
+            if (classForums == null || classForums.Count == 0)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(classForums));
+                return methodResult;
+            }
             var classForumReports = classForums.Select(x => new ClassForumReportModel
             {
                 Id = x.Id,
-                Title = x.Title,
+                Name = x.Lesson?.Name,
                 CourseSkill = x.CourseSkill,
-                ClassForumResultScore = x.ClassForumResults.Where(x => x.StudentId == studentId).Select(x => new ClassForumResultScoreModel
+                TotalCorrect = 30,
+                ClassForumResultScore = x.ClassForumResults.Select(x => new ClassForumResultScoreModel
                 {
                     Id = x.Id,
-                    CorrectCount = x.ClassForumScores.Sum(x => x.Score),
+                    CorrectCount = x.ClassForumScores.Count > 0 ? x.ClassForumScores.Sum(x => x.Score) : default,
                     TotalCorrect = 30,
                     Status = x.Status,
-                    ClassForumScores = _mapper.Map<IList<ClassForumScoreModel>>(x.ClassForumScores)
                 }).FirstOrDefault(),
             }).ToList();
             methodResult.StatusCode = StatusCodes.Status200OK;

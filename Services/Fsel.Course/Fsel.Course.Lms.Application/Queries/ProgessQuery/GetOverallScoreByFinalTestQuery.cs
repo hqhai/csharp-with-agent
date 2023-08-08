@@ -7,9 +7,12 @@ namespace Fsel.Course.Lms.Application.Queries.ProgessQuery
     using Fsel.Core.Base;
     using Fsel.Course.Domain.Entities.SkillScoresConfigs;
     using Fsel.Course.Domain.Enums;
+    using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Services.UserServices;
+    using Fsel.Shared.Enums;
+    using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -23,14 +26,17 @@ namespace Fsel.Course.Lms.Application.Queries.ProgessQuery
     {
         private readonly AuthContext _authContext;
         private readonly IFinalTestResultRepository _finalTestResultRepository;
+        private readonly ICourseRepository _courseRepository;
         private readonly IUserService _userService;
 
         public GetOverallScoreByFinalTestQueryHandler(AuthContext authContext
             , IFinalTestResultRepository finalTestResultRepository
+            , ICourseRepository courseRepository
             , IUserService userService)
         {
             _authContext = authContext;
             _finalTestResultRepository = finalTestResultRepository;
+            _courseRepository = courseRepository;
             _userService = userService;
         }
 
@@ -47,6 +53,19 @@ namespace Fsel.Course.Lms.Application.Queries.ProgessQuery
                 return methodResult;
             }
             var studentId = studentResult?.Content?.Result?.Id;
+
+            var course = await _courseRepository.GetByIdAsync(request.CourseId);
+            if (course == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(course));
+                return methodResult;
+            }
+            else if (course.CourseLevel.GetEnumCourseType() != EnumCourseType.Academic)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.CourseNotTypeAcademic), nameof(course));
+                return methodResult;
+            }
+
             var finalTestResults = await _finalTestResultRepository.Queryable.Where(x => x.StudentId == studentId && x.CourseId == request.CourseId && x.Status == EnumResultStatus.Done)
                                                                              .ToListAsync(cancellationToken);
             if (!finalTestResults.Any())

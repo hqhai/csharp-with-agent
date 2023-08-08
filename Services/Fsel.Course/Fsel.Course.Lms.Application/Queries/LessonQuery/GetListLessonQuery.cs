@@ -52,8 +52,8 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
             var studentId = student?.Content?.Result?.Id;
 
             var lessonQuery = await _lessonRepository.Queryable
-                                .Include(x => x.UnitLessons.Where(x => !x.IsDeleted))
-                                .Include(x => x.LessonResults.Where(x => x.StudentId == studentId && x.CourseId == request.CourseId && x.UnitId == request.UnitId))
+                                .Include(x => x.UnitLessons)
+                                .Include(x => x.LessonResults)
                                 .Where(x => x.UnitLessons.Select(x => x.UnitId).Contains(request.UnitId))
                                 .AsNoTracking()
                                 .Select(x => new LessonModel

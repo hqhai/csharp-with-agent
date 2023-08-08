@@ -63,10 +63,10 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkQuery
                                         .Include(x => x.HomeWork)
                                         .ThenInclude(x => x!.LessonHomeWorks)
                                         .Include(x => x.HomeWork)
-                                        .ThenInclude(x => x!.HomeWorkQuestions.Where(x => !x.IsDeleted).OrderBy(x => x.CreatedDate))
+                                        .ThenInclude(x => x!.HomeWorkQuestions)
                                         .ThenInclude(x => x.Question)
-                                        .Include(x => x.HomeWorkAnswers.Where(x => !x.IsDeleted).OrderBy(x => x.CreatedDate))
-                                        .Where(x => x.HomeWork != null && x.LessonResultId == request.LessonResultId)
+                                        .Include(x => x.HomeWorkAnswers)
+                                        .Where(x => x.LessonResultId == request.LessonResultId)
                                         .AsNoTracking()
                                         .Select(h => new LessonHomeWorkResultModel
                                         {

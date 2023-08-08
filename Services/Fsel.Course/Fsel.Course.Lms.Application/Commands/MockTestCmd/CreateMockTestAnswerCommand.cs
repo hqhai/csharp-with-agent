@@ -202,7 +202,8 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
                         CorrectCount = count,
                         Scores = count.GetIeltsScore(sectionGroup.CourseSkill),
                         CountQuestion = item.Answers.Count,
-                        TotalQuestion = item.Answers.Count
+                        TotalQuestion = item.Answers.Count,
+                        Percent = (double)questionCount / count * 100
                     };
                     skillScores.Add(skillScore);
                 }

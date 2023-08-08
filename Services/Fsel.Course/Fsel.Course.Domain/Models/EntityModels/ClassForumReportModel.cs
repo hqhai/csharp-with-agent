@@ -7,8 +7,9 @@ namespace Fsel.Course.Domain.Models.EntityModels
 
     public class ClassForumReportModel : BaseModel
     {
-        public string? Title { get; set; }
         public EnumCourseSkill CourseSkill { get; set; }
+        public double TotalCorrect { get; set; }
+        public string? Name { get; set; }
         public ClassForumResultScoreModel? ClassForumResultScore { get; set; }
     }
 }
