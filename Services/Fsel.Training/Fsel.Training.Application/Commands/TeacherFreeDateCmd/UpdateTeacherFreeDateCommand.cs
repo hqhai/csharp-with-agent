@@ -16,18 +16,18 @@ namespace Fsel.Training.Application.Commands.TeacherFreeDateCmd
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class CreateTeacherFreeDateCommand : CreateTeacherFreeDateCommandModel, IRequest<MethodResult<TeacherFreeDateModel>>
+    public class UpdateTeacherFreeDateCommand : UpdateTeacherFreeDateCommandModel, IRequest<MethodResult<TeacherFreeDateModel>>
     {
     }
 
-    public class CreateTeacherFreeDateCommandHandler : IRequestHandler<CreateTeacherFreeDateCommand, MethodResult<TeacherFreeDateModel>>
+    public class UpdateTeacherFreeDateCommandHandler : IRequestHandler<UpdateTeacherFreeDateCommand, MethodResult<TeacherFreeDateModel>>
     {
         private readonly IUserService _userService;
         private readonly AuthContext _authContext;
         private readonly ITeacherFreeDateRepository _teacherFreeDateRepository;
         private readonly IMapper _mapper;
 
-        public CreateTeacherFreeDateCommandHandler(IUserService userService,
+        public UpdateTeacherFreeDateCommandHandler(IUserService userService,
             AuthContext authContext,
             ITeacherFreeDateRepository teacherFreeDateRepository,
             IMapper mapper)
@@ -38,7 +38,7 @@ namespace Fsel.Training.Application.Commands.TeacherFreeDateCmd
             _mapper = mapper;
         }
 
-        public async Task<MethodResult<TeacherFreeDateModel>> Handle(CreateTeacherFreeDateCommand request, CancellationToken cancellationToken)
+        public async Task<MethodResult<TeacherFreeDateModel>> Handle(UpdateTeacherFreeDateCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<TeacherFreeDateModel> methodResult = new MethodResult<TeacherFreeDateModel>();
