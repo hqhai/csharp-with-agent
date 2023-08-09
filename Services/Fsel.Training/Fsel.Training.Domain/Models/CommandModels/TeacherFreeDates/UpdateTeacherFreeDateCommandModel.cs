@@ -7,7 +7,7 @@ namespace Fsel.Training.Domain.Models.CommandModels.TeacherFreeDates
     using Fsel.Core.Base.BaseModels;
     using Fsel.Training.Domain.Models.CommandModels.TeacherFreeTimes;
 
-    public class UpdateTeacherFreeDateCommand : BaseCommandModel
+    public class UpdateTeacherFreeDateCommandModel : BaseCommandModel
     {
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
