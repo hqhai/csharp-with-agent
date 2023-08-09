@@ -46,7 +46,9 @@ namespace Fsel.Course.Application.Commands.CourseCmd
 
             #region Validation
 
-            var course = _courseRepository.Queryable.Where(e => e.Id == request.Id).Include(e => e.CourseUnitMockTests).Include(e => e.CourseTeachers).FirstOrDefault();
+            var course = await _courseRepository.Queryable.Include(e => e.CourseUnitMockTests)
+                                                        .Include(e => e.CourseTeachers)
+                                                        .FirstOrDefaultAsync(e => e.Id == request.Id, cancellationToken);
             if (course == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
@@ -76,7 +78,6 @@ namespace Fsel.Course.Application.Commands.CourseCmd
             await _courseRepository.ExecuteTransactionAsync(async () =>
             {
                 course = _courseRepository.Update(course);
-
                 await _courseRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 methodResult.Result = _mapper.Map<CourseModel>(course);

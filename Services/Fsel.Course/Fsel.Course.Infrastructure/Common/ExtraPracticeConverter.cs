@@ -819,7 +819,6 @@ namespace Fsel.Course.Infrastructure.Common
                     Id = extraPractice.MockTest!.Id,
                     Name = extraPractice.MockTest.Name,
                     MockTestType = extraPractice.MockTest.MockTestType,
-                    CourseType = extraPractice.MockTest.CourseType,
                     CreatedDate = extraPractice.MockTest.CreatedDate,
                     CreatedFullName = extraPractice.MockTest.CreatedFullName,
                     CreatedUserId = extraPractice.MockTest.CreatedUserId,
