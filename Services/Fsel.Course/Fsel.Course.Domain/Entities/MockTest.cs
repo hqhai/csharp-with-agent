@@ -4,7 +4,6 @@ using System.ComponentModel.DataAnnotations;
 using Fsel.Common.Enums.ErrorCodes;
 using Fsel.Core.Entities;
 using Fsel.Course.Domain.Enums;
-using Fsel.Shared.Enums;
 
 namespace Fsel.Course.Domain.Entities
 {
@@ -16,11 +15,6 @@ namespace Fsel.Course.Domain.Entities
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         [MaxLength(250, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? Name { get; set; }
-
-        /// <summary>
-        /// Loại Course
-        /// </summary>
-        public EnumCourseType CourseType { get; set; }
 
         /// <summary>
         /// Loại MockTest
