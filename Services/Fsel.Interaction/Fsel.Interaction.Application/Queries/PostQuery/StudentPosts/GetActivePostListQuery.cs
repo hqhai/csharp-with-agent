@@ -128,6 +128,7 @@ namespace Fsel.Interaction.Application.Queries.PostQuery.StudentPosts
                 CourseLevel = post.CourseLevel,
                 UserId = post.UserId,
                 CreatedUserId = post.CreatedUserId,
+                FullName = post.CreatedFullName,
                 CreatedDate = post.CreatedDate,
                 UpdatedDate = post.UpdatedDate,
                 UpdatedUserId = post.UpdatedUserId,
