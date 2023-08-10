@@ -6,8 +6,10 @@ namespace Fsel.Interaction.Api.Controllers.Student
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
     using Fsel.Core.Base.BaseModels;
+    using Fsel.Interaction.Application.Commands.ActionCmd;
     using Fsel.Interaction.Application.Commands.PostCmd.StudentPostCmd;
     using Fsel.Interaction.Application.Queries.PostQuery;
+    using Fsel.Interaction.Application.Queries.PostQuery.StudentPosts;
     using Fsel.Interaction.Domain.Models.EntityModels;
     using Fsel.Shared.Enums;
     using MediatR;

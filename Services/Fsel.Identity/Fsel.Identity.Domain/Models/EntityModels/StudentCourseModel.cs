@@ -8,6 +8,7 @@ namespace Fsel.Identity.Domain.Models.EntityModels
     public class StudentCourseModel : BaseModel
     {
         public string? ClassName { get; set; }
+        public string? CourseName { get; set; }
         public string? Membership { get; set; }
         public DateTime? StartDate { get; set; }
         public DateTime? EndDate { get; set; }

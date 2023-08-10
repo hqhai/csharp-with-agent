@@ -10,6 +10,16 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         CourseNotInNewState,
 
         /// <summary>
+        /// Course Not Type IElts
+        /// </summary>
+        CourseNotTypeIElts,
+
+        /// <summary>
+        /// Course Not Type Academic
+        /// </summary>
+        CourseNotTypeAcademic,
+
+        /// <summary>
         /// Student not in class
         /// </summary>
         StudentNotInClass,
@@ -33,5 +43,30 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         /// Course is in New state, can't start Lesson
         /// </summary>
         CourseIsNewStateCantStartLesson,
+
+        /// <summary>
+        /// another level unit exists
+        /// </summary>
+        AnotherLevelUnitExists,
+
+        /// <summary>
+        /// Duplicate Unit Id
+        /// </summary>
+        DuplicateUnitId,
+
+        /// <summary>
+        /// MockTest is up to two
+        /// </summary>
+        MockTestIsUpToTwo,
+
+        /// <summary>
+        /// FinalTest is up to One
+        /// </summary>
+        FinalTestIsUpToOne,
+
+        /// <summary>
+        /// UnitTest is up to Eight
+        /// </summary>
+        UnitTestIsUpToEight
     }
 }

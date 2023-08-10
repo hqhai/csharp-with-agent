@@ -76,14 +76,16 @@ namespace Fsel.Interaction.Application.Queries.StudentReviewQuery
                 courses = courseResults.Content?.Result?.ToList();
             }
 
-            var studentReviews = await _studentReviewRepository.Queryable.Include(x => x.StudentReviewDetails).Select(x => new StudentReviewInfoModel
-            {
-                Id = x.Id,
-                ReviewType = x.ReviewType,
-                CourseId = x.CourseId,
-                StudentId = x.StudentId,
-                StudentReviewDetails = _mapper.Map<IList<StudentReviewDetailModel>>(x.StudentReviewDetails)
-            }).ToListAsync(cancellationToken: cancellationToken);
+            var studentReviews = await _studentReviewRepository.Queryable.Include(x => x.StudentReviewDetails)
+                .Where(x => x.StudentId == studentId)
+                .Select(x => new StudentReviewInfoModel
+                {
+                    Id = x.Id,
+                    ReviewType = x.ReviewType,
+                    CourseId = x.CourseId,
+                    StudentId = x.StudentId,
+                    StudentReviewDetails = _mapper.Map<IList<StudentReviewDetailModel>>(x.StudentReviewDetails.OrderBy(x => x.CreatedDate))
+                }).ToListAsync(cancellationToken: cancellationToken);
 
             foreach (var studentReview in studentReviews)
             {

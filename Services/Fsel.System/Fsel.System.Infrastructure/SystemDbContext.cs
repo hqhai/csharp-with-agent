@@ -28,6 +28,7 @@ namespace Fsel.System.Infrastructure
         public DbSet<CourseTimeConfig> CourseTimeConfigs { get; set; }
         public DbSet<ForbiddenWord> ForbiddenWords { get; set; }
         public DbSet<TeachingCost> TeachingCosts { get; set; }
+        public DbSet<LogAction> LogActions { get; set; }
         public DbSet<ReferralDiscountConfig> ReferralDiscountConfigs { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)

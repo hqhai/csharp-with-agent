@@ -7,8 +7,8 @@ namespace Fsel.Interaction.Domain.Models.QueryModels.Posts
 
     public class GetActivePostListQueryModel : BaseQueryModel
     {
-        public EnumPostStatus? Status { get; set; }
-
         public EnumPostType PostType { get; set; }
+
+        public string? TopicTagName { get; set; }
     }
 }

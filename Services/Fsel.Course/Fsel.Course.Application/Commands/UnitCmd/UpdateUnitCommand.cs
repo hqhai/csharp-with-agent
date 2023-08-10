@@ -42,8 +42,8 @@ namespace Fsel.Course.Application.Commands.UnitCmd
             #region Validation
 
             var unit = await _unitRepository.Queryable
-                                    .Include(e => e.UnitLessons.Where(n => !n.IsDeleted))
-                                    .Include(e => e.UnitSkillMockTests.Where(n => !n.IsDeleted))
+                                    .Include(e => e.UnitLessons)
+                                    .Include(e => e.UnitSkillMockTests)
                                     .FirstOrDefaultAsync(e => e.Id == request.Id, cancellationToken: cancellationToken);
             if (unit == null)
             {
@@ -78,10 +78,10 @@ namespace Fsel.Course.Application.Commands.UnitCmd
                 {
                     unit.UnitSkillMockTests = new List<UnitSkillMockTest>
                     {
-                    new UnitSkillMockTest
-                    {
-                        MockTestId = request.MockTestId ?? default,
-                    }
+                        new UnitSkillMockTest
+                        {
+                            MockTestId = request.MockTestId ?? default,
+                        }
                     };
                 }
                 unit = _unitRepository.Update(unit);
