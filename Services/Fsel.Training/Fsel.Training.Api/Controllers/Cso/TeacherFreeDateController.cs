@@ -39,7 +39,7 @@ namespace Fsel.Training.Api.Controllers.Cso
         /// Get List free Teacher
         /// </summary>
 
-        [HttpGet("get-list-teacher-free-date-by-teacherId")]
+        [HttpGet("get-list-by-teacherId")]
         [ProducesResponseType(typeof(MethodResult<IList<TeacherFreeDateModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetListFreeTeacher([FromQuery] GetListTeacherFreeDateByTeacherIdQuery query)
