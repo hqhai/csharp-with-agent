@@ -11,6 +11,7 @@ namespace Fsel.Interaction.Application.Queries.PostQuery.StudentPosts
     using Fsel.Interaction.Domain.IRepositories;
     using Fsel.Interaction.Domain.Models.EntityModels;
     using Fsel.Interaction.Domain.Models.QueryModels.Posts;
+    using Fsel.Interaction.Infrastructure.Repositories;
     using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Http;
@@ -27,13 +28,16 @@ namespace Fsel.Interaction.Application.Queries.PostQuery.StudentPosts
         private readonly AuthContext _authContext;
         private readonly IUserService _userService;
         private readonly ICommentRepository _commentRepository;
+        private readonly ITopicTagRepository _topicTagRepository;
 
         public GetActivePostListQueryHandler
             (
              IPostRepository postRepository,
              IInteractionActionRepository interactionActionRepository,
              AuthContext authContext, IUserService userService,
-             ICommentRepository commentRepository
+             ICommentRepository commentRepository,
+             ITopicTagRepository topicTagRepository
+
             )
         {
             _postRepository = postRepository;
@@ -41,6 +45,7 @@ namespace Fsel.Interaction.Application.Queries.PostQuery.StudentPosts
             _authContext = authContext;
             _userService = userService;
             _commentRepository = commentRepository;
+            _topicTagRepository = topicTagRepository;
         }
 
         public async Task<MethodResult<PagingItemsModel<PostSearchModel>>> Handle(GetActivePostListQuery request, CancellationToken cancellationToken)
@@ -51,10 +56,25 @@ namespace Fsel.Interaction.Application.Queries.PostQuery.StudentPosts
             var student = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
             var courseLevel = student?.Content?.Result?.CourseLevel;
 
-            var postQuery = _postRepository.Queryable.Where(post => !_interactionActionRepository.Queryable
-                                                     .Any(interaction => interaction.ObjectId == post.Id &&
-                                                      interaction.Type == EnumInteractionActionType.Disable &&
-                                                      interaction.UserId == _authContext.CurrentUserId) && post.Status == EnumPostStatus.Active);
+            //Get TopicTagID
+            var topicTagId = _topicTagRepository.Queryable
+                    .Where(topicTag => topicTag.Name == request.TopicTagName!)
+                    .Select(topicTag => topicTag.Id)
+                    .ToList();
+            //Get All Post
+            var postQuery = _postRepository.Queryable
+                .Where(post => !_interactionActionRepository.Queryable
+                    .Any(interaction => interaction.ObjectId == post.Id &&
+                        interaction.Type == EnumInteractionActionType.Disable &&
+                        interaction.UserId == _authContext.CurrentUserId)
+                    && post.Status == EnumPostStatus.Active);
+
+            //Get Post Contain TopicTag
+            if (topicTagId.Any())
+            {
+                postQuery = postQuery.Where(post => post.PostTags
+                    .Any(postTag => topicTagId.Contains(postTag.TopicTagId)));
+            }
 
             IQueryable<Post> sortedQuery = postQuery;
             switch (request.PostType)
@@ -119,6 +139,15 @@ namespace Fsel.Interaction.Application.Queries.PostQuery.StudentPosts
                     break;
             }
 
+            int totalItem = await sortedQuery.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
+            if (totalItem == 0)
+            {
+                methodResult.Result = new PagingItemsModel<PostSearchModel>(new List<PostSearchModel>(), request, totalItem);
+                methodResult.StatusCode = StatusCodes.Status200OK;
+                return methodResult;
+            }
+
+
             var result = sortedQuery.Select(post => new PostSearchModel
             {
                 Id = post.Id,
@@ -134,7 +163,6 @@ namespace Fsel.Interaction.Application.Queries.PostQuery.StudentPosts
                 UpdatedUserId = post.UpdatedUserId,
                 FilePaths = post.FilePaths,
                 PostTags = post.PostTags
-                               .Where(postTag => postTag.TopicTag != null)
                                .Select(postTag => new TopicTagModel
                                {
                                    Name = postTag.TopicTag!.Name,
@@ -142,8 +170,6 @@ namespace Fsel.Interaction.Application.Queries.PostQuery.StudentPosts
                                }).ToList()
 
             });
-
-            int totalItem = await sortedQuery.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
 
             var lists = await result
                     .AsNoTracking()
