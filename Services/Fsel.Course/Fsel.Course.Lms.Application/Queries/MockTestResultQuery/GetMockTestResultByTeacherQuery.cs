@@ -64,7 +64,6 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
                 Id = mockTest!.Id,
                 Name = mockTest.Name,
                 MockTestType = mockTest.MockTestType,
-                CourseType = mockTest.CourseType,
                 CreatedDate = mockTest.CreatedDate,
                 CreatedFullName = mockTest.CreatedFullName,
                 CreatedUserId = mockTest.CreatedUserId,

@@ -6,7 +6,7 @@ namespace Fsel.Interaction.Domain.Models.CommandModels.StudentReviewDetails
 
     public class SaveStudentReviewDetailCommandModel
     {
-        public EnumReviewQuestionType QuestionType { get; set; }
+        public EnumReviewQuestionType ReviewQuestionType { get; set; }
         public double VoteStars { get; set; }
         public string? Content { get; set; }
     }

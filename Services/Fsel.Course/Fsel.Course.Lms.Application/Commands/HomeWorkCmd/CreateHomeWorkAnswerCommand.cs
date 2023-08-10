@@ -2,6 +2,7 @@
 
 namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd
 {
+    using System.Linq;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Course.Domain.Entities;
@@ -61,10 +62,18 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd
                 methodResult.AddErrorBadRequest(nameof(EnumHomeWorkResultErrorCode.HomeWorkResultDone));
                 return methodResult;
             }
-            var skillScores = new List<SkillScores>();
+            if (homeWorkResult.HomeWork == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(homeWorkResult.HomeWork));
+                return methodResult;
+            }
+
+            var questionIds = request.Answers.Select(x => x.QuestionId).Distinct().ToList();
+            var questions = await _questionRepository.GetByIdsAsync(questionIds);
+            int correctTotal = default;
             foreach (var item in request.Answers)
             {
-                var question = await _questionRepository.GetByIdAsync(item.QuestionId);
+                var question = questions.FirstOrDefault(x => x.Id == item.QuestionId);
                 if (question == null)
                 {
                     methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(question));
@@ -92,7 +101,7 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd
                         methodResult.AddErrorBadRequest(nameof(EnumHomeWorkAnswerErrorCode.AnswerIsInTheWrongFormat), nameof(answerConfig), answerConfig);
                         return methodResult;
                     }
-
+                    correctTotal += correctCount;
                     homeWorkResult.HomeWorkAnswers.Add(new HomeWorkAnswer
                     {
                         Answer = answerConfig,
@@ -100,14 +109,13 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd
                         HomeWorkQuestionId = homeWorkQuestion.Id,
                         HomeWorkResultId = homeWorkResult.Id
                     });
-                    skillScores.Add(new SkillScores { TotalCount = question.CorrectTotal, CorrectCount = correctCount });
                 }
             }
-            var skillScore = await _homeWorkResultRepository.Queryable
+            var homeWorkResultLesson = await _homeWorkResultRepository.Queryable
                             .Include(x => x.HomeWork)
-                            .ThenInclude(x => x!.HomeWorkQuestions.Where(x => !x.IsDeleted))
+                            .ThenInclude(x => x!.HomeWorkQuestions)
                             .ThenInclude(x => x.Question)
-                            .Include(x => x.HomeWorkAnswers.Where(x => !x.IsDeleted))
+                            .Include(x => x.HomeWorkAnswers)
                             .Where(x => x.HomeWork != null && x.Id == homeWorkResult.Id)
                             .Select(h => new LessonHomeWorkResultModel
                             {
@@ -116,20 +124,32 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd
                                 Name = h.HomeWork.Name,
                                 CourseSkill = h.HomeWork.CourseSkill,
                                 CourseLevel = h.HomeWork.CourseLevel,
-                                QuestionTotal = h.HomeWork.HomeWorkQuestions.Where(x => !x.IsDeleted).Select(x => x.Question).Count(),
-                                QuestionCompleted = h.HomeWorkAnswers.Count()
+                                QuestionTotal = h.HomeWork.HomeWorkQuestions.Select(x => x.Question).Count(),
+                                QuestionCompleted = h.HomeWorkAnswers.Count(),
+                                CorrectCount = h.HomeWorkAnswers.Sum(x => x.CorrectCount),
+                                CorrectTotal = h.HomeWork.HomeWorkQuestions.Select(x => x.Question).Sum(x => x!.CorrectTotal),
                             }).FirstOrDefaultAsync(cancellationToken);
-            if (skillScore != null && skillScore.QuestionCompleted + Convert.ToInt32(skillScores.Count) == skillScore.QuestionTotal)
+            if (homeWorkResultLesson != null && homeWorkResultLesson.QuestionCompleted + request.Answers.Count == homeWorkResultLesson.QuestionTotal)
             {
-                homeWorkResult.CorrectCount += Convert.ToInt32(skillScores.Sum(x => x.CorrectCount));
+                homeWorkResult.CorrectCount = homeWorkResultLesson.QuestionCompleted > 0 ? homeWorkResultLesson.CorrectCount + correctTotal : homeWorkResult.CorrectCount + request.Answers.Count;
                 homeWorkResult.Status = EnumResultStatus.Done;
-                homeWorkResult.SkillScores?.Add(new SkillScores { CorrectCount = homeWorkResult.CorrectCount, TotalCount = homeWorkResult.CorrectTotal, Skill = homeWorkResult.HomeWork?.CourseSkill ?? default });
                 homeWorkResult.Percent = homeWorkResult.CorrectTotal > 0 ? ((double)homeWorkResult.CorrectCount / homeWorkResult.CorrectTotal * 100) : 0;
+                var skillScores = new SkillScores
+                {
+                    Skill = homeWorkResult.HomeWork.CourseSkill,
+                    CorrectCount = homeWorkResult.CorrectCount,
+                    TotalCount = homeWorkResultLesson.CorrectTotal,
+                    CountQuestion = homeWorkResultLesson.QuestionCompleted + request.Answers.Count,
+                    TotalQuestion = homeWorkResultLesson.QuestionTotal,
+                    Percent = homeWorkResult.Percent,
+                    Scores = 0
+                };
+                homeWorkResult.SkillScores = new List<SkillScores> { skillScores };
             }
             else
             {
                 homeWorkResult.Status = EnumResultStatus.Process;
-                homeWorkResult.CorrectCount += Convert.ToInt32(skillScores.Sum(x => x.CorrectCount));
+                homeWorkResult.CorrectCount += Convert.ToInt32(correctTotal);
             }
 
             #endregion Validation

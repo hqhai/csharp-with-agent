@@ -14,6 +14,12 @@ namespace Fsel.Course.Domain.Entities
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         public string? Content { get; set; }
 
+        [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
+        public string? WordContent { get; set; }
+
+        [MaxLength(10000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
+        public string? GradingAlFeedback { get; set; }
+
         public Guid? GradingTeacherId { get; set; }
 
         /// <summary>
@@ -36,20 +42,14 @@ namespace Fsel.Course.Domain.Entities
         [MaxLength(1000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? FeedBackNote { get; set; }
 
-        /// <summary>
-        /// File Link
-        /// </summary>
-        [MaxLength(1000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
-        public string? FilePath { get; set; }
-
         public bool? IsFlagged { get; set; }
 
         public ClassForum? ClassForum { get; set; }
 
         public LessonResult? LessonResult { get; set; }
 
-        public IList<ClassForumScore> ClassForumScores { get; set; } = new List<ClassForumScore>();
+        public ICollection<ClassForumScore> ClassForumScores { get; set; } = new List<ClassForumScore>();
 
-        public IList<ClassForumResultFile>? ClassForumResultFiles { get; set; } = new List<ClassForumResultFile>();
+        public ICollection<ClassForumResultFile> ClassForumResultFiles { get; set; } = new List<ClassForumResultFile>();
     }
 }

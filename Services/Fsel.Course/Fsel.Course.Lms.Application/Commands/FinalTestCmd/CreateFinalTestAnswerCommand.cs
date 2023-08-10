@@ -165,7 +165,7 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd
                         finalTestResult.FinalTestAnswers.Add(finalAnswer);
                     }
                 }
-                skillScores.Add(new SkillScores { Skill = item.Skill, TotalCount = questions.Sum(x => x.CorrectTotal), CorrectCount = count });
+                skillScores.Add(new SkillScores { Skill = item.Skill, TotalCount = questions.Sum(x => x.CorrectTotal), CorrectCount = count, CountQuestion = item.Answers.Count, TotalQuestion = item.Answers.Count, Percent = questions.Sum(x => x.CorrectTotal) > 0 ? (double)questions.Sum(x => x.CorrectTotal) / count * 100 : default });
             }
 
             #endregion Validation

@@ -32,7 +32,9 @@ namespace Fsel.Course.Application.Commands.CourseCmd
 
             #region Validation
 
-            var course = _courseRepository.Queryable.Where(e => e.Id == request.Id).Include(e => e.CourseUnitMockTests).Include(e => e.CourseTeachers).FirstOrDefault();
+            var course = await _courseRepository.Queryable.Include(e => e.CourseUnitMockTests)
+                                                            .Include(e => e.CourseTeachers)
+                                                            .FirstOrDefaultAsync(e => e.Id == request.Id, cancellationToken);
             if (course == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(course));

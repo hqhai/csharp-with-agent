@@ -32,7 +32,6 @@ namespace Fsel.Interaction.Application.Queries.StudentReviewQuery
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<IList<StudentReviewModel>>();
-
             var studentReviews = await _studentReviewRepository.Queryable.Include(x => x.StudentReviewDetails).Where(x => x.ReviewType == request.ReviewType).Select(x => new StudentReviewModel
             {
                 Id = x.Id,
