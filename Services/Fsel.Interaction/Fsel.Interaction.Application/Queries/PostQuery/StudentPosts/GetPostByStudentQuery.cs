@@ -43,12 +43,6 @@ namespace Fsel.Interaction.Application.Queries.PostQuery
                                             .Where(x => x.UserId == _authContext.CurrentUserId && x.Status == request.Status)
                                             .ToListAsync(cancellationToken);
 
-            if (posts == null || posts.Count == 0)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(posts));
-                return methodResult;
-            }
-
             methodResult.Result = _mapper.Map<List<PostModel>>(posts);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
