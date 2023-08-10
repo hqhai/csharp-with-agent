@@ -28,5 +28,10 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         /// MockTest must correct score
         /// </summary>
         MockTestMustCorrectScore,
+
+        /// <summary>
+        /// Skill Speaking Or Writing
+        /// </summary>
+        SkillSpeakingOrWriting,
     }
 }
