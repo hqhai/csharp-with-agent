@@ -23,6 +23,17 @@ namespace Fsel.Training.Api.Controllers.Cso
         {
             _mediator = mediator;
         }
+        /// <summary>
+        /// Get Detail Teacher Free Date
+        /// </summary>
+        [HttpGet("{id}")]
+        [ProducesResponseType(typeof(MethodResult<TeacherFreeDateModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.BadRequest)]
+        public async Task<IActionResult> Get([FromRoute] Guid id)
+        {
+            MethodResult<TeacherFreeDateModel> commandResult = await _mediator.Send(new GetTeacherFreeDateQuery { TeacherFreeDateId = id }).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
 
         /// <summary>
         /// Get List free Teacher
