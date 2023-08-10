@@ -13,6 +13,6 @@ namespace Fsel.Course.Lms.Application.Services.SystemService
         Task<IApiResponse<MethodResult<IList<CourseTimeConfigModel>>>> GetCourseTimeConfigAsync([Body] IList<Guid> courseIds);
 
         [Get("/log-action/{userId}")]
-        Task<IApiResponse<MethodResult<IList<LogActionModel>>>> GetLogActionsByUserId([FromRoute] Guid userId);
+        Task<IApiResponse<MethodResult<LogActionDaysModel>>> GetLogActionsByUserId([FromRoute] Guid userId);
     }
 }

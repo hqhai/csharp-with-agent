@@ -91,49 +91,18 @@ namespace Fsel.Course.Lms.Application.Queries.ProgessQuery
             }
             var (numberOfDaysStreak, isDaysStreakIncrease) = (0, true);
             var logActions = logActionResults?.Content?.Result;
-            if (logActions != null && logActions.Count > 0)
+            if (logActions != null)
             {
-                var userActivityDays = logActions.Where(x => x.CreatedDate.HasValue)
-                                         .GroupBy(log => log.CreatedDate!.Value.Date) // Nhóm theo UserId
-                                         .Select(group => new
-                                         {
-                                             Date = group.Key,
-                                             Days = group.Distinct().Count()
-                                         }).ToList();
-                (numberOfDaysStreak, isDaysStreakIncrease) = await CountContinuousDaysAsync(userActivityDays.Select(x => x.Date).ToList());
+                progessMenu.NumberOfDaysStreak = logActions.NumberOfDaysStreak;
+                progessMenu.IsDaysStreakIncrease = logActions.IsDaysStreakIncrease;
             }
 
             progessMenu.NumberOfUnitDone = numberOfUnitDone;
             progessMenu.NumberOfPostsCreated = numberOfPostsCreated;
             progessMenu.NumberOfPracticesDone = numberOfPracticesDone;
-            progessMenu.NumberOfDaysStreak = numberOfDaysStreak;
-            progessMenu.IsDaysStreakIncrease = isDaysStreakIncrease;
             methodResult.StatusCode = StatusCodes.Status200OK;
             methodResult.Result = progessMenu;
             return methodResult;
-        }
-
-        private static async Task<(int, bool)> CountContinuousDaysAsync(IEnumerable<DateTime> dates)
-        {
-            int count = 0;
-            DateTime? previousDate = null;
-            bool isDaysStreakIncrease = true;
-            foreach (var date in dates)
-            {
-                if (previousDate == null || (date - previousDate.Value).TotalDays == 1)
-                {
-                    count++;
-                    isDaysStreakIncrease = true;
-                }
-                else
-                {
-                    count = 1;
-                    isDaysStreakIncrease = false;
-                }
-                previousDate = date;
-                await Task.Delay(1);
-            }
-            return (count, isDaysStreakIncrease);
         }
     }
 }

@@ -26,11 +26,11 @@ namespace Fsel.System.Api.Controllers
         /// Get LogActions by UnitId
         /// </summary>
         [HttpGet("{userId}")]
-        [ProducesResponseType(typeof(MethodResult<IList<LogActionModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(MethodResult<LogActionDaysModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetLogActionsByUserId([FromRoute] Guid userId)
         {
-            MethodResult<IList<LogActionModel>> commandResult = await _mediator.Send(new GetLogActionByUserIdQuery { Id = userId }).ConfigureAwait(false);
+            MethodResult<LogActionDaysModel> commandResult = await _mediator.Send(new GetLogActionByUserIdQuery { Id = userId }).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
     }
