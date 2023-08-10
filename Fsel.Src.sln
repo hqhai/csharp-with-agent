@@ -120,7 +120,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Fsel.Realtime.Domain", "Ser
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Fsel.Realtime.Infrastructure", "Services\Fsel.Realtime\Fsel.Realtime.Infrastructure\Fsel.Realtime.Infrastructure.csproj", "{08F5C58C-AFED-4A0E-8515-F896FB4668A0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Fsel.Realtime.Application", "Services\Fsel.Realtime\Fsel.Realtime.Application\Fsel.Realtime.Application.csproj", "{5D2BC015-775A-4A2F-8504-2D9CF57ED0F7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Fsel.Realtime.Application", "Services\Fsel.Realtime\Fsel.Realtime.Application\Fsel.Realtime.Application.csproj", "{5D2BC015-775A-4A2F-8504-2D9CF57ED0F7}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Fsel.Queue", "Fsel.Queue", "{C3C4F5CE-A2C6-4A91-AFBF-B0F54A495F46}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -349,6 +351,7 @@ Global
 		{CB921892-7164-4CB3-A989-94650141B739} = {8C1B7E40-82E8-4028-9A7A-254C7BBED5CC}
 		{08F5C58C-AFED-4A0E-8515-F896FB4668A0} = {8C1B7E40-82E8-4028-9A7A-254C7BBED5CC}
 		{5D2BC015-775A-4A2F-8504-2D9CF57ED0F7} = {8C1B7E40-82E8-4028-9A7A-254C7BBED5CC}
+		{C3C4F5CE-A2C6-4A91-AFBF-B0F54A495F46} = {5E7078A9-8DE2-459D-854D-7D8625E92C43}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {C3F5014D-C4B6-471E-9F07-3E7AE3B37304}
