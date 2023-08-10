@@ -89,7 +89,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgessQuery
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(logActionResults));
                 return methodResult;
             }
-            var numberOfDaysStreak = 0;
+            var (numberOfDaysStreak, isDaysStreakIncrease) = (0, true);
             var logActions = logActionResults?.Content?.Result;
             if (logActions != null && logActions.Count > 0)
             {
@@ -100,24 +100,25 @@ namespace Fsel.Course.Lms.Application.Queries.ProgessQuery
                                              Date = group.Key,
                                              Days = group.Distinct().Count()
                                          }).ToList();
-                numberOfDaysStreak = await CountContinuousDaysAsync(userActivityDays.Select(x => x.Date).ToList());
+                (numberOfDaysStreak, isDaysStreakIncrease) = await CountContinuousDaysAsync(userActivityDays.Select(x => x.Date).ToList());
             }
 
             progessMenu.NumberOfUnitDone = numberOfUnitDone;
             progessMenu.NumberOfPostsCreated = numberOfPostsCreated;
             progessMenu.NumberOfPracticesDone = numberOfPracticesDone;
             progessMenu.NumberOfDaysStreak = numberOfDaysStreak;
+            progessMenu.IsDaysStreakIncrease = isDaysStreakIncrease;
             methodResult.StatusCode = StatusCodes.Status200OK;
             methodResult.Result = progessMenu;
             return methodResult;
         }
 
-        private static async Task<int> CountContinuousDaysAsync(IEnumerable<DateTime> dates)
+        private static async Task<(int, bool)> CountContinuousDaysAsync(IEnumerable<DateTime> dates)
         {
             int count = 0;
             int maxCount = 0;
             DateTime? previousDate = null;
-
+            bool isDaysStreakIncrease = true;
             foreach (var date in dates)
             {
                 if (previousDate == null || (date - previousDate.Value).TotalDays == 1)
@@ -126,17 +127,19 @@ namespace Fsel.Course.Lms.Application.Queries.ProgessQuery
                     if (count > maxCount)
                     {
                         maxCount = count;
+                        isDaysStreakIncrease = true;
                     }
                 }
                 else
                 {
                     count = 1;
                     maxCount = count;
+                    isDaysStreakIncrease = false;
                 }
                 previousDate = date;
                 await Task.Delay(1);
             }
-            return maxCount;
+            return (maxCount, isDaysStreakIncrease);
         }
     }
 }
