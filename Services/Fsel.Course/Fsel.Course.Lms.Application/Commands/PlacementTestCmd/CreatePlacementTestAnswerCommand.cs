@@ -148,7 +148,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
                         placementTestAnswers.Add(placementTestAnswer);
                     }
                 }
-                var skillScore = new SkillScores { Skill = item.Skill, TotalCount = questions.Sum(x => x.CorrectTotal), CorrectCount = count };
+                var skillScore = new SkillScores { Skill = item.Skill, TotalCount = questions.Sum(x => x.CorrectTotal), CorrectCount = count, Percent = questions.Sum(x => x.CorrectTotal) > 0 ? (double)count / questions.Sum(x => x.CorrectTotal) * 100 : default };
                 if (placementTestResult.Level == EnumPlacementTestLevel.IELTS)
                 {
                     skillScore.Scores = skillScore.CorrectCount.GetIeltsScore(skillScore.Skill);

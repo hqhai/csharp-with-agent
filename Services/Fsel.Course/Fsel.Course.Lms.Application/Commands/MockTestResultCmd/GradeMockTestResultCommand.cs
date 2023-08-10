@@ -7,6 +7,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestResultCmd
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
     using Fsel.Course.Domain.Entities;
+    using Fsel.Course.Domain.Entities.SkillScoresConfigs;
     using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.CommandModels.MockTestResults;
@@ -53,16 +54,23 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestResultCmd
                 methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError));
                 return methodResult;
             }
+
             var teacherId = teacherResult.Content?.Result?.Id;
             if (request.MockTestScores == null || request.MockTestScores.Count == 0)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.MockTestScores));
                 return methodResult;
             }
+
             var mockTestResult = await _mockTestResultRepository.Queryable.Include(x => x.MockTestScores).Where(e => e.Id == request.MockTestResultId).FirstOrDefaultAsync(cancellationToken);
             if (mockTestResult == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(mockTestResult));
+                return methodResult;
+            }
+            if (mockTestResult.MockTestScores.Count > 0)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(mockTestResult.MockTestScores));
                 return methodResult;
             }
             var sectionGroupIds = request.MockTestScores.Select(y => y.SectionGroupId).Distinct().ToList();
@@ -72,6 +80,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestResultCmd
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(sectionGroups));
                 return methodResult;
             }
+
             IList<MockTestScore> mockTestScores = new List<MockTestScore>();
             foreach (var item in request.MockTestScores)
             {
@@ -91,8 +100,21 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestResultCmd
                 }
                 mockTestScores.Add(mockTestScore);
             }
+            foreach (var item in sectionGroups)
+            {
+                var skillScore = new SkillScores
+                {
+                    CorrectCount = mockTestScores.Where(x => x.SectionGroupId == item.Id).Sum(x => x.Score),
+                    TotalCount = 36,
+                    Scores = (double)36 / mockTestScores.Where(x => x.SectionGroupId == item.Id).Sum(x => x.Score),
+                    Skill = item.CourseSkill
+                };
+                mockTestResult.SkillScores?.Add(skillScore);
+            }
+            mockTestResult.Percent = mockTestResult.SkillScores?.Average(x => x.CorrectCount / x.TotalCount) ?? default;
             mockTestResult.MockTestScores = mockTestScores;
             mockTestResult.GradingTeacherId = teacherId;
+
             await _mockTestResultRepository.ExecuteTransactionAsync(async () =>
             {
                 _mockTestResultRepository.Update(mockTestResult);
