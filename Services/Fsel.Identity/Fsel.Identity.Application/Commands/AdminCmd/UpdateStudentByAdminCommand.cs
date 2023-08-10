@@ -109,6 +109,18 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
                     }
                 }
             }
+            else if (student != null)
+            {
+                if (student.ParentStudents != null && student.ParentStudents.Count > 0)
+                {
+                    var human = userView.Human?.Student?.ParentStudents.FirstOrDefault()?.Parent?.Human;
+                    if (human != null)
+                    {
+                        await _humanRepository.DeleteAsync(human);
+                        await _humanRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+                    }
+                }
+            }
 
             #endregion Update Parent
 
