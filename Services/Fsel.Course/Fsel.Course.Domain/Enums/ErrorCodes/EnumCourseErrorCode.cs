@@ -43,5 +43,30 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         /// Course is in New state, can't start Lesson
         /// </summary>
         CourseIsNewStateCantStartLesson,
+
+        /// <summary>
+        /// another level unit exists
+        /// </summary>
+        AnotherLevelUnitExists,
+
+        /// <summary>
+        /// Duplicate Unit Id
+        /// </summary>
+        DuplicateUnitId,
+
+        /// <summary>
+        /// MockTest is up to two
+        /// </summary>
+        MockTestIsUpToTwo,
+
+        /// <summary>
+        /// FinalTest is up to One
+        /// </summary>
+        FinalTestIsUpToOne,
+
+        /// <summary>
+        /// UnitTest is up to Eight
+        /// </summary>
+        UnitTestIsUpToEight
     }
 }

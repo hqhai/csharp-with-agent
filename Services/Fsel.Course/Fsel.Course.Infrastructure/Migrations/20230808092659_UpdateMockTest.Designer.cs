@@ -4,6 +4,7 @@ using Fsel.Course.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fsel.Course.Infrastructure.Migrations
 {
     [DbContext(typeof(CourseDbContext))]
-    partial class CourseDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230808092659_UpdateMockTest")]
+    partial class UpdateMockTest
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -69,9 +72,6 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
-                    b.Property<bool>("IsAlFeedBack")
-                        .HasColumnType("bit");
-
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit")
                         .HasColumnOrder(110);
@@ -81,29 +81,6 @@ namespace Fsel.Course.Infrastructure.Migrations
 
                     b.Property<string>("MediaPost")
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<double>("SettingFrequecy")
-                        .HasColumnType("float");
-
-                    b.Property<string>("SettingModel")
-                        .HasMaxLength(250)
-                        .HasColumnType("nvarchar(250)");
-
-                    b.Property<double>("SettingPresence")
-                        .HasColumnType("float");
-
-                    b.Property<double>("SettingTemperature")
-                        .HasColumnType("float");
-
-                    b.Property<double>("SettingTopP")
-                        .HasColumnType("float");
-
-                    b.Property<double>("SettingWordMaxLength")
-                        .HasColumnType("float");
-
-                    b.Property<string>("SystemRoleAlConfig")
-                        .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)");
 
                     b.Property<double>("TaggetTimeLimit")
                         .HasColumnType("float");
@@ -123,10 +100,6 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.Property<Guid?>("UpdatedUserId")
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(102);
-
-                    b.Property<string>("UserAlConfig")
-                        .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)");
 
                     b.HasKey("Id");
 
@@ -248,9 +221,9 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.Property<int?>("FeedBackStars")
                         .HasColumnType("int");
 
-                    b.Property<string>("GradingAlFeedback")
-                        .HasMaxLength(10000)
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<string>("FilePath")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
 
                     b.Property<Guid?>("GradingTeacherId")
                         .HasColumnType("uniqueidentifier");
@@ -285,10 +258,6 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.Property<Guid?>("UpdatedUserId")
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(102);
-
-                    b.Property<string>("WordContent")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 

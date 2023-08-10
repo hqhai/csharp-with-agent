@@ -34,6 +34,10 @@ namespace Fsel.Course.Domain.Models.EntityModels
 
         public bool? IsLiked { get; set; }
 
+        public string? WordContent { get; set; }
+
+        public string? GradingAlFeedback { get; set; }
+
         public EnumCourseLevel CourseLevel { get; set; }
 
         public ClassForumModel? ClassForum { get; set; }

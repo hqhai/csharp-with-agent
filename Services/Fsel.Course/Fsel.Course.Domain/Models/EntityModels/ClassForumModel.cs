@@ -20,7 +20,23 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public EnumCourseSkill CourseSkill { get; set; }
 
         public Guid? LessonId { get; set; }
+        public bool IsAlFeedBack { get; set; }
 
+        public string? SystemRoleAlConfig { get; set; }
+
+        public string? UserAlConfig { get; set; }
+
+        public string? SettingModel { get; set; }
+
+        public double SettingTemperature { get; set; }
+
+        public double SettingWordMaxLength { get; set; }
+
+        public double SettingTopP { get; set; }
+
+        public double SettingFrequecy { get; set; }
+
+        public double SettingPresence { get; set; }
         public IList<ClassForumFileModel>? ClassForumFiles { get; set; }
     }
 }
