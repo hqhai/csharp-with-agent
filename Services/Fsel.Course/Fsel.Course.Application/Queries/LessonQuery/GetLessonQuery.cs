@@ -41,7 +41,6 @@ namespace Fsel.Course.Application.Queries.LessonQuery
             var video = lesson.LessonVideos.Select(x => x.Video).FirstOrDefault();
 
             var lessonModel = _mapper.Map<LessonModel>(lesson);
-            lessonModel.Video = _mapper.Map<VideoModel>(video);
             lessonModel.VideoId = video?.Id;
             lessonModel.HomeWorks = _mapper.Map<IList<HomeWorkModel>>(lesson.LessonHomeWorks.OrderBy(x => x!.CreatedDate).Select(x => x.HomeWork));
             lessonModel.ClassForum = _mapper.Map<ClassForumModel>(lesson.ClassForum);

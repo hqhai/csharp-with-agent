@@ -13,5 +13,10 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         /// ScoreMustLessThan9
         /// </summary>
         ScoreMustLessThan9,
+
+        /// <summary>
+        /// Mock Test Result Not Status Done
+        /// </summary>
+        MockTestResultNotStatusDone,
     }
 }
