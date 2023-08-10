@@ -97,9 +97,10 @@ namespace Fsel.Course.Lms.Application.Queries.ProgessQuery
                                          .GroupBy(log => log.CreatedDate!.Value.Date) // Nhóm theo UserId
                                          .Select(group => new
                                          {
-                                             UserId = group.Key,
+                                             Date = group.Key,
                                              Days = group.Distinct().Count()
                                          }).ToList();
+                numberOfDaysStreak = await CountContinuousDaysAsync(userActivityDays.Select(x => x.Date).ToList());
             }
 
             progessMenu.NumberOfUnitDone = numberOfUnitDone;
@@ -109,6 +110,33 @@ namespace Fsel.Course.Lms.Application.Queries.ProgessQuery
             methodResult.StatusCode = StatusCodes.Status200OK;
             methodResult.Result = progessMenu;
             return methodResult;
+        }
+
+        private static async Task<int> CountContinuousDaysAsync(IEnumerable<DateTime> dates)
+        {
+            int count = 0;
+            int maxCount = 0;
+            DateTime? previousDate = null;
+
+            foreach (var date in dates)
+            {
+                if (previousDate == null || (date - previousDate.Value).TotalDays == 1)
+                {
+                    count++;
+                    if (count > maxCount)
+                    {
+                        maxCount = count;
+                    }
+                }
+                else
+                {
+                    count = 1;
+                    maxCount = count;
+                }
+                previousDate = date;
+                await Task.Delay(1);
+            }
+            return maxCount;
         }
     }
 }
