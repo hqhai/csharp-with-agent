@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Training.Application.Queries.TeacherFreeDateQuery
+namespace Fsel.Training.Application.Queries.TeacherFreeTimeQuery
 {
     using System.Collections.Generic;
     using System.Linq;
@@ -18,12 +18,12 @@ namespace Fsel.Training.Application.Queries.TeacherFreeDateQuery
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class GetListFreeTeacherByCalendarQuery : IRequest<MethodResult<IList<TeacherFreeTimeModel>>>
+    public class GetListTeacherFreeTimeByCalendarQuery : IRequest<MethodResult<IList<TeacherFreeTimeModel>>>
     {
         public Guid ClassLiveCalendarId { get; set; }
     }
 
-    public class GetListFreeTeacherByCalendarQueryHandler : IRequestHandler<GetListFreeTeacherByCalendarQuery, MethodResult<IList<TeacherFreeTimeModel>>>
+    public class GetListTeacherFreeTimeByCalendarQueryHandler : IRequestHandler<GetListTeacherFreeTimeByCalendarQuery, MethodResult<IList<TeacherFreeTimeModel>>>
     {
         private readonly ITeacherFreeTimeRepository _teacherFreeTimeRepository;
         private readonly IClassLiveCalendarRepository _classLiveCalendarRepository;
@@ -31,7 +31,7 @@ namespace Fsel.Training.Application.Queries.TeacherFreeDateQuery
         private readonly IMapper _mapper;
         private readonly ISystemService _systemService;
 
-        public GetListFreeTeacherByCalendarQueryHandler(ITeacherFreeTimeRepository teacherFreeTimeRepository
+        public GetListTeacherFreeTimeByCalendarQueryHandler(ITeacherFreeTimeRepository teacherFreeTimeRepository
             , IClassLiveCalendarRepository classLiveCalendarRepository
             , IUserService userService
             , ISystemService systemService
@@ -44,7 +44,7 @@ namespace Fsel.Training.Application.Queries.TeacherFreeDateQuery
             _systemService = systemService;
         }
 
-        public async Task<MethodResult<IList<TeacherFreeTimeModel>>> Handle(GetListFreeTeacherByCalendarQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<IList<TeacherFreeTimeModel>>> Handle(GetListTeacherFreeTimeByCalendarQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<IList<TeacherFreeTimeModel>>();

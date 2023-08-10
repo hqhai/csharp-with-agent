@@ -73,12 +73,9 @@ namespace Fsel.Training.Application.Queries.CancelScheduleLiveQuery
                     }).ToList();
                 }
             }
-            if (classLiveWorkFlow.Status == EnumWorkFlowCancelScheduleStatus.WaitVote.ToString())
+            if (classLiveWorkFlow.Status == EnumWorkFlowCancelScheduleStatus.WaitVote.ToString() && classLiveWorkFlow.UpdatedDate != null && classLiveWorkFlow.UpdatedDate.Value.AddDays(2) <= DateTime.Now)
             {
-                if (classLiveWorkFlow.UpdatedDate != null && classLiveWorkFlow.UpdatedDate.Value.AddDays(2) <= DateTime.Now)
-                {
-                    liveSessionInformation.IsWaitVote = true;
-                }
+                liveSessionInformation.IsWaitVote = true;
             }
             liveSessionInformation.ClassName = @class?.Name;
             liveSessionInformation.Description = classLiveWorkFlow.Description;
