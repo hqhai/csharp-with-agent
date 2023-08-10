@@ -20,7 +20,7 @@ builder.Services.AddScoped<ICourseTimeConfigRepository, CourseTimeConfigReposito
 builder.Services.AddScoped<IForbiddenWordRepository, ForbiddenWordRepository>();
 builder.Services.AddScoped<ITeachingCostRepository, TeachingCostRepository>();
 builder.Services.AddScoped<IReferralDiscountConfigRepository, ReferralDiscountConfigRepository>();
-
+builder.Services.AddScoped<ILogActionRepository, LogActionRepository>();
 /*builder.AddRefitClients(typeof(IUserService), appSetting?.Services?.UserApiUrl);*/
 var app = builder.Build();
 
