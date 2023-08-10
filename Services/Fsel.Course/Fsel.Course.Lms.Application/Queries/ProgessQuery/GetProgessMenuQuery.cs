@@ -9,6 +9,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgessQuery
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Course.Lms.Application.Services.SystemService;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using MediatR;
     using Microsoft.AspNetCore.Http;
@@ -25,18 +26,21 @@ namespace Fsel.Course.Lms.Application.Queries.ProgessQuery
         private readonly IClassForumRepository _classForumRepository;
         private readonly IUnitRepository _unitRepository;
         private readonly ILessonExtraPracticeRepository _lessonExtraPracticeRepository;
+        private readonly ISystemService _systemService;
         private readonly IUserService _userService;
 
         public GetProgessMenuQueryHandler(AuthContext authContext
             , IClassForumRepository classForumRepository
             , IUnitRepository unitRepository
             , ILessonExtraPracticeRepository lessonExtraPracticeRepository
+            , ISystemService systemService
             , IUserService userService)
         {
             _authContext = authContext;
             _classForumRepository = classForumRepository;
             _unitRepository = unitRepository;
             _lessonExtraPracticeRepository = lessonExtraPracticeRepository;
+            _systemService = systemService;
             _userService = userService;
         }
 
@@ -79,6 +83,20 @@ namespace Fsel.Course.Lms.Application.Queries.ProgessQuery
             var numberOfPostsCreated = classForums.SelectMany(x => x.ClassForumResults)
                                                     .Where(x => x.Status == EnumClassForumResultStatus.PendingForGrading || x.Status == EnumClassForumResultStatus.Graded)
                                                     .Count();
+            var logActionResults = await _systemService.GetLogActionsByUserId(_authContext.CurrentUserId);
+            if (!logActionResults.IsSuccessStatusCode)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(logActionResults));
+                return methodResult;
+            }
+            var (numberOfDaysStreak, isDaysStreakIncrease) = (0, true);
+            var logActions = logActionResults?.Content?.Result;
+            if (logActions != null)
+            {
+                progessMenu.NumberOfDaysStreak = logActions.NumberOfDaysStreak;
+                progessMenu.IsDaysStreakIncrease = logActions.IsDaysStreakIncrease;
+            }
+
             progessMenu.NumberOfUnitDone = numberOfUnitDone;
             progessMenu.NumberOfPostsCreated = numberOfPostsCreated;
             progessMenu.NumberOfPracticesDone = numberOfPracticesDone;

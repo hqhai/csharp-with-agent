@@ -7,6 +7,7 @@ namespace Fsel.Training.Api.Controllers.Cso
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
     using Fsel.Training.Application.Queries.ScheduleQuery;
+    using Fsel.Training.Application.Queries.TeacherFreeDateQuery;
     using Fsel.Training.Domain.Models.EntityModels;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
@@ -22,18 +23,29 @@ namespace Fsel.Training.Api.Controllers.Cso
         {
             _mediator = mediator;
         }
+        /// <summary>
+        /// Get Detail Teacher Free Date
+        /// </summary>
+        [HttpGet("{id}")]
+        [ProducesResponseType(typeof(MethodResult<TeacherFreeDateModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.BadRequest)]
+        public async Task<IActionResult> Get([FromRoute] Guid id)
+        {
+            MethodResult<TeacherFreeDateModel> commandResult = await _mediator.Send(new GetTeacherFreeDateQuery { TeacherFreeDateId = id }).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
 
         /// <summary>
-        /// Get class live priority
+        /// Get List free Teacher
         /// </summary>
 
-        [HttpGet]
-        [ProducesResponseType(typeof(MethodResult<IList<TeacherFreeTimeModel>>), (int)HttpStatusCode.OK)]
+        [HttpGet("get-list-by-teacherId")]
+        [ProducesResponseType(typeof(MethodResult<IList<TeacherFreeDateModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> SearchClassLive([FromQuery] SearchTeacherFreeDateByCsoQuery query)
+        public async Task<IActionResult> GetListFreeTeacher([FromQuery] GetListTeacherFreeDateByTeacherIdQuery query)
         {
-            MethodResult<IList<TeacherFreeTimeModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
-            return queryResult.GetActionResult();
+            MethodResult<IList<TeacherFreeDateModel>> commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            return commandResult.GetActionResult();
         }
 
         /// <summary>
