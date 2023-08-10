@@ -1,5 +1,7 @@
 using Fsel.Common.Constants;
+using Fsel.Common.Helpers;
 using Fsel.Core.Base;
+using Fsel.Shared.Constants;
 using Fsel.System.Domain.Entities;
 using Fsel.System.Domain.Entities.Configs;
 using Fsel.System.Infrastructure.Configs;
@@ -18,9 +20,13 @@ namespace Fsel.System.Infrastructure
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             ArgumentNullException.ThrowIfNull(modelBuilder);
-            SeedCourselevel(modelBuilder);
+            SeedQuestBoards(modelBuilder);
             modelBuilder.ApplyConfiguration(new TeachingCostEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new ReferralDiscountConfigConfiguration());
+            modelBuilder.ApplyConfiguration(new QuestBoardConfigConfigConfiguration());
+            modelBuilder.ApplyConfiguration(new QuestBoardConfigConfiguration());
+            modelBuilder.ApplyConfiguration(new QuestBoardTaskConfigConfiguration());
+            modelBuilder.ApplyConfiguration(new QuestBoardTaskStudentConfigConfiguration());
             base.OnModelCreating(modelBuilder);
         }
 
@@ -30,6 +36,10 @@ namespace Fsel.System.Infrastructure
         public DbSet<TeachingCost> TeachingCosts { get; set; }
         public DbSet<LogAction> LogActions { get; set; }
         public DbSet<ReferralDiscountConfig> ReferralDiscountConfigs { get; set; }
+        public DbSet<QuestBoardTask> QuestBoardTasks { get; set; }
+        public DbSet<QuestBoardTaskStudent> QuestBoardTaskStudents { get; set; }
+        public DbSet<QuestBoard> QuestBoards { get; set; }
+        public DbSet<QuestBoardConfig> QuestBoardConfigs { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -46,13 +56,13 @@ namespace Fsel.System.Infrastructure
             }
         }
 
-        //private static void SeedQuestBoards(ModelBuilder builder)
-        //{
-        //    var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, QuestBoardFileName.QuestBoardFileName);
-        //    var surveyQuestions = ConvertHelper.DeserializeFromFilePath<IList<SurveyQuestion>>(path);
-        //    ArgumentNullException.ThrowIfNull(surveyQuestions);
-        //    builder.Entity<SurveyQuestion>().HasData(surveyQuestions);
-        //}
+        private static void SeedQuestBoards(ModelBuilder builder)
+        {
+            var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, QuestBoardSettings.QuestBoardFileName);
+            var questBoardConfigs = ConvertHelper.DeserializeFromFilePath<IList<QuestBoardConfig>>(path);
+            ArgumentNullException.ThrowIfNull(questBoardConfigs);
+            builder.Entity<QuestBoardConfig>().HasData(questBoardConfigs);
+        }
 
         private static void SeedCourselevel(ModelBuilder builder)
         {

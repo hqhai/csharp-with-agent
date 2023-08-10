@@ -2,6 +2,8 @@
 
 using Fsel.Common.ValueSettings;
 using Fsel.Core.Extensions;
+using Fsel.System.Application.Services.CourseServices;
+using Fsel.System.Application.Services.UserServices;
 using Fsel.System.Domain.IRepositories;
 using Fsel.System.Infrastructure;
 using Fsel.System.Infrastructure.Repositories;
@@ -21,7 +23,11 @@ builder.Services.AddScoped<IForbiddenWordRepository, ForbiddenWordRepository>();
 builder.Services.AddScoped<ITeachingCostRepository, TeachingCostRepository>();
 builder.Services.AddScoped<IReferralDiscountConfigRepository, ReferralDiscountConfigRepository>();
 builder.Services.AddScoped<ILogActionRepository, LogActionRepository>();
-/*builder.AddRefitClients(typeof(IUserService), appSetting?.Services?.UserApiUrl);*/
+builder.Services.AddScoped<IQuestBoardRepository, QuestBoardRepository>();
+builder.Services.AddScoped<IQuestBoardConfigRepository, QuestBoardConfigRepository>();
+builder.AddRefitClients(typeof(IUserService), appSetting?.Services?.UserApiUrl);
+builder.AddRefitClients(typeof(ICourseService), appSetting?.Services?.UserApiUrl);
+builder.AddRefitClients(typeof(IUserService), appSetting?.Services?.UserApiUrl);
 var app = builder.Build();
 
 app.UseServices();

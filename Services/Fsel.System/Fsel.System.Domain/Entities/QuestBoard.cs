@@ -3,9 +3,11 @@
 namespace Fsel.System.Domain.Entities
 {
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Common.Helpers;
     using Fsel.Core.Entities;
     using Fsel.Shared.Enums;
     using global::System.ComponentModel.DataAnnotations;
+    using global::System.ComponentModel.DataAnnotations.Schema;
 
     public class QuestBoard : Entity
     {
@@ -61,7 +63,15 @@ namespace Fsel.System.Domain.Entities
         /// <summary>
         /// Loại Package
         /// </summary>
-        public IList<Guid>? PackageIds { get; set; }
+        [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
+        public string? PackageIdsStr { get; set; }
+
+        [NotMapped]
+        public IList<Guid>? PackageIds
+        {
+            get { return ConvertHelper.Deserialize<IList<Guid>>(PackageIdsStr); }
+            set { PackageIdsStr = ConvertHelper.Serialize(value); }
+        }
 
         /// <summary>
         /// Yêu cầu bắt buộc
@@ -76,7 +86,6 @@ namespace Fsel.System.Domain.Entities
         /// <summary>
         /// Nhiệm vụ phụ thuộc
         /// </summary>
-        [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
-        public Guid DependentId { get; set; }
+        public Guid? DependentId { get; set; }
     }
 }

@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.System.Domain.Entities.Configs
+namespace Fsel.System.Domain.Entities
 {
     using Fsel.Core.Entities;
     using Fsel.Shared.Enums;
