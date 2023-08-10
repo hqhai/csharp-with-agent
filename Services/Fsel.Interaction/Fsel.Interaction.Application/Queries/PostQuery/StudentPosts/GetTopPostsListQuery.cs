@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Interaction.Application.Queries.PostQuery
+namespace Fsel.Interaction.Application.Queries.PostQuery.StudentPosts
 {
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
@@ -10,7 +10,6 @@ namespace Fsel.Interaction.Application.Queries.PostQuery
     using Fsel.Interaction.Domain.IRepositories;
     using Fsel.Interaction.Domain.Models.EntityModels;
     using Fsel.Interaction.Domain.Models.QueryModels.Posts;
-    using Fsel.Interaction.Infrastructure.Repositories;
     using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Http;
