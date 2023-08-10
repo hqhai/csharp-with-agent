@@ -116,7 +116,6 @@ namespace Fsel.Course.Lms.Application.Queries.ProgessQuery
         private static async Task<(int, bool)> CountContinuousDaysAsync(IEnumerable<DateTime> dates)
         {
             int count = 0;
-            int maxCount = 0;
             DateTime? previousDate = null;
             bool isDaysStreakIncrease = true;
             foreach (var date in dates)
@@ -124,22 +123,17 @@ namespace Fsel.Course.Lms.Application.Queries.ProgessQuery
                 if (previousDate == null || (date - previousDate.Value).TotalDays == 1)
                 {
                     count++;
-                    if (count > maxCount)
-                    {
-                        maxCount = count;
-                        isDaysStreakIncrease = true;
-                    }
+                    isDaysStreakIncrease = true;
                 }
                 else
                 {
                     count = 1;
-                    maxCount = count;
                     isDaysStreakIncrease = false;
                 }
                 previousDate = date;
                 await Task.Delay(1);
             }
-            return (maxCount, isDaysStreakIncrease);
+            return (count, isDaysStreakIncrease);
         }
     }
 }
