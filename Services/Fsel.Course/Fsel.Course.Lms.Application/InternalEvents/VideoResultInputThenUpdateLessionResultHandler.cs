@@ -34,11 +34,12 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                     var classForumResult = lessonResult.ClassForumResults.FirstOrDefault();
                     var isCheckHomeWork = lessonResult.HomeWorkResults.All(x => x.Status == EnumResultStatus.Done) && classForumResult != null;
                     var isCheckClassForum = classForumResult?.Status == EnumClassForumResultStatus.Graded;
-                    var percentHomeWork = isCheckHomeWork ? (double)lessonResult.HomeWorkResults.Average(x => x.Percent) * 30 : 0;
-                    var percentClassForum = isCheckClassForum ? ((double)classForumResult!.ClassForumScores.Sum(x => x.Score) / 36) * 30 : 0;
+                    var percentHomeWork = isCheckHomeWork ? (double)lessonResult.HomeWorkResults.Average(x => x.Percent) * 30 : default;
+                    var percentClassForum = isCheckClassForum ? ((double)classForumResult!.ClassForumScores.Sum(x => x.Score) / 36) * 30 : default;
                     var percentVideo = lessonResult.VideoResult.Percent * 40;
                     var percent = (percentClassForum + percentHomeWork + percentVideo) / 100;
                     lessonResult.Percent = percent;
+                    lessonResult.SkillScores = videoResult.VideoSkillScores?.FirstOrDefault(x => x.Type == EnumTimeCodeType.Standalone)?.SkillScores;
                     lessonResult.Status = EnumResultStatus.Done;
                     _lessonResultRepository.Update(lessonResult);
                     await _lessonResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
