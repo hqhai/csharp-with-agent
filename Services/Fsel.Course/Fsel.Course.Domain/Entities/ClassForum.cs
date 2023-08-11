@@ -52,11 +52,9 @@ namespace Fsel.Course.Domain.Entities
 
         public bool IsAlFeedBack { get; set; }
 
-        [MaxLength(1000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         [RequiredIf(nameof(IsAlFeedBack), true, ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         public string? SystemRoleAlConfig { get; set; }
 
-        [MaxLength(1000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         [RequiredIf(nameof(IsAlFeedBack), true, ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         public string? UserAlConfig { get; set; }
 
