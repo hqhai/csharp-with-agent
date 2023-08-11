@@ -18,11 +18,11 @@ namespace Fsel.Training.Api.Controllers.Cso
     [Route(Settings.APIDefaultRoute + "/cso/teacher-free-date")]
     [ApiController]
     [Authorize(Roles = nameof(EnumRole.CSO))]
-    public class TeacherTimeDateController : ControllerBase
+    public class TeacherFreeDateController : ControllerBase
     {
         private readonly IMediator _mediator;
 
-        public TeacherTimeDateController(IMediator mediator)
+        public TeacherFreeDateController(IMediator mediator)
         {
             _mediator = mediator;
         }
