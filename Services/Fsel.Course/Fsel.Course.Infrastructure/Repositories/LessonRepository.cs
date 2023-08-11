@@ -26,7 +26,7 @@ namespace Fsel.Course.Infrastructure.Repositories
                                  .Include(e => e.LessonInstructions.Where(n => !n.IsDeleted).OrderBy(x => x.CreatedDate))
                                  .Include(e => e.LessonVideos.Where(n => !n.IsDeleted).OrderBy(x => x.CreatedDate))
                                  .ThenInclude(e => e.Video)
-                                 .ThenInclude(e => e.VideoTimeCodes.OrderBy(x => x.CreatedDate))
+                                 .ThenInclude(e => e!.VideoTimeCodes.OrderBy(x => x.CreatedDate))
                                  .AsNoTracking()
                                  .FirstOrDefaultAsync(x => x.Id == id);
             }
