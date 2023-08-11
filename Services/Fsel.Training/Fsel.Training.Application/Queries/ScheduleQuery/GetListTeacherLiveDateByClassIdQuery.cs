@@ -74,7 +74,7 @@ namespace Fsel.Training.Application.Queries.ScheduleQuery
             teacherFreeDateOneModel.ForEach(x => x.Priority = true);
 
             var teacherFreeDateTwo = teacherFreeDates.Where(x => @class.LiveDays.All(n => x.TeacherFreeTimes.Any(x => x.Priority = false && x.DayOfWeek == n && x.LiveTimeFrameId == @class.LiveTimeFrameId))).ToList();
-            var teacherFreeDateTwoModel = _mapper.Map<IList<TeacherFreeDateModel>>(teacherFreeDateOne);
+            var teacherFreeDateTwoModel = _mapper.Map<IList<TeacherFreeDateModel>>(teacherFreeDateTwo);
             teacherFreeDateTwoModel.ForEach(x => x.Priority = false);
 
             var teacherFreeDateModel = teacherFreeDateOneModel.Union(teacherFreeDateTwoModel).ToList();
