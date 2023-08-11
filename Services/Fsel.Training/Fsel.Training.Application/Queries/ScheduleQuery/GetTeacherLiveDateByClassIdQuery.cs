@@ -72,10 +72,22 @@ namespace Fsel.Training.Application.Queries.ScheduleQuery
                                     .Include(x => x.TeacherFreeTimes)
                                     .Where(x => x.StartDate.Date <= @class.StartDate.Value.Date && x.EndDate.Date >= @class.EndDate.Value.Date)
                                     .ToArrayAsync(cancellationToken);
+            if (teacherFreeDates == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(teacherFreeDates));
+                return methodResult;
+            }
+            var teacherFreeDate = teacherFreeDates.FirstOrDefault(x =>
+                                                    @class.LiveDays.All(n =>
+                                                    x.TeacherFreeTimes.Any(x => x.DayOfWeek == n)) &&
+                                                    x.TeacherFreeTimes.Any(x => x.LiveTimeFrameId == @class.LiveTimeFrameId));
 
-            var teacherFreeDate = teacherFreeDates.FirstOrDefault(x => x.TeacherFreeTimes.All(n => @class.LiveDays.Contains(n.DayOfWeek) && @class.LiveTimeFrameId == n.LiveTimeFrameId));
+            if (teacherFreeDate == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(teacherFreeDate));
+                return methodResult;
+            }
             var teacherFreeDateModel = _mapper.Map<TeacherFreeDateModel>(teacherFreeDate);
-
             var teacherResult = await _userService.GetTeacherByIdAsync(teacherFreeDateModel.TeacherId);
             var teacher = teacherResult.Content?.Result;
             teacherFreeDateModel.TeacherName = teacher?.Human?.FullName;
