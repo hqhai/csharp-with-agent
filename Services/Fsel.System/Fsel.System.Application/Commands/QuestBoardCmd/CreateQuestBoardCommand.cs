@@ -87,7 +87,7 @@ namespace Fsel.System.Application.Commands.QuestBoardCmd
             if (request.StartDate <= request.EndDate)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumQuestBoardErrorcode.EndtDateMustMorethanStartDate));
-                return methodResult;
+                return methodResult;.
             }
             var dependentTasks = new List<QuestBoardTask>();
             if (request.DependentId != null)
