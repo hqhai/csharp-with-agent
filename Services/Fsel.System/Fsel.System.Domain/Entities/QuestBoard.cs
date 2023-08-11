@@ -87,5 +87,7 @@ namespace Fsel.System.Domain.Entities
         /// Nhiệm vụ phụ thuộc
         /// </summary>
         public Guid? DependentId { get; set; }
+
+        public ICollection<QuestBoardTask> QuestBoardTasks { get; set; } = new List<QuestBoardTask>();
     }
 }

@@ -16,32 +16,29 @@ namespace Fsel.System.Application.Commands.QuestBoardCmd
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class CreateQuestBoardCommand : CreateQuestBoardCommandModel, IRequest<MethodResult<QuestBoardModel>>
+    public class UpdateQuestBoardCommand : UpdateQuestBoardCommandModel, IRequest<MethodResult<QuestBoardModel>>
     {
     }
 
-    public class CreateQuestBoardCommandHandler : IRequestHandler<CreateQuestBoardCommand, MethodResult<QuestBoardModel>>
+    public class UpdateQuestBoardCommandHandler : IRequestHandler<UpdateQuestBoardCommand, MethodResult<QuestBoardModel>>
     {
         private readonly IMapper _mapper;
         private readonly IQuestBoardRepository _questBoardRepository;
         private readonly IOrderService _orderService;
-        private readonly IQuestBoardTaskRepository _questBoardTaskRepository;
         private readonly IQuestBoardConfigRepository _questBoardConfigRepository;
 
-        public CreateQuestBoardCommandHandler(IMapper mapper
+        public UpdateQuestBoardCommandHandler(IMapper mapper
             , IQuestBoardRepository questBoardRepository
             , IOrderService orderService
-            , IQuestBoardTaskRepository questBoardTaskRepository
             , IQuestBoardConfigRepository questBoardConfigRepository)
         {
             _mapper = mapper;
             _questBoardRepository = questBoardRepository;
             _orderService = orderService;
-            _questBoardTaskRepository = questBoardTaskRepository;
             _questBoardConfigRepository = questBoardConfigRepository;
         }
 
-        public async Task<MethodResult<QuestBoardModel>> Handle(CreateQuestBoardCommand request, CancellationToken cancellationToken)
+        public async Task<MethodResult<QuestBoardModel>> Handle(UpdateQuestBoardCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<QuestBoardModel>();
@@ -54,7 +51,6 @@ namespace Fsel.System.Application.Commands.QuestBoardCmd
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(questBoardConfig));
                 return methodResult;
             }
-
             var packageResults = await _orderService.GetPackages();
             if (!packageResults.IsSuccessStatusCode)
             {
@@ -89,16 +85,6 @@ namespace Fsel.System.Application.Commands.QuestBoardCmd
                 methodResult.AddErrorBadRequest(nameof(EnumQuestBoardErrorcode.EndtDateMustMorethanStartDate));
                 return methodResult;
             }
-            var dependentTasks = new List<QuestBoardTask>();
-            if (request.DependentId != null)
-            {
-                dependentTasks = await _questBoardTaskRepository.Queryable.Where(x => x.QuestBoardId == request.DependentId).ToListAsync(cancellationToken);
-                if (dependentTasks == null)
-                {
-                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(questBoardConfig));
-                    return methodResult;
-                }
-            }
 
             #endregion Validate QuestBoard
 
@@ -108,14 +94,12 @@ namespace Fsel.System.Application.Commands.QuestBoardCmd
                 methodResult.AddErrorBadRequest(questBoard.ErrorMessages);
                 return methodResult;
             }
-            questBoard.QuestBoardTasks = await GetDateRangeAsync(request.StartDate, request.EndDate, request.RepeatType);
-
             await _questBoardRepository.ExecuteTransactionAsync(async () =>
             {
-                questBoard = _questBoardRepository.Add(questBoard);
+                questBoard = _questBoardRepository.Update(questBoard);
                 await _questBoardRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
-                methodResult.StatusCode = StatusCodes.Status201Created;
+                methodResult.StatusCode = StatusCodes.Status200OK;
                 methodResult.Result = _mapper.Map<QuestBoardModel>(questBoard);
                 return methodResult;
             });
@@ -123,7 +107,7 @@ namespace Fsel.System.Application.Commands.QuestBoardCmd
             return methodResult;
         }
 
-        private static async Task<List<QuestBoardTask>> GetDateRangeAsync(DateTime startDate, DateTime endDate, EnumRepeatType repeatType)
+        private static async Task<List<DateTime>> GetDateRangeAsync(DateTime startDate, DateTime endDate, EnumRepeatType repeatType)
         {
             int repeatInterval = 0;
 
@@ -146,10 +130,16 @@ namespace Fsel.System.Application.Commands.QuestBoardCmd
                 .Select(offset => new QuestBoardTask
                 {
                     ImplementDate = startDate.AddDays(offset * repeatInterval),
+                    QuestBoardId = Guid.NewGuid(),
                     DependentTaskId = Guid.NewGuid()
                 })
                 .ToList();
-            return tasks;
+
+            // Simulate asynchronous work
+            await Task.Delay(0);
+
+            List<DateTime> implementDates = tasks.Select(task => task.ImplementDate).ToList();
+            return implementDates;
         }
     }
 }

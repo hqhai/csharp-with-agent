@@ -14,9 +14,7 @@ namespace Fsel.System.Domain.Entities
         public DateTime ImplementDate { get; set; }
 
         public QuestBoard? QuestBoard { get; set; }
-
-        [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
-        public Guid DependentTaskId { get; set; }
+        public Guid? DependentTaskId { get; set; }
 
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         public Guid QuestBoardId { get; set; }
