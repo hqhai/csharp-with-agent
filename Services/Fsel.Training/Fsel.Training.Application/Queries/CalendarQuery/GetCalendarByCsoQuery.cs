@@ -95,6 +95,7 @@ namespace Fsel.Training.Application.Queries.CalendarQuery
                             Note = x.Note,
                             Status = x.Status,
                             ClassId = x.ClassId,
+                            ClassCode = x.Class!.Code,
                             TeacherId = x.TeacherId,
                             Class = _mapper.Map<ClassModel>(x.Class)
                         });

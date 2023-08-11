@@ -50,7 +50,7 @@ namespace Fsel.Training.Application.Queries.TeacherFreeDateQuery
                 return methodResult;
             }
             var teacherId = teacher.Content?.Result?.Id;
-            var teacherFreeDate = await _teacherFreeDateRepository.Queryable.Include(x => x.TeacherFreeTimes).FirstOrDefaultAsync(x => x.TeacherId == teacherId, cancellationToken);
+            var teacherFreeDate = await _teacherFreeDateRepository.Queryable.Include(x => x.TeacherFreeTimes).FirstOrDefaultAsync(x => x.TeacherId == teacherId && x.Id == request.TeacherFreeDateId, cancellationToken);
             var teacherFreeDateModel = _mapper.Map<TeacherFreeDateModel>(teacherFreeDate);
 
             var timeFramesResult = await _systemService.GetLiveTimeFramesAsync();
