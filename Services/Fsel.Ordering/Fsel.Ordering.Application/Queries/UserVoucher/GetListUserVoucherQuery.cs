@@ -48,6 +48,16 @@ namespace Fsel.Ordering.Application.Queries.UserVoucher
                                 StartDate = x.Voucher!.StartDate,
                                 EndDate = x.Voucher.EndDate,
                                 VoucherName = x.Voucher.Name,
+                                VoucherPackages = x.Voucher.VoucherPackages.Select(x => new VoucherPackageModel
+                                {
+                                    Id = x.Id,
+                                    VoucherId = x.VoucherId,
+                                    CreatedDate = x.CreatedDate,
+                                    Percentage = x.Percentage,
+                                    PackageId = x.PackageId,
+                                    DiscountedPrice = (double)x.Package!.Price - (x.Percentage * (double)x.Package!.Price / 100),
+                                    Price = (double)x.Package!.Price,
+                                }).ToList(),
                             }).ToListAsync(cancellationToken);
 
             methodResult.Result = userVoucherModel;
