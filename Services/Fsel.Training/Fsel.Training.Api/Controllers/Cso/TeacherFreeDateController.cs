@@ -6,15 +6,18 @@ namespace Fsel.Training.Api.Controllers.Cso
     using System.Net;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
+    using Fsel.Shared.Enums;
     using Fsel.Training.Application.Queries.ScheduleQuery;
     using Fsel.Training.Application.Queries.TeacherFreeDateQuery;
     using Fsel.Training.Domain.Models.EntityModels;
     using MediatR;
+    using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
 
     [ApiVersion(Settings.APIVersion)]
     [Route(Settings.APIDefaultRoute + "/cso/teacher-free-date")]
     [ApiController]
+    [Authorize(Roles = nameof(EnumRole.CSO))]
     public class TeacherTimeDateController : ControllerBase
     {
         private readonly IMediator _mediator;
@@ -23,6 +26,7 @@ namespace Fsel.Training.Api.Controllers.Cso
         {
             _mediator = mediator;
         }
+
         /// <summary>
         /// Get Detail Teacher Free Date
         /// </summary>
