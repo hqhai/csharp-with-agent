@@ -8,6 +8,7 @@ namespace Fsel.Training.Application.Queries.ScheduleQuery
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Shared.Enums;
     using Fsel.Training.Application.Services.UserServices;
     using Fsel.Training.Application.Services.UserServices.Models;
     using Fsel.Training.Domain.Enums.ErrorCodes;
@@ -52,11 +53,7 @@ namespace Fsel.Training.Application.Queries.ScheduleQuery
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(@class));
                 return methodResult;
             }
-            if (@class.TeacherId.HasValue)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumClassErrorCode.TeacherIsAlreadyInTheClass), nameof(@class.TeacherId));
-                return methodResult;
-            }
+            
             if (@class.StartDate == null || @class.EndDate == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumClassErrorCode.ClassEndDateAndStartDateIsNull), nameof(@class));
