@@ -79,7 +79,8 @@ namespace Fsel.Training.Application.Queries.ScheduleQuery
                                    .ToArrayAsync(cancellationToken);
                 if (teacherFreeDates == null)
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(teacherFreeDates));
+                    methodResult.Result = null;
+                    methodResult.StatusCode = StatusCodes.Status200OK;
                     return methodResult;
                 }
 
@@ -92,7 +93,8 @@ namespace Fsel.Training.Application.Queries.ScheduleQuery
 
             if (teacherFreeDate == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(teacherFreeDate));
+                methodResult.Result = null;
+                methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
             }
             var teacherFreeDateModel = _mapper.Map<TeacherFreeDateModel>(teacherFreeDate);
