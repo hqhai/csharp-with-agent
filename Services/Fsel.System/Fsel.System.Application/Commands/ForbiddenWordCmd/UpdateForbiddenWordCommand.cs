@@ -41,7 +41,6 @@ namespace Fsel.System.Application.Commands.ForbiddenWordCmd
 
             var forbiddenWordName = await _forbiddenWordRepository.Queryable.AnyAsync(x => x!.Word!.ToLower() == compareWord, cancellationToken);
 
-
             if (forbiddenWordName)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(forbiddenWordName));
