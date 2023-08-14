@@ -4,14 +4,17 @@ namespace Fsel.System.Application.Commands.ForbiddenWordCmd
 {
     using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.System.Domain.Entities;
     using Fsel.System.Domain.IRepositories;
     using Fsel.System.Domain.Models.CommandModels.ForbiddenWords;
     using Fsel.System.Domain.Models.EntityModels;
     using global::System;
+    using global::System.Globalization;
     using global::System.Threading.Tasks;
     using MediatR;
     using Microsoft.AspNetCore.Http;
+    using Microsoft.EntityFrameworkCore;
 
     public class CreateForbiddenWordCommand : CreateForbiddenWordCommandModel, IRequest<MethodResult<ForbiddenWordModel>>
     {
@@ -32,6 +35,21 @@ namespace Fsel.System.Application.Commands.ForbiddenWordCmd
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<ForbiddenWordModel> methodResult = new MethodResult<ForbiddenWordModel>();
+
+            var cultureInfo = CultureInfo.InvariantCulture;
+
+            var allForbiddenWords = await _forbiddenWordRepository.Queryable
+                .ToListAsync(cancellationToken);
+
+            var forbiddenWordName = allForbiddenWords
+                .Any(f => f.Word!.ToLower(cultureInfo) == request.Word!.ToLower(cultureInfo));
+
+
+            if (forbiddenWordName)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(forbiddenWordName));
+                return methodResult;
+            }
 
             ForbiddenWord forbiddenWord = _mapper.Map<ForbiddenWord>(request);
             await _forbiddenWordRepository.ExecuteTransactionAsync(async () =>
