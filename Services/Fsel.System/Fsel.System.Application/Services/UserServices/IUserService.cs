@@ -3,6 +3,7 @@
 namespace Fsel.System.Application.Services.UserServices
 {
     using Fsel.Common.ActionResults;
+    using Fsel.System.Application.Services.UserServices.Models;
     using Microsoft.AspNetCore.Mvc;
     using Refit;
 
