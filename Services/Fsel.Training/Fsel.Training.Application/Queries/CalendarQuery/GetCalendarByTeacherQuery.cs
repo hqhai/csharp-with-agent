@@ -9,8 +9,8 @@ namespace Fsel.Training.Application.Queries.CalendarQuery
     using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
-    using Fsel.Shared.Helpers;
     using Fsel.Training.Application.Services.CourseServices;
     using Fsel.Training.Application.Services.SystemServices;
     using Fsel.Training.Application.Services.UserServices;
@@ -18,9 +18,8 @@ namespace Fsel.Training.Application.Queries.CalendarQuery
     using Fsel.Training.Domain.Models.EntityModels;
     using Fsel.Training.Domain.Models.QueryModels;
     using MediatR;
-    using Microsoft.EntityFrameworkCore;
     using Microsoft.AspNetCore.Http;
-    using Fsel.Training.Domain.Enums.ErrorCodes;
+    using Microsoft.EntityFrameworkCore;
 
     public class GetCalendarByTeacherQuery : GetCalendarByTeacherQueryModel, IRequest<MethodResult<IList<ClassLiveCalendarModel>>>
     {
@@ -73,7 +72,7 @@ namespace Fsel.Training.Application.Queries.CalendarQuery
             var teacher = teacherResult.Content?.Result;
             if (teacher == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumClassErrorCode.TeachersNotExits));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(teacher));
                 return methodResult;
             }
 

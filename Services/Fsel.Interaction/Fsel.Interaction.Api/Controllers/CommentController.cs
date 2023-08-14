@@ -2,14 +2,14 @@
 
 namespace Fsel.Interaction.Api.Controllers
 {
-    using Fsel.Common.ActionResults;
     using System.Net;
+    using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
+    using Fsel.Interaction.Application.Commands.CommentCmd;
+    using Fsel.Interaction.Application.Queries.CommentQuery;
+    using Fsel.Interaction.Domain.Models.EntityModels;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
-    using Fsel.Interaction.Application.Commands.CommentCmd;
-    using Fsel.Interaction.Domain.Models.EntityModels;
-    using Fsel.Interaction.Application.Queries.CommentQuery;
 
     [ApiVersion(Settings.APIVersion)]
     [Route(Settings.APIDefaultRoute + "/comment")]

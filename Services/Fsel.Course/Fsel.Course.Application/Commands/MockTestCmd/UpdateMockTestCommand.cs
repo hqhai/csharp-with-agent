@@ -8,6 +8,7 @@ namespace Fsel.Course.Application.Commands.MockTestCmd
     using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
@@ -49,19 +50,19 @@ namespace Fsel.Course.Application.Commands.MockTestCmd
 
             if (request.SectionGroups == null || request.SectionGroups.Count == 0)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSectionGroupErrorCode.SectionGroupsNull), nameof(request.SectionGroups));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.SectionGroups));
                 return methodResult;
             }
             if (await _mockTestRepository.Queryable.AnyAsync(x => x.Id != request.Id && x.Name == request.Name, cancellationToken))
             {
-                methodResult.AddErrorBadRequest(nameof(EnumMockTestErrorCode.NameAlreadyExists), nameof(request.Name), request.Name);
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(request.Name));
                 return methodResult;
             }
 
             var mockTest = await _mockTestRepository.GetIncludeByIdAsync(request.Id);
             if (mockTest == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumMockTestErrorCode.MockTestsNotExist), nameof(request.Id), request.Id);
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(mockTest));
                 return methodResult;
             }
 
@@ -82,7 +83,7 @@ namespace Fsel.Course.Application.Commands.MockTestCmd
             {
                 if (sectionGroup == null)
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumSectionGroupErrorCode.SectionGroupNull), nameof(sectionGroup));
+                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(sectionGroup));
                     return methodResult;
                 }
                 var newSectionGroup = _mapper.Map<SectionGroup>(sectionGroup);

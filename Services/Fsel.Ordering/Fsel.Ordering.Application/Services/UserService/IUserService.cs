@@ -13,8 +13,10 @@ namespace Fsel.Ordering.Application.Services.UserService
     {
         [Get("/student/get-by-user-id/{id}")]
         Task<IApiResponse<MethodResult<StudentModel>>> GetStudentByUserIdAsync([FromRoute] Guid id);
+
         [Post("/student/get-by-user-ids")]
-        Task<IApiResponse<MethodResult<IList<StudentModel>>>> GetStudentsByIdsAsync([FromBody] GetStudentByUserIdsQuery model);
+        Task<IApiResponse<MethodResult<IList<StudentModel>>>> GetStudentsByIdsAsync([FromBody] IList<string> ids);
+
         [Put("/student/update-student-class")]
         Task<IApiResponse<MethodResult<StudentModel>>> UpdateStudentByClassAsync([Body] UpdateStudentByClassIdModel command);
     }

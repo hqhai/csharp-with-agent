@@ -5,26 +5,6 @@ namespace Fsel.Training.Domain.Enums.ErrorCodes
     public enum EnumClassLiveWorkFlowErrorCode
     {
         /// <summary>
-        /// ClassLiveWorkFlow Does not exits
-        /// </summary>
-        ClassLiveWorkFlowNotExits,
-
-        /// <summary>
-        /// Teacher Does not exits
-        /// </summary>
-        TeacherNotExits,
-
-        /// <summary>
-        /// CSO Does not exits
-        /// </summary>
-        CSONotExits,
-
-        /// <summary>
-        /// ClassLiveWorkFlow Already exist
-        /// </summary>
-        ClassLiveWorkFlowAlreadyExist,
-
-        /// <summary>
         /// Class Not Status Pedding
         /// </summary>
         ClassNotStatusPedding,
@@ -52,6 +32,17 @@ namespace Fsel.Training.Domain.Enums.ErrorCodes
         /// <summary>
         /// live date is invalid
         /// </summary>
-        LiveDateInvalid
+        LiveDateInvalid,
+
+        /// <summary>
+        /// ClassLiveWorkFlowPlans Null
+        /// </summary>
+        ClassLiveWorkFlowPlansNull,
+
+        /// <summary>
+        /// Voting time is not enough for 2 days
+        /// </summary>
+        VotingTimeIsNotEnoughForTwoDays
+,
     }
 }

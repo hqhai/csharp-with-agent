@@ -6,6 +6,7 @@ namespace Fsel.Course.Infrastructure.Common
     using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
@@ -43,13 +44,13 @@ namespace Fsel.Course.Infrastructure.Common
 
             if (request.LessonIds == null || request.LessonIds.Count == 0)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumLessonErrorCode.LessonsNull), nameof(request.LessonIds), request.LessonIds);
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.LessonIds));
                 return methodResult;
             }
 
             if (_lessonRepository.IsIdsInValid(request.LessonIds))
             {
-                methodResult.AddErrorBadRequest(nameof(EnumLessonErrorCode.LessonsNotExist), nameof(request.LessonIds), request.LessonIds);
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.LessonIds));
                 return methodResult;
             }
             if (request.MockTestId != null)
@@ -63,7 +64,7 @@ namespace Fsel.Course.Infrastructure.Common
             }
             if (await _unitRepository.Queryable.AnyAsync(x => x.Code == request.Code && x.CourseLevel == request.CourseLevel && (request.Id == Guid.Empty || x.Id != request.Id)))
             {
-                methodResult.AddErrorBadRequest(nameof(EnumMockTestErrorCode.CodeAndLevelAlreadyExist), nameof(request.Code), request.Code);
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(request.Code));
                 return methodResult;
             }
 

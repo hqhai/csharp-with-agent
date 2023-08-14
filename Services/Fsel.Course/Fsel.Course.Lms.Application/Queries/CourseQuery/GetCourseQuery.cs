@@ -6,6 +6,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
     using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums;
@@ -51,7 +52,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
             var studentResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
             if (!studentResult.IsSuccessStatusCode)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.StudentNull));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(studentResult));
                 return methodResult;
             }
             var studentId = studentResult?.Content?.Result?.Id;
@@ -65,7 +66,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
             var @class = classResult?.Content?.Result;
             if (@class == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.ClassesNotExist));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(@class));
                 return methodResult;
             }
 
@@ -169,7 +170,6 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
                         Id = x.MockTest.Id,
                         Name = x.MockTest.Name,
                         MockTestType = x.MockTest.MockTestType,
-                        CourseType = x.MockTest.CourseType,
                         CreatedDate = x.MockTest.CreatedDate,
                         CreatedFullName = x.MockTest.CreatedFullName,
                         CreatedUserId = x.MockTest.CreatedUserId,

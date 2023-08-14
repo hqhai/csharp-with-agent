@@ -12,6 +12,5 @@ namespace Fsel.Course.Lms.Application.Services.TrainingServices.Models
         public Guid PackageId { get; set; }
         public Guid? LiveTimeFrameId { get; set; }
         public IList<DayOfWeek>? LiveDays { get; set; }
-
     }
 }

@@ -6,6 +6,7 @@ namespace Fsel.Training.Application.Commands.ClassCmd
     using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Training.Domain.Enums.ErrorCodes;
     using Fsel.Training.Domain.IRepositories;
     using Fsel.Training.Domain.Models.CommandModels.Classes;
@@ -35,7 +36,7 @@ namespace Fsel.Training.Application.Commands.ClassCmd
             var @class = await _classRepository.GetByIdAsync(request.Id);
             if (@class == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumClassErrorCode.ClassesNotExits));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(@class));
                 return methodResult;
             }
             if (@class.TeacherApprovalStatus == Shared.Enums.EnumTeacherApprovalStatus.Approved)

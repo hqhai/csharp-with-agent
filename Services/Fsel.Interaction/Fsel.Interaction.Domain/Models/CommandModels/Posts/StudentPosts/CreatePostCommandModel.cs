@@ -18,7 +18,6 @@ namespace Fsel.Interaction.Domain.Models.CommandModels.Posts.StudentPost
 
         public Guid UserId { get; set; }
 
-
         public string? AvatarPath { get; set; }
 
         public string? FullName { get; set; }

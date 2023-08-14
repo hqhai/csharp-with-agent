@@ -5,13 +5,12 @@ namespace Fsel.Interaction.Application.Queries.PostQuery
     using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Common.ActionResults;
-    using Fsel.Interaction.Domain.Enums.ErrorCodes;
+    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Interaction.Domain.IRepositories;
     using Fsel.Interaction.Domain.Models.EntityModels;
     using Fsel.Interaction.Domain.Models.QueryModels.Posts;
     using MediatR;
     using Microsoft.AspNetCore.Http;
-    using Microsoft.EntityFrameworkCore;
 
     public class GetPostDetailQuery : GetPostsByStudentQueryModel, IRequest<MethodResult<PostModel>>
     {
@@ -36,10 +35,9 @@ namespace Fsel.Interaction.Application.Queries.PostQuery
 
             var posts = await _postRepository.GetIncludeByIdAsync(request.PostId);
 
-
             if (posts == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumPostErrorCode.PostNotExist));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(posts));
                 return methodResult;
             }
 

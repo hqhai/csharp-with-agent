@@ -4,6 +4,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoResultCmd
 {
     using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Course.Domain.Entities.SkillScoresConfigs;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.Enums.ErrorCodes;
@@ -60,7 +61,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoResultCmd
             var videoResult = await _videoResultRepository.Queryable.FirstOrDefaultAsync(x => x.LessonResultId == request.LessonResulttId, cancellationToken: cancellationToken);
             if (videoResult == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumVideoResultErrorCode.VideoResultNotExist), nameof(request.LessonResulttId), request.LessonResulttId);
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(videoResult));
                 return methodResult;
             }
 
@@ -124,14 +125,18 @@ namespace Fsel.Course.Lms.Application.Commands.VideoResultCmd
                                                 select new SkillScores
                                                 {
                                                     Skill = skill,
-                                                    TotalCount = questionTimeCodeQJ != null ? questionTimeCodeQJ.TotalCount : default,
-                                                    CorrectCount = answerTimeCodeQJ != null ? answerTimeCodeQJ.CorrectCount : default,
+                                                    TotalCount = questionTimeCodeQJ.TotalCount,
+                                                    CorrectCount = answerTimeCodeQJ.CorrectCount,
+                                                    TotalQuestion = questionTimeCodeQJ.TotalQuestion,
+                                                    CountQuestion = answerTimeCodeQJ.TotalAnswer,
+                                                    Percent = questionTimeCodeQJ.TotalCount > 0 ? (double)answerTimeCodeQJ.CorrectCount / questionTimeCodeQJ.TotalCount * 100 : default
                                                 }).ToList()
                              };
-            videoResult.CorrectCount = (int)scoreQuery.Where(x => x.Type == EnumTimeCodeType.Standalone).SelectMany(x => x.SkillScores!).Sum(x => x.CorrectCount);
-            videoResult.CorrectTotal = (int)scoreQuery.Where(x => x.Type == EnumTimeCodeType.Standalone).SelectMany(x => x.SkillScores!).Sum(x => x.TotalCount);
+            var skillScores = scoreQuery.Where(x => x.Type == EnumTimeCodeType.Standalone).SelectMany(x => x.SkillScores!).ToList();
+            videoResult.CorrectCount = (int)skillScores.Sum(x => x.CorrectCount);
+            videoResult.CorrectTotal = (int)skillScores.Sum(x => x.TotalCount);
             videoResult.Status = EnumResultStatus.Done;
-            videoResult.Percent = videoResult.CorrectTotal != 0 ? (double)videoResult.CorrectCount / videoResult.CorrectTotal * 100 : 0;
+            videoResult.Percent = videoResult.CorrectTotal > 0 ? (double)videoResult.CorrectCount / videoResult.CorrectTotal * 100 : default;
             videoResult.VideoSkillScores = scoreQuery.ToList();
             await _videoResultRepository.ExecuteTransactionAsync(async () =>
             {

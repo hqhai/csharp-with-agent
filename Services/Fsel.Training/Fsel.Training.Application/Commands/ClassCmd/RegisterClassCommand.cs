@@ -5,6 +5,7 @@ namespace Fsel.Training.Application.Commands.ClassCmd
     using System.Threading;
     using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
     using Fsel.Shared.Enums;
     using Fsel.Training.Application.Queries.ClassQuery;
@@ -72,7 +73,7 @@ namespace Fsel.Training.Application.Commands.ClassCmd
                 var student = await _userService.GetStudentByUserIdAsync(userId);
                 if (student == null)
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumClassErrorCode.UserNotExits));
+                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student));
                     return methodResult;
                 }
                 var studentId = student!.Content!.Result!.Id;
@@ -80,7 +81,7 @@ namespace Fsel.Training.Application.Commands.ClassCmd
                 var classStudent = await _classStudentRepository.Queryable.FirstOrDefaultAsync(x => x.StudentId == studentId && x.ClassId == classnew.Id, cancellationToken);
                 if (classStudent != null)
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumClassErrorCode.ClassStudentAlreadyExist), nameof(studentId), studentId);
+                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(classStudent));
                     return methodResult;
                 }
 

@@ -6,9 +6,9 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery
     using System.Globalization;
     using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
     using Fsel.Ordering.Application.Services.UserService;
-    using Fsel.Ordering.Domain.Enums.ErrorCodes;
     using Fsel.Ordering.Domain.IRepositories;
     using Fsel.Ordering.Domain.Models.EntityModels;
     using Fsel.Shared.Enums;
@@ -51,7 +51,7 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery
             var package = await _packageRepository.Queryable.FirstOrDefaultAsync(x => x.Id == request.PackageId, cancellationToken);
             if (package == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumOrderErrorCode.PackageNotExist));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(package));
                 return methodResult;
             }
             var student = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);

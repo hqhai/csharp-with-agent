@@ -6,12 +6,12 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
     using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
     using Fsel.Ordering.Application.Services.TrainingService;
     using Fsel.Ordering.Application.Services.TrainingService.CommandModels;
     using Fsel.Ordering.Domain.Entities;
     using Fsel.Ordering.Domain.Enums;
-    using Fsel.Ordering.Domain.Enums.ErrorCodes;
     using Fsel.Ordering.Domain.IRepositories;
     using Fsel.Ordering.Domain.Models.CommandModels.Orders;
     using Fsel.Ordering.Domain.Models.EntityModels;
@@ -52,13 +52,13 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
             var package = await _packageRepository.GetByIdAsync(request.PackageId);
             if (package == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumOrderErrorCode.PackageNotExist));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(package));
                 return methodResult;
             }
 
             if (await _orderRepository.Queryable.AnyAsync(x => x.Code == request.Code, cancellationToken))
             {
-                methodResult.AddErrorBadRequest(nameof(EnumOrderErrorCode.CodeOrderAlreadyExist));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Code));
                 return methodResult;
             }
 
@@ -70,7 +70,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
             }
             if (classnew?.Content?.Result == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumOrderErrorCode.ClassNotExist));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(classnew));
                 return methodResult;
             }
 

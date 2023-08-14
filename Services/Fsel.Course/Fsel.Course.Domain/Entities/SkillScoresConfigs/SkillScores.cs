@@ -18,5 +18,14 @@ namespace Fsel.Course.Domain.Entities.SkillScoresConfigs
 
         [JsonRequired]
         public double CorrectCount { get; set; }
+
+        [JsonRequired]
+        public double TotalQuestion { get; set; }
+
+        [JsonRequired]
+        public double CountQuestion { get; set; }
+
+        [JsonRequired]
+        public double Percent { get; set; }
     }
 }

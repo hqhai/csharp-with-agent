@@ -8,9 +8,9 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumQuery
     using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
     using Fsel.Course.Domain.Enums;
-    using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Services.InteractionService;
@@ -62,13 +62,13 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumQuery
             var student = studentResult?.Content?.Result;
             if (studentResult == null || student == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.StudentNull));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(studentResult));
                 return methodResult;
             }
             var isLesson = await _lessonRepository.AnyAsync(request.LessonId);
             if (!isLesson)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumLessonErrorCode.LessonsNotExist));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(isLesson));
                 return methodResult;
             }
 
@@ -78,7 +78,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumQuery
 
             if (classForum == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumClassForumErrorCode.ClassForumNotExist));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(classForum));
                 return methodResult;
             }
             var classForumByStudentModel = _mapper.Map<ClassForumByStudentModel>(classForum);

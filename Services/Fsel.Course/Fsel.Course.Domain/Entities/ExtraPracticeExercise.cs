@@ -13,6 +13,5 @@ namespace Fsel.Course.Domain.Entities
         public Guid? ExtraPracticeId { get; set; }
         public Guid? ExerciseId { get; set; }
         public ICollection<ExtraPracticeExerciseResult> ExtraPracticeExerciseResults { get; set; } = new List<ExtraPracticeExerciseResult>();
-
     }
 }

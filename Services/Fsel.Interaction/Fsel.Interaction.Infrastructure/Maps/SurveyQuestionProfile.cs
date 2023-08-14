@@ -3,8 +3,8 @@
 namespace Fsel.Interaction.Infrastructure.Maps
 {
     using AutoMapper;
-    using Fsel.Interaction.Domain.Entities;
     using Fsel.Core.Extensions;
+    using Fsel.Interaction.Domain.Entities;
     using Fsel.Interaction.Domain.Models.EntityModels;
 
     public class SurveyQuestionProfile : Profile

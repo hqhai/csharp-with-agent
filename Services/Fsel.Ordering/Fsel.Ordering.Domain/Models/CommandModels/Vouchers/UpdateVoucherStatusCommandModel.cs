@@ -6,6 +6,6 @@ namespace Fsel.Ordering.Domain.Models.CommandModels.Vouchers
 
     public class UpdateVoucherStatusCommandModel : BaseCommandModel
     {
-        public bool? IsActive { get; set; }
+        public bool IsActive { get; set; }
     }
 }

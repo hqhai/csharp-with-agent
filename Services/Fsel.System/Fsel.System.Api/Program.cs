@@ -19,7 +19,8 @@ builder.Services.AddScoped<ILiveTimeFrameRepository, LiveTimeFrameRepository>();
 builder.Services.AddScoped<ICourseTimeConfigRepository, CourseTimeConfigRepository>();
 builder.Services.AddScoped<IForbiddenWordRepository, ForbiddenWordRepository>();
 builder.Services.AddScoped<ITeachingCostRepository, TeachingCostRepository>();
-
+builder.Services.AddScoped<IReferralDiscountConfigRepository, ReferralDiscountConfigRepository>();
+builder.Services.AddScoped<ILogActionRepository, LogActionRepository>();
 /*builder.AddRefitClients(typeof(IUserService), appSetting?.Services?.UserApiUrl);*/
 var app = builder.Build();
 

@@ -8,6 +8,7 @@ namespace Fsel.Ordering.Application.Commands.VoucherCmds
     using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Ordering.Domain.Entities;
     using Fsel.Ordering.Domain.Enums.ErrorCodes;
     using Fsel.Ordering.Domain.IRepositories;
@@ -39,7 +40,7 @@ namespace Fsel.Ordering.Application.Commands.VoucherCmds
             MethodResult<VoucherModel> methodResult = new MethodResult<VoucherModel>();
 
             Voucher voucher = _mapper.Map<Voucher>(request);
-            if (request.StartDate < request.EndDate)
+            if (request.StartDate > request.EndDate)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumVoucherErrorCode.VoucherStartTimeMustSoonerThanEndTime), nameof(request.EndDate), request.EndDate);
                 return methodResult;
@@ -53,7 +54,7 @@ namespace Fsel.Ordering.Application.Commands.VoucherCmds
             {
                 if (_packageRepository.IsIdsInValid(request.VoucherPackages.Select(x => x.PackageId).ToList()))
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumPackageErrorCode.PackageNotExist));
+                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.VoucherPackages));
                     return methodResult;
                 }
                 voucher.VoucherPackages = request.VoucherPackages!.Select((x) => new VoucherPackage

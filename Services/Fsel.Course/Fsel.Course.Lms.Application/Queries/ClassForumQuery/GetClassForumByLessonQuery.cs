@@ -6,8 +6,8 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumQuery
     using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Course.Domain.Enums;
-    using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using MediatR;
@@ -41,7 +41,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumQuery
                                    .FirstOrDefaultAsync(x => x.LessonId == request.LessonId, cancellationToken);
             if (classForum == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumClassForumErrorCode.ClassForumNull));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(classForum));
                 return methodResult;
             }
 

@@ -34,6 +34,8 @@ builder.Services.AddScoped<IUserOtpCodeRepository, UserOtpCodeRepository>();
 builder.Services.AddScoped<IParentStudentRepository, ParentStudentRepository>();
 builder.Services.AddScoped<ICSORepository, CSORepository>();
 builder.Services.AddScoped<ITeacherBankAccountRepository, TeacherBankAccountRepository>();
+builder.Services.AddScoped<IUserSettingRepository, UserSettingRepository>();
+
 builder.AddRefitClients(typeof(ISenderService), appSetting?.Services?.SenderApiUrl);
 builder.AddRefitClients(typeof(IOrderService), appSetting?.Services?.OrderApiUrl);
 builder.AddRefitClients(typeof(IInteractionService), appSetting?.Services?.InteractionApiUrl);

@@ -4,8 +4,8 @@ namespace Fsel.System.Application.Commands.LiveTimeFrameCmd
 {
     using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.System.Domain.Entities;
-    using Fsel.System.Domain.Enums.ErrorCodes;
     using Fsel.System.Domain.IRepositories;
     using Fsel.System.Domain.Models.CommandModels.LiveTimeFrames;
     using Fsel.System.Domain.Models.EntityModels;
@@ -35,7 +35,7 @@ namespace Fsel.System.Application.Commands.LiveTimeFrameCmd
 
             if (request.LiveTimeFrames == null || request.LiveTimeFrames.Count == 0)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumLiveTimeFrameErrorCode.LiveTimeFramesNotEmpty), nameof(request.LiveTimeFrames), request.LiveTimeFrames);
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.LiveTimeFrames));
                 return methodResult;
             }
 
@@ -52,7 +52,7 @@ namespace Fsel.System.Application.Commands.LiveTimeFrameCmd
                     liveTimeFrameNew = await _liveTimeFrameRepository.GetByIdAsync(item.Id.Value);
                     if (liveTimeFrameNew == null)
                     {
-                        methodResult.AddErrorBadRequest(nameof(EnumLiveTimeFrameErrorCode.LiveTimeFramesNotEmpty));
+                        methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(liveTimeFrameNew));
                         return methodResult;
                     }
                     liveTimeFrameNew = _mapper.Map(item, liveTimeFrameNew);

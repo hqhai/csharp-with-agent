@@ -2,9 +2,9 @@
 
 namespace Fsel.Interaction.Domain.Models.EntityModels
 {
-    using Fsel.Shared.Enums;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Interaction.Domain.Entities;
+    using Fsel.Shared.Enums;
 
     public class SurveyQuestionModel : BaseModel
     {

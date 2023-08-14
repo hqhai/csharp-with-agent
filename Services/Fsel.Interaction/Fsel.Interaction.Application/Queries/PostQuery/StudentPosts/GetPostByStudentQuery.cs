@@ -5,9 +5,9 @@ namespace Fsel.Interaction.Application.Queries.PostQuery
     using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
     using Fsel.Interaction.Application.Services.UserServices;
-    using Fsel.Interaction.Domain.Enums.ErrorCodes;
     using Fsel.Interaction.Domain.IRepositories;
     using Fsel.Interaction.Domain.Models.EntityModels;
     using Fsel.Interaction.Domain.Models.QueryModels.Posts;
@@ -42,12 +42,6 @@ namespace Fsel.Interaction.Application.Queries.PostQuery
             var posts = await _postRepository.Queryable
                                             .Where(x => x.UserId == _authContext.CurrentUserId && x.Status == request.Status)
                                             .ToListAsync(cancellationToken);
-
-            if (posts == null || posts.Count == 0)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumPostErrorCode.PostNotExist));
-                return methodResult;
-            }
 
             methodResult.Result = _mapper.Map<List<PostModel>>(posts);
             methodResult.StatusCode = StatusCodes.Status200OK;
