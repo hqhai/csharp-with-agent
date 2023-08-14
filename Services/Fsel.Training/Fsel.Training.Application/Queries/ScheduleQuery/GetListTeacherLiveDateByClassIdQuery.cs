@@ -68,7 +68,11 @@ namespace Fsel.Training.Application.Queries.ScheduleQuery
                                     .Include(x => x.TeacherFreeTimes)
                                     .Where(x => x.StartDate.Date <= @class.StartDate.Value.Date && x.EndDate.Date >= @class.EndDate.Value.Date && (!@class.TeacherId.HasValue || x.TeacherId != @class.TeacherId))
                                     .ToListAsync(cancellationToken);
-
+            if (teacherFreeDates == null || teacherFreeDates.Count == 0)
+            {
+                methodResult.Result = null;
+                return methodResult;
+            }
             var teacherFreeDateOne = teacherFreeDates.Where(x => @class.LiveDays.All(n => x.TeacherFreeTimes.Any(x => x.Priority = true && x.DayOfWeek == n && x.LiveTimeFrameId == @class.LiveTimeFrameId))).ToList();
             var teacherFreeDateOneModel = _mapper.Map<IList<TeacherFreeDateModel>>(teacherFreeDateOne);
             teacherFreeDateOneModel.ForEach(x => x.Priority = true);
