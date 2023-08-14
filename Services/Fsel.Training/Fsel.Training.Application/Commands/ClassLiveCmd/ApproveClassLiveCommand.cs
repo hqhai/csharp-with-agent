@@ -8,6 +8,8 @@ namespace Fsel.Training.Application.Commands.ClassLiveCmd
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
     using Fsel.Shared.Enums;
+    using Fsel.Shared.Enums.ErrorCodes;
+    using Fsel.Training.Application.Services.SystemServices;
     using Fsel.Training.Application.Services.UserServices;
     using Fsel.Training.Domain.Entities;
     using Fsel.Training.Domain.Enums.ErrorCodes;
@@ -24,6 +26,8 @@ namespace Fsel.Training.Application.Commands.ClassLiveCmd
     public class ApproveClassLiveCommandHandler : IRequestHandler<ApproveClassLiveCommand, MethodResult<bool>>
     {
         private readonly IClassLiveWorkFlowRepository _classLiveWorkFlowRepository;
+        private readonly ISystemService _systemService;
+        private readonly IClassLiveCalendarRepository _classLiveCalendarRepository;
         private readonly IClassRepository _classRepository;
         private readonly ITeacherFreeDateRepository _teacherFreeDateRepository;
         private readonly AuthContext _authContext;
@@ -31,12 +35,16 @@ namespace Fsel.Training.Application.Commands.ClassLiveCmd
 
         public ApproveClassLiveCommandHandler(
             IClassLiveWorkFlowRepository classLiveWorkFlowRepository,
+            ISystemService systemService,
+            IClassLiveCalendarRepository classLiveCalendarRepository,
             IClassRepository classRepository,
             ITeacherFreeDateRepository teacherFreeDateRepository,
             AuthContext authContext,
             IUserService userService)
         {
             _classLiveWorkFlowRepository = classLiveWorkFlowRepository;
+            _systemService = systemService;
+            _classLiveCalendarRepository = classLiveCalendarRepository;
             _classRepository = classRepository;
             _teacherFreeDateRepository = teacherFreeDateRepository;
             _authContext = authContext;
@@ -98,6 +106,29 @@ namespace Fsel.Training.Application.Commands.ClassLiveCmd
                         if (request.IsAcept)
                         {
                             @class.TeacherApprovalStatus = EnumTeacherApprovalStatus.Approved;
+                            var liveTimeFrameResults = await _systemService.GetLiveTimeFramesAsync();
+                            if (!liveTimeFrameResults.IsSuccessStatusCode)
+                            {
+                                methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallSystemServiceError));
+                                return methodResult;
+                            }
+                            var liveTimeFrames = liveTimeFrameResults?.Content?.Result;
+                            var classLives = await _classLiveCalendarRepository.Queryable.Where(x => x.ClassId == @class.Id && x.TeacherId == @class.TeacherId).ToListAsync(cancellationToken);
+                            if (classLives != null && classLives.Count > 0)
+                            {
+                                List<ClassLiveCalendar> classLiveCalendars = new List<ClassLiveCalendar>();
+                                foreach (var classLive in classLives)
+                                {
+                                    var liveTimeFrame = liveTimeFrames?.FirstOrDefault(x => x.Id == classLive.LiveTimeFrameId);
+                                    if (liveTimeFrame != null && classLive.LiveDate.Date.AddHours(liveTimeFrame.StartTime ?? default) > DateTime.Now)
+                                    {
+                                        classLive.TeacherId = @class.TeacherId;
+                                        classLiveCalendars.Add(classLive);
+                                    }
+                                }
+                                _classLiveCalendarRepository.UpdateList(classLiveCalendars);
+                                await _classLiveCalendarRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+                            }
                         }
                         else
                         {
