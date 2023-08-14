@@ -36,14 +36,8 @@ namespace Fsel.System.Application.Commands.ForbiddenWordCmd
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<ForbiddenWordModel> methodResult = new MethodResult<ForbiddenWordModel>();
 
-            var cultureInfo = CultureInfo.InvariantCulture;
-
-            var allForbiddenWords = await _forbiddenWordRepository.Queryable
-                .ToListAsync(cancellationToken);
-
-            var forbiddenWordName = allForbiddenWords
-                .Any(f => f.Word!.ToLower(cultureInfo) == request.Word!.ToLower(cultureInfo));
-
+            var allForbiddenWords = await _forbiddenWordRepository.Queryable.ToListAsync(cancellationToken);
+            var forbiddenWordName = allForbiddenWords.Any(f => string.Equals(f.Word, request.Word, StringComparison.OrdinalIgnoreCase));
 
             if (forbiddenWordName)
             {

@@ -37,13 +37,9 @@ namespace Fsel.System.Application.Commands.ForbiddenWordCmd
             var forbiddenWord = await _forbiddenWordRepository.GetByIdAsync(request.Id);
 
             #region Validation
-            var cultureInfo = CultureInfo.InvariantCulture;
+            var allForbiddenWords = await _forbiddenWordRepository.Queryable.ToListAsync(cancellationToken);
+            var forbiddenWordName = allForbiddenWords.Any(f => string.Equals(f.Word, request.Word, StringComparison.OrdinalIgnoreCase));
 
-            var allForbiddenWords = await _forbiddenWordRepository.Queryable
-                .ToListAsync(cancellationToken);
-
-            var forbiddenWordName = allForbiddenWords
-                .Any(f => f.Word!.ToLower(cultureInfo) == request.Word!.ToLower(cultureInfo));
             if (forbiddenWordName)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(forbiddenWordName));
