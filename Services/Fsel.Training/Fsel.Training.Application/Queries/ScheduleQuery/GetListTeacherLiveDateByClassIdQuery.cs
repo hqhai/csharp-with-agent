@@ -66,7 +66,7 @@ namespace Fsel.Training.Application.Queries.ScheduleQuery
 
             var teacherFreeDates = await _teacherFreeDateRepository.Queryable
                                     .Include(x => x.TeacherFreeTimes)
-                                    .Where(x => x.StartDate.Date <= @class.StartDate.Value.Date && x.EndDate.Date >= @class.EndDate.Value.Date)
+                                    .Where(x => x.StartDate.Date <= @class.StartDate.Value.Date && x.EndDate.Date >= @class.EndDate.Value.Date && (!@class.TeacherId.HasValue || x.TeacherId != @class.TeacherId))
                                     .ToListAsync(cancellationToken);
 
             var teacherFreeDateOne = teacherFreeDates.Where(x => @class.LiveDays.All(n => x.TeacherFreeTimes.Any(x => x.Priority = true && x.DayOfWeek == n && x.LiveTimeFrameId == @class.LiveTimeFrameId))).ToList();
@@ -84,8 +84,9 @@ namespace Fsel.Training.Application.Queries.ScheduleQuery
             var teacher = teacherResult.Content?.Result;
             foreach (var item in teacherFreeDateModel)
             {
-                item.TeacherName = teacher?.FirstOrDefault(x => x.Id == item.TeacherId)?.Human?.FullName;
-                item.TeacherCode = teacher?.FirstOrDefault(x => x.Id == item.TeacherId)?.Human?.Code;
+                var human = teacher?.FirstOrDefault(x => x.Id == item.TeacherId)?.Human;
+                item.TeacherName = human?.FullName;
+                item.TeacherCode = human?.Code;
             }
 
             methodResult.Result = teacherFreeDateModel;
