@@ -84,9 +84,9 @@ namespace Fsel.Interaction.Application.Queries.CommentQuery
                     item.ObjectId = item.ObjectId;
                 }
 
-                results.AddRange(commentModels.OrderBy(x => x.CreatedDate));
+                results.AddRange(commentModels);
             }
-            return results;
+            return results.OrderBy(x => x.CreatedDate).ToList();
         }
     }
 }
