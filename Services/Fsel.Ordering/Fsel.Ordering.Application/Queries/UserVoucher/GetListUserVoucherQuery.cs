@@ -7,6 +7,7 @@ namespace Fsel.Ordering.Application.Queries.UserVoucher
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
+    using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base;
     using Fsel.Ordering.Domain.Entities.PackageConfigs;
@@ -25,11 +26,13 @@ namespace Fsel.Ordering.Application.Queries.UserVoucher
     {
         private readonly IUserVoucherRepository _userVoucherRepository;
         private readonly AuthContext _authContext;
+        private readonly IMapper _mapper;
 
-        public GetListUserVoucherQueryHandler(IUserVoucherRepository userVoucherRepository, AuthContext authContext)
+        public GetListUserVoucherQueryHandler(IUserVoucherRepository userVoucherRepository, AuthContext authContext, IMapper mapper)
         {
             _userVoucherRepository = userVoucherRepository;
             _authContext = authContext;
+            _mapper = mapper;
         }
 
         public async Task<MethodResult<IList<UserVoucherModel>>> Handle(GetListUserVoucherQuery request, CancellationToken cancellationToken)
@@ -58,9 +61,7 @@ namespace Fsel.Ordering.Application.Queries.UserVoucher
                                     Percentage = x.Percentage,
                                     PackageId = x.PackageId,
                                     DiscountedPrice = (double)x.Package!.Price - (x.Percentage * (double)x.Package!.Price / 100),
-                                    Price = (double)x.Package!.Price,
-                                    Code = x.Package.Code,
-                                    Description = x.Package.Description
+                                    Package = _mapper.Map<PackageModel>(x.Package)
                                 }).ToList(),
                             }).ToListAsync(cancellationToken);
 
