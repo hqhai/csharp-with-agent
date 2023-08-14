@@ -11,6 +11,7 @@ namespace Fsel.Ordering.Application.Queries.UserVoucher
     using Fsel.Core.Base;
     using Fsel.Ordering.Domain.IRepositories;
     using Fsel.Ordering.Domain.Models.EntityModels;
+    using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -38,7 +39,7 @@ namespace Fsel.Ordering.Application.Queries.UserVoucher
 
             var userVoucherModel = await _userVoucherRepository.Queryable
                             .Include(x => x.Voucher)
-                            .Where(x => x.UserId == _authContext.CurrentUserId)
+                            .Where(x => x.UserId == _authContext.CurrentUserId && x.Status == EnumUserVoucherStatus.NotUsed)
                             .Select(x => new UserVoucherModel
                             {
                                 Id = x.Id,
@@ -57,6 +58,7 @@ namespace Fsel.Ordering.Application.Queries.UserVoucher
                                     PackageId = x.PackageId,
                                     DiscountedPrice = (double)x.Package!.Price - (x.Percentage * (double)x.Package!.Price / 100),
                                     Price = (double)x.Package!.Price,
+                                    Code = x.Package.Code,
                                 }).ToList(),
                             }).ToListAsync(cancellationToken);
 
