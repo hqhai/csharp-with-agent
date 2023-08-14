@@ -31,13 +31,6 @@ namespace Fsel.System.Application.Commands.ForbiddenWordCmd
             _forbiddenWordRepository = forbiddenWordRepository;
         }
 
-        private static string LowerString(string target)
-        {
-            var cultureInfo = CultureInfo.InvariantCulture;
-
-            return target.ToLower(cultureInfo);
-        }
-
         public async Task<MethodResult<ForbiddenWordModel>> Handle(CreateForbiddenWordCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
@@ -46,7 +39,6 @@ namespace Fsel.System.Application.Commands.ForbiddenWordCmd
             string compareWord = request!.Word!.ToLower(CultureInfo.InvariantCulture);
 
             var forbiddenWordName = await _forbiddenWordRepository.Queryable.AnyAsync(x => x!.Word!.ToLower() == compareWord, cancellationToken);
-
 
             if (forbiddenWordName)
             {
