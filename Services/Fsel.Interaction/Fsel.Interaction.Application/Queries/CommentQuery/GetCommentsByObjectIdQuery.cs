@@ -86,7 +86,7 @@ namespace Fsel.Interaction.Application.Queries.CommentQuery
 
                 results.AddRange(commentModels);
             }
-            return results;
+            return results.OrderBy(x => x.CreatedDate).ToList();
         }
     }
 }
