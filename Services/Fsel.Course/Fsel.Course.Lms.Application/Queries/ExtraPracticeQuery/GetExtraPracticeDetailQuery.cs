@@ -4,10 +4,10 @@ namespace Fsel.Course.Lms.Application.Queries.ExtraPracticeQuery
 {
     using System.Threading;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums;
-    using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Services.UserServices;
@@ -53,7 +53,7 @@ namespace Fsel.Course.Lms.Application.Queries.ExtraPracticeQuery
             var studentsResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
             if (studentsResult == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumVideoErrorCode.UserNotExist));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
                 return methodResult;
             }
             var studentId = studentsResult.Content!.Result!.Id;
@@ -132,7 +132,7 @@ namespace Fsel.Course.Lms.Application.Queries.ExtraPracticeQuery
                     VideoFilePath = video.VideoFilePath,
                     IsActive = video.LessonVideos.Any(),
                     TotalQuestion = video.VideoTimeCodes.SelectMany(x => x.TimeCodeExercises).Select(x => x.Exercise).SelectMany(x => x!.ExerciseQuestions).Select(x => x.Question).Count(),
-                    TeacherId = video.TeacherId ?? null,
+                    TeacherId = video.TeacherId,
                     CourseLevel = video.CourseLevel,
                     SubFilePath = video.SubFilePath,
                     Type = video.Type,

@@ -4,7 +4,7 @@ namespace Fsel.Course.Lms.Application.Queries.ExtraPracticeQuery
 {
     using AutoMapper;
     using Fsel.Common.ActionResults;
-    using Fsel.Course.Domain.Enums.ErrorCodes;
+    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Infrastructure.Common;
@@ -51,7 +51,7 @@ namespace Fsel.Course.Lms.Application.Queries.ExtraPracticeQuery
                 var extraPracticeResult = await _extraPracticeResultRepository.Queryable.FirstOrDefaultAsync(x => x.Id == request.ExtraPracticeResultId, cancellationToken);
                 if (extraPracticeResult == null)
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumExtraPracticeErrorCode.ExtraPracticeResultNotExist));
+                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
                     return methodResult;
                 }
 
@@ -85,7 +85,7 @@ namespace Fsel.Course.Lms.Application.Queries.ExtraPracticeQuery
                 var extraPracticeExerciseResult = await _extraPracticeExerciseResultRepository.Queryable.FirstOrDefaultAsync(x => x.Id == request.ExtraPracticeExerciseResultId, cancellationToken);
                 if (extraPracticeExerciseResult == null)
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumExtraPracticeExerciseResultErrorCode.ExtraPracticeExerciseResultNotExist));
+                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
                     return methodResult;
                 }
 

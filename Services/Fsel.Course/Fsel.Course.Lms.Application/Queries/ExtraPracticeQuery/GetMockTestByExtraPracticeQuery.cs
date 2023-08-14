@@ -5,7 +5,7 @@ namespace Fsel.Course.Lms.Application.Queries.ExtraPracticeQuery
     using System;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
-    using Fsel.Course.Domain.Enums.ErrorCodes;
+    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Infrastructure.Common;
@@ -40,7 +40,7 @@ namespace Fsel.Course.Lms.Application.Queries.ExtraPracticeQuery
             var extraPracticeResult = await _extraPracticeResultRepository.GetByIdAsync(request.ExtraPracticeResultId);
             if (extraPracticeResult == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumExtraPracticeErrorCode.ExtraPracticeResultNotExist));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
                 return methodResult;
             }
 
@@ -70,7 +70,7 @@ namespace Fsel.Course.Lms.Application.Queries.ExtraPracticeQuery
                                                                     .FirstOrDefaultAsync(cancellationToken);
             if (extraPractice == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumExtraPracticeErrorCode.ExtraPracticeNotExist));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
                 return methodResult;
             }
             var extraPracticeModel = new ExtraPracticeModel
@@ -94,7 +94,6 @@ namespace Fsel.Course.Lms.Application.Queries.ExtraPracticeQuery
                     Id = extraPractice.MockTest!.Id,
                     Name = extraPractice.MockTest.Name,
                     MockTestType = extraPractice.MockTest.MockTestType,
-                    CourseType = extraPractice.MockTest.CourseType,
                     CreatedDate = extraPractice.MockTest.CreatedDate,
                     CreatedFullName = extraPractice.MockTest.CreatedFullName,
                     CreatedUserId = extraPractice.MockTest.CreatedUserId,

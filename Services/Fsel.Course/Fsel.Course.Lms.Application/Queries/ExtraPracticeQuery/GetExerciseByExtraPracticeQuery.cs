@@ -5,10 +5,10 @@ namespace Fsel.Course.Lms.Application.Queries.ExtraPracticeQuery
     using System;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums;
-    using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Services.UserServices;
@@ -50,7 +50,7 @@ namespace Fsel.Course.Lms.Application.Queries.ExtraPracticeQuery
             var studentsResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
             if (studentsResult == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumVideoErrorCode.UserNotExist));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
                 return methodResult;
             }
             var studentId = studentsResult.Content!.Result!.Id;
@@ -62,7 +62,7 @@ namespace Fsel.Course.Lms.Application.Queries.ExtraPracticeQuery
             return methodResult;
         }
 
-        public async Task<IList<ExtraPracticeExerciseModel>> GetExtraPraticeExerciseTypeBook(Guid extraPracticeId, Guid? extraPracticeChapterId, Guid extraPracticeResultId)
+        public async Task<IList<ExtraPracticeExerciseModel>> GetExtraPracticeExerciseTypeBook(Guid extraPracticeId, Guid? extraPracticeChapterId, Guid extraPracticeResultId)
         {
             var extraPracticeExerciseModels = new List<ExtraPracticeExerciseModel>();
             var extraPracticeExercises = await _extraPracticeExerciseRepository.Queryable.Include(x => x.Exercise)
@@ -102,7 +102,7 @@ namespace Fsel.Course.Lms.Application.Queries.ExtraPracticeQuery
             return extraPracticeExerciseModels;
         }
 
-        public async Task<IList<ExtraPracticeExerciseModel>> GetExtraPraticeExerciseTypeVideoEmbed(Guid extraPracticeId, Guid extraPracticeResultId)
+        public async Task<IList<ExtraPracticeExerciseModel>> GetExtraPracticeExerciseTypeVideoEmbed(Guid extraPracticeId, Guid extraPracticeResultId)
         {
             var extraPracticeExerciseModels = new List<ExtraPracticeExerciseModel>();
             var extraPracticeExercises = await _extraPracticeExerciseRepository.Queryable.Include(x => x.Exercise)
@@ -154,12 +154,12 @@ namespace Fsel.Course.Lms.Application.Queries.ExtraPracticeQuery
                     case EnumExtraPracticeType.Book:
                         if (extraPracticeChapterId != null)
                         {
-                            extraPracticeExerciseModels = await GetExtraPraticeExerciseTypeBook(extraPractice.Id, extraPracticeChapterId, extraPracticeResult.Id);
+                            extraPracticeExerciseModels = await GetExtraPracticeExerciseTypeBook(extraPractice.Id, extraPracticeChapterId, extraPracticeResult.Id);
                         }
                         break;
 
                     case EnumExtraPracticeType.VideoEmbed:
-                        extraPracticeExerciseModels = await GetExtraPraticeExerciseTypeVideoEmbed(extraPractice.Id, extraPracticeResult.Id);
+                        extraPracticeExerciseModels = await GetExtraPracticeExerciseTypeVideoEmbed(extraPractice.Id, extraPracticeResult.Id);
                         break;
 
                     default:

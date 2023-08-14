@@ -6,9 +6,9 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
     using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
     using Fsel.Course.Domain.Enums;
-    using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Services.UserServices;
@@ -16,12 +16,12 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class RestartExtraPraticeAnswerVideoCommand : IRequest<MethodResult<ExtraPracticeResultModel>>
+    public class RestartExtraPracticeAnswerVideoCommand : IRequest<MethodResult<ExtraPracticeResultModel>>
     {
         public Guid ExtraPracticeResultId { get; set; }
     }
 
-    public class RestartExtraPraticeAnswerVideoCommandHandler : IRequestHandler<RestartExtraPraticeAnswerVideoCommand, MethodResult<ExtraPracticeResultModel>>
+    public class RestartExtraPracticeAnswerVideoCommandHandler : IRequestHandler<RestartExtraPracticeAnswerVideoCommand, MethodResult<ExtraPracticeResultModel>>
     {
         private readonly IExtraPracticeResultRepository _extraPracticeResultRepository;
         private readonly AuthContext _authContext;
@@ -29,7 +29,7 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
         private readonly IUserService _userService;
         private readonly IExtraPracticeAnswerRepository _extraPracticeAnswerRepository;
 
-        public RestartExtraPraticeAnswerVideoCommandHandler(IExtraPracticeResultRepository extraPracticeResultRepository
+        public RestartExtraPracticeAnswerVideoCommandHandler(IExtraPracticeResultRepository extraPracticeResultRepository
             , AuthContext authContext
             , IMapper mapper
             , IUserService userService
@@ -42,7 +42,7 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
             _extraPracticeAnswerRepository = extraPracticeAnswerRepository;
         }
 
-        public async Task<MethodResult<ExtraPracticeResultModel>> Handle(RestartExtraPraticeAnswerVideoCommand request, CancellationToken cancellationToken)
+        public async Task<MethodResult<ExtraPracticeResultModel>> Handle(RestartExtraPracticeAnswerVideoCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<ExtraPracticeResultModel> methodResult = new MethodResult<ExtraPracticeResultModel>();
@@ -52,14 +52,14 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
             var student = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
             if (!student.IsSuccessStatusCode)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumMockTestErrorCode.UserNotExist), nameof(student), _authContext.CurrentUserId.ToString());
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student), _authContext.CurrentUserId.ToString());
                 return methodResult;
             }
             var studentId = student?.Content?.Result?.Id;
             var extraPracticeResult = await _extraPracticeResultRepository.Queryable.Include(x => x.ExtraPracticeAnswers).FirstOrDefaultAsync(x => x.Id == request.ExtraPracticeResultId && x.StudentId == studentId, cancellationToken);
             if (extraPracticeResult == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumExtraPracticeErrorCode.ExtraPracticeResultNotExist));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
                 return methodResult;
             }
 

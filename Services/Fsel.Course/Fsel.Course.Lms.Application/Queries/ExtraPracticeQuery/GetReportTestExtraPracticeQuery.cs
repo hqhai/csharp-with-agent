@@ -6,6 +6,7 @@ namespace Fsel.Course.Lms.Application.Queries.ExtraPracticeQuery
     using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Course.Domain.Entities.SkillScoresConfigs;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.Enums.ErrorCodes;
@@ -42,7 +43,7 @@ namespace Fsel.Course.Lms.Application.Queries.ExtraPracticeQuery
             var extraPracticeResult = await _extraPracticeResultRepository.Queryable.FirstOrDefaultAsync(x => x.Id == request.ExtraPracticeResultId, cancellationToken: cancellationToken);
             if (extraPracticeResult == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumExtraPracticeErrorCode.ExtraPracticeResultNotExist), nameof(request.ExtraPracticeResultId), request.ExtraPracticeResultId);
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.ExtraPracticeResultId), request.ExtraPracticeResultId);
                 return methodResult;
             }
             if (extraPracticeResult.SkillScores != null && extraPracticeResult.Status == EnumResultStatus.Done)

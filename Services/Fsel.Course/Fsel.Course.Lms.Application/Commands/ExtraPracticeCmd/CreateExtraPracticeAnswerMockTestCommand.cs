@@ -4,6 +4,7 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
 {
     using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Entities.SkillScoresConfigs;
@@ -68,14 +69,14 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
             var student = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
             if (!student.IsSuccessStatusCode)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumMockTestErrorCode.UserNotExist), nameof(student), _authContext.CurrentUserId.ToString());
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student), _authContext.CurrentUserId.ToString());
                 return methodResult;
             }
             var studentId = student?.Content?.Result?.Id;
             var extraPracticeResult = await _extraPracticeResultRepository.Queryable.Include(x => x.ExtraPracticeAnswers).FirstOrDefaultAsync(x => x.Id == request.ExtraPracticeResultId && x.StudentId == studentId, cancellationToken);
             if (extraPracticeResult == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumExtraPracticeErrorCode.ExtraPracticeResultNotExist));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
                 return methodResult;
             }
 
@@ -102,7 +103,7 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
             {
                 if (request.SectionGroups.Any(x => x.Answers == null))
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumExtraPracticeErrorCode.AnswersNull));
+                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
                     return methodResult;
                 }
                 var method = await AddExtraPracticeResult(extraPracticeResult, request, cancellationToken);
@@ -147,7 +148,7 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
             var sectionTimeCode = await _sectionTimeCodeRepository.Queryable.FirstOrDefaultAsync(x => x.Id == extraPractice.SectionTimeCodeId!, cancellationToken);
             if (sectionTimeCode == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSectionTimeCodeErrorCode.SectionTimeCodeNotExist), nameof(extraPractice.SectionTimeCodeId), extraPractice.SectionTimeCodeId);
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(extraPractice.SectionTimeCodeId), extraPractice.SectionTimeCodeId);
                 return methodResult;
             }
             var extraPracticeAnswer = await _extraPracticeAnswerRepository.Queryable.FirstOrDefaultAsync(x => x.ExtraPracticeResultId == extraPracticeResult.Id && x.SectionTimeCodeId == sectionTimeCode.Id, cancellationToken);
@@ -171,7 +172,7 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
             var section = await _sectionRepository.Queryable.FirstOrDefaultAsync(x => x.Id == extraPractice.SectionId!, cancellationToken);
             if (section == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSectionErrorCode.SectionNotExist), nameof(extraPractice.SectionId), extraPractice.SectionId);
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(extraPractice.SectionId), extraPractice.SectionId);
                 return methodResult;
             }
             var extraPracticeAnswer = await _extraPracticeAnswerRepository.Queryable.FirstOrDefaultAsync(x => x.ExtraPracticeResultId == extraPracticeResult.Id && x.SectionId == section.Id, cancellationToken);
@@ -200,7 +201,7 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
                 var sectionGroup = await _sectionGroupRepository.GetByIdAsync(item.SectionGroupId);
                 if (sectionGroup == null)
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumSectionGroupErrorCode.SectionGroupNotExist), nameof(item.SectionGroupId), item.SectionGroupId);
+                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(item.SectionGroupId), item.SectionGroupId);
                     return methodResult;
                 }
                 var questionIds = request.SectionGroups.SelectMany(x => x.Answers!).Select(x => x.QuestionId ?? default).ToList();
@@ -213,12 +214,12 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
                         var question = await _questionRepository.Queryable.FirstOrDefaultAsync(x => x.Id == answer.QuestionId, cancellationToken);
                         if (question == null)
                         {
-                            methodResult.AddErrorBadRequest(nameof(EnumQuestionErrorCode.QuestionNotExist), nameof(answer.QuestionId), answer.QuestionId);
+                            methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(answer.QuestionId), answer.QuestionId);
                             return methodResult;
                         }
                         else if (question.Config == null)
                         {
-                            methodResult.AddErrorBadRequest(nameof(EnumQuestionErrorCode.QuestionConfigNull), nameof(question), question);
+                            methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(question), question);
                             return methodResult;
                         }
                         var extraPracticeAnswer = await _extraPracticeAnswerRepository.Queryable.FirstOrDefaultAsync(x => x.QuestionId == answer.QuestionId && x.ExtraPracticeResultId == request.ExtraPracticeResultId, cancellationToken);

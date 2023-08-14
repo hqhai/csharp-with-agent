@@ -201,7 +201,7 @@ namespace Fsel.Course.Lms.Api.Controllers
         [HttpPost("restart-answer-video")]
         [ProducesResponseType(typeof(MethodResult<ExtraPracticeResultModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> RestartAnswerVideo([FromBody] RestartExtraPraticeAnswerVideoCommand command)
+        public async Task<IActionResult> RestartAnswerVideo([FromBody] RestartExtraPracticeAnswerVideoCommand command)
         {
             MethodResult<ExtraPracticeResultModel> queryResult = await _mediator.Send(command).ConfigureAwait(false);
             return queryResult.GetActionResult();

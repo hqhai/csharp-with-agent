@@ -7,7 +7,6 @@ namespace Fsel.Course.Infrastructure.Common
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums;
-    using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.CommandModels.Exercises;
     using Fsel.Course.Domain.Models.CommandModels.ExtraPractices;
@@ -123,7 +122,7 @@ namespace Fsel.Course.Infrastructure.Common
             VoidMethodResult methodResult = new VoidMethodResult();
             if (await _extraPracticeRepository.Queryable.AnyAsync(x => x.Code == request.Code))
             {
-                methodResult.AddErrorBadRequest(nameof(EnumExtraPracticeErrorCode.CodeAlreadyExists), nameof(request.Code), request.Code);
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(request.Code), request.Code);
                 return methodResult;
             }
             List<ExtraPracticeExercise> extraPracticeExercises = new List<ExtraPracticeExercise>();
@@ -208,7 +207,7 @@ namespace Fsel.Course.Infrastructure.Common
             VoidMethodResult methodResult = new VoidMethodResult();
             if (await _extraPracticeRepository.Queryable.AnyAsync(x => x.Id != request.Id && x.Code == request.Code))
             {
-                methodResult.AddErrorBadRequest(nameof(EnumExtraPracticeErrorCode.CodeAlreadyExists), nameof(request.Code), request.Code);
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(request.Code), request.Code);
                 return methodResult;
             }
             List<ExtraPracticeExercise> extraPracticeExercises = new List<ExtraPracticeExercise>();
