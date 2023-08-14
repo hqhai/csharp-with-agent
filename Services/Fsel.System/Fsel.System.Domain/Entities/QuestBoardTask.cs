@@ -18,5 +18,7 @@ namespace Fsel.System.Domain.Entities
 
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         public Guid QuestBoardId { get; set; }
+
+        public ICollection<QuestBoardTaskStudent> QuestBoardTaskStudents { get; set; } = new List<QuestBoardTaskStudent>();
     }
 }

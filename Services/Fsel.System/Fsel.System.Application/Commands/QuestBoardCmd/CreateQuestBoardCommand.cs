@@ -87,7 +87,7 @@ namespace Fsel.System.Application.Commands.QuestBoardCmd
             if (request.StartDate <= request.EndDate)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumQuestBoardErrorcode.EndtDateMustMorethanStartDate));
-                return methodResult;.
+                return methodResult;
             }
             var dependentTasks = new List<QuestBoardTask>();
             if (request.DependentId != null)
@@ -108,7 +108,7 @@ namespace Fsel.System.Application.Commands.QuestBoardCmd
                 methodResult.AddErrorBadRequest(questBoard.ErrorMessages);
                 return methodResult;
             }
-            questBoard.QuestBoardTasks = await GetDateRangeAsync(request.StartDate, request.EndDate, request.RepeatType);
+            questBoard.QuestBoardTasks = await GetDateRangeAsync(request.StartDate, request.EndDate, request.RepeatType, request.DependentId);
 
             await _questBoardRepository.ExecuteTransactionAsync(async () =>
             {
@@ -123,10 +123,9 @@ namespace Fsel.System.Application.Commands.QuestBoardCmd
             return methodResult;
         }
 
-        private static async Task<List<QuestBoardTask>> GetDateRangeAsync(DateTime startDate, DateTime endDate, EnumRepeatType repeatType)
+        private async Task<List<QuestBoardTask>> GetDateRangeAsync(DateTime startDate, DateTime endDate, EnumRepeatType repeatType, Guid? id)
         {
             int repeatInterval = 0;
-
             switch (repeatType)
             {
                 case EnumRepeatType.Day:
@@ -141,15 +140,21 @@ namespace Fsel.System.Application.Commands.QuestBoardCmd
                     repeatInterval = 30;
                     break;
             }
-
-            List<QuestBoardTask> tasks = Enumerable.Range(0, (endDate - startDate).Days / repeatInterval + 1)
-                .Select(offset => new QuestBoardTask
+            List<QuestBoardTask> questBoardTasks = Enumerable.Range(0, (endDate - startDate).Days / repeatInterval + 1)
+               .Select(offset => new QuestBoardTask
+               {
+                   ImplementDate = startDate.AddDays(offset * repeatInterval),
+               })
+               .ToList();
+            if (id != null)
+            {
+                var dependentTasks = await _questBoardTaskRepository.Queryable.Where(x => x.Id == id).ToListAsync();
+                foreach (var task in questBoardTasks)
                 {
-                    ImplementDate = startDate.AddDays(offset * repeatInterval),
-                    DependentTaskId = Guid.NewGuid()
-                })
-                .ToList();
-            return tasks;
+                    task.DependentTaskId = dependentTasks.FirstOrDefault(x => x.ImplementDate == task.ImplementDate)?.Id ?? default;
+                }
+            }
+            return questBoardTasks;
         }
     }
 }
