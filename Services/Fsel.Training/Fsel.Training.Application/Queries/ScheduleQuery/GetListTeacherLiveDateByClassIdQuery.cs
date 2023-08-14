@@ -71,6 +71,7 @@ namespace Fsel.Training.Application.Queries.ScheduleQuery
             if (teacherFreeDates == null || teacherFreeDates.Count == 0)
             {
                 methodResult.Result = null;
+                methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
             }
             var teacherFreeDateOne = teacherFreeDates.Where(x => @class.LiveDays.All(n => x.TeacherFreeTimes.Any(x => x.Priority = true && x.DayOfWeek == n && x.LiveTimeFrameId == @class.LiveTimeFrameId))).ToList();

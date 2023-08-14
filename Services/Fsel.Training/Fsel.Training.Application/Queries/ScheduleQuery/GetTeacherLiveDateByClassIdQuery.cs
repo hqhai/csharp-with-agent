@@ -80,6 +80,7 @@ namespace Fsel.Training.Application.Queries.ScheduleQuery
                 if (teacherFreeDates == null)
                 {
                     methodResult.Result = null;
+                    methodResult.StatusCode = StatusCodes.Status200OK;
                     return methodResult;
                 }
 
@@ -93,9 +94,11 @@ namespace Fsel.Training.Application.Queries.ScheduleQuery
             if (teacherFreeDate == null)
             {
                 methodResult.Result = null;
+                methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
             }
             var teacherFreeDateModel = _mapper.Map<TeacherFreeDateModel>(teacherFreeDate);
+            teacherFreeDateModel.IsTeacher = @class.TeacherId.HasValue;
             var teacherResult = await _userService.GetTeacherByIdAsync(teacherFreeDateModel.TeacherId);
             var teacher = teacherResult.Content?.Result;
             teacherFreeDateModel.TeacherName = teacher?.Human?.FullName;
