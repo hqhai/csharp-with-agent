@@ -4,6 +4,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using Fsel.Common.ActionResults;
+using Fsel.Common.Constants;
 using Fsel.Common.Helpers;
 using Fsel.Identity.Application.Services.InteractionService;
 using Fsel.Identity.Application.Services.LmsCourseService;
@@ -69,17 +70,17 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             var jti = Guid.NewGuid().ToString();
             var authClaims = new List<Claim>
             {
-                new Claim(JwtRegisteredClaimNames.Name, user.UserName ?? string.Empty),
-                new Claim(JwtRegisteredClaimNames.GivenName, user.FullName ?? string.Empty),
-                new Claim(JwtRegisteredClaimNames.Email, user.Email ?? string.Empty),
-                new Claim(JwtRegisteredClaimNames.NameId, user.Id ?? string.Empty),
-                new Claim(JwtRegisteredClaimNames.Sub, _appSetting.Jwt?.Subject ?? string.Empty),
-                new Claim(JwtRegisteredClaimNames.Jti, jti),
+                new Claim(JwtClaimNames.UserName, user.UserName ?? string.Empty),
+                new Claim(JwtClaimNames.FullName, user.FullName ?? string.Empty),
+                new Claim(JwtClaimNames.Email, user.Email ?? string.Empty),
+                new Claim(JwtClaimNames.UserId, user.Id ?? string.Empty),
+                new Claim(JwtClaimNames.Sub, _appSetting.Jwt?.Subject ?? string.Empty),
+                new Claim(JwtClaimNames.Jti, jti),
             };
 
             foreach (var userRole in userRoles)
             {
-                authClaims.Add(new Claim(ClaimTypes.Role, userRole));
+                authClaims.Add(new Claim(JwtClaimNames.Role, userRole));
             }
 
             var secretKeyBytes = Encoding.ASCII.GetBytes(_appSetting.Jwt?.SecretKey ?? string.Empty);
