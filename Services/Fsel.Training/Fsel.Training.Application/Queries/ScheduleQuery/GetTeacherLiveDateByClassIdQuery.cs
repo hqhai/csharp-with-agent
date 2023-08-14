@@ -98,7 +98,6 @@ namespace Fsel.Training.Application.Queries.ScheduleQuery
                 return methodResult;
             }
             var teacherFreeDateModel = _mapper.Map<TeacherFreeDateModel>(teacherFreeDate);
-            teacherFreeDateModel.IsTeacher = @class.TeacherId.HasValue;
             var teacherResult = await _userService.GetTeacherByIdAsync(teacherFreeDateModel.TeacherId);
             var teacher = teacherResult.Content?.Result;
             teacherFreeDateModel.TeacherName = teacher?.Human?.FullName;
