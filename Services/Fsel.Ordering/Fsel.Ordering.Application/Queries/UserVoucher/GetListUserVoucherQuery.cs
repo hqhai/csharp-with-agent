@@ -9,6 +9,7 @@ namespace Fsel.Ordering.Application.Queries.UserVoucher
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base;
+    using Fsel.Ordering.Domain.Entities.PackageConfigs;
     using Fsel.Ordering.Domain.IRepositories;
     using Fsel.Ordering.Domain.Models.EntityModels;
     using Fsel.Shared.Enums;
@@ -59,6 +60,7 @@ namespace Fsel.Ordering.Application.Queries.UserVoucher
                                     DiscountedPrice = (double)x.Package!.Price - (x.Percentage * (double)x.Package!.Price / 100),
                                     Price = (double)x.Package!.Price,
                                     Code = x.Package.Code,
+                                    Description = x.Package.Description
                                 }).ToList(),
                             }).ToListAsync(cancellationToken);
 

@@ -4,6 +4,7 @@ namespace Fsel.Ordering.Domain.Models.EntityModels
 {
     using System;
     using Fsel.Core.Base.BaseModels;
+    using Fsel.Ordering.Domain.Entities.PackageConfigs;
     using Fsel.Ordering.Domain.Enums;
 
     public class VoucherPackageModel : BaseModel
@@ -14,6 +15,7 @@ namespace Fsel.Ordering.Domain.Models.EntityModels
         public Guid VoucherId { get; set; }
         public double Price { get; set; }
         public EnumPackageCode? Code { get; set; }
+        public IList<PackageConfig>? Description { get; set; }
         public PackageModel? Package { get; set; }
     }
 }
