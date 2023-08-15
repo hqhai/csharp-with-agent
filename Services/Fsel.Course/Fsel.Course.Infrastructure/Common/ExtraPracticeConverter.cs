@@ -417,7 +417,7 @@ namespace Fsel.Course.Infrastructure.Common
                         }).FirstOrDefault()
                     }).ToList(),
                 }).ToList(),
-                ExtraPracticeResult = extraPracticeResult != null ? new ExtraPraticeResultModel
+                ExtraPracticeResult = extraPracticeResult != null ? new ExtraPracticeResultModel
                 {
                     Id = extraPracticeResult.Id,
                     CorrectCount = extraPracticeResult.CorrectCount,
@@ -498,7 +498,7 @@ namespace Fsel.Course.Infrastructure.Common
                         }).ToList(),
                     }).ToList(),
                 },
-                ExtraPracticeResult = extraPracticeResult != null ? new ExtraPraticeResultModel
+                ExtraPracticeResult = extraPracticeResult != null ? new ExtraPracticeResultModel
                 {
                     Id = extraPracticeResult.Id,
                     CorrectCount = extraPracticeResult.CorrectCount,
@@ -578,7 +578,7 @@ namespace Fsel.Course.Infrastructure.Common
                         ExtraPracticeExerciseId = x.ExtraPracticeExerciseId,
                     }).FirstOrDefault()
                 }).ToList(),
-                ExtraPracticeResult = extraPractice.ExtraPracticeResults.Where(m => !m.IsDeleted && m.StudentId == studentId).Select(x => new ExtraPraticeResultModel
+                ExtraPracticeResult = extraPractice.ExtraPracticeResults.Where(m => !m.IsDeleted && m.StudentId == studentId).Select(x => new ExtraPracticeResultModel
                 {
                     Id = x.Id,
                     CorrectCount = x.CorrectCount,
@@ -678,7 +678,7 @@ namespace Fsel.Course.Infrastructure.Common
                         }).ToList(),
                     }).ToList(),
                 },
-                ExtraPracticeResult = extraPractice.ExtraPracticeResults.Where(m => m.StudentId == studentId).Select(x => new ExtraPraticeResultModel
+                ExtraPracticeResult = extraPractice.ExtraPracticeResults.Where(m => m.StudentId == studentId).Select(x => new ExtraPracticeResultModel
                 {
                     Id = x.Id,
                     CorrectCount = x.CorrectCount,
@@ -758,7 +758,7 @@ namespace Fsel.Course.Infrastructure.Common
                         }).ToList(),
                     }).ToList(),
                 },
-                ExtraPracticeResult = extraPractice.ExtraPracticeResults.Where(m => !m.IsDeleted && m.StudentId == studentId).Select(x => new ExtraPraticeResultModel
+                ExtraPracticeResult = extraPractice.ExtraPracticeResults.Where(m => !m.IsDeleted && m.StudentId == studentId).Select(x => new ExtraPracticeResultModel
                 {
                     Id = x.Id,
                     CorrectCount = x.CorrectCount,
@@ -827,7 +827,7 @@ namespace Fsel.Course.Infrastructure.Common
                          .Select(x => x.SectionGroup).OrderBy(x => x!.CreatedDate)
                          .Select(x => _sectionConverter.GetSectionGroupModel(x, true)).ToList(),
                 },
-                ExtraPracticeResult = extraPractice.ExtraPracticeResults.Where(m => m.StudentId == studentId).Select(x => new ExtraPraticeResultModel
+                ExtraPracticeResult = extraPractice.ExtraPracticeResults.Where(m => m.StudentId == studentId).Select(x => new ExtraPracticeResultModel
                 {
                     Id = x.Id,
                     CorrectCount = x.CorrectCount,
@@ -862,7 +862,7 @@ namespace Fsel.Course.Infrastructure.Common
                 Name = extraPractice.Name,
                 Type = extraPractice.Type,
                 VideoLink = extraPractice.VideoLink,
-                ExtraPracticeResult = extraPractice.ExtraPracticeResults.Where(m => !m.IsDeleted).Select(x => new ExtraPraticeResultModel
+                ExtraPracticeResult = extraPractice.ExtraPracticeResults.Where(m => !m.IsDeleted).Select(x => new ExtraPracticeResultModel
                 {
                     Id = x.Id,
                     CorrectCount = x.CorrectCount,
