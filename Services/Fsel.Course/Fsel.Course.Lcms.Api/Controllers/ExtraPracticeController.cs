@@ -116,7 +116,7 @@ namespace Fsel.Course.Lcms.Api.Controllers
         }
 
         /// <summary>
-        /// Get MockTests Not ExtraPratice
+        /// Get MockTests Not ExtraPractice
         /// </summary>
         [HttpGet("mock-tests")]
         [ProducesResponseType(typeof(MethodResult<IList<MockTestSearchModel>>), (int)HttpStatusCode.OK)]

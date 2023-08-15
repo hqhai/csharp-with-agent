@@ -7,7 +7,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
     using Fsel.Course.Domain.Entities.SkillScoresConfigs;
     using Fsel.Course.Domain.Enums;
 
-    public class ExtraPraticeResultModel : BaseModel
+    public class ExtraPracticeResultModel : BaseModel
     {
         public double Percent { get; set; }
         public int CorrectCount { get; set; }
