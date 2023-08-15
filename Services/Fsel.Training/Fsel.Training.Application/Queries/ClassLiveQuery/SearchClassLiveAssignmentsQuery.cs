@@ -12,6 +12,7 @@ namespace Fsel.Training.Application.Queries.ClassLiveQuery
     using Fsel.Training.Application.Services.CourseServices;
     using Fsel.Training.Application.Services.SystemServices;
     using Fsel.Training.Application.Services.UserServices;
+    using Fsel.Training.Domain.Entities;
     using Fsel.Training.Domain.IRepositories;
     using Fsel.Training.Domain.Models.EntityModels;
     using MediatR;
@@ -106,15 +107,24 @@ namespace Fsel.Training.Application.Queries.ClassLiveQuery
             if (ids.Count > 0)
             {
                 var classLiveWordFlows = await _classLiveWorkFlowRepository.Queryable.Include(x => x.ClassLiveCalendar).Where(x => ids.Contains(x.Id)).ToListAsync(cancellationToken);
-                var classes = await _classRepository.Queryable.Where(x => ids.Contains(x.Id)).ToListAsync(cancellationToken);
+                var classes = await _classRepository.Queryable.Include(x => x.ClassLiveCalendars).Where(x => ids.Contains(x.Id)).ToListAsync(cancellationToken);
                 if (classes.Count > 0)
                 {
                     classes.ForEach(x =>
                     {
-                        x.TeacherApprovalStatus = EnumTeacherApprovalStatus.Approved;
                         if (x.Status == EnumStatusClass.Active)
                         {
-                            x.ClassLiveCalendars.ForEach(y => y.TeacherId = teacherId);
+                            var classLiveCalendars = x.ClassLiveCalendars
+                                         .Where(classLive => timeFrames?.FirstOrDefault(x => x.Id == classLive.LiveTimeFrameId)?.StartTime != null &&
+                                             classLive.LiveDate.Date.AddHours(timeFrames.First(x => x.Id == classLive.LiveTimeFrameId)?.StartTime ?? default) > DateTime.Now
+                                         )
+                                         .Select(classLive => new ClassLiveCalendar
+                                         {
+                                             TeacherId = x.TeacherId,
+                                         })
+                                         .ToList();
+                            x.ClassLiveCalendars = classLiveCalendars;
+                            x.TeacherApprovalStatus = EnumTeacherApprovalStatus.Approved;
                         }
                     });
                     _classRepository.UpdateList(classes);

@@ -116,16 +116,15 @@ namespace Fsel.Training.Application.Commands.ClassLiveCmd
                             var classLives = await _classLiveCalendarRepository.Queryable.Where(x => x.ClassId == @class.Id).ToListAsync(cancellationToken);
                             if (classLives != null && classLives.Count > 0)
                             {
-                                List<ClassLiveCalendar> classLiveCalendars = new List<ClassLiveCalendar>();
-                                foreach (var classLive in classLives)
-                                {
-                                    var liveTimeFrame = liveTimeFrames?.FirstOrDefault(x => x.Id == classLive.LiveTimeFrameId);
-                                    if (liveTimeFrame != null && classLive.LiveDate.Date.AddHours(liveTimeFrame.StartTime ?? default) > DateTime.Now)
-                                    {
-                                        classLive.TeacherId = @class.TeacherId;
-                                        classLiveCalendars.Add(classLive);
-                                    }
-                                }
+                                var classLiveCalendars = classLives
+                                        .Where(classLive => liveTimeFrames?.FirstOrDefault(x => x.Id == classLive.LiveTimeFrameId)?.StartTime != null &&
+                                            classLive.LiveDate.Date.AddHours(liveTimeFrames.First(x => x.Id == classLive.LiveTimeFrameId)?.StartTime ?? default) > DateTime.Now
+                                        )
+                                        .Select(classLive => new ClassLiveCalendar
+                                        {
+                                            TeacherId = @class.TeacherId,
+                                        })
+                                        .ToList();
                                 _classLiveCalendarRepository.UpdateList(classLiveCalendars);
                                 await _classLiveCalendarRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
                             }
