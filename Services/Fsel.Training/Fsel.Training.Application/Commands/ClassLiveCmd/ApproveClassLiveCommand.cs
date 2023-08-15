@@ -103,6 +103,8 @@ namespace Fsel.Training.Application.Commands.ClassLiveCmd
                 {
                     if (@class.TeacherApprovalStatus == EnumTeacherApprovalStatus.Pending)
                     {
+                        List<ClassLiveCalendar>? classLiveCalendars = default;
+                        TeacherFreeDate? teacherFreeDate = default;
                         if (request.IsAccept)
                         {
                             @class.TeacherApprovalStatus = EnumTeacherApprovalStatus.Approved;
@@ -116,32 +118,28 @@ namespace Fsel.Training.Application.Commands.ClassLiveCmd
                             var classLives = await _classLiveCalendarRepository.Queryable.Where(x => x.ClassId == @class.Id).ToListAsync(cancellationToken);
                             if (classLives != null && classLives.Count > 0)
                             {
-                                var classLiveCalendars = classLives.Where(classLive => liveTimeFrames?.FirstOrDefault(x => x.Id == classLive.LiveTimeFrameId)?.StartTime != null &&
-                                            classLive.LiveDate.Date.AddHours(liveTimeFrames.First(x => x.Id == classLive.LiveTimeFrameId)?.StartTime ?? default) > DateTime.Now
-                                        ).Select(x =>
-                                        {
-                                            x.TeacherId = @class.TeacherId;
-                                            return x;
-                                        })
-                                    .ToList();
-                                _classLiveCalendarRepository.UpdateList(classLiveCalendars);
-                                await _classLiveCalendarRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+                                classLiveCalendars = classLives.Where(classLive => liveTimeFrames?.FirstOrDefault(x => x.Id == classLive.LiveTimeFrameId)?.StartTime != null &&
+                                           classLive.LiveDate.Date.AddHours(liveTimeFrames.First(x => x.Id == classLive.LiveTimeFrameId)?.StartTime ?? default) > DateTime.Now
+                                       ).Select(x =>
+                                       {
+                                           x.TeacherId = @class.TeacherId;
+                                           return x;
+                                       })
+                                   .ToList();
                             }
                         }
                         else
                         {
-                            var teacherFreeDate = await _teacherFreeDateRepository.Queryable
-                                    .Include(x => x.TeacherFreeTimes)
-                                    .Where(x => @class.StartDate.HasValue && @class.EndDate.HasValue && x.StartDate.Date <= @class.StartDate.Value.Date && x.EndDate.Date >= @class.EndDate.Value.Date && x.TeacherId == teacherId)
-                                    .FirstOrDefaultAsync(cancellationToken);
+                            teacherFreeDate = await _teacherFreeDateRepository.Queryable
+                                   .Include(x => x.TeacherFreeTimes)
+                                   .Where(x => @class.StartDate.HasValue && @class.EndDate.HasValue && x.StartDate.Date <= @class.StartDate.Value.Date && x.EndDate.Date >= @class.EndDate.Value.Date && x.TeacherId == teacherId)
+                                   .FirstOrDefaultAsync(cancellationToken);
                             if (teacherFreeDate == null)
                             {
                                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(teacherFreeDate));
                                 return methodResult;
                             }
                             teacherFreeDate.TeacherFreeTimes = teacherFreeDate.TeacherFreeTimes.Where(x => !(@class.LiveDays != null && @class.LiveDays.Any() && @class.LiveDays.All(n => x.DayOfWeek == n) && x.LiveTimeFrameId == @class.LiveTimeFrameId)).ToList();
-                            _teacherFreeDateRepository.Update(teacherFreeDate);
-                            await _teacherFreeDateRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
                             @class.TeacherApprovalStatus = default;
                             @class.TeacherId = default;
@@ -151,6 +149,17 @@ namespace Fsel.Training.Application.Commands.ClassLiveCmd
                             methodResult.AddErrorBadRequest(@class.ErrorMessages);
                             return methodResult;
                         }
+                        if (classLiveCalendars != null && classLiveCalendars.Any())
+                        {
+                            _classLiveCalendarRepository.UpdateList(classLiveCalendars);
+                            await _classLiveCalendarRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+                        }
+                        if (teacherFreeDate != null)
+                        {
+                            _teacherFreeDateRepository.Update(teacherFreeDate);
+                            await _teacherFreeDateRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                        }
+
                         _classRepository.Update(@class);
                         await _classRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
                     }
