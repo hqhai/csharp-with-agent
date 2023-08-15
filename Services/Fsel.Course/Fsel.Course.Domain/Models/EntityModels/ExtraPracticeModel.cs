@@ -29,7 +29,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public VideoModel? Video { get; set; }
         public PlacementTestModel? PlacementTest { get; set; }
         public IList<ExerciseModel>? Exercises { get; set; }
-        public ExtraPraticeResultModel? ExtraPracticeResult { get; set; }
+        public ExtraPracticeResultModel? ExtraPracticeResult { get; set; }
         public MockTestModel? MockTest { get; set; }
         public Guid? UnitId { get; set; }
         public string? NameUnit { get; set; }
