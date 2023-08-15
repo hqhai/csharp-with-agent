@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fsel.System.Infrastructure.Migrations
 {
     [DbContext(typeof(SystemDbContext))]
-    [Migration("20230815025230_Create_QuestBoard")]
+    [Migration("20230815105204_Create_QuestBoard")]
     partial class Create_QuestBoard
     {
         /// <inheritdoc />
@@ -342,7 +342,7 @@ namespace Fsel.System.Infrastructure.Migrations
                         .HasMaxLength(1000)
                         .HasColumnType("nvarchar(1000)");
 
-                    b.Property<bool>("IsActice")
+                    b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
                     b.Property<bool>("IsDeleted")
@@ -465,7 +465,7 @@ namespace Fsel.System.Infrastructure.Migrations
                         {
                             Id = new Guid("68bd35d3-c09b-45f3-9a05-0e10691f7c42"),
                             Category = "FinishOnelesson",
-                            CreatedDate = new DateTime(2023, 8, 15, 9, 52, 30, 631, DateTimeKind.Local).AddTicks(8679),
+                            CreatedDate = new DateTime(2023, 8, 15, 17, 52, 3, 918, DateTimeKind.Local).AddTicks(8193),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             IsDeleted = false,
@@ -475,7 +475,7 @@ namespace Fsel.System.Infrastructure.Migrations
                         {
                             Id = new Guid("72933280-e14b-4715-a802-dcd88e031e79"),
                             Category = "FinishOneHomeworkMiniProject",
-                            CreatedDate = new DateTime(2023, 8, 15, 9, 52, 30, 631, DateTimeKind.Local).AddTicks(8943),
+                            CreatedDate = new DateTime(2023, 8, 15, 17, 52, 3, 918, DateTimeKind.Local).AddTicks(8462),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             IsDeleted = false,
@@ -485,7 +485,7 @@ namespace Fsel.System.Infrastructure.Migrations
                         {
                             Id = new Guid("cfce3f4b-66d5-467d-8f57-50a089257bcb"),
                             Category = "FinishOneUnitTest",
-                            CreatedDate = new DateTime(2023, 8, 15, 9, 52, 30, 631, DateTimeKind.Local).AddTicks(8964),
+                            CreatedDate = new DateTime(2023, 8, 15, 17, 52, 3, 918, DateTimeKind.Local).AddTicks(8484),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             IsDeleted = false,
@@ -495,7 +495,7 @@ namespace Fsel.System.Infrastructure.Migrations
                         {
                             Id = new Guid("7b436441-ef2f-4a83-be79-ee5ec5f18355"),
                             Category = "FinishOneUnit",
-                            CreatedDate = new DateTime(2023, 8, 15, 9, 52, 30, 631, DateTimeKind.Local).AddTicks(8977),
+                            CreatedDate = new DateTime(2023, 8, 15, 17, 52, 3, 918, DateTimeKind.Local).AddTicks(8499),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             IsDeleted = false,
@@ -505,7 +505,7 @@ namespace Fsel.System.Infrastructure.Migrations
                         {
                             Id = new Guid("e0f52102-85de-4719-99e0-72f88450dcdd"),
                             Category = "FinishTheFirstFinalTest",
-                            CreatedDate = new DateTime(2023, 8, 15, 9, 52, 30, 631, DateTimeKind.Local).AddTicks(8989),
+                            CreatedDate = new DateTime(2023, 8, 15, 17, 52, 3, 918, DateTimeKind.Local).AddTicks(8511),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             IsDeleted = false,
@@ -515,7 +515,7 @@ namespace Fsel.System.Infrastructure.Migrations
                         {
                             Id = new Guid("eff567fd-a061-48fb-9a9c-3407d17e7b0f"),
                             Category = "FinishTheFirstLevelPass",
-                            CreatedDate = new DateTime(2023, 8, 15, 9, 52, 30, 631, DateTimeKind.Local).AddTicks(9003),
+                            CreatedDate = new DateTime(2023, 8, 15, 17, 52, 3, 918, DateTimeKind.Local).AddTicks(8526),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             IsDeleted = false,
@@ -525,7 +525,7 @@ namespace Fsel.System.Infrastructure.Migrations
                         {
                             Id = new Guid("64c0a3a5-849c-412d-86b6-3f5e4809cc84"),
                             Category = "FinishOneFinalTest",
-                            CreatedDate = new DateTime(2023, 8, 15, 9, 52, 30, 631, DateTimeKind.Local).AddTicks(9014),
+                            CreatedDate = new DateTime(2023, 8, 15, 17, 52, 3, 918, DateTimeKind.Local).AddTicks(8537),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             IsDeleted = false,
@@ -535,7 +535,7 @@ namespace Fsel.System.Infrastructure.Migrations
                         {
                             Id = new Guid("bb35cdbf-98a7-4ce7-9b71-f457b386d64c"),
                             Category = "FinishOneLevelPass",
-                            CreatedDate = new DateTime(2023, 8, 15, 9, 52, 30, 631, DateTimeKind.Local).AddTicks(9026),
+                            CreatedDate = new DateTime(2023, 8, 15, 17, 52, 3, 918, DateTimeKind.Local).AddTicks(8548),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             IsDeleted = false,

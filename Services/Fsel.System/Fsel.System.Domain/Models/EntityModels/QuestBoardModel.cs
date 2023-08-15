@@ -18,7 +18,7 @@ namespace Fsel.System.Domain.Models.EntityModels
         public EnumRepeatType RepeatType { get; set; }
         public IList<Guid>? PackageIds { get; set; }
         public bool IsRequired { get; set; }
-        public bool IsActice { get; set; }
+        public bool IsActive { get; set; }
         public Guid? DependentId { get; set; }
         public IList<QuestBoardTaskModel>? QuestBoardTasks { get; set; }
     }

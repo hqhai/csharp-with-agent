@@ -19,6 +19,11 @@ namespace Fsel.System.Infrastructure.Configs
                 .HasConversion(
                     v => v.ToString(),
                     v => v.EnumParse<EnumQuestBoardStatus>());
+
+            builder.HasOne(a => a.QuestBoardTask)
+                    .WithMany(b => b.QuestBoardTaskStudents)
+                    .HasForeignKey(b => b.QuestBoardTaskId)
+                    .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

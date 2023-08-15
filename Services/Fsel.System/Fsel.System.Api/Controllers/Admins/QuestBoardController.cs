@@ -37,6 +37,18 @@ namespace Fsel.System.Api.Controllers.Admins
         }
 
         /// <summary>
+        /// Get Quest Boards
+        /// </summary>
+        [HttpGet("quest-boards")]
+        [ProducesResponseType(typeof(MethodResult<PagingItemsModel<QuestBoardSearchModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> Gets()
+        {
+            var queryResult = await _mediator.Send(new GetQuestBoardsByAdminQuery()).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
         /// Get Quest Board
         /// </summary>
         [HttpGet("{id}")]
@@ -44,14 +56,14 @@ namespace Fsel.System.Api.Controllers.Admins
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> Get([FromRoute] Guid id)
         {
-            MethodResult<QuestBoardModel> commandResult = await _mediator.Send(new GetQuestBoardQueryByAdminQuery { Id = id }).ConfigureAwait(false);
+            MethodResult<QuestBoardModel> commandResult = await _mediator.Send(new GetQuestBoardByAdminQuery { Id = id }).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
 
         /// <summary>
         /// Active Quest Board
         /// </summary>
-        [HttpPost("actice")]
+        [HttpPost("active")]
         [ProducesResponseType(typeof(MethodResult<QuestBoardModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> Active([FromQuery] ActiveQuestBoardCommand command)

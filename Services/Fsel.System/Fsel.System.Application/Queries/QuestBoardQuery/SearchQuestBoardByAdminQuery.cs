@@ -46,7 +46,8 @@ namespace Fsel.System.Application.Queries.QuestBoardQuery
                                     UpdatedDate = x.UpdatedDate,
                                     UpdatedFullName = x.UpdatedFullName,
                                     UpdatedUserId = x.UpdatedUserId,
-                                    MissionType = x.DependentId != null
+                                    MissionType = x.DependentId != null,
+                                    IsActive = x.IsActive
                                 });
             if (!string.IsNullOrEmpty(request.Keyword))
             {

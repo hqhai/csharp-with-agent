@@ -38,7 +38,7 @@ namespace Fsel.System.Application.Commands.QuestBoardCmd
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(questBoard));
                 return methodResult;
             }
-            questBoard.IsActice = true;
+            questBoard.IsActive = true;
             await _questBoardRepository.ExecuteTransactionAsync(async () =>
             {
                 questBoard = _questBoardRepository.Update(questBoard);

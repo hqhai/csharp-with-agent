@@ -13,6 +13,7 @@ namespace Fsel.System.Infrastructure.Maps
         public QuestBoardProfile()
         {
             CreateMap<QuestBoard, QuestBoardModel>().IgnoreAllNonExisting();
+            CreateMap<QuestBoardTask, QuestBoardTaskModel>().IgnoreAllNonExisting();
             CreateMap<CreateQuestBoardCommandModel, QuestBoard>().IgnoreAllNonExisting();
             CreateMap<UpdateQuestBoardCommandModel, QuestBoard>().IgnoreAllNonExisting();
         }

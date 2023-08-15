@@ -12,6 +12,10 @@ namespace Fsel.System.Infrastructure.Configs
         public void Configure(EntityTypeBuilder<QuestBoardTask> builder)
         {
             ArgumentNullException.ThrowIfNull(builder);
+            builder.HasOne(a => a.QuestBoard)
+                    .WithMany(b => b.QuestBoardTasks)
+                    .HasForeignKey(b => b.QuestBoardId)
+                    .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

@@ -81,7 +81,7 @@ namespace Fsel.System.Domain.Entities
         /// <summary>
         /// Bật tắt nhiệm vụ
         /// </summary>
-        public bool IsActice { get; set; }
+        public bool IsActive { get; set; }
 
         /// <summary>
         /// Nhiệm vụ phụ thuộc
