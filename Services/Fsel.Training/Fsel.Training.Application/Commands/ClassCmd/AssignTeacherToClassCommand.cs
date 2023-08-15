@@ -37,7 +37,7 @@ namespace Fsel.Training.Application.Commands.ClassCmd
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<ClassModel> methodResult = new MethodResult<ClassModel>();
-            var @class = await _classRepository.GetByIdAsync(request.Id);
+            var @class = await _classRepository.GetByIdAsync(request.ClassId);
             if (@class == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(@class));
@@ -56,7 +56,7 @@ namespace Fsel.Training.Application.Commands.ClassCmd
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(teacher));
                 return methodResult;
             }
-            @class.Id = request.Id;
+            @class.Id = request.ClassId;
             @class.TeacherId = request.TeacherId;
 
             await _classRepository.ExecuteTransactionAsync(async () =>
