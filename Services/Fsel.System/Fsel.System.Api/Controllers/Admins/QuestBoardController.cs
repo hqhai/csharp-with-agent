@@ -51,10 +51,10 @@ namespace Fsel.System.Api.Controllers.Admins
         /// <summary>
         /// Active Quest Board
         /// </summary>
-        [HttpPost]
+        [HttpPost("actice")]
         [ProducesResponseType(typeof(MethodResult<QuestBoardModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> Active([FromBody] ActiveQuestBoardCommand command)
+        public async Task<IActionResult> Active([FromQuery] ActiveQuestBoardCommand command)
         {
             MethodResult<QuestBoardModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();

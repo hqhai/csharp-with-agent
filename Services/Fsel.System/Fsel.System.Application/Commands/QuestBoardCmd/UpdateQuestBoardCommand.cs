@@ -87,9 +87,9 @@ namespace Fsel.System.Application.Commands.QuestBoardCmd
                 }
             }
 
-            if (request.StartDate <= DateTime.Now)
+            if (request.StartDate < DateTime.Now)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumQuestBoardErrorcode.StartDateMustMorethanDateNow));
+                methodResult.AddErrorBadRequest(nameof(EnumQuestBoardErrorcode.StartDateMustMorethanDateNowPlus1));
                 return methodResult;
             }
             if (request.StartDate <= request.EndDate)

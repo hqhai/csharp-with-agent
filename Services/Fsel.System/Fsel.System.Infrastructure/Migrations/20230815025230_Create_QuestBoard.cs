@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
@@ -86,7 +86,7 @@ namespace Fsel.System.Infrastructure.Migrations
                     DeletedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false),
                     ImplementDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    DependentTaskId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    DependentTaskId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     QuestBoardId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
@@ -135,14 +135,14 @@ namespace Fsel.System.Infrastructure.Migrations
                 columns: new[] { "Id", "Category", "CreatedDate", "CreatedFullName", "CreatedUserId", "DeletedDate", "DeletedFullName", "DeletedUserId", "IsDeleted", "Type", "UpdatedDate", "UpdatedFullName", "UpdatedUserId" },
                 values: new object[,]
                 {
-                    { new Guid("64c0a3a5-849c-412d-86b6-3f5e4809cc84"), "FinishOneFinalTest", new DateTime(2023, 8, 10, 16, 53, 46, 925, DateTimeKind.Local).AddTicks(4959), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, false, "MainQuests", null, null, null },
-                    { new Guid("68bd35d3-c09b-45f3-9a05-0e10691f7c42"), "FinishOnelesson", new DateTime(2023, 8, 10, 16, 53, 46, 925, DateTimeKind.Local).AddTicks(4498), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, false, "MainQuests", null, null, null },
-                    { new Guid("72933280-e14b-4715-a802-dcd88e031e79"), "FinishOneHomeworkMiniProject", new DateTime(2023, 8, 10, 16, 53, 46, 925, DateTimeKind.Local).AddTicks(4883), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, false, "MainQuests", null, null, null },
-                    { new Guid("7b436441-ef2f-4a83-be79-ee5ec5f18355"), "FinishOneUnit", new DateTime(2023, 8, 10, 16, 53, 46, 925, DateTimeKind.Local).AddTicks(4919), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, false, "MainQuests", null, null, null },
-                    { new Guid("bb35cdbf-98a7-4ce7-9b71-f457b386d64c"), "FinishOneLevelPass", new DateTime(2023, 8, 10, 16, 53, 46, 925, DateTimeKind.Local).AddTicks(4971), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, false, "MainQuests", null, null, null },
-                    { new Guid("cfce3f4b-66d5-467d-8f57-50a089257bcb"), "FinishOneUnitTest", new DateTime(2023, 8, 10, 16, 53, 46, 925, DateTimeKind.Local).AddTicks(4904), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, false, "MainQuests", null, null, null },
-                    { new Guid("e0f52102-85de-4719-99e0-72f88450dcdd"), "FinishTheFirstFinalTest", new DateTime(2023, 8, 10, 16, 53, 46, 925, DateTimeKind.Local).AddTicks(4932), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, false, "MainQuests", null, null, null },
-                    { new Guid("eff567fd-a061-48fb-9a9c-3407d17e7b0f"), "FinishTheFirstLevelPass", new DateTime(2023, 8, 10, 16, 53, 46, 925, DateTimeKind.Local).AddTicks(4948), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, false, "MainQuests", null, null, null }
+                    { new Guid("64c0a3a5-849c-412d-86b6-3f5e4809cc84"), "FinishOneFinalTest", new DateTime(2023, 8, 15, 9, 52, 30, 631, DateTimeKind.Local).AddTicks(9014), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, false, "MainQuests", null, null, null },
+                    { new Guid("68bd35d3-c09b-45f3-9a05-0e10691f7c42"), "FinishOnelesson", new DateTime(2023, 8, 15, 9, 52, 30, 631, DateTimeKind.Local).AddTicks(8679), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, false, "MainQuests", null, null, null },
+                    { new Guid("72933280-e14b-4715-a802-dcd88e031e79"), "FinishOneHomeworkMiniProject", new DateTime(2023, 8, 15, 9, 52, 30, 631, DateTimeKind.Local).AddTicks(8943), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, false, "MainQuests", null, null, null },
+                    { new Guid("7b436441-ef2f-4a83-be79-ee5ec5f18355"), "FinishOneUnit", new DateTime(2023, 8, 15, 9, 52, 30, 631, DateTimeKind.Local).AddTicks(8977), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, false, "MainQuests", null, null, null },
+                    { new Guid("bb35cdbf-98a7-4ce7-9b71-f457b386d64c"), "FinishOneLevelPass", new DateTime(2023, 8, 15, 9, 52, 30, 631, DateTimeKind.Local).AddTicks(9026), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, false, "MainQuests", null, null, null },
+                    { new Guid("cfce3f4b-66d5-467d-8f57-50a089257bcb"), "FinishOneUnitTest", new DateTime(2023, 8, 15, 9, 52, 30, 631, DateTimeKind.Local).AddTicks(8964), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, false, "MainQuests", null, null, null },
+                    { new Guid("e0f52102-85de-4719-99e0-72f88450dcdd"), "FinishTheFirstFinalTest", new DateTime(2023, 8, 15, 9, 52, 30, 631, DateTimeKind.Local).AddTicks(8989), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, false, "MainQuests", null, null, null },
+                    { new Guid("eff567fd-a061-48fb-9a9c-3407d17e7b0f"), "FinishTheFirstLevelPass", new DateTime(2023, 8, 15, 9, 52, 30, 631, DateTimeKind.Local).AddTicks(9003), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, false, "MainQuests", null, null, null }
                 });
 
             migrationBuilder.CreateIndex(

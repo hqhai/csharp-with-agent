@@ -62,7 +62,7 @@ namespace Fsel.System.Application.Commands.QuestBoardCmd
                 return methodResult;
             }
             var packages = packageResults?.Content?.Result;
-            var isCheckPackageIds = request.PackageIds?.All(y => packages?.Any(x => x.Equals(y)) ?? default) ?? default;
+            var isCheckPackageIds = request.PackageIds?.All(y => packages?.Any(x => x.Id == y) ?? default) ?? default;
             if (!isCheckPackageIds)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(isCheckPackageIds));
@@ -78,13 +78,13 @@ namespace Fsel.System.Application.Commands.QuestBoardCmd
                     return methodResult;
                 }
             }
-
-            if (request.StartDate <= DateTime.Now)
+            var date = request.StartDate.Date.AddHours(request.StartDate.Hour);
+            if (date < DateTime.Now.Date.AddHours(DateTime.Now.Hour))
             {
-                methodResult.AddErrorBadRequest(nameof(EnumQuestBoardErrorcode.StartDateMustMorethanDateNow));
+                methodResult.AddErrorBadRequest(nameof(EnumQuestBoardErrorcode.StartDateMustMorethanDateNowPlus1));
                 return methodResult;
             }
-            if (request.StartDate <= request.EndDate)
+            if (request.StartDate > request.EndDate)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumQuestBoardErrorcode.EndtDateMustMorethanStartDate));
                 return methodResult;
