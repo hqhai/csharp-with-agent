@@ -126,6 +126,10 @@ namespace Fsel.Training.Application.Queries.ClassLiveQuery
                             x.ClassLiveCalendars = classLiveCalendars;
                             x.TeacherApprovalStatus = EnumTeacherApprovalStatus.Approved;
                         }
+                        else
+                        {
+                            x.TeacherApprovalStatus = EnumTeacherApprovalStatus.Approved;
+                        }
                     });
                     _classRepository.UpdateList(classes);
                     await _classRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
