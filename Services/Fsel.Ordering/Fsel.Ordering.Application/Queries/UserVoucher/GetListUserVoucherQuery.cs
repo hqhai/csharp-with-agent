@@ -43,7 +43,7 @@ namespace Fsel.Ordering.Application.Queries.UserVoucher
 
             var userVoucherModel = await _userVoucherRepository.Queryable
                             .Include(x => x.Voucher)
-                            .Where(x => x.UserId == _authContext.CurrentUserId && x.Status == EnumUserVoucherStatus.NotUsed)
+                            .Where(x => x.UserId == _authContext.CurrentUserId && x.Status == EnumUserVoucherStatus.NotUsed && (x.Voucher!.StartDate <= DateTime.Now && DateTime.Now <= x.Voucher.EndDate))
                             .Select(x => new UserVoucherModel
                             {
                                 Id = x.Id,
