@@ -7,11 +7,12 @@ namespace Fsel.System.Application.Queries.QuestBoardQuery
     using Fsel.Core.Extensions;
     using Fsel.System.Domain.IRepositories;
     using Fsel.System.Domain.Models.EntityModels;
+    using Fsel.System.Domain.Models.QueryModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class SearchQuestBoardByAdminQuery : BaseQueryModel, IRequest<MethodResult<PagingItemsModel<QuestBoardSearchModel>>>
+    public class SearchQuestBoardByAdminQuery : SearchQuestBoardByAdminQueryModel, IRequest<MethodResult<PagingItemsModel<QuestBoardSearchModel>>>
     {
     }
 
@@ -33,7 +34,13 @@ namespace Fsel.System.Application.Queries.QuestBoardQuery
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 return methodResult;
             }
-            var questBoardQuery = _questBoardRepository.Queryable
+            if (request.Type == null)
+            {
+                methodResult.Result = null;
+                methodResult.StatusCode = StatusCodes.Status200OK;
+                return methodResult;
+            }
+            var questBoardQuery = _questBoardRepository.Queryable.Where(x => x.Type == request.Type)
                                 .Select(x => new QuestBoardSearchModel
                                 {
                                     Id = x.Id,
