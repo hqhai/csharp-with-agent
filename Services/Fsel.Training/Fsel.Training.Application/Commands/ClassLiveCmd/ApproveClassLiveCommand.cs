@@ -113,7 +113,7 @@ namespace Fsel.Training.Application.Commands.ClassLiveCmd
                                 return methodResult;
                             }
                             var liveTimeFrames = liveTimeFrameResults?.Content?.Result;
-                            var classLives = await _classLiveCalendarRepository.Queryable.Where(x => x.ClassId == @class.Id && x.TeacherId == @class.TeacherId).ToListAsync(cancellationToken);
+                            var classLives = await _classLiveCalendarRepository.Queryable.Where(x => x.ClassId == @class.Id).ToListAsync(cancellationToken);
                             if (classLives != null && classLives.Count > 0)
                             {
                                 List<ClassLiveCalendar> classLiveCalendars = new List<ClassLiveCalendar>();
