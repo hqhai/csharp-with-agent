@@ -72,7 +72,7 @@ namespace Fsel.Course.Lms.Application.Queries.ExtraPracticeQuery
                                      .ToListAsync();
             if (extraPracticeExercises != null && extraPracticeExercises.Count > 0)
             {
-                extraPracticeExerciseModels = extraPracticeExercises.Select(x => new ExtraPracticeExerciseModel
+                extraPracticeExerciseModels = extraPracticeExercises.OrderBy(x => x.CreatedDate).Select(x => new ExtraPracticeExerciseModel
                 {
                     Id = x.Id,
                     CreatedDate = x.CreatedDate,

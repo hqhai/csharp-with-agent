@@ -54,7 +54,7 @@ namespace Fsel.Course.Lms.Api.Controllers
         /// <summary>
         /// Get And Start ExtraPractice
         /// </summary>
-        [HttpGet("start-extraPractice/{id}")]
+        [HttpGet("start-extra-practice/{id}")]
         [ProducesResponseType(typeof(MethodResult<ExtraPracticeResultModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetAndStartExtraPractice([FromRoute] Guid id)
@@ -66,7 +66,7 @@ namespace Fsel.Course.Lms.Api.Controllers
         /// <summary>
         /// Get ExtraPractice Detail
         /// </summary>
-        [HttpGet("detail/{id}")]
+        [HttpGet("{id}")]
         [ProducesResponseType(typeof(MethodResult<ExtraPracticeModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetExtraPracticeDetail([FromRoute] Guid id)
@@ -78,7 +78,7 @@ namespace Fsel.Course.Lms.Api.Controllers
         /// <summary>
         /// Get ExtraPractice Detail MockTest
         /// </summary>
-        [HttpGet("detail-mocktest")]
+        [HttpGet("get-detail-mock-test")]
         [ProducesResponseType(typeof(MethodResult<ExtraPracticeModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetExtraPracticeDetailMockTest([FromQuery] GetMockTestByExtraPracticeQuery query)
@@ -90,7 +90,7 @@ namespace Fsel.Course.Lms.Api.Controllers
         /// <summary>
         /// Get ExtraPractice Detail PlacementTest
         /// </summary>
-        [HttpGet("detail-placementtest")]
+        [HttpGet("get-detail-placement-test")]
         [ProducesResponseType(typeof(MethodResult<ExtraPracticeModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetExtraPracticeDetailPlacementTest([FromQuery] GetPlacementTestByExtraPracticeQuery query)
@@ -102,7 +102,7 @@ namespace Fsel.Course.Lms.Api.Controllers
         /// <summary>
         /// Get TimeCodes Detail by ExtraPractice
         /// </summary>
-        [HttpGet("detail-timecode")]
+        [HttpGet("get-detail-time-code")]
         [ProducesResponseType(typeof(MethodResult<VideoTimeCodeModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetTimeCodeByExtraPractice([FromQuery] GetTimeCodeDetailByExtraPracticeQuery query)
@@ -114,7 +114,7 @@ namespace Fsel.Course.Lms.Api.Controllers
         /// <summary>
         /// Get Exercise By ExtraPractice
         /// </summary>
-        [HttpGet("exercises")]
+        [HttpGet("get-exercises")]
         [ProducesResponseType(typeof(MethodResult<IList<ExtraPracticeExerciseModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetExerciseByExtraPractice([FromQuery] GetExerciseByExtraPracticeQuery query)
@@ -126,7 +126,7 @@ namespace Fsel.Course.Lms.Api.Controllers
         /// <summary>
         /// Get ExtraPractice Detail Questions
         /// </summary>
-        [HttpGet("questions")]
+        [HttpGet("get-questions")]
         [ProducesResponseType(typeof(MethodResult<ExerciseModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetExtraPracticeDetailQuestions([FromQuery] GetQuestionByExtraPracticeQuery query)
@@ -162,7 +162,7 @@ namespace Fsel.Course.Lms.Api.Controllers
         /// <summary>
         /// Create ExtraPractice Answer MockTest
         /// </summary>
-        [HttpPost("create-answer-mocktest")]
+        [HttpPost("create-answer-mock-test")]
         [ProducesResponseType(typeof(MethodResult<ExtraPracticeResultModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> CreateAnswerMockTest([FromBody] CreateExtraPracticeAnswerMockTestCommand command)
@@ -174,7 +174,7 @@ namespace Fsel.Course.Lms.Api.Controllers
         /// <summary>
         /// Create ExtraPractice Answer PlacementTest
         /// </summary>
-        [HttpPost("create-answer-placementtest")]
+        [HttpPost("create-answer-placement-test")]
         [ProducesResponseType(typeof(MethodResult<ExtraPracticeResultModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> CreateAnswerPlacementTest([FromBody] CreateExtraPracticeAnswerPlacementTestCommand command)
