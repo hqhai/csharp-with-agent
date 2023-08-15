@@ -73,7 +73,7 @@ namespace Fsel.Training.Application.Commands.ClassLiveCmd
                     var classLiveWorkFlowParent = await _classLiveWorkFlowRepository.GetByIdAsync(classLiveWorkFlow.WorkFlowParentId ?? default);
                     if (classLiveWorkFlow.Type == EnumWorkFlowType.AssignTeacher && classLiveWorkFlowParent != null && classLiveWorkFlow.ClassLiveCalendar != null)
                     {
-                        if (request.IsAcept)
+                        if (request.IsAccept)
                         {
                             classLiveWorkFlowParent.Status = EnumWorkFlowChangeTeacherStatus.DoneScheduled.ToString();
                             classLiveWorkFlow.ClassLiveCalendar.TeacherId = teacherId;
@@ -103,7 +103,7 @@ namespace Fsel.Training.Application.Commands.ClassLiveCmd
                 {
                     if (@class.TeacherApprovalStatus == EnumTeacherApprovalStatus.Pending)
                     {
-                        if (request.IsAcept)
+                        if (request.IsAccept)
                         {
                             @class.TeacherApprovalStatus = EnumTeacherApprovalStatus.Approved;
                             var liveTimeFrameResults = await _systemService.GetLiveTimeFramesAsync();
@@ -116,15 +116,14 @@ namespace Fsel.Training.Application.Commands.ClassLiveCmd
                             var classLives = await _classLiveCalendarRepository.Queryable.Where(x => x.ClassId == @class.Id).ToListAsync(cancellationToken);
                             if (classLives != null && classLives.Count > 0)
                             {
-                                var classLiveCalendars = classLives
-                                        .Where(classLive => liveTimeFrames?.FirstOrDefault(x => x.Id == classLive.LiveTimeFrameId)?.StartTime != null &&
+                                var classLiveCalendars = classLives.Where(classLive => liveTimeFrames?.FirstOrDefault(x => x.Id == classLive.LiveTimeFrameId)?.StartTime != null &&
                                             classLive.LiveDate.Date.AddHours(liveTimeFrames.First(x => x.Id == classLive.LiveTimeFrameId)?.StartTime ?? default) > DateTime.Now
-                                        )
-                                        .Select(classLive => new ClassLiveCalendar
+                                        ).Select(x =>
                                         {
-                                            TeacherId = @class.TeacherId,
+                                            x.TeacherId = @class.TeacherId;
+                                            return x;
                                         })
-                                        .ToList();
+                                    .ToList();
                                 _classLiveCalendarRepository.UpdateList(classLiveCalendars);
                                 await _classLiveCalendarRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
                             }
