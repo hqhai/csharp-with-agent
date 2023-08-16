@@ -58,25 +58,28 @@ namespace Fsel.Training.Application.Commands.TeacherFreeDateCmd
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(teacher));
                 return methodResult;
             }
+            if (request.StartDate < DateTime.Now.Date)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumTeacherFreeDateErrorCode.StartDateBiggerThanDateNow));
+                return methodResult;
+            }
             if (request.StartDate > request.EndDate)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumTeacherFreeDateErrorCode.StartDateNotBiggerThanEndDate));
                 return methodResult;
             }
 
-            var isCheckStart = await _teacherFreeDateRepository.Queryable.AnyAsync(p => (p.StartDate <= request.StartDate && p.EndDate >= request.StartDate) && p.TeacherId == teacherId && p.Id != request.Id, cancellationToken);
+            var isCheckStart = await _teacherFreeDateRepository.Queryable.AnyAsync(p =>
+                               ((request.StartDate >= p.StartDate && request.StartDate <= p.EndDate) ||
+                               (request.EndDate >= p.StartDate && request.EndDate <= p.EndDate) ||
+                               (request.StartDate <= p.StartDate && request.EndDate >= p.EndDate)) &&
+                               p.TeacherId == teacherId && p.Id != request.Id, cancellationToken);
             if (isCheckStart)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(isCheckStart));
                 return methodResult;
             }
 
-            var isCheckEnd = await _teacherFreeDateRepository.Queryable.AnyAsync(p => (p.StartDate <= request.EndDate && p.EndDate >= request.EndDate) && p.TeacherId == teacherId && p.Id != request.Id, cancellationToken);
-            if (isCheckEnd)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(isCheckEnd));
-                return methodResult;
-            }
             _mapper.Map(request, teacherFreeDate);
             teacherFreeDate.TeacherId = teacherId ?? default;
             if (!teacherFreeDate.IsValid())
