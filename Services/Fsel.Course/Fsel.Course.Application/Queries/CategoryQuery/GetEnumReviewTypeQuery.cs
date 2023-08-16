@@ -25,7 +25,7 @@ namespace Fsel.Course.Application.Queries.CategoryQuery
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<object> methodResult = new MethodResult<object>();
-            methodResult.Result = request.ReviewType.GetEnumReviewTypes();
+            methodResult.Result = request.ReviewType.GetEnumReviewQuestionTypes();
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }

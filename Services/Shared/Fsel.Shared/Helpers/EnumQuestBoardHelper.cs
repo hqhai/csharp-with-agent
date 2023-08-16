@@ -19,7 +19,7 @@ namespace Fsel.Shared.Helpers
             new KeyValuePair<EnumQuestBoardType, EnumQuestBoardCategory>(EnumQuestBoardType.MainQuests, EnumQuestBoardCategory.FinishOneLevelPass),
         };
 
-        public static IList<object> GetEnumQuestBoardTypes(this EnumQuestBoardType? questBoardType)
+        public static IList<object> GetEnumQuestBoardCategorys(this EnumQuestBoardType? questBoardType)
         {
             var results = new List<object>();
             foreach (var item in s_questboardTypeCategory.Where(x => x.Key == questBoardType))
