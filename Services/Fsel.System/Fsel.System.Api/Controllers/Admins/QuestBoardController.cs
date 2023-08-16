@@ -5,16 +5,19 @@ namespace Fsel.System.Api.Controllers.Admins
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
     using Fsel.Core.Base.BaseModels;
+    using Fsel.Shared.Enums;
     using Fsel.System.Application.Commands.QuestBoardCmd;
     using Fsel.System.Application.Queries.QuestBoardQuery;
     using Fsel.System.Domain.Models.EntityModels;
     using global::System.Net;
     using MediatR;
+    using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
 
     [ApiVersion(Settings.APIVersion)]
     [Route(Settings.APIDefaultRoute + "/admin/quest-board")]
     [ApiController]
+    [Authorize(Roles = nameof(EnumRole.Admin))]
     public class QuestBoardController : ControllerBase
     {
         private readonly IMediator _mediator;
