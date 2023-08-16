@@ -18,26 +18,20 @@ namespace Fsel.Shared.Helpers
 
         public static bool IsCheckFeedBack(IList<EnumFeedBackNegative>? enumFeedBackNegatives, IList<EnumFeedBackPositive>? enumFeedBackPositives)
         {
-            if (enumFeedBackPositives?.Count > 0)
+            if ((enumFeedBackNegatives == null || enumFeedBackNegatives.Count == 0) &&
+                (enumFeedBackPositives == null || enumFeedBackPositives.Count == 0))
             {
-                foreach (var item in enumFeedBackPositives)
-                {
-                    var e = s_feedBack.FirstOrDefault(x => x.Value == item).Key;
-                    if (enumFeedBackNegatives?.Count > 0 && enumFeedBackNegatives.Any(x => x == e))
-                    {
-                        return false;
-                    }
-                }
+                return true;
             }
-            else if (enumFeedBackNegatives?.Count > 0)
+
+            var positiveSet = new HashSet<EnumFeedBackPositive>(enumFeedBackPositives ?? Enumerable.Empty<EnumFeedBackPositive>());
+            var negativeSet = new HashSet<EnumFeedBackNegative>(enumFeedBackNegatives ?? Enumerable.Empty<EnumFeedBackNegative>());
+
+            foreach (var feedbackPair in s_feedBack)
             {
-                foreach (var item in enumFeedBackNegatives)
+                if (positiveSet.Contains(feedbackPair.Value) && negativeSet.Contains(feedbackPair.Key))
                 {
-                    var e = s_feedBack.FirstOrDefault(x => x.Key == item).Value;
-                    if (enumFeedBackPositives?.Count > 0 && enumFeedBackPositives.Any(x => x == e))
-                    {
-                        return false;
-                    }
+                    return false;
                 }
             }
 
