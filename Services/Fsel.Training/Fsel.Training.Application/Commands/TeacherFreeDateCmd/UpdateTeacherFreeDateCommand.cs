@@ -58,25 +58,25 @@ namespace Fsel.Training.Application.Commands.TeacherFreeDateCmd
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(teacher));
                 return methodResult;
             }
+            if (request.StartDate < DateTime.Now.Date)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumTeacherFreeDateErrorCode.StartDateBiggerThanDateNow));
+                return methodResult;
+            }
             if (request.StartDate > request.EndDate)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumTeacherFreeDateErrorCode.StartDateNotBiggerThanEndDate));
                 return methodResult;
             }
 
-            var isCheckStart = await _teacherFreeDateRepository.Queryable.AnyAsync(p => (p.StartDate <= request.StartDate && p.EndDate >= request.StartDate) && p.TeacherId == teacherId && p.Id != request.Id, cancellationToken);
-            if (isCheckStart)
+            var teacherFreeDates = await _teacherFreeDateRepository.Queryable.Where(p => p.TeacherId == teacherId && p.Id != request.Id).ToListAsync(cancellationToken);
+            var isCheckStart = teacherFreeDates.All(p => p.EndDate < request.StartDate);
+            if (!isCheckStart)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(isCheckStart));
                 return methodResult;
             }
 
-            var isCheckEnd = await _teacherFreeDateRepository.Queryable.AnyAsync(p => (p.StartDate <= request.EndDate && p.EndDate >= request.EndDate) && p.TeacherId == teacherId && p.Id != request.Id, cancellationToken);
-            if (isCheckEnd)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(isCheckEnd));
-                return methodResult;
-            }
             _mapper.Map(request, teacherFreeDate);
             teacherFreeDate.TeacherId = teacherId ?? default;
             if (!teacherFreeDate.IsValid())
