@@ -151,7 +151,7 @@ namespace Fsel.System.Application.Commands.QuestBoardCmd
                 var dependentTasks = await _questBoardTaskRepository.Queryable.Where(x => x.QuestBoardId == id).ToListAsync();
                 foreach (var task in questBoardTasks)
                 {
-                    task.DependentTaskId = dependentTasks.FirstOrDefault(x => x.ImplementDate == task.ImplementDate)?.Id ?? default;
+                    task.DependentTaskId = dependentTasks.FirstOrDefault(x => x.ImplementDate == task.ImplementDate)?.Id ?? null;
                 }
             }
             return questBoardTasks;
