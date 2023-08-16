@@ -87,24 +87,24 @@ namespace Fsel.Course.Lcms.Api.Controllers
         }
 
         /// <summary>
-        /// Get Review Type
+        /// Get Review Question Type
         /// </summary>
-        [HttpGet("review-type")]
+        [HttpGet("review-question-types")]
         [ProducesResponseType(typeof(MethodResult<object>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetReviewType([FromQuery] GetEnumReviewTypeQuery query)
+        public async Task<IActionResult> GetReviewQuestionTypes([FromQuery] GetEnumReviewQuestionTypesQuery query)
         {
             var queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
 
         /// <summary>
-        /// Get QuestBoard Type
+        /// Get QuestBoard Categorys
         /// </summary>
-        [HttpGet("quest-board-type")]
+        [HttpGet("quest-board-categorys")]
         [ProducesResponseType(typeof(MethodResult<object>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetQuestBoardType([FromQuery] GetEnumQuestBoardTypeQuery query)
+        public async Task<IActionResult> GetQuestBoardCategorys([FromQuery] GetEnumQuestBoardCategorysQuery query)
         {
             var queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();

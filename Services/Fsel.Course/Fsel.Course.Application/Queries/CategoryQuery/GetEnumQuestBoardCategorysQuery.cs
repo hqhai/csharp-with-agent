@@ -10,22 +10,22 @@ namespace Fsel.Course.Application.Queries.CategoryQuery
     using MediatR;
     using Microsoft.AspNetCore.Http;
 
-    public class GetEnumReviewTypeQuery : IRequest<MethodResult<object>>
+    public class GetEnumQuestBoardCategorysQuery : IRequest<MethodResult<object>>
     {
-        public EnumReviewType? ReviewType { get; set; }
+        public EnumQuestBoardType? QuestBoardType { get; set; }
     }
 
-    public class GetEnumReviewTypeQueryHandler : IRequestHandler<GetEnumReviewTypeQuery, MethodResult<object>>
+    public class GetEnumQuestBoardCategorysQueryHandler : IRequestHandler<GetEnumQuestBoardCategorysQuery, MethodResult<object>>
     {
-        public GetEnumReviewTypeQueryHandler()
+        public GetEnumQuestBoardCategorysQueryHandler()
         {
         }
 
-        public async Task<MethodResult<object>> Handle(GetEnumReviewTypeQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<object>> Handle(GetEnumQuestBoardCategorysQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<object> methodResult = new MethodResult<object>();
-            methodResult.Result = request.ReviewType.GetEnumReviewQuestionTypes();
+            methodResult.Result = request.QuestBoardType.GetEnumQuestBoardCategorys();
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }
