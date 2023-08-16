@@ -42,7 +42,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<bool> methodResult = new MethodResult<bool>();
 
-            if (!EnumCourseLevelHelper.IsCheckFeedBack(request.FeedBackNegatives, request.FeedBackPositives))
+            if (!EnumFeedBackHelper.IsCheckFeedBack(request.FeedBackNegatives, request.FeedBackPositives))
             {
                 methodResult.AddErrorBadRequest(nameof(EnumClassForumResultErrorCode.FeedbackPositiveOrFeedBackBothHaveValue));
                 return methodResult;
