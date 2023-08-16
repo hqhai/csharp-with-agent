@@ -2,6 +2,7 @@
 
 namespace Fsel.Course.Lcms.Api.Controllers
 {
+    using System.Collections.Generic;
     using System.Net;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
@@ -16,7 +17,7 @@ namespace Fsel.Course.Lcms.Api.Controllers
     using Microsoft.AspNetCore.Mvc;
 
     [ApiVersion(Settings.APIVersion)]
-    [Route(Settings.APIDefaultRoute + "/extrapractice")]
+    [Route(Settings.APIDefaultRoute + "/extra-practice")]
     [ApiController]
     [Authorize(Roles = nameof(EnumRole.MasterAdmin))]
     public class ExtraPracticeController : ControllerBase
@@ -65,6 +66,18 @@ namespace Fsel.Course.Lcms.Api.Controllers
         }
 
         /// <summary>
+        /// ExtraPractices
+        /// </summary>
+        [HttpGet("extra-practices")]
+        [ProducesResponseType(typeof(MethodResult<IList<ExtraPracticeModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetExtraPractices()
+        {
+            MethodResult<IList<ExtraPracticeModel>> queryResult = await _mediator.Send(new GetExtraPracticesQuery()).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
         /// Update a ExtraPractice
         /// </summary>
         [HttpPut("{id}")]
@@ -91,7 +104,19 @@ namespace Fsel.Course.Lcms.Api.Controllers
         }
 
         /// <summary>
-        /// Get MockTests Not ExtraPratice
+        /// Get Detail ExtraPractice Skill
+        /// </summary>
+        [HttpGet("skill/{id}")]
+        [ProducesResponseType(typeof(MethodResult<ExtraPracticeSkillModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetSkill([FromRoute] Guid id)
+        {
+            MethodResult<ExtraPracticeSkillModel> commandResult = await _mediator.Send(new GetExtraPracticeSkillByIdQuery { Id = id }).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Get MockTests Not ExtraPractice
         /// </summary>
         [HttpGet("mock-tests")]
         [ProducesResponseType(typeof(MethodResult<IList<MockTestSearchModel>>), (int)HttpStatusCode.OK)]

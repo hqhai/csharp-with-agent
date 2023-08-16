@@ -122,12 +122,12 @@ namespace Fsel.Training.Api.Controllers.Admin
         /// Assign Teacher To Class
         /// </summary>
         [HttpPut("assign-teacher-to-class")]
-        [ProducesResponseType(typeof(MethodResult<ClassModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> AssignTeacherToClass([FromBody] AssignTeacherToClassCommand command)
         {
             ArgumentNullException.ThrowIfNull(command);
-            MethodResult<ClassModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            MethodResult<bool> commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
 

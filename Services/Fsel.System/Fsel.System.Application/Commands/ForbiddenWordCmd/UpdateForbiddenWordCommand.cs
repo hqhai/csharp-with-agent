@@ -9,9 +9,11 @@ namespace Fsel.System.Application.Commands.ForbiddenWordCmd
     using Fsel.System.Domain.Models.CommandModels.ForbiddenWords;
     using Fsel.System.Domain.Models.EntityModels;
     using global::System;
+    using global::System.Globalization;
     using global::System.Threading.Tasks;
     using MediatR;
     using Microsoft.AspNetCore.Http;
+    using Microsoft.EntityFrameworkCore;
 
     public class UpdateForbiddenWordCommand : UpdateForbiddenWordCommandModel, IRequest<MethodResult<ForbiddenWordModel>>
     {
@@ -35,7 +37,15 @@ namespace Fsel.System.Application.Commands.ForbiddenWordCmd
             var forbiddenWord = await _forbiddenWordRepository.GetByIdAsync(request.Id);
 
             #region Validation
+            string compareWord = request!.Word!.ToLower(CultureInfo.InvariantCulture).Trim();
 
+            var forbiddenWordName = await _forbiddenWordRepository.Queryable.AnyAsync(x => x!.Word!.ToLower().Trim() == compareWord && x.Id != request.Id, cancellationToken);
+
+            if (forbiddenWordName)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(forbiddenWordName));
+                return methodResult;
+            }
             if (forbiddenWord == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(forbiddenWord));

@@ -21,5 +21,7 @@ namespace Fsel.Ordering.Domain.Models.EntityModels
         public DateTime? EndDate { get; set; }
 
         public VoucherModel? Voucher { get; set; }
+
+        public IList<VoucherPackageModel>? VoucherPackages { get; set; }
     }
 }
