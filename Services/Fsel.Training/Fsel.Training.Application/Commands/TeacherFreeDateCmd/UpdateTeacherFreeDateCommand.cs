@@ -69,9 +69,12 @@ namespace Fsel.Training.Application.Commands.TeacherFreeDateCmd
                 return methodResult;
             }
 
-            var teacherFreeDates = await _teacherFreeDateRepository.Queryable.Where(p => p.TeacherId == teacherId && p.Id != request.Id).ToListAsync(cancellationToken);
-            var isCheckStart = teacherFreeDates.All(p => p.EndDate < request.StartDate);
-            if (!isCheckStart)
+            var isCheckStart = await _teacherFreeDateRepository.Queryable.AnyAsync(p =>
+                               ((request.StartDate >= p.StartDate && request.StartDate <= p.EndDate) ||
+                               (request.EndDate >= p.StartDate && request.EndDate <= p.EndDate) ||
+                               (request.StartDate <= p.StartDate && request.EndDate >= p.EndDate)) &&
+                               p.TeacherId == teacherId && p.Id != request.Id, cancellationToken);
+            if (isCheckStart)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(isCheckStart));
                 return methodResult;
