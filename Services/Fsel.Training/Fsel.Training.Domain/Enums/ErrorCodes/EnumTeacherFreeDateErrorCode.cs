@@ -8,5 +8,10 @@ namespace Fsel.Training.Domain.Enums.ErrorCodes
         /// StartDate is not bigger than EndDate
         /// </summary>
         StartDateNotBiggerThanEndDate,
+
+        /// <summary>
+        /// StartDate Bigger Than DateNow
+        /// </summary>
+        StartDateBiggerThanDateNow,
     }
 }
