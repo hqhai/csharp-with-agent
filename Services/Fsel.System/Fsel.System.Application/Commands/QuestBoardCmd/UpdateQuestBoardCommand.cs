@@ -88,7 +88,7 @@ namespace Fsel.System.Application.Commands.QuestBoardCmd
             var date = request.StartDate.Date.AddHours(request.StartDate.Hour);
             if (date < DateTime.Now.Date.AddHours(DateTime.Now.Hour))
             {
-                methodResult.AddErrorBadRequest(nameof(EnumQuestBoardErrorcode.StartDateMustMorethanDateNowPlus1));
+                methodResult.AddErrorBadRequest(nameof(EnumQuestBoardErrorcode.StartDateMustMorethanDateNow));
                 return methodResult;
             }
 
@@ -112,7 +112,7 @@ namespace Fsel.System.Application.Commands.QuestBoardCmd
             #endregion Validate QuestBoard
 
             _mapper.Map(request, questBoard);
-            questBoard.QuestBoardTasks = await GetDateRangeAsync(request.StartDate, request.EndDate, request.RepeatType, request.DependentId);
+            questBoard.QuestBoardTasks = await GetDateRangeAsync(request.StartDate, request.EndDate, request.RepeatType, request.DependentId, questBoard.QuestBoardTasks.ToList());
             if (!questBoard.IsValid())
             {
                 methodResult.AddErrorBadRequest(questBoard.ErrorMessages);
@@ -131,7 +131,7 @@ namespace Fsel.System.Application.Commands.QuestBoardCmd
             return methodResult;
         }
 
-        private async Task<List<QuestBoardTask>> GetDateRangeAsync(DateTime startDate, DateTime endDate, EnumRepeatType repeatType, Guid? id)
+        private async Task<List<QuestBoardTask>> GetDateRangeAsync(DateTime startDate, DateTime endDate, EnumRepeatType repeatType, Guid? id, IList<QuestBoardTask>? questBoardTasks)
         {
             int repeatInterval = 0;
             switch (repeatType)
@@ -148,21 +148,29 @@ namespace Fsel.System.Application.Commands.QuestBoardCmd
                     repeatInterval = 30;
                     break;
             }
-            List<QuestBoardTask> questBoardTasks = Enumerable.Range(0, (endDate - startDate).Days / repeatInterval + 1)
+            List<QuestBoardTask> questBoardTaskNews = Enumerable.Range(0, (endDate - startDate).Days / repeatInterval + 1)
                .Select(offset => new QuestBoardTask
                {
                    ImplementDate = startDate.AddDays(offset * repeatInterval),
                })
                .ToList();
+            var currentDate = DateTime.Now;
+            questBoardTaskNews = questBoardTaskNews.Where(task => task.ImplementDate >= currentDate).ToList();
+
             if (id != null)
             {
                 var dependentTasks = await _questBoardTaskRepository.Queryable.Where(x => x.Id == id).ToListAsync();
-                foreach (var task in questBoardTasks)
+                foreach (var task in questBoardTaskNews)
                 {
                     task.DependentTaskId = dependentTasks.FirstOrDefault(x => x.ImplementDate == task.ImplementDate)?.Id ?? default;
                 }
             }
-            return questBoardTasks;
+            if (questBoardTasks != null)
+            {
+                var completedTasks = questBoardTasks.Where(task => task.ImplementDate < currentDate).ToList();
+                questBoardTaskNews.AddRange(completedTasks);
+            }
+            return questBoardTaskNews;
         }
     }
 }

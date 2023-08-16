@@ -5,9 +5,9 @@ namespace Fsel.System.Domain.Enums.ErrorCodes
     public enum EnumQuestBoardErrorcode
     {
         /// <summary>
-        /// StartDate Must More than DateNow Plus 1
+        /// StartDate Must More than DateNow
         /// </summary>
-        StartDateMustMorethanDateNowPlus1,
+        StartDateMustMorethanDateNow,
 
         /// <summary>
         /// EndtDate Must More than StartDate

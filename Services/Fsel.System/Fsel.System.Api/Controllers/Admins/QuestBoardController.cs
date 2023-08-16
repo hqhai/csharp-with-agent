@@ -39,12 +39,12 @@ namespace Fsel.System.Api.Controllers.Admins
         /// <summary>
         /// Get Quest Boards
         /// </summary>
-        [HttpGet("quest-boards")]
+        [HttpGet("list-quest-board-active")]
         [ProducesResponseType(typeof(MethodResult<PagingItemsModel<QuestBoardSearchModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> Gets()
         {
-            var queryResult = await _mediator.Send(new GetQuestBoardsByAdminQuery()).ConfigureAwait(false);
+            var queryResult = await _mediator.Send(new GetQuestBoardsActiveByAdminQuery()).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
 

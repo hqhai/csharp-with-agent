@@ -81,7 +81,7 @@ namespace Fsel.System.Application.Commands.QuestBoardCmd
             var date = request.StartDate.Date.AddHours(request.StartDate.Hour);
             if (date < DateTime.Now.Date.AddHours(DateTime.Now.Hour))
             {
-                methodResult.AddErrorBadRequest(nameof(EnumQuestBoardErrorcode.StartDateMustMorethanDateNowPlus1));
+                methodResult.AddErrorBadRequest(nameof(EnumQuestBoardErrorcode.StartDateMustMorethanDateNow));
                 return methodResult;
             }
             if (request.StartDate > request.EndDate)

@@ -10,22 +10,22 @@ namespace Fsel.System.Application.Queries.QuestBoardQuery
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class GetQuestBoardsByAdminQuery : IRequest<MethodResult<IList<QuestBoardModel>>>
+    public class GetQuestBoardsActiveByAdminQuery : IRequest<MethodResult<IList<QuestBoardModel>>>
     {
     }
 
-    public class GetQuestBoardsByAdminQueryHandler : IRequestHandler<GetQuestBoardsByAdminQuery, MethodResult<IList<QuestBoardModel>>>
+    public class GetQuestBoardsActiveByAdminQueryHandler : IRequestHandler<GetQuestBoardsActiveByAdminQuery, MethodResult<IList<QuestBoardModel>>>
     {
         private readonly IQuestBoardRepository _questBoardRepository;
         private readonly IMapper _mapper;
 
-        public GetQuestBoardsByAdminQueryHandler(IQuestBoardRepository questBoardRepository, IMapper mapper)
+        public GetQuestBoardsActiveByAdminQueryHandler(IQuestBoardRepository questBoardRepository, IMapper mapper)
         {
             _questBoardRepository = questBoardRepository;
             _mapper = mapper;
         }
 
-        public async Task<MethodResult<IList<QuestBoardModel>>> Handle(GetQuestBoardsByAdminQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<IList<QuestBoardModel>>> Handle(GetQuestBoardsActiveByAdminQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<IList<QuestBoardModel>>();
