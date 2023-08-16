@@ -33,5 +33,10 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         /// Result not from student
         /// </summary>
         ResultNotFromStudent,
+
+        /// <summary>
+        /// Feedback Positive Or FeedBack Both Have Value
+        /// </summary>
+        FeedbackPositiveOrFeedBackBothHaveValue,
     }
 }
