@@ -87,6 +87,14 @@ namespace Fsel.Course.Application.Queries.CategoryQuery
                 case EnumCourseSourceData.TeacherRole:
                     methodResult.Result = ConvertHelper.EnumToListModel<EnumRoleTeacher>();
                     break;
+
+                case EnumCourseSourceData.QuestBoardType:
+                    methodResult.Result = ConvertHelper.EnumToListModel<EnumQuestBoardType>();
+                    break;
+
+                case EnumCourseSourceData.RepeatType:
+                    methodResult.Result = ConvertHelper.EnumToListModel<EnumRepeatType>();
+                    break;
             }
 
             methodResult.StatusCode = StatusCodes.Status200OK;

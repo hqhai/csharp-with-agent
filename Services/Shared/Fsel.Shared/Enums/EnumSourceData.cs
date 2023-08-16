@@ -20,6 +20,8 @@ namespace Fsel.Shared.Enums
         ExtraPracticeProgress,
         SortFilter,
         ReviewType,
-        TeacherRole
+        TeacherRole,
+        QuestBoardType,
+        RepeatType
     }
 }

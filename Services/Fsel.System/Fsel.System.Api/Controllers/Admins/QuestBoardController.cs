@@ -43,7 +43,7 @@ namespace Fsel.System.Api.Controllers.Admins
         /// Get Quest Boards
         /// </summary>
         [HttpGet("list-quest-board-active")]
-        [ProducesResponseType(typeof(MethodResult<PagingItemsModel<QuestBoardSearchModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(MethodResult<IList<QuestBoardSearchModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> Gets()
         {
