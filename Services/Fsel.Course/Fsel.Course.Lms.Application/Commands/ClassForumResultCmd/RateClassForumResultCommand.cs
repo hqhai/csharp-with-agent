@@ -14,6 +14,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.CommandModels.ClassForumResults;
     using Fsel.Course.Lms.Application.Services.UserServices;
+    using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.AspNetCore.Http;
 
@@ -40,6 +41,12 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<bool> methodResult = new MethodResult<bool>();
+
+            if (!EnumFeedBackHelper.IsCheckFeedBack(request.FeedBackNegatives, request.FeedBackPositives))
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumClassForumResultErrorCode.FeedbackPositiveOrFeedBackBothHaveValue));
+                return methodResult;
+            }
             var student = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
             if (!student.IsSuccessStatusCode)
             {
