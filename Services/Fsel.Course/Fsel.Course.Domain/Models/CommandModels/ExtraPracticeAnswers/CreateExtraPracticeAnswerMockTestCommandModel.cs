@@ -4,7 +4,6 @@ namespace Fsel.Course.Domain.Models.CommandModels.ExtraPracticeAnswers
 {
     public class CreateExtraPracticeAnswerMockTestCommandModel
     {
-        public Guid ExtraPracticeId { get; set; }
         public Guid ExtraPracticeResultId { get; set; }
         public IList<ExtraPracticeAnswerSectionGroupMTModel>? SectionGroups { get; set; }
         public bool IsActive { get; set; }

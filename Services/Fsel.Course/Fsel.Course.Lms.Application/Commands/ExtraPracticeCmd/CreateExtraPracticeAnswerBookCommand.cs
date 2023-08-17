@@ -22,16 +22,17 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class CreateExtraPracticeAnswerBookCommand : CreateExtraPracticeAnswerBookCommandModel, IRequest<MethodResult<ExtraPracticeResultModel>>
+    public class CreateExtraPracticeAnswerBookCommand : CreateExtraPracticeAnswerBookCommandModel, IRequest<MethodResult<ExtraPracticeExerciseResultModel>>
     {
     }
 
-    public class CreateExtraPracticeAnswerBookCommandHandler : IRequestHandler<CreateExtraPracticeAnswerBookCommand, MethodResult<ExtraPracticeResultModel>>
+    public class CreateExtraPracticeAnswerBookCommandHandler : IRequestHandler<CreateExtraPracticeAnswerBookCommand, MethodResult<ExtraPracticeExerciseResultModel>>
     {
         private readonly AuthContext _authContext;
         private readonly IUserService _userService;
         private readonly IExtraPracticeRepository _extraPracticeRepository;
         private readonly IMapper _mapper;
+        private readonly IExtraPracticeExerciseRepository _extraPracticeExerciseRepository;
         private readonly IExtraPracticeAnswerRepository _extraPracticeAnswerRepository;
         private readonly AnswerTypeConverter _answerTypeConverter;
         private readonly IQuestionRepository _questionRepository;
@@ -42,6 +43,7 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
             , IUserService userService
             , IExtraPracticeRepository extraPracticeRepository
             , IMapper mapper
+            , IExtraPracticeExerciseRepository extraPracticeExerciseRepository
             , IExtraPracticeAnswerRepository extraPracticeAnswerRepository
             , AnswerTypeConverter answerTypeConverter
             , IQuestionRepository questionRepository
@@ -52,6 +54,7 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
             _userService = userService;
             _extraPracticeRepository = extraPracticeRepository;
             _mapper = mapper;
+            _extraPracticeExerciseRepository = extraPracticeExerciseRepository;
             _extraPracticeAnswerRepository = extraPracticeAnswerRepository;
             _answerTypeConverter = answerTypeConverter;
             _questionRepository = questionRepository;
@@ -59,10 +62,10 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
             _extraPracticeExerciseResultRepository = extraPracticeExerciseResultRepository;
         }
 
-        public async Task<MethodResult<ExtraPracticeResultModel>> Handle(CreateExtraPracticeAnswerBookCommand request, CancellationToken cancellationToken)
+        public async Task<MethodResult<ExtraPracticeExerciseResultModel>> Handle(CreateExtraPracticeAnswerBookCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            MethodResult<ExtraPracticeResultModel> methodResult = new MethodResult<ExtraPracticeResultModel>();
+            MethodResult<ExtraPracticeExerciseResultModel> methodResult = new MethodResult<ExtraPracticeExerciseResultModel>();
 
             #region Validate
 
@@ -74,8 +77,8 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
             }
             var studentId = student?.Content?.Result?.Id;
 
-            var extraPractice = await _extraPracticeRepository.GetByIdAsync(request.ExtraPracticeId);
-            if (extraPractice == null)
+            var extraPracticeExercise = await _extraPracticeExerciseRepository.Queryable.FirstOrDefaultAsync(x => x.Id == request.ExtraPracticeExerciseId, cancellationToken);
+            if (extraPracticeExercise == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
                 return methodResult;
@@ -151,17 +154,9 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
             }
             await _extraPracticeResultRepository.ExecuteTransactionAsync(async () =>
             {
-                if (extraPracticeExerciseResult != null)
-                {
-                    _extraPracticeExerciseResultRepository.Update(extraPracticeExerciseResult);
-                    await _extraPracticeExerciseResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
-                }
-                else
-                {
-                    _extraPracticeResultRepository.Update(extraPracticeResult);
-                    await _extraPracticeResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
-                }
-                methodResult.Result = _mapper.Map<ExtraPracticeResultModel>(extraPracticeExerciseResult);
+                extraPracticeExerciseResult = _extraPracticeExerciseResultRepository.Update(extraPracticeExerciseResult ?? new ExtraPracticeExerciseResult());
+                await _extraPracticeExerciseResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+                methodResult.Result = _mapper.Map<ExtraPracticeExerciseResultModel>(extraPracticeExerciseResult);
                 methodResult.StatusCode = StatusCodes.Status201Created;
                 return methodResult;
             });

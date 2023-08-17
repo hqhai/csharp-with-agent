@@ -4,16 +4,17 @@ namespace Fsel.Course.Domain.Models.CommandModels.ExtraPracticeAnswers
 {
     public class CreateExtraPracticeAnswerPlacementTestCommandModel
     {
-        public Guid ExtraPracticeId { get; set; }
         public Guid ExtraPracticeResultId { get; set; }
         public IList<ExtraPracticeAnswerSectionGroupPTModel>? SectionGroups { get; set; }
         public bool IsActive { get; set; }
     }
+
     public class ExtraPracticeAnswerSectionGroupPTModel
     {
         public Guid SectionGroupId { get; set; }
         public IList<ExtraPracticeAnswerTypePlacementTestModel>? Answers { get; set; }
     }
+
     public class ExtraPracticeAnswerTypePlacementTestModel
     {
         public Guid QuestionId { get; set; }
