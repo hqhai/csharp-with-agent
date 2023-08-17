@@ -51,23 +51,29 @@ namespace Fsel.System.Application.Queries.QuestBoardStudentQuery
                 return methodResult;
             }
 
-            var student = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
-            if (!student.IsSuccessStatusCode)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student));
-                return methodResult;
-            }
-            var studentId = student?.Content?.Result?.Id;
             if (request.Type == null)
             {
                 methodResult.Result = null;
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
             }
+
+            var studentResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
+            if (!studentResult.IsSuccessStatusCode)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(studentResult));
+                return methodResult;
+            }
+            var student = studentResult?.Content?.Result;
+            if (student == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student));
+                return methodResult;
+            }
             var questBoardQuery = from baseQ in _questBoardRepository.Queryable
                                   join q in _questBoardTaskRepository.Queryable on baseQ.Id equals q.QuestBoardId
                                   join qts in _questBoardTaskStudentRepository.Queryable on q.Id equals qts.QuestBoardTaskId
-                                  where baseQ.Type == request.Type && (qts == null || qts.StudentId == studentId) && (baseQ.Type != EnumQuestBoardType.DailyQuests || q.ImplementDate.Date.AddHours(8) < DateTime.Now)
+                                  where baseQ.Type == request.Type && q.ImplementDate >= DateTime.Now && (baseQ.PackageIds != null && baseQ.PackageIds.Any(x => x == student.PackageId)) && (qts == null || qts.StudentId == student.Id)
                                   select new QuestBoardByStudentModel
                                   {
                                       Id = baseQ.Id,
