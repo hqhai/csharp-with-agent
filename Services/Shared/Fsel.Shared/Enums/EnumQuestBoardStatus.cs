@@ -4,7 +4,8 @@ namespace Fsel.Shared.Enums
 {
     public enum EnumQuestBoardStatus
     {
-        NoDone,
+        New,
+        Process,
         Done
     }
 }

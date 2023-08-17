@@ -10,4 +10,8 @@
     <ProjectReference Include="..\Fsel.System.Infrastructure\Fsel.System.Infrastructure.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Commands\QuestBoardStudentCmd\" />
+  </ItemGroup>
+
 </Project>

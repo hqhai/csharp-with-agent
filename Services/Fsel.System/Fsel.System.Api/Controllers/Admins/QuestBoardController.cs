@@ -7,7 +7,7 @@ namespace Fsel.System.Api.Controllers.Admins
     using Fsel.Core.Base.BaseModels;
     using Fsel.Shared.Enums;
     using Fsel.System.Application.Commands.QuestBoardCmd;
-    using Fsel.System.Application.Queries.QuestBoardQuery;
+    using Fsel.System.Application.Queries.QuestBoardQuery.MainQuests;
     using Fsel.System.Domain.Models.EntityModels;
     using global::System.Net;
     using MediatR;

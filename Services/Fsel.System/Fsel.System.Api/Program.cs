@@ -1,6 +1,5 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-using Fsel.Common.ValueSettings;
 using Fsel.Core.Extensions;
 using Fsel.System.Application.Services.CourseServices;
 using Fsel.System.Application.Services.OrderServices;
@@ -28,6 +27,7 @@ builder.Services.AddScoped<ILogActionRepository, LogActionRepository>();
 builder.Services.AddScoped<IQuestBoardRepository, QuestBoardRepository>();
 builder.Services.AddScoped<IQuestBoardConfigRepository, QuestBoardConfigRepository>();
 builder.Services.AddScoped<IQuestBoardTaskRepository, QuestBoardTaskRepository>();
+builder.Services.AddScoped<IQuestBoardTaskStudentRepository, QuestBoardTaskStudentRepository>();
 builder.AddRefitClients(typeof(IUserService), appSetting?.Services?.UserApiUrl);
 builder.AddRefitClients(typeof(ICourseService), appSetting?.Services?.UserApiUrl);
 builder.AddRefitClients(typeof(IOrderService), appSetting?.Services?.OrderApiUrl);
