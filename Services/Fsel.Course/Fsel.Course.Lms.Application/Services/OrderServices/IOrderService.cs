@@ -13,6 +13,6 @@ namespace Fsel.Course.Lms.Application.Services.OrderServices
         Task<IApiResponse<MethodResult<IList<PackageModel>>>> GetPackages();
 
         [Get("/order/is-status-payment")]
-        Task<IApiResponse<MethodResult<bool>>> IsCheckStatusUser([FromQuery] IsCheckStatusOrderByUserModel query);
+        Task<IApiResponse<MethodResult<bool>>> IsCheckStatusUser([FromQuery] IsCheckPaymentStatusByUserModel query);
     }
 }

@@ -10,15 +10,15 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class GetStatusOrderByUserQuery : IsCheckStatusOrderByUserModel, IRequest<MethodResult<bool>>
+    public class GetStatusOrderByUserQuery : IsCheckPaymentStatusByUserModel, IRequest<MethodResult<bool>>
     {
     }
 
-    public class IsCheckStatusOrderByUserQueryHandler : IRequestHandler<GetStatusOrderByUserQuery, MethodResult<bool>>
+    public class GetStatusOrderByUserQueryHandler : IRequestHandler<GetStatusOrderByUserQuery, MethodResult<bool>>
     {
         private readonly IOrderRepository _orderRepository;
 
-        public IsCheckStatusOrderByUserQueryHandler(IOrderRepository orderRepository)
+        public GetStatusOrderByUserQueryHandler(IOrderRepository orderRepository)
         {
             _orderRepository = orderRepository;
         }

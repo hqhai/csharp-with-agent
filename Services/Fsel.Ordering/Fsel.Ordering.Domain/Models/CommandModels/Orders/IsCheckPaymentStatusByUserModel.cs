@@ -2,7 +2,7 @@
 
 namespace Fsel.Ordering.Domain.Models.CommandModels.Orders
 {
-    public class IsCheckStatusOrderByUserModel
+    public class IsCheckPaymentStatusByUserModel
     {
         public Guid UserId { get; set; }
         public Guid CourseId { get; set; }

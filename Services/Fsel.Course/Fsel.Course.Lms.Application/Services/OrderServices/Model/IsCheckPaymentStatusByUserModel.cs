@@ -2,7 +2,7 @@
 
 namespace Fsel.Course.Lms.Application.Services.OrderServices.Model
 {
-    public class IsCheckStatusOrderByUserModel
+    public class IsCheckPaymentStatusByUserModel
     {
         public Guid UserId { get; set; }
         public Guid CourseId { get; set; }
