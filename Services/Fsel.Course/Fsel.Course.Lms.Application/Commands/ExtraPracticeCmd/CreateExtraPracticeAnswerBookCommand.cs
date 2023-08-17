@@ -140,7 +140,7 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
                     extraPracticeExerciseResult.Status = EnumResultStatus.Process;
                     extraPracticeExerciseResult.Percent = 0;
                 }
-                extraPracticeExerciseResult.CorrectCount += extraPracticeExerciseResult.ExtraPracticeAnswers.Sum(x => x.CorrectCount);
+                extraPracticeExerciseResult.CorrectCount += extraPracticeExerciseResult.ExtraPracticeAnswers.Where(x => !x.IsDeleted).Sum(x => x.CorrectCount);
                 if (request.IsActive)
                 {
                     extraPracticeExerciseResult.Status = EnumResultStatus.Done;

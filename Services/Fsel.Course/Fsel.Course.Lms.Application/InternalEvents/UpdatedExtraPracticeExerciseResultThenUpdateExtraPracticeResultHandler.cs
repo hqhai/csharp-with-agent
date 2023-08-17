@@ -111,7 +111,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             ArgumentNullException.ThrowIfNull(extraPracticeResult);
             ArgumentNullException.ThrowIfNull(extraPracticeExerciseResults);
 
-            extraPracticeResult.CorrectCount = extraPracticeExerciseResults.Sum(x => x.CorrectCount);
+            extraPracticeResult.CorrectCount += extraPracticeExerciseResults.Sum(x => x.CorrectCount);
             extraPracticeResult.Status = EnumResultStatus.Done;
             extraPracticeResult.Percent = extraPracticeResult.CorrectTotal > 0 ? (double)extraPracticeResult.CorrectCount / extraPracticeResult.CorrectTotal : 0;
 
@@ -124,7 +124,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             ArgumentNullException.ThrowIfNull(extraPracticeResult);
             ArgumentNullException.ThrowIfNull(extraPracticeExerciseResults);
 
-            extraPracticeResult.CorrectCount = extraPracticeExerciseResults.Sum(x => x.CorrectCount);
+            extraPracticeResult.CorrectCount += extraPracticeExerciseResults.Sum(x => x.CorrectCount);
             extraPracticeResult.Status = EnumResultStatus.Done;
             extraPracticeResult.Percent = extraPracticeResult.CorrectTotal > 0 ? (double)extraPracticeResult.CorrectCount / extraPracticeResult.CorrectTotal : 0;
 
