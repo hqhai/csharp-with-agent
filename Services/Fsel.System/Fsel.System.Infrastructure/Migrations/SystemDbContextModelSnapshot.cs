@@ -22,7 +22,7 @@ namespace Fsel.System.Infrastructure.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("Fsel.System.Domain.Entities.CourseTimeConfig", b =>
+            modelBuilder.Entity("Fsel.System.Domain.Entities.Configs.CourseTimeConfig", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -286,6 +286,396 @@ namespace Fsel.System.Infrastructure.Migrations
                     b.ToTable("LogActions");
                 });
 
+            modelBuilder.Entity("Fsel.System.Domain.Entities.QuestBoard", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(0);
+
+                    b.Property<string>("Category")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(107);
+
+                    b.Property<string>("CreatedFullName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(104);
+
+                    b.Property<Guid>("CreatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(101);
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(109);
+
+                    b.Property<string>("DeletedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(106);
+
+                    b.Property<Guid?>("DeletedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(103);
+
+                    b.Property<Guid?>("DependentId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<DateTime>("EndDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("ImagePath")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit")
+                        .HasColumnOrder(110);
+
+                    b.Property<bool>("IsRequired")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
+
+                    b.Property<int>("NumberOfStars")
+                        .HasColumnType("int");
+
+                    b.Property<string>("PackageIdsStr")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("RepeatType")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<DateTime>("StartDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(108);
+
+                    b.Property<string>("UpdatedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(105);
+
+                    b.Property<Guid?>("UpdatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(102);
+
+                    b.HasKey("Id");
+
+                    b.ToTable("QuestBoards");
+                });
+
+            modelBuilder.Entity("Fsel.System.Domain.Entities.QuestBoardConfig", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(0);
+
+                    b.Property<string>("Category")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(107);
+
+                    b.Property<string>("CreatedFullName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(104);
+
+                    b.Property<Guid>("CreatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(101);
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(109);
+
+                    b.Property<string>("DeletedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(106);
+
+                    b.Property<Guid?>("DeletedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(103);
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit")
+                        .HasColumnOrder(110);
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(108);
+
+                    b.Property<string>("UpdatedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(105);
+
+                    b.Property<Guid?>("UpdatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(102);
+
+                    b.HasKey("Id");
+
+                    b.ToTable("QuestBoardConfigs");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("68bd35d3-c09b-45f3-9a05-0e10691f7c42"),
+                            Category = "FinishOnelesson",
+                            CreatedDate = new DateTime(2023, 8, 15, 17, 52, 3, 918, DateTimeKind.Local).AddTicks(8193),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Type = "MainQuests"
+                        },
+                        new
+                        {
+                            Id = new Guid("72933280-e14b-4715-a802-dcd88e031e79"),
+                            Category = "FinishOneHomeworkMiniProject",
+                            CreatedDate = new DateTime(2023, 8, 15, 17, 52, 3, 918, DateTimeKind.Local).AddTicks(8462),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Type = "MainQuests"
+                        },
+                        new
+                        {
+                            Id = new Guid("cfce3f4b-66d5-467d-8f57-50a089257bcb"),
+                            Category = "FinishOneUnitTest",
+                            CreatedDate = new DateTime(2023, 8, 15, 17, 52, 3, 918, DateTimeKind.Local).AddTicks(8484),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Type = "MainQuests"
+                        },
+                        new
+                        {
+                            Id = new Guid("7b436441-ef2f-4a83-be79-ee5ec5f18355"),
+                            Category = "FinishOneUnit",
+                            CreatedDate = new DateTime(2023, 8, 15, 17, 52, 3, 918, DateTimeKind.Local).AddTicks(8499),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Type = "MainQuests"
+                        },
+                        new
+                        {
+                            Id = new Guid("e0f52102-85de-4719-99e0-72f88450dcdd"),
+                            Category = "FinishTheFirstFinalTest",
+                            CreatedDate = new DateTime(2023, 8, 15, 17, 52, 3, 918, DateTimeKind.Local).AddTicks(8511),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Type = "MainQuests"
+                        },
+                        new
+                        {
+                            Id = new Guid("eff567fd-a061-48fb-9a9c-3407d17e7b0f"),
+                            Category = "FinishTheFirstLevelPass",
+                            CreatedDate = new DateTime(2023, 8, 15, 17, 52, 3, 918, DateTimeKind.Local).AddTicks(8526),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Type = "MainQuests"
+                        },
+                        new
+                        {
+                            Id = new Guid("64c0a3a5-849c-412d-86b6-3f5e4809cc84"),
+                            Category = "FinishOneFinalTest",
+                            CreatedDate = new DateTime(2023, 8, 15, 17, 52, 3, 918, DateTimeKind.Local).AddTicks(8537),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Type = "MainQuests"
+                        },
+                        new
+                        {
+                            Id = new Guid("bb35cdbf-98a7-4ce7-9b71-f457b386d64c"),
+                            Category = "FinishOneLevelPass",
+                            CreatedDate = new DateTime(2023, 8, 15, 17, 52, 3, 918, DateTimeKind.Local).AddTicks(8548),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Type = "MainQuests"
+                        });
+                });
+
+            modelBuilder.Entity("Fsel.System.Domain.Entities.QuestBoardTask", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(0);
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(107);
+
+                    b.Property<string>("CreatedFullName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(104);
+
+                    b.Property<Guid>("CreatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(101);
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(109);
+
+                    b.Property<string>("DeletedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(106);
+
+                    b.Property<Guid?>("DeletedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(103);
+
+                    b.Property<Guid?>("DependentTaskId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("ImplementDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit")
+                        .HasColumnOrder(110);
+
+                    b.Property<Guid>("QuestBoardId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(108);
+
+                    b.Property<string>("UpdatedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(105);
+
+                    b.Property<Guid?>("UpdatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(102);
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("QuestBoardId");
+
+                    b.ToTable("QuestBoardTasks");
+                });
+
+            modelBuilder.Entity("Fsel.System.Domain.Entities.QuestBoardTaskStudent", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(0);
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(107);
+
+                    b.Property<string>("CreatedFullName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(104);
+
+                    b.Property<Guid>("CreatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(101);
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(109);
+
+                    b.Property<string>("DeletedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(106);
+
+                    b.Property<Guid?>("DeletedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(103);
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit")
+                        .HasColumnOrder(110);
+
+                    b.Property<Guid>("QuestBoardTaskId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<Guid>("StudentId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(108);
+
+                    b.Property<string>("UpdatedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(105);
+
+                    b.Property<Guid?>("UpdatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(102);
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("QuestBoardTaskId");
+
+                    b.ToTable("QuestBoardTaskStudents");
+                });
+
             modelBuilder.Entity("Fsel.System.Domain.Entities.ReferralDiscountConfig", b =>
                 {
                     b.Property<Guid>("Id")
@@ -427,6 +817,38 @@ namespace Fsel.System.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("TeachingCosts");
+                });
+
+            modelBuilder.Entity("Fsel.System.Domain.Entities.QuestBoardTask", b =>
+                {
+                    b.HasOne("Fsel.System.Domain.Entities.QuestBoard", "QuestBoard")
+                        .WithMany("QuestBoardTasks")
+                        .HasForeignKey("QuestBoardId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("QuestBoard");
+                });
+
+            modelBuilder.Entity("Fsel.System.Domain.Entities.QuestBoardTaskStudent", b =>
+                {
+                    b.HasOne("Fsel.System.Domain.Entities.QuestBoardTask", "QuestBoardTask")
+                        .WithMany("QuestBoardTaskStudents")
+                        .HasForeignKey("QuestBoardTaskId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("QuestBoardTask");
+                });
+
+            modelBuilder.Entity("Fsel.System.Domain.Entities.QuestBoard", b =>
+                {
+                    b.Navigation("QuestBoardTasks");
+                });
+
+            modelBuilder.Entity("Fsel.System.Domain.Entities.QuestBoardTask", b =>
+                {
+                    b.Navigation("QuestBoardTaskStudents");
                 });
 #pragma warning restore 612, 618
         }

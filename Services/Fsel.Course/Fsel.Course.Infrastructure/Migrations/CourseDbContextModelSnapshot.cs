@@ -239,9 +239,15 @@ namespace Fsel.Course.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(103);
 
+                    b.Property<string>("FeedBackNegativesStr")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("FeedBackNote")
                         .HasMaxLength(1000)
                         .HasColumnType("nvarchar(1000)");
+
+                    b.Property<string>("FeedBackPositivesStr")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int?>("FeedBackStars")
                         .HasColumnType("int");

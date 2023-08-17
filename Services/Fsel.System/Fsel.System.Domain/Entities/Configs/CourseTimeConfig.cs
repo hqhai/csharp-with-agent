@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.System.Domain.Entities
+namespace Fsel.System.Domain.Entities.Configs
 {
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Entities;
