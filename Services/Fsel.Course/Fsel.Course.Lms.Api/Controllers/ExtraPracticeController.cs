@@ -40,6 +40,18 @@ namespace Fsel.Course.Lms.Api.Controllers
         }
 
         /// <summary>
+        /// Search ExtraPractice Suggest
+        /// </summary>
+        [HttpGet("suggest")]
+        [ProducesResponseType(typeof(MethodResult<PagingItemsModel<ExtraPracticeSearchModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> SearchSuggest([FromQuery] SearchSuggestExtraPracticeQuery query)
+        {
+            MethodResult<PagingItemsModel<ExtraPracticeSuggestModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
         /// Get Filter
         /// </summary>
         [HttpGet("level-units")]
