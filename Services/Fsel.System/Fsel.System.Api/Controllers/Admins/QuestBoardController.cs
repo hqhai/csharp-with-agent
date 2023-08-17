@@ -5,19 +5,16 @@ namespace Fsel.System.Api.Controllers.Admins
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
     using Fsel.Core.Base.BaseModels;
-    using Fsel.Shared.Enums;
     using Fsel.System.Application.Commands.QuestBoardCmd;
     using Fsel.System.Application.Queries.QuestBoardQuery;
     using Fsel.System.Domain.Models.EntityModels;
     using global::System.Net;
     using MediatR;
-    using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
 
     [ApiVersion(Settings.APIVersion)]
     [Route(Settings.APIDefaultRoute + "/admin/quest-board")]
     [ApiController]
-    [Authorize(Roles = nameof(EnumRole.Admin))]
     public class QuestBoardController : ControllerBase
     {
         private readonly IMediator _mediator;
@@ -45,9 +42,9 @@ namespace Fsel.System.Api.Controllers.Admins
         [HttpGet("list-quest-board-active")]
         [ProducesResponseType(typeof(MethodResult<IList<QuestBoardSearchModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> Gets()
+        public async Task<IActionResult> Gets([FromQuery] GetQuestBoardsActiveByAdminQuery query)
         {
-            var queryResult = await _mediator.Send(new GetQuestBoardsActiveByAdminQuery()).ConfigureAwait(false);
+            var queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
 

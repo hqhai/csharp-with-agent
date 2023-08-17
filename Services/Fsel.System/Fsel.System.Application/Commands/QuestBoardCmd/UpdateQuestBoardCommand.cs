@@ -112,7 +112,20 @@ namespace Fsel.System.Application.Commands.QuestBoardCmd
             #endregion Validate QuestBoard
 
             _mapper.Map(request, questBoard);
-            questBoard.QuestBoardTasks = await GetDateRangeAsync(request.StartDate, request.EndDate, request.RepeatType, request.DependentId, questBoard.QuestBoardTasks.ToList());
+            if (!request.IsLifeTime)
+            {
+                questBoard.QuestBoardTasks = await GetDateRangeAsync(request.StartDate, request.EndDate, request.RepeatType, request.DependentId, questBoard.QuestBoardTasks.ToList());
+            }
+            else if (request.EndDate != null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(request.EndDate));
+                return methodResult;
+            }
+            else if (request.RepeatType != null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(request.RepeatType));
+                return methodResult;
+            }
             if (!questBoard.IsValid())
             {
                 methodResult.AddErrorBadRequest(questBoard.ErrorMessages);
@@ -131,7 +144,7 @@ namespace Fsel.System.Application.Commands.QuestBoardCmd
             return methodResult;
         }
 
-        private async Task<List<QuestBoardTask>> GetDateRangeAsync(DateTime startDate, DateTime endDate, EnumRepeatType repeatType, Guid? id, IList<QuestBoardTask>? questBoardTasks)
+        private async Task<List<QuestBoardTask>> GetDateRangeAsync(DateTime startDate, DateTime? endDate, EnumRepeatType? repeatType, Guid? id, IList<QuestBoardTask>? questBoardTasks)
         {
             int repeatInterval = 0;
             switch (repeatType)
@@ -148,7 +161,7 @@ namespace Fsel.System.Application.Commands.QuestBoardCmd
                     repeatInterval = 30;
                     break;
             }
-            List<QuestBoardTask> questBoardTaskNews = Enumerable.Range(0, (endDate - startDate).Days / repeatInterval + 1)
+            List<QuestBoardTask> questBoardTaskNews = Enumerable.Range(0, ((endDate ?? default) - startDate).Days / repeatInterval + 1)
                .Select(offset => new QuestBoardTask
                {
                    ImplementDate = startDate.AddDays(offset * repeatInterval),
@@ -165,7 +178,7 @@ namespace Fsel.System.Application.Commands.QuestBoardCmd
                     task.DependentTaskId = dependentTasks.FirstOrDefault(x => x.ImplementDate == task.ImplementDate)?.Id ?? null;
                 }
             }
-            if (questBoardTasks != null)
+            if (questBoardTasks != null && questBoardTasks.Count > 0)
             {
                 var completedTasks = questBoardTasks.Where(task => task.ImplementDate < currentDate).ToList();
                 questBoardTaskNews.AddRange(completedTasks);

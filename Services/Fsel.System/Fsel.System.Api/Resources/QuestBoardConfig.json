@@ -20,16 +20,6 @@
     "category": "FinishOneUnit"
   },
   {
-    "id": "e0f52102-85de-4719-99e0-72f88450dcdd",
-    "type": "MainQuests",
-    "category": "FinishTheFirstFinalTest"
-  },
-  {
-    "id": "eff567fd-a061-48fb-9a9c-3407d17e7b0f",
-    "type": "MainQuests",
-    "category": "FinishTheFirstLevelPass"
-  },
-  {
     "id": "64c0a3a5-849c-412d-86b6-3f5e4809cc84",
     "type": "MainQuests",
     "category": "FinishOneFinalTest"

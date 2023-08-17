@@ -19,15 +19,9 @@ namespace Fsel.Shared.Enums
         FinishOneUnit,
 
         [Description("Kết thúc bài kiểm tra cuối kỳ đầu tiên")]
-        FinishTheFirstFinalTest,
-
-        [Description("Hoàn thành Cấp độ đầu tiên (Đạt)")]
-        FinishTheFirstLevelPass,
-
-        [Description("Hoàn thành một bài kiểm tra cuối cùng")]
         FinishOneFinalTest,
 
-        [Description("Hoàn thành một cấp độ (Đạt)")]
-        FinishOneLevelPass
+        [Description("Hoàn thành Cấp độ đầu tiên (Đạt)")]
+        FinishOneLevelPass,
     }
 }

@@ -4,6 +4,7 @@ namespace Fsel.System.Application.Queries.QuestBoardQuery
 {
     using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Shared.Enums;
     using Fsel.System.Domain.IRepositories;
     using Fsel.System.Domain.Models.EntityModels;
     using MediatR;
@@ -12,6 +13,7 @@ namespace Fsel.System.Application.Queries.QuestBoardQuery
 
     public class GetQuestBoardsActiveByAdminQuery : IRequest<MethodResult<IList<QuestBoardModel>>>
     {
+        public EnumQuestBoardType? QuestBoardType { get; set; }
     }
 
     public class GetQuestBoardsActiveByAdminQueryHandler : IRequestHandler<GetQuestBoardsActiveByAdminQuery, MethodResult<IList<QuestBoardModel>>>
@@ -29,7 +31,15 @@ namespace Fsel.System.Application.Queries.QuestBoardQuery
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<IList<QuestBoardModel>>();
-            var questBoards = await _questBoardRepository.Queryable.Where(x => x.IsActive && x.DependentId == null).ToListAsync(cancellationToken);
+
+            if (request.QuestBoardType == null)
+            {
+                methodResult.Result = null;
+                methodResult.StatusCode = StatusCodes.Status200OK;
+                return methodResult;
+            }
+
+            var questBoards = await _questBoardRepository.Queryable.Where(x => x.Type == request.QuestBoardType && x.IsActive && x.DependentId == null).ToListAsync(cancellationToken);
             if (questBoards == null || questBoards.Count == 0)
             {
                 methodResult.Result = null;

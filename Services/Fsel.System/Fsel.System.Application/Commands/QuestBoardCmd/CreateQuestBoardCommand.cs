@@ -103,13 +103,20 @@ namespace Fsel.System.Application.Commands.QuestBoardCmd
             #endregion Validate QuestBoard
 
             var questBoard = _mapper.Map<QuestBoard>(request);
+            if (!request.IsLifeTime)
+            {
+                questBoard.QuestBoardTasks = await GetDateRangeAsync(request.StartDate, request.EndDate, request.RepeatType, request.DependentId);
+            }
+            else if (request.EndDate != null || request.RepeatType != null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(request.EndDate));
+                return methodResult;
+            }
             if (!questBoard.IsValid())
             {
                 methodResult.AddErrorBadRequest(questBoard.ErrorMessages);
                 return methodResult;
             }
-            questBoard.QuestBoardTasks = await GetDateRangeAsync(request.StartDate, request.EndDate, request.RepeatType, request.DependentId);
-
             await _questBoardRepository.ExecuteTransactionAsync(async () =>
             {
                 questBoard = _questBoardRepository.Add(questBoard);
@@ -123,7 +130,7 @@ namespace Fsel.System.Application.Commands.QuestBoardCmd
             return methodResult;
         }
 
-        private async Task<List<QuestBoardTask>> GetDateRangeAsync(DateTime startDate, DateTime endDate, EnumRepeatType repeatType, Guid? id)
+        private async Task<List<QuestBoardTask>> GetDateRangeAsync(DateTime startDate, DateTime? endDate, EnumRepeatType? repeatType, Guid? id)
         {
             int repeatInterval = 0;
             switch (repeatType)
@@ -140,7 +147,7 @@ namespace Fsel.System.Application.Commands.QuestBoardCmd
                     repeatInterval = 30;
                     break;
             }
-            List<QuestBoardTask> questBoardTasks = Enumerable.Range(0, (endDate - startDate).Days / repeatInterval + 1)
+            List<QuestBoardTask> questBoardTasks = Enumerable.Range(0, ((endDate ?? default) - startDate).Days / repeatInterval + 1)
                .Select(offset => new QuestBoardTask
                {
                    ImplementDate = startDate.AddDays(offset * repeatInterval),
