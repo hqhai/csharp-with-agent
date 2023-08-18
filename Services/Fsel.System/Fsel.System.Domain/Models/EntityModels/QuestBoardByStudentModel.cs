@@ -10,7 +10,11 @@ namespace Fsel.System.Domain.Models.EntityModels
         public string? Name { get; set; }
         public long NumberOfStars { get; set; }
         public double Percent { get; set; }
+        public IList<Guid>? PackageIds { get; set; }
         public EnumQuestBoardCategory Category { get; set; }
         public EnumQuestBoardStatus Status { get; set; }
+        public EnumRepeatType? RepeatType { get; set; }
+        public DateTime StartDate { get; set; }
+        public DateTime? EndDate { get; set; }
     }
 }

@@ -32,5 +32,29 @@ namespace Fsel.Course.Lms.Api.Controllers
             MethodResult<double> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
+
+        /// <summary>
+        /// get percent unit result now
+        /// </summary>
+        [HttpGet("percent-unit")]
+        [ProducesResponseType(typeof(MethodResult<double>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetPercentUnitResult([FromQuery] GetFinishOneUnitQuery query)
+        {
+            MethodResult<double> queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// get percent course result
+        /// </summary>
+        [HttpGet("percent-course")]
+        [ProducesResponseType(typeof(MethodResult<double>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetPercentCourseResult([FromQuery] GetFinishOneLevelPassQuery query)
+        {
+            MethodResult<double> queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
     }
 }

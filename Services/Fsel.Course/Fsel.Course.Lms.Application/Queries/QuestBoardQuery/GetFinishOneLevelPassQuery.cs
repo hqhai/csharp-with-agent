@@ -16,34 +16,28 @@ namespace Fsel.Course.Lms.Application.Queries.QuestBoardQuery
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class GetFinishOneUnitQuery : IRequest<MethodResult<double>>
+    public class GetFinishOneLevelPassQuery : IRequest<MethodResult<double>>
     {
         public Guid StudentId { get; set; }
         public Guid CurrentUserId { get; set; }
     }
 
-    public class GetFinishOneUnitQueryHandler : IRequestHandler<GetFinishOneUnitQuery, MethodResult<double>>
+    public class GetFinishOneLevelPassQueryHandler : IRequestHandler<GetFinishOneLevelPassQuery, MethodResult<double>>
     {
         private readonly ITrainingService _trainingService;
         private readonly IOrderService _orderService;
-        private readonly IUnitRepository _unitRepository;
-        private readonly IUnitResultRepository _unitResultRepository;
         private readonly ICourseRepository _courseRepository;
 
-        public GetFinishOneUnitQueryHandler(ITrainingService trainingService
+        public GetFinishOneLevelPassQueryHandler(ITrainingService trainingService
             , IOrderService orderService
-            , IUnitRepository unitRepository
-            , IUnitResultRepository unitResultRepository
             , ICourseRepository courseRepository)
         {
             _trainingService = trainingService;
             _orderService = orderService;
-            _unitRepository = unitRepository;
-            _unitResultRepository = unitResultRepository;
             _courseRepository = courseRepository;
         }
 
-        public async Task<MethodResult<double>> Handle(GetFinishOneUnitQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<double>> Handle(GetFinishOneLevelPassQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<double> methodResult = new MethodResult<double>();
@@ -72,27 +66,13 @@ namespace Fsel.Course.Lms.Application.Queries.QuestBoardQuery
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(isCheckUserOrder));
                 return methodResult;
             }
-            var course = await _courseRepository.GetByIdAsync(@class.CourseId);
+            var course = await _courseRepository.Queryable.Include(x => x.UnitResults.Where(x => x.StudentId == request.StudentId)).Include(x => x.CourseUnitMockTests).FirstOrDefaultAsync(x => x.Id == @class.CourseId, cancellationToken);
             if (course == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(course));
                 return methodResult;
             }
-
-            var unitResult = await _unitResultRepository.Queryable.FirstOrDefaultAsync(x => x.StudentId == request.StudentId && x.CourseId == course.Id && x.Status == EnumResultStatus.Process, cancellationToken);
-            if (unitResult == null)
-            {
-                methodResult.Result = default;
-                methodResult.StatusCode = StatusCodes.Status200OK;
-                return methodResult;
-            }
-            var unit = await _unitRepository.Queryable.Include(x => x.LessonResults.Where(x => x.StudentId == request.StudentId)).Include(x => x.UnitLessons).FirstOrDefaultAsync(x => x.Id == unitResult.UnitId, cancellationToken);
-            if (unit == null)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(unit));
-                return methodResult;
-            }
-            methodResult.Result = (double)unit.LessonResults.Where(x => x.Status == EnumResultStatus.Done).ToList().Count / unit.UnitLessons.ToList().Count;
+            methodResult.Result = (double)course.UnitResults.Where(x => x.Status == EnumResultStatus.Done).ToList().Count / course.CourseUnitMockTests.Where(x => x.UnitId != null).ToList().Count;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }

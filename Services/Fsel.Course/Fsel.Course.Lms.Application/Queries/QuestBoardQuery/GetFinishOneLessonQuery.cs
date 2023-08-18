@@ -15,9 +15,9 @@ namespace Fsel.Course.Lms.Application.Queries.QuestBoardQuery
     public class GetFinishOneLessonQuery : IRequest<MethodResult<double>>
     {
         public Guid StudentId { get; set; }
-        public EnumRepeatType RepeatType { get; set; }
+        public EnumRepeatType? RepeatType { get; set; }
         public DateTime StartDate { get; set; }
-        public DateTime EndDate { get; set; }
+        public DateTime? EndDate { get; set; }
     }
 
     public class GetFinishOneLessonQueryHandler : IRequestHandler<GetFinishOneLessonQuery, MethodResult<double>>
@@ -63,7 +63,11 @@ namespace Fsel.Course.Lms.Application.Queries.QuestBoardQuery
             }
             DateTime currentDate = DateTime.Now;
             VideoResult? videoResult = default;
-            if (request.RepeatType == EnumRepeatType.Day)
+            if (request.RepeatType == null)
+            {
+                videoResult = videoResults.FirstOrDefault(x => !x.UpdatedDate.HasValue || x.UpdatedDate.Value > request.StartDate);
+            }
+            else if (request.RepeatType == EnumRepeatType.Day)
             {
                 DateTime startOfDay = currentDate.Date.AddHours(8);
                 DateTime endOfDay = currentDate.Date.AddDays(1);
