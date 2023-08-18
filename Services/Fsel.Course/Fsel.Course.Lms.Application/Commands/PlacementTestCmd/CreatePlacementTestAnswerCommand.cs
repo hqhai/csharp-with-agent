@@ -62,7 +62,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
 
             #region Validation
 
-            if (request.Skills == null || request.Skills.Any(x => x.Answers == null || x.Answers.Count == 0))
+            if (request.Skills == null || request.Skills.Count == 0 || request.Skills.Any(x => x.Answers == null || x.Answers.Count == 0))
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Skills));
                 return methodResult;

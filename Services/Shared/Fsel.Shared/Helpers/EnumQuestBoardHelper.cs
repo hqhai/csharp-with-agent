@@ -2,6 +2,7 @@
 
 namespace Fsel.Shared.Helpers
 {
+    using Fsel.Common.Helpers;
     using Fsel.Shared.Enums;
 
     public static class EnumQuestBoardHelper
@@ -12,25 +13,24 @@ namespace Fsel.Shared.Helpers
             new KeyValuePair<EnumQuestBoardType, EnumQuestBoardCategory>(EnumQuestBoardType.MainQuests, EnumQuestBoardCategory.FinishOneHomeworkMiniProject),
             new KeyValuePair<EnumQuestBoardType, EnumQuestBoardCategory>(EnumQuestBoardType.MainQuests, EnumQuestBoardCategory.FinishOneUnitTest),
             new KeyValuePair<EnumQuestBoardType, EnumQuestBoardCategory>(EnumQuestBoardType.MainQuests, EnumQuestBoardCategory.FinishOneUnit),
-            new KeyValuePair<EnumQuestBoardType, EnumQuestBoardCategory>(EnumQuestBoardType.MainQuests, EnumQuestBoardCategory.FinishTheFirstFinalTest),
-            new KeyValuePair<EnumQuestBoardType, EnumQuestBoardCategory>(EnumQuestBoardType.MainQuests, EnumQuestBoardCategory.FinishTheFirstLevelPass),
             new KeyValuePair<EnumQuestBoardType, EnumQuestBoardCategory>(EnumQuestBoardType.MainQuests, EnumQuestBoardCategory.FinishOneFinalTest),
             new KeyValuePair<EnumQuestBoardType, EnumQuestBoardCategory>(EnumQuestBoardType.MainQuests, EnumQuestBoardCategory.FinishOneLevelPass),
         };
 
-        public static IList<EnumQuestBoardCategory> GetEnumQuestBoardCategorys(this EnumQuestBoardType? questBoardType)
+        public static IList<object> GetEnumQuestBoardCategorys(this EnumQuestBoardType? questBoardType)
         {
-            var questBoardCategorys = new List<EnumQuestBoardCategory>();
-            if (questBoardType == null)
+            var results = new List<object>();
+            foreach (var item in s_questboardTypeCategory.Where(x => x.Key == questBoardType))
             {
-                questBoardCategorys = s_questboardTypeCategory.Select(x => x.Value).ToList();
-            }
-            else
-            {
-                questBoardCategorys = s_questboardTypeCategory.Where(x => x.Key == questBoardType).Select(x => x.Value).ToList();
-            }
+                var result = new
+                {
+                    Name = item.Value.GetDescription(),
+                    Value = item.Value
+                };
 
-            return questBoardCategorys;
+                results.Add(result);
+            }
+            return results;
         }
     }
 }

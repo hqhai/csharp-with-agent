@@ -89,14 +89,13 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             var param = new SendOtpTemplateModel
             {
                 OtpCode = otp,
-                AccessLink = string.Format(CultureInfo.InvariantCulture, _appSetting.ConstantUrl!.ConfirmOtpUrl!, otp),
                 OtpValidTime = string.Format(CultureInfo.InvariantCulture, SenderSettings.OtpValidMinute, _appSetting!.Otp!.StepTime)
             };
             var subject = string.Format(CultureInfo.InvariantCulture, SenderSettings.SendOtpSubjectFullName, user.FullName);
             var sendResult = new MethodResult<bool>();
             if (!string.IsNullOrEmpty(request.Email))
             {
-                sendResult = await _mediator.Send(new SenderCommand { Email = user.Email, Subject = subject, Params = param, Template = EnumSenderTemplate.SendOtpAndLink }, cancellationToken).ConfigureAwait(false);
+                sendResult = await _mediator.Send(new SenderCommand { Email = user.Email, Subject = subject, Params = param, Template = EnumSenderTemplate.SendOtp }, cancellationToken).ConfigureAwait(false);
             }
 
             if (!sendResult.IsOK)

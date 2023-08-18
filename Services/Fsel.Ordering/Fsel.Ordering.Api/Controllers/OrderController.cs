@@ -27,14 +27,26 @@ namespace Fsel.Ordering.Api.Controllers
         }
 
         /// <summary>
-        /// Generate Ramdom Order
+        /// Generate Random Order
         /// </summary>
         [HttpGet("")]
         [ProducesResponseType(typeof(MethodResult<GenerateRamdomOrderModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GenerateRamdomOrder([FromQuery] GenerateRamdomOrderQuery query)
+        public async Task<IActionResult> GenerateRandomOrder([FromQuery] GenerateRamdomOrderQuery query)
         {
             MethodResult<GenerateRamdomOrderModel> commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Check Status User
+        /// </summary>
+        [HttpGet("is-status-payment")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> IsCheckStatusUser([FromQuery] GetStatusOrderByUserQuery query)
+        {
+            MethodResult<bool> commandResult = await _mediator.Send(query).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
 
