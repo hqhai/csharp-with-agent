@@ -60,6 +60,10 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
                 Content = classForumResult.Content,
                 Status = classForumResult.Status,
                 ClassForumId = classForumResult.ClassForumId,
+                GradingStartDate = classForumResult.GradingStartDate,
+                CheckCsoId = classForumResult.CheckCsoId,
+                GradingTeacherId = classForumResult.GradingTeacherId ?? default,
+                CheckStartDate = classForumResult.CheckStartDate,
                 ClassForumResultFiles = classForumResult.ClassForumResultFiles == null ? null : classForumResult.ClassForumResultFiles.Select(x => new ClassForumResultFileModel
                 {
                     FilePath = x.FilePath,
