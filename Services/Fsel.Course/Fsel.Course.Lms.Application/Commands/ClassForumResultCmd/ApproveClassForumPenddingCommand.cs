@@ -9,6 +9,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Core.Base;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
@@ -26,6 +27,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
     {
         private readonly IClassForumResultRepository _classForumResultRepository;
         private readonly IMapper _mapper;
+        private AuthContext _authContext;
 
         public ApproveClassForumPenddingCommandHandler(IClassForumResultRepository classForumResultRepository, IMapper mapper)
         {
@@ -54,7 +56,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
             await _classForumResultRepository.ExecuteTransactionAsync(async () =>
             {
                 classForumResult.Status = request.IsApprove ? EnumClassForumResultStatus.PendingForGrading : EnumClassForumResultStatus.Denied;
-
+                classForumResult.CheckCsoId = _authContext.CurrentUserId;
                 _classForumResultRepository.Update(classForumResult);
                 await _classForumResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
                 methodResult.StatusCode = StatusCodes.Status201Created;
