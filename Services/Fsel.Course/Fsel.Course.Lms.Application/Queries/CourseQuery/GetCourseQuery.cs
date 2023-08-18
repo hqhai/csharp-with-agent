@@ -10,12 +10,14 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
     using Fsel.Core.Base;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums;
-    using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Course.Lms.Application.Services.OrderServices;
+    using Fsel.Course.Lms.Application.Services.OrderServices.Model;
     using Fsel.Course.Lms.Application.Services.TrainingServices;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Course.Lms.Application.Services.UserServices.Models;
+    using Fsel.Shared.Enums.ErrorCodes;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -31,9 +33,11 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
         private readonly IUserService _userService;
         private readonly ITrainingService _trainingService;
         private readonly AuthContext _authContext;
+        private readonly IOrderService _orderService;
 
         public GetCourseQueryHandler(IMapper mapper,
             AuthContext authContext,
+            IOrderService orderService,
             ICourseRepository courseRepository,
             IUserService userService,
             ITrainingService trainingService)
@@ -43,6 +47,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
             _userService = userService;
             _trainingService = trainingService;
             _authContext = authContext;
+            _orderService = orderService;
         }
 
         public async Task<MethodResult<CourseModel>> Handle(GetCourseQuery request, CancellationToken cancellationToken)
@@ -52,15 +57,15 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
             var studentResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
             if (!studentResult.IsSuccessStatusCode)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(studentResult));
+                methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError), nameof(studentResult));
                 return methodResult;
             }
-            var studentId = studentResult?.Content?.Result?.Id;
-
+            var student = studentResult?.Content?.Result;
+            var studentId = student?.Id;
             var classResult = await _trainingService.GetClassByStudentId(studentId ?? default);
             if (!classResult.IsSuccessStatusCode)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.StudentNotInClass));
+                methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallTrainingServiceError));
                 return methodResult;
             }
             var @class = classResult?.Content?.Result;
@@ -70,6 +75,18 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
                 return methodResult;
             }
 
+            var orderResult = await _orderService.IsCheckStatusUser(new IsCheckPaymentStatusByUserModel { ClassId = @class.Id, CourseId = @class.CourseId, PackageId = @class.PackageId, UserId = _authContext.CurrentUserId });
+            if (!orderResult.IsSuccessStatusCode)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallOrderServiceError));
+                return methodResult;
+            }
+            var isCheckUserOrder = orderResult?.Content?.Result ?? default;
+            if (!isCheckUserOrder)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(isCheckUserOrder));
+                return methodResult;
+            }
             var course = await _courseRepository.Queryable
                              .Include(x => x.CourseResults)
                              .Include(x => x.CourseUnitMockTests)

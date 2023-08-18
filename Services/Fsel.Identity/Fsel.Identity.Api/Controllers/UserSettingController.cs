@@ -6,7 +6,6 @@ namespace Fsel.Identity.Api.Controllers
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
     using Fsel.Identity.Application.Commands.UserSetttingCmd;
-    using Fsel.Identity.Application.Queries.UserQuery;
     using Fsel.Identity.Application.Queries.UserSettingQuery;
     using Fsel.Identity.Domain.Models.EntityModels;
     using MediatR;
@@ -37,14 +36,14 @@ namespace Fsel.Identity.Api.Controllers
         }
 
         /// <summary>
-        /// Get User setting 
+        /// Get User setting
         /// </summary>
         [HttpGet("get-user")]
         [ProducesResponseType(typeof(MethodResult<UserSettingModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> Get()
         {
-            MethodResult<UserSettingModel> commandResult = await _mediator.Send( new GetUserSettingQuery()).ConfigureAwait(false);
+            MethodResult<UserSettingModel> commandResult = await _mediator.Send(new GetUserSettingQuery()).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
     }
