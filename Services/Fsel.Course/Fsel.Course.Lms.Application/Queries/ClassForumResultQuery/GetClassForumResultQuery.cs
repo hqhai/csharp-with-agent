@@ -6,6 +6,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
+    using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
@@ -27,13 +28,15 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
         private readonly IUserService _userService;
         private readonly AuthContext _authContext;
         private readonly IClassForumResultRepository _classForumResultRepository;
+        private readonly IMapper _mapper;
 
-        public GetClassForumResultQueryHandler(IClassForumRepository classForumRepository, IUserService userService, AuthContext authContext, IClassForumResultRepository classForumResultRepository)
+        public GetClassForumResultQueryHandler(IClassForumRepository classForumRepository, IUserService userService, AuthContext authContext, IClassForumResultRepository classForumResultRepository, IMapper mapper)
         {
             _classForumRepository = classForumRepository;
             _userService = userService;
             _authContext = authContext;
             _classForumResultRepository = classForumResultRepository;
+            _mapper = mapper;
         }
 
         public async Task<MethodResult<ClassForumResultModel>> Handle(GetClassForumResultQuery request, CancellationToken cancellationToken)
@@ -60,6 +63,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
                 Content = classForumResult.Content,
                 Status = classForumResult.Status,
                 ClassForumId = classForumResult.ClassForumId,
+                ClassForum = _mapper.Map<ClassForumModel>(classForumResult.ClassForum),
                 ClassForumResultFiles = classForumResult.ClassForumResultFiles == null ? null : classForumResult.ClassForumResultFiles.Select(x => new ClassForumResultFileModel
                 {
                     FilePath = x.FilePath,
