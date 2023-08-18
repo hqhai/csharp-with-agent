@@ -58,6 +58,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
                     CourseCode = x.LessonResult!.Course!.Code,
                     LessonDisplayOrder = x.LessonResult!.Lesson!.UnitLessons.Where(y => y.UnitId == x.LessonResult.UnitId).Select(x => x.DisplayOrder).FirstOrDefault(),
                     UnitDisplayOrder = x.LessonResult.Unit!.CourseUnitMockTests.Where(y => y.CourseId == x.LessonResult.CourseId).Select(x => x.DisplayOrder).FirstOrDefault(),
+                    CreatedDate = x.CreatedDate,
                     ClassForumResultFiles = x.ClassForumResultFiles == null ? null : x.ClassForumResultFiles.Select(x => new ClassForumResultFileModel
                     {
                         FilePath = x.FilePath,
