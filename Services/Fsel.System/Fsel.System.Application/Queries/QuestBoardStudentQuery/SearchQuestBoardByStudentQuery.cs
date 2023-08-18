@@ -8,6 +8,7 @@ namespace Fsel.System.Application.Queries.QuestBoardStudentQuery
     using Fsel.Core.Base.BaseModels;
     using Fsel.Core.Extensions;
     using Fsel.Shared.Enums;
+    using Fsel.Shared.Enums.ErrorCodes;
     using Fsel.System.Application.Services.UserServices;
     using Fsel.System.Domain.IRepositories;
     using Fsel.System.Domain.Models.EntityModels;
@@ -58,7 +59,7 @@ namespace Fsel.System.Application.Queries.QuestBoardStudentQuery
             var studentResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
             if (!studentResult.IsSuccessStatusCode)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(studentResult));
+                methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError), nameof(studentResult));
                 return methodResult;
             }
             var student = studentResult?.Content?.Result;
@@ -89,6 +90,7 @@ namespace Fsel.System.Application.Queries.QuestBoardStudentQuery
             {
                 questBoardQuery = questBoardQuery.Where(m => m.Id.ToString() == request.Keyword || (m.Name ?? string.Empty).Contains(request.Keyword));
             }
+
             int totalItem = await questBoardQuery.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
             var lists = await questBoardQuery
                     .ApplySortAndPaging(request)

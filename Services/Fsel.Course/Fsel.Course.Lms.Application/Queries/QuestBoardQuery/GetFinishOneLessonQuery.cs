@@ -1,0 +1,163 @@
+// Copyright (c) Atlantic. All rights reserved.
+
+namespace Fsel.Course.Lms.Application.Queries.QuestBoardQuery
+{
+    using System.Threading;
+    using Fsel.Common.ActionResults;
+    using Fsel.Course.Domain.Entities;
+    using Fsel.Course.Domain.Enums;
+    using Fsel.Course.Domain.IRepositories;
+    using Fsel.Shared.Enums;
+    using MediatR;
+    using Microsoft.AspNetCore.Http;
+    using Microsoft.EntityFrameworkCore;
+
+    public class GetFinishOneLessonQuery : IRequest<MethodResult<double>>
+    {
+        public Guid StudentId { get; set; }
+        public EnumRepeatType RepeatType { get; set; }
+        public DateTime StartDate { get; set; }
+        public DateTime EndDate { get; set; }
+    }
+
+    public class GetFinishOneLessonQueryHandler : IRequestHandler<GetFinishOneLessonQuery, MethodResult<double>>
+    {
+        private readonly IVideoResultRepository _videoResultRepository;
+        private readonly IVideoTimeCodeRepository _videoTimeCodeRepository;
+        private readonly IVideoRepository _videoRepository;
+        private readonly IQuestionRepository _questionRepository;
+        private readonly IVideoTimeCodeAnswerRepository _videoTimeCodeAnswerRepository;
+        private readonly ITimeCodeExerciseRepository _timeCodeExerciseRepository;
+        private readonly IExerciseQuestionRepository _exerciseQuestionRepository;
+        private readonly IExerciseRepository _exerciseRepository;
+
+        public GetFinishOneLessonQueryHandler(IVideoResultRepository videoResultRepository
+            , IVideoTimeCodeRepository videoTimeCodeRepository
+            , IVideoRepository videoRepository
+            , IQuestionRepository questionRepository
+            , IVideoTimeCodeAnswerRepository videoTimeCodeAnswerRepository
+            , ITimeCodeExerciseRepository timeCodeExerciseRepository
+            , IExerciseQuestionRepository exerciseQuestionRepository
+            , IExerciseRepository exerciseRepository)
+        {
+            _videoResultRepository = videoResultRepository;
+            _videoTimeCodeRepository = videoTimeCodeRepository;
+            _videoRepository = videoRepository;
+            _questionRepository = questionRepository;
+            _videoTimeCodeAnswerRepository = videoTimeCodeAnswerRepository;
+            _timeCodeExerciseRepository = timeCodeExerciseRepository;
+            _exerciseQuestionRepository = exerciseQuestionRepository;
+            _exerciseRepository = exerciseRepository;
+        }
+
+        public async Task<MethodResult<double>> Handle(GetFinishOneLessonQuery request, CancellationToken cancellationToken)
+        {
+            ArgumentNullException.ThrowIfNull(request);
+            MethodResult<double> methodResult = new MethodResult<double>();
+            var videoResults = await _videoResultRepository.Queryable.Where(x => x.StudentId == request.StudentId).ToListAsync(cancellationToken);
+            if (videoResults == null || videoResults.Count == 0)
+            {
+                methodResult.StatusCode = StatusCodes.Status200OK;
+                methodResult.Result = 0;
+                return methodResult;
+            }
+            DateTime currentDate = DateTime.Now;
+            VideoResult? videoResult = default;
+            if (request.RepeatType == EnumRepeatType.Day)
+            {
+                DateTime startOfDay = currentDate.Date.AddHours(8);
+                DateTime endOfDay = currentDate.Date.AddDays(1);
+                videoResult = videoResults.FirstOrDefault(x => !x.UpdatedDate.HasValue || (x.UpdatedDate.Value > startOfDay && x.UpdatedDate.Value < endOfDay));
+            }
+            else if (request.RepeatType == EnumRepeatType.Week)
+            {
+                DateTime startOfWeek = currentDate.AddDays(-(int)currentDate.DayOfWeek);
+                DateTime endOfWeek = startOfWeek.AddDays(6);
+                videoResult = GetVideoResult(startOfWeek, endOfWeek, request, videoResults);
+            }
+            else if (request.RepeatType == EnumRepeatType.Month)
+            {
+                DateTime startOfMonth = new DateTime(currentDate.Year, currentDate.Month, 1);
+                DateTime endOfMonth = startOfMonth.AddMonths(1).AddDays(-1);
+                videoResult = GetVideoResult(startOfMonth, endOfMonth, request, videoResults);
+            }
+
+            if (videoResult == null)
+            {
+                methodResult.Result = 0;
+                methodResult.StatusCode = StatusCodes.Status200OK;
+                return methodResult;
+            }
+            methodResult.StatusCode = StatusCodes.Status200OK;
+            methodResult.Result = await GetDoubleAsync(videoResult, cancellationToken);
+            return methodResult;
+        }
+
+        private static VideoResult? GetVideoResult(DateTime startDate, DateTime endDate, GetFinishOneLessonQuery request, IList<VideoResult> videoResults)
+        {
+            ArgumentNullException.ThrowIfNull(videoResults);
+            ArgumentNullException.ThrowIfNull(request);
+            VideoResult? videoResult = default;
+            if (endDate > request.EndDate && startDate < request.StartDate)
+            {
+                videoResult = videoResults.FirstOrDefault(x =>
+                               (!x.UpdatedDate.HasValue ||
+                               (x.UpdatedDate.Value >= request.StartDate && x.UpdatedDate.Value <= request.EndDate)));
+            }
+            else if (endDate > request.EndDate)
+            {
+                videoResult = videoResults.FirstOrDefault(x =>
+                               (!x.UpdatedDate.HasValue ||
+                               (x.UpdatedDate.Value >= startDate && x.UpdatedDate.Value <= request.EndDate)));
+            }
+            else if (startDate < request.StartDate)
+            {
+                videoResult = videoResults.FirstOrDefault(x =>
+                               (!x.UpdatedDate.HasValue ||
+                               (x.UpdatedDate.Value >= request.StartDate && x.UpdatedDate.Value <= endDate)));
+            }
+            else
+            {
+                videoResult = videoResults.FirstOrDefault(x =>
+                              (!x.UpdatedDate.HasValue ||
+                              (x.UpdatedDate.Value >= startDate && x.UpdatedDate.Value <= endDate)));
+            }
+
+            return videoResult;
+        }
+
+        private async Task<double> GetDoubleAsync(VideoResult videoResult, CancellationToken cancellationToken)
+        {
+            var answerQuery = from baseQ in _videoResultRepository.Queryable
+                              join vtca in _videoTimeCodeAnswerRepository.Queryable on baseQ.Id equals vtca.VideoResultId
+                              join e in _exerciseRepository.Queryable on vtca.ExerciseId equals e.Id
+                              join te in _timeCodeExerciseRepository.Queryable on e.Id equals te.ExerciseId
+                              join vt in _videoTimeCodeRepository.Queryable on te.VideoTimeCodeId equals vt.Id
+                              where baseQ.Id == videoResult.Id && vt.TimeCodeType == EnumTimeCodeType.Standalone
+                              group new { vt, vtca } by vt.TimeCodeType into g
+                              select new
+                              {
+                                  Type = g.Key,
+                                  CorrectCount = g.Select(x => x.vtca).Count()
+                              };
+
+            var questionQuery = from baseQ in _videoResultRepository.Queryable
+                                join v in _videoRepository.Queryable on baseQ.VideoId equals v.Id
+                                join vt in _videoTimeCodeRepository.Queryable on v.Id equals vt.VideoId
+                                join te in _timeCodeExerciseRepository.Queryable on vt.Id equals te.VideoTimeCodeId
+                                join e in _exerciseRepository.Queryable on te.ExerciseId equals e.Id
+                                join eq in _exerciseQuestionRepository.Queryable on e.Id equals eq.ExerciseId
+                                join q in _questionRepository.Queryable on eq.QuestionId equals q.Id
+                                where baseQ.Id == videoResult.Id && q.QuestionType != EnumQuestionType.ExercisePreparation && vt.TimeCodeType == EnumTimeCodeType.Standalone
+                                group new { vt, q } by vt.TimeCodeType into g
+                                select new
+                                {
+                                    Type = g.Key,
+                                    TotalCount = g.Select(x => x.q).Count()
+                                };
+            var answers = await answerQuery.ToListAsync(cancellationToken);
+            var questions = await questionQuery.ToListAsync(cancellationToken);
+            return questions?.Sum(x => x.TotalCount) > 0 ? ((double)(answers?.Sum(x => x.CorrectCount) ?? default) / questions?.Sum(x => x.TotalCount) ?? default) * 100 : default;
+        }
+    }
+}
