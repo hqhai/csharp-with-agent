@@ -23,22 +23,19 @@ namespace Fsel.System.Application.Queries.QuestBoardStudentQuery
     public class SearchQuestBoardByStudentQueryHandler : IRequestHandler<SearchQuestBoardByStudentQuery, MethodResult<PagingItemsModel<QuestBoardByStudentModel>>>
     {
         private readonly IQuestBoardRepository _questBoardRepository;
+        private readonly IQuestBoardStudentRepository _questBoardStudentRepository;
         private readonly AuthContext _authContext;
         private readonly IUserService _userService;
-        private readonly IQuestBoardTaskStudentRepository _questBoardTaskStudentRepository;
-        private readonly IQuestBoardTaskRepository _questBoardTaskRepository;
 
         public SearchQuestBoardByStudentQueryHandler(IQuestBoardRepository questBoardRepository
+            , IQuestBoardStudentRepository questBoardStudentRepository
             , AuthContext authContext
-            , IUserService userService
-            , IQuestBoardTaskStudentRepository questBoardTaskStudentRepository
-            , IQuestBoardTaskRepository questBoardTaskRepository)
+            , IUserService userService)
         {
             _questBoardRepository = questBoardRepository;
+            _questBoardStudentRepository = questBoardStudentRepository;
             _authContext = authContext;
             _userService = userService;
-            _questBoardTaskStudentRepository = questBoardTaskStudentRepository;
-            _questBoardTaskRepository = questBoardTaskRepository;
         }
 
         public async Task<MethodResult<PagingItemsModel<QuestBoardByStudentModel>>> Handle(SearchQuestBoardByStudentQuery request, CancellationToken cancellationToken)
@@ -71,9 +68,8 @@ namespace Fsel.System.Application.Queries.QuestBoardStudentQuery
                 return methodResult;
             }
             var questBoardQuery = from baseQ in _questBoardRepository.Queryable
-                                  join q in _questBoardTaskRepository.Queryable on baseQ.Id equals q.QuestBoardId
-                                  join qts in _questBoardTaskStudentRepository.Queryable on q.Id equals qts.QuestBoardTaskId
-                                  where baseQ.Type == request.Type && q.ImplementDate >= DateTime.Now && (baseQ.PackageIds != null && baseQ.PackageIds.Any(x => x == student.PackageId)) && (qts == null || qts.StudentId == student.Id)
+                                  join qts in _questBoardStudentRepository.Queryable on baseQ.Id equals qts.QuestBoardId
+                                  where baseQ.Type == request.Type && (baseQ.PackageIds != null && baseQ.PackageIds.Any(x => x == student.PackageId)) && (qts == null || qts.StudentId == student.Id)
                                   select new QuestBoardByStudentModel
                                   {
                                       Id = baseQ.Id,

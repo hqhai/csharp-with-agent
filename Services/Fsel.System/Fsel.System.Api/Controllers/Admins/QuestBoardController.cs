@@ -6,7 +6,7 @@ namespace Fsel.System.Api.Controllers.Admins
     using Fsel.Common.Constants;
     using Fsel.Core.Base.BaseModels;
     using Fsel.System.Application.Commands.QuestBoardCmd;
-    using Fsel.System.Application.Queries.QuestBoardQuery.MainQuests;
+    using Fsel.System.Application.Queries.QuestBoardQuery;
     using Fsel.System.Domain.Models.EntityModels;
     using global::System.Net;
     using MediatR;
