@@ -29,10 +29,11 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
         private readonly IMapper _mapper;
         private AuthContext _authContext;
 
-        public ApproveClassForumPenddingCommandHandler(IClassForumResultRepository classForumResultRepository, IMapper mapper)
+        public ApproveClassForumPenddingCommandHandler(IClassForumResultRepository classForumResultRepository, IMapper mapper, AuthContext authContext)
         {
             _classForumResultRepository = classForumResultRepository;
             _mapper = mapper;
+            _authContext = authContext;
         }
 
         public async Task<MethodResult<ClassForumResultModel>> Handle(ApproveClassForumPenddingCommand request, CancellationToken cancellationToken)
