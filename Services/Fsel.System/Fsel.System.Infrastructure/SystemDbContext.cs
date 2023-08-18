@@ -25,8 +25,7 @@ namespace Fsel.System.Infrastructure
             modelBuilder.ApplyConfiguration(new ReferralDiscountConfigConfiguration());
             modelBuilder.ApplyConfiguration(new QuestBoardConfigConfigConfiguration());
             modelBuilder.ApplyConfiguration(new QuestBoardConfigConfiguration());
-            modelBuilder.ApplyConfiguration(new QuestBoardTaskConfigConfiguration());
-            modelBuilder.ApplyConfiguration(new QuestBoardTaskStudentConfigConfiguration());
+            modelBuilder.ApplyConfiguration(new QuestBoardStudentConfigConfiguration());
             base.OnModelCreating(modelBuilder);
         }
 
@@ -36,8 +35,7 @@ namespace Fsel.System.Infrastructure
         public DbSet<TeachingCost> TeachingCosts { get; set; }
         public DbSet<LogAction> LogActions { get; set; }
         public DbSet<ReferralDiscountConfig> ReferralDiscountConfigs { get; set; }
-        public DbSet<QuestBoardTask> QuestBoardTasks { get; set; }
-        public DbSet<QuestBoardTaskStudent> QuestBoardTaskStudents { get; set; }
+        public DbSet<QuestBoardStudent> QuestBoardStudents { get; set; }
         public DbSet<QuestBoard> QuestBoards { get; set; }
         public DbSet<QuestBoardConfig> QuestBoardConfigs { get; set; }
 
