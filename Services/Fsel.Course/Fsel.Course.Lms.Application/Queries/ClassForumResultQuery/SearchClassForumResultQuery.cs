@@ -45,6 +45,10 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
 
             var classForumResultQuery = _classForumResultRepository.Queryable
                                     .Include(x => x.ClassForum)
+                                    .ThenInclude(x => x!.Lesson)
+                                    .ThenInclude(x => x!.UnitLessons)
+                                    .ThenInclude(x => x.Unit)
+                                    .ThenInclude(x => x!.CourseUnitMockTests)
                                     .Where(x => x.Status != EnumClassForumResultStatus.Graded)
                                     .Select(x => new ClassForumResultSearchModel
                                     {
@@ -59,6 +63,8 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
                                             CreatedFullName = x.CreatedFullName,
                                         }).FirstOrDefault(),
                                         LessonName = x.ClassForum!.Lesson!.Name,
+                                        LessonDisplayOrder = x.ClassForum!.Lesson.UnitLessons.Select(x =>x.DisplayOrder).FirstOrDefault(),
+                                        UnitDisplayOrder = x.ClassForum.Lesson.UnitLessons.Select(x => x.Unit).SelectMany(x => x.CourseUnitMockTests).Select(x => x.DisplayOrder).FirstOrDefault(),
                                         UnitName = x.ClassForum.Lesson.UnitLessons.Select(x => x.Unit).Select(x => x!.Name).FirstOrDefault(),
                                         TeacherId = x.GradingTeacherId
                                     });
@@ -78,6 +84,14 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
             if (request.UnitName != null)
             {
                 classForumResultQuery = classForumResultQuery.Where(m => (m.UnitName ?? string.Empty).Contains(request.UnitName));
+            }
+            if (request.LessonDisplayOrder != null)
+            {
+                classForumResultQuery = classForumResultQuery.Where(m => m.LessonDisplayOrder == request.LessonDisplayOrder);
+            }
+            if (request.UnitDisplayOrder != null)
+            {
+                classForumResultQuery = classForumResultQuery.Where(m => m.UnitDisplayOrder == request.UnitDisplayOrder);
             }
             int totalItem = await classForumResultQuery.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
             var lists = await classForumResultQuery
