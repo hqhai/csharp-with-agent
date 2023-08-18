@@ -9,10 +9,12 @@ namespace Fsel.System.Application.Commands.QuestBoardCmd
     using Fsel.System.Domain.Models.EntityModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
+    using Microsoft.EntityFrameworkCore;
 
     public class ActiveQuestBoardCommand : IRequest<MethodResult<QuestBoardModel>>
     {
         public Guid Id { get; set; }
+        public bool IsActive { get; set; }
     }
 
     public class ActiveQuestBoardCommandHandler : IRequestHandler<ActiveQuestBoardCommand, MethodResult<QuestBoardModel>>
@@ -31,14 +33,22 @@ namespace Fsel.System.Application.Commands.QuestBoardCmd
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<QuestBoardModel>();
-
+            if (!request.IsActive)
+            {
+                var questBoards = await _questBoardRepository.Queryable.Where(x=>x.DependentId == request.Id).ToListAsync(cancellationToken);
+                if (questBoards != null && questBoards.Count > 0)
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(questBoards));
+                    return methodResult;
+                }
+            }
             var questBoard = await _questBoardRepository.GetByIdAsync(request.Id);
             if (questBoard == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(questBoard));
                 return methodResult;
             }
-            questBoard.IsActive = true;
+            questBoard.IsActive = request.IsActive;
             await _questBoardRepository.ExecuteTransactionAsync(async () =>
             {
                 questBoard = _questBoardRepository.Update(questBoard);

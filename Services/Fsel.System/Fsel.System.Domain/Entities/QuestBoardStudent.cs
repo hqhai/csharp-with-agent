@@ -4,21 +4,20 @@ namespace Fsel.System.Domain.Entities
 {
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Entities;
+    using Fsel.Shared.Enums;
     using global::System.ComponentModel.DataAnnotations;
 
-    public class QuestBoardTask : Entity
+    public class QuestBoardStudent : Entity
     {
-        /// <summary>
-        /// Thời gian bắt đầu nhiệm vụ
-        /// </summary>
-        public DateTime ImplementDate { get; set; }
-
+        public EnumQuestBoardStatus Status { get; set; }
         public QuestBoard? QuestBoard { get; set; }
-        public Guid? DependentTaskId { get; set; }
 
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         public Guid QuestBoardId { get; set; }
 
-        public ICollection<QuestBoardTaskStudent> QuestBoardTaskStudents { get; set; } = new List<QuestBoardTaskStudent>();
+        [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
+        public Guid StudentId { get; set; }
+
+        public Guid? ObjectId { get; set; }
     }
 }

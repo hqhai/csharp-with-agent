@@ -31,7 +31,7 @@ namespace Fsel.System.Application.Queries.QuestBoardQuery
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<QuestBoardModel>();
-            var questBoard = await _questBoardRepository.Queryable.Include(x => x.QuestBoardTasks.OrderBy(x => x.ImplementDate)).FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
+            var questBoard = await _questBoardRepository.Queryable.FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
             if (questBoard == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(questBoard));

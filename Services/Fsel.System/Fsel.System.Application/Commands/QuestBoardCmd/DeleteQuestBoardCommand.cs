@@ -27,7 +27,7 @@ namespace Fsel.System.Application.Commands.QuestBoardCmd
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<bool>();
-            var questBoard = await _questBoardRepository.Queryable.Include(x => x.QuestBoardTasks).ThenInclude(x => x.QuestBoardTaskStudents).FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
+            var questBoard = await _questBoardRepository.Queryable.Include(x => x.QuestBoardStudents).FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
             if (questBoard == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(questBoard));
