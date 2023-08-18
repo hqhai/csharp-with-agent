@@ -33,7 +33,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public ClassForumModel? ClassForum { get; set; }
 
         public LessonResultModel? LessonResult { get; set; }
-
+        public string? CourseCode { get; set; }
         public string? ClassCode { get; set; }
         public int LessonDisplayOrder { get; set; }
         public int UnitDisplayOrder { get; set; }
