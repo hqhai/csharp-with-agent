@@ -62,10 +62,10 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
                                             CreatedUserId = x.CreatedUserId,
                                             CreatedFullName = x.CreatedFullName,
                                         }).FirstOrDefault(),
-                                        CourseCode = x.LessonResult!.Lesson!.UnitLessons.Select(x => x.Unit).SelectMany(x => x!.CourseUnitMockTests).Select(x => x.Course).Select(x => x!.Code).FirstOrDefault(),
+                                        CourseCode = x.LessonResult!.Course!.Code,
                                         LessonName = x.ClassForum!.Lesson!.Name,
-                                        LessonDisplayOrder = x.LessonResult!.Lesson!.UnitLessons.Where(y => y.LessonId == x.LessonResult.LessonId).Select(x => x.DisplayOrder).FirstOrDefault(),
-                                        UnitDisplayOrder = x.LessonResult.Lesson.UnitLessons.Select(x => x.Unit).SelectMany(x => x.CourseUnitMockTests).Where(y => y.UnitId == x.LessonResult.UnitId).Select(x => x.DisplayOrder).FirstOrDefault(),
+                                        LessonDisplayOrder = x.LessonResult!.Lesson!.UnitLessons.Where(y => y.UnitId == x.LessonResult.UnitId).Select(x => x.DisplayOrder).FirstOrDefault(),
+                                        UnitDisplayOrder = x.LessonResult.Unit!.CourseUnitMockTests.Where(y => y.UnitId == x.LessonResult.UnitId).Select(x => x.DisplayOrder).FirstOrDefault(),
                                         UnitName = x.ClassForum.Lesson.UnitLessons.Select(x => x.Unit).Select(x => x!.Name).FirstOrDefault(),
                                         TeacherId = x.GradingTeacherId
                                     });
