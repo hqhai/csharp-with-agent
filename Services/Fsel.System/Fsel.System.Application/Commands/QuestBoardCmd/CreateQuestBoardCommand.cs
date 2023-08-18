@@ -5,7 +5,6 @@ namespace Fsel.System.Application.Commands.QuestBoardCmd
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
-    using Fsel.Shared.Enums;
     using Fsel.System.Application.Services.OrderServices;
     using Fsel.System.Domain.Entities;
     using Fsel.System.Domain.Enums.ErrorCodes;
@@ -25,19 +24,16 @@ namespace Fsel.System.Application.Commands.QuestBoardCmd
         private readonly IMapper _mapper;
         private readonly IQuestBoardRepository _questBoardRepository;
         private readonly IOrderService _orderService;
-        private readonly IQuestBoardTaskRepository _questBoardTaskRepository;
         private readonly IQuestBoardConfigRepository _questBoardConfigRepository;
 
         public CreateQuestBoardCommandHandler(IMapper mapper
             , IQuestBoardRepository questBoardRepository
             , IOrderService orderService
-            , IQuestBoardTaskRepository questBoardTaskRepository
             , IQuestBoardConfigRepository questBoardConfigRepository)
         {
             _mapper = mapper;
             _questBoardRepository = questBoardRepository;
             _orderService = orderService;
-            _questBoardTaskRepository = questBoardTaskRepository;
             _questBoardConfigRepository = questBoardConfigRepository;
         }
 
@@ -52,6 +48,13 @@ namespace Fsel.System.Application.Commands.QuestBoardCmd
             if (questBoardConfig == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(questBoardConfig));
+                return methodResult;
+            }
+
+            var isCheckName = await _questBoardRepository.Queryable.AnyAsync(x => x.Name == request.Name, cancellationToken);
+            if (isCheckName)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(isCheckName));
                 return methodResult;
             }
 
@@ -89,29 +92,29 @@ namespace Fsel.System.Application.Commands.QuestBoardCmd
                 methodResult.AddErrorBadRequest(nameof(EnumQuestBoardErrorcode.EndtDateMustMorethanStartDate));
                 return methodResult;
             }
-            var dependentTasks = new List<QuestBoardTask>();
             if (request.DependentId != null)
             {
-                dependentTasks = await _questBoardTaskRepository.Queryable.Where(x => x.QuestBoardId == request.DependentId).ToListAsync(cancellationToken);
-                if (dependentTasks == null)
+                var dependent = await _questBoardRepository.Queryable.FirstOrDefaultAsync(x => x.Id == request.DependentId, cancellationToken);
+                if (dependent == null)
                 {
                     methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(questBoardConfig));
                     return methodResult;
                 }
             }
-
-            #endregion Validate QuestBoard
-
-            var questBoard = _mapper.Map<QuestBoard>(request);
-            if (!request.IsLifeTime)
-            {
-                questBoard.QuestBoardTasks = await GetDateRangeAsync(request.StartDate, request.EndDate, request.RepeatType, request.DependentId);
-            }
-            else if (request.EndDate != null || request.RepeatType != null)
+            if (request.IsLifeTime && request.EndDate != null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(request.EndDate));
                 return methodResult;
             }
+            else if (request.IsLifeTime && request.RepeatType != null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(request.RepeatType));
+                return methodResult;
+            }
+
+            #endregion Validate QuestBoard
+
+            var questBoard = _mapper.Map<QuestBoard>(request);
             if (!questBoard.IsValid())
             {
                 methodResult.AddErrorBadRequest(questBoard.ErrorMessages);
@@ -128,40 +131,6 @@ namespace Fsel.System.Application.Commands.QuestBoardCmd
             });
 
             return methodResult;
-        }
-
-        private async Task<List<QuestBoardTask>> GetDateRangeAsync(DateTime startDate, DateTime? endDate, EnumRepeatType? repeatType, Guid? id)
-        {
-            int repeatInterval = 0;
-            switch (repeatType)
-            {
-                case EnumRepeatType.Day:
-                    repeatInterval = 1;
-                    break;
-
-                case EnumRepeatType.Week:
-                    repeatInterval = 7;
-                    break;
-
-                case EnumRepeatType.Month:
-                    repeatInterval = 30;
-                    break;
-            }
-            List<QuestBoardTask> questBoardTasks = Enumerable.Range(0, ((endDate ?? default) - startDate).Days / repeatInterval + 1)
-               .Select(offset => new QuestBoardTask
-               {
-                   ImplementDate = startDate.AddDays(offset * repeatInterval),
-               })
-               .ToList();
-            if (id != null)
-            {
-                var dependentTasks = await _questBoardTaskRepository.Queryable.Where(x => x.QuestBoardId == id).ToListAsync();
-                foreach (var task in questBoardTasks)
-                {
-                    task.DependentTaskId = dependentTasks.FirstOrDefault(x => x.ImplementDate == task.ImplementDate)?.Id ?? null;
-                }
-            }
-            return questBoardTasks;
         }
     }
 }

@@ -85,20 +85,6 @@ namespace Fsel.System.Api.Controllers.Admins
         }
 
         /// <summary>
-        /// Update Quest Board
-        /// </summary>
-        [HttpPut("{id}")]
-        [ProducesResponseType(typeof(MethodResult<QuestBoardModel>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> Update([FromRoute] Guid id, [FromBody] UpdateQuestBoardCommand command)
-        {
-            ArgumentNullException.ThrowIfNull(command);
-            command.Id = id;
-            MethodResult<QuestBoardModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
-            return commandResult.GetActionResult();
-        }
-
-        /// <summary>
         /// Delete Quest Board
         /// </summary>
         [HttpDelete("{id}")]

@@ -21,6 +21,5 @@ namespace Fsel.System.Domain.Models.EntityModels
         public bool IsRequired { get; set; }
         public bool IsActive { get; set; }
         public Guid? DependentId { get; set; }
-        public IList<QuestBoardTaskModel>? QuestBoardTasks { get; set; }
     }
 }

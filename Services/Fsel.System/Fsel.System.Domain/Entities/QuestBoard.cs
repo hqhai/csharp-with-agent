@@ -93,6 +93,6 @@ namespace Fsel.System.Domain.Entities
         /// </summary>
         public Guid? DependentId { get; set; }
 
-        public ICollection<QuestBoardTask> QuestBoardTasks { get; set; } = new List<QuestBoardTask>();
+        public ICollection<QuestBoardStudent> QuestBoardStudents { get; set; } = new List<QuestBoardStudent>();
     }
 }
