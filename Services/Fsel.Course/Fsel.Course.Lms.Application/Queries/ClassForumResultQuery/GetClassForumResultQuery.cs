@@ -42,6 +42,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
             var methodResult = new MethodResult<ClassForumResultModel>();
 
             var classForumResult = await _classForumResultRepository.Queryable
+                .Include(x => x.ClassForum)
                 .Include(x => x.ClassForumResultFiles)
                 .Include(x => x.ClassForumScores)
                 .Where(x => x.Id == request.ClassForumResultId)
@@ -58,6 +59,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
                 Id = classForumResult.Id,
                 Content = classForumResult.Content,
                 Status = classForumResult.Status,
+                ClassForumId = classForumResult.ClassForumId,
                 ClassForumResultFiles = classForumResult.ClassForumResultFiles == null ? null : classForumResult.ClassForumResultFiles.Select(x => new ClassForumResultFileModel
                 {
                     FilePath = x.FilePath,
