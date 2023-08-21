@@ -38,5 +38,13 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         /// Feedback Positive Or FeedBack Both Have Value
         /// </summary>
         FeedbackPositiveOrFeedBackBothHaveValue,
+        /// <summary>
+        /// Cso Id Invalid
+        /// </summary>
+        CsoIdInvalid,
+        /// <summary>
+        /// Teacher Id Invalid
+        /// </summary>
+        TeacherIdInvalid,
     }
 }

@@ -108,7 +108,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumScoreCmd
 
             if (classForumResult.GradingTeacherId != teacherId)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(classForumResult.GradingTeacherId));
+                methodResult.AddErrorBadRequest(nameof(EnumClassForumResultErrorCode.TeacherIdInvalid), nameof(classForumResult.GradingTeacherId));
                 return methodResult;
             }
             if (classForumResult.Status != EnumClassForumResultStatus.PendingForGrading)
