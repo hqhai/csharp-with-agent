@@ -8,10 +8,11 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
     using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
-    using Fsel.Course.Lms.Application.Services.UserServices;
+    using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -23,16 +24,12 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
 
     public class GetClassForumResultQueryHandler : IRequestHandler<GetClassForumResultQuery, MethodResult<ClassForumResultModel>>
     {
-        private readonly IClassForumRepository _classForumRepository;
-        private readonly IUserService _userService;
         private readonly AuthContext _authContext;
         private readonly IClassForumResultRepository _classForumResultRepository;
         private readonly IMapper _mapper;
 
-        public GetClassForumResultQueryHandler(IClassForumRepository classForumRepository, IUserService userService, AuthContext authContext, IClassForumResultRepository classForumResultRepository, IMapper mapper)
+        public GetClassForumResultQueryHandler(AuthContext authContext, IClassForumResultRepository classForumResultRepository, IMapper mapper)
         {
-            _classForumRepository = classForumRepository;
-            _userService = userService;
             _authContext = authContext;
             _classForumResultRepository = classForumResultRepository;
             _mapper = mapper;
@@ -42,38 +39,69 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<ClassForumResultModel>();
-
             var classForumResult = await _classForumResultRepository.Queryable
+                .Include(x => x.LessonResult)
+                .ThenInclude(x => x!.Lesson)
+                .ThenInclude(x => x!.UnitLessons)
+                .ThenInclude(x => x.Unit)
+                .ThenInclude(x => x!.CourseUnitMockTests)
                 .Include(x => x.ClassForum)
                 .Include(x => x.ClassForumResultFiles)
                 .Include(x => x.ClassForumScores)
                 .Where(x => x.Id == request.ClassForumResultId)
-                .Select(x => new ClassForumResultModel
-                {
-                    Id = x.Id,
-                    Content = x.Content,
-                    Status = x.Status,
-                    ClassForumId = x.ClassForumId,
-                    ClassForum = _mapper.Map<ClassForumModel>(x.ClassForum),
-                    CourseCode = x.LessonResult!.Course!.Code,
-                    LessonDisplayOrder = x.LessonResult!.Lesson!.UnitLessons.Where(y => y.UnitId == x.LessonResult.UnitId).Select(x => x.DisplayOrder).FirstOrDefault(),
-                    UnitDisplayOrder = x.LessonResult.Unit!.CourseUnitMockTests.Where(y => y.CourseId == x.LessonResult.CourseId).Select(x => x.DisplayOrder).FirstOrDefault(),
-                    CreatedDate = x.CreatedDate,
-                    ClassForumResultFiles = x.ClassForumResultFiles == null ? null : x.ClassForumResultFiles.Select(x => new ClassForumResultFileModel
-                    {
-                        FilePath = x.FilePath,
-                    }).ToList(),
-                    ClassForumScores = x.ClassForumScores == null ? null : x.ClassForumScores.Select(x => new ClassForumScoreModel
-                    {
-                        Id = x.Id,
-                        Feedback = x.Feedback,
-                        Criteria = x.Criteria,
-                        Score = x.Score
-                    }).ToList(),
-                })
+                .AsNoTracking()
                 .FirstOrDefaultAsync(cancellationToken);
 
-            methodResult.Result = classForumResult;
+            if (classForumResult == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(classForumResult));
+                return methodResult;
+            }
+
+            var lesson = classForumResult.LessonResult?.Lesson?.UnitLessons.FirstOrDefault(y => y.UnitId == classForumResult.LessonResult.UnitId)?.DisplayOrder;
+            var unit = classForumResult.LessonResult?.Unit?.CourseUnitMockTests.FirstOrDefault(y => y.CourseId == classForumResult.LessonResult.CourseId)?.DisplayOrder;
+
+            var classForumResultModel = new ClassForumResultModel
+            {
+                Id = classForumResult.Id,
+                Content = classForumResult.Content,
+                Status = classForumResult.Status,
+                ClassForumId = classForumResult.ClassForumId,
+                ClassForum = _mapper.Map<ClassForumModel>(classForumResult.ClassForum),
+                LessonDisplayOrder = lesson ?? default,
+                UnitDisplayOrder = unit ?? default,
+                CreatedDate = classForumResult.CreatedDate,
+                CheckStartDate = classForumResult.CheckStartDate,
+                GradingStartDate = classForumResult.GradingStartDate,
+                CheckCsoId = classForumResult.CheckCsoId,
+                GradingTeacherId = classForumResult.GradingTeacherId ?? default,
+                ClassForumResultFiles = classForumResult.ClassForumResultFiles == null ? null : classForumResult.ClassForumResultFiles.Select(x => new ClassForumResultFileModel
+                {
+                    FilePath = x.FilePath,
+                }).ToList(),
+                ClassForumScores = classForumResult.ClassForumScores == null ? null : classForumResult.ClassForumScores.Select(x => new ClassForumScoreModel
+                {
+                    Id = x.Id,
+                    Feedback = x.Feedback,
+                    Criteria = x.Criteria,
+                    Score = x.Score
+                }).ToList(),
+            };
+
+            if (_authContext.Roles!.Contains(EnumRole.CSO.ToString()))
+            {
+                classForumResult.CheckCsoId = _authContext.CurrentUserId;
+                classForumResult.CheckStartDate = DateTime.Now;
+            }
+
+            if (_authContext.Roles!.Contains(EnumRole.Teacher.ToString()))
+            {
+                classForumResult.GradingTeacherId = _authContext.CurrentUserId;
+                classForumResult.GradingStartDate = DateTime.Now;
+            }
+            classForumResult = _classForumResultRepository.Update(classForumResult);
+            await _classForumResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+            methodResult.Result = classForumResultModel;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }
