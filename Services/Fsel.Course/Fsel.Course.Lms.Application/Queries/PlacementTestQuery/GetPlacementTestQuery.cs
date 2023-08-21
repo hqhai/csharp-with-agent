@@ -15,6 +15,7 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestQuery
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
+    using Fsel.Shared.Enums.ErrorCodes;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -62,7 +63,7 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestQuery
             var student = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
             if (!student.IsSuccessStatusCode)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student));
+                methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError), nameof(student));
                 return methodResult;
             }
             var studentId = student?.Content?.Result?.Id;
