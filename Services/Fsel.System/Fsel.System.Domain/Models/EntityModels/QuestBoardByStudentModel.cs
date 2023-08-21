@@ -12,7 +12,7 @@ namespace Fsel.System.Domain.Models.EntityModels
         public double Percent { get; set; }
         public IList<Guid>? PackageIds { get; set; }
         public EnumQuestBoardCategory Category { get; set; }
-        public EnumQuestBoardStudentStatus Status { get; set; }
+        public EnumQuestBoardStudentStatus? Status { get; set; }
         public EnumRepeatType? RepeatType { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime? EndDate { get; set; }
