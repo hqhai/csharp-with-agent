@@ -62,6 +62,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
                                             CreatedUserId = x.CreatedUserId,
                                             CreatedFullName = x.CreatedFullName,
                                         }).FirstOrDefault(),
+                                        Status = x.Status,
                                         GradingStartDate = x.GradingStartDate,
                                         GradingTeacherId = x.GradingTeacherId ?? default,
                                         CheckCsoId = x.CheckCsoId,
@@ -80,6 +81,10 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
             if (request.TeacherId != null)
             {
                 classForumResultQuery = classForumResultQuery.Where(m => m.TeacherId == request.TeacherId);
+            }
+            if (request.Status != null)
+            {
+                classForumResultQuery = classForumResultQuery.Where(m => m.Status == request.Status);
             }
             if (request.LessonName != null)
             {

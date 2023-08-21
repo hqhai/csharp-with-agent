@@ -17,7 +17,7 @@ namespace Fsel.Course.Domain.Models.QueryModels.ClassForumResults
 
         public int? UnitDisplayOrder { get; set; }
 
-        [JsonIgnore]
+        /*[JsonIgnore]*/
         public EnumClassForumResultStatus? Status { get; set; }
     }
 }
