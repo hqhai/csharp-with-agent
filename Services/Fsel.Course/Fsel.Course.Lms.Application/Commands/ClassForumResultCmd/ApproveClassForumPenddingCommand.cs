@@ -55,7 +55,6 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
             }
             var csoResults = await _userService.GetCSOByUserId(_authContext.CurrentUserId);
             var csoId = csoResults.Content?.Result?.Id;
-            classForumResult.CheckCsoId = csoId;
 
             if (classForumResult.Status != EnumClassForumResultStatus.Pending)
             {
