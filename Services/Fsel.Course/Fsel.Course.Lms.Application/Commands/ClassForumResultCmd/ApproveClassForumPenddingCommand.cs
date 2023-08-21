@@ -47,14 +47,25 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
             var classForumResult = await _classForumResultRepository.Queryable.Include(x => x.ClassForumResultFiles)
                                                                     .Where(e => e.Id == request.ClassForumResultId)
                                                                     .FirstOrDefaultAsync(cancellationToken: cancellationToken);
+
             if (classForumResult == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(classForumResult));
                 return methodResult;
             }
+            var csoResults = await _userService.GetCSOByUserId(_authContext.CurrentUserId);
+            var csoId = csoResults.Content?.Result?.Id;
+            classForumResult.CheckCsoId = csoId;
+
             if (classForumResult.Status != EnumClassForumResultStatus.Pending)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumClassForumResultErrorCode.ClassForumResultStatusNotPendding));
+                return methodResult;
+            }
+
+            if (classForumResult.CheckCsoId != csoId)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(classForumResult.GradingTeacherId));
                 return methodResult;
             }
             await _classForumResultRepository.ExecuteTransactionAsync(async () =>
