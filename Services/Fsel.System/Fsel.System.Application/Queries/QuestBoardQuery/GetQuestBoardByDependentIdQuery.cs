@@ -37,7 +37,7 @@ namespace Fsel.System.Application.Queries.QuestBoardQuery
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(questBoard));
                 return methodResult;
             }
-            var questBoards = await _questBoardRepository.Queryable.Where(x => x.DependentId == request.DependentId).ToListAsync(cancellationToken);
+            var questBoards = await _questBoardRepository.Queryable.Where(x => x.DependentId == request.DependentId).OrderBy(x => x.CreatedDate).ToListAsync(cancellationToken);
             if (questBoards == null || questBoards.Count == 0)
             {
                 methodResult.Result = null;
