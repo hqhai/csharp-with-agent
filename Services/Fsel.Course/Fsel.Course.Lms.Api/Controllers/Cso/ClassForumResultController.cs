@@ -30,10 +30,9 @@ namespace Fsel.Course.Lms.Api.Controllers.Cso
         [HttpGet]
         [ProducesResponseType(typeof(MethodResult<PagingItemsModel<ClassForumResultSearchModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> Search([FromQuery] SearchClassForumResultQuery query)
+        public async Task<IActionResult> Search([FromQuery] SearchClassForumResultByCsoQuery query)
         {
             ArgumentNullException.ThrowIfNull(query);
-            query.Status = Domain.Enums.EnumClassForumResultStatus.Pending;
             var queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }

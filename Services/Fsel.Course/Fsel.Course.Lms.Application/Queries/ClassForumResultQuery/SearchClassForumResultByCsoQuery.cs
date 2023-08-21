@@ -3,9 +3,13 @@
 namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
 {
     using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Text;
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
+    using Fsel.Core.Base;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Core.Extensions;
     using Fsel.Course.Domain.Enums;
@@ -17,22 +21,23 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class SearchClassForumResultQuery : SearchClassForumResultQueryModel, IRequest<MethodResult<PagingItemsModel<ClassForumResultSearchModel>>>
+    public class SearchClassForumResultByCsoQuery : SearchClassForumResultQueryModel, IRequest<MethodResult<PagingItemsModel<ClassForumResultSearchModel>>>
     {
     }
-
-    public class SearchClassForumResultQueryHandler : IRequestHandler<SearchClassForumResultQuery, MethodResult<PagingItemsModel<ClassForumResultSearchModel>>>
+    public class SearchClassForumResultByCsoQueryHandler : IRequestHandler<SearchClassForumResultByCsoQuery, MethodResult<PagingItemsModel<ClassForumResultSearchModel>>>
     {
         private readonly IClassForumResultRepository _classForumResultRepository;
         private readonly ITrainingService _trainingService;
+        private readonly AuthContext _authContext;
 
-        public SearchClassForumResultQueryHandler(IClassForumResultRepository classForumResultRepository, ITrainingService trainingService)
+        public SearchClassForumResultByCsoQueryHandler(IClassForumResultRepository classForumResultRepository, ITrainingService trainingService, AuthContext authContext)
         {
             _classForumResultRepository = classForumResultRepository;
             _trainingService = trainingService;
+            _authContext = authContext;
         }
 
-        public async Task<MethodResult<PagingItemsModel<ClassForumResultSearchModel>>> Handle(SearchClassForumResultQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<PagingItemsModel<ClassForumResultSearchModel>>> Handle(SearchClassForumResultByCsoQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<PagingItemsModel<ClassForumResultSearchModel>> methodResult = new MethodResult<PagingItemsModel<ClassForumResultSearchModel>>();
@@ -49,7 +54,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
                                     .ThenInclude(x => x.Unit)
                                     .ThenInclude(x => x!.CourseUnitMockTests)
                                     .Include(x => x.ClassForum)
-                                    .Where(x => x.Status != EnumClassForumResultStatus.Graded)
+                                    .Where(x => x.Status == EnumClassForumResultStatus.Pending && (x.CheckCsoId == null || x.CheckCsoId == _authContext.CurrentUserId))
                                     .Select(x => new ClassForumResultSearchModel
                                     {
                                         Id = x.Id,
@@ -63,9 +68,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
                                             CreatedFullName = x.CreatedFullName,
                                         }).FirstOrDefault(),
                                         Status = x.Status,
-                                        GradingStartDate = x.GradingStartDate,
-                                        GradingTeacherId = x.GradingTeacherId ?? default,
-                                        CheckCsoId = x.CheckCsoId,
+                                        CheckStartDate = x.CheckStartDate,
                                         CourseCode = x.LessonResult!.Course!.Code,
                                         LessonName = x.ClassForum!.Lesson!.Name,
                                         LessonDisplayOrder = x.LessonResult.Lesson!.UnitLessons.FirstOrDefault(y => y.UnitId == x.LessonResult.UnitId)!.DisplayOrder,

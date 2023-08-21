@@ -57,6 +57,17 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(classForumResult));
                 return methodResult;
             }
+            if (_authContext.Roles!.Contains(EnumRole.CSO.ToString()))
+            {
+                classForumResult.CheckCsoId = _authContext.CurrentUserId;
+                classForumResult.CheckStartDate = DateTime.Now;
+            }
+
+            if (_authContext.Roles!.Contains(EnumRole.Teacher.ToString()))
+            {
+                classForumResult.GradingTeacherId = _authContext.CurrentUserId;
+                classForumResult.GradingStartDate = DateTime.Now;
+            }
 
             var lesson = classForumResult.LessonResult?.Lesson?.UnitLessons.FirstOrDefault(y => y.UnitId == classForumResult.LessonResult.UnitId)?.DisplayOrder;
             var unit = classForumResult.LessonResult?.Unit?.CourseUnitMockTests.FirstOrDefault(y => y.CourseId == classForumResult.LessonResult.CourseId)?.DisplayOrder;
@@ -88,17 +99,6 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
                 }).ToList(),
             };
 
-            if (_authContext.Roles!.Contains(EnumRole.CSO.ToString()))
-            {
-                classForumResult.CheckCsoId = _authContext.CurrentUserId;
-                classForumResult.CheckStartDate = DateTime.Now;
-            }
-
-            if (_authContext.Roles!.Contains(EnumRole.Teacher.ToString()))
-            {
-                classForumResult.GradingTeacherId = _authContext.CurrentUserId;
-                classForumResult.GradingStartDate = DateTime.Now;
-            }
             classForumResult = _classForumResultRepository.Update(classForumResult);
             await _classForumResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
             methodResult.Result = classForumResultModel;
