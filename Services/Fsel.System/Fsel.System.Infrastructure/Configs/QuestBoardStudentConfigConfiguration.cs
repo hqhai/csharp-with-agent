@@ -18,7 +18,7 @@ namespace Fsel.System.Infrastructure.Configs
                 .HasMaxLength(100)
                 .HasConversion(
                     v => v.ToString(),
-                    v => v.EnumParse<EnumQuestBoardStatus>());
+                    v => v.EnumParse<EnumQuestBoardStudentStatus>());
 
             builder.HasOne(a => a.QuestBoard)
                     .WithMany(b => b.QuestBoardStudents)

@@ -87,10 +87,10 @@ namespace Fsel.System.Application.Queries.QuestBoardStudentQuery
                                          StartDate = baseQ.StartDate,
                                          EndDate = baseQ.EndDate ?? null,
                                          NumberOfStars = baseQ.NumberOfStars,
-                                         Status = baseQ.QuestBoardStudents.FirstOrDefault(x => x.StudentId == student.Id && x.QuestBoardId == baseQ.Id) == null ? EnumQuestBoardStatus.New : baseQ.QuestBoardStudents.FirstOrDefault(x => x.StudentId == student.Id && x.QuestBoardId == baseQ.Id)!.Status,
+                                         Status = baseQ.QuestBoardStudents.FirstOrDefault(x => x.StudentId == student.Id && x.QuestBoardId == baseQ.Id) == null ? EnumQuestBoardStudentStatus.New : baseQ.QuestBoardStudents.FirstOrDefault(x => x.StudentId == student.Id && x.QuestBoardId == baseQ.Id)!.Status,
                                      }).ToListAsync(cancellationToken);
             questBoards = questBoards.Where(baseQ => baseQ.PackageIds != null && baseQ.PackageIds.Count > 0 && baseQ.PackageIds.Any(x => x == student.PackageId)).ToList();
-            var questBoardDepentDoneIds = questBoards.Where(x => x.Status == EnumQuestBoardStatus.Completed).Select(x => x.Id).ToList();
+            var questBoardDepentDoneIds = questBoards.Where(x => x.Status == EnumQuestBoardStudentStatus.Completed).Select(x => x.Id).ToList();
             var questBoardDepents = await _questBoardRepository.Queryable
                                      .Include(x => x.QuestBoardStudents)
                                      .Where(x => x.DependentId != null && x.IsActive && questBoardDepentDoneIds.Any(y => y == (x.DependentId ?? default)))
@@ -110,7 +110,7 @@ namespace Fsel.System.Application.Queries.QuestBoardStudentQuery
                                          StartDate = baseQ.StartDate,
                                          EndDate = baseQ.EndDate ?? null,
                                          NumberOfStars = baseQ.NumberOfStars,
-                                         Status = baseQ.QuestBoardStudents.FirstOrDefault(x => x.StudentId == student.Id && x.QuestBoardId == baseQ.Id) == null ? EnumQuestBoardStatus.New : baseQ.QuestBoardStudents.FirstOrDefault(x => x.StudentId == student.Id && x.QuestBoardId == baseQ.Id)!.Status,
+                                         Status = baseQ.QuestBoardStudents.FirstOrDefault(x => x.StudentId == student.Id && x.QuestBoardId == baseQ.Id) == null ? EnumQuestBoardStudentStatus.New : baseQ.QuestBoardStudents.FirstOrDefault(x => x.StudentId == student.Id && x.QuestBoardId == baseQ.Id)!.Status,
                                      }).ToListAsync(cancellationToken);
             questBoardDepents = questBoardDepents.Where(baseQ => baseQ.PackageIds != null && baseQ.PackageIds.Count > 0 && baseQ.PackageIds.Any(x => x == student.PackageId)).ToList();
             var query = questBoards.Union(questBoardDepents);

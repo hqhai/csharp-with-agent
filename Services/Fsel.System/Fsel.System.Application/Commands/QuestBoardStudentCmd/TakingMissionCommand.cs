@@ -69,7 +69,7 @@ namespace Fsel.System.Application.Commands.QuestBoardStudentCmd
             {
                 QuestBoardId = request.Id,
                 StudentId = student.Id,
-                Status = EnumQuestBoardStatus.Process
+                Status = EnumQuestBoardStudentStatus.Process
             };
             await _questBoardStudentRepository.ExecuteTransactionAsync(async () =>
             {

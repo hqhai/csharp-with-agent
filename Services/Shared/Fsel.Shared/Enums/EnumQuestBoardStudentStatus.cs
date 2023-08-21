@@ -2,7 +2,7 @@
 
 namespace Fsel.Shared.Enums
 {
-    public enum EnumQuestBoardStatus
+    public enum EnumQuestBoardStudentStatus
     {
         New,
         Process,
