@@ -6,12 +6,12 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestQuery
     using System.Threading;
     using AutoMapper;
     using Fsel.Common.ActionResults;
-    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Services.UserServices;
+    using Fsel.Shared.Enums.ErrorCodes;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -45,7 +45,7 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestQuery
             var student = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
             if (!student.IsSuccessStatusCode)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student));
+                methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError), nameof(student));
                 return methodResult;
             }
             var studentId = student?.Content?.Result?.Id;
@@ -54,7 +54,8 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestQuery
                                                                             .FirstOrDefaultAsync(cancellationToken);
             if (placementTestResult == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(placementTestResult));
+                methodResult.Result = null;
+                methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
             }
             var placementTestResultModel = _mapper.Map<PlacementTestResultModel>(placementTestResult);
