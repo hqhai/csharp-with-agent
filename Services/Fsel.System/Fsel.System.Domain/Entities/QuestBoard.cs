@@ -74,7 +74,11 @@ namespace Fsel.System.Domain.Entities
         [NotMapped]
         public IList<Guid>? PackageIds
         {
-            get { return ConvertHelper.Deserialize<IList<Guid>>(PackageIdsStr); }
+            get
+            {
+                var a = ConvertHelper.Deserialize<IList<Guid>>(PackageIdsStr);
+                return a;
+            }
             set { PackageIdsStr = ConvertHelper.Serialize(value); }
         }
 

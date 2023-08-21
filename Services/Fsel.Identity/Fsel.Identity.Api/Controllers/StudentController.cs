@@ -84,6 +84,18 @@ namespace Fsel.Identity.Api.Controllers
         }
 
         /// <summary>
+        /// Update Student By Token
+        /// </summary>
+        [HttpPut("update-student-token")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> UpdateStudentByToken([FromBody] UpdateStudentByTokenCommand command)
+        {
+            MethodResult<bool> commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
         /// Get list user by Ids
         /// </summary>
         [HttpPost("get-by-user-ids")]

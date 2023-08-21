@@ -9,7 +9,7 @@ namespace Fsel.System.Domain.Entities
 
     public class QuestBoardStudent : Entity
     {
-        public EnumQuestBoardStatus Status { get; set; }
+        public EnumQuestBoardStudentStatus Status { get; set; }
         public QuestBoard? QuestBoard { get; set; }
 
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
