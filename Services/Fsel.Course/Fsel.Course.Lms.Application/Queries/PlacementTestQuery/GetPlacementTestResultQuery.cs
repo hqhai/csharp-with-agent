@@ -12,6 +12,7 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestQuery
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Shared.Enums.ErrorCodes;
+    using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -58,6 +59,7 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestQuery
             {
                 placementTestResultModel.CountQuestion = placementTestResult.SkillScores.Sum(x => x.CountQuestion);
                 placementTestResultModel.TotalQuestion = placementTestResult.SkillScores.Sum(x => x.TotalQuestion);
+                placementTestResultModel.LevelNext = placementTestResult.Level.GetLevelInScore(placementTestResult.Percent) ?? default;
             }
             methodResult.StatusCode = StatusCodes.Status200OK;
             methodResult.Result = placementTestResultModel;
