@@ -52,14 +52,9 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestQuery
             var placementTestResult = await _placementTestResultRepository.Queryable.Where(x => x.Status == EnumResultStatus.Done && x.StudentId == studentId)
                                                                             .OrderByDescending(x => x.CreatedDate)
                                                                             .FirstOrDefaultAsync(cancellationToken);
-            if (placementTestResult == null)
-            {
-                methodResult.Result = null;
-                methodResult.StatusCode = StatusCodes.Status200OK;
-                return methodResult;
-            }
+
             var placementTestResultModel = _mapper.Map<PlacementTestResultModel>(placementTestResult);
-            if (placementTestResult.SkillScores != null)
+            if (placementTestResult != null && placementTestResult.SkillScores != null)
             {
                 placementTestResultModel.CountQuestion = placementTestResult.SkillScores.Sum(x => x.CountQuestion);
                 placementTestResultModel.TotalQuestion = placementTestResult.SkillScores.Sum(x => x.TotalQuestion);
