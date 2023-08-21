@@ -66,7 +66,7 @@ namespace Fsel.System.Api.Controllers.Admins
         /// <summary>
         /// Get Quest Board By DependentId
         /// </summary>
-        [HttpGet("dependent/{dependentId}")]
+        [HttpGet("get-list-by-dependent/{dependentId}")]
         [ProducesResponseType(typeof(MethodResult<IList<QuestBoardModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetQuestBoardByDependentId([FromRoute] Guid dependentId)
