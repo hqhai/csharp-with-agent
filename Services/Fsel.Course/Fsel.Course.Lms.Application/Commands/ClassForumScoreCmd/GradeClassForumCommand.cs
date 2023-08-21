@@ -105,6 +105,12 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumScoreCmd
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(classForumResult));
                 return methodResult;
             }
+
+            if (classForumResult.GradingTeacherId != teacherId)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(classForumResult.GradingTeacherId));
+                return methodResult;
+            }
             if (classForumResult.Status != EnumClassForumResultStatus.PendingForGrading)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumClassForumResultErrorCode.ClassForumResultStatusNotPendingForGrading));
@@ -112,7 +118,6 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumScoreCmd
             }
             await _classForumScoreRepository.ExecuteTransactionAsync(async () =>
             {
-                classForumResult.GradingTeacherId = teacherId;
                 classForumResult.Status = EnumClassForumResultStatus.Graded;
                 await _classForumScoreRepository.AddList(classForumScores);
                 await _classForumScoreRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);

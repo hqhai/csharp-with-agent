@@ -40,7 +40,7 @@ namespace Fsel.Course.Lms.Api.Controllers.Cso
         /// <summary>
         /// Cso approve class forum
         /// </summary>
-        [HttpPut]
+        [HttpPut("approve-class-forum-result")]
         [ProducesResponseType(typeof(MethodResult<ClassForumResultModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> Update([FromBody] ApproveClassForumPenddingCommand command)

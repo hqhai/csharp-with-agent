@@ -15,6 +15,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.CommandModels.ClassForumResults;
     using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Course.Lms.Application.Services.UserServices;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -27,13 +28,15 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
     {
         private readonly IClassForumResultRepository _classForumResultRepository;
         private readonly IMapper _mapper;
-        private AuthContext _authContext;
+        private readonly AuthContext _authContext;
+        private readonly IUserService _userService;
 
-        public ApproveClassForumPenddingCommandHandler(IClassForumResultRepository classForumResultRepository, IMapper mapper, AuthContext authContext)
+        public ApproveClassForumPenddingCommandHandler(IClassForumResultRepository classForumResultRepository, IMapper mapper, AuthContext authContext, IUserService userService)
         {
             _classForumResultRepository = classForumResultRepository;
             _mapper = mapper;
             _authContext = authContext;
+            _userService = userService;
         }
 
         public async Task<MethodResult<ClassForumResultModel>> Handle(ApproveClassForumPenddingCommand request, CancellationToken cancellationToken)
@@ -56,8 +59,20 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
             }
             await _classForumResultRepository.ExecuteTransactionAsync(async () =>
             {
-                classForumResult.Status = request.IsApprove ? EnumClassForumResultStatus.PendingForGrading : EnumClassForumResultStatus.Denied;
-                classForumResult.CheckCsoId = _authContext.CurrentUserId;
+                if (request.IsApprove)
+                {
+                    classForumResult.Status = EnumClassForumResultStatus.PendingForGrading;
+                    var csoResults = await _userService.GetCSOByUserId(_authContext.CurrentUserId);
+                    var csoId = csoResults.Content?.Result?.Id;
+                    classForumResult.CheckCsoId = csoId;
+                }
+                else
+                {
+                    classForumResult.Status = EnumClassForumResultStatus.Denied;
+                    classForumResult.CheckStartDate = null;
+                    classForumResult.CheckCsoId = null;
+                }
+
                 _classForumResultRepository.Update(classForumResult);
                 await _classForumResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
                 methodResult.StatusCode = StatusCodes.Status201Created;
