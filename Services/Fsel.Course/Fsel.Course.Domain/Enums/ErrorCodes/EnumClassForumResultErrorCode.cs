@@ -41,10 +41,10 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         /// <summary>
         /// Cso Id Invalid
         /// </summary>
-        CsoIdInvalid,
+        CsoInvalid,
         /// <summary>
         /// Teacher Id Invalid
         /// </summary>
-        TeacherIdInvalid,
+        TeacherInvalid,
     }
 }

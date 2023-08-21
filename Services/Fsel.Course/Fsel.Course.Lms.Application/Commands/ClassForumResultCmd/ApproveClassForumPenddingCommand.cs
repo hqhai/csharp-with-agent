@@ -64,7 +64,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
 
             if (classForumResult.CheckCsoId != csoId)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumClassForumResultErrorCode.CsoIdInvalid), nameof(classForumResult.CheckCsoId));
+                methodResult.AddErrorBadRequest(nameof(EnumClassForumResultErrorCode.CsoInvalid), nameof(classForumResult.CheckCsoId));
                 return methodResult;
             }
             await _classForumResultRepository.ExecuteTransactionAsync(async () =>
