@@ -46,10 +46,11 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 var extraPracticeResult = await _extraPracticeResultRepository.GetByIdAsync(extraPraticeExerciseResult.ExtraPracticeResultId);
                 var extraPracticeExerciseResults = await _extraPracticeExerciseResultRepository.Queryable
                                 .Where(x => x.ExtraPracticeResultId == extraPraticeExerciseResult.ExtraPracticeResultId && x.StudentId == extraPraticeExerciseResult.StudentId).ToListAsync(cancellationToken);
-                if (extraPracticeResult != null)
+                var extraPractice = await _extraPracticeRepository.GetByIdAsync(extraPracticeResult?.ExtraPracticeId ?? default);
+
+                if (extraPracticeResult != null && extraPractice != null)
                 {
-                    var extraPractice = await _extraPracticeRepository.GetByIdAsync(extraPracticeResult.ExtraPracticeId);
-                    if (extraPractice != null && extraPractice.Type == EnumExtraPracticeType.Book)
+                    if (extraPractice.Type == EnumExtraPracticeType.Book)
                     {
                         extraPractice = await _extraPracticeRepository.Queryable
                                                          .Include(x => x.ExtraPracticeChapters.Where(y => !y.IsDeleted))
@@ -62,59 +63,76 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                         if (extraPractice != null)
                         {
                             var extraPracticeChapters = extraPractice.ExtraPracticeChapters;
-                            var exerciseCount = extraPracticeChapters.SelectMany(x => x.ExtraPracticeExercises).Select(x => x.Exercise).Count();
-                            var resultCount = extraPracticeChapters.SelectMany(x => x.ExtraPracticeExercises).SelectMany(x => x.ExtraPracticeExerciseResults)
+                            var extraPracticeExercises = extraPracticeChapters.SelectMany(x => x.ExtraPracticeExercises).ToList();
+                            var extraPracticeExercise = extraPracticeExercises.FirstOrDefault(x => x.Id == extraPraticeExerciseResult.ExtraPracticeExerciseId);
+
+                            var exerciseCount = extraPracticeExercises.Select(x => x.Exercise).Count();
+                            var resultCount = extraPracticeExercises.SelectMany(x => x.ExtraPracticeExerciseResults)
                                                                                   .Where(y => y.StudentId == extraPracticeResult.StudentId && y.Status == EnumResultStatus.Done)
                                                                                   .Count();
-                            var exercise = extraPracticeChapters.FirstOrDefault(x => x.Id == extraPraticeExerciseResult.ExtraPracticeExerciseId);
-                            //var exerciseChapterCount = extraPracticeChapters.FirstOrDefault(x =>)
 
-                            if (exerciseCount == resultCount)
+                            if (extraPracticeExercise != null)
                             {
-                                await UpdateExtraPracticeResultTypeBook(extraPracticeResult, cancellationToken);
-                            }
-                            else
-                            {
-                                var extraPracticeExerciseResult = extraPractice!.ExtraPracticeChapters.SelectMany(x => x.ExtraPracticeExercises)
-                                                                        .SelectMany(x => x.ExtraPracticeExerciseResults)
-                                                                        .OrderBy(x => x.CreatedDate)
-                                                                        .FirstOrDefault(x => x.Status == EnumResultStatus.Unfinished);
-
-                                if (extraPracticeExerciseResult != null)
+                                var extraPracticeChapter = extraPracticeChapters.FirstOrDefault(x => x.Id == extraPracticeExercise.ExtraPracticeChapterId);
+                                var exerciseChapterCount = extraPracticeChapter?.ExtraPracticeExercises.Count;
+                                var resultChapterCount = extraPracticeChapter?.ExtraPracticeExercises.SelectMany(x => x.ExtraPracticeExerciseResults)
+                                                                                  .Where(y => y.StudentId == extraPracticeResult.StudentId && y.Status == EnumResultStatus.Done)
+                                                                                  .Count();
+                                if (resultChapterCount == exerciseChapterCount)
                                 {
-                                    extraPracticeExerciseResult.Status = EnumResultStatus.New;
-                                    _extraPracticeExerciseResultRepository.Update(extraPracticeExerciseResult);
-                                    await _extraPracticeExerciseResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                                    await UpdateExtraPracticeExerciseResultTypeBook(extraPracticeResult, cancellationToken);
+                                }
+                                else if (exerciseCount == resultCount)
+                                {
+                                    await UpdateExtraPracticeResultTypeBook(extraPracticeResult, cancellationToken);
+                                }
+                                else
+                                {
+                                    var extraPracticeExerciseResult = extraPractice!.ExtraPracticeChapters.SelectMany(x => x.ExtraPracticeExercises)
+                                                                            .SelectMany(x => x.ExtraPracticeExerciseResults)
+                                                                            .OrderBy(x => x.CreatedDate)
+                                                                            .FirstOrDefault(x => x.Status == EnumResultStatus.Unfinished);
+
+                                    if (extraPracticeExerciseResult != null)
+                                    {
+                                        extraPracticeExerciseResult.Status = EnumResultStatus.New;
+                                        _extraPracticeExerciseResultRepository.Update(extraPracticeExerciseResult);
+                                        await _extraPracticeExerciseResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                                    }
                                 }
                             }
                         }
                     }
-                    else if (extraPractice != null && extraPractice.Type == EnumExtraPracticeType.VideoEmbed)
+                    else if (extraPractice.Type == EnumExtraPracticeType.VideoEmbed)
                     {
                         extraPractice = await _extraPracticeRepository.Queryable.Include(x => x.ExtraPracticeExercises.Where(y => !y.IsDeleted))
                                                                 .ThenInclude(x => x.Exercise)
                                                              .Include(x => x.ExtraPracticeExercises.Where(y => !y.IsDeleted))
                                                                 .ThenInclude(x => x.ExtraPracticeExerciseResults)
                                                              .FirstOrDefaultAsync(x => x.Id == extraPracticeResult.ExtraPracticeId, cancellationToken);
+                        if (extraPractice != null)
+                        {
+                            var extraPracticeExercises = extraPractice.ExtraPracticeExercises;
+                            var exerciseCount = extraPracticeExercises.Select(x => x.Exercise).Count();
+                            var resultCount = extraPracticeExercises.SelectMany(x => x.ExtraPracticeExerciseResults)
+                                                                                  .Where(y => y.StudentId == extraPracticeResult.StudentId && y.Status == EnumResultStatus.Done)
+                                                                                  .Count();
 
-                        var exerciseCount = extraPractice!.ExtraPracticeExercises.Select(x => x.Exercise).Count();
-                        var resultCount = extraPractice.ExtraPracticeExercises.SelectMany(x => x.ExtraPracticeExerciseResults)
-                                                                              .Where(y => y.StudentId == extraPracticeResult.StudentId && y.Status == EnumResultStatus.Done)
-                                                                              .Count();
-                        if (exerciseCount == resultCount)
-                        {
-                            await UpdateExtraPracticeResult(extraPracticeResult, cancellationToken);
-                        }
-                        else
-                        {
-                            var extraPracticeExerciseResult = extraPractice.ExtraPracticeExercises.SelectMany(x => x.ExtraPracticeExerciseResults)
-                                                                    .OrderBy(x => x.CreatedDate)
-                                                                    .FirstOrDefault(x => x.Status == EnumResultStatus.Unfinished);
-                            if (extraPracticeExerciseResult != null)
+                            if (exerciseCount == resultCount)
                             {
-                                extraPracticeExerciseResult.Status = EnumResultStatus.New;
-                                _extraPracticeExerciseResultRepository.Update(extraPracticeExerciseResult);
-                                await _extraPracticeExerciseResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                                await UpdateExtraPracticeResult(extraPracticeResult, cancellationToken);
+                            }
+                            else
+                            {
+                                var extraPracticeExerciseResult = extraPractice.ExtraPracticeExercises.SelectMany(x => x.ExtraPracticeExerciseResults)
+                                                                        .OrderBy(x => x.CreatedDate)
+                                                                        .FirstOrDefault(x => x.Status == EnumResultStatus.Unfinished);
+                                if (extraPracticeExerciseResult != null)
+                                {
+                                    extraPracticeExerciseResult.Status = EnumResultStatus.New;
+                                    _extraPracticeExerciseResultRepository.Update(extraPracticeExerciseResult);
+                                    await _extraPracticeExerciseResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                                }
                             }
                         }
                     }
@@ -158,6 +176,27 @@ namespace Fsel.Course.Lms.Application.InternalEvents
 
             extraPracticeResult.CorrectCount = correctCounts.Sum(x => x.CorrectCount);
             extraPracticeResult.Status = EnumResultStatus.Done;
+            extraPracticeResult.Percent = extraPracticeResult.CorrectTotal > 0 ? (double)extraPracticeResult.CorrectCount / extraPracticeResult.CorrectTotal : 0;
+
+            _extraPracticeResultRepository.Update(extraPracticeResult);
+            await _extraPracticeResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+        }
+
+        public async Task UpdateExtraPracticeExerciseResultTypeBook(ExtraPracticeResult? extraPracticeResult, CancellationToken cancellationToken)
+        {
+            ArgumentNullException.ThrowIfNull(extraPracticeResult);
+            var correctCounts = from baseQ in _extraPracticeRepository.Queryable
+                                join ec in _extraPracticeChapterRepository.Queryable on baseQ.Id equals ec.ExtraPracticeId
+                                join ee in _extraPracticeExerciseRepository.Queryable on ec.Id equals ee.ExtraPracticeChapterId
+                                join eer in _extraPracticeExerciseResultRepository.Queryable on ee.Id equals eer.ExtraPracticeExerciseId
+                                join ea in _extraPracticeAnswerRepository.Queryable on eer.Id equals ea.ExtraPracticeExerciseResultId
+                                where baseQ.Id == extraPracticeResult.ExtraPracticeId
+                                select new
+                                {
+                                    CorrectCount = ea.CorrectCount
+                                };
+
+            extraPracticeResult.CorrectCount = correctCounts.Sum(x => x.CorrectCount);
             extraPracticeResult.Percent = extraPracticeResult.CorrectTotal > 0 ? (double)extraPracticeResult.CorrectCount / extraPracticeResult.CorrectTotal : 0;
 
             _extraPracticeResultRepository.Update(extraPracticeResult);
