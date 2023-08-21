@@ -61,6 +61,18 @@ namespace Fsel.System.Api.Controllers.Admins
         }
 
         /// <summary>
+        /// Get Quest Board By DependentId
+        /// </summary>
+        [HttpGet("dependent")]
+        [ProducesResponseType(typeof(MethodResult<IList<QuestBoardModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetQuestBoardByDependentId([FromRoute] Guid dependentId)
+        {
+            MethodResult<IList<QuestBoardModel>> commandResult = await _mediator.Send(new GetQuestBoardByDependentIdQuery { DependentId = dependentId }).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
         /// Active Quest Board
         /// </summary>
         [HttpPost("active")]
@@ -93,6 +105,18 @@ namespace Fsel.System.Api.Controllers.Admins
         public async Task<IActionResult> Delete([FromRoute] Guid id)
         {
             MethodResult<bool> commandResult = await _mediator.Send(new DeleteQuestBoardCommand { Id = id }).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Delete Quest Boards
+        /// </summary>
+        [HttpDelete]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> DeleteByIds([FromBody] DeleteQuestBoardsCommand command)
+        {
+            MethodResult<bool> commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
     }
