@@ -12,7 +12,9 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
     using Fsel.Core.Base;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Shared.Enums;
+    using Fsel.Shared.Enums.ErrorCodes;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -27,12 +29,14 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
         private readonly AuthContext _authContext;
         private readonly IClassForumResultRepository _classForumResultRepository;
         private readonly IMapper _mapper;
+        private readonly IUserService _userService;
 
-        public GetClassForumResultQueryHandler(AuthContext authContext, IClassForumResultRepository classForumResultRepository, IMapper mapper)
+        public GetClassForumResultQueryHandler(AuthContext authContext, IClassForumResultRepository classForumResultRepository, IMapper mapper, IUserService userService)
         {
             _authContext = authContext;
             _classForumResultRepository = classForumResultRepository;
             _mapper = mapper;
+            _userService = userService;
         }
 
         public async Task<MethodResult<ClassForumResultModel>> Handle(GetClassForumResultQuery request, CancellationToken cancellationToken)
@@ -59,13 +63,17 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
             }
             if (_authContext.Roles!.Contains(EnumRole.CSO.ToString()))
             {
-                classForumResult.CheckCsoId = _authContext.CurrentUserId;
+                var csoResults = await _userService.GetCSOByUserId(_authContext.CurrentUserId);
+                var csoId = csoResults.Content?.Result?.Id;
+                classForumResult.CheckCsoId = csoId;
                 classForumResult.CheckStartDate = DateTime.Now;
             }
 
             if (_authContext.Roles!.Contains(EnumRole.Teacher.ToString()))
             {
-                classForumResult.GradingTeacherId = _authContext.CurrentUserId;
+                var teacherResult = await _userService.GetTeacherByUserIdAsync(_authContext.CurrentUserId);
+                var teacherId = teacherResult.Content?.Result?.Id;
+                classForumResult.GradingTeacherId = teacherId;
                 classForumResult.GradingStartDate = DateTime.Now;
             }
 
