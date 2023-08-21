@@ -52,6 +52,12 @@ namespace Fsel.Course.Domain.Entities
         public LessonResult? LessonResult { get; set; }
         public string? FeedBackPositivesStr { get; set; }
 
+        public Guid? CheckCsoId { get; set; }
+
+        public DateTime? CheckStartDate { get; set; }
+
+        public DateTime? GradingStartDate { get; set; }
+
         [NotMapped]
         public IList<EnumFeedBackPositive>? FeedBackPositives
         {
