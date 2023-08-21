@@ -26,8 +26,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
         private readonly IClassForumResultRepository _classForumResultRepository;
         private readonly ITrainingService _trainingService;
 
-        public SearchClassForumResultQueryHandler(IClassForumResultRepository classForumResultRepository
-            , ITrainingService trainingService)
+        public SearchClassForumResultQueryHandler(IClassForumResultRepository classForumResultRepository, ITrainingService trainingService)
         {
             _classForumResultRepository = classForumResultRepository;
             _trainingService = trainingService;
@@ -44,11 +43,12 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
             }
 
             var classForumResultQuery = _classForumResultRepository.Queryable
-                                    .Include(x => x.ClassForum)
+                                    .Include(x => x.LessonResult)
                                     .ThenInclude(x => x!.Lesson)
                                     .ThenInclude(x => x!.UnitLessons)
                                     .ThenInclude(x => x.Unit)
                                     .ThenInclude(x => x!.CourseUnitMockTests)
+                                    .Include(x => x.ClassForum)
                                     .Where(x => x.Status != EnumClassForumResultStatus.Graded)
                                     .Select(x => new ClassForumResultSearchModel
                                     {
@@ -62,9 +62,10 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
                                             CreatedUserId = x.CreatedUserId,
                                             CreatedFullName = x.CreatedFullName,
                                         }).FirstOrDefault(),
+                                        CourseCode = x.LessonResult!.Course!.Code,
                                         LessonName = x.ClassForum!.Lesson!.Name,
-                                        LessonDisplayOrder = x.ClassForum!.Lesson.UnitLessons.Select(x =>x.DisplayOrder).FirstOrDefault(),
-                                        UnitDisplayOrder = x.ClassForum.Lesson.UnitLessons.Select(x => x.Unit).SelectMany(x => x.CourseUnitMockTests).Select(x => x.DisplayOrder).FirstOrDefault(),
+                                        LessonDisplayOrder = x.LessonResult!.Lesson!.UnitLessons.Where(y => y.UnitId == x.LessonResult.UnitId).Select(x => x.DisplayOrder).FirstOrDefault(),
+                                        UnitDisplayOrder = x.LessonResult.Unit!.CourseUnitMockTests.Where(y => y.CourseId == x.LessonResult.CourseId).Select(x => x.DisplayOrder).FirstOrDefault(),
                                         UnitName = x.ClassForum.Lesson.UnitLessons.Select(x => x.Unit).Select(x => x!.Name).FirstOrDefault(),
                                         TeacherId = x.GradingTeacherId
                                     });
