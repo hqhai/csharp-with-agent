@@ -48,7 +48,7 @@ namespace Fsel.System.Domain.Entities
         /// <summary>
         /// Ngày kết thúc
         /// </summary>
-        public DateTime EndDate { get; set; }
+        public DateTime? EndDate { get; set; }
 
         /// <summary>
         /// Tổng số sao đạt được
@@ -56,9 +56,14 @@ namespace Fsel.System.Domain.Entities
         public int NumberOfStars { get; set; }
 
         /// <summary>
+        /// Check nhiệm vụ không thời hạn
+        /// </summary>
+        public bool IsLifeTime { get; set; }
+
+        /// <summary>
         /// Lặp lại theo
         /// </summary>
-        public EnumRepeatType RepeatType { get; set; }
+        public EnumRepeatType? RepeatType { get; set; }
 
         /// <summary>
         /// Loại Package
@@ -69,7 +74,11 @@ namespace Fsel.System.Domain.Entities
         [NotMapped]
         public IList<Guid>? PackageIds
         {
-            get { return ConvertHelper.Deserialize<IList<Guid>>(PackageIdsStr); }
+            get
+            {
+                var a = ConvertHelper.Deserialize<IList<Guid>>(PackageIdsStr);
+                return a;
+            }
             set { PackageIdsStr = ConvertHelper.Serialize(value); }
         }
 
@@ -88,6 +97,6 @@ namespace Fsel.System.Domain.Entities
         /// </summary>
         public Guid? DependentId { get; set; }
 
-        public ICollection<QuestBoardTask> QuestBoardTasks { get; set; } = new List<QuestBoardTask>();
+        public ICollection<QuestBoardStudent> QuestBoardStudents { get; set; } = new List<QuestBoardStudent>();
     }
 }

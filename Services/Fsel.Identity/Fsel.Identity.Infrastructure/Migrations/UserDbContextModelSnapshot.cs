@@ -416,6 +416,9 @@ namespace Fsel.Identity.Infrastructure.Migrations
                         .HasColumnType("bit")
                         .HasColumnOrder(110);
 
+                    b.Property<long>("NumberOfToken")
+                        .HasColumnType("bigint");
+
                     b.Property<string>("Occupation")
                         .HasMaxLength(250)
                         .HasColumnType("nvarchar(250)");

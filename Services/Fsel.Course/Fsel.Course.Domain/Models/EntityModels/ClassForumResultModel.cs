@@ -38,11 +38,20 @@ namespace Fsel.Course.Domain.Models.EntityModels
 
         public string? GradingAlFeedback { get; set; }
 
+        public Guid? CheckCsoId { get; set; }
+
+        public DateTime? CheckStartDate { get; set; }
+
+        public DateTime? GradingStartDate { get; set; }
+
         public EnumCourseLevel CourseLevel { get; set; }
 
         public ClassForumModel? ClassForum { get; set; }
 
         public LessonResultModel? LessonResult { get; set; }
+        public string? CourseCode { get; set; }
+        public int LessonDisplayOrder { get; set; }
+        public int UnitDisplayOrder { get; set; }
         public IList<EnumFeedBackPositive>? FeedBackPositives { get; set; }
         public IList<EnumFeedBackNegative>? FeedBackNegatives { get; set; }
         public IList<ClassForumResultFileModel>? ClassForumResultFiles { get; set; }

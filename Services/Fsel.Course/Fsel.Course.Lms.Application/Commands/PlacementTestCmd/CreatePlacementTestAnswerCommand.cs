@@ -62,7 +62,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
 
             #region Validation
 
-            if (request.Skills == null || request.Skills.Any(x => x.Answers == null || x.Answers.Count == 0))
+            if (request.Skills == null || request.Skills.Count == 0 || request.Skills.Any(x => x.Answers == null || x.Answers.Count == 0))
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Skills));
                 return methodResult;
@@ -75,7 +75,12 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
             }
 
             var studentId = student?.Content?.Result?.Id;
-
+            var placementTestResults = await _placementTestResultRepository.Queryable.Where(x => x.Status == EnumResultStatus.Done && x.StudentId == studentId).ToListAsync(cancellationToken);
+            if (placementTestResults.Count >= 3)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumPlacementTestErrorCode.PlacementTestResultMaxThree), nameof(placementTestResults));
+                return methodResult;
+            }
             var placementTestResult = await _placementTestResultRepository.Queryable.FirstOrDefaultAsync(x => x.Level == request.Level && x.Status == EnumResultStatus.Process, cancellationToken);
             if (placementTestResult == null)
             {
@@ -148,7 +153,15 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
                         placementTestAnswers.Add(placementTestAnswer);
                     }
                 }
-                var skillScore = new SkillScores { Skill = item.Skill, TotalCount = questions.Sum(x => x.CorrectTotal), CorrectCount = count, Percent = questions.Sum(x => x.CorrectTotal) > 0 ? (double)count / questions.Sum(x => x.CorrectTotal) * 100 : default };
+                var skillScore = new SkillScores
+                {
+                    Skill = item.Skill,
+                    CountQuestion = item.Answers.Count,
+                    TotalQuestion = questions.Count,
+                    TotalCount = questions.Sum(x => x.CorrectTotal),
+                    CorrectCount = count,
+                    Percent = questions.Sum(x => x.CorrectTotal) > 0 ? (double)count / questions.Sum(x => x.CorrectTotal) * 100 : default
+                };
                 if (placementTestResult.Level == EnumPlacementTestLevel.IELTS)
                 {
                     skillScore.Scores = skillScore.CorrectCount.GetIeltsScore(skillScore.Skill);
@@ -181,8 +194,6 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
                     methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError));
                 }
             }
-
-            var placementTestResults = await _placementTestResultRepository.Queryable.Where(x => x.Status == EnumResultStatus.Done && x.StudentId == studentId).ToListAsync(cancellationToken);
 
             await _placementTestAnswerRepository.ExecuteTransactionAsync(async () =>
             {

@@ -9,20 +9,20 @@ namespace Fsel.System.Infrastructure.Configs
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-    public class QuestBoardTaskStudentConfigConfiguration : IEntityTypeConfiguration<QuestBoardTaskStudent>
+    public class QuestBoardStudentConfigConfiguration : IEntityTypeConfiguration<QuestBoardStudent>
     {
-        public void Configure(EntityTypeBuilder<QuestBoardTaskStudent> builder)
+        public void Configure(EntityTypeBuilder<QuestBoardStudent> builder)
         {
             ArgumentNullException.ThrowIfNull(builder);
             builder.Property(e => e.Status)
                 .HasMaxLength(100)
                 .HasConversion(
                     v => v.ToString(),
-                    v => v.EnumParse<EnumQuestBoardStatus>());
+                    v => v.EnumParse<EnumQuestBoardStudentStatus>());
 
-            builder.HasOne(a => a.QuestBoardTask)
-                    .WithMany(b => b.QuestBoardTaskStudents)
-                    .HasForeignKey(b => b.QuestBoardTaskId)
+            builder.HasOne(a => a.QuestBoard)
+                    .WithMany(b => b.QuestBoardStudents)
+                    .HasForeignKey(b => b.QuestBoardId)
                     .OnDelete(DeleteBehavior.Cascade);
         }
     }

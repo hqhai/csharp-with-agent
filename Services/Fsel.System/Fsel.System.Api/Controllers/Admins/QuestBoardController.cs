@@ -45,9 +45,9 @@ namespace Fsel.System.Api.Controllers.Admins
         [HttpGet("list-quest-board-active")]
         [ProducesResponseType(typeof(MethodResult<IList<QuestBoardSearchModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> Gets()
+        public async Task<IActionResult> Gets([FromQuery] GetQuestBoardsActiveByAdminQuery query)
         {
-            var queryResult = await _mediator.Send(new GetQuestBoardsActiveByAdminQuery()).ConfigureAwait(false);
+            var queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
 
@@ -60,6 +60,18 @@ namespace Fsel.System.Api.Controllers.Admins
         public async Task<IActionResult> Get([FromRoute] Guid id)
         {
             MethodResult<QuestBoardModel> commandResult = await _mediator.Send(new GetQuestBoardByAdminQuery { Id = id }).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Get Quest Board By DependentId
+        /// </summary>
+        [HttpGet("get-list-by-dependent/{dependentId}")]
+        [ProducesResponseType(typeof(MethodResult<IList<QuestBoardModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetQuestBoardByDependentId([FromRoute] Guid dependentId)
+        {
+            MethodResult<IList<QuestBoardModel>> commandResult = await _mediator.Send(new GetQuestBoardByDependentIdQuery { DependentId = dependentId }).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
 
@@ -88,20 +100,6 @@ namespace Fsel.System.Api.Controllers.Admins
         }
 
         /// <summary>
-        /// Update Quest Board
-        /// </summary>
-        [HttpPut("{id}")]
-        [ProducesResponseType(typeof(MethodResult<QuestBoardModel>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> Update([FromRoute] Guid id, [FromBody] UpdateQuestBoardCommand command)
-        {
-            ArgumentNullException.ThrowIfNull(command);
-            command.Id = id;
-            MethodResult<QuestBoardModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
-            return commandResult.GetActionResult();
-        }
-
-        /// <summary>
         /// Delete Quest Board
         /// </summary>
         [HttpDelete("{id}")]
@@ -110,6 +108,18 @@ namespace Fsel.System.Api.Controllers.Admins
         public async Task<IActionResult> Delete([FromRoute] Guid id)
         {
             MethodResult<bool> commandResult = await _mediator.Send(new DeleteQuestBoardCommand { Id = id }).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Delete Quest Boards
+        /// </summary>
+        [HttpDelete]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> DeleteByIds([FromBody] DeleteQuestBoardsCommand command)
+        {
+            MethodResult<bool> commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
     }

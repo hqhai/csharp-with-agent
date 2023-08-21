@@ -6,9 +6,9 @@ namespace Fsel.System.Infrastructure.Repositories
     using Fsel.System.Domain.Entities;
     using Fsel.System.Domain.IRepositories;
 
-    public class QuestBoardTaskRepository : BaseRepository<QuestBoardTask>, IQuestBoardTaskRepository
+    public class QuestBoardStudentRepository : BaseRepository<QuestBoardStudent>, IQuestBoardStudentRepository
     {
-        public QuestBoardTaskRepository(SystemDbContext dbContext, AuthContext authContext) : base(dbContext, authContext)
+        public QuestBoardStudentRepository(SystemDbContext dbContext, AuthContext authContext) : base(dbContext, authContext)
         {
         }
     }

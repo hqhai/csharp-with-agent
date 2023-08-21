@@ -22,6 +22,7 @@ namespace Fsel.Identity.Domain.Entities
         public EnumCourseLevel CourseLevel { get; set; }
 
         public bool CreatedByParent { get; set; }
+        public long NumberOfToken { get; set; }
 
         public Guid? ClassId { get; set; }
 

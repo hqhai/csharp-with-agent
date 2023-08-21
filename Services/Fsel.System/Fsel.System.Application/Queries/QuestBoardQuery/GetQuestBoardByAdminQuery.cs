@@ -9,7 +9,6 @@ namespace Fsel.System.Application.Queries.QuestBoardQuery
     using Fsel.System.Domain.Models.EntityModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
-    using Microsoft.EntityFrameworkCore;
 
     public class GetQuestBoardByAdminQuery : IRequest<MethodResult<QuestBoardModel>>
     {
@@ -31,7 +30,7 @@ namespace Fsel.System.Application.Queries.QuestBoardQuery
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<QuestBoardModel>();
-            var questBoard = await _questBoardRepository.Queryable.Include(x => x.QuestBoardTasks.OrderBy(x => x.ImplementDate)).FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
+            var questBoard = await _questBoardRepository.GetByIdAsync(request.Id);
             if (questBoard == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(questBoard));
