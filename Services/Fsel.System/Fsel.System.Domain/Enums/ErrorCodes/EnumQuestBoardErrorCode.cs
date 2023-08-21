@@ -13,5 +13,10 @@ namespace Fsel.System.Domain.Enums.ErrorCodes
         /// EndtDate Must More than StartDate
         /// </summary>
         EndtDateMustMorethanStartDate,
+
+        /// <summary>
+        /// QuestBoardStudent Status Done
+        /// </summary>
+        QuestBoardStudentStatusDone
     }
 }

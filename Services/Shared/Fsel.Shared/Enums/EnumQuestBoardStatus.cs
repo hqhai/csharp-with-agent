@@ -6,6 +6,7 @@ namespace Fsel.Shared.Enums
     {
         New,
         Process,
-        Done
+        Done,
+        Completed
     }
 }

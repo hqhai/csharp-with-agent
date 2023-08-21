@@ -2,49 +2,87 @@
 
 namespace Fsel.System.Application.Commands.QuestBoardStudentCmd
 {
-    using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Core.Base;
+    using Fsel.Shared.Enums;
+    using Fsel.Shared.Enums.ErrorCodes;
+    using Fsel.System.Application.Services.UserServices;
+    using Fsel.System.Domain.Enums.ErrorCodes;
     using Fsel.System.Domain.IRepositories;
-    using Fsel.System.Domain.Models.EntityModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
+    using Microsoft.EntityFrameworkCore;
 
-    public class QuestRewardCommand : IRequest<MethodResult<QuestBoardModel>>
+    public class QuestRewardCommand : IRequest<MethodResult<bool>>
     {
         public Guid Id { get; set; }
     }
 
-    public class QuestRewardCommandHandler : IRequestHandler<QuestRewardCommand, MethodResult<QuestBoardModel>>
+    public class QuestRewardCommandHandler : IRequestHandler<QuestRewardCommand, MethodResult<bool>>
     {
-        private readonly IMapper _mapper;
+        private readonly AuthContext _authContext;
+        private readonly IUserService _userService;
+        private readonly IQuestBoardStudentRepository _questBoardStudentRepository;
         private readonly IQuestBoardRepository _questBoardRepository;
 
-        public QuestRewardCommandHandler(IMapper mapper
+        public QuestRewardCommandHandler(AuthContext authContext
+            , IUserService userService
+            , IQuestBoardStudentRepository questBoardStudentRepository
             , IQuestBoardRepository questBoardRepository)
         {
-            _mapper = mapper;
+            _authContext = authContext;
+            _userService = userService;
+            _questBoardStudentRepository = questBoardStudentRepository;
             _questBoardRepository = questBoardRepository;
         }
 
-        public async Task<MethodResult<QuestBoardModel>> Handle(QuestRewardCommand request, CancellationToken cancellationToken)
+        public async Task<MethodResult<bool>> Handle(QuestRewardCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            var methodResult = new MethodResult<QuestBoardModel>();
-
+            var methodResult = new MethodResult<bool>();
+            var studentResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
+            if (!studentResult.IsSuccessStatusCode)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError), nameof(studentResult));
+                return methodResult;
+            }
+            var student = studentResult?.Content?.Result;
+            if (student == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student));
+                return methodResult;
+            }
             var questBoard = await _questBoardRepository.GetByIdAsync(request.Id);
             if (questBoard == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(questBoard));
                 return methodResult;
             }
-            await _questBoardRepository.ExecuteTransactionAsync(async () =>
+            var questBoardStudent = await _questBoardStudentRepository.Queryable.FirstOrDefaultAsync(x => x.QuestBoardId == request.Id && x.StudentId == student.Id, cancellationToken);
+            if (questBoardStudent == null)
             {
-                questBoard = _questBoardRepository.Update(questBoard);
-                await _questBoardRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
-
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(questBoardStudent));
+                return methodResult;
+            }
+            if (questBoardStudent.Status != EnumQuestBoardStatus.Done)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumQuestBoardErrorcode.QuestBoardStudentStatusDone), nameof(questBoardStudent));
+                return methodResult;
+            }
+            questBoardStudent.Status = EnumQuestBoardStatus.Completed;
+            var updateTokenStudent = await _userService.UpdateStudentByTokenAsync(new Services.UserServices.Models.UpdateStudentByTokenModel { NumberOfToken = questBoard.NumberOfStars, StudentId = student.Id });
+            if (!updateTokenStudent.IsSuccessStatusCode)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError), nameof(updateTokenStudent));
+                return methodResult;
+            }
+            await _questBoardStudentRepository.ExecuteTransactionAsync(async () =>
+            {
+                questBoardStudent = _questBoardStudentRepository.Update(questBoardStudent);
+                await _questBoardStudentRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
                 methodResult.StatusCode = StatusCodes.Status200OK;
-                methodResult.Result = _mapper.Map<QuestBoardModel>(questBoard);
+                methodResult.Result = true;
                 return methodResult;
             });
 

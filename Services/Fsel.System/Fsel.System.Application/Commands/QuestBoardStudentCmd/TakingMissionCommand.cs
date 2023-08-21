@@ -2,49 +2,82 @@
 
 namespace Fsel.System.Application.Commands.QuestBoardStudentCmd
 {
-    using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Core.Base;
+    using Fsel.Shared.Enums;
+    using Fsel.Shared.Enums.ErrorCodes;
+    using Fsel.System.Application.Services.UserServices;
+    using Fsel.System.Domain.Entities;
     using Fsel.System.Domain.IRepositories;
-    using Fsel.System.Domain.Models.EntityModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
+    using Microsoft.EntityFrameworkCore;
 
-    public class TakingMissionCommand : IRequest<MethodResult<QuestBoardModel>>
+    public class TakingMissionCommand : IRequest<MethodResult<bool>>
     {
         public Guid Id { get; set; }
     }
 
-    public class TakingMissionCommandHandler : IRequestHandler<TakingMissionCommand, MethodResult<QuestBoardModel>>
+    public class TakingMissionCommandHandler : IRequestHandler<TakingMissionCommand, MethodResult<bool>>
     {
-        private readonly IMapper _mapper;
+        private readonly IUserService _userService;
         private readonly IQuestBoardRepository _questBoardRepository;
+        private readonly IQuestBoardStudentRepository _questBoardStudentRepository;
+        private readonly AuthContext _authContext;
 
-        public TakingMissionCommandHandler(IMapper mapper
-            , IQuestBoardRepository questBoardRepository)
+        public TakingMissionCommandHandler(IUserService userService
+            , IQuestBoardRepository questBoardRepository
+            , IQuestBoardStudentRepository questBoardStudentRepository
+            , AuthContext authContext)
         {
-            _mapper = mapper;
+            _userService = userService;
             _questBoardRepository = questBoardRepository;
+            _questBoardStudentRepository = questBoardStudentRepository;
+            _authContext = authContext;
         }
 
-        public async Task<MethodResult<QuestBoardModel>> Handle(TakingMissionCommand request, CancellationToken cancellationToken)
+        public async Task<MethodResult<bool>> Handle(TakingMissionCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            var methodResult = new MethodResult<QuestBoardModel>();
-
+            var methodResult = new MethodResult<bool>();
+            var studentResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
+            if (!studentResult.IsSuccessStatusCode)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError), nameof(studentResult));
+                return methodResult;
+            }
+            var student = studentResult?.Content?.Result;
+            if (student == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student));
+                return methodResult;
+            }
             var questBoard = await _questBoardRepository.GetByIdAsync(request.Id);
             if (questBoard == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(questBoard));
                 return methodResult;
             }
-            await _questBoardRepository.ExecuteTransactionAsync(async () =>
+            var questBoardStudent = await _questBoardStudentRepository.Queryable.FirstOrDefaultAsync(x => x.QuestBoardId == request.Id && x.StudentId == student.Id, cancellationToken);
+            if (questBoardStudent != null)
             {
-                questBoard = _questBoardRepository.Update(questBoard);
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(questBoardStudent));
+                return methodResult;
+            }
+            questBoardStudent = new QuestBoardStudent
+            {
+                QuestBoardId = request.Id,
+                StudentId = student.Id,
+                Status = EnumQuestBoardStatus.New
+            };
+            await _questBoardStudentRepository.ExecuteTransactionAsync(async () =>
+            {
+                questBoardStudent = _questBoardStudentRepository.Add(questBoardStudent);
                 await _questBoardRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
-                methodResult.StatusCode = StatusCodes.Status200OK;
-                methodResult.Result = _mapper.Map<QuestBoardModel>(questBoard);
+                methodResult.StatusCode = StatusCodes.Status201Created;
+                methodResult.Result = true;
                 return methodResult;
             });
 
