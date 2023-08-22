@@ -102,15 +102,18 @@ namespace Fsel.Course.Application.Commands.PlacementTestCmd
 
             await _placementTestRepository.ExecuteTransactionAsync(async () =>
             {
-                placementTest.ExtraPractice = new ExtraPractice
+                if (placementTest.Level == EnumPlacementTestLevel.IELTS)
                 {
-                    Code = placementTest.Name,
-                    Name = placementTest.Name,
-                    IsActive = placementTest.IsActive,
-                    InstructionContent = placementTest.InstructionContent,
-                    Type = EnumExtraPracticeType.MockTest,
-                    CourseLevel = placementTest.Level.GetCourseLevelByPlacementTestLevel()
-                };
+                    placementTest.ExtraPractice = new ExtraPractice
+                    {
+                        Code = placementTest.Name,
+                        Name = placementTest.Name,
+                        IsActive = placementTest.IsActive,
+                        InstructionContent = placementTest.InstructionContent,
+                        Type = EnumExtraPracticeType.MockTest,
+                        CourseLevel = placementTest.Level.GetCourseLevelByPlacementTestLevel()
+                    };
+                }
 
                 placementTest = _placementTestRepository.Add(placementTest);
                 await _placementTestRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
