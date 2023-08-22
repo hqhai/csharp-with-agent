@@ -17,6 +17,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public EnumCourseLevel CourseLevel { get; set; }
         public IList<EnumCourseSkill>? CourseSkills { get; set; }
         public ExtraPracticeResultModel? ExtraPracticeResult { get; set; }
+        public EnumResultStatus Status { get; set; }
         public Guid? UnitId { get; set; }
         public string? NameUnit { get; set; }
         public long? AccessCount { get; set; }
