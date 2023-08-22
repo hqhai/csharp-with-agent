@@ -28,6 +28,30 @@ namespace Fsel.Course.Lms.Api.Controllers
         }
 
         /// <summary>
+        /// Search ExtraPractice
+        /// </summary>
+        [HttpGet]
+        [ProducesResponseType(typeof(MethodResult<PagingItemsModel<ExtraPracticeSearchModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> Search([FromQuery] SearchExtraPracticeQuery query)
+        {
+            MethodResult<PagingItemsModel<ExtraPracticeSearchModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Search ExtraPractice Suggest
+        /// </summary>
+        [HttpGet("suggest")]
+        [ProducesResponseType(typeof(MethodResult<PagingItemsModel<ExtraPracticeSearchModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> SearchSuggest([FromQuery] SearchSuggestExtraPracticeQuery query)
+        {
+            MethodResult<PagingItemsModel<ExtraPracticeSuggestModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
         /// Get Filter
         /// </summary>
         [HttpGet("level-units")]
@@ -42,36 +66,156 @@ namespace Fsel.Course.Lms.Api.Controllers
         /// <summary>
         /// Get And Start ExtraPractice
         /// </summary>
-        [HttpGet("start-extraPractice/{id}")]
-        [ProducesResponseType(typeof(MethodResult<ExtraPracticeModel>), (int)HttpStatusCode.OK)]
+        [HttpGet("start-extra-practice/{id}")]
+        [ProducesResponseType(typeof(MethodResult<ExtraPracticeResultModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetAndStartExtraPractice([FromRoute] Guid id)
         {
-            MethodResult<ExtraPracticeModel> queryResult = await _mediator.Send(new StartExtraPracticeCommand { ExtraPracticeId = id }).ConfigureAwait(false);
+            MethodResult<ExtraPracticeResultModel> queryResult = await _mediator.Send(new StartExtraPracticeCommand { ExtraPracticeId = id }).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
 
         /// <summary>
-        /// Search ExtraPractice
+        /// Get ExtraPractice Detail
         /// </summary>
-        [HttpGet()]
-        [ProducesResponseType(typeof(MethodResult<PagingItemsModel<ExtraPracticeSearchModel>>), (int)HttpStatusCode.OK)]
+        [HttpGet("{id}")]
+        [ProducesResponseType(typeof(MethodResult<ExtraPracticeModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> Search([FromQuery] SearchExtraPracticeQuery query)
+        public async Task<IActionResult> GetExtraPracticeDetail([FromRoute] Guid id)
         {
-            MethodResult<PagingItemsModel<ExtraPracticeSearchModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            MethodResult<ExtraPracticeModel> queryResult = await _mediator.Send(new GetExtraPracticeDetailQuery { ExtraPracticeId = id }).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
 
         /// <summary>
-        /// Create ExtraPractice Answer
+        /// Get ExtraPractice Detail MockTest
         /// </summary>
-        [HttpPost("create-extraPractice-answer")]
+        [HttpGet("get-detail-mock-test")]
+        [ProducesResponseType(typeof(MethodResult<ExtraPracticeModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetExtraPracticeDetailMockTest([FromQuery] GetMockTestByExtraPracticeQuery query)
+        {
+            MethodResult<ExtraPracticeModel> queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Get ExtraPractice Detail PlacementTest
+        /// </summary>
+        [HttpGet("get-detail-placement-test")]
+        [ProducesResponseType(typeof(MethodResult<ExtraPracticeModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetExtraPracticeDetailPlacementTest([FromQuery] GetPlacementTestByExtraPracticeQuery query)
+        {
+            MethodResult<ExtraPracticeModel> queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Get TimeCodes Detail by ExtraPractice
+        /// </summary>
+        [HttpGet("get-detail-time-code")]
+        [ProducesResponseType(typeof(MethodResult<VideoTimeCodeModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetTimeCodeByExtraPractice([FromQuery] GetTimeCodeDetailByExtraPracticeQuery query)
+        {
+            MethodResult<VideoTimeCodeModel> queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Get Exercise By ExtraPractice
+        /// </summary>
+        [HttpGet("get-exercises")]
+        [ProducesResponseType(typeof(MethodResult<IList<ExtraPracticeExerciseModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetExerciseByExtraPractice([FromQuery] GetExerciseByExtraPracticeQuery query)
+        {
+            MethodResult<IList<ExtraPracticeExerciseModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Get ExtraPractice Detail Questions
+        /// </summary>
+        [HttpGet("get-questions")]
+        [ProducesResponseType(typeof(MethodResult<ExerciseModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetExtraPracticeDetailQuestions([FromQuery] GetQuestionByExtraPracticeQuery query)
+        {
+            MethodResult<ExerciseModel> queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Get ExtraPractice Detail Questions
+        /// </summary>
+        [HttpGet("report-test")]
+        [ProducesResponseType(typeof(MethodResult<ExtraPracticeResultModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetReportTest([FromQuery] GetReportTestExtraPracticeQuery query)
+        {
+            MethodResult<ExtraPracticeResultModel> queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Create ExtraPractice Answer Book
+        /// </summary>
+        [HttpPost("create-answer-book")]
         [ProducesResponseType(typeof(MethodResult<ExtraPracticeExerciseResultModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> CreateAnswer([FromBody] CreateExtraPracticeAnswerCommand command)
+        public async Task<IActionResult> CreateAnswerBook([FromBody] CreateExtraPracticeAnswerBookCommand command)
         {
             MethodResult<ExtraPracticeExerciseResultModel> queryResult = await _mediator.Send(command).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Create ExtraPractice Answer MockTest
+        /// </summary>
+        [HttpPost("create-answer-mock-test")]
+        [ProducesResponseType(typeof(MethodResult<ExtraPracticeResultModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> CreateAnswerMockTest([FromBody] CreateExtraPracticeAnswerMockTestCommand command)
+        {
+            MethodResult<ExtraPracticeResultModel> queryResult = await _mediator.Send(command).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Create ExtraPractice Answer PlacementTest
+        /// </summary>
+        [HttpPost("create-answer-placement-test")]
+        [ProducesResponseType(typeof(MethodResult<ExtraPracticeResultModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> CreateAnswerPlacementTest([FromBody] CreateExtraPracticeAnswerPlacementTestCommand command)
+        {
+            MethodResult<ExtraPracticeResultModel> queryResult = await _mediator.Send(command).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Create ExtraPractice Answer Video
+        /// </summary>
+        [HttpPost("create-answer-video")]
+        [ProducesResponseType(typeof(MethodResult<ExtraPracticeResultModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> CreateAnswerVideo([FromBody] CreateExtraPracticeAnswerVideoCommand command)
+        {
+            MethodResult<ExtraPracticeResultModel> queryResult = await _mediator.Send(command).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Restart ExtraPractice Answer Video
+        /// </summary>
+        [HttpPost("restart-answer-video")]
+        [ProducesResponseType(typeof(MethodResult<ExtraPracticeResultModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> RestartAnswerVideo([FromBody] RestartExtraPracticeAnswerVideoCommand command)
+        {
+            MethodResult<ExtraPracticeResultModel> queryResult = await _mediator.Send(command).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
     }
