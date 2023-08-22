@@ -91,7 +91,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                                     var extraPracticeExerciseResult = extraPractice!.ExtraPracticeChapters.SelectMany(x => x.ExtraPracticeExercises)
                                                                             .SelectMany(x => x.ExtraPracticeExerciseResults)
                                                                             .OrderBy(x => x.CreatedDate)
-                                                                            .FirstOrDefault(x => x.Status == EnumResultStatus.Unfinished);
+                                                                            .FirstOrDefault(x => x.ExecuteCount == 0);
 
                                     if (extraPracticeExerciseResult != null)
                                     {

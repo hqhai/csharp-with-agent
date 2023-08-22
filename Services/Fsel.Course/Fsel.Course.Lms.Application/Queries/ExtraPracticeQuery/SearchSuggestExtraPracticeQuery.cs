@@ -40,7 +40,7 @@ namespace Fsel.Course.Lms.Application.Queries.ExtraPracticeQuery
             }
             var random = new Random();
             var extraPracticeQuery = _extraPracticeRepository.Queryable
-                                     .Where(x => x.IsActive && x.Type == extraPractice.Type)
+                                     .Where(x => x.IsActive && x.Type == extraPractice.Type && x.Id != request.ExtraPracticeId)
                                      .AsNoTracking()
                                      .Select(x => new ExtraPracticeSuggestModel
                                      {
