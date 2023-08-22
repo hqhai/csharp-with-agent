@@ -174,7 +174,7 @@ namespace Fsel.Course.Lms.Application.Queries.ExtraPracticeQuery
             switch (extraPractice.Type)
             {
                 case EnumExtraPracticeType.Book:
-                    courseSkills = extraPractice.ExtraPracticeChapters.SelectMany(x => x.ExtraPracticeExercises).Select(x => x.Exercise).Distinct().Select(x => x!.CourseSkill).ToList();
+                    courseSkills = extraPractice.ExtraPracticeChapters.SelectMany(x => x.ExtraPracticeExercises).Select(x => x.Exercise).Select(x => x!.CourseSkill).Distinct().ToList();
                     break;
 
                 case EnumExtraPracticeType.VideoEmbed:
