@@ -31,7 +31,7 @@ namespace Fsel.Course.Lms.Api.Controllers
         [HttpGet("get-list-course-teacher")]
         [ProducesResponseType(typeof(MethodResult<IList<CourseModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetLIstCourseTeacher([FromQuery] GetListCourseTeacherQuery query)
+        public async Task<IActionResult> GetListCourseTeacher([FromQuery] GetListCourseTeacherQuery query)
         {
             MethodResult<IList<CourseModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
