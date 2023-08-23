@@ -51,12 +51,12 @@ namespace Fsel.Course.Lms.Api.Controllers
         //}
 
         /// <summary>
-        /// Setting Student
+        /// Student Setting
         /// </summary>
-        [HttpGet("setting-student")]
+        [HttpGet("student-setting")]
         [ProducesResponseType(typeof(MethodResult<StudentSettingModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> SettingStudent()
+        public async Task<IActionResult> StudentSetting()
         {
             MethodResult<StudentSettingModel> queryResult = await _mediator.Send(new GetStudentSettingQuery()).ConfigureAwait(false);
             return queryResult.GetActionResult();
