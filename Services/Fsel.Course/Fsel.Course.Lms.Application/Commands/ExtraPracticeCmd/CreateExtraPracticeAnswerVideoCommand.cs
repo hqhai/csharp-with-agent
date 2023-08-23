@@ -174,14 +174,14 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
             VoidMethodResult methodResult = new VoidMethodResult();
             var extraPracticeAnswer = await _extraPracticeAnswerRepository.Queryable
                                  .FirstOrDefaultAsync(x => x.QuestionId == extraPracticeAnswerQuestion.QuestionId && x.ExtraPracticeResultId == extraPracticeResult.Id, cancellationToken);
+            var (answerConfig, correctCount) = _answerTypeConverter.GetTotalCorrectByAsnwerType(extraPracticeAnswerQuestion.Answer, question.Config, question.QuestionType);
+            if (answerConfig == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumExtraPracticeErrorCode.AnswerIsInTheWrongFormat), nameof(extraPracticeAnswerQuestion.Answer), extraPracticeAnswerQuestion.Answer);
+                return methodResult;
+            }
             if (extraPracticeAnswer == null)
             {
-                var (answerConfig, correctCount) = _answerTypeConverter.GetTotalCorrectByAsnwerType(extraPracticeAnswerQuestion.Answer, question.Config, question.QuestionType);
-                if (answerConfig == null)
-                {
-                    methodResult.AddErrorBadRequest(nameof(EnumExtraPracticeErrorCode.AnswerIsInTheWrongFormat), nameof(extraPracticeAnswerQuestion.Answer), extraPracticeAnswerQuestion.Answer);
-                    return methodResult;
-                }
                 extraPracticeResult.ExtraPracticeAnswers.Add(new ExtraPracticeAnswer
                 {
                     Answer = answerConfig,
@@ -189,6 +189,12 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
                     ExtraPracticeResultId = extraPracticeResult.Id,
                     QuestionId = extraPracticeAnswerQuestion.QuestionId
                 });
+            }
+            else
+            {
+                extraPracticeAnswer.Answer = answerConfig;
+                extraPracticeAnswer.CorrectCount = correctCount;
+                extraPracticeResult.ExtraPracticeAnswers.Add(extraPracticeAnswer);
             }
             return methodResult;
         }
