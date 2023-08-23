@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Course.Lms.Application.Queries.SettingStudentQuery
+namespace Fsel.Course.Lms.Application.Queries.Students
 {
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
@@ -36,8 +36,8 @@ namespace Fsel.Course.Lms.Application.Queries.SettingStudentQuery
         public async Task<MethodResult<StudentSettingModel>> Handle(GetStudentSettingQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            MethodResult<StudentSettingModel> methodResult = new MethodResult<StudentSettingModel>();
-            StudentSettingModel settingStudentModel = new StudentSettingModel();
+            var methodResult = new MethodResult<StudentSettingModel>();
+            var settingStudentModel = new StudentSettingModel();
             var studentResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
             if (!studentResult.IsSuccessStatusCode)
             {
