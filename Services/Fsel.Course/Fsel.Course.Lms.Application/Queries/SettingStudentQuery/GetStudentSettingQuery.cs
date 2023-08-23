@@ -14,11 +14,11 @@ namespace Fsel.Course.Lms.Application.Queries.SettingStudentQuery
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class SettingStudentCheckQuery : IRequest<MethodResult<SettingStudentModel>>
+    public class GetStudentSettingQuery : IRequest<MethodResult<StudentSettingModel>>
     {
     }
 
-    public class SettingStudentCheckQueryHandler : IRequestHandler<SettingStudentCheckQuery, MethodResult<SettingStudentModel>>
+    public class SettingStudentCheckQueryHandler : IRequestHandler<GetStudentSettingQuery, MethodResult<StudentSettingModel>>
     {
         private readonly IUserService _userService;
         private readonly IPlacementTestResultRepository _placementTestResultRepository;
@@ -33,11 +33,11 @@ namespace Fsel.Course.Lms.Application.Queries.SettingStudentQuery
             _authContext = authContext;
         }
 
-        public async Task<MethodResult<SettingStudentModel>> Handle(SettingStudentCheckQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<StudentSettingModel>> Handle(GetStudentSettingQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            MethodResult<SettingStudentModel> methodResult = new MethodResult<SettingStudentModel>();
-            SettingStudentModel settingStudentModel = new SettingStudentModel();
+            MethodResult<StudentSettingModel> methodResult = new MethodResult<StudentSettingModel>();
+            StudentSettingModel settingStudentModel = new StudentSettingModel();
             var studentResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
             if (!studentResult.IsSuccessStatusCode)
             {
@@ -53,7 +53,7 @@ namespace Fsel.Course.Lms.Application.Queries.SettingStudentQuery
                 settingStudentModel.Level = student.CourseLevel;
                 settingStudentModel.IsPlacementTest = placementTestResult != null;
                 settingStudentModel.ClassId = student.ClassId ?? null;
-                settingStudentModel.LevelNext = placementTestResult?.Level.GetLevelInScore(placementTestResult.Percent) ?? default;
+                settingStudentModel.PTNextLevel = placementTestResult?.Level.GetLevelInScore(placementTestResult.Percent) ?? default;
             }
 
             methodResult.StatusCode = StatusCodes.Status200OK;

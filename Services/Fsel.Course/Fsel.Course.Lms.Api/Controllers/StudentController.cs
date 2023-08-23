@@ -7,6 +7,7 @@ namespace Fsel.Course.Lms.Api.Controllers
     using Fsel.Common.Constants;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Queries.CourseQuery;
+    using Fsel.Course.Lms.Application.Queries.SettingStudentQuery;
     using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Authorization;
@@ -48,5 +49,17 @@ namespace Fsel.Course.Lms.Api.Controllers
         //    MethodResult<string> queryResult = await _mediator.Send(query).ConfigureAwait(false);
         //    return queryResult.GetActionResult();
         //}
+
+        /// <summary>
+        /// Setting Student
+        /// </summary>
+        [HttpGet("check-student")]
+        [ProducesResponseType(typeof(MethodResult<StudentSettingModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> CheckStudent()
+        {
+            MethodResult<StudentSettingModel> queryResult = await _mediator.Send(new GetStudentSettingQuery()).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
     }
 }

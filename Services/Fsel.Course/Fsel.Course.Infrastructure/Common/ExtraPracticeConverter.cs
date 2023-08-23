@@ -301,11 +301,7 @@ namespace Fsel.Course.Infrastructure.Common
                 exercises = extraPractice.Video.VideoTimeCodes.SelectMany(x => x.TimeCodeExercises).Select(x => x.Exercise ?? new Exercise()).ToList();
                 questions = exercises.SelectMany(x => x.ExerciseQuestions).Select(x => x.Question ?? new Question()).ToList();
             }
-            if (extraPracticeExercises != null && extraPracticeExercises.Count > 0)
-            {
-                exercises = extraPracticeExercises.Select(x => x.Exercise ?? new Exercise()).ToList();
-                questions = exercises.SelectMany(x => x.ExerciseQuestions).Select(x => x.Question ?? new Question()).ToList();
-            }
+
             if (extraPracticeExercises != null)
             {
                 foreach (var item in extraPracticeExercises)
