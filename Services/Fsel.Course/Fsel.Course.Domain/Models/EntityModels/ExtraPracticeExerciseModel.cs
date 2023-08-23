@@ -10,5 +10,6 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public ExerciseModel? Exercise { get; set; }
         public bool IsStatus { get; set; }
         public ExtraPracticeExerciseResultModel? ExtraPracticeExerciseResult { get; set; }
+        public ExtraPracticeAnswerModel? ExtraPracticeAnswer { get; set; }
     }
 }

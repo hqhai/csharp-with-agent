@@ -37,6 +37,7 @@ builder.Services.AddScoped<IExtraPracticeExerciseRepository, ExtraPracticeExerci
 builder.Services.AddScoped<IExtraPracticeExerciseResultRepository, ExtraPracticeExerciseResultRepository>();
 builder.Services.AddScoped<IExtraPracticeResultRepository, ExtraPracticeResultRepository>();
 builder.Services.AddScoped<IExtraPracticeAnswerRepository, ExtraPracticeAnswerRepository>();
+builder.Services.AddScoped<IExtraPracticeChapterRepository, ExtraPracticeChapterRepository>();
 
 builder.Services.AddScoped<IClassForumRepository, ClassForumRepository>();
 builder.Services.AddScoped<IHomeWorkRepository, HomeWorkRepository>();
