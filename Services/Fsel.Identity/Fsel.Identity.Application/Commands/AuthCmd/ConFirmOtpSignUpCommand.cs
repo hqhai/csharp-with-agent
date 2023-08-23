@@ -18,11 +18,11 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
     using Microsoft.AspNetCore.Identity;
     using Microsoft.EntityFrameworkCore;
 
-    public class ComfirmOTPSignUpCommand : ConfirmOTPCommandModel, IRequest<MethodResult<ConfirmOtpModel>>
+    public class ConfirmOtpSignUpCommand : ConfirmOTPCommandModel, IRequest<MethodResult<ConfirmOtpModel>>
     {
     }
 
-    public class ComfirmOTPSignUpCommandHandler : IRequestHandler<ComfirmOTPSignUpCommand, MethodResult<ConfirmOtpModel>>
+    public class ComfirmOTPSignUpCommandHandler : IRequestHandler<ConfirmOtpSignUpCommand, MethodResult<ConfirmOtpModel>>
     {
         private readonly UserManager<User> _userManager;
         private readonly IMediator _mediator;
@@ -49,7 +49,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             _parentRepository = parentRepository;
         }
 
-        public async Task<MethodResult<ConfirmOtpModel>> Handle(ComfirmOTPSignUpCommand request, CancellationToken cancellationToken)
+        public async Task<MethodResult<ConfirmOtpModel>> Handle(ConfirmOtpSignUpCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             ArgumentNullException.ThrowIfNull(_appSetting.Otp);
@@ -113,7 +113,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             return methodResult;
         }
 
-        private async Task<Human> CreateHuman(ComfirmOTPSignUpCommand request, IList<string> roles, User user)
+        private async Task<Human> CreateHuman(ConfirmOtpSignUpCommand request, IList<string> roles, User user)
         {
             Human human = _mapper.Map<Human>(request);
             human.UserId = user.Id;

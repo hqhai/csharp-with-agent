@@ -15,11 +15,11 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Fsel.Identity.Application.Commands.AuthCmd
 {
-    public class ComfirmOTPResetPasswordCommand : ComfirmOTPResetPasswordCommandModel, IRequest<MethodResult<bool>>
+    public class ConFirmOTPResetPasswordCommand : ComfirmOTPResetPasswordCommandModel, IRequest<MethodResult<bool>>
     {
     }
 
-    public class ComfirmOTPResetPasswordCommandHandler : IRequestHandler<ComfirmOTPResetPasswordCommand, MethodResult<bool>>
+    public class ConFirmOTPResetPasswordCommandHandler : IRequestHandler<ConFirmOTPResetPasswordCommand, MethodResult<bool>>
     {
         private readonly UserManager<User> _userManager;
         private readonly IUserOtpCodeRepository _userOtpCodeRepository;
@@ -27,7 +27,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
         private readonly IHumanRepository _humanRepository;
         private readonly IParentRepository _parentRepository;
 
-        public ComfirmOTPResetPasswordCommandHandler(UserManager<User> userManager, IUserOtpCodeRepository userOtpCodeRepository, IMapper mapper, IHumanRepository humanRepository, IParentRepository parentRepository)
+        public ConFirmOTPResetPasswordCommandHandler(UserManager<User> userManager, IUserOtpCodeRepository userOtpCodeRepository, IMapper mapper, IHumanRepository humanRepository, IParentRepository parentRepository)
         {
             _userManager = userManager;
             _userOtpCodeRepository = userOtpCodeRepository;
@@ -36,7 +36,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             _parentRepository = parentRepository;
         }
 
-        public async Task<MethodResult<bool>> Handle(ComfirmOTPResetPasswordCommand request, CancellationToken cancellationToken)
+        public async Task<MethodResult<bool>> Handle(ConFirmOTPResetPasswordCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<bool> methodResult = new MethodResult<bool>();
