@@ -14,7 +14,7 @@ using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 
-namespace Fsel.Course.Lms.Application.Queries.ProgessQuery
+namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
 {
     public class GetOverallScoreByClassForumQuery : IRequest<MethodResult<OverallScoreReportModel>>
     {

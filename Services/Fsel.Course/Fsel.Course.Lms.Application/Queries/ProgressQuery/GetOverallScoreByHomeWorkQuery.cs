@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Course.Lms.Application.Queries.ProgessQuery
+namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
 {
     using System;
     using System.Linq;

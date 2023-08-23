@@ -2,7 +2,7 @@
 
 namespace Fsel.Course.Domain.Models.EntityModels
 {
-    public class ProgessMenuModel
+    public class ProgressMenuModel
     {
         public long NumberOfUnitDone { get; set; }
         public long NumberOfDaysStreak { get; set; }
