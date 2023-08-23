@@ -22,7 +22,6 @@ namespace Fsel.Course.Domain.Entities
         public string? Description { get; set; }
 
         public int PageNumber { get; set; }
-
         public ExtraPractice? ExtraPractice { get; set; }
 
         public Guid ExtraPracticeId { get; set; }

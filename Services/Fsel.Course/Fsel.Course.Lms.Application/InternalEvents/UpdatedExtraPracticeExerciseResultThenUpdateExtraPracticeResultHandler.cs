@@ -78,17 +78,29 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                                 var resultChapterCount = extraPracticeChapter?.ExtraPracticeExercises.SelectMany(x => x.ExtraPracticeExerciseResults)
                                                                                   .Where(y => y.StudentId == extraPracticeResult.StudentId && y.Status == EnumResultStatus.Done)
                                                                                   .Count();
-                                if (resultChapterCount == exerciseChapterCount)
-                                {
-                                    await UpdateExtraPracticeExerciseResultTypeBook(extraPracticeResult, cancellationToken);
-                                }
-                                else if (exerciseCount == resultCount)
+                                if (exerciseCount == resultCount)
                                 {
                                     await UpdateExtraPracticeResultTypeBook(extraPracticeResult, cancellationToken);
                                 }
+                                else if (resultChapterCount == exerciseChapterCount && extraPracticeChapter != null)
+                                {
+                                    extraPracticeChapter = extraPracticeChapters.OrderBy(x => x.CreatedDate).FirstOrDefault(x => x.Id != extraPracticeExercise.ExtraPracticeChapterId && x.PageNumber > extraPracticeChapter.PageNumber);
+                                    var extraPracticeExerciseResult = extraPracticeChapter?.ExtraPracticeExercises
+                                                                            .SelectMany(x => x.ExtraPracticeExerciseResults)
+                                                                            .OrderBy(x => x.CreatedDate)
+                                                                            .FirstOrDefault(x => x.ExecuteCount == 0 && x.StudentId == extraPraticeExerciseResult.StudentId);
+
+                                    if (extraPracticeExerciseResult != null)
+                                    {
+                                        extraPracticeExerciseResult.Status = EnumResultStatus.New;
+                                        _extraPracticeExerciseResultRepository.Update(extraPracticeExerciseResult);
+                                        await _extraPracticeExerciseResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                                    }
+                                    await UpdateExtraPracticeExerciseResultTypeBook(extraPracticeResult, cancellationToken);
+                                }
                                 else
                                 {
-                                    var extraPracticeExerciseResult = extraPractice!.ExtraPracticeChapters.SelectMany(x => x.ExtraPracticeExercises)
+                                    var extraPracticeExerciseResult = extraPracticeChapter?.ExtraPracticeExercises
                                                                             .SelectMany(x => x.ExtraPracticeExerciseResults)
                                                                             .OrderBy(x => x.CreatedDate)
                                                                             .FirstOrDefault(x => x.ExecuteCount == 0 && x.StudentId == extraPraticeExerciseResult.StudentId);
@@ -197,6 +209,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                                 };
 
             extraPracticeResult.CorrectCount = correctCounts.Sum(x => x.CorrectCount);
+            extraPracticeResult.Status = EnumResultStatus.Process;
             extraPracticeResult.Percent = extraPracticeResult.CorrectTotal > 0 ? (double)extraPracticeResult.CorrectCount / extraPracticeResult.CorrectTotal : 0;
 
             _extraPracticeResultRepository.Update(extraPracticeResult);
