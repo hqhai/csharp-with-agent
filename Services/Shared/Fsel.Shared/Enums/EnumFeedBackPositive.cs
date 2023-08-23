@@ -4,6 +4,6 @@ namespace Fsel.Shared.Enums
 {
     public enum EnumFeedBackPositive
     {
-        Userful, EasyToUnderStand, Accurate, Fast
+        Useful, EasyToUnderStand, Accurate, Fast
     }
 }
