@@ -98,6 +98,7 @@ namespace Fsel.Course.Lms.Application.Queries.ExtraPracticeQuery
                     CreatedFullName = extraPractice.MockTest.CreatedFullName,
                     CreatedUserId = extraPractice.MockTest.CreatedUserId,
                     IsActive = true,
+                    ExecutionTime = extraPractice.MockTest.MockTestSections.Select(x => x.SectionGroup).Sum(x => x.ExecutionTime),
                     SectionGroups = extraPractice.MockTest.MockTestSections.Where(x => x.SectionGroup != null)
                          .Select(x => x.SectionGroup).OrderBy(x => x!.CreatedDate)
                          .Select(x => _sectionConverter.GetSectionGroupModel(x, true)).ToList(),
