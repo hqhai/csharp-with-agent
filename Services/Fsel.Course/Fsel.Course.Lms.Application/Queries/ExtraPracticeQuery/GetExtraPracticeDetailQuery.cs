@@ -224,7 +224,7 @@ namespace Fsel.Course.Lms.Application.Queries.ExtraPracticeQuery
                         Name = x.Name,
                         ExtraPracticeId = x.ExtraPracticeId,
                         PageNumber = x.PageNumber,
-                        IsLock = x.ExtraPracticeExercises.SelectMany(x => x.ExtraPracticeExerciseResults).Any(x => x.Status != EnumResultStatus.Unfinished),
+                        IsLock = !x.ExtraPracticeExercises.SelectMany(x => x.ExtraPracticeExerciseResults).Any(x => x.Status != EnumResultStatus.Unfinished),
                     }).ToList(),
                     ExtraPracticeResult = extraPractice.ExtraPracticeResults.Where(x => x.Id == extraPracticeResultId).Select(x => new ExtraPracticeResultModel
                     {
