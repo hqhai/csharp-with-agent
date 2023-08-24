@@ -9,7 +9,6 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
-    using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.CommandModels.ClassForumResults;
@@ -72,7 +71,6 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
                 methodResult.AddErrorBadRequest(nameof(EnumClassForumResultErrorCode.FeedBackStarOnlyCanHane5));
                 return methodResult;
             }
-           
 
             _mapper.Map(request, classForumResult);
             await _classForumResultRepository.ExecuteTransactionAsync(async () =>
