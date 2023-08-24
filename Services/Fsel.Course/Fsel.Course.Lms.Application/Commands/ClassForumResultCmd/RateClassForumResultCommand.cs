@@ -69,14 +69,10 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
             }
             if (classForumResult.FeedBackStars > 5)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumClassForumResultErrorCode.ClassForumResultStatusNotGraded));
+                methodResult.AddErrorBadRequest(nameof(EnumClassForumResultErrorCode.FeedBackStarOnlyCanHane5));
                 return methodResult;
             }
-            if (classForumResult.Status != EnumClassForumResultStatus.Graded)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumClassForumResultErrorCode.ClassForumResultStatusNotGraded));
-                return methodResult;
-            }
+           
 
             _mapper.Map(request, classForumResult);
             await _classForumResultRepository.ExecuteTransactionAsync(async () =>
