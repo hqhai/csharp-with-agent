@@ -9,7 +9,6 @@ namespace Fsel.Course.Lms.Application.Queries.Students
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Services.UserServices;
-    using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -54,7 +53,7 @@ namespace Fsel.Course.Lms.Application.Queries.Students
                 settingStudentModel.IsPlacementTest = placementTestResult != null;
                 settingStudentModel.ClassId = student.ClassId ?? null;
                 settingStudentModel.PTLevel = placementTestResult?.Level ?? null;
-                settingStudentModel.PTNextLevel = placementTestResult?.Level.GetLevelInScore(placementTestResult.Percent) ?? null;
+                settingStudentModel.Birthday = student.Human?.Birthday;
             }
 
             methodResult.StatusCode = StatusCodes.Status200OK;

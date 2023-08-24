@@ -11,5 +11,6 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public EnumCourseLevel Level { get; set; }
         public EnumPlacementTestLevel? PTLevel { get; set; }
         public EnumCourseLevel? PTNextLevel { get; set; }
+        public DateTime? Birthday { get; set; }
     }
 }

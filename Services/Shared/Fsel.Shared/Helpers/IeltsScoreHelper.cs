@@ -122,7 +122,7 @@ namespace Fsel.Shared.Helpers
                         break;
 
                     case EnumPlacementTestLevel.B1Plus:
-                        courseLevel = value >= 75 ? EnumCourseLevel.B2 : EnumCourseLevel.B1;
+                        courseLevel = value >= 75 ? EnumCourseLevel.B2 : EnumCourseLevel.B1Plus;
                         break;
 
                     case EnumPlacementTestLevel.B2:
