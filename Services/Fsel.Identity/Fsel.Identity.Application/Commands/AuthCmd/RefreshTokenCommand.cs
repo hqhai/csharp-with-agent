@@ -46,10 +46,12 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             {
                 ValidateIssuer = true,
                 ValidateAudience = true,
+                ValidateLifetime = true,
                 ValidateIssuerSigningKey = true,
+                ValidAudience = _appSetting?.Jwt?.Audience,
+                ValidIssuer = _appSetting?.Jwt?.Issuer,
                 IssuerSigningKey = new SymmetricSecurityKey(secretKeyBytes),
                 ClockSkew = TimeSpan.Zero,
-                ValidateLifetime = true
             };
             var tokenValidationResult = await jwtTokenHandler.ValidateTokenAsync(request.AccessToken, tokenValidateParam);
 
