@@ -111,41 +111,75 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
                 videoResult.CurrentVideoTimeCodeId = videoTimeCodeQuestion?.Id;
 
                 var answer = await _videoTimeCodeAnswerRepository.GetAsync(videoResult.Id, question.Id, exercise?.Id, videoTimeCodeQuestion?.Id);
-
-                var (answerConfig, correctCount) = _answerTypeConverter.GetTotalCorrectByAsnwerType(item.Answer, question.Config, question.QuestionType);
-                if (answerConfig == null)
+                if (videoTimeCodeQuestion != null)
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumVideoTimeCodeAnswerErrorCode.AnswerIsInTheWrongFormat), nameof(item.Answer), item.Answer);
-                    return methodResult;
+                    if (item.Answer != null)
+                    {
+                        var (answerConfig, correctCount) = _answerTypeConverter.GetTotalCorrectByAsnwerType(item.Answer, question.Config, question.QuestionType);
+                        if (answerConfig == null)
+                        {
+                            methodResult.AddErrorBadRequest(nameof(EnumVideoTimeCodeAnswerErrorCode.AnswerIsInTheWrongFormat), nameof(item.Answer), item.Answer);
+                            return methodResult;
+                        }
+                        if (answer == null && exercise != null)
+                        {
+                            answer = new VideoTimeCodeAnswer
+                            {
+                                Answer = answerConfig,
+                                VideoTimeCodeId = videoTimeCodeQuestion.Id,
+                                ExerciseId = exercise.Id,
+                                QuestionId = question.Id,
+                                VideoResultId = videoResult.Id,
+                                CorrectCount = question.Ungraded ? default : correctCount,
+                                Status = videoTimeCodeQuestion.TimeCodeType != EnumTimeCodeType.Standalone ? EnumCurrentStatus.Done : EnumCurrentStatus.Process
+                            };
+                            videoTimeCodeAnswers.Add(answer);
+                        }
+                        correctCountStudent += correctCount;
+                        if (answer != null && answer.Status == EnumCurrentStatus.Process)
+                        {
+                            answer.Answer = answerConfig;
+                            answer.CorrectCount = question.Ungraded ? default : correctCount;
+                            answer.Status = EnumCurrentStatus.Done;
+                            updateVideoTimeCodeAnswers.Add(answer);
+                        }
+                    }
+                    else
+                    {
+                        if (answer == null && exercise != null)
+                        {
+                            answer = new VideoTimeCodeAnswer
+                            {
+                                Answer = item.Answer,
+                                VideoTimeCodeId = videoTimeCodeQuestion.Id,
+                                ExerciseId = exercise.Id,
+                                QuestionId = question.Id,
+                                VideoResultId = videoResult.Id,
+                                CorrectCount = default,
+                                Status = videoTimeCodeQuestion.TimeCodeType != EnumTimeCodeType.Standalone ? EnumCurrentStatus.Done : EnumCurrentStatus.Process
+                            };
+                            videoTimeCodeAnswers.Add(answer);
+                        }
+                        correctCountStudent += 0;
+                        if (answer != null && answer.Status == EnumCurrentStatus.Process)
+                        {
+                            answer.Answer = item.Answer;
+                            answer.CorrectCount = default;
+                            answer.Status = EnumCurrentStatus.Done;
+                            updateVideoTimeCodeAnswers.Add(answer);
+                        }
+                    }
+                    if (answer != null && answer.Status == EnumCurrentStatus.Done)
+                    {
+                        methodResult.AddErrorBadRequest(nameof(EnumVideoTimeCodeAnswerErrorCode.AnswersDone));
+                        return methodResult;
+                    }
+                }
+                else
+                {
+                    correctCountStudent += 0;
                 }
                 correctTotal += question.CorrectTotal;
-                correctCountStudent += correctCount;
-                if (answer == null && exercise != null && videoTimeCodeQuestion != null)
-                {
-                    answer = new VideoTimeCodeAnswer
-                    {
-                        Answer = answerConfig,
-                        VideoTimeCodeId = videoTimeCodeQuestion.Id,
-                        ExerciseId = exercise.Id,
-                        QuestionId = question.Id,
-                        VideoResultId = videoResult.Id,
-                        CorrectCount = question.Ungraded ? default : correctCount,
-                        Status = videoTimeCodeQuestion.TimeCodeType != EnumTimeCodeType.Standalone ? EnumCurrentStatus.Done : EnumCurrentStatus.Process
-                    };
-                    videoTimeCodeAnswers.Add(answer);
-                }
-                else if (answer != null && answer.Status == EnumCurrentStatus.Process)
-                {
-                    answer.Answer = answerConfig;
-                    answer.CorrectCount = question.Ungraded ? default : correctCount;
-                    answer.Status = EnumCurrentStatus.Done;
-                    updateVideoTimeCodeAnswers.Add(answer);
-                }
-                else if (answer != null && answer.Status == EnumCurrentStatus.Done)
-                {
-                    methodResult.AddErrorBadRequest(nameof(EnumVideoTimeCodeAnswerErrorCode.AnswersDone));
-                    return methodResult;
-                }
             }
             if (correctTotal == correctCountStudent && videoTimeCodeAnswers.All(x => x.Status == EnumCurrentStatus.Process))
             {

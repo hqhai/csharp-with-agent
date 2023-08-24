@@ -149,19 +149,32 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd
 
                     if (finalAnswer == null)
                     {
-                        var (answerConfig, correctCount) = _answerTypeConverter.GetTotalCorrectByAsnwerType(answer.Answer, question.Config, question.QuestionType);
-                        if (answerConfig == null)
+                        if (answer.Answer != null)
                         {
-                            methodResult.AddErrorBadRequest(nameof(EnumFinalTestAnswerErrorCode.AnswerIsInTheWrongFormat), nameof(answer.Answer), answer.Answer);
-                            return methodResult;
+                            var (answerConfig, correctCount) = _answerTypeConverter.GetTotalCorrectByAsnwerType(answer.Answer, question.Config, question.QuestionType);
+                            if (answerConfig == null)
+                            {
+                                methodResult.AddErrorBadRequest(nameof(EnumFinalTestAnswerErrorCode.AnswerIsInTheWrongFormat), nameof(answer.Answer), answer.Answer);
+                                return methodResult;
+                            }
+                            count += correctCount;
+                            finalAnswer = new FinalTestAnswer
+                            {
+                                CorrectCount = correctCount,
+                                Answer = answerConfig,
+                                SectionQuestionId = sectionQuestionId
+                            };
                         }
-                        count += correctCount;
-                        finalAnswer = new FinalTestAnswer
+                        else
                         {
-                            CorrectCount = correctCount,
-                            Answer = answerConfig,
-                            SectionQuestionId = sectionQuestionId
-                        };
+                            finalAnswer = new FinalTestAnswer
+                            {
+                                CorrectCount = 0,
+                                Answer = answer.Answer,
+                                SectionQuestionId = sectionQuestionId
+                            };
+                        }
+
                         finalTestResult.FinalTestAnswers.Add(finalAnswer);
                     }
                 }
