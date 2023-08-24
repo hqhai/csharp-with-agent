@@ -135,14 +135,19 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
                             };
                             videoTimeCodeAnswers.Add(answer);
                         }
-                        correctCountStudent += correctCount;
-                        if (answer != null && answer.Status == EnumCurrentStatus.Process)
+                        else if (answer != null && answer.Status == EnumCurrentStatus.Process)
                         {
                             answer.Answer = answerConfig;
                             answer.CorrectCount = question.Ungraded ? default : correctCount;
                             answer.Status = EnumCurrentStatus.Done;
                             updateVideoTimeCodeAnswers.Add(answer);
                         }
+                        else if (answer != null && answer.Status == EnumCurrentStatus.Done)
+                        {
+                            methodResult.AddErrorBadRequest(nameof(EnumVideoTimeCodeAnswerErrorCode.AnswersDone));
+                            return methodResult;
+                        }
+                        correctCountStudent += correctCount;
                     }
                     else
                     {
@@ -160,19 +165,19 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
                             };
                             videoTimeCodeAnswers.Add(answer);
                         }
-                        correctCountStudent += 0;
-                        if (answer != null && answer.Status == EnumCurrentStatus.Process)
+                        else if (answer != null && answer.Status == EnumCurrentStatus.Process)
                         {
                             answer.Answer = item.Answer;
                             answer.CorrectCount = default;
                             answer.Status = EnumCurrentStatus.Done;
                             updateVideoTimeCodeAnswers.Add(answer);
                         }
-                    }
-                    if (answer != null && answer.Status == EnumCurrentStatus.Done)
-                    {
-                        methodResult.AddErrorBadRequest(nameof(EnumVideoTimeCodeAnswerErrorCode.AnswersDone));
-                        return methodResult;
+                        else if (answer != null && answer.Status == EnumCurrentStatus.Done)
+                        {
+                            methodResult.AddErrorBadRequest(nameof(EnumVideoTimeCodeAnswerErrorCode.AnswersDone));
+                            return methodResult;
+                        }
+                        correctCountStudent += 0;
                     }
                 }
                 else
