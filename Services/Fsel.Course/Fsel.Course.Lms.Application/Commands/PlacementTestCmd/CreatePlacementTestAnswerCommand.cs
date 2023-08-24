@@ -80,10 +80,10 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
                                                                            .FirstOrDefaultAsync(cancellationToken);
             if (placementTestResultDone != null)
             {
-                var levelNext = placementTestResultDone.Level.GetLevelInScore(placementTestResultDone.Percent) ?? default;
-                if (student?.CourseLevel == levelNext)
+                var (levelNext, isLock) = placementTestResultDone.Level.GetLevelInScore(placementTestResultDone.Percent);
+                if (isLock)
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumPlacementTestErrorCode.TheLevelIsRightForTheLevel), nameof(levelNext));
+                    methodResult.AddErrorBadRequest(nameof(EnumPlacementTestErrorCode.PlacementTestLock), nameof(levelNext));
                     return methodResult;
                 }
             }
@@ -124,6 +124,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
                         return methodResult;
                     }
                     int count = 0;
+                    int countQuestion = 0;
                     foreach (var answer in item.Answers)
                     {
                         var question = questions.FirstOrDefault(x => x.Id == answer.QuestionId);
@@ -154,6 +155,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
                                 return methodResult;
                             }
                             count += correctCount;
+                            countQuestion++;
                             placementTestAnswer = new PlacementTestAnswer
                             {
                                 CorrectCount = correctCount,
@@ -163,14 +165,16 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
                             placementTestAnswers.Add(placementTestAnswer);
                         }
                     }
+                    var percent = questions.Sum(x => x.CorrectTotal) > 0 ? (double)count / questions.Sum(x => x.CorrectTotal) * 100 : default;
                     var skillScore = new SkillScores
                     {
                         Skill = item.Skill,
-                        CountQuestion = item.Answers.Count,
+                        CountQuestion = countQuestion,
+                        Scores = percent.GetIeltsScore(item.Skill),
                         TotalQuestion = questions.Count,
                         TotalCount = questions.Sum(x => x.CorrectTotal),
                         CorrectCount = count,
-                        Percent = questions.Sum(x => x.CorrectTotal) > 0 ? (double)count / questions.Sum(x => x.CorrectTotal) * 100 : default
+                        Percent = percent
                     };
                     if (placementTestResult.Level == EnumPlacementTestLevel.IELTS)
                     {
@@ -190,7 +194,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
             placementTestResult.PlacementTestAnswers = placementTestAnswers;
 
             var overallScore = NumberHelper.RoundNumberDouble(skillScores.Select(x => x.Scores).Average());
-            var currentLevel = request.Level.GetLevelInScore(placementTestResult.Level == EnumPlacementTestLevel.IELTS ? overallScore : placementTestResult.Percent);
+            var (currentLevel, isLockNew) = request.Level.GetLevelInScore(placementTestResult.Level == EnumPlacementTestLevel.IELTS ? overallScore : placementTestResult.Percent);
 
             if (currentLevel.HasValue)
             {

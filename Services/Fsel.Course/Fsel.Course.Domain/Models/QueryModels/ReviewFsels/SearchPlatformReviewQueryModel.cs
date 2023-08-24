@@ -4,7 +4,7 @@ namespace Fsel.Course.Domain.Models.QueryModels.ReviewFsels
 {
     using Fsel.Core.Base.BaseModels;
 
-    public class SearchReviewCommunicationQueryModel : BaseQueryModel
+    public class SearchPlatformReviewQueryModel : BaseQueryModel
     {
     }
 }

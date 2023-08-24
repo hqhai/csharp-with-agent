@@ -50,10 +50,12 @@ namespace Fsel.Course.Lms.Application.Queries.Students
                 var placementTestResult = await _placementTestResultRepository.Queryable.Where(x => x.Status == EnumResultStatus.Done && x.StudentId == student.Id)
                                                                                 .OrderByDescending(x => x.CreatedDate)
                                                                                 .FirstOrDefaultAsync(cancellationToken);
+                var (levelNext, isLock) = placementTestResult?.Level.GetLevelInScore(placementTestResult.Percent) ?? (null, default);
                 settingStudentModel.Level = student.CourseLevel;
                 settingStudentModel.IsPlacementTest = placementTestResult != null;
                 settingStudentModel.ClassId = student.ClassId ?? null;
-                settingStudentModel.PTNextLevel = placementTestResult?.Level.GetLevelInScore(placementTestResult.Percent) ?? default;
+                settingStudentModel.PTLevel = placementTestResult?.Level ?? null;
+                settingStudentModel.IsLockPT = isLock;
             }
 
             methodResult.StatusCode = StatusCodes.Status200OK;
