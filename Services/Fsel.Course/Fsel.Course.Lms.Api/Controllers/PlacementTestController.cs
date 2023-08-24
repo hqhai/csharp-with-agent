@@ -16,11 +16,11 @@ namespace Fsel.Course.Lms.Api.Controllers
     [ApiVersion(Settings.APIVersion)]
     [Route(Settings.APIDefaultRoute + "/placement-test")]
     [ApiController]
-    public class PlacmentTestController : ControllerBase
+    public class PlacementTestController : ControllerBase
     {
         private readonly IMediator _mediator;
 
-        public PlacmentTestController(IMediator mediator)
+        public PlacementTestController(IMediator mediator)
         {
             _mediator = mediator;
         }
@@ -47,6 +47,18 @@ namespace Fsel.Course.Lms.Api.Controllers
         public async Task<IActionResult> CheckResultByStudentId([FromRoute] Guid studentId)
         {
             MethodResult<bool> queryResult = await _mediator.Send(new CheckResultByStudentIdQuery { StudentId = studentId }).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// count result by StudentId
+        /// </summary>
+        [HttpGet("count-result/{studentId}")]
+        [ProducesResponseType(typeof(MethodResult<int>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> CountResultByStudentId([FromRoute] Guid studentId)
+        {
+            MethodResult<int> queryResult = await _mediator.Send(new GetCountPlacementTestResultQuery { StudentId = studentId }).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
 

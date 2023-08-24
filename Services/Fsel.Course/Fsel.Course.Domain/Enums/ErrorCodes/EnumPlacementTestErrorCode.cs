@@ -13,5 +13,15 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         ///  must have the correct score
         /// </summary>
         MustCorrectScore,
+
+        /// <summary>
+        ///  must have the correct score
+        /// </summary>
+        PlacementTestResultMaxThree,
+
+        /// <summary>
+        ///  The level is right for the level
+        /// </summary>
+        TheLevelIsRightForTheLevel
     }
 }

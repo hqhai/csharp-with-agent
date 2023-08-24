@@ -205,6 +205,12 @@ namespace Fsel.Course.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(0);
 
+                    b.Property<Guid?>("CheckCsoId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("CheckStartDate")
+                        .HasColumnType("datetime2");
+
                     b.Property<Guid>("ClassForumId")
                         .HasColumnType("uniqueidentifier");
 
@@ -255,6 +261,9 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.Property<string>("GradingAlFeedback")
                         .HasMaxLength(10000)
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("GradingStartDate")
+                        .HasColumnType("datetime2");
 
                     b.Property<Guid?>("GradingTeacherId")
                         .HasColumnType("uniqueidentifier");
@@ -953,6 +962,9 @@ namespace Fsel.Course.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(103);
 
+                    b.Property<string>("ImagePath")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("InstructionContent")
                         .HasColumnType("nvarchar(max)");
 
@@ -1359,6 +1371,9 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.Property<Guid>("CreatedUserId")
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(101);
+
+                    b.Property<Guid?>("CurrentVideoTimeCodeId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime?>("DeletedDate")
                         .HasColumnType("datetime2")

@@ -38,6 +38,11 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public int LessonDisplayOrder { get; set; }
         public int UnitDisplayOrder { get; set; }
 
+        public Guid? CheckCsoId { get; set; }
+
+        public DateTime? CheckStartDate { get; set; }
+
+        public DateTime? GradingStartDate { get; set; }
         public IList<ClassForumResultFileModel>? ClassForumResultFiles { get; set; }
 
         public IList<ClassForumScoreModel>? ClassForumScores { get; set; }

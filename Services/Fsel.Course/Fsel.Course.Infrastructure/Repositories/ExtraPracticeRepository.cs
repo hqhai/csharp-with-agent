@@ -53,26 +53,21 @@ namespace Fsel.Course.Infrastructure.Repositories
                                             Name = x.Name,
                                             ExtraPracticeId = x.ExtraPracticeId,
                                             PageNumber = x.PageNumber,
-                                            ExtraPracticeExercises = x.ExtraPracticeExercises.OrderBy(x => x!.CreatedDate).Select(x => new ExtraPracticeExerciseModel
+                                            Exercises = x.ExtraPracticeExercises.OrderBy(x => x!.CreatedDate).Select(x => x.Exercise).Select(x => new ExerciseModel
                                             {
-                                                Id = x.Id,
-                                                CreatedDate = x.CreatedDate,
-                                                TotalCount = x.Exercise!.ExerciseQuestions.Select(x => x.Question).Sum(x => x!.CorrectTotal),
-                                                Exercise = new ExerciseModel
+                                                Id = x!.Id,
+                                                MediaPost = x.MediaPost,
+                                                Name = x.Name,
+                                                CourseSkill = x.CourseSkill,
+                                                Questions = x.ExerciseQuestions.Select(x => x.Question).OrderBy(x => x!.CreatedDate).Select(m => new QuestionModel()
                                                 {
-                                                    Id = x.Exercise!.Id,
-                                                    MediaPost = x.Exercise.MediaPost,
-                                                    CourseSkill = x.Exercise.CourseSkill,
-                                                    Questions = x.Exercise.ExerciseQuestions.Select(x => x.Question).OrderBy(x => x!.CreatedDate).Select(m => new QuestionModel()
-                                                    {
-                                                        Id = m!.Id,
-                                                        QuestionType = m!.QuestionType,
-                                                        CorrectTotal = m!.CorrectTotal,
-                                                        Explanation = m!.Explanation,
-                                                        Ungraded = m!.Ungraded,
-                                                        Config = m.Config,
-                                                    }).ToList(),
-                                                },
+                                                    Id = m!.Id,
+                                                    QuestionType = m!.QuestionType,
+                                                    CorrectTotal = m!.CorrectTotal,
+                                                    Explanation = m!.Explanation,
+                                                    Ungraded = m!.Ungraded,
+                                                    Config = m.Config,
+                                                }).ToList(),
                                             }).ToList(),
                                         }).ToList(),
                                         Video = x.Video == null ? null : new VideoModel
@@ -148,6 +143,94 @@ namespace Fsel.Course.Infrastructure.Repositories
                                     .ThenInclude(x => x!.ExerciseQuestions.Where(x => !x.IsDeleted).OrderBy(x => x.CreatedDate))
                                     .ThenInclude(x => x.Question)
                                     .FirstOrDefaultAsync(x => x.Id == id);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<ExtraPractice?> GetIncludeSkillReadingAsync(Guid? id)
+        {
+            try
+            {
+                return await Queryable.Include(x => x.MockTest)
+                                    .ThenInclude(x => x!.MockTestSections)
+                                    .ThenInclude(x => x.SectionGroup)
+                                    .ThenInclude(x => x!.Sections)
+                                    .ThenInclude(x => x.SectionParts)
+                                    .ThenInclude(x => x.SectionQuestions)
+                                    .ThenInclude(x => x.Question)
+                                    .FirstOrDefaultAsync(x => x.Id == id);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<ExtraPractice?> GetIncludeByTypeVideoEmbedAsync(Guid? id)
+        {
+            try
+            {
+                return await Queryable.Include(x => x.ExtraPracticeExercises)
+                                .ThenInclude(x => x.Exercise)
+                                .ThenInclude(x => x!.ExerciseQuestions)
+                                .ThenInclude(x => x.Question)
+                                .FirstOrDefaultAsync(x => x.Id == id);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<ExtraPractice?> GetIncludeByTypeInteractiveVideoAsync(Guid? id)
+        {
+            try
+            {
+                return await Queryable.Include(x => x.Video)
+                                .ThenInclude(x => x!.VideoTimeCodes)
+                                .ThenInclude(x => x.TimeCodeExercises)
+                                .ThenInclude(x => x.Exercise)
+                                .ThenInclude(x => x!.ExerciseQuestions)
+                                .ThenInclude(x => x.Question)
+                                .FirstOrDefaultAsync(x => x.Id == id);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<ExtraPractice?> GetIncludeByTypeBookAsync(Guid? id)
+        {
+            try
+            {
+                return await Queryable.Include(x => x.ExtraPracticeChapters)
+                                .ThenInclude(x => x.ExtraPracticeExercises)
+                                .ThenInclude(x => x.Exercise)
+                                .ThenInclude(x => x!.ExerciseQuestions)
+                                .ThenInclude(x => x.Question)
+                                .FirstOrDefaultAsync(x => x.Id == id);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<ExtraPractice?> GetIncludeByPlacementTestAsync(Guid? id)
+        {
+            try
+            {
+                return await Queryable.Include(x => x.PlacementTest)
+                                .ThenInclude(x => x!.PlacementTestSections)
+                                .ThenInclude(x => x.SectionGroup)
+                                .ThenInclude(x => x!.Sections)
+                                .ThenInclude(x => x.SectionQuestions)
+                                .ThenInclude(x => x.Question)
+                                .FirstOrDefaultAsync(x => x.Id == id);
             }
             catch (Exception)
             {
