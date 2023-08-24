@@ -16,7 +16,7 @@ services:
             - JWT__SUBJECT=baseWebApiSubject
             - JWT__TOKENVALIDITYINMINUTES=1440
             - JWT__REFRESHTOKENVALIDITYINDAYS=7
-            - QueueConfig__RootUri=rabbitmq://localhost
+            - QueueConfig__RootUri=rabbitmq://42.96.58.145
             - QueueConfig__Username=guest
             - QueueConfig__Password=guest
         ports:
