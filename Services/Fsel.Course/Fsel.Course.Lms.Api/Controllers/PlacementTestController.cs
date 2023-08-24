@@ -76,6 +76,19 @@ namespace Fsel.Course.Lms.Api.Controllers
         }
 
         /// <summary>
+        /// get list PlacementTest Result
+        /// </summary>
+        [HttpGet("get-list-result")]
+        [Authorize(Roles = nameof(EnumRole.Student))]
+        [ProducesResponseType(typeof(MethodResult<IList<PlacementTestResultModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetListResult()
+        {
+            MethodResult<IList<PlacementTestResultModel>> queryResult = await _mediator.Send(new GetListPlacementTestResultQuery()).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
         /// Create PlacementTest Answers
         /// </summary>
         [HttpPost("create-answers")]
