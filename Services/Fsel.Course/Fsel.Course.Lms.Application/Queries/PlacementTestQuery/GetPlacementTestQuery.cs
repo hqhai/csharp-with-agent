@@ -74,15 +74,16 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestQuery
             }
             var student = studentResult?.Content?.Result;
             var studentId = student?.Id;
+
             var placementTestResultDone = await _placementTestResultRepository.Queryable.Where(x => x.Status == EnumResultStatus.Done && x.StudentId == studentId)
                                                                           .OrderByDescending(x => x.CreatedDate)
                                                                           .FirstOrDefaultAsync(cancellationToken);
             if (placementTestResultDone != null)
             {
-                var levelNext = placementTestResultDone.Level.GetLevelInScore(placementTestResultDone.Percent) ?? default;
-                if (student?.CourseLevel == levelNext)
+                var (levelNext, isLock) = placementTestResultDone.Level.GetLevelInScore(placementTestResultDone.Percent);
+                if (isLock)
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumPlacementTestErrorCode.TheLevelIsRightForTheLevel), nameof(levelNext));
+                    methodResult.AddErrorBadRequest(nameof(EnumPlacementTestErrorCode.PlacementTestLock), nameof(levelNext));
                     return methodResult;
                 }
             }

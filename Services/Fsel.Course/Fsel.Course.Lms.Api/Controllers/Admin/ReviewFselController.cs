@@ -28,14 +28,14 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
         }
 
         /// <summary>
-        /// Search Communication
+        /// Search platform review
         /// </summary>
-        [HttpGet("communication")]
-        [ProducesResponseType(typeof(MethodResult<ReviewCommunicationSearchModel>), (int)HttpStatusCode.OK)]
+        [HttpGet("platform-review")]
+        [ProducesResponseType(typeof(MethodResult<ReviewPlatformSearchModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> SearchCommunication([FromQuery] SearchReviewCommunicationQuery query)
+        public async Task<IActionResult> SearchPlatformReview([FromQuery] SearchPlatformReviewQuery query)
         {
-            MethodResult<ReviewCommunicationSearchModel> queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            MethodResult<ReviewPlatformSearchModel> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
 
