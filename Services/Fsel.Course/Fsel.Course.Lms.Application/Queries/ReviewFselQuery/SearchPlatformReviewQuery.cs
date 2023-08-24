@@ -68,7 +68,7 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
             int totalItem = studentReviewQuery.Count();
             var lists = studentReviewQuery.OrderBy(x => x.CreatedDate).Skip((request!.Page - 1) * request!.PageSize).Take(request!.PageSize).ToList();
 
-            methodResult.Result = new ReviewPlatformSearchModel { Starts = starts, PagingItemsModel = new PagingItemsModel<ReviewPlatformModel>(lists, request, totalItem) };
+            methodResult.Result = new ReviewPlatformSearchModel { Starts = starts, PagingItems = new PagingItemsModel<ReviewPlatformModel>(lists, request, totalItem) };
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }

@@ -8,7 +8,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
     public class ReviewPlatformSearchModel
     {
         public double Starts { get; set; }
-        public PagingItemsModel<ReviewPlatformModel> PagingItemsModel { get; set; } = new PagingItemsModel<ReviewPlatformModel>();
+        public PagingItemsModel<ReviewPlatformModel> PagingItems { get; set; } = new PagingItemsModel<ReviewPlatformModel>();
     }
 
     public class ReviewPlatformModel : BaseModel
