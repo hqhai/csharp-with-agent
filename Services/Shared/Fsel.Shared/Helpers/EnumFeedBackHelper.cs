@@ -10,7 +10,7 @@ namespace Fsel.Shared.Helpers
     {
         private static IList<KeyValuePair<EnumFeedBackNegative, EnumFeedBackPositive>> s_feedBack = new List<KeyValuePair<EnumFeedBackNegative, EnumFeedBackPositive>>
         {
-            new KeyValuePair<EnumFeedBackNegative, EnumFeedBackPositive>(EnumFeedBackNegative.NotUseful, EnumFeedBackPositive.Userful),
+            new KeyValuePair<EnumFeedBackNegative, EnumFeedBackPositive>(EnumFeedBackNegative.NotUseful, EnumFeedBackPositive.Useful),
             new KeyValuePair<EnumFeedBackNegative, EnumFeedBackPositive>(EnumFeedBackNegative.HardToUnderStand, EnumFeedBackPositive.EasyToUnderStand),
             new KeyValuePair<EnumFeedBackNegative, EnumFeedBackPositive>(EnumFeedBackNegative.NotAccurate, EnumFeedBackPositive.Accurate),
             new KeyValuePair<EnumFeedBackNegative, EnumFeedBackPositive>(EnumFeedBackNegative.Slow, EnumFeedBackPositive.Fast),
