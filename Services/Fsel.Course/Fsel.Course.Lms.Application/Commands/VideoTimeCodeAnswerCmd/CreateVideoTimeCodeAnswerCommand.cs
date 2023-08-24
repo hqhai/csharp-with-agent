@@ -111,20 +111,17 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
                 videoResult.CurrentVideoTimeCodeId = videoTimeCodeQuestion?.Id;
 
                 var answer = await _videoTimeCodeAnswerRepository.GetAsync(videoResult.Id, question.Id, exercise?.Id, videoTimeCodeQuestion?.Id);
-
                 var (answerConfig, correctCount) = _answerTypeConverter.GetTotalCorrectByAsnwerType(item.Answer, question.Config, question.QuestionType);
-                if (answerConfig == null)
+                if (item.Answer != null && answerConfig == null)
                 {
                     methodResult.AddErrorBadRequest(nameof(EnumVideoTimeCodeAnswerErrorCode.AnswerIsInTheWrongFormat), nameof(item.Answer), item.Answer);
                     return methodResult;
                 }
-                correctTotal += question.CorrectTotal;
-                correctCountStudent += correctCount;
-                if (answer == null && exercise != null && videoTimeCodeQuestion != null)
+                if (answer == null && exercise != null)
                 {
                     answer = new VideoTimeCodeAnswer
                     {
-                        Answer = answerConfig,
+                        Answer = answerConfig ?? item.Answer,
                         VideoTimeCodeId = videoTimeCodeQuestion.Id,
                         ExerciseId = exercise.Id,
                         QuestionId = question.Id,
@@ -136,7 +133,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
                 }
                 else if (answer != null && answer.Status == EnumCurrentStatus.Process)
                 {
-                    answer.Answer = answerConfig;
+                    answer.Answer = answerConfig ?? item.Answer;
                     answer.CorrectCount = question.Ungraded ? default : correctCount;
                     answer.Status = EnumCurrentStatus.Done;
                     updateVideoTimeCodeAnswers.Add(answer);
@@ -146,6 +143,8 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
                     methodResult.AddErrorBadRequest(nameof(EnumVideoTimeCodeAnswerErrorCode.AnswersDone));
                     return methodResult;
                 }
+                correctCountStudent += correctCount;
+                correctTotal += question.CorrectTotal;
             }
             if (correctTotal == correctCountStudent && videoTimeCodeAnswers.All(x => x.Status == EnumCurrentStatus.Process))
             {
