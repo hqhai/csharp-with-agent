@@ -7,6 +7,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Folder Include="Controllers\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Fsel.Realtime.Application\Fsel.Realtime.Application.csproj" />
   </ItemGroup>
 
 </Project>

@@ -8,6 +8,7 @@ using Fsel.Interaction.Domain.IRepositories;
 using Fsel.Interaction.Infrastructure;
 using Fsel.Interaction.Infrastructure.Repositories;
 using Fsel.Interaction.Infrastructure.ValueSettings;
+using Fsel.Interaction.Application.Queues.Publishers;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -29,11 +30,15 @@ builder.Services.AddScoped<IStudentReviewRepository, StudentReviewRepository>();
 builder.Services.AddScoped<ISupportCategoryRepository, SupportCategoryRepository>();
 builder.Services.AddScoped<ISupportQuestionRepository, SupportQuestionRepository>();
 builder.Services.AddScoped<ISupportTicketRepository, SupportTicketRepository>();
+builder.Services.AddScoped<DiscussionBoardCommentPublisher>();
+builder.Services.AddScoped<DiscussionBoardLikePublisher>();
 
 builder.AddRefitClients(typeof(IUserService), appSetting?.Services?.UserApiUrl);
 builder.AddRefitClients(typeof(ITrainingService), appSetting?.Services?.TrainingApiUrl);
 builder.AddRefitClients(typeof(ICourseService), appSetting?.Services?.LmsCourseApiUrl);
-var app = builder.Build();
 
+builder.AddRabbitMq(appSetting);
+
+var app = builder.Build();
 app.UseServices();
 app.Run();

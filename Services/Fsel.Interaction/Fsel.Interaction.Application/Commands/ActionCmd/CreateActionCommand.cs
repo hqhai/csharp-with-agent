@@ -10,6 +10,7 @@ namespace Fsel.Interaction.Application.Commands.ActionCmd
     using Fsel.Interaction.Domain.Entities;
     using Fsel.Interaction.Domain.IRepositories;
     using Fsel.Interaction.Domain.Models.CommandModels.Actions;
+    using Fsel.Interaction.Application.Queues.Publishers;
     using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Http;
@@ -23,13 +24,15 @@ namespace Fsel.Interaction.Application.Commands.ActionCmd
     {
         private readonly IMapper _mapper;
         private readonly IInteractionActionRepository _interactionActionRepository;
+        private readonly DiscussionBoardLikePublisher _discussionBoardLikePublisher;
         private readonly AuthContext _authContext;
 
-        public CreateActionCommandHandler(IMapper mapper, IInteractionActionRepository interactionActionRepository, AuthContext authContext)
+        public CreateActionCommandHandler(IMapper mapper, IInteractionActionRepository interactionActionRepository, AuthContext authContext, DiscussionBoardLikePublisher discussionBoardLikePublisher)
         {
             _mapper = mapper;
             _interactionActionRepository = interactionActionRepository;
             _authContext = authContext;
+            _discussionBoardLikePublisher = discussionBoardLikePublisher;
         }
 
         public async Task<MethodResult<bool>> Handle(CreateActionCommand request, CancellationToken cancellationToken)
@@ -70,6 +73,11 @@ namespace Fsel.Interaction.Application.Commands.ActionCmd
                     }
 
                     action = _interactionActionRepository.Add(action);
+
+                    if (action.Type == EnumInteractionActionType.Like)
+                    {
+                        await _discussionBoardLikePublisher.Publish(action.ObjectId, cancellationToken).ConfigureAwait(false);
+                    }
                 }
                 else if (action.Type == EnumInteractionActionType.Like)
                 {

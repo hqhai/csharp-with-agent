@@ -1,27 +1,25 @@
 // Copyright (c) Atlantic. All rights reserved.
 
+using Fsel.Common.ValueSettings;
+using Fsel.Core.Extensions;
+using Fsel.Realtime.Application.Hubs;
+using Fsel.Realtime.Application.Queues.Consumers;
+using Fsel.Shared.Constants;
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+var appSetting = builder.AddAppSettings<BaseAppSetting>();
+builder.AddServices();
+builder.AddSwaggerGens(appSetting);
+builder.AddAuthenticationJwtBearers(appSetting);
 
-builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.AddRabbitMq(appSetting, new Dictionary<string, Type>
+{
+    { QueueSettings.RealtimeQueue.NameQueue.DiscussionBoard, typeof(DiscussionBoardConsumer) }
+});
+builder.AddHubs<DiscussionBoardHub>();
 
 var app = builder.Build();
-
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
-
-app.UseHttpsRedirection();
-
-app.UseAuthorization();
-
-app.MapControllers();
-
+app.UseServices();
+app.UseHubs<DiscussionBoardHub>(RealtimeSettings.DiscussionBoardHub.Pattern);
 app.Run();

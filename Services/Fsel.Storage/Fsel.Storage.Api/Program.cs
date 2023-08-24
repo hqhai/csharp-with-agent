@@ -12,7 +12,7 @@ builder.AddServices();
 builder.AddSwaggerGens(appSetting);
 builder.AddAuthenticationJwtBearers(appSetting);
 
-builder.Services.AddScoped<IAmazonS3Service, AmazonS3Service>();
+//builder.Services.AddScoped<IAmazonS3Service, AmazonS3Service>();
 
 var app = builder.Build();
 app.UseServices();
