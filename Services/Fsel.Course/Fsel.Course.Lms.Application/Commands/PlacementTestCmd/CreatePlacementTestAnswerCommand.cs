@@ -81,7 +81,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
             if (placementTestResultDone != null)
             {
                 var levelNext = placementTestResultDone.Level.GetLevelInScore(placementTestResultDone.Percent) ?? default;
-                if (student?.CourseLevel == levelNext)
+                if (placementTestResultDone.Level.ToString() == levelNext.ToString())
                 {
                     methodResult.AddErrorBadRequest(nameof(EnumPlacementTestErrorCode.TheLevelIsRightForTheLevel), nameof(levelNext));
                     return methodResult;
@@ -124,6 +124,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
                         return methodResult;
                     }
                     int count = 0;
+                    int countQuestion = 0;
                     foreach (var answer in item.Answers)
                     {
                         var question = questions.FirstOrDefault(x => x.Id == answer.QuestionId);
@@ -154,6 +155,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
                                 return methodResult;
                             }
                             count += correctCount;
+                            countQuestion++;
                             placementTestAnswer = new PlacementTestAnswer
                             {
                                 CorrectCount = correctCount,
@@ -166,7 +168,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
                     var skillScore = new SkillScores
                     {
                         Skill = item.Skill,
-                        CountQuestion = item.Answers.Count,
+                        CountQuestion = countQuestion,
                         TotalQuestion = questions.Count,
                         TotalCount = questions.Sum(x => x.CorrectTotal),
                         CorrectCount = count,

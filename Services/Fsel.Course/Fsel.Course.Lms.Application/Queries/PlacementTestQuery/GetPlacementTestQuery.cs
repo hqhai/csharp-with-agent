@@ -80,7 +80,7 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestQuery
             if (placementTestResultDone != null)
             {
                 var levelNext = placementTestResultDone.Level.GetLevelInScore(placementTestResultDone.Percent) ?? default;
-                if (student?.CourseLevel == levelNext)
+                if (placementTestResultDone.Level.ToString() == levelNext.ToString())
                 {
                     methodResult.AddErrorBadRequest(nameof(EnumPlacementTestErrorCode.TheLevelIsRightForTheLevel), nameof(levelNext));
                     return methodResult;

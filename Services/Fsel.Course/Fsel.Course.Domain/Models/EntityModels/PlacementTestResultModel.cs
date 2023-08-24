@@ -17,7 +17,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public int CorrectCount { get; set; }
 
         public double? OverallScore
-        { get { return SkillScores != null ? NumberHelper.RoundNumberDouble(SkillScores.Select(x => x.Scores).Average()) : default; } }
+        { get { return SkillScores != null && SkillScores.Count > 0 ? NumberHelper.RoundNumberDouble(SkillScores.Select(x => x.Scores).Average()) : default; } }
 
         public int CorrectTotal { get; set; }
         public IList<SkillScores>? SkillScores { get; set; }

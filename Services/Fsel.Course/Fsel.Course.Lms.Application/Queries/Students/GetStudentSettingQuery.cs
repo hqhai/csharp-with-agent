@@ -53,7 +53,8 @@ namespace Fsel.Course.Lms.Application.Queries.Students
                 settingStudentModel.Level = student.CourseLevel;
                 settingStudentModel.IsPlacementTest = placementTestResult != null;
                 settingStudentModel.ClassId = student.ClassId ?? null;
-                settingStudentModel.PTNextLevel = placementTestResult?.Level.GetLevelInScore(placementTestResult.Percent) ?? default;
+                settingStudentModel.PTLevel = placementTestResult?.Level ?? null;
+                settingStudentModel.PTNextLevel = placementTestResult?.Level.GetLevelInScore(placementTestResult.Percent) ?? null;
             }
 
             methodResult.StatusCode = StatusCodes.Status200OK;
