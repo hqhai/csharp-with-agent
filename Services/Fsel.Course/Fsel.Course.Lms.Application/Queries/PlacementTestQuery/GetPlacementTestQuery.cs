@@ -80,27 +80,10 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestQuery
                                                                           .FirstOrDefaultAsync(cancellationToken);
             if (placementTestResultDone != null)
             {
-                var birthday = student?.Human?.Birthday;
-                if (birthday?.Year != 0)
+                var (levelNext, isLock) = placementTestResultDone.Level.GetLevelInScore(placementTestResultDone.Percent);
+                if (isLock)
                 {
-                    var currentDate = DateTime.Now;
-                    int age = currentDate.Year - (birthday?.Year ?? default);
-                    if (birthday > currentDate.AddYears(-age))
-                    {
-                        age--;
-                    }
-
-                    if (age <= 13)
-                    {
-                        methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(age));
-                        return methodResult;
-                    }
-                }
-
-                var levelNext = placementTestResultDone.Level.GetLevelInScore(placementTestResultDone.Percent) ?? default;
-                if (placementTestResultDone.Level.ToString() == levelNext.ToString())
-                {
-                    methodResult.AddErrorBadRequest(nameof(EnumPlacementTestErrorCode.TheLevelIsRightForTheLevel), nameof(levelNext));
+                    methodResult.AddErrorBadRequest(nameof(EnumPlacementTestErrorCode.PlacementTestLock), nameof(levelNext));
                     return methodResult;
                 }
             }

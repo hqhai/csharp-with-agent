@@ -9,6 +9,7 @@ namespace Fsel.Course.Lms.Application.Queries.Students
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Services.UserServices;
+    using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -49,11 +50,12 @@ namespace Fsel.Course.Lms.Application.Queries.Students
                 var placementTestResult = await _placementTestResultRepository.Queryable.Where(x => x.Status == EnumResultStatus.Done && x.StudentId == student.Id)
                                                                                 .OrderByDescending(x => x.CreatedDate)
                                                                                 .FirstOrDefaultAsync(cancellationToken);
+                var (levelNext, isLock) = placementTestResult?.Level.GetLevelInScore(placementTestResult.Percent) ?? (null, default);
                 settingStudentModel.Level = student.CourseLevel;
                 settingStudentModel.IsPlacementTest = placementTestResult != null;
                 settingStudentModel.ClassId = student.ClassId ?? null;
                 settingStudentModel.PTLevel = placementTestResult?.Level ?? null;
-                settingStudentModel.Birthday = student.Human?.Birthday;
+                settingStudentModel.IsLockPT = isLock;
             }
 
             methodResult.StatusCode = StatusCodes.Status200OK;
