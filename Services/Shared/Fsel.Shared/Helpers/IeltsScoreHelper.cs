@@ -109,7 +109,7 @@ namespace Fsel.Shared.Helpers
                         }
                         else
                         {
-                            courseLevel = null;
+                            courseLevel = EnumCourseLevel.A1; /*null;*/
                         }
                         break;
 
