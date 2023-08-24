@@ -71,7 +71,13 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
                 methodResult.AddErrorBadRequest(nameof(EnumClassForumResultErrorCode.FeedBackStarOnlyCanHane5));
                 return methodResult;
             }
-
+            #region temporary delete
+            /* if (classForumResult.Status != EnumClassForumResultStatus.Graded)
+             {
+                 methodResult.AddErrorBadRequest(nameof(EnumClassForumResultErrorCode.ClassForumResultStatusNotGraded));
+                 return methodResult;
+             }*/
+            #endregion
             _mapper.Map(request, classForumResult);
             await _classForumResultRepository.ExecuteTransactionAsync(async () =>
             {
