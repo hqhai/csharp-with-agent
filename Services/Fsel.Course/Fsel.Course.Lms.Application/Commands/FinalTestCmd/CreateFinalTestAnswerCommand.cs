@@ -150,7 +150,7 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd
                     if (finalAnswer == null)
                     {
                         var (answerConfig, correctCount) = _answerTypeConverter.GetTotalCorrectByAsnwerType(answer.Answer, question.Config, question.QuestionType);
-                        if (answer.Answer != null && answerConfig == null)
+                        if (!string.IsNullOrEmpty(answer.Answer?.ToString()) && answerConfig == null)
                         {
                             methodResult.AddErrorBadRequest(nameof(EnumFinalTestAnswerErrorCode.AnswerIsInTheWrongFormat), nameof(answer.Answer), answer.Answer);
                             return methodResult;
