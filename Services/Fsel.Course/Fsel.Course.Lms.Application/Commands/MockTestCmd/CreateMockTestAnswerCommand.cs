@@ -130,7 +130,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
                             if (mockTestAnswer == null)
                             {
                                 var (answerConfig, correctCount) = _answerTypeConverter.GetTotalCorrectByAsnwerType(answer.Answer, question.Config, question.QuestionType);
-                                if (answerConfig == null)
+                                if (!string.IsNullOrEmpty(answer.Answer?.ToString()) && answerConfig == null)
                                 {
                                     methodResult.AddErrorBadRequest(nameof(EnumMockTestAnswerErrorCode.AnswerIsInTheWrongFormat), nameof(answer.Answer), answer.Answer);
                                     return methodResult;
