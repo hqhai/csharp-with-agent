@@ -87,7 +87,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
                     TotalQuestion = x.Sum(x => x.TotalQuestion),
                     Scores = x.Average(x => x.Scores)
                 }).ToList();
-            skillScores.ForEach(x => x.Percent = x.CorrectCount / x.TotalCount);
+            skillScores.ForEach(x => x.Percent = x.TotalCount > 0 ? x.CorrectCount / x.TotalCount : default);
             overallScoreReport.SkillScores = skillScores;
             overallScoreReport.TotalQuestion = skillScores.Sum(x => x.TotalQuestion);
             overallScoreReport.CountQuestion = skillScores.Sum(x => x.CountQuestion);
