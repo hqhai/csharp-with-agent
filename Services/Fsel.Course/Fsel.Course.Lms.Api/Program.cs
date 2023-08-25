@@ -101,7 +101,7 @@ builder.AddRefitClients(typeof(IInteractionService), appSetting?.Services?.Inter
 builder.AddRefitClients(typeof(ISystemService), appSetting?.Services?.SystemApiUrl);
 builder.AddRefitClients(typeof(IOrderService), appSetting?.Services?.OrderApiUrl);
 
-builder.AddRabbitMq(appSetting);
+builder.AddMassTransit(appSetting);
 
 var app = builder.Build();
 app.UseServices();
