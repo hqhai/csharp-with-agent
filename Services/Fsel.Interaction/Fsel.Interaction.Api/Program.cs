@@ -37,7 +37,7 @@ builder.AddRefitClients(typeof(IUserService), appSetting?.Services?.UserApiUrl);
 builder.AddRefitClients(typeof(ITrainingService), appSetting?.Services?.TrainingApiUrl);
 builder.AddRefitClients(typeof(ICourseService), appSetting?.Services?.LmsCourseApiUrl);
 
-builder.AddRabbitMq(appSetting);
+builder.AddMassTransit(appSetting);
 
 var app = builder.Build();
 app.UseServices();
