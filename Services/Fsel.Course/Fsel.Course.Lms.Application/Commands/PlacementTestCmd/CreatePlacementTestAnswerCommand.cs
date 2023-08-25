@@ -146,7 +146,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
                         var sectionQuestionId = question.SectionQuestions.FirstOrDefault()!.Id;
                         var placementTestAnswer = await _placementTestAnswerRepository.Queryable.FirstOrDefaultAsync(x => x.PlacementTestResultId == placementTestResult.Id && x.SectionQuestionId == sectionQuestionId, cancellationToken);
 
-                        if (placementTestAnswer == null && answer.Answer != null)
+                        if (placementTestAnswer == null && !string.IsNullOrEmpty(answer.Answer?.ToString()))
                         {
                             var (answerConfig, correctCount) = _answerTypeConverter.GetTotalCorrectByAsnwerType(answer.Answer, question.Config, question.QuestionType);
                             if (answerConfig == null)
