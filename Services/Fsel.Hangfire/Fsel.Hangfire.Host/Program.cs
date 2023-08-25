@@ -22,5 +22,4 @@ app.UseServices();
 app.UseHangfireDashboards();
 
 RecurringJobBase.Setup();
-
 app.Run();

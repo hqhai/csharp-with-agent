@@ -1,4 +1,4 @@
-﻿// Copyright (c) Atlantic. All rights reserved.
+// Copyright (c) Atlantic. All rights reserved.
 
 namespace Fsel.Shared.Constants
 {
@@ -7,6 +7,7 @@ namespace Fsel.Shared.Constants
         public static class JobName
         {
             public const string TestWorkerJob = "TestWorkerJob";
+            public const string AssignmentScheduleJob = "AssignmentScheduleJob";
         }
     }
 }

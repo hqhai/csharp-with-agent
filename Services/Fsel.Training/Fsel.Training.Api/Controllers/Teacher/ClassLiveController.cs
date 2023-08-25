@@ -55,6 +55,18 @@ namespace Fsel.Training.Api.Controllers.Teacher
             return queryResult.GetActionResult();
         }
 
+        /// <summary>
+        /// Approve teacher
+        /// </summary>
+        [HttpPut("approve-auto")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> ApproveAuto()
+        {
+            var queryResult = await _mediator.Send(new UpdateClassLiveAssignmentCommand()).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
         ///  <summary>
         ///  Search ClassLive
         ///  </summary>

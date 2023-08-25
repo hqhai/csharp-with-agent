@@ -3,11 +3,9 @@
 namespace Fsel.Training.Application.Commands.ClassLiveCmd
 {
     using Fsel.Common.ActionResults;
-    using Fsel.Core.Base;
     using Fsel.Shared.Enums;
-    using Fsel.Training.Application.Services.CourseServices;
+    using Fsel.Shared.Enums.ErrorCodes;
     using Fsel.Training.Application.Services.SystemServices;
-    using Fsel.Training.Application.Services.UserServices;
     using Fsel.Training.Domain.Entities;
     using Fsel.Training.Domain.IRepositories;
     using Fsel.Training.Domain.Models.CommandModels.ClassLives;
@@ -22,25 +20,20 @@ namespace Fsel.Training.Application.Commands.ClassLiveCmd
 
     public class UpdateClassLiveAssignmentCommandHandler : IRequestHandler<UpdateClassLiveAssignmentCommand, MethodResult<bool>>
     {
-        private readonly AuthContext _authContext;
         private readonly IClassRepository _classRepository;
         private readonly IClassLiveWorkFlowRepository _classLiveWorkFlowRepository;
-        private readonly IUserService _userService;
-        private readonly ICourseService _courseService;
+        private readonly IClassLiveCalendarRepository _classLiveCalendarRepository;
         private readonly ISystemService _systemService;
 
-        public UpdateClassLiveAssignmentCommandHandler(AuthContext authContext,
+        public UpdateClassLiveAssignmentCommandHandler(
             IClassRepository classRepository,
             IClassLiveWorkFlowRepository classLiveWorkFlowRepository,
-            IUserService userService,
-            ICourseService courseService,
+            IClassLiveCalendarRepository classLiveCalendarRepository,
             ISystemService systemService)
         {
-            _authContext = authContext;
             _classRepository = classRepository;
             _classLiveWorkFlowRepository = classLiveWorkFlowRepository;
-            _userService = userService;
-            _courseService = courseService;
+            _classLiveCalendarRepository = classLiveCalendarRepository;
             _systemService = systemService;
         }
 
@@ -50,30 +43,46 @@ namespace Fsel.Training.Application.Commands.ClassLiveCmd
             ArgumentNullException.ThrowIfNull(request);
 
             var timeFramesResult = await _systemService.GetLiveTimeFramesAsync();
+            if (!timeFramesResult.IsSuccessStatusCode)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallSystemServiceError), nameof(timeFramesResult));
+                return methodResult;
+            }
             var timeFrames = timeFramesResult.Content?.Result;
-            var teacherResult = await _userService.GetTeacherByUserIdAsync(_authContext.CurrentUserId);
-            var teacherId = teacherResult.Content?.Result?.Id;
-            var r1 = _classRepository.Queryable.Include(x => x.ClassLiveCalendars).Where(x => x.LiveTimeFrameId != null && x.TeacherId == teacherId && x.TeacherApprovalStatus == EnumTeacherApprovalStatus.Pending)
-                 .Select(x => new ClassLiveModel
-                 {
-                     Id = x.Id,
-                     StartDate = x.StartDate,
-                     LiveTimeFrameId = x.LiveTimeFrameId
-                 })
-                 .ToList();
+            var classPendingIds = await _classRepository.Queryable.Where(x => x.TeacherApprovalStatus == EnumTeacherApprovalStatus.Pending).Select(x => x.Id).ToListAsync(cancellationToken);
+            List<ClassLiveCalendar> classLiveCalendars = new List<ClassLiveCalendar>();
+            foreach (var classId in classPendingIds)
+            {
+                var classLiveCalendar = await _classLiveCalendarRepository.Queryable.Where(x => classPendingIds.Contains(x.ClassId) && x.Status == EnumClassLiveCalendarStatus.NotStudied)
+                    .OrderByDescending(x => x.LiveDate).FirstOrDefaultAsync(cancellationToken);
+                if (classLiveCalendar != null)
+                {
+                    classLiveCalendars.Add(classLiveCalendar);
+                }
+            }
 
-            var r2 = _classLiveWorkFlowRepository.Queryable
+            var r1 = await _classLiveWorkFlowRepository.Queryable
                 .Include(x => x.ClassLiveCalendar)
                 .ThenInclude(x => x!.Class)
-                .Where(x => x.Type == EnumWorkFlowType.AssignTeacher && x.Status == EnumWorkFlowAssignTeacherStatus.Pending.ToString() && x.TeacherId == teacherId)
+                .Where(x => x.Type == EnumWorkFlowType.AssignTeacher && x.Status == EnumWorkFlowAssignTeacherStatus.Pending.ToString())
                 .Select(x => new ClassLiveModel
                 {
                     Id = x.Id,
                     StartDate = x.ClassLiveCalendar!.LiveDate,
                     LiveTimeFrameId = x.ClassLiveCalendar.LiveTimeFrameId
-                })
-                .ToList();
-            var query = r1.Union(r2);
+                }).ToListAsync(cancellationToken);
+            var query = r1;
+            if (classLiveCalendars.Count > 0)
+            {
+                var r2 = classLiveCalendars
+                .Select(x => new ClassLiveModel
+                {
+                    Id = x.Id,
+                    StartDate = x.LiveDate,
+                    LiveTimeFrameId = x.LiveTimeFrameId
+                }).ToList();
+                query = query.Union(r2).ToList();
+            }
             IList<Guid> ids = new List<Guid>();
             foreach (var item in query)
             {
@@ -126,7 +135,10 @@ namespace Fsel.Training.Application.Commands.ClassLiveCmd
                     classLiveWordFlows.ForEach(x =>
                     {
                         x.Status = EnumWorkFlowAssignTeacherStatus.Approved.ToString();
-                        x.ClassLiveCalendar!.TeacherId = teacherId;
+                        if (x.ClassLiveCalendar != null)
+                        {
+                            x.ClassLiveCalendar.TeacherId = x.TeacherId;
+                        }
                     });
                     _classLiveWorkFlowRepository.UpdateList(classLiveWordFlows);
                     await _classLiveWorkFlowRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);

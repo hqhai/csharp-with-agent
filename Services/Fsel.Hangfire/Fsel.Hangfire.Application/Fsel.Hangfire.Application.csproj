@@ -12,6 +12,7 @@
 
   <ItemGroup>
     <Folder Include="Queues\" />
+    <Folder Include="Services\TrainingServices\Models\" />
   </ItemGroup>
 
 </Project>
