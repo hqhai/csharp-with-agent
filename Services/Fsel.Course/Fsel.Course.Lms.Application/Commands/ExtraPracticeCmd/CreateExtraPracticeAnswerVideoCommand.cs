@@ -118,10 +118,11 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
                         }
                         var exercise = question.ExerciseQuestions.Select(x => x.Exercise).FirstOrDefault();
                         var videoTimeCodeQuestion = exercise?.TimeCodeExercises.Select(x => x.VideoTimeCode).FirstOrDefault();
-                        extraPracticeResult.CurrentVideoTimeCodeId = videoTimeCodeQuestion?.Id;
+                        var currenVideoTimeCodeId = videoTimeCodeQuestion?.Id;
+                        extraPracticeResult.CurrentVideoTimeCodeId = currenVideoTimeCodeId;
 
                         var extraPracticeAnswer = await _extraPracticeAnswerRepository.Queryable
-                                       .FirstOrDefaultAsync(x => x.QuestionId == item.QuestionId && x.ExtraPracticeResultId == extraPracticeResult.Id, cancellationToken);
+                                       .FirstOrDefaultAsync(x => x.QuestionId == item.QuestionId && x.ExtraPracticeResultId == extraPracticeResult.Id && x.VideoTimeCodeId == currenVideoTimeCodeId, cancellationToken);
 
                         var (answerConfig, correctCount) = _answerTypeConverter.GetTotalCorrectByAsnwerType(item.Answer, question.Config, question.QuestionType);
                         if (answerConfig == null && !string.IsNullOrEmpty(item.Answer?.ToString()))
@@ -137,6 +138,7 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
                             {
                                 Answer = answerConfig,
                                 CorrectCount = correctCount,
+                                VideoTimeCodeId = currenVideoTimeCodeId,
                                 ExtraPracticeResultId = extraPracticeResult.Id,
                                 QuestionId = item.QuestionId,
                                 Status = videoTimeCodeQuestion.TimeCodeType != EnumTimeCodeType.Standalone ? EnumCurrentStatus.Done : EnumCurrentStatus.Process
@@ -167,7 +169,14 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
                     extraPracticeResult.Status = EnumResultStatus.Process;
                     extraPracticeResult.Percent = 0;
                 }
-                extraPracticeResult.CorrectCount = extraPracticeResult.ExtraPracticeAnswers.Sum(x => x.CorrectCount);
+                if (extraPracticeAnswers.Count > 0)
+                {
+                    extraPracticeResult.CorrectCount += extraPracticeAnswers.Sum(x => x.CorrectCount);
+                }
+                else if (updateExtraPracticeAnswers.Count > 0)
+                {
+                    extraPracticeResult.CorrectCount += updateExtraPracticeAnswers.Sum(x => x.CorrectCount);
+                }
                 if (request.IsActive)
                 {
                     extraPracticeResult.Status = EnumResultStatus.Done;
@@ -176,6 +185,7 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
                 else
                 {
                     extraPracticeResult.Status = EnumResultStatus.Process;
+                    extraPracticeResult.Percent = extraPracticeResult.CorrectTotal > 0 ? (double)extraPracticeResult.CorrectCount / extraPracticeResult.CorrectTotal * 100 : default;
                 }
             }
             await _extraPracticeResultRepository.ExecuteTransactionAsync(async () =>

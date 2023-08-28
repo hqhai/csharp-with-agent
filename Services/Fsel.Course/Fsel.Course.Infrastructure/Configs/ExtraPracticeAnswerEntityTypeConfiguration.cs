@@ -41,6 +41,11 @@ namespace Fsel.Course.Infrastructure.Configs
                .HasForeignKey(b => b.ExtraPracticeExerciseResultId)
                .OnDelete(DeleteBehavior.Cascade);
 
+            builder.HasOne(a => a.VideoTimeCode)
+                      .WithMany(b => b.ExtraPracticeAnswers)
+                      .HasForeignKey(b => b.VideoTimeCodeId)
+                      .OnDelete(DeleteBehavior.NoAction);
+
             builder.HasOne(a => a.Section)
               .WithMany(b => b.ExtraPracticeAnswers)
               .HasForeignKey(b => b.SectionId)
