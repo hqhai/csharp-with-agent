@@ -36,7 +36,6 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
         private readonly AnswerTypeConverter _answerTypeConverter;
         private readonly IQuestionRepository _questionRepository;
         private readonly IExtraPracticeResultRepository _extraPracticeResultRepository;
-        private readonly IExtraPracticeExerciseResultRepository _extraPracticeExerciseResultRepository;
 
         public CreateExtraPracticeAnswerVideoCommandHandler(AuthContext authContext
             , IUserService userService
@@ -44,8 +43,7 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
             , IExtraPracticeAnswerRepository extraPracticeAnswerRepository
             , AnswerTypeConverter answerTypeConverter
             , IQuestionRepository questionRepository
-            , IExtraPracticeResultRepository extraPracticeResultRepository
-            , IExtraPracticeExerciseResultRepository extraPracticeExerciseResultRepository)
+            , IExtraPracticeResultRepository extraPracticeResultRepository)
         {
             _authContext = authContext;
             _userService = userService;
@@ -54,7 +52,6 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
             _answerTypeConverter = answerTypeConverter;
             _questionRepository = questionRepository;
             _extraPracticeResultRepository = extraPracticeResultRepository;
-            _extraPracticeExerciseResultRepository = extraPracticeExerciseResultRepository;
         }
 
         public async Task<MethodResult<ExtraPracticeResultModel>> Handle(CreateExtraPracticeAnswerVideoCommand request, CancellationToken cancellationToken)
