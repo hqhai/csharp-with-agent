@@ -3,7 +3,9 @@
 namespace Fsel.Course.Infrastructure.Configs
 {
     using System;
+    using Fsel.Common.Helpers;
     using Fsel.Course.Domain.Entities;
+    using Fsel.Shared.Enums;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -12,6 +14,13 @@ namespace Fsel.Course.Infrastructure.Configs
         public void Configure(EntityTypeBuilder<ExtraPracticeAnswer> builder)
         {
             ArgumentNullException.ThrowIfNull(builder);
+
+            builder.Property(e => e.Status)
+                .HasMaxLength(100)
+                .HasConversion(
+                    v => v.ToString(),
+                    v => v.EnumParse<EnumCurrentStatus>());
+
             builder.HasOne(a => a.Question)
                 .WithMany(b => b.ExtraPracticeAnswers)
                 .HasForeignKey(b => b.QuestionId)

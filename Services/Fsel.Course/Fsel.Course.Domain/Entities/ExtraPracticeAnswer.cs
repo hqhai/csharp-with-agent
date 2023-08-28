@@ -7,6 +7,7 @@ namespace Fsel.Course.Domain.Entities
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Common.Helpers;
     using Fsel.Core.Entities;
+    using Fsel.Shared.Enums;
 
     public class ExtraPracticeAnswer : Entity
     {
@@ -29,6 +30,7 @@ namespace Fsel.Course.Domain.Entities
         [Range(0, 10000_0000, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
         public int CorrectCount { get; set; }
 
+        public EnumCurrentStatus? Status { get; set; }
         public Question? Question { get; set; }
         public ExtraPracticeResult? ExtraPracticeResult { get; set; }
         public ExtraPracticeExerciseResult? ExtraPracticeExerciseResult { get; set; }
