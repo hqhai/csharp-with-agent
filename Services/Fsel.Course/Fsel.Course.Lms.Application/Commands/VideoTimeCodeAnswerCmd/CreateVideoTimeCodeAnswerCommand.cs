@@ -112,7 +112,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
 
                 var answer = await _videoTimeCodeAnswerRepository.GetAsync(videoResult.Id, question.Id, exercise?.Id, videoTimeCodeQuestion?.Id);
                 var (answerConfig, correctCount) = _answerTypeConverter.GetTotalCorrectByAsnwerType(item.Answer, question.Config, question.QuestionType);
-                if (item.Answer != null && answerConfig == null)
+                if (!string.IsNullOrEmpty(item.Answer?.ToString()) && answerConfig == null)
                 {
                     methodResult.AddErrorBadRequest(nameof(EnumVideoTimeCodeAnswerErrorCode.AnswerIsInTheWrongFormat), nameof(item.Answer), item.Answer);
                     return methodResult;
@@ -122,12 +122,12 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
                     answer = new VideoTimeCodeAnswer
                     {
                         Answer = answerConfig ?? item.Answer,
-                        VideoTimeCodeId = videoTimeCodeQuestion.Id,
+                        VideoTimeCodeId = videoTimeCodeQuestion?.Id ?? default,
                         ExerciseId = exercise.Id,
                         QuestionId = question.Id,
                         VideoResultId = videoResult.Id,
                         CorrectCount = question.Ungraded ? default : correctCount,
-                        Status = videoTimeCodeQuestion.TimeCodeType != EnumTimeCodeType.Standalone ? EnumCurrentStatus.Done : EnumCurrentStatus.Process
+                        Status = videoTimeCodeQuestion?.TimeCodeType != EnumTimeCodeType.Standalone ? EnumCurrentStatus.Done : EnumCurrentStatus.Process
                     };
                     videoTimeCodeAnswers.Add(answer);
                 }

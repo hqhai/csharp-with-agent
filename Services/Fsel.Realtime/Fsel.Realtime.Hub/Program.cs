@@ -5,6 +5,8 @@ using Fsel.Core.Extensions;
 using Fsel.Realtime.Application.Hubs;
 using Fsel.Realtime.Application.Queues.Consumers;
 using Fsel.Shared.Constants;
+using MassTransit;
+using MassTransit.SignalR;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,11 +15,15 @@ builder.AddServices();
 builder.AddSwaggerGens(appSetting);
 builder.AddAuthenticationJwtBearers(appSetting);
 
-builder.AddRabbitMq(appSetting, new Dictionary<string, Type>
+builder.AddMassTransit(appSetting,
+queues: new Dictionary<string, Type>
 {
     { QueueSettings.RealtimeQueue.NameQueue.DiscussionBoard, typeof(DiscussionBoardConsumer) }
+},
+setHub: (IBusRegistrationConfigurator x) =>
+{
+    x.AddSignalRHub<DiscussionBoardHub>();
 });
-builder.AddHubs<DiscussionBoardHub>();
 
 var app = builder.Build();
 app.UseServices();

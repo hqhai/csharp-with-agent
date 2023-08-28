@@ -18,8 +18,9 @@ builder.Services.AddHangfireServer();
 
 var app = builder.Build();
 
-app.UseHangfireDashboard();
+app.UseServices();
+app.UseHangfireDashboards();
+
 RecurringJobBase.Setup();
 
-app.UseServices();
 app.Run();
