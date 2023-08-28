@@ -1,6 +1,8 @@
 // Copyright (c) Atlantic. All rights reserved.
 
 using Fsel.Core.Extensions;
+using Fsel.Shared.Constants;
+using Fsel.Training.Application.Queues.Consumers;
 using Fsel.Training.Application.Services.CourseServices;
 using Fsel.Training.Application.Services.OrderServices;
 using Fsel.Training.Application.Services.SystemServices;
@@ -9,6 +11,7 @@ using Fsel.Training.Domain.IRepositories;
 using Fsel.Training.Infrastructure;
 using Fsel.Training.Infrastructure.Repositories;
 using Fsel.Training.Infrastructure.ValueSettings;
+using MassTransit;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -31,6 +34,7 @@ builder.Services.AddScoped<ITeacherFreeDateRepository, TeacherFreeDateRepository
 builder.Services.AddScoped<ITeacherFreeTimeRepository, TeacherFreeTimeRepository>();
 builder.Services.AddScoped<IClassLiveWorkFlowRepository, ClassLiveWorkFlowRepository>();
 builder.Services.AddScoped<IClassLiveWorkFlowPlanRepository, ClassLiveWorkFlowPlanRepository>();
+//builder.Services.AddScoped<UpdateClassLiveAssignmentConsumer>();
 
 builder.AddRefitClients(typeof(IUserService), appSetting?.Services?.UserApiUrl);
 builder.AddRefitClients(typeof(ICourseService), appSetting?.Services?.CourseApiUrl);

@@ -5,11 +5,12 @@ using Fsel.Training.Application.Services.SystemServices;
 using Fsel.Training.Domain.Entities;
 using Fsel.Training.Domain.IRepositories;
 using Fsel.Training.Domain.Models.EntityModels;
+using MassTransit;
 using Microsoft.EntityFrameworkCore;
 
 namespace Fsel.Training.Application.Queues.Consumers
 {
-    public class UpdateClassLiveAssignmentConsumer
+    public class UpdateClassLiveAssignmentConsumer : IConsumer
     {
         private readonly IQueueProvider _queueProvider;
         private readonly IClassRepository _classRepository;
@@ -31,7 +32,7 @@ namespace Fsel.Training.Application.Queues.Consumers
             _systemService = systemService;
         }
 
-        public async Task Publish(CancellationToken cancellationToken)
+        public async Task Consume(CancellationToken cancellationToken)
         {
             var timeFramesResult = await _systemService.GetLiveTimeFramesAsync();
             if (!timeFramesResult.IsSuccessStatusCode)
