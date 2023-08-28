@@ -2,26 +2,26 @@
 
 namespace Fsel.Hangfire.Application.Workers
 {
-    using System.Threading.Tasks;
     using Fsel.Core.Base.Interfaces;
+    using Fsel.Hangfire.Application.Queues.Publishers;
 
     public class AssignmentScheduleWorker : IWorker
     {
-        //private readonly ITrainingService _trainingService;
+        private readonly UpdateClassLiveAssignmentPublisher _updateClassLiveAssignmentPublisher;
 
-        //public AssignmentScheduleWorker(ITrainingService trainingService)
-        //{
-        //    _trainingService = trainingService;
-        //}
-        public Task RunAsync<T>(T? data = null) where T : class
+        public AssignmentScheduleWorker(UpdateClassLiveAssignmentPublisher updateClassLiveAssignmentPublisher)
         {
-            return Task.CompletedTask;
+            _updateClassLiveAssignmentPublisher = updateClassLiveAssignmentPublisher;
         }
 
-        public Task RunAsync()
+        public async Task RunAsync<T>(T? data = null) where T : class
         {
-            return Task.CompletedTask;
-            //await _trainingService.ApproveAutoAsync();
+            await _updateClassLiveAssignmentPublisher.Publish(CancellationToken.None);
+        }
+
+        public async Task RunAsync()
+        {
+            await _updateClassLiveAssignmentPublisher.Publish(CancellationToken.None);
         }
     }
 }
