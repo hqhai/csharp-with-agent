@@ -163,30 +163,6 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
                 {
                     extraPracticeAnswers.ForEach(x => x.Status = EnumCurrentStatus.Done);
                 }
-                if (extraPracticeResult.Status == EnumResultStatus.Done)
-                {
-                    extraPracticeResult.CorrectCount = 0;
-                    extraPracticeResult.Status = EnumResultStatus.Process;
-                    extraPracticeResult.Percent = 0;
-                }
-                if (extraPracticeAnswers.Count > 0)
-                {
-                    extraPracticeResult.CorrectCount += extraPracticeAnswers.Sum(x => x.CorrectCount);
-                }
-                else if (updateExtraPracticeAnswers.Count > 0)
-                {
-                    extraPracticeResult.CorrectCount += updateExtraPracticeAnswers.Sum(x => x.CorrectCount);
-                }
-                if (request.IsActive)
-                {
-                    extraPracticeResult.Status = EnumResultStatus.Done;
-                    extraPracticeResult.Percent = 100;
-                }
-                else
-                {
-                    extraPracticeResult.Status = EnumResultStatus.Process;
-                    extraPracticeResult.Percent = extraPracticeResult.CorrectTotal > 0 ? (double)extraPracticeResult.CorrectCount / extraPracticeResult.CorrectTotal * 100 : default;
-                }
             }
             await _extraPracticeResultRepository.ExecuteTransactionAsync(async () =>
             {
