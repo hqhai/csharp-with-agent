@@ -16,7 +16,7 @@ namespace Fsel.Hangfire.Application.Queues.Publishers
 
         public async Task Publish(CancellationToken cancellationToken)
         {
-            await _queueProvider.Publish<object>(QueueSettings.RealtimeQueue.NameQueue.UpdateClassLiveAssignment, null, cancellationToken);
+            await _queueProvider.Publish(QueueSettings.RealtimeQueue.NameQueue.UpdateClassLiveAssignment, cancellationToken);
         }
     }
 }

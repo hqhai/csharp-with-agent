@@ -40,14 +40,13 @@ builder.AddRefitClients(typeof(IUserService), appSetting?.Services?.UserApiUrl);
 builder.AddRefitClients(typeof(ICourseService), appSetting?.Services?.CourseApiUrl);
 builder.AddRefitClients(typeof(IOrderService), appSetting?.Services?.OrderApiUrl);
 builder.AddRefitClients(typeof(ISystemService), appSetting?.Services?.SystemApiUrl);
-builder.AddMassTransit(appSetting);
-var app = builder.Build();
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+builder.AddMassTransit(appSetting,
+queues: new Dictionary<string, Type>
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+    { QueueSettings.RealtimeQueue.NameQueue.UpdateClassLiveAssignment, typeof(UpdateClassLiveAssignmentConsumer) }
+});
+
+var app = builder.Build();
 app.UseServices();
 app.Run();

@@ -1,6 +1,8 @@
+using Fsel.Core.Base.BaseModels;
 using Fsel.Core.Base.Interfaces;
 using Fsel.Shared.Constants;
 using Fsel.Shared.Enums;
+using Fsel.Shared.Models.ShareModels;
 using Fsel.Training.Application.Services.SystemServices;
 using Fsel.Training.Domain.Entities;
 using Fsel.Training.Domain.IRepositories;
@@ -10,29 +12,26 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Fsel.Training.Application.Queues.Consumers
 {
-    public class UpdateClassLiveAssignmentConsumer : IConsumer
+    public class UpdateClassLiveAssignmentConsumer : IConsumer<BaseQueueModel>
     {
-        private readonly IQueueProvider _queueProvider;
         private readonly IClassRepository _classRepository;
         private readonly IClassLiveWorkFlowRepository _classLiveWorkFlowRepository;
         private readonly IClassLiveCalendarRepository _classLiveCalendarRepository;
         private readonly ISystemService _systemService;
 
         public UpdateClassLiveAssignmentConsumer(
-            IQueueProvider queueProvider,
             IClassRepository classRepository,
             IClassLiveWorkFlowRepository classLiveWorkFlowRepository,
             IClassLiveCalendarRepository classLiveCalendarRepository,
             ISystemService systemService)
         {
-            _queueProvider = queueProvider;
             _classRepository = classRepository;
             _classLiveWorkFlowRepository = classLiveWorkFlowRepository;
             _classLiveCalendarRepository = classLiveCalendarRepository;
             _systemService = systemService;
         }
 
-        public async Task Consume(CancellationToken cancellationToken)
+        public async Task Consume(ConsumeContext<BaseQueueModel> context)
         {
             var timeFramesResult = await _systemService.GetLiveTimeFramesAsync();
             if (!timeFramesResult.IsSuccessStatusCode)
@@ -40,12 +39,12 @@ namespace Fsel.Training.Application.Queues.Consumers
                 return;
             }
             var timeFrames = timeFramesResult.Content?.Result;
-            var classPendingIds = await _classRepository.Queryable.Where(x => x.TeacherApprovalStatus == EnumTeacherApprovalStatus.Pending).Select(x => x.Id).ToListAsync(cancellationToken);
+            var classPendingIds = await _classRepository.Queryable.Where(x => x.TeacherApprovalStatus == EnumTeacherApprovalStatus.Pending).Select(x => x.Id).ToListAsync();
             List<ClassLiveCalendar> classLiveCalendars = new List<ClassLiveCalendar>();
             foreach (var classId in classPendingIds)
             {
                 var classLiveCalendar = await _classLiveCalendarRepository.Queryable.Where(x => classPendingIds.Contains(x.ClassId) && x.Status == EnumClassLiveCalendarStatus.NotStudied)
-                    .OrderByDescending(x => x.LiveDate).FirstOrDefaultAsync(cancellationToken);
+                    .OrderByDescending(x => x.LiveDate).FirstOrDefaultAsync();
                 if (classLiveCalendar != null)
                 {
                     classLiveCalendars.Add(classLiveCalendar);
@@ -61,7 +60,7 @@ namespace Fsel.Training.Application.Queues.Consumers
                     Id = x.Id,
                     StartDate = x.ClassLiveCalendar!.LiveDate,
                     LiveTimeFrameId = x.ClassLiveCalendar.LiveTimeFrameId
-                }).ToListAsync(cancellationToken);
+                }).ToListAsync();
             var query = r1;
             if (classLiveCalendars.Count > 0)
             {
@@ -93,8 +92,8 @@ namespace Fsel.Training.Application.Queues.Consumers
             }
             if (ids.Count > 0)
             {
-                var classLiveWordFlows = await _classLiveWorkFlowRepository.Queryable.Include(x => x.ClassLiveCalendar).Where(x => ids.Contains(x.Id)).ToListAsync(cancellationToken);
-                var classes = await _classRepository.Queryable.Include(x => x.ClassLiveCalendars).Where(x => ids.Contains(x.Id)).ToListAsync(cancellationToken);
+                var classLiveWordFlows = await _classLiveWorkFlowRepository.Queryable.Include(x => x.ClassLiveCalendar).Where(x => ids.Contains(x.Id)).ToListAsync();
+                var classes = await _classRepository.Queryable.Include(x => x.ClassLiveCalendars).Where(x => ids.Contains(x.Id)).ToListAsync();
                 if (classes.Count > 0)
                 {
                     classes.ForEach(x =>
@@ -119,7 +118,7 @@ namespace Fsel.Training.Application.Queues.Consumers
                         }
                     });
                     _classRepository.UpdateList(classes);
-                    await _classRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+                    await _classRepository.UnitOfWork.SaveEntitiesAsync().ConfigureAwait(false);
                 }
                 if (classLiveWordFlows.Count > 0)
                 {
@@ -132,10 +131,9 @@ namespace Fsel.Training.Application.Queues.Consumers
                         }
                     });
                     _classLiveWorkFlowRepository.UpdateList(classLiveWordFlows);
-                    await _classLiveWorkFlowRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+                    await _classLiveWorkFlowRepository.UnitOfWork.SaveEntitiesAsync().ConfigureAwait(false);
                 }
             }
-            await _queueProvider.Publish<object>(QueueSettings.RealtimeQueue.NameQueue.UpdateClassLiveAssignment, null, cancellationToken);
         }
     }
 }
