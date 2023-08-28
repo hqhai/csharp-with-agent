@@ -138,7 +138,6 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
                 {
                     answer.Answer = answerConfig;
                     answer.CorrectCount = question.Ungraded ? default : correctCount;
-                    answer.Status = EnumCurrentStatus.Done;
                     updateVideoTimeCodeAnswers.Add(answer);
                 }
                 else if (answer != null && answer.Status == EnumCurrentStatus.Done)
