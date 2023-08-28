@@ -109,6 +109,7 @@ namespace Fsel.Course.Lms.Application.Queries.FinalTestQuery
                     Id = x!.Id,
                     ExecutionTime = x!.ExecutionTime,
                     CourseSkill = x.CourseSkill,
+                    TotalQuestion = x.Sections.SelectMany(x => x.SectionQuestions).Count(),
                     Sections = x.Sections.OrderBy(x => x!.DisplayOrder).Select(x => new SectionModel
                     {
                         Id = x.Id,
