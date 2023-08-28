@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace FiveSIS.Shared.Enums
+namespace Fsel.Shared.Enums
 {
 
     public enum EnumNotificationContent

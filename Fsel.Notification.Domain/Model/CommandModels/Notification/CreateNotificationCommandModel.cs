@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace FiveSIS.Notification.Domain.Model.CommandModels.Notification
+namespace Fsel.Notification.Domain.Model.CommandModels.Notification
 {
     using System;
 

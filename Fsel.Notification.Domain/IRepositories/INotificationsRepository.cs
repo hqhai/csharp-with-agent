@@ -1,9 +1,9 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace FiveSIS.Notification.Domain.IRepositories
+namespace Fsel.Notification.Domain.IRepositories
 {
-    using FiveSIS.Notification.Domain.Entities;
     using Fsel.Core.Base.Interfaces;
+    using Fsel.Notification.Domain.Entities;
 
     public interface INotificationsRepository : IRepository<Notifications>
     {

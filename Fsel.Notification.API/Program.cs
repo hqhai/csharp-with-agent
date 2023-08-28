@@ -1,27 +1,27 @@
 // Copyright (c) Atlantic. All rights reserved.
 
+using Fsel.Notification.Domain.IRepositories;
+using Fsel.Notification.Infrastructure;
+using Fsel.Notification.Infrastructure.Repositories;
+using Fsel.Notification.Infrastructure.ValueSettings;
+using Fsel.Notification.Application.Services;
+using Fsel.Core.Extensions;
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+var appSetting = builder.AddAppSettings<AppSetting>();
+builder.AddServices();
+builder.AddSwaggerGens(appSetting);
+builder.AddAuthenticationJwtBearers(appSetting);
+builder.AddDbContexts<NotificationsDBContext>();
 
-builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddScoped<INotificationsRepository, NotificationsRepository>();
+builder.Services.AddScoped<INotificationTypeRepository, NotificationTypeRepository>();
+
+builder.AddRefitClients(typeof(IUserService), appSetting?.Services?.UserApiUrl, appSetting?.Jwt?.SecretKey);
 
 var app = builder.Build();
-
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
-
-app.UseHttpsRedirection();
-
-app.UseAuthorization();
-
-app.MapControllers();
-
+app.UseServices(appSetting);
 app.Run();
+
+

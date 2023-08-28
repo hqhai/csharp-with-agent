@@ -6,4 +6,13 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Folder Include="Services\Models\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Fsel.Notification.Infrastructure\Fsel.Notification.Infrastructure.csproj" />
+    <ProjectReference Include="..\Services\Shared\Fsel.Shared\Fsel.Shared.csproj" />
+  </ItemGroup>
+
 </Project>

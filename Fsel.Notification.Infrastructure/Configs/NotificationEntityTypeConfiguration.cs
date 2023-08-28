@@ -1,9 +1,9 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace FiveSIS.Notification.Infrastructure.Configs
+namespace Fsel.Notification.Infrastructure.Configs
 {
-    using FiveSIS.Notification.Domain.Entities;
-    using FiveSIS.Shared.Enums;
+    using Fsel.Notification.Domain.Entities;
+    using Fsel.Shared.Enums;
     using Fsel.Common.Helpers;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.Metadata.Builders;

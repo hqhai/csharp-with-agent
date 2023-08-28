@@ -1,9 +1,9 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace FiveSIS.Notification.Domain.Model.EntityModels
+namespace Fsel.Notification.Domain.Model.EntityModels
 {
-    using FiveSIS.Shared.Enums;
     using Fsel.Core.Base.BaseModels;
+    using Fsel.Shared.Enums;
 
     public class NotificationsModel : BaseModel
     {
