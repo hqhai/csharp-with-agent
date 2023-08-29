@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Course.Lms.Application.Queries.ProgessQuery
+namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
 {
     using System.Linq;
     using Fsel.Common.ActionResults;
@@ -15,12 +15,12 @@ namespace Fsel.Course.Lms.Application.Queries.ProgessQuery
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class GetProgessMenuQuery : IRequest<MethodResult<ProgessMenuModel>>
+    public class GetProgressMenuQuery : IRequest<MethodResult<ProgressMenuModel>>
     {
         public Guid CourseId { get; set; }
     }
 
-    public class GetProgessMenuQueryHandler : IRequestHandler<GetProgessMenuQuery, MethodResult<ProgessMenuModel>>
+    public class GetProgressMenuQueryHandler : IRequestHandler<GetProgressMenuQuery, MethodResult<ProgressMenuModel>>
     {
         private readonly AuthContext _authContext;
         private readonly IClassForumRepository _classForumRepository;
@@ -29,7 +29,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgessQuery
         private readonly ISystemService _systemService;
         private readonly IUserService _userService;
 
-        public GetProgessMenuQueryHandler(AuthContext authContext
+        public GetProgressMenuQueryHandler(AuthContext authContext
             , IClassForumRepository classForumRepository
             , IUnitRepository unitRepository
             , ILessonExtraPracticeRepository lessonExtraPracticeRepository
@@ -44,11 +44,11 @@ namespace Fsel.Course.Lms.Application.Queries.ProgessQuery
             _userService = userService;
         }
 
-        public async Task<MethodResult<ProgessMenuModel>> Handle(GetProgessMenuQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<ProgressMenuModel>> Handle(GetProgressMenuQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            MethodResult<ProgessMenuModel> methodResult = new MethodResult<ProgessMenuModel>();
-            ProgessMenuModel progessMenu = new ProgessMenuModel();
+            MethodResult<ProgressMenuModel> methodResult = new MethodResult<ProgressMenuModel>();
+            ProgressMenuModel progressMenu = new ProgressMenuModel();
             var studentResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
             if (!studentResult.IsSuccessStatusCode)
             {
@@ -93,15 +93,15 @@ namespace Fsel.Course.Lms.Application.Queries.ProgessQuery
             var logActions = logActionResults?.Content?.Result;
             if (logActions != null)
             {
-                progessMenu.NumberOfDaysStreak = logActions.NumberOfDaysStreak;
-                progessMenu.IsDaysStreakIncrease = logActions.IsDaysStreakIncrease;
+                progressMenu.NumberOfDaysStreak = logActions.NumberOfDaysStreak;
+                progressMenu.IsDaysStreakIncrease = logActions.IsDaysStreakIncrease;
             }
 
-            progessMenu.NumberOfUnitDone = numberOfUnitDone;
-            progessMenu.NumberOfPostsCreated = numberOfPostsCreated;
-            progessMenu.NumberOfPracticesDone = numberOfPracticesDone;
+            progressMenu.NumberOfUnitDone = numberOfUnitDone;
+            progressMenu.NumberOfPostsCreated = numberOfPostsCreated;
+            progressMenu.NumberOfPracticesDone = numberOfPracticesDone;
             methodResult.StatusCode = StatusCodes.Status200OK;
-            methodResult.Result = progessMenu;
+            methodResult.Result = progressMenu;
             return methodResult;
         }
     }
