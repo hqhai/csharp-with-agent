@@ -78,12 +78,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
             var placementTestResultDone = await _placementTestResultRepository.Queryable.Where(x => x.Status == EnumResultStatus.Done && x.StudentId == studentId)
                                                                            .OrderByDescending(x => x.CreatedDate)
                                                                            .FirstOrDefaultAsync(cancellationToken);
-            DateTime today = DateTime.Today;
-            int age = today.Year - student?.Human?.Birthday?.Year ?? default;
-            if (today > student?.Human?.Birthday?.AddYears(age))
-            {
-                age--;
-            }
+            int age = IeltsScoreHelper.GetYearOld(student?.Human?.Birthday);
             if (placementTestResultDone != null)
             {
                 var (levelNext, isLock) = placementTestResultDone.Level.GetLevelInScore(placementTestResultDone.Percent, age);

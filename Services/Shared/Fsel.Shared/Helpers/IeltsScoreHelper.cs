@@ -75,6 +75,17 @@ namespace Fsel.Shared.Helpers
             return default;
         }
 
+        public static int GetYearOld(DateTime? birthday)
+        {
+            DateTime today = DateTime.Today;
+            int age = today.Year - birthday?.Year ?? default;
+            if (today > birthday?.AddYears(age))
+            {
+                age--;
+            }
+            return age;
+        }
+
         public static (EnumCourseLevel?, bool) GetLevelInScore(this EnumPlacementTestLevel enumPlacementTestLevel, double? value = 0, int? yearOld = 0)
         {
             EnumCourseLevel? courseLevel;

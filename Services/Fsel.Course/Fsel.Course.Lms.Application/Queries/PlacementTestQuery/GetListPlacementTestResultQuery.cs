@@ -60,12 +60,7 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestQuery
                 methodResult.Result = null;
                 return methodResult;
             }
-            DateTime today = DateTime.Today;
-            int age = today.Year - student?.Human?.Birthday?.Year ?? default;
-            if (today > student?.Human?.Birthday?.AddYears(age))
-            {
-                age--;
-            }
+            int age = IeltsScoreHelper.GetYearOld(student?.Human?.Birthday);
             var placementTestResultModels = _mapper.Map<IList<PlacementTestResultModel>>(placementTestResults);
             foreach (var item in placementTestResultModels)
             {
