@@ -10,8 +10,4 @@
     <ProjectReference Include="..\..\Fsel.Realtime\Fsel.Realtime.Infrastructure\Fsel.Realtime.Infrastructure.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Queues\" />
-  </ItemGroup>
-
 </Project>
