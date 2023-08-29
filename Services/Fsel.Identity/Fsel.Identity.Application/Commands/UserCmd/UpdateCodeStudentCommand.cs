@@ -14,6 +14,7 @@ namespace Fsel.Identity.Application.Commands.UserCmd
     using Fsel.Identity.Domain.Models.CommandModels.Users;
     using Fsel.Identity.Domain.Models.EntityModels;
     using Fsel.Shared.Enums;
+    using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Identity;
@@ -62,15 +63,10 @@ namespace Fsel.Identity.Application.Commands.UserCmd
                 code = $"HN_{weekNumber}{lastDigitOfYear}{number}{2}{lastOfBirthDay}{stt:000}";
             }
             user.Human!.Code = code;
-            int age = currentDate.Year - request.Birthday.Year;
-            if (request.Birthday > currentDate.AddYears(-age))
-            {
-                age--;
-            }
-
+            int age = DateTimeHelper.GetYearOld(request.Birthday);
             if (age <= 13)
             {
-                user.Human!.Student!.CourseLevel = EnumCourseLevel.A1;
+                user.Human!.Student!.CourseLevel = EnumCourseLevel.A2;
             }
             else if (age >= 14)
             {

@@ -11,5 +11,16 @@ namespace Fsel.Shared.Helpers
         {
             return dateTime.HasValue ? dateTime.Value.ToString(format, CultureInfo.InvariantCulture) : null;
         }
+
+        public static int GetYearOld(DateTime? birthday)
+        {
+            DateTime today = DateTime.Today;
+            int age = today.Year - birthday?.Year ?? default;
+            if (today > birthday?.AddYears(age))
+            {
+                age--;
+            }
+            return age;
+        }
     }
 }
