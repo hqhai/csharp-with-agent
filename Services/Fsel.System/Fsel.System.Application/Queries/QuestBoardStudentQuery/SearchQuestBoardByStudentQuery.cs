@@ -160,24 +160,24 @@ namespace Fsel.System.Application.Queries.QuestBoardStudentQuery
                 switch (item.Category)
                 {
                     case EnumQuestBoardCategory.FinishOneLesson:
-                        var finishOnelesson = await _courseService.GetPercentVideoResult(new GetFinishOneLessonQueryModel { EndDate = item.EndDate, StartDate = item.StartDate, RepeatType = item.RepeatType, StudentId = studentId });
-                        var (percent, objectId) = finishOnelesson.Content?.Result ?? default;
-                        item.Percent = percent;
-                        item.ObjectId = objectId;
+                        var finishOnelessonResult = await _courseService.GetPercentVideoResult(new GetFinishOneLessonQueryModel { EndDate = item.EndDate, StartDate = item.StartDate, RepeatType = item.RepeatType, StudentId = studentId });
+                        var finishOnelesson = finishOnelessonResult.Content?.Result ?? default;
+                        item.Percent = finishOnelesson?.Percent ?? default;
+                        item.ObjectId = finishOnelesson?.ObjectId;
                         break;
 
                     case EnumQuestBoardCategory.FinishOneUnit:
-                        var finishOneUnit = await _courseService.GetPercentUnitResult(new GetFinishOneQueryModel { CurrentUserId = currentUserId, StudentId = studentId });
-                        var (percentUnit, objectUnitId) = finishOneUnit.Content?.Result ?? default;
-                        item.Percent = percentUnit;
-                        item.ObjectId = objectUnitId;
+                        var finishOneUnitResult = await _courseService.GetPercentUnitResult(new GetFinishOneQueryModel { CurrentUserId = currentUserId, StudentId = studentId });
+                        var finishOneUnit = finishOneUnitResult.Content?.Result ?? default;
+                        item.Percent = finishOneUnit?.Percent ?? default;
+                        item.ObjectId = finishOneUnit?.ObjectId;
                         break;
 
                     case EnumQuestBoardCategory.FinishOneLevelPass:
-                        var finishOneLevelPass = await _courseService.GetPercentCourseResult(new GetFinishOneQueryModel { CurrentUserId = currentUserId, StudentId = studentId });
-                        var (percentLevelPass, objectLevelPassId) = finishOneLevelPass.Content?.Result ?? default;
-                        item.Percent = percentLevelPass;
-                        item.ObjectId = objectLevelPassId;
+                        var finishOneLevelPassResult = await _courseService.GetPercentCourseResult(new GetFinishOneQueryModel { CurrentUserId = currentUserId, StudentId = studentId });
+                        var finishOneLevelPass = finishOneLevelPassResult.Content?.Result ?? default;
+                        item.Percent = finishOneLevelPass?.Percent ?? default;
+                        item.ObjectId = finishOneLevelPass?.ObjectId;
                         break;
 
                     default:

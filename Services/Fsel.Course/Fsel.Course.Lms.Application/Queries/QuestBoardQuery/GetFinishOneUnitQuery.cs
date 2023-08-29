@@ -12,17 +12,18 @@ namespace Fsel.Course.Lms.Application.Queries.QuestBoardQuery
     using Fsel.Course.Lms.Application.Services.OrderServices.Model;
     using Fsel.Course.Lms.Application.Services.TrainingServices;
     using Fsel.Shared.Enums.ErrorCodes;
+    using Fsel.Shared.Models.ShareModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class GetFinishOneUnitQuery : IRequest<MethodResult<(double, Guid?)>>
+    public class GetFinishOneUnitQuery : IRequest<MethodResult<QuestBoardCategoryModel>>
     {
         public Guid StudentId { get; set; }
         public Guid CurrentUserId { get; set; }
     }
 
-    public class GetFinishOneUnitQueryHandler : IRequestHandler<GetFinishOneUnitQuery, MethodResult<(double, Guid?)>>
+    public class GetFinishOneUnitQueryHandler : IRequestHandler<GetFinishOneUnitQuery, MethodResult<QuestBoardCategoryModel>>
     {
         private readonly ITrainingService _trainingService;
         private readonly IOrderService _orderService;
@@ -43,10 +44,11 @@ namespace Fsel.Course.Lms.Application.Queries.QuestBoardQuery
             _courseRepository = courseRepository;
         }
 
-        public async Task<MethodResult<(double, Guid?)>> Handle(GetFinishOneUnitQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<QuestBoardCategoryModel>> Handle(GetFinishOneUnitQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            MethodResult<(double, Guid?)> methodResult = new MethodResult<(double, Guid?)>();
+            MethodResult<QuestBoardCategoryModel> methodResult = new MethodResult<QuestBoardCategoryModel>();
+            QuestBoardCategoryModel questBoardCategoryModel = new QuestBoardCategoryModel();
             var classResult = await _trainingService.GetClassByStudentId(request.StudentId);
             if (!classResult.IsSuccessStatusCode)
             {
@@ -92,7 +94,9 @@ namespace Fsel.Course.Lms.Application.Queries.QuestBoardQuery
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(unit));
                 return methodResult;
             }
-            methodResult.Result = ((double)unit.LessonResults.Where(x => x.Status == EnumResultStatus.Done).ToList().Count / unit.UnitLessons.ToList().Count, default);
+            questBoardCategoryModel.Percent = (double)unit.LessonResults.Where(x => x.Status == EnumResultStatus.Done).ToList().Count / unit.UnitLessons.ToList().Count;
+            questBoardCategoryModel.ObjectId = unitResult.Id;
+            methodResult.Result = questBoardCategoryModel;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }

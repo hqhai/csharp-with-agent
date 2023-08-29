@@ -8,11 +8,12 @@ namespace Fsel.Course.Lms.Application.Queries.QuestBoardQuery
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Shared.Enums;
+    using Fsel.Shared.Models.ShareModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class GetFinishOneLessonQuery : IRequest<MethodResult<(double, Guid?)>>
+    public class GetFinishOneLessonQuery : IRequest<MethodResult<QuestBoardCategoryModel>>
     {
         public Guid StudentId { get; set; }
         public EnumRepeatType? RepeatType { get; set; }
@@ -20,7 +21,7 @@ namespace Fsel.Course.Lms.Application.Queries.QuestBoardQuery
         public DateTime? EndDate { get; set; }
     }
 
-    public class GetFinishOneLessonQueryHandler : IRequestHandler<GetFinishOneLessonQuery, MethodResult<(double, Guid?)>>
+    public class GetFinishOneLessonQueryHandler : IRequestHandler<GetFinishOneLessonQuery, MethodResult<QuestBoardCategoryModel>>
     {
         private readonly IVideoResultRepository _videoResultRepository;
         private readonly IVideoTimeCodeRepository _videoTimeCodeRepository;
@@ -50,15 +51,16 @@ namespace Fsel.Course.Lms.Application.Queries.QuestBoardQuery
             _exerciseRepository = exerciseRepository;
         }
 
-        public async Task<MethodResult<(double, Guid?)>> Handle(GetFinishOneLessonQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<QuestBoardCategoryModel>> Handle(GetFinishOneLessonQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            MethodResult<(double, Guid?)> methodResult = new MethodResult<(double, Guid?)>();
+            MethodResult<QuestBoardCategoryModel> methodResult = new MethodResult<QuestBoardCategoryModel>();
+            QuestBoardCategoryModel questBoardCategoryModel = new QuestBoardCategoryModel();
             var videoResults = await _videoResultRepository.Queryable.Where(x => x.StudentId == request.StudentId).ToListAsync(cancellationToken);
             if (videoResults == null || videoResults.Count == 0)
             {
                 methodResult.StatusCode = StatusCodes.Status200OK;
-                methodResult.Result = (default, null);
+                methodResult.Result = null;
                 return methodResult;
             }
             DateTime currentDate = DateTime.Now;
@@ -71,7 +73,7 @@ namespace Fsel.Course.Lms.Application.Queries.QuestBoardQuery
             {
                 DateTime startOfDay = currentDate.Date.AddHours(8);
                 DateTime endOfDay = currentDate.Date.AddDays(1);
-                videoResult = videoResults.FirstOrDefault(x => !x.UpdatedDate.HasValue || (x.UpdatedDate.Value > startOfDay && x.UpdatedDate.Value < endOfDay));
+                videoResult = videoResults.OrderBy(x => x.CreatedDate).FirstOrDefault(x => !x.UpdatedDate.HasValue || (x.UpdatedDate.Value > startOfDay && x.UpdatedDate.Value < endOfDay) || (x.UpdatedDate.Value < endOfDay));
             }
             else if (request.RepeatType == EnumRepeatType.Week)
             {
@@ -88,12 +90,15 @@ namespace Fsel.Course.Lms.Application.Queries.QuestBoardQuery
 
             if (videoResult == null)
             {
-                methodResult.Result = (default, null);
+                methodResult.Result = null;
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
             }
+
             methodResult.StatusCode = StatusCodes.Status200OK;
-            methodResult.Result = (await GetDoubleAsync(videoResult, cancellationToken), default);
+            questBoardCategoryModel.Percent = await GetDoubleAsync(videoResult, cancellationToken);
+            questBoardCategoryModel.ObjectId = videoResult.LessonResultId;
+            methodResult.Result = questBoardCategoryModel;
             return methodResult;
         }
 
