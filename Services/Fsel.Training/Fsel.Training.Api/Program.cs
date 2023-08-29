@@ -1,6 +1,8 @@
 // Copyright (c) Atlantic. All rights reserved.
 
 using Fsel.Core.Extensions;
+using Fsel.Shared.Constants;
+using Fsel.Training.Application.Queues.Consumers;
 using Fsel.Training.Application.Services.CourseServices;
 using Fsel.Training.Application.Services.OrderServices;
 using Fsel.Training.Application.Services.SystemServices;
@@ -9,6 +11,7 @@ using Fsel.Training.Domain.IRepositories;
 using Fsel.Training.Infrastructure;
 using Fsel.Training.Infrastructure.Repositories;
 using Fsel.Training.Infrastructure.ValueSettings;
+using MassTransit;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -37,13 +40,15 @@ builder.AddRefitClients(typeof(ICourseService), appSetting?.Services?.CourseApiU
 builder.AddRefitClients(typeof(IOrderService), appSetting?.Services?.OrderApiUrl);
 builder.AddRefitClients(typeof(ISystemService), appSetting?.Services?.SystemApiUrl);
 
-var app = builder.Build();
-
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+builder.AddMassTransit(appSetting,
+queues: new Dictionary<string, Type>
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+    { QueueSettings.RealtimeQueue.NameQueue.UpdateClassLiveAssignment, typeof(UpdateClassLiveAssignmentConsumer) }
+});
+//builder.Services.AddMediator(cfg =>
+//{
+//    cfg.AddConsumer<UpdateClassLiveAssignmentConsumer>();
+//});
+var app = builder.Build();
 app.UseServices();
 app.Run();

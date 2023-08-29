@@ -43,15 +43,16 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestQuery
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<IList<PlacementTestResultModel>> methodResult = new MethodResult<IList<PlacementTestResultModel>>();
-            var student = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
-            if (!student.IsSuccessStatusCode)
+            var studentResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
+            if (!studentResult.IsSuccessStatusCode)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError), nameof(student));
+                methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError), nameof(studentResult));
                 return methodResult;
             }
-            var studentId = student?.Content?.Result?.Id;
+            var student = studentResult?.Content?.Result;
+            var studentId = student?.Id;
             var placementTestResults = await _placementTestResultRepository.Queryable.Where(x => x.Status == EnumResultStatus.Done && x.StudentId == studentId)
-                                                                            .OrderByDescending(x => x.CreatedDate)
+                                                                            .OrderBy(x => x.CreatedDate)
                                                                             .ToListAsync(cancellationToken);
             if (!placementTestResults.Any())
             {
@@ -59,10 +60,11 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestQuery
                 methodResult.Result = null;
                 return methodResult;
             }
+            int age = DateTimeHelper.GetYearOld(student?.Human?.Birthday);
             var placementTestResultModels = _mapper.Map<IList<PlacementTestResultModel>>(placementTestResults);
             foreach (var item in placementTestResultModels)
             {
-                var (ptNext, isLock) = item.Level.GetLevelInScore(item.Percent);
+                var (ptNext, isLock) = item.Level.GetLevelInScore(item.Percent, age);
                 if (item.SkillScores != null && item.SkillScores.Count > 0)
                 {
                     item.CountQuestion = item.SkillScores.Sum(x => x.CountQuestion);

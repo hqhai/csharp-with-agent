@@ -100,9 +100,9 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkQuery
                     Explanation = n.Question!.Explanation,
                     QuestionType = n.Question!.QuestionType,
                     Config = _questionTypeConverter.QuestionTypeConverterObject(n.Question.Config, n.Question.QuestionType, isDisableAnswers: !checkDone).Item1,
-                    ResultAnswer = _mapper.Map<AnswerModel>(n.HomeWorkAnswers.FirstOrDefault())
+                    ResultAnswer = _mapper.Map<AnswerModel>(n.HomeWorkAnswers.FirstOrDefault(n => n.HomeWorkResultId == homeWorkResult.Id))
                 }).ToList(),
-                HomeWorkResult = homeWork.HomeWorkResults.Select(x => new HomeWorkResultModel
+                HomeWorkResult = homeWork.HomeWorkResults.Where(x => x.Id == homeWorkResult.Id).Select(x => new HomeWorkResultModel
                 {
                     Id = x.Id,
                     HomeWorkId = x.HomeWorkId,

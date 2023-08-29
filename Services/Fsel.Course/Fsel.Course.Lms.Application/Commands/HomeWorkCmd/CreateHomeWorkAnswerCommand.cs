@@ -70,6 +70,7 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd
 
             var questionIds = request.Answers.Select(x => x.QuestionId).Distinct().ToList();
             var questions = await _questionRepository.GetByIdsAsync(questionIds);
+            var homeWorkAnswers = new List<HomeWorkAnswer>();
             int correctTotal = default;
             foreach (var item in request.Answers)
             {
@@ -92,23 +93,30 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd
                     methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(homeWorkQuestion));
                     return methodResult;
                 }
-                var isHomeWorkAnswer = await _homeWorkAnswerRepository.Queryable.AnyAsync(x => x.HomeWorkQuestionId == homeWorkQuestion.Id && x.HomeWorkResultId == request.HomeWorkResultId, cancellationToken);
-                if (!isHomeWorkAnswer && item.Answer != null)
+                var homeWorkAnswer = await _homeWorkAnswerRepository.Queryable.FirstOrDefaultAsync(x => x.HomeWorkQuestionId == homeWorkQuestion.Id && x.HomeWorkResultId == request.HomeWorkResultId, cancellationToken);
+                var (answerConfig, correctCount) = _answerTypeConverter.GetTotalCorrectByAsnwerType(item.Answer, question.Config, question.QuestionType);
+                if (answerConfig == null && !string.IsNullOrEmpty(item.Answer?.ToString()))
                 {
-                    var (answerConfig, correctCount) = _answerTypeConverter.GetTotalCorrectByAsnwerType(item.Answer, question.Config, question.QuestionType);
-                    if (answerConfig == null)
-                    {
-                        methodResult.AddErrorBadRequest(nameof(EnumHomeWorkAnswerErrorCode.AnswerIsInTheWrongFormat), nameof(answerConfig), answerConfig);
-                        return methodResult;
-                    }
+                    methodResult.AddErrorBadRequest(nameof(EnumHomeWorkAnswerErrorCode.AnswerIsInTheWrongFormat), nameof(answerConfig), answerConfig);
+                    return methodResult;
+                }
+                if (homeWorkAnswer == null)
+                {
                     correctTotal += correctCount;
-                    homeWorkResult.HomeWorkAnswers.Add(new HomeWorkAnswer
+                    homeWorkAnswers.Add(new HomeWorkAnswer
                     {
                         Answer = answerConfig,
                         CorrectCount = correctCount,
                         HomeWorkQuestionId = homeWorkQuestion.Id,
                         HomeWorkResultId = homeWorkResult.Id
                     });
+                }
+                else
+                {
+                    correctTotal += correctCount;
+                    homeWorkAnswer.Answer = answerConfig;
+                    homeWorkAnswer.CorrectCount = correctCount;
+                    homeWorkAnswers.Add(homeWorkAnswer);
                 }
             }
             var homeWorkResultLesson = await _homeWorkResultRepository.Queryable
