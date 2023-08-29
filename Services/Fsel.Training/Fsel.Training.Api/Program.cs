@@ -1,9 +1,7 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-using System.Reflection;
 using Fsel.Core.Extensions;
 using Fsel.Shared.Constants;
-using Fsel.Training.Application.Commands.ClassLiveCmd;
 using Fsel.Training.Application.Queues.Consumers;
 using Fsel.Training.Application.Services.CourseServices;
 using Fsel.Training.Application.Services.OrderServices;
@@ -14,8 +12,6 @@ using Fsel.Training.Infrastructure;
 using Fsel.Training.Infrastructure.Repositories;
 using Fsel.Training.Infrastructure.ValueSettings;
 using MassTransit;
-using MediatR;
-using Microsoft.AspNetCore.Hosting;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -49,12 +45,10 @@ queues: new Dictionary<string, Type>
 {
     { QueueSettings.RealtimeQueue.NameQueue.UpdateClassLiveAssignment, typeof(UpdateClassLiveAssignmentConsumer) }
 });
-
-builder.Services.AddMediator(cfg =>
-{
-    cfg.AddConsumer<UpdateClassLiveAssignmentConsumer>();
-});
-
+//builder.Services.AddMediator(cfg =>
+//{
+//    cfg.AddConsumer<UpdateClassLiveAssignmentConsumer>();
+//});
 var app = builder.Build();
 app.UseServices();
 app.Run();
