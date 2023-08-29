@@ -46,24 +46,8 @@ namespace Fsel.Course.Infrastructure.Common
         public long GetTotalQuestion(SectionGroup? sectionGroup)
         {
             ArgumentNullException.ThrowIfNull(sectionGroup);
-            if (sectionGroup.CourseSkill == EnumCourseSkill.Listening)
-            {
-                return sectionGroup.Sections.Any(x => x.SectionParts != null && x.SectionParts.Count > 0) ? sectionGroup.Sections.SelectMany(x => x.SectionParts).SelectMany(x => x.SectionQuestions).Select(x => x.Question).Count() : 0;
-            }
-            else if (sectionGroup.CourseSkill == EnumCourseSkill.Reading)
-            {
-                return sectionGroup.Sections.Any(x => x.SectionParts != null && x.SectionParts.Count > 0) ? sectionGroup.Sections.SelectMany(x => x.SectionParts).SelectMany(x => x.SectionQuestions).Select(x => x.Question).Count() : 0;
-            }
-            else if (sectionGroup.CourseSkill == EnumCourseSkill.Vocabulary)
-            {
-                return sectionGroup.Sections.Any(x => x.SectionParts != null && x.SectionParts.Count > 0) ? sectionGroup.Sections.SelectMany(x => x.SectionParts).SelectMany(x => x.SectionQuestions).Select(x => x.Question).Count() : 0;
-            }
-            else if (sectionGroup.CourseSkill == EnumCourseSkill.Grammar)
-            {
-                return sectionGroup.Sections.Any(x => x.SectionParts != null && x.SectionParts.Count > 0) ? sectionGroup.Sections.SelectMany(x => x.SectionParts).SelectMany(x => x.SectionQuestions).Select(x => x.Question).Count() : 0;
-            }
-            else if (sectionGroup.CourseSkill == EnumCourseSkill.Speaking)
 
+            if (sectionGroup.CourseSkill == EnumCourseSkill.Speaking)
             {
                 return sectionGroup.Sections.Any(x => x.SectionTimeCodes != null && x.SectionTimeCodes.Count > 0) ? sectionGroup.Sections.SelectMany(x => x.SectionTimeCodes).Count() : 0;
             }
@@ -71,8 +55,10 @@ namespace Fsel.Course.Infrastructure.Common
             {
                 return sectionGroup.Sections.Any() ? sectionGroup.Sections.Count : 0;
             }
-
-            return 0;
+            else
+            {
+                return sectionGroup.Sections.Any(x => x.SectionParts != null && x.SectionParts.Count > 0) ? sectionGroup.Sections.SelectMany(x => x.SectionParts).SelectMany(x => x.SectionQuestions).Select(x => x.Question).Count() : 0;
+            }
         }
 
         public IList<SectionModel>? GetSectionModels(IList<Section>? sections, bool isDisableAnswers = false)
