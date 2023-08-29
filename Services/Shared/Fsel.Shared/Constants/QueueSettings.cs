@@ -28,6 +28,8 @@ namespace Fsel.Shared.Constants
             public static class NameQueue
             {
                 public const string DiscussionBoard = $"{KeyQueue}_DiscussionBoard";
+
+                public const string Notification = $"{KeyQueue}_Notification";
             }
         }
 
