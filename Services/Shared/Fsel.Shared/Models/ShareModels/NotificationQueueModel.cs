@@ -5,7 +5,7 @@ namespace Fsel.Shared.Models.ShareModels
     using System;
     public class NotificationQueueModel
     {
-        public Guid ObjectId { get; set; }
+        public Guid? ObjectId { get; set; }
 
         public string? Message { get; set; }
 

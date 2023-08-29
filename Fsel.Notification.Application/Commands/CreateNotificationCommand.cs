@@ -13,6 +13,7 @@ namespace Fsel.Notification.Application.Commands
     using Fsel.Common.Enums.ErrorCodes;
     using MediatR;
     using Microsoft.AspNetCore.Http;
+    using Fsel.Notification.Application.Queues.Publishers;
 
     public class CreateNotificationCommand : CreateNotificationCommandModel, IRequest<MethodResult<NotificationsModel>>
     {
@@ -23,12 +24,14 @@ namespace Fsel.Notification.Application.Commands
         private readonly IMapper _mapper;
         private readonly INotificationsRepository _notificationsRepository;
         private readonly INotificationTypeRepository _notificationTypeRepository;
+        private readonly NotificationMessagePublisher _notificationMessagePublisher;
 
-        public CreateNotificationCommandHandler(INotificationsRepository notificationsRepository, IMapper mapper, INotificationTypeRepository notificationTypeRepository )
+        public CreateNotificationCommandHandler(INotificationsRepository notificationsRepository, IMapper mapper, INotificationTypeRepository notificationTypeRepository, NotificationMessagePublisher notificationMessagePublisher)
         {
             _notificationsRepository = notificationsRepository;
             _mapper = mapper;
             _notificationTypeRepository = notificationTypeRepository;
+            _notificationMessagePublisher = notificationMessagePublisher;
         }
 
         public async Task<MethodResult<NotificationsModel>> Handle(CreateNotificationCommand request, CancellationToken cancellationToken)
@@ -63,6 +66,8 @@ namespace Fsel.Notification.Application.Commands
             {
                 notificationNew = _notificationsRepository.Add(notificationNew);
                 await _notificationsRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+
+                await _notificationMessagePublisher.Publish(notificationNew, cancellationToken).ConfigureAwait(false);
 
                 methodResult.StatusCode = StatusCodes.Status201Created;
                 methodResult.Result = _mapper.Map<NotificationsModel>(notificationNew);
