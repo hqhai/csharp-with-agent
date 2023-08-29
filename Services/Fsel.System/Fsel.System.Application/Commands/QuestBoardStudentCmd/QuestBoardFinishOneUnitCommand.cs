@@ -57,7 +57,7 @@ namespace Fsel.System.Application.Commands.QuestBoardStudentCmd
                 questBoardStudent = _questBoardStudentRepository.Update(questBoardStudent);
                 await _questBoardRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
-                methodResult.StatusCode = StatusCodes.Status201Created;
+                methodResult.StatusCode = StatusCodes.Status200OK;
                 methodResult.Result = true;
                 return methodResult;
             });
