@@ -22,6 +22,8 @@ builder.Services.AddScoped<NotificationMessagePublisher>();
 
 builder.AddRefitClients(typeof(IUserService), appSetting?.Services?.UserApiUrl, appSetting?.Jwt?.SecretKey);
 
+builder.AddMassTransit(appSetting);
+
 var app = builder.Build();
 app.UseServices(appSetting);
 app.Run();

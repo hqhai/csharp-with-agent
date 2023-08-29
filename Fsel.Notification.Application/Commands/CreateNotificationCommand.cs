@@ -44,12 +44,12 @@ namespace Fsel.Notification.Application.Commands
 
             // check null data
 
-            var notificationTypeId = request.NotificationTypeId != Guid.Empty ? await _notificationTypeRepository.GetByIdAsync(request.NotificationTypeId) : null;
-            if (notificationTypeId == null)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.NotificationTypeId), request.NotificationTypeId);
-                return methodResult;
-            }
+            //var notificationTypeId = request.NotificationTypeId != Guid.Empty ? _notificationTypeRepository.GetByIdAsync(request.NotificationTypeId) : null;
+            //if (notificationTypeId == null)
+            //{
+            //    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.NotificationTypeId), request.NotificationTypeId);
+            //    return methodResult;
+            //}
 
             //var user = request.UserId != Guid.Empty ? await _userService.GetUserById(request.UserId) : null;
             //if (user == null)
