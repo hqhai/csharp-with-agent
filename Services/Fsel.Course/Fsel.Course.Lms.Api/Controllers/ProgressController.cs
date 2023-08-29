@@ -9,21 +9,21 @@ namespace Fsel.Course.Lms.Api.Controllers
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Queries.HomeWorkQuery;
     using Fsel.Course.Lms.Application.Queries.LessonQuery;
-    using Fsel.Course.Lms.Application.Queries.ProgessQuery;
+    using Fsel.Course.Lms.Application.Queries.ProgressQuery;
     using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
 
     [ApiVersion(Settings.APIVersion)]
-    [Route(Settings.APIDefaultRoute + "/progess")]
+    [Route(Settings.APIDefaultRoute + "/progress")]
     [ApiController]
     [Authorize(Roles = nameof(EnumRole.Student))]
-    public class ProgessController : ControllerBase
+    public class ProgressController : ControllerBase
     {
         private readonly IMediator _mediator;
 
-        public ProgessController(IMediator mediator)
+        public ProgressController(IMediator mediator)
         {
             _mediator = mediator;
         }
@@ -41,21 +41,21 @@ namespace Fsel.Course.Lms.Api.Controllers
         }
 
         /// <summary>
-        /// get progess menu
+        /// get progress menu
         /// </summary>
-        [HttpGet("progess-menu/{courseId}")]
-        [ProducesResponseType(typeof(MethodResult<ProgessMenuModel>), (int)HttpStatusCode.OK)]
+        [HttpGet("progress-menu/{courseId}")]
+        [ProducesResponseType(typeof(MethodResult<ProgressMenuModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetProgessMenu([FromRoute] Guid courseId)
+        public async Task<IActionResult> GetProgressMenu([FromRoute] Guid courseId)
         {
-            MethodResult<ProgessMenuModel> queryResult = await _mediator.Send(new GetProgessMenuQuery { CourseId = courseId }).ConfigureAwait(false);
+            MethodResult<ProgressMenuModel> queryResult = await _mediator.Send(new GetProgressMenuQuery { CourseId = courseId }).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
 
         /// <summary>
-        /// get overall mocktest
+        /// get overall mock test
         /// </summary>
-        [HttpGet("overall-mocktest/{courseId}")]
+        [HttpGet("overall-mock-test/{courseId}")]
         [ProducesResponseType(typeof(MethodResult<IList<OverallScoreReportByMockTestModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetOverallScoreByMockTest([FromRoute] Guid courseId)
@@ -65,9 +65,9 @@ namespace Fsel.Course.Lms.Api.Controllers
         }
 
         /// <summary>
-        /// get overall detail-mocktest
+        /// get overall detail mock test
         /// </summary>
-        [HttpGet("overall-detail-mocktest")]
+        [HttpGet("overall-detail-mock-test")]
         [ProducesResponseType(typeof(MethodResult<MockTestResultModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetDetailOverallScoreByMockTest([FromQuery] GetDetailOverallScoreByMockTestQuery query)
@@ -91,7 +91,7 @@ namespace Fsel.Course.Lms.Api.Controllers
         /// <summary>
         /// get overall finalTest
         /// </summary>
-        [HttpGet("overall-finaltest/{courseId}")]
+        [HttpGet("overall-final-test/{courseId}")]
         [ProducesResponseType(typeof(MethodResult<OverallScoreReportModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetOverallScoreByFinalTest([FromRoute] Guid courseId)

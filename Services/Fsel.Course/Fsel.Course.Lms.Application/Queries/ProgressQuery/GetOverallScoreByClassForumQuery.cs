@@ -14,7 +14,7 @@ using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 
-namespace Fsel.Course.Lms.Application.Queries.ProgessQuery
+namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
 {
     public class GetOverallScoreByClassForumQuery : IRequest<MethodResult<OverallScoreReportModel>>
     {
@@ -96,7 +96,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgessQuery
                 CorrectCount = x.SelectMany(x => x.ClassForumResults).SelectMany(x => x.ClassForumScores).Sum(x => x.Score),
                 TotalCount = 36,
             }).ToList();
-            skillScores.ForEach(x => x.Percent = x.CorrectCount / x.TotalCount);
+            skillScores.ForEach(x => x.Percent = x.TotalCount > 0 ? x.CorrectCount / x.TotalCount : default);
             overallScoreReport.SkillScores = skillScores;
             methodResult.StatusCode = StatusCodes.Status200OK;
             methodResult.Result = overallScoreReport;

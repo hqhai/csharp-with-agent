@@ -17,8 +17,8 @@ services:
             - JWT__TOKENVALIDITYINMINUTES=1440
             - JWT__REFRESHTOKENVALIDITYINDAYS=7
             - QueueConfig__RootUri=rabbitmq://42.96.58.145
-            - QueueConfig__Username=guest
-            - QueueConfig__Password=guest
+            - QueueConfig__Username=admin
+            - QueueConfig__Password=Fsel@2023
         ports:
             - 5501:80
             - 7501:443

@@ -11,5 +11,6 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public double Percent { get; set; }
         public bool IsPlacement { get; set; }
         public EnumCourseLevel CourseLevel { get; set; }
+        public EnumCourseType CourseType { get; set; }
     }
 }
