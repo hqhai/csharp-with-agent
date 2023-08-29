@@ -140,16 +140,16 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
                 await _courseRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
             }
             course = await _courseRepository.Queryable
-                        .Include(x => x.CourseResults.Where(y => y.StudentId == studentId))
+                        .Include(x => x.CourseResults.Where(y => y.StudentId == studentId && y.CourseId == @class.CourseId))
                         .Include(x => x.CourseUnitMockTests)
                         .ThenInclude(x => x.Unit)
-                        .ThenInclude(x => x!.UnitResults.Where(y => y.StudentId == studentId))
+                        .ThenInclude(x => x!.UnitResults.Where(y => y.StudentId == studentId && y.CourseId == @class.CourseId))
                         .Include(x => x.CourseUnitMockTests)
                         .ThenInclude(x => x.MockTest)
-                        .ThenInclude(x => x!.MockTestResults.Where(y => y.StudentId == studentId))
+                        .ThenInclude(x => x!.MockTestResults.Where(y => y.StudentId == studentId && y.CourseId == @class.CourseId))
                         .Include(x => x.CourseUnitMockTests)
                         .ThenInclude(x => x.FinalTest)
-                        .ThenInclude(x => x!.FinalTestResults.Where(y => y.StudentId == studentId))
+                        .ThenInclude(x => x!.FinalTestResults.Where(y => y.StudentId == studentId && y.CourseId == @class.CourseId))
                         .Include(x => x.CourseTeachers)
                         .Where(x => x.Id == @class.CourseId)
                         .AsNoTracking()
@@ -180,7 +180,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
                         CreatedDate = x.FinalTest.CreatedDate,
                         CreatedFullName = x.FinalTest.CreatedFullName,
                         ExecutionTime = x.FinalTest.ExecutionTime,
-                        FinalTestResult = _mapper.Map<FinalTestResultModel>(x.FinalTest.FinalTestResults.FirstOrDefault())
+                        FinalTestResult = _mapper.Map<FinalTestResultModel>(x.FinalTest.FinalTestResults.FirstOrDefault(y => y.StudentId == studentId && y.CourseId == @class.CourseId))
                     } : null,
                     MockTest = x.MockTest != null ? new MockTestModel
                     {
@@ -191,7 +191,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
                         CreatedFullName = x.MockTest.CreatedFullName,
                         CreatedUserId = x.MockTest.CreatedUserId,
                         IsActive = x.MockTest.CourseUnitMockTests.Any(),
-                        MockTestResult = _mapper.Map<MockTestResultModel>(x.MockTest.MockTestResults.FirstOrDefault())
+                        MockTestResult = _mapper.Map<MockTestResultModel>(x.MockTest.MockTestResults.FirstOrDefault(y => y.StudentId == studentId && y.CourseId == @class.CourseId))
                     } : null,
                     Unit = x.Unit != null ? new UnitModel
                     {
@@ -203,12 +203,12 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
                         CreatedFullName = x.Unit.CreatedFullName,
                         CreatedUserId = x.Unit.CreatedUserId,
                         IsActive = x.Unit.CourseUnitMockTests.Any(),
-                        UnitResult = _mapper.Map<UnitResultModel>(x.Unit.UnitResults.FirstOrDefault())
+                        UnitResult = _mapper.Map<UnitResultModel>(x.Unit.UnitResults.FirstOrDefault(y => y.StudentId == studentId && y.CourseId == @class.CourseId))
                     } : null,
                     Type = x.FinalTest != null ? nameof(x.FinalTest) : x.MockTest != null ? nameof(x.MockTest) : x.Unit != null ? nameof(x.Unit) : null
                 }).ToList(),
                 CourseTeachers = _mapper.Map<List<CourseTeacherModel>>(course.CourseTeachers),
-                CourseResult = _mapper.Map<CourseResultModel>(course.CourseResults.FirstOrDefault()),
+                CourseResult = _mapper.Map<CourseResultModel>(course.CourseResults.FirstOrDefault(x => x.StudentId == studentId)),
             };
 
             var teachersResult = await _userService.GetTeacherByIdsAsync(new GetTeacherByIdsQueryModel { Ids = course?.CourseTeachers?.Select(x => x.TeacherId).ToList() });
