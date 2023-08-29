@@ -1,4 +1,4 @@
-﻿// Copyright (c) Atlantic. All rights reserved.
+// Copyright (c) Atlantic. All rights reserved.
 
 namespace Fsel.Hangfire.Host.Jobs
 {

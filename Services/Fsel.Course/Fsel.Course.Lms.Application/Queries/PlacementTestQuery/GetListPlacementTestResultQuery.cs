@@ -52,7 +52,7 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestQuery
             var student = studentResult?.Content?.Result;
             var studentId = student?.Id;
             var placementTestResults = await _placementTestResultRepository.Queryable.Where(x => x.Status == EnumResultStatus.Done && x.StudentId == studentId)
-                                                                            .OrderByDescending(x => x.CreatedDate)
+                                                                            .OrderBy(x => x.CreatedDate)
                                                                             .ToListAsync(cancellationToken);
             if (!placementTestResults.Any())
             {
