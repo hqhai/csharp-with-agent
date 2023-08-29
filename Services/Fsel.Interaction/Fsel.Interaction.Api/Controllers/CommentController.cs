@@ -58,5 +58,17 @@ namespace Fsel.Interaction.Api.Controllers
             var commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
+
+        /// <summary>
+        /// Delete a comment
+        /// </summary>
+        [HttpDelete("{id}")]
+        [ProducesResponseType(typeof(MethodResult<CommentModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> Delete([FromRoute] Guid id)
+        {
+            MethodResult<bool> commandResult = await _mediator.Send(new DeleteCommentCommand { Id = id }).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
     }
 }
