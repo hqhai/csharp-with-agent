@@ -7,6 +7,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
     using Fsel.Course.Domain.Entities.SkillScoresConfigs;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
+    using Fsel.Course.Lms.Application.Queues.Publishers;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
     using Microsoft.EntityFrameworkCore;
@@ -19,6 +20,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
         private readonly ILessonResultRepository _lessonResultRepository;
         private readonly ICourseResultRepository _courseResultRepository;
         private readonly ICourseRepository _courseRepository;
+        private readonly FinishOneLevelPassPublisher _finishOneLevelPassPublisher;
         private readonly IFinalTestResultRepository _finalTestResultRepository;
         private readonly IMockTestResultRepository _mockTestResultRepository;
         private readonly IHomeWorkResultRepository _homeWorkResultRepository;
@@ -29,6 +31,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             ILessonResultRepository lessonResultRepository,
             ICourseResultRepository courseResultRepository,
             ICourseRepository courseRepository,
+            FinishOneLevelPassPublisher finishOneLevelPassPublisher,
             IFinalTestResultRepository finalTestResultRepository,
             IMockTestResultRepository mockTestResultRepository,
             IHomeWorkResultRepository homeWorkResultRepository)
@@ -39,6 +42,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             _lessonResultRepository = lessonResultRepository;
             _courseResultRepository = courseResultRepository;
             _courseRepository = courseRepository;
+            _finishOneLevelPassPublisher = finishOneLevelPassPublisher;
             _finalTestResultRepository = finalTestResultRepository;
             _mockTestResultRepository = mockTestResultRepository;
             _homeWorkResultRepository = homeWorkResultRepository;
@@ -46,11 +50,11 @@ namespace Fsel.Course.Lms.Application.InternalEvents
 
         #region Get Skill Scores
 
-        public async Task<List<SkillScores>> VideoSkillScores(Guid? lessonResultid)
+        public async Task<List<SkillScores>> VideoSkillScores(Guid? lessonResultId)
         {
-            ArgumentNullException.ThrowIfNull(lessonResultid);
+            ArgumentNullException.ThrowIfNull(lessonResultId);
             List<SkillScores> skillScores = new List<SkillScores>();
-            var videoResult = await _videoResultRepository.Queryable.FirstOrDefaultAsync(x => x.Status == EnumResultStatus.Done && x.LessonResultId == lessonResultid);
+            var videoResult = await _videoResultRepository.Queryable.FirstOrDefaultAsync(x => x.Status == EnumResultStatus.Done && x.LessonResultId == lessonResultId);
             if (videoResult != null && videoResult.VideoSkillScores != null)
             {
                 skillScores = videoResult.VideoSkillScores.Where(x => x.Type == EnumTimeCodeType.Standalone).SelectMany(x => x.SkillScores!).Where(x => x.TotalCount != 0).ToList();
@@ -58,11 +62,11 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             return skillScores;
         }
 
-        public async Task<List<SkillScores>> UnitTestSkillScores(Guid? lessonResultid)
+        public async Task<List<SkillScores>> UnitTestSkillScores(Guid? lessonResultId)
         {
-            ArgumentNullException.ThrowIfNull(lessonResultid);
+            ArgumentNullException.ThrowIfNull(lessonResultId);
             List<SkillScores> skillScores = new List<SkillScores>();
-            var videoResult = await _videoResultRepository.Queryable.FirstOrDefaultAsync(x => x.Status == EnumResultStatus.Done && x.LessonResultId == lessonResultid);
+            var videoResult = await _videoResultRepository.Queryable.FirstOrDefaultAsync(x => x.Status == EnumResultStatus.Done && x.LessonResultId == lessonResultId);
             if (videoResult != null && videoResult.VideoSkillScores != null)
             {
                 skillScores = videoResult.VideoSkillScores.Where(x => x.Type == EnumTimeCodeType.UnitTest).SelectMany(x => x.SkillScores!).Where(x => x.TotalCount != 0).ToList();
@@ -70,11 +74,11 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             return skillScores;
         }
 
-        public async Task<List<SkillScores>> SkillTestSkillScores(Guid? lessonResultid)
+        public async Task<List<SkillScores>> SkillTestSkillScores(Guid? lessonResultId)
         {
-            ArgumentNullException.ThrowIfNull(lessonResultid);
+            ArgumentNullException.ThrowIfNull(lessonResultId);
             List<SkillScores> skillScores = new List<SkillScores>();
-            var videoResult = await _videoResultRepository.Queryable.FirstOrDefaultAsync(x => x.Status == EnumResultStatus.Done && x.LessonResultId == lessonResultid);
+            var videoResult = await _videoResultRepository.Queryable.FirstOrDefaultAsync(x => x.Status == EnumResultStatus.Done && x.LessonResultId == lessonResultId);
             if (videoResult != null && videoResult.VideoSkillScores != null)
             {
                 skillScores = videoResult.VideoSkillScores.Where(x => x.Type == EnumTimeCodeType.SkillTest).SelectMany(x => x.SkillScores!).Where(x => x.TotalCount != 0).ToList();
@@ -96,11 +100,11 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             return skillScores;
         }
 
-        public async Task<List<SkillScores>> HomeWordsSkillScores(Guid? lessonResultid)
+        public async Task<List<SkillScores>> HomeWordsSkillScores(Guid? lessonResultId)
         {
-            ArgumentNullException.ThrowIfNull(lessonResultid);
+            ArgumentNullException.ThrowIfNull(lessonResultId);
             List<SkillScores> skillScores = new List<SkillScores>();
-            var homeWorkResults = await _homeWorkResultRepository.Queryable.Where(x => x.Status == EnumResultStatus.Done && x.LessonResultId == lessonResultid).ToArrayAsync();
+            var homeWorkResults = await _homeWorkResultRepository.Queryable.Where(x => x.Status == EnumResultStatus.Done && x.LessonResultId == lessonResultId).ToArrayAsync();
             if (homeWorkResults != null)
             {
                 foreach (var item in homeWorkResults)
@@ -256,6 +260,10 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 {
                     var isCheckDone = false;
                     var isCheckUnitResults = course.UnitResults.Where(x => x.StudentId == unitResult.StudentId).All(x => x.Status == EnumResultStatus.Done);
+                    if (isCheckUnitResults)
+                    {
+                        await _finishOneLevelPassPublisher.Publish(unitResult, cancellationToken);
+                    }
                     switch (course.CourseLevel.GetEnumCourseType())
                     {
                         case EnumCourseType.Ielts:

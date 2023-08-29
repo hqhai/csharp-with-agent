@@ -158,7 +158,7 @@ namespace Fsel.System.Application.Queries.QuestBoardStudentQuery
             {
                 switch (item.Category)
                 {
-                    case EnumQuestBoardCategory.FinishOnelesson:
+                    case EnumQuestBoardCategory.FinishOneLesson:
                         var finishOnelesson = await _courseService.GetPercentVideoResult(new GetFinishOneLessonQueryModel { EndDate = item.EndDate, StartDate = item.StartDate, RepeatType = item.RepeatType, StudentId = studentId });
                         item.Percent = finishOnelesson.Content?.Result ?? default;
                         break;

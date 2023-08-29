@@ -8,6 +8,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
+    using Fsel.Course.Lms.Application.Queues.Publishers;
     using MediatR;
     using Microsoft.EntityFrameworkCore;
 
@@ -28,6 +29,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             , IMockTestRepository mockTestRepository
             , IUnitResultRepository unitResultRepository
             , IMockTestResultRepository mockTestResultRepository
+            , FinishOneLevelPassPublisher finishOneLevelPassPublisher
             , IFinalTestResultRepository finalTestResultRepository
             ) : base(videoResultRepository,
                 classForumResultRepository,
@@ -35,6 +37,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 lessonResultRepository,
                 courseResultRepository,
                 courseRepository,
+                finishOneLevelPassPublisher,
                 finalTestResultRepository,
                 mockTestResultRepository,
                 homeWorkResultRepository)

@@ -11,6 +11,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoResultCmd
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.CommandModels.VideoResults;
     using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Course.Lms.Application.Queues.Publishers;
     using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Http;
@@ -31,9 +32,11 @@ namespace Fsel.Course.Lms.Application.Commands.VideoResultCmd
         private readonly IExerciseQuestionRepository _exerciseQuestionRepository;
         private readonly IQuestionRepository _questionRepository;
         private readonly IMapper _mapper;
+        private readonly FinishOneLessonPublisher _finishOneLessonPublisher;
 
         public ReviewLessonVideoCommandHandler(IVideoResultRepository videoResultRepository,
             IMapper mapper,
+            FinishOneLessonPublisher finishOneLessonPublisher,
             IVideoTimeCodeAnswerRepository videoTimeCodeAnswerRepository,
             ITimeCodeExerciseRepository timeCodeExerciseRepository,
             IExerciseRepository exerciseRepository,
@@ -51,6 +54,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoResultCmd
             _questionRepository = questionRepository;
             _videoResultRepository = videoResultRepository;
             _mapper = mapper;
+            _finishOneLessonPublisher = finishOneLessonPublisher;
         }
 
         public async Task<MethodResult<VideoResultModel>> Handle(ReviewLessonVideoCommand request, CancellationToken cancellationToken)
@@ -138,6 +142,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoResultCmd
             videoResult.Status = EnumResultStatus.Done;
             videoResult.Percent = videoResult.CorrectTotal > 0 ? (double)videoResult.CorrectCount / videoResult.CorrectTotal * 100 : default;
             videoResult.VideoSkillScores = scoreQuery.ToList();
+            await _finishOneLessonPublisher.Publish(videoResult, cancellationToken);
             await _videoResultRepository.ExecuteTransactionAsync(async () =>
             {
                 videoResult = _videoResultRepository.Update(videoResult);

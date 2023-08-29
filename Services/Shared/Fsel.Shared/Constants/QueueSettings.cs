@@ -30,6 +30,12 @@ namespace Fsel.Shared.Constants
             {
                 public const string DiscussionBoard = $"{KeyQueue}_DiscussionBoard";
                 public const string UpdateClassLiveAssignment = $"{KeyQueue}_UpdateClassLiveAssignment";
+                public const string QuestBoardFinishOneLesson = $"{KeyQueue}_QuestBoardFinishOneLesson";
+                public const string QuestBoardFinishOneHomeWork = $"{KeyQueue}_QuestBoardFinishOneHomeWork";
+                public const string QuestBoardFinishOneUnitTest = $"{KeyQueue}_QuestBoardFinishOneUnitTest";
+                public const string QuestBoardFinishOneFinalTest = $"{KeyQueue}_QuestBoardFinishOneFinalTest";
+                public const string QuestBoardFinishOneUnit = $"{KeyQueue}_QuestBoardFinishOneUnit";
+                public const string QuestBoardFinishOneLevelPass = $"{KeyQueue}_QuestBoardFinishOneLevelPass";
             }
         }
 
