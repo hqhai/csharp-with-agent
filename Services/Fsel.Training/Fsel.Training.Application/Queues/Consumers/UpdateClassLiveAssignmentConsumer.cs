@@ -1,7 +1,7 @@
 using Fsel.Core.Base.BaseModels;
 using Fsel.Training.Application.Commands.ClassLiveCmd;
 using MassTransit;
-using MassTransit.Mediator;
+using MediatR;
 
 namespace Fsel.Training.Application.Queues.Consumers
 {
