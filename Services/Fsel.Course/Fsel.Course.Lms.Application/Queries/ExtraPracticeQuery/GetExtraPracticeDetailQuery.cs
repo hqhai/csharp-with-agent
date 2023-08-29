@@ -113,7 +113,7 @@ namespace Fsel.Course.Lms.Application.Queries.ExtraPracticeQuery
         public async Task<VideoModel> GetTypeVideoModel(Guid? id)
         {
             var videoModel = new VideoModel();
-            var video = await _videoRepository.Queryable.Include(x => x.LessonVideos.Where(y => !y.IsDeleted))
+            var video = await _videoRepository.Queryable.Include(x => x.LessonVideos.Where(x => x.VideoId == id))
                                      .Include(i => i.VideoTimeCodes.Where(x => !x.IsDeleted))
                                      .ThenInclude(x => x.TimeCodeExercises)
                                      .ThenInclude(x => x.Exercise)

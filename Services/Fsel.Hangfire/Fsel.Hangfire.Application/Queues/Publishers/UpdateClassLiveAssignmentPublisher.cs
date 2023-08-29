@@ -1,5 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
+using Fsel.Core.Base.BaseModels;
 using Fsel.Core.Base.Interfaces;
 using Fsel.Shared.Constants;
 
@@ -16,7 +17,7 @@ namespace Fsel.Hangfire.Application.Queues.Publishers
 
         public async Task Publish(CancellationToken cancellationToken)
         {
-            await _queueProvider.Publish(QueueSettings.RealtimeQueue.NameQueue.UpdateClassLiveAssignment, cancellationToken);
+            await _queueProvider.Publish(QueueSettings.RealtimeQueue.NameQueue.UpdateClassLiveAssignment, new BaseQueueModel { QueueId = Guid.NewGuid().ToString() }, cancellationToken);
         }
     }
 }
