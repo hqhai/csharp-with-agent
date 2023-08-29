@@ -27,6 +27,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             , ICourseRepository courseRepository
             , ICourseResultRepository courseResultRepository
             , IMockTestRepository mockTestRepository
+            , FinishOneUnitPublisher finishOneUnitPublisher
             , IUnitResultRepository unitResultRepository
             , IMockTestResultRepository mockTestResultRepository
             , FinishOneLevelPassPublisher finishOneLevelPassPublisher
@@ -37,6 +38,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 lessonResultRepository,
                 courseResultRepository,
                 courseRepository,
+                finishOneUnitPublisher,
                 finishOneLevelPassPublisher,
                 finalTestResultRepository,
                 mockTestResultRepository,

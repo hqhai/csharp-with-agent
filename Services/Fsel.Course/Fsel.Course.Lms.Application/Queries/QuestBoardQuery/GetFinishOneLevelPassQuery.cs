@@ -16,13 +16,13 @@ namespace Fsel.Course.Lms.Application.Queries.QuestBoardQuery
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class GetFinishOneLevelPassQuery : IRequest<MethodResult<double>>
+    public class GetFinishOneLevelPassQuery : IRequest<MethodResult<(double, Guid?)>>
     {
         public Guid StudentId { get; set; }
         public Guid CurrentUserId { get; set; }
     }
 
-    public class GetFinishOneLevelPassQueryHandler : IRequestHandler<GetFinishOneLevelPassQuery, MethodResult<double>>
+    public class GetFinishOneLevelPassQueryHandler : IRequestHandler<GetFinishOneLevelPassQuery, MethodResult<(double, Guid?)>>
     {
         private readonly ITrainingService _trainingService;
         private readonly IOrderService _orderService;
@@ -37,10 +37,10 @@ namespace Fsel.Course.Lms.Application.Queries.QuestBoardQuery
             _courseRepository = courseRepository;
         }
 
-        public async Task<MethodResult<double>> Handle(GetFinishOneLevelPassQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<(double, Guid?)>> Handle(GetFinishOneLevelPassQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            MethodResult<double> methodResult = new MethodResult<double>();
+            MethodResult<(double, Guid?)> methodResult = new MethodResult<(double, Guid?)>();
             var classResult = await _trainingService.GetClassByStudentId(request.StudentId);
             if (!classResult.IsSuccessStatusCode)
             {
@@ -72,7 +72,7 @@ namespace Fsel.Course.Lms.Application.Queries.QuestBoardQuery
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(course));
                 return methodResult;
             }
-            methodResult.Result = (double)course.UnitResults.Where(x => x.Status == EnumResultStatus.Done).ToList().Count / course.CourseUnitMockTests.Where(x => x.UnitId != null).ToList().Count;
+            methodResult.Result = ((double)course.UnitResults.Where(x => x.Status == EnumResultStatus.Done).ToList().Count / course.CourseUnitMockTests.Where(x => x.UnitId != null).ToList().Count, default);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }

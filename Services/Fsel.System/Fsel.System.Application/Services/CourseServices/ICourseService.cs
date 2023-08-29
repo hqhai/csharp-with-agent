@@ -30,12 +30,12 @@ namespace Fsel.System.Application.Services.CourseServices
         Task<IApiResponse<MethodResult<IList<CourseModel>>>> GetListCourseByIds([FromBody] IList<Guid> courseIds);
 
         [Get("/quest-board/percent-video")]
-        Task<IApiResponse<MethodResult<double>>> GetPercentVideoResult([Query] GetFinishOneLessonQueryModel query);
+        Task<IApiResponse<MethodResult<(double, Guid?)>>> GetPercentVideoResult([Query] GetFinishOneLessonQueryModel query);
 
         [Get("/quest-board/percent-unit")]
-        Task<IApiResponse<MethodResult<double>>> GetPercentUnitResult([Query] GetFinishOneQueryModel query);
+        Task<IApiResponse<MethodResult<(double, Guid?)>>> GetPercentUnitResult([Query] GetFinishOneQueryModel query);
 
         [Get("/quest-board/percent-course")]
-        Task<IApiResponse<MethodResult<double>>> GetPercentCourseResult([Query] GetFinishOneQueryModel query);
+        Task<IApiResponse<MethodResult<(double, Guid?)>>> GetPercentCourseResult([Query] GetFinishOneQueryModel query);
     }
 }

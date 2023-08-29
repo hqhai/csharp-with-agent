@@ -17,6 +17,7 @@ namespace Fsel.System.Application.Commands.QuestBoardStudentCmd
     public class TakingMissionCommand : IRequest<MethodResult<bool>>
     {
         public Guid Id { get; set; }
+        public Guid? ObjectId { get; set; }
     }
 
     public class TakingMissionCommandHandler : IRequestHandler<TakingMissionCommand, MethodResult<bool>>
@@ -67,6 +68,7 @@ namespace Fsel.System.Application.Commands.QuestBoardStudentCmd
             }
             questBoardStudent = new QuestBoardStudent
             {
+                ObjectId = request.ObjectId,
                 QuestBoardId = request.Id,
                 StudentId = student.Id,
                 Status = EnumQuestBoardStudentStatus.Process

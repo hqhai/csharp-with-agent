@@ -15,7 +15,7 @@ namespace Fsel.Course.Lms.Application.Queues.Publishers
             _queueProvider = queueProvider;
         }
 
-        public async Task Publish(UnitResult? request, CancellationToken cancellationToken)
+        public async Task Publish(CourseResult? request, CancellationToken cancellationToken)
         {
             if (request == null)
             {
@@ -23,6 +23,7 @@ namespace Fsel.Course.Lms.Application.Queues.Publishers
             }
             await _queueProvider.Publish(QueueSettings.RealtimeQueue.NameQueue.QuestBoardFinishOneLevelPass, new QuestBoardStudentQueueModel
             {
+                ObjectId = request.CourseId,
                 StudentId = request.StudentId,
                 QuestBoardType = EnumQuestBoardType.MainQuests,
                 QuestBoardCategory = EnumQuestBoardCategory.FinishOneLevelPass

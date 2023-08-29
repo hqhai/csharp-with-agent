@@ -22,7 +22,7 @@ namespace Fsel.Course.Lms.Application.Queues.Publishers
                 return;
             }
 
-            await _queueProvider.Publish(QueueSettings.RealtimeQueue.NameQueue.QuestBoardFinishOneLesson, new QuestBoardStudentQueueModel
+            await _queueProvider.Publish(QueueSettings.RealtimeQueue.NameQueue.QuestBoardFinishOneFinalTest, new QuestBoardStudentQueueModel
             {
                 ObjectId = request.Id,
                 StudentId = request.StudentId,

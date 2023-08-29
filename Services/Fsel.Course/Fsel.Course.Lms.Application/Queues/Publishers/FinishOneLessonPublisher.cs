@@ -15,7 +15,7 @@ namespace Fsel.Course.Lms.Application.Queues.Publishers
             _queueProvider = queueProvider;
         }
 
-        public async Task Publish(VideoResult? request, CancellationToken cancellationToken)
+        public async Task Publish(LessonResult? request, CancellationToken cancellationToken)
         {
             if (request == null)
             {

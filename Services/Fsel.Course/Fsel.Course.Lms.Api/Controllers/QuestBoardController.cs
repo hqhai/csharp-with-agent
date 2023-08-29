@@ -25,11 +25,11 @@ namespace Fsel.Course.Lms.Api.Controllers
         /// get percent video result now
         /// </summary>
         [HttpGet("percent-video")]
-        [ProducesResponseType(typeof(MethodResult<double>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(MethodResult<(double, Guid?)>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetPercentVideoResultNow([FromQuery] GetFinishOneLessonQuery query)
         {
-            MethodResult<double> queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            MethodResult<(double, Guid?)> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
 
@@ -37,11 +37,11 @@ namespace Fsel.Course.Lms.Api.Controllers
         /// get percent unit result now
         /// </summary>
         [HttpGet("percent-unit")]
-        [ProducesResponseType(typeof(MethodResult<double>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(MethodResult<(double, Guid?)>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetPercentUnitResult([FromQuery] GetFinishOneUnitQuery query)
         {
-            MethodResult<double> queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            MethodResult<(double, Guid?)> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
 
@@ -49,11 +49,11 @@ namespace Fsel.Course.Lms.Api.Controllers
         /// get percent course result
         /// </summary>
         [HttpGet("percent-course")]
-        [ProducesResponseType(typeof(MethodResult<double>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(MethodResult<(double, Guid?)>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetPercentCourseResult([FromQuery] GetFinishOneLevelPassQuery query)
         {
-            MethodResult<double> queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            MethodResult<(double, Guid?)> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
     }

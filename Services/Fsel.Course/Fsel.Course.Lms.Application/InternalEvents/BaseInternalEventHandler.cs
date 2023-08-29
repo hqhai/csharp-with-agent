@@ -20,6 +20,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
         private readonly ILessonResultRepository _lessonResultRepository;
         private readonly ICourseResultRepository _courseResultRepository;
         private readonly ICourseRepository _courseRepository;
+        private readonly FinishOneUnitPublisher _finishOneUnitPublisher;
         private readonly FinishOneLevelPassPublisher _finishOneLevelPassPublisher;
         private readonly IFinalTestResultRepository _finalTestResultRepository;
         private readonly IMockTestResultRepository _mockTestResultRepository;
@@ -31,6 +32,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             ILessonResultRepository lessonResultRepository,
             ICourseResultRepository courseResultRepository,
             ICourseRepository courseRepository,
+            FinishOneUnitPublisher finishOneUnitPublisher,
             FinishOneLevelPassPublisher finishOneLevelPassPublisher,
             IFinalTestResultRepository finalTestResultRepository,
             IMockTestResultRepository mockTestResultRepository,
@@ -42,6 +44,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             _lessonResultRepository = lessonResultRepository;
             _courseResultRepository = courseResultRepository;
             _courseRepository = courseRepository;
+            _finishOneUnitPublisher = finishOneUnitPublisher;
             _finishOneLevelPassPublisher = finishOneLevelPassPublisher;
             _finalTestResultRepository = finalTestResultRepository;
             _mockTestResultRepository = mockTestResultRepository;
@@ -197,6 +200,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 unitResult.Status = EnumResultStatus.Done;
                 unitResult.Percent = await PercentUnit(videoSkillScores, 18) + await PercentUnit(homeSkillScores, 22) + await PercentUnit(classForumSkillScores, 20) + await PercentUnit(skillTestSkillScores, 10) + await PercentUnit(unitTestSkillScores, 30);
                 unitResult.SkillScores = groupedSkillScores;
+                await _finishOneUnitPublisher.Publish(unitResult, cancellationToken);
                 _unitResultRepository.Update(unitResult);
                 await _unitResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
             }
@@ -260,10 +264,6 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 {
                     var isCheckDone = false;
                     var isCheckUnitResults = course.UnitResults.Where(x => x.StudentId == unitResult.StudentId).All(x => x.Status == EnumResultStatus.Done);
-                    if (isCheckUnitResults)
-                    {
-                        await _finishOneLevelPassPublisher.Publish(unitResult, cancellationToken);
-                    }
                     switch (course.CourseLevel.GetEnumCourseType())
                     {
                         case EnumCourseType.Ielts:
@@ -378,6 +378,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             var courseResult = await _courseResultRepository.Queryable.FirstOrDefaultAsync(x => x.CourseId == courseId && x.StudentId == studentId, cancellationToken);
             if (courseResult != null)
             {
+                await _finishOneLevelPassPublisher.Publish(courseResult, cancellationToken);
                 courseResult.Status = EnumCourseStatus.InActive;
                 _courseResultRepository.Update(courseResult);
                 await _courseResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);

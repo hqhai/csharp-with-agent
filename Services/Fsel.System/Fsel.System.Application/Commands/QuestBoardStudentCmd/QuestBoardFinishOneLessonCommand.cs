@@ -43,6 +43,14 @@ namespace Fsel.System.Application.Commands.QuestBoardStudentCmd
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
             }
+            var questBoard = questBoardStudent.QuestBoard;
+            var date = DateTime.Now;
+            if (questBoard != null && (questBoard.StartDate >= date || questBoard.EndDate < date))
+            {
+                methodResult.Result = false;
+                methodResult.StatusCode = StatusCodes.Status200OK;
+                return methodResult;
+            }
             questBoardStudent.Status = EnumQuestBoardStudentStatus.Done;
             await _questBoardStudentRepository.ExecuteTransactionAsync(async () =>
             {

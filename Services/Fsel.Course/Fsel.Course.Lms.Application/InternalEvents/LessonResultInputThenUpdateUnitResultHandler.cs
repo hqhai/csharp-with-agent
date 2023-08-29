@@ -19,7 +19,6 @@ namespace Fsel.Course.Lms.Application.InternalEvents
     {
         private readonly IUnitRepository _unitRepository;
         private readonly ILessonResultRepository _lessonResultRepository;
-        private readonly FinishOneUnitPublisher _finishOneUnitPublisher;
         private readonly IMockTestResultRepository _mockTestResultRepository;
 
         public LessonResultInputThenUpdateUnitResultHandler(IUnitRepository unitRepository
@@ -40,6 +39,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 lessonResultRepository,
                 courseResultRepository,
                 courseRepository,
+                finishOneUnitPublisher,
                 finishOneLevelPassPublisher,
                 finalTestResultRepository,
                 mockTestResultRepository,
@@ -47,7 +47,6 @@ namespace Fsel.Course.Lms.Application.InternalEvents
         {
             _unitRepository = unitRepository;
             _lessonResultRepository = lessonResultRepository;
-            _finishOneUnitPublisher = finishOneUnitPublisher;
             _mockTestResultRepository = mockTestResultRepository;
         }
 
@@ -65,12 +64,10 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             {
                 if (unit.LessonResults.Count == unit.UnitLessons.Count && unit.UnitSkillMockTests.Count == 0)
                 {
-                    await _finishOneUnitPublisher.Publish(lessonResult, cancellationToken);
                     await UpdateUnit(unit.LessonResults.ToList(), unit, lessonResult.CourseId, lessonResult.StudentId, cancellationToken);
                 }
                 else if (unit.LessonResults.Count == unit.UnitLessons.Count && unit.UnitSkillMockTests.Count > 0)
                 {
-                    await _finishOneUnitPublisher.Publish(lessonResult, cancellationToken);
                     await UpdateTheNextLesson(unit, lessonResult, cancellationToken);
                 }
                 else

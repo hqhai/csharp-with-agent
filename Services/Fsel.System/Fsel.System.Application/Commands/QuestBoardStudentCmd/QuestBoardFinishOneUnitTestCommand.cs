@@ -37,7 +37,16 @@ namespace Fsel.System.Application.Commands.QuestBoardStudentCmd
             var questBoardStudent = await _questBoardStudentRepository.Queryable.Include(x => x.QuestBoard)
                                 .Where(x => x.QuestBoard != null && x.QuestBoard.Category == EnumQuestBoardCategory.FinishOneUnitTest && x.Status == EnumQuestBoardStudentStatus.Process && x.StudentId == request.StudentId)
                                 .FirstOrDefaultAsync(cancellationToken);
+
             if (questBoardStudent == null)
+            {
+                methodResult.Result = false;
+                methodResult.StatusCode = StatusCodes.Status200OK;
+                return methodResult;
+            }
+            var questBoard = questBoardStudent.QuestBoard;
+            var date = DateTime.Now;
+            if (questBoard != null && (questBoard.StartDate >= date || questBoard.EndDate < date))
             {
                 methodResult.Result = false;
                 methodResult.StatusCode = StatusCodes.Status200OK;
