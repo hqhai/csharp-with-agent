@@ -60,7 +60,7 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestQuery
                 methodResult.Result = null;
                 return methodResult;
             }
-            int age = IeltsScoreHelper.GetYearOld(student?.Human?.Birthday);
+            int age = DateTimeHelper.GetYearOld(student?.Human?.Birthday);
             var placementTestResultModels = _mapper.Map<IList<PlacementTestResultModel>>(placementTestResults);
             foreach (var item in placementTestResultModels)
             {

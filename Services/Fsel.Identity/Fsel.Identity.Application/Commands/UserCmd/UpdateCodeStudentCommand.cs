@@ -63,7 +63,7 @@ namespace Fsel.Identity.Application.Commands.UserCmd
                 code = $"HN_{weekNumber}{lastDigitOfYear}{number}{2}{lastOfBirthDay}{stt:000}";
             }
             user.Human!.Code = code;
-            int age = IeltsScoreHelper.GetYearOld(request.Birthday);
+            int age = DateTimeHelper.GetYearOld(request.Birthday);
             if (age <= 13)
             {
                 user.Human!.Student!.CourseLevel = EnumCourseLevel.A2;

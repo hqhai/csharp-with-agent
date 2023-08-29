@@ -45,7 +45,7 @@ namespace Fsel.Course.Lms.Application.Queries.Students
                 return methodResult;
             }
             var student = studentResult?.Content?.Result;
-            int age = IeltsScoreHelper.GetYearOld(student?.Human?.Birthday);
+            int age = DateTimeHelper.GetYearOld(student?.Human?.Birthday);
             if (student != null)
             {
                 var placementTestResult = await _placementTestResultRepository.Queryable.Where(x => x.Status == EnumResultStatus.Done && x.StudentId == student.Id)
