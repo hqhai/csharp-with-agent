@@ -80,7 +80,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
                                                                            .FirstOrDefaultAsync(cancellationToken);
             DateTime today = DateTime.Today;
             int age = today.Year - student?.Human?.Birthday?.Year ?? default;
-            if (today < student?.Human?.Birthday?.AddYears(age))
+            if (today > student?.Human?.Birthday?.AddYears(age))
             {
                 age--;
             }

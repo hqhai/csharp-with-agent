@@ -76,7 +76,7 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestQuery
             var studentId = student?.Id;
             DateTime today = DateTime.Today;
             int age = today.Year - student?.Human?.Birthday?.Year ?? default;
-            if (today < student?.Human?.Birthday?.AddYears(age))
+            if (today > student?.Human?.Birthday?.AddYears(age))
             {
                 age--;
             }
