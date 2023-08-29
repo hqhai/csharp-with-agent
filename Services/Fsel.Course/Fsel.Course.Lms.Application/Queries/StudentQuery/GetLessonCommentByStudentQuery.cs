@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Course.Lms.Application.Queries.Students
+namespace Fsel.Course.Lms.Application.Queries.StudentQuery
 {
     using Fsel.Common.ActionResults;
     using Fsel.Course.Domain.Enums;
