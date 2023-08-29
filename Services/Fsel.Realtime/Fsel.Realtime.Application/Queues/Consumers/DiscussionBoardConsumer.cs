@@ -1,4 +1,4 @@
-﻿using Fsel.Realtime.Application.Hubs;
+using Fsel.Realtime.Application.Hubs;
 using Fsel.Shared.Constants;
 using Fsel.Shared.Models.ShareModels;
 using MassTransit;

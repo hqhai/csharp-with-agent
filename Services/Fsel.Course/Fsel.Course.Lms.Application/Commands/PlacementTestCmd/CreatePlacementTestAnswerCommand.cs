@@ -152,10 +152,10 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
                         var sectionQuestionId = question.SectionQuestions.FirstOrDefault()!.Id;
                         var placementTestAnswer = await _placementTestAnswerRepository.Queryable.FirstOrDefaultAsync(x => x.PlacementTestResultId == placementTestResult.Id && x.SectionQuestionId == sectionQuestionId, cancellationToken);
 
-                        if (placementTestAnswer == null && !string.IsNullOrEmpty(answer.Answer?.ToString()))
+                        if (placementTestAnswer == null)
                         {
                             var (answerConfig, correctCount) = _answerTypeConverter.GetTotalCorrectByAsnwerType(answer.Answer, question.Config, question.QuestionType);
-                            if (answerConfig == null)
+                            if (answerConfig == null && !string.IsNullOrEmpty(answer.Answer?.ToString()))
                             {
                                 methodResult.AddErrorBadRequest(nameof(EnumPlacementTestAnswerErrorCode.AnswerIsInTheWrongFormat), nameof(answer.Answer), answer.Answer);
                                 return methodResult;
