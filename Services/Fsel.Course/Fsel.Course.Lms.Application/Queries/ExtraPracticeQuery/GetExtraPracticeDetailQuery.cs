@@ -113,13 +113,12 @@ namespace Fsel.Course.Lms.Application.Queries.ExtraPracticeQuery
         public async Task<VideoModel> GetTypeVideoModel(Guid? id)
         {
             var videoModel = new VideoModel();
-            var video = await _videoRepository.Queryable.Include(x => x.LessonVideos.Where(y => !y.IsDeleted))
+            var video = await _videoRepository.Queryable.Include(x => x.LessonVideos.Where(y => y.VideoId == id))
                                      .Include(i => i.VideoTimeCodes.Where(x => !x.IsDeleted))
                                      .ThenInclude(x => x.TimeCodeExercises)
                                      .ThenInclude(x => x.Exercise)
                                      .ThenInclude(x => x!.ExerciseQuestions)
                                      .ThenInclude(x => x.Question)
-                                .Include(i => i.VideoResults.Where(x => !x.IsDeleted))
                                 .Where(x => x.Id == id)
                                 .AsNoTracking()
                                 .FirstOrDefaultAsync();
@@ -183,10 +182,10 @@ namespace Fsel.Course.Lms.Application.Queries.ExtraPracticeQuery
         public async Task<ExtraPracticeModel> GetTypeBookModel(Guid id, Guid extraPracticeResultId)
         {
             var extraPracticeModel = new ExtraPracticeModel();
-            var extraPractice = await _extraPracticeRepository.Queryable.Include(x => x.ExtraPracticeResults.Where(y => !y.IsDeleted))
+            var extraPractice = await _extraPracticeRepository.Queryable.Include(x => x.ExtraPracticeResults.Where(y => y.Id == extraPracticeResultId))
                                                                   .Include(x => x.ExtraPracticeChapters.Where(y => !y.IsDeleted))
                                                                       .ThenInclude(x => x.ExtraPracticeExercises.Where(y => !y.IsDeleted))
-                                                                      .ThenInclude(x => x.ExtraPracticeExerciseResults)
+                                                                      .ThenInclude(x => x.ExtraPracticeExerciseResults.Where(x => x.ExtraPracticeResultId == extraPracticeResultId))
                                                                       .AsNoTracking()
                                                                   .FirstOrDefaultAsync(x => x.Id == id);
             if (extraPractice != null)

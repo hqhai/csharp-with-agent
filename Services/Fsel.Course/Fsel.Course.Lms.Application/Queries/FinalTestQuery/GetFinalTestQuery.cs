@@ -67,7 +67,7 @@ namespace Fsel.Course.Lms.Application.Queries.FinalTestQuery
                 return methodResult;
             }
             var finalTest = await _finalTestRepository.Queryable.Include(x => x.CourseUnitMockTests)
-                                                        .Include(x => x.FinalTestResults.Where(x => x.StudentId == studentId))
+                                                        .Include(x => x.FinalTestResults.Where(x => x.Id == finalTestResult.Id))
                                                         .Include(x => x.FinalTestSections)
                                                         .ThenInclude(x => x.SectionGroup)
                                                         .ThenInclude(x => x!.Sections)
@@ -129,7 +129,7 @@ namespace Fsel.Course.Lms.Application.Queries.FinalTestQuery
                         }).ToList()
                     }).ToList(),
                 }).ToList(),
-                FinalTestResult = (finalTest.FinalTestResults != null && finalTest.FinalTestResults.Count > 0) ? finalTest.FinalTestResults.Select(x => new FinalTestResultModel
+                FinalTestResult = (finalTest.FinalTestResults != null && finalTest.FinalTestResults.Count > 0) ? finalTest.FinalTestResults.Where(x => x.Id == finalTestResult.Id).Select(x => new FinalTestResultModel
                 {
                     Id = x.Id,
                     CorrectCount = x.CorrectCount,
