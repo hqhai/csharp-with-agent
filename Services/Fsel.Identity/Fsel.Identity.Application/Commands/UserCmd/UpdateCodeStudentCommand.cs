@@ -70,7 +70,7 @@ namespace Fsel.Identity.Application.Commands.UserCmd
 
             if (age <= 13)
             {
-                user.Human!.Student!.CourseLevel = EnumCourseLevel.A1;
+                user.Human!.Student!.CourseLevel = EnumCourseLevel.A2;
             }
             else if (age >= 14)
             {

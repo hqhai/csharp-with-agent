@@ -75,7 +75,7 @@ namespace Fsel.Shared.Helpers
             return default;
         }
 
-        public static (EnumCourseLevel?, bool) GetLevelInScore(this EnumPlacementTestLevel enumPlacementTestLevel, double? value = 0)
+        public static (EnumCourseLevel?, bool) GetLevelInScore(this EnumPlacementTestLevel enumPlacementTestLevel, double? value = 0, int? yearOld = 0)
         {
             EnumCourseLevel? courseLevel;
             bool isLock = false;
@@ -116,12 +116,24 @@ namespace Fsel.Shared.Helpers
                         break;
 
                     case EnumPlacementTestLevel.A2:
-                        isLock = value >= 75;
-                        courseLevel = isLock ? EnumCourseLevel.B1 : EnumCourseLevel.A1;
+                        if (yearOld >= 14)
+                        {
+                            isLock = value >= 75;
+                        }
+                        courseLevel = value >= 75 ? EnumCourseLevel.B1 : EnumCourseLevel.A1;
                         break;
 
                     case EnumPlacementTestLevel.B1:
-                        courseLevel = value >= 75 ? EnumCourseLevel.B1Plus : EnumCourseLevel.A2;
+                        if (yearOld <= 13)
+                        {
+                            isLock = value < 75;
+                            courseLevel = !isLock ? EnumCourseLevel.B1Plus : EnumCourseLevel.B1;
+                        }
+                        else
+                        {
+                            courseLevel = value >= 75 ? EnumCourseLevel.B1Plus : EnumCourseLevel.A2;
+                        }
+
                         break;
 
                     case EnumPlacementTestLevel.B1Plus:
@@ -130,8 +142,8 @@ namespace Fsel.Shared.Helpers
                         break;
 
                     case EnumPlacementTestLevel.B2:
-                        isLock = true;
-                        courseLevel = value >= 75 ? EnumCourseLevel.C1 : EnumCourseLevel.B2;
+                        isLock = value < 75;
+                        courseLevel = !isLock ? EnumCourseLevel.C1 : EnumCourseLevel.B2;
                         break;
 
                     case EnumPlacementTestLevel.C1:

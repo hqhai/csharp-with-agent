@@ -74,13 +74,18 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestQuery
             }
             var student = studentResult?.Content?.Result;
             var studentId = student?.Id;
-
+            DateTime today = DateTime.Today;
+            int age = today.Year - student?.Human?.Birthday?.Year ?? default;
+            if (today < student?.Human?.Birthday?.AddYears(age))
+            {
+                age--;
+            }
             var placementTestResultDone = await _placementTestResultRepository.Queryable.Where(x => x.Status == EnumResultStatus.Done && x.StudentId == studentId)
                                                                           .OrderByDescending(x => x.CreatedDate)
                                                                           .FirstOrDefaultAsync(cancellationToken);
             if (placementTestResultDone != null)
             {
-                var (levelNext, isLock) = placementTestResultDone.Level.GetLevelInScore(placementTestResultDone.Percent);
+                var (levelNext, isLock) = placementTestResultDone.Level.GetLevelInScore(placementTestResultDone.Percent, age);
                 if (isLock)
                 {
                     methodResult.AddErrorBadRequest(nameof(EnumPlacementTestErrorCode.PlacementTestLock), nameof(levelNext));

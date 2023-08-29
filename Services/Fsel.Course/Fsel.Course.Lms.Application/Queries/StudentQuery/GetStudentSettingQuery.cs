@@ -45,12 +45,18 @@ namespace Fsel.Course.Lms.Application.Queries.Students
                 return methodResult;
             }
             var student = studentResult?.Content?.Result;
+            DateTime today = DateTime.Today;
+            int age = today.Year - student?.Human?.Birthday?.Year ?? default;
+            if (today < student?.Human?.Birthday?.AddYears(age))
+            {
+                age--;
+            }
             if (student != null)
             {
                 var placementTestResult = await _placementTestResultRepository.Queryable.Where(x => x.Status == EnumResultStatus.Done && x.StudentId == student.Id)
                                                                                 .OrderByDescending(x => x.CreatedDate)
                                                                                 .FirstOrDefaultAsync(cancellationToken);
-                var (levelNext, isLock) = placementTestResult?.Level.GetLevelInScore(placementTestResult.Percent) ?? (null, default);
+                var (levelNext, isLock) = placementTestResult?.Level.GetLevelInScore(placementTestResult.Percent, age) ?? (null, default);
                 settingStudentModel.Level = student.CourseLevel;
                 settingStudentModel.IsPlacementTest = placementTestResult != null;
                 settingStudentModel.ClassId = student.ClassId ?? null;
