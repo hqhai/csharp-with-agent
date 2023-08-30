@@ -6,6 +6,7 @@ namespace Fsel.Course.Lms.Api.Controllers
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
     using Fsel.Course.Lms.Application.Queries.QuestBoardQuery;
+    using Fsel.Shared.Models.ShareModels;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
 
@@ -25,11 +26,11 @@ namespace Fsel.Course.Lms.Api.Controllers
         /// get percent video result now
         /// </summary>
         [HttpGet("percent-video")]
-        [ProducesResponseType(typeof(MethodResult<double>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(MethodResult<QuestBoardCategoryModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetPercentVideoResultNow([FromQuery] GetFinishOneLessonQuery query)
         {
-            MethodResult<double> queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            MethodResult<QuestBoardCategoryModel> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
 
@@ -37,11 +38,11 @@ namespace Fsel.Course.Lms.Api.Controllers
         /// get percent unit result now
         /// </summary>
         [HttpGet("percent-unit")]
-        [ProducesResponseType(typeof(MethodResult<double>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(MethodResult<QuestBoardCategoryModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetPercentUnitResult([FromQuery] GetFinishOneUnitQuery query)
         {
-            MethodResult<double> queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            MethodResult<QuestBoardCategoryModel> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
 
@@ -49,11 +50,11 @@ namespace Fsel.Course.Lms.Api.Controllers
         /// get percent course result
         /// </summary>
         [HttpGet("percent-course")]
-        [ProducesResponseType(typeof(MethodResult<double>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(MethodResult<QuestBoardCategoryModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetPercentCourseResult([FromQuery] GetFinishOneLevelPassQuery query)
         {
-            MethodResult<double> queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            MethodResult<QuestBoardCategoryModel> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
     }

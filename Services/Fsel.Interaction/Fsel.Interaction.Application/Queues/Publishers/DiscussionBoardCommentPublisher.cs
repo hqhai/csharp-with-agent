@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using Fsel.Core.Base;
 using Fsel.Core.Base.Interfaces;
 using Fsel.Interaction.Domain.Entities;

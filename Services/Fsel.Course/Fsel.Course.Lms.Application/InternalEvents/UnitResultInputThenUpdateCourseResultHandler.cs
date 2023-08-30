@@ -6,6 +6,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
+    using Fsel.Course.Lms.Application.Queues.Publishers;
     using MediatR;
 
     public class UnitResultInputThenUpdateCourseResultHandler : BaseInternalEventHandler,
@@ -17,8 +18,10 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             , IClassForumResultRepository classForumResultRepository
             , IHomeWorkResultRepository homeWorkResultRepository
             , ICourseRepository courseRepository
+            , FinishOneUnitPublisher finishOneUnitPublisher
             , ICourseResultRepository courseResultRepository
             , IMockTestResultRepository mockTestResultRepository
+            , FinishOneLevelPassPublisher finishOneLevelPassPublisher
             , IFinalTestResultRepository finalTestResultRepository
             ) : base(videoResultRepository,
                 classForumResultRepository,
@@ -26,6 +29,8 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 lessonResultRepository,
                 courseResultRepository,
                 courseRepository,
+                finishOneUnitPublisher,
+                finishOneLevelPassPublisher,
                 finalTestResultRepository,
                 mockTestResultRepository,
                 homeWorkResultRepository)

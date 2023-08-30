@@ -13,8 +13,10 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd
     using Fsel.Course.Domain.Models.CommandModels.HomeWorkAnswers;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Infrastructure.Common;
+    using Fsel.Course.Lms.Application.Queues.Publishers;
     using MediatR;
     using Microsoft.AspNetCore.Http;
+    using Microsoft.AspNetCore.Mvc;
     using Microsoft.EntityFrameworkCore;
 
     public class CreateHomeWorkAnswerCommand : CreateHomeWorkAnswerCommandModel, IRequest<MethodResult<bool>>
@@ -26,12 +28,14 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd
         private readonly IHomeWorkResultRepository _homeWorkResultRepository;
         private readonly IHomeWorkQuestionRepository _homeWorkQuestionRepository;
         private readonly IHomeWorkAnswerRepository _homeWorkAnswerRepository;
+        private readonly FinishOneHomeWorkPublisher _finishOneHomeWorkPublisher;
         private readonly AnswerTypeConverter _answerTypeConverter;
         private readonly IQuestionRepository _questionRepository;
 
         public CreateHomeWorkAnswerCommandHandler(IHomeWorkResultRepository homeWorkResultRepository,
             IHomeWorkQuestionRepository homeWorkQuestionRepository,
             IHomeWorkAnswerRepository homeWorkAnswerRepository,
+            FinishOneHomeWorkPublisher finishOneHomeWorkPublisher,
             AnswerTypeConverter answerTypeConverter,
             IQuestionRepository questionRepository
             )
@@ -39,6 +43,7 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd
             _homeWorkResultRepository = homeWorkResultRepository;
             _homeWorkQuestionRepository = homeWorkQuestionRepository;
             _homeWorkAnswerRepository = homeWorkAnswerRepository;
+            _finishOneHomeWorkPublisher = finishOneHomeWorkPublisher;
             _answerTypeConverter = answerTypeConverter;
             _questionRepository = questionRepository;
         }
@@ -152,6 +157,7 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd
                     Percent = homeWorkResult.Percent,
                     Scores = 0
                 };
+                await _finishOneHomeWorkPublisher.Publish(homeWorkResult, cancellationToken);
                 homeWorkResult.SkillScores = new List<SkillScores> { skillScores };
             }
             else

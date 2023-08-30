@@ -12,7 +12,7 @@ namespace Fsel.Hangfire.Host.Jobs
         public static void Setup()
         {
             JobExtensions.SetEnqueueJob<TestWorker>();
-            JobExtensions.SetRecurringJob<AssignmentScheduleWorker>(WorkerSettings.JobName.TestWorkerJob, Cron.MinuteInterval(1));
+            JobExtensions.SetRecurringJob<AssignmentScheduleWorker>(WorkerSettings.JobName.AssignmentScheduleJob, Cron.MinuteInterval(1));
             //JobExtensions.SetRecurringJob<TestWorker>(WorkerSettings.JobName.TestWorkerJob, Cron.Daily);
         }
     }
