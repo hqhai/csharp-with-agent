@@ -12,23 +12,23 @@ namespace Fsel.System.Application.Commands.QuestBoardStudentCmd
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class QuestBoardMainQuestsCommand : QuestBoardStudentQueueModel, IRequest<MethodResult<bool>>
+    public class QuestBoardMainFinishCommand : QuestBoardStudentQueueModel, IRequest<MethodResult<bool>>
     {
     }
 
-    public class UpdateQuestBoardStudentCommandHandler : IRequestHandler<QuestBoardMainQuestsCommand, MethodResult<bool>>
+    public class QuestBoardMainFinishCommandHandler : IRequestHandler<QuestBoardMainFinishCommand, MethodResult<bool>>
     {
         private readonly IQuestBoardRepository _questBoardRepository;
         private readonly IQuestBoardStudentRepository _questBoardStudentRepository;
 
-        public UpdateQuestBoardStudentCommandHandler(IQuestBoardRepository questBoardRepository
+        public QuestBoardMainFinishCommandHandler(IQuestBoardRepository questBoardRepository
             , IQuestBoardStudentRepository questBoardStudentRepository)
         {
             _questBoardRepository = questBoardRepository;
             _questBoardStudentRepository = questBoardStudentRepository;
         }
 
-        public async Task<MethodResult<bool>> Handle(QuestBoardMainQuestsCommand request, CancellationToken cancellationToken)
+        public async Task<MethodResult<bool>> Handle(QuestBoardMainFinishCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<bool>();

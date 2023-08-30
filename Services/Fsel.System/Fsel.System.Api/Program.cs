@@ -36,12 +36,7 @@ builder.AddRefitClients(typeof(IOrderService), appSetting?.Services?.OrderApiUrl
 builder.AddMassTransit(appSetting,
 queues: new Dictionary<string, Type>
 {
-    { QueueSettings.RealtimeQueue.NameQueue.QuestBoardFinishOneLesson, typeof(QuestBoardMainQuestsConsumer) },
-    { QueueSettings.RealtimeQueue.NameQueue.QuestBoardFinishOneFinalTest, typeof(QuestBoardMainQuestsConsumer) },
-    { QueueSettings.RealtimeQueue.NameQueue.QuestBoardFinishOneHomeWork, typeof(QuestBoardMainQuestsConsumer) },
-    { QueueSettings.RealtimeQueue.NameQueue.QuestBoardFinishOneLevelPass, typeof(QuestBoardMainQuestsConsumer) },
-    { QueueSettings.RealtimeQueue.NameQueue.QuestBoardFinishOneUnitTest, typeof(QuestBoardMainQuestsConsumer) },
-    { QueueSettings.RealtimeQueue.NameQueue.QuestBoardFinishOneUnit, typeof(QuestBoardMainQuestsConsumer) },
+    { QueueSettings.RealtimeQueue.NameQueue.QuestBoardMainFinish, typeof(QuestBoardMainFinishConsumer) },
 });
 
 var app = builder.Build();

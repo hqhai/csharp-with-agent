@@ -5,11 +5,11 @@ using MediatR;
 
 namespace Fsel.System.Application.Queues.Consumers
 {
-    public class QuestBoardMainQuestsConsumer : IConsumer<QuestBoardStudentQueueModel>
+    public class QuestBoardMainFinishConsumer : IConsumer<QuestBoardStudentQueueModel>
     {
         private readonly IMediator _mediator;
 
-        public QuestBoardMainQuestsConsumer(IMediator mediator)
+        public QuestBoardMainFinishConsumer(IMediator mediator)
         {
             _mediator = mediator;
         }
@@ -18,7 +18,7 @@ namespace Fsel.System.Application.Queues.Consumers
         {
             if (context != null)
             {
-                await _mediator.Send(new QuestBoardMainQuestsCommand
+                await _mediator.Send(new QuestBoardMainFinishCommand
                 {
                     ObjectId = context.Message.ObjectId,
                     QuestBoardCategory = context.Message.QuestBoardCategory,
