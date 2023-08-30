@@ -65,7 +65,7 @@ namespace Fsel.Course.Lms.Application.Queries.QuestBoardQuery
             }
             DateTime currentDate = DateTime.Now;
             VideoResult? videoResult = default;
-            if (request.RepeatType == null)
+            if (!request.EndDate.HasValue)
             {
                 videoResult = videoResults.FirstOrDefault(x => !x.UpdatedDate.HasValue || x.UpdatedDate.Value > request.StartDate);
             }
