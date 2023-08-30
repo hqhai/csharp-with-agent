@@ -1,4 +1,4 @@
-﻿using Fsel.Core.Base.Interfaces;
+using Fsel.Core.Base.Interfaces;
 using Fsel.Interaction.Domain.IRepositories;
 using Fsel.Shared.Constants;
 using Fsel.Shared.Enums;
