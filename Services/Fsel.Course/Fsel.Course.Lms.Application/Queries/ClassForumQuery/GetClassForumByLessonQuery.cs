@@ -44,13 +44,12 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumQuery
                                    .FirstOrDefaultAsync(x => x.LessonId == request.LessonId, cancellationToken);
 
             var classForm = _mapper.Map<ClassForumModel>(classForumQuery);
-            var actionsResult = await _interactionService.GetsActionAsync(new InteractionActionCommandModel { ObjectIds = classForm?.ClassForumResults.Select(x => x.Id).ToList() });
+            var actionsResult = await _interactionService.GetsActionAsync(new InteractionActionCommandModel { ObjectIds = classForm?.ClassForumResults?.Select(x => x.Id).ToList() });
             var actions = actionsResult.Content?.Result;
 
             if (actions != null)
             {
-                classForm!.ClassForumResults = classForm.ClassForumResults?.Where(x => !actions.Any(n => n.IsDisable && n.ObjectId == x.Id)).ToList();
-                foreach (var item in classForm.ClassForumResults!)
+                foreach (var item in classForm?.ClassForumResults!)
                 {
                     var action = actions.FirstOrDefault(x => x.ObjectId == item.Id);
                     item.CommentNumber = action?.CommentNumber;
