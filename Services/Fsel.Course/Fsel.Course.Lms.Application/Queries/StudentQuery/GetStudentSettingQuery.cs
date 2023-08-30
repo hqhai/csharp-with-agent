@@ -8,6 +8,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentQuery
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Course.Lms.Application.Services.SenderService;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Shared.Helpers;
     using MediatR;
@@ -25,13 +26,12 @@ namespace Fsel.Course.Lms.Application.Queries.StudentQuery
         private readonly AuthContext _authContext;
         private readonly ISenderService _senderService;
 
-        public SettingStudentCheckQueryHandler(IUserService userService,
-            IPlacementTestResultRepository placementTestResultRepository,
-            AuthContext authContext)
+        public SettingStudentCheckQueryHandler(IUserService userService, IPlacementTestResultRepository placementTestResultRepository, AuthContext authContext, ISenderService senderService)
         {
             _userService = userService;
             _placementTestResultRepository = placementTestResultRepository;
             _authContext = authContext;
+            _senderService = senderService;
         }
 
         public async Task<MethodResult<StudentSettingModel>> Handle(GetStudentSettingQuery request, CancellationToken cancellationToken)
