@@ -39,8 +39,26 @@ namespace Fsel.Course.Infrastructure.Common
             var sectionGroupModel = _mapper.Map<SectionGroupModel>(sectionGroup);
             sectionGroupModel.MockTestScores = _mapper.Map<IList<MockTestScoreModel>>(sectionGroup?.MockTestScores);
             sectionGroupModel.Sections = GetSectionModels(sectionGroup?.Sections.ToList(), isDisableAnswers);
-            sectionGroupModel.TotalQuestion = sectionGroup!.Sections.Any(x => x.SectionParts != null && x.SectionParts.Count > 0) ? sectionGroup.Sections.SelectMany(x => x.SectionParts).SelectMany(x => x.SectionQuestions).Select(x => x.Question).Count() : 0;
+            sectionGroupModel.TotalQuestion = GetTotalQuestion(sectionGroup);
             return sectionGroupModel;
+        }
+
+        public long GetTotalQuestion(SectionGroup? sectionGroup)
+        {
+            ArgumentNullException.ThrowIfNull(sectionGroup);
+
+            if (sectionGroup.CourseSkill == EnumCourseSkill.Speaking)
+            {
+                return sectionGroup.Sections.Any(x => x.SectionTimeCodes != null && x.SectionTimeCodes.Count > 0) ? sectionGroup.Sections.SelectMany(x => x.SectionTimeCodes).Count() : 0;
+            }
+            else if (sectionGroup.CourseSkill == EnumCourseSkill.Writing)
+            {
+                return sectionGroup.Sections.Any() ? sectionGroup.Sections.Count : 0;
+            }
+            else
+            {
+                return sectionGroup.Sections.Any(x => x.SectionParts != null && x.SectionParts.Count > 0) ? sectionGroup.Sections.SelectMany(x => x.SectionParts).SelectMany(x => x.SectionQuestions).Select(x => x.Question).Count() : 0;
+            }
         }
 
         public IList<SectionModel>? GetSectionModels(IList<Section>? sections, bool isDisableAnswers = false)

@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Course.Lms.Application.Queries.ProgessQuery
+namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
 {
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
@@ -24,16 +24,19 @@ namespace Fsel.Course.Lms.Application.Queries.ProgessQuery
     public class GetOverallScoreQueryHandler : IRequestHandler<GetOverallScoreQuery, MethodResult<OverallScoreModel>>
     {
         private readonly AuthContext _authContext;
+        private readonly ICourseRepository _courseRepository;
         private readonly IPlacementTestResultRepository _placementTestResultRepository;
         private readonly IUnitResultRepository _unitResultRepository;
         private readonly IUserService _userService;
 
         public GetOverallScoreQueryHandler(AuthContext authContext
+            , ICourseRepository courseRepository
             , IPlacementTestResultRepository placementTestResultRepository
             , IUnitResultRepository unitResultRepository
             , IUserService userService)
         {
             _authContext = authContext;
+            _courseRepository = courseRepository;
             _placementTestResultRepository = placementTestResultRepository;
             _unitResultRepository = unitResultRepository;
             _userService = userService;
@@ -53,7 +56,12 @@ namespace Fsel.Course.Lms.Application.Queries.ProgessQuery
             var student = studentResult?.Content?.Result;
             var level = student?.CourseLevel;
             var studentId = student?.Id;
-
+            var course = await _courseRepository.GetByIdAsync(request.CourseId);
+            if (course == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(course));
+                return methodResult;
+            }
             var unitResults = await _unitResultRepository.Queryable.Include(x => x.Unit)
                                                             .Where(x => x.StudentId == studentId && x.Status == EnumResultStatus.Done && x.CourseId == request.CourseId)
                                                             .ToArrayAsync(cancellationToken);
@@ -75,11 +83,11 @@ namespace Fsel.Course.Lms.Application.Queries.ProgessQuery
                 overallScoreModel.IsPlacement = false;
                 if ((level?.GetEnumCourseType() ?? default) == EnumCourseType.Academic)
                 {
-                    overallScoreModel.Percent = overallScoreModel.SkillScores != null ? overallScoreModel.SkillScores.Average(x => x.Percent) : default;
+                    overallScoreModel.Percent = (overallScoreModel.SkillScores != null && overallScoreModel.SkillScores.Count > 0) ? overallScoreModel.SkillScores.Average(x => x.Percent) : default;
                 }
                 else
                 {
-                    overallScoreModel.Percent = overallScoreModel.SkillScores != null ? overallScoreModel.SkillScores.Average(x => x.Percent) : default;
+                    overallScoreModel.Percent = (overallScoreModel.SkillScores != null && overallScoreModel.SkillScores.Count > 0) ? overallScoreModel.SkillScores.Average(x => x.Percent) : default;
                 }
             }
             else
@@ -102,7 +110,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgessQuery
                 }
             }
             overallScoreModel.CourseLevel = level ?? default;
-
+            overallScoreModel.CourseType = course.CourseType;
             methodResult.StatusCode = StatusCodes.Status200OK;
             methodResult.Result = overallScoreModel;
             return methodResult;

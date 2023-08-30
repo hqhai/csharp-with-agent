@@ -67,7 +67,7 @@ namespace Fsel.Course.Lms.Application.Queries.FinalTestQuery
                 return methodResult;
             }
             var finalTest = await _finalTestRepository.Queryable.Include(x => x.CourseUnitMockTests)
-                                                        .Include(x => x.FinalTestResults.Where(x => x.StudentId == studentId))
+                                                        .Include(x => x.FinalTestResults.Where(x => x.Id == finalTestResult.Id))
                                                         .Include(x => x.FinalTestSections)
                                                         .ThenInclude(x => x.SectionGroup)
                                                         .ThenInclude(x => x!.Sections)
@@ -109,6 +109,7 @@ namespace Fsel.Course.Lms.Application.Queries.FinalTestQuery
                     Id = x!.Id,
                     ExecutionTime = x!.ExecutionTime,
                     CourseSkill = x.CourseSkill,
+                    TotalQuestion = x.Sections.SelectMany(x => x.SectionQuestions).Count(),
                     Sections = x.Sections.OrderBy(x => x!.DisplayOrder).Select(x => new SectionModel
                     {
                         Id = x.Id,
@@ -125,11 +126,11 @@ namespace Fsel.Course.Lms.Application.Queries.FinalTestQuery
                             Ungraded = x.Question.Ungraded,
                             CorrectTotal = x.Question.CorrectTotal,
                             Config = _questionTypeConverter.QuestionTypeConverterObject(x.Question.Config, x.Question.QuestionType, isDisableAnswers: !checkDone).Item1,
-                            ResultAnswer = _mapper.Map<AnswerModel>(x.FinalTestAnswers.FirstOrDefault())
+                            ResultAnswer = _mapper.Map<AnswerModel>(x.FinalTestAnswers.FirstOrDefault(x => x.FinalTestResultId == finalTestResult.Id))
                         }).ToList()
                     }).ToList(),
                 }).ToList(),
-                FinalTestResult = (finalTest.FinalTestResults != null && finalTest.FinalTestResults.Count > 0) ? finalTest.FinalTestResults.Select(x => new FinalTestResultModel
+                FinalTestResult = (finalTest.FinalTestResults != null && finalTest.FinalTestResults.Count > 0) ? finalTest.FinalTestResults.Where(x => x.Id == finalTestResult.Id).Select(x => new FinalTestResultModel
                 {
                     Id = x.Id,
                     CorrectCount = x.CorrectCount,

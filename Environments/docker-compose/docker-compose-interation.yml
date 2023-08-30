@@ -21,6 +21,8 @@ services:
             - QueueConfig__Username=admin
             - QueueConfig__Password=Fsel@2023
             - SERVICES_UserApiUrl=http://42.96.58.145:5202/api/v1
+            - SERVICES_TrainingApiUrl=http://42.96.58.145:5207/api/v1
+            - SERVICES_LmsCourseApiUrl=http://42.96.58.145:5204/api/v1
         ports:
             - 5208:80
             - 7208:443

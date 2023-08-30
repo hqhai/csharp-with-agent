@@ -166,7 +166,7 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
                     if (extraPracticeAnswer == null)
                     {
                         var (answerConfig, correctCount) = _answerTypeConverter.GetTotalCorrectByAsnwerType(answer.Answer, question.Config, question.QuestionType);
-                        if (answerConfig == null)
+                        if (answerConfig == null && !string.IsNullOrEmpty(answer.Answer?.ToString()))
                         {
                             methodResult.AddErrorBadRequest(nameof(EnumExtraPracticeErrorCode.AnswerIsInTheWrongFormat), nameof(answer.Answer), answer.Answer);
                             return methodResult;
