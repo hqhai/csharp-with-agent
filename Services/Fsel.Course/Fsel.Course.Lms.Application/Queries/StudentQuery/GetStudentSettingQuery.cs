@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Course.Lms.Application.Queries.Students
+namespace Fsel.Course.Lms.Application.Queries.StudentQuery
 {
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
@@ -23,6 +23,7 @@ namespace Fsel.Course.Lms.Application.Queries.Students
         private readonly IUserService _userService;
         private readonly IPlacementTestResultRepository _placementTestResultRepository;
         private readonly AuthContext _authContext;
+        private readonly ISenderService _senderService;
 
         public SettingStudentCheckQueryHandler(IUserService userService,
             IPlacementTestResultRepository placementTestResultRepository,
