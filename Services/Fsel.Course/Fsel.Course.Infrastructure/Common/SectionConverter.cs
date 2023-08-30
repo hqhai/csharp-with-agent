@@ -57,7 +57,23 @@ namespace Fsel.Course.Infrastructure.Common
             }
             else
             {
-                return sectionGroup.Sections.Any(x => x.SectionParts != null && x.SectionParts.Count > 0) ? sectionGroup.Sections.SelectMany(x => x.SectionParts).SelectMany(x => x.SectionQuestions).Select(x => x.Question).Count() : 0;
+                var sectionParts = sectionGroup.Sections.SelectMany(x => x.SectionParts).ToList();
+                if (sectionParts.Count > 0)
+                {
+                    return sectionParts.SelectMany(x => x.SectionQuestions).Select(x => x.Question).Count();
+                }
+                else
+                {
+                    var sectionQuestions = sectionGroup.Sections.SelectMany(x => x.SectionQuestions).ToList();
+                    if (sectionQuestions.Count > 0)
+                    {
+                        return sectionGroup.Sections.SelectMany(x => x.SectionQuestions).Select(x => x.Question).Count();
+                    }
+                    else
+                    {
+                        return default;
+                    }
+                }
             }
         }
 
