@@ -18,14 +18,19 @@ builder.AddAuthenticationJwtBearers(appSetting);
 builder.AddMassTransit(appSetting,
 queues: new Dictionary<string, Type>
 {
-    { QueueSettings.RealtimeQueue.NameQueue.DiscussionBoard, typeof(DiscussionBoardConsumer) }
+    { QueueSettings.RealtimeQueue.NameQueue.DiscussionBoard, typeof(DiscussionBoardConsumer) },
+    { QueueSettings.RealtimeQueue.NameQueue.Notification, typeof(NotificationConsumer) }
 },
+
 setHub: (IBusRegistrationConfigurator x) =>
 {
     x.AddSignalRHub<DiscussionBoardHub>();
+    x.AddSignalRHub<NotificationHub>();
+
 });
 
 var app = builder.Build();
 app.UseServices();
 app.UseHubs<DiscussionBoardHub>(RealtimeSettings.DiscussionBoardHub.Pattern);
+app.UseHubs<NotificationHub>(RealtimeSettings.NotificationHub.Pattern);
 app.Run();
