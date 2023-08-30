@@ -76,7 +76,6 @@ namespace Fsel.Notification.Application.Commands
                     Template = notificationTypeResult?.Template,
                     Message = notificationNew.Message,
                     ObjectId = notificationNew.ObjectId,
-                    UserIds = request.RoleIds
                 };
 
                 await _notificationMessagePublisher.Publish(notificationRealTime, cancellationToken).ConfigureAwait(false);
