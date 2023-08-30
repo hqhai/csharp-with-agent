@@ -180,6 +180,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
                 .ThenInclude(x => x.Exercise)
                 .ThenInclude(x => x!.ExerciseQuestions)
                 .ThenInclude(x => x.Question)
+                .ThenInclude(x => x.VideoTimeCodeAnswers.Where(x => x.VideoResultId == videoResult.Id))
                 .FirstOrDefaultAsync(x => x.Id == videoResult.CurrentVideoTimeCodeId, cancellationToken);
             var videoTimeCodeModel = videoTimeCode != null ? new VideoTimeCodeModel
             {
@@ -206,7 +207,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
                         Explanation = m.Explanation,
                         Ungraded = m.Ungraded,
                         Config = _questionTypeConverter.QuestionTypeConverterObject(m.Config, m.QuestionType, isDisableAnswers: !(m.VideoTimeCodeAnswers?.FirstOrDefault()?.Status == EnumCurrentStatus.Done)).Item1,
-                        ResultAnswer = _mapper.Map<AnswerModel>(m.VideoTimeCodeAnswers?.FirstOrDefault())
+                        ResultAnswer = _mapper.Map<AnswerModel>(m.VideoTimeCodeAnswers?.FirstOrDefault(x => x.VideoResultId == videoResult.Id))
                     }).ToList(),
                 }).ToList(),
             } : null;

@@ -18,7 +18,13 @@ namespace Fsel.System.Application.Queues.Consumers
         {
             if (context != null)
             {
-                await _mediator.Send(new QuestBoardFinishOneFinalTestCommand()).ConfigureAwait(false);
+                await _mediator.Send(new QuestBoardFinishOneFinalTestCommand
+                {
+                    ObjectId = context.Message.ObjectId,
+                    QuestBoardCategory = context.Message.QuestBoardCategory,
+                    QuestBoardType = context.Message.QuestBoardType,
+                    StudentId = context.Message.StudentId,
+                }).ConfigureAwait(false);
             }
         }
     }
