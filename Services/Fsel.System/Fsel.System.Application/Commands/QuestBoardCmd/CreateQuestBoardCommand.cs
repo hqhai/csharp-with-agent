@@ -106,11 +106,6 @@ namespace Fsel.System.Application.Commands.QuestBoardCmd
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(request.EndDate));
                 return methodResult;
             }
-            else if (request.IsLifeTime && request.RepeatType != null)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(request.RepeatType));
-                return methodResult;
-            }
 
             #endregion Validate QuestBoard
 

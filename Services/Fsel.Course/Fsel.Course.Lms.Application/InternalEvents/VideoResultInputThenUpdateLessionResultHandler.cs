@@ -8,6 +8,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
+    using Fsel.Course.Lms.Application.Queues.Publishers;
     using MediatR;
     using Microsoft.EntityFrameworkCore;
 
@@ -15,10 +16,13 @@ namespace Fsel.Course.Lms.Application.InternalEvents
         INotificationHandler<EntityChangedEvent<VideoResult>>
     {
         private readonly ILessonResultRepository _lessonResultRepository;
+        private readonly FinishOneLessonPublisher _finishOneLessonPublisher;
 
-        public VideoResultInputThenUpdateLessionResultHandler(ILessonResultRepository lessonResultRepository)
+        public VideoResultInputThenUpdateLessionResultHandler(ILessonResultRepository lessonResultRepository, FinishOneLessonPublisher finishOneLessonPublisher)
+
         {
             _lessonResultRepository = lessonResultRepository;
+            _finishOneLessonPublisher = finishOneLessonPublisher;
         }
 
         public async Task Handle(EntityChangedEvent<VideoResult> notification, CancellationToken cancellationToken)
@@ -31,6 +35,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             {
                 if (videoResult.Status == EnumResultStatus.Done)
                 {
+                    await _finishOneLessonPublisher.Publish(lessonResult, cancellationToken);
                     var classForumResult = lessonResult.ClassForumResults.FirstOrDefault();
                     var isCheckHomeWork = lessonResult.HomeWorkResults.All(x => x.Status == EnumResultStatus.Done) && classForumResult != null;
                     var isCheckClassForum = classForumResult?.Status == EnumClassForumResultStatus.Graded;

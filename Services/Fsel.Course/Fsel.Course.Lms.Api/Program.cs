@@ -6,6 +6,7 @@ using Fsel.Course.Infrastructure;
 using Fsel.Course.Infrastructure.Common;
 using Fsel.Course.Infrastructure.Repositories;
 using Fsel.Course.Infrastructure.ValueSettings;
+using Fsel.Course.Lms.Application.Queues.Publishers;
 using Fsel.Course.Lms.Application.Services.InteractionService;
 using Fsel.Course.Lms.Application.Services.OrderServices;
 using Fsel.Course.Lms.Application.Services.SystemService;
@@ -88,6 +89,7 @@ builder.Services.AddScoped<IClassForumResultRepository, ClassForumResultReposito
 builder.Services.AddScoped<IClassForumResultFileRepository, ClassForumResultFileRepository>();
 builder.Services.AddScoped<IClassForumScoreRepository, ClassForumScoreRepository>();
 
+// Converter
 builder.Services.AddScoped<ExtraPracticeConverter>();
 builder.Services.AddScoped<QuestionTypeConverter>();
 builder.Services.AddScoped<AnswerTypeConverter>();
@@ -95,6 +97,16 @@ builder.Services.AddScoped<SectionConverter>();
 builder.Services.AddScoped<VideoConverter>();
 builder.Services.AddScoped<CourseHelper>();
 builder.Services.AddScoped<UnitHelper>();
+
+// Publisher
+builder.Services.AddScoped<FinishOneFinalTestPublisher>();
+builder.Services.AddScoped<FinishOneHomeWorkPublisher>();
+builder.Services.AddScoped<FinishOneLessonPublisher>();
+builder.Services.AddScoped<FinishOneLevelPassPublisher>();
+builder.Services.AddScoped<FinishOneUnitPublisher>();
+builder.Services.AddScoped<FinishOneUnitTestPublisher>();
+
+// Refit
 builder.AddRefitClients(typeof(IUserService), appSetting?.Services?.UserApiUrl);
 builder.AddRefitClients(typeof(ITrainingService), appSetting?.Services?.ClassApiUrl);
 builder.AddRefitClients(typeof(IInteractionService), appSetting?.Services?.InteractionApiUrl);

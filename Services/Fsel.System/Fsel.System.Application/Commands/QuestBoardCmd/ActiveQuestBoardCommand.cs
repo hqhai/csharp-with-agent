@@ -35,7 +35,7 @@ namespace Fsel.System.Application.Commands.QuestBoardCmd
             var methodResult = new MethodResult<QuestBoardModel>();
             if (!request.IsActive)
             {
-                var questBoards = await _questBoardRepository.Queryable.Where(x=>x.DependentId == request.Id).ToListAsync(cancellationToken);
+                var questBoards = await _questBoardRepository.Queryable.Where(x => x.DependentId == request.Id).ToListAsync(cancellationToken);
                 if (questBoards != null && questBoards.Count > 0)
                 {
                     methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(questBoards));

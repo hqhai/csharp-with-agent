@@ -14,6 +14,7 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd
     using Fsel.Course.Domain.Models.CommandModels.FinalTestAnswers;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Infrastructure.Common;
+    using Fsel.Course.Lms.Application.Queues.Publishers;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using MediatR;
     using Microsoft.AspNetCore.Http;
@@ -30,6 +31,7 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd
         private readonly IFinalTestResultRepository _finalTestResultRepository;
         private readonly IFinalTestRepository _finalTestRepository;
         private readonly IMapper _mapper;
+        private readonly FinishOneFinalTestPublisher _finishOneFinalTestPublisher;
         private readonly AuthContext _authContext;
         private readonly IUserService _userService;
         private readonly ICourseRepository _courseRepository;
@@ -41,6 +43,7 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd
             , IFinalTestResultRepository finalTestResultRepository
             , IFinalTestRepository finalTestRepository
             , IMapper mapper
+            , FinishOneFinalTestPublisher finishOneFinalTestPublisher
             , AuthContext authContext
             , IUserService userService
             , ICourseRepository courseRepository
@@ -51,6 +54,7 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd
             _finalTestResultRepository = finalTestResultRepository;
             _finalTestRepository = finalTestRepository;
             _mapper = mapper;
+            _finishOneFinalTestPublisher = finishOneFinalTestPublisher;
             _authContext = authContext;
             _userService = userService;
             _courseRepository = courseRepository;
@@ -177,7 +181,7 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd
                 finalTestResult.Status = EnumResultStatus.Done;
                 finalTestResult.SkillScores = skillScores;
                 finalTestResult.Percent = finalTestResult.CorrectTotal > 0 ? ((double)finalTestResult.CorrectCount / finalTestResult.CorrectTotal * 100) : 0;
-
+                await _finishOneFinalTestPublisher.Publish(finalTestResult, cancellationToken);
                 finalTestResult = _finalTestResultRepository.Update(finalTestResult);
                 await _finalTestResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 

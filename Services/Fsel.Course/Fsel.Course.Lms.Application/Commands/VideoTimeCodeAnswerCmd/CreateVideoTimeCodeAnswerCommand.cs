@@ -12,6 +12,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
     using Fsel.Course.Domain.Models.CommandModels.VideoTimeCodeAnswers;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Infrastructure.Common;
+    using Fsel.Course.Lms.Application.Queues.Publishers;
     using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Http;
@@ -27,6 +28,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
         private readonly IVideoResultRepository _videoResultRepository;
         private readonly ILessonResultRepository _lessonResultRepository;
         private readonly IMapper _mapper;
+        private readonly FinishOneUnitTestPublisher _finishOneUnitTestPublisher;
         private readonly QuestionTypeConverter _questionTypeConverter;
         private readonly IVideoTimeCodeRepository _videoTimeCodeRepository;
         private readonly IQuestionRepository _questionRepository;
@@ -37,6 +39,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
             , IVideoResultRepository videoResultRepository
             , ILessonResultRepository lessonResultRepository
             , IMapper mapper
+            , FinishOneUnitTestPublisher finishOneUnitTestPublisher
             , QuestionTypeConverter questionTypeConverter
             , IVideoTimeCodeRepository videoTimeCodeRepository
             , IQuestionRepository questionRepository
@@ -46,6 +49,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
             _videoResultRepository = videoResultRepository;
             _lessonResultRepository = lessonResultRepository;
             _mapper = mapper;
+            _finishOneUnitTestPublisher = finishOneUnitTestPublisher;
             _questionTypeConverter = questionTypeConverter;
             _videoTimeCodeRepository = videoTimeCodeRepository;
             _questionRepository = questionRepository;
@@ -86,6 +90,10 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
                 return methodResult;
             }
 
+            var exercise = questions.SelectMany(x => x.ExerciseQuestions).Select(x => x.Exercise).FirstOrDefault();
+            var videoTimeCodeQuestion = exercise?.TimeCodeExercises.Select(x => x.VideoTimeCode).FirstOrDefault();
+            videoResult.CurrentVideoTimeCodeId = videoTimeCodeQuestion?.Id;
+
             #endregion Validation
 
             var videoTimeCodeAnswers = new List<VideoTimeCodeAnswer>();
@@ -106,10 +114,6 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
                     return methodResult;
                 }
 
-                var exercise = question.ExerciseQuestions.Select(x => x.Exercise).FirstOrDefault();
-                var videoTimeCodeQuestion = exercise?.TimeCodeExercises.Select(x => x.VideoTimeCode).FirstOrDefault();
-                videoResult.CurrentVideoTimeCodeId = videoTimeCodeQuestion?.Id;
-
                 var answer = await _videoTimeCodeAnswerRepository.GetAsync(videoResult.Id, question.Id, exercise?.Id, videoTimeCodeQuestion?.Id);
                 var (answerConfig, correctCount) = _answerTypeConverter.GetTotalCorrectByAsnwerType(item.Answer, question.Config, question.QuestionType);
                 if (!string.IsNullOrEmpty(item.Answer?.ToString()) && answerConfig == null)
@@ -129,6 +133,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
                         CorrectCount = question.Ungraded ? default : correctCount,
                         Status = videoTimeCodeQuestion?.TimeCodeType != EnumTimeCodeType.Standalone ? EnumCurrentStatus.Done : EnumCurrentStatus.Process
                     };
+
                     videoTimeCodeAnswers.Add(answer);
                 }
                 else if (answer != null && answer.Status == EnumCurrentStatus.Process)
@@ -150,8 +155,13 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
             {
                 videoTimeCodeAnswers.ForEach(x => x.Status = EnumCurrentStatus.Done);
             }
+
             await _videoTimeCodeAnswerRepository.ExecuteTransactionAsync(async () =>
             {
+                if (videoTimeCodeQuestion?.TimeCodeType == EnumTimeCodeType.UnitTest)
+                {
+                    await _finishOneUnitTestPublisher.Publish(videoResult, cancellationToken);
+                }
                 if (videoTimeCodeAnswers.Count > 0)
                 {
                     await _videoTimeCodeAnswerRepository.AddList(videoTimeCodeAnswers);
@@ -170,6 +180,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
                 .ThenInclude(x => x.Exercise)
                 .ThenInclude(x => x!.ExerciseQuestions)
                 .ThenInclude(x => x.Question)
+                .ThenInclude(x => x.VideoTimeCodeAnswers.Where(x => x.VideoResultId == videoResult.Id))
                 .FirstOrDefaultAsync(x => x.Id == videoResult.CurrentVideoTimeCodeId, cancellationToken);
             var videoTimeCodeModel = videoTimeCode != null ? new VideoTimeCodeModel
             {
@@ -195,8 +206,8 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
                         CorrectTotal = m.CorrectTotal,
                         Explanation = m.Explanation,
                         Ungraded = m.Ungraded,
-                        Config = _questionTypeConverter.QuestionTypeConverterObject(m.Config, m.QuestionType, isDisableAnswers: !(m.VideoTimeCodeAnswers!.FirstOrDefault()!.Status == EnumCurrentStatus.Done)).Item1,
-                        ResultAnswer = _mapper.Map<AnswerModel>(m.VideoTimeCodeAnswers!.FirstOrDefault())
+                        Config = _questionTypeConverter.QuestionTypeConverterObject(m.Config, m.QuestionType, isDisableAnswers: !(m.VideoTimeCodeAnswers?.FirstOrDefault()?.Status == EnumCurrentStatus.Done)).Item1,
+                        ResultAnswer = _mapper.Map<AnswerModel>(m.VideoTimeCodeAnswers?.FirstOrDefault(x => x.VideoResultId == videoResult.Id))
                     }).ToList(),
                 }).ToList(),
             } : null;
