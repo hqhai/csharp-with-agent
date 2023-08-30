@@ -17,7 +17,6 @@ namespace Fsel.Course.Domain.Entities
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         public string? Content { get; set; }
 
-        [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         public string? WordContent { get; set; }
 
         [MaxLength(10000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
@@ -73,6 +72,7 @@ namespace Fsel.Course.Domain.Entities
             get { return ConvertHelper.Deserialize<IList<EnumFeedBackNegative>>(FeedBackNegativesStr); }
             set { FeedBackNegativesStr = ConvertHelper.Serialize(value); }
         }
+
         public ICollection<ClassForumScore> ClassForumScores { get; set; } = new List<ClassForumScore>();
 
         public ICollection<ClassForumResultFile> ClassForumResultFiles { get; set; } = new List<ClassForumResultFile>();
