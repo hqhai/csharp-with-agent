@@ -1,6 +1,8 @@
 // Copyright (c) Atlantic. All rights reserved.
 
 using Fsel.Core.Extensions;
+using Fsel.Shared.Constants;
+using Fsel.System.Application.Queues.Consumers;
 using Fsel.System.Application.Services.CourseServices;
 using Fsel.System.Application.Services.OrderServices;
 using Fsel.System.Application.Services.UserServices;
@@ -30,6 +32,13 @@ builder.Services.AddScoped<IQuestBoardStudentRepository, QuestBoardStudentReposi
 builder.AddRefitClients(typeof(IUserService), appSetting?.Services?.UserApiUrl);
 builder.AddRefitClients(typeof(ICourseService), appSetting?.Services?.LmsCourseApiUrl);
 builder.AddRefitClients(typeof(IOrderService), appSetting?.Services?.OrderApiUrl);
+
+builder.AddMassTransit(appSetting,
+queues: new Dictionary<string, Type>
+{
+    { QueueSettings.RealtimeQueue.NameQueue.QuestBoardMainFinish, typeof(QuestBoardMainFinishConsumer) },
+});
+
 var app = builder.Build();
 app.UseServices();
 app.Run();
