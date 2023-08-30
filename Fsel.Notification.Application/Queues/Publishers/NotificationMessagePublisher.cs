@@ -1,5 +1,6 @@
 using Fsel.Core.Base.Interfaces;
 using Fsel.Notification.Domain.Entities;
+using Fsel.Notification.Domain.Model.EntityModels;
 using Fsel.Shared.Constants;
 using Fsel.Shared.Models.ShareModels;
 
@@ -14,7 +15,7 @@ namespace Fsel.Notification.Application.Queues.Publishers
             _queueProvider = queueProvider;
         }
 
-        public async Task Publish(Notifications notification, CancellationToken cancellationToken)
+        public async Task Publish(NotificationsModel notification, CancellationToken cancellationToken)
         {
             if (notification == null)
             {
@@ -26,6 +27,8 @@ namespace Fsel.Notification.Application.Queues.Publishers
                 ObjectId = notification.ObjectId,
                 UserId = notification.UserId,
                 Message = notification.Message,
+                Template = notification.Template,
+                UserIds = notification.UserIds,
 
             }, cancellationToken);
         }

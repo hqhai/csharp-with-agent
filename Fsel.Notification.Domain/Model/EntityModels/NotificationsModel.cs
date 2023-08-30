@@ -8,7 +8,7 @@ namespace Fsel.Notification.Domain.Model.EntityModels
     public class NotificationsModel : BaseModel
     {
 
-        public Guid? UserId { get; set; }
+        public Guid UserId { get; set; }
 
         public Guid? RoleId { get; set; }
 
@@ -23,5 +23,9 @@ namespace Fsel.Notification.Domain.Model.EntityModels
         public Guid NotificationTypeId { get; set; }
 
         public string? Template { get; set; }
+
+        public string? Icon { get; set; }
+
+        public string? UserIds { get; set; }
     }
 }

@@ -13,6 +13,6 @@ namespace Fsel.Notification.Domain.Model.CommandModels.Notification
 
         public Guid UserId { get; set; } = Guid.Empty;
 
-        public Guid NotificationTypeId { get; set; } = Guid.Empty;
+        public Guid NotificationTypeId { get; set; }
     }
 }

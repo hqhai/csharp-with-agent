@@ -10,10 +10,10 @@ namespace Fsel.Notification.Application.Commands
     using Fsel.Notification.Domain.Model.CommandModels.Notification;
     using Fsel.Notification.Domain.Model.EntityModels;
     using Fsel.Common.ActionResults;
-    using Fsel.Common.Enums.ErrorCodes;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Fsel.Notification.Application.Queues.Publishers;
+    using Fsel.Common.Enums.ErrorCodes;
 
     public class CreateNotificationCommand : CreateNotificationCommandModel, IRequest<MethodResult<NotificationsModel>>
     {
@@ -42,33 +42,46 @@ namespace Fsel.Notification.Application.Commands
             #region Validation
             Notifications notificationNew = _mapper.Map<Notifications>(request);
 
+
+
+
             // check null data
 
-            //var notificationTypeId = request.NotificationTypeId != Guid.Empty ? _notificationTypeRepository.GetByIdAsync(request.NotificationTypeId) : null;
-            //if (notificationTypeId == null)
-            //{
-            //    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.NotificationTypeId), request.NotificationTypeId);
-            //    return methodResult;
-            //}
+            var notificationType = request.NotificationTypeId != Guid.Empty ? _notificationTypeRepository.GetByIdAsync(request.NotificationTypeId) : null;
+            if (notificationType == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.NotificationTypeId), request.NotificationTypeId);
+                return methodResult;
+            }
 
-            //var user = request.UserId != Guid.Empty ? await _userService.GetUserById(request.UserId) : null;
-            //if (user == null)
-            //{
-            //    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.UserId), request.UserId);
-            //    return methodResult;
-            //}
+            var notificationTypeResult = notificationType.Result;
+
 
             #endregion Validation
 
 
             #region Handler
+
             await _notificationsRepository.ExecuteTransactionAsync(async () =>
             {
                 notificationNew = _notificationsRepository.Add(notificationNew);
+
                 await _notificationsRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
-                await _notificationMessagePublisher.Publish(notificationNew, cancellationToken).ConfigureAwait(false);
 
+                //Push notification
+                var notificationRealTime = new NotificationsModel()
+                {
+                    UserId = notificationNew.UserId,
+                    Template = notificationTypeResult?.Template,
+                    Message = notificationNew.Message,
+                    ObjectId = notificationNew.ObjectId,
+                };
+
+                await _notificationMessagePublisher.Publish(notificationRealTime, cancellationToken).ConfigureAwait(false);
+
+
+                //Return Value
                 methodResult.StatusCode = StatusCodes.Status201Created;
                 methodResult.Result = _mapper.Map<NotificationsModel>(notificationNew);
                 return methodResult;
