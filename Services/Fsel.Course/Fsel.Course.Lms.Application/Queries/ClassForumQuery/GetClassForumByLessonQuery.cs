@@ -37,20 +37,20 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumQuery
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<ClassForumModel> methodResult = new MethodResult<ClassForumModel>();
-            var classForum = await _classForumRepository.Queryable
+            var classForumQuery = await _classForumRepository.Queryable
                                    .Include(x => x.ClassForumResults!)
                                    .ThenInclude(x => x.ClassForumResultFiles)
                                    .Where(x => x.ClassForumResults!.Any(x => x.Status == EnumClassForumResultStatus.PendingForGrading || x.Status == EnumClassForumResultStatus.Graded))
                                    .FirstOrDefaultAsync(x => x.LessonId == request.LessonId, cancellationToken);
 
-            var classFormQuery = _mapper.Map<ClassForumModel>(classForum);
-            var actionsResult = await _interactionService.GetsActionAsync(new InteractionActionCommandModel { ObjectIds = classForum?.ClassForumResults.Select(x => x.Id).ToList() });
+            var classForm = _mapper.Map<ClassForumModel>(classForumQuery);
+            var actionsResult = await _interactionService.GetsActionAsync(new InteractionActionCommandModel { ObjectIds = classForm?.ClassForumResults.Select(x => x.Id).ToList() });
             var actions = actionsResult.Content?.Result;
 
             if (actions != null)
             {
-                classFormQuery!.ClassForumResults = classFormQuery.ClassForumResults?.Where(x => !actions.Any(n => n.IsDisable && n.ObjectId == x.Id)).ToList();
-                foreach (var item in classFormQuery.ClassForumResults!)
+                classForm!.ClassForumResults = classForm.ClassForumResults?.Where(x => !actions.Any(n => n.IsDisable && n.ObjectId == x.Id)).ToList();
+                foreach (var item in classForm.ClassForumResults!)
                 {
                     var action = actions.FirstOrDefault(x => x.ObjectId == item.Id);
                     item.CommentNumber = action?.CommentNumber;
@@ -59,7 +59,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumQuery
                 }
             }
 
-            methodResult.Result = classFormQuery;
+            methodResult.Result = classForm;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }
