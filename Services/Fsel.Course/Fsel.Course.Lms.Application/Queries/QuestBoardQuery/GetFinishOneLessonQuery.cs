@@ -56,7 +56,7 @@ namespace Fsel.Course.Lms.Application.Queries.QuestBoardQuery
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<QuestBoardCategoryModel> methodResult = new MethodResult<QuestBoardCategoryModel>();
             QuestBoardCategoryModel questBoardCategoryModel = new QuestBoardCategoryModel();
-            var videoResults = await _videoResultRepository.Queryable.Where(x => x.StudentId == request.StudentId).ToListAsync(cancellationToken);
+            var videoResults = await _videoResultRepository.Queryable.Where(x => x.StudentId == request.StudentId).OrderBy(x => x.CreatedDate).ToListAsync(cancellationToken);
             if (videoResults == null || videoResults.Count == 0)
             {
                 methodResult.StatusCode = StatusCodes.Status200OK;
@@ -73,7 +73,7 @@ namespace Fsel.Course.Lms.Application.Queries.QuestBoardQuery
             {
                 DateTime startOfDay = currentDate.Date.AddHours(8);
                 DateTime endOfDay = currentDate.Date.AddDays(1);
-                videoResult = videoResults.OrderBy(x => x.CreatedDate).FirstOrDefault(x => !x.UpdatedDate.HasValue || (x.UpdatedDate.Value > startOfDay && x.UpdatedDate.Value < endOfDay) || (x.UpdatedDate.Value < endOfDay));
+                videoResult = videoResults.FirstOrDefault(x => !x.UpdatedDate.HasValue || (x.UpdatedDate.Value > startOfDay && x.UpdatedDate.Value < endOfDay) || (x.UpdatedDate.Value < endOfDay));
             }
             else if (request.RepeatType == EnumRepeatType.Week)
             {

@@ -87,7 +87,7 @@ namespace Fsel.System.Application.Queries.QuestBoardStudentQuery
                                          StartDate = baseQ.StartDate,
                                          EndDate = baseQ.EndDate ?? null,
                                          NumberOfStars = baseQ.NumberOfStars,
-                                         Status = baseQ.QuestBoardStudents.Any(x => x.StudentId == student.Id && x.QuestBoardId == baseQ.Id) ? baseQ.QuestBoardStudents.FirstOrDefault(x => x.StudentId == student.Id && x.QuestBoardId == baseQ.Id)!.Status : null,
+                                         Status = baseQ.QuestBoardStudents.Any(x => x.StudentId == student.Id && x.QuestBoardId == baseQ.Id && x.CreatedDate.Date == DateTime.Now.Date) ? baseQ.QuestBoardStudents.FirstOrDefault(x => x.StudentId == student.Id && x.QuestBoardId == baseQ.Id && x.CreatedDate.Date == DateTime.Now.Date)!.Status : null,
                                      }).ToListAsync(cancellationToken);
 
             questBoards = questBoards.Where(baseQ => baseQ.PackageIds != null && baseQ.PackageIds.Count > 0 && baseQ.PackageIds.Any(x => x == student.PackageId)).ToList();
