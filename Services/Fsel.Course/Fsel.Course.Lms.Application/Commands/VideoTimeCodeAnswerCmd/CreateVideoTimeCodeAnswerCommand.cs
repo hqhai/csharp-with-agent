@@ -28,6 +28,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
         private readonly IVideoResultRepository _videoResultRepository;
         private readonly ILessonResultRepository _lessonResultRepository;
         private readonly IMapper _mapper;
+        private readonly VideoConverter _videoConverter;
         private readonly FinishOneUnitTestPublisher _finishOneUnitTestPublisher;
         private readonly QuestionTypeConverter _questionTypeConverter;
         private readonly IVideoTimeCodeRepository _videoTimeCodeRepository;
@@ -39,6 +40,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
             , IVideoResultRepository videoResultRepository
             , ILessonResultRepository lessonResultRepository
             , IMapper mapper
+            , VideoConverter videoConverter
             , FinishOneUnitTestPublisher finishOneUnitTestPublisher
             , QuestionTypeConverter questionTypeConverter
             , IVideoTimeCodeRepository videoTimeCodeRepository
@@ -49,6 +51,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
             _videoResultRepository = videoResultRepository;
             _lessonResultRepository = lessonResultRepository;
             _mapper = mapper;
+            _videoConverter = videoConverter;
             _finishOneUnitTestPublisher = finishOneUnitTestPublisher;
             _questionTypeConverter = questionTypeConverter;
             _videoTimeCodeRepository = videoTimeCodeRepository;
@@ -162,6 +165,10 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
                 {
                     await _finishOneUnitTestPublisher.Publish(videoResult, cancellationToken);
                 }
+                if (videoTimeCodeQuestion?.TimeCodeType != EnumTimeCodeType.Standalone)
+                {
+                }
+
                 if (videoTimeCodeAnswers.Count > 0)
                 {
                     await _videoTimeCodeAnswerRepository.AddList(videoTimeCodeAnswers);

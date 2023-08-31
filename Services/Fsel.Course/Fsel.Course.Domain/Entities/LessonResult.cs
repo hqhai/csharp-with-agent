@@ -16,8 +16,17 @@ namespace Fsel.Course.Domain.Entities
         /// <summary>
         /// Phần trăm cẩu trả lời đúng
         /// </summary>
-        [Range(0, 10000_0000, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
-        public double Percent { get; set; }
+        private double _percent;
+
+        [Range(0, 100, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
+        public double Percent
+        {
+            get
+            {
+                return CorrectTotal > 0 ? ((double)CorrectCount / CorrectTotal * 100) : _percent;
+            }
+            set { _percent = CorrectTotal > 0 ? ((double)CorrectCount / CorrectTotal * 100) : value; }
+        }
 
         /// <summary>
         /// Trạng thái
@@ -29,6 +38,18 @@ namespace Fsel.Course.Domain.Entities
         /// </summary>
         [MaxLength(2000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? SummaryNote { get; set; }
+
+        /// <summary>
+        /// Số câu trả lời đúng của Student
+        /// </summary>
+        [Range(0, 10000_0000, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
+        public int CorrectCount { get; set; }
+
+        /// <summary>
+        /// Tổng số câu trả lời đúng
+        /// </summary>
+        [Range(0, 10000_0000, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
+        public int CorrectTotal { get; set; }
 
         public string? SkillScoresStr { get; set; }
 
