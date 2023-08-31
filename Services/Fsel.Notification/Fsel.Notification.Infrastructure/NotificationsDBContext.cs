@@ -19,6 +19,7 @@ namespace Fsel.Notification.Infrastructure
 
         public DbSet<Notifications> Notifications { get; set; }
         public DbSet<NotificationType> NotificationType { get; set; }
+        public DbSet<NotificationRemind> NotificationReminds { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -27,6 +28,7 @@ namespace Fsel.Notification.Infrastructure
             SeedNotificationType(modelBuilder);
             modelBuilder.ApplyConfiguration(new NotificationEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new NotificationTypeEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new NotificationRemindEntityTypeConfiguration());
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
