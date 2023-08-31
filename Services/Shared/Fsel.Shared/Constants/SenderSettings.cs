@@ -13,6 +13,6 @@ namespace Fsel.Shared.Constants
         public const string OtpValidMinute = "{0} phút";
         public const string OtpValidDay = "{0} ngày";
 
-        public const string ResultAnnouncement = "THÔNG BÁO KẾT QUẢ LÀM BÀI PLACEMENT TEST";
+        public const string SendPTResultSubject = "THÔNG BÁO KẾT QUẢ LÀM BÀI PLACEMENT TEST";
     }
 }
