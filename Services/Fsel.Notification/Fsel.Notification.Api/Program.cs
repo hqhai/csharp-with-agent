@@ -18,6 +18,7 @@ builder.AddDbContexts<NotificationsDBContext>();
 
 builder.Services.AddScoped<INotificationsRepository, NotificationsRepository>();
 builder.Services.AddScoped<INotificationTypeRepository, NotificationTypeRepository>();
+builder.Services.AddScoped<INotificationRemindRepository, NotificationRemindRepository>();
 builder.Services.AddScoped<NotificationMessagePublisher>();
 
 builder.AddRefitClients(typeof(IUserService), appSetting?.Services?.UserApiUrl, appSetting?.Jwt?.SecretKey);
