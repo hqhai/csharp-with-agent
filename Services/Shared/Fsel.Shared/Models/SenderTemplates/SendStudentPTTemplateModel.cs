@@ -9,5 +9,7 @@ namespace Fsel.Shared.Models.SenderTemplates
         public EnumCourseLevel CourseLevel { get; set; }
 
         public string? StudentName { get; set; }
+
+        public string? Percents { get; set; }
     }
 }

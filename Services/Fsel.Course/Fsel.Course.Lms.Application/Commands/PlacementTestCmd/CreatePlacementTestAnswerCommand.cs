@@ -2,6 +2,7 @@
 
 namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
 {
+    using System.Globalization;
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
@@ -14,11 +15,15 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
     using Fsel.Course.Domain.Models.CommandModels.PlacementTestAnswers;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Infrastructure.Common;
+    using Fsel.Course.Lms.Application.Commands.AuthCmd;
+    using Fsel.Course.Lms.Application.Services.SenderService;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Course.Lms.Application.Services.UserServices.Models;
+    using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Enums.ErrorCodes;
     using Fsel.Shared.Helpers;
+    using Fsel.Shared.Models.SenderTemplates;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -36,15 +41,10 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
         private readonly IMapper _mapper;
         private readonly AuthContext _authContext;
         private readonly AnswerTypeConverter _answerTypeConverter;
+        private readonly ISenderService _senderService;
+        private readonly IMediator _mediator;
 
-        public CreatePlacementTestAnswerCommandHandler(
-             IPlacementTestAnswerRepository placementTestAnswerRepository
-            , IPlacementTestResultRepository placementTestResultRepository
-            , IUserService userService
-            , IQuestionRepository questionRepository
-            , IMapper mapper
-            , AuthContext authContext
-            , AnswerTypeConverter answerTypeConverter)
+        public CreatePlacementTestAnswerCommandHandler(IPlacementTestAnswerRepository placementTestAnswerRepository, IPlacementTestResultRepository placementTestResultRepository, IUserService userService, IQuestionRepository questionRepository, IMapper mapper, AuthContext authContext, AnswerTypeConverter answerTypeConverter, ISenderService senderService, IMediator mediator)
         {
             _placementTestAnswerRepository = placementTestAnswerRepository;
             _placementTestResultRepository = placementTestResultRepository;
@@ -53,6 +53,8 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
             _mapper = mapper;
             _authContext = authContext;
             _answerTypeConverter = answerTypeConverter;
+            _senderService = senderService;
+            _mediator = mediator;
         }
 
         public async Task<MethodResult<IList<PlacementTestResultModel>>> Handle(CreatePlacementTestAnswerCommand request, CancellationToken cancellationToken)
@@ -217,11 +219,40 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
                 await _placementTestResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
                 placementTestResults.Add(placementTestResult);
+                placementTestResults = placementTestResults.OrderBy(x => x.CreatedDate).ToList();
+
                 methodResult.StatusCode = StatusCodes.Status201Created;
                 methodResult.Result = _mapper.Map<IList<PlacementTestResultModel>>(placementTestResults);
                 return methodResult;
             });
+            if (isLockNew)
+            {
+                var param = new SendStudentPTTemplateModel
+                {
+                    StudentName = student?.Human?.FullName,
+                    CourseLevel = student!.CourseLevel,
+                    Percents = string.Join(Environment.NewLine, placementTestResults.Select((x, index) => $"- {index + 1}: {x.Percent} %")),
+                };
+                var subject = string.Format(CultureInfo.InvariantCulture, SenderSettings.ResultAnnouncement);
+                var sendResult = new MethodResult<bool>();
+                if (!string.IsNullOrEmpty(student!.Human?.Email))
+                {
+                    if (currentLevel == EnumCourseLevel.A2 || currentLevel == EnumCourseLevel.B1)
+                    {
+                        sendResult = await _mediator.Send(new SenderCommand { Email = student!.Human?.Email, Subject = subject, Params = param, Template = EnumSenderTemplate.SendStudentPTOnline }, cancellationToken).ConfigureAwait(false);
+                    }
+                    else
+                    {
+                        sendResult = await _mediator.Send(new SenderCommand { Email = student!.Human?.Email, Subject = subject, Params = param, Template = EnumSenderTemplate.SendStudentPT }, cancellationToken).ConfigureAwait(false);
+                    }
+                }
 
+                if (!sendResult.IsOK)
+                {
+                    methodResult.AddErrorBadRequest(sendResult?.ErrorMessages);
+                    return methodResult;
+                }
+            }
             return methodResult;
         }
     }

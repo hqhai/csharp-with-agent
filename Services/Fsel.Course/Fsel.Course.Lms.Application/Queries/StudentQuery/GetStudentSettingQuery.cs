@@ -29,16 +29,14 @@ namespace Fsel.Course.Lms.Application.Queries.StudentQuery
         private readonly IUserService _userService;
         private readonly IPlacementTestResultRepository _placementTestResultRepository;
         private readonly AuthContext _authContext;
-        private readonly ISenderService _senderService;
-        private readonly IMediator _mediator;
 
-        public SettingStudentCheckQueryHandler(IUserService userService, IPlacementTestResultRepository placementTestResultRepository, AuthContext authContext, ISenderService senderService, IMediator mediator)
+        public SettingStudentCheckQueryHandler(IUserService userService,
+            IPlacementTestResultRepository placementTestResultRepository,
+            AuthContext authContext)
         {
             _userService = userService;
             _placementTestResultRepository = placementTestResultRepository;
             _authContext = authContext;
-            _senderService = senderService;
-            _mediator = mediator;
         }
 
         public async Task<MethodResult<StudentSettingModel>> Handle(GetStudentSettingQuery request, CancellationToken cancellationToken)
@@ -53,7 +51,6 @@ namespace Fsel.Course.Lms.Application.Queries.StudentQuery
                 return methodResult;
             }
             var student = studentResult?.Content?.Result;
-            student = studentResult?.Content?.Result;
             int age = DateTimeHelper.GetYearOld(student?.Human?.Birthday);
             if (student != null)
             {
@@ -66,24 +63,6 @@ namespace Fsel.Course.Lms.Application.Queries.StudentQuery
                 settingStudentModel.ClassId = student.ClassId ?? null;
                 settingStudentModel.PTLevel = placementTestResult?.Level ?? null;
                 settingStudentModel.IsLockPT = isLock;
-            }
-
-            var param = new SendStudentPTTemplateModel
-            {
-                StudentName = student?.Human?.FullName,
-                CourseLevel = student!.CourseLevel,
-            };
-            var subject = string.Format(CultureInfo.InvariantCulture, SenderSettings.ResultAnnouncement, student?.Human?.FullName);
-            var sendResult = new MethodResult<bool>();
-            if (!string.IsNullOrEmpty(student!.Human?.Email))
-            {
-                sendResult = await _mediator.Send(new SenderCommand { Email = student!.Human?.Email, Subject = subject, Params = param, Template = EnumSenderTemplate.SendStudentPT }, cancellationToken).ConfigureAwait(false);
-            }
-
-            if (!sendResult.IsOK)
-            {
-                methodResult.AddErrorBadRequest(sendResult?.ErrorMessages);
-                return methodResult;
             }
 
             methodResult.StatusCode = StatusCodes.Status200OK;
