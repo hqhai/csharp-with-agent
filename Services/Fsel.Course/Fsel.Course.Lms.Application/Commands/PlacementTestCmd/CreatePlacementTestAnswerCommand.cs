@@ -231,20 +231,13 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
                 {
                     StudentName = student?.Human?.FullName,
                     CourseLevel = student!.CourseLevel,
-                    Percents = string.Join(Environment.NewLine, placementTestResults.Select((x, index) => $"- {index + 1}: {x.Percent} %")),
+                    Percents = string.Join(Environment.NewLine, placementTestResults.Select((x, index) => $"- Module {index + 1}: {x.Percent} %")),
                 };
                 var subject = string.Format(CultureInfo.InvariantCulture, SenderSettings.ResultAnnouncement);
                 var sendResult = new MethodResult<bool>();
                 if (!string.IsNullOrEmpty(student!.Human?.Email))
                 {
-                    if (currentLevel == EnumCourseLevel.A2 || currentLevel == EnumCourseLevel.B1)
-                    {
-                        sendResult = await _mediator.Send(new SenderCommand { Email = student!.Human?.Email, Subject = subject, Params = param, Template = EnumSenderTemplate.SendStudentPTOnline }, cancellationToken).ConfigureAwait(false);
-                    }
-                    else
-                    {
-                        sendResult = await _mediator.Send(new SenderCommand { Email = student!.Human?.Email, Subject = subject, Params = param, Template = EnumSenderTemplate.SendStudentPT }, cancellationToken).ConfigureAwait(false);
-                    }
+                    sendResult = await _mediator.Send(new SenderCommand { Email = student!.Human?.Email, Subject = subject, Params = param, Template = EnumSenderTemplate.SendStudentPTOnline }, cancellationToken).ConfigureAwait(false);
                 }
 
                 if (!sendResult.IsOK)
