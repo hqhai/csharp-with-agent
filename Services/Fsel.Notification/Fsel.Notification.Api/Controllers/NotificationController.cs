@@ -57,7 +57,7 @@ namespace Fsel.Notification.Api.Controllers
         /// </summary>
         /// <param name="cmd"></param>
         /// <returns></returns>
-        [HttpPost]
+        [HttpPost("status")]
         [ProducesResponseType(typeof(MethodResult<NotificationRemindModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> CreateNotificationRemind([FromBody] CreateNotificationRemindCommand cmd)
@@ -71,7 +71,7 @@ namespace Fsel.Notification.Api.Controllers
         /// </summary>
         /// <param name="cmd"></param>
         /// <returns></returns>
-        [HttpPut]
+        [HttpPut("status")]
         [ProducesResponseType(typeof(MethodResult<NotificationRemindModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> UpdateNotificationRemind([FromBody] UpdateNotificationRemindCommand cmd)

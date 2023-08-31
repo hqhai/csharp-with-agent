@@ -34,6 +34,7 @@ namespace Fsel.Notification.Application.Commands
 
             #region Handler
             NotificationRemind notificationNew = _mapper.Map<NotificationRemind>(request);
+
             await _notificationRemindRepository.ExecuteTransactionAsync(async () =>
             {
                 notificationNew = _notificationRemindRepository.Add(notificationNew);
