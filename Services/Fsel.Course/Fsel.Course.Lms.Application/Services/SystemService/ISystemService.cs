@@ -14,5 +14,8 @@ namespace Fsel.Course.Lms.Application.Services.SystemService
 
         [Get("/log-action/{userId}")]
         Task<IApiResponse<MethodResult<LogActionDaysModel>>> GetLogActionsByUserId([FromRoute] Guid userId);
+
+        [Post("/log-action")]
+        Task<IApiResponse<MethodResult<IList<LogActionDaysModel>>>> GetLogActionsByUserIdsAsync([FromBody] IList<Guid> ids);
     }
 }

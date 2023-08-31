@@ -34,20 +34,16 @@ namespace Fsel.Course.Lms.Application.InternalEvents
         {
             ArgumentNullException.ThrowIfNull(notification);
             var videoResult = notification.Data;
-            var lessonResult = await _lessonResultRepository.Queryable
-                                        .Include(x => x.VideoResult)
-                                        .FirstOrDefaultAsync(x => x.Id == videoResult.LessonResultId, cancellationToken);
-            if (lessonResult != null && lessonResult.VideoResult != null)
+            var lessonResult = await _lessonResultRepository.Queryable.FirstOrDefaultAsync(x => x.Id == videoResult.LessonResultId, cancellationToken);
+            if (lessonResult != null && videoResult.Status == EnumResultStatus.Done)
             {
                 var skillScores = videoResult.VideoSkillScores?.FirstOrDefault(x => x.Type == EnumTimeCodeType.Standalone)?.SkillScores;
                 lessonResult.CorrectCount = videoResult.CorrectCount;
+                lessonResult.CorrectTotal = videoResult.CorrectTotal;
                 lessonResult.Percent = videoResult.Percent * 40 / 100;
                 lessonResult.SkillScores = skillScores;
-                if (videoResult.Status == EnumResultStatus.Done)
-                {
-                    await _finishOneLessonPublisher.Publish(lessonResult, cancellationToken);
-                    lessonResult.Status = EnumResultStatus.Done;
-                }
+                await _finishOneLessonPublisher.Publish(lessonResult, cancellationToken);
+                lessonResult.Status = EnumResultStatus.Done;
                 _lessonResultRepository.Update(lessonResult);
                 await _lessonResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
             }

@@ -33,5 +33,17 @@ namespace Fsel.System.Api.Controllers
             MethodResult<LogActionDaysModel> commandResult = await _mediator.Send(new GetLogActionByUserIdQuery { Id = userId }).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
+
+        /// <summary>
+        /// Get LogActions by UnitIds
+        /// </summary>
+        [HttpPost]
+        [ProducesResponseType(typeof(MethodResult<IList<LogActionDaysModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetLogActionsByUserIds([FromBody] IList<Guid> ids)
+        {
+            MethodResult<IList<LogActionDaysModel>> commandResult = await _mediator.Send(new GetListLogActionByUserIdsQuery { Ids = ids }).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
     }
 }

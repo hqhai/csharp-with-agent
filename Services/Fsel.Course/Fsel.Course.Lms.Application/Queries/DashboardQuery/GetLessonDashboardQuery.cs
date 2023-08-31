@@ -24,10 +24,9 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
     {
     }
 
-    public class GetLessonByStudentQueryHandler : IRequestHandler<GetLessonDashboardQuery, MethodResult<LessonDashboardModel>>
+    public class GetLessonDashboardQueryHandler : IRequestHandler<GetLessonDashboardQuery, MethodResult<LessonDashboardModel>>
     {
         private readonly IUserService _userService;
-        private readonly ILessonRepository _lessonRepository;
         private readonly ILessonResultRepository _lessonResultRepository;
         private readonly IVideoResultRepository _videoResultRepository;
         private readonly IExerciseRepository _exerciseRepository;
@@ -40,8 +39,7 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
         private readonly IMapper _mapper;
         private readonly AuthContext _authContext;
 
-        public GetLessonByStudentQueryHandler(IUserService userService,
-            ILessonRepository lessonRepository,
+        public GetLessonDashboardQueryHandler(IUserService userService,
             ILessonResultRepository lessonResultRepository,
             IVideoResultRepository videoResultRepository,
             IExerciseRepository exerciseRepository,
@@ -55,7 +53,6 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
             AuthContext authContext)
         {
             _userService = userService;
-            _lessonRepository = lessonRepository;
             _lessonResultRepository = lessonResultRepository;
             _videoResultRepository = videoResultRepository;
             _exerciseRepository = exerciseRepository;

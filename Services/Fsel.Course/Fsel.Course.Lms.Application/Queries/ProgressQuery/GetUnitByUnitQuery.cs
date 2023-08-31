@@ -67,11 +67,12 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
                 CreatedUserId = x.CreatedUserId,
                 IsActive = true,
                 Name = x.Name,
+                DisplayOrder = x.CourseUnitMockTests.FirstOrDefault(y => y.CourseId == request.CourseId && y.UnitId == x.Id)?.DisplayOrder ?? default,
                 UpdatedDate = x.UpdatedDate,
                 UpdatedFullName = x.UpdatedFullName,
                 UpdatedUserId = x.UpdatedUserId,
                 UnitResult = _mapper.Map<UnitResultModel>(x.UnitResults.FirstOrDefault())
-            }).ToList();
+            }).OrderBy(x => x.DisplayOrder).ToList();
             methodResult.StatusCode = StatusCodes.Status200OK;
             methodResult.Result = unitModels;
             return methodResult;

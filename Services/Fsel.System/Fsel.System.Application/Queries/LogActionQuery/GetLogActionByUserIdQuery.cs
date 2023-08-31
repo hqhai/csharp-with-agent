@@ -3,6 +3,7 @@
 namespace Fsel.System.Application.Queries.LogActionQuery
 {
     using Fsel.Common.ActionResults;
+    using Fsel.Shared.Helpers;
     using Fsel.System.Domain.IRepositories;
     using Fsel.System.Domain.Models.EntityModels;
     using MediatR;
@@ -38,7 +39,7 @@ namespace Fsel.System.Application.Queries.LogActionQuery
                             Days = group.Distinct().Count()
                         }).ToList();
 
-                var (numberOfDaysStreak, isDaysStreakIncrease) = await CountContinuousDaysAsync(userActivityDays.Select(x => x.Date).ToList());
+                var (numberOfDaysStreak, isDaysStreakIncrease) = await DateTimeHelper.CountContinuousDaysAsync(userActivityDays.Select(x => x.Date).ToList());
                 logActionDaysModel.IsDaysStreakIncrease = isDaysStreakIncrease;
                 logActionDaysModel.NumberOfDaysStreak = numberOfDaysStreak;
             }
@@ -46,29 +47,6 @@ namespace Fsel.System.Application.Queries.LogActionQuery
             methodResult.Result = logActionDaysModel;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
-        }
-
-        private static async Task<(int, bool)> CountContinuousDaysAsync(IEnumerable<DateTime> dates)
-        {
-            int count = 0;
-            DateTime? previousDate = null;
-            bool isDaysStreakIncrease = true;
-            foreach (var date in dates)
-            {
-                if (previousDate == null || (date - previousDate.Value).TotalDays == 1)
-                {
-                    count++;
-                    isDaysStreakIncrease = true;
-                }
-                else
-                {
-                    count = 1;
-                    isDaysStreakIncrease = false;
-                }
-                previousDate = date;
-                await Task.Delay(1);
-            }
-            return (count, isDaysStreakIncrease);
         }
     }
 }
