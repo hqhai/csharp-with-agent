@@ -12,6 +12,7 @@ namespace Fsel.Notification.Application.Commands
     using Fsel.Common.ActionResults;
     using MediatR;
     using Microsoft.AspNetCore.Http;
+    using Microsoft.EntityFrameworkCore;
 
     public class CreateNotificationRemindCommand : CreateNotificationRemindCommandModel, IRequest<MethodResult<NotificationRemindModel>>
     {
@@ -31,21 +32,37 @@ namespace Fsel.Notification.Application.Commands
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<NotificationRemindModel> methodResult = new MethodResult<NotificationRemindModel>();
-
             #region Handler
-            NotificationRemind notificationNew = _mapper.Map<NotificationRemind>(request);
+            var notificationRemindExists = await _notificationRemindRepository.Queryable.Where(x => x.UserId == request.UserId && x.ObjectId == request.ObjectId).ToListAsync(cancellationToken);
+
+            NotificationRemind notificationUpdateObject = new NotificationRemind();
+
+            if (notificationRemindExists != null && notificationRemindExists.Count > 0)
+            {
+                notificationUpdateObject = notificationRemindExists.FirstOrDefault() ?? notificationUpdateObject;
+            }
 
             await _notificationRemindRepository.ExecuteTransactionAsync(async () =>
             {
-                notificationNew = _notificationRemindRepository.Add(notificationNew);
-                await _notificationRemindRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
-
-                //Return Value
+                // Add to database if not Exists
+                if (notificationRemindExists == null || notificationRemindExists.Count == 0)
+                {
+                    NotificationRemind notificationNew = _mapper.Map<NotificationRemind>(request);
+                    notificationNew = _notificationRemindRepository.Add(notificationNew);
+                    await _notificationRemindRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+                    methodResult.Result = _mapper.Map<NotificationRemindModel>(notificationNew);
+                }
+                // Update database if exists
+                else
+                {
+                    notificationUpdateObject.Status = request.Status;
+                    notificationUpdateObject = _notificationRemindRepository.Update(notificationUpdateObject);
+                    await _notificationRemindRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+                    methodResult.Result = _mapper.Map<NotificationRemindModel>(notificationUpdateObject);
+                }
                 methodResult.StatusCode = StatusCodes.Status201Created;
-                methodResult.Result = _mapper.Map<NotificationRemindModel>(notificationNew);
                 return methodResult;
             });
-
             #endregion
             return methodResult;
         }
