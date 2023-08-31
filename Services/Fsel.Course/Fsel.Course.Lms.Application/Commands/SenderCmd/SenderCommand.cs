@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Course.Lms.Application.Commands.AuthCmd
+namespace Fsel.Course.Lms.Application.Commands.SenderCmd
 {
     using System;
     using System.Collections.Generic;
@@ -21,11 +21,11 @@ namespace Fsel.Course.Lms.Application.Commands.AuthCmd
         public EnumSenderTemplate? Template { get; set; }
     }
 
-    public class SendOTPCommandHandler : IRequestHandler<SenderCommand, MethodResult<bool>>
+    public class SenderCommandHandler : IRequestHandler<SenderCommand, MethodResult<bool>>
     {
         private readonly ISenderService _senderService;
 
-        public SendOTPCommandHandler(ISenderService senderService)
+        public SenderCommandHandler(ISenderService senderService)
         {
             _senderService = senderService;
         }
@@ -33,7 +33,7 @@ namespace Fsel.Course.Lms.Application.Commands.AuthCmd
         public async Task<MethodResult<bool>> Handle(SenderCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            MethodResult<bool> methodResult = new MethodResult<bool>();
+            var methodResult = new MethodResult<bool>();
 
             if (!string.IsNullOrEmpty(request.Email))
             {

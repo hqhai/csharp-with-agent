@@ -15,8 +15,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
     using Fsel.Course.Domain.Models.CommandModels.PlacementTestAnswers;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Infrastructure.Common;
-    using Fsel.Course.Lms.Application.Commands.AuthCmd;
-    using Fsel.Course.Lms.Application.Services.SenderService;
+    using Fsel.Course.Lms.Application.Commands.SenderCmd;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Course.Lms.Application.Services.UserServices.Models;
     using Fsel.Shared.Constants;
@@ -41,10 +40,9 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
         private readonly IMapper _mapper;
         private readonly AuthContext _authContext;
         private readonly AnswerTypeConverter _answerTypeConverter;
-        private readonly ISenderService _senderService;
         private readonly IMediator _mediator;
 
-        public CreatePlacementTestAnswerCommandHandler(IPlacementTestAnswerRepository placementTestAnswerRepository, IPlacementTestResultRepository placementTestResultRepository, IUserService userService, IQuestionRepository questionRepository, IMapper mapper, AuthContext authContext, AnswerTypeConverter answerTypeConverter, ISenderService senderService, IMediator mediator)
+        public CreatePlacementTestAnswerCommandHandler(IPlacementTestAnswerRepository placementTestAnswerRepository, IPlacementTestResultRepository placementTestResultRepository, IUserService userService, IQuestionRepository questionRepository, IMapper mapper, AuthContext authContext, AnswerTypeConverter answerTypeConverter, IMediator mediator)
         {
             _placementTestAnswerRepository = placementTestAnswerRepository;
             _placementTestResultRepository = placementTestResultRepository;
@@ -53,7 +51,6 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
             _mapper = mapper;
             _authContext = authContext;
             _answerTypeConverter = answerTypeConverter;
-            _senderService = senderService;
             _mediator = mediator;
         }
 
@@ -238,12 +235,6 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
                 if (!string.IsNullOrEmpty(student!.Human?.Email))
                 {
                     sendResult = await _mediator.Send(new SenderCommand { Email = student!.Human?.Email, Subject = subject, Params = param, Template = EnumSenderTemplate.SendStudentPTOnline }, cancellationToken).ConfigureAwait(false);
-                }
-
-                if (!sendResult.IsOK)
-                {
-                    methodResult.AddErrorBadRequest(sendResult?.ErrorMessages);
-                    return methodResult;
                 }
             }
             return methodResult;
