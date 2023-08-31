@@ -134,7 +134,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Fsel.Hangfire.Domain", "Ser
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Fsel.Notification", "Fsel.Notification", "{3E7A5683-AFB7-448C-84D2-5504864E51E4}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Fsel.Notification.API", "Services\Fsel.Notification\Fsel.Notification.API\Fsel.Notification.API.csproj", "{F7216236-DA31-422E-9422-7E27131FBBC8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Fsel.Notification.Api", "Services\Fsel.Notification\Fsel.Notification.API\Fsel.Notification.Api.csproj", "{F7216236-DA31-422E-9422-7E27131FBBC8}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Fsel.Notification.Application", "Services\Fsel.Notification\Fsel.Notification.Application\Fsel.Notification.Application.csproj", "{BC7DD186-96EE-45BD-A6AD-724998A736FB}"
 EndProject
