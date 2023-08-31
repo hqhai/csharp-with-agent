@@ -6,12 +6,14 @@ namespace Fsel.Notification.Infrastructure.Maps
     using Fsel.Notification.Domain.Entities;
     using Fsel.Notification.Domain.Model.EntityModels;
     using Fsel.Core.Extensions;
+    using Fsel.Notification.Domain.Model.CommandModels.Notification;
 
     public class NotificationRemindProfile : Profile
     {
         public NotificationRemindProfile()
         {
             CreateMap<NotificationRemind, NotificationRemindModel>().IgnoreAllNonExisting();
+            CreateMap<CreateNotificationRemindCommandModel, NotificationRemind>().IgnoreAllNonExisting();
         }
     }
 }
