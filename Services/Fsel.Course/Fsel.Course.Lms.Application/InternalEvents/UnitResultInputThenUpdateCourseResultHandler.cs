@@ -7,11 +7,16 @@ namespace Fsel.Course.Lms.Application.InternalEvents
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Lms.Application.Queues.Publishers;
+    using Fsel.Shared.Enums;
+    using Fsel.Shared.Helpers;
     using MediatR;
+    using Microsoft.EntityFrameworkCore;
 
     public class UnitResultInputThenUpdateCourseResultHandler : BaseInternalEventHandler,
         INotificationHandler<EntityChangedEvent<UnitResult>>
     {
+        private readonly ICourseRepository _courseRepository;
+
         public UnitResultInputThenUpdateCourseResultHandler(IUnitResultRepository unitResultRepository
             , ILessonResultRepository lessonResultRepository
             , IVideoResultRepository videoResultRepository
@@ -35,6 +40,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 mockTestResultRepository,
                 homeWorkResultRepository)
         {
+            _courseRepository = courseRepository;
         }
 
         public async Task Handle(EntityChangedEvent<UnitResult> notification, CancellationToken cancellationToken)
@@ -44,6 +50,21 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             if (unitResult.Status == EnumResultStatus.Done)
             {
                 await UpdateProcessUnit(unitResult, cancellationToken);
+            }
+        }
+
+        public async Task UpdateCourse(Guid courseId, CancellationToken cancellationToken)
+        {
+            var course = await _courseRepository.GetByIdAsync(courseId);
+            if (course != null)
+            {
+                var courseType = course.CourseLevel.GetEnumCourseType();
+                if (courseType == EnumCourseType.Academic)
+                {
+                }
+                else
+                {
+                }
             }
         }
     }

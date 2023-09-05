@@ -53,6 +53,42 @@ namespace Fsel.Course.Lms.Application.InternalEvents
 
         #region Get Skill Scores
 
+        public async Task UpdateCourse(Guid courseId)
+        {
+            var course = await _courseRepository.GetByIdAsync(courseId);
+            if (course != null)
+            {
+                var courseType = course.CourseLevel.GetEnumCourseType();
+                if (courseType == EnumCourseType.Academic)
+                {
+                }
+                else
+                {
+                }
+            }
+        }
+
+        public async Task UpdateCourseAcademic()
+        {
+            List<SkillScores> videoSkillScores = new List<SkillScores>();
+            List<SkillScores> homeSkillScores = new List<SkillScores>();
+            List<SkillScores> classForumSkillScores = new List<SkillScores>();
+            List<SkillScores> skillTestSkillScores = new List<SkillScores>();
+            List<SkillScores> unitTestSkillScores = new List<SkillScores>();
+        }
+
+        public async Task<List<SkillScores>> VideoSkillScoreByCourses(Guid? lessonResultId)
+        {
+            ArgumentNullException.ThrowIfNull(lessonResultId);
+            List<SkillScores> skillScores = new List<SkillScores>();
+            var videoResult = await _videoResultRepository.Queryable.FirstOrDefaultAsync(x => x.Status == EnumResultStatus.Done && x.LessonResultId == lessonResultId);
+            if (videoResult != null && videoResult.VideoSkillScores != null)
+            {
+                skillScores = videoResult.VideoSkillScores.Where(x => x.Type == EnumTimeCodeType.Standalone).SelectMany(x => x.SkillScores!).Where(x => x.TotalCount != 0).ToList();
+            }
+            return skillScores;
+        }
+
         public async Task<List<SkillScores>> VideoSkillScores(Guid? lessonResultId)
         {
             ArgumentNullException.ThrowIfNull(lessonResultId);
@@ -89,11 +125,11 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             return skillScores;
         }
 
-        public async Task<SkillScores> ClassForumSkillScores(Guid? lessonResultid)
+        public async Task<SkillScores> ClassForumSkillScores(Guid? lessonResultId)
         {
-            ArgumentNullException.ThrowIfNull(lessonResultid);
+            ArgumentNullException.ThrowIfNull(lessonResultId);
             SkillScores skillScores = new SkillScores();
-            var classForumResult = await _classForumResultRepository.Queryable.Include(x => x.ClassForum).Include(x => x.ClassForumScores).FirstOrDefaultAsync(x => x.Status == EnumClassForumResultStatus.Graded && x.LessonResultId == lessonResultid);
+            var classForumResult = await _classForumResultRepository.Queryable.Include(x => x.ClassForum).Include(x => x.ClassForumScores).FirstOrDefaultAsync(x => x.Status == EnumClassForumResultStatus.Graded && x.LessonResultId == lessonResultId);
             if (classForumResult != null && classForumResult.ClassForumScores != null && classForumResult.ClassForum != null)
             {
                 skillScores.Skill = classForumResult.ClassForum.CourseSkill;
