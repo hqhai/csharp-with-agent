@@ -21,7 +21,7 @@ builder.Services.AddScoped<INotificationTypeRepository, NotificationTypeReposito
 builder.Services.AddScoped<INotificationRemindRepository, NotificationRemindRepository>();
 builder.Services.AddScoped<NotificationMessagePublisher>();
 
-builder.AddRefitClients(typeof(IUserService), appSetting?.Services?.UserApiUrl, appSetting?.Jwt?.SecretKey);
+builder.AddRefitClients(typeof(IUserService), appSetting?.Services?.UserApiUrl);
 
 builder.AddMassTransit(appSetting);
 

@@ -3,9 +3,11 @@
 namespace Fsel.Shared.Models.ShareModels
 {
     using System;
+    using Fsel.Shared.Enums;
+
     public class NotificationQueueModel
     {
-        public Guid? ObjectId { get; set; }
+        public Guid ObjectId { get; set; }
 
         public string? Message { get; set; }
 
@@ -16,6 +18,10 @@ namespace Fsel.Shared.Models.ShareModels
         public string? Icon { get; set; }
 
         public string? UserIds { get; set; }
+
+        public List<EnumRole>? Roles { get; set; }
+
+        public Guid NotificationTypeId { get; set; }
 
     }
 }
