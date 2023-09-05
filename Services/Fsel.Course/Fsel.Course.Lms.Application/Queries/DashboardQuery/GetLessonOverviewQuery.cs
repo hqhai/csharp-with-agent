@@ -20,11 +20,11 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class GetLessonDashboardQuery : IRequest<MethodResult<LessonDashboardModel>>
+    public class GetLessonOverviewQuery : IRequest<MethodResult<LessonDashboardModel>>
     {
     }
 
-    public class GetLessonDashboardQueryHandler : IRequestHandler<GetLessonDashboardQuery, MethodResult<LessonDashboardModel>>
+    public class GetLessonDashboardQueryHandler : IRequestHandler<GetLessonOverviewQuery, MethodResult<LessonDashboardModel>>
     {
         private readonly IUserService _userService;
         private readonly ILessonResultRepository _lessonResultRepository;
@@ -66,7 +66,7 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
             _authContext = authContext;
         }
 
-        public async Task<MethodResult<LessonDashboardModel>> Handle(GetLessonDashboardQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<LessonDashboardModel>> Handle(GetLessonOverviewQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<LessonDashboardModel> methodResult = new MethodResult<LessonDashboardModel>();

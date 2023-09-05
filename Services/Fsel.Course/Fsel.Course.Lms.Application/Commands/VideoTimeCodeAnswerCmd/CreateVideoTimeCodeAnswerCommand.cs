@@ -124,6 +124,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
                 }
                 if (answer == null && exercise != null)
                 {
+                    correctCountStudent += correctCount;
                     answer = new VideoTimeCodeAnswer
                     {
                         Answer = answerConfig ?? item.Answer,
@@ -150,22 +151,18 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
                     methodResult.AddErrorBadRequest(nameof(EnumVideoTimeCodeAnswerErrorCode.AnswersDone));
                     return methodResult;
                 }
-                correctCountStudent += correctCount;
                 correctTotal += question.CorrectTotal;
             }
-            if (correctTotal == correctCountStudent && videoTimeCodeAnswers.All(x => x.Status == EnumCurrentStatus.Process))
+            if ((correctTotal == correctCountStudent && videoTimeCodeAnswers.All(x => x.Status == EnumCurrentStatus.Process)) || videoTimeCodeQuestion?.TimeCodeType != EnumTimeCodeType.Standalone)
             {
                 videoResult.CorrectCount += correctCountStudent;
                 videoTimeCodeAnswers.ForEach(x => x.Status = EnumCurrentStatus.Done);
             }
-            if (correctCountUpdateStudent > 0)
+            else if (correctCountUpdateStudent > 0)
             {
                 videoResult.CorrectCount += correctCountUpdateStudent;
             }
-            if (videoTimeCodeQuestion?.TimeCodeType != EnumTimeCodeType.Standalone)
-            {
-                videoResult.CorrectCount += correctCountStudent;
-            }
+
             await _videoTimeCodeAnswerRepository.ExecuteTransactionAsync(async () =>
             {
                 if (videoTimeCodeQuestion?.TimeCodeType == EnumTimeCodeType.UnitTest)
