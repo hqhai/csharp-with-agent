@@ -98,8 +98,6 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
 
             var videoTimeCodeAnswers = new List<VideoTimeCodeAnswer>();
             var updateVideoTimeCodeAnswers = new List<VideoTimeCodeAnswer>();
-            int correctCountStudent = 0;
-            int correctCountUpdateStudent = 0;
             int correctTotal = 0;
             foreach (var item in request.Answers)
             {
@@ -124,7 +122,6 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
                 }
                 if (answer == null && exercise != null)
                 {
-                    correctCountStudent += correctCount;
                     answer = new VideoTimeCodeAnswer
                     {
                         Answer = answerConfig ?? item.Answer,
@@ -140,7 +137,6 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
                 }
                 else if (answer != null && answer.Status == EnumCurrentStatus.Process)
                 {
-                    correctCountUpdateStudent += correctCount;
                     answer.Answer = answerConfig ?? item.Answer;
                     answer.CorrectCount = question.Ungraded ? default : correctCount;
                     answer.Status = EnumCurrentStatus.Done;
@@ -153,15 +149,6 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
                 }
                 correctTotal += question.CorrectTotal;
             }
-            if ((correctTotal == correctCountStudent && videoTimeCodeAnswers.All(x => x.Status == EnumCurrentStatus.Process)) || videoTimeCodeQuestion?.TimeCodeType != EnumTimeCodeType.Standalone)
-            {
-                videoResult.CorrectCount += correctCountStudent;
-                videoTimeCodeAnswers.ForEach(x => x.Status = EnumCurrentStatus.Done);
-            }
-            else if (correctCountUpdateStudent > 0)
-            {
-                videoResult.CorrectCount += correctCountUpdateStudent;
-            }
 
             await _videoTimeCodeAnswerRepository.ExecuteTransactionAsync(async () =>
             {
@@ -172,11 +159,18 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
 
                 if (videoTimeCodeAnswers.Count > 0)
                 {
+                    if (videoTimeCodeQuestion?.TimeCodeType != EnumTimeCodeType.Standalone || correctTotal == videoTimeCodeAnswers.Sum(x => x.CorrectCount))
+                    {
+                        videoTimeCodeAnswers.ForEach(x => x.Status = EnumCurrentStatus.Done);
+                        videoResult.CorrectCount += videoTimeCodeAnswers.Sum(x => x.CorrectCount);
+                    }
+
                     await _videoTimeCodeAnswerRepository.AddList(videoTimeCodeAnswers);
                     await _videoTimeCodeAnswerRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
                 }
                 else if (updateVideoTimeCodeAnswers.Count > 0)
                 {
+                    videoResult.CorrectCount += updateVideoTimeCodeAnswers.Sum(x => x.CorrectCount);
                     _videoTimeCodeAnswerRepository.UpdateList(updateVideoTimeCodeAnswers);
                     await _videoTimeCodeAnswerRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
                 }
