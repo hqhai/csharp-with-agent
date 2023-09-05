@@ -40,10 +40,8 @@ namespace Fsel.Notification.Application.Commands
             MethodResult<NotificationsModel> methodResult = new MethodResult<NotificationsModel>();
 
             #region Validation
+
             Notifications notificationNew = _mapper.Map<Notifications>(request);
-
-
-
 
             // check null data
 
@@ -56,9 +54,7 @@ namespace Fsel.Notification.Application.Commands
 
             var notificationTypeResult = notificationType.Result;
 
-
             #endregion Validation
-
 
             #region Handler
 
@@ -67,7 +63,6 @@ namespace Fsel.Notification.Application.Commands
                 notificationNew = _notificationsRepository.Add(notificationNew);
 
                 await _notificationsRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
-
 
                 //Push notification
                 var notificationRealTime = new NotificationsModel()
@@ -80,14 +75,14 @@ namespace Fsel.Notification.Application.Commands
 
                 await _notificationMessagePublisher.Publish(notificationRealTime, cancellationToken).ConfigureAwait(false);
 
-
                 //Return Value
                 methodResult.StatusCode = StatusCodes.Status201Created;
                 methodResult.Result = _mapper.Map<NotificationsModel>(notificationNew);
                 return methodResult;
             });
 
-            #endregion
+            #endregion Handler
+
             return methodResult;
         }
     }

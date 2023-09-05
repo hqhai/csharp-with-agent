@@ -6,6 +6,8 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Core.Base.Interfaces;
+    using Fsel.Ordering.Application.Services.CourseService;
     using Fsel.Ordering.Application.Services.TrainingService;
     using Fsel.Ordering.Application.Services.UserService;
     using Fsel.Ordering.Application.Services.UserService.Models;
@@ -13,6 +15,9 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
     using Fsel.Ordering.Domain.Enums.ErrorCodes;
     using Fsel.Ordering.Domain.IRepositories;
     using Fsel.Ordering.Domain.Models.CommandModels.Orders;
+    using Fsel.Shared.Constants;
+    using Fsel.Shared.Enums.ErrorCodes;
+    using Fsel.Shared.Models.ShareModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -26,12 +31,16 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
         private readonly IOrderRepository _orderRepository;
         private readonly ITrainingService _trainingService;
         private readonly IUserService _userService;
+        private readonly IQueueProvider _queueProvider;
+        private readonly ILmsCourseService _lmsCourseService;
 
-        public ChangeStatusOrderCommandHandler(IOrderRepository orderRepository, ITrainingService trainingService, IUserService userService)
+        public ChangeStatusOrderCommandHandler(IOrderRepository orderRepository, ITrainingService trainingService, IUserService userService, IQueueProvider queueProvider, ILmsCourseService lmsCourseService)
         {
             _orderRepository = orderRepository;
             _trainingService = trainingService;
             _userService = userService;
+            _queueProvider = queueProvider;
+            _lmsCourseService = lmsCourseService;
         }
 
         public async Task<MethodResult<bool>> Handle(ChangeStatusOrderCommand request, CancellationToken cancellationToken)
@@ -62,6 +71,13 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(classes));
                 return methodResult;
             }
+            var courseResults = await _lmsCourseService.GetCoursesByIdsAsync(new List<Guid> { order.CourseId });
+            if (!courseResults.IsSuccessStatusCode)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallCourseServiceError), nameof(courseResults));
+                return methodResult;
+            }
+            var course = courseResults.Content?.Result?.FirstOrDefault();
             await _orderRepository.ExecuteTransactionAsync(async () =>
             {
                 if (request.OrderStatus == EnumOrderStatus.Reject)
@@ -81,6 +97,12 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
                         methodResult.AddErrorBadRequest(nameof(EnumOrderErrorCode.UpdateNotSuccess));
                         return methodResult;
                     }
+                    await _queueProvider.Publish(QueueSettings.RealtimeQueue.NameQueue.Notification, new NotificationQueueModel
+                    {
+                        UserId = order.UserId,
+                        ObjectId = order.Id,
+                        Message = "Bạn đã mua khóa học " + course?.Name + " thành công. Hãy bắt đầu học nào!"
+                    }, cancellationToken);
                 }
                 order.Status = request.OrderStatus;
                 order = _orderRepository.Update(order);
@@ -96,7 +118,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
                         return methodResult;
                     }
                 }
-                methodResult.StatusCode = StatusCodes.Status201Created;
+                methodResult.StatusCode = StatusCodes.Status200OK;
                 methodResult.Result = true;
                 return methodResult;
             });

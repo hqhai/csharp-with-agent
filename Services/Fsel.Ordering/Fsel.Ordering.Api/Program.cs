@@ -31,7 +31,8 @@ builder.AddRefitClients(typeof(IUserService), appSetting?.Services?.UserApiUrl);
 builder.AddRefitClients(typeof(ILmsCourseService), appSetting?.Services?.LmsCourseApiUrl);
 builder.AddRefitClients(typeof(ITrainingService), appSetting?.Services?.ClassApiUrl);
 builder.AddRefitClients(typeof(ISystemService), appSetting?.Services?.SystemApiUrl);
-var app = builder.Build();
 
+builder.AddMassTransit(appSetting);
+var app = builder.Build();
 app.UseServices();
 app.Run();

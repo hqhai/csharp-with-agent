@@ -1,5 +1,4 @@
 using Fsel.Core.Base.Interfaces;
-using Fsel.Notification.Domain.Entities;
 using Fsel.Notification.Domain.Model.EntityModels;
 using Fsel.Shared.Constants;
 using Fsel.Shared.Models.ShareModels;
@@ -29,7 +28,6 @@ namespace Fsel.Notification.Application.Queues.Publishers
                 Message = notification.Message,
                 Template = notification.Template,
                 UserIds = notification.UserIds,
-
             }, cancellationToken);
         }
     }
