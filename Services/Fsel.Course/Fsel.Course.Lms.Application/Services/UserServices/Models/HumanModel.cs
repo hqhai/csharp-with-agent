@@ -9,5 +9,6 @@ namespace Fsel.Course.Lms.Application.Services.UserServices.Models
         public string? AvatarPath { get; set; }
         public string? Code { get; set; }
         public Guid? UserId { get; set; }
+        public string? Email { get; set; }
     }
 }

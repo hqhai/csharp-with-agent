@@ -60,7 +60,7 @@ namespace Fsel.Interaction.Application.Queries.CommentQuery
             var commentQuery = from c in _commentRepository.Queryable
                                join ca in _interactionActionRepository.Queryable on c.Id equals ca.ObjectId into caJ
                                from p in caJ.DefaultIfEmpty()
-                               where c.ObjectId == objectId && (p == null || (p.Type != EnumInteractionActionType.Disable && p.UserId == _authContext.CurrentUserId))
+                               where c.ObjectId == objectId && (p == null || !(p.Type == EnumInteractionActionType.Disable && p.UserId == _authContext.CurrentUserId))
                                select c;
 
             var comments = await commentQuery.ToListAsync();
