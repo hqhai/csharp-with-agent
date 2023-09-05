@@ -52,7 +52,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
                 {
                     videoResult.Status = EnumResultStatus.Process;
                     _videoResultRepository.Update(videoResult);
-                    await _videoResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+                    await _videoResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
                 }
 
                 var lessonResult = await _lessonResultRepository.GetByIdAsync(request.LessonResultId);
@@ -60,7 +60,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
                 {
                     lessonResult.Status = EnumResultStatus.Process;
                     _lessonResultRepository.Update(lessonResult);
-                    await _lessonResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+                    await _lessonResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
                 }
                 methodResult.Result = true;
                 methodResult.StatusCode = StatusCodes.Status200OK;
