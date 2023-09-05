@@ -9,23 +9,15 @@ namespace Fsel.Course.Domain.Entities
     using Fsel.Core.Entities;
     using Fsel.Course.Domain.Entities.SkillScoresConfigs;
     using Fsel.Course.Domain.Enums;
+    using Fsel.Shared.Helpers;
 
     public class VideoResult : Entity
     {
         /// <summary>
         /// Phần trăm câu trả lời đúng
         /// </summary>
-        private double _percent;
-
         [Range(0, 100, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
-        public double Percent
-        {
-            get
-            {
-                return CorrectTotal > 0 ? ((double)CorrectCount / CorrectTotal * 100) : _percent;
-            }
-            set { _percent = CorrectTotal > 0 ? ((double)CorrectCount / CorrectTotal * 100) : value; }
-        }
+        public double Percent { get; set; }
 
         /// <summary>
         /// Số câu trả lời đúng của Student

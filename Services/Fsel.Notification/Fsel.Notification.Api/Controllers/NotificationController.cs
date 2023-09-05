@@ -50,5 +50,20 @@ namespace Fsel.Notification.Api.Controllers
             MethodResult<NotificationsModel> commandResult = await _mediator.Send(cmd).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
+
+
+        /// <summary>
+        /// Turn Off/On Notification
+        /// </summary>
+        /// <param name="cmd"></param>
+        /// <returns></returns>
+        [HttpPost("status")]
+        [ProducesResponseType(typeof(MethodResult<NotificationRemindModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> CreateNotificationRemind([FromBody] CreateNotificationRemindCommand cmd)
+        {
+            MethodResult<NotificationRemindModel> commandResult = await _mediator.Send(cmd).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
     }
 }
