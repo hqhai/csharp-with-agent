@@ -107,6 +107,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                                     TotalQuestion = group.Sum(x => x.TotalQuestion),
                                     Percent = group.Average(x => x.Percent),
                                 }).ToList();
+
             var percent = await PercentUnit(videoSkillScores, 18) + await PercentUnit(homeSkillScores, 22) + await PercentUnit(classForumSkillScores, 20) + await PercentUnit(skillTestSkillScores, 10) + await PercentUnit(unitTestSkillScores, 30);
             return (groupedSkillScores, percent);
         }
