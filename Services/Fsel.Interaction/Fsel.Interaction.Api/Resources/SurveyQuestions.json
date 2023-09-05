@@ -7,6 +7,7 @@
     "icon": "addd",
     "displayOrder": 1,
     "type": "ChooseMultipleColumn",
+    "isPilot": false,
     "answers": [
       {
         "id": 1,
@@ -58,6 +59,7 @@
     "icon": "addd",
     "displayOrder": 2,
     "type": "YourDirection",
+    "isPilot": false,
     "answers": [
       {
         "id": 1,
@@ -77,6 +79,7 @@
     "icon": "fluent_target-arrow-16-filled.png",
     "displayOrder": 3,
     "type": "ChooseMultipleColumn",
+    "isPilot": false,
     "answers": [
       {
         "id": 1,
@@ -118,6 +121,7 @@
     "icon": "wideword.png",
     "displayOrder": 4,
     "type": "YourPlace",
+    "isPilot": false,
     "answers": {
       "countryCode": 123,
       "countryName": "Việt Nam",
@@ -133,6 +137,7 @@
     "icon": "time.png",
     "displayOrder": 5,
     "type": "AgeGender",
+    "isPilot": false,
     "answers": {
       "birthday": null,
       "ageGenderQuestions": [
@@ -149,6 +154,487 @@
           "gender": "Other"
         }
       ]
+    }
+  },
+  {
+    "id": "66f39c7d-0a80-4e4a-a0ac-e61227577f1c",
+    "createdDate": "2023-09-5",
+    "question": "Họ tên đầy đủ của bạn là gì",
+    "description": "Câu trả lời của bạn",
+    "icon": null,
+    "displayOrder": 6,
+    "type": "YourName",
+    "isPilot": true,
+    "answers": {
+      "answer": null
+    }
+  },
+  {
+    "id": "29c8fcba-08ef-4e5b-8990-3fbbe324f712",
+    "createdDate": "2023-09-5",
+    "question": "Bạn Sống ở đâu",
+    "description": "addd",
+    "icon": null,
+    "displayOrder": 7,
+    "type": "YourDistrict",
+    "isPilot": true,
+    "answers": {
+      "districts": [
+        {
+          "id": 1,
+          "district": "Ba Đình"
+        },
+        {
+          "id": 2,
+          "district": "Hoàn Kiếm"
+        },
+        {
+          "id": 3,
+          "district": "Tây Hồ"
+        },
+        {
+          "id": 4,
+          "district": "Long Biên"
+        },
+        {
+          "id": 5,
+          "district": "Cầu Giấy"
+        },
+        {
+          "id": 6,
+          "district": "Đống Đa"
+        },
+        {
+          "id": 7,
+          "district": "Hai Bà Trưng"
+        },
+        {
+          "id": 8,
+          "district": "Hoàng Mai"
+        },
+        {
+          "id": 9,
+          "district": "Thanh Xuân"
+        },
+        {
+          "id": 10,
+          "district": "Hà Đông"
+        },
+        {
+          "id": 11,
+          "district": "Bắc Từ Liêm"
+        },
+        {
+          "id": 12,
+          "district": "Nam Từ Liêm"
+        },
+        {
+          "id": 13,
+          "district": "Ba Vì"
+        },
+        {
+          "id": 14,
+          "district": "Chương Mỹ"
+        },
+        {
+          "id": 15,
+          "district": "Đan Phượng"
+        },
+        {
+          "id": 16,
+          "district": "Đông Anh"
+        },
+        {
+          "id": 17,
+          "district": "Gia Lâm"
+        },
+        {
+          "id": 18,
+          "district": "Hoài Đức"
+        },
+        {
+          "id": 19,
+          "district": "Mê Linh"
+        },
+        {
+          "id": 20,
+          "district": "Phú Xuyên"
+        },
+        {
+          "id": 21,
+          "district": "Phúc Thọ"
+        },
+        {
+          "id": 22,
+          "district": "Quốc Oai"
+        },
+        {
+          "id": 23,
+          "district": "Thạch Thất"
+        },
+        {
+          "id": 24,
+          "district": "Thanh Oai"
+        },
+        {
+          "id": 25,
+          "district": "Thanh Trì"
+        },
+        {
+          "id": 26,
+          "district": "Thường Tín"
+        },
+        {
+          "id": 27,
+          "district": " Ứng Hòa"
+        },
+        {
+          "id": 28,
+          "district": "khác"
+        }
+      ]
+    }
+  },
+  {
+    "id": "4b65d6cd-1462-40e5-b58c-762cc0634e7e",
+    "createdDate": "2023-09-5",
+    "question": "Số điện thoại của bạn là gì",
+    "description": "addd",
+    "icon": null,
+    "displayOrder": 7,
+    "type": "YourPhoneNumber",
+    "isPilot": true,
+    "answers": {
+      "phone_number": null
+    }
+  },
+  {
+    "id": "208cad60-156f-4bc3-9bc5-909d63abe0ee",
+    "createdDate": "2023-09-5",
+    "question": "Họ tên đầy đủ của trẻ nhà bạn là gì",
+    "description": "addd",
+    "icon": null,
+    "displayOrder": 8,
+    "type": "YourChildName",
+    "isPilot": true,
+    "answers": {
+      "answer": null
+    }
+  },
+  {
+    "id": "eedef9bb-e835-4636-b939-6a83f84090d1",
+    "createdDate": "2023-07-21",
+    "question": "Xác định độ tuổi và giới tính",
+    "description": "addd",
+    "icon": null,
+    "displayOrder": 9,
+    "type": "YourChildAge",
+    "isPilot": true,
+    "answers": {
+      "birthday": null,
+      "ageQuestions": [
+        {
+          "id": 1,
+          "age": "<11"
+        },
+        {
+          "id": 2,
+          "age": "11"
+        },
+        {
+          "id": 3,
+          "age": "12"
+        },
+        {
+          "id": 4,
+          "age": "13"
+        },
+        {
+          "id": 5,
+          "age": "14"
+        },
+        {
+          "id": 6,
+          "age": "15"
+        },
+        {
+          "id": 7,
+          "age": "16"
+        },
+        {
+          "id": 8,
+          "age": "17"
+        },
+        {
+          "id": 9,
+          "age": "18"
+        },
+        {
+          "id": 10,
+          "age": "19+"
+        }
+      ]
+    }
+  },
+  {
+    "id": "31cecfcc-4446-4f18-9847-5cbf5eb07fe7",
+    "createdDate": "2023-07-21",
+    "question": "Xác định độ tuổi và giới tính",
+    "description": "addd",
+    "icon": null,
+    "displayOrder": 10,
+    "type": "AgeGender",
+    "isPilot": true,
+    "answers": {
+      "birthday": null,
+      "ageGenderQuestions": [
+        {
+          "id": 1,
+          "gender": "Male"
+        },
+        {
+          "id": 2,
+          "gender": "Female"
+        },
+        {
+          "id": 3,
+          "gender": "Other"
+        }
+      ]
+    }
+  },
+  {
+    "id": "5071703f-991c-4e04-b9ed-618c26937b40",
+    "createdDate": "2023-07-21",
+    "question": "Con bạn có thể cam kết hoàn thành khóa học thí điểm 6 tháng với tốc độ 3 buổi học mỗi tuần (7,5 giờ mỗi tuần) từ tháng 10 năm 2023 đến tháng 3 năm 2024 không?",
+    "description": "addd",
+    "icon": null,
+    "displayOrder": 11,
+    "type": "Commit",
+    "isPilot": true,
+    "answers": {
+      "choice": [
+        {
+          "id": 1,
+          "content": "Yes"
+        },
+        {
+          "id": 2,
+          "content": "No"
+        }
+      ]
+    }
+  },
+  {
+    "id": "9fdacbbf-dde9-4bdb-8016-5fd1aa23bfeb",
+    "createdDate": "2023-07-21",
+    "question": "Con bạn có thể cam kết hoàn thành khóa học thí điểm 4 tháng với tốc độ 3 buổi học mỗi tuần (5 giờ mỗi tuần) từ tháng 11 năm 2023 đến tháng 2 năm 2024 không?",
+    "description": "addd",
+    "icon": null,
+    "displayOrder": 12,
+    "type": "Commit",
+    "isPilot": true,
+    "answers": {
+      "choice": [
+        {
+          "id": 1,
+          "content": "Yes"
+        },
+        {
+          "id": 2,
+          "content": "No"
+        }
+      ]
+    }
+  },
+  {
+    "id": "62b0eeed-cc64-4049-b931-49eb2009e5bb",
+    "createdDate": "2023-07-21",
+    "question": "Bạn có PC hoặc Laptop ở nhà để con bạn có thể sử dụng để truy cập khóa học không?",
+    "description": "addd",
+    "icon": null,
+    "displayOrder": 13,
+    "type": "Devices",
+    "isPilot": true,
+    "answers": {
+      "choice": [
+        {
+          "id": 1,
+          "content": "Laptop"
+        },
+        {
+          "id": 2,
+          "content": "PC"
+        },
+        {
+          "id": 3,
+          "content": "Both"
+        },
+        {
+          "id": 4,
+          "content": "No"
+        }
+      ]
+    }
+  },
+  {
+    "id": "3850cb76-fcee-412e-9e81-e1bc67b448f6",
+    "createdDate": "2023-07-21",
+    "question": "Con bạn có thể mượn máy tính xách tay và mang đến các buổi học thí điểm tại trung tâm chúng tôi để tham gia khóa học không?",
+    "description": "addd",
+    "icon": null,
+    "displayOrder": 14,
+    "type": "Commit",
+    "isPilot": true,
+    "answers": {
+      "choice": [
+        {
+          "id": 1,
+          "content": "Yes"
+        },
+        {
+          "id": 2,
+          "content": "No"
+        }
+      ]
+    }
+  },
+  {
+    "id": "ccef11e7-2296-4c51-8514-894f10626fa7",
+    "createdDate": "2023-07-21",
+    "question": "Chúng tôi sẽ tổ chức 4 buổi on-site (2 tiếng/buổi) tại trung tâm (33 Lạc Trung hoặc 125 Hoàng Ngân) để lấy ý kiến ​​phản hồi của các bạn trong thời gian thí điểm. Bạn sẵn sàng đưa con mình tham dự những buổi học này ở mức độ nào?",
+    "description": "addd",
+    "icon": null,
+    "displayOrder": 15,
+    "type": "Commit",
+    "isPilot": true,
+    "answers": {
+      "choice": [
+        {
+          "id": 1,
+          "content": "1 (Not willing at all)"
+        },
+        {
+          "id": 2,
+          "content": "2"
+        },
+        {
+          "id": 3,
+          "content": "3"
+        },
+        {
+          "id": 4,
+          "content": "4"
+        },
+        {
+          "id": 5,
+          "content": "5"
+        },
+        {
+          "id": 6,
+          "content": "6"
+        },
+        {
+          "id": 7,
+          "content": "7"
+        },
+        {
+          "id": 8,
+          "content": "8"
+        },
+        {
+          "id": 9,
+          "content": "9"
+        },
+        {
+          "id": 10,
+          "content": "10 (Very Willing)"
+        }
+      ]
+    }
+  },
+  {
+    "id": "3850cb76-fcee-412e-9e81-e1bc67b448f6",
+    "createdDate": "2023-07-21",
+    "question": "Ngày nào sau đây thuận tiện cho con bạn tham dự các buổi học tại chỗ trong thời gian thí điểm? (Chọn nhiều phương án)",
+    "description": "addd",
+    "icon": null,
+    "displayOrder": 16,
+    "type": "OfflineDay",
+    "isPilot": true,
+    "answers": {
+      "choice": [
+        {
+          "id": 1,
+          "content": "Monday evenings"
+        },
+        {
+          "id": 2,
+          "content": "Tuesday evenings"
+        },
+        {
+          "id": 3,
+          "content": "Wednesday evenings"
+        },
+        {
+          "id": 4,
+          "content": "Thursday evenings"
+        },
+        {
+          "id": 5,
+          "content": "Friday evenings"
+        },
+        {
+          "id": 6,
+          "content": "Saturday mornings"
+        },
+        {
+          "id": 7,
+          "content": "Saturday afternoons"
+        },
+        {
+          "id": 8,
+          "content": "Saturday evenings"
+        },
+        {
+          "id": 9,
+          "content": "Sunday mornings"
+        },
+        {
+          "id": 10,
+          "content": "Sunday afternoons"
+        },
+        {
+          "id": 11,
+          "content": "Sunday evenings"
+        }
+      ]
+    }
+  },
+  {
+    "id": "5a794448-c73a-43c3-9777-533de88e244d",
+    "createdDate": "2023-09-5",
+    "question": "Bạn biết đến FSEL Pilot bằng cách nào?",
+    "description": "addd",
+    "icon": null,
+    "displayOrder": 17,
+    "type": "ShortAnswer",
+    "isPilot": true,
+    "answers": {
+      "answer": null
+    }
+  },
+  {
+    "id": "60fc468f-3a38-4639-8df9-ea769a027cf6",
+    "createdDate": "2023-09-5",
+    "question": "Tại sao bạn muốn đăng ký FSEL Pilot?",
+    "description": "addd",
+    "icon": null,
+    "displayOrder": 18,
+    "type": "ShortAnswer",
+    "isPilot": true,
+    "answers": {
+      "answer": null
     }
   }
 ]

@@ -6,6 +6,7 @@ namespace Fsel.Shared.Enums
     {
         SendOtp,
         SendOtpAndLink,
-        SendStudentPTOnline
+        SendStudentPTOnline,
+        SendSurveyToParent
     }
 }
