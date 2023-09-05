@@ -35,7 +35,7 @@ namespace Fsel.System.Api.Controllers
         }
 
         /// <summary>
-        /// Get LogActions by UnitIds
+        /// Get LogActions by UserIds
         /// </summary>
         [HttpPost]
         [ProducesResponseType(typeof(MethodResult<IList<LogActionDaysModel>>), (int)HttpStatusCode.OK)]
