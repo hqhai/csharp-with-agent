@@ -56,7 +56,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
 
         #region Get Skill Scores Unit
 
-        public async Task<(List<SkillScores>, double)> UpdateUnitAcademic(IList<LessonResult> lessonResults)
+        public async Task<(List<SkillScores>, double)> UpdateUnitResult(IList<LessonResult> lessonResults)
         {
             ArgumentNullException.ThrowIfNull(lessonResults);
             List<SkillScores> videoSkillScores = new List<SkillScores>();
@@ -327,7 +327,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             var unitResult = await _unitResultRepository.Queryable.FirstOrDefaultAsync(x => x.UnitId == unit.Id && x.StudentId == studentId && x.CourseId == courseId, cancellationToken);
             if (unit != null && unitResult != null)
             {
-                var (groupedSkillScores, percent) = await UpdateUnitAcademic(lessonResults);
+                var (groupedSkillScores, percent) = await UpdateUnitResult(lessonResults);
                 unitResult.CorrectCount = (int)groupedSkillScores.Sum(x => x.CorrectCount);
                 unitResult.CorrectTotal = (int)groupedSkillScores.Sum(x => x.TotalCount);
                 unitResult.Status = EnumResultStatus.Done;
