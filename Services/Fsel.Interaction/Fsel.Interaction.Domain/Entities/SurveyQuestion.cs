@@ -35,6 +35,7 @@ namespace Fsel.Interaction.Domain.Entities
             set { AnswerStr = ConvertHelper.Serialize(value); }
         }
 
+        public bool IsPilot { get; set; }
         public IList<CustomerSurvey> CustomerSurveys { get; set; } = new List<CustomerSurvey>();
     }
 }

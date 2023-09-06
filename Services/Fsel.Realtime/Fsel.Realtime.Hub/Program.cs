@@ -11,7 +11,7 @@ using MassTransit.SignalR;
 var builder = WebApplication.CreateBuilder(args);
 
 var appSetting = builder.AddAppSettings<BaseAppSetting>();
-builder.AddServices();
+builder.AddServices(appSetting);
 builder.AddSwaggerGens(appSetting);
 builder.AddAuthenticationJwtBearers(appSetting);
 
