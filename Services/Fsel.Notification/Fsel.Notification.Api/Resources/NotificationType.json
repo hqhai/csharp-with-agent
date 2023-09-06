@@ -3,8 +3,8 @@
     "id": "A6FCD7A0-6DB9-419C-ADF7-25BF15FE2954",
     "type": "Text",
     "content": "ContentOne",
-    "active": true,
-    "priorty": 1,
+    "icon": "",
+    "priority": 1,
     "template": "",
     "createdDate": "2023-08-28"
   },
@@ -12,8 +12,8 @@
     "id": "a805f268-467b-4149-8d01-b2ea05e1f3bd",
     "type": "Text",
     "content": "OrderChangeStatus",
-    "active": true,
-    "priorty": 1,
+    "icon": "",
+    "priority": 1,
     "template": "Bạn đã mua khóa học {0} thành công. Hãy bắt đầu học nào!",
     "createdDate": "2023-08-28"
   },
@@ -21,8 +21,8 @@
     "id": "86c0df96-f131-42bf-b315-0a8a85584f6a",
     "type": "Text",
     "content": "OrderCreate",
-    "active": true,
-    "priorty": 1,
+    "icon": "",
+    "priority": 1,
     "template": "Bạn có hóa đơn khóa học mới phê duyệt. Nhấn để phê duyệt.",
     "createdDate": "2023-08-28"
   }
