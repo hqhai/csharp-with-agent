@@ -17,7 +17,6 @@ namespace Fsel.Notification.Application.Commands
     public class CreateNotificationRemindCommand : CreateNotificationRemindCommandModel, IRequest<MethodResult<NotificationRemindModel>>
     {
     }
-
     public class CreateNotificationRemindCommandHandler : IRequestHandler<CreateNotificationRemindCommand, MethodResult<NotificationRemindModel>>
     {
         private readonly IMapper _mapper;
@@ -32,7 +31,9 @@ namespace Fsel.Notification.Application.Commands
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<NotificationRemindModel> methodResult = new MethodResult<NotificationRemindModel>();
+
             #region Handler
+
             var notificationRemindExists = await _notificationRemindRepository.Queryable.Where(x => x.UserId == request.UserId && x.ObjectId == request.ObjectId).ToListAsync(cancellationToken);
 
             NotificationRemind notificationUpdateObject = new NotificationRemind();

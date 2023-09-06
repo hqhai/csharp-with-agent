@@ -18,7 +18,7 @@ namespace Fsel.Notification.Domain.Model.EntityModels
 
         public string? Message { get; set; }
 
-        public Guid? ObjectId { get; set; }
+        public Guid ObjectId { get; set; }
 
         public Guid NotificationTypeId { get; set; }
 
