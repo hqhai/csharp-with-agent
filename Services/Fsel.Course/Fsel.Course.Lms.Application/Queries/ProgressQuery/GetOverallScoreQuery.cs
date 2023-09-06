@@ -81,14 +81,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
                         Percent = x.Average(x => x.Percent)
                     }).ToList();
                 overallScoreModel.IsPlacement = false;
-                if ((level?.GetEnumCourseType() ?? default) == EnumCourseType.Academic)
-                {
-                    overallScoreModel.Percent = (overallScoreModel.SkillScores != null && overallScoreModel.SkillScores.Count > 0) ? overallScoreModel.SkillScores.Average(x => x.Percent) : default;
-                }
-                else
-                {
-                    overallScoreModel.Percent = (overallScoreModel.SkillScores != null && overallScoreModel.SkillScores.Count > 0) ? overallScoreModel.SkillScores.Average(x => x.Percent) : default;
-                }
+                overallScoreModel.Percent = unitResults.Average(x => x.Percent);
             }
             else
             {
@@ -100,14 +93,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
                 }
                 overallScoreModel.SkillScores = placementTestScore.SkillScores;
                 overallScoreModel.IsPlacement = true;
-                if ((level?.GetEnumCourseType() ?? default) == EnumCourseType.Academic)
-                {
-                    overallScoreModel.Percent = (overallScoreModel.SkillScores?.Average(x => x.Percent) ?? default);
-                }
-                else
-                {
-                    overallScoreModel.Percent = (overallScoreModel.SkillScores?.Average(x => x.Percent) ?? default);
-                }
+                overallScoreModel.Percent = placementTestScore.Percent;
             }
             overallScoreModel.CourseLevel = level ?? default;
             overallScoreModel.CourseType = course.CourseType;
