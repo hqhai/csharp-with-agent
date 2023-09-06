@@ -97,6 +97,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
 
             await _orderRepository.ExecuteTransactionAsync(async () =>
             {
+                order = _orderRepository.Add(order);
                 await _notificationMessagePublisher.Publish(new NotificationTypeTextModel
                 {
                     Title = NotificationTemplateTitleSetting.TitleCreateOrderTemplate,
@@ -104,8 +105,6 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
                     ObjectId = order.Id,
                     Message = NotificationTemplateSetting.CreateOrderTemplate
                 }, cancellationToken);
-
-                order = _orderRepository.Add(order);
                 await _orderRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
                 methodResult.StatusCode = StatusCodes.Status201Created;
