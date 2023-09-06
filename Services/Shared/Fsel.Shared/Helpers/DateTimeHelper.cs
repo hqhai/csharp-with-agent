@@ -22,5 +22,32 @@ namespace Fsel.Shared.Helpers
             }
             return age;
         }
+
+        public static async Task<(int, bool)> CountContinuousDaysAsync(IList<DateTime>? dates)
+        {
+            if (dates != null && dates.Count > 0)
+            {
+                int count = 0;
+                DateTime? previousDate = null;
+                bool isDaysStreakIncrease = true;
+                foreach (var date in dates)
+                {
+                    if (previousDate == null || (date - previousDate.Value).TotalDays == 1)
+                    {
+                        count++;
+                        isDaysStreakIncrease = true;
+                    }
+                    else
+                    {
+                        count = 1;
+                        isDaysStreakIncrease = false;
+                    }
+                    previousDate = date;
+                    await Task.Delay(1);
+                }
+                return (count, isDaysStreakIncrease);
+            }
+            return (0, false);
+        }
     }
 }

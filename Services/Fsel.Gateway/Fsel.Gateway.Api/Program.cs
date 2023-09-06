@@ -5,7 +5,7 @@ using Ocelot.DependencyInjection;
 var builder = WebApplication.CreateBuilder(args);
 
 var appSetting = builder.AddAppSettings<BaseAppSetting>();
-builder.AddServices();
+builder.AddServices(appSetting);
 builder.AddAuthenticationJwtBearers(appSetting);
 
 builder.Services.AddSwaggerForOcelot(builder.Configuration);

@@ -98,7 +98,6 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
 
             var videoTimeCodeAnswers = new List<VideoTimeCodeAnswer>();
             var updateVideoTimeCodeAnswers = new List<VideoTimeCodeAnswer>();
-            int correctCountStudent = 0;
             int correctTotal = 0;
             foreach (var item in request.Answers)
             {
@@ -148,12 +147,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
                     methodResult.AddErrorBadRequest(nameof(EnumVideoTimeCodeAnswerErrorCode.AnswersDone));
                     return methodResult;
                 }
-                correctCountStudent += correctCount;
                 correctTotal += question.CorrectTotal;
-            }
-            if (correctTotal == correctCountStudent && videoTimeCodeAnswers.All(x => x.Status == EnumCurrentStatus.Process))
-            {
-                videoTimeCodeAnswers.ForEach(x => x.Status = EnumCurrentStatus.Done);
             }
 
             await _videoTimeCodeAnswerRepository.ExecuteTransactionAsync(async () =>
@@ -162,25 +156,33 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
                 {
                     await _finishOneUnitTestPublisher.Publish(videoResult, cancellationToken);
                 }
+
                 if (videoTimeCodeAnswers.Count > 0)
                 {
+                    if (videoTimeCodeQuestion?.TimeCodeType != EnumTimeCodeType.Standalone || correctTotal == videoTimeCodeAnswers.Sum(x => x.CorrectCount))
+                    {
+                        videoTimeCodeAnswers.ForEach(x => x.Status = EnumCurrentStatus.Done);
+                        videoResult.CorrectCount += videoTimeCodeAnswers.Sum(x => x.CorrectCount);
+                    }
+
                     await _videoTimeCodeAnswerRepository.AddList(videoTimeCodeAnswers);
                     await _videoTimeCodeAnswerRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
                 }
                 else if (updateVideoTimeCodeAnswers.Count > 0)
                 {
+                    videoResult.CorrectCount += updateVideoTimeCodeAnswers.Sum(x => x.CorrectCount);
                     _videoTimeCodeAnswerRepository.UpdateList(updateVideoTimeCodeAnswers);
                     await _videoTimeCodeAnswerRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
                 }
                 _videoResultRepository.Update(videoResult);
-                await _videoResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                await _videoResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
                 return methodResult;
             });
             var videoTimeCode = await _videoTimeCodeRepository.Queryable.Include(x => x.TimeCodeExercises)
                 .ThenInclude(x => x.Exercise)
                 .ThenInclude(x => x!.ExerciseQuestions)
                 .ThenInclude(x => x.Question)
-                .ThenInclude(x => x.VideoTimeCodeAnswers.Where(x => x.VideoResultId == videoResult.Id))
+                .ThenInclude(x => x!.VideoTimeCodeAnswers.Where(x => x.VideoResultId == videoResult.Id))
                 .FirstOrDefaultAsync(x => x.Id == videoResult.CurrentVideoTimeCodeId, cancellationToken);
             var videoTimeCodeModel = videoTimeCode != null ? new VideoTimeCodeModel
             {
