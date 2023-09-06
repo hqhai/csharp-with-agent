@@ -21,6 +21,8 @@ namespace Fsel.Interaction.Application.Queries.CommentQuery
     public class GetCommentsByObjectIdQuery : IRequest<MethodResult<IList<CommentModel>>>
     {
         public Guid ObjectId { get; set; }
+
+        public EnumCommentFilter Filter { get; set; }
     }
 
     public class GetCommentsByObjectIdQueryHandler : IRequestHandler<GetCommentsByObjectIdQuery, MethodResult<IList<CommentModel>>>
@@ -50,12 +52,12 @@ namespace Fsel.Interaction.Application.Queries.CommentQuery
 
             MethodResult<IList<CommentModel>> methodResult = new MethodResult<IList<CommentModel>>();
 
-            methodResult.Result = await GetCommentsByObjectIdAsync(request.ObjectId);
+            methodResult.Result = await GetCommentsByObjectIdAsync(request.ObjectId, request.Filter);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }
 
-        public async Task<IList<CommentModel>?> GetCommentsByObjectIdAsync(Guid objectId)
+        public async Task<IList<CommentModel>?> GetCommentsByObjectIdAsync(Guid objectId, EnumCommentFilter? filter = null)
         {
             var commentQuery = from c in _commentRepository.Queryable
                                join ca in _interactionActionRepository.Queryable on c.Id equals ca.ObjectId into caJ
@@ -86,7 +88,24 @@ namespace Fsel.Interaction.Application.Queries.CommentQuery
 
                 results.AddRange(commentModels);
             }
-            return results.OrderBy(x => x.CreatedDate).ToList();
+
+            if (filter.HasValue)
+            {
+                switch (filter.Value)
+                {
+                    case EnumCommentFilter.Newest:
+                        results = results.OrderByDescending(x => x.CreatedDate).ToList();
+                        break;
+                    case EnumCommentFilter.MostPopular:
+                        results = results.OrderByDescending(x => x.LikeNumber).ToList();
+                        break;
+                    case EnumCommentFilter.AllComment:
+                        results = results.OrderBy(x => x.CreatedDate).ToList();
+                        break;
+                }
+            }
+
+            return results;
         }
     }
 }

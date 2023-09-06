@@ -46,12 +46,8 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumQuery
                                    .Where(x => x.ClassForumResults!.Any(x => x.Status == EnumClassForumResultStatus.PendingForGrading || x.Status == EnumClassForumResultStatus.Graded))
                                    .FirstOrDefaultAsync(x => x.LessonId == request.LessonId, cancellationToken);
 
-            foreach (var classForumResult in classForumQuery!.ClassForumResults)
-            {
-                var studentResult = await _userService.GetStudentByUserIdAsync(classForumResult.CreatedUserId);
-                var student = studentResult?.Content?.Result;
-            }
             var classForm = _mapper.Map<ClassForumModel>(classForumQuery);
+
             var actionsResult = await _interactionService.GetsActionAsync(new InteractionActionCommandModel { ObjectIds = classForm?.ClassForumResults?.Select(x => x.Id).ToList() });
             var actions = actionsResult.Content?.Result;
 
@@ -63,6 +59,9 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumQuery
                     item.CommentNumber = action?.CommentNumber;
                     item.LikeNumber = action?.LikeNumber;
                     item.IsLiked = action?.IsLiked;
+                    var studentResult = await _userService.GetStudentByUserIdAsync(item.StudentId);
+                    var student = studentResult.Content?.Result;
+                    item.AvatarPath = student?.Human?.AvatarPath;
                 }
             }
 
