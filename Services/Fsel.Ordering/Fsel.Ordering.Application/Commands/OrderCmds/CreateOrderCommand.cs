@@ -16,7 +16,6 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
     using Fsel.Ordering.Domain.IRepositories;
     using Fsel.Ordering.Domain.Models.CommandModels.Orders;
     using Fsel.Ordering.Domain.Models.EntityModels;
-    using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Models.ShareModels;
     using MediatR;
@@ -102,7 +101,6 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
                 {
                     Roles = new List<EnumRole> { EnumRole.Admin },
                     ObjectId = order.Id,
-                    Message = NotificationTemplateSetting.CreateOrderTemplate,
                     Type = EnumNotificationPushingType.Text,
                     Content = EnumNotificationContent.OrderCreate
                 }, cancellationToken);

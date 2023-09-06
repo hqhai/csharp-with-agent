@@ -29,7 +29,7 @@ namespace Fsel.Notification.Application.Queues.Consumers
                 {
                     UserId = dataReceipt.UserId ?? default,
                     ObjectId = dataReceipt.ObjectId,
-                    Message = string.Format(notificationType?.Template, dataReceipt.Message),
+                    Message = string.Format(notificationType?.Template, dataReceipt.Params),
                     Roles = dataReceipt.Roles,
                     NotificationTypeId = notificationType?.Id ?? default
                 };
