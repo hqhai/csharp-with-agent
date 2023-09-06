@@ -107,5 +107,16 @@ namespace Fsel.Shared.Constants
             {
             }
         }
+
+        public static class NotificationQueue
+        {
+            public const string KeyQueue = nameof(NotificationQueue);
+
+            public static class NameQueue
+            {
+                public const string DiscussionBoard = $"{KeyQueue}_DiscussionBoard";
+                public const string ClassForum = $"{KeyQueue}_ClassForum";
+            }
+        }
     }
 }

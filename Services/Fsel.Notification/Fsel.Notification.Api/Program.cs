@@ -22,7 +22,6 @@ builder.Services.AddScoped<INotificationsRepository, NotificationsRepository>();
 builder.Services.AddScoped<INotificationTypeRepository, NotificationTypeRepository>();
 builder.Services.AddScoped<INotificationRemindRepository, NotificationRemindRepository>();
 builder.Services.AddScoped<NotificationMessagePublisher>();
-
 builder.AddRefitClients(typeof(IUserService), appSetting?.Services?.UserApiUrl);
 
 
@@ -30,8 +29,8 @@ builder.AddRefitClients(typeof(IUserService), appSetting?.Services?.UserApiUrl);
 builder.AddMassTransit(appSetting, queues:
 new Dictionary<string, Type>
 {
-    { QueueSettings.RealtimeQueue.NameQueue.DiscussionBoard, typeof(DiscussionBoardCommentConsumer) },
-    { QueueSettings.RealtimeQueue.NameQueue.ClassForum, typeof(InterationActionConsumer) },
+    { QueueSettings.NotificationQueue.NameQueue.DiscussionBoard, typeof(DiscussionBoardCommentConsumer) },
+    { QueueSettings.NotificationQueue.NameQueue.ClassForum, typeof(InterationActionConsumer) },
 });
 
 var app = builder.Build();
