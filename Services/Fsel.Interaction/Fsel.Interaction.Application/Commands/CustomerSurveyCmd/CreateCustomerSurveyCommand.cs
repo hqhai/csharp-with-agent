@@ -101,8 +101,10 @@ namespace Fsel.Interaction.Application.Commands.CustomerSurveyCmd
                 {
                     UserName = studentName
                 };
+
                 var subjectSurvey = string.Format(CultureInfo.InvariantCulture, SenderSettings.SendSurveyResultSubject);
                 var sendSurveyResult = new MethodResult<bool>();
+
                 if (!string.IsNullOrEmpty(request.Email))
                 {
                     sendSurveyResult = await _mediator.Send(new SenderCommand { Email = request.Email, Subject = subjectSurvey, Params = paramSurvey, Template = EnumSenderTemplate.SendSurveyToParentStudent }, cancellationToken).ConfigureAwait(false);
