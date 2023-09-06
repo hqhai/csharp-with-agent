@@ -11,6 +11,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumQuery
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Services.InteractionService;
     using Fsel.Course.Lms.Application.Services.InteractionService.Models;
+    using Fsel.Course.Lms.Application.Services.UserServices;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -25,12 +26,14 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumQuery
         private readonly IClassForumRepository _classForumRepository;
         private readonly IMapper _mapper;
         private readonly IInteractionService _interactionService;
+        private readonly IUserService _userService;
 
-        public GetClassForumByLessonQueryHandler(IClassForumRepository classForumRepository, IMapper mapper, IInteractionService interactionService)
+        public GetClassForumByLessonQueryHandler(IClassForumRepository classForumRepository, IMapper mapper, IInteractionService interactionService, IUserService userService)
         {
             _classForumRepository = classForumRepository;
             _mapper = mapper;
             _interactionService = interactionService;
+            _userService = userService;
         }
 
         public async Task<MethodResult<ClassForumModel>> Handle(GetClassForumByLessonQuery request, CancellationToken cancellationToken)
@@ -43,6 +46,11 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumQuery
                                    .Where(x => x.ClassForumResults!.Any(x => x.Status == EnumClassForumResultStatus.PendingForGrading || x.Status == EnumClassForumResultStatus.Graded))
                                    .FirstOrDefaultAsync(x => x.LessonId == request.LessonId, cancellationToken);
 
+            foreach (var classForumResult in classForumQuery!.ClassForumResults)
+            {
+                var studentResult = await _userService.GetStudentByUserIdAsync(classForumResult.CreatedUserId);
+                var student = studentResult?.Content?.Result;
+            }
             var classForm = _mapper.Map<ClassForumModel>(classForumQuery);
             var actionsResult = await _interactionService.GetsActionAsync(new InteractionActionCommandModel { ObjectIds = classForm?.ClassForumResults?.Select(x => x.Id).ToList() });
             var actions = actionsResult.Content?.Result;
