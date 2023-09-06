@@ -18,7 +18,6 @@ namespace Fsel.Notification.Domain.Model.EntityModels
         public int Priority { get; set; }
 
         public string? Template { get; set; }
-
-        public ICollection<NotificationMessageModel> Notifications { get; set; } = new List<NotificationMessageModel>();
+       
     }
 }

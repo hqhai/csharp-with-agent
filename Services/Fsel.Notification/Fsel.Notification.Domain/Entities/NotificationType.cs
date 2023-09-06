@@ -20,6 +20,5 @@ namespace Fsel.Notification.Domain.Entities
 
         public string? Template { get; set; }
 
-        public ICollection<NotificationMessage> Notifications { get; set; } = new List<NotificationMessage>();
     }
 }

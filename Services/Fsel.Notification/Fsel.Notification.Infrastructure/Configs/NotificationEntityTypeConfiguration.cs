@@ -18,11 +18,6 @@ namespace Fsel.Notification.Infrastructure.Configs
                 .HasConversion(
                     v => v.ToString(),
                     v => v.EnumParse<EnumNotificationStatus>());
-
-            builder.HasOne(a => a.NotificationType)
-               .WithMany(b => b.Notifications)
-               .HasForeignKey(b => b.NotificationTypeId)
-               .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }
