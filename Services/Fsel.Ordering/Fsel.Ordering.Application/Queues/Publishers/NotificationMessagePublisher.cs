@@ -20,7 +20,7 @@ namespace Fsel.Ordering.Application.Queues.Publishers
                 return;
             }
 
-            await _queueProvider.Publish(QueueSettings.RealtimeQueue.NameQueue.NotificationText, new NotificationTypeTextModel
+            await _queueProvider.Publish(QueueSettings.OrderingQueue.NameQueue.NotificationTypeText, new NotificationTypeTextModel
             {
                 Title = notification.Title,
                 ObjectId = notification.ObjectId,

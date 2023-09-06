@@ -28,9 +28,9 @@ builder.AddRefitClients(typeof(IUserService), appSetting?.Services?.UserApiUrl);
 builder.AddMassTransit(appSetting, queues:
 new Dictionary<string, Type>
 {
-    { QueueSettings.RealtimeQueue.NameQueue.DiscussionBoard, typeof(DiscussionBoardCommentConsumer) },
-    { QueueSettings.RealtimeQueue.NameQueue.ClassForum, typeof(InterationActionConsumer) },
-    { QueueSettings.RealtimeQueue.NameQueue.NotificationText, typeof(NotificationTypeTextConsumer) },
+    { QueueSettings.NotificationQueue.NameQueue.DiscussionBoard, typeof(DiscussionBoardCommentConsumer) },
+    { QueueSettings.NotificationQueue.NameQueue.ClassForum, typeof(InterationActionConsumer) },
+    { QueueSettings.OrderingQueue.NameQueue.NotificationTypeText, typeof(NotificationTypeTextConsumer) },
 });
 
 var app = builder.Build();

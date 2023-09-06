@@ -17,7 +17,7 @@ namespace Fsel.Hangfire.Application.Queues.Publishers
 
         public async Task Publish(CancellationToken cancellationToken)
         {
-            await _queueProvider.Publish(QueueSettings.RealtimeQueue.NameQueue.UpdateClassLiveAssignment, new BaseQueueModel { QueueId = Guid.NewGuid().ToString() }, cancellationToken);
+            await _queueProvider.Publish(QueueSettings.LmsQueue.NameQueue.UpdateClassLiveAssignment, new BaseQueueModel { QueueId = Guid.NewGuid().ToString() }, cancellationToken);
         }
     }
 }
