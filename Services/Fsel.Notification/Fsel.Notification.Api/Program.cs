@@ -13,7 +13,7 @@ using Fsel.Notification.Application.Queues.Consumers;
 var builder = WebApplication.CreateBuilder(args);
 
 var appSetting = builder.AddAppSettings<AppSetting>();
-builder.AddServices();
+builder.AddServices(appSetting);
 builder.AddSwaggerGens(appSetting);
 builder.AddAuthenticationJwtBearers(appSetting);
 builder.AddDbContexts<NotificationsDBContext>();

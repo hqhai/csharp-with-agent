@@ -89,18 +89,19 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             return skillScores;
         }
 
-        public async Task<SkillScores> ClassForumSkillScores(Guid? lessonResultid)
+        public async Task<SkillScores?> ClassForumSkillScores(Guid? lessonResultId)
         {
-            ArgumentNullException.ThrowIfNull(lessonResultid);
-            SkillScores skillScores = new SkillScores();
-            var classForumResult = await _classForumResultRepository.Queryable.Include(x => x.ClassForum).Include(x => x.ClassForumScores).FirstOrDefaultAsync(x => x.Status == EnumClassForumResultStatus.Graded && x.LessonResultId == lessonResultid);
+            ArgumentNullException.ThrowIfNull(lessonResultId);
+            var classForumResult = await _classForumResultRepository.Queryable.Include(x => x.ClassForum).Include(x => x.ClassForumScores).FirstOrDefaultAsync(x => x.Status == EnumClassForumResultStatus.Graded && x.LessonResultId == lessonResultId);
             if (classForumResult != null && classForumResult.ClassForumScores != null && classForumResult.ClassForum != null)
             {
+                SkillScores skillScores = new SkillScores();
                 skillScores.Skill = classForumResult.ClassForum.CourseSkill;
                 skillScores.TotalCount = 36;
                 skillScores.CorrectCount = classForumResult.ClassForumScores.Sum(x => x.Score);
+                return skillScores;
             }
-            return skillScores;
+            return null;
         }
 
         public async Task<List<SkillScores>> HomeWordsSkillScores(Guid? lessonResultId)
@@ -172,7 +173,11 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                         unitTestSkillScores.AddRange(await UnitTestSkillScores(lesssonResult.Id));
                         skillTestSkillScores.AddRange(await SkillTestSkillScores(lesssonResult.Id));
                         homeSkillScores.AddRange(await HomeWordsSkillScores(lesssonResult.Id));
-                        classForumSkillScores.Add(await ClassForumSkillScores(lesssonResult.Id));
+                        var classForumSkill = await ClassForumSkillScores(lesssonResult.Id);
+                        if (classForumSkill != null)
+                        {
+                            classForumSkillScores.Add(classForumSkill);
+                        }
                     }
                 }
 

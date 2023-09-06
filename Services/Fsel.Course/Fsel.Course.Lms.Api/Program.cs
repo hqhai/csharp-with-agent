@@ -9,6 +9,7 @@ using Fsel.Course.Infrastructure.ValueSettings;
 using Fsel.Course.Lms.Application.Queues.Publishers;
 using Fsel.Course.Lms.Application.Services.InteractionService;
 using Fsel.Course.Lms.Application.Services.OrderServices;
+using Fsel.Course.Lms.Application.Services.SenderService;
 using Fsel.Course.Lms.Application.Services.SystemService;
 using Fsel.Course.Lms.Application.Services.TrainingServices;
 using Fsel.Course.Lms.Application.Services.UserServices;
@@ -18,7 +19,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 var appSetting = builder.AddAppSettings<AppSetting>();
-builder.AddServices();
+builder.AddServices(appSetting);
 builder.AddSwaggerGens(appSetting);
 builder.AddAuthenticationJwtBearers(appSetting);
 builder.AddDbContexts<CourseDbContext>();
@@ -34,6 +35,8 @@ builder.Services.AddScoped<IUnitRepository, UnitRepository>();
 builder.Services.AddScoped<IUnitLessonRepository, UnitLessonRepository>();
 builder.Services.AddScoped<IVideoTimeCodeRepository, VideoTimeCodeRepository>();
 builder.Services.AddScoped<IVideoRepository, VideoRepository>();
+builder.Services.AddScoped<IVideoTimeCodeAnswerRepository, VideoTimeCodeAnswerRepository>();
+builder.Services.AddScoped<IVideoResultRepository, VideoResultRepository>();
 builder.Services.AddScoped<IExtraPracticeRepository, ExtraPracticeRepository>();
 builder.Services.AddScoped<IExtraPracticeExerciseRepository, ExtraPracticeExerciseRepository>();
 builder.Services.AddScoped<IExtraPracticeExerciseResultRepository, ExtraPracticeExerciseResultRepository>();
@@ -50,8 +53,6 @@ builder.Services.AddScoped<ICourseTeacherRepository, CourseTeacherRepository>();
 builder.Services.AddScoped<ICourseUnitMockTestRepository, CourseUnitMockTestRepository>();
 builder.Services.AddScoped<IMockTestRepository, MockTestRepository>();
 builder.Services.AddScoped<ILessonRepository, LessonRepository>();
-builder.Services.AddScoped<IVideoResultRepository, VideoResultRepository>();
-builder.Services.AddScoped<IVideoTimeCodeAnswerRepository, VideoTimeCodeAnswerRepository>();
 builder.Services.AddScoped<ICourseResultRepository, CourseResultRepository>();
 builder.Services.AddScoped<IUnitResultRepository, UnitResultRepository>();
 builder.Services.AddScoped<ILessonResultRepository, LessonResultRepository>();
@@ -112,6 +113,7 @@ builder.AddRefitClients(typeof(ITrainingService), appSetting?.Services?.ClassApi
 builder.AddRefitClients(typeof(IInteractionService), appSetting?.Services?.InteractionApiUrl);
 builder.AddRefitClients(typeof(ISystemService), appSetting?.Services?.SystemApiUrl);
 builder.AddRefitClients(typeof(IOrderService), appSetting?.Services?.OrderApiUrl);
+builder.AddRefitClients(typeof(ISenderService), appSetting?.Services?.SenderApiUrl);
 
 builder.AddMassTransit(appSetting);
 
