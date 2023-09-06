@@ -46,7 +46,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             var finalTestResult = notification.Data;
             if (finalTestResult != null && finalTestResult.Status == EnumResultStatus.Done)
             {
-                await UpdateProcessFinalTest(finalTestResult, cancellationToken);
+                await UpdateCourseResult(finalTestResult.CourseId, finalTestResult.StudentId, cancellationToken);
             }
         }
     }

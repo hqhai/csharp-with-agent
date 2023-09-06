@@ -52,20 +52,5 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 await UpdateProcessUnit(unitResult, cancellationToken);
             }
         }
-
-        public async Task UpdateCourse(Guid courseId, CancellationToken cancellationToken)
-        {
-            var course = await _courseRepository.GetByIdAsync(courseId);
-            if (course != null)
-            {
-                var courseType = course.CourseLevel.GetEnumCourseType();
-                if (courseType == EnumCourseType.Academic)
-                {
-                }
-                else
-                {
-                }
-            }
-        }
     }
 }
