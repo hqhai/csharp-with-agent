@@ -14,16 +14,17 @@ namespace Fsel.Interaction.Application.Queues.Publishers
             _queueProvider = queueProvider;
         }
 
-        public async Task Publish(Guid? objectId, CancellationToken cancellationToken)
+        public async Task Publish(ClassForumCommentQueueModel comment, CancellationToken cancellationToken)
         {
-            if (objectId == null)
+            if (comment == null)
             {
                 return;
             }
 
+
             await _queueProvider.Publish(QueueSettings.InteractionQueue.NameQueue.Comment, new ClassForumCommentQueueModel
             {
-                ObjectId = objectId.Value
+                ObjectId = comment.ObjectId,
             }, cancellationToken);
 
         }
