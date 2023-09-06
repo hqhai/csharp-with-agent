@@ -202,17 +202,6 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                 }
             }
 
-            var paramSurvey = new SendSurveyTemplateModel
-            {
-                UserName = request.FullName
-            };
-            var subjectSurvey = string.Format(CultureInfo.InvariantCulture, SenderSettings.SendSurveyResultSubject);
-            var sendSurveyResult = new MethodResult<bool>();
-            if (!string.IsNullOrEmpty(request.Email))
-            {
-                sendSurveyResult = await _mediator.Send(new SenderCommand { Email = request.Email, Subject = subjectSurvey, Params = paramSurvey, Template = EnumSenderTemplate.SendSurveyToParent }, cancellationToken).ConfigureAwait(false);
-            }
-
             methodResult.StatusCode = StatusCodes.Status200OK;
             methodResult.Result = _mapper.Map<UserModel>(user);
             return methodResult;

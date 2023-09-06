@@ -163,7 +163,7 @@
     "description": "Câu trả lời của bạn",
     "icon": null,
     "displayOrder": 6,
-    "type": "YourName",
+    "type": "ShortAnswer",
     "isPilot": true,
     "answers": {
       "answer": null
@@ -176,124 +176,122 @@
     "description": "addd",
     "icon": null,
     "displayOrder": 7,
-    "type": "YourDistrict",
+    "type": "DropDown",
     "isPilot": true,
-    "answers": {
-      "districts": [
-        {
-          "id": 1,
-          "district": "Ba Đình"
-        },
-        {
-          "id": 2,
-          "district": "Hoàn Kiếm"
-        },
-        {
-          "id": 3,
-          "district": "Tây Hồ"
-        },
-        {
-          "id": 4,
-          "district": "Long Biên"
-        },
-        {
-          "id": 5,
-          "district": "Cầu Giấy"
-        },
-        {
-          "id": 6,
-          "district": "Đống Đa"
-        },
-        {
-          "id": 7,
-          "district": "Hai Bà Trưng"
-        },
-        {
-          "id": 8,
-          "district": "Hoàng Mai"
-        },
-        {
-          "id": 9,
-          "district": "Thanh Xuân"
-        },
-        {
-          "id": 10,
-          "district": "Hà Đông"
-        },
-        {
-          "id": 11,
-          "district": "Bắc Từ Liêm"
-        },
-        {
-          "id": 12,
-          "district": "Nam Từ Liêm"
-        },
-        {
-          "id": 13,
-          "district": "Ba Vì"
-        },
-        {
-          "id": 14,
-          "district": "Chương Mỹ"
-        },
-        {
-          "id": 15,
-          "district": "Đan Phượng"
-        },
-        {
-          "id": 16,
-          "district": "Đông Anh"
-        },
-        {
-          "id": 17,
-          "district": "Gia Lâm"
-        },
-        {
-          "id": 18,
-          "district": "Hoài Đức"
-        },
-        {
-          "id": 19,
-          "district": "Mê Linh"
-        },
-        {
-          "id": 20,
-          "district": "Phú Xuyên"
-        },
-        {
-          "id": 21,
-          "district": "Phúc Thọ"
-        },
-        {
-          "id": 22,
-          "district": "Quốc Oai"
-        },
-        {
-          "id": 23,
-          "district": "Thạch Thất"
-        },
-        {
-          "id": 24,
-          "district": "Thanh Oai"
-        },
-        {
-          "id": 25,
-          "district": "Thanh Trì"
-        },
-        {
-          "id": 26,
-          "district": "Thường Tín"
-        },
-        {
-          "id": 27,
-          "district": " Ứng Hòa"
-        },
-        {
-          "id": 28,
-          "district": "khác"
-        }
-      ]
-    }
+    "answers": [
+      {
+        "id": 1,
+        "district": "Ba Đình"
+      },
+      {
+        "id": 2,
+        "district": "Hoàn Kiếm"
+      },
+      {
+        "id": 3,
+        "district": "Tây Hồ"
+      },
+      {
+        "id": 4,
+        "district": "Long Biên"
+      },
+      {
+        "id": 5,
+        "district": "Cầu Giấy"
+      },
+      {
+        "id": 6,
+        "district": "Đống Đa"
+      },
+      {
+        "id": 7,
+        "district": "Hai Bà Trưng"
+      },
+      {
+        "id": 8,
+        "district": "Hoàng Mai"
+      },
+      {
+        "id": 9,
+        "district": "Thanh Xuân"
+      },
+      {
+        "id": 10,
+        "district": "Hà Đông"
+      },
+      {
+        "id": 11,
+        "district": "Bắc Từ Liêm"
+      },
+      {
+        "id": 12,
+        "district": "Nam Từ Liêm"
+      },
+      {
+        "id": 13,
+        "district": "Ba Vì"
+      },
+      {
+        "id": 14,
+        "district": "Chương Mỹ"
+      },
+      {
+        "id": 15,
+        "district": "Đan Phượng"
+      },
+      {
+        "id": 16,
+        "district": "Đông Anh"
+      },
+      {
+        "id": 17,
+        "district": "Gia Lâm"
+      },
+      {
+        "id": 18,
+        "district": "Hoài Đức"
+      },
+      {
+        "id": 19,
+        "district": "Mê Linh"
+      },
+      {
+        "id": 20,
+        "district": "Phú Xuyên"
+      },
+      {
+        "id": 21,
+        "district": "Phúc Thọ"
+      },
+      {
+        "id": 22,
+        "district": "Quốc Oai"
+      },
+      {
+        "id": 23,
+        "district": "Thạch Thất"
+      },
+      {
+        "id": 24,
+        "district": "Thanh Oai"
+      },
+      {
+        "id": 25,
+        "district": "Thanh Trì"
+      },
+      {
+        "id": 26,
+        "district": "Thường Tín"
+      },
+      {
+        "id": 27,
+        "district": " Ứng Hòa"
+      },
+      {
+        "id": 28,
+        "district": "khác"
+      }
+    ]
   },
   {
     "id": "9619b7d3-b2ab-4462-9044-b443ab79942a",
@@ -302,11 +300,9 @@
     "description": "addd",
     "icon": null,
     "displayOrder": 7,
-    "type": "YourPhoneNumber",
+    "type": "ShortAnswer",
     "isPilot": true,
-    "answers": {
-      "phone_number": null
-    }
+    "answers": null
   },
   {
     "id": "cedef58c-7d94-4efc-a030-0216b3034bef",
@@ -315,11 +311,9 @@
     "description": "addd",
     "icon": null,
     "displayOrder": 8,
-    "type": "YourChildName",
+    "type": "ShortAnswer",
     "isPilot": true,
-    "answers": {
-      "answer": null
-    }
+    "answers": null
   },
   {
     "id": "0f9df809-9ae9-4e8c-891d-ec645483f290",
@@ -328,53 +322,50 @@
     "description": "addd",
     "icon": null,
     "displayOrder": 9,
-    "type": "YourChildAge",
+    "type": "DropDown",
     "isPilot": true,
-    "answers": {
-      "birthday": null,
-      "ageQuestions": [
-        {
-          "id": 1,
-          "age": "<11"
-        },
-        {
-          "id": 2,
-          "age": "11"
-        },
-        {
-          "id": 3,
-          "age": "12"
-        },
-        {
-          "id": 4,
-          "age": "13"
-        },
-        {
-          "id": 5,
-          "age": "14"
-        },
-        {
-          "id": 6,
-          "age": "15"
-        },
-        {
-          "id": 7,
-          "age": "16"
-        },
-        {
-          "id": 8,
-          "age": "17"
-        },
-        {
-          "id": 9,
-          "age": "18"
-        },
-        {
-          "id": 10,
-          "age": "19+"
-        }
-      ]
-    }
+    "answers": [
+      {
+        "id": 1,
+        "age": "<11"
+      },
+      {
+        "id": 2,
+        "age": "11"
+      },
+      {
+        "id": 3,
+        "age": "12"
+      },
+      {
+        "id": 4,
+        "age": "13"
+      },
+      {
+        "id": 5,
+        "age": "14"
+      },
+      {
+        "id": 6,
+        "age": "15"
+      },
+      {
+        "id": 7,
+        "age": "16"
+      },
+      {
+        "id": 8,
+        "age": "17"
+      },
+      {
+        "id": 9,
+        "age": "18"
+      },
+      {
+        "id": 10,
+        "age": "19+"
+      }
+    ]
   },
   {
     "id": "52548bc5-3536-478c-978b-05f98815bf31",
@@ -385,23 +376,20 @@
     "displayOrder": 10,
     "type": "AgeGender",
     "isPilot": true,
-    "answers": {
-      "birthday": null,
-      "ageGenderQuestions": [
-        {
-          "id": 1,
-          "gender": "Male"
-        },
-        {
-          "id": 2,
-          "gender": "Female"
-        },
-        {
-          "id": 3,
-          "gender": "Other"
-        }
-      ]
-    }
+    "answers": [
+      {
+        "id": 1,
+        "gender": "Male"
+      },
+      {
+        "id": 2,
+        "gender": "Female"
+      },
+      {
+        "id": 3,
+        "gender": "Other"
+      }
+    ]
   },
   {
     "id": "73ab87b1-c0ae-40c6-ba37-1cdce350563a",
@@ -410,20 +398,18 @@
     "description": "addd",
     "icon": null,
     "displayOrder": 11,
-    "type": "Commit",
+    "type": "MultipleChoiceVertical",
     "isPilot": true,
-    "answers": {
-      "choice": [
-        {
-          "id": 1,
-          "content": "Yes"
-        },
-        {
-          "id": 2,
-          "content": "No"
-        }
-      ]
-    }
+    "answers": [
+      {
+        "id": 1,
+        "content": "Yes"
+      },
+      {
+        "id": 2,
+        "content": "No"
+      }
+    ]
   },
   {
     "id": "fcd14833-b79f-4cf4-9ee8-65b041a7daf1",
@@ -432,20 +418,18 @@
     "description": "addd",
     "icon": null,
     "displayOrder": 12,
-    "type": "Commit",
+    "type": "MultipleChoiceVertical",
     "isPilot": true,
-    "answers": {
-      "choice": [
-        {
-          "id": 1,
-          "content": "Yes"
-        },
-        {
-          "id": 2,
-          "content": "No"
-        }
-      ]
-    }
+    "answers": [
+      {
+        "id": 1,
+        "content": "Yes"
+      },
+      {
+        "id": 2,
+        "content": "No"
+      }
+    ]
   },
   {
     "id": "06b1a0df-eaef-4be9-a9da-9c2633e3a12a",
@@ -454,28 +438,26 @@
     "description": "addd",
     "icon": null,
     "displayOrder": 13,
-    "type": "Devices",
+    "type": "MultipleChoiceVertical",
     "isPilot": true,
-    "answers": {
-      "choice": [
-        {
-          "id": 1,
-          "content": "Laptop"
-        },
-        {
-          "id": 2,
-          "content": "PC"
-        },
-        {
-          "id": 3,
-          "content": "Both"
-        },
-        {
-          "id": 4,
-          "content": "No"
-        }
-      ]
-    }
+    "answers": [
+      {
+        "id": 1,
+        "content": "Laptop"
+      },
+      {
+        "id": 2,
+        "content": "PC"
+      },
+      {
+        "id": 3,
+        "content": "Both"
+      },
+      {
+        "id": 4,
+        "content": "No"
+      }
+    ]
   },
   {
     "id": "83a5b867-c3a1-47b9-91e3-a6fd6086501e",
@@ -484,20 +466,18 @@
     "description": "addd",
     "icon": null,
     "displayOrder": 14,
-    "type": "Commit",
+    "type": "MultipleChoiceVertical",
     "isPilot": true,
-    "answers": {
-      "choice": [
-        {
-          "id": 1,
-          "content": "Yes"
-        },
-        {
-          "id": 2,
-          "content": "No"
-        }
-      ]
-    }
+    "answers": [
+      {
+        "id": 1,
+        "content": "Yes"
+      },
+      {
+        "id": 2,
+        "content": "No"
+      }
+    ]
   },
   {
     "id": "56628f4a-0384-426c-b849-81ab1671afa4",
@@ -506,52 +486,50 @@
     "description": "addd",
     "icon": null,
     "displayOrder": 15,
-    "type": "Commit",
+    "type": "MultipleChoiceHorizontal",
     "isPilot": true,
-    "answers": {
-      "choice": [
-        {
-          "id": 1,
-          "content": "1 (Not willing at all)"
-        },
-        {
-          "id": 2,
-          "content": "2"
-        },
-        {
-          "id": 3,
-          "content": "3"
-        },
-        {
-          "id": 4,
-          "content": "4"
-        },
-        {
-          "id": 5,
-          "content": "5"
-        },
-        {
-          "id": 6,
-          "content": "6"
-        },
-        {
-          "id": 7,
-          "content": "7"
-        },
-        {
-          "id": 8,
-          "content": "8"
-        },
-        {
-          "id": 9,
-          "content": "9"
-        },
-        {
-          "id": 10,
-          "content": "10 (Very Willing)"
-        }
-      ]
-    }
+    "answers": [
+      {
+        "id": 1,
+        "content": "1 (Not willing at all)"
+      },
+      {
+        "id": 2,
+        "content": "2"
+      },
+      {
+        "id": 3,
+        "content": "3"
+      },
+      {
+        "id": 4,
+        "content": "4"
+      },
+      {
+        "id": 5,
+        "content": "5"
+      },
+      {
+        "id": 6,
+        "content": "6"
+      },
+      {
+        "id": 7,
+        "content": "7"
+      },
+      {
+        "id": 8,
+        "content": "8"
+      },
+      {
+        "id": 9,
+        "content": "9"
+      },
+      {
+        "id": 10,
+        "content": "10 (Very Willing)"
+      }
+    ]
   },
   {
     "id": "20675350-89f2-47e3-8e64-b04f2da6290b",
@@ -560,56 +538,54 @@
     "description": "addd",
     "icon": null,
     "displayOrder": 16,
-    "type": "OfflineDay",
+    "type": "CheckList",
     "isPilot": true,
-    "answers": {
-      "choice": [
-        {
-          "id": 1,
-          "content": "Monday evenings"
-        },
-        {
-          "id": 2,
-          "content": "Tuesday evenings"
-        },
-        {
-          "id": 3,
-          "content": "Wednesday evenings"
-        },
-        {
-          "id": 4,
-          "content": "Thursday evenings"
-        },
-        {
-          "id": 5,
-          "content": "Friday evenings"
-        },
-        {
-          "id": 6,
-          "content": "Saturday mornings"
-        },
-        {
-          "id": 7,
-          "content": "Saturday afternoons"
-        },
-        {
-          "id": 8,
-          "content": "Saturday evenings"
-        },
-        {
-          "id": 9,
-          "content": "Sunday mornings"
-        },
-        {
-          "id": 10,
-          "content": "Sunday afternoons"
-        },
-        {
-          "id": 11,
-          "content": "Sunday evenings"
-        }
-      ]
-    }
+    "answers": [
+      {
+        "id": 1,
+        "content": "Monday evenings"
+      },
+      {
+        "id": 2,
+        "content": "Tuesday evenings"
+      },
+      {
+        "id": 3,
+        "content": "Wednesday evenings"
+      },
+      {
+        "id": 4,
+        "content": "Thursday evenings"
+      },
+      {
+        "id": 5,
+        "content": "Friday evenings"
+      },
+      {
+        "id": 6,
+        "content": "Saturday mornings"
+      },
+      {
+        "id": 7,
+        "content": "Saturday afternoons"
+      },
+      {
+        "id": 8,
+        "content": "Saturday evenings"
+      },
+      {
+        "id": 9,
+        "content": "Sunday mornings"
+      },
+      {
+        "id": 10,
+        "content": "Sunday afternoons"
+      },
+      {
+        "id": 11,
+        "content": "Sunday evenings"
+      }
+    ]
   },
   {
     "id": "5317ae1a-46db-4f25-9625-f9c28bd3c688",
@@ -620,9 +596,7 @@
     "displayOrder": 17,
     "type": "ShortAnswer",
     "isPilot": true,
-    "answers": {
-      "answer": null
-    }
+    "answers": null
   },
   {
     "id": "1fde61af-e1e0-4027-ad21-1176ad212119",

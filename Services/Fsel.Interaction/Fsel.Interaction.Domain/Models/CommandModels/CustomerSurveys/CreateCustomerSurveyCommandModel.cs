@@ -2,6 +2,8 @@
 
 namespace Fsel.Interaction.Domain.Models.CommandModels.CustomerSurveys
 {
+    using System.ComponentModel.DataAnnotations;
+
     public class CreateCustomerSurveyCommandModel
     {
         public IList<CreateSurveyCommandModel>? Answers { get; set; }
@@ -9,6 +11,9 @@ namespace Fsel.Interaction.Domain.Models.CommandModels.CustomerSurveys
         public Guid? UserId { get; set; }
 
         public bool? IsPilot { get; set; }
+
+        [EmailAddress]
+        public string? Email { get; set; }
     }
 
     public class CreateSurveyCommandModel

@@ -8,16 +8,13 @@ namespace Fsel.Shared.Enums
         ChooseMultipleColumn,
         YourDirection,
         YourPlace,
-        YourName,
-        YourDistrict,
-        YourPhoneNumber,
-        YourChildName,
-        YourChildAge,
-        Commit,
-        Devices,
-        OfflineDay,
-        OfflineLocation,
-        OfflineDate,
-        ShortAnswer
+        Text,
+        ShortAnswer,
+        DropDown,
+        MultipleChoiceVertical,
+        MultipleChoiceHorizontal,
+        CheckList,
+
+
     }
 }
