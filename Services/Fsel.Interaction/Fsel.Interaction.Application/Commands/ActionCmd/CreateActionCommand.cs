@@ -15,6 +15,7 @@ namespace Fsel.Interaction.Application.Commands.ActionCmd
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
+    using Fsel.Shared.Models.ShareModels;
 
     public class CreateActionCommand : CreateActionCommandModel, IRequest<MethodResult<bool>>
     {
@@ -25,14 +26,16 @@ namespace Fsel.Interaction.Application.Commands.ActionCmd
         private readonly IMapper _mapper;
         private readonly IInteractionActionRepository _interactionActionRepository;
         private readonly DiscussionBoardLikePublisher _discussionBoardLikePublisher;
+        private readonly InterationActionPublisher _interationActionPublisher;
         private readonly AuthContext _authContext;
 
-        public CreateActionCommandHandler(IMapper mapper, IInteractionActionRepository interactionActionRepository, AuthContext authContext, DiscussionBoardLikePublisher discussionBoardLikePublisher)
+        public CreateActionCommandHandler(IMapper mapper, IInteractionActionRepository interactionActionRepository, AuthContext authContext, DiscussionBoardLikePublisher discussionBoardLikePublisher, InterationActionPublisher interationActionPublisher)
         {
             _mapper = mapper;
             _interactionActionRepository = interactionActionRepository;
             _authContext = authContext;
             _discussionBoardLikePublisher = discussionBoardLikePublisher;
+            _interationActionPublisher = interationActionPublisher;
         }
 
         public async Task<MethodResult<bool>> Handle(CreateActionCommand request, CancellationToken cancellationToken)
@@ -83,8 +86,21 @@ namespace Fsel.Interaction.Application.Commands.ActionCmd
                 {
                     await _interactionActionRepository.DeleteAsync(action);
                 }
+                else if (action.Type == EnumInteractionActionType.Disable || action.Type == EnumInteractionActionType.Flag)
+                {
+                    InterationActionQueueModel model = new InterationActionQueueModel()
+                    {
+                        ObjectId = action.ObjectId,
+                        Type = action.Type,
+                        UserId = _authContext.CurrentUserId,
+                        FullName = _authContext.CurrentFullName
+                    };
+
+                    await _interationActionPublisher.Publish(model, cancellationToken).ConfigureAwait(false);
+                }
 
                 await _interactionActionRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+
 
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 methodResult.Result = true;

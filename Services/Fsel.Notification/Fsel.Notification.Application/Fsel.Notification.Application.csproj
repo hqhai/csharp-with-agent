@@ -8,8 +8,6 @@
 
   <ItemGroup>
     <Folder Include="Hubs\" />
-    <Folder Include="Queues\Consumers\" />
-    <Folder Include="Services\Models\" />
   </ItemGroup>
 
   <ItemGroup>

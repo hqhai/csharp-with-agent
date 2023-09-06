@@ -15,7 +15,7 @@ using Microsoft.AspNetCore.Identity;
 
 var builder = WebApplication.CreateBuilder(args);
 var appSetting = builder.AddAppSettings<AppSetting>();
-builder.AddServices();
+builder.AddServices(appSetting);
 builder.AddSwaggerGens(appSetting);
 builder.AddAuthenticationIdentity(appSetting);
 builder.AddDbContexts<UserDbContext>();
