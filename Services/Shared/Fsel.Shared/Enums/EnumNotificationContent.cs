@@ -2,12 +2,13 @@
 
 namespace Fsel.Shared.Enums
 {
-
     public enum EnumNotificationContent
     {
         ContentOne,
         ContentTwo,
         ContentThree,
-        ContentFour
+        ContentFour,
+        OrderChangeStatus,
+        OrderCreate
     }
 }

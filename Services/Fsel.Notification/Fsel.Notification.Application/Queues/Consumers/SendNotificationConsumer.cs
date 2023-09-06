@@ -1,6 +1,5 @@
 using Fsel.Notification.Application.Commands;
 using Fsel.Notification.Domain.IRepositories;
-using Fsel.Shared.Enums;
 using Fsel.Shared.Models.ShareModels;
 using MassTransit;
 using MediatR;
@@ -25,12 +24,12 @@ namespace Fsel.Notification.Application.Queues.Consumers
 
             if (dataReceipt != null)
             {
-                var notificationType = await _notificationTypeRepository.Queryable.FirstOrDefaultAsync(x => x.Type == EnumNotificationPushingType.Text);
+                var notificationType = await _notificationTypeRepository.Queryable.FirstOrDefaultAsync(x => x.Type == dataReceipt.Type && x.Content == dataReceipt.Content);
                 CreateNotificationCommand model = new CreateNotificationCommand()
                 {
                     UserId = dataReceipt.UserId ?? default,
                     ObjectId = dataReceipt.ObjectId,
-                    Message = dataReceipt.Message ?? notificationType?.Template,
+                    Message = string.Format(notificationType?.Template, dataReceipt.Message),
                     Roles = dataReceipt.Roles,
                     NotificationTypeId = notificationType?.Id ?? default
                 };

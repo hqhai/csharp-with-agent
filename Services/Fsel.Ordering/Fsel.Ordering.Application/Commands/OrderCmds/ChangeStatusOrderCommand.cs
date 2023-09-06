@@ -16,6 +16,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
     using Fsel.Ordering.Domain.IRepositories;
     using Fsel.Ordering.Domain.Models.CommandModels.Orders;
     using Fsel.Shared.Constants;
+    using Fsel.Shared.Enums;
     using Fsel.Shared.Enums.ErrorCodes;
     using Fsel.Shared.Models.ShareModels;
     using MediatR;
@@ -105,7 +106,9 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
                     {
                         UserId = order.UserId,
                         ObjectId = order.Id,
-                        Message = string.Format(NotificationTemplateSetting.ChangeStatusOrderTemplate, course?.Name)
+                        Message = course?.Name,
+                        Type = EnumNotificationPushingType.Text,
+                        Content = EnumNotificationContent.OrderChangeStatus
                     }, cancellationToken);
                 }
                 order.Status = request.OrderStatus;

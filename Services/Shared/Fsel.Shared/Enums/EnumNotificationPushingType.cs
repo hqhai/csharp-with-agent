@@ -2,12 +2,11 @@
 
 namespace Fsel.Shared.Enums
 {
-
     public enum EnumNotificationPushingType
     {
         Text,
         LinkPage,
         LinkPopup,
-        LinkComment
+        LinkComment,
     }
 }
