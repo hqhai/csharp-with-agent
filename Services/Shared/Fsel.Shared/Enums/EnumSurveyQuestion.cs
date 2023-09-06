@@ -8,13 +8,10 @@ namespace Fsel.Shared.Enums
         ChooseMultipleColumn,
         YourDirection,
         YourPlace,
-        Text,
         ShortAnswer,
         DropDown,
         MultipleChoiceVertical,
         MultipleChoiceHorizontal,
         CheckList,
-
-
     }
 }

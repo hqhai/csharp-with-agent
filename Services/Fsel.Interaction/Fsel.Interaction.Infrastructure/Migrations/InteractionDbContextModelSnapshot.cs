@@ -936,7 +936,7 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                         new
                         {
                             Id = new Guid("ee0e74f5-83ae-44dd-a7d0-0f7b650884f8"),
-                            AnswerStr = "{\"answer\":null}",
+                            AnswerStr = "null",
                             CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
@@ -1118,7 +1118,7 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                         new
                         {
                             Id = new Guid("1fde61af-e1e0-4027-ad21-1176ad212119"),
-                            AnswerStr = "{\"answer\":null}",
+                            AnswerStr = "null",
                             CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),

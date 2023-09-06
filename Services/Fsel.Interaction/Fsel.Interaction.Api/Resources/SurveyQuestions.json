@@ -165,9 +165,7 @@
     "displayOrder": 6,
     "type": "ShortAnswer",
     "isPilot": true,
-    "answers": {
-      "answer": null
-    }
+    "answers": null
   },
   {
     "id": "f959d3d1-cab3-4fc6-8341-cb44bcbd3e30",
@@ -607,8 +605,6 @@
     "displayOrder": 18,
     "type": "ShortAnswer",
     "isPilot": true,
-    "answers": {
-      "answer": null
-    }
+    "answers": null
   }
 ]
