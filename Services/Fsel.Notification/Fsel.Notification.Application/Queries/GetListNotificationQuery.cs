@@ -12,30 +12,28 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Fsel.Notification.Application.Queries
 {
-    public class GetListNotificationQuery : SearchNotificationModel, IRequest<MethodResult<PagingItemsModel<NotificationsModel>>>
+    public class GetListNotificationQuery : SearchNotificationModel, IRequest<MethodResult<PagingItemsModel<NotificationMessageModel>>>
     {
     }
 
-    public class GetListNotificationQueryQueryHandler : IRequestHandler<GetListNotificationQuery, MethodResult<PagingItemsModel<NotificationsModel>>>
+    public class GetListNotificationQueryQueryHandler : IRequestHandler<GetListNotificationQuery, MethodResult<PagingItemsModel<NotificationMessageModel>>>
     {
-        private readonly IMapper _mapper;
         private readonly INotificationsRepository _notificationsRepository;
 
-        public GetListNotificationQueryQueryHandler(IMapper mapper, INotificationsRepository notificationsRepository)
+        public GetListNotificationQueryQueryHandler(INotificationsRepository notificationsRepository)
         {
-            _mapper = mapper;
             _notificationsRepository = notificationsRepository;
         }
 
-        public async Task<MethodResult<PagingItemsModel<NotificationsModel>>> Handle(GetListNotificationQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<PagingItemsModel<NotificationMessageModel>>> Handle(GetListNotificationQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            var methodResult = new MethodResult<PagingItemsModel<NotificationsModel>>();
+            var methodResult = new MethodResult<PagingItemsModel<NotificationMessageModel>>();
 
             var notificationQuery = _notificationsRepository.Queryable.Include(x => x.NotificationType)
                                                                       .Where(x => x.Status == EnumNotificationStatus.Sent
                                                                             && x.NotificationType!.Type == request.Type)
-                                                                      .Select(x => new NotificationsModel
+                                                                      .Select(x => new NotificationMessageModel
                                                                       {
                                                                           Id = x.Id,
                                                                           UserId = x.UserId,
@@ -69,7 +67,7 @@ namespace Fsel.Notification.Application.Queries
                     .ToListAsync(cancellationToken: cancellationToken)
                     .ConfigureAwait(false);
 
-            methodResult.Result = new PagingItemsModel<NotificationsModel>(lists, request, totalItem);
+            methodResult.Result = new PagingItemsModel<NotificationMessageModel>(lists, request, totalItem);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }

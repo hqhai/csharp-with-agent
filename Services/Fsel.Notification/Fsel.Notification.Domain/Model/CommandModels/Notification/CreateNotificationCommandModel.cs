@@ -12,7 +12,7 @@ namespace Fsel.Notification.Domain.Model.CommandModels.Notification
 
         public IList<EnumRole>? Roles { get; set; }
 
-        public Guid UserId { get; set; } = Guid.Empty;
+        public Guid? UserId { get; set; }
 
         public Guid NotificationTypeId { get; set; }
 

@@ -38,13 +38,15 @@ namespace Fsel.Course.Domain.Models.EntityModels
 
         public string? GradingAlFeedback { get; set; }
 
+        public string? AvatarPath { get; set; }
+
+        public EnumCourseLevel CourseLevel { get; set; }
+
         public Guid? CheckCsoId { get; set; }
 
         public DateTime? CheckStartDate { get; set; }
 
         public DateTime? GradingStartDate { get; set; }
-
-        public EnumCourseLevel CourseLevel { get; set; }
 
         public ClassForumModel? ClassForum { get; set; }
 
