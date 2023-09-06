@@ -22,6 +22,5 @@ namespace Fsel.Shared.Models.ShareModels
         public List<EnumRole>? Roles { get; set; }
 
         public Guid NotificationTypeId { get; set; }
-
     }
 }

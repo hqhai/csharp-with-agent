@@ -87,7 +87,7 @@ namespace Fsel.Shared.Constants
 
             public static class NameQueue
             {
-                public const string NotificationTypeText = $"{KeyQueue}_NotificationTypeText";
+                public const string OrderNotification = $"{KeyQueue}_OrderNotification";
             }
         }
 

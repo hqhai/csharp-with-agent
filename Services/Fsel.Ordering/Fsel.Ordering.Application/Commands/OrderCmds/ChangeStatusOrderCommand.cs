@@ -101,7 +101,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
                         methodResult.AddErrorBadRequest(nameof(EnumOrderErrorCode.UpdateNotSuccess));
                         return methodResult;
                     }
-                    await _notificationMessagePublisher.Publish(new NotificationTypeTextModel
+                    await _notificationMessagePublisher.Publish(new NotificationAllQueueModel
                     {
                         Title = NotificationTemplateTitleSetting.TitleChangeStatusOrderTemplate,
                         UserId = order.UserId,

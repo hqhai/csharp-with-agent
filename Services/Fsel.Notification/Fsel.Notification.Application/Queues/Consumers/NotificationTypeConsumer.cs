@@ -8,18 +8,18 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Fsel.Notification.Application.Queues.Consumers
 {
-    public class NotificationTypeTextConsumer : IConsumer<NotificationTypeTextModel>
+    public class NotificationTypeConsumer : IConsumer<NotificationAllQueueModel>
     {
         private readonly IMediator _mediator;
         private readonly INotificationTypeRepository _notificationTypeRepository;
 
-        public NotificationTypeTextConsumer(IMediator mediator, INotificationTypeRepository notificationTypeRepository)
+        public NotificationTypeConsumer(IMediator mediator, INotificationTypeRepository notificationTypeRepository)
         {
             _mediator = mediator;
             _notificationTypeRepository = notificationTypeRepository;
         }
 
-        public async Task Consume(ConsumeContext<NotificationTypeTextModel> context)
+        public async Task Consume(ConsumeContext<NotificationAllQueueModel> context)
         {
             var dataReceipt = context?.Message;
 
@@ -31,7 +31,7 @@ namespace Fsel.Notification.Application.Queues.Consumers
                     Title = dataReceipt.Title,
                     UserId = dataReceipt.UserId ?? default,
                     ObjectId = dataReceipt.ObjectId,
-                    Message = dataReceipt.Message,
+                    Message = dataReceipt.Message ?? notificationType?.Template,
                     Roles = dataReceipt.Roles,
                     NotificationTypeId = notificationType?.Id ?? default
                 };
