@@ -28,11 +28,11 @@ namespace Fsel.Notification.Api.Controllers
         /// Get Notification
         /// </summary>
         [HttpGet]
-        [ProducesResponseType(typeof(MethodResult<PagingItemsModel<NotificationsModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(MethodResult<PagingItemsModel<NotificationMessageModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetList([FromQuery] GetListNotificationQuery query)
         {
-            MethodResult<PagingItemsModel<NotificationsModel>> commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            MethodResult<PagingItemsModel<NotificationMessageModel>> commandResult = await _mediator.Send(query).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
 
@@ -42,11 +42,11 @@ namespace Fsel.Notification.Api.Controllers
         /// <param name="query"></param>
         /// <returns></returns>
         [HttpPost]
-        [ProducesResponseType(typeof(MethodResult<NotificationsModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(MethodResult<NotificationMessageModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> CreateNotification([FromBody] CreateNotificationCommand cmd)
         {
-            MethodResult<NotificationsModel> commandResult = await _mediator.Send(cmd).ConfigureAwait(false);
+            MethodResult<NotificationMessageModel> commandResult = await _mediator.Send(cmd).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
 
