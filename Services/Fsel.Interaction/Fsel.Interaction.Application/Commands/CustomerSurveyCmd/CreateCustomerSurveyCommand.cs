@@ -42,14 +42,24 @@ namespace Fsel.Interaction.Application.Commands.CustomerSurveyCmd
             ArgumentNullException.ThrowIfNull(request);
             ArgumentNullException.ThrowIfNull(request.Answers);
             MethodResult<IList<CustomerSurveyModel>> methodResult = new MethodResult<IList<CustomerSurveyModel>>();
+            #region Old logic
+            /* var count = await _surveyQuestionRepository.Queryable.CountAsync(cancellationToken: cancellationToken);
+             if (request.Answers.Count < count)
+             {
+                 methodResult.AddErrorBadRequest(nameof(EnumCustomerSurveyErrorCode.NotEnoughQuestions));
+                 return methodResult;
+             }*/
+            #endregion
 
-            var count = await _surveyQuestionRepository.Queryable.CountAsync(cancellationToken: cancellationToken);
-            if (request.Answers.Count < count)
+            #region pilot
+
+            var countPilot = await _surveyQuestionRepository.Queryable.Where(x => x.IsPilot == request.IsPilot).CountAsync(cancellationToken: cancellationToken);
+            if (request.Answers.Count < countPilot)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumCustomerSurveyErrorCode.NotEnoughQuestions));
                 return methodResult;
             }
-
+            #endregion
             List<CustomerSurvey> customerSurveys = new List<CustomerSurvey>();
 
             foreach (var item in request.Answers)

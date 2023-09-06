@@ -13,7 +13,7 @@ namespace Fsel.Interaction.Application.Queries.SurveyQuestionQuery
 
     public class GetAllSurveyQuestQuery : IRequest<MethodResult<IList<SurveyQuestionModel>>>
     {
-        public bool? IsPilot { get; set; }
+        public bool IsPilot { get; set; }
     }
 
     public class GetAllSurveyQuestQueryHandler : IRequestHandler<GetAllSurveyQuestQuery, MethodResult<IList<SurveyQuestionModel>>>
