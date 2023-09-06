@@ -144,7 +144,7 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd
                             }).FirstOrDefaultAsync(cancellationToken);
             if (homeWorkResultLesson != null && homeWorkResultLesson.QuestionCompleted + request.Answers.Count == homeWorkResultLesson.QuestionTotal)
             {
-                homeWorkResult.CorrectCount = homeWorkResultLesson.QuestionCompleted > 0 ? homeWorkResultLesson.CorrectCount + correctTotal : homeWorkResult.CorrectCount + request.Answers.Count;
+                homeWorkResult.CorrectCount = correctTotal;
                 homeWorkResult.Status = EnumResultStatus.Done;
                 homeWorkResult.Percent = homeWorkResult.CorrectTotal > 0 ? ((double)homeWorkResult.CorrectCount / homeWorkResult.CorrectTotal * 100) : 0;
                 var skillScores = new SkillScores

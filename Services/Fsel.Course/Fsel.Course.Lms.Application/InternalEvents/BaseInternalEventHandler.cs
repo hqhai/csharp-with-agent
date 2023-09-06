@@ -160,18 +160,19 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             return skillScores;
         }
 
-        public async Task<SkillScores> ClassForumSkillScores(Guid? lessonResultId)
+        public async Task<SkillScores?> ClassForumSkillScores(Guid? lessonResultId)
         {
             ArgumentNullException.ThrowIfNull(lessonResultId);
-            SkillScores skillScores = new SkillScores();
             var classForumResult = await _classForumResultRepository.Queryable.Include(x => x.ClassForum).Include(x => x.ClassForumScores).FirstOrDefaultAsync(x => x.Status == EnumClassForumResultStatus.Graded && x.LessonResultId == lessonResultId);
             if (classForumResult != null && classForumResult.ClassForumScores != null && classForumResult.ClassForum != null)
             {
+                SkillScores skillScores = new SkillScores();
                 skillScores.Skill = classForumResult.ClassForum.CourseSkill;
                 skillScores.TotalCount = 36;
                 skillScores.CorrectCount = classForumResult.ClassForumScores.Sum(x => x.Score);
+                return skillScores;
             }
-            return skillScores;
+            return null;
         }
 
         public async Task<List<SkillScores>> HomeWordsSkillScores(Guid? lessonResultId)

@@ -40,6 +40,7 @@ namespace Fsel.Course.Infrastructure.Repositories
                                         BookFilePath = x.BookFilePath,
                                         InstructionContent = x.InstructionContent,
                                         IsActive = x.IsActive,
+                                        ImagePath = x.ImagePath,
                                         Name = x.Name,
                                         Type = x.Type,
                                         VideoId = x.VideoId,
