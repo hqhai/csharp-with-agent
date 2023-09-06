@@ -49,16 +49,15 @@ namespace Fsel.Notification.Application.Commands
 
             #region Validation
 
+            Notifications notificationNew = _mapper.Map<Notifications>(request);
+
             // check null data
-            var notificationType = request.NotificationTypeId != Guid.Empty ? _notificationTypeRepository.GetByIdAsync(request.NotificationTypeId) : null;
-            if (notificationType == null)
+            var notificationTypeResult = request.NotificationTypeId != Guid.Empty ? await _notificationTypeRepository.GetByIdAsync(request.NotificationTypeId) : null;
+            if (notificationTypeResult == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.NotificationTypeId), request.NotificationTypeId);
                 return methodResult;
             }
-
-            // Lấy ra notificationType của thông báo đó
-            var notificationTypeResult = notificationType.Result;
 
             //list User bị tắt thông báo
             var listUserOffNotification = await _notificationRemindRepository.Queryable.Where(x => x.Status == EnumNotificationRemindStatus.Off && x.ObjectId == request.ObjectId).Select(x => x.UserId).ToListAsync(cancellationToken);
@@ -69,10 +68,10 @@ namespace Fsel.Notification.Application.Commands
             List<Guid> allIds = new List<Guid>();
             if (request.Roles != null)
             {
-                foreach (var item in request.Roles!)
+                foreach (var item in request.Roles)
                 {
                     roleQuery.Role = item;
-                    var user = await _userService.GetUserByRole(roleQuery);
+                    var user = await _userService.GetUserByRoleAsync(roleQuery);
                     if (user.Content?.Result != null)
                     {
                         var userIds = user.Content.Result;

@@ -6,7 +6,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
-    using Fsel.Core.Base.Interfaces;
+    using Fsel.Ordering.Application.Queues.Publishers;
     using Fsel.Ordering.Application.Services.CourseService;
     using Fsel.Ordering.Application.Services.TrainingService;
     using Fsel.Ordering.Application.Services.UserService;
@@ -31,16 +31,20 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
         private readonly IOrderRepository _orderRepository;
         private readonly ITrainingService _trainingService;
         private readonly IUserService _userService;
-        private readonly IQueueProvider _queueProvider;
         private readonly ILmsCourseService _lmsCourseService;
+        private readonly NotificationMessagePublisher _notificationMessagePublisher;
 
-        public ChangeStatusOrderCommandHandler(IOrderRepository orderRepository, ITrainingService trainingService, IUserService userService, IQueueProvider queueProvider, ILmsCourseService lmsCourseService)
+        public ChangeStatusOrderCommandHandler(IOrderRepository orderRepository
+            , ITrainingService trainingService
+            , IUserService userService
+            , ILmsCourseService lmsCourseService
+            , NotificationMessagePublisher notificationMessagePublisher)
         {
             _orderRepository = orderRepository;
             _trainingService = trainingService;
             _userService = userService;
-            _queueProvider = queueProvider;
             _lmsCourseService = lmsCourseService;
+            _notificationMessagePublisher = notificationMessagePublisher;
         }
 
         public async Task<MethodResult<bool>> Handle(ChangeStatusOrderCommand request, CancellationToken cancellationToken)
@@ -97,11 +101,12 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
                         methodResult.AddErrorBadRequest(nameof(EnumOrderErrorCode.UpdateNotSuccess));
                         return methodResult;
                     }
-                    await _queueProvider.Publish(QueueSettings.RealtimeQueue.NameQueue.Notification, new NotificationQueueModel
+                    await _notificationMessagePublisher.Publish(new NotificationTypeTextModel
                     {
+                        Title = NotificationTemplateTitleSetting.TitleChangeStatusOrderTemplate,
                         UserId = order.UserId,
                         ObjectId = order.Id,
-                        Message = "Bạn đã mua khóa học " + course?.Name + " thành công. Hãy bắt đầu học nào!"
+                        Message = string.Format(NotificationTemplateSetting.ChangeStatusOrderTemplate, course?.Name)
                     }, cancellationToken);
                 }
                 order.Status = request.OrderStatus;

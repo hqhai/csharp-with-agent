@@ -32,7 +32,8 @@ namespace Fsel.Shared.Constants
                 public const string ClassForum = $"{KeyQueue}_ClassForum";
                 public const string UpdateClassLiveAssignment = $"{KeyQueue}_UpdateClassLiveAssignment";
                 public const string QuestBoardMainFinish = $"{KeyQueue}_QuestBoardMainFinish";
-                public const string Notification = $"{KeyQueue}_Notification";
+                public const string Notification = $"{KeyQueue}_NotificationType";
+                public const string NotificationText = $"{KeyQueue}_NotificationTypeText";
             }
         }
 

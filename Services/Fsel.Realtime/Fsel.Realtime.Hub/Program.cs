@@ -26,7 +26,6 @@ setHub: (IBusRegistrationConfigurator x) =>
 {
     x.AddSignalRHub<DiscussionBoardHub>();
     x.AddSignalRHub<NotificationHub>();
-
 });
 
 var app = builder.Build();

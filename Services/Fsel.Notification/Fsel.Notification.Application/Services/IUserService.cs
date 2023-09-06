@@ -16,6 +16,6 @@ namespace Fsel.Notification.Application.Services
         Task<IApiResponse<MethodResult<StudentModel>>> GetStudentByUserIdAsync([FromRoute] Guid id);
 
         [Get("/user/get-users-by-role")]
-        Task<IApiResponse<MethodResult<IList<UserModel>>>> GetUserByRole([FromQuery] GetUsersByRoleQueryModel query);
+        Task<IApiResponse<MethodResult<IList<UserModel>>>> GetUserByRoleAsync([Query] GetUsersByRoleQueryModel query);
     }
 }

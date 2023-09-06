@@ -8,6 +8,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
+    using Fsel.Ordering.Application.Queues.Publishers;
     using Fsel.Ordering.Application.Services.TrainingService;
     using Fsel.Ordering.Application.Services.TrainingService.CommandModels;
     using Fsel.Ordering.Domain.Entities;
@@ -15,6 +16,9 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
     using Fsel.Ordering.Domain.IRepositories;
     using Fsel.Ordering.Domain.Models.CommandModels.Orders;
     using Fsel.Ordering.Domain.Models.EntityModels;
+    using Fsel.Shared.Constants;
+    using Fsel.Shared.Enums;
+    using Fsel.Shared.Models.ShareModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -28,18 +32,21 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
         private readonly IMapper _mapper;
         private readonly IOrderRepository _orderRepository;
         private readonly AuthContext _authContext;
+        private readonly NotificationMessagePublisher _notificationMessagePublisher;
         private readonly ITrainingService _trainingService;
         private readonly IPackageRepository _packageRepository;
 
         public CreateOrderCommandHandler(IMapper mapper,
             IOrderRepository orderRepository,
             AuthContext authContext,
+            NotificationMessagePublisher notificationMessagePublisher,
             ITrainingService trainingService,
             IPackageRepository packageRepository)
         {
             _mapper = mapper;
             _orderRepository = orderRepository;
             _authContext = authContext;
+            _notificationMessagePublisher = notificationMessagePublisher;
             _trainingService = trainingService;
             _packageRepository = packageRepository;
         }
@@ -90,6 +97,14 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
 
             await _orderRepository.ExecuteTransactionAsync(async () =>
             {
+                await _notificationMessagePublisher.Publish(new NotificationTypeTextModel
+                {
+                    Title = NotificationTemplateTitleSetting.TitleCreateOrderTemplate,
+                    Roles = new List<EnumRole> { EnumRole.Admin },
+                    ObjectId = order.Id,
+                    Message = NotificationTemplateSetting.CreateOrderTemplate
+                }, cancellationToken);
+
                 order = _orderRepository.Add(order);
                 await _orderRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
