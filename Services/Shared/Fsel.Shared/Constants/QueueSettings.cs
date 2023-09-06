@@ -36,6 +36,16 @@ namespace Fsel.Shared.Constants
             }
         }
 
+        public static class LmsCourseQueue
+        {
+            public const string KeyQueue = nameof(LmsCourseQueue);
+
+            public static class NameQueue
+            {
+                public const string CreateClassForumResult = $"{KeyQueue}_CreateClassForumResult";
+            }
+        }
+
         public static class SenderQueue
         {
             public const string KeyQueue = nameof(SenderQueue);

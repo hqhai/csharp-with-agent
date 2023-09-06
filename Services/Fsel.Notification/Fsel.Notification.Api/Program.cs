@@ -32,6 +32,7 @@ new Dictionary<string, Type>
 {
     { QueueSettings.RealtimeQueue.NameQueue.DiscussionBoard, typeof(DiscussionBoardCommentConsumer) },
     { QueueSettings.RealtimeQueue.NameQueue.ClassForum, typeof(InterationActionConsumer) },
+    { QueueSettings.LmsCourseQueue.NameQueue.CreateClassForumResult, typeof(CreateClassForumResultConsumer) },
 });
 
 var app = builder.Build();

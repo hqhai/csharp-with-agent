@@ -14,6 +14,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.CommandModels.ClassForumResults;
     using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Course.Lms.Application.Queues.Publishers;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using MediatR;
     using Microsoft.AspNetCore.Http;
@@ -31,13 +32,14 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
         private readonly IClassForumResultRepository _classForumResultRepository;
         private readonly IClassForumRepository _classForumRepository;
         private readonly ILessonResultRepository _lessonResultRepository;
-
+        private readonly CreateClassForumResultPublisher _classForumResultPublisher;
         public CreateClassForumResultCommandHandler(IMapper mapper
             , AuthContext authContext
             , IUserService userService
             , IClassForumResultRepository classForumResultRepository
             , IClassForumRepository classForumRepository
-            , ILessonResultRepository lessonResultRepository)
+            , ILessonResultRepository lessonResultRepository,
+CreateClassForumResultPublisher classForumResultPublisher)
         {
             _mapper = mapper;
             _authContext = authContext;
@@ -45,6 +47,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
             _classForumResultRepository = classForumResultRepository;
             _classForumRepository = classForumRepository;
             _lessonResultRepository = lessonResultRepository;
+            _classForumResultPublisher = classForumResultPublisher;
         }
 
         public async Task<MethodResult<ClassForumResultModel>> Handle(CreateClassForumResultCommand request, CancellationToken cancellationToken)
@@ -110,9 +113,9 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
 
             await _classForumResultRepository.ExecuteTransactionAsync(async () =>
             {
-                _classForumResultRepository.Add(classForumResult);
+                classForumResult = _classForumResultRepository.Add(classForumResult);
                 await _classForumResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
-
+                await _classForumResultPublisher.Publish(classForumResult, cancellationToken);
                 methodResult.StatusCode = StatusCodes.Status201Created;
                 methodResult.Result = _mapper.Map<ClassForumResultModel>(classForumResult);
                 return methodResult;
