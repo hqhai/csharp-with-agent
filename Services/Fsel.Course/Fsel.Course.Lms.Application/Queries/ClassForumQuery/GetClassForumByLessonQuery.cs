@@ -48,20 +48,24 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumQuery
 
             var classForm = _mapper.Map<ClassForumModel>(classForumQuery);
 
-            var actionsResult = await _interactionService.GetsActionAsync(new InteractionActionCommandModel { ObjectIds = classForm?.ClassForumResults?.Select(x => x.Id).ToList() });
-            var actions = actionsResult.Content?.Result;
-
-            if (actions != null)
+            if (classForumQuery != null)
             {
-                foreach (var item in classForm?.ClassForumResults!)
+                var actionsResult = await _interactionService.GetsActionAsync(new InteractionActionCommandModel { ObjectIds = classForm?.ClassForumResults?.Select(x => x.Id).ToList() });
+                var actions = actionsResult.Content?.Result;
+
+                var studentResult = await _userService.GetStudentsByStudentIdsAsync(classForumQuery!.ClassForumResults.Select(x => x.StudentId).ToList());
+                var students = studentResult.Content?.Result;
+                if (actions != null)
                 {
-                    var action = actions.FirstOrDefault(x => x.ObjectId == item.Id);
-                    item.CommentNumber = action?.CommentNumber;
-                    item.LikeNumber = action?.LikeNumber;
-                    item.IsLiked = action?.IsLiked;
-                    var studentResult = await _userService.GetStudentByUserIdAsync(item.StudentId);
-                    var student = studentResult.Content?.Result;
-                    item.AvatarPath = student?.Human?.AvatarPath;
+                    foreach (var item in classForm?.ClassForumResults!)
+                    {
+                        var action = actions.FirstOrDefault(x => x.ObjectId == item.Id);
+                        item.CommentNumber = action?.CommentNumber;
+                        item.LikeNumber = action?.LikeNumber;
+                        item.IsLiked = action?.IsLiked;
+                        var student = students?.FirstOrDefault(x => x.Id == item.StudentId);
+                        item.AvatarPath = student?.Human?.AvatarPath;
+                    }
                 }
             }
 
