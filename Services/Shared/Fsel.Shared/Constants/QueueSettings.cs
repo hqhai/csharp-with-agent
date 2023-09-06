@@ -78,6 +78,7 @@ namespace Fsel.Shared.Constants
 
             public static class NameQueue
             {
+                public const string Comment = $"{KeyQueue}_Comment";
             }
         }
 

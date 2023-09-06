@@ -34,7 +34,7 @@ builder.Services.AddScoped<ISupportTicketRepository, SupportTicketRepository>();
 builder.Services.AddScoped<DiscussionBoardCommentPublisher>();
 builder.Services.AddScoped<DiscussionBoardLikePublisher>();
 builder.Services.AddScoped<InterationActionPublisher>();
-
+builder.Services.AddScoped<ClassForumCommentPublisher>();
 
 builder.AddRefitClients(typeof(IUserService), appSetting?.Services?.UserApiUrl);
 builder.AddRefitClients(typeof(ITrainingService), appSetting?.Services?.TrainingApiUrl);

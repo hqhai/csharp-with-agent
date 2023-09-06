@@ -25,14 +25,16 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
         private readonly IMapper _mapper;
         private readonly ICommentRepository _commentRepository;
         private readonly DiscussionBoardCommentPublisher _discussionBoardCommentPublisher;
+        private readonly ClassForumCommentPublisher _classForumCommentPublisher;
         private readonly AuthContext _authContext;
 
-        public CreateCommentCommandHandler(IMapper mapper, ICommentRepository commentRepository, AuthContext authContext, DiscussionBoardCommentPublisher discussionBoardCommentPublisher)
+        public CreateCommentCommandHandler(IMapper mapper, ICommentRepository commentRepository, AuthContext authContext, DiscussionBoardCommentPublisher discussionBoardCommentPublisher, ClassForumCommentPublisher classForumCommentPublisher)
         {
             _mapper = mapper;
             _commentRepository = commentRepository;
             _authContext = authContext;
             _discussionBoardCommentPublisher = discussionBoardCommentPublisher;
+            _classForumCommentPublisher = classForumCommentPublisher;
         }
 
         public async Task<MethodResult<bool>> Handle(CreateCommentCommand request, CancellationToken cancellationToken)
@@ -58,8 +60,9 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
                 }
                 else
                 {
-
-                }    
+                    var postOwner = await 
+                    await _classForumCommentPublisher.Publish(, cancellationToken).ConfigureAwait(false);
+                }
 
 
                 methodResult.StatusCode = StatusCodes.Status201Created;
