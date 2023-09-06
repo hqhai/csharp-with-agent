@@ -61,35 +61,34 @@ namespace Fsel.Notification.Application.Commands
             // Lấy ra notificationType của thông báo đó
             var notificationTypeResult = notificationType.Result;
 
-
-            // Get list UserId by role
-            GetUsersByRoleQueryModel roleQuery = new GetUsersByRoleQueryModel();
-            List<string> allIds = new List<string>();
-            foreach (var item in request.Roles!)
-            {
-                roleQuery.Role = item;
-                var user = await _userService.GetUserByRole(roleQuery);
-                if (user.Content?.Result != null)
-                {
-                    var userIds = user.Content.Result;
-                    allIds.AddRange(userIds.Select(u => u.Id.ToString()));
-                }
-            }
-            string concatenatedIds = string.Join(",", allIds);
-
-
             //list User bị tắt thông báo
             var listUserOffNotification = await _notificationRemindRepository.Queryable.Where(x => x.Status == EnumNotificationRemindStatus.Off && x.ObjectId == request.ObjectId).Select(x => x.UserId).ToListAsync(cancellationToken);
 
+            // Handle list UserId
+            GetUsersByRoleQueryModel roleQuery = new GetUsersByRoleQueryModel();
+            string listUserId = "";
+            List<Guid> allIds = new List<Guid>();
+            if (request.Roles != null)
+            {
+                foreach (var item in request.Roles!)
+                {
+                    roleQuery.Role = item;
+                    var user = await _userService.GetUserByRole(roleQuery);
+                    if (user.Content?.Result != null)
+                    {
+                        var userIds = user.Content.Result;
+                        allIds.AddRange(userIds.Select(u => u.Id));
+                    }
+                }
 
-            List<Guid> splitIds = concatenatedIds.Split(',').Select(Guid.Parse).ToList();
+                listUserId = FilteredListUserTurnOnNotification(allIds, listUserOffNotification);
+            }
 
-            //So sánh list User với List User tắt thông báo, và không lấy những User tắt thông báo trong list User ban đầu
-            var filteredGuids = splitIds.Where(id => !listUserOffNotification.Contains(id)).ToList();
-
-            //Chuỗi UserId được join lại từ List User sau khi lọc
-            string filteredConcatenatedGuids = string.Join(",", filteredGuids);
-
+            // Handle 1 UserId
+            List<Guid> userOneElement = new List<Guid>();
+            userOneElement.Add(notificationNew.UserId);
+            string resultOneElement = FilteredListUserTurnOnNotification(userOneElement, listUserOffNotification);
+            notificationNew.UserId = string.IsNullOrEmpty(resultOneElement) ? Guid.Empty : new Guid(resultOneElement);
 
             #endregion Validation
 
@@ -108,8 +107,9 @@ namespace Fsel.Notification.Application.Commands
                 {
                     UserId = notificationNew.UserId,
                     Template = notificationTypeResult?.Template,
+                    ObjectId = notificationNew.ObjectId,
                     Message = notificationNew.Message,
-                    UserIds = filteredConcatenatedGuids
+                    UserIds = listUserId
                 };
 
                 await _notificationMessagePublisher.Publish(notificationRealTime, cancellationToken).ConfigureAwait(false);
@@ -123,6 +123,23 @@ namespace Fsel.Notification.Application.Commands
 
             #endregion
             return methodResult;
+        }
+
+        /// <summary>
+        /// Lấy ra những User không tắt Notification
+        /// </summary>
+        /// <param name="allIds"></param>
+        /// <param name="listUserOffNotification"></param>
+        /// <returns></returns>
+        private static string FilteredListUserTurnOnNotification(List<Guid> allIds, List<Guid> listUserOffNotification)
+        {
+            string result = "";
+            var filteredGuids = allIds.Where(id => !listUserOffNotification.Contains(id)).ToList();
+
+            //Chuỗi UserId được join lại từ List User sau khi lọc
+            result = string.Join(",", filteredGuids);
+
+            return result;
         }
     }
 }
