@@ -11,10 +11,4 @@ namespace Fsel.Shared.Constants
         public const string ChangeStatusOrderTemplate = "Bạn đã mua khóa học {0} thành công. Hãy bắt đầu học nào!";
         public const string CreateOrderTemplate = "Bận có hóa đơn khóa học mới phê duyệt. Nhấn để phê duyệt.";
     }
-
-    public static class NotificationTemplateTitleSetting
-    {
-        public const string TitleChangeStatusOrderTemplate = "Course purchased successfully.";
-        public const string TitleCreateOrderTemplate = "Course invoice approve";
-    }
 }

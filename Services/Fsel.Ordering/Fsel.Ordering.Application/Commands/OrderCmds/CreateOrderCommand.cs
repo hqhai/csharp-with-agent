@@ -98,9 +98,8 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
             await _orderRepository.ExecuteTransactionAsync(async () =>
             {
                 order = _orderRepository.Add(order);
-                await _notificationMessagePublisher.Publish(new NotificationAllQueueModel
+                await _notificationMessagePublisher.Publish(new NotificationQueueModel
                 {
-                    Title = NotificationTemplateTitleSetting.TitleCreateOrderTemplate,
                     Roles = new List<EnumRole> { EnumRole.Admin },
                     ObjectId = order.Id,
                     Message = NotificationTemplateSetting.CreateOrderTemplate

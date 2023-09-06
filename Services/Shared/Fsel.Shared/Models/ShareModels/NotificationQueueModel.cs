@@ -11,7 +11,7 @@ namespace Fsel.Shared.Models.ShareModels
 
         public string? Message { get; set; }
 
-        public Guid UserId { get; set; }
+        public Guid? UserId { get; set; }
 
         public string? Template { get; set; }
 

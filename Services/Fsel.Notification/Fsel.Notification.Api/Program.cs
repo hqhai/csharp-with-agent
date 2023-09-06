@@ -30,7 +30,7 @@ new Dictionary<string, Type>
 {
     { QueueSettings.NotificationQueue.NameQueue.DiscussionBoard, typeof(DiscussionBoardCommentConsumer) },
     { QueueSettings.NotificationQueue.NameQueue.ClassForum, typeof(InterationActionConsumer) },
-    { QueueSettings.OrderingQueue.NameQueue.OrderNotification, typeof(NotificationTypeConsumer) },
+    { QueueSettings.OrderingQueue.NameQueue.SendNotification, typeof(SendNotificationConsumer) },
 });
 
 var app = builder.Build();

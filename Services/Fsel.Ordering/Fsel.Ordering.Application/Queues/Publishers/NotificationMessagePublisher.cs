@@ -13,16 +13,15 @@ namespace Fsel.Ordering.Application.Queues.Publishers
             _queueProvider = queueProvider;
         }
 
-        public async Task Publish(NotificationAllQueueModel notification, CancellationToken cancellationToken)
+        public async Task Publish(NotificationQueueModel notification, CancellationToken cancellationToken)
         {
             if (notification == null)
             {
                 return;
             }
 
-            await _queueProvider.Publish(QueueSettings.OrderingQueue.NameQueue.OrderNotification, new NotificationAllQueueModel
+            await _queueProvider.Publish(QueueSettings.OrderingQueue.NameQueue.SendNotification, new NotificationQueueModel
             {
-                Title = notification.Title,
                 ObjectId = notification.ObjectId,
                 UserId = notification.UserId,
                 Roles = notification.Roles,
