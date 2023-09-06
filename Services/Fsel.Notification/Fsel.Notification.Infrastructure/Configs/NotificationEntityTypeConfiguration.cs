@@ -8,9 +8,9 @@ namespace Fsel.Notification.Infrastructure.Configs
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-    public class NotificationEntityTypeConfiguration : IEntityTypeConfiguration<Notifications>
+    public class NotificationEntityTypeConfiguration : IEntityTypeConfiguration<NotificationMessage>
     {
-        public void Configure(EntityTypeBuilder<Notifications> builder)
+        public void Configure(EntityTypeBuilder<NotificationMessage> builder)
         {
             ArgumentNullException.ThrowIfNull(builder);
             builder.Property(e => e.Status)

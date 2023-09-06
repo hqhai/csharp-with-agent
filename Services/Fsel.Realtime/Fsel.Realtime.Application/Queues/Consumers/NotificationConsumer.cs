@@ -20,12 +20,12 @@ namespace Fsel.Realtime.Application.Queues.Consumers
 
             if (context != null)
             {
-                if (context.Message.UserId != Guid.Empty && string.IsNullOrEmpty(context.Message.UserIds))
+                if (context.Message.UserId != Guid.Empty && context.Message.UserIds.Count == 0)
                 {
                     var userId = context.Message.UserId.ToString();
                     await _notificationHubContext.Clients.User(userId).SendAsync(RealtimeSettings.NotificationHub.Methods.NotificationMessage, context.Message);
                 }
-                else if (!string.IsNullOrEmpty(context.Message.UserIds))
+                else if (context.Message.UserIds.Count > 0)
                 {
                     var userIds = context.Message.UserIds;
                     await _notificationHubContext.Clients.Users(userIds).SendAsync(RealtimeSettings.NotificationHub.Methods.NotificationMessage, context.Message);

@@ -34,7 +34,6 @@ namespace Fsel.Notification.Application.Queues.Consumers
                     {
                         UserId = dataReceipt.UserId,
                         ObjectId = dataReceipt.ObjectId,
-                        Message = NotificationTemplateSetting.FlagPostTemplate,
                         NotificationTypeId = notificationTypeId
                     };
                     await _mediator.Send(model).ConfigureAwait(false);
