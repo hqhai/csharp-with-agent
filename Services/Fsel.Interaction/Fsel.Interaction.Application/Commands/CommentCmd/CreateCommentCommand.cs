@@ -14,6 +14,7 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
+    using Fsel.Shared.Enums;
 
     public class CreateCommentCommand : CreateCommentCommandModel, IRequest<MethodResult<bool>>
     {
@@ -51,7 +52,15 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
                 comment = _commentRepository.Add(comment);
                 await _commentRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
-                await _discussionBoardCommentPublisher.Publish(comment, cancellationToken).ConfigureAwait(false);
+                if (request.Type == EnumCommentType.DiscussionBoard)
+                {
+                    await _discussionBoardCommentPublisher.Publish(comment, cancellationToken).ConfigureAwait(false);
+                }
+                else
+                {
+
+                }    
+
 
                 methodResult.StatusCode = StatusCodes.Status201Created;
                 methodResult.Result = true;
