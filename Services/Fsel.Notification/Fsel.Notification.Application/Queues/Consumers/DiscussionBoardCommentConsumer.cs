@@ -22,12 +22,7 @@ namespace Fsel.Notification.Application.Queues.Consumers
 
             if (dataReceipt != null)
             {
-                CreateNotificationCommand model = new CreateNotificationCommand()
-                {
-
-                };
-
-                await _mediator.Send(model).ConfigureAwait(false);
+                await _mediator.Send(new CreateNotificationCommand()).ConfigureAwait(false);
             }
         }
     }

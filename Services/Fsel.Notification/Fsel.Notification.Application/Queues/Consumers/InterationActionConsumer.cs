@@ -1,5 +1,6 @@
 using Fsel.Notification.Application.Commands;
 using Fsel.Notification.Domain.IRepositories;
+using Fsel.Shared.Constants;
 using Fsel.Shared.Enums;
 using Fsel.Shared.Models.ShareModels;
 using MassTransit;
@@ -33,7 +34,7 @@ namespace Fsel.Notification.Application.Queues.Consumers
                     {
                         UserId = dataReceipt.UserId,
                         ObjectId = dataReceipt.ObjectId,
-                        Message = "Bài viết/comment của {0} thuộc {1} đã bị gắn cờ. Vui lòng kiểm tra",
+                        Message = NotificationTemplateSetting.FlagPostTemplate,
                         NotificationTypeId = notificationTypeId
                     };
                     await _mediator.Send(model).ConfigureAwait(false);
