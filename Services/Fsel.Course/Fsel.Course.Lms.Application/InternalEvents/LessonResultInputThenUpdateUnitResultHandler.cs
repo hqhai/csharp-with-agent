@@ -70,7 +70,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 }
                 else if (unit.LessonResults.Count == unit.UnitLessons.Count && unit.UnitSkillMockTests.Count > 0)
                 {
-                    UpdateUnit(lessonResultIds, unit, lessonResult.CourseId, lessonResult.StudentId, cancellationToken);
+                    await UpdateUnit(lessonResultIds, unit, lessonResult.CourseId, lessonResult.StudentId, cancellationToken).ConfigureAwait(false);
                     await UpdateTheNextLesson(unit, lessonResult, cancellationToken);
                 }
                 else
@@ -78,7 +78,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                     var isCheck = unit.LessonResults.Any(x => x.Status == EnumResultStatus.New);
                     if (!isCheck)
                     {
-                        UpdateUnit(lessonResultIds, unit, lessonResult.CourseId, lessonResult.StudentId, cancellationToken);
+                        await UpdateUnit(lessonResultIds, unit, lessonResult.CourseId, lessonResult.StudentId, cancellationToken).ConfigureAwait(false);
                         await UpdateTheNextLesson(unit, lessonResult, cancellationToken);
                     }
                 }

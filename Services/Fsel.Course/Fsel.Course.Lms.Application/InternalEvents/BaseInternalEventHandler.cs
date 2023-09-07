@@ -484,13 +484,13 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 var finalTestId = course.CourseUnitMockTests.Where(x => x.FinalTestId != null).FirstOrDefault()?.FinalTestId;
                 var unitIds = course.CourseUnitMockTests.Where(x => x.UnitId != null).Select(x => x.UnitId ?? default).ToList();
                 var courseType = course.CourseLevel.GetEnumCourseType();
-                await UpdateCourseResult(unitIds, studentId, courseType, finalTestId);
+                await UpdateCourseResult(unitIds, studentId, courseType, finalTestId).ConfigureAwait(false);
             }
         }
 
         public async Task UpdateCourseResult(Guid courseId, Guid studentId, CancellationToken cancellationToken)
         {
-            await UpdateCourse(courseId, studentId);
+            await UpdateCourse(courseId, studentId).ConfigureAwait(false);
             var courseResult = await _courseResultRepository.Queryable.FirstOrDefaultAsync(x => x.CourseId == courseId && x.StudentId == studentId, cancellationToken);
             if (courseResult != null)
             {
