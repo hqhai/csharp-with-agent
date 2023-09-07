@@ -60,6 +60,9 @@ namespace Fsel.Notification.Infrastructure.Migrations
                         .HasColumnType("bit")
                         .HasColumnOrder(110);
 
+                    b.Property<string>("Link")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Message")
                         .HasColumnType("nvarchar(max)");
 
@@ -216,7 +219,10 @@ namespace Fsel.Notification.Infrastructure.Migrations
                     b.Property<int>("Priority")
                         .HasColumnType("int");
 
-                    b.Property<string>("Template")
+                    b.Property<string>("TemplateLink")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("TemplateMessage")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Type")
@@ -252,7 +258,8 @@ namespace Fsel.Notification.Infrastructure.Migrations
                             Icon = "",
                             IsDeleted = false,
                             Priority = 0,
-                            Template = "Bài viết của {0} thuộc {1} đã bị gán cờ. Vui lòng kiểm tra.",
+                            TemplateLink = "",
+                            TemplateMessage = "Bài viết của {0} thuộc {1} đã bị gán cờ. Vui lòng kiểm tra.",
                             Type = "Text"
                         },
                         new
@@ -265,12 +272,13 @@ namespace Fsel.Notification.Infrastructure.Migrations
                             Icon = "",
                             IsDeleted = false,
                             Priority = 0,
-                            Template = "Bình luận của {0} thuộc {1} đã bị gán cờ. Vui lòng kiểm tra.",
+                            TemplateLink = "",
+                            TemplateMessage = "Bình luận của {0} thuộc {1} đã bị gán cờ. Vui lòng kiểm tra.",
                             Type = "Text"
                         },
                         new
                         {
-                            Id = new Guid("ef2b0a36-983d-4b71-aab0-1a124574b4dc"),
+                            Id = new Guid("810c70ca-4f3c-4d02-a194-708fa45d42ea"),
                             Content = "ClassForum",
                             CreatedDate = new DateTime(2023, 8, 28, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
@@ -278,8 +286,51 @@ namespace Fsel.Notification.Infrastructure.Migrations
                             Icon = "",
                             IsDeleted = false,
                             Priority = 0,
-                            Template = "",
+                            TemplateLink = "",
+                            TemplateMessage = "{0} vừa bình luận bài viết của bạn.",
                             Type = "LinkComment"
+                        },
+                        new
+                        {
+                            Id = new Guid("9e983172-dba2-4ca7-b602-372c011ecb99"),
+                            Content = "InterationAction",
+                            CreatedDate = new DateTime(2023, 8, 28, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            Icon = "",
+                            IsDeleted = false,
+                            Priority = 0,
+                            TemplateLink = "",
+                            TemplateMessage = "{0} vừa trả lời bình luận của bạn.",
+                            Type = "LinkComment"
+                        },
+                        new
+                        {
+                            Id = new Guid("a805f268-467b-4149-8d01-b2ea05e1f3bd"),
+                            Content = "OrderChangeStatus",
+                            CreatedDate = new DateTime(2023, 8, 28, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            Icon = "",
+                            IsDeleted = false,
+                            Priority = 1,
+                            TemplateLink = "",
+                            TemplateMessage = "Bạn đã mua khóa học {0} thành công. Hãy bắt đầu học nào!",
+                            Type = "Text"
+                        },
+                        new
+                        {
+                            Id = new Guid("86c0df96-f131-42bf-b315-0a8a85584f6a"),
+                            Content = "OrderCreate",
+                            CreatedDate = new DateTime(2023, 8, 28, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            Icon = "",
+                            IsDeleted = false,
+                            Priority = 1,
+                            TemplateLink = "",
+                            TemplateMessage = "Bạn có hóa đơn khóa học mới phê duyệt. Nhấn để phê duyệt.",
+                            Type = "Text"
                         });
                 });
 

@@ -25,13 +25,13 @@ namespace Fsel.Notification.Application.Queues.Consumers
 
             if (dataReceipt != null)
             {
-
                 if (dataReceipt!.Type == EnumInteractionActionType.Flag)
                 {
-                    var notificationType = _notificationTypeRepository.Queryable.Where(x => x.Type == EnumNotificationPushingType.Text && x.Content == EnumNotificationContent.ClassForum).Select(x => new NotificationMessage
+                    var notificationType = _notificationTypeRepository.Queryable.Where(x => x.Type == EnumNotificationType.Text && x.Content == EnumNotificationContent.ClassForum).Select(x => new NotificationMessage
                     {
                         Id = x.Id,
-                        Message = x.Template
+                        Message = x.TemplateMessage,
+                        Link = x.TemplateLink
                     }).FirstOrDefault();
 
                     CreateNotificationCommand model = new CreateNotificationCommand()
@@ -40,6 +40,7 @@ namespace Fsel.Notification.Application.Queues.Consumers
                         ObjectId = dataReceipt.ObjectId,
                         NotificationTypeId = notificationType!.Id,
                         Message = notificationType!.Message,
+                        Link = notificationType!.Link
                     };
                     await _mediator.Send(model).ConfigureAwait(false);
                 }

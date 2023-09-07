@@ -2,10 +2,11 @@
 
 namespace Fsel.Shared.Enums
 {
-
     public enum EnumNotificationContent
     {
         ClassForum,
-        InterationAction
+        InterationAction,
+        OrderChangeStatus,
+        OrderCreate
     }
 }

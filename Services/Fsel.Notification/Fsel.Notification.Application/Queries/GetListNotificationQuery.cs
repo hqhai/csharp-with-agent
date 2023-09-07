@@ -40,12 +40,14 @@ namespace Fsel.Notification.Application.Queries
                                                                           RoleId = x.RoleId,
                                                                           Status = x.Status,
                                                                           Message = x.Message,
+                                                                          Link = x.Link,
                                                                           ObjectId = x.ObjectId,
                                                                           CreatedDate = x.CreatedDate,
                                                                           CreatedUserId = x.CreatedUserId,
                                                                           CreatedFullName = x.CreatedFullName,
                                                                           NotificationTypeId = x.NotificationTypeId,
-                                                                          Template = x.NotificationType!.Template
+                                                                          TemplateMessage = x.NotificationType!.TemplateMessage,
+                                                                          TemplateLink = x.NotificationType!.TemplateLink
                                                                       });
 
 

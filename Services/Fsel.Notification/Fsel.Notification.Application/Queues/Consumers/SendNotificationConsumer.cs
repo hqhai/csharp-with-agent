@@ -8,12 +8,12 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Fsel.Notification.Application.Queues.Consumers
 {
-    public class ClassForumCommentConsumer : IConsumer<NotificationQueueModel>
+    public class SendNotificationConsumer : IConsumer<NotificationQueueModel>
     {
         private readonly IMediator _mediator;
         private readonly INotificationTypeRepository _notificationTypeRepository;
 
-        public ClassForumCommentConsumer(IMediator mediator, INotificationTypeRepository notificationTypeRepository)
+        public SendNotificationConsumer(IMediator mediator, INotificationTypeRepository notificationTypeRepository)
         {
             _mediator = mediator;
             _notificationTypeRepository = notificationTypeRepository;
@@ -26,18 +26,12 @@ namespace Fsel.Notification.Application.Queues.Consumers
             if (dataReceipt != null)
             {
                 var notificationType = await _notificationTypeRepository.Queryable.FirstOrDefaultAsync(x => x.Type == dataReceipt.Type && x.Content == dataReceipt.Content);
-
-                string message = dataReceipt.ParamsMessage != null ? string.Format(CultureInfo.InvariantCulture, notificationType?.TemplateMessage ?? string.Empty, dataReceipt.ParamsMessage.ToArray()) : "";
-
-                string link = dataReceipt.ParamsLink != null ? string.Format(CultureInfo.InvariantCulture, notificationType?.TemplateLink ?? string.Empty, dataReceipt.ParamsLink.ToArray()) : "";
-
-
                 CreateNotificationCommand model = new CreateNotificationCommand()
                 {
                     UserId = dataReceipt.UserId ?? default,
                     ObjectId = dataReceipt.ObjectId,
-                    Message = message,
-                    Link = link,
+                    Message = string.Format(CultureInfo.InvariantCulture, notificationType?.TemplateMessage!, dataReceipt.ParamsMessage),
+                    Link = string.Format(CultureInfo.InvariantCulture, notificationType?.TemplateLink!, dataReceipt.ParamsLink),
                     Roles = dataReceipt.Roles,
                     NotificationTypeId = notificationType?.Id ?? default
                 };

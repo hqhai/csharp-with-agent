@@ -36,7 +36,6 @@ namespace Fsel.Notification.Api.Controllers
             return commandResult.GetActionResult();
         }
 
-
         /// <summary>
         /// Push Notification
         /// </summary>
@@ -50,7 +49,6 @@ namespace Fsel.Notification.Api.Controllers
             MethodResult<NotificationMessageModel> commandResult = await _mediator.Send(cmd).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
-
 
         /// <summary>
         /// Turn Off/On Notification

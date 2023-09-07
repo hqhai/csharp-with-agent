@@ -26,9 +26,8 @@ namespace Fsel.Notification.Application.Queues.Publishers
                 ObjectId = notification.ObjectId,
                 UserId = notification.UserId,
                 Message = notification.Message,
-                Template = notification.Template,
+                Link = notification.Link,
                 UserIds = notification.UserIds,
-
             }, cancellationToken);
         }
     }

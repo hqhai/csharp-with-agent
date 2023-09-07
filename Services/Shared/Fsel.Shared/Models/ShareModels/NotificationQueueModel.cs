@@ -7,9 +7,14 @@ namespace Fsel.Shared.Models.ShareModels
 
     public class NotificationQueueModel
     {
+        public EnumNotificationType Type { get; set; }
+
+        public EnumNotificationContent Content { get; set; }
         public Guid ObjectId { get; set; }
 
         public string? Message { get; set; }
+
+        public string? Link { get; set; }
 
         public Guid? UserId { get; set; }
 
@@ -23,5 +28,7 @@ namespace Fsel.Shared.Models.ShareModels
 
         public Guid NotificationTypeId { get; set; }
 
+        public IList<object>? ParamsMessage { get; set; }
+        public IList<object>? ParamsLink { get; set; }
     }
 }

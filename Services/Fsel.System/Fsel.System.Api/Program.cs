@@ -36,7 +36,7 @@ builder.AddRefitClients(typeof(IOrderService), appSetting?.Services?.OrderApiUrl
 builder.AddMassTransit(appSetting,
 queues: new Dictionary<string, Type>
 {
-    { QueueSettings.RealtimeQueue.NameQueue.QuestBoardMainFinish, typeof(QuestBoardMainFinishConsumer) },
+    { QueueSettings.LmsQueue.NameQueue.QuestBoardMainFinish, typeof(QuestBoardMainFinishConsumer) },
 });
 
 var app = builder.Build();

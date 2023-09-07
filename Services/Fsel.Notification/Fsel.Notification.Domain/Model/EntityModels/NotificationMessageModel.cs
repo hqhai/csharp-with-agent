@@ -14,14 +14,18 @@ namespace Fsel.Notification.Domain.Model.EntityModels
 
         public EnumNotificationStatus Status { get; set; }
 
-
         public string? Message { get; set; }
+
+        public string? Link { get; set; }
 
         public Guid ObjectId { get; set; }
 
         public Guid NotificationTypeId { get; set; }
 
-        public string? Template { get; set; }
+        public string? TemplateMessage { get; set; }
+
+        public string? TemplateLink { get; set; }
+
 
         public string? Icon { get; set; }
 

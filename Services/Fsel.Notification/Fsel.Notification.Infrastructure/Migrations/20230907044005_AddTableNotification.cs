@@ -56,7 +56,8 @@ namespace Fsel.Notification.Infrastructure.Migrations
                     Content = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     Type = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     Priority = table.Column<int>(type: "int", nullable: false),
-                    Template = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    TemplateMessage = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    TemplateLink = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -82,6 +83,7 @@ namespace Fsel.Notification.Infrastructure.Migrations
                     RoleId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     Status = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     Message = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Link = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     ObjectId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     NotificationTypeId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
@@ -98,12 +100,15 @@ namespace Fsel.Notification.Infrastructure.Migrations
 
             migrationBuilder.InsertData(
                 table: "NotificationTypes",
-                columns: new[] { "Id", "Content", "CreatedDate", "CreatedFullName", "CreatedUserId", "DeletedDate", "DeletedFullName", "DeletedUserId", "Icon", "IsDeleted", "Priority", "Template", "Type", "UpdatedDate", "UpdatedFullName", "UpdatedUserId" },
+                columns: new[] { "Id", "Content", "CreatedDate", "CreatedFullName", "CreatedUserId", "DeletedDate", "DeletedFullName", "DeletedUserId", "Icon", "IsDeleted", "Priority", "TemplateLink", "TemplateMessage", "Type", "UpdatedDate", "UpdatedFullName", "UpdatedUserId" },
                 values: new object[,]
                 {
-                    { new Guid("d789788a-1ba5-405b-b280-ae92cd3b4fc2"), "ClassForum", new DateTime(2023, 8, 28, 0, 0, 0, 0, DateTimeKind.Unspecified), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, "", false, 0, "Bài viết của {0} thuộc {1} đã bị gán cờ. Vui lòng kiểm tra.", "Text", null, null, null },
-                    { new Guid("ef2b0a36-983d-4b71-aab0-1a124574b4dc"), "ClassForum", new DateTime(2023, 8, 28, 0, 0, 0, 0, DateTimeKind.Unspecified), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, "", false, 0, "", "LinkComment", null, null, null },
-                    { new Guid("efba1f99-8fad-47b5-af14-978f674f438e"), "InterationAction", new DateTime(2023, 8, 28, 0, 0, 0, 0, DateTimeKind.Unspecified), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, "", false, 0, "Bình luận của {0} thuộc {1} đã bị gán cờ. Vui lòng kiểm tra.", "Text", null, null, null }
+                    { new Guid("810c70ca-4f3c-4d02-a194-708fa45d42ea"), "ClassForum", new DateTime(2023, 8, 28, 0, 0, 0, 0, DateTimeKind.Unspecified), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, "", false, 0, "", "{0} vừa bình luận bài viết của bạn.", "LinkComment", null, null, null },
+                    { new Guid("86c0df96-f131-42bf-b315-0a8a85584f6a"), "OrderCreate", new DateTime(2023, 8, 28, 0, 0, 0, 0, DateTimeKind.Unspecified), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, "", false, 1, "", "Bạn có hóa đơn khóa học mới phê duyệt. Nhấn để phê duyệt.", "Text", null, null, null },
+                    { new Guid("9e983172-dba2-4ca7-b602-372c011ecb99"), "InterationAction", new DateTime(2023, 8, 28, 0, 0, 0, 0, DateTimeKind.Unspecified), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, "", false, 0, "", "{0} vừa trả lời bình luận của bạn.", "LinkComment", null, null, null },
+                    { new Guid("a805f268-467b-4149-8d01-b2ea05e1f3bd"), "OrderChangeStatus", new DateTime(2023, 8, 28, 0, 0, 0, 0, DateTimeKind.Unspecified), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, "", false, 1, "", "Bạn đã mua khóa học {0} thành công. Hãy bắt đầu học nào!", "Text", null, null, null },
+                    { new Guid("d789788a-1ba5-405b-b280-ae92cd3b4fc2"), "ClassForum", new DateTime(2023, 8, 28, 0, 0, 0, 0, DateTimeKind.Unspecified), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, "", false, 0, "", "Bài viết của {0} thuộc {1} đã bị gán cờ. Vui lòng kiểm tra.", "Text", null, null, null },
+                    { new Guid("efba1f99-8fad-47b5-af14-978f674f438e"), "InterationAction", new DateTime(2023, 8, 28, 0, 0, 0, 0, DateTimeKind.Unspecified), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, "", false, 0, "", "Bình luận của {0} thuộc {1} đã bị gán cờ. Vui lòng kiểm tra.", "Text", null, null, null }
                 });
 
             migrationBuilder.CreateIndex(

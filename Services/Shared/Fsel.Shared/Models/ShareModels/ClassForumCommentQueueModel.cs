@@ -13,6 +13,10 @@ namespace Fsel.Shared.Models.ShareModels
         public string? FullName { get; set; }
 
         public string? Message { get; set; }
+
+        public string? Link { get; set; }
+        public IList<object>? ParamsMessage { get; set; }
+        public IList<object>? ParamsLink { get; set; }
     }
 
 }

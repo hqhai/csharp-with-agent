@@ -24,18 +24,16 @@ builder.Services.AddScoped<INotificationRemindRepository, NotificationRemindRepo
 builder.Services.AddScoped<NotificationMessagePublisher>();
 builder.AddRefitClients(typeof(IUserService), appSetting?.Services?.UserApiUrl);
 
-
-
 builder.AddMassTransit(appSetting, queues:
 new Dictionary<string, Type>
 {
     { QueueSettings.NotificationQueue.NameQueue.DiscussionBoard, typeof(DiscussionBoardCommentConsumer) },
     { QueueSettings.InteractionQueue.NameQueue.ClassForum, typeof(InterationActionConsumer) },
     { QueueSettings.InteractionQueue.NameQueue.Comment, typeof(ClassForumCommentConsumer) },
+    { QueueSettings.OrderingQueue.NameQueue.SendNotification, typeof(SendNotificationConsumer) },
+
 });
 
 var app = builder.Build();
 app.UseServices(appSetting);
 app.Run();
-
-

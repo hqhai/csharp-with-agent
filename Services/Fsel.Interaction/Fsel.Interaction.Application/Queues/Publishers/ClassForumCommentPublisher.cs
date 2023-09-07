@@ -1,5 +1,4 @@
 using Fsel.Core.Base.Interfaces;
-using Fsel.Interaction.Domain.IRepositories;
 using Fsel.Shared.Constants;
 using Fsel.Shared.Models.ShareModels;
 
@@ -14,19 +13,24 @@ namespace Fsel.Interaction.Application.Queues.Publishers
             _queueProvider = queueProvider;
         }
 
-        public async Task Publish(ClassForumCommentQueueModel comment, CancellationToken cancellationToken)
+        public async Task Publish(NotificationQueueModel notification, CancellationToken cancellationToken)
         {
-            if (comment == null)
+            if (notification == null)
             {
                 return;
             }
 
 
-            await _queueProvider.Publish(QueueSettings.InteractionQueue.NameQueue.Comment, new ClassForumCommentQueueModel
+            await _queueProvider.Publish(QueueSettings.InteractionQueue.NameQueue.Comment, new NotificationQueueModel
             {
-                ObjectId = comment.ObjectId,
-                Message = comment.Message,
-                UserId = comment.UserId
+                ObjectId = notification.ObjectId,
+                Message = notification.Message,
+                Link = notification.Link,
+                UserId = notification.UserId,
+                Type = notification.Type,
+                Content = notification.Content,
+                ParamsMessage = notification.ParamsMessage,
+
             }, cancellationToken);
 
         }

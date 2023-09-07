@@ -60,7 +60,7 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
             {
                 comment = _commentRepository.Add(comment);
                 await _commentRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
-                ClassForumCommentQueueModel model = new ClassForumCommentQueueModel();
+                NotificationQueueModel model = new NotificationQueueModel();
                 switch (request.Type)
                 {
                     case EnumCommentType.DiscussionBoard:
@@ -77,11 +77,14 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
                             break;
                         }
 
-                        model = new ClassForumCommentQueueModel()
+                        model = new NotificationQueueModel()
                         {
-                            Message = NotificationTemplateSetting.CommentPost.Format(_authContext.CurrentUsername),
+                            ParamsMessage = new List<object> { _authContext.CurrentUsername! ?? string.Empty, },
                             ObjectId = request.ObjectId,
                             UserId = postOwner!.CreatedUserId,
+                            Content = EnumNotificationContent.ClassForum,
+                            Type = EnumNotificationType.LinkComment
+
                         };
                         await _classForumCommentPublisher.Publish(model, cancellationToken).ConfigureAwait(false);
                         break;
@@ -95,11 +98,13 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
                             break;
                         }
 
-                        model = new ClassForumCommentQueueModel()
+                        model = new NotificationQueueModel()
                         {
-                            Message = NotificationTemplateSetting.CommentReply.Format(_authContext.CurrentUsername),
+                            ParamsMessage = new List<object> { _authContext.CurrentUsername ?? string.Empty },
                             ObjectId = request.ObjectId,
                             UserId = commentOwnerId,
+                            Content = EnumNotificationContent.InterationAction,
+                            Type = EnumNotificationType.LinkComment
                         };
                         await _classForumCommentPublisher.Publish(model, cancellationToken).ConfigureAwait(false);
                         break;

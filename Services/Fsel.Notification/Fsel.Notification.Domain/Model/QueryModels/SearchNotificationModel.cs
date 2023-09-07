@@ -11,6 +11,6 @@ namespace Fsel.Notification.Domain.Model.QueryModels
         public Guid? UserId { get; set; }
         public Guid? RoleId { get; set; }
 
-        public EnumNotificationPushingType Type { get; set; }
+        public EnumNotificationType Type { get; set; }
     }
 }

@@ -48,6 +48,7 @@ namespace Fsel.Notification.Application.Commands
             MethodResult<NotificationMessageModel> methodResult = new MethodResult<NotificationMessageModel>();
 
             #region Validation
+
             NotificationMessage notificationNew = _mapper.Map<NotificationMessage>(request);
 
             // check null data
@@ -66,10 +67,10 @@ namespace Fsel.Notification.Application.Commands
             List<string> listUserId = new List<string>();
             if (request.Roles != null)
             {
-                foreach (var item in request.Roles!)
+                foreach (var item in request.Roles)
                 {
                     roleQuery.Role = item;
-                    var user = await _userService.GetUserByRole(roleQuery);
+                    var user = await _userService.GetUserByRoleAsync(roleQuery);
                     if (user.Content?.Result != null)
                     {
                         var users = user.Content.Result;
@@ -93,7 +94,6 @@ namespace Fsel.Notification.Application.Commands
                 }
             }
 
-
             #region Handler
             await _notificationsRepository.ExecuteTransactionAsync(async () =>
             {
@@ -112,9 +112,9 @@ namespace Fsel.Notification.Application.Commands
                 var notificationRealTime = new NotificationMessageModel()
                 {
                     UserId = notificationNew.UserId,
-                    Template = notificationTypeResult?.Template,
                     ObjectId = notificationNew.ObjectId,
                     Message = notificationNew.Message,
+                    Link = notificationNew.Message,
                     UserIds = listUserId
                 };
 
@@ -126,7 +126,8 @@ namespace Fsel.Notification.Application.Commands
                 return methodResult;
             });
 
-            #endregion
+            #endregion Handler
+
             return methodResult;
         }
     }

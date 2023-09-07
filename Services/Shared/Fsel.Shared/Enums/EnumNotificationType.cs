@@ -4,10 +4,9 @@ namespace Fsel.Shared.Enums
 {
     public enum EnumNotificationType
     {
-        SetWarningForUpdateTestResult
-            , SetWarningReportMonthly
-            , SetWarningReportTerm
-            , SetWarningReportYearly
-            , UpcommingTestReminder
+        Text,
+        LinkPage,
+        LinkPopup,
+        LinkComment,
     }
 }

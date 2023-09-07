@@ -11,7 +11,7 @@ namespace Fsel.Notification.Domain.Model.EntityModels
 
         public EnumNotificationContent Content { get; set; }
 
-        public EnumNotificationPushingType Type { get; set; }
+        public EnumNotificationType Type { get; set; }
 
         public bool Active { get; set; }
 
