@@ -72,7 +72,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                                                     .ToList();
             List<SkillScores> groupedSkillScores = mergedSkillScores
                                 .GroupBy(x => x.Skill)
-                                .Select(group => GetSumScoreByCourse(group)).ToList();
+                                .Select(group => GetSumSkillScore(group)).ToList();
             var percent = percentClassForum + percentHomeWork + percentSkillTest + percentUnitTest + percentVideo;
             return (groupedSkillScores, percent);
         }
@@ -85,7 +85,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             if (videoResult != null && videoResult.VideoSkillScores != null)
             {
                 skillScores = videoResult.VideoSkillScores.Where(x => x.Type == type && x.SkillScores != null && x.SkillScores.Any())
-                                        .SelectMany(x => x.SkillScores!).GroupBy(x => x.Skill).Select(x => GetSumScoreByCourse(x)).ToList();
+                                        .SelectMany(x => x.SkillScores!).GroupBy(x => x.Skill).Select(x => GetSkillScore(x)).ToList();
                 return (skillScores, skillScores.Sum(x => x.Percent * percentSkill / skillScores.Count));
             }
             return (skillScores, 0);
@@ -111,7 +111,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                     skillScore.Percent = x.ClassForumScores.Sum(x => x.Score) / 36;
                     return skillScore;
                 }).ToList();
-                skillScores = skillScores.GroupBy(x => x.Skill).Select(x => GetSumScoreByCourse(x)).ToList();
+                skillScores = skillScores.GroupBy(x => x.Skill).Select(x => GetSkillScore(x)).ToList();
                 return (skillScores, skillScores.Average(x => x.Percent * (percentSkill * skillScores.Count)));
             }
             return (skillScores, 0);
@@ -126,7 +126,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             {
                 skillScores = homeWorkResults.Where(x => x.SkillScores != null && x.SkillScores.Any())
                                         .SelectMany(x => x.SkillScores!)
-                                        .GroupBy(x => x.Skill).Select(x => GetSumScoreByCourse(x)).ToList();
+                                        .GroupBy(x => x.Skill).Select(x => GetSkillScore(x)).ToList();
             }
             return (skillScores, skillScores.Sum(x => x.Percent * percentSkill / skillScores.Count));
         }
@@ -163,7 +163,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             }
             List<SkillScores> groupedSkillScores = mergedSkillScores
                                .GroupBy(x => x.Skill)
-                               .Select(group => GetSumScoreByCourse(group)).ToList();
+                               .Select(group => GetSumSkillScore(group)).ToList();
             return (groupedSkillScores, percent);
         }
 
@@ -178,7 +178,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 skillScores = videoResults.Where(x => x.VideoSkillScores != null && x.VideoSkillScores.Any())
                                         .SelectMany(x => x.VideoSkillScores!)
                                         .Where(x => x.Type == EnumTimeCodeType.Standalone && x.SkillScores != null && x.SkillScores.Any())
-                                        .SelectMany(x => x.SkillScores!).GroupBy(x => x.Skill).Select(x => GetSumScoreByCourse(x)).ToList();
+                                        .SelectMany(x => x.SkillScores!).GroupBy(x => x.Skill).Select(x => GetSkillScore(x)).ToList();
                 if (type == EnumCourseType.Academic)
                 {
                     return (skillScores, skillScores.Average(x => x.Percent * ((double)9 * skillScores.Count)));
@@ -200,7 +200,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             return (skillScores, 0);
         }
 
-        public SkillScores GetSumScoreByCourse(IGrouping<EnumCourseSkill, SkillScores>? group)
+        public SkillScores GetSumSkillScore(IGrouping<EnumCourseSkill, SkillScores>? group)
         {
             if (group != null)
             {
@@ -218,7 +218,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             return new SkillScores();
         }
 
-        public SkillScores GetSkillSkillScore(IGrouping<EnumCourseSkill, SkillScores>? x)
+        public SkillScores GetSkillScore(IGrouping<EnumCourseSkill, SkillScores>? x)
         {
             if (x != null)
             {
@@ -245,7 +245,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             {
                 skillScores = homeWorkResults.Where(x => x.SkillScores != null && x.SkillScores.Any())
                                         .SelectMany(x => x.SkillScores!)
-                                        .GroupBy(x => x.Skill).Select(x => GetSumScoreByCourse(x)).ToList();
+                                        .GroupBy(x => x.Skill).Select(x => GetSkillScore(x)).ToList();
                 if (type == EnumCourseType.Academic)
                 {
                     return (skillScores, skillScores.Average(x => x.Percent * ((double)14 * skillScores.Count)));
@@ -276,7 +276,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                     return skillScore;
                 }).ToList();
 
-                skillScores = skillScores.GroupBy(x => x.Skill).Select(x => GetSumScoreByCourse(x)).ToList();
+                skillScores = skillScores.GroupBy(x => x.Skill).Select(x => GetSkillScore(x)).ToList();
 
                 if (type == EnumCourseType.Academic)
                 {
@@ -304,12 +304,12 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                                         .Where(x => x.Type == type && x.SkillScores != null && x.SkillScores.Any())
                                         .SelectMany(x => x.SkillScores!)
                                         .GroupBy(x => x.Skill)
-                                        .Select(x => GetSumScoreByCourse(x)).ToList();
+                                        .Select(x => GetSkillScore(x)).ToList();
                     var percent = skillScores.Average(x => x.Percent) * 24 / unitIds.Count;
                     skillScorePercents.Add((skillScores, percent));
                 }
             }
-            var skillScoreSkills = skillScorePercents.SelectMany(x => x.Item1).GroupBy(x => x.Skill).Select(x => GetSumScoreByCourse(x)).ToList();
+            var skillScoreSkills = skillScorePercents.SelectMany(x => x.Item1).GroupBy(x => x.Skill).Select(x => GetSkillScore(x)).ToList();
             return (skillScoreSkills, skillScorePercents.Sum(x => x.Item2));
         }
 
@@ -317,7 +317,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
         {
             ArgumentNullException.ThrowIfNull(finalTestId);
             var finalTestResult = await _finalTestResultRepository.Queryable.FirstOrDefaultAsync(x => x.FinalTestId == finalTestId && x.StudentId == studentId && x.Status == EnumResultStatus.Done);
-            var skillScores = finalTestResult?.SkillScores?.GroupBy(x => x.Skill).Select(x => GetSumScoreByCourse(x)).ToList();
+            var skillScores = finalTestResult?.SkillScores?.GroupBy(x => x.Skill).Select(x => GetSkillScore(x)).ToList();
             var percent = finalTestResult?.Percent * 15;
             return (skillScores ?? new List<SkillScores>(), percent ?? default);
         }
