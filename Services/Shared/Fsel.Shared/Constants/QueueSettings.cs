@@ -29,8 +29,7 @@ namespace Fsel.Shared.Constants
             public static class NameQueue
             {
                 public const string DiscussionBoard = $"{KeyQueue}_DiscussionBoard";
-                public const string UpdateClassLiveAssignment = $"{KeyQueue}_UpdateClassLiveAssignment";
-                public const string QuestBoardMainFinish = $"{KeyQueue}_QuestBoardMainFinish";
+                public const string ClassForum = $"{KeyQueue}_ClassForum";
                 public const string Notification = $"{KeyQueue}_Notification";
             }
         }
@@ -68,6 +67,7 @@ namespace Fsel.Shared.Constants
 
             public static class NameQueue
             {
+                public const string QuestBoardMainFinish = $"{KeyQueue}_QuestBoardMainFinish";
             }
         }
 
@@ -86,6 +86,7 @@ namespace Fsel.Shared.Constants
 
             public static class NameQueue
             {
+                public const string SendNotification = $"{KeyQueue}_SendNotification";
             }
         }
 
@@ -98,12 +99,24 @@ namespace Fsel.Shared.Constants
             }
         }
 
+        public static class NotificationQueue
+        {
+            public const string KeyQueue = nameof(NotificationQueue);
+
+            public static class NameQueue
+            {
+                public const string DiscussionBoard = $"{KeyQueue}_DiscussionBoard";
+                public const string ClassForum = $"{KeyQueue}_ClassForum";
+            }
+        }
+
         public static class TrainingQueue
         {
             public const string KeyQueue = nameof(TrainingQueue);
 
             public static class NameQueue
             {
+                public const string UpdateClassLiveAssignment = $"{KeyQueue}_UpdateClassLiveAssignment";
             }
         }
     }

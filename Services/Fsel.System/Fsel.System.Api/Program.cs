@@ -15,7 +15,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 var appSetting = builder.AddAppSettings<AppSetting>();
-builder.AddServices();
+builder.AddServices(appSetting);
 builder.AddSwaggerGens(appSetting);
 builder.AddAuthenticationJwtBearers(appSetting);
 builder.AddDbContexts<SystemDbContext>();
@@ -36,7 +36,7 @@ builder.AddRefitClients(typeof(IOrderService), appSetting?.Services?.OrderApiUrl
 builder.AddMassTransit(appSetting,
 queues: new Dictionary<string, Type>
 {
-    { QueueSettings.RealtimeQueue.NameQueue.QuestBoardMainFinish, typeof(QuestBoardMainFinishConsumer) },
+    { QueueSettings.LmsQueue.NameQueue.QuestBoardMainFinish, typeof(QuestBoardMainFinishConsumer) },
 });
 
 var app = builder.Build();

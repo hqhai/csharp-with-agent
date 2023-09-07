@@ -23,7 +23,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 // Add services to the container.
 var appSetting = builder.AddAppSettings<AppSetting>();
-builder.AddServices();
+builder.AddServices(appSetting);
 builder.AddSwaggerGens(appSetting);
 builder.AddAuthenticationJwtBearers(appSetting);
 builder.AddDbContexts<TrainingDbContext>();
@@ -43,7 +43,7 @@ builder.AddRefitClients(typeof(ISystemService), appSetting?.Services?.SystemApiU
 builder.AddMassTransit(appSetting,
 queues: new Dictionary<string, Type>
 {
-    { QueueSettings.RealtimeQueue.NameQueue.UpdateClassLiveAssignment, typeof(UpdateClassLiveAssignmentConsumer) }
+    { QueueSettings.TrainingQueue.NameQueue.UpdateClassLiveAssignment, typeof(UpdateClassLiveAssignmentConsumer) }
 });
 //builder.Services.AddMediator(cfg =>
 //{

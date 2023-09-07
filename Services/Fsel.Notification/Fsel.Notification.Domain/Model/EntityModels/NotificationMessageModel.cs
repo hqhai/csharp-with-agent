@@ -5,20 +5,19 @@ namespace Fsel.Notification.Domain.Model.EntityModels
     using Fsel.Core.Base.BaseModels;
     using Fsel.Shared.Enums;
 
-    public class NotificationsModel : BaseModel
+    public class NotificationMessageModel : BaseModel
     {
 
-        public Guid UserId { get; set; }
+        public Guid? UserId { get; set; }
 
         public Guid? RoleId { get; set; }
 
         public EnumNotificationStatus Status { get; set; }
 
-        public string? Title { get; set; }
 
         public string? Message { get; set; }
 
-        public Guid? ObjectId { get; set; }
+        public Guid ObjectId { get; set; }
 
         public Guid NotificationTypeId { get; set; }
 
@@ -26,6 +25,6 @@ namespace Fsel.Notification.Domain.Model.EntityModels
 
         public string? Icon { get; set; }
 
-        public string? UserIds { get; set; }
+        public IList<string>? UserIds { get; set; }
     }
 }
