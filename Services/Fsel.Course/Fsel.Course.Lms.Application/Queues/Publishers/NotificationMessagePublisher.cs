@@ -21,7 +21,7 @@ namespace Fsel.Course.Lms.Application.Queues.Publishers
             {
                 return;
             }
-            await _queueProvider.Publish(QueueSettings.LmsQueue.NameQueue.ClassForumResult, new NotificationQueueModel
+            await _queueProvider.Publish(QueueSettings.LmsQueue.NameQueue.SendNotification, new NotificationQueueModel
             {
                 ObjectId = request.ObjectId,
                 Message = request.Message,

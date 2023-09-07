@@ -67,7 +67,7 @@ namespace Fsel.Shared.Constants
             public static class NameQueue
             {
                 public const string QuestBoardMainFinish = $"{KeyQueue}_QuestBoardMainFinish";
-                public const string ClassForumResult = $"{KeyQueue}_ClassForumResult";
+                public const string SendNotification = $"{KeyQueue}_SendNotification";
             }
         }
 
