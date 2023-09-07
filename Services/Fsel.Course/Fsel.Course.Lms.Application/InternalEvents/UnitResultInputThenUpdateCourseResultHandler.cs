@@ -7,10 +7,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Lms.Application.Queues.Publishers;
-    using Fsel.Shared.Enums;
-    using Fsel.Shared.Helpers;
     using MediatR;
-    using Microsoft.EntityFrameworkCore;
 
     public class UnitResultInputThenUpdateCourseResultHandler : BaseInternalEventHandler,
         INotificationHandler<EntityChangedEvent<UnitResult>>
@@ -19,6 +16,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
 
         public UnitResultInputThenUpdateCourseResultHandler(IUnitResultRepository unitResultRepository
             , ILessonResultRepository lessonResultRepository
+            , IUnitRepository unitRepository
             , IVideoResultRepository videoResultRepository
             , IClassForumResultRepository classForumResultRepository
             , IHomeWorkResultRepository homeWorkResultRepository
@@ -34,6 +32,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 lessonResultRepository,
                 courseResultRepository,
                 courseRepository,
+                unitRepository,
                 finishOneUnitPublisher,
                 finishOneLevelPassPublisher,
                 finalTestResultRepository,

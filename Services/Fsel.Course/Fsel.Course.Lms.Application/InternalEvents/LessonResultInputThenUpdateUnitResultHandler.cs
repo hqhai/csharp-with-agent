@@ -39,6 +39,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 lessonResultRepository,
                 courseResultRepository,
                 courseRepository,
+                unitRepository,
                 finishOneUnitPublisher,
                 finishOneLevelPassPublisher,
                 finalTestResultRepository,
@@ -62,13 +63,14 @@ namespace Fsel.Course.Lms.Application.InternalEvents
 
             if (unit != null && lessonResult.Status == EnumResultStatus.Done)
             {
+                var lessonResultIds = unit.LessonResults.Select(x => x.Id).ToList();
                 if (unit.LessonResults.Count == unit.UnitLessons.Count && unit.UnitSkillMockTests.Count == 0)
                 {
-                    await UpdateUnit(unit.LessonResults.ToList(), unit, lessonResult.CourseId, lessonResult.StudentId, cancellationToken);
+                    await UpdateUnit(lessonResultIds, unit, lessonResult.CourseId, lessonResult.StudentId, cancellationToken);
                 }
                 else if (unit.LessonResults.Count == unit.UnitLessons.Count && unit.UnitSkillMockTests.Count > 0)
                 {
-                    await UpdateUnit(unit.LessonResults.ToList(), unit, lessonResult.CourseId, lessonResult.StudentId, cancellationToken);
+                    await UpdateUnit(lessonResultIds, unit, lessonResult.CourseId, lessonResult.StudentId, cancellationToken);
                     await UpdateTheNextLesson(unit, lessonResult, cancellationToken);
                 }
                 else
@@ -76,7 +78,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                     var isCheck = unit.LessonResults.Any(x => x.Status == EnumResultStatus.New);
                     if (!isCheck)
                     {
-                        await UpdateUnit(unit.LessonResults.ToList(), unit, lessonResult.CourseId, lessonResult.StudentId, cancellationToken);
+                        await UpdateUnit(lessonResultIds, unit, lessonResult.CourseId, lessonResult.StudentId, cancellationToken);
                         await UpdateTheNextLesson(unit, lessonResult, cancellationToken);
                     }
                 }

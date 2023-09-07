@@ -16,6 +16,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
     {
         public FinalResultInputThenUpdateCourseResultHandler(
              ILessonResultRepository lessonResultRepository
+            , IUnitRepository unitRepository
             , IVideoResultRepository videoResultRepository
             , IClassForumResultRepository classForumResultRepository
             , IHomeWorkResultRepository homeWorkResultRepository
@@ -32,6 +33,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 lessonResultRepository,
                 courseResultRepository,
                 courseRepository,
+                unitRepository,
                 finishOneUnitPublisher,
                 finishOneLevelPassPublisher,
                 finalTestResultRepository,
