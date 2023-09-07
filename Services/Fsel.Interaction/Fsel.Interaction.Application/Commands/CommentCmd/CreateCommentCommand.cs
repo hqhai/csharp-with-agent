@@ -15,11 +15,11 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
     using Fsel.Shared.Enums;
-    using Fsel.Interaction.Application.Services.ClassForumResultServices;
     using Fsel.Shared.Models.ShareModels;
     using MassTransit.Initializers;
     using Fsel.Shared.Constants;
     using Kros.Extensions;
+    using Fsel.Interaction.Application.Services.CourseServices;
 
     public class CreateCommentCommand : CreateCommentCommandModel, IRequest<MethodResult<bool>>
     {
@@ -32,16 +32,16 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
         private readonly DiscussionBoardCommentPublisher _discussionBoardCommentPublisher;
         private readonly ClassForumCommentPublisher _classForumCommentPublisher;
         private readonly AuthContext _authContext;
-        private readonly IClassForumResultService _classForumResultService;
+        private readonly ICourseService _courseService;
 
-        public CreateCommentCommandHandler(IMapper mapper, ICommentRepository commentRepository, AuthContext authContext, DiscussionBoardCommentPublisher discussionBoardCommentPublisher, ClassForumCommentPublisher classForumCommentPublisher, IClassForumResultService classForumResultService)
+        public CreateCommentCommandHandler(IMapper mapper, ICommentRepository commentRepository, AuthContext authContext, DiscussionBoardCommentPublisher discussionBoardCommentPublisher, ClassForumCommentPublisher classForumCommentPublisher, ICourseService courseService)
         {
             _mapper = mapper;
             _commentRepository = commentRepository;
             _authContext = authContext;
             _discussionBoardCommentPublisher = discussionBoardCommentPublisher;
             _classForumCommentPublisher = classForumCommentPublisher;
-            _classForumResultService = classForumResultService;
+            _courseService = courseService;
         }
 
         public async Task<MethodResult<bool>> Handle(CreateCommentCommand request, CancellationToken cancellationToken)
@@ -69,7 +69,7 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
                         break;
                     case EnumCommentType.ClassForum:
 
-                        var postOwner = await _classForumResultService.GetClassForumResultByIdAsync(request.ObjectId).Select(x => x.Content?.Result?.ClassForum?.ClassForumResults?.FirstOrDefault()).ConfigureAwait(false);
+                        var postOwner = await _courseService.GetClassForumResultByIdAsync(request.ObjectId).Select(x => x.Content?.Result?.ClassForum?.ClassForumResults?.FirstOrDefault()).ConfigureAwait(false);
 
                         //Không thông báo khi comment bài viết của chính mình
                         if (postOwner!.CreatedUserId == _authContext.CurrentUserId)
