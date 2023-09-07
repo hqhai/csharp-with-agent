@@ -8,9 +8,9 @@ namespace Fsel.Notification.Infrastructure.Configs
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-    public class NotificationEntityTypeConfiguration : IEntityTypeConfiguration<Notifications>
+    public class NotificationEntityTypeConfiguration : IEntityTypeConfiguration<NotificationMessage>
     {
-        public void Configure(EntityTypeBuilder<Notifications> builder)
+        public void Configure(EntityTypeBuilder<NotificationMessage> builder)
         {
             ArgumentNullException.ThrowIfNull(builder);
             builder.Property(e => e.Status)
@@ -18,11 +18,6 @@ namespace Fsel.Notification.Infrastructure.Configs
                 .HasConversion(
                     v => v.ToString(),
                     v => v.EnumParse<EnumNotificationStatus>());
-
-            builder.HasOne(a => a.NotificationType)
-               .WithMany(b => b.Notifications)
-               .HasForeignKey(b => b.NotificationTypeId)
-               .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

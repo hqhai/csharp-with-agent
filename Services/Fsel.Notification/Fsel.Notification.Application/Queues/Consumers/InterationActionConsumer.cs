@@ -25,7 +25,6 @@ namespace Fsel.Notification.Application.Queues.Consumers
 
             if (dataReceipt != null)
             {
-
                 if (dataReceipt!.Type == EnumInteractionActionType.Flag)
                 {
                     var notificationTypeId = _notificationTypeRepository.Queryable.Where(x => x.Type == EnumNotificationPushingType.Text).Select(x => x.Id).FirstOrDefault();
@@ -34,7 +33,6 @@ namespace Fsel.Notification.Application.Queues.Consumers
                     {
                         UserId = dataReceipt.UserId,
                         ObjectId = dataReceipt.ObjectId,
-                        Message = NotificationTemplateSetting.FlagPostTemplate,
                         NotificationTypeId = notificationTypeId
                     };
                     await _mediator.Send(model).ConfigureAwait(false);

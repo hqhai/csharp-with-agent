@@ -14,7 +14,7 @@ namespace Fsel.Notification.Application.Queues.Publishers
             _queueProvider = queueProvider;
         }
 
-        public async Task Publish(NotificationsModel notification, CancellationToken cancellationToken)
+        public async Task Publish(NotificationMessageModel notification, CancellationToken cancellationToken)
         {
             if (notification == null)
             {
@@ -28,7 +28,6 @@ namespace Fsel.Notification.Application.Queues.Publishers
                 Message = notification.Message,
                 Template = notification.Template,
                 UserIds = notification.UserIds,
-
             }, cancellationToken);
         }
     }

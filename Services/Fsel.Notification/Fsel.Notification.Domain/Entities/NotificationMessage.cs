@@ -4,15 +4,13 @@ using Fsel.Shared.Enums;
 
 namespace Fsel.Notification.Domain.Entities
 {
-    public class Notifications : Entity
+    public class NotificationMessage : Entity
     {
-        public Guid UserId { get; set; } = Guid.Empty;
+        public Guid? UserId { get; set; }
 
-        public Guid RoleId { get; set; } = Guid.Empty;
+        public Guid? RoleId { get; set; }
 
         public EnumNotificationStatus Status { get; set; }
-
-        public string? Title { get; set; }
 
         public string? Message { get; set; }
 
