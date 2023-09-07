@@ -8,13 +8,11 @@ namespace Fsel.Interaction.Api.Controllers
     using Fsel.Interaction.Application.Queries.SurveyQuestionQuery;
     using Fsel.Interaction.Domain.Models.EntityModels;
     using MediatR;
-    using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
 
     [ApiVersion(Settings.APIVersion)]
     [Route(Settings.APIDefaultRoute + "/surveyQuestion")]
     [ApiController]
-    [Authorize]
     public class SurveyQuestionController : ControllerBase
     {
         private readonly IMediator _mediator;
