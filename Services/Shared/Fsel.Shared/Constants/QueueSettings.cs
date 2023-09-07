@@ -67,7 +67,6 @@ namespace Fsel.Shared.Constants
 
             public static class NameQueue
             {
-                public const string UpdateClassLiveAssignment = $"{KeyQueue}_UpdateClassLiveAssignment";
                 public const string QuestBoardMainFinish = $"{KeyQueue}_QuestBoardMainFinish";
             }
         }
@@ -117,6 +116,7 @@ namespace Fsel.Shared.Constants
 
             public static class NameQueue
             {
+                public const string UpdateClassLiveAssignment = $"{KeyQueue}_UpdateClassLiveAssignment";
             }
         }
     }

@@ -20,9 +20,9 @@ namespace Fsel.Shared.Models.ShareModels
 
         public string? Icon { get; set; }
 
-        public List<string> UserIds { get; set; }
+        public IList<string>? UserIds { get; set; }
 
-        public List<EnumRole>? Roles { get; set; }
+        public IList<EnumRole>? Roles { get; set; }
 
         public Guid NotificationTypeId { get; set; }
         public IList<object>? Params { get; set; }
