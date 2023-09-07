@@ -7,7 +7,6 @@ namespace Fsel.Notification.Domain.Entities
 
     public class NotificationType : Entity
     {
-
         public string? Icon { get; set; }
 
         public EnumNotificationContent Content { get; set; }
@@ -19,6 +18,5 @@ namespace Fsel.Notification.Domain.Entities
         public string? TemplateMessage { get; set; }
 
         public string? TemplateLink { get; set; }
-
     }
 }

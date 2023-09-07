@@ -4,7 +4,7 @@
     "type": "Text",
     "content": "ClassForum",
     "icon": "",
-    "priorty": 1,
+    "priority": 1,
     "templateMessage": "Bài viết của {0} thuộc {1} đã bị gán cờ. Vui lòng kiểm tra.",
     "templateLink": "",
     "createdDate": "2023-08-28"
@@ -12,9 +12,9 @@
   {
     "id": "D789788A-1BA6-405B-F280-AE92CD3B4FC2",
     "type": "Text",
-    "content": "ClassForumResult",
+    "content": "CreateClassForumResult",
     "icon": "",
-    "priorty": 1,
+    "priority": 1,
     "templateMessage": "Bạn có bài đăng của học sinh đang chờ duyệt.",
     "templateLink": "",
     "createdDate": "2023-08-28"
@@ -24,7 +24,7 @@
     "type": "Text",
     "content": "Comment",
     "icon": "",
-    "priorty": 1,
+    "priority": 1,
     "templateMessage": "Bình luận của {0} thuộc {1} đã bị gán cờ. Vui lòng kiểm tra.",
     "templateLink": "",
     "createdDate": "2023-08-28"
@@ -34,7 +34,7 @@
     "type": "LinkComment",
     "content": "ClassForum",
     "icon": "",
-    "priorty": 1,
+    "priority": 1,
     "templateMessage": "{0} vừa bình luận bài viết của bạn.",
     "templateLink": "",
     "createdDate": "2023-08-28"
@@ -44,7 +44,7 @@
     "type": "LinkComment",
     "content": "Comment",
     "icon": "",
-    "priorty": 1,
+    "priority": 1,
     "templateMessage": "{0} vừa trả lời bình luận của bạn.",
     "templateLink": "",
     "createdDate": "2023-08-28"
