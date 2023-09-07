@@ -12,7 +12,7 @@
   {
     "id": "EFBA1F99-8FAD-47B5-AF14-978F674F438E",
     "type": "Text",
-    "content": "InterationAction",
+    "content": "Comment",
     "icon": "",
     "priorty": 1,
     "templateMessage": "Bình luận của {0} thuộc {1} đã bị gán cờ. Vui lòng kiểm tra.",

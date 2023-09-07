@@ -82,7 +82,7 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
                             ParamsMessage = new List<object> { _authContext.CurrentUsername! ?? string.Empty, },
                             ObjectId = request.ObjectId,
                             UserId = postOwner!.CreatedUserId,
-                            Content = EnumNotificationContent.ClassForum,
+                            Content = EnumNotificationContent.Comment,
                             Type = EnumNotificationType.LinkComment
 
                         };
@@ -103,7 +103,7 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
                             ParamsMessage = new List<object> { _authContext.CurrentUsername ?? string.Empty },
                             ObjectId = request.ObjectId,
                             UserId = commentOwnerId,
-                            Content = EnumNotificationContent.InterationAction,
+                            Content = EnumNotificationContent.Comment,
                             Type = EnumNotificationType.LinkComment
                         };
                         await _classForumCommentPublisher.Publish(model, cancellationToken).ConfigureAwait(false);

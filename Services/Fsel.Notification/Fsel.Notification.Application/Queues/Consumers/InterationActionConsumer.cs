@@ -1,10 +1,11 @@
+using System.Globalization;
 using Fsel.Notification.Application.Commands;
-using Fsel.Notification.Domain.Entities;
 using Fsel.Notification.Domain.IRepositories;
 using Fsel.Shared.Enums;
 using Fsel.Shared.Models.ShareModels;
 using MassTransit;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 
 namespace Fsel.Notification.Application.Queues.Consumers
 {
@@ -25,22 +26,22 @@ namespace Fsel.Notification.Application.Queues.Consumers
 
             if (dataReceipt != null)
             {
-                if (dataReceipt!.Type == EnumInteractionActionType.Flag)
+                if (dataReceipt!.InterationType == EnumInteractionActionType.Flag)
                 {
-                    var notificationType = _notificationTypeRepository.Queryable.Where(x => x.Type == EnumNotificationType.Text && x.Content == EnumNotificationContent.ClassForum).Select(x => new NotificationMessage
-                    {
-                        Id = x.Id,
-                        Message = x.TemplateMessage,
-                        Link = x.TemplateLink
-                    }).FirstOrDefault();
+                    var notificationType = await _notificationTypeRepository.Queryable.FirstOrDefaultAsync(x => x.Type == dataReceipt.Type && x.Content == dataReceipt.Content);
+
+                    string message = dataReceipt.ParamsMessage != null ? string.Format(CultureInfo.InvariantCulture, notificationType?.TemplateMessage ?? string.Empty, dataReceipt.ParamsMessage.ToArray()) : "";
+
+                    string link = dataReceipt.ParamsLink != null ? string.Format(CultureInfo.InvariantCulture, notificationType?.TemplateLink ?? string.Empty, dataReceipt.ParamsLink.ToArray()) : "";
 
                     CreateNotificationCommand model = new CreateNotificationCommand()
                     {
-                        UserId = dataReceipt.UserId,
+                        UserId = dataReceipt.UserId ?? default,
                         ObjectId = dataReceipt.ObjectId,
-                        NotificationTypeId = notificationType!.Id,
-                        Message = notificationType!.Message,
-                        Link = notificationType!.Link
+                        Message = message,
+                        Link = link,
+                        Roles = dataReceipt.Roles,
+                        NotificationTypeId = notificationType?.Id ?? default
                     };
                     await _mediator.Send(model).ConfigureAwait(false);
                 }

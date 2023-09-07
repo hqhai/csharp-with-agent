@@ -33,6 +33,10 @@ namespace Fsel.Notification.Application.Commands
             MethodResult<NotificationRemindModel> methodResult = new MethodResult<NotificationRemindModel>();
 
             #region Handler
+            if (request.UserId == null)
+            {
+                return methodResult;
+            }
 
             var notificationRemindExists = await _notificationRemindRepository.Queryable.Where(x => x.UserId == request.UserId && x.ObjectId == request.ObjectId).ToListAsync(cancellationToken);
 

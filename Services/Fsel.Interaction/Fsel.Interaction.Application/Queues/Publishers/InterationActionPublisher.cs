@@ -25,7 +25,6 @@ namespace Fsel.Interaction.Application.Queues.Publishers
                 ObjectId = model.ObjectId,
                 Type = model.Type,
                 UserId = model.UserId,
-                FullName = model.FullName
             }, cancellationToken);
 
         }
