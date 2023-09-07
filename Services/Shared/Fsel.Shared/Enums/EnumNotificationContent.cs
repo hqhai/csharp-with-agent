@@ -4,10 +4,11 @@ namespace Fsel.Shared.Enums
 {
     public enum EnumNotificationContent
     {
-        ClassForum,
+        FlagClassForum,
         Comment,
         OrderChangeStatus,
         OrderCreate,
-        CreateClassForumResult
+        CreateClassForumResult,
+        ReplyComment
     }
 }

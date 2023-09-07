@@ -103,7 +103,7 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
                             ParamsMessage = new List<object> { _authContext.CurrentUsername ?? string.Empty },
                             ObjectId = request.ObjectId,
                             UserId = commentOwnerId,
-                            Content = EnumNotificationContent.Comment,
+                            Content = EnumNotificationContent.ReplyComment,
                             Type = EnumNotificationType.LinkComment
                         };
                         await _classForumCommentPublisher.Publish(model, cancellationToken).ConfigureAwait(false);

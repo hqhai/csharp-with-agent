@@ -92,6 +92,8 @@ namespace Fsel.Interaction.Application.Commands.ActionCmd
                     {
                         ObjectId = action.ObjectId,
                         InterationType = action.Type,
+                        Type = EnumNotificationType.LinkPage,
+                        Content = EnumNotificationContent.FlagClassForum,
                         UserId = _authContext.CurrentUserId,
                     };
 
