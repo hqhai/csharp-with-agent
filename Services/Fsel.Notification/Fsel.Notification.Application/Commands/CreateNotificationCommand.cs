@@ -48,6 +48,7 @@ namespace Fsel.Notification.Application.Commands
             MethodResult<NotificationMessageModel> methodResult = new MethodResult<NotificationMessageModel>();
 
             #region Validation
+
             NotificationMessage notificationNew = _mapper.Map<NotificationMessage>(request);
 
             // check null data
@@ -69,10 +70,10 @@ namespace Fsel.Notification.Application.Commands
             List<string> listUserId = new List<string>();
             if (request.Roles != null)
             {
-                foreach (var item in request.Roles!)
+                foreach (var item in request.Roles)
                 {
                     roleQuery.Role = item;
-                    var user = await _userService.GetUserByRole(roleQuery);
+                    var user = await _userService.GetUserByRoleAsync(roleQuery);
                     if (user.Content?.Result != null)
                     {
                         var users = user.Content.Result;
@@ -85,7 +86,6 @@ namespace Fsel.Notification.Application.Commands
 
             #endregion Validation
 
-
             #region Handler
 
             await _notificationsRepository.ExecuteTransactionAsync(async () =>
@@ -93,7 +93,6 @@ namespace Fsel.Notification.Application.Commands
                 //Save into Database
                 notificationNew = _notificationsRepository.Add(notificationNew);
                 await _notificationsRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
-
 
                 //Push notification
                 var notificationRealTime = new NotificationMessageModel()
@@ -107,14 +106,14 @@ namespace Fsel.Notification.Application.Commands
 
                 await _notificationMessagePublisher.Publish(notificationRealTime, cancellationToken).ConfigureAwait(false);
 
-
                 //Return Value
                 methodResult.StatusCode = StatusCodes.Status201Created;
                 methodResult.Result = _mapper.Map<NotificationMessageModel>(notificationNew);
                 return methodResult;
             });
 
-            #endregion
+            #endregion Handler
+
             return methodResult;
         }
     }

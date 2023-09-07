@@ -25,17 +25,14 @@ builder.Services.AddScoped<NotificationMessagePublisher>();
 
 builder.AddRefitClients(typeof(IUserService), appSetting?.Services?.UserApiUrl);
 
-
-
 builder.AddMassTransit(appSetting, queues:
 new Dictionary<string, Type>
 {
-    { QueueSettings.RealtimeQueue.NameQueue.DiscussionBoard, typeof(DiscussionBoardCommentConsumer) },
-    { QueueSettings.RealtimeQueue.NameQueue.ClassForum, typeof(InterationActionConsumer) },
+    { QueueSettings.NotificationQueue.NameQueue.DiscussionBoard, typeof(DiscussionBoardCommentConsumer) },
+    { QueueSettings.NotificationQueue.NameQueue.ClassForum, typeof(InterationActionConsumer) },
+    { QueueSettings.OrderingQueue.NameQueue.SendNotification, typeof(SendNotificationConsumer) },
 });
 
 var app = builder.Build();
 app.UseServices(appSetting);
 app.Run();
-
-

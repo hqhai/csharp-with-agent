@@ -16,5 +16,4 @@ namespace Fsel.Shared.Models.ShareModels
 
         public string? FullName { get; set; }
     }
-
 }

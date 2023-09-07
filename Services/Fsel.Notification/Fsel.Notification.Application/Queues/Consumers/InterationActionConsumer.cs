@@ -25,7 +25,6 @@ namespace Fsel.Notification.Application.Queues.Consumers
 
             if (dataReceipt != null)
             {
-
                 if (dataReceipt!.Type == EnumInteractionActionType.Flag)
                 {
                     var notificationTypeId = _notificationTypeRepository.Queryable.Where(x => x.Type == EnumNotificationPushingType.Text).Select(x => x.Id).FirstOrDefault();

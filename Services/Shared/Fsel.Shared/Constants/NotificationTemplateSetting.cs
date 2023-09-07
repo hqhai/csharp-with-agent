@@ -2,6 +2,8 @@
 
 namespace Fsel.Shared.Constants
 {
+    using static MassTransit.Logging.OperationName;
+
     public static class NotificationTemplateSetting
     {
       
