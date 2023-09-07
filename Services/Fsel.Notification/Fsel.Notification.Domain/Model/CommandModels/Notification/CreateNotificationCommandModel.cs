@@ -9,6 +9,8 @@ namespace Fsel.Notification.Domain.Model.CommandModels.Notification
     {
         public string? Title { get; set; }
         public string? Message { get; set; }
+
+        public string? Link { get; set; }
         public IList<EnumRole>? Roles { get; set; }
 
         public Guid? UserId { get; set; }

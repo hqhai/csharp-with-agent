@@ -101,7 +101,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
                 {
                     Roles = new List<EnumRole> { EnumRole.Admin },
                     ObjectId = order.Id,
-                    Type = EnumNotificationPushingType.Text,
+                    Type = EnumNotificationType.Text,
                     Content = EnumNotificationContent.OrderCreate
                 }, cancellationToken);
                 await _orderRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);

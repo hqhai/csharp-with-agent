@@ -6,6 +6,7 @@ namespace Fsel.Shared.Constants
 
     public static class NotificationTemplateSetting
     {
-      
+        public const string CommentPost = "{0} vừa bình luận bài viết của bạn";
+        public const string CommentReply = "{0} vừa trả lời bình luận của bạn";
     }
 }

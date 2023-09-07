@@ -30,7 +30,7 @@ namespace Fsel.Shared.Constants
             {
                 public const string DiscussionBoard = $"{KeyQueue}_DiscussionBoard";
                 public const string ClassForum = $"{KeyQueue}_ClassForum";
-                public const string Notification = $"{KeyQueue}_Notification";
+               
             }
         }
 
@@ -77,6 +77,8 @@ namespace Fsel.Shared.Constants
 
             public static class NameQueue
             {
+                public const string SendNotification = $"{KeyQueue}_SendNotification";
+                public const string InterationAction = $"{KeyQueue}_InterationAction";
             }
         }
 
@@ -106,7 +108,7 @@ namespace Fsel.Shared.Constants
             public static class NameQueue
             {
                 public const string DiscussionBoard = $"{KeyQueue}_DiscussionBoard";
-                public const string ClassForum = $"{KeyQueue}_ClassForum";
+                public const string Notification = $"{KeyQueue}_Notification";
             }
         }
 
@@ -119,5 +121,6 @@ namespace Fsel.Shared.Constants
                 public const string UpdateClassLiveAssignment = $"{KeyQueue}_UpdateClassLiveAssignment";
             }
         }
+
     }
 }
