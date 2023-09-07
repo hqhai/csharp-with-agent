@@ -20,7 +20,7 @@ namespace Fsel.Interaction.Application.Queues.Publishers
                 return;
             }
 
-            await _queueProvider.Publish(QueueSettings.InteractionQueue.NameQueue.ClassForum, new InterationActionQueueModel
+            await _queueProvider.Publish(QueueSettings.InteractionQueue.NameQueue.InterationAction, new InterationActionQueueModel
             {
                 ObjectId = model.ObjectId,
                 Type = model.Type,

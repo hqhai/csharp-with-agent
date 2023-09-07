@@ -21,7 +21,7 @@ namespace Fsel.Interaction.Application.Queues.Publishers
             }
 
 
-            await _queueProvider.Publish(QueueSettings.InteractionQueue.NameQueue.Comment, new NotificationQueueModel
+            await _queueProvider.Publish(QueueSettings.InteractionQueue.NameQueue.SendNotification, new NotificationQueueModel
             {
                 ObjectId = notification.ObjectId,
                 Message = notification.Message,
