@@ -30,11 +30,11 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
         private readonly IMapper _mapper;
         private readonly ICommentRepository _commentRepository;
         private readonly DiscussionBoardCommentPublisher _discussionBoardCommentPublisher;
-        private readonly ClassForumCommentPublisher _classForumCommentPublisher;
+        private readonly NotificationMessagePublisher _classForumCommentPublisher;
         private readonly AuthContext _authContext;
         private readonly ICourseService _courseService;
 
-        public CreateCommentCommandHandler(IMapper mapper, ICommentRepository commentRepository, AuthContext authContext, DiscussionBoardCommentPublisher discussionBoardCommentPublisher, ClassForumCommentPublisher classForumCommentPublisher, ICourseService courseService)
+        public CreateCommentCommandHandler(IMapper mapper, ICommentRepository commentRepository, AuthContext authContext, DiscussionBoardCommentPublisher discussionBoardCommentPublisher, NotificationMessagePublisher classForumCommentPublisher, ICourseService courseService)
         {
             _mapper = mapper;
             _commentRepository = commentRepository;

@@ -4,11 +4,11 @@ using Fsel.Shared.Models.ShareModels;
 
 namespace Fsel.Interaction.Application.Queues.Publishers
 {
-    public class ClassForumCommentPublisher
+    public class NotificationMessagePublisher
     {
         private readonly IQueueProvider _queueProvider;
 
-        public ClassForumCommentPublisher(IQueueProvider queueProvider)
+        public NotificationMessagePublisher(IQueueProvider queueProvider)
         {
             _queueProvider = queueProvider;
         }
