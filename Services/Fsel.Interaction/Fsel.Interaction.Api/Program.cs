@@ -10,6 +10,7 @@ using Fsel.Interaction.Infrastructure.Repositories;
 using Fsel.Interaction.Infrastructure.ValueSettings;
 using Fsel.Interaction.Application.Queues.Publishers;
 using Fsel.Interaction.Application.Services.SenderServices;
+using Fsel.Interaction.Application.Services.ClassForumResultServices;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -39,6 +40,7 @@ builder.Services.AddScoped<ClassForumCommentPublisher>();
 builder.AddRefitClients(typeof(IUserService), appSetting?.Services?.UserApiUrl);
 builder.AddRefitClients(typeof(ITrainingService), appSetting?.Services?.TrainingApiUrl);
 builder.AddRefitClients(typeof(ICourseService), appSetting?.Services?.LmsCourseApiUrl);
+builder.AddRefitClients(typeof(IClassForumResultService), appSetting?.Services?.LmsCourseApiUrl);
 builder.AddRefitClients(typeof(ISenderService), appSetting?.Services?.SenderApiUrl);
 builder.AddMassTransit(appSetting);
 

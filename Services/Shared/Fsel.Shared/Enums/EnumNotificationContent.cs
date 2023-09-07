@@ -5,9 +5,7 @@ namespace Fsel.Shared.Enums
 
     public enum EnumNotificationContent
     {
-        ContentOne,
-        ContentTwo,
-        ContentThree,
-        ContentFour
+        ClassForum,
+        InterationAction
     }
 }

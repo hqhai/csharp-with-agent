@@ -27,4 +27,5 @@ namespace Fsel.Notification.Domain.Model.EntityModels
 
         public IList<string>? UserIds { get; set; }
     }
+
 }

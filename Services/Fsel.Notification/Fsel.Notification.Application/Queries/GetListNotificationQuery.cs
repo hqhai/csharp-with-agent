@@ -50,12 +50,12 @@ namespace Fsel.Notification.Application.Queries
 
 
 
-            if (request.UserId != Guid.Empty)
+            if (request.UserId != null)
             {
                 notificationQuery = notificationQuery.Where(m => m.UserId == request.UserId);
             }
 
-            if (request.RoleId != Guid.Empty)
+            if (request.RoleId != null)
             {
                 notificationQuery = notificationQuery.Where(m => m.RoleId == request.RoleId);
             }

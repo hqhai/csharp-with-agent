@@ -21,7 +21,7 @@ namespace Fsel.Notification.Application.Queues.Publishers
                 return;
             }
 
-            await _queueProvider.Publish(QueueSettings.RealtimeQueue.NameQueue.Notification, new NotificationQueueModel
+            await _queueProvider.Publish(QueueSettings.NotificationQueue.NameQueue.Notification, new NotificationQueueModel
             {
                 ObjectId = notification.ObjectId,
                 UserId = notification.UserId,

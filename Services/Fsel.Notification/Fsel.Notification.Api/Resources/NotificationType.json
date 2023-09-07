@@ -1,9 +1,27 @@
 [
   {
-    "id": "A6FCD7A0-6DB9-419C-ADF7-25BF15FE2954",
+    "id": "D789788A-1BA5-405B-B280-AE92CD3B4FC2",
     "type": "Text",
-    "content": "ContentOne",
-    "active": true,
+    "content": "ClassForum",
+    "icon": "",
+    "priorty": 1,
+    "template": "Bài viết của {0} thuộc {1} đã bị gán cờ. Vui lòng kiểm tra.",
+    "createdDate": "2023-08-28"
+  },
+  {
+    "id": "EFBA1F99-8FAD-47B5-AF14-978F674F438E",
+    "type": "Text",
+    "content": "InterationAction",
+    "icon": "",
+    "priorty": 1,
+    "template": "Bình luận của {0} thuộc {1} đã bị gán cờ. Vui lòng kiểm tra.",
+    "createdDate": "2023-08-28"
+  },
+  {
+    "id": "EF2B0A36-983D-4B71-AAB0-1A124574B4DC",
+    "type": "LinkComment",
+    "content": "ClassForum",
+    "icon": "",
     "priorty": 1,
     "template": "",
     "createdDate": "2023-08-28"

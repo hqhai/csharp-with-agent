@@ -1,6 +1,6 @@
 using Fsel.Notification.Application.Commands;
+using Fsel.Notification.Domain.Entities;
 using Fsel.Notification.Domain.IRepositories;
-using Fsel.Shared.Constants;
 using Fsel.Shared.Enums;
 using Fsel.Shared.Models.ShareModels;
 using MassTransit;
@@ -28,13 +28,18 @@ namespace Fsel.Notification.Application.Queues.Consumers
 
                 if (dataReceipt!.Type == EnumInteractionActionType.Flag)
                 {
-                    var notificationTypeId = _notificationTypeRepository.Queryable.Where(x => x.Type == EnumNotificationPushingType.Text).Select(x => x.Id).FirstOrDefault();
+                    var notificationType = _notificationTypeRepository.Queryable.Where(x => x.Type == EnumNotificationPushingType.Text && x.Content == EnumNotificationContent.ClassForum).Select(x => new NotificationMessage
+                    {
+                        Id = x.Id,
+                        Message = x.Template
+                    }).FirstOrDefault();
 
                     CreateNotificationCommand model = new CreateNotificationCommand()
                     {
                         UserId = dataReceipt.UserId,
                         ObjectId = dataReceipt.ObjectId,
-                        NotificationTypeId = notificationTypeId
+                        NotificationTypeId = notificationType!.Id,
+                        Message = notificationType!.Message,
                     };
                     await _mediator.Send(model).ConfigureAwait(false);
                 }

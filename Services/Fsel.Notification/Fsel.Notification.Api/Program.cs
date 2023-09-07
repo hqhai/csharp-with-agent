@@ -30,7 +30,8 @@ builder.AddMassTransit(appSetting, queues:
 new Dictionary<string, Type>
 {
     { QueueSettings.NotificationQueue.NameQueue.DiscussionBoard, typeof(DiscussionBoardCommentConsumer) },
-    { QueueSettings.NotificationQueue.NameQueue.ClassForum, typeof(InterationActionConsumer) },
+    { QueueSettings.InteractionQueue.NameQueue.ClassForum, typeof(InterationActionConsumer) },
+    { QueueSettings.InteractionQueue.NameQueue.Comment, typeof(ClassForumCommentConsumer) },
 });
 
 var app = builder.Build();

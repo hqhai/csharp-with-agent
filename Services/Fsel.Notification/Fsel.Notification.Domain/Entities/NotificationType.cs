@@ -14,8 +14,6 @@ namespace Fsel.Notification.Domain.Entities
 
         public EnumNotificationPushingType Type { get; set; }
 
-        public bool Active { get; set; }
-
         public int Priority { get; set; }
 
         public string? Template { get; set; }

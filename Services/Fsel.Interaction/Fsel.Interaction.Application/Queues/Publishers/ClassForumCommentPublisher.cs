@@ -25,6 +25,8 @@ namespace Fsel.Interaction.Application.Queues.Publishers
             await _queueProvider.Publish(QueueSettings.InteractionQueue.NameQueue.Comment, new ClassForumCommentQueueModel
             {
                 ObjectId = comment.ObjectId,
+                Message = comment.Message,
+                UserId = comment.UserId
             }, cancellationToken);
 
         }

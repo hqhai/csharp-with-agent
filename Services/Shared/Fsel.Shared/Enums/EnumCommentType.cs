@@ -5,6 +5,7 @@ namespace Fsel.Shared.Enums
     public enum EnumCommentType
     {
         ClassForum,
-        DiscussionBoard
+        DiscussionBoard,
+        ReplyComment
     }
 }

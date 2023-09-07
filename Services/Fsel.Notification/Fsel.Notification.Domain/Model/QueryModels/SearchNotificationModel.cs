@@ -8,8 +8,8 @@ namespace Fsel.Notification.Domain.Model.QueryModels
 
     public class SearchNotificationModel : BaseQueryModel
     {
-        public Guid UserId { get; set; } = Guid.Empty;
-        public Guid RoleId { get; set; } = Guid.Empty;
+        public Guid? UserId { get; set; }
+        public Guid? RoleId { get; set; }
 
         public EnumNotificationPushingType Type { get; set; }
     }
