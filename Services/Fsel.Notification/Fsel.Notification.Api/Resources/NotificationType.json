@@ -42,7 +42,7 @@
   {
     "id": "9E983172-DBA2-4CA7-B602-372C011ECB99",
     "type": "LinkComment",
-    "content": "InterationAction",
+    "content": "Comment",
     "icon": "",
     "priorty": 1,
     "templateMessage": "{0} vừa trả lời bình luận của bạn.",
