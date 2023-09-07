@@ -1,11 +1,42 @@
 [
   {
-    "id": "A6FCD7A0-6DB9-419C-ADF7-25BF15FE2954",
+    "id": "D789788A-1BA5-405B-B280-AE92CD3B4FC2",
     "type": "Text",
-    "content": "ContentOne",
+    "content": "ClassForum",
     "icon": "",
-    "priority": 1,
-    "template": "",
+    "priorty": 1,
+    "templateMessage": "Bài viết của {0} thuộc {1} đã bị gán cờ. Vui lòng kiểm tra.",
+    "templateLink": "",
+    "createdDate": "2023-08-28"
+  },
+  {
+    "id": "EFBA1F99-8FAD-47B5-AF14-978F674F438E",
+    "type": "Text",
+    "content": "Comment",
+    "icon": "",
+    "priorty": 1,
+    "templateMessage": "Bình luận của {0} thuộc {1} đã bị gán cờ. Vui lòng kiểm tra.",
+    "templateLink": "",
+    "createdDate": "2023-08-28"
+  },
+  {
+    "id": "810C70CA-4F3C-4D02-A194-708FA45D42EA",
+    "type": "LinkComment",
+    "content": "ClassForum",
+    "icon": "",
+    "priorty": 1,
+    "templateMessage": "{0} vừa bình luận bài viết của bạn.",
+    "templateLink": "",
+    "createdDate": "2023-08-28"
+  },
+  {
+    "id": "9E983172-DBA2-4CA7-B602-372C011ECB99",
+    "type": "LinkComment",
+    "content": "Comment",
+    "icon": "",
+    "priorty": 1,
+    "templateMessage": "{0} vừa trả lời bình luận của bạn.",
+    "templateLink": "",
     "createdDate": "2023-08-28"
   },
   {
@@ -14,7 +45,8 @@
     "content": "OrderChangeStatus",
     "icon": "",
     "priority": 1,
-    "template": "Bạn đã mua khóa học {0} thành công. Hãy bắt đầu học nào!",
+    "templateMessage": "Bạn đã mua khóa học {0} thành công. Hãy bắt đầu học nào!",
+    "templateLink": "",
     "createdDate": "2023-08-28"
   },
   {
@@ -23,7 +55,8 @@
     "content": "OrderCreate",
     "icon": "",
     "priority": 1,
-    "template": "Bạn có hóa đơn khóa học mới phê duyệt. Nhấn để phê duyệt.",
+    "templateMessage": "Bạn có hóa đơn khóa học mới phê duyệt. Nhấn để phê duyệt.",
+    "templateLink": "",
     "createdDate": "2023-08-28"
   }
 ]

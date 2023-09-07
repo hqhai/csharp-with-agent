@@ -1,3 +1,4 @@
+using System.Globalization;
 using Fsel.Notification.Application.Commands;
 using Fsel.Notification.Domain.IRepositories;
 using Fsel.Shared.Models.ShareModels;
@@ -25,11 +26,17 @@ namespace Fsel.Notification.Application.Queues.Consumers
             if (dataReceipt != null)
             {
                 var notificationType = await _notificationTypeRepository.Queryable.FirstOrDefaultAsync(x => x.Type == dataReceipt.Type && x.Content == dataReceipt.Content);
+
+                string message = dataReceipt.ParamsMessage != null ? string.Format(CultureInfo.InvariantCulture, notificationType?.TemplateMessage ?? string.Empty, dataReceipt.ParamsMessage.ToArray()) : "";
+
+                string link = dataReceipt.ParamsLink != null ? string.Format(CultureInfo.InvariantCulture, notificationType?.TemplateLink ?? string.Empty, dataReceipt.ParamsLink.ToArray()) : "";
+
                 CreateNotificationCommand model = new CreateNotificationCommand()
                 {
                     UserId = dataReceipt.UserId ?? default,
                     ObjectId = dataReceipt.ObjectId,
-                    Message = string.Format(notificationType?.Template, dataReceipt.Params),
+                    Message = message,
+                    Link = link,
                     Roles = dataReceipt.Roles,
                     NotificationTypeId = notificationType?.Id ?? default
                 };

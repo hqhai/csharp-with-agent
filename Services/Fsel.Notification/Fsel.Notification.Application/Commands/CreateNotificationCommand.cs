@@ -59,9 +59,6 @@ namespace Fsel.Notification.Application.Commands
                 return methodResult;
             }
 
-            // Lấy ra notificationType của thông báo đó
-            // var notificationTypeResult = notificationType.Result;
-
             //list User bị tắt thông báo
             var listUserOffNotification = await _notificationRemindRepository.Queryable.Where(x => x.Status == EnumNotificationRemindStatus.Off && x.ObjectId == request.ObjectId).Select(x => x.UserId.ToString()).ToListAsync(cancellationToken);
 
@@ -81,34 +78,51 @@ namespace Fsel.Notification.Application.Commands
                     }
                 }
 
+                //Loại bỏ những phần tử không có trong listUserId
                 listUserId = listUserId.Where(id => !listUserOffNotification.Contains(id)).ToList();
             }
 
             #endregion Validation
+            List<NotificationMessage> listNotificationMessage = new List<NotificationMessage>();
+            if (listUserId.Count > 0)
+            {
+                foreach (var item in listUserId)
+                {
+                    NotificationMessage notificationElement = _mapper.Map<NotificationMessage>(request);
+                    notificationElement.UserId = new Guid(item);
+                    listNotificationMessage.Add(notificationElement);
+                }
+            }
 
             #region Handler
-
             await _notificationsRepository.ExecuteTransactionAsync(async () =>
             {
                 //Save into Database
-                notificationNew = _notificationsRepository.Add(notificationNew);
+                if (listNotificationMessage.Count > 0)
+                {
+                    await _notificationsRepository.AddList(listNotificationMessage);
+                }
+                else
+                {
+                    notificationNew = _notificationsRepository.Add(notificationNew);
+                }
                 await _notificationsRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
                 //Push notification
                 var notificationRealTime = new NotificationMessageModel()
                 {
                     UserId = notificationNew.UserId,
-                    Template = notificationTypeResult?.Template,
                     ObjectId = notificationNew.ObjectId,
                     Message = notificationNew.Message,
+                    Link = notificationNew.Message,
                     UserIds = listUserId
                 };
 
                 await _notificationMessagePublisher.Publish(notificationRealTime, cancellationToken).ConfigureAwait(false);
 
                 //Return Value
-                methodResult.StatusCode = StatusCodes.Status201Created;
                 methodResult.Result = _mapper.Map<NotificationMessageModel>(notificationNew);
+                methodResult.StatusCode = StatusCodes.Status201Created;
                 return methodResult;
             });
 

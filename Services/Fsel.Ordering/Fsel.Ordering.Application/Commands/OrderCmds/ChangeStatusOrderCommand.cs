@@ -106,8 +106,8 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
                     {
                         UserId = order.UserId,
                         ObjectId = order.Id,
-                        Params = new List<object> { course?.Name ?? string.Empty },
-                        Type = EnumNotificationPushingType.Text,
+                        ParamsMessage = new List<object> { course?.Name ?? string.Empty },
+                        Type = EnumNotificationType.Text,
                         Content = EnumNotificationContent.OrderChangeStatus
                     }, cancellationToken);
                 }

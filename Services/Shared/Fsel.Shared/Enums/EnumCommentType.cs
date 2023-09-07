@@ -2,11 +2,10 @@
 
 namespace Fsel.Shared.Enums
 {
-    public enum EnumNotificationContent
+    public enum EnumCommentType
     {
         ClassForum,
-        Comment,
-        OrderChangeStatus,
-        OrderCreate
+        DiscussionBoard,
+        ReplyComment
     }
 }
