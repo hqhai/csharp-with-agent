@@ -20,14 +20,7 @@ namespace Fsel.Ordering.Application.Queues.Publishers
                 return;
             }
 
-            await _queueProvider.Publish(QueueSettings.OrderingQueue.NameQueue.SendNotification, new NotificationQueueModel
-            {
-                ObjectId = notification.ObjectId,
-                UserId = notification.UserId,
-                Roles = notification.Roles,
-                Message = notification.Message,
-                UserIds = notification.UserIds,
-            }, cancellationToken);
+            await _queueProvider.Publish(QueueSettings.OrderingQueue.NameQueue.SendNotification, notification, cancellationToken);
         }
     }
 }
