@@ -57,5 +57,21 @@ namespace Fsel.Course.Infrastructure.Repositories
                 throw;
             }
         }
+
+        public async Task<EntityCourse?> GetIncludeCourseUnitMockTestByIdAsync(Guid id)
+        {
+            try
+            {
+                return await Queryable.Include(x => x.CourseUnitMockTests)
+                                                  .Include(x => x.UnitResults)
+                                                  .Include(x => x.MockTestResults)
+                                                  .Include(x => x.FinalTestResults)
+                                                  .FirstOrDefaultAsync(x => x.Id == id);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
     }
 }

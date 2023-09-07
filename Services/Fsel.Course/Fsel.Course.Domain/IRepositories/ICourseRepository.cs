@@ -8,5 +8,7 @@ namespace Fsel.Course.Domain.IRepositories
     public interface ICourseRepository : IRepository<EntityCourse>
     {
         Task<EntityCourse?> GetIncludeLessonVideoByIdAsync(Guid id);
+
+        Task<EntityCourse?> GetIncludeCourseUnitMockTestByIdAsync(Guid id);
     }
 }
