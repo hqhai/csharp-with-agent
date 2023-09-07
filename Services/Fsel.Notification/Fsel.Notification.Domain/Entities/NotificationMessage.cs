@@ -14,6 +14,8 @@ namespace Fsel.Notification.Domain.Entities
 
         public string? Message { get; set; }
 
+        public string? Link { get; set; }
+
         public Guid ObjectId { get; set; }
 
         public Guid NotificationTypeId { get; set; }

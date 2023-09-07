@@ -7,7 +7,7 @@ namespace Fsel.Notification.Domain.Model.CommandModels.Notification
 
     public class CreateNotificationRemindCommandModel
     {
-        public Guid UserId { get; set; }
+        public Guid? UserId { get; set; }
         public Guid ObjectId { get; set; }
         public EnumNotificationRemindStatus Status { get; set; }
     }

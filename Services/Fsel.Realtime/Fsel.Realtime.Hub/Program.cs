@@ -19,7 +19,7 @@ builder.AddMassTransit(appSetting,
 queues: new Dictionary<string, Type>
 {
     { QueueSettings.RealtimeQueue.NameQueue.DiscussionBoard, typeof(DiscussionBoardConsumer) },
-    { QueueSettings.RealtimeQueue.NameQueue.Notification, typeof(NotificationConsumer) }
+    { QueueSettings.NotificationQueue.NameQueue.Notification, typeof(NotificationConsumer) }
 },
 
 setHub: (IBusRegistrationConfigurator x) =>

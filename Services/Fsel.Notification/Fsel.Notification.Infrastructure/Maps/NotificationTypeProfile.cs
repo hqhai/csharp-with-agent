@@ -9,7 +9,8 @@ namespace Fsel.Notification.Infrastructure.Maps
 
     public class NotificationTypeProfile : Profile
     {
-        public NotificationTypeProfile() {
+        public NotificationTypeProfile()
+        {
 
             CreateMap<NotificationType, NotificationsTypeModel>().IgnoreAllNonExisting();
         }

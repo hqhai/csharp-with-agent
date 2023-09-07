@@ -17,7 +17,7 @@ namespace Fsel.Notification.Infrastructure.Configs
                .HasMaxLength(100)
                .HasConversion(
                    v => v.ToString(),
-                   v => v.EnumParse<EnumNotificationPushingType>());
+                   v => v.EnumParse<EnumNotificationType>());
             builder.Property(e => e.Content)
                .HasMaxLength(100)
                .HasConversion(
