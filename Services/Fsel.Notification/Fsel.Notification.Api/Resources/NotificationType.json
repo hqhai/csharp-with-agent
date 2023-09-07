@@ -10,6 +10,16 @@
     "createdDate": "2023-08-28"
   },
   {
+    "id": "D789788A-1BA6-405B-F280-AE92CD3B4FC2",
+    "type": "Text",
+    "content": "ClassForumResult",
+    "icon": "",
+    "priorty": 1,
+    "templateMessage": "Bạn có bài đăng của học sinh đang chờ duyệt.",
+    "templateLink": "",
+    "createdDate": "2023-08-28"
+  },
+  {
     "id": "EFBA1F99-8FAD-47B5-AF14-978F674F438E",
     "type": "Text",
     "content": "Comment",
