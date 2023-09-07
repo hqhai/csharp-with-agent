@@ -127,7 +127,7 @@ NotificationMessagePublisher notificationMessagePublisher)
                 {
                     ObjectId = classForumResult.Id,
                     Roles = roles,
-                    Content = EnumNotificationContent.ClassForumResult,
+                    Content = EnumNotificationContent.CreateClassForumResult,
                     Type = EnumNotificationType.Text
                 };
 

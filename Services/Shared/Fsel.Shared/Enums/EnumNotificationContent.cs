@@ -8,6 +8,6 @@ namespace Fsel.Shared.Enums
         Comment,
         OrderChangeStatus,
         OrderCreate,
-        ClassForumResult
+        CreateClassForumResult
     }
 }
