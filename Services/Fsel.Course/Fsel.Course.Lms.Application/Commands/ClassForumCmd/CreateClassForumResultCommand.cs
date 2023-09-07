@@ -16,6 +16,8 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Queues.Publishers;
     using Fsel.Course.Lms.Application.Services.UserServices;
+    using Fsel.Shared.Enums;
+    using Fsel.Shared.Models.ShareModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -33,6 +35,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
         private readonly IClassForumRepository _classForumRepository;
         private readonly ILessonResultRepository _lessonResultRepository;
         private readonly CreateClassForumResultPublisher _classForumResultPublisher;
+
         public CreateClassForumResultCommandHandler(IMapper mapper
             , AuthContext authContext
             , IUserService userService
@@ -115,7 +118,20 @@ CreateClassForumResultPublisher classForumResultPublisher)
             {
                 classForumResult = _classForumResultRepository.Add(classForumResult);
                 await _classForumResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
-                await _classForumResultPublisher.Publish(classForumResult, cancellationToken);
+
+                //mặc định gửi cho tất cả CSO
+                IList<EnumRole> roles = new List<EnumRole>();
+                roles.Add(EnumRole.CSO);
+
+                NotificationQueueModel model = new NotificationQueueModel()
+                {
+                    ObjectId = classForumResult.Id,
+                    Roles = roles,
+                    Content = EnumNotificationContent.ClassForumResult,
+                    Type = EnumNotificationType.Text
+                };
+
+                await _classForumResultPublisher.Publish(model, cancellationToken);
                 methodResult.StatusCode = StatusCodes.Status201Created;
                 methodResult.Result = _mapper.Map<ClassForumResultModel>(classForumResult);
                 return methodResult;

@@ -40,7 +40,7 @@ namespace Fsel.Shared.Constants
 
             public static class NameQueue
             {
-                public const string CreateClassForumResult = $"{KeyQueue}_CreateClassForumResult";
+                public const string SendNotification = $"{KeyQueue}_SendNotification";
             }
         }
 

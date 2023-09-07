@@ -31,7 +31,7 @@ new Dictionary<string, Type>
     { QueueSettings.InteractionQueue.NameQueue.InterationAction, typeof(InterationActionConsumer) },
     { QueueSettings.InteractionQueue.NameQueue.SendNotification, typeof(SendNotificationConsumer) },
     { QueueSettings.OrderingQueue.NameQueue.SendNotification, typeof(SendNotificationConsumer) },
-    { QueueSettings.LmsCourseQueue.NameQueue.CreateClassForumResult, typeof(CreateClassForumResultConsumer) },
+    { QueueSettings.LmsCourseQueue.NameQueue.SendNotification, typeof(SendNotificationConsumer) },
 });
 
 var app = builder.Build();
