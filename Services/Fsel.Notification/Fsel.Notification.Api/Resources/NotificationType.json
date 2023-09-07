@@ -22,7 +22,7 @@
   {
     "id": "EFBA1F99-8FAD-47B5-AF14-978F674F438E",
     "type": "LinkComment",
-    "content": "Comment",
+    "content": "FlagComment",
     "icon": "",
     "priority": 1,
     "templateMessage": "Bình luận của {0} thuộc {1} đã bị gán cờ. Vui lòng kiểm tra.",
