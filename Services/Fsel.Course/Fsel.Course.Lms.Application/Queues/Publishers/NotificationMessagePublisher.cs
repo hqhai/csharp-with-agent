@@ -6,11 +6,11 @@ namespace Fsel.Course.Lms.Application.Queues.Publishers
     using Fsel.Shared.Constants;
     using Fsel.Shared.Models.ShareModels;
 
-    public class CreateClassForumResultPublisher
+    public class NotificationMessagePublisher
     {
         private readonly IQueueProvider _queueProvider;
 
-        public CreateClassForumResultPublisher(IQueueProvider queueProvider)
+        public NotificationMessagePublisher(IQueueProvider queueProvider)
         {
             _queueProvider = queueProvider;
         }
@@ -21,7 +21,7 @@ namespace Fsel.Course.Lms.Application.Queues.Publishers
             {
                 return;
             }
-            await _queueProvider.Publish(QueueSettings.LmsCourseQueue.NameQueue.SendNotification, new NotificationQueueModel
+            await _queueProvider.Publish(QueueSettings.LmsQueue.NameQueue.ClassForumResult, new NotificationQueueModel
             {
                 ObjectId = request.ObjectId,
                 Message = request.Message,

@@ -34,7 +34,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
         private readonly IClassForumResultRepository _classForumResultRepository;
         private readonly IClassForumRepository _classForumRepository;
         private readonly ILessonResultRepository _lessonResultRepository;
-        private readonly CreateClassForumResultPublisher _classForumResultPublisher;
+        private readonly NotificationMessagePublisher _notificationMessagePublisher;
 
         public CreateClassForumResultCommandHandler(IMapper mapper
             , AuthContext authContext
@@ -42,7 +42,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
             , IClassForumResultRepository classForumResultRepository
             , IClassForumRepository classForumRepository
             , ILessonResultRepository lessonResultRepository,
-CreateClassForumResultPublisher classForumResultPublisher)
+NotificationMessagePublisher notificationMessagePublisher)
         {
             _mapper = mapper;
             _authContext = authContext;
@@ -50,7 +50,7 @@ CreateClassForumResultPublisher classForumResultPublisher)
             _classForumResultRepository = classForumResultRepository;
             _classForumRepository = classForumRepository;
             _lessonResultRepository = lessonResultRepository;
-            _classForumResultPublisher = classForumResultPublisher;
+            _notificationMessagePublisher = notificationMessagePublisher;
         }
 
         public async Task<MethodResult<ClassForumResultModel>> Handle(CreateClassForumResultCommand request, CancellationToken cancellationToken)
@@ -131,7 +131,7 @@ CreateClassForumResultPublisher classForumResultPublisher)
                     Type = EnumNotificationType.Text
                 };
 
-                await _classForumResultPublisher.Publish(model, cancellationToken);
+                await _notificationMessagePublisher.Publish(model, cancellationToken);
                 methodResult.StatusCode = StatusCodes.Status201Created;
                 methodResult.Result = _mapper.Map<ClassForumResultModel>(classForumResult);
                 return methodResult;
