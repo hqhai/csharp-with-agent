@@ -71,8 +71,8 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
 
                         var postOwner = await _courseService.GetClassForumResultByIdAsync(request.ObjectId).Select(x => x.Content?.Result?.ClassForum?.ClassForumResults?.FirstOrDefault()).ConfigureAwait(false);
 
-                        //Không thông báo khi comment bài viết của chính mình
-                        if (postOwner!.CreatedUserId == _authContext.CurrentUserId)
+                        //Không tìm thấy postOwner và Không thông báo khi comment bài viết của chính mình
+                        if (postOwner == null || postOwner!.CreatedUserId == _authContext.CurrentUserId)
                         {
                             break;
                         }
