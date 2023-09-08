@@ -55,8 +55,6 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             _homeWorkResultRepository = homeWorkResultRepository;
         }
 
-        #region Get Skill Scores Unit
-
         public async Task<(List<SkillScores>, double)> UpdateUnitResult(IList<Guid>? lessonResultIds)
         {
             ArgumentNullException.ThrowIfNull(lessonResultIds);
@@ -71,7 +69,29 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             return (groupedSkillScores, percent);
         }
 
-        public async Task<(List<SkillScores>, double)> VideoSkillScores(IList<Guid>? lessonResultIds, EnumTimeCodeType type, int percentSkill)
+        public async Task<(List<SkillScores>, double)> UpdateCourseResult(IList<Guid> unitIds, Guid studentId, EnumCourseType type, Guid? finalTestId)
+        {
+            ArgumentNullException.ThrowIfNull(unitIds);
+            var units = await _unitRepository.Queryable.Include(x => x.LessonResults.Where(x => x.StudentId == studentId)).Where(x => unitIds.Contains(x.Id)).ToListAsync();
+            var lessonResults = units.SelectMany(x => x.LessonResults).Where(x => x.StudentId == studentId).ToList();
+            var (videoSkillScores, percentVideo) = await VideoSkillScores(lessonResults.Select(x => x.Id).ToList(), EnumTimeCodeType.Standalone, 0, type);
+            var (homeWorkSkillScores, percentHomeWork) = await HomeWordsSkillScores(lessonResults.Select(x => x.Id).ToList(), 0, type);
+            var (classForumSkillScores, percentClassForum) = await ClassForumSkillScores(lessonResults.Select(x => x.Id).ToList(), 0, type);
+            double percent = percentClassForum + percentHomeWork + percentVideo;
+            List<SkillScores> mergedSkillScores = videoSkillScores.Concat(homeWorkSkillScores).Concat(classForumSkillScores).ToList();
+            if (type == EnumCourseType.Academic)
+            {
+                var (unitSkillScores, percentUnitSkill) = await SkillScoreByCourses(unitIds, studentId, EnumTimeCodeType.UnitTest);
+                var (skillSkillScores, percentSkill) = await SkillScoreByCourses(unitIds, studentId, EnumTimeCodeType.SkillTest);
+                var (finalTestSkillScores, percentFinalTest) = await FinalTestSkillScoreByCourses(finalTestId, studentId);
+                mergedSkillScores = mergedSkillScores.Concat(skillSkillScores).Concat(unitSkillScores).Concat(finalTestSkillScores).ToList();
+                percent = percent + percentUnitSkill + percentSkill + percentFinalTest;
+            }
+            List<SkillScores> groupedSkillScores = mergedSkillScores.GroupBy(x => x.Skill).Select(group => GetSumSkillScore(group)).ToList();
+            return (groupedSkillScores, percent);
+        }
+
+        public async Task<(List<SkillScores>, double)> VideoSkillScores(IList<Guid>? lessonResultIds, EnumTimeCodeType type, int percentSkill = 0, EnumCourseType? courseType = null)
         {
             ArgumentNullException.ThrowIfNull(lessonResultIds);
             List<SkillScores> skillScores = new List<SkillScores>();
@@ -79,12 +99,26 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             if (videoResult != null && videoResult.VideoSkillScores != null)
             {
                 skillScores = videoResult.VideoSkillScores.Where(x => x.Type == type && x.SkillScores != null && x.SkillScores.Any()).SelectMany(x => x.SkillScores!).GroupBy(x => x.Skill).Select(x => GetSkillScore(x)).ToList();
-                return (skillScores, skillScores.Sum(x => x.Percent * percentSkill / skillScores.Count));
+                if (courseType == EnumCourseType.Academic)
+                {
+                    return (skillScores, skillScores.Average(x => x.Percent * ((double)9 * skillScores.Count)));
+                }
+                else
+                {
+                    return (skillScores, skillScores.Average(x =>
+                    {
+                        if (x.Skill == EnumCourseSkill.Writing || x.Skill == EnumCourseSkill.Speaking)
+                        {
+                            return x.Percent * 3.5;
+                        }
+                        return x.Percent * 3.25;
+                    }));
+                }
             }
-            return (skillScores, 0);
+            return (skillScores, skillScores.Sum(x => x.Percent * percentSkill / skillScores.Count));
         }
 
-        public async Task<(List<SkillScores>, double)> ClassForumSkillScores(IList<Guid>? lessonResultIds, int percentSkill)
+        public async Task<(List<SkillScores>, double)> ClassForumSkillScores(IList<Guid>? lessonResultIds, int percentSkill = 0, EnumCourseType? courseType = null)
         {
             ArgumentNullException.ThrowIfNull(lessonResultIds);
             List<SkillScores> skillScores = new List<SkillScores>();
@@ -102,12 +136,19 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                     skillScore.Percent = x.ClassForumScores.Sum(x => x.Score) / 36;
                     return skillScore;
                 }).ToList().GroupBy(x => x.Skill).Select(x => GetSkillScore(x)).ToList();
-                return (skillScores, skillScores.Average(x => x.Percent * (percentSkill * skillScores.Count)));
+                if (courseType != null && courseType == EnumCourseType.Academic)
+                {
+                    return (skillScores, skillScores.Average(x => x.Percent * (20 * skillScores.Count)));
+                }
+                else if (courseType != null && courseType == EnumCourseType.Ielts)
+                {
+                    return (skillScores, skillScores.Average(x => x.Percent * (32 * skillScores.Count)));
+                }
             }
-            return (skillScores, 0);
+            return (skillScores, skillScores.Average(x => x.Percent * (percentSkill * skillScores.Count)));
         }
 
-        public async Task<(List<SkillScores>, double)> HomeWordsSkillScores(IList<Guid>? lessonResultIds, int percentSkill)
+        public async Task<(List<SkillScores>, double)> HomeWordsSkillScores(IList<Guid>? lessonResultIds, int percentSkill = 0, EnumCourseType? courseType = null)
         {
             ArgumentNullException.ThrowIfNull(lessonResultIds);
             List<SkillScores> skillScores = new List<SkillScores>();
@@ -115,70 +156,16 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             if (homeWorkResults != null)
             {
                 skillScores = homeWorkResults.Where(x => x.SkillScores != null && x.SkillScores.Any()).SelectMany(x => x.SkillScores!).GroupBy(x => x.Skill).Select(x => GetSkillScore(x)).ToList();
+                if (courseType != null && courseType == EnumCourseType.Academic)
+                {
+                    return (skillScores, skillScores.Average(x => x.Percent * ((double)14 * skillScores.Count)));
+                }
+                else if (courseType != null && courseType == EnumCourseType.Academic)
+                {
+                    return (skillScores, skillScores.Average(x => x.Percent * ((double)48 * skillScores.Count)));
+                }
             }
             return (skillScores, skillScores.Sum(x => x.Percent * percentSkill / skillScores.Count));
-        }
-
-        #endregion Get Skill Scores Unit
-
-        #region Get Skill Scores Course
-
-        public async Task<(List<SkillScores>, double)> UpdateCourseResult(IList<Guid> unitIds, Guid studentId, EnumCourseType type, Guid? finalTestId)
-        {
-            ArgumentNullException.ThrowIfNull(unitIds);
-            var units = await _unitRepository.Queryable.Include(x => x.LessonResults.Where(x => x.StudentId == studentId)).Where(x => unitIds.Contains(x.Id)).ToListAsync();
-            var lessonResults = units.SelectMany(x => x.LessonResults).Where(x => x.StudentId == studentId).ToList();
-
-            var (videoSkillScores, percentVideo) = await VideoSkillScoreByCourses(lessonResults.Select(x => x.Id).ToList(), type);
-            var (homeWorkSkillScores, percentHomeWork) = await HomeWorkSkillScoreByCourses(lessonResults.Select(x => x.Id).ToList(), type);
-            var (classForumSkillScores, percentClassForum) = await ClassForumSkillScoreByCourses(lessonResults.Select(x => x.Id).ToList(), type);
-            double percent = percentClassForum + percentHomeWork + percentVideo;
-
-            List<SkillScores> mergedSkillScores = videoSkillScores
-                                               .Concat(homeWorkSkillScores)
-                                               .Concat(classForumSkillScores)
-                                               .ToList();
-            if (type == EnumCourseType.Academic)
-            {
-                var (unitSkillScores, percentUnitSkill) = await SkillScoreByCourses(unitIds, studentId, EnumTimeCodeType.UnitTest);
-                var (skillSkillScores, percentSkill) = await SkillScoreByCourses(unitIds, studentId, EnumTimeCodeType.SkillTest);
-                var (finalTestSkillScores, percentFinalTest) = await FinalTestSkillScoreByCourses(finalTestId, studentId);
-                mergedSkillScores = mergedSkillScores.Concat(skillSkillScores)
-                                                   .Concat(unitSkillScores)
-                                                   .Concat(finalTestSkillScores)
-                                                   .ToList();
-                percent = percent + percentUnitSkill + percentSkill + percentFinalTest;
-            }
-            List<SkillScores> groupedSkillScores = mergedSkillScores
-                               .GroupBy(x => x.Skill)
-                               .Select(group => GetSumSkillScore(group)).ToList();
-            return (groupedSkillScores, percent);
-        }
-
-        public async Task<(List<SkillScores>, double)> VideoSkillScoreByCourses(IList<Guid>? lessonResultIds, EnumCourseType type)
-        {
-            ArgumentNullException.ThrowIfNull(lessonResultIds);
-
-            List<SkillScores> skillScores = new List<SkillScores>();
-            var videoResults = await _videoResultRepository.Queryable.Where(x => x.Status == EnumResultStatus.Done && lessonResultIds.Contains(x.LessonResultId)).ToListAsync();
-            if (videoResults != null)
-            {
-                skillScores = videoResults.SelectMany(x => x.VideoSkillScores!).Where(x => x.Type == EnumTimeCodeType.Standalone && x.SkillScores != null && x.SkillScores.Any())
-                                        .SelectMany(x => x.SkillScores!).GroupBy(x => x.Skill).Select(x => GetSkillScore(x)).ToList();
-                if (type == EnumCourseType.Academic)
-                {
-                    return (skillScores, skillScores.Average(x => x.Percent * ((double)9 * skillScores.Count)));
-                }
-                return (skillScores, skillScores.Average(x =>
-                {
-                    if (x.Skill == EnumCourseSkill.Writing || x.Skill == EnumCourseSkill.Speaking)
-                    {
-                        return x.Percent * 3.5;
-                    }
-                    return x.Percent * 3.25;
-                }));
-            }
-            return (skillScores, 0);
         }
 
         public SkillScores GetSumSkillScore(IGrouping<EnumCourseSkill, SkillScores>? group)
@@ -216,54 +203,6 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             return skillScores;
         }
 
-        public async Task<(List<SkillScores>, double)> HomeWorkSkillScoreByCourses(IList<Guid>? lessonResultIds, EnumCourseType type)
-        {
-            ArgumentNullException.ThrowIfNull(lessonResultIds);
-
-            List<SkillScores> skillScores = new List<SkillScores>();
-            var homeWorkResults = await _homeWorkResultRepository.Queryable.Where(x => x.Status == EnumResultStatus.Done && lessonResultIds.Contains(x.LessonResultId)).ToListAsync();
-            if (homeWorkResults != null)
-            {
-                skillScores = homeWorkResults.Where(x => x.SkillScores != null && x.SkillScores.Any()).SelectMany(x => x.SkillScores!)
-                                        .GroupBy(x => x.Skill).Select(x => GetSkillScore(x)).ToList();
-                if (type == EnumCourseType.Academic)
-                {
-                    return (skillScores, skillScores.Average(x => x.Percent * ((double)14 * skillScores.Count)));
-                }
-                return (skillScores, skillScores.Average(x => x.Percent * ((double)48 * skillScores.Count)));
-            }
-            return (skillScores, 0);
-        }
-
-        public async Task<(List<SkillScores>, double)> ClassForumSkillScoreByCourses(IList<Guid>? lessonResultIds, EnumCourseType type)
-        {
-            ArgumentNullException.ThrowIfNull(lessonResultIds);
-
-            List<SkillScores> skillScores = new List<SkillScores>();
-            var classForumResults = await _classForumResultRepository.Queryable.Include(x => x.ClassForumScores).Include(x => x.ClassForum)
-                                .Where(x => x.Status == EnumClassForumResultStatus.Graded && lessonResultIds.Contains(x.LessonResultId)).ToListAsync();
-            if (classForumResults != null)
-            {
-                skillScores = classForumResults.Select(x =>
-                {
-                    SkillScores skillScore = new SkillScores();
-                    skillScore.Skill = x.ClassForum!.CourseSkill;
-                    skillScore.TotalQuestion = 1;
-                    skillScore.CountQuestion = 1;
-                    skillScore.TotalCount = 36;
-                    skillScore.CorrectCount = x.ClassForumScores.Sum(x => x.Score);
-                    skillScore.Percent = x.ClassForumScores.Sum(x => x.Score) / 36;
-                    return skillScore;
-                }).ToList().GroupBy(x => x.Skill).Select(x => GetSkillScore(x)).ToList();
-                if (type == EnumCourseType.Academic)
-                {
-                    return (skillScores, skillScores.Average(x => x.Percent * (20 * skillScores.Count)));
-                }
-                return (skillScores, skillScores.Average(x => x.Percent * (32 * skillScores.Count)));
-            }
-            return (skillScores, 0);
-        }
-
         public async Task<(List<SkillScores>, double)> SkillScoreByCourses(IList<Guid>? unitIds, Guid studentId, EnumTimeCodeType type)
         {
             ArgumentNullException.ThrowIfNull(unitIds);
@@ -276,15 +215,13 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 if (lessonResultIds != null && lessonResultIds.Any())
                 {
                     var videoResults = await _videoResultRepository.Queryable.Where(x => lessonResultIds.Contains(x.LessonResultId)).ToListAsync();
-                    var skillScores = videoResults.SelectMany(x => x.VideoSkillScores!).Where(x => x.Type == type && x.SkillScores != null && x.SkillScores.Any()).SelectMany(x => x.SkillScores!)
-                                        .GroupBy(x => x.Skill)
-                                        .Select(x => GetSkillScore(x)).ToList();
+                    var skillScores = videoResults.SelectMany(x => x.VideoSkillScores!).Where(x => x.Type == type && x.SkillScores != null && x.SkillScores.Any()).SelectMany(x => x.SkillScores!).GroupBy(x => x.Skill).Select(x => GetSkillScore(x)).ToList();
                     var percent = skillScores.Average(x => x.Percent) * 24 / unitIds.Count;
                     skillScorePercents.Add((skillScores, percent));
                 }
             }
             var skillScoreSkills = skillScorePercents.SelectMany(x => x.Item1).GroupBy(x => x.Skill).Select(x => GetSkillScore(x)).ToList();
-            return (skillScoreSkills, skillScorePercents.Sum(x => x.Item2));
+            return (skillScoreSkills, skillScorePercents.Average(x => x.Item2));
         }
 
         public async Task<(List<SkillScores>, double)> FinalTestSkillScoreByCourses(Guid? finalTestId, Guid studentId)
@@ -295,10 +232,6 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             var percent = finalTestResult?.Percent * 15;
             return (skillScores ?? new List<SkillScores>(), percent ?? default);
         }
-
-        #endregion Get Skill Scores Course
-
-        #region Update Unit
 
         public async Task UpdateUnit(IList<Guid>? lessonResultIds, Domain.Entities.Unit? unit, Guid courseId, Guid studentId, CancellationToken cancellationToken)
         {
@@ -318,10 +251,6 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 await _unitResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
             }
         }
-
-        #endregion Update Unit
-
-        #region Update Status Same Level Lesson
 
         public async Task UpdateTheNextLesson(Unit? unit, LessonResult lessonResult, CancellationToken cancellationToken)
         {
@@ -351,10 +280,6 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             }
         }
 
-        #endregion Update Status Same Level Lesson
-
-        #region Update Status Same Level Unit
-
         public async Task UpdateProcessUnit(UnitResult? unitResult, CancellationToken cancellationToken)
         {
             var courseId = unitResult != null ? unitResult.CourseId : default;
@@ -380,7 +305,6 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 {
                     var isCheckUnitResults = course.UnitResults.Where(x => x.StudentId == mockTestResult.StudentId).All(x => x.Status == EnumResultStatus.Done);
                     var isCheckDone = isCheckUnitResults && course.MockTestResults.Where(x => x.StudentId == mockTestResult.StudentId).All(x => x.Status == EnumResultStatus.Done);
-
                     var displayOrder = course.CourseUnitMockTests.FirstOrDefault(x => x.MockTestId == mockTestResult.MockTestId)?.DisplayOrder;
                     var courseUnitMockTest = course.CourseUnitMockTests.FirstOrDefault(x => x.DisplayOrder == displayOrder + 1);
                     if (!isCheckDone && courseUnitMockTest != null)
@@ -438,10 +362,6 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             }
         }
 
-        #endregion Update Status Same Level Unit
-
-        #region Update Course
-
         public async Task UpdateCourse(Guid courseId, Guid studentId)
         {
             var course = await _courseRepository.Queryable.Include(x => x.CourseUnitMockTests).FirstOrDefaultAsync(x => x.Id == courseId);
@@ -466,7 +386,5 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 await _courseResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
             }
         }
-
-        #endregion Update Course
     }
 }
