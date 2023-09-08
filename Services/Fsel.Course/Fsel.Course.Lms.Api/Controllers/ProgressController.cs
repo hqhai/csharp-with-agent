@@ -139,7 +139,7 @@ namespace Fsel.Course.Lms.Api.Controllers
         /// <summary>
         /// get unit by unit
         /// </summary>
-        [HttpGet("unit/{courseId}")]
+        [HttpGet("unit")]
         [ProducesResponseType(typeof(MethodResult<IList<UnitModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetUnitByUnit([FromQuery] GetUnitByUnitQuery query)
