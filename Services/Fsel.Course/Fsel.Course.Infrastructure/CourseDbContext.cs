@@ -63,8 +63,6 @@ namespace Fsel.Course.Infrastructure
         public DbSet<SectionQuestion> SectionQuestions { get; set; }
         public DbSet<SectionTimeCode> SectionTimeCodes { get; set; }
         public DbSet<MockTestSection> MockTestSections { get; set; }
-        public DbSet<MockTestScore> MockTestScores { get; set; }
-
         public DbSet<FinalTest> FinalTests { get; set; }
         public DbSet<MockTestResult> MockTestResults { get; set; }
         public DbSet<MockTestAnswer> MockTestAnswers { get; set; }

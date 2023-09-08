@@ -5,6 +5,7 @@ namespace Fsel.Course.Lms.Api.Controllers
     using System.Net;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
+    using Fsel.Core.Base.BaseModels;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Commands.ClassForumCmd;
     using Fsel.Course.Lms.Application.Commands.ClassForumResultCmd;

@@ -2,7 +2,6 @@
 
 using AutoMapper;
 using Fsel.Common.ActionResults;
-using Fsel.Common.Enums.ErrorCodes;
 using Fsel.Course.Domain.Entities;
 using Fsel.Course.Domain.Enums.ErrorCodes;
 using Fsel.Course.Domain.IRepositories;
@@ -42,12 +41,12 @@ namespace Fsel.Course.Application.Commands.UnitCmd
             #region Validation
 
             var unit = await _unitRepository.Queryable
-                                    .Include(e => e.UnitLessons)
-                                    .Include(e => e.UnitSkillMockTests)
+                                    .Include(e => e.UnitLessons.Where(n => !n.IsDeleted))
+                                    .Include(e => e.UnitSkillMockTests.Where(n => !n.IsDeleted))
                                     .FirstOrDefaultAsync(e => e.Id == request.Id, cancellationToken: cancellationToken);
             if (unit == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(unit));
+                methodResult.AddErrorBadRequest(nameof(EnumUnitErrorCode.UnitNotExist), nameof(request.Id), request?.Id);
                 return methodResult;
             }
 
@@ -78,10 +77,10 @@ namespace Fsel.Course.Application.Commands.UnitCmd
                 {
                     unit.UnitSkillMockTests = new List<UnitSkillMockTest>
                     {
-                        new UnitSkillMockTest
-                        {
-                            MockTestId = request.MockTestId ?? default,
-                        }
+                    new UnitSkillMockTest
+                    {
+                        MockTestId = request.MockTestId ?? default,
+                    }
                     };
                 }
                 unit = _unitRepository.Update(unit);

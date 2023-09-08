@@ -5,7 +5,6 @@ namespace Fsel.Identity.Application.Commands.ParentCmd
     using System.Threading;
     using AutoMapper;
     using Fsel.Common.ActionResults;
-    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
     using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.Enums.ErrorCodes;
@@ -52,7 +51,7 @@ namespace Fsel.Identity.Application.Commands.ParentCmd
             var isUsernameExist = await _userManager.Users.AnyAsync(e => e.UserName == request.UserName, cancellationToken: cancellationToken);
             if (isUsernameExist)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(request.UserName), request.UserName);
+                methodResult.AddErrorBadRequest(nameof(EnumAuthErrorCode.UserNameAlreadyExist), nameof(request.UserName), request.UserName);
                 return methodResult;
             }
 
@@ -62,7 +61,7 @@ namespace Fsel.Identity.Application.Commands.ParentCmd
 
             if (parent == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(parent));
+                methodResult.AddErrorBadRequest(nameof(EnumParentErrorCode.ParentNull));
                 return methodResult;
             }
 

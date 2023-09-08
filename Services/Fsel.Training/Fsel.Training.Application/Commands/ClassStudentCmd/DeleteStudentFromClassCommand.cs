@@ -6,8 +6,8 @@ namespace Fsel.Training.Application.Commands.ClassStudentCmd
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
-    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Training.Application.Services.UserServices;
+    using Fsel.Training.Domain.Enums.ErrorCodes;
     using Fsel.Training.Domain.IRepositories;
     using MediatR;
     using Microsoft.AspNetCore.Http;
@@ -22,7 +22,6 @@ namespace Fsel.Training.Application.Commands.ClassStudentCmd
     {
         private readonly IClassStudentRepository _classStudentRepository;
         private readonly IUserService _userService;
-
         public DeleteStudentFromClassCommandHandler(IClassStudentRepository classStudentRepository, IUserService userService)
         {
             _classStudentRepository = classStudentRepository;
@@ -36,14 +35,14 @@ namespace Fsel.Training.Application.Commands.ClassStudentCmd
             var student = await _userService.GetStudentByUserIdAsync(request.UserId);
             if (!student.IsSuccessStatusCode)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student));
+                methodResult.AddErrorBadRequest(nameof(EnumClassErrorCode.StudentsNotExits));
                 return methodResult;
             }
             var studentId = student.Content?.Result?.Id;
             var classStudent = await _classStudentRepository.Queryable.FirstOrDefaultAsync(p => p.StudentId == studentId, cancellationToken);
             if (classStudent == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(classStudent));
+                methodResult.AddErrorBadRequest(nameof(EnumClassErrorCode.ClassStudentNotExist));
                 return methodResult;
             }
             await _classStudentRepository.ExecuteTransactionAsync(async () =>
@@ -55,6 +54,7 @@ namespace Fsel.Training.Application.Commands.ClassStudentCmd
                 return methodResult;
             });
             return methodResult;
+
         }
     }
 }

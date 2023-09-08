@@ -12,13 +12,13 @@ namespace Fsel.Identity.Domain.Entities
     public class CSO : Entity
     {
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
-        public string? CourseTypesStr { get; set; }
+        public string? RoleLivesStr { get; set; }
 
         [NotMapped]
-        public IList<EnumCourseType>? CourseTypes
+        public IList<EnumCourseType>? RoleLives
         {
-            get { return ConvertHelper.Deserialize<IList<EnumCourseType>>(CourseTypesStr); }
-            set { CourseTypesStr = ConvertHelper.Serialize(value); }
+            get { return ConvertHelper.Deserialize<IList<EnumCourseType>>(RoleLivesStr); }
+            set { RoleLivesStr = ConvertHelper.Serialize(value); }
         }
 
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
@@ -31,14 +31,15 @@ namespace Fsel.Identity.Domain.Entities
             set { CourseLevelsStr = ConvertHelper.Serialize(value); }
         }
 
+
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
-        public string? PackageIdsStr { get; set; }
+        public string? SubscriptionClassesStr { get; set; }
 
         [NotMapped]
-        public IList<Guid>? PackageIds
+        public IList<EnumSubscriptionClass>? SubscriptionClasses
         {
-            get { return ConvertHelper.Deserialize<IList<Guid>>(PackageIdsStr); }
-            set { PackageIdsStr = ConvertHelper.Serialize(value); }
+            get { return ConvertHelper.Deserialize<IList<EnumSubscriptionClass>>(SubscriptionClassesStr); }
+            set { SubscriptionClassesStr = ConvertHelper.Serialize(value); }
         }
 
         [MaxLength(1000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]

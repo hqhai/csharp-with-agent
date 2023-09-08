@@ -3,11 +3,13 @@
 namespace Fsel.Ordering.Application.Commands.VoucherCmds
 {
     using System;
+    using System.Collections.Generic;
     using System.Linq;
+    using System.Text;
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
-    using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Ordering.Domain.Enums.ErrorCodes;
     using Fsel.Ordering.Domain.IRepositories;
     using MediatR;
     using Microsoft.AspNetCore.Http;
@@ -37,7 +39,7 @@ namespace Fsel.Ordering.Application.Commands.VoucherCmds
                                     .FirstOrDefaultAsync(e => e.Id == request.Id, cancellationToken: cancellationToken);
             if (voucher == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(voucher));
+                methodResult.AddErrorBadRequest(nameof(EnumVoucherErrorCode.VoucherNotExist), nameof(request.Id), request?.Id);
                 return methodResult;
             }
 

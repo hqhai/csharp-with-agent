@@ -12,7 +12,6 @@ namespace Fsel.Training.Infrastructure.Maps
         public ClassStudentProfile()
         {
             CreateMap<ClassStudent, ClassStudentModel>().IgnoreAllNonExisting();
-            CreateMap<ClassStudent, ClassStudentDetailModel>().IgnoreAllNonExisting();
         }
     }
 }

@@ -19,9 +19,6 @@ namespace Fsel.Shared.Enums
         WorkFlowType,
         ExtraPracticeProgress,
         SortFilter,
-        ReviewType,
-        TeacherRole,
-        QuestBoardType,
-        RepeatType
+        ReviewType
     }
 }

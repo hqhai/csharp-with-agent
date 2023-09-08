@@ -2,10 +2,9 @@
 
 namespace Fsel.Interaction.Domain.Entities
 {
-    using System.ComponentModel.DataAnnotations;
     using Fsel.Common.Enums.ErrorCodes;
+    using System.ComponentModel.DataAnnotations;
     using Fsel.Core.Entities;
-    using Fsel.Shared.Enums;
 
     public class Comment : Entity
     {
@@ -18,7 +17,5 @@ namespace Fsel.Interaction.Domain.Entities
         public Guid ObjectId { get; set; }
 
         public Guid UserId { get; set; }
-
-        public EnumCommentType Type { get; set; }
     }
 }

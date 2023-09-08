@@ -29,11 +29,7 @@ namespace Fsel.Course.Domain.Entities
         [NotMapped]
         public IList<SkillScores>? SkillScores
         {
-            get
-            {
-                var a = ConvertHelper.Deserialize<IList<SkillScores>>(SkillScoresStr);
-                return a;
-            }
+            get { return ConvertHelper.Deserialize<IList<SkillScores>>(SkillScoresStr); }
             set { SkillScoresStr = ConvertHelper.Serialize(value); }
         }
 

@@ -1,10 +1,10 @@
 // Copyright (c) Atlantic. All rights reserved.
 
 using System.ComponentModel.DataAnnotations;
+using Fsel.Shared.Enums;
 using Fsel.Common.Enums.ErrorCodes;
 using Fsel.Core.Entities;
 using Fsel.Course.Domain.Enums;
-using Fsel.Shared.Enums;
 
 namespace Fsel.Course.Domain.Entities
 {
@@ -37,13 +37,12 @@ namespace Fsel.Course.Domain.Entities
         /// <summary>
         /// Giáo Viên ID
         /// </summary>
-        public Guid TeacherId { get; set; }
+        public Guid? TeacherId { get; set; }
 
         /// <summary>
         /// Trình độ khóa
         /// </summary>
         public EnumCourseLevel CourseLevel { get; set; }
-
         public ExtraPractice? ExtraPractice { get; set; }
         public ICollection<LessonVideo> LessonVideos { get; set; } = new List<LessonVideo>();
         public ICollection<VideoTimeCode> VideoTimeCodes { get; set; } = new List<VideoTimeCode>();

@@ -18,7 +18,6 @@ namespace Fsel.Training.Domain.Models.EntityModels
         public string? TeacherName { get; set; }
         public string? TeacherAvatar { get; set; }
         public Guid ClassId { get; set; }
-        public string? ClassCode { get; set; }
         public ClassModel? Class { get; set; }
     }
 }

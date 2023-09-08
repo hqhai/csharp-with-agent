@@ -21,7 +21,6 @@ namespace Fsel.Shared.Helpers
                 return Math.Round(number, 1, MidpointRounding.AwayFromZero);
             }
         }
-
         public static string GenerateCode(int length)
         {
             string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
@@ -33,7 +32,6 @@ namespace Fsel.Shared.Helpers
 
             return orderCode;
         }
-
         public static string GenerateCodeNumber(int length)
         {
             string chars = "0123456789";
@@ -44,12 +42,6 @@ namespace Fsel.Shared.Helpers
                                       .Select(s => s[random.Next(s.Length)]).ToArray());
 
             return orderCode;
-        }
-
-        public static double ConvertDouble(double value)
-        {
-            double convertedValue = Math.Round(value, 2);
-            return convertedValue;
         }
     }
 }

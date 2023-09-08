@@ -3,8 +3,8 @@
 namespace Fsel.Identity.Application.Commands.AdminCmd
 {
     using Fsel.Common.ActionResults;
-    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Identity.Domain.Entities;
+    using Fsel.Identity.Domain.Enums.ErrorCodes;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Identity;
@@ -30,7 +30,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
             var user = await _userManager.FindByIdAsync(request.Id.ToString());
             if (user == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(user));
+                methodResult.AddErrorBadRequest(nameof(EnumUserErrorCode.UserNotExist), nameof(request.Id), request.Id);
                 return methodResult;
             }
 

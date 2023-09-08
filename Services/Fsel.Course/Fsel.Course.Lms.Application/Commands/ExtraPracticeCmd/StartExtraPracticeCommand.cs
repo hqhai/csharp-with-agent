@@ -4,62 +4,61 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
 {
     using System;
     using System.Threading.Tasks;
-    using AutoMapper;
     using Fsel.Common.ActionResults;
-    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums;
+    using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Course.Infrastructure.Common;
     using Fsel.Course.Lms.Application.Services.UserServices;
-    using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class StartExtraPracticeCommand : IRequest<MethodResult<ExtraPracticeResultModel>>
+    public class StartExtraPracticeCommand : IRequest<MethodResult<ExtraPracticeModel>>
     {
         public Guid ExtraPracticeId { get; set; }
     }
 
-    public class StartExtraPracticeCommandHandler : IRequestHandler<StartExtraPracticeCommand, MethodResult<ExtraPracticeResultModel>>
+    public class StartExtraPracticeCommandHandler : IRequestHandler<StartExtraPracticeCommand, MethodResult<ExtraPracticeModel>>
     {
         private readonly IExtraPracticeRepository _extraPracticeRepository;
-        private readonly IMapper _mapper;
         private readonly AuthContext _authContext;
         private readonly IUserService _userService;
+        private readonly ExtraPracticeConverter _extraPracticeConverter;
         private readonly IExtraPracticeResultRepository _extraPracticeResultRepository;
 
         public StartExtraPracticeCommandHandler(IExtraPracticeRepository extraPracticeRepository
-            , IMapper mapper
             , AuthContext authContext
             , IUserService userService
+            , ExtraPracticeConverter extraPracticeConverter
             , IExtraPracticeResultRepository extraPracticeResultRepository)
         {
             _extraPracticeRepository = extraPracticeRepository;
-            _mapper = mapper;
             _authContext = authContext;
             _userService = userService;
+            _extraPracticeConverter = extraPracticeConverter;
             _extraPracticeResultRepository = extraPracticeResultRepository;
         }
 
-        public async Task<MethodResult<ExtraPracticeResultModel>> Handle(StartExtraPracticeCommand request, CancellationToken cancellationToken)
+        public async Task<MethodResult<ExtraPracticeModel>> Handle(StartExtraPracticeCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            var methodResult = new MethodResult<ExtraPracticeResultModel>();
+            var methodResult = new MethodResult<ExtraPracticeModel>();
 
             var extraPractice = await _extraPracticeRepository.GetByIdAsync(request.ExtraPracticeId);
             if (extraPractice == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(extraPractice));
+                methodResult.AddErrorBadRequest(nameof(EnumExtraPracticeErrorCode.ExtraPracticeNotExist));
                 return methodResult;
             }
 
             var student = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
             if (!student.IsSuccessStatusCode)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student));
+                methodResult.AddErrorBadRequest(nameof(EnumMockTestErrorCode.UserNotExist), nameof(student), _authContext.CurrentUserId.ToString());
                 return methodResult;
             }
             var studentId = student?.Content?.Result?.Id;
@@ -67,19 +66,18 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
             if (extraPracticeResult == null)
             {
                 var a = await GetCorrectTotal(extraPractice, studentId ?? default);
-                extraPracticeResult = new ExtraPracticeResult
+                extraPractice.ExtraPracticeResults.Add(new ExtraPracticeResult
                 {
                     StudentId = studentId ?? default,
                     CorrectTotal = a.Item1,
-                    Status = EnumResultStatus.New,
                     ExtraPracticeExerciseResults = a.Item2 != null ? a.Item2 : new List<ExtraPracticeExerciseResult>()
-                };
-                extraPractice.ExtraPracticeResults.Add(extraPracticeResult);
+                });
                 _extraPracticeRepository.Update(extraPractice);
                 await _extraPracticeRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
             }
+
             methodResult.StatusCode = StatusCodes.Status200OK;
-            methodResult.Result = _mapper.Map<ExtraPracticeResultModel>(extraPracticeResult);
+            methodResult.Result = await _extraPracticeConverter.SwitchExtraPractice(extraPractice, studentId ?? default);
             return methodResult;
         }
 
@@ -98,7 +96,7 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
                     break;
 
                 case EnumExtraPracticeType.Exercise:
-                    (correctTotal, extraPracticeExerciseResults) = await GetCorrectTotalExercise(extraPractice.Id, studentId);
+                    (correctTotal, extraPracticeExerciseResults) = await GetCorrectTotalExercise(extraPractice.Id);
                     break;
 
                 case EnumExtraPracticeType.InteractiveVideo:
@@ -118,9 +116,14 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
 
         private async Task<(int, IList<ExtraPracticeExerciseResult>?)> GetCorrectTotalVideoEmbed(Guid id, Guid studentId)
         {
-            var extraPractice = await _extraPracticeRepository.GetIncludeByTypeVideoEmbedAsync(id);
+            var extraPractice = await _extraPracticeRepository.Queryable.Include(x => x.ExtraPracticeExercises)
+                                .ThenInclude(x => x.Exercise)
+                                .ThenInclude(x => x!.ExerciseQuestions)
+                                .ThenInclude(x => x.Question)
+                                .FirstOrDefaultAsync(x => x.Id == id);
             if (extraPractice != null)
             {
+                var correctTotal = extraPractice.ExtraPracticeExercises.Select(x => x.Exercise).SelectMany(x => x!.ExerciseQuestions).Select(x => x.Question).Sum(x => x!.CorrectTotal);
                 IList<ExtraPracticeExerciseResult> extraPracticeExerciseResults = extraPractice.ExtraPracticeExercises.OrderBy(x => x.CreatedDate)
                    .Select((x, index) => new ExtraPracticeExerciseResult
                    {
@@ -130,92 +133,36 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
                        StudentId = studentId,
                        Status = index == 0 ? EnumResultStatus.New : EnumResultStatus.Unfinished
                    }).ToList();
-                var correctTotal = extraPracticeExerciseResults.Sum(x => x!.CorrectTotal);
                 return (correctTotal, extraPracticeExerciseResults);
             }
             return (0, null);
         }
 
-        private async Task<(int, IList<ExtraPracticeExerciseResult>?)> GetCorrectTotalExercise(Guid id, Guid studentId)
+        private async Task<(int, IList<ExtraPracticeExerciseResult>?)> GetCorrectTotalExercise(Guid id)
         {
-            var extraPractice = await _extraPracticeRepository.GetIncludeByTypeVideoEmbedAsync(id);
+            var extraPractice = await _extraPracticeRepository.Queryable.Include(x => x.ExtraPracticeExercises)
+                                .ThenInclude(x => x.Exercise)
+                                .ThenInclude(x => x!.ExerciseQuestions)
+                                .ThenInclude(x => x.Question)
+                                .FirstOrDefaultAsync(x => x.Id == id);
             if (extraPractice != null)
             {
-                IList<ExtraPracticeExerciseResult> extraPracticeExerciseResults = extraPractice.ExtraPracticeExercises.OrderBy(x => x.CreatedDate)
-                   .Select((x, index) => new ExtraPracticeExerciseResult
-                   {
-                       CorrectTotal = x.Exercise!.ExerciseQuestions.Select(x => x.Question).Sum(x => x!.CorrectTotal),
-                       CourseSkill = x.Exercise.CourseSkill,
-                       ExtraPracticeExerciseId = x.Id,
-                       StudentId = studentId,
-                       Status = index == 0 ? EnumResultStatus.New : EnumResultStatus.Unfinished
-                   }).ToList();
-                var correctTotal = extraPracticeExerciseResults.Sum(x => x!.CorrectTotal);
-                return (correctTotal, extraPracticeExerciseResults);
+                var correctTotal = extraPractice.ExtraPracticeExercises.Select(x => x.Exercise).SelectMany(x => x!.ExerciseQuestions).Select(x => x.Question).Sum(x => x!.CorrectTotal);
+                return (correctTotal, null);
             }
             return (0, null);
         }
 
         private async Task<(int, IList<ExtraPracticeExerciseResult>?)> GetCorrectTotalMockTest(Guid id)
         {
-            var extraPractice = await _extraPracticeRepository.Queryable.Include(x => x.MockTest)
-                                .Include(x => x.PlacementTest)
+            var extraPractice = await _extraPracticeRepository.Queryable.Include(x => x.ExtraPracticeExercises)
+                                .ThenInclude(x => x.Exercise)
+                                .ThenInclude(x => x!.ExerciseQuestions)
+                                .ThenInclude(x => x.Question)
                                 .FirstOrDefaultAsync(x => x.Id == id);
-            int correctTotal = 0;
-            if (extraPractice != null && extraPractice.MockTest != null)
+            if (extraPractice != null)
             {
-                extraPractice = await _extraPracticeRepository.Queryable.Include(x => x.MockTest)
-                                                                        .ThenInclude(x => x!.MockTestSections)
-                                                                        .ThenInclude(x => x.SectionGroup)
-                                                                        .FirstOrDefaultAsync(x => x.Id == id);
-                if (extraPractice != null && extraPractice.MockTest!.MockTestType == EnumMockTestType.SkillMockTest)
-                {
-                    var sectionGroup = extraPractice.MockTest.MockTestSections.Select(x => x.SectionGroup).FirstOrDefault();
-                    if (sectionGroup != null)
-                    {
-                        switch (sectionGroup.CourseSkill)
-                        {
-                            case EnumCourseSkill.Reading:
-                            case EnumCourseSkill.Listening:
-                                correctTotal = 40;
-                                break;
-
-                            case EnumCourseSkill.Writing:
-                                correctTotal = 36;
-                                break;
-
-                            case EnumCourseSkill.Speaking:
-                                correctTotal = 36;
-                                break;
-                        }
-                    }
-
-                    return (correctTotal, null);
-                }
-                else
-                {
-                    correctTotal = 40 * 2 + 36 * 2;
-                    return (correctTotal, null);
-                }
-            }
-            else if (extraPractice != null && extraPractice.PlacementTest != null)
-            {
-                if (extraPractice.PlacementTest.Level == EnumPlacementTestLevel.IELTS)
-                {
-                    correctTotal = 40 * 2;
-                }
-                else
-                {
-                    extraPractice = await _extraPracticeRepository.GetIncludeByPlacementTestAsync(id);
-
-                    correctTotal = extraPractice!.PlacementTest!.PlacementTestSections
-                                .Select(x => x.SectionGroup)
-                                .SelectMany(x => x!.Sections)
-                                .SelectMany(x => x.SectionQuestions)
-                                .Select(x => x.Question)
-                                .Sum(x => x!.CorrectTotal);
-                }
-
+                var correctTotal = extraPractice.ExtraPracticeExercises.Select(x => x.Exercise).SelectMany(x => x!.ExerciseQuestions).Select(x => x.Question).Sum(x => x!.CorrectTotal);
                 return (correctTotal, null);
             }
             return (0, null);
@@ -223,15 +170,16 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
 
         private async Task<(int, IList<ExtraPracticeExerciseResult>?)> GetCorrectTotalInteractiveVideo(Guid id)
         {
-            var extraPractice = await _extraPracticeRepository.GetIncludeByTypeInteractiveVideoAsync(id);
-            if (extraPractice != null && extraPractice.Video != null)
+            var extraPractice = await _extraPracticeRepository.Queryable.Include(x => x.Video)
+                                .ThenInclude(x => x!.VideoTimeCodes)
+                                .ThenInclude(x => x.TimeCodeExercises)
+                                .ThenInclude(x => x.Exercise)
+                                .ThenInclude(x => x!.ExerciseQuestions)
+                                .ThenInclude(x => x.Question)
+                                .FirstOrDefaultAsync(x => x.Id == id);
+            if (extraPractice != null)
             {
-                var correctTotal = extraPractice.Video.VideoTimeCodes
-                               .SelectMany(x => x.TimeCodeExercises)
-                               .Select(x => x.Exercise)
-                               .SelectMany(x => x!.ExerciseQuestions)
-                               .Select(x => x.Question)
-                               .Sum(x => x!.CorrectTotal);
+                var correctTotal = extraPractice.ExtraPracticeExercises.Select(x => x.Exercise).SelectMany(x => x!.ExerciseQuestions).Select(x => x.Question).Sum(x => x!.CorrectTotal);
                 return (correctTotal, null);
             }
             return (0, null);
@@ -239,11 +187,21 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
 
         private async Task<(int, IList<ExtraPracticeExerciseResult>?)> GetCorrectTotalBook(Guid id, Guid studentId)
         {
-            var extraPractice = await _extraPracticeRepository.GetIncludeByTypeBookAsync(id);
+            var extraPractice = await _extraPracticeRepository.Queryable.Include(x => x.ExtraPracticeChapters)
+                                .ThenInclude(x => x.ExtraPracticeExercises)
+                                .ThenInclude(x => x.Exercise)
+                                .ThenInclude(x => x!.ExerciseQuestions)
+                                .ThenInclude(x => x.Question)
+                                .FirstOrDefaultAsync(x => x.Id == id);
             if (extraPractice != null)
             {
+                var correctTotal = extraPractice.ExtraPracticeChapters.SelectMany(x => x.ExtraPracticeExercises).OrderBy(x => x.CreatedDate)
+                                                                        .Select(x => x.Exercise)
+                                                                        .SelectMany(x => x!.ExerciseQuestions)
+                                                                        .Select(x => x.Question)
+                                                                        .Sum(x => x!.CorrectTotal);
                 IList<ExtraPracticeExerciseResult> extraPracticeExerciseResults = extraPractice.ExtraPracticeChapters
-                   .SelectMany(x => x.ExtraPracticeExercises).OrderBy(x => x.CreatedDate)
+                    .SelectMany(x => x.ExtraPracticeExercises).OrderBy(x => x.CreatedDate)
                    .Select((x, index) => new ExtraPracticeExerciseResult
                    {
                        CorrectTotal = x.Exercise!.ExerciseQuestions.Select(x => x.Question).Sum(x => x!.CorrectTotal),
@@ -252,7 +210,6 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
                        StudentId = studentId,
                        Status = index == 0 ? EnumResultStatus.New : EnumResultStatus.Unfinished
                    }).ToList();
-                var correctTotal = extraPracticeExerciseResults.Sum(x => x.CorrectTotal);
                 return (correctTotal, extraPracticeExerciseResults);
             }
             return (0, null);

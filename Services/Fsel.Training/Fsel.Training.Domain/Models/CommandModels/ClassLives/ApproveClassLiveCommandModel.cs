@@ -6,7 +6,7 @@ namespace Fsel.Training.Domain.Models.CommandModels.ClassLives
 
     public class ApproveClassLiveCommandModel : BaseCommandModel
     {
-        public bool IsAccept { get; set; }
+        public bool IsAcept { get; set; }
         public string? Description { get; set; }
     }
 }

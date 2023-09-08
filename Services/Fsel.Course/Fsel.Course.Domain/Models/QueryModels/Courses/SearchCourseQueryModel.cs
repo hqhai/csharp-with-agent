@@ -1,7 +1,7 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-using Fsel.Core.Base.BaseModels;
 using Fsel.Shared.Enums;
+using Fsel.Core.Base.BaseModels;
 
 namespace Fsel.Course.Domain.Models.QueryModels.Courses
 {

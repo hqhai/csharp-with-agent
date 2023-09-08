@@ -41,8 +41,6 @@ namespace Fsel.Course.Domain.Entities
         [MaxLength(1000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? BookBackgroundPath { get; set; }
 
-        public string? ImagePath { get; set; }
-
         /// <summary>
         /// Tác giả
         /// </summary>

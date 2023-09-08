@@ -5,7 +5,6 @@ namespace Fsel.Training.Application.Commands.ClassCmd
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
-    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Shared.Enums;
     using Fsel.Training.Application.Services.SystemServices;
@@ -38,7 +37,7 @@ namespace Fsel.Training.Application.Commands.ClassCmd
             var classes = await _classRepository.GetByIdAsync(request.Id);
             if (classes == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(classes));
+                methodResult.AddErrorBadRequest(nameof(EnumClassErrorCode.ClassesNotExits));
                 return methodResult;
             }
             if (classes.Status != EnumStatusClass.New)

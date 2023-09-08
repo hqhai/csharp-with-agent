@@ -5,7 +5,6 @@ namespace Fsel.Training.Application.Commands.ClassStudentCmd
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
-    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Training.Application.Services.UserServices;
     using Fsel.Training.Application.Services.UserServices.Models;
     using Fsel.Training.Domain.Enums.ErrorCodes;
@@ -26,7 +25,6 @@ namespace Fsel.Training.Application.Commands.ClassStudentCmd
         private readonly IClassRepository _classRepository;
         private readonly IClassStudentRepository _classStudentRepository;
         private readonly IUserService _userService;
-
         public TransferStudentCommandHandler(IClassRepository classRepository, IClassStudentRepository classStudentRepository, IUserService userService)
         {
             _classRepository = classRepository;
@@ -41,7 +39,7 @@ namespace Fsel.Training.Application.Commands.ClassStudentCmd
             var classes = await _classRepository.GetByIdAsync(request.ClassId);
             if (classes == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(classes));
+                methodResult.AddErrorBadRequest(nameof(EnumClassErrorCode.ClassesNotExits), nameof(request.ClassId), request.ClassId);
                 return methodResult;
             }
             var student = await _classStudentRepository.Queryable.FirstOrDefaultAsync(p => p.ClassId == request.ClassId && p.StudentId == request.StudentId, cancellationToken);

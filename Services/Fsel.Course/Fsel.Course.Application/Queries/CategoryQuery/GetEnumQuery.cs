@@ -64,6 +64,10 @@ namespace Fsel.Course.Application.Queries.CategoryQuery
                     methodResult.Result = ConvertHelper.EnumToListModel<EnumFinalTestLevel>();
                     break;
 
+                case EnumCourseSourceData.SubscriptionClass:
+                    methodResult.Result = ConvertHelper.EnumToListModel<EnumSubscriptionClass>();
+                    break;
+
                 case EnumCourseSourceData.CurrentStatus:
                     methodResult.Result = ConvertHelper.EnumToListModel<EnumCurrentStatus>();
                     break;
@@ -82,18 +86,6 @@ namespace Fsel.Course.Application.Queries.CategoryQuery
 
                 case EnumCourseSourceData.ReviewType:
                     methodResult.Result = ConvertHelper.EnumToListModel<EnumReviewType>();
-                    break;
-
-                case EnumCourseSourceData.TeacherRole:
-                    methodResult.Result = ConvertHelper.EnumToListModel<EnumRoleTeacher>();
-                    break;
-
-                case EnumCourseSourceData.QuestBoardType:
-                    methodResult.Result = ConvertHelper.EnumToListModel<EnumQuestBoardType>();
-                    break;
-
-                case EnumCourseSourceData.RepeatType:
-                    methodResult.Result = ConvertHelper.EnumToListModel<EnumRepeatType>();
                     break;
             }
 

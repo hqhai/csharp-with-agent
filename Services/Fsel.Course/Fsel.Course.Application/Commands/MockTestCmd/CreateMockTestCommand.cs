@@ -7,8 +7,8 @@ namespace Fsel.Course.Application.Commands.MockTestCmd
     using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Common.ActionResults;
-    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Course.Domain.Entities;
+    using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.CommandModels.MockTests;
     using Fsel.Course.Domain.Models.EntityModels;
@@ -47,12 +47,12 @@ namespace Fsel.Course.Application.Commands.MockTestCmd
 
             if (request.SectionGroups == null || request.SectionGroups.Count == 0)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.SectionGroups));
+                methodResult.AddErrorBadRequest(nameof(EnumSectionGroupErrorCode.SectionGroupsNull), nameof(request.SectionGroups));
                 return methodResult;
             }
             if (await _mockTestRepository.Queryable.AnyAsync(x => x.Name == request.Name, cancellationToken))
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(request.Name));
+                methodResult.AddErrorBadRequest(nameof(EnumMockTestErrorCode.NameAlreadyExists), nameof(request.Name), request.Name);
                 return methodResult;
             }
             MockTest mockTest = _mapper.Map<MockTest>(request);
@@ -66,14 +66,14 @@ namespace Fsel.Course.Application.Commands.MockTestCmd
             {
                 if (sectionGroup == null)
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(sectionGroup));
+                    methodResult.AddErrorBadRequest(nameof(EnumSectionGroupErrorCode.SectionGroupNull), nameof(sectionGroup));
                     return methodResult;
                 }
                 else
                 {
                     if (sectionGroup.Sections == null || sectionGroup.Sections.Count == 0)
                     {
-                        methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(sectionGroup.Sections));
+                        methodResult.AddErrorBadRequest(nameof(EnumSectionErrorCode.SectionsNull), nameof(sectionGroup.Sections));
                         return methodResult;
                     }
 

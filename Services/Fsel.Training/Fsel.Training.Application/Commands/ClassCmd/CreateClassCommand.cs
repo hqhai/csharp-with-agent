@@ -6,10 +6,10 @@ namespace Fsel.Training.Application.Commands.ClassCmd
     using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Common.ActionResults;
-    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Shared.Enums;
     using Fsel.Training.Application.Queries.ClassQuery;
     using Fsel.Training.Domain.Entities;
+    using Fsel.Training.Domain.Enums.ErrorCodes;
     using Fsel.Training.Domain.IRepositories;
     using Fsel.Training.Domain.Models.CommandModels.Classes;
     using Fsel.Training.Domain.Models.EntityModels;
@@ -43,7 +43,7 @@ namespace Fsel.Training.Application.Commands.ClassCmd
             var checkExistClassCode = await _classRepository.Queryable.AnyAsync(p => p.Code == generateClassCode.Result, cancellationToken);
             if (checkExistClassCode)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(checkExistClassCode));
+                methodResult.AddErrorBadRequest(nameof(EnumClassErrorCode.CodeClassAlreadyExist));
                 return methodResult;
             }
 

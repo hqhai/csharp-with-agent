@@ -3,8 +3,8 @@
 namespace Fsel.Course.Application.Services.UserServices.Models
 {
     using System;
-    using Fsel.Core.Base.BaseModels;
     using Fsel.Shared.Enums;
+    using Fsel.Core.Base.BaseModels;
 
     public class StudentModel : BaseModel
     {

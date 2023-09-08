@@ -3,17 +3,21 @@
 namespace Fsel.Interaction.Application.Queries.PostQuery
 {
     using System.Threading.Tasks;
+    using System.Xml.Linq;
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Core.Extensions;
     using Fsel.Interaction.Application.Services.UserServices;
+    using Fsel.Interaction.Application.Services.UserServices.Models;
+    using Fsel.Interaction.Domain.Entities;
     using Fsel.Interaction.Domain.IRepositories;
     using Fsel.Interaction.Domain.Models.EntityModels;
     using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
+    using Microsoft.Extensions.Hosting;
 
     public class GetPostsByFlagQuery : BaseQueryModel, IRequest<MethodResult<PagingItemsModel<PostModel>>>
     {

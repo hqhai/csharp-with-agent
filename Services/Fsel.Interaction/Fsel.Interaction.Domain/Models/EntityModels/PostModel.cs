@@ -4,6 +4,7 @@ namespace Fsel.Interaction.Domain.Models.EntityModels
 {
     using System;
     using Fsel.Core.Base.BaseModels;
+    using Fsel.Interaction.Domain.Entities;
     using Fsel.Shared.Enums;
 
     public class PostModel : BaseModel

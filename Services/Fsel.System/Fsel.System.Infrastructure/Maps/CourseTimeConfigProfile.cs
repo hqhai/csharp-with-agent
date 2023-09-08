@@ -4,7 +4,7 @@ namespace Fsel.System.Infrastructure.Maps
 {
     using AutoMapper;
     using Fsel.Core.Extensions;
-    using Fsel.System.Domain.Entities.Configs;
+    using Fsel.System.Domain.Entities;
     using Fsel.System.Domain.Models.CommandModels.CourseTimeConfigs;
     using Fsel.System.Domain.Models.EntityModels;
 

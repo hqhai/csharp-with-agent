@@ -24,8 +24,5 @@ namespace Fsel.Interaction.Application.Services.CourseServices
 
         [Post("/admin/course")]
         Task<IApiResponse<MethodResult<IList<CourseModel>>>> GetListCourseByIds([FromBody] IList<Guid> courseIds);
-
-        [Get("/class-forum-result/{id}")]
-        Task<IApiResponse<MethodResult<ClassForumResultModel>>> GetClassForumResultByIdAsync([FromRoute] Guid id);
     }
 }

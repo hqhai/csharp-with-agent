@@ -4,7 +4,7 @@ namespace Fsel.Course.Application.Queries.QuestionFormQuery
 {
     using AutoMapper;
     using Fsel.Common.ActionResults;
-    using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using MediatR;
@@ -34,7 +34,7 @@ namespace Fsel.Course.Application.Queries.QuestionFormQuery
 
             if (questionForm == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(questionForm));
+                methodResult.AddErrorBadRequest(nameof(EnumQuestionFormErrorCode.QuestionFormNotExist), nameof(request.Id), request.Id);
                 return methodResult;
             }
 

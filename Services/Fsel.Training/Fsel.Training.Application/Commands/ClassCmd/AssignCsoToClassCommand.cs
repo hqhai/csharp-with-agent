@@ -5,7 +5,6 @@ namespace Fsel.Training.Application.Commands.ClassCmd
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
-    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Training.Domain.Enums.ErrorCodes;
     using Fsel.Training.Domain.IRepositories;
     using MediatR;
@@ -16,7 +15,6 @@ namespace Fsel.Training.Application.Commands.ClassCmd
         public Guid CsoId { get; set; }
         public Guid ClassId { get; set; }
     }
-
     public class AssignCsoToClassCommandHandler : IRequestHandler<AssignCsoToClassCommand, MethodResult<bool>>
     {
         private readonly IClassRepository _classRepository;
@@ -34,7 +32,7 @@ namespace Fsel.Training.Application.Commands.ClassCmd
             var classes = await _classRepository.GetByIdAsync(request.ClassId);
             if (classes == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(classes));
+                methodResult.AddErrorBadRequest(nameof(EnumClassErrorCode.ClassesNotExits));
                 return methodResult;
             }
             if (classes.CsoId.HasValue)
@@ -54,4 +52,5 @@ namespace Fsel.Training.Application.Commands.ClassCmd
             return methodResult;
         }
     }
+
 }

@@ -5,6 +5,8 @@ using Fsel.Common.ActionResults;
 using Fsel.Common.Constants;
 using Fsel.Identity.Application.Commands.AuthCmd;
 using Fsel.Identity.Application.Commands.UserCmd;
+using Fsel.Identity.Application.Queries.StudentQuery;
+using Fsel.Identity.Application.Queries.TeacherQuery;
 using Fsel.Identity.Application.Queries.UserQuery;
 using Fsel.Identity.Domain.Models.EntityModels;
 using Fsel.Shared.Enums;
@@ -75,18 +77,6 @@ namespace Fsel.Identity.Api.Controllers
         public async Task<IActionResult> GetProfileUser()
         {
             MethodResult<UserProfileModel> commandResult = await _mediator.Send(new GetUserProfileQuery()).ConfigureAwait(false);
-            return commandResult.GetActionResult();
-        }
-
-        /// <summary>
-        /// Get users by role
-        /// </summary>
-        [HttpGet("get-users-by-role")]
-        [ProducesResponseType(typeof(MethodResult<IList<UserModel>>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetUsersByRole([FromQuery] GetUsersByRoleQuery query)
-        {
-            MethodResult<IList<UserModel>> commandResult = await _mediator.Send(query).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
     }

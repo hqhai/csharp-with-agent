@@ -7,8 +7,8 @@ namespace Fsel.Course.Lms.Application.Queries.VideoQuery
     using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Common.ActionResults;
-    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
+    using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Infrastructure.Common;
@@ -57,10 +57,10 @@ namespace Fsel.Course.Lms.Application.Queries.VideoQuery
             var studentsResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
             if (studentsResult == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(studentsResult));
+                methodResult.AddErrorBadRequest(nameof(EnumVideoErrorCode.UserNotExist));
                 return methodResult;
             }
-            var studentId = studentsResult.Content?.Result?.Id;
+            var studentId = studentsResult.Content!.Result!.Id;
 
             var videoResult = await _videoResultRepository.Queryable.Where(x => !request.LessonResultId.HasValue || x.LessonResultId == request.LessonResultId)
                 .FirstOrDefaultAsync(x => x.VideoId == request.VideoId && x.StudentId == studentId, cancellationToken);
@@ -78,7 +78,7 @@ namespace Fsel.Course.Lms.Application.Queries.VideoQuery
 
             if (videoTimeCode == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(videoTimeCode));
+                methodResult.AddErrorBadRequest(nameof(EnumVideoErrorCode.VideoNotExist), nameof(request.VideoId), request.VideoId);
                 return methodResult;
             }
 

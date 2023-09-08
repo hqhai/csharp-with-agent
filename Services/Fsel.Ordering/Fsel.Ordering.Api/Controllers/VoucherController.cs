@@ -2,16 +2,17 @@
 
 namespace Fsel.Ordering.Api.Controllers
 {
-    using System.Net;
     using Fsel.Common.ActionResults;
+    using System.Net;
     using Fsel.Common.Constants;
     using Fsel.Core.Base.BaseModels;
-    using Fsel.Ordering.Application.Commands.VoucherCmds;
-    using Fsel.Ordering.Application.Queries.UserVoucher;
-    using Fsel.Ordering.Application.Queries.VoucherQuery;
-    using Fsel.Ordering.Domain.Models.EntityModels;
+    using Fsel.Shared.Enums;
     using MediatR;
+    using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
+    using Fsel.Ordering.Domain.Models.EntityModels;
+    using Fsel.Ordering.Application.Queries.VoucherQuery;
+    using Fsel.Ordering.Application.Commands.VoucherCmds;
 
     [ApiVersion(Settings.APIVersion)]
     [Route(Settings.APIDefaultRoute + "/voucher")]
@@ -98,18 +99,6 @@ namespace Fsel.Ordering.Api.Controllers
             ArgumentNullException.ThrowIfNull(command);
             command.Id = id;
             MethodResult<bool> commandResult = await _mediator.Send(command).ConfigureAwait(false);
-            return commandResult.GetActionResult();
-        }
-
-        /// <summary>
-        /// Get list User voucher
-        /// </summary>
-        [HttpGet("get-current-vouchers")]
-        [ProducesResponseType(typeof(MethodResult<IList<UserVoucherModel>>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> Get()
-        {
-            MethodResult<IList<UserVoucherModel>> commandResult = await _mediator.Send(new GetListUserVoucherQuery()).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
     }

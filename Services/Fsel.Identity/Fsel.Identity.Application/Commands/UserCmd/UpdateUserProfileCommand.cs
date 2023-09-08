@@ -4,9 +4,9 @@ namespace Fsel.Identity.Application.Commands.UserCmd
 {
     using AutoMapper;
     using Fsel.Common.ActionResults;
-    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
     using Fsel.Identity.Domain.Entities;
+    using Fsel.Identity.Domain.Enums.ErrorCodes;
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Domain.Models.CommandModels.Users;
     using Fsel.Identity.Domain.Models.EntityModels;
@@ -46,7 +46,7 @@ namespace Fsel.Identity.Application.Commands.UserCmd
 
             if (user == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(user));
+                methodResult.AddErrorBadRequest(nameof(EnumUserErrorCode.UserNotExist));
                 return methodResult;
             }
 
@@ -62,13 +62,13 @@ namespace Fsel.Identity.Application.Commands.UserCmd
                                                    .FirstOrDefaultAsync(x => x.Id == _authContext.CurrentUserId.ToString(), cancellationToken);
                 if (userView == null)
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(userView));
+                    methodResult.AddErrorBadRequest(nameof(EnumUserErrorCode.UserNotExist));
                     return methodResult;
                 }
                 var teacherBankAccountNew = userView.Human?.Teacher?.TeacherBankAccounts?.FirstOrDefault(x => x.Status == EnumStatusBank.New);
                 if (teacherBankAccountNew != null)
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(teacherBankAccountNew));
+                    methodResult.AddErrorBadRequest(nameof(EnumTeacherErrorCode.TeacherBankAccountAlreadyExist));
                     return methodResult;
                 }
                 if (request.TeacherBankAccount != null)
@@ -86,7 +86,7 @@ namespace Fsel.Identity.Application.Commands.UserCmd
                                                    .FirstOrDefaultAsync(x => x.Id == _authContext.CurrentUserId.ToString(), cancellationToken);
                 if (userView == null)
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(userView));
+                    methodResult.AddErrorBadRequest(nameof(EnumUserErrorCode.UserNotExist));
                     return methodResult;
                 }
                 _mapper.Map(request, userView!.Human!.CSO);
@@ -99,7 +99,7 @@ namespace Fsel.Identity.Application.Commands.UserCmd
                                                    .FirstOrDefaultAsync(x => x.Id == _authContext.CurrentUserId.ToString(), cancellationToken);
                 if (userView == null)
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(userView));
+                    methodResult.AddErrorBadRequest(nameof(EnumUserErrorCode.UserNotExist));
                     return methodResult;
                 }
                 var student = userView.Human!.Student!;
@@ -109,7 +109,7 @@ namespace Fsel.Identity.Application.Commands.UserCmd
                     {
                         if (string.IsNullOrEmpty(request.Parent.FullName))
                         {
-                            methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Parent.FullName));
+                            methodResult.AddErrorBadRequest(nameof(EnumParentErrorCode.ParentFullNameNotNull));
                             return methodResult;
                         }
 
@@ -151,7 +151,7 @@ namespace Fsel.Identity.Application.Commands.UserCmd
                                                   .FirstOrDefaultAsync(x => x.Id == _authContext.CurrentUserId.ToString(), cancellationToken);
                     if (userView == null)
                     {
-                        methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(userView));
+                        methodResult.AddErrorBadRequest(nameof(EnumUserErrorCode.UserNotExist));
                         return methodResult;
                     }
 
@@ -174,7 +174,7 @@ namespace Fsel.Identity.Application.Commands.UserCmd
 
                 if (userView == null)
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(userView));
+                    methodResult.AddErrorBadRequest(nameof(EnumUserErrorCode.UserNotExist));
                     return methodResult;
                 }
                 _mapper.Map(request, userView!.Human!.Parent);
@@ -186,7 +186,7 @@ namespace Fsel.Identity.Application.Commands.UserCmd
                                                .FirstOrDefaultAsync(x => x.Id == _authContext.CurrentUserId.ToString(), cancellationToken);
                 if (userView == null)
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(userView));
+                    methodResult.AddErrorBadRequest(nameof(EnumUserErrorCode.UserNotExist));
                     return methodResult;
                 }
                 _mapper.Map(request, userView!.Human!.CSO);
@@ -197,7 +197,7 @@ namespace Fsel.Identity.Application.Commands.UserCmd
                                     .FirstOrDefaultAsync(x => x.Id == _authContext.CurrentUserId.ToString(), cancellationToken);
                 if (userView == null)
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(userView));
+                    methodResult.AddErrorBadRequest(nameof(EnumUserErrorCode.UserNotExist));
                     return methodResult;
                 }
             }

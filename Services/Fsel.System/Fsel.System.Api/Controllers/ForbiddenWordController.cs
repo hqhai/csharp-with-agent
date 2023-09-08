@@ -75,18 +75,6 @@ namespace Fsel.System.Api.Controllers
         }
 
         /// <summary>
-        /// Delete a Forbidden Word
-        /// </summary>
-        [HttpDelete("list-forbidden-word")]
-        [ProducesResponseType(typeof(MethodResult<ForbiddenWordModel>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> DeleteListForbiddenWord([FromBody] DeleteListForbiddenWordCommand delete)
-        {
-            MethodResult<bool> commandResult = await _mediator.Send(delete).ConfigureAwait(false);
-            return commandResult.GetActionResult();
-        }
-
-        /// <summary>
         /// Get Forbidden Word
         /// </summary>
         [HttpGet("{id}")]

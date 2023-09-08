@@ -8,10 +8,10 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestQuery
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base;
     using Fsel.Course.Domain.Enums;
+    using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Services.UserServices;
-    using Fsel.Shared.Enums.ErrorCodes;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -45,22 +45,15 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestQuery
             var student = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
             if (!student.IsSuccessStatusCode)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError), nameof(student));
+                methodResult.AddErrorBadRequest(nameof(EnumLessonErrorCode.UserNotExist), nameof(student), _authContext.CurrentUserId.ToString());
                 return methodResult;
             }
             var studentId = student?.Content?.Result?.Id;
             var placementTestResult = await _placementTestResultRepository.Queryable.Where(x => x.Status == EnumResultStatus.Done && x.StudentId == studentId)
                                                                             .OrderByDescending(x => x.CreatedDate)
                                                                             .FirstOrDefaultAsync(cancellationToken);
-
-            var placementTestResultModel = _mapper.Map<PlacementTestResultModel>(placementTestResult);
-            if (placementTestResult != null && placementTestResult.SkillScores != null)
-            {
-                placementTestResultModel.CountQuestion = placementTestResult.SkillScores.Sum(x => x.CountQuestion);
-                placementTestResultModel.TotalQuestion = placementTestResult.SkillScores.Sum(x => x.TotalQuestion);
-            }
             methodResult.StatusCode = StatusCodes.Status200OK;
-            methodResult.Result = placementTestResultModel;
+            methodResult.Result = _mapper.Map<PlacementTestResultModel>(placementTestResult);
             return methodResult;
         }
     }

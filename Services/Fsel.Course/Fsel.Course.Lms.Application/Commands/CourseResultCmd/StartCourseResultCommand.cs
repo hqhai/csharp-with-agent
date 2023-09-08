@@ -4,9 +4,9 @@ namespace Fsel.Course.Lms.Application.Commands.CourseResultCmd
 {
     using AutoMapper;
     using Fsel.Common.ActionResults;
-    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
     using Fsel.Course.Domain.Enums;
+    using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Services.UserServices;
@@ -55,7 +55,7 @@ namespace Fsel.Course.Lms.Application.Commands.CourseResultCmd
             var courseResult = await _courseResultRepository.Queryable.FirstOrDefaultAsync(x => x.Id == request.CourseResultId && x.StudentId == studentId, cancellationToken);
             if (courseResult == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(courseResult));
+                methodResult.AddErrorBadRequest(nameof(EnumCourseResultErrorCode.CourseResultsNotExist));
                 return methodResult;
             }
 

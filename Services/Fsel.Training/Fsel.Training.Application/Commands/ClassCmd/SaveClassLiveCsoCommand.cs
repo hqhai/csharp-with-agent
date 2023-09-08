@@ -7,7 +7,7 @@ namespace Fsel.Training.Application.Commands.ClassCmd
     using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Common.ActionResults;
-    using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Training.Domain.Enums.ErrorCodes;
     using Fsel.Training.Domain.IRepositories;
     using Fsel.Training.Domain.Models.CommandModels.Classes;
     using Fsel.Training.Domain.Models.EntityModels;
@@ -39,7 +39,7 @@ namespace Fsel.Training.Application.Commands.ClassCmd
 
             if (classLive == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(classLive));
+                methodResult.AddErrorBadRequest(nameof(EnumClassErrorCode.ClassNotFound));
                 return methodResult;
             }
             _mapper.Map(request, classLive);

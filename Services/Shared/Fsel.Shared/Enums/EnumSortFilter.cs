@@ -8,13 +8,10 @@ namespace Fsel.Shared.Enums
     {
         [Description("Newest")]
         Newest,
-
         [Description("Oldest")]
         Oldest,
-
         [Description("Most popular")]
         MostPopular,
-
         [Description("Trending now")]
         TrendingNow
     }

@@ -4,7 +4,6 @@ namespace Fsel.Interaction.Application.Commands.TopicTagCmd
 {
     using AutoMapper;
     using Fsel.Common.ActionResults;
-    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Interaction.Domain.Entities;
     using Fsel.Interaction.Domain.Enums.ErrorCodes;
     using Fsel.Interaction.Domain.IRepositories;
@@ -50,7 +49,7 @@ namespace Fsel.Interaction.Application.Commands.TopicTagCmd
                     topicTag = await _topicTagRepository.GetByIdAsync(item.Id.Value);
                     if (topicTag == null)
                     {
-                        methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(topicTag));
+                        methodResult.AddErrorBadRequest(nameof(EnumeTopicTagErrorCode.TopicTagsDontExist));
                         return methodResult;
                     }
                     topicTag = _mapper.Map(item, topicTag);

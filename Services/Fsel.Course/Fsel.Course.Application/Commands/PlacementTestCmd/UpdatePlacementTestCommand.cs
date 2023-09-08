@@ -2,7 +2,6 @@
 
 using AutoMapper;
 using Fsel.Common.ActionResults;
-using Fsel.Common.Enums.ErrorCodes;
 using Fsel.Course.Domain.Entities;
 using Fsel.Course.Domain.Enums.ErrorCodes;
 using Fsel.Course.Domain.IRepositories;
@@ -44,18 +43,18 @@ namespace Fsel.Course.Application.Commands.PlacementTestCmd
 
             if (request.SectionGroups == null || request.SectionGroups.Count == 0)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.SectionGroups));
+                methodResult.AddErrorBadRequest(nameof(EnumSectionGroupErrorCode.SectionGroupsNull), nameof(request.SectionGroups));
                 return methodResult;
             }
             if (await _placementTestRepository.Queryable.AnyAsync(x => x.Id != request.Id && x.Name == request.Name, cancellationToken))
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(request.Name));
+                methodResult.AddErrorBadRequest(nameof(EnumPlacementTestErrorCode.NameAlreadyExists), nameof(request.Name), request.Name);
                 return methodResult;
             }
             var placementTest = await _placementTestRepository.GetIncludeByIdAsync(request.Id);
             if (placementTest == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(placementTest));
+                methodResult.AddErrorBadRequest(nameof(EnumPlacementTestErrorCode.PlacementTestNotExist), nameof(request.Id), request.Id);
                 return methodResult;
             }
 
@@ -87,7 +86,7 @@ namespace Fsel.Course.Application.Commands.PlacementTestCmd
             {
                 if (sectionGroup == null)
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(sectionGroup));
+                    methodResult.AddErrorBadRequest(nameof(EnumSectionGroupErrorCode.SectionGroupNull), nameof(sectionGroup));
                     return methodResult;
                 }
                 var newSectionGroup = _mapper.Map<SectionGroup>(sectionGroup);

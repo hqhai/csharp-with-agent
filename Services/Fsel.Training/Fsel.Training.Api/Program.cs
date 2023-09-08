@@ -1,8 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
 using Fsel.Core.Extensions;
-using Fsel.Shared.Constants;
-using Fsel.Training.Application.Queues.Consumers;
 using Fsel.Training.Application.Services.CourseServices;
 using Fsel.Training.Application.Services.OrderServices;
 using Fsel.Training.Application.Services.SystemServices;
@@ -11,7 +9,6 @@ using Fsel.Training.Domain.IRepositories;
 using Fsel.Training.Infrastructure;
 using Fsel.Training.Infrastructure.Repositories;
 using Fsel.Training.Infrastructure.ValueSettings;
-using MassTransit;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -23,7 +20,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 // Add services to the container.
 var appSetting = builder.AddAppSettings<AppSetting>();
-builder.AddServices(appSetting);
+builder.AddServices();
 builder.AddSwaggerGens(appSetting);
 builder.AddAuthenticationJwtBearers(appSetting);
 builder.AddDbContexts<TrainingDbContext>();
@@ -40,15 +37,13 @@ builder.AddRefitClients(typeof(ICourseService), appSetting?.Services?.CourseApiU
 builder.AddRefitClients(typeof(IOrderService), appSetting?.Services?.OrderApiUrl);
 builder.AddRefitClients(typeof(ISystemService), appSetting?.Services?.SystemApiUrl);
 
-builder.AddMassTransit(appSetting,
-queues: new Dictionary<string, Type>
-{
-    { QueueSettings.TrainingQueue.NameQueue.UpdateClassLiveAssignment, typeof(UpdateClassLiveAssignmentConsumer) }
-});
-//builder.Services.AddMediator(cfg =>
-//{
-//    cfg.AddConsumer<UpdateClassLiveAssignmentConsumer>();
-//});
 var app = builder.Build();
+
+// Configure the HTTP request pipeline.
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
 app.UseServices();
 app.Run();

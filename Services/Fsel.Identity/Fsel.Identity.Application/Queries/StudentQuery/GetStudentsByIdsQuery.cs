@@ -7,7 +7,7 @@ namespace Fsel.Identity.Application.Queries.StudentQuery
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
-    using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Identity.Domain.Enums.ErrorCodes;
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Domain.Models.EntityModels;
     using MediatR;
@@ -37,7 +37,7 @@ namespace Fsel.Identity.Application.Queries.StudentQuery
 
             if (request.Ids == null || request.Ids.Count == 0)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Ids));
+                methodResult.AddErrorBadRequest(nameof(EnumUserErrorCode.StudentIdsNull), nameof(request.Ids), request.Ids);
                 return methodResult;
             }
 

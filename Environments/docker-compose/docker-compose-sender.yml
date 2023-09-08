@@ -10,7 +10,6 @@ services:
         environment:
             - ASPNETCORE_ENVIRONMENT=Testing
             - SERVICENAME=Sender
-            - SentryConfig__Dsn=https://530c364a1c006e0dade385d197373f4a@o4505797571444736.ingest.sentry.io/4505797729452032
             - SMTP__FROM=duongphanthtb@gmail.com
             - SMTP__SMTPSERVER=smtp.gmail.com
             - SMTP__PORT=465

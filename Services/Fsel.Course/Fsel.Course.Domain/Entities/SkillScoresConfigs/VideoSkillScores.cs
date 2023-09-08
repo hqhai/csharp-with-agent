@@ -10,7 +10,6 @@ namespace Fsel.Course.Domain.Entities.SkillScoresConfigs
     {
         [JsonRequired]
         public EnumTimeCodeType Type { get; set; }
-
         [JsonRequired]
         public IList<SkillScores>? SkillScores { get; set; }
     }

@@ -3,12 +3,12 @@ using System.Globalization;
 using System.Text;
 using AutoMapper;
 using Fsel.Common.ActionResults;
-using Fsel.Common.Enums.ErrorCodes;
+using Fsel.Common.Constants;
 using Fsel.Common.Helpers;
 using Fsel.Identity.Application.Commands.AuthCmd;
-using Fsel.Identity.Application.Services.OrderService;
 using Fsel.Identity.Domain.Entities;
 using Fsel.Identity.Domain.Enums;
+using Fsel.Identity.Domain.Enums.ErrorCodes;
 using Fsel.Identity.Domain.IRepositories;
 using Fsel.Identity.Domain.Models.CommandModels.Users;
 using Fsel.Identity.Domain.Models.EntityModels;
@@ -21,7 +21,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using OtpNet;
-using EnumAuthErrorCode = Fsel.Identity.Domain.Enums.ErrorCodes.EnumAuthErrorCode;
 
 namespace Fsel.Identity.Application.Commands.AdminCmd
 {
@@ -34,7 +33,6 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
         private readonly UserManager<User> _userManager;
         private readonly RoleManager<Role> _roleManager;
         private readonly IMapper _mapper;
-        private readonly IOrderService _orderService;
         private readonly IMediator _mediator;
         private readonly IUserOtpCodeRepository _userOtpCodeRepository;
         private readonly AppSetting _appSetting;
@@ -45,7 +43,6 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
         public CreateUserCommandHandler(UserManager<User> userManager,
             RoleManager<Role> roleManager,
             IMapper mapper,
-            IOrderService orderService,
             IMediator mediator,
             IUserOtpCodeRepository userOtpCodeRepository,
             AppSetting appSetting,
@@ -56,7 +53,6 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
             _userManager = userManager;
             _roleManager = roleManager;
             _mapper = mapper;
-            _orderService = orderService;
             _mediator = mediator;
             _userOtpCodeRepository = userOtpCodeRepository;
             _appSetting = appSetting;
@@ -69,43 +65,6 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<UserModel>();
-
-            #region validate
-
-            if (request.Role == EnumRoleRegisterWithAdmin.CSO)
-            {
-                if (request.PackageIds == null || request.PackageIds.Count == 0)
-                {
-                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.PackageIds));
-                    return methodResult;
-                }
-
-                var packageResults = await _orderService.GetPackages();
-                var packages = packageResults?.Content?.Result;
-                if (packages != null)
-                {
-                    var isCheck = request.PackageIds.All(x => packages.Select(y => y.Id).Contains(x));
-                    if (!isCheck)
-                    {
-                        methodResult.AddErrorBadRequest(nameof(EnumAuthErrorCode.PackageIdsEnteredIsIncorrect));
-                        return methodResult;
-                    }
-                }
-            }
-            if (request.CourseLevels == null || request.CourseLevels.Count == 0)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.CourseLevels));
-                return methodResult;
-            }
-
-            if ((request.CourseTypes == null || request.CourseTypes.Count == 0) && (request.LiveCourseTypes == null || request.LiveCourseTypes.Count == 0))
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.CourseTypes), nameof(request.LiveCourseTypes));
-                return methodResult;
-            }
-
-            #endregion validate
-
             var user = await _userManager.FindByEmailAsync(request.Email!);
             if (user != null)
             {
@@ -114,22 +73,31 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
             }
             else
             {
-                var role = await _roleManager.FindByNameAsync(request.Role.ToString() ?? string.Empty);
+                var role = await _roleManager.FindByNameAsync(request?.Role.ToString() ?? string.Empty);
                 var newPassword = new PasswordGeneratorHelper(8, 10).Generate();
                 IdentityResult result;
                 user = new();
                 _mapper.Map(request, user);
-                user.UserName = request.Email;
+                user.UserName = request?.Email;
                 result = await _userManager.CreateAsync(user, newPassword);
                 if (!result.Succeeded)
                 {
                     methodResult.AddErrorBadRequest(nameof(EnumAuthErrorCode.UserFailToCreate), nameof(newPassword), newPassword);
                     return methodResult;
                 }
-                var human = await CreateHuman(request, user);
+
+                var human = await CreateHuman(request!, user);
                 human = _humanRepository.Add(human);
                 await _humanRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-                await _userManager.AddToRoleAsync(user, request.Role.ToString());
+                if (request!.Role == EnumRoleRegisterWithAdmin.Teacher)
+                {
+                    var roleLives = human!.Teacher!.RoleLives;
+                    if (roleLives != null && roleLives.Count > 0)
+                    {
+                        await _userManager.AddToRoleAsync(user, EnumRole.TeacherLive.ToString());
+                    }
+                }
+                await _userManager.AddToRoleAsync(user, request!.Role.ToString());
 
                 #region Send Code OTP
 
@@ -189,8 +157,8 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
                 human.Teacher = new Teacher
                 {
                     HumanId = human.Id,
-                    LiveCourseTypes = request.LiveCourseTypes,
                     CourseLevels = request.CourseLevels,
+                    RoleLives = request.RoleLives,
                     CourseTypes = request.CourseTypes
                 };
                 human.Teacher.TeacherBankAccounts?.Add(new TeacherBankAccount
@@ -208,9 +176,9 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
                 human.CSO = new CSO
                 {
                     HumanId = human.Id,
-                    CourseTypes = request.CourseTypes,
+                    RoleLives = request.RoleLives,
                     CourseLevels = request.CourseLevels,
-                    PackageIds = request.PackageIds,
+                    SubscriptionClasses = request.SubscriptionClasses
                 };
                 human.Code = $"CSO_{stt:0000}";
             }

@@ -17,5 +17,6 @@ namespace Fsel.Course.Domain.Entities
 
         public SectionGroup? SectionGroup { get; set; }
         public FinalTest? FinalTest { get; set; }
+
     }
 }

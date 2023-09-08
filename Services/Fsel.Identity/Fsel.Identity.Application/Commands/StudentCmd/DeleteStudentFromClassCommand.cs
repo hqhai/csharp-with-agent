@@ -6,10 +6,11 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
-    using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Identity.Domain.Enums;
     using Fsel.Identity.Domain.IRepositories;
     using MediatR;
     using Microsoft.AspNetCore.Http;
+    using Microsoft.EntityFrameworkCore;
 
     public class DeleteStudentFromClassCommand : IRequest<MethodResult<bool>>
     {
@@ -35,7 +36,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
             var student = await _studentRepository.GetByIdAsync(request.Id);
             if (student == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student));
+                methodResult.AddErrorBadRequest(nameof(EnumHumanErrorCode.StudentNotExist));
                 return methodResult;
             }
             await _studentRepository.ExecuteTransactionAsync(async () =>

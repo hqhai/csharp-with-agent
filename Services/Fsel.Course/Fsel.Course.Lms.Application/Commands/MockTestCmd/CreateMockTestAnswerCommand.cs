@@ -7,7 +7,6 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
     using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Common.ActionResults;
-    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Entities.SkillScoresConfigs;
     using Fsel.Course.Domain.Enums;
@@ -61,18 +60,18 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
             MethodResult<MockTestResultModel> methodResult = new MethodResult<MockTestResultModel>();
             if (request.SectionGroups == null || request.SectionGroups.Count == 0)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.SectionGroups));
+                methodResult.AddErrorBadRequest(nameof(EnumMockTestAnswerErrorCode.SkillNull), nameof(request.SectionGroups), request.SectionGroups);
                 return methodResult;
             }
             var mockTestResult = await _mockTestResultRepository.Queryable.FirstOrDefaultAsync(x => x.Id == request.MockTestResultId, cancellationToken);
             if (mockTestResult == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(mockTestResult));
+                methodResult.AddErrorBadRequest(nameof(EnumMockTestResultErrorCode.MockTestResultNotExist), nameof(request.MockTestResultId), request.MockTestResultId);
                 return methodResult;
             }
             else if (mockTestResult.Status == EnumResultStatus.Done)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumMockTestResultErrorCode.MockTestResultDone), nameof(mockTestResult.Status));
+                methodResult.AddErrorBadRequest(nameof(EnumMockTestResultErrorCode.MockTestResultDone), nameof(request.MockTestResultId), request.MockTestResultId);
                 return methodResult;
             }
 
@@ -82,7 +81,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
 
             if (sectionGroups == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(sectionGroups));
+                methodResult.AddErrorBadRequest(nameof(EnumSectionGroupErrorCode.SectionGroupsNull), nameof(sectionGroups));
                 return methodResult;
             }
 
@@ -90,7 +89,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
             var questions = await _questionRepository.GetIncludeSectionByIdAsync(questionIds);
             if (questions == null || questions.Count == 0)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(questions));
+                methodResult.AddErrorBadRequest(nameof(EnumQuestionErrorCode.QuestionsNotExist), nameof(questionIds), questionIds);
                 return methodResult;
             }
             foreach (var item in request.SectionGroups)
@@ -99,7 +98,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
                 {
                     if (item.Answers == null || item.Answers.Count == 0)
                     {
-                        methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.SectionGroups));
+                        methodResult.AddErrorBadRequest(nameof(EnumMockTestAnswerErrorCode.AnswerNull), nameof(request.SectionGroups), request.SectionGroups);
                         return methodResult;
                     }
 
@@ -112,17 +111,17 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
                             var question = questions.FirstOrDefault(x => x.Id == answer.QuestionId);
                             if (question == null)
                             {
-                                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(question));
+                                methodResult.AddErrorBadRequest(nameof(EnumQuestionErrorCode.QuestionNotExist), nameof(answer.QuestionId), answer.QuestionId);
                                 return methodResult;
                             }
                             else if (question.Config == null)
                             {
-                                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(question));
+                                methodResult.AddErrorBadRequest(nameof(EnumQuestionErrorCode.QuestionConfigNull), nameof(question), question);
                                 return methodResult;
                             }
                             else if (question.SectionQuestions == null || question.SectionQuestions.Count == 0)
                             {
-                                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(question.SectionQuestions));
+                                methodResult.AddErrorBadRequest(nameof(EnumSectionQuestionErrorCode.SectionQuestionsNotExist), nameof(question.SectionQuestions));
                                 return methodResult;
                             }
                             var sectionQuestionId = question.SectionQuestions.FirstOrDefault()!.Id;
@@ -130,7 +129,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
                             if (mockTestAnswer == null)
                             {
                                 var (answerConfig, correctCount) = _answerTypeConverter.GetTotalCorrectByAsnwerType(answer.Answer, question.Config, question.QuestionType);
-                                if (!string.IsNullOrEmpty(answer.Answer?.ToString()) && answerConfig == null)
+                                if (answerConfig == null)
                                 {
                                     methodResult.AddErrorBadRequest(nameof(EnumMockTestAnswerErrorCode.AnswerIsInTheWrongFormat), nameof(answer.Answer), answer.Answer);
                                     return methodResult;
@@ -152,7 +151,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
                             var section = await _sectionRepository.Queryable.FirstOrDefaultAsync(x => x.Id == sectionId, cancellationToken);
                             if (section == null)
                             {
-                                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(section));
+                                methodResult.AddErrorBadRequest(nameof(EnumSectionErrorCode.SectionNotExist), nameof(answer.SectionId), answer.SectionId);
                                 return methodResult;
                             }
                             var mockTestAnswer = await _mockTestAnswerRepository.Queryable.FirstOrDefaultAsync(x => x.MockTestResultId == mockTestResult.Id && x.SectionId == sectionId, cancellationToken);
@@ -173,7 +172,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
                             var sectionTimeCode = await _sectionTimeCodeRepository.Queryable.FirstOrDefaultAsync(x => x.Id == sectionTimeCodeId, cancellationToken);
                             if (sectionTimeCode == null)
                             {
-                                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(sectionTimeCode));
+                                methodResult.AddErrorBadRequest(nameof(EnumSectionTimeCodeErrorCode.SectionTimeCodeNotExist), nameof(answer.SectionTimeCodeId), answer.SectionTimeCodeId);
                                 return methodResult;
                             }
                             var mockTestAnswer = await _mockTestAnswerRepository.Queryable.FirstOrDefaultAsync(x => x.MockTestResultId == mockTestResult.Id && x.SectionTimeCodeId == sectionTimeCodeId, cancellationToken);
@@ -192,7 +191,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
                     var sectionGroup = sectionGroups.FirstOrDefault(x => x.Id == item.SectionGroupId);
                     if (sectionGroup == null)
                     {
-                        methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(item.SectionGroupId));
+                        methodResult.AddErrorBadRequest(nameof(EnumSectionGroupErrorCode.SectionGroupsNull), nameof(item.SectionGroupId), item.SectionGroupId);
                         return methodResult;
                     }
                     var skillScore = new SkillScores
@@ -200,10 +199,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
                         Skill = sectionGroup.CourseSkill,
                         TotalCount = questionCount,
                         CorrectCount = count,
-                        Scores = count.GetIeltsScore(sectionGroup.CourseSkill),
-                        CountQuestion = item.Answers.Count,
-                        TotalQuestion = item.Answers.Count,
-                        Percent = (double)questionCount / count * 100
+                        Scores = count.GetIeltsScore(sectionGroup.CourseSkill)
                     };
                     skillScores.Add(skillScore);
                 }
@@ -212,6 +208,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
             {
                 mockTestResult.CorrectCount = (int)skillScores.Sum(x => x.CorrectCount);
                 mockTestResult.CorrectTotal = (int)skillScores.Sum(x => x.TotalCount);
+                mockTestResult.Percent = mockTestResult.CorrectTotal > 0 ? (double)mockTestResult.CorrectCount / mockTestResult.CorrectTotal * 100 : 0;
                 mockTestResult.Status = EnumResultStatus.Done;
                 mockTestResult.SkillScores = skillScores;
             }

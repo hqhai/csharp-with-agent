@@ -3,7 +3,9 @@
 namespace Fsel.Ordering.Infrastructure.Configs
 {
     using System;
+    using Fsel.Common.Helpers;
     using Fsel.Ordering.Domain.Entities;
+    using Fsel.Ordering.Domain.Enums;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -12,6 +14,7 @@ namespace Fsel.Ordering.Infrastructure.Configs
         public void Configure(EntityTypeBuilder<Voucher> builder)
         {
             ArgumentNullException.ThrowIfNull(builder);
+            
         }
     }
 }

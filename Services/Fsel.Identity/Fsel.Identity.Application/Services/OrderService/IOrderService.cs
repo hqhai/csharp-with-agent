@@ -10,8 +10,5 @@ namespace Fsel.Identity.Application.Services.OrderService
     {
         [Get("/package")]
         Task<IApiResponse<MethodResult<List<PackageModel>>>> GetPackages();
-
-        [Post("/user-referral")]
-        Task<IApiResponse<MethodResult<bool>>> CreateUserReferralAsync([Body] CreateUserReferralCommandModel command);
     }
 }

@@ -3,11 +3,11 @@
 using System.Net;
 using Fsel.Common.ActionResults;
 using Fsel.Common.Constants;
+using Fsel.Shared.Enums;
 using Fsel.Core.Base.BaseModels;
 using Fsel.Course.Application.Commands.UnitCmd;
 using Fsel.Course.Application.Queries.UnitQuery;
 using Fsel.Course.Domain.Models.EntityModels;
-using Fsel.Shared.Enums;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

@@ -12,11 +12,11 @@ namespace Fsel.Course.Lms.Application.Queries.ExtraPracticeQuery
     {
     }
 
-    public class GetListLevelByUnitQueryHandler : IRequestHandler<GetListLevelByUnitQuery, MethodResult<object>>
+    public class GetFilterExtraPracticeQueryHandler : IRequestHandler<GetListLevelByUnitQuery, MethodResult<object>>
     {
         private readonly IUnitRepository _unitRepository;
 
-        public GetListLevelByUnitQueryHandler(IUnitRepository unitRepository)
+        public GetFilterExtraPracticeQueryHandler(IUnitRepository unitRepository)
         {
             _unitRepository = unitRepository;
         }
@@ -25,7 +25,7 @@ namespace Fsel.Course.Lms.Application.Queries.ExtraPracticeQuery
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<object> methodResult = new MethodResult<object>();
-            var units = await _unitRepository.Queryable.OrderBy(x => x.CreatedDate).GroupBy(x => x.CourseLevel).Select(x => new
+            var units = await _unitRepository.Queryable.GroupBy(x => x.CourseLevel).AsNoTracking().Select(x => new
             {
                 CourseLevel = x.Key,
                 Units = x.Select(y => new

@@ -94,6 +94,7 @@ namespace Fsel.Training.Application.Queries.ClassQuery.Admin
                 methodResult.Result = allTeacher;
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
+
             }
         }
     }

@@ -11,7 +11,6 @@ services:
             - ASPNETCORE_ENVIRONMENT=Testing
             - CONNECTIONSTRINGS__DEFAULTCONNECTION=Data Source=183.91.11.235;Initial Catalog=env-dev.system-service;User Id=sa;Password=FselTech@2023;TrustServerCertificate=true;
             - SERVICENAME=System
-            - SentryConfig__Dsn=https://530c364a1c006e0dade385d197373f4a@o4505797571444736.ingest.sentry.io/4505797729452032
             - JWT__SECRETKEY=JsonWebApiTokenWithSwaggerAuthorizationAuthenticationAspNetCore
             - JWT__ISSUER=baseWebApiIssuer
             - JWT__AUDIENCE=baseWebApiAudience
@@ -19,8 +18,6 @@ services:
             - JWT__TOKENVALIDITYINMINUTES=1440
             - JWT__REFRESHTOKENVALIDITYINDAYS=7
             - SERVICES_UserApiUrl=http://42.96.58.145:5202/api/v1
-            - SERVICES_OrderApiUrl=http://42.96.58.145:5209/api/v1
-            - SERVICES_LmsCourseApiUrl=http://42.96.58.145:5204/api/v1
         ports:
             - 52010:80
             - 7010:443

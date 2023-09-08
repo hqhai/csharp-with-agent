@@ -18,11 +18,5 @@ namespace Fsel.Identity.Application.Services.TrainingService
 
         [Get("/class/class-course-student/{studentId}")]
         Task<IApiResponse<MethodResult<IList<StudentCourseModel>>>> GetClassCourseStudentAsync([FromRoute] Guid studentId);
-
-        [Post("/admin/class/user-class-by-teacherids")]
-        Task<IApiResponse<MethodResult<List<UserClassModel>>>> GetUserClassByTeacherIds([FromBody] IList<Guid> ids);
-
-        [Post("/admin/class/user-class-by-csoids")]
-        Task<IApiResponse<MethodResult<List<UserClassModel>>>> GetUserClassByCSOIdsAsync([FromBody] IList<Guid> ids);
     }
 }

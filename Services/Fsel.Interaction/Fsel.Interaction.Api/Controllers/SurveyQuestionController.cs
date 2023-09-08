@@ -8,11 +8,13 @@ namespace Fsel.Interaction.Api.Controllers
     using Fsel.Interaction.Application.Queries.SurveyQuestionQuery;
     using Fsel.Interaction.Domain.Models.EntityModels;
     using MediatR;
+    using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
 
     [ApiVersion(Settings.APIVersion)]
     [Route(Settings.APIDefaultRoute + "/surveyQuestion")]
     [ApiController]
+    [Authorize]
     public class SurveyQuestionController : ControllerBase
     {
         private readonly IMediator _mediator;
@@ -28,9 +30,9 @@ namespace Fsel.Interaction.Api.Controllers
         [HttpGet]
         [ProducesResponseType(typeof(MethodResult<IList<SurveyQuestionModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetAll([FromQuery] GetAllSurveyQuestQuery query)
+        public async Task<IActionResult> GetAll()
         {
-            MethodResult<IList<SurveyQuestionModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            MethodResult<IList<SurveyQuestionModel>> queryResult = await _mediator.Send(new GetAllSurveyQuestQuery()).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
 

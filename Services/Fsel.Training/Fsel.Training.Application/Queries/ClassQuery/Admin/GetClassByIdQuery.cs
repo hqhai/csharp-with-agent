@@ -7,7 +7,7 @@ namespace Fsel.Training.Application.Queries.ClassQuery.Admin
     using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Common.ActionResults;
-    using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Training.Domain.Enums.ErrorCodes;
     using Fsel.Training.Domain.IRepositories;
     using Fsel.Training.Domain.Models.EntityModels;
     using MediatR;
@@ -37,7 +37,7 @@ namespace Fsel.Training.Application.Queries.ClassQuery.Admin
             var classes = await _classRepository.GetByIdAsync(request.Id);
             if (classes == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(classes));
+                methodResult.AddErrorBadRequest(nameof(EnumClassErrorCode.ClassesNotExits), nameof(request.Id), request.Id);
                 return methodResult;
             }
             methodResult.Result = _mapper.Map<ClassModel>(classes);

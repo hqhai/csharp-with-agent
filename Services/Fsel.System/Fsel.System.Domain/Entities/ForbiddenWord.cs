@@ -9,8 +9,8 @@ namespace Fsel.System.Domain.Entities
     public class ForbiddenWord : Entity
     {
         /// <summary>
-        /// Từ cấm
-        /// </summary>
+        /// Từ cấm 
+        /// </summary>     
         [MaxLength(250, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? Word { get; set; }
 

@@ -8,10 +8,9 @@ namespace Fsel.Identity.Domain.Models.EntityModels
 
     public class CSOModel : BaseModel
     {
-        public IList<EnumCourseType>? CourseTypes { get; set; }
+        public IList<EnumCourseType>? RoleLives { get; set; }
         public IList<EnumCourseLevel>? CourseLevels { get; set; }
-        public IList<string>? PackageNames { get; set; }
-        public IList<Guid>? PackageIds { get; set; }
+        public IList<EnumSubscriptionClass>? SubscriptionClasses { get; set; }
         public string? PassportPath { get; set; }
 
         public string? UniversityDegreePath { get; set; }

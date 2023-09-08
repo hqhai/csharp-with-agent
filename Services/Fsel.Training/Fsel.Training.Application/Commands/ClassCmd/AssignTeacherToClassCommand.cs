@@ -4,61 +4,53 @@ namespace Fsel.Training.Application.Commands.ClassCmd
 {
     using System.Threading;
     using System.Threading.Tasks;
+    using AutoMapper;
     using Fsel.Common.ActionResults;
-    using Fsel.Common.Enums.ErrorCodes;
-    using Fsel.Shared.Enums;
-    using Fsel.Training.Application.Services.UserServices;
+    using Fsel.Training.Domain.Enums.ErrorCodes;
     using Fsel.Training.Domain.IRepositories;
     using Fsel.Training.Domain.Models.CommandModels.Classes;
+    using Fsel.Training.Domain.Models.EntityModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
 
-    public class AssignTeacherToClassCommand : AssignTeacherToClassCommandModel, IRequest<MethodResult<bool>>
+    public class AssignTeacherToClassCommand : AssignTeacherToClassCommandModel, IRequest<MethodResult<ClassModel>>
     {
     }
 
-    public class AssignTeacherToClassCommandHandler : IRequestHandler<AssignTeacherToClassCommand, MethodResult<bool>>
+    public class AssignTeacherToClassCommandHandler : IRequestHandler<AssignTeacherToClassCommand, MethodResult<ClassModel>>
     {
         private readonly IClassRepository _classRepository;
-        private readonly IUserService _userService;
+        private readonly IMapper _mapper;
 
-        public AssignTeacherToClassCommandHandler(IClassRepository classRepository, IUserService userService)
+        public AssignTeacherToClassCommandHandler(IClassRepository classRepository, IMapper mapper)
         {
             _classRepository = classRepository;
-            _userService = userService;
+            _mapper = mapper;
         }
 
-        public async Task<MethodResult<bool>> Handle(AssignTeacherToClassCommand request, CancellationToken cancellationToken)
+        public async Task<MethodResult<ClassModel>> Handle(AssignTeacherToClassCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            MethodResult<bool> methodResult = new MethodResult<bool>();
-            var classes = await _classRepository.GetByIdAsync(request.ClassId);
-            if (classes == null)
+            MethodResult<ClassModel> methodResult = new MethodResult<ClassModel>();
+            var @class = await _classRepository.GetByIdAsync(request.Id);
+            if (@class == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(classes));
+                methodResult.AddErrorBadRequest(nameof(EnumClassErrorCode.ClassesNotExits));
                 return methodResult;
             }
-            var teacherResult = await _userService.GetTeacherByIdAsync(request.TeacherId);
-            if (!teacherResult.IsSuccessStatusCode)
+            if (@class.TeacherApprovalStatus == Shared.Enums.EnumTeacherApprovalStatus.Approved)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(teacherResult));
+                methodResult.AddErrorBadRequest(nameof(EnumClassErrorCode.TeacherApproveStatusIsApprove));
                 return methodResult;
             }
-
-            var teacher = teacherResult?.Content?.Result;
-            if (teacher == null)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(teacher));
-                return methodResult;
-            }
-            classes.TeacherId = request.TeacherId;
-            classes.TeacherApprovalStatus = EnumTeacherApprovalStatus.Pending;
+            _mapper.Map(request, @class);
             await _classRepository.ExecuteTransactionAsync(async () =>
             {
-                _classRepository.Update(classes);
+                @class.TeacherApprovalStatus = Shared.Enums.EnumTeacherApprovalStatus.Pending;
+                _classRepository.Update(@class);
                 await _classRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
                 methodResult.StatusCode = StatusCodes.Status200OK;
-                methodResult.Result = true;
+                methodResult.Result = _mapper.Map<ClassModel>(@class);
                 return methodResult;
             });
             return methodResult;

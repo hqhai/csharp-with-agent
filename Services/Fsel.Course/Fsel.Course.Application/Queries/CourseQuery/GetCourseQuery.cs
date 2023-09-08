@@ -2,7 +2,7 @@
 
 using AutoMapper;
 using Fsel.Common.ActionResults;
-using Fsel.Common.Enums.ErrorCodes;
+using Fsel.Course.Domain.Enums.ErrorCodes;
 using Fsel.Course.Domain.IRepositories;
 using Fsel.Course.Domain.Models.EntityModels;
 using MediatR;
@@ -35,7 +35,7 @@ namespace Fsel.Course.Application.Queries.CourseQuery
 
             if (course == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(course));
+                methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.CourseNotExist), nameof(request.Id), request.Id);
                 return methodResult;
             }
 

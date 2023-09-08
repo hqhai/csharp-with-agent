@@ -40,20 +40,6 @@ namespace Fsel.Training.Api.Controllers.Teacher
         }
 
         /// <summary>
-        /// Update Teacher Free Date
-        /// </summary>
-        [HttpPut("{id}")]
-        [ProducesResponseType(typeof(MethodResult<TeacherFreeDateModel>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.BadRequest)]
-        public async Task<IActionResult> Update([FromRoute] Guid id, [FromBody] UpdateTeacherFreeDateCommand command)
-        {
-            ArgumentNullException.ThrowIfNull(command);
-            command.Id = id;
-            MethodResult<TeacherFreeDateModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
-            return commandResult.GetActionResult();
-        }
-
-        /// <summary>
         /// Search Teacher Free Date
         /// </summary>
         [HttpGet]

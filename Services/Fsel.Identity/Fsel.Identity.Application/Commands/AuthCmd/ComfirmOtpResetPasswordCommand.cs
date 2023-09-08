@@ -2,9 +2,9 @@
 
 using AutoMapper;
 using Fsel.Common.ActionResults;
-using Fsel.Common.Enums.ErrorCodes;
 using Fsel.Identity.Domain.Entities;
 using Fsel.Identity.Domain.Enums;
+using Fsel.Identity.Domain.Enums.ErrorCodes;
 using Fsel.Identity.Domain.IRepositories;
 using Fsel.Identity.Domain.Models.CommandModels.Auths;
 using Fsel.Shared.Enums;
@@ -43,12 +43,12 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
 
             if (string.IsNullOrEmpty(request.NewPassword))
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.NewPassword));
+                methodResult.AddErrorBadRequest(nameof(EnumAuthErrorCode.PasswordNotEmpty), nameof(request.NewPassword));
                 return methodResult;
             }
             if (string.IsNullOrEmpty(request.Otp))
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Otp));
+                methodResult.AddErrorBadRequest(nameof(EnumAuthErrorCode.OtpNull), nameof(request.Otp));
                 return methodResult;
             }
 
@@ -57,7 +57,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
 
             if (user == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Otp));
+                methodResult.AddErrorBadRequest(nameof(EnumAuthErrorCode.OtpNotExist), nameof(request.Otp), request.Otp);
                 return methodResult;
             }
 
@@ -65,13 +65,13 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                        .FirstOrDefaultAsync(x => x.UserId == user!.Id && x.Status == EnumStatusUser.New && !x.IsDeleted && x.OTPCode == request.Otp, cancellationToken);
             if (userOtpCode == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Otp));
+                methodResult.AddErrorBadRequest(nameof(EnumAuthErrorCode.InvalidOTP), nameof(request.Otp), request.Otp);
                 return methodResult;
             }
 
             if (DateTime.Compare(DateTime.Now, userOtpCode.ExpiredTime) > 0)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Otp));
+                methodResult.AddErrorBadRequest(nameof(EnumAuthErrorCode.OTPExpired), nameof(request.Otp), request.Otp);
                 return methodResult;
             }
 

@@ -7,6 +7,7 @@ namespace Fsel.Interaction.Api.Controllers
     using Fsel.Common.Constants;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Interaction.Application.Commands.SupportQuetionCmd;
+    using Fsel.Interaction.Application.Commands.SupportTicketCmd;
     using Fsel.Interaction.Application.Queries.SupportQuestionQuery;
     using Fsel.Interaction.Domain.Models.EntityModels;
     using MediatR;
@@ -85,7 +86,6 @@ namespace Fsel.Interaction.Api.Controllers
             MethodResult<SupportQuestionModel> commandResult = await _mediator.Send(new GetSupportQuestionQuery { Id = id }).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
-
         /// <summary>
         /// Update a Support Question
         /// </summary>

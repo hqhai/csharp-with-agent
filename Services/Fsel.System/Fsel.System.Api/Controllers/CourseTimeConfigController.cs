@@ -7,10 +7,10 @@ namespace Fsel.System.Api.Controllers
     using Fsel.Core.Base.BaseModels;
     using Fsel.System.Application.Commands.CourseTimeConfigCmd;
     using Fsel.System.Application.Querys.CourseTimeConfigQuery;
-    using Fsel.System.Domain.Models.EntityModels;
-    using global::System.Net;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
+    using global::System.Net;
+    using Fsel.System.Domain.Models.EntityModels;
 
     [ApiVersion(Settings.APIVersion)]
     [Route(Settings.APIDefaultRoute + "/course-time-config")]

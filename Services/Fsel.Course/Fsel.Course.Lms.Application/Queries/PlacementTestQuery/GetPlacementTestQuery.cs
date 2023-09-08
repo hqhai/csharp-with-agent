@@ -6,10 +6,8 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestQuery
     using System.Collections.Generic;
     using System.Threading;
     using Fsel.Common.ActionResults;
-    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
     using Fsel.Course.Domain.Entities;
-    using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
@@ -17,8 +15,6 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestQuery
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
-    using Fsel.Shared.Enums.ErrorCodes;
-    using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -32,19 +28,16 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestQuery
     {
         private readonly AuthContext _authContext;
         private readonly SectionConverter _sectionConverter;
-        private readonly IPlacementTestResultRepository _placementTestResultRepository;
         private readonly IUserService _userService;
         private readonly IPlacementTestRepository _placementTestRepository;
 
         public GetPlacementTestQueryHandler(AuthContext authContext
             , SectionConverter sectionConverter
-            , IPlacementTestResultRepository placementTestResultRepository
             , IUserService userService
             , IPlacementTestRepository placementTestRepository)
         {
             _authContext = authContext;
             _sectionConverter = sectionConverter;
-            _placementTestResultRepository = placementTestResultRepository;
             _userService = userService;
             _placementTestRepository = placementTestRepository;
         }
@@ -62,31 +55,18 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestQuery
 
             if (placementTests == null || placementTests.Count == 0)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(placementTests));
+                methodResult.AddErrorBadRequest(nameof(EnumPlacementTestErrorCode.PlacementTestNotExist));
                 return methodResult;
             }
 
-            var studentResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
-            if (!studentResult.IsSuccessStatusCode)
+            var student = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
+            if (!student.IsSuccessStatusCode)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError), nameof(studentResult));
+                methodResult.AddErrorBadRequest(nameof(EnumLessonErrorCode.UserNotExist), nameof(student), _authContext.CurrentUserId.ToString());
                 return methodResult;
             }
-            var student = studentResult?.Content?.Result;
-            var studentId = student?.Id;
-            int age = DateTimeHelper.GetYearOld(student?.Human?.Birthday);
-            var placementTestResultDone = await _placementTestResultRepository.Queryable.Where(x => x.Status == EnumResultStatus.Done && x.StudentId == studentId)
-                                                                          .OrderByDescending(x => x.CreatedDate)
-                                                                          .FirstOrDefaultAsync(cancellationToken);
-            if (placementTestResultDone != null)
-            {
-                var (levelNext, isLock) = placementTestResultDone.Level.GetLevelInScore(placementTestResultDone.Percent, age);
-                if (isLock)
-                {
-                    methodResult.AddErrorBadRequest(nameof(EnumPlacementTestErrorCode.PlacementTestLock), nameof(levelNext));
-                    return methodResult;
-                }
-            }
+            var studentId = student?.Content?.Result?.Id;
+
             var query = _placementTestRepository.Queryable.Where(x => x.Level == request.Level && x.IsActive);
 
             PlacementTestBankModel bankModel = new PlacementTestBankModel();

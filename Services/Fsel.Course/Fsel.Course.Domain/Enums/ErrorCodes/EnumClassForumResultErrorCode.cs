@@ -5,6 +5,21 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
     public enum EnumClassForumResultErrorCode
     {
         /// <summary>
+        /// ClassForum Is Null
+        /// </summary>
+        ClassForumResultNull,
+
+        /// <summary>
+        /// Class Forum File Is Null
+        /// </summary>
+        ClassForumResultFileNull,
+
+        /// <summary>
+        /// Class Forum not exist
+        /// </summary>
+        ClassForumResultNotExist,
+
+        /// <summary>
         /// Class Forum result Status not pendding
         /// </summary>
         ClassForumResultStatusNotPendding,
@@ -33,18 +48,5 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         /// Result not from student
         /// </summary>
         ResultNotFromStudent,
-
-        /// <summary>
-        /// Feedback Positive Or FeedBack Both Have Value
-        /// </summary>
-        FeedbackPositiveOrFeedBackBothHaveValue,
-        /// <summary>
-        /// Cso Id Invalid
-        /// </summary>
-        CsoInvalid,
-        /// <summary>
-        /// Teacher Id Invalid
-        /// </summary>
-        TeacherInvalid,
     }
 }

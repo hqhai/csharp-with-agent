@@ -6,8 +6,8 @@ namespace Fsel.Course.Lms.Application.Queries.UnitQuery
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
-    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
+    using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Services.UserServices;
@@ -42,7 +42,7 @@ namespace Fsel.Course.Lms.Application.Queries.UnitQuery
             var studentsResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
             if (studentsResult == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(studentsResult));
+                methodResult.AddErrorBadRequest(nameof(EnumUnitErrorCode.UserNotExist));
                 return methodResult;
             }
             var studentId = studentsResult.Content!.Result!.Id;
