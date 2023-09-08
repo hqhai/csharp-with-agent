@@ -51,7 +51,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                                     }).ToList();
             lessonResult.CorrectCount = (int)(correctVideo + correctClassForum + correctHomeWork ?? default);
             lessonResult.CorrectTotal = (int)(totalVideo + totalHomeWork + totalClassForum ?? default);
-            lessonResult.Percent = percentVideo * 40 + percentHomeWork * 30 + percentClassForum * 40 ?? default;
+            lessonResult.Percent = (percentVideo * 40 + percentHomeWork * 30 + percentClassForum * 40 ?? default) / 100;
             lessonResult.SkillScores = groupedSkillScores;
         }
 
@@ -94,29 +94,9 @@ namespace Fsel.Course.Lms.Application.InternalEvents
 
         public async Task<(double?, double?, double, IList<SkillScores>?)> GetHomeResults(Guid lessonResultId, CancellationToken cancellationToken)
         {
-            var skillScoreQuery = from baseQ in _lessonResultRepository.Queryable
-                                  join hr in _homeWorkResultRepository.Queryable on baseQ.Id equals hr.LessonResultId
-                                  join h in _homeWorkRepository.Queryable on hr.HomeWorkId equals h.Id
-                                  join hq in _homeWorkQuestionRepository.Queryable on h.Id equals hq.HomeWorkId
-                                  join q in _questionRepository.Queryable on hq.QuestionId equals q.Id
-                                  join ha in _homeWorkAnswerRepository.Queryable on hr.Id equals ha.HomeWorkResultId
-                                  where baseQ.Id == lessonResultId
-                                  group new { h, ha, q } by h.CourseSkill into g
-                                  select new SkillScores
-                                  {
-                                      Skill = g.Key,
-                                      CorrectCount = g.Select(x => x.ha).Sum(x => x.CorrectCount),
-                                      TotalCount = g.Select(x => x.q).Sum(x => x.CorrectTotal),
-                                      CountQuestion = g.Select(x => x.q).Count(),
-                                      TotalQuestion = g.Select(x => x.ha).Count(),
-                                  };
-            if (skillScoreQuery.Any())
-            {
-                var skillScores = await skillScoreQuery.ToListAsync(cancellationToken);
-                skillScores.ForEach(x => x.Percent = x.TotalCount > 0 ? NumberHelper.ConvertDouble(x.CorrectCount / x.TotalCount) : default);
-                return (skillScores.Sum(x => x.TotalCount), skillScores.Sum(x => x.TotalCount), skillScores.Average(x => x.Scores), skillScores);
-            }
-            return (null, null, default, null);
+            var skillScores = await _homeWorkResultRepository.Queryable.Where(x => x.LessonResultId == lessonResultId && x.Status == EnumResultStatus.Done).SelectMany(x => x.SkillScores!).ToListAsync(cancellationToken);
+            skillScores.ForEach(x => x.Percent = x.TotalCount > 0 ? NumberHelper.ConvertDouble(x.CorrectCount / x.TotalCount) : default);
+            return (skillScores.Sum(x => x.TotalCount), skillScores.Sum(x => x.TotalCount), skillScores.Average(x => x.Scores), skillScores);
         }
 
         public async Task UpdateTheNextLesson(Unit? unit, LessonResult lessonResult, CancellationToken cancellationToken)

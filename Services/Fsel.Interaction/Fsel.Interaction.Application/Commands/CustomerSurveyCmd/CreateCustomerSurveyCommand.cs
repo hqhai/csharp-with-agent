@@ -76,7 +76,7 @@ namespace Fsel.Interaction.Application.Commands.CustomerSurveyCmd
                 var customerSurvey = new CustomerSurvey
                 {
                     Answer = item.Answer,
-                    UserId = request.UserId.ToString() ?? _authContext.CurrentUserId.ToString(),
+                    UserId = (request.UserId ?? _authContext.CurrentUserId).ToString(),
                     SurveyQuestionId = item.Id
                 };
                 if (!customerSurvey.IsValid())

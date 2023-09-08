@@ -103,13 +103,15 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
             }
             if (lessonResult == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(lessonResult));
+                methodResult.Result = null;
+                methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
             }
             var lesson = lessonResult.Lesson;
             if (lesson == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(lesson));
+                methodResult.Result = null;
+                methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
             }
 
