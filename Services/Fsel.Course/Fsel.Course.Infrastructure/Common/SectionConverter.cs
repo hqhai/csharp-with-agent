@@ -4,6 +4,7 @@ namespace Fsel.Course.Infrastructure.Common
 {
     using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
@@ -36,9 +37,44 @@ namespace Fsel.Course.Infrastructure.Common
         public SectionGroupModel GetSectionGroupModel(SectionGroup? sectionGroup, bool isDisableAnswers = false)
         {
             var sectionGroupModel = _mapper.Map<SectionGroupModel>(sectionGroup);
+            sectionGroupModel.MockTestScores = _mapper.Map<IList<MockTestScoreModel>>(sectionGroup?.MockTestScores);
             sectionGroupModel.Sections = GetSectionModels(sectionGroup?.Sections.ToList(), isDisableAnswers);
-            sectionGroupModel.TotalQuestion = sectionGroup!.Sections.Any(x => x.SectionParts != null && x.SectionParts.Count > 0) ? sectionGroup.Sections.SelectMany(x => x.SectionParts).SelectMany(x => x.SectionQuestions).Select(x => x.Question).Count() : 0;
+            sectionGroupModel.TotalQuestion = GetTotalQuestion(sectionGroup);
             return sectionGroupModel;
+        }
+
+        public long GetTotalQuestion(SectionGroup? sectionGroup)
+        {
+            ArgumentNullException.ThrowIfNull(sectionGroup);
+
+            if (sectionGroup.CourseSkill == EnumCourseSkill.Speaking)
+            {
+                return sectionGroup.Sections.Any(x => x.SectionTimeCodes != null && x.SectionTimeCodes.Count > 0) ? sectionGroup.Sections.SelectMany(x => x.SectionTimeCodes).Count() : 0;
+            }
+            else if (sectionGroup.CourseSkill == EnumCourseSkill.Writing)
+            {
+                return sectionGroup.Sections.Any() ? sectionGroup.Sections.Count : 0;
+            }
+            else
+            {
+                var sectionParts = sectionGroup.Sections.SelectMany(x => x.SectionParts).ToList();
+                if (sectionParts.Count > 0)
+                {
+                    return sectionParts.SelectMany(x => x.SectionQuestions).Select(x => x.Question).Count();
+                }
+                else
+                {
+                    var sectionQuestions = sectionGroup.Sections.SelectMany(x => x.SectionQuestions).ToList();
+                    if (sectionQuestions.Count > 0)
+                    {
+                        return sectionGroup.Sections.SelectMany(x => x.SectionQuestions).Select(x => x.Question).Count();
+                    }
+                    else
+                    {
+                        return default;
+                    }
+                }
+            }
         }
 
         public IList<SectionModel>? GetSectionModels(IList<Section>? sections, bool isDisableAnswers = false)
@@ -105,7 +141,7 @@ namespace Fsel.Course.Infrastructure.Common
 
             if (questions == null || questions.Count == 0)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumQuestionErrorCode.QuestionsNull), nameof(questions));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(questions));
                 return methodResult;
             }
             foreach (var question in questions)
@@ -144,7 +180,7 @@ namespace Fsel.Course.Infrastructure.Common
             VoidMethodResult methodResult = new VoidMethodResult();
             if (sectionModels == null || sectionModels.Count == 0)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSectionErrorCode.SectionsNull), nameof(sectionGroup.Sections));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(sectionGroup.Sections));
                 return methodResult;
             }
             IList<Section> sections = sectionGroup.Sections;
@@ -152,7 +188,7 @@ namespace Fsel.Course.Infrastructure.Common
             {
                 if (section == null)
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumSectionErrorCode.SectionNull), nameof(section));
+                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(section));
                     return methodResult;
                 }
                 Section newSection = sections.ElementAt(sectionModels.IndexOf(section));
@@ -167,14 +203,14 @@ namespace Fsel.Course.Infrastructure.Common
                     {
                         if (section.SectionParts == null || section.SectionParts.Count == 0)
                         {
-                            methodResult.AddErrorBadRequest(nameof(EnumSectionPartErrorCode.SectionPartsNull), nameof(section.SectionParts));
+                            methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(section.SectionParts));
                             return methodResult;
                         }
                         foreach (var sectionPart in section.SectionParts)
                         {
                             if (sectionPart == null)
                             {
-                                methodResult.AddErrorBadRequest(nameof(EnumSectionPartErrorCode.SectionPartNull), nameof(sectionPart), sectionPart);
+                                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(sectionPart));
                                 return methodResult;
                             }
                             else
@@ -209,14 +245,14 @@ namespace Fsel.Course.Infrastructure.Common
                 {
                     if (section.SectionTimeCodes == null || section.SectionTimeCodes.Count == 0)
                     {
-                        methodResult.AddErrorBadRequest(nameof(EnumSectionTimeCodeErrorCode.TimeCodeCanNotNull), nameof(sectionGroup.CourseSkill));
+                        methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(sectionGroup.CourseSkill));
                         return methodResult;
                     }
                     foreach (var sectionTimeCode in section.SectionTimeCodes)
                     {
                         if (sectionTimeCode == null)
                         {
-                            methodResult.AddErrorBadRequest(nameof(EnumSectionTimeCodeErrorCode.SectionTimeCodesNull), nameof(sectionTimeCode), sectionTimeCode);
+                            methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(sectionTimeCode));
                             return methodResult;
                         }
                         else
@@ -225,15 +261,7 @@ namespace Fsel.Course.Infrastructure.Common
                         }
                     }
                 }
-                //else
-                //{
-                //    var method = AddQuestionToSession(section, section.Questions);
-                //    if (!method.IsOK)
-                //    {
-                //        methodResult.AddError(method.ErrorMessages);
-                //        return methodResult;
-                //    }
-                //}
+
                 if (!newSection.IsValid())
                 {
                     methodResult.AddErrorBadRequest(newSection.ErrorMessages);

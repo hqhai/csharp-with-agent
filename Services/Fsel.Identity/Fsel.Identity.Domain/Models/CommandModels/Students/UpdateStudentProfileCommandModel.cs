@@ -14,6 +14,5 @@ namespace Fsel.Identity.Domain.Models.CommandModels.Students
         public string? Address { get; set; }
         public string? Occupation { get; set; }
         public string? School { get; set; }
-
     }
 }

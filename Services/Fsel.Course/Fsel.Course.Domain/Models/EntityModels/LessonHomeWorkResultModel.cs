@@ -6,6 +6,11 @@ namespace Fsel.Course.Domain.Models.EntityModels
     {
         public long QuestionCompleted { get; set; }
         public long QuestionTotal { get; set; }
-        public double QuestionPercent { get { return QuestionTotal > 0 ? (QuestionCompleted / (double)QuestionTotal) * 100 : default; } }
+
+        public double QuestionPercent
+        { get { return QuestionTotal > 0 ? (QuestionCompleted / (double)QuestionTotal) * 100 : default; } }
+
+        public int CorrectCount { get; set; }
+        public int CorrectTotal { get; set; }
     }
 }

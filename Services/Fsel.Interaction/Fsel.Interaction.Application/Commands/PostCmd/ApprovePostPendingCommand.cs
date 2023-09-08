@@ -6,7 +6,7 @@ namespace Fsel.Interaction.Application.Commands.PostCmd
     using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Common.ActionResults;
-    using Fsel.Interaction.Domain.Enums.ErrorCodes;
+    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Interaction.Domain.IRepositories;
     using Fsel.Interaction.Domain.Models.CommandModels.Posts;
     using Fsel.Interaction.Domain.Models.EntityModels;
@@ -37,12 +37,12 @@ namespace Fsel.Interaction.Application.Commands.PostCmd
             var post = await _postRepository.GetByIdAsync(request.PostId);
             if (post == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumPostErrorCode.PostNotExist), nameof(request.PostId), request.PostId);
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(post));
                 return methodResult;
             }
             if (post.Status != EnumPostStatus.Pending)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumPostErrorCode.PostIsNotPending));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(post.Status));
                 return methodResult;
             }
             await _postRepository.ExecuteTransactionAsync(async () =>

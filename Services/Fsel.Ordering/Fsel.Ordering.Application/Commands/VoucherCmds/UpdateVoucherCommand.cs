@@ -8,6 +8,7 @@ namespace Fsel.Ordering.Application.Commands.VoucherCmds
     using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Ordering.Domain.Entities;
     using Fsel.Ordering.Domain.Enums.ErrorCodes;
     using Fsel.Ordering.Domain.IRepositories;
@@ -15,6 +16,7 @@ namespace Fsel.Ordering.Application.Commands.VoucherCmds
     using Fsel.Ordering.Domain.Models.EntityModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
+    using Microsoft.EntityFrameworkCore;
 
     public class UpdateVoucherCommand : UpdateVoucherCommandModel, IRequest<MethodResult<VoucherModel>>
     {
@@ -46,10 +48,10 @@ namespace Fsel.Ordering.Application.Commands.VoucherCmds
                 return methodResult;
             }
 
-            var voucher = await _voucherRepository.GetIncludeByIdAsync(request.Id);
+            var voucher = await _voucherRepository.Queryable.Include(x => x.VoucherPackages).Where(x => x.Id == request.Id).FirstOrDefaultAsync(cancellationToken);
             if (voucher == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumVoucherErrorCode.VoucherNotExist), nameof(request.Id), request.Id);
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(voucher));
                 return methodResult;
             }
             if (!voucher.IsValid())
@@ -60,13 +62,11 @@ namespace Fsel.Ordering.Application.Commands.VoucherCmds
 
             #endregion Validation
 
-            voucher.VoucherPackages = request.VoucherPackages!.Select((x) => new VoucherPackage
-            {
-                Percentage = x.Percentage,
-                PackageId = x.PackageId
-            }).ToList();
+            _mapper.Map(request, voucher);
+
             await _voucherRepository.ExecuteTransactionAsync(async () =>
             {
+                 
                 voucher = _voucherRepository.Update(voucher);
                 await _voucherRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 

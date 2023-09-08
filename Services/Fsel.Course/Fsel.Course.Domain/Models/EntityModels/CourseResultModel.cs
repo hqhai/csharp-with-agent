@@ -20,6 +20,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
         /// Trạng thái của Couse
         /// </summary>
         public EnumCourseStatus Status { get; set; }
+
         public Guid CourseId { get; set; }
         public Guid StudentId { get; set; }
     }

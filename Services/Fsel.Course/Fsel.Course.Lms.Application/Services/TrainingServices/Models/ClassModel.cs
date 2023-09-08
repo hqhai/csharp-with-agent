@@ -3,8 +3,8 @@
 namespace Fsel.Course.Lms.Application.Services.TrainingServices.Models
 {
     using System;
-    using Fsel.Shared.Enums;
     using Fsel.Core.Base.BaseModels;
+    using Fsel.Shared.Enums;
 
     public class ClassModel : BaseModel
     {
@@ -15,5 +15,6 @@ namespace Fsel.Course.Lms.Application.Services.TrainingServices.Models
         public EnumTeacherApprovalStatus TeacherApprovalStatus { get; set; }
         public EnumStatusClass Status { get; set; }
         public Guid CourseId { get; set; }
+        public Guid PackageId { get; set; }
     }
 }

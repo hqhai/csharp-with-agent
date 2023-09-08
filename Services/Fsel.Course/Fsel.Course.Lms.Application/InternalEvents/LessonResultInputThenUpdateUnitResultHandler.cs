@@ -8,6 +8,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
+    using Fsel.Course.Lms.Application.Queues.Publishers;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
     using MediatR;
@@ -27,7 +28,9 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             , IClassForumResultRepository classForumResultRepository
             , IHomeWorkResultRepository homeWorkResultRepository
             , ICourseRepository courseRepository
+            , FinishOneUnitPublisher finishOneUnitPublisher
             , ICourseResultRepository courseResultRepository
+            , FinishOneLevelPassPublisher finishOneLevelPassPublisher
             , IMockTestResultRepository mockTestResultRepository
             , IFinalTestResultRepository finalTestResultRepository
             ) : base(videoResultRepository,
@@ -36,6 +39,8 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 lessonResultRepository,
                 courseResultRepository,
                 courseRepository,
+                finishOneUnitPublisher,
+                finishOneLevelPassPublisher,
                 finalTestResultRepository,
                 mockTestResultRepository,
                 homeWorkResultRepository)
@@ -63,6 +68,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 }
                 else if (unit.LessonResults.Count == unit.UnitLessons.Count && unit.UnitSkillMockTests.Count > 0)
                 {
+                    await UpdateUnit(unit.LessonResults.ToList(), unit, lessonResult.CourseId, lessonResult.StudentId, cancellationToken);
                     await UpdateTheNextLesson(unit, lessonResult, cancellationToken);
                 }
                 else
@@ -70,6 +76,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                     var isCheck = unit.LessonResults.Any(x => x.Status == EnumResultStatus.New);
                     if (!isCheck)
                     {
+                        await UpdateUnit(unit.LessonResults.ToList(), unit, lessonResult.CourseId, lessonResult.StudentId, cancellationToken);
                         await UpdateTheNextLesson(unit, lessonResult, cancellationToken);
                     }
                 }

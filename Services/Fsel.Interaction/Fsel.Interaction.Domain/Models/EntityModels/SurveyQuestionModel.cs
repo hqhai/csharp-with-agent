@@ -2,9 +2,9 @@
 
 namespace Fsel.Interaction.Domain.Models.EntityModels
 {
-    using Fsel.Shared.Enums;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Interaction.Domain.Entities;
+    using Fsel.Shared.Enums;
 
     public class SurveyQuestionModel : BaseModel
     {
@@ -14,6 +14,7 @@ namespace Fsel.Interaction.Domain.Models.EntityModels
         public int DisplayOrder { get; set; }
         public EnumSurveyQuestion Type { get; set; }
         public object? Answers { get; set; }
+        public bool IsPilot { get; set; }
         public IList<CustomerSurvey>? CustomerSurveys { get; set; }
     }
 }

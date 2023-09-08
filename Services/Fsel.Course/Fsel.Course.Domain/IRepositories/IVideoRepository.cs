@@ -1,10 +1,10 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-using Fsel.Shared.Enums;
 using Fsel.Core.Base.Interfaces;
 using Fsel.Course.Domain.Entities;
 using Fsel.Course.Domain.Enums;
 using Fsel.Course.Domain.Models.EntityModels;
+using Fsel.Shared.Enums;
 
 namespace Fsel.Course.Domain.IRepositories
 {

@@ -5,11 +5,14 @@ namespace Fsel.Training.Application.Queries.ClassLiveWorkFlowQuery
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
+    using Fsel.Core.Base;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Core.Extensions;
     using Fsel.Shared.Enums;
+    using Fsel.Shared.Enums.ErrorCodes;
     using Fsel.Training.Application.Services.SystemServices;
     using Fsel.Training.Application.Services.UserServices;
+    using Fsel.Training.Application.Services.UserServices.Models;
     using Fsel.Training.Domain.IRepositories;
     using Fsel.Training.Domain.Models.EntityModels;
     using MediatR;
@@ -24,12 +27,17 @@ namespace Fsel.Training.Application.Queries.ClassLiveWorkFlowQuery
     {
         private readonly IClassLiveWorkFlowRepository _classLiveWorkFlowRepository;
         private readonly ISystemService _systemService;
+        private readonly AuthContext _authContext;
         private readonly IUserService _userService;
 
-        public SearchChangeTeacherLiveByCsoQueryHandler(IClassLiveWorkFlowRepository classLiveWorkFlowRepository, ISystemService systemService, IUserService userService)
+        public SearchChangeTeacherLiveByCsoQueryHandler(IClassLiveWorkFlowRepository classLiveWorkFlowRepository
+            , ISystemService systemService
+            , AuthContext authContext
+            , IUserService userService)
         {
             _classLiveWorkFlowRepository = classLiveWorkFlowRepository;
             _systemService = systemService;
+            _authContext = authContext;
             _userService = userService;
         }
 
@@ -53,22 +61,31 @@ namespace Fsel.Training.Application.Queries.ClassLiveWorkFlowQuery
                 }
                 teacherIds = teachersResult.Content.Result.Select(x => x.Id).Distinct().ToList();
             }
-            var classLiveWorkFlows = _classLiveWorkFlowRepository.Queryable.Where(p => p.Type == EnumWorkFlowType.ChangeTeacher).Include(cld => cld.ClassLiveCalendar).ThenInclude(c => c!.Class).Select(ac => new ChangeTeacherLiveModel
+
+            var csoResult = await _userService.GetCsoByUserIdAsync(_authContext.CurrentUserId);
+            if (!csoResult.IsSuccessStatusCode)
             {
-                Id = ac.Id,
-                ClassName = ac.ClassLiveCalendar!.Class!.Name,
-                TeacherId = ac.TeacherId,
-                LiveTimeFrameId = ac.ClassLiveCalendar.LiveTimeFrameId,
-                Status = ac.Status,
-                LiveDate = ac.ClassLiveCalendar.LiveDate,
-                CreatedDate = ac.CreatedDate,
-                ClassLiveCalendarId = ac.ClassLiveCalendarId
-            });
-            if (!string.IsNullOrEmpty(request.Keyword))
-            {
-                classLiveWorkFlows = classLiveWorkFlows.Where(p => !string.IsNullOrEmpty(p.ClassName) && p.ClassName.Contains(request.Keyword));
+                methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError));
+                return methodResult;
             }
-            if (teacherIds.Count > 0)
+            var csoId = csoResult.Content?.Result?.Id;
+
+            var classLiveWorkFlows = _classLiveWorkFlowRepository.Queryable.Include(cld => cld.ClassLiveCalendar)
+                .ThenInclude(c => c!.Class)
+                .Where(p => p.Type == EnumWorkFlowType.ChangeTeacher && p.CsoId == csoId)
+                .Select(ac => new ChangeTeacherLiveModel
+                {
+                    Id = ac.Id,
+                    ClassName = ac.ClassLiveCalendar!.Class!.Code,
+                    Type = ac.Type,
+                    TeacherId = ac.TeacherId,
+                    LiveTimeFrameId = ac.ClassLiveCalendar.LiveTimeFrameId,
+                    Status = ac.Status,
+                    LiveDate = ac.ClassLiveCalendar.LiveDate,
+                    CreatedDate = ac.CreatedDate,
+                    ClassLiveCalendarId = ac.ClassLiveCalendarId
+                });
+            if (teacherIds.Count >= 0 && !string.IsNullOrEmpty(request.Keyword))
             {
                 classLiveWorkFlows = classLiveWorkFlows.Where(p => teacherIds.Contains(p.TeacherId ?? default));
             }
@@ -86,9 +103,13 @@ namespace Fsel.Training.Application.Queries.ClassLiveWorkFlowQuery
                 return methodResult;
             }
             var liveTimeFrames = liveTimeFramesResult.Content?.Result;
+            var teacherResult = await _userService.GetTeacherByIdsAsync(new GetTeacherByIdsQueryModel { Ids = lists.Select(x => x.TeacherId ?? default).Distinct().ToList() });
+            var teachers = teacherResult.Content?.Result;
 
             foreach (var item in lists)
             {
+                var teacher = teachers!.FirstOrDefault(x => x.Id == item.TeacherId);
+                item.TeacherName = teacher?.Human?.FullName;
                 var liveTimeFrame = liveTimeFrames?.FirstOrDefault(p => p.Id == item.LiveTimeFrameId);
                 item.StartTime = liveTimeFrame?.StartTime;
                 item.EndTime = liveTimeFrame?.EndTime;

@@ -75,9 +75,10 @@ namespace Fsel.Shared.Helpers
             return default;
         }
 
-        public static EnumCourseLevel? GetLevelInScore(this EnumPlacementTestLevel enumPlacementTestLevel, double? value = 0)
+        public static (EnumCourseLevel?, bool) GetLevelInScore(this EnumPlacementTestLevel enumPlacementTestLevel, double? value = 0, int? yearOld = 0)
         {
             EnumCourseLevel? courseLevel;
+            bool isLock = false;
             if (enumPlacementTestLevel == EnumPlacementTestLevel.IELTS && value >= 3 && value <= 3.5)
             {
                 courseLevel = EnumCourseLevel.RFE;
@@ -99,6 +100,7 @@ namespace Fsel.Shared.Helpers
                 switch (enumPlacementTestLevel)
                 {
                     case EnumPlacementTestLevel.A1:
+                        isLock = true;
                         if (value >= 75)
                         {
                             courseLevel = EnumCourseLevel.A2;
@@ -109,24 +111,39 @@ namespace Fsel.Shared.Helpers
                         }
                         else
                         {
-                            courseLevel = null;
+                            courseLevel = EnumCourseLevel.A1; /*null;*/
                         }
                         break;
 
                     case EnumPlacementTestLevel.A2:
+                        if (yearOld >= 14)
+                        {
+                            isLock = value >= 75;
+                        }
                         courseLevel = value >= 75 ? EnumCourseLevel.B1 : EnumCourseLevel.A1;
                         break;
 
                     case EnumPlacementTestLevel.B1:
-                        courseLevel = value >= 75 ? EnumCourseLevel.B1Plus : EnumCourseLevel.A2;
+                        if (yearOld <= 13)
+                        {
+                            isLock = value < 75;
+                            courseLevel = !isLock ? EnumCourseLevel.B1Plus : EnumCourseLevel.B1;
+                        }
+                        else
+                        {
+                            courseLevel = value >= 75 ? EnumCourseLevel.B1Plus : EnumCourseLevel.A2;
+                        }
+
                         break;
 
                     case EnumPlacementTestLevel.B1Plus:
-                        courseLevel = value >= 75 ? EnumCourseLevel.B2 : EnumCourseLevel.B1;
+                        isLock = value < 75;
+                        courseLevel = !isLock ? EnumCourseLevel.B2 : EnumCourseLevel.B1Plus;
                         break;
 
                     case EnumPlacementTestLevel.B2:
-                        courseLevel = value >= 75 ? EnumCourseLevel.C1 : EnumCourseLevel.B2;
+                        isLock = value < 75;
+                        courseLevel = !isLock ? EnumCourseLevel.C1 : EnumCourseLevel.B2;
                         break;
 
                     case EnumPlacementTestLevel.C1:
@@ -139,7 +156,7 @@ namespace Fsel.Shared.Helpers
                 }
             }
 
-            return courseLevel;
+            return (courseLevel, isLock);
         }
     }
 }

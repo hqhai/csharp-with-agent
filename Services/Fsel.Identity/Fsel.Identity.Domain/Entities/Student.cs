@@ -5,9 +5,9 @@ namespace Fsel.Identity.Domain.Entities
     using System;
     using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations;
-    using Fsel.Shared.Enums;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Entities;
+    using Fsel.Shared.Enums;
 
     public class Student : Entity
     {
@@ -22,6 +22,7 @@ namespace Fsel.Identity.Domain.Entities
         public EnumCourseLevel CourseLevel { get; set; }
 
         public bool CreatedByParent { get; set; }
+        public long NumberOfToken { get; set; }
 
         public Guid? ClassId { get; set; }
 

@@ -1,6 +1,9 @@
 using Fsel.Common.Constants;
+using Fsel.Common.Helpers;
 using Fsel.Core.Base;
+using Fsel.Shared.Constants;
 using Fsel.System.Domain.Entities;
+using Fsel.System.Domain.Entities.Configs;
 using Fsel.System.Infrastructure.Configs;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -17,8 +20,12 @@ namespace Fsel.System.Infrastructure
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             ArgumentNullException.ThrowIfNull(modelBuilder);
-            SeedCourselevel(modelBuilder);
+            SeedQuestBoards(modelBuilder);
             modelBuilder.ApplyConfiguration(new TeachingCostEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new ReferralDiscountConfigConfiguration());
+            modelBuilder.ApplyConfiguration(new QuestBoardConfigConfigConfiguration());
+            modelBuilder.ApplyConfiguration(new QuestBoardConfigConfiguration());
+            modelBuilder.ApplyConfiguration(new QuestBoardStudentConfigConfiguration());
             base.OnModelCreating(modelBuilder);
         }
 
@@ -26,6 +33,11 @@ namespace Fsel.System.Infrastructure
         public DbSet<CourseTimeConfig> CourseTimeConfigs { get; set; }
         public DbSet<ForbiddenWord> ForbiddenWords { get; set; }
         public DbSet<TeachingCost> TeachingCosts { get; set; }
+        public DbSet<LogAction> LogActions { get; set; }
+        public DbSet<ReferralDiscountConfig> ReferralDiscountConfigs { get; set; }
+        public DbSet<QuestBoardStudent> QuestBoardStudents { get; set; }
+        public DbSet<QuestBoard> QuestBoards { get; set; }
+        public DbSet<QuestBoardConfig> QuestBoardConfigs { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -40,6 +52,14 @@ namespace Fsel.System.Infrastructure
                     configuration.GetConnectionString(Settings.DefaultConnection),
                     options => options.MigrationsAssembly(GetType().Assembly.GetName().Name));
             }
+        }
+
+        private static void SeedQuestBoards(ModelBuilder builder)
+        {
+            var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, QuestBoardSettings.QuestBoardFileName);
+            var questBoardConfigs = ConvertHelper.DeserializeFromFilePath<IList<QuestBoardConfig>>(path);
+            ArgumentNullException.ThrowIfNull(questBoardConfigs);
+            builder.Entity<QuestBoardConfig>().HasData(questBoardConfigs);
         }
 
         private static void SeedCourselevel(ModelBuilder builder)

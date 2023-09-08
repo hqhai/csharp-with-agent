@@ -4,10 +4,11 @@ namespace Fsel.Training.Application.Queries.CancelScheduleLiveQuery
 {
     using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Shared.Enums;
     using Fsel.Training.Application.Services.SystemServices;
     using Fsel.Training.Application.Services.UserServices;
     using Fsel.Training.Application.Services.UserServices.Models;
-    using Fsel.Training.Domain.Enums.ErrorCodes;
     using Fsel.Training.Domain.IRepositories;
     using Fsel.Training.Domain.Models.EntityModels;
     using MediatR;
@@ -45,7 +46,7 @@ namespace Fsel.Training.Application.Queries.CancelScheduleLiveQuery
             var classLiveWorkFlow = await _classLiveWorkFlowRepository.GetIncludeByIdAsync(request.Id);
             if (classLiveWorkFlow == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumClassLiveWorkFlowErrorCode.ClassLiveWorkFlowNotExits));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(classLiveWorkFlow));
                 return methodResult;
             }
             _mapper.Map(classLiveWorkFlow, liveSessionInformation);
@@ -72,9 +73,13 @@ namespace Fsel.Training.Application.Queries.CancelScheduleLiveQuery
                     }).ToList();
                 }
             }
+            if (classLiveWorkFlow.Status == EnumWorkFlowCancelScheduleStatus.WaitVote.ToString() && classLiveWorkFlow.UpdatedDate != null && classLiveWorkFlow.UpdatedDate.Value.AddDays(2) <= DateTime.Now)
+            {
+                liveSessionInformation.IsWaitVote = true;
+            }
             liveSessionInformation.ClassName = @class?.Name;
             liveSessionInformation.Description = classLiveWorkFlow.Description;
-            TeacherModel? teacher = new TeacherModel();
+            var teacher = new TeacherModel();
             if (classLiveWorkFlow.TeacherId.HasValue)
             {
                 var teacherResult = await _userService.GetTeacherByIdAsync(classLiveWorkFlow.TeacherId ?? default);

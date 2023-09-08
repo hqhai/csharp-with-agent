@@ -6,7 +6,7 @@ namespace Fsel.Training.Application.Commands.ClassCmd
     using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Common.ActionResults;
-    using Fsel.Training.Domain.Enums.ErrorCodes;
+    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Training.Domain.IRepositories;
     using Fsel.Training.Domain.Models.CommandModels.Classes;
     using Fsel.Training.Domain.Models.EntityModels;
@@ -21,6 +21,7 @@ namespace Fsel.Training.Application.Commands.ClassCmd
     {
         private readonly IClassRepository _classRepository;
         private readonly IMapper _mapper;
+
         public UpdateClassCommandHandler(IClassRepository classRepository, IMapper mapper)
         {
             _classRepository = classRepository;
@@ -34,7 +35,7 @@ namespace Fsel.Training.Application.Commands.ClassCmd
             var classes = await _classRepository.GetByIdAsync(request.Id);
             if (classes == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumClassErrorCode.ClassesNotExits));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(classes));
                 return methodResult;
             }
             await _classRepository.ExecuteTransactionAsync(async () =>

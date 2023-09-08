@@ -5,16 +5,6 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
     public enum EnumPlacementTestErrorCode
     {
         /// <summary>
-        /// Placement Test does not exist
-        /// </summary>
-        PlacementTestNotExist,
-
-        /// <summary>
-        /// Placement Test is null
-        /// </summary>
-        PlacementTestNull,
-
-        /// <summary>
         /// Placement Test  is in active state
         /// </summary>
         PlacementTestInActiveState,
@@ -25,8 +15,13 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         MustCorrectScore,
 
         /// <summary>
-        /// Name Already Exists
+        ///  must have the correct score
         /// </summary>
-        NameAlreadyExists
+        PlacementTestResultMaxThree,
+
+        /// <summary>
+        ///  PlacementTest Lock
+        /// </summary>
+        PlacementTestLock
     }
 }

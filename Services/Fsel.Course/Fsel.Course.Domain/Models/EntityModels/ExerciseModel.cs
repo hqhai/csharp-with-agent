@@ -14,6 +14,5 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public EnumCourseSkill CourseSkill { get; set; }
 
         public IList<QuestionModel>? Questions { get; set; }
-
     }
 }

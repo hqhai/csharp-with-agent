@@ -67,6 +67,11 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                     b.Property<Guid>("ObjectId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
                     b.Property<DateTime?>("UpdatedDate")
                         .HasColumnType("datetime2")
                         .HasColumnOrder(108);
@@ -509,7 +514,7 @@ namespace Fsel.Interaction.Infrastructure.Migrations
 
                     b.HasIndex("StudentReviewId");
 
-                    b.ToTable("StudentReviewDetail");
+                    b.ToTable("StudentReviewDetails");
                 });
 
             modelBuilder.Entity("Fsel.Interaction.Domain.Entities.SupportCategory", b =>
@@ -827,6 +832,9 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                         .HasColumnType("bit")
                         .HasColumnOrder(110);
 
+                    b.Property<bool>("IsPilot")
+                        .HasColumnType("bit");
+
                     b.Property<string>("Question")
                         .IsRequired()
                         .HasMaxLength(500)
@@ -866,6 +874,7 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                             DisplayOrder = 1,
                             Icon = "addd",
                             IsDeleted = false,
+                            IsPilot = false,
                             Question = "Bạn biết đến Fsel từ đâu?",
                             Type = "ChooseMultipleColumn"
                         },
@@ -880,6 +889,7 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                             DisplayOrder = 2,
                             Icon = "addd",
                             IsDeleted = false,
+                            IsPilot = false,
                             Question = "Chọn hướng đi của bạn",
                             Type = "YourDirection"
                         },
@@ -894,6 +904,7 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                             DisplayOrder = 3,
                             Icon = "fluent_target-arrow-16-filled.png",
                             IsDeleted = false,
+                            IsPilot = false,
                             Question = "Tại sao bạn học ngoại ngữ",
                             Type = "ChooseMultipleColumn"
                         },
@@ -908,6 +919,7 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                             DisplayOrder = 4,
                             Icon = "wideword.png",
                             IsDeleted = false,
+                            IsPilot = false,
                             Question = "Vị trí của bạn",
                             Type = "YourPlace"
                         },
@@ -922,8 +934,205 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                             DisplayOrder = 5,
                             Icon = "time.png",
                             IsDeleted = false,
+                            IsPilot = false,
                             Question = "Xác định độ tuổi và giới tính",
                             Type = "AgeGender"
+                        },
+                        new
+                        {
+                            Id = new Guid("ee0e74f5-83ae-44dd-a7d0-0f7b650884f8"),
+                            AnswerStr = "null",
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            Description = "Câu trả lời của bạn",
+                            DisplayOrder = 6,
+                            IsDeleted = false,
+                            IsPilot = true,
+                            Question = "Họ tên đầy đủ của bạn là gì",
+                            Type = "ShortAnswer"
+                        },
+                        new
+                        {
+                            Id = new Guid("f959d3d1-cab3-4fc6-8341-cb44bcbd3e30"),
+                            AnswerStr = "[{\"id\":1,\"district\":\"Ba \\u0110\\u00ECnh\"},{\"id\":2,\"district\":\"Ho\\u00E0n Ki\\u1EBFm\"},{\"id\":3,\"district\":\"T\\u00E2y H\\u1ED3\"},{\"id\":4,\"district\":\"Long Bi\\u00EAn\"},{\"id\":5,\"district\":\"C\\u1EA7u Gi\\u1EA5y\"},{\"id\":6,\"district\":\"\\u0110\\u1ED1ng \\u0110a\"},{\"id\":7,\"district\":\"Hai B\\u00E0 Tr\\u01B0ng\"},{\"id\":8,\"district\":\"Ho\\u00E0ng Mai\"},{\"id\":9,\"district\":\"Thanh Xu\\u00E2n\"},{\"id\":10,\"district\":\"H\\u00E0 \\u0110\\u00F4ng\"},{\"id\":11,\"district\":\"B\\u1EAFc T\\u1EEB Li\\u00EAm\"},{\"id\":12,\"district\":\"Nam T\\u1EEB Li\\u00EAm\"},{\"id\":13,\"district\":\"Ba V\\u00EC\"},{\"id\":14,\"district\":\"Ch\\u01B0\\u01A1ng M\\u1EF9\"},{\"id\":15,\"district\":\"\\u0110an Ph\\u01B0\\u1EE3ng\"},{\"id\":16,\"district\":\"\\u0110\\u00F4ng Anh\"},{\"id\":17,\"district\":\"Gia L\\u00E2m\"},{\"id\":18,\"district\":\"Ho\\u00E0i \\u0110\\u1EE9c\"},{\"id\":19,\"district\":\"M\\u00EA Linh\"},{\"id\":20,\"district\":\"Ph\\u00FA Xuy\\u00EAn\"},{\"id\":21,\"district\":\"Ph\\u00FAc Th\\u1ECD\"},{\"id\":22,\"district\":\"Qu\\u1ED1c Oai\"},{\"id\":23,\"district\":\"Th\\u1EA1ch Th\\u1EA5t\"},{\"id\":24,\"district\":\"Thanh Oai\"},{\"id\":25,\"district\":\"Thanh Tr\\u00EC\"},{\"id\":26,\"district\":\"Th\\u01B0\\u1EDDng T\\u00EDn\"},{\"id\":27,\"district\":\" \\u1EE8ng H\\u00F2a\"},{\"id\":28,\"district\":\"kh\\u00E1c\"}]",
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            Description = "addd",
+                            DisplayOrder = 7,
+                            IsDeleted = false,
+                            IsPilot = true,
+                            Question = "Bạn Sống ở đâu",
+                            Type = "DropDown"
+                        },
+                        new
+                        {
+                            Id = new Guid("9619b7d3-b2ab-4462-9044-b443ab79942a"),
+                            AnswerStr = "null",
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            Description = "addd",
+                            DisplayOrder = 7,
+                            IsDeleted = false,
+                            IsPilot = true,
+                            Question = "Số điện thoại của bạn là gì",
+                            Type = "ShortAnswer"
+                        },
+                        new
+                        {
+                            Id = new Guid("cedef58c-7d94-4efc-a030-0216b3034bef"),
+                            AnswerStr = "null",
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            Description = "addd",
+                            DisplayOrder = 8,
+                            IsDeleted = false,
+                            IsPilot = true,
+                            Question = "Họ tên đầy đủ của trẻ nhà bạn là gì",
+                            Type = "ShortAnswer"
+                        },
+                        new
+                        {
+                            Id = new Guid("0f9df809-9ae9-4e8c-891d-ec645483f290"),
+                            AnswerStr = "[{\"id\":1,\"age\":\"\\u003C11\"},{\"id\":2,\"age\":\"11\"},{\"id\":3,\"age\":\"12\"},{\"id\":4,\"age\":\"13\"},{\"id\":5,\"age\":\"14\"},{\"id\":6,\"age\":\"15\"},{\"id\":7,\"age\":\"16\"},{\"id\":8,\"age\":\"17\"},{\"id\":9,\"age\":\"18\"},{\"id\":10,\"age\":\"19\\u002B\"}]",
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            Description = "addd",
+                            DisplayOrder = 9,
+                            IsDeleted = false,
+                            IsPilot = true,
+                            Question = "Xác định độ tuổi và giới tính",
+                            Type = "DropDown"
+                        },
+                        new
+                        {
+                            Id = new Guid("52548bc5-3536-478c-978b-05f98815bf31"),
+                            AnswerStr = "[{\"id\":1,\"gender\":\"Male\"},{\"id\":2,\"gender\":\"Female\"},{\"id\":3,\"gender\":\"Other\"}]",
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            Description = "addd",
+                            DisplayOrder = 10,
+                            IsDeleted = false,
+                            IsPilot = true,
+                            Question = "Xác định độ tuổi và giới tính",
+                            Type = "AgeGender"
+                        },
+                        new
+                        {
+                            Id = new Guid("73ab87b1-c0ae-40c6-ba37-1cdce350563a"),
+                            AnswerStr = "[{\"id\":1,\"content\":\"Yes\"},{\"id\":2,\"content\":\"No\"}]",
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            Description = "addd",
+                            DisplayOrder = 11,
+                            IsDeleted = false,
+                            IsPilot = true,
+                            Question = "Con bạn có thể cam kết hoàn thành khóa học thí điểm 6 tháng với tốc độ 3 buổi học mỗi tuần (7,5 giờ mỗi tuần) từ tháng 10 năm 2023 đến tháng 3 năm 2024 không?",
+                            Type = "MultipleChoiceVertical"
+                        },
+                        new
+                        {
+                            Id = new Guid("fcd14833-b79f-4cf4-9ee8-65b041a7daf1"),
+                            AnswerStr = "[{\"id\":1,\"content\":\"Yes\"},{\"id\":2,\"content\":\"No\"}]",
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            Description = "addd",
+                            DisplayOrder = 12,
+                            IsDeleted = false,
+                            IsPilot = true,
+                            Question = "Con bạn có thể cam kết hoàn thành khóa học thí điểm 4 tháng với tốc độ 3 buổi học mỗi tuần (5 giờ mỗi tuần) từ tháng 11 năm 2023 đến tháng 2 năm 2024 không?",
+                            Type = "MultipleChoiceVertical"
+                        },
+                        new
+                        {
+                            Id = new Guid("06b1a0df-eaef-4be9-a9da-9c2633e3a12a"),
+                            AnswerStr = "[{\"id\":1,\"content\":\"Laptop\"},{\"id\":2,\"content\":\"PC\"},{\"id\":3,\"content\":\"Both\"},{\"id\":4,\"content\":\"No\"}]",
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            Description = "addd",
+                            DisplayOrder = 13,
+                            IsDeleted = false,
+                            IsPilot = true,
+                            Question = "Bạn có PC hoặc Laptop ở nhà để con bạn có thể sử dụng để truy cập khóa học không?",
+                            Type = "MultipleChoiceVertical"
+                        },
+                        new
+                        {
+                            Id = new Guid("83a5b867-c3a1-47b9-91e3-a6fd6086501e"),
+                            AnswerStr = "[{\"id\":1,\"content\":\"Yes\"},{\"id\":2,\"content\":\"No\"}]",
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            Description = "addd",
+                            DisplayOrder = 14,
+                            IsDeleted = false,
+                            IsPilot = true,
+                            Question = "Con bạn có thể mượn máy tính xách tay và mang đến các buổi học thí điểm tại trung tâm chúng tôi để tham gia khóa học không?",
+                            Type = "MultipleChoiceVertical"
+                        },
+                        new
+                        {
+                            Id = new Guid("56628f4a-0384-426c-b849-81ab1671afa4"),
+                            AnswerStr = "[{\"id\":1,\"content\":\"1 (Not willing at all)\"},{\"id\":2,\"content\":\"2\"},{\"id\":3,\"content\":\"3\"},{\"id\":4,\"content\":\"4\"},{\"id\":5,\"content\":\"5\"},{\"id\":6,\"content\":\"6\"},{\"id\":7,\"content\":\"7\"},{\"id\":8,\"content\":\"8\"},{\"id\":9,\"content\":\"9\"},{\"id\":10,\"content\":\"10 (Very Willing)\"}]",
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            Description = "addd",
+                            DisplayOrder = 15,
+                            IsDeleted = false,
+                            IsPilot = true,
+                            Question = "Chúng tôi sẽ tổ chức 4 buổi on-site (2 tiếng/buổi) tại trung tâm (33 Lạc Trung hoặc 125 Hoàng Ngân) để lấy ý kiến ​​phản hồi của các bạn trong thời gian thí điểm. Bạn sẵn sàng đưa con mình tham dự những buổi học này ở mức độ nào?",
+                            Type = "MultipleChoiceHorizontal"
+                        },
+                        new
+                        {
+                            Id = new Guid("20675350-89f2-47e3-8e64-b04f2da6290b"),
+                            AnswerStr = "[{\"id\":1,\"content\":\"Monday evenings\"},{\"id\":2,\"content\":\"Tuesday evenings\"},{\"id\":3,\"content\":\"Wednesday evenings\"},{\"id\":4,\"content\":\"Thursday evenings\"},{\"id\":5,\"content\":\"Friday evenings\"},{\"id\":6,\"content\":\"Saturday mornings\"},{\"id\":7,\"content\":\"Saturday afternoons\"},{\"id\":8,\"content\":\"Saturday evenings\"},{\"id\":9,\"content\":\"Sunday mornings\"},{\"id\":10,\"content\":\"Sunday afternoons\"},{\"id\":11,\"content\":\"Sunday evenings\"}]",
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            Description = "addd",
+                            DisplayOrder = 16,
+                            IsDeleted = false,
+                            IsPilot = true,
+                            Question = "Ngày nào sau đây thuận tiện cho con bạn tham dự các buổi học tại chỗ trong thời gian thí điểm? (Chọn nhiều phương án)",
+                            Type = "CheckList"
+                        },
+                        new
+                        {
+                            Id = new Guid("5317ae1a-46db-4f25-9625-f9c28bd3c688"),
+                            AnswerStr = "null",
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            Description = "addd",
+                            DisplayOrder = 17,
+                            IsDeleted = false,
+                            IsPilot = true,
+                            Question = "Bạn biết đến FSEL Pilot bằng cách nào?",
+                            Type = "ShortAnswer"
+                        },
+                        new
+                        {
+                            Id = new Guid("1fde61af-e1e0-4027-ad21-1176ad212119"),
+                            AnswerStr = "null",
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            Description = "addd",
+                            DisplayOrder = 18,
+                            IsDeleted = false,
+                            IsPilot = true,
+                            Question = "Tại sao bạn muốn đăng ký FSEL Pilot?",
+                            Type = "ShortAnswer"
                         });
                 });
 

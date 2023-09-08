@@ -6,6 +6,5 @@ namespace Fsel.Interaction.Domain.Models.QueryModels.SupportCategorys
 
     public class SearchSupportCategoryQueryModel : BaseQueryModel
     {
-
     }
 }

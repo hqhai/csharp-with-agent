@@ -3,10 +3,9 @@
 namespace Fsel.Course.Domain.Models.CommandModels.MockTests
 {
     using System.Collections.Generic;
-    using Fsel.Shared.Enums;
-    using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.Models.CommandModels.SectionGroups;
+    using Fsel.Shared.Enums;
 
     public class CreateMockTestCommandModel
     {

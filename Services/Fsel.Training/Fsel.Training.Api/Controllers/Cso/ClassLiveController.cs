@@ -6,15 +6,18 @@ namespace Fsel.Training.Api.Controllers.Cso
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
     using Fsel.Core.Base.BaseModels;
+    using Fsel.Shared.Enums;
     using Fsel.Training.Application.Commands.ClassCmd;
     using Fsel.Training.Application.Queries.ClassQuery;
     using Fsel.Training.Domain.Models.EntityModels;
     using MediatR;
+    using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
 
     [ApiVersion(Settings.APIVersion)]
     [Route(Settings.APIDefaultRoute + "/cso/class-live")]
     [ApiController]
+    [Authorize(Roles = nameof(EnumRole.CSO))]
     public class ClassLiveController : ControllerBase
     {
         private readonly IMediator _mediator;
@@ -79,12 +82,12 @@ namespace Fsel.Training.Api.Controllers.Cso
         /// Update a class live
         /// </summary>
         [HttpPut("assign-teacher-to-class")]
-        [ProducesResponseType(typeof(MethodResult<ClassModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> UpdateClassLiveStatus([FromBody] AssignTeacherToClassCommand command)
         {
             ArgumentNullException.ThrowIfNull(command);
-            MethodResult<ClassModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            MethodResult<bool> commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
     }

@@ -1,8 +1,8 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-using Fsel.Shared.Enums;
 using Fsel.Course.Domain.Models.CommandModels.CourseTeachers;
 using Fsel.Course.Domain.Models.CommandModels.CourseUnitMockTests;
+using Fsel.Shared.Enums;
 
 namespace Fsel.Course.Domain.Models.CommandModels.Courses
 {

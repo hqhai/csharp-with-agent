@@ -3,9 +3,9 @@
 namespace Fsel.Identity.Application.Queries.AdminQuery
 {
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Identity.Application.Services.InteractionService;
     using Fsel.Identity.Domain.Entities;
-    using Fsel.Identity.Domain.Enums.ErrorCodes;
     using Fsel.Identity.Domain.Models.EntityModels;
     using Fsel.Shared.Enums.ErrorCodes;
     using MediatR;
@@ -39,7 +39,7 @@ namespace Fsel.Identity.Application.Queries.AdminQuery
                                         .FirstOrDefaultAsync(x => x.Human != null && x.Human.Student != null && x.Human.Student.Id == request.StudentId, cancellationToken);
             if (user == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumStudentErrorCode.StudentNotExist));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(user));
                 return methodResult;
             }
             var surveyQuestions = await _interactionService.SurveyQuestionsByUserId(user.Id);

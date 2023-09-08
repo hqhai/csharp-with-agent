@@ -12,7 +12,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 var appSetting = builder.AddAppSettings<AppSetting>();
-builder.AddServices();
+builder.AddServices(appSetting);
 builder.AddSwaggerGens(appSetting);
 builder.AddAuthenticationJwtBearers(appSetting);
 builder.AddDbContexts<CourseDbContext>();
@@ -28,10 +28,13 @@ builder.Services.AddScoped<IUnitRepository, UnitRepository>();
 builder.Services.AddScoped<IUnitLessonRepository, UnitLessonRepository>();
 builder.Services.AddScoped<IVideoTimeCodeRepository, VideoTimeCodeRepository>();
 builder.Services.AddScoped<IVideoRepository, VideoRepository>();
+builder.Services.AddScoped<IVideoTimeCodeAnswerRepository, VideoTimeCodeAnswerRepository>();
+builder.Services.AddScoped<IVideoResultRepository, VideoResultRepository>();
 builder.Services.AddScoped<IExtraPracticeRepository, ExtraPracticeRepository>();
 builder.Services.AddScoped<IExtraPracticeExerciseRepository, ExtraPracticeExerciseRepository>();
 builder.Services.AddScoped<IExtraPracticeExerciseResultRepository, ExtraPracticeExerciseResultRepository>();
 builder.Services.AddScoped<IExtraPracticeResultRepository, ExtraPracticeResultRepository>();
+builder.Services.AddScoped<IExtraPracticeChapterRepository, ExtraPracticeChapterRepository>();
 
 builder.Services.AddScoped<IClassForumRepository, ClassForumRepository>();
 builder.Services.AddScoped<IHomeWorkRepository, HomeWorkRepository>();
