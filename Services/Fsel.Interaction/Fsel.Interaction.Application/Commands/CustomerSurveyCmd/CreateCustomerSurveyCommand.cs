@@ -93,7 +93,7 @@ namespace Fsel.Interaction.Application.Commands.CustomerSurveyCmd
                 await _customerSurveyRepository.AddList(customerSurveys);
                 await _customerSurveyRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
-                var student = await _userService.GetStudentByUserIdAsync(request.UserId ?? default);
+                var student = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
                 var studentName = student.Content?.Result?.Human?.FullName;
                 var paramSurvey = new SendSurveyTemplateModel
                 {
