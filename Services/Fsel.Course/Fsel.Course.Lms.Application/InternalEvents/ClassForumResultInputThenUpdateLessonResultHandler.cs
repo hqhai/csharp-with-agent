@@ -7,6 +7,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
     using Fsel.Core.Applications.InternalEvents;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.IRepositories;
+    using Fsel.Course.Lms.Application.Queues.Publishers;
     using MediatR;
     using Microsoft.EntityFrameworkCore;
 
@@ -15,23 +16,23 @@ namespace Fsel.Course.Lms.Application.InternalEvents
     {
         private readonly ILessonResultRepository _lessonResultRepository;
 
-        public ClassForumResultInputThenUpdateLessonResultHandler(ILessonResultRepository lessonResultRepository
-            , IHomeWorkResultRepository homeWorkResultRepository
-            , IHomeWorkAnswerRepository homeWorkAnswerRepository
-            , IHomeWorkRepository homeWorkRepository
-            , IVideoResultRepository videoResultRepository
-            , IClassForumResultRepository classForumResultRepository
-            , IHomeWorkQuestionRepository homeWorkQuestionRepository
-            , IQuestionRepository questionRepository
-            ) : base(lessonResultRepository,
-                homeWorkResultRepository,
-                homeWorkAnswerRepository,
-                homeWorkRepository,
-                videoResultRepository,
-                classForumResultRepository,
-                homeWorkQuestionRepository,
-                questionRepository
-                )
+        public ClassForumResultInputThenUpdateLessonResultHandler(IVideoResultRepository videoResultRepository,
+            IClassForumResultRepository classForumResultRepository,
+            IUnitResultRepository unitResultRepository,
+            ILessonResultRepository lessonResultRepository,
+            ICourseResultRepository courseResultRepository,
+            IHomeWorkQuestionRepository homeWorkQuestionRepository,
+            IHomeWorkAnswerRepository homeWorkAnswerRepository,
+            IQuestionRepository questionRepository,
+            IHomeWorkRepository homeWorkRepository,
+            ICourseRepository courseRepository,
+            IUnitRepository unitRepository,
+            FinishOneUnitPublisher finishOneUnitPublisher,
+            FinishOneLevelPassPublisher finishOneLevelPassPublisher,
+            IFinalTestResultRepository finalTestResultRepository,
+            IMockTestResultRepository mockTestResultRepository,
+            IHomeWorkResultRepository homeWorkResultRepository)
+            : base(videoResultRepository, classForumResultRepository, unitResultRepository, lessonResultRepository, courseResultRepository, homeWorkQuestionRepository, homeWorkAnswerRepository, questionRepository, homeWorkRepository, courseRepository, unitRepository, finishOneUnitPublisher, finishOneLevelPassPublisher, finalTestResultRepository, mockTestResultRepository, homeWorkResultRepository)
         {
             _lessonResultRepository = lessonResultRepository;
         }

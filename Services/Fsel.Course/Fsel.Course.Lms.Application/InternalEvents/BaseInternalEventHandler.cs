@@ -55,20 +55,6 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             _homeWorkResultRepository = homeWorkResultRepository;
         }
 
-        public async Task<(List<SkillScores>, double)> UpdateUnitResult(IList<Guid>? lessonResultIds)
-        {
-            ArgumentNullException.ThrowIfNull(lessonResultIds);
-            var (videoSkillScores, percentVideo) = await VideoSkillScores(lessonResultIds, EnumTimeCodeType.Standalone, 18);
-            var (unitTestSkillScores, percentUnitTest) = await VideoSkillScores(lessonResultIds, EnumTimeCodeType.UnitTest, 30);
-            var (skillTestSkillScores, percentSkillTest) = await VideoSkillScores(lessonResultIds, EnumTimeCodeType.SkillTest, 10);
-            var (homeWorkSkillScores, percentHomeWork) = await HomeWordsSkillScores(lessonResultIds, 22);
-            var (classForumSkillScores, percentClassForum) = await ClassForumSkillScores(lessonResultIds, 20);
-            List<SkillScores> mergedSkillScores = videoSkillScores.Concat(homeWorkSkillScores).Concat(classForumSkillScores).Concat(skillTestSkillScores).Concat(unitTestSkillScores).ToList();
-            List<SkillScores> groupedSkillScores = mergedSkillScores.GroupBy(x => x.Skill).Select(group => GetSumSkillScore(group)).ToList();
-            var percent = percentClassForum + percentHomeWork + percentSkillTest + percentUnitTest + percentVideo;
-            return (groupedSkillScores, percent);
-        }
-
         public async Task<(List<SkillScores>, double)> UpdateCourseResult(IList<Guid> unitIds, Guid studentId, EnumCourseType type, Guid? finalTestId)
         {
             ArgumentNullException.ThrowIfNull(unitIds);
@@ -231,53 +217,6 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             var skillScores = finalTestResult?.SkillScores?.GroupBy(x => x.Skill).Select(x => GetSkillScore(x)).ToList();
             var percent = finalTestResult?.Percent * 15;
             return (skillScores ?? new List<SkillScores>(), percent ?? default);
-        }
-
-        public async Task UpdateUnit(IList<Guid>? lessonResultIds, Domain.Entities.Unit? unit, Guid courseId, Guid studentId, CancellationToken cancellationToken)
-        {
-            ArgumentNullException.ThrowIfNull(lessonResultIds);
-            ArgumentNullException.ThrowIfNull(unit);
-            var unitResult = await _unitResultRepository.Queryable.FirstOrDefaultAsync(x => x.UnitId == unit.Id && x.StudentId == studentId && x.CourseId == courseId, cancellationToken);
-            if (unit != null && unitResult != null)
-            {
-                var (groupedSkillScores, percent) = await UpdateUnitResult(lessonResultIds);
-                unitResult.CorrectCount = (int)groupedSkillScores.Sum(x => x.CorrectCount);
-                unitResult.CorrectTotal = (int)groupedSkillScores.Sum(x => x.TotalCount);
-                unitResult.Status = EnumResultStatus.Done;
-                unitResult.Percent = percent;
-                unitResult.SkillScores = groupedSkillScores;
-                await _finishOneUnitPublisher.Publish(unitResult, cancellationToken);
-                _unitResultRepository.Update(unitResult);
-                await _unitResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
-            }
-        }
-
-        public async Task UpdateTheNextLesson(Unit? unit, LessonResult lessonResult, CancellationToken cancellationToken)
-        {
-            ArgumentNullException.ThrowIfNull(unit);
-            var mockTestId = unit.UnitSkillMockTests.FirstOrDefault()?.MockTestId;
-            var displayOrder = unit.UnitLessons.FirstOrDefault(x => x.LessonId == lessonResult.LessonId)!.DisplayOrder;
-            var lesson = unit.UnitLessons.FirstOrDefault(x => x.DisplayOrder == displayOrder + 1)?.Lesson;
-            if (lesson != null)
-            {
-                var lessonResultNext = await _lessonResultRepository.Queryable.FirstOrDefaultAsync(x => x.CourseId == lessonResult.CourseId && x.UnitId == lessonResult.UnitId && x.StudentId == lessonResult.StudentId && x.LessonId == lesson.Id, cancellationToken);
-                if (lessonResultNext != null)
-                {
-                    lessonResultNext.Status = EnumResultStatus.New;
-                    _lessonResultRepository.Update(lessonResultNext);
-                    await _lessonResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
-                }
-            }
-            else if (unit.CourseLevel.GetEnumCourseType() == EnumCourseType.Ielts && mockTestId.HasValue)
-            {
-                var mockTestResult = await _mockTestResultRepository.Queryable.FirstOrDefaultAsync(x => x.CourseId == lessonResult.CourseId && x.UnitId == lessonResult.UnitId && x.StudentId == lessonResult.StudentId && x.MockTestId == mockTestId.Value, cancellationToken);
-                if (mockTestResult != null)
-                {
-                    mockTestResult.Status = EnumResultStatus.New;
-                    _mockTestResultRepository.Update(mockTestResult);
-                    await _mockTestResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
-                }
-            }
         }
 
         public async Task UpdateProcessUnit(UnitResult? unitResult, CancellationToken cancellationToken)

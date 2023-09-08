@@ -6,38 +6,61 @@ namespace Fsel.Course.Lms.Application.InternalEvents
     using Fsel.Course.Domain.Entities.SkillScoresConfigs;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
+    using Fsel.Course.Lms.Application.Queues.Publishers;
+    using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
     using Microsoft.EntityFrameworkCore;
 
-    public class BaseInternalLessonResultEventHandler
+    public class BaseInternalLessonResultEventHandler : BaseInternalUnitResultEventHandler
     {
-        private readonly ILessonResultRepository _lessonResultRepository;
         private readonly IVideoResultRepository _videoResultRepository;
         private readonly IClassForumResultRepository _classForumResultRepository;
+        private readonly ILessonResultRepository _lessonResultRepository;
         private readonly IHomeWorkQuestionRepository _homeWorkQuestionRepository;
-        private readonly IQuestionRepository _questionRepository;
-        private readonly IHomeWorkResultRepository _homeWorkResultRepository;
         private readonly IHomeWorkAnswerRepository _homeWorkAnswerRepository;
+        private readonly IQuestionRepository _questionRepository;
         private readonly IHomeWorkRepository _homeWorkRepository;
+        private readonly IMockTestResultRepository _mockTestResultRepository;
+        private readonly IHomeWorkResultRepository _homeWorkResultRepository;
 
-        public BaseInternalLessonResultEventHandler(ILessonResultRepository lessonResultRepository
-            , IHomeWorkResultRepository homeWorkResultRepository
-            , IHomeWorkAnswerRepository homeWorkAnswerRepository
-            , IHomeWorkRepository homeWorkRepository
-            , IVideoResultRepository videoResultRepository
+        public BaseInternalLessonResultEventHandler(IVideoResultRepository videoResultRepository
             , IClassForumResultRepository classForumResultRepository
+            , IUnitResultRepository unitResultRepository
+            , ILessonResultRepository lessonResultRepository
+            , ICourseResultRepository courseResultRepository
             , IHomeWorkQuestionRepository homeWorkQuestionRepository
+            , IHomeWorkAnswerRepository homeWorkAnswerRepository
             , IQuestionRepository questionRepository
-            )
+            , IHomeWorkRepository homeWorkRepository
+            , ICourseRepository courseRepository
+            , IUnitRepository unitRepository
+            , FinishOneUnitPublisher finishOneUnitPublisher
+            , FinishOneLevelPassPublisher finishOneLevelPassPublisher
+            , IFinalTestResultRepository finalTestResultRepository
+            , IMockTestResultRepository mockTestResultRepository
+            , IHomeWorkResultRepository homeWorkResultRepository)
+            : base(videoResultRepository,
+                  classForumResultRepository,
+                  unitResultRepository,
+                  lessonResultRepository,
+                  courseResultRepository,
+                  courseRepository,
+                  unitRepository,
+                  finishOneUnitPublisher,
+                  finishOneLevelPassPublisher,
+                  finalTestResultRepository,
+                  mockTestResultRepository,
+                  homeWorkResultRepository)
         {
-            _lessonResultRepository = lessonResultRepository;
             _videoResultRepository = videoResultRepository;
             _classForumResultRepository = classForumResultRepository;
+            _lessonResultRepository = lessonResultRepository;
             _homeWorkQuestionRepository = homeWorkQuestionRepository;
-            _questionRepository = questionRepository;
-            _homeWorkResultRepository = homeWorkResultRepository;
             _homeWorkAnswerRepository = homeWorkAnswerRepository;
+            _questionRepository = questionRepository;
             _homeWorkRepository = homeWorkRepository;
+            _mockTestResultRepository = mockTestResultRepository;
+            _homeWorkResultRepository = homeWorkResultRepository;
         }
 
         public async Task GetLessonResult(LessonResult lessonResult, CancellationToken cancellationToken)
@@ -140,6 +163,34 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 return (skillScores.Sum(x => x.TotalCount), skillScores.Sum(x => x.TotalCount), skillScores.Average(x => x.Scores), skillScores);
             }
             return (null, null, default, null);
+        }
+
+        public async Task UpdateTheNextLesson(Unit? unit, LessonResult lessonResult, CancellationToken cancellationToken)
+        {
+            ArgumentNullException.ThrowIfNull(unit);
+            var mockTestId = unit.UnitSkillMockTests.FirstOrDefault()?.MockTestId;
+            var displayOrder = unit.UnitLessons.FirstOrDefault(x => x.LessonId == lessonResult.LessonId)!.DisplayOrder;
+            var lesson = unit.UnitLessons.FirstOrDefault(x => x.DisplayOrder == displayOrder + 1)?.Lesson;
+            if (lesson != null)
+            {
+                var lessonResultNext = await _lessonResultRepository.Queryable.FirstOrDefaultAsync(x => x.CourseId == lessonResult.CourseId && x.UnitId == lessonResult.UnitId && x.StudentId == lessonResult.StudentId && x.LessonId == lesson.Id, cancellationToken);
+                if (lessonResultNext != null)
+                {
+                    lessonResultNext.Status = EnumResultStatus.New;
+                    _lessonResultRepository.Update(lessonResultNext);
+                    await _lessonResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+                }
+            }
+            else if (unit.CourseLevel.GetEnumCourseType() == EnumCourseType.Ielts && mockTestId.HasValue)
+            {
+                var mockTestResult = await _mockTestResultRepository.Queryable.FirstOrDefaultAsync(x => x.CourseId == lessonResult.CourseId && x.UnitId == lessonResult.UnitId && x.StudentId == lessonResult.StudentId && x.MockTestId == mockTestId.Value, cancellationToken);
+                if (mockTestResult != null)
+                {
+                    mockTestResult.Status = EnumResultStatus.New;
+                    _mockTestResultRepository.Update(mockTestResult);
+                    await _mockTestResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+                }
+            }
         }
     }
 }

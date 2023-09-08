@@ -14,7 +14,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
     using MediatR;
     using Microsoft.EntityFrameworkCore;
 
-    public class LessonResultInputThenUpdateUnitResultHandler : BaseInternalEventHandler,
+    public class LessonResultInputThenUpdateUnitResultHandler : BaseInternalUnitResultEventHandler,
         INotificationHandler<EntityChangedEvent<LessonResult>>
     {
         private readonly IUnitRepository _unitRepository;

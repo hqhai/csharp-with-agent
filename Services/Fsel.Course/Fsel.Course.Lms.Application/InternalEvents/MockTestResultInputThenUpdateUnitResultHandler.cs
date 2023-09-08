@@ -12,7 +12,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
     using MediatR;
     using Microsoft.EntityFrameworkCore;
 
-    public class MockTestResultInputThenUpdateUnitResultHandler : BaseInternalEventHandler,
+    public class MockTestResultInputThenUpdateUnitResultHandler : BaseInternalUnitResultEventHandler,
         INotificationHandler<EntityChangedEvent<MockTestResult>>
     {
         private readonly IUnitRepository _unitRepository;
