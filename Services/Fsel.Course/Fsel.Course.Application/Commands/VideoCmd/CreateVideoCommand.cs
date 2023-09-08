@@ -45,7 +45,6 @@ namespace Fsel.Course.Application.Commands.VideoCmd
                 methodResult.AddErrorBadRequest(method.ErrorMessages);
                 return methodResult;
             }
-
             #endregion Validation
 
             await _videoRepository.ExecuteTransactionAsync(async () =>

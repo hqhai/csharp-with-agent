@@ -17,7 +17,6 @@ namespace Fsel.Identity.Domain.Entities
 
         [MaxLength(250, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? BankName { get; set; }
-
         public EnumStatusBank Status { get; set; }
         public Teacher? Teacher { get; set; }
         public Guid TeacherId { get; set; }

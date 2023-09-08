@@ -9,9 +9,20 @@ namespace Fsel.Training.Domain.Enums.ErrorCodes
         /// </summary>
         StartDateNotBiggerThanEndDate,
 
+
         /// <summary>
-        /// StartDate Bigger Than DateNow
+        /// Teacher Does not exits
         /// </summary>
-        StartDateBiggerThanDateNow,
+        TeacherNotExits,
+
+        /// <summary>
+        /// StartDate already exists
+        /// </summary>
+        StartDateAlreadyExists,
+
+        /// <summary>
+        /// EndDate already exists
+        /// </summary>
+        EndDateAlreadyExists,
     }
 }

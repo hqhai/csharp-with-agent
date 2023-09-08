@@ -23,7 +23,6 @@ namespace Fsel.Identity.Application.Queries.TeacherQuery
     {
         private readonly ITeacherRepository _teacherRepository;
         private readonly IMapper _mapper;
-
         public GetTeachersByKeywordQueryHandler(ITeacherRepository teacherRepository, IMapper mapper)
         {
             _teacherRepository = teacherRepository;

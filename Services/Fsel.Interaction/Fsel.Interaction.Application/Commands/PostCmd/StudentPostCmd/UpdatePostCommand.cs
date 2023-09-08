@@ -6,8 +6,8 @@ namespace Fsel.Interaction.Application.Commands.PostCmd.StudentPostCmd
     using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Common.ActionResults;
-    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Interaction.Domain.Entities;
+    using Fsel.Interaction.Domain.Enums.ErrorCodes;
     using Fsel.Interaction.Domain.IRepositories;
     using Fsel.Interaction.Domain.Models.CommandModels.Posts.StudentPost;
     using Fsel.Interaction.Domain.Models.EntityModels;
@@ -42,12 +42,11 @@ namespace Fsel.Interaction.Application.Commands.PostCmd.StudentPostCmd
                                    .FirstOrDefaultAsync(e => e.Id == request.Id, cancellationToken: cancellationToken);
             if (studentPosts == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(studentPosts));
+                methodResult.AddErrorBadRequest(nameof(EnumPostErrorCode.PostNotExist), nameof(request.Id), request.Id);
                 return methodResult;
             }
             _mapper.Map(request, studentPosts);
-
-            #endregion Validation
+            #endregion
 
             await _iPostRepository.ExecuteTransactionAsync(async () =>
             {

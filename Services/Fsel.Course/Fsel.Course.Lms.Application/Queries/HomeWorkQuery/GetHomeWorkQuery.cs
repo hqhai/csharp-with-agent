@@ -7,9 +7,9 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkQuery
     using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Common.ActionResults;
-    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
     using Fsel.Course.Domain.Enums;
+    using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Infrastructure.Common;
@@ -55,35 +55,32 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkQuery
             var studentsResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
             if (studentsResult == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(studentsResult));
+                methodResult.AddErrorBadRequest(nameof(EnumHomeWorkErrorCode.UserNotExist));
                 return methodResult;
             }
-            var studentId = studentsResult.Content?.Result?.Id;
+            var studentId = studentsResult.Content!.Result!.Id;
 
             var homeWorkResult = await _homeWorkResultRepository.Queryable
                 .FirstOrDefaultAsync(x => x.LessonResultId == request.LessonResultId && x.HomeWorkId == request.HomeWorkId && x.StudentId == studentId, cancellationToken);
-            if (homeWorkResult == null)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(homeWorkResult));
-                return methodResult;
-            }
+
             var homeWork = await _homeWorkRepository.Queryable
-                        .Include(x => x.HomeWorkQuestions)
-                        .ThenInclude(x => x.HomeWorkAnswers.Where(n => n.HomeWorkResultId == homeWorkResult.Id))
-                        .Include(x => x.HomeWorkQuestions)
+                        .Include(x => x.LessonHomeWorks.Where(n => !n.IsDeleted))
+                        .Include(x => x.HomeWorkQuestions.Where(n => !n.IsDeleted))
+                        .ThenInclude(x => x.HomeWorkAnswers.Where(n => !n.IsDeleted && homeWorkResult != null && n.HomeWorkResultId == homeWorkResult.Id))
+                        .Include(x => x.HomeWorkQuestions.Where(n => !n.IsDeleted))
                         .ThenInclude(x => x.Question)
-                        .Include(x => x.HomeWorkResults.Where(x => x.Id == homeWorkResult.Id))
+                        .Include(x => x.HomeWorkResults.Where(n => !n.IsDeleted))
                         .Where(x => x.Id == request.HomeWorkId)
                         .AsNoTracking()
-                        .FirstOrDefaultAsync(cancellationToken);
+                        .FirstOrDefaultAsync(cancellationToken: cancellationToken);
 
             if (homeWork == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(homeWork));
+                methodResult.AddErrorBadRequest(nameof(EnumHomeWorkErrorCode.HomeWorkNotExist), nameof(request.HomeWorkId), request?.HomeWorkId);
                 return methodResult;
             }
 
-            var checkDone = homeWorkResult.Status == EnumResultStatus.Done;
+            var checkDone = homeWorkResult != null && homeWorkResult.Status == EnumResultStatus.Done;
             var homeWorkModel = new HomeWorkModel()
             {
                 Id = homeWork.Id,
@@ -92,6 +89,7 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkQuery
                 MediaPost = homeWork.MediaPost,
                 CourseLevel = homeWork.CourseLevel,
                 CourseSkill = homeWork.CourseSkill,
+                IsActive = homeWork.LessonHomeWorks.Any(),
                 Questions = homeWork.HomeWorkQuestions.OrderBy(x => x!.CreatedDate).Select(n => new QuestionModel
                 {
                     Id = n.Question!.Id,
@@ -100,9 +98,9 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkQuery
                     Explanation = n.Question!.Explanation,
                     QuestionType = n.Question!.QuestionType,
                     Config = _questionTypeConverter.QuestionTypeConverterObject(n.Question.Config, n.Question.QuestionType, isDisableAnswers: !checkDone).Item1,
-                    ResultAnswer = _mapper.Map<AnswerModel>(n.HomeWorkAnswers.FirstOrDefault(n => n.HomeWorkResultId == homeWorkResult.Id))
+                    ResultAnswer = _mapper.Map<AnswerModel>(n.HomeWorkAnswers.FirstOrDefault())
                 }).ToList(),
-                HomeWorkResult = homeWork.HomeWorkResults.Where(x => x.Id == homeWorkResult.Id).Select(x => new HomeWorkResultModel
+                HomeWorkResult = homeWork.HomeWorkResults.Where(x => x.StudentId == studentId).Select(x => new HomeWorkResultModel
                 {
                     Id = x.Id,
                     HomeWorkId = x.HomeWorkId,

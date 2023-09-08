@@ -6,7 +6,7 @@ namespace Fsel.Interaction.Application.Commands.SupportCategoryCmd
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
-    using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Interaction.Domain.Enums.ErrorCodes;
     using Fsel.Interaction.Domain.IRepositories;
     using MediatR;
     using Microsoft.AspNetCore.Http;
@@ -35,7 +35,7 @@ namespace Fsel.Interaction.Application.Commands.SupportCategoryCmd
             var supportCategory = await _supportCategoryRepository.GetByIdAsync(request.Id);
             if (supportCategory == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(supportCategory));
+                methodResult.AddErrorBadRequest(nameof(EnumSupportCategoryErrorCode.SupportCategoryNotExist), nameof(request.Id), request?.Id);
                 return methodResult;
             }
 

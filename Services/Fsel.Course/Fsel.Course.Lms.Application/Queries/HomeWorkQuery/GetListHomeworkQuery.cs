@@ -6,8 +6,8 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkQuery
     using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Common.ActionResults;
-    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
+    using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Services.UserServices;
@@ -49,24 +49,24 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkQuery
             var student = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
             if (!student.IsSuccessStatusCode)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student));
+                methodResult.AddErrorBadRequest(nameof(EnumHomeWorkErrorCode.UserNotExist));
                 return methodResult;
             }
             var studentId = student?.Content?.Result?.Id;
-            var lessonResult = await _lessonResultRepository.Queryable.FirstOrDefaultAsync(x => x.Id == request.LessonResultId && x.StudentId == studentId, cancellationToken);
+            var lessonResult = await _lessonResultRepository.GetByIdAsync(request.LessonResultId);
             if (lessonResult == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(lessonResult));
+                methodResult.AddErrorBadRequest(nameof(EnumLessonResultErrorCode.LessonResultNotExist));
                 return methodResult;
             }
             var lessonSkillScoreQuery = await _homeWorkResultRepository.Queryable
                                         .Include(x => x.HomeWork)
                                         .ThenInclude(x => x!.LessonHomeWorks)
                                         .Include(x => x.HomeWork)
-                                        .ThenInclude(x => x!.HomeWorkQuestions)
+                                        .ThenInclude(x => x!.HomeWorkQuestions.Where(x => !x.IsDeleted).OrderBy(x => x.CreatedDate))
                                         .ThenInclude(x => x.Question)
-                                        .Include(x => x.HomeWorkAnswers)
-                                        .Where(x => x.LessonResultId == request.LessonResultId)
+                                        .Include(x => x.HomeWorkAnswers.Where(x => !x.IsDeleted).OrderBy(x => x.CreatedDate))
+                                        .Where(x => x.HomeWork != null && x.LessonResultId == request.LessonResultId)
                                         .AsNoTracking()
                                         .Select(h => new LessonHomeWorkResultModel
                                         {

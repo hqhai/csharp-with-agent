@@ -36,16 +36,12 @@ namespace Fsel.Identity.Application.Queries.StudentQuery
             ArgumentNullException.ThrowIfNull(request);
 
             MethodResult<IList<StudentModel>> methodResult = new MethodResult<IList<StudentModel>>();
-            if (request.StudentIds == null || !request.StudentIds.Any())
-            {
-                methodResult.Result = null;
-                methodResult.StatusCode = StatusCodes.Status200OK;
-                return methodResult;
-            }
-            var students = await _studentRepository.Queryable
+
+            var student = await _studentRepository.Queryable
                                     .Include(x => x.Human)
-                                    .Where(x => request.StudentIds.Contains(x.Id)).ToListAsync(cancellationToken: cancellationToken);
-            methodResult.Result = _mapper.Map<IList<StudentModel>>(students);
+                                    .Where(x => request.StudentIds!.Contains(x.Id)).ToListAsync(cancellationToken: cancellationToken);
+
+            methodResult.Result = _mapper.Map<IList<StudentModel>>(student);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }

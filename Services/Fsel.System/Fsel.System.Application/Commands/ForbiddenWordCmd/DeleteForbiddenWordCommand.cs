@@ -3,7 +3,7 @@
 namespace Fsel.System.Application.Commands.ForbiddenWordCmd
 {
     using Fsel.Common.ActionResults;
-    using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.System.Domain.Enums.ErrorCodes;
     using Fsel.System.Domain.IRepositories;
     using global::System;
     using MediatR;
@@ -33,7 +33,7 @@ namespace Fsel.System.Application.Commands.ForbiddenWordCmd
             var forbiddenWord = await _forbiddenWordRepository.GetByIdAsync(request.Id);
             if (forbiddenWord == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(forbiddenWord));
+                methodResult.AddErrorBadRequest(nameof(EnumForbiddenWordErrorCode.ForbiddenWordsNotExist), nameof(request.Id), request?.Id);
                 return methodResult;
             }
 

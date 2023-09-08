@@ -1,7 +1,8 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-using Fsel.Course.Domain.Models.CommandModels.Questions;
 using Fsel.Shared.Enums;
+using Fsel.Course.Domain.Models.CommandModels.Questions;
+using System.ComponentModel.DataAnnotations;
 
 namespace Fsel.Course.Domain.Models.CommandModels.Exercises
 {

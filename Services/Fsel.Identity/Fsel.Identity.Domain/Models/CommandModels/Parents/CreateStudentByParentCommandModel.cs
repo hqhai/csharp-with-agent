@@ -14,9 +14,7 @@ namespace Fsel.Identity.Domain.Models.CommandModels.Parents
 
         [Required]
         public string? Password { get; set; }
-
         public string? School { get; set; }
-
         [Required]
         public string? AvatarPath { get; set; }
     }

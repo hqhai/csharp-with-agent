@@ -8,10 +8,8 @@ namespace Fsel.Shared.Enums
     {
         [Description("Completed")]
         Completed,
-
         [Description("In Progress")]
         InProgress,
-
         [Description("Un Opened")]
         UnOpened
     }

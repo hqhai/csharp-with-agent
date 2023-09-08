@@ -4,7 +4,6 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd
 {
     using AutoMapper;
     using Fsel.Common.ActionResults;
-    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Entities.SkillScoresConfigs;
@@ -14,7 +13,6 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd
     using Fsel.Course.Domain.Models.CommandModels.FinalTestAnswers;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Infrastructure.Common;
-    using Fsel.Course.Lms.Application.Queues.Publishers;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using MediatR;
     using Microsoft.AspNetCore.Http;
@@ -31,7 +29,6 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd
         private readonly IFinalTestResultRepository _finalTestResultRepository;
         private readonly IFinalTestRepository _finalTestRepository;
         private readonly IMapper _mapper;
-        private readonly FinishOneFinalTestPublisher _finishOneFinalTestPublisher;
         private readonly AuthContext _authContext;
         private readonly IUserService _userService;
         private readonly ICourseRepository _courseRepository;
@@ -43,7 +40,6 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd
             , IFinalTestResultRepository finalTestResultRepository
             , IFinalTestRepository finalTestRepository
             , IMapper mapper
-            , FinishOneFinalTestPublisher finishOneFinalTestPublisher
             , AuthContext authContext
             , IUserService userService
             , ICourseRepository courseRepository
@@ -54,7 +50,6 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd
             _finalTestResultRepository = finalTestResultRepository;
             _finalTestRepository = finalTestRepository;
             _mapper = mapper;
-            _finishOneFinalTestPublisher = finishOneFinalTestPublisher;
             _authContext = authContext;
             _userService = userService;
             _courseRepository = courseRepository;
@@ -70,13 +65,13 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd
 
             if (request.FinalTestAnswers == null || request.FinalTestAnswers.Any(x => x.Answers == null || x.Answers.Count == 0))
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.FinalTestAnswers));
+                methodResult.AddErrorBadRequest(nameof(EnumFinalTestAnswerErrorCode.FinalTestAnswersNull), nameof(request.FinalTestAnswers), request.FinalTestAnswers);
                 return methodResult;
             }
             var student = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
             if (!student.IsSuccessStatusCode)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student));
+                methodResult.AddErrorBadRequest(nameof(EnumLessonErrorCode.UserNotExist), nameof(student), _authContext.CurrentUserId.ToString());
                 return methodResult;
             }
             var studentId = student?.Content?.Result?.Id;
@@ -84,14 +79,14 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd
             var finalTest = await _finalTestRepository.GetByIdAsync(request.FinalTestId);
             if (finalTest == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(finalTest));
+                methodResult.AddErrorBadRequest(nameof(EnumFinalTestErrorCode.FinalTestsNotExist), nameof(request.FinalTestId), request.FinalTestId);
                 return methodResult;
             }
 
             var course = await _courseRepository.GetByIdAsync(request.CourseId);
             if (course == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(course));
+                methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.CourseNotExist), nameof(request.CourseId), request.CourseId);
                 return methodResult;
             }
 
@@ -119,14 +114,14 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd
             {
                 if (item.Answers == null || item.Answers.Count == 0)
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(item.Answers));
+                    methodResult.AddErrorBadRequest(nameof(EnumFinalTestAnswerErrorCode.AnswersNull));
                     return methodResult;
                 }
                 var questionIds = item.Answers.Select(x => x.QuestionId).ToList();
                 var questions = await _questionRepository.GetIncludeSectionByIdAsync(questionIds);
                 if (questions == null || questions.Count == 0)
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(questions));
+                    methodResult.AddErrorBadRequest(nameof(EnumQuestionErrorCode.QuestionsNotExist), nameof(questionIds), questionIds);
                     return methodResult;
                 }
                 int count = 0;
@@ -135,17 +130,17 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd
                     var question = questions.FirstOrDefault(x => x.Id == answer.QuestionId);
                     if (question == null)
                     {
-                        methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(question));
+                        methodResult.AddErrorBadRequest(nameof(EnumQuestionErrorCode.QuestionNull), nameof(answer.QuestionId), answer.QuestionId);
                         return methodResult;
                     }
                     else if (question.Config == null)
                     {
-                        methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(question));
+                        methodResult.AddErrorBadRequest(nameof(EnumQuestionErrorCode.QuestionConfigNull), nameof(question), question);
                         return methodResult;
                     }
                     else if (question.SectionQuestions == null || question.SectionQuestions.Count == 0)
                     {
-                        methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(question.SectionQuestions));
+                        methodResult.AddErrorBadRequest(nameof(EnumSectionQuestionErrorCode.SectionQuestionsNotExist), nameof(question.SectionQuestions));
                         return methodResult;
                     }
                     var sectionQuestionId = question.SectionQuestions.FirstOrDefault()!.Id;
@@ -154,22 +149,22 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd
                     if (finalAnswer == null)
                     {
                         var (answerConfig, correctCount) = _answerTypeConverter.GetTotalCorrectByAsnwerType(answer.Answer, question.Config, question.QuestionType);
-                        if (!string.IsNullOrEmpty(answer.Answer?.ToString()) && answerConfig == null)
+                        if (answerConfig == null)
                         {
                             methodResult.AddErrorBadRequest(nameof(EnumFinalTestAnswerErrorCode.AnswerIsInTheWrongFormat), nameof(answer.Answer), answer.Answer);
                             return methodResult;
                         }
+                        count += correctCount;
                         finalAnswer = new FinalTestAnswer
                         {
                             CorrectCount = correctCount,
-                            Answer = answerConfig ?? answer.Answer,
+                            Answer = answerConfig,
                             SectionQuestionId = sectionQuestionId
                         };
-                        count += correctCount;
                         finalTestResult.FinalTestAnswers.Add(finalAnswer);
                     }
                 }
-                skillScores.Add(new SkillScores { Skill = item.Skill, TotalCount = questions.Sum(x => x.CorrectTotal), CorrectCount = count, CountQuestion = item.Answers.Count, TotalQuestion = item.Answers.Count, Percent = questions.Sum(x => x.CorrectTotal) > 0 ? (double)questions.Sum(x => x.CorrectTotal) / count * 100 : default });
+                skillScores.Add(new SkillScores { Skill = item.Skill, TotalCount = questions.Sum(x => x.CorrectTotal), CorrectCount = count });
             }
 
             #endregion Validation
@@ -181,7 +176,7 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd
                 finalTestResult.Status = EnumResultStatus.Done;
                 finalTestResult.SkillScores = skillScores;
                 finalTestResult.Percent = finalTestResult.CorrectTotal > 0 ? ((double)finalTestResult.CorrectCount / finalTestResult.CorrectTotal * 100) : 0;
-                await _finishOneFinalTestPublisher.Publish(finalTestResult, cancellationToken);
+
                 finalTestResult = _finalTestResultRepository.Update(finalTestResult);
                 await _finalTestResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 

@@ -30,7 +30,6 @@ namespace Fsel.Course.Domain.Entities
         /// Trình độ khóa
         /// </summary>
         public EnumPlacementTestLevel Level { get; set; }
-
         public ExtraPractice? ExtraPractice { get; set; }
         public ICollection<PlacementTestSection> PlacementTestSections { get; set; } = new List<PlacementTestSection>();
     }

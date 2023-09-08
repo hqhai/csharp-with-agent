@@ -7,7 +7,6 @@ namespace Fsel.Ordering.Application.Services.CourseService.Model
 
     public class CourseModel : BaseModel
     {
-        public string? Name { get; set; }
         public EnumCourseLevel CourseLevel { get; set; }
     }
 }

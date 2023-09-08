@@ -5,6 +5,11 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
     public enum EnumMockTestErrorCode
     {
         /// <summary>
+        /// MockTests does not exist
+        /// </summary>
+        MockTestsNotExist,
+
+        /// <summary>
         /// MockTest Exists Other Than TypeSkillMockTest
         /// </summary>
         MockTestExistsOtherThanTypeSkillMockTest,
@@ -25,13 +30,45 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         MockTestNotInActiveState,
 
         /// <summary>
+        /// User does not exist
+        /// </summary>
+        UserNotExist,
+
+        /// <summary>
         /// MockTest must correct score
         /// </summary>
         MockTestMustCorrectScore,
 
         /// <summary>
-        /// Skill Speaking Or Writing
+        /// MockTest Type Does Not Exist
         /// </summary>
-        SkillSpeakingOrWriting,
+        MockTestTypeNotExist,
+
+        /// <summary>
+        /// Code And Level Already Exist
+        /// </summary>
+        CodeAndLevelAlreadyExist,
+
+        /// <summary>
+        /// MockTest Already Exist To ExtraPractice
+        /// </summary>
+        MockTestAlreadyExistToExtraPractice,
+
+        /// <summary>
+        /// MockTestId Not Null
+        /// </summary>
+        MockTestIdNotNull,
+
+        /// <summary>
+        /// Name Already Exists
+        /// </summary>
+        NameAlreadyExists,
+
+
+        /// <summary>
+        /// MockTestIds Not Null
+        /// </summary>
+        MockTestIdsNotNull,
+
     }
 }

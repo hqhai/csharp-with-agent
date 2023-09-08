@@ -19,7 +19,7 @@ namespace Fsel.Shared.Helpers
             new KeyValuePair<EnumReviewType, EnumReviewQuestionType>(EnumReviewType.Platform, EnumReviewQuestionType.PROCESSINGPLATFORM)
         };
 
-        public static IList<object> GetEnumReviewQuestionTypes(this EnumReviewType? reviewType)
+        public static IList<object> GetEnumReviewTypes(this EnumReviewType? reviewType)
         {
             var results = new List<object>();
             foreach (var item in s_reviewType.Where(x => x.Key == reviewType))

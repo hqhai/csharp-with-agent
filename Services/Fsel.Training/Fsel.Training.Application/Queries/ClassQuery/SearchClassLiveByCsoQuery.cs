@@ -8,11 +8,8 @@ namespace Fsel.Training.Application.Queries.ClassQuery
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
-    using Fsel.Core.Base;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Core.Extensions;
-    using Fsel.Shared.Enums.ErrorCodes;
-    using Fsel.Training.Application.Services.SystemServices;
     using Fsel.Training.Application.Services.UserServices;
     using Fsel.Training.Application.Services.UserServices.Models;
     using Fsel.Training.Domain.IRepositories;
@@ -29,16 +26,12 @@ namespace Fsel.Training.Application.Queries.ClassQuery
     public class SearchClassLiveByCsoQueryHandler : IRequestHandler<SearchClassLiveByCsoQuery, MethodResult<PagingItemsModel<ClassLiveCalendarModel>>>
     {
         private readonly IClassLiveCalendarRepository _classLiveCalendarRepository;
-        private readonly AuthContext _authContext;
         private readonly IUserService _userService;
-        private readonly ISystemService _systemService;
 
-        public SearchClassLiveByCsoQueryHandler(IClassLiveCalendarRepository classLiveCalendarRepository, AuthContext authContext, IUserService userService, ISystemService systemService)
+        public SearchClassLiveByCsoQueryHandler(IClassLiveCalendarRepository classLiveCalendarRepository, IUserService userService)
         {
             _classLiveCalendarRepository = classLiveCalendarRepository;
-            _authContext = authContext;
             _userService = userService;
-            _systemService = systemService;
         }
 
         public async Task<MethodResult<PagingItemsModel<ClassLiveCalendarModel>>> Handle(SearchClassLiveByCsoQuery request, CancellationToken cancellationToken)
@@ -50,33 +43,34 @@ namespace Fsel.Training.Application.Queries.ClassQuery
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 return methodResult;
             }
-            var csoResult = await _userService.GetCsoByUserIdAsync(_authContext.CurrentUserId);
-            if (!csoResult.IsSuccessStatusCode)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError));
-                return methodResult;
-            }
-            var csoId = csoResult.Content?.Result?.Id;
-            var timeFramesResult = await _systemService.GetLiveTimeFramesAsync();
-            var timeFrames = timeFramesResult.Content?.Result;
+
             var classLiveQuery = _classLiveCalendarRepository.Queryable
                                         .Include(x => x.Class)
-                                        .Where(x => x.Class!.CsoId == csoId)
                                         .Select(x => new ClassLiveCalendarModel
                                         {
                                             Id = x.Id,
                                             ClassId = x.ClassId,
-                                            ClassCode = x.Class!.Code,
-                                            TeacherId = x.TeacherId,
-                                            LiveTimeFrameId = x.LiveTimeFrameId,
-                                            LiveDate = x.LiveDate,
+                                            Class = new ClassModel
+                                            {
+                                                Id = x.Class!.Id,
+                                                Name = x.Class!.Name,
+                                                Code = x.Class!.Code,
+                                                TeacherId = x.Class!.TeacherId,
+                                                StartDate = x.Class!.StartDate.HasValue ? x.Class!.StartDate.Value : default,
+                                                EndDate = x.Class!.EndDate.HasValue ? x.Class!.EndDate.Value : default,
+                                                LiveDays = x.Class!.LiveDays,
+                                            },
                                             CreatedDate = x.CreatedDate
                                         });
             if (!string.IsNullOrEmpty(request.Keyword))
             {
-                classLiveQuery = classLiveQuery.Where(m => m.Id.ToString() == request.Keyword || (m!.ClassCode ?? string.Empty).Contains(request.Keyword));
+                classLiveQuery = classLiveQuery.Where(m => m.Id.ToString() == request.Keyword || (m.Class!.Name ?? string.Empty).Contains(request.Keyword));
             }
 
+            if (request.ClassCode != null)
+            {
+                classLiveQuery = classLiveQuery.Where(m => m.Class!.Code == request.ClassCode);
+            }
             int totalItem = await classLiveQuery.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
             var lists = await classLiveQuery
                     .ApplySortAndPaging(request)
@@ -84,16 +78,13 @@ namespace Fsel.Training.Application.Queries.ClassQuery
                     .ToListAsync(cancellationToken: cancellationToken)
                     .ConfigureAwait(false);
 
-            var teacherResult = await _userService.GetTeacherByIdsAsync(new GetTeacherByIdsQueryModel { Ids = lists.Select(x => x.TeacherId ?? default).Distinct().ToList() });
+            var teacherResult = await _userService.GetTeacherByIdsAsync(new GetTeacherByIdsQueryModel { Ids = lists.Select(x => x.Class!.TeacherId ?? default).Distinct().ToList() });
             var teachers = teacherResult.Content?.Result;
 
             foreach (var item in lists)
             {
-                var teacher = teachers!.FirstOrDefault(x => x.Id == item.TeacherId);
-                item.TeacherName = teacher?.Human?.FullName;
-                var liveTimeFrame = timeFrames?.FirstOrDefault(x => x.Id == item.LiveTimeFrameId);
-                item.StartTime = liveTimeFrame?.StartTime ?? default;
-                item.EndTime = liveTimeFrame?.EndTime ?? default;
+                var teacher = teachers!.FirstOrDefault(x => x.Id == item.Class!.TeacherId);
+                item.Class!.TeacherName = teacher?.Human?.FullName;
             }
 
             methodResult.Result = new PagingItemsModel<ClassLiveCalendarModel>(lists, request, totalItem);

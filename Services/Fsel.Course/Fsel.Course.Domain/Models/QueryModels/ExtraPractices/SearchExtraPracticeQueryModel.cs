@@ -10,6 +10,5 @@ namespace Fsel.Course.Domain.Models.QueryModels.ExtraPractices
     {
         public EnumCourseLevel? CourseLevel { get; set; }
         public EnumExtraPracticeType? Type { get; set; }
-        public bool? IsActive { get; set; }
     }
 }

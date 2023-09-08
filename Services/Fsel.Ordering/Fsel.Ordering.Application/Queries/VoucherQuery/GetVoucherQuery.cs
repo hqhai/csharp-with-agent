@@ -6,7 +6,7 @@ namespace Fsel.Ordering.Application.Queries.VoucherQuery
     using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Common.ActionResults;
-    using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Ordering.Domain.Enums.ErrorCodes;
     using Fsel.Ordering.Domain.IRepositories;
     using Fsel.Ordering.Domain.Models.EntityModels;
     using MediatR;
@@ -64,7 +64,7 @@ namespace Fsel.Ordering.Application.Queries.VoucherQuery
 
             if (voucherQuery == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(voucherQuery));
+                methodResult.AddErrorBadRequest(nameof(EnumVoucherErrorCode.VoucherNotExist), nameof(request.Id), request.Id);
                 return methodResult;
             }
             var voucherModel = _mapper.Map<VoucherModel>(voucherQuery);

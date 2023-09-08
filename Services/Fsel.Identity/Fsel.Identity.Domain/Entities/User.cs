@@ -15,7 +15,5 @@ namespace Fsel.Identity.Domain.Entities
         public virtual Human? Human { get; set; }
 
         public virtual ICollection<UserOtpCode> UserOtpCodes { get; set; } = new List<UserOtpCode>();
-
-        public virtual ICollection<UserSetting> UserSettings { get; set; } = new List<UserSetting>();
     }
 }

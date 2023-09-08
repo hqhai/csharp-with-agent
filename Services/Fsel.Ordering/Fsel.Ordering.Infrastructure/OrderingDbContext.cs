@@ -27,7 +27,6 @@ namespace Fsel.Ordering.Infrastructure
             modelBuilder.ApplyConfiguration(new PackageEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new VoucherEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new VoucherPackageEntityTypeConfiguration());
-            modelBuilder.ApplyConfiguration(new UserVoucherEnityTypeConfiguration());
             base.OnModelCreating(modelBuilder);
         }
 
@@ -38,10 +37,6 @@ namespace Fsel.Ordering.Infrastructure
         public DbSet<Voucher> Vouchers { get; set; }
 
         public DbSet<VoucherPackage> VoucherPackages { get; set; }
-
-        public DbSet<UserVoucher> UserVouchers { get; set; }
-
-        public DbSet<UserReferral> UserReferrals { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -74,8 +69,7 @@ namespace Fsel.Ordering.Infrastructure
                             new PackageConfig { Content = "Diễn đàn", Status = true },
                             new PackageConfig { Content = "Giảng viên nhận xét", Status = false },
                             new PackageConfig { Content = "Truy cập tiết học trực tuyến cho kỹ năng nói với Giảng viên", Status = false },
-                        },
-                        CreatedDate = new DateTime(2023, 7, 24)
+                        }
                     },
                     new Package()
                     {
@@ -90,7 +84,6 @@ namespace Fsel.Ordering.Infrastructure
                             new PackageConfig { Content = "Giảng viên nhận xét", Status = true },
                             new PackageConfig { Content = "Truy cập tiết học trực tuyến cho kỹ năng nói với Giảng viên", Status = false },
                         },
-                        CreatedDate = new DateTime(2023, 7, 24)
                     },
                     new Package()
                     {
@@ -104,8 +97,7 @@ namespace Fsel.Ordering.Infrastructure
                             new PackageConfig { Content = "Diễn đàn", Status = true },
                             new PackageConfig { Content = "Giảng viên nhận xét", Status = true },
                             new PackageConfig { Content = "Truy cập tiết học trực tuyến cho kỹ năng nói với Giảng viên", Status = true }
-                        },
-                        CreatedDate = new DateTime(2023, 7, 24)
+                        }
                     }
                 );
             ;

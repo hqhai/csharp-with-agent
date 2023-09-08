@@ -2,13 +2,13 @@
 
 namespace Fsel.Storage.Api.Controllers
 {
-    using System.Net;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
-    using Fsel.Shared.Attributes;
+    using System.Net;
+    using Microsoft.AspNetCore.Mvc;
     using Fsel.Storage.Application.Services.AmazonS3Services;
     using Fsel.Storage.Domain.Enums;
-    using Microsoft.AspNetCore.Mvc;
+    using Fsel.Shared.Attributes;
 
     [ApiVersion(Settings.APIVersion)]
     [Route(Settings.APIDefaultRoute + "/file")]

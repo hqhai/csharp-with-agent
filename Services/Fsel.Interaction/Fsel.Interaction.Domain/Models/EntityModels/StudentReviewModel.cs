@@ -9,7 +9,6 @@ namespace Fsel.Interaction.Domain.Models.EntityModels
     {
         public EnumReviewType ReviewType { get; set; }
         public Guid StudentId { get; set; }
-        public string? FullName { get; set; }
         public Guid? CourseId { get; set; }
         public IList<StudentReviewDetailModel>? StudentReviewDetails { get; set; }
     }

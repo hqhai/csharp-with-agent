@@ -3,7 +3,6 @@
 namespace Fsel.Course.Application.Commands.ExtraPracticeCmd
 {
     using Fsel.Common.ActionResults;
-    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Infrastructure.Common;
@@ -33,7 +32,7 @@ namespace Fsel.Course.Application.Commands.ExtraPracticeCmd
             var extraPractice = await _extraPracticeRepository.GetIncludeByIdAsync(request.Id);
             if (extraPractice == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(extraPractice));
+                methodResult.AddErrorBadRequest(nameof(EnumExtraPracticeErrorCode.ExtraPracticeNotExist), nameof(request.Id), request.Id);
                 return methodResult;
             }
             if (extraPractice.IsActive)

@@ -2,8 +2,8 @@
 
 namespace Fsel.Training.Domain.Entities
 {
-    using System.ComponentModel.DataAnnotations;
     using Fsel.Common.Enums.ErrorCodes;
+    using System.ComponentModel.DataAnnotations;
     using Fsel.Core.Entities;
     using Fsel.Shared.Enums;
 

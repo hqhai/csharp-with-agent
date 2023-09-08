@@ -37,7 +37,6 @@ namespace Fsel.Interaction.Api.Controllers
             return queryResult.GetActionResult();
         }
 
-
         /// <summary>
         /// Check Student by id
         /// </summary>

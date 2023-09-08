@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net7.0</TargetFramework>
@@ -7,12 +7,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Commands\SurveyQuestionCmd\" />
-    <Folder Include="Queues\Consumers\" />
+    <ProjectReference Include="..\Fsel.Interaction.Infrastructure\Fsel.Interaction.Infrastructure.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Fsel.Interaction.Infrastructure\Fsel.Interaction.Infrastructure.csproj" />
+    <Folder Include="Commands\SurveyQuestionCmd\" />
   </ItemGroup>
 
 </Project>

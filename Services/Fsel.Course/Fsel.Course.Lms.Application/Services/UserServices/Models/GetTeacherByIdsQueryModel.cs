@@ -4,6 +4,9 @@ namespace Fsel.Course.Lms.Application.Services.UserServices.Models
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
+    using System.Text;
+    using System.Threading.Tasks;
 
     public class GetTeacherByIdsQueryModel
     {

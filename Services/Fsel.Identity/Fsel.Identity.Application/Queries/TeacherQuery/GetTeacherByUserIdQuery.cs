@@ -7,10 +7,12 @@ namespace Fsel.Identity.Application.Queries.TeacherQuery
     using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Identity.Domain.Enums.ErrorCodes;
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Domain.Models.EntityModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
+    using Microsoft.EntityFrameworkCore;
 
     public class GetTeacherByUserIdQuery : IRequest<MethodResult<TeacherModel>>
     {

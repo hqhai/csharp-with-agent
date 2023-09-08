@@ -3,7 +3,6 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Text;
 using Fsel.Common.ActionResults;
-using Fsel.Common.Constants;
 using Fsel.Common.Helpers;
 using Fsel.Identity.Domain.Enums.ErrorCodes;
 using Fsel.Identity.Domain.IRepositories;
@@ -46,12 +45,10 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             {
                 ValidateIssuer = true,
                 ValidateAudience = true,
-                ValidateLifetime = true,
                 ValidateIssuerSigningKey = true,
-                ValidAudience = _appSetting?.Jwt?.Audience,
-                ValidIssuer = _appSetting?.Jwt?.Issuer,
                 IssuerSigningKey = new SymmetricSecurityKey(secretKeyBytes),
                 ClockSkew = TimeSpan.Zero,
+                ValidateLifetime = true
             };
             var tokenValidationResult = await jwtTokenHandler.ValidateTokenAsync(request.AccessToken, tokenValidateParam);
 
@@ -65,7 +62,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                 }
             }
 
-            var checkExpireDate = long.TryParse(tokenValidationResult.ClaimsIdentity.Claims.FirstOrDefault(x => x.Type == JwtClaimNames.Exp)?.Value, out long utcExpireDate);
+            var checkExpireDate = long.TryParse(tokenValidationResult.ClaimsIdentity.Claims.FirstOrDefault(x => x.Type == JwtRegisteredClaimNames.Exp)?.Value, out long utcExpireDate);
 
             var expireDate = utcExpireDate.ConvertUnixTimeStampToDateTime();
             if (!checkExpireDate || expireDate < DateTime.Now)

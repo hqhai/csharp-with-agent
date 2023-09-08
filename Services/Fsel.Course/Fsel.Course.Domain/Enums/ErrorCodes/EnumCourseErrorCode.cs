@@ -5,24 +5,54 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
     public enum EnumCourseErrorCode
     {
         /// <summary>
+        /// Courses does not exist
+        /// </summary>
+        CoursesNotExist,
+
+        /// <summary>
+        /// Course does not exist
+        /// </summary>
+        CourseNotExist,
+
+        /// <summary>
+        /// Course already exists
+        /// </summary>
+        CourseCodeIsExist,
+
+        /// <summary>
         /// Course is not in a new state
         /// </summary>
         CourseNotInNewState,
 
         /// <summary>
-        /// Course Not Type IElts
-        /// </summary>
-        CourseNotTypeIElts,
-
-        /// <summary>
-        /// Course Not Type Academic
-        /// </summary>
-        CourseNotTypeAcademic,
-
-        /// <summary>
         /// Student not in class
         /// </summary>
         StudentNotInClass,
+
+        /// <summary>
+        /// Teachers does not exist
+        /// </summary>
+        TeachersNotExist,
+
+        /// <summary>
+        /// Class does not exist
+        /// </summary>
+        ClassNotExist,
+
+        /// <summary>
+        /// Classes does not exist
+        /// </summary>
+        ClassesNotExist,
+
+        /// <summary>
+        /// Classe Code does not exist
+        /// </summary>
+        ClasseCodeNotExist,
+
+        /// <summary>
+        /// Student Is Null
+        /// </summary>
+        StudentNull,
 
         /// <summary>
         /// MocktestId and UnitId cannot have values at the same time.
@@ -45,28 +75,8 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         CourseIsNewStateCantStartLesson,
 
         /// <summary>
-        /// another level unit exists
+        /// CourseIds Null
         /// </summary>
-        AnotherLevelUnitExists,
-
-        /// <summary>
-        /// Duplicate Unit Id
-        /// </summary>
-        DuplicateUnitId,
-
-        /// <summary>
-        /// MockTest is up to two
-        /// </summary>
-        MockTestIsUpToTwo,
-
-        /// <summary>
-        /// FinalTest is up to One
-        /// </summary>
-        FinalTestIsUpToOne,
-
-        /// <summary>
-        /// UnitTest is up to Eight
-        /// </summary>
-        UnitTestIsUpToEight
+        CourseIdsNull,
     }
 }

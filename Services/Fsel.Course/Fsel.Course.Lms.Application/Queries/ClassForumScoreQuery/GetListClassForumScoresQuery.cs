@@ -9,7 +9,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumScoreQuery
     using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Common.ActionResults;
-    using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using MediatR;
@@ -43,7 +43,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumScoreQuery
             var isClassForumResult = await _classForumResultRepository.AnyAsync(request.ClassForumResultId);
             if (!isClassForumResult)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(isClassForumResult));
+                methodResult.AddErrorBadRequest(nameof(EnumClassForumResultErrorCode.ClassForumResultNotExist));
                 return methodResult;
             }
             var classForumScores = await _classForumScoreRepository.Queryable

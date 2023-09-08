@@ -16,7 +16,6 @@ namespace Fsel.Training.Infrastructure.Maps
             CreateMap<TeacherFreeDate, TeacherFreeDateModel>().IgnoreAllNonExisting();
             CreateMap<TeacherFreeTime, TeacherFreeTimeModel>().IgnoreAllNonExisting();
             CreateMap<CreateTeacherFreeDateCommandModel, TeacherFreeDate>().IgnoreAllNonExisting();
-            CreateMap<UpdateTeacherFreeDateCommandModel, TeacherFreeDate>().IgnoreAllNonExisting();
             CreateMap<CreateTeacherFreeTimeCommandModel, TeacherFreeTime>().IgnoreAllNonExisting();
         }
     }

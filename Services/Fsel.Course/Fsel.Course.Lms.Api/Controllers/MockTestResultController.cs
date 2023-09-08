@@ -6,7 +6,6 @@ namespace Fsel.Course.Lms.Api.Controllers
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
     using Fsel.Course.Domain.Models.EntityModels;
-    using Fsel.Course.Lms.Application.Commands.MockTestResultCmd;
     using Fsel.Course.Lms.Application.Queries.MockTestResultQuery;
     using Fsel.Shared.Enums;
     using MediatR;
@@ -35,18 +34,6 @@ namespace Fsel.Course.Lms.Api.Controllers
         public async Task<IActionResult> GetMockTestResultById([FromRoute] Guid mockTestResultId)
         {
             MethodResult<MockTestResultModel> queryResult = await _mediator.Send(new GetMockTestReportQuery { MockTestResultId = mockTestResultId }).ConfigureAwait(false);
-            return queryResult.GetActionResult();
-        }
-
-        /// <summary>s
-        /// ReportFeedback Mock tesk result
-        /// </summary>
-        [HttpPost]
-        [ProducesResponseType(typeof(MethodResult<MockTestResultModel>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> ReportFeedback([FromBody] ReportFeedbackMockTestCommand command)
-        {
-            MethodResult<MockTestResultModel> queryResult = await _mediator.Send(command).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
     }

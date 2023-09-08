@@ -5,13 +5,12 @@ using Fsel.Core.Base;
 using Fsel.Identity.Domain.Entities;
 using Fsel.Identity.Infrastructure.Configs;
 using MediatR;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 
 namespace Fsel.Identity.Infrastructure
 {
-    public class UserDbContext : BaseIdentityDbContext<User, Role, string, IdentityUserClaim<string>, IdentityRoleClaim<string>, UserToken>
+    public class UserDbContext : BaseIdentityDbContext<User>
     {
         public UserDbContext(DbContextOptions<UserDbContext> options, IMediator mediator, AuthContext authContext) : base(options, mediator, authContext)
         {
@@ -31,7 +30,6 @@ namespace Fsel.Identity.Infrastructure
             builder.ApplyConfiguration(new StudentEntityTypeConfiguration());
             builder.ApplyConfiguration(new UserEntityTypeConfiguration());
             builder.ApplyConfiguration(new UserOtpCodeEntityTypeConfiguration());
-            builder.ApplyConfiguration(new UserSettingEntityTypeConfiguration());
             base.OnModelCreating(builder);
         }
 
@@ -48,7 +46,6 @@ namespace Fsel.Identity.Infrastructure
         public DbSet<TeacherBankAccount> TeacherBankAccounts { get; set; }
         public DbSet<ParentStudent> ParentStudents { get; set; }
         public DbSet<UserOtpCode> UserOtpCodes { get; set; }
-        public DbSet<UserSetting> UserSettings { get; set; }
 
         #endregion Db Set
 

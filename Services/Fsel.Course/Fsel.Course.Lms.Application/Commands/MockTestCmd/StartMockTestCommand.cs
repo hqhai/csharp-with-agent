@@ -5,7 +5,6 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
-    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums;
@@ -60,7 +59,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
             var course = await _courseRepository.GetByIdAsync(request.CourseId);
             if (course == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(course));
+                methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.CourseNotExist), nameof(request.CourseId), request.CourseId);
                 return methodResult;
             }
             else if (course.Status == EnumCourseStatus.New)
@@ -74,14 +73,14 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
                 var unit = await _unitRepository.Queryable.FirstOrDefaultAsync(x => x.Id == request.UnitId, cancellationToken);
                 if (unit == null)
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(unit));
+                    methodResult.AddErrorBadRequest(nameof(EnumUnitErrorCode.UnitNotExist), nameof(request.UnitId), request.UnitId);
                     return methodResult;
                 }
             }
             var student = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
             if (!student.IsSuccessStatusCode)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student));
+                methodResult.AddErrorBadRequest(nameof(EnumMockTestErrorCode.UserNotExist), nameof(student), _authContext.CurrentUserId.ToString());
                 return methodResult;
             }
             var studentId = student?.Content?.Result?.Id;
@@ -133,7 +132,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
                                                 .FirstOrDefaultAsync(cancellationToken: cancellationToken);
             if (mockTest == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(mockTest));
+                methodResult.AddErrorBadRequest(nameof(EnumMockTestErrorCode.MockTestsNotExist), nameof(request.MockTestId), request.MockTestId);
                 return methodResult;
             }
             if (!(mockTest.CourseUnitMockTests.Any() || mockTest.UnitSkillMockTests.Any()))
@@ -148,6 +147,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
                 Id = mockTest!.Id,
                 Name = mockTest.Name,
                 MockTestType = mockTest.MockTestType,
+                CourseType = mockTest.CourseType,
                 CreatedDate = mockTest.CreatedDate,
                 CreatedFullName = mockTest.CreatedFullName,
                 CreatedUserId = mockTest.CreatedUserId,

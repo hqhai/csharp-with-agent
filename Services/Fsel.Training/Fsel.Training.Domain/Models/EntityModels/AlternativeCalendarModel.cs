@@ -4,7 +4,6 @@ namespace Fsel.Training.Domain.Models.EntityModels
 {
     using System;
     using Fsel.Core.Base.BaseModels;
-    using Fsel.Shared.Enums;
 
     public class ChangeTeacherLiveModel : BaseModel
     {
@@ -13,7 +12,6 @@ namespace Fsel.Training.Domain.Models.EntityModels
         public double? StartTime { get; set; }
         public double? EndTime { get; set; }
         public DateTime? LiveDate { get; set; }
-        public EnumWorkFlowType Type { get; set; }
         public string? Status { get; set; }
         public Guid? TeacherId { get; set; }
         public Guid? LiveTimeFrameId { get; set; }

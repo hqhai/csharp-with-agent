@@ -5,11 +5,8 @@ namespace Fsel.Training.Application.Commands.ClassLiveCmd
     using System;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
-    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
     using Fsel.Shared.Enums;
-    using Fsel.Shared.Enums.ErrorCodes;
-    using Fsel.Training.Application.Services.SystemServices;
     using Fsel.Training.Application.Services.UserServices;
     using Fsel.Training.Domain.Entities;
     using Fsel.Training.Domain.Enums.ErrorCodes;
@@ -26,27 +23,18 @@ namespace Fsel.Training.Application.Commands.ClassLiveCmd
     public class ApproveClassLiveCommandHandler : IRequestHandler<ApproveClassLiveCommand, MethodResult<bool>>
     {
         private readonly IClassLiveWorkFlowRepository _classLiveWorkFlowRepository;
-        private readonly ISystemService _systemService;
-        private readonly IClassLiveCalendarRepository _classLiveCalendarRepository;
         private readonly IClassRepository _classRepository;
-        private readonly ITeacherFreeDateRepository _teacherFreeDateRepository;
         private readonly AuthContext _authContext;
         private readonly IUserService _userService;
 
         public ApproveClassLiveCommandHandler(
             IClassLiveWorkFlowRepository classLiveWorkFlowRepository,
-            ISystemService systemService,
-            IClassLiveCalendarRepository classLiveCalendarRepository,
             IClassRepository classRepository,
-            ITeacherFreeDateRepository teacherFreeDateRepository,
             AuthContext authContext,
             IUserService userService)
         {
             _classLiveWorkFlowRepository = classLiveWorkFlowRepository;
-            _systemService = systemService;
-            _classLiveCalendarRepository = classLiveCalendarRepository;
             _classRepository = classRepository;
-            _teacherFreeDateRepository = teacherFreeDateRepository;
             _authContext = authContext;
             _userService = userService;
         }
@@ -59,7 +47,7 @@ namespace Fsel.Training.Application.Commands.ClassLiveCmd
             var teacherResult = await _userService.GetTeacherByUserIdAsync(_authContext.CurrentUserId);
             if (!teacherResult.IsSuccessStatusCode)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(teacherResult));
+                methodResult.AddErrorBadRequest(nameof(EnumClassLiveWorkFlowErrorCode.TeacherNotExits));
                 return methodResult;
             }
             var teacherId = teacherResult.Content?.Result?.Id;
@@ -73,7 +61,7 @@ namespace Fsel.Training.Application.Commands.ClassLiveCmd
                     var classLiveWorkFlowParent = await _classLiveWorkFlowRepository.GetByIdAsync(classLiveWorkFlow.WorkFlowParentId ?? default);
                     if (classLiveWorkFlow.Type == EnumWorkFlowType.AssignTeacher && classLiveWorkFlowParent != null && classLiveWorkFlow.ClassLiveCalendar != null)
                     {
-                        if (request.IsAccept)
+                        if (request.IsAcept)
                         {
                             classLiveWorkFlowParent.Status = EnumWorkFlowChangeTeacherStatus.DoneScheduled.ToString();
                             classLiveWorkFlow.ClassLiveCalendar.TeacherId = teacherId;
@@ -103,44 +91,12 @@ namespace Fsel.Training.Application.Commands.ClassLiveCmd
                 {
                     if (@class.TeacherApprovalStatus == EnumTeacherApprovalStatus.Pending)
                     {
-                        List<ClassLiveCalendar>? classLiveCalendars = default;
-                        TeacherFreeDate? teacherFreeDate = default;
-                        if (request.IsAccept)
+                        if (request.IsAcept)
                         {
                             @class.TeacherApprovalStatus = EnumTeacherApprovalStatus.Approved;
-                            var liveTimeFrameResults = await _systemService.GetLiveTimeFramesAsync();
-                            if (!liveTimeFrameResults.IsSuccessStatusCode)
-                            {
-                                methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallSystemServiceError));
-                                return methodResult;
-                            }
-                            var liveTimeFrames = liveTimeFrameResults?.Content?.Result;
-                            var classLives = await _classLiveCalendarRepository.Queryable.Where(x => x.ClassId == @class.Id).ToListAsync(cancellationToken);
-                            if (classLives != null && classLives.Count > 0)
-                            {
-                                classLiveCalendars = classLives.Where(classLive => liveTimeFrames?.FirstOrDefault(x => x.Id == classLive.LiveTimeFrameId)?.StartTime != null &&
-                                           classLive.LiveDate.Date.AddHours(liveTimeFrames.First(x => x.Id == classLive.LiveTimeFrameId)?.StartTime ?? default) > DateTime.Now
-                                       ).Select(x =>
-                                       {
-                                           x.TeacherId = @class.TeacherId;
-                                           return x;
-                                       })
-                                   .ToList();
-                            }
                         }
                         else
                         {
-                            teacherFreeDate = await _teacherFreeDateRepository.Queryable
-                                   .Include(x => x.TeacherFreeTimes)
-                                   .Where(x => @class.StartDate.HasValue && @class.EndDate.HasValue && x.StartDate.Date <= @class.StartDate.Value.Date && x.EndDate.Date >= @class.EndDate.Value.Date && x.TeacherId == teacherId)
-                                   .FirstOrDefaultAsync(cancellationToken);
-                            if (teacherFreeDate == null)
-                            {
-                                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(teacherFreeDate));
-                                return methodResult;
-                            }
-                            teacherFreeDate.TeacherFreeTimes = teacherFreeDate.TeacherFreeTimes.Where(x => !(@class.LiveDays != null && @class.LiveDays.Any() && @class.LiveDays.All(n => x.DayOfWeek == n) && x.LiveTimeFrameId == @class.LiveTimeFrameId)).ToList();
-
                             @class.TeacherApprovalStatus = default;
                             @class.TeacherId = default;
                         }
@@ -149,17 +105,6 @@ namespace Fsel.Training.Application.Commands.ClassLiveCmd
                             methodResult.AddErrorBadRequest(@class.ErrorMessages);
                             return methodResult;
                         }
-                        if (classLiveCalendars != null && classLiveCalendars.Any())
-                        {
-                            _classLiveCalendarRepository.UpdateList(classLiveCalendars);
-                            await _classLiveCalendarRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
-                        }
-                        if (teacherFreeDate != null)
-                        {
-                            _teacherFreeDateRepository.Update(teacherFreeDate);
-                            await _teacherFreeDateRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-                        }
-
                         _classRepository.Update(@class);
                         await _classRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
                     }
@@ -172,7 +117,7 @@ namespace Fsel.Training.Application.Commands.ClassLiveCmd
             }
             else
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(classLiveWorkFlow));
+                methodResult.AddErrorBadRequest(nameof(EnumClassLiveCalendarErrorCode.ClassLiveCalendarNotExits));
                 return methodResult;
             }
 

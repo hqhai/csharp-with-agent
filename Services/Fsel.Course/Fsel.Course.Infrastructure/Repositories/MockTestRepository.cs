@@ -83,6 +83,7 @@ namespace Fsel.Course.Infrastructure.Repositories
                                        {
                                            Id = x.Id,
                                            Name = x.Name,
+                                           CourseType = x.CourseType,
                                            CreatedDate = x.CreatedDate,
                                            IsActive = x.UnitSkillMockTests.Any() || x.CourseUnitMockTests.Any(),
                                            MockTestType = x.MockTestType,

@@ -8,7 +8,6 @@ namespace Fsel.Ordering.Application.Commands.VoucherCmds
     using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Common.ActionResults;
-    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Ordering.Domain.Entities;
     using Fsel.Ordering.Domain.Enums.ErrorCodes;
     using Fsel.Ordering.Domain.IRepositories;
@@ -54,7 +53,7 @@ namespace Fsel.Ordering.Application.Commands.VoucherCmds
             {
                 if (_packageRepository.IsIdsInValid(request.VoucherPackages.Select(x => x.PackageId).ToList()))
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.VoucherPackages));
+                    methodResult.AddErrorBadRequest(nameof(EnumPackageErrorCode.PackageNotExist));
                     return methodResult;
                 }
                 voucher.VoucherPackages = request.VoucherPackages!.Select((x) => new VoucherPackage

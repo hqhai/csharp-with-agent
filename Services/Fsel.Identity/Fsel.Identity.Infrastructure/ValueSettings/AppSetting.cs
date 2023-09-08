@@ -16,7 +16,6 @@ namespace Fsel.Identity.Infrastructure.ValueSettings
     {
         public string? ConfirmOtpUrl { get; set; }
     }
-
     public class Services : BaseServices
     {
         public string? InteractionApiUrl { get; set; }

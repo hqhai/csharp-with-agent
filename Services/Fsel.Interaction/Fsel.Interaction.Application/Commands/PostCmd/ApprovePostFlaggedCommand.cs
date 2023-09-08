@@ -4,7 +4,7 @@ namespace Fsel.Interaction.Application.Commands.PostCmd
 {
     using AutoMapper;
     using Fsel.Common.ActionResults;
-    using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Interaction.Domain.Entities;
     using Fsel.Interaction.Domain.Enums.ErrorCodes;
     using Fsel.Interaction.Domain.IRepositories;
     using Fsel.Interaction.Domain.Models.CommandModels.Posts;
@@ -39,7 +39,7 @@ namespace Fsel.Interaction.Application.Commands.PostCmd
                                                       .Where(e => e.Id == request.PostId).FirstOrDefaultAsync(cancellationToken: cancellationToken);
             if (post == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(post));
+                methodResult.AddErrorBadRequest(nameof(EnumPostErrorCode.PostNotExist), nameof(request.PostId), request.PostId);
                 return methodResult;
             }
 

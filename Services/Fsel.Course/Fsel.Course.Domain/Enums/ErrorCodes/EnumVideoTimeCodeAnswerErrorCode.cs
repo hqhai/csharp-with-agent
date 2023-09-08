@@ -10,6 +10,11 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         AnswerIsInTheWrongFormat,
 
         /// <summary>
+        /// Answers Is Null
+        /// </summary>
+        AnswersNull,
+
+        /// <summary>
         /// AnswersDone
         /// </summary>
         AnswersDone

@@ -3,8 +3,8 @@
 namespace Fsel.Course.Infrastructure.Configs
 {
     using Fsel.Course.Domain.Entities;
-    using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.Metadata.Builders;
+    using Microsoft.EntityFrameworkCore;
 
     public class SectionTimeCodeEntityTypeConfiguration : IEntityTypeConfiguration<SectionTimeCode>
     {
@@ -16,6 +16,7 @@ namespace Fsel.Course.Infrastructure.Configs
                 .WithMany(b => b.SectionTimeCodes)
                 .HasForeignKey(b => b.SectionId)
                 .OnDelete(DeleteBehavior.Cascade);
+
         }
     }
 }

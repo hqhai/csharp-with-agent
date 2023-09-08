@@ -32,7 +32,6 @@ namespace Fsel.Ordering.Domain.Entities
         public bool IsActive { get; set; }
 
         public string? CustomerTypesStr { get; set; }
-
         [NotMapped]
         public IList<EnumCustomerType>? CustomerTypes
         {
@@ -50,7 +49,5 @@ namespace Fsel.Ordering.Domain.Entities
         }
 
         public ICollection<VoucherPackage> VoucherPackages { get; set; } = new List<VoucherPackage>();
-
-        public ICollection<UserVoucher> UserVouchers { get; set; } = new List<UserVoucher>();
     }
 }

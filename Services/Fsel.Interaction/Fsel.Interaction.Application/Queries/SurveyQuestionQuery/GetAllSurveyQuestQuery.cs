@@ -13,7 +13,6 @@ namespace Fsel.Interaction.Application.Queries.SurveyQuestionQuery
 
     public class GetAllSurveyQuestQuery : IRequest<MethodResult<IList<SurveyQuestionModel>>>
     {
-        public bool IsPilot { get; set; }
     }
 
     public class GetAllSurveyQuestQueryHandler : IRequestHandler<GetAllSurveyQuestQuery, MethodResult<IList<SurveyQuestionModel>>>
@@ -29,19 +28,16 @@ namespace Fsel.Interaction.Application.Queries.SurveyQuestionQuery
         {
             var methodResult = new MethodResult<IList<SurveyQuestionModel>>();
 
-            var surveyQuestionquery = await _surveyQuestionRepository.Queryable
-                .Where(x => x.IsPilot == request.IsPilot)
-                .Select(x => new SurveyQuestionModel
-                {
-                    Id = x.Id,
-                    Type = x.Type,
-                    Description = x.Description,
-                    DisplayOrder = x.DisplayOrder,
-                    Icon = x.Icon,
-                    Question = x.Question,
-                    Answers = x.Answers,
-                    IsPilot = x.IsPilot,
-                }).ToListAsync(cancellationToken: cancellationToken);
+            var surveyQuestionquery = await _surveyQuestionRepository.Queryable.Select(x => new SurveyQuestionModel
+            {
+                Id = x.Id,
+                Type = x.Type,
+                Description = x.Description,
+                DisplayOrder = x.DisplayOrder,
+                Icon = x.Icon,
+                Question = x.Question,
+                Answers = x.Answers
+            }).ToListAsync(cancellationToken: cancellationToken);
 
             methodResult.Result = surveyQuestionquery;
             methodResult.StatusCode = StatusCodes.Status200OK;

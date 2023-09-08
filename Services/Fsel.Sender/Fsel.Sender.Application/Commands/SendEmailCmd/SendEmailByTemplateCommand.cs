@@ -29,7 +29,6 @@ namespace Fsel.Sender.Application.Commands.SendEmailCmd
             MethodResult<bool> methodResult = new MethodResult<bool>();
 
             #region Validation
-
             if (request.Template == null || request.Params == null)
             {
                 methodResult.Result = false;
@@ -56,7 +55,6 @@ namespace Fsel.Sender.Application.Commands.SendEmailCmd
             }, cancellationToken);
 
             #endregion Validation
-
             methodResult.StatusCode = StatusCodes.Status200OK;
             methodResult.Result = true;
             return methodResult;

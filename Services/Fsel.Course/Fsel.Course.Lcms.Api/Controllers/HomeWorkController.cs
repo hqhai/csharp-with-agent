@@ -2,17 +2,17 @@
 
 namespace Fsel.Course.Lcms.Api.Controllers
 {
-    using System.Net;
     using Fsel.Common.ActionResults;
+    using System.Net;
     using Fsel.Common.Constants;
     using Fsel.Core.Base.BaseModels;
-    using Fsel.Course.Application.Commands.HomeWorkCmd;
-    using Fsel.Course.Application.Queries.HomeWorkQuery;
     using Fsel.Course.Domain.Models.EntityModels;
-    using Fsel.Shared.Enums;
     using MediatR;
-    using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
+    using Fsel.Course.Application.Queries.HomeWorkQuery;
+    using Fsel.Course.Application.Commands.HomeWorkCmd;
+    using Fsel.Shared.Enums;
+    using Microsoft.AspNetCore.Authorization;
 
     [ApiVersion(Settings.APIVersion)]
     [Route(Settings.APIDefaultRoute + "/home-work")]

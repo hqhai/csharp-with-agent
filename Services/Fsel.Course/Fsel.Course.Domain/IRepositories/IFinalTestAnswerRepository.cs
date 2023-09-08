@@ -9,3 +9,4 @@ namespace Fsel.Course.Domain.IRepositories
     {
     }
 }
+

@@ -2,14 +2,14 @@
 
 namespace Fsel.Interaction.Api.Controllers
 {
-    using System.Net;
     using Fsel.Common.ActionResults;
+    using System.Net;
     using Fsel.Common.Constants;
+    using MediatR;
+    using Microsoft.AspNetCore.Mvc;
     using Fsel.Interaction.Application.Commands.ActionCmd;
     using Fsel.Interaction.Application.Queries.InterationActionQuery;
     using Fsel.Interaction.Domain.Models.EntityModels;
-    using MediatR;
-    using Microsoft.AspNetCore.Mvc;
 
     [ApiVersion(Settings.APIVersion)]
     [Route(Settings.APIDefaultRoute + "/interaction-action")]

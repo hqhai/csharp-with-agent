@@ -5,6 +5,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
     using System;
     using System.Collections.Generic;
     using Fsel.Core.Base.BaseModels;
+    using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums;
     using Fsel.Shared.Enums;
 
@@ -34,28 +35,12 @@ namespace Fsel.Course.Domain.Models.EntityModels
 
         public bool? IsLiked { get; set; }
 
-        public string? WordContent { get; set; }
-
-        public string? GradingAlFeedback { get; set; }
-
-        public string? AvatarPath { get; set; }
-
         public EnumCourseLevel CourseLevel { get; set; }
-
-        public Guid? CheckCsoId { get; set; }
-
-        public DateTime? CheckStartDate { get; set; }
-
-        public DateTime? GradingStartDate { get; set; }
 
         public ClassForumModel? ClassForum { get; set; }
 
         public LessonResultModel? LessonResult { get; set; }
-        public string? CourseCode { get; set; }
-        public int LessonDisplayOrder { get; set; }
-        public int UnitDisplayOrder { get; set; }
-        public IList<EnumFeedBackPositive>? FeedBackPositives { get; set; }
-        public IList<EnumFeedBackNegative>? FeedBackNegatives { get; set; }
+
         public IList<ClassForumResultFileModel>? ClassForumResultFiles { get; set; }
 
         public IList<ClassForumScoreModel>? ClassForumScores { get; set; }

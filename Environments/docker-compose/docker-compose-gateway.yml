@@ -9,8 +9,6 @@ services:
             dockerfile: Environments/Testing/Gateway.Testing.Dockerfile
         environment:
             - ASPNETCORE_ENVIRONMENT=Testing
-            - SERVICENAME=Gateway
-            - SentryConfig__Dsn=https://530c364a1c006e0dade385d197373f4a@o4505797571444736.ingest.sentry.io/4505797729452032
             - JWT__SECRETKEY=JsonWebApiTokenWithSwaggerAuthorizationAuthenticationAspNetCore
             - JWT__ISSUER=baseWebApiIssuer
             - JWT__AUDIENCE=baseWebApiAudience

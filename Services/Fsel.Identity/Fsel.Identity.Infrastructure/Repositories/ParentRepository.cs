@@ -6,7 +6,7 @@ namespace Fsel.Identity.Infrastructure.Repositories
     using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.IRepositories;
 
-    public class ParentRepository : BaseRepository<Parent>, IParentRepository
+    public class ParentRepository : BaseIdentityRepository<Parent, User>, IParentRepository
     {
         public ParentRepository(UserDbContext dbContext, AuthContext authContext) : base(dbContext, authContext)
         {

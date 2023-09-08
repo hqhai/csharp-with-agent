@@ -19,7 +19,7 @@ services:
             - JWT__REFRESHTOKENVALIDITYINDAYS=7
             - Otp__StepTime=3
             - Otp__StepDayWithAdmin=7
-            - ConstantUrl__ConfirmOtpUrl=http://42.96.58.145:4300/login/first-login?otp={0}
+            - ConstantUrl__ConfirmOtpUrl=http://fsel-auth-api.fsel.edu.vn/v1/user/confirm-otp-signup?OTP={0}&NewPassword=Admin@123
             - SERVICES_SenderApiUrl=http://42.96.58.145:5206/api/v1
             - SERVICES_InteractionApiUrl=http://42.96.58.145:5208/api/
             - SERVICES_ClassApiUrl=http://42.96.58.145:5207/api/v1
@@ -46,7 +46,7 @@ services:
             - JWT__REFRESHTOKENVALIDITYINDAYS=7
             - Otp__StepTime=3
             - Otp__StepDayWithAdmin=7
-            - ConstantUrl__ConfirmOtpUrl=http://42.96.58.145:4300/login/first-login?otp={0}
+            - ConstantUrl__ConfirmOtpUrl=http://fsel-auth-api.fsel.edu.vn/v1/user/confirm-otp-signup?OTP={0}&NewPassword=Admin@123
             - SERVICES_SenderApiUrl=http://42.96.58.145:5206/api/v1
             - SERVICES_InteractionApiUrl=http://42.96.58.145:5208/api/
             - SERVICES_ClassApiUrl=http://42.96.58.145:5207/api/v1
@@ -206,7 +206,6 @@ services:
             - SERVICES_UserApiUrl=http://42.96.58.145:5202/api/v1
             - SERVICES_ClassApiUrl=http://42.96.58.145:5207/api/v1
             - SERVICES_LmsCourseApiUrl=http://42.96.58.145:5204/api/v1
-            - SERVICES_OrderApiUrl=http://42.96.58.145:5209/api/v1
         ports:
             - 5209:80
             - 7209:443
@@ -228,8 +227,6 @@ services:
             - JWT__TOKENVALIDITYINMINUTES=1440
             - JWT__REFRESHTOKENVALIDITYINDAYS=7
             - SERVICES_UserApiUrl=http://42.96.58.145:5202/api/v1
-            - SERVICES_OrderApiUrl=http://42.96.58.145:5209/api/v1
-            - SERVICES_LmsCourseApiUrl=http://42.96.58.145:5204/api/v1
         ports:
             - 52010:80
             - 7010:443

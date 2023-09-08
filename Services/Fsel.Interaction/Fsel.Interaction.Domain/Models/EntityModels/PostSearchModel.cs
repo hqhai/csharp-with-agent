@@ -3,7 +3,8 @@
 namespace Fsel.Interaction.Domain.Models.EntityModels
 {
     using System;
-    using Fsel.Core.Base.BaseModels;   
+    using Fsel.Core.Base.BaseModels;
+    using Fsel.Interaction.Domain.Entities;
     using Fsel.Shared.Enums;
 
     public class PostSearchModel : BaseModel
@@ -24,10 +25,10 @@ namespace Fsel.Interaction.Domain.Models.EntityModels
 
         public IList<string>? FilePaths { get; set; }
 
-        public ICollection<TopicTagModel>? PostTags { get; set; }
-
         public int? LikeCount { get; set; }
 
         public int? CommentCount { get; set; }
+
+
     }
 }

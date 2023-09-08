@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Interaction.Application.Queries.PostQuery.StudentPosts
+namespace Fsel.Interaction.Application.Queries.PostQuery
 {
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
@@ -11,11 +11,12 @@ namespace Fsel.Interaction.Application.Queries.PostQuery.StudentPosts
     using Fsel.Interaction.Domain.IRepositories;
     using Fsel.Interaction.Domain.Models.EntityModels;
     using Fsel.Interaction.Domain.Models.QueryModels.Posts;
-    using Fsel.Interaction.Infrastructure.Repositories;
     using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
+    using Microsoft.Extensions.Hosting;
+    using Microsoft.VisualBasic;
 
     public class GetActivePostListQuery : GetActivePostListQueryModel, IRequest<MethodResult<PagingItemsModel<PostSearchModel>>>
     {
@@ -28,16 +29,13 @@ namespace Fsel.Interaction.Application.Queries.PostQuery.StudentPosts
         private readonly AuthContext _authContext;
         private readonly IUserService _userService;
         private readonly ICommentRepository _commentRepository;
-        private readonly ITopicTagRepository _topicTagRepository;
 
         public GetActivePostListQueryHandler
             (
              IPostRepository postRepository,
              IInteractionActionRepository interactionActionRepository,
              AuthContext authContext, IUserService userService,
-             ICommentRepository commentRepository,
-             ITopicTagRepository topicTagRepository
-
+             ICommentRepository commentRepository
             )
         {
             _postRepository = postRepository;
@@ -45,7 +43,6 @@ namespace Fsel.Interaction.Application.Queries.PostQuery.StudentPosts
             _authContext = authContext;
             _userService = userService;
             _commentRepository = commentRepository;
-            _topicTagRepository = topicTagRepository;
         }
 
         public async Task<MethodResult<PagingItemsModel<PostSearchModel>>> Handle(GetActivePostListQuery request, CancellationToken cancellationToken)
@@ -56,38 +53,21 @@ namespace Fsel.Interaction.Application.Queries.PostQuery.StudentPosts
             var student = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
             var courseLevel = student?.Content?.Result?.CourseLevel;
 
-            //Get TopicTagID
-            var topicTagId = _topicTagRepository.Queryable
-                    .Where(topicTag => topicTag.Name == request.TopicTagName!)
-                    .Select(topicTag => topicTag.Id)
-                    .ToList();
-            //Get All Post
-            var postQuery = _postRepository.Queryable
-                .Where(post => !_interactionActionRepository.Queryable
-                    .Any(interaction => interaction.ObjectId == post.Id &&
-                        interaction.Type == EnumInteractionActionType.Disable &&
-                        interaction.UserId == _authContext.CurrentUserId)
-                    && post.Status == EnumPostStatus.Active);
-
-            //Get Post Contain TopicTag
-            if (topicTagId.Any())
-            {
-                postQuery = postQuery.Where(post => post.PostTags
-                    .Any(postTag => topicTagId.Contains(postTag.TopicTagId)));
-            }
+            var postQuery = _postRepository.Queryable.Where(post => !_interactionActionRepository.Queryable
+                                                     .Any(interaction => interaction.ObjectId == post.Id &&
+                                                      interaction.Type == EnumInteractionActionType.Disable &&
+                                                      interaction.UserId == _authContext.CurrentUserId));
 
             IQueryable<Post> sortedQuery = postQuery;
             switch (request.PostType)
             {
                 case EnumPostType.Recent:
-                    sortedQuery = postQuery.Include(post => post.PostTags).OrderByDescending(post => post.CreatedDate);
+                    sortedQuery = postQuery.OrderByDescending(post => post.CreatedDate);
                     //sortedQuery2 = postQuery.Select(post=> new { Post = post}).OrderByDescending(item => item.CreatedDate);
                     break;
-
                 case EnumPostType.Relevant:
-                    sortedQuery = postQuery.Include(post => post.PostTags).Where(post => post.CourseLevel == courseLevel).OrderByDescending(post => post.CreatedDate);
+                    sortedQuery = postQuery.Where(post => post.CourseLevel == courseLevel).OrderByDescending(post => post.CreatedDate);
                     break;
-
                 case EnumPostType.Trending:
                     var date7DaysAgo = DateTime.Now.AddDays(-7);
                     //sortedQuery = from post in postQuery
@@ -100,15 +80,16 @@ namespace Fsel.Interaction.Application.Queries.PostQuery.StudentPosts
                     //              orderby g.Count() descending
                     //              select g.Key;
 
-                    sortedQuery = postQuery
-                        .Include(post => post.PostTags).Select(post => new
-                        {
-                            Post = post,
-                            InteractionCount = _interactionActionRepository.Queryable
+
+
+                    sortedQuery = postQuery.Select(post => new
+                    {
+                        Post = post,
+                        InteractionCount = _interactionActionRepository.Queryable
                                         .Count(interaction => interaction.ObjectId == post.Id && interaction.Type == EnumInteractionActionType.Like),
-                            CommentCount = _commentRepository.Queryable
+                        CommentCount = _commentRepository.Queryable
                                         .Count(comment => comment.ObjectId == post.Id)
-                        })
+                    })
                                         .Where(item => item.InteractionCount > 0 && item.Post.CreatedDate >= date7DaysAgo)
                                         .OrderByDescending(item => item.InteractionCount)
                                         .ThenByDescending(item => item.CommentCount)
@@ -126,27 +107,17 @@ namespace Fsel.Interaction.Application.Queries.PostQuery.StudentPosts
                                             UpdatedUserId = item.Post.UpdatedUserId,
                                         });
 
-                    break;
 
+                    break;
                 case EnumPostType.Top:
                     sortedQuery = postQuery
-                            .Include(post => post.PostTags)
+                            .Include(post => post.PostTags.Where(y => !y.IsDeleted))
                             .OrderByDescending(post => post.PostTags.Count)
                             .ThenByDescending(post => post.CreatedDate);
                     break;
-
                 default:
                     break;
             }
-
-            int totalItem = await sortedQuery.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
-            if (totalItem == 0)
-            {
-                methodResult.Result = new PagingItemsModel<PostSearchModel>(new List<PostSearchModel>(), request, totalItem);
-                methodResult.StatusCode = StatusCodes.Status200OK;
-                return methodResult;
-            }
-
 
             var result = sortedQuery.Select(post => new PostSearchModel
             {
@@ -157,19 +128,12 @@ namespace Fsel.Interaction.Application.Queries.PostQuery.StudentPosts
                 CourseLevel = post.CourseLevel,
                 UserId = post.UserId,
                 CreatedUserId = post.CreatedUserId,
-                FullName = post.CreatedFullName,
                 CreatedDate = post.CreatedDate,
                 UpdatedDate = post.UpdatedDate,
                 UpdatedUserId = post.UpdatedUserId,
-                FilePaths = post.FilePaths,
-                PostTags = post.PostTags
-                               .Select(postTag => new TopicTagModel
-                               {
-                                   Name = postTag.TopicTag!.Name,
-                                   Color = postTag.TopicTag!.Color,
-                               }).ToList()
-
             });
+
+            int totalItem = await sortedQuery.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
 
             var lists = await result
                     .AsNoTracking()
@@ -192,5 +156,7 @@ namespace Fsel.Interaction.Application.Queries.PostQuery.StudentPosts
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }
+
+
     }
 }

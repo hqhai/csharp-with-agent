@@ -7,7 +7,7 @@ namespace Fsel.Identity.Infrastructure.Repositories
     using Fsel.Identity.Domain.IRepositories;
     using Microsoft.EntityFrameworkCore;
 
-    public class CSORepository : BaseRepository<CSO>, ICSORepository
+    public class CSORepository : BaseIdentityRepository<CSO, User>, ICSORepository
     {
         public CSORepository(UserDbContext dbContext, AuthContext authContext) : base(dbContext, authContext)
         {

@@ -11,13 +11,11 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public string? Code { get; set; }
         public string? Name { get; set; }
         public string? InstructionContent { get; set; }
-        public string? ImagePath { get; set; }
         public bool IsActive { get; set; }
         public EnumExtraPracticeType Type { get; set; }
         public EnumCourseLevel CourseLevel { get; set; }
         public IList<EnumCourseSkill>? CourseSkills { get; set; }
-        public ExtraPracticeResultModel? ExtraPracticeResult { get; set; }
-        public EnumResultStatus Status { get; set; }
+        public ExtraPraticeResultModel? ExtraPracticeResult { get; set; }
         public Guid? UnitId { get; set; }
         public string? NameUnit { get; set; }
         public long? AccessCount { get; set; }
