@@ -4,20 +4,19 @@ namespace Fsel.Course.Lms.Api.Controllers
 {
     using System.Net;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Attributes;
     using Fsel.Common.Constants;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Commands.ClassForumCmd;
     using Fsel.Course.Lms.Application.Commands.ClassForumResultCmd;
     using Fsel.Course.Lms.Application.Queries.ClassForumResultQuery;
-    using Fsel.Shared.Enums;
     using MediatR;
-    using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
 
     [ApiVersion(Settings.APIVersion)]
     [Route(Settings.APIDefaultRoute + "/class-forum-result")]
     [ApiController]
-    [Authorize(Roles = nameof(EnumRole.Student))]
+    [Permission]
     public class ClassForumResultController : ControllerBase
     {
         private readonly IMediator _mediator;
