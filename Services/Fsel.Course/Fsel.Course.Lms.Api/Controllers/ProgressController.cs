@@ -144,7 +144,7 @@ namespace Fsel.Course.Lms.Api.Controllers
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetUnitByUnit([FromRoute] Guid courseId)
         {
-            MethodResult<IList<UnitModel>> queryResult = await _mediator.Send(new GetUnitByUnitQuery { CourseId = courseId }).ConfigureAwait(false);
+            MethodResult<IList<UnitModel>> queryResult = await _mediator.Send(new GetUnitByUnitVideoQuery { CourseId = courseId }).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
 
