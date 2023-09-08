@@ -95,6 +95,10 @@ namespace Fsel.Course.Application.Queries.CategoryQuery
                 case EnumCourseSourceData.RepeatType:
                     methodResult.Result = ConvertHelper.EnumToListModel<EnumRepeatType>();
                     break;
+
+                case EnumCourseSourceData.ProcessType:
+                    methodResult.Result = ConvertHelper.EnumToListModel<EnumProcessType>();
+                    break;
             }
 
             methodResult.StatusCode = StatusCodes.Status200OK;
