@@ -54,6 +54,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
                                 .Include(x => x.CourseUnitMockTests)
                                 .Include(x => x.LessonResults.Where(x => x.StudentId == studentId))
                                 .Where(x => x.CourseUnitMockTests.Any(x => x.CourseId == request.CourseId))
+                                .AsNoTracking()
                                 .ToListAsync(cancellationToken);
             if (units == null || units.Count == 0)
             {
@@ -78,7 +79,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
                     UpdatedFullName = x.UpdatedFullName,
                     UpdatedUserId = x.UpdatedUserId,
                     UnitResult = _mapper.Map<UnitResultModel>(x.UnitResults.FirstOrDefault()),
-                    Percent = countDone / x.UnitLessons.Select(x => x.Lesson).Count(),
+                    Percent = (double)countDone / x.UnitLessons.Select(x => x.Lesson).Count() * 100,
                 };
                 return unitModel;
             }).OrderBy(x => x.DisplayOrder).ToList();

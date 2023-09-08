@@ -14,19 +14,19 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class GetUnitByUnitHomeWorkQuery : IRequest<MethodResult<IList<UnitModel>>>
+    public class GetUnitByUnitClassForumQuery : IRequest<MethodResult<IList<UnitModel>>>
     {
         public Guid CourseId { get; set; }
     }
 
-    public class GetUnitByUnitHomeWorkQueryHandler : IRequestHandler<GetUnitByUnitHomeWorkQuery, MethodResult<IList<UnitModel>>>
+    public class GetUnitByUnitClassForumQueryHandler : IRequestHandler<GetUnitByUnitClassForumQuery, MethodResult<IList<UnitModel>>>
     {
         private readonly AuthContext _authContext;
         private readonly IMapper _mapper;
         private readonly IUnitRepository _unitRepository;
         private readonly IUserService _userService;
 
-        public GetUnitByUnitHomeWorkQueryHandler(AuthContext authContext
+        public GetUnitByUnitClassForumQueryHandler(AuthContext authContext
             , IMapper mapper
             , IUnitRepository unitRepository
             , IUserService userService)
@@ -37,7 +37,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
             _userService = userService;
         }
 
-        public async Task<MethodResult<IList<UnitModel>>> Handle(GetUnitByUnitHomeWorkQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<IList<UnitModel>>> Handle(GetUnitByUnitClassForumQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<IList<UnitModel>> methodResult = new MethodResult<IList<UnitModel>>();
@@ -49,11 +49,11 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
             }
             var studentId = studentResult?.Content?.Result?.Id;
 
-            var units = await _unitRepository.Queryable.Include(x => x.UnitLessons).ThenInclude(x => x.Lesson).ThenInclude(x => x!.LessonHomeWorks).ThenInclude(x => x.HomeWork)
+            var units = await _unitRepository.Queryable.Include(x => x.UnitLessons).ThenInclude(x => x.Lesson).ThenInclude(x => x!.ClassForum)
                                 .Include(x => x.UnitResults.Where(x => x.StudentId == studentId && x.CourseId == request.CourseId))
                                 .Include(x => x.CourseUnitMockTests)
                                 .Include(x => x.LessonResults.Where(x => x.StudentId == studentId))
-                                .ThenInclude(x => x.HomeWorkResults.Where(x => x.StudentId == studentId))
+                                .ThenInclude(x => x.ClassForumResults.Where(x => x.StudentId == studentId))
                                 .Where(x => x.CourseUnitMockTests.Any(x => x.CourseId == request.CourseId))
                                 .AsNoTracking()
                                 .ToListAsync(cancellationToken);
@@ -64,8 +64,8 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
             }
             var unitModels = units.Select(x =>
             {
-                var homeWorks = x.UnitLessons.Select(x => x.Lesson).SelectMany(x => x.LessonHomeWorks).Select(x => x.HomeWork).ToList();
-                var countDone = x.LessonResults.SelectMany(x => x.HomeWorkResults).Where(x => x.StudentId == studentId && x.Status == EnumResultStatus.Done).Count();
+                var countDone = x.LessonResults.SelectMany(x => x.ClassForumResults).Where(x => x.StudentId == studentId && x.Status == EnumClassForumResultStatus.Graded).Count();
+                var totalDone = x.UnitLessons.Select(x => x.Lesson).Select(x => x!.ClassForum).Count();
                 var unitModel = new UnitModel
                 {
                     Id = x.Id,
@@ -81,7 +81,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
                     UpdatedFullName = x.UpdatedFullName,
                     UpdatedUserId = x.UpdatedUserId,
                     UnitResult = _mapper.Map<UnitResultModel>(x.UnitResults.FirstOrDefault()),
-                    Percent = (double)countDone / homeWorks.Count * 100,
+                    Percent = (double)countDone / totalDone * 100,
                 };
                 return unitModel;
             }).OrderBy(x => x.DisplayOrder).ToList();
