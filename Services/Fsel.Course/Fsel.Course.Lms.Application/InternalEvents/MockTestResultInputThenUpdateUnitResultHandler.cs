@@ -15,39 +15,8 @@ namespace Fsel.Course.Lms.Application.InternalEvents
     public class MockTestResultInputThenUpdateUnitResultHandler : BaseInternalUnitResultEventHandler,
         INotificationHandler<EntityChangedEvent<MockTestResult>>
     {
-        private readonly IUnitRepository _unitRepository;
-        private readonly IUnitResultRepository _unitResultRepository;
-        private readonly IMockTestRepository _mockTestRepository;
-
-        public MockTestResultInputThenUpdateUnitResultHandler(IUnitRepository unitRepository
-            , ILessonResultRepository lessonResultRepository
-            , IVideoResultRepository videoResultRepository
-            , IClassForumResultRepository classForumResultRepository
-            , IHomeWorkResultRepository homeWorkResultRepository
-            , ICourseRepository courseRepository
-            , ICourseResultRepository courseResultRepository
-            , IMockTestRepository mockTestRepository
-            , FinishOneUnitPublisher finishOneUnitPublisher
-            , IUnitResultRepository unitResultRepository
-            , IMockTestResultRepository mockTestResultRepository
-            , FinishOneLevelPassPublisher finishOneLevelPassPublisher
-            , IFinalTestResultRepository finalTestResultRepository
-            ) : base(videoResultRepository,
-                classForumResultRepository,
-                unitResultRepository,
-                lessonResultRepository,
-                courseResultRepository,
-                courseRepository,
-                unitRepository,
-                finishOneUnitPublisher,
-                finishOneLevelPassPublisher,
-                finalTestResultRepository,
-                mockTestResultRepository,
-                homeWorkResultRepository)
+        public MockTestResultInputThenUpdateUnitResultHandler(IVideoResultRepository videoResultRepository, IClassForumResultRepository classForumResultRepository, IUnitResultRepository unitResultRepository, ILessonResultRepository lessonResultRepository, ICourseResultRepository courseResultRepository, ICourseRepository courseRepository, IUnitRepository unitRepository, IMockTestRepository mockTestRepository, IHomeWorkQuestionRepository homeWorkQuestionRepository, IHomeWorkAnswerRepository homeWorkAnswerRepository, IQuestionRepository questionRepository, IHomeWorkRepository homeWorkRepository, FinishOneUnitPublisher finishOneUnitPublisher, FinishOneLevelPassPublisher finishOneLevelPassPublisher, IFinalTestResultRepository finalTestResultRepository, IMockTestResultRepository mockTestResultRepository, IHomeWorkResultRepository homeWorkResultRepository) : base(videoResultRepository, classForumResultRepository, unitResultRepository, lessonResultRepository, courseResultRepository, courseRepository, unitRepository, mockTestRepository, homeWorkQuestionRepository, homeWorkAnswerRepository, questionRepository, homeWorkRepository, finishOneUnitPublisher, finishOneLevelPassPublisher, finalTestResultRepository, mockTestResultRepository, homeWorkResultRepository)
         {
-            _unitRepository = unitRepository;
-            _unitResultRepository = unitResultRepository;
-            _mockTestRepository = mockTestRepository;
         }
 
         public async Task Handle(EntityChangedEvent<MockTestResult> notification, CancellationToken cancellationToken)

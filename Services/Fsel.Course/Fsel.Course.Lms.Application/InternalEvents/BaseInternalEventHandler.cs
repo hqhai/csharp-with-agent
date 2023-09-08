@@ -15,18 +15,23 @@ namespace Fsel.Course.Lms.Application.InternalEvents
 
     public class BaseInternalEventHandler
     {
-        private readonly IVideoResultRepository _videoResultRepository;
-        private readonly IClassForumResultRepository _classForumResultRepository;
-        private readonly IUnitResultRepository _unitResultRepository;
-        private readonly ILessonResultRepository _lessonResultRepository;
-        private readonly ICourseResultRepository _courseResultRepository;
-        private readonly ICourseRepository _courseRepository;
-        private readonly IUnitRepository _unitRepository;
-        private readonly FinishOneUnitPublisher _finishOneUnitPublisher;
-        private readonly FinishOneLevelPassPublisher _finishOneLevelPassPublisher;
-        private readonly IFinalTestResultRepository _finalTestResultRepository;
-        private readonly IMockTestResultRepository _mockTestResultRepository;
-        private readonly IHomeWorkResultRepository _homeWorkResultRepository;
+        protected readonly IVideoResultRepository _videoResultRepository;
+        protected readonly IClassForumResultRepository _classForumResultRepository;
+        protected readonly IUnitResultRepository _unitResultRepository;
+        protected readonly ILessonResultRepository _lessonResultRepository;
+        protected readonly ICourseResultRepository _courseResultRepository;
+        protected readonly ICourseRepository _courseRepository;
+        protected readonly IUnitRepository _unitRepository;
+        protected readonly IMockTestRepository _mockTestRepository;
+        protected readonly IHomeWorkQuestionRepository _homeWorkQuestionRepository;
+        protected readonly IHomeWorkAnswerRepository _homeWorkAnswerRepository;
+        protected readonly IQuestionRepository _questionRepository;
+        protected readonly IHomeWorkRepository _homeWorkRepository;
+        protected readonly FinishOneUnitPublisher _finishOneUnitPublisher;
+        protected readonly FinishOneLevelPassPublisher _finishOneLevelPassPublisher;
+        protected readonly IFinalTestResultRepository _finalTestResultRepository;
+        protected readonly IMockTestResultRepository _mockTestResultRepository;
+        protected readonly IHomeWorkResultRepository _homeWorkResultRepository;
 
         public BaseInternalEventHandler(IVideoResultRepository videoResultRepository,
             IClassForumResultRepository classForumResultRepository,
@@ -35,6 +40,11 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             ICourseResultRepository courseResultRepository,
             ICourseRepository courseRepository,
             IUnitRepository unitRepository,
+            IMockTestRepository mockTestRepository,
+            IHomeWorkQuestionRepository homeWorkQuestionRepository,
+            IHomeWorkAnswerRepository homeWorkAnswerRepository,
+            IQuestionRepository questionRepository,
+            IHomeWorkRepository homeWorkRepository,
             FinishOneUnitPublisher finishOneUnitPublisher,
             FinishOneLevelPassPublisher finishOneLevelPassPublisher,
             IFinalTestResultRepository finalTestResultRepository,
@@ -48,6 +58,11 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             _courseResultRepository = courseResultRepository;
             _courseRepository = courseRepository;
             _unitRepository = unitRepository;
+            _mockTestRepository = mockTestRepository;
+            _homeWorkQuestionRepository = homeWorkQuestionRepository;
+            _homeWorkAnswerRepository = homeWorkAnswerRepository;
+            _questionRepository = questionRepository;
+            _homeWorkRepository = homeWorkRepository;
             _finishOneUnitPublisher = finishOneUnitPublisher;
             _finishOneLevelPassPublisher = finishOneLevelPassPublisher;
             _finalTestResultRepository = finalTestResultRepository;

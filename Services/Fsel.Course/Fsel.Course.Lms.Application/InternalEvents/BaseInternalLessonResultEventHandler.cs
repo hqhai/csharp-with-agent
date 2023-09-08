@@ -11,56 +11,10 @@ namespace Fsel.Course.Lms.Application.InternalEvents
     using Fsel.Shared.Helpers;
     using Microsoft.EntityFrameworkCore;
 
-    public class BaseInternalLessonResultEventHandler : BaseInternalUnitResultEventHandler
+    public class BaseInternalLessonResultEventHandler : BaseInternalEventHandler
     {
-        private readonly IVideoResultRepository _videoResultRepository;
-        private readonly IClassForumResultRepository _classForumResultRepository;
-        private readonly ILessonResultRepository _lessonResultRepository;
-        private readonly IHomeWorkQuestionRepository _homeWorkQuestionRepository;
-        private readonly IHomeWorkAnswerRepository _homeWorkAnswerRepository;
-        private readonly IQuestionRepository _questionRepository;
-        private readonly IHomeWorkRepository _homeWorkRepository;
-        private readonly IMockTestResultRepository _mockTestResultRepository;
-        private readonly IHomeWorkResultRepository _homeWorkResultRepository;
-
-        public BaseInternalLessonResultEventHandler(IVideoResultRepository videoResultRepository
-            , IClassForumResultRepository classForumResultRepository
-            , IUnitResultRepository unitResultRepository
-            , ILessonResultRepository lessonResultRepository
-            , ICourseResultRepository courseResultRepository
-            , IHomeWorkQuestionRepository homeWorkQuestionRepository
-            , IHomeWorkAnswerRepository homeWorkAnswerRepository
-            , IQuestionRepository questionRepository
-            , IHomeWorkRepository homeWorkRepository
-            , ICourseRepository courseRepository
-            , IUnitRepository unitRepository
-            , FinishOneUnitPublisher finishOneUnitPublisher
-            , FinishOneLevelPassPublisher finishOneLevelPassPublisher
-            , IFinalTestResultRepository finalTestResultRepository
-            , IMockTestResultRepository mockTestResultRepository
-            , IHomeWorkResultRepository homeWorkResultRepository)
-            : base(videoResultRepository,
-                  classForumResultRepository,
-                  unitResultRepository,
-                  lessonResultRepository,
-                  courseResultRepository,
-                  courseRepository,
-                  unitRepository,
-                  finishOneUnitPublisher,
-                  finishOneLevelPassPublisher,
-                  finalTestResultRepository,
-                  mockTestResultRepository,
-                  homeWorkResultRepository)
+        public BaseInternalLessonResultEventHandler(IVideoResultRepository videoResultRepository, IClassForumResultRepository classForumResultRepository, IUnitResultRepository unitResultRepository, ILessonResultRepository lessonResultRepository, ICourseResultRepository courseResultRepository, ICourseRepository courseRepository, IUnitRepository unitRepository, IMockTestRepository mockTestRepository, IHomeWorkQuestionRepository homeWorkQuestionRepository, IHomeWorkAnswerRepository homeWorkAnswerRepository, IQuestionRepository questionRepository, IHomeWorkRepository homeWorkRepository, FinishOneUnitPublisher finishOneUnitPublisher, FinishOneLevelPassPublisher finishOneLevelPassPublisher, IFinalTestResultRepository finalTestResultRepository, IMockTestResultRepository mockTestResultRepository, IHomeWorkResultRepository homeWorkResultRepository) : base(videoResultRepository, classForumResultRepository, unitResultRepository, lessonResultRepository, courseResultRepository, courseRepository, unitRepository, mockTestRepository, homeWorkQuestionRepository, homeWorkAnswerRepository, questionRepository, homeWorkRepository, finishOneUnitPublisher, finishOneLevelPassPublisher, finalTestResultRepository, mockTestResultRepository, homeWorkResultRepository)
         {
-            _videoResultRepository = videoResultRepository;
-            _classForumResultRepository = classForumResultRepository;
-            _lessonResultRepository = lessonResultRepository;
-            _homeWorkQuestionRepository = homeWorkQuestionRepository;
-            _homeWorkAnswerRepository = homeWorkAnswerRepository;
-            _questionRepository = questionRepository;
-            _homeWorkRepository = homeWorkRepository;
-            _mockTestResultRepository = mockTestResultRepository;
-            _homeWorkResultRepository = homeWorkResultRepository;
         }
 
         public async Task GetLessonResult(LessonResult lessonResult, CancellationToken cancellationToken)

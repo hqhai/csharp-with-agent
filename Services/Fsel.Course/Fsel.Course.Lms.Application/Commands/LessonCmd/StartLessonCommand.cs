@@ -135,7 +135,7 @@ namespace Fsel.Course.Lms.Application.Commands.LessonCmd
                 }
                 lessonResult.VideoResult = new VideoResult
                 {
-                    VideoId = lesson.LessonVideos.FirstOrDefault()!.VideoId,
+                    VideoId = lesson.LessonVideos.FirstOrDefault()?.VideoId ?? default,
                     Status = EnumResultStatus.Process,
                     StudentId = studentId ?? default,
                 };
@@ -147,6 +147,7 @@ namespace Fsel.Course.Lms.Application.Commands.LessonCmd
                     StudentId = studentId ?? default,
                     CorrectTotal = x.HomeWorkQuestions.Select(x => x.Question).Sum(x => x!.CorrectTotal)
                 }).ToList();
+
                 lessonResult.Status = EnumResultStatus.Process;
                 lessonResult = _lessonResultRepository.Update(lessonResult);
                 await _lessonResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
