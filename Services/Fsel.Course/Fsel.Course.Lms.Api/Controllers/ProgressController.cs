@@ -139,12 +139,12 @@ namespace Fsel.Course.Lms.Api.Controllers
         /// <summary>
         /// get unit by unit
         /// </summary>
-        [HttpGet("unit/video-unit/{courseId}")]
+        [HttpGet("unit/{courseId}")]
         [ProducesResponseType(typeof(MethodResult<IList<UnitModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetUnitByUnit([FromRoute] Guid courseId)
+        public async Task<IActionResult> GetUnitByUnit([FromQuery] GetUnitByUnitQuery query)
         {
-            MethodResult<IList<UnitModel>> queryResult = await _mediator.Send(new GetUnitByUnitVideoQuery { CourseId = courseId }).ConfigureAwait(false);
+            MethodResult<IList<UnitModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
 
@@ -217,30 +217,6 @@ namespace Fsel.Course.Lms.Api.Controllers
         public async Task<IActionResult> GetUnitByLesson([FromRoute] Guid lessonResultId)
         {
             MethodResult<OverallScoreReportModel> queryResult = await _mediator.Send(new GetUnitByLessonQuery { LessonResultId = lessonResultId }).ConfigureAwait(false);
-            return queryResult.GetActionResult();
-        }
-
-        /// <summary>
-        /// Get List Unit By CourseId and HomeWork
-        /// </summary>
-        [HttpGet("unit/homework-unit/{courseId}")]
-        [ProducesResponseType(typeof(MethodResult<IList<UnitModel>>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetUnitByUnitHomeWork([FromRoute] Guid courseId)
-        {
-            MethodResult<IList<UnitModel>> queryResult = await _mediator.Send(new GetUnitByUnitHomeWorkQuery { CourseId = courseId }).ConfigureAwait(false);
-            return queryResult.GetActionResult();
-        }
-
-        /// <summary>
-        /// Get List Unit By CourseId and ClassForum
-        /// </summary>
-        [HttpGet("unit/class-forum-unit/{courseId}")]
-        [ProducesResponseType(typeof(MethodResult<IList<UnitModel>>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetUnitByUnitClassForum([FromRoute] Guid courseId)
-        {
-            MethodResult<IList<UnitModel>> queryResult = await _mediator.Send(new GetUnitByUnitClassForumQuery { CourseId = courseId }).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
 
