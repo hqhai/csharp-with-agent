@@ -7,19 +7,16 @@ namespace Fsel.Notification.Domain.Entities
 
     public class NotificationType : Entity
     {
-
         public string? Icon { get; set; }
 
         public EnumNotificationContent Content { get; set; }
 
-        public EnumNotificationPushingType Type { get; set; }
-
-        public bool Active { get; set; }
+        public EnumNotificationType Type { get; set; }
 
         public int Priority { get; set; }
 
-        public string? Template { get; set; }
+        public string? TemplateMessage { get; set; }
 
-        public ICollection<Notifications> Notifications { get; set; } = new List<Notifications>();
+        public string? TemplateLink { get; set; }
     }
 }

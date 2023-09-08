@@ -14,21 +14,20 @@ namespace Fsel.Notification.Application.Queues.Publishers
             _queueProvider = queueProvider;
         }
 
-        public async Task Publish(NotificationsModel notification, CancellationToken cancellationToken)
+        public async Task Publish(NotificationMessageModel notification, CancellationToken cancellationToken)
         {
             if (notification == null)
             {
                 return;
             }
 
-            await _queueProvider.Publish(QueueSettings.RealtimeQueue.NameQueue.Notification, new NotificationQueueModel
+            await _queueProvider.Publish(QueueSettings.NotificationQueue.NameQueue.Notification, new NotificationQueueModel
             {
                 ObjectId = notification.ObjectId,
                 UserId = notification.UserId,
                 Message = notification.Message,
-                Template = notification.Template,
+                Link = notification.Link,
                 UserIds = notification.UserIds,
-
             }, cancellationToken);
         }
     }

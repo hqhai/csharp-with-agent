@@ -19,11 +19,11 @@ namespace Fsel.Notification.Application.Commands
     using Fsel.Shared.Enums;
     using Microsoft.EntityFrameworkCore;
 
-    public class CreateNotificationCommand : CreateNotificationCommandModel, IRequest<MethodResult<NotificationsModel>>
+    public class CreateNotificationCommand : CreateNotificationCommandModel, IRequest<MethodResult<NotificationMessageModel>>
     {
     }
 
-    public class CreateNotificationCommandHandler : IRequestHandler<CreateNotificationCommand, MethodResult<NotificationsModel>>
+    public class CreateNotificationCommandHandler : IRequestHandler<CreateNotificationCommand, MethodResult<NotificationMessageModel>>
     {
         private readonly IMapper _mapper;
         private readonly INotificationsRepository _notificationsRepository;
@@ -42,104 +42,93 @@ namespace Fsel.Notification.Application.Commands
             _notificationRemindRepository = notificationRemindRepository;
         }
 
-        public async Task<MethodResult<NotificationsModel>> Handle(CreateNotificationCommand request, CancellationToken cancellationToken)
+        public async Task<MethodResult<NotificationMessageModel>> Handle(CreateNotificationCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            MethodResult<NotificationsModel> methodResult = new MethodResult<NotificationsModel>();
+            MethodResult<NotificationMessageModel> methodResult = new MethodResult<NotificationMessageModel>();
 
             #region Validation
-            Notifications notificationNew = _mapper.Map<Notifications>(request);
+
+            NotificationMessage notificationNew = _mapper.Map<NotificationMessage>(request);
 
             // check null data
-            var notificationType = request.NotificationTypeId != Guid.Empty ? _notificationTypeRepository.GetByIdAsync(request.NotificationTypeId) : null;
-            if (notificationType == null)
+            var notificationTypeResult = request.NotificationTypeId != Guid.Empty ? await _notificationTypeRepository.GetByIdAsync(request.NotificationTypeId) : null;
+            if (notificationTypeResult == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.NotificationTypeId), request.NotificationTypeId);
                 return methodResult;
             }
 
-            // Lấy ra notificationType của thông báo đó
-            var notificationTypeResult = notificationType.Result;
-
             //list User bị tắt thông báo
-            var listUserOffNotification = await _notificationRemindRepository.Queryable.Where(x => x.Status == EnumNotificationRemindStatus.Off && x.ObjectId == request.ObjectId).Select(x => x.UserId).ToListAsync(cancellationToken);
+            var listUserOffNotification = await _notificationRemindRepository.Queryable.Where(x => x.Status == EnumNotificationRemindStatus.Off && x.ObjectId == request.ObjectId).Select(x => x.UserId.ToString()).ToListAsync(cancellationToken);
 
             // Handle list UserId
             GetUsersByRoleQueryModel roleQuery = new GetUsersByRoleQueryModel();
-            string listUserId = "";
-            List<Guid> allIds = new List<Guid>();
+            List<string> listUserId = new List<string>();
             if (request.Roles != null)
             {
-                foreach (var item in request.Roles!)
+                foreach (var item in request.Roles)
                 {
                     roleQuery.Role = item;
-                    var user = await _userService.GetUserByRole(roleQuery);
+                    var user = await _userService.GetUserByRoleAsync(roleQuery);
                     if (user.Content?.Result != null)
                     {
-                        var userIds = user.Content.Result;
-                        allIds.AddRange(userIds.Select(u => u.Id));
+                        var users = user.Content.Result;
+                        listUserId.AddRange(users.Select(u => u.Id.ToString()));
                     }
                 }
 
-                listUserId = FilteredListUserTurnOnNotification(allIds, listUserOffNotification);
+                //Loại bỏ những phần tử không có trong listUserId
+                listUserId = listUserId.Where(id => !listUserOffNotification.Contains(id)).ToList();
             }
 
-            // Handle 1 UserId
-            List<Guid> userOneElement = new List<Guid>();
-            userOneElement.Add(notificationNew.UserId);
-            string resultOneElement = FilteredListUserTurnOnNotification(userOneElement, listUserOffNotification);
-            notificationNew.UserId = string.IsNullOrEmpty(resultOneElement) ? Guid.Empty : new Guid(resultOneElement);
-
             #endregion Validation
-
+            List<NotificationMessage> listNotificationMessage = new List<NotificationMessage>();
+            if (listUserId.Count > 0)
+            {
+                foreach (var item in listUserId)
+                {
+                    NotificationMessage notificationElement = _mapper.Map<NotificationMessage>(request);
+                    notificationElement.UserId = new Guid(item);
+                    listNotificationMessage.Add(notificationElement);
+                }
+            }
 
             #region Handler
-
             await _notificationsRepository.ExecuteTransactionAsync(async () =>
             {
-                notificationNew = _notificationsRepository.Add(notificationNew);
-
+                //Save into Database
+                if (listNotificationMessage.Count > 0)
+                {
+                    await _notificationsRepository.AddList(listNotificationMessage);
+                }
+                else
+                {
+                    notificationNew = _notificationsRepository.Add(notificationNew);
+                }
                 await _notificationsRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
-
                 //Push notification
-                var notificationRealTime = new NotificationsModel()
+                var notificationRealTime = new NotificationMessageModel()
                 {
                     UserId = notificationNew.UserId,
-                    Template = notificationTypeResult?.Template,
                     ObjectId = notificationNew.ObjectId,
                     Message = notificationNew.Message,
+                    Link = notificationNew.Message,
                     UserIds = listUserId
                 };
 
                 await _notificationMessagePublisher.Publish(notificationRealTime, cancellationToken).ConfigureAwait(false);
 
-
                 //Return Value
+                methodResult.Result = _mapper.Map<NotificationMessageModel>(notificationNew);
                 methodResult.StatusCode = StatusCodes.Status201Created;
-                methodResult.Result = _mapper.Map<NotificationsModel>(notificationNew);
                 return methodResult;
             });
 
-            #endregion
+            #endregion Handler
+
             return methodResult;
-        }
-
-        /// <summary>
-        /// Lấy ra những User không tắt Notification
-        /// </summary>
-        /// <param name="allIds"></param>
-        /// <param name="listUserOffNotification"></param>
-        /// <returns></returns>
-        private static string FilteredListUserTurnOnNotification(List<Guid> allIds, List<Guid> listUserOffNotification)
-        {
-            string result = "";
-            var filteredGuids = allIds.Where(id => !listUserOffNotification.Contains(id)).ToList();
-
-            //Chuỗi UserId được join lại từ List User sau khi lọc
-            result = string.Join(",", filteredGuids);
-
-            return result;
         }
     }
 }

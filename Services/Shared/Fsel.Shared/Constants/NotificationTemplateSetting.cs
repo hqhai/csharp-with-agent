@@ -2,9 +2,11 @@
 
 namespace Fsel.Shared.Constants
 {
+    using static MassTransit.Logging.OperationName;
+
     public static class NotificationTemplateSetting
     {
-        public const string FlagPostTemplate = "Bài viết của {0} thuộc {1} đã bị gán cờ. Vui lòng kiểm tra.";
-        public const string FlagCommentTemplate = "Bình luận của {0} thuộc {1} đã bị gán cờ. Vui lòng kiểm tra.";
+        public const string CommentPost = "{0} vừa bình luận bài viết của bạn";
+        public const string CommentReply = "{0} vừa trả lời bình luận của bạn";
     }
 }

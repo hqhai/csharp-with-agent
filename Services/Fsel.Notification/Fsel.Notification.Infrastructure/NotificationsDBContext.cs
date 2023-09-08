@@ -17,8 +17,8 @@ namespace Fsel.Notification.Infrastructure
             ChangeTracker.LazyLoadingEnabled = true;
         }
 
-        public DbSet<Notifications> Notifications { get; set; }
-        public DbSet<NotificationType> NotificationType { get; set; }
+        public DbSet<NotificationMessage> NotificationMessages { get; set; }
+        public DbSet<NotificationType> NotificationTypes { get; set; }
         public DbSet<NotificationRemind> NotificationReminds { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

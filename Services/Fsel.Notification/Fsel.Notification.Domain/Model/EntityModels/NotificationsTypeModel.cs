@@ -11,14 +11,13 @@ namespace Fsel.Notification.Domain.Model.EntityModels
 
         public EnumNotificationContent Content { get; set; }
 
-        public EnumNotificationPushingType Type { get; set; }
+        public EnumNotificationType Type { get; set; }
 
         public bool Active { get; set; }
 
         public int Priority { get; set; }
 
         public string? Template { get; set; }
-
-        public ICollection<NotificationsModel> Notifications { get; set; } = new List<NotificationsModel>();
+       
     }
 }

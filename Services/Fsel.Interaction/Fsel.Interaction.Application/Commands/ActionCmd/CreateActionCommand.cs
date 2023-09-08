@@ -91,9 +91,10 @@ namespace Fsel.Interaction.Application.Commands.ActionCmd
                     InterationActionQueueModel model = new InterationActionQueueModel()
                     {
                         ObjectId = action.ObjectId,
-                        Type = action.Type,
+                        InterationType = action.Type,
+                        Type = EnumNotificationType.LinkPage,
+                        Content = EnumNotificationContent.FlagClassForum,
                         UserId = _authContext.CurrentUserId,
-                        FullName = _authContext.CurrentFullName
                     };
 
                     await _interationActionPublisher.Publish(model, cancellationToken).ConfigureAwait(false);
