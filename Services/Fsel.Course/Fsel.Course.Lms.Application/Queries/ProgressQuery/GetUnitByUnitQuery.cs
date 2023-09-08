@@ -9,6 +9,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
     using Fsel.Core.Base;
     using Fsel.Course.Domain.Entities.SkillScoresConfigs;
     using Fsel.Course.Domain.Enums;
+    using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Services.UserServices;
@@ -27,6 +28,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
     {
         private readonly AuthContext _authContext;
         private readonly IMapper _mapper;
+        private readonly ICourseRepository _courseRepository;
         private readonly IVideoRepository _videoRepository;
         private readonly IVideoResultRepository _videoResultRepository;
         private readonly IUnitRepository _unitRepository;
@@ -34,6 +36,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
 
         public GetUnitByUnitVideoQueryHandler(AuthContext authContext
             , IMapper mapper
+            , ICourseRepository courseRepository
             , IVideoRepository videoRepository
             , IVideoResultRepository videoResultRepository
             , IUnitRepository unitRepository
@@ -41,6 +44,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
         {
             _authContext = authContext;
             _mapper = mapper;
+            _courseRepository = courseRepository;
             _videoRepository = videoRepository;
             _videoResultRepository = videoResultRepository;
             _unitRepository = unitRepository;
@@ -58,6 +62,18 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
                 return methodResult;
             }
             var studentId = studentResult?.Content?.Result?.Id;
+            var course = await _courseRepository.GetByIdAsync(request.CourseId);
+            if (course == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(course));
+                return methodResult;
+            }
+            else if (course.CourseType == EnumCourseType.Ielts && request.Type == EnumProcessType.UnitTest)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.CourseNotTypeAcademic), nameof(course));
+                return methodResult;
+            }
+
             var units = new List<Domain.Entities.Unit>();
             if (request.Type == EnumProcessType.LessonVideo)
             {
