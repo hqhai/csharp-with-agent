@@ -22,7 +22,6 @@ namespace Fsel.Shared.Enums
         ReviewType,
         TeacherRole,
         QuestBoardType,
-        RepeatType,
-        ProcessType
+        RepeatType
     }
 }

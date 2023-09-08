@@ -91,16 +91,16 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
                              .AsNoTracking()
                              .ToListAsync(cancellationToken);
             }
-            else if (request.Type == EnumProcessType.ClassForum)
+            else if (request.Type == EnumProcessType.UnitTest)
             {
-                units = await _unitRepository.Queryable.Include(x => x.UnitLessons).ThenInclude(x => x.Lesson).ThenInclude(x => x!.ClassForum)
-                             .Include(x => x.UnitResults.Where(x => x.StudentId == studentId && x.CourseId == request.CourseId))
-                             .Include(x => x.CourseUnitMockTests)
-                             .Include(x => x.LessonResults.Where(x => x.StudentId == studentId))
-                             .ThenInclude(x => x.ClassForumResults.Where(x => x.StudentId == studentId))
-                             .Where(x => x.CourseUnitMockTests.Any(x => x.CourseId == request.CourseId))
-                             .AsNoTracking()
-                             .ToListAsync(cancellationToken);
+                units = await _unitRepository.Queryable.Include(x => x.UnitResults.Where(x => x.StudentId == studentId && x.CourseId == request.CourseId))
+                              .Include(x => x.UnitLessons)
+                              .ThenInclude(x => x.Lesson)
+                              .ThenInclude(x => x!.LessonVideos)
+                              .Include(x => x.CourseUnitMockTests)
+                              .Where(x => x.CourseUnitMockTests.Any(x => x.CourseId == request.CourseId))
+                              .AsNoTracking()
+                              .ToListAsync(cancellationToken);
             }
 
             if (units == null || units.Count == 0)
@@ -192,7 +192,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
                 UpdatedFullName = x.UpdatedFullName,
                 UpdatedUserId = x.UpdatedUserId,
                 UnitResult = _mapper.Map<UnitResultModel>(x.UnitResults.FirstOrDefault()),
-                Percent = countDone / totalDone * 100,
+                Percent = totalDone > 0 ? countDone / totalDone * 100 : default,
             };
             return unitModel;
         }
