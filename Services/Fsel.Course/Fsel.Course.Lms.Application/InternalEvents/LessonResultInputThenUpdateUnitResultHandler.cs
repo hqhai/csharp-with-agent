@@ -55,23 +55,9 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             }
         }
 
-        public async Task UpdateTheNextLesson(Domain.Entities.Unit? unit, LessonResult lessonResult, CancellationToken cancellationToken)
+        private async Task UpdateTheNextLesson(Domain.Entities.Unit? unit, LessonResult lessonResult, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(unit);
-            var isCheckDone = true;
-            switch (unit.CourseLevel.GetEnumCourseType())
-            {
-                case EnumCourseType.Ielts:
-                    isCheckDone = false;
-                    break;
-
-                case EnumCourseType.Academic:
-                    isCheckDone = true;
-                    break;
-
-                default:
-                    break;
-            }
             var mockTestId = unit.UnitSkillMockTests.FirstOrDefault()?.MockTestId;
             var displayOrder = unit.UnitLessons.FirstOrDefault(x => x.LessonId == lessonResult.LessonId)!.DisplayOrder;
             var lesson = unit.UnitLessons.FirstOrDefault(x => x.DisplayOrder == displayOrder + 1)?.Lesson;
@@ -85,7 +71,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                     await _lessonResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
                 }
             }
-            else if (!isCheckDone && mockTestId.HasValue)
+            else if (unit.CourseLevel.GetEnumCourseType() == EnumCourseType.Ielts && mockTestId.HasValue)
             {
                 var mockTestResult = await _mockTestResultRepository.Queryable.FirstOrDefaultAsync(x => x.CourseId == lessonResult.CourseId && x.UnitId == lessonResult.UnitId && x.StudentId == lessonResult.StudentId && x.MockTestId == mockTestId.Value, cancellationToken);
                 if (mockTestResult != null)

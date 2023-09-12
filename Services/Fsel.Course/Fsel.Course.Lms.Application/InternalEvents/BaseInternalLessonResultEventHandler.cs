@@ -7,7 +7,6 @@ namespace Fsel.Course.Lms.Application.InternalEvents
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Lms.Application.Queues.Publishers;
-    using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
     using Microsoft.EntityFrameworkCore;
 
@@ -17,7 +16,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
         {
         }
 
-        public async Task GetLessonResult(LessonResult lessonResult, CancellationToken cancellationToken)
+        public async Task UpdateLessonResult(LessonResult lessonResult, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(lessonResult);
             var (correctVideo, totalVideo, percentVideo, skillScoreVideos) = await GetVideoResult(lessonResult.Id, cancellationToken);
@@ -55,7 +54,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             lessonResult.SkillScores = groupedSkillScores;
         }
 
-        public async Task<(double?, double?, double?, IList<SkillScores>?)> GetVideoResult(Guid lessonResultId, CancellationToken cancellationToken)
+        private async Task<(double?, double?, double?, IList<SkillScores>?)> GetVideoResult(Guid lessonResultId, CancellationToken cancellationToken)
         {
             var videoResult = await _videoResultRepository.Queryable.FirstOrDefaultAsync(x => x.LessonResultId == lessonResultId, cancellationToken);
             if (videoResult != null)
@@ -70,7 +69,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             return (null, null, default, null);
         }
 
-        public async Task<(double?, double?, double, IList<SkillScores>?)> GetClassForumResult(Guid lessonResultId, CancellationToken cancellationToken)
+        private async Task<(double?, double?, double, IList<SkillScores>?)> GetClassForumResult(Guid lessonResultId, CancellationToken cancellationToken)
         {
             var classForumResult = await _classForumResultRepository.Queryable.Include(x => x.ClassForumScores)
                                                                             .Include(x => x.ClassForum)
@@ -92,39 +91,11 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             return (null, null, default, null);
         }
 
-        public async Task<(double?, double?, double, IList<SkillScores>?)> GetHomeResults(Guid lessonResultId, CancellationToken cancellationToken)
+        private async Task<(double?, double?, double, IList<SkillScores>?)> GetHomeResults(Guid lessonResultId, CancellationToken cancellationToken)
         {
             var skillScores = await _homeWorkResultRepository.Queryable.Where(x => x.LessonResultId == lessonResultId && x.Status == EnumResultStatus.Done).SelectMany(x => x.SkillScores!).ToListAsync(cancellationToken);
             skillScores.ForEach(x => x.Percent = x.TotalCount > 0 ? NumberHelper.ConvertDouble(x.CorrectCount / x.TotalCount) : default);
             return (skillScores.Sum(x => x.TotalCount), skillScores.Sum(x => x.TotalCount), skillScores.Average(x => x.Scores), skillScores);
-        }
-
-        public async Task UpdateTheNextLesson(Unit? unit, LessonResult lessonResult, CancellationToken cancellationToken)
-        {
-            ArgumentNullException.ThrowIfNull(unit);
-            var mockTestId = unit.UnitSkillMockTests.FirstOrDefault()?.MockTestId;
-            var displayOrder = unit.UnitLessons.FirstOrDefault(x => x.LessonId == lessonResult.LessonId)!.DisplayOrder;
-            var lesson = unit.UnitLessons.FirstOrDefault(x => x.DisplayOrder == displayOrder + 1)?.Lesson;
-            if (lesson != null)
-            {
-                var lessonResultNext = await _lessonResultRepository.Queryable.FirstOrDefaultAsync(x => x.CourseId == lessonResult.CourseId && x.UnitId == lessonResult.UnitId && x.StudentId == lessonResult.StudentId && x.LessonId == lesson.Id, cancellationToken);
-                if (lessonResultNext != null)
-                {
-                    lessonResultNext.Status = EnumResultStatus.New;
-                    _lessonResultRepository.Update(lessonResultNext);
-                    await _lessonResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
-                }
-            }
-            else if (unit.CourseLevel.GetEnumCourseType() == EnumCourseType.Ielts && mockTestId.HasValue)
-            {
-                var mockTestResult = await _mockTestResultRepository.Queryable.FirstOrDefaultAsync(x => x.CourseId == lessonResult.CourseId && x.UnitId == lessonResult.UnitId && x.StudentId == lessonResult.StudentId && x.MockTestId == mockTestId.Value, cancellationToken);
-                if (mockTestResult != null)
-                {
-                    mockTestResult.Status = EnumResultStatus.New;
-                    _mockTestResultRepository.Update(mockTestResult);
-                    await _mockTestResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
-                }
-            }
         }
     }
 }
