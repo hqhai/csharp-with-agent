@@ -122,7 +122,6 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
         {
             var lessons = await _lessonRepository.Queryable
                             .Include(x => x.LessonInstructions)
-                            .Include(x => x.LessonResults.Where(y => y.UnitId == request.UnitId && y.CourseId == request.CourseId && y.StudentId == studentId))
                             .Include(x => x.UnitLessons)
                             .Include(x => x.LessonVideos)
                             .ThenInclude(x => x.Video)
@@ -136,25 +135,24 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
                                 CourseLevel = x.CourseLevel,
                                 InstructionContent = x.InstructionContent,
                                 IsActive = x.UnitLessons.Any(),
-                                VideoId = x.LessonVideos.Where(x => x.Video != null).Select(x => x.Video).FirstOrDefault()!.Id,
+                                VideoId = x.LessonVideos.FirstOrDefault()!.VideoId,
                                 DisplayOrder = x.UnitLessons.Where(n => n.UnitId == request.UnitId && n.LessonId == x.Id).Select(x => x.DisplayOrder).FirstOrDefault(),
                                 LessonInstructions = _mapper.Map<IList<LessonInstructionModel>>(x.LessonInstructions.OrderBy(x => x.CreatedDate).ToList()),
-                                LessonResult = _mapper.Map<LessonResultModel>(x.LessonResults.Where(y => y.UnitId == request.UnitId && y.CourseId == request.CourseId && y.StudentId == studentId).FirstOrDefault(y => y.LessonId == x.Id)),
                             }).OrderBy(x => x.DisplayOrder).ToListAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
             var lessonIds = lessons.Select(x => x.Id).ToList();
-            var lessonResults = await _lessonResultRepository.Queryable.Include(x => x.Lesson)
-                                                                     .ThenInclude(x => x!.LessonInstructions)
-                                                                     .Include(x => x.VideoResult)
+            var lessonResults = await _lessonResultRepository.Queryable.Include(x => x.VideoResult)
                                                                      .Include(x => x.HomeWorkResults.Where(x => x.StudentId == studentId))
                                                                      .Include(x => x.ClassForumResults.Where(x => x.StudentId == studentId))
-                                                                     .Where(x => x.StudentId == studentId && lessonIds.Contains(x.LessonId))
+                                                                     .Where(x => x.StudentId == studentId && lessonIds.Contains(x.LessonId) && x.UnitId == request.UnitId && x.CourseId == request.CourseId)
                                                                      .AsNoTracking()
                                                                      .ToListAsync(cancellationToken).ConfigureAwait(false);
+
             foreach (var lesson in lessons)
             {
                 var lessonResult = lessonResults.FirstOrDefault(x => x.LessonId == lesson.Id);
                 if (lessonResult != null)
                 {
+                    lesson.LessonResult = _mapper.Map<LessonResultModel>(lessonResult);
                     var homeWorks = lessonResult.HomeWorkResults.Where(x => x.StudentId == studentId && x.LessonResultId == lessonResult.Id).ToList();
                     var classForums = lessonResult.ClassForumResults.Where(x => x.StudentId == studentId && x.LessonResultId == lessonResult.Id).ToList();
                     lesson.StatusVideo = GetStatusVideo(lessonResult.VideoResult);
