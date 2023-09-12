@@ -93,7 +93,12 @@ namespace Fsel.Course.Lms.Application.InternalEvents
 
         private async Task<(double?, double?, double, IList<SkillScores>?)> GetHomeResults(Guid lessonResultId, CancellationToken cancellationToken)
         {
-            var skillScores = await _homeWorkResultRepository.Queryable.Where(x => x.LessonResultId == lessonResultId && x.Status == EnumResultStatus.Done).SelectMany(x => x.SkillScores!).ToListAsync(cancellationToken);
+            var homeWorkResults = await _homeWorkResultRepository.Queryable.Where(x => x.LessonResultId == lessonResultId && x.Status == EnumResultStatus.Done).ToListAsync(cancellationToken);
+            if (!homeWorkResults.Any())
+            {
+                return (null, null, default, null);
+            }
+            var skillScores = homeWorkResults.Where(x => x.SkillScores != null && x.SkillScores.Any()).SelectMany(x => x.SkillScores!).ToList();
             skillScores.ForEach(x => x.Percent = x.TotalCount > 0 ? NumberHelper.ConvertDouble(x.CorrectCount / x.TotalCount) : default);
             return (skillScores.Sum(x => x.TotalCount), skillScores.Sum(x => x.TotalCount), skillScores.Average(x => x.Scores), skillScores);
         }
