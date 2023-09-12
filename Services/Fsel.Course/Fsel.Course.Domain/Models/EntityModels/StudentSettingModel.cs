@@ -11,6 +11,5 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public EnumCourseLevel Level { get; set; }
         public EnumPlacementTestLevel? PTLevel { get; set; }
         public bool IsLockPT { get; set; }
-        public bool IsLockOrder { get; set; }
     }
 }
