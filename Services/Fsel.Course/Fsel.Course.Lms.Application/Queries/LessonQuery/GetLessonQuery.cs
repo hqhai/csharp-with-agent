@@ -154,10 +154,16 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
                 {
                     lesson.LessonResult = _mapper.Map<LessonResultModel>(lessonResult);
                     var homeWorks = lessonResult.HomeWorkResults.Where(x => x.StudentId == studentId && x.LessonResultId == lessonResult.Id).ToList();
-                    var classForums = lessonResult.ClassForumResults.Where(x => x.StudentId == studentId && x.LessonResultId == lessonResult.Id).ToList();
-                    lesson.StatusVideo = GetStatusVideo(lessonResult.VideoResult);
-                    lesson.StatusClassForum = GetStatusClassForums(classForums, lesson.StatusVideo);
-                    lesson.StatusHomeWork = GetStatusHomeWorks(homeWorks, lesson.StatusClassForum);
+                    var classForumResult = lessonResult.ClassForumResults.FirstOrDefault(x => x.StudentId == studentId && x.LessonResultId == lessonResult.Id);
+                    lesson.IsVideo = lessonResult.VideoResult?.Status == EnumResultStatus.Done;
+                    if (lesson.IsVideo)
+                    {
+                        lesson.IsClassForum = lesson.IsVideo;
+                    }
+                    if (classForumResult != null && !(classForumResult.Status == EnumClassForumResultStatus.Denied || classForumResult.Status == EnumClassForumResultStatus.Draft))
+                    {
+                        lesson.IsHomeWork = true;
+                    }
                 }
             }
             return lessons;
@@ -178,8 +184,7 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
             {
                 return null;
             }
-            var mockTest = unit.UnitSkillMockTests
-                                    .Select(x => x.MockTest)
+            var mockTest = unit.UnitSkillMockTests.Select(x => x.MockTest)
                                     .Select(x =>
                                     {
                                         var sectionGroups = x.MockTestSections.Select(x => x.SectionGroup).ToList();
@@ -201,68 +206,6 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
                                         return mockTest;
                                     }).FirstOrDefault();
             return mockTest;
-        }
-
-        public EnumResultStatus GetStatusVideo(VideoResult? videoResult)
-        {
-            if (videoResult != null)
-            {
-                if (videoResult.Status == EnumResultStatus.Process || videoResult.Status == EnumResultStatus.New)
-                {
-                    return EnumResultStatus.Process;
-                }
-                else
-                {
-                    return videoResult.Status;
-                }
-            }
-            return EnumResultStatus.Unfinished;
-        }
-
-        public EnumResultStatus GetStatusHomeWorks(IList<HomeWorkResult>? homeWorkResults, EnumResultStatus status)
-        {
-            var statusHomeWork = EnumResultStatus.Unfinished;
-            if (status == EnumResultStatus.Done)
-            {
-                statusHomeWork = EnumResultStatus.New;
-            }
-            if (homeWorkResults != null && homeWorkResults.Count > 0)
-            {
-                if (homeWorkResults.All(x => x.Status == EnumResultStatus.Done))
-                {
-                    return EnumResultStatus.Done;
-                }
-                else if (homeWorkResults.All(x => x.Status == EnumResultStatus.New))
-                {
-                    return EnumResultStatus.Unfinished;
-                }
-                else if (homeWorkResults.Any(x => x.Status == EnumResultStatus.Process))
-                {
-                    return EnumResultStatus.Process;
-                }
-            }
-            return statusHomeWork;
-        }
-
-        public EnumResultStatus GetStatusClassForums(IList<ClassForumResult>? classForumResults, EnumResultStatus status)
-        {
-            var statusClassForum = EnumResultStatus.Unfinished;
-            if (status == EnumResultStatus.Done)
-            {
-                statusClassForum = EnumResultStatus.New;
-            }
-            if (classForumResults != null && classForumResults.Count > 0)
-            {
-                if (classForumResults.All(x => x.Status == EnumClassForumResultStatus.Graded))
-                {
-                    return EnumResultStatus.Done;
-                }
-                else if (classForumResults.Any(x => x.Status != EnumClassForumResultStatus.Graded))
-                {
-                    return EnumResultStatus.Process;
-                }
-            }
-            return statusClassForum;
         }
     }
 }

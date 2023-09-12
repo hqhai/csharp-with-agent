@@ -20,8 +20,8 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public IList<Guid>? ExtraPracticeIds { get; set; }
         public IList<LessonInstructionModel>? LessonInstructions { get; set; }
         public ClassForumModel? ClassForum { get; set; }
-        public EnumResultStatus StatusVideo { get; set; }
-        public EnumResultStatus StatusClassForum { get; set; }
-        public EnumResultStatus StatusHomeWork { get; set; }
+        public bool IsVideo { get; set; }
+        public bool IsClassForum { get; set; }
+        public bool IsHomeWork { get; set; }
     }
 }
