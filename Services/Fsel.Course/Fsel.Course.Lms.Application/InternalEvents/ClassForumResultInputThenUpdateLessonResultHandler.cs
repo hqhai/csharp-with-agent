@@ -27,7 +27,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             var lessonResult = await _lessonResultRepository.Queryable.FirstOrDefaultAsync(x => x.Id == classForumResult.LessonResultId, cancellationToken);
             if (lessonResult != null)
             {
-                await UpdateLessonResult(lessonResult, cancellationToken);
+                await GetLessonResult(lessonResult, cancellationToken);
                 if (classForumResult.Status == EnumClassForumResultStatus.Pending)
                 {
                     await UpdateHomeWorks(classForumResult, cancellationToken);

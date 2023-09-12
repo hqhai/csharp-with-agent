@@ -16,7 +16,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
         {
         }
 
-        public async Task UpdateLessonResult(LessonResult lessonResult, CancellationToken cancellationToken)
+        public async Task GetLessonResult(LessonResult lessonResult, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(lessonResult);
             var (correctVideo, totalVideo, percentVideo, skillScoreVideos) = await GetVideoResult(lessonResult.Id, cancellationToken);

@@ -31,7 +31,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             {
                 var isHomeWorksDone = lessonResult.HomeWorkResults.All(x => x.StudentId == homeWorkResult.StudentId && x.LessonResultId == homeWorkResult.LessonResultId && x.Status == EnumResultStatus.Done);
                 var isClassForumDone = lessonResult.ClassForumResults.Any(x => x.StudentId == homeWorkResult.StudentId && x.LessonResultId == homeWorkResult.LessonResultId && (x.Status == EnumClassForumResultStatus.PendingForGrading || x.Status == EnumClassForumResultStatus.Graded));
-                await UpdateLessonResult(lessonResult, cancellationToken);
+                await GetLessonResult(lessonResult, cancellationToken);
                 if (isClassForumDone && isHomeWorksDone)
                 {
                     lessonResult.Status = EnumResultStatus.Done;

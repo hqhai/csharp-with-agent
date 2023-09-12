@@ -21,7 +21,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             var unitResult = await _unitResultRepository.Queryable.FirstOrDefaultAsync(x => x.UnitId == unit.Id && x.StudentId == studentId && x.CourseId == courseId, cancellationToken);
             if (unit != null && unitResult != null)
             {
-                var (groupedSkillScores, percent) = await UpdateUnitResult(lessonResultIds);
+                var (groupedSkillScores, percent) = await GetUnitSkillScores(lessonResultIds);
                 unitResult.CorrectCount = (int)groupedSkillScores.Sum(x => x.CorrectCount);
                 unitResult.CorrectTotal = (int)groupedSkillScores.Sum(x => x.TotalCount);
                 unitResult.Status = EnumResultStatus.Done;
@@ -33,7 +33,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             }
         }
 
-        public async Task<(List<SkillScores>, double)> UpdateUnitResult(IList<Guid>? lessonResultIds)
+        public async Task<(List<SkillScores>, double)> GetUnitSkillScores(IList<Guid>? lessonResultIds)
         {
             ArgumentNullException.ThrowIfNull(lessonResultIds);
             var (videoSkillScores, percentVideo) = await GetVideoSkillScores(lessonResultIds, EnumTimeCodeType.Standalone, 18);
