@@ -67,15 +67,15 @@ namespace Fsel.Course.Lms.Application.Queries.StudentQuery
                 var @class = classResult?.Content?.Result;
                 if (@class == null)
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(@class));
-                    return methodResult;
+                    var isLockOrder = await _orderService.IsCheckStatusUser(new IsCheckPaymentStatusByUserModel { ClassId = @class.Id, CourseId = @class.CourseId, PackageId = @class.PackageId, UserId = _authContext.CurrentUserId });
+                    if (!isLockOrder.IsSuccessStatusCode)
+                    {
+                        methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(isLockOrder));
+                        return methodResult;
+                    }
+                    settingStudentModel.IsLockOrder = isLockOrder?.Content?.Result ?? default;
                 }
-                var isLockOrder = await _orderService.IsCheckStatusUser(new IsCheckPaymentStatusByUserModel { ClassId = @class.Id, CourseId = @class.CourseId, PackageId = @class.PackageId, UserId = _authContext.CurrentUserId });
-                if (!isLockOrder.IsSuccessStatusCode)
-                {
-                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(isLockOrder));
-                    return methodResult;
-                }
+
                 var placementTestResult = await _placementTestResultRepository.Queryable.Where(x => x.Status == EnumResultStatus.Done && x.StudentId == student.Id)
                                                                                 .OrderByDescending(x => x.CreatedDate)
                                                                                 .FirstOrDefaultAsync(cancellationToken);
@@ -85,7 +85,6 @@ namespace Fsel.Course.Lms.Application.Queries.StudentQuery
                 settingStudentModel.ClassId = student.ClassId ?? null;
                 settingStudentModel.PTLevel = placementTestResult?.Level ?? null;
                 settingStudentModel.IsLockPT = isLock;
-                settingStudentModel.IsLockOrder = isLockOrder?.Content?.Result ?? default;
             }
 
             methodResult.StatusCode = StatusCodes.Status200OK;
