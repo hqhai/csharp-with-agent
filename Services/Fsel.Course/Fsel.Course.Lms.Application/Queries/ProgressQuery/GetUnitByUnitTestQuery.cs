@@ -68,13 +68,14 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
             var videoIds = unit.UnitLessons.Select(x => x.Lesson).SelectMany(x => x!.LessonVideos).Select(x => x!.VideoId).ToList();
             var videoResultIds = await _videoResultRepository.Queryable.Where(x => x.StudentId == studentId && videoIds.Contains(x.VideoId)).Select(x => x.Id).ToListAsync(cancellationToken);
             var videos = await _videoRepository.Queryable.Include(x => x.VideoTimeCodes)
-                                                        .ThenInclude(x => x.VideoTimeCodeAnswers.Where(y => videoResultIds.Contains(y.VideoResultId)))
                                                         .Include(x => x.VideoTimeCodes)
                                                         .ThenInclude(x => x.TimeCodeExercises)
                                                         .ThenInclude(x => x.Exercise)
                                                         .ThenInclude(x => x!.ExerciseQuestions)
                                                         .ThenInclude(x => x.Question)
+                                                        .ThenInclude(x => x.VideoTimeCodeAnswers.Where(y => videoResultIds.Contains(y.VideoResultId)))
                                                         .Where(x => videoIds.Contains(x.Id))
+                                                        .AsNoTracking()
                                                         .ToListAsync(cancellationToken);
             if (videos == null || videos.Count == 0)
             {
@@ -84,13 +85,18 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
             var videoTimeCodes = videos.SelectMany(x => x.VideoTimeCodes).Where(x => x.TimeCodeType == EnumTimeCodeType.UnitTest).ToList();
             var exercises = videoTimeCodes.SelectMany(x => x.TimeCodeExercises).Select(x => x.Exercise).ToList();
 
-            var skillScores = exercises.GroupBy(x => x!.CourseSkill).Select(x => new SkillScores
+            var skillScores = exercises.GroupBy(x => x!.CourseSkill).Select(x =>
             {
-                Skill = x.Key,
-                CountQuestion = x.SelectMany(x => x!.ExerciseQuestions).Select(x => x.Question).Count(),
-                TotalQuestion = x.SelectMany(x => x!.VideoTimeCodeAnswers).Count(),
-                CorrectCount = x.SelectMany(x => x!.VideoTimeCodeAnswers).Sum(x => x.CorrectCount),
-                TotalCount = x.SelectMany(x => x!.ExerciseQuestions).Select(x => x.Question).Sum(x => x!.CorrectTotal),
+                var questions = x.SelectMany(x => x!.ExerciseQuestions).Select(x => x.Question).ToList();
+                var skillScore = new SkillScores
+                {
+                    Skill = x.Key,
+                    CountQuestion = questions.Count,
+                    TotalQuestion = questions.SelectMany(x => x!.VideoTimeCodeAnswers).Count(),
+                    CorrectCount = questions.SelectMany(x => x!.VideoTimeCodeAnswers).Sum(x => x.CorrectCount),
+                    TotalCount = questions.Sum(x => x!.CorrectTotal),
+                };
+                return skillScore;
             }).ToList();
             skillScores.ForEach(x => x.Percent = x.CorrectCount / x.TotalCount);
             overallScoreReport.SkillScores = skillScores;
