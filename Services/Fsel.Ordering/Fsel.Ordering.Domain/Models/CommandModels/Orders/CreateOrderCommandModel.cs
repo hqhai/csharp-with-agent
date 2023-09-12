@@ -17,7 +17,6 @@ namespace Fsel.Ordering.Domain.Models.CommandModels.Orders
         public Guid CourseId { get; set; }
         public Guid PackageId { get; set; }
         public Guid? LiveTimeFrameId { get; set; }
-
         public IList<DayOfWeek>? LiveDays { get; set; }
     }
 }
