@@ -1,7 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
 using Fsel.Core.Base.BaseModels;
-using Fsel.Course.Domain.Enums;
 using Fsel.Shared.Enums;
 
 namespace Fsel.Course.Domain.Models.EntityModels
@@ -20,8 +19,8 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public IList<Guid>? ExtraPracticeIds { get; set; }
         public IList<LessonInstructionModel>? LessonInstructions { get; set; }
         public ClassForumModel? ClassForum { get; set; }
-        public bool IsVideo { get; set; }
-        public bool IsClassForum { get; set; }
-        public bool IsHomeWork { get; set; }
+        public bool IsVideoLock { get; set; }
+        public bool IsClassForumLock { get; set; } = true;
+        public bool IsHomeWorkLock { get; set; } = true;
     }
 }

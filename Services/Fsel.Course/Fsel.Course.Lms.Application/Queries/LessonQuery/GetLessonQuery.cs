@@ -155,14 +155,13 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
                     lesson.LessonResult = _mapper.Map<LessonResultModel>(lessonResult);
                     var homeWorks = lessonResult.HomeWorkResults.Where(x => x.StudentId == studentId && x.LessonResultId == lessonResult.Id).ToList();
                     var classForumResult = lessonResult.ClassForumResults.FirstOrDefault(x => x.StudentId == studentId && x.LessonResultId == lessonResult.Id);
-                    lesson.IsVideo = lessonResult.VideoResult?.Status == EnumResultStatus.Done;
-                    if (lesson.IsVideo)
+                    if (lessonResult.VideoResult?.Status == EnumResultStatus.Done)
                     {
-                        lesson.IsClassForum = lesson.IsVideo;
+                        lesson.IsClassForumLock = !lesson.IsVideoLock;
                     }
-                    if (classForumResult != null && !(classForumResult.Status == EnumClassForumResultStatus.Denied || classForumResult.Status == EnumClassForumResultStatus.Draft))
+                    if (classForumResult != null && (classForumResult.Status == EnumClassForumResultStatus.PendingForGrading || classForumResult.Status == EnumClassForumResultStatus.Graded))
                     {
-                        lesson.IsHomeWork = true;
+                        lesson.IsHomeWorkLock = false;
                     }
                 }
             }
