@@ -16,7 +16,6 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd
     using Fsel.Course.Lms.Application.Queues.Publishers;
     using MediatR;
     using Microsoft.AspNetCore.Http;
-    using Microsoft.AspNetCore.Mvc;
     using Microsoft.EntityFrameworkCore;
 
     public class CreateHomeWorkAnswerCommand : CreateHomeWorkAnswerCommandModel, IRequest<MethodResult<bool>>
@@ -170,6 +169,12 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd
 
             await _homeWorkAnswerRepository.ExecuteTransactionAsync(async () =>
             {
+                if (homeWorkAnswers.Any())
+                {
+                    _homeWorkAnswerRepository.UpdateList(homeWorkAnswers);
+                    await _homeWorkAnswerRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+                }
+
                 _homeWorkResultRepository.Update(homeWorkResult);
                 await _homeWorkResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
