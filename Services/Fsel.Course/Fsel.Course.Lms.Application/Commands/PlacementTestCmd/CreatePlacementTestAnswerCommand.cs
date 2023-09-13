@@ -253,7 +253,8 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
                         CourseLevel = currentLevel.Value,
                         FullName = student?.Human?.FullName,
                         PaymentMethod = EnumPaymentMethodStatus.Card,
-                        CodeCourse = course?.Code
+                        CodeCourse = course?.Code,
+                        UserId = _authContext.CurrentUserId
                     };
                     await _createOrderPublisher.Publish(createOrderQueueModel, cancellationToken);
                 }

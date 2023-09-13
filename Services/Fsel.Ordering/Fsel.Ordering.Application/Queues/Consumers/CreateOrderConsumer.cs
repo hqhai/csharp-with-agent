@@ -29,7 +29,8 @@ namespace Fsel.Ordering.Application.Queues.Consumers
                 Country = message.Country,
                 CourseId = message.CourseId,
                 CourseLevel = message.CourseLevel,
-                CodeCourse = message.CodeCourse
+                CodeCourse = message.CodeCourse,
+                UserId = message.UserId,
             }).ConfigureAwait(false);
         }
     }

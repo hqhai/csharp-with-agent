@@ -22,6 +22,7 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery
     {
         public Guid PackageId { get; set; }
         public EnumCourseLevel CourseLevel { get; set; }
+        public Guid UserId { get; set; }
     }
 
     public class GetOrderQueryHandler : IRequestHandler<GenerateRamdomOrderQuery, MethodResult<GenerateRamdomOrderModel>>
@@ -29,17 +30,14 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery
         private readonly IPackageRepository _packageRepository;
         private readonly IMapper _mapper;
         private readonly IUserService _userService;
-        private readonly AuthContext _authContext;
 
         public GetOrderQueryHandler(IPackageRepository packageRepository,
             IMapper mapper,
-            IUserService userService,
-            AuthContext authContext)
+            IUserService userService)
         {
             _packageRepository = packageRepository;
             _mapper = mapper;
             _userService = userService;
-            _authContext = authContext;
         }
 
         public async Task<MethodResult<GenerateRamdomOrderModel>> Handle(GenerateRamdomOrderQuery request, CancellationToken cancellationToken)
@@ -54,7 +52,7 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(package));
                 return methodResult;
             }
-            var student = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
+            var student = await _userService.GetStudentByUserIdAsync(request.UserId);
             if (!student.IsSuccessStatusCode)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError));

@@ -31,7 +31,6 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
     {
         private readonly IMapper _mapper;
         private readonly IOrderRepository _orderRepository;
-        private readonly AuthContext _authContext;
         private readonly MediatR.IMediator _mediator;
         private readonly NotificationMessagePublisher _notificationMessagePublisher;
         private readonly ITrainingService _trainingService;
@@ -39,7 +38,6 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
 
         public CreateOrderCommandHandler(IMapper mapper,
             IOrderRepository orderRepository,
-            AuthContext authContext,
             IMediator mediator,
             NotificationMessagePublisher notificationMessagePublisher,
             ITrainingService trainingService,
@@ -47,7 +45,6 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
         {
             _mapper = mapper;
             _orderRepository = orderRepository;
-            _authContext = authContext;
             _mediator = mediator;
             _notificationMessagePublisher = notificationMessagePublisher;
             _trainingService = trainingService;
@@ -65,9 +62,9 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(package));
                 return methodResult;
             }
-            var codeSend = await _mediator.Send(new GenerateRamdomOrderQuery { CourseLevel = request.CourseLevel, PackageId = package.Id }, cancellationToken).ConfigureAwait(false);
+            var codeSend = await _mediator.Send(new GenerateRamdomOrderQuery { CourseLevel = request.CourseLevel, PackageId = package.Id, UserId = request.UserId }, cancellationToken).ConfigureAwait(false);
             var code = codeSend.Result?.Code;
-            if (await _orderRepository.Queryable.AnyAsync(x => x.UserId == _authContext.CurrentUserId && x.Status != EnumOrderStatus.Reject && x.CreatedDate.AddDays(14) < DateTime.Now, cancellationToken))
+            if (await _orderRepository.Queryable.AnyAsync(x => x.UserId == request.UserId && x.Status != EnumOrderStatus.Reject && x.CreatedDate.AddDays(14) < DateTime.Now, cancellationToken))
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(request.CourseLevel));
                 return methodResult;
@@ -93,7 +90,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
 
             Order order = _mapper.Map<Order>(request);
             order.Status = EnumOrderStatus.New;
-            order.UserId = _authContext.CurrentUserId;
+            order.UserId = request.UserId;
             order.Price = package.Price;
             order.DiscountPercent = 5;
             order.DiscountPrice = order.Price * order.DiscountPercent / 100;

@@ -13,5 +13,6 @@ namespace Fsel.Shared.Models.ShareModels
         public string? CodeCourse { get; set; }
         public EnumPaymentMethodStatus PaymentMethod { get; set; }
         public Guid CourseId { get; set; }
+        public Guid UserId { get; set; }
     }
 }
