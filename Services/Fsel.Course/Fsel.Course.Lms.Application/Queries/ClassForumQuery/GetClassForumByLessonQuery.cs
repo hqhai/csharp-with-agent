@@ -6,6 +6,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumQuery
     using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Core.Base;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
@@ -27,13 +28,15 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumQuery
         private readonly IMapper _mapper;
         private readonly IInteractionService _interactionService;
         private readonly IUserService _userService;
+        private readonly AuthContext _authContext;
 
-        public GetClassForumByLessonQueryHandler(IClassForumRepository classForumRepository, IMapper mapper, IInteractionService interactionService, IUserService userService)
+        public GetClassForumByLessonQueryHandler(IClassForumRepository classForumRepository, IMapper mapper, IInteractionService interactionService, IUserService userService, AuthContext authContext)
         {
             _classForumRepository = classForumRepository;
             _mapper = mapper;
             _interactionService = interactionService;
             _userService = userService;
+            _authContext = authContext;
         }
 
         public async Task<MethodResult<ClassForumModel>> Handle(GetClassForumByLessonQuery request, CancellationToken cancellationToken)
@@ -50,7 +53,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumQuery
 
             if (classForumQuery != null)
             {
-                var actionsResult = await _interactionService.GetsActionAsync(new InteractionActionCommandModel { ObjectIds = classForm?.ClassForumResults?.Select(x => x.Id).ToList() });
+                var actionsResult = await _interactionService.GetsActionAsync(new InteractionActionCommandModel { ObjectIds = classForm?.ClassForumResults?.Select(x => x.Id).ToList(), UserId = _authContext.CurrentUserId });
                 var actions = actionsResult.Content?.Result;
 
                 var studentResult = await _userService.GetStudentsByStudentIdsAsync(classForumQuery!.ClassForumResults.Select(x => x.StudentId).ToList());
