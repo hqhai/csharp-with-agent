@@ -1,10 +1,10 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Ordering.Domain.Models.CommandModels.Orders
+namespace Fsel.Shared.Models.ShareModels
 {
     using Fsel.Shared.Enums;
 
-    public class CreateOrderCommandModel
+    public class CreateOrderQueueModel
     {
         public EnumCourseLevel CourseLevel { get; set; }
         public string? FullName { get; set; }
@@ -13,8 +13,5 @@ namespace Fsel.Ordering.Domain.Models.CommandModels.Orders
         public string? CodeCourse { get; set; }
         public EnumPaymentMethodStatus PaymentMethod { get; set; }
         public Guid CourseId { get; set; }
-        public Guid PackageId { get; set; }
-        public Guid? LiveTimeFrameId { get; set; }
-        public IList<DayOfWeek>? LiveDays { get; set; }
     }
 }

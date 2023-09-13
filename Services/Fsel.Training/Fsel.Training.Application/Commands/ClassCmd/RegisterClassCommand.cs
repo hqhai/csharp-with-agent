@@ -51,15 +51,17 @@ namespace Fsel.Training.Application.Commands.ClassCmd
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<ClassModel> methodResult = new MethodResult<ClassModel>();
+            var codeResult = await _mediator.Send(new GetNewClassCodeQuery { Code = request.CodeCourse, CourseLevel = request.CourseLevel }, cancellationToken).ConfigureAwait(false);
+            var code = codeResult.Result;
 
             await _classRepository.ExecuteTransactionAsync(async () =>
             {
                 var classnew = await _classRepository.Queryable.Include(x => x.ClassStudents)
-                           .FirstOrDefaultAsync(x => x.Code == request.Code && x.CourseId == request.CourseId, cancellationToken);
+                           .FirstOrDefaultAsync(x => x.CourseId == request.CourseId, cancellationToken);
 
                 if (classnew == null)
                 {
-                    classnew = await CreateClassAsync(request.Code, request.CourseId, request.PackageId, request.LiveTimeFrameId, request.LiveDays);
+                    classnew = await CreateClassAsync(code, request.CourseId, request.PackageId, request.LiveTimeFrameId, request.LiveDays);
                 }
                 else if (classnew.ClassStudents.Count > 11 || classnew.Status == EnumStatusClass.Active)
                 {

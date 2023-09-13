@@ -3,6 +3,7 @@
 namespace Fsel.Ordering.Domain.Models.EntityModels
 {
     using Fsel.Ordering.Domain.Enums;
+    using Fsel.Shared.Enums;
 
     public class OrderModel
     {
