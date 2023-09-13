@@ -21,7 +21,7 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkQuery
     public class GetHomeWorkQuery : IRequest<MethodResult<HomeWorkModel>>
     {
         public Guid HomeWorkId { get; set; }
-        public Guid? LessonResultId { get; set; }
+        public Guid LessonResultId { get; set; }
     }
 
     public class GetHomeWorkQueryHandler : IRequestHandler<GetHomeWorkQuery, MethodResult<HomeWorkModel>>

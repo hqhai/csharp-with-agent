@@ -14,40 +14,11 @@ namespace Fsel.Course.Lms.Application.InternalEvents
     using MediatR;
     using Microsoft.EntityFrameworkCore;
 
-    public class LessonResultInputThenUpdateUnitResultHandler : BaseInternalEventHandler,
+    public class LessonResultInputThenUpdateUnitResultHandler : BaseInternalUnitResultEventHandler,
         INotificationHandler<EntityChangedEvent<LessonResult>>
     {
-        private readonly IUnitRepository _unitRepository;
-        private readonly ILessonResultRepository _lessonResultRepository;
-        private readonly IMockTestResultRepository _mockTestResultRepository;
-
-        public LessonResultInputThenUpdateUnitResultHandler(IUnitRepository unitRepository
-            , IUnitResultRepository unitResultRepository
-            , ILessonResultRepository lessonResultRepository
-            , IVideoResultRepository videoResultRepository
-            , IClassForumResultRepository classForumResultRepository
-            , IHomeWorkResultRepository homeWorkResultRepository
-            , ICourseRepository courseRepository
-            , FinishOneUnitPublisher finishOneUnitPublisher
-            , ICourseResultRepository courseResultRepository
-            , FinishOneLevelPassPublisher finishOneLevelPassPublisher
-            , IMockTestResultRepository mockTestResultRepository
-            , IFinalTestResultRepository finalTestResultRepository
-            ) : base(videoResultRepository,
-                classForumResultRepository,
-                unitResultRepository,
-                lessonResultRepository,
-                courseResultRepository,
-                courseRepository,
-                finishOneUnitPublisher,
-                finishOneLevelPassPublisher,
-                finalTestResultRepository,
-                mockTestResultRepository,
-                homeWorkResultRepository)
+        public LessonResultInputThenUpdateUnitResultHandler(IVideoResultRepository videoResultRepository, IClassForumResultRepository classForumResultRepository, IUnitResultRepository unitResultRepository, ILessonResultRepository lessonResultRepository, ICourseResultRepository courseResultRepository, ICourseRepository courseRepository, IUnitRepository unitRepository, IMockTestRepository mockTestRepository, IHomeWorkQuestionRepository homeWorkQuestionRepository, IHomeWorkAnswerRepository homeWorkAnswerRepository, IQuestionRepository questionRepository, IHomeWorkRepository homeWorkRepository, FinishOneUnitPublisher finishOneUnitPublisher, FinishOneLevelPassPublisher finishOneLevelPassPublisher, IFinalTestResultRepository finalTestResultRepository, IMockTestResultRepository mockTestResultRepository, IHomeWorkResultRepository homeWorkResultRepository) : base(videoResultRepository, classForumResultRepository, unitResultRepository, lessonResultRepository, courseResultRepository, courseRepository, unitRepository, mockTestRepository, homeWorkQuestionRepository, homeWorkAnswerRepository, questionRepository, homeWorkRepository, finishOneUnitPublisher, finishOneLevelPassPublisher, finalTestResultRepository, mockTestResultRepository, homeWorkResultRepository)
         {
-            _unitRepository = unitRepository;
-            _lessonResultRepository = lessonResultRepository;
-            _mockTestResultRepository = mockTestResultRepository;
         }
 
         public async Task Handle(EntityChangedEvent<LessonResult> notification, CancellationToken cancellationToken)
@@ -62,13 +33,14 @@ namespace Fsel.Course.Lms.Application.InternalEvents
 
             if (unit != null && lessonResult.Status == EnumResultStatus.Done)
             {
+                var lessonResultIds = unit.LessonResults.Select(x => x.Id).ToList();
                 if (unit.LessonResults.Count == unit.UnitLessons.Count && unit.UnitSkillMockTests.Count == 0)
                 {
-                    await UpdateUnit(unit.LessonResults.ToList(), unit, lessonResult.CourseId, lessonResult.StudentId, cancellationToken);
+                    await UpdateUnit(lessonResultIds, unit, lessonResult.CourseId, lessonResult.StudentId, cancellationToken);
                 }
                 else if (unit.LessonResults.Count == unit.UnitLessons.Count && unit.UnitSkillMockTests.Count > 0)
                 {
-                    await UpdateUnit(unit.LessonResults.ToList(), unit, lessonResult.CourseId, lessonResult.StudentId, cancellationToken);
+                    await UpdateUnit(lessonResultIds, unit, lessonResult.CourseId, lessonResult.StudentId, cancellationToken).ConfigureAwait(false);
                     await UpdateTheNextLesson(unit, lessonResult, cancellationToken);
                 }
                 else
@@ -76,30 +48,16 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                     var isCheck = unit.LessonResults.Any(x => x.Status == EnumResultStatus.New);
                     if (!isCheck)
                     {
-                        await UpdateUnit(unit.LessonResults.ToList(), unit, lessonResult.CourseId, lessonResult.StudentId, cancellationToken);
+                        await UpdateUnit(lessonResultIds, unit, lessonResult.CourseId, lessonResult.StudentId, cancellationToken).ConfigureAwait(false);
                         await UpdateTheNextLesson(unit, lessonResult, cancellationToken);
                     }
                 }
             }
         }
 
-        public async Task UpdateTheNextLesson(Domain.Entities.Unit? unit, LessonResult lessonResult, CancellationToken cancellationToken)
+        private async Task UpdateTheNextLesson(Domain.Entities.Unit? unit, LessonResult lessonResult, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(unit);
-            var isCheckDone = true;
-            switch (unit.CourseLevel.GetEnumCourseType())
-            {
-                case EnumCourseType.Ielts:
-                    isCheckDone = false;
-                    break;
-
-                case EnumCourseType.Academic:
-                    isCheckDone = true;
-                    break;
-
-                default:
-                    break;
-            }
             var mockTestId = unit.UnitSkillMockTests.FirstOrDefault()?.MockTestId;
             var displayOrder = unit.UnitLessons.FirstOrDefault(x => x.LessonId == lessonResult.LessonId)!.DisplayOrder;
             var lesson = unit.UnitLessons.FirstOrDefault(x => x.DisplayOrder == displayOrder + 1)?.Lesson;
@@ -113,7 +71,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                     await _lessonResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
                 }
             }
-            else if (!isCheckDone && mockTestId.HasValue)
+            else if (unit.CourseLevel.GetEnumCourseType() == EnumCourseType.Ielts && mockTestId.HasValue)
             {
                 var mockTestResult = await _mockTestResultRepository.Queryable.FirstOrDefaultAsync(x => x.CourseId == lessonResult.CourseId && x.UnitId == lessonResult.UnitId && x.StudentId == lessonResult.StudentId && x.MockTestId == mockTestId.Value, cancellationToken);
                 if (mockTestResult != null)

@@ -63,6 +63,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
             var classForumResultScores = new List<ClassForumResultScoreModel>();
             var classForums = await _classForumRepository.Queryable
                                             .Include(x => x.Lesson)
+                                            .ThenInclude(x => x.LessonResults.Where(x => x.StudentId == studentId))
                                             .Include(x => x.ClassForumResults.Where(x => x.StudentId == studentId))
                                             .ThenInclude(x => x.ClassForumScores)
                                             .Where(x => lessonIds.Contains(x.LessonId))
@@ -78,6 +79,8 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
                 Name = x.Lesson?.Name,
                 CourseSkill = x.CourseSkill,
                 TotalCorrect = 30,
+                LessonId = x.LessonId,
+                LessonResultId = x.Lesson?.LessonResults.FirstOrDefault(y => y.LessonId == x.LessonId && y.StudentId == studentId)?.Id,
                 ClassForumResultScore = x.ClassForumResults.Select(x => new ClassForumResultScoreModel
                 {
                     Id = x.Id,

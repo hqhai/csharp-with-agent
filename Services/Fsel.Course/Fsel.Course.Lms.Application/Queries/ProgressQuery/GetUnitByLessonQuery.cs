@@ -77,8 +77,8 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
             var skillScores = exercises.GroupBy(x => x!.CourseSkill).Select(x => new SkillScores
             {
                 Skill = x.Key,
-                CountQuestion = x.SelectMany(x => x!.ExerciseQuestions).Select(x => x.Question).Count(),
-                TotalQuestion = x.SelectMany(x => x!.VideoTimeCodeAnswers).Count(),
+                CountQuestion = x.SelectMany(x => x!.VideoTimeCodeAnswers).Count(),
+                TotalQuestion = x.SelectMany(x => x!.ExerciseQuestions).Select(x => x.Question).Count(),
                 CorrectCount = x.SelectMany(x => x!.VideoTimeCodeAnswers).Sum(x => x.CorrectCount),
                 TotalCount = x.SelectMany(x => x!.ExerciseQuestions).Select(x => x.Question).Sum(x => x!.CorrectTotal),
             }).ToList();
@@ -87,7 +87,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
             overallScoreReport.SkillScores = skillScores;
             overallScoreReport.CountQuestion = skillScores.Sum(x => x.CountQuestion);
             overallScoreReport.TotalQuestion = skillScores.Sum(x => x.TotalQuestion);
-
+            overallScoreReport.CourseSkills = exercises.Select(x => x!.CourseSkill).Distinct().ToList();
             methodResult.StatusCode = StatusCodes.Status200OK;
             methodResult.Result = overallScoreReport;
             return methodResult;

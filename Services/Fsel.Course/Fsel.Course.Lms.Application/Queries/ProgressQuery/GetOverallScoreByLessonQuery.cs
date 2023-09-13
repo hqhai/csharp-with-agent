@@ -98,6 +98,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
             overallScoreReport.SkillScores = skillScores;
             overallScoreReport.CountQuestion = skillScores.Sum(x => x.CountQuestion);
             overallScoreReport.TotalQuestion = skillScores.Sum(x => x.TotalQuestion);
+            overallScoreReport.CourseSkills = exercises.Select(x => x!.CourseSkill).Distinct().ToList();
             methodResult.StatusCode = StatusCodes.Status200OK;
             methodResult.Result = overallScoreReport;
             return methodResult;

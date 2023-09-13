@@ -62,9 +62,15 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
                 return methodResult;
             }
 
+            if (await _orderRepository.Queryable.AnyAsync(x => x.UserId == _authContext.CurrentUserId && x.Status != EnumOrderStatus.Reject && x.CreatedDate.AddDays(14) < DateTime.Now, cancellationToken))
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(request.CourseLevel));
+                return methodResult;
+            }
+
             if (await _orderRepository.Queryable.AnyAsync(x => x.Code == request.Code, cancellationToken))
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Code));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(request.Code));
                 return methodResult;
             }
 

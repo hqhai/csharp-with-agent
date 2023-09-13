@@ -91,6 +91,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
             overallScoreReport.SkillScores = skillScores;
             overallScoreReport.TotalQuestion = skillScores.Sum(x => x.TotalQuestion);
             overallScoreReport.CountQuestion = skillScores.Sum(x => x.CountQuestion);
+            overallScoreReport.CourseSkills = new List<EnumCourseSkill> { EnumCourseSkill.Reading, EnumCourseSkill.Grammar, EnumCourseSkill.Vocabulary };
             methodResult.StatusCode = StatusCodes.Status200OK;
             methodResult.Result = overallScoreReport;
             return methodResult;
