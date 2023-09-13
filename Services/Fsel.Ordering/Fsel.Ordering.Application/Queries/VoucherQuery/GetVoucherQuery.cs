@@ -58,7 +58,7 @@ namespace Fsel.Ordering.Application.Queries.VoucherQuery
                                             PackageId = x.PackageId,
                                             Percentage = x.Percentage,
                                             VoucherId = x.VoucherId,
-                                            DiscountedPrice = (double)x.Package!.Price - (x.Percentage * NumberHelper.ConvertDoublePercent((double)x.Package!.Price)),
+                                            DiscountedPrice = (double)x.Package!.Price - NumberHelper.ConvertDoublePercent(x.Percentage * (double)x.Package!.Price),
                                             Price = (double)x.Package!.Price,
                                         }).ToList(),
                                     }).FirstOrDefaultAsync(cancellationToken);
