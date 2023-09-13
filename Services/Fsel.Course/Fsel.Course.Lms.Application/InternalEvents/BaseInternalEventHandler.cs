@@ -110,9 +110,9 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                     {
                         if (x.Skill == EnumCourseSkill.Writing || x.Skill == EnumCourseSkill.Speaking)
                         {
-                            return NumberHelper.ConvertDouble(x.Percent * 3.5 / 100);
+                            return NumberHelper.ConvertDivideDoublePercent(x.Percent * 3.5);
                         }
-                        return NumberHelper.ConvertDouble(x.Percent * 3.25 / 100);
+                        return NumberHelper.ConvertDivideDoublePercent(x.Percent * 3.25);
                     })) : default);
                 }
             }
