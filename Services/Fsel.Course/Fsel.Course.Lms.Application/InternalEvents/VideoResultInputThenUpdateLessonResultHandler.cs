@@ -40,7 +40,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 lessonResult.SkillScores = skillScores;
                 await _finishOneLessonPublisher.Publish(lessonResult, cancellationToken);
                 _lessonResultRepository.Update(lessonResult);
-                await _lessonResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+                await _lessonResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             }
         }
     }

@@ -10,5 +10,7 @@ namespace Fsel.Course.Domain.IRepositories
         Task<EntityCourse?> GetIncludeLessonVideoByIdAsync(Guid id);
 
         Task<EntityCourse?> GetIncludeCourseUnitMockTestByIdAsync(Guid id);
+
+        Task<EntityCourse?> GetIncludeCourseResult(Guid id, Guid? studentId);
     }
 }

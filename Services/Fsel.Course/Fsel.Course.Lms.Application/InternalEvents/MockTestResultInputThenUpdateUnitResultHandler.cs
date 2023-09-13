@@ -40,7 +40,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                     }
                 }
             }
-            else if (mockTest != null && mockTest.MockTestType == EnumMockTestType.SkillMockTest && mockTestResult.Status == EnumResultStatus.Done)
+            else if (mockTest != null && mockTest.MockTestType == EnumMockTestType.FullMockTest && mockTestResult.Status == EnumResultStatus.Done)
             {
                 await UpdateProcessMockTest(mockTestResult, cancellationToken);
             }
