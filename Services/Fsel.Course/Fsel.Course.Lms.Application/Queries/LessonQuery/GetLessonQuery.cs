@@ -157,7 +157,7 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
                     var classForumResult = lessonResult.ClassForumResults.FirstOrDefault(x => x.StudentId == studentId && x.LessonResultId == lessonResult.Id);
                     if (lessonResult.VideoResult?.Status == EnumResultStatus.Done)
                     {
-                        lesson.IsClassForumLock = !lesson.IsVideoLock;
+                        lesson.IsClassForumLock = false;
                     }
                     if (classForumResult != null && (classForumResult.Status == EnumClassForumResultStatus.PendingForGrading || classForumResult.Status == EnumClassForumResultStatus.Graded))
                     {
