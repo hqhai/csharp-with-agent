@@ -152,7 +152,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             }
         }
 
-        public async Task UpdateExtraPracticeResult(ExtraPracticeResult? extraPracticeResult, CancellationToken cancellationToken)
+        private async Task UpdateExtraPracticeResult(ExtraPracticeResult? extraPracticeResult, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(extraPracticeResult);
             var correctCounts = from baseQ in _extraPracticeRepository.Queryable
@@ -172,7 +172,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             await _extraPracticeResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         }
 
-        public async Task UpdateExtraPracticeResultTypeBook(ExtraPracticeResult? extraPracticeResult, CancellationToken cancellationToken)
+        private async Task UpdateExtraPracticeResultTypeBook(ExtraPracticeResult? extraPracticeResult, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(extraPracticeResult);
             var correctCounts = from baseQ in _extraPracticeRepository.Queryable
@@ -194,7 +194,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             await _extraPracticeResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         }
 
-        public async Task UpdateExtraPracticeExerciseResultTypeBook(ExtraPracticeResult? extraPracticeResult, CancellationToken cancellationToken)
+        private async Task UpdateExtraPracticeExerciseResultTypeBook(ExtraPracticeResult? extraPracticeResult, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(extraPracticeResult);
             var correctCounts = from baseQ in _extraPracticeRepository.Queryable

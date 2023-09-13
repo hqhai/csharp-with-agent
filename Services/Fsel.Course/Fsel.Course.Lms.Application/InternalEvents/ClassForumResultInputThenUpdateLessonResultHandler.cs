@@ -37,7 +37,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             }
         }
 
-        public async Task UpdateHomeWorks(ClassForumResult classForumResult, CancellationToken cancellationToken)
+        private async Task UpdateHomeWorks(ClassForumResult classForumResult, CancellationToken cancellationToken)
         {
             var homeWorkResults = await _homeWorkResultRepository.Queryable.Where(x => x.LessonResultId == classForumResult.LessonResultId).ToListAsync(cancellationToken);
             if (homeWorkResults != null)
