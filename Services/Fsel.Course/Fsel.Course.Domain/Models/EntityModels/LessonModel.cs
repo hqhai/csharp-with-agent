@@ -19,5 +19,8 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public IList<Guid>? ExtraPracticeIds { get; set; }
         public IList<LessonInstructionModel>? LessonInstructions { get; set; }
         public ClassForumModel? ClassForum { get; set; }
+        public bool IsVideoLock { get; set; }
+        public bool IsClassForumLock { get; set; } = true;
+        public bool IsHomeWorkLock { get; set; } = true;
     }
 }
