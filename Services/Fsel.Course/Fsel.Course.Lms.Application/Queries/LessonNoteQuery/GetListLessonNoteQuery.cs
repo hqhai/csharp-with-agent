@@ -40,7 +40,8 @@ namespace Fsel.Course.Lms.Application.Queries.LessonNoteQuery
                                             Id = lessonResult.Id,
                                             Name = lessonResult.Name,
                                             Note = lessonResult.Note,
-                                            LessonResultId = lessonResult.LessonResultId
+                                            LessonResultId = lessonResult.LessonResultId,
+                                            CreatedDate = lessonResult.CreatedDate,
                                         }).ToListAsync(cancellationToken: cancellationToken);
 
             var lessonResult = await _lessonResultRepository.Queryable.Where(x => x.Id == request.LessonResultId).FirstOrDefaultAsync(cancellationToken: cancellationToken);

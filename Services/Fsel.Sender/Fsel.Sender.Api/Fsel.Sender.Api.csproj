@@ -24,4 +24,13 @@
     <ProjectReference Include="..\Fsel.Sender.Application\Fsel.Sender.Application.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="Resources\SendStudentPTOnline.html">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Resources\SendSurveyToParentStudent.html">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>
