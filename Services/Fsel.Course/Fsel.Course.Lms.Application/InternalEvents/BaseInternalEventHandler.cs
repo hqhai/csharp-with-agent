@@ -316,28 +316,37 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             }
         }
 
-        private async Task UpdateCourse(Guid courseId, Guid studentId)
+        private async Task UpdateCourse(Guid courseId, Guid studentId, CancellationToken cancellationToken)
         {
-            var course = await _courseRepository.Queryable.Include(x => x.CourseUnitMockTests).FirstOrDefaultAsync(x => x.Id == courseId);
+            var course = await _courseRepository.Queryable.Include(x => x.CourseUnitMockTests).FirstOrDefaultAsync(x => x.Id == courseId, cancellationToken);
             if (course != null)
             {
+                var courseResult = await _courseResultRepository.Queryable.FirstOrDefaultAsync(x => x.CourseId == courseId && x.StudentId == studentId, cancellationToken);
                 var finalTestId = course.CourseUnitMockTests.Where(x => x.FinalTestId != null).FirstOrDefault()?.FinalTestId;
                 var unitIds = course.CourseUnitMockTests.Where(x => x.UnitId != null).Select(x => x.UnitId ?? default).ToList();
                 var courseType = course.CourseLevel.GetEnumCourseType();
-                await GetCourseResult(unitIds, studentId, courseType, finalTestId).ConfigureAwait(false);
+                var (skillScores, percent) = await GetCourseResult(unitIds, studentId, courseType, finalTestId).ConfigureAwait(false);
+                if (courseResult != null)
+                {
+                    courseResult.CorrectCount = (int)skillScores.Sum(x => x.CorrectCount);
+                    courseResult.CorrectTotal = (int)skillScores.Sum(x => x.TotalCount);
+                    courseResult.Percent = percent;
+                    _courseResultRepository.Update(courseResult);
+                    await _courseResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                }
             }
         }
 
         public async Task UpdateCourseResult(Guid courseId, Guid studentId, CancellationToken cancellationToken)
         {
-            await UpdateCourse(courseId, studentId).ConfigureAwait(false);
+            await UpdateCourse(courseId, studentId, cancellationToken).ConfigureAwait(false);
             var courseResult = await _courseResultRepository.Queryable.FirstOrDefaultAsync(x => x.CourseId == courseId && x.StudentId == studentId, cancellationToken);
             if (courseResult != null)
             {
                 await _finishOneLevelPassPublisher.Publish(courseResult, cancellationToken);
                 courseResult.Status = EnumCourseStatus.InActive;
                 _courseResultRepository.Update(courseResult);
-                await _courseResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+                await _courseResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             }
         }
     }
