@@ -59,8 +59,8 @@ namespace Fsel.Course.Lms.Application.Queries.StudentQuery
             if (student != null)
             {
                 var placementTestResult = await _placementTestResultRepository.Queryable.Where(x => x.Status == EnumResultStatus.Done && x.StudentId == student.Id)
-                                                                           .OrderByDescending(x => x.CreatedDate)
-                                                                           .FirstOrDefaultAsync(cancellationToken);
+                                                                               .OrderByDescending(x => x.CreatedDate)
+                                                                               .FirstOrDefaultAsync(cancellationToken);
                 var (levelNext, isLock) = placementTestResult?.Level.GetLevelInScore(placementTestResult.Percent, age) ?? (null, default);
 
                 settingStudentModel.Level = student.CourseLevel;
