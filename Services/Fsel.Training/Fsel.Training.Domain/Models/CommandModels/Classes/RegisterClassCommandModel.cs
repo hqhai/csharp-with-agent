@@ -12,5 +12,6 @@ namespace Fsel.Training.Domain.Models.CommandModels.Classes
         public EnumCourseLevel CourseLevel { get; set; }
         public Guid? LiveTimeFrameId { get; set; }
         public IList<DayOfWeek>? LiveDays { get; set; }
+        public Guid UserId { get; set; }
     }
 }

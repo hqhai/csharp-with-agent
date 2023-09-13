@@ -61,7 +61,7 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery
 
             CultureInfo culture = new CultureInfo("en-US");
             string formattedDate = DateTime.Now.ToString("ddMMyyyy", culture);
-            var code = $"{request.CourseLevel.GetEnumCourseType()}{formattedDate}{package.Code.ToString()!.Substring(0, 1)}{student.Content!.Result!.Human!.Code}";
+            var code = $"{request.CourseLevel.GetEnumCourseType()}{formattedDate}{package.Code.ToString()!.Substring(0, 1)}{student.Content?.Result?.Human?.Code}";
             order.Code = code;
             order.Package = _mapper.Map<PackageModel>(package);
 

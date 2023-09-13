@@ -7,7 +7,6 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
-    using Fsel.Core.Base;
     using Fsel.Ordering.Application.Queries.OrderQuery;
     using Fsel.Ordering.Application.Queues.Publishers;
     using Fsel.Ordering.Application.Services.TrainingService;
@@ -76,12 +75,13 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
                 return methodResult;
             }
 
-            var classnew = await _trainingService.RegisterClassAsync(new RegisterClassCommandModel { CodeCourse = request.CodeCourse, CourseId = request.CourseId, CourseLevel = request.CourseLevel, PackageId = package.Id, LiveDays = request.LiveDays, LiveTimeFrameId = request.LiveTimeFrameId });
+            var classnew = await _trainingService.RegisterClassAsync(new RegisterClassCommandModel { UserId = request.UserId, CodeCourse = request.CodeCourse, CourseId = request.CourseId, CourseLevel = request.CourseLevel, PackageId = package.Id, LiveDays = request.LiveDays, LiveTimeFrameId = request.LiveTimeFrameId });
             if (!classnew.IsSuccessStatusCode)
             {
                 methodResult.AddError(classnew.Error);
                 return methodResult;
             }
+
             if (classnew?.Content?.Result == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(classnew));
@@ -91,6 +91,8 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
             Order order = _mapper.Map<Order>(request);
             order.Status = EnumOrderStatus.New;
             order.UserId = request.UserId;
+            order.Code = code;
+            order.PackageId = package.Id;
             order.Price = package.Price;
             order.DiscountPercent = 5;
             order.DiscountPrice = order.Price * order.DiscountPercent / 100;
@@ -105,6 +107,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
             await _orderRepository.ExecuteTransactionAsync(async () =>
             {
                 order = _orderRepository.Add(order);
+                await _orderRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
                 await _notificationMessagePublisher.Publish(new NotificationQueueModel
                 {
                     Roles = new List<EnumRole> { EnumRole.Admin },
@@ -112,8 +115,6 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
                     Type = EnumNotificationType.Text,
                     Content = EnumNotificationContent.OrderCreate
                 }, cancellationToken);
-                await _orderRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
-
                 methodResult.StatusCode = StatusCodes.Status201Created;
                 methodResult.Result = _mapper.Map<OrderModel>(order);
                 return methodResult;
