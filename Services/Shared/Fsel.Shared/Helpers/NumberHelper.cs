@@ -46,7 +46,7 @@ namespace Fsel.Shared.Helpers
             return orderCode;
         }
 
-        public static double ConvertDivideDoublePercent(double value)
+        public static double ConvertDoublePercent(double value)
         {
             double convertedValue = Math.Round(value / 100, 2);
             return convertedValue;

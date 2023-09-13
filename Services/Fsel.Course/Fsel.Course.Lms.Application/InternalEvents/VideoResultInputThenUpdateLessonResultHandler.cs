@@ -9,6 +9,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Lms.Application.Queues.Publishers;
+    using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.EntityFrameworkCore;
 
@@ -36,7 +37,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 var skillScores = videoResult.VideoSkillScores?.FirstOrDefault(x => x.Type == EnumTimeCodeType.Standalone)?.SkillScores;
                 lessonResult.CorrectCount = videoResult.CorrectCount;
                 lessonResult.CorrectTotal = videoResult.CorrectTotal;
-                lessonResult.Percent = videoResult.Percent * 40 / 100;
+                lessonResult.Percent = NumberHelper.ConvertDoublePercent(videoResult.Percent * 40);
                 lessonResult.SkillScores = skillScores;
                 await _finishOneLessonPublisher.Publish(lessonResult, cancellationToken);
                 _lessonResultRepository.Update(lessonResult);
