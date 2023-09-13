@@ -99,7 +99,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 return (null, null, default, null);
             }
             var skillScores = homeWorkResults.Where(x => x.SkillScores != null && x.SkillScores.Any()).SelectMany(x => x.SkillScores!).ToList();
-            skillScores.ForEach(x => x.Percent = x.TotalCount > 0 ? NumberHelper.ConvertDoublePercent(x.CorrectCount / x.TotalCount) : default);
+            skillScores.ForEach(x => x.Percent = x.TotalCount > 0 ? NumberHelper.ConvertDouble(x.CorrectCount / x.TotalCount * 100) : default);
             return (skillScores.Sum(x => x.TotalCount), skillScores.Sum(x => x.TotalCount), skillScores.Average(x => x.Scores), skillScores);
         }
     }

@@ -110,9 +110,9 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                     {
                         if (x.Skill == EnumCourseSkill.Writing || x.Skill == EnumCourseSkill.Speaking)
                         {
-                            return NumberHelper.ConvertDoublePercent(x.Percent * 3.5);
+                            return NumberHelper.ConvertDouble(x.Percent * 3.5 / 100);
                         }
-                        return NumberHelper.ConvertDoublePercent(x.Percent * 3.25);
+                        return NumberHelper.ConvertDouble(x.Percent * 3.25 / 100);
                     })) : default);
                 }
             }
@@ -146,7 +146,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                     return (skillScores, skillScores.Any() ? NumberHelper.ConvertDivideDoublePercent(skillScores.Average(x => x.Percent * (32 * skillScores.Count))) : default);
                 }
             }
-            return (skillScores, skillScores.Any() ? NumberHelper.ConvertDivideDoublePercent(skillScores.Average(x => x.Percent * (percentSkill * skillScores.Count))) : default);
+            return (skillScores, skillScores.Any() ? NumberHelper.ConvertDouble(skillScores.Average(x => x.Percent * (percentSkill * skillScores.Count))) : default);
         }
 
         public async Task<(List<SkillScores>, double)> GetHomeWordsSkillScores(IList<Guid>? lessonResultIds, int percentSkill = 0, EnumCourseType? courseType = null)
@@ -181,7 +181,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                     CorrectCount = group.Sum(x => x.CorrectCount),
                     CountQuestion = group.Sum(x => x.CountQuestion),
                     TotalQuestion = group.Sum(x => x.TotalQuestion),
-                    Percent = NumberHelper.ConvertDivideDoublePercent(group.Average(x => x.Percent)),
+                    Percent = NumberHelper.ConvertDouble(group.Average(x => x.Percent)),
                 };
             }
             return new SkillScores();
@@ -198,7 +198,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 skillScores.CountQuestion = x.Sum(x => x.CountQuestion);
                 skillScores.TotalCount = x.Sum(x => x.TotalCount);
                 skillScores.CorrectCount = x.Sum(x => x.CorrectCount);
-                skillScores.Percent = NumberHelper.ConvertDoublePercent(x.Sum(x => x.CorrectCount) / x.Sum(x => x.TotalCount));
+                skillScores.Percent = NumberHelper.ConvertDouble(x.Sum(x => x.CorrectCount) / x.Sum(x => x.TotalCount) * 100);
                 return skillScores;
             };
             return skillScores;
