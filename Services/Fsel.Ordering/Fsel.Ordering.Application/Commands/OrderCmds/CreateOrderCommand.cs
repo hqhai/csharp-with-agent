@@ -17,6 +17,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
     using Fsel.Ordering.Domain.Models.CommandModels.Orders;
     using Fsel.Ordering.Domain.Models.EntityModels;
     using Fsel.Shared.Enums;
+    using Fsel.Shared.Helpers;
     using Fsel.Shared.Models.ShareModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
@@ -91,7 +92,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
             order.UserId = _authContext.CurrentUserId;
             order.Price = package.Price;
             order.DiscountPercent = 5;
-            order.DiscountPrice = order.Price * order.DiscountPercent / 100;
+            order.DiscountPrice = (decimal)NumberHelper.ConvertDouble(Convert.ToDouble(order.Price * order.DiscountPercent));
             order.TotalPrice = order.Price - order.DiscountPrice;
             order.ClassId = classnew.Content?.Result.Id ?? default;
             if (!order.IsValid())
