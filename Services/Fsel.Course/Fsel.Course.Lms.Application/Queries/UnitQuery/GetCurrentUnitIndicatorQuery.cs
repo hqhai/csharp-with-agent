@@ -71,7 +71,7 @@ namespace Fsel.Course.Lms.Application.Queries.UnitQuery
             }
             #endregion
 
-            methodResult.Result = ConvertHelper.Deserialize<IList<SkillScores>>(currentUnitIndicator!.UnitResult.SkillScoresStr);
+            methodResult.Result = currentUnitIndicator!.UnitResult.SkillScores;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }
