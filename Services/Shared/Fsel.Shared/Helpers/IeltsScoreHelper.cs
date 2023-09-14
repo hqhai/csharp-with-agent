@@ -143,8 +143,8 @@ namespace Fsel.Shared.Helpers
                     case EnumPlacementTestLevel.B1Plus:
                         if (yearOld <= 13)
                         {
-                            isLock = value >= 75;
-                            courseLevel = isLock ? EnumCourseLevel.B2 : EnumCourseLevel.B1;
+                            isLock = true;
+                            courseLevel = value >= 75 ? EnumCourseLevel.B2 : EnumCourseLevel.B1;
                         }
                         else
                         {
