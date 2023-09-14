@@ -83,7 +83,7 @@ namespace Fsel.Course.Domain.Entities
 
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         public Guid StudentId { get; set; }
-        public DateTime? CheckStartDate { get; set; }
+        public DateTime? GradingStartDate { get; set; }
 
         public ICollection<MockTestAnswer> MockTestAnswers { get; set; } = new List<MockTestAnswer>();
         public ICollection<MockTestScore> MockTestScores { get; set; } = new List<MockTestScore>();
