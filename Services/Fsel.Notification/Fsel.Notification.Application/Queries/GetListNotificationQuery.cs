@@ -1,14 +1,13 @@
-using AutoMapper;
 using Fsel.Notification.Domain.IRepositories;
 using Fsel.Notification.Domain.Model.EntityModels;
 using Fsel.Notification.Domain.Model.QueryModels;
-using Fsel.Shared.Enums;
 using Fsel.Common.ActionResults;
 using Fsel.Core.Base.BaseModels;
 using Fsel.Core.Extensions;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using Fsel.Core.Base;
 
 namespace Fsel.Notification.Application.Queries
 {
@@ -19,10 +18,12 @@ namespace Fsel.Notification.Application.Queries
     public class GetListNotificationQueryQueryHandler : IRequestHandler<GetListNotificationQuery, MethodResult<PagingItemsModel<NotificationMessageModel>>>
     {
         private readonly INotificationsRepository _notificationsRepository;
+        private readonly AuthContext _authContext;
 
-        public GetListNotificationQueryQueryHandler(INotificationsRepository notificationsRepository)
+        public GetListNotificationQueryQueryHandler(INotificationsRepository notificationsRepository, AuthContext authContext)
         {
             _notificationsRepository = notificationsRepository;
+            _authContext = authContext;
         }
 
         public async Task<MethodResult<PagingItemsModel<NotificationMessageModel>>> Handle(GetListNotificationQuery request, CancellationToken cancellationToken)
@@ -31,8 +32,7 @@ namespace Fsel.Notification.Application.Queries
             var methodResult = new MethodResult<PagingItemsModel<NotificationMessageModel>>();
 
             var notificationQuery = _notificationsRepository.Queryable.Include(x => x.NotificationType)
-                                                                      .Where(x => x.Status == EnumNotificationStatus.Sent
-                                                                            && x.NotificationType!.Type == request.Type)
+                                                                      .Where(x => x.UserId == _authContext.CurrentUserId)
                                                                       .Select(x => new NotificationMessageModel
                                                                       {
                                                                           Id = x.Id,
@@ -46,20 +46,11 @@ namespace Fsel.Notification.Application.Queries
                                                                           CreatedUserId = x.CreatedUserId,
                                                                           CreatedFullName = x.CreatedFullName,
                                                                           NotificationTypeId = x.NotificationTypeId,
-                                                                          TemplateMessage = x.NotificationType!.TemplateMessage,
-                                                                          TemplateLink = x.NotificationType!.TemplateLink
                                                                       });
 
-
-
-            if (request.UserId != null)
+            if (request.Status != null)
             {
-                notificationQuery = notificationQuery.Where(m => m.UserId == request.UserId);
-            }
-
-            if (request.RoleId != null)
-            {
-                notificationQuery = notificationQuery.Where(m => m.RoleId == request.RoleId);
+                notificationQuery = notificationQuery.Where(m => m.Status == request.Status);
             }
 
             int totalItem = await notificationQuery.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
