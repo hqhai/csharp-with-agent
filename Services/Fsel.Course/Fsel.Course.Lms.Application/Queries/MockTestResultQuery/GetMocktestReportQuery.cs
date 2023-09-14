@@ -9,8 +9,10 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
+    using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Course.Infrastructure.Repositories;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using MediatR;
     using Microsoft.AspNetCore.Http;
@@ -52,31 +54,38 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
             var mockTestResult = await _mockTestResultRepository.Queryable.Include(x => x.MockTestScores).OrderBy(x => x.CreatedDate)
                                     .Where(x => x.Id == request.MockTestResultId && x.StudentId == studentId)
                                     .AsNoTracking()
-                                    .Select(x => new MockTestResultModel
-                                    {
-                                        Id = x.Id,
-                                        Percent = x.Percent,
-                                        CorrectCount = x.CorrectCount,
-                                        CorrectTotal = x.CorrectTotal,
-                                        CourseId = x.CourseId,
-                                        CreatedDate = x.CreatedDate,
-                                        SkillScores = x.SkillScores,
-                                        Status = x.Status,
-                                        StudentId = x.StudentId,
-                                        MockTestId = x.MockTestId,
-                                        MockTestScores = _mapper.Map<IList<MockTestScoreModel>>(x.MockTestScores.OrderBy(x => x.CreatedDate))
-                                    }).FirstOrDefaultAsync(cancellationToken);
+                                    .FirstOrDefaultAsync(cancellationToken);
+
             if (mockTestResult == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(mockTestResult));
                 return methodResult;
             }
 
-            if (mockTestResult.SkillScores != null)
+            mockTestResult.CheckStartDate = DateTime.Now;
+            var mockTestResultModel = new MockTestResultModel
             {
-                mockTestResult.Scores = mockTestResult.SkillScores.Average(x => x.Scores);
+                Id = mockTestResult.Id,
+                Percent = mockTestResult.Percent,
+                CorrectCount = mockTestResult.CorrectCount,
+                CorrectTotal = mockTestResult.CorrectTotal,
+                CourseId = mockTestResult.CourseId,
+                CreatedDate = mockTestResult.CreatedDate,
+                SkillScores = mockTestResult.SkillScores,
+                Status = mockTestResult.Status,
+                StudentId = mockTestResult.StudentId,
+                MockTestId = mockTestResult.MockTestId,
+                MockTestScores = _mapper.Map<IList<MockTestScoreModel>>(mockTestResult.MockTestScores?.OrderBy(x => x.CreatedDate))
+            };
+
+            if (mockTestResultModel.SkillScores != null)
+            {
+                mockTestResultModel.Scores = mockTestResult.SkillScores!.Average(x => x.Scores);
             }
-            methodResult.Result = mockTestResult;
+
+            mockTestResult = _mockTestResultRepository.Update(mockTestResult);
+            await _mockTestResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+            methodResult.Result = mockTestResultModel;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }
