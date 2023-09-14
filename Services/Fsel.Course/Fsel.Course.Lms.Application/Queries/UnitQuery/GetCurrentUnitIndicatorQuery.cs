@@ -54,7 +54,7 @@ namespace Fsel.Course.Lms.Application.Queries.UnitQuery
 
             var currentUnitIndicator = await _unitResultRepository
                               .Queryable
-                              .Where(x => x.CourseId == request.CourseId && x.Status == EnumResultStatus.New)
+                              .Where(x => x.CourseId == request.CourseId && x.Status == EnumResultStatus.Done)
                               .Select(x => new
                               {
                                   UnitResult = x,
