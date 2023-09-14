@@ -78,7 +78,7 @@ namespace Fsel.Identity.Application.Commands.UserCmd
                 return methodResult;
             }
             methodResult.StatusCode = StatusCodes.Status200OK;
-            methodResult.Result = _mapper.Map<UserModel>(user);
+            methodResult.Result = _mapper.Map<UserModel>(userView);
             return methodResult;
         }
 

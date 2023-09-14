@@ -79,7 +79,7 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
             }
 
             int totalItem = teacherRatingQuery!.Count();
-            var lists = teacherRatingQuery!.OrderBy(x => x.CreatedDate).Skip((request!.Page - 1) * request!.PageSize).Take(request!.PageSize).ToList();
+            var lists = teacherRatingQuery!.OrderBy(x => x.CreatedDate).Skip((request.Page - 1) * request.PageSize).Take(request.PageSize).ToList();
 
             foreach (var item in lists)
             {

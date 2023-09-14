@@ -238,7 +238,10 @@ namespace Fsel.Course.Lms.Application.InternalEvents
 
         private async Task<(List<SkillScores>, double)> GetFinalTestSkillScore(Guid? finalTestId, Guid studentId)
         {
-            ArgumentNullException.ThrowIfNull(finalTestId);
+            if (finalTestId == null)
+            {
+                return (new List<SkillScores>(), default);
+            }
 
             var finalTestResult = await _finalTestResultRepository.Queryable.FirstOrDefaultAsync(x => x.FinalTestId == finalTestId && x.StudentId == studentId && x.Status == EnumResultStatus.Done);
             var skillScores = finalTestResult?.SkillScores?.GroupBy(x => x.Skill).Select(x => GetSkillScore(x)).ToList();
