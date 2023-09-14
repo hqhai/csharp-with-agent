@@ -3,6 +3,7 @@
 namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
 {
     using Fsel.Common.ActionResults;
+    using Fsel.Core.Base;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Core.Extensions;
     using Fsel.Course.Domain.Enums;
@@ -22,12 +23,13 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
     {
         private readonly IMockTestResultRepository _mockTestResultRepository;
         private readonly ICourseRepository _courseRepository;
+        private readonly AuthContext _authContext;
 
-        public SearchMockTestByTeacherQueryHandler(IMockTestResultRepository mockTestResultRepository,
-            ICourseRepository courseRepository)
+        public SearchMockTestByTeacherQueryHandler(IMockTestResultRepository mockTestResultRepository, ICourseRepository courseRepository, AuthContext authContext)
         {
             _mockTestResultRepository = mockTestResultRepository;
             _courseRepository = courseRepository;
+            _authContext = authContext;
         }
 
         public async Task<MethodResult<PagingItemsModel<MockTestResultSearchModel>>> Handle(SearchMockTestByTeacherQuery request, CancellationToken cancellationToken)
@@ -44,7 +46,7 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
                                                                         .ThenInclude(x => x!.MockTestSections)
                                                                         .ThenInclude(x => x!.SectionGroup)
                                                                         .Include(x => x.MockTestScores)
-                                                                        .Where(x => x.Status == EnumResultStatus.Done && x.MockTestScores.Count == 0 && x.GradingTeacherId == null)
+                                                                        .Where(x => x.Status == EnumResultStatus.Done && x.MockTestScores.Count == 0 && (x.GradingTeacherId == null || x.GradingTeacherId == _authContext.CurrentUserId))
                                                                         .AsNoTracking()
                                                                         .Select(x => new MockTestResultSearchModel
                                                                         {
