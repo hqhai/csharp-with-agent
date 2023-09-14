@@ -9,6 +9,7 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Infrastructure.Common;
+    using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Http;
@@ -25,13 +26,15 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
         private readonly IMockTestRepository _mockTestRepository;
         private readonly SectionConverter _sectionConverter;
         private readonly AuthContext _authContext;
+        private readonly IUserService _userService;
 
-        public GetMockTestResultByTeacherQueryHandler(IMockTestResultRepository mockTestResultRepository, IMockTestRepository mockTestRepository, SectionConverter sectionConverter, AuthContext authContext)
+        public GetMockTestResultByTeacherQueryHandler(IMockTestResultRepository mockTestResultRepository, IMockTestRepository mockTestRepository, SectionConverter sectionConverter, AuthContext authContext, IUserService userService)
         {
             _mockTestResultRepository = mockTestResultRepository;
             _mockTestRepository = mockTestRepository;
             _sectionConverter = sectionConverter;
             _authContext = authContext;
+            _userService = userService;
         }
 
         public async Task<MethodResult<MockTestModel>> Handle(GetMockTestResultByTeacherQuery request, CancellationToken cancellationToken)
@@ -61,7 +64,12 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
                                     .Where(x => x.Id == mockTestResult.MockTestId)
                                     .AsNoTracking()
                                     .FirstOrDefaultAsync(cancellationToken);
+
             var isCheckFull = mockTest!.MockTestType == EnumMockTestType.FullMockTest;
+
+
+            var teacherResult = await _userService.GetTeacherByUserIdAsync(_authContext.CurrentUserId);
+            var teacherId = teacherResult.Content?.Result?.Id;
 
             if (mockTestResult.GradingStartDate.HasValue && mockTestResult.GradingStartDate.Value.AddMinutes(30) < DateTime.Now)
             {
@@ -70,7 +78,7 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
             }
             else
             {
-                mockTestResult.GradingTeacherId = _authContext.CurrentUserId;
+                mockTestResult.GradingTeacherId = teacherId;
                 mockTestResult.GradingStartDate = DateTime.Now;
             }
             var mockTestModel = new MockTestModel
