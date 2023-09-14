@@ -12,7 +12,12 @@ namespace Fsel.Ordering.Application.Services.TrainingService.CommandModels
         public string? Code { get; set; }
         public EnumCourseLevel CourseLevel { get; set; }
         public Guid? LiveTimeFrameId { get; set; }
-
         public IList<DayOfWeek>? LiveDays { get; set; }
+
+        #region Pilot
+
+        public Guid? UserId { get; set; }
+
+        #endregion Pilot
     }
 }
