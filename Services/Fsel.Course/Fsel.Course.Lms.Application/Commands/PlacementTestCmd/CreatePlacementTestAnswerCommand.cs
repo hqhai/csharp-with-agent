@@ -223,6 +223,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
                 if (!isCheckResult.IsSuccessStatusCode)
                 {
                     methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError));
+                    return methodResult;
                 }
             }
 
@@ -243,7 +244,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
                 if (currentLevel.HasValue)
                 {
                     Random random = new Random();
-                    var courses = await _courseRepository.Queryable.Where(x => x.CourseLevel == currentLevel.Value).ToListAsync(cancellationToken);
+                    var courses = await _courseRepository.Queryable.Where(x => x.CourseLevel == currentLevel.Value && x.Status != EnumCourseStatus.New).ToListAsync(cancellationToken);
                     var course = courses.OrderBy(x => random.Next(courses.Count)).FirstOrDefault();
                     CreateOrderQueueModel createOrderQueueModel = new CreateOrderQueueModel
                     {

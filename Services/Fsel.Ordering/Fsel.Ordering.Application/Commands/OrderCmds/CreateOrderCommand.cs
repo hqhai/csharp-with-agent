@@ -11,6 +11,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
     using Fsel.Ordering.Application.Queues.Publishers;
     using Fsel.Ordering.Application.Services.TrainingService;
     using Fsel.Ordering.Application.Services.TrainingService.CommandModels;
+    using Fsel.Ordering.Application.Services.UserService;
     using Fsel.Ordering.Domain.Entities;
     using Fsel.Ordering.Domain.Enums;
     using Fsel.Ordering.Domain.IRepositories;
@@ -32,6 +33,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
         private readonly IMapper _mapper;
         private readonly IOrderRepository _orderRepository;
         private readonly MediatR.IMediator _mediator;
+        private readonly IUserService _userService;
         private readonly NotificationMessagePublisher _notificationMessagePublisher;
         private readonly ITrainingService _trainingService;
         private readonly IPackageRepository _packageRepository;
@@ -39,6 +41,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
         public CreateOrderCommandHandler(IMapper mapper,
             IOrderRepository orderRepository,
             IMediator mediator,
+            IUserService userService,
             NotificationMessagePublisher notificationMessagePublisher,
             ITrainingService trainingService,
             IPackageRepository packageRepository)
@@ -46,6 +49,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
             _mapper = mapper;
             _orderRepository = orderRepository;
             _mediator = mediator;
+            _userService = userService;
             _notificationMessagePublisher = notificationMessagePublisher;
             _trainingService = trainingService;
             _packageRepository = packageRepository;
@@ -96,7 +100,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
             order.PackageId = package.Id;
             order.Price = package.Price;
             order.DiscountPercent = 5;
-            order.DiscountPrice = (decimal)NumberHelper.ConvertDouble(Convert.ToDouble(order.Price * order.DiscountPercent));
+            order.DiscountPrice = (decimal)NumberHelper.ConvertDoublePercent(Convert.ToDouble(order.Price * order.DiscountPercent));
             order.TotalPrice = order.Price - order.DiscountPrice;
             order.ClassId = classnew.Content?.Result.Id ?? default;
             if (!order.IsValid())
