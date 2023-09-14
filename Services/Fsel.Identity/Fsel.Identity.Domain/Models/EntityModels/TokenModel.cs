@@ -12,7 +12,7 @@ namespace Fsel.Identity.Domain.Models.EntityModels
         public DateTime? Expiration { get; set; }
         public IList<string>? Roles { get; set; }
         public bool? IsSurvey { get; set; } = true;
-        public bool? IsOrder { get; set; }
+        public bool? IsOrder { get; set; } = true;
         public bool? IsPlacementTest { get; set; } = true;
     }
 }

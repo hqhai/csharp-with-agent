@@ -122,15 +122,20 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
 
             if (userRoles.Contains(EnumRole.Student.ToString()))
             {
+                tokenLogin.IsOrder = false;
                 tokenLogin.ClassId = await GetClassId(user.Id);
                 var classStudent = await _trainingService.GetClassByStudentId(user.Human?.Student?.Id ?? default);
-                tokenLogin.ClassCode = classStudent?.Content?.Result?.Code;
+                var @class = classStudent?.Content?.Result;
                 var isPlacementTest = await _lmsCourseService.IsPlacementTestAsync(user.Human?.Student?.Id ?? default);
                 tokenLogin.IsPlacementTest = isPlacementTest?.Content?.Result;
                 var isSurvey = await _interactionService.IsSurveyCompleted(Guid.Parse(request.Id ?? string.Empty));
+                if (@class != null)
+                {
+                    var isOrder = await _orderService.IsCheckStatusUser(new IsCheckPaymentStatusByUserModel { CourseId = @class.CourseId, ClassId = @class.Id, PackageId = @class.PackageId, UserId = Guid.Parse(request.Id ?? string.Empty) });
+                    tokenLogin.ClassCode = @class.Code;
+                    tokenLogin.IsOrder = isOrder?.Content?.Result;
+                }
 
-                var isOrder = await _orderService.IsCheckStatusUser(new IsCheckPaymentStatusByUserModel { });
-                tokenLogin.IsOrder = isOrder?.Content?.Result;
                 if (isSurvey.IsSuccessStatusCode)
                 {
                     tokenLogin.IsSurvey = isSurvey?.Content?.Result;
