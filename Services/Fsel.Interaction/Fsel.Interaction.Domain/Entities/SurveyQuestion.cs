@@ -21,7 +21,9 @@ namespace Fsel.Interaction.Domain.Entities
         [MaxLength(500, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? Icon { get; set; }
 
-        public int DisplayOrder { get; set; }
+        public float DisplayOrder { get; set; }
+
+        public int DisplayLevel { get; set; }
 
         public EnumSurveyQuestion Type { get; set; }
 
