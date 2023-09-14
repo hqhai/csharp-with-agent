@@ -11,23 +11,23 @@ namespace Fsel.Interaction.Application.Queries.SurveyQuestionQuery
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class GetAllSurveyQuestQuery : IRequest<MethodResult<IList<SurveyQuestionModel>>>
+    public class GetAllSurveyQuestionQuery : IRequest<MethodResult<IList<SurveyQuestionModel>>>
     {
         public bool IsPilot { get; set; }
 
         public int? DisplayLevel { get; set; }
     }
 
-    public class GetAllSurveyQuestQueryHandler : IRequestHandler<GetAllSurveyQuestQuery, MethodResult<IList<SurveyQuestionModel>>>
+    public class GetAllSurveyQuestionQueryHandler : IRequestHandler<GetAllSurveyQuestionQuery, MethodResult<IList<SurveyQuestionModel>>>
     {
         private readonly ISurveyQuestionRepository _surveyQuestionRepository;
 
-        public GetAllSurveyQuestQueryHandler(ISurveyQuestionRepository surveyQuestionRepository)
+        public GetAllSurveyQuestionQueryHandler(ISurveyQuestionRepository surveyQuestionRepository)
         {
             _surveyQuestionRepository = surveyQuestionRepository;
         }
 
-        public async Task<MethodResult<IList<SurveyQuestionModel>>> Handle(GetAllSurveyQuestQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<IList<SurveyQuestionModel>>> Handle(GetAllSurveyQuestionQuery request, CancellationToken cancellationToken)
         {
             var methodResult = new MethodResult<IList<SurveyQuestionModel>>();
 

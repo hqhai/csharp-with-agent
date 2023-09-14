@@ -28,7 +28,7 @@ namespace Fsel.Interaction.Api.Controllers
         [HttpGet]
         [ProducesResponseType(typeof(MethodResult<IList<SurveyQuestionModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetAll([FromQuery] GetAllSurveyQuestQuery query)
+        public async Task<IActionResult> GetAll([FromQuery] GetAllSurveyQuestionQuery query)
         {
             MethodResult<IList<SurveyQuestionModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
