@@ -46,7 +46,7 @@ namespace Fsel.Training.Application.Commands.ClassCmd
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<ClassModel> methodResult = new MethodResult<ClassModel>();
-            var codeResult = await _mediator.Send(new GetNewClassCodeQuery { Code = request.CodeCourse, CourseLevel = request.CourseLevel }, cancellationToken).ConfigureAwait(false);
+            var codeResult = await _mediator.Send(new GetNewClassCodeQuery { Code = request.Code, CourseLevel = request.CourseLevel }, cancellationToken).ConfigureAwait(false);
             var code = codeResult.Result;
 
             await _classRepository.ExecuteTransactionAsync(async () =>
@@ -60,10 +60,10 @@ namespace Fsel.Training.Application.Commands.ClassCmd
                 }
                 else if (classnew.ClassStudents.Count > 99 || classnew.Status == EnumStatusClass.Active)
                 {
-                    var code = await _mediator.Send(new GetNewClassCodeQuery { Code = request.CodeCourse, CourseLevel = request.CourseLevel }, cancellationToken).ConfigureAwait(false);
+                    var code = await _mediator.Send(new GetNewClassCodeQuery { Code = request.Code, CourseLevel = request.CourseLevel }, cancellationToken).ConfigureAwait(false);
                     classnew = await CreateClassAsync(code.Result, request.CourseId, request.PackageId, request.LiveTimeFrameId, request.LiveDays).ConfigureAwait(false);
                 }
-                var student = await _userService.GetStudentByUserIdAsync(request.UserId);
+                var student = await _userService.GetStudentByUserIdAsync(request.UserId ?? default);
                 if (student == null)
                 {
                     methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student));
