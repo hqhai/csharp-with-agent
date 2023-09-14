@@ -2,7 +2,10 @@
 
 namespace Fsel.Interaction.Application.Queries.SurveyQuestionQuery
 {
+    using System;
+    using System.Collections.Generic;
     using System.Linq;
+    using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
     using Fsel.Interaction.Domain.IRepositories;
@@ -11,28 +14,26 @@ namespace Fsel.Interaction.Application.Queries.SurveyQuestionQuery
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class GetAllSurveyQuestQuery : IRequest<MethodResult<IList<SurveyQuestionModel>>>
+    public class GetListQuestionByIdsQuery : IRequest<MethodResult<IList<SurveyQuestionModel>>>
     {
-        public bool IsPilot { get; set; }
-
-        public int? DisplayLevel { get; set; }
+        public IList<Guid>? QuestionIds { get; set; }
     }
 
-    public class GetAllSurveyQuestQueryHandler : IRequestHandler<GetAllSurveyQuestQuery, MethodResult<IList<SurveyQuestionModel>>>
+    public class GetListQuestionByIdsQueryHandler : IRequestHandler<GetListQuestionByIdsQuery, MethodResult<IList<SurveyQuestionModel>>>
     {
         private readonly ISurveyQuestionRepository _surveyQuestionRepository;
 
-        public GetAllSurveyQuestQueryHandler(ISurveyQuestionRepository surveyQuestionRepository)
+        public GetListQuestionByIdsQueryHandler(ISurveyQuestionRepository surveyQuestionRepository)
         {
             _surveyQuestionRepository = surveyQuestionRepository;
         }
 
-        public async Task<MethodResult<IList<SurveyQuestionModel>>> Handle(GetAllSurveyQuestQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<IList<SurveyQuestionModel>>> Handle(GetListQuestionByIdsQuery request, CancellationToken cancellationToken)
         {
             var methodResult = new MethodResult<IList<SurveyQuestionModel>>();
 
             var surveyQuestionquery = await _surveyQuestionRepository.Queryable
-                .Where(x => x.IsPilot == request.IsPilot && (x.DisplayLevel == request.DisplayLevel || (request.DisplayLevel == null || request.DisplayLevel == 1)))
+                .Where(x => request.QuestionIds!.Contains(x.Id))
                 .OrderBy(x => x.DisplayOrder)
                 .Select(x => new SurveyQuestionModel
                 {

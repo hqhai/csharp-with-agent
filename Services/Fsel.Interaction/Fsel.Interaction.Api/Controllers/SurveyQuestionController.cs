@@ -35,6 +35,18 @@ namespace Fsel.Interaction.Api.Controllers
         }
 
         /// <summary>
+        /// Get list Survey Question by ids
+        /// </summary>
+        [HttpGet("get-list-question-by-ids")]
+        [ProducesResponseType(typeof(MethodResult<IList<SurveyQuestionModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetListQuestionByIds([FromQuery] GetListQuestionByIdsQuery query)
+        {
+            MethodResult<IList<SurveyQuestionModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
         /// Get SurveyQuestions By UserId
         /// </summary>
         [HttpGet("{userId}")]
