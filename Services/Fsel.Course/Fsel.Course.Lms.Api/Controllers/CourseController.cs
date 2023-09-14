@@ -3,6 +3,7 @@
 using System.Net;
 using Fsel.Common.ActionResults;
 using Fsel.Common.Constants;
+using Fsel.Course.Domain.Entities.SkillScoresConfigs;
 using Fsel.Course.Domain.Models.EntityModels;
 using Fsel.Course.Lms.Application.Commands.CourseResultCmd;
 using Fsel.Course.Lms.Application.Queries.CourseQuery;
@@ -47,6 +48,18 @@ namespace Fsel.Course.Lms.Api.Controllers
         public async Task<IActionResult> StartCourseResult([FromRoute] Guid courseResultId)
         {
             MethodResult<CourseResultModel> commandResult = await _mediator.Send(new StartCourseResultCommand { CourseResultId = courseResultId }).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Get Unit-skill-diagram
+        /// </summary>
+        [HttpGet("unit-skill-diagram")]
+        [ProducesResponseType(typeof(MethodResult<List<IList<SkillScores>>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetUnitSkillDiagram([FromQuery] GetUnitSkillDiagramQuery query)
+        {
+            MethodResult<IList<SkillScores>> commandResult = await _mediator.Send(query).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
     }
