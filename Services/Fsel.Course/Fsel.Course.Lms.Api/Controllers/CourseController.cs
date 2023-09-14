@@ -50,17 +50,5 @@ namespace Fsel.Course.Lms.Api.Controllers
             MethodResult<CourseResultModel> commandResult = await _mediator.Send(new StartCourseResultCommand { CourseResultId = courseResultId }).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
-
-        /// <summary>
-        /// Get Unit-skill-diagram
-        /// </summary>
-        [HttpGet("unit-skill-diagram")]
-        [ProducesResponseType(typeof(MethodResult<List<IList<SkillScores>>>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetUnitSkillDiagram([FromQuery] GetUnitSkillDiagramQuery query)
-        {
-            MethodResult<IList<SkillScores>> commandResult = await _mediator.Send(query).ConfigureAwait(false);
-            return commandResult.GetActionResult();
-        }
     }
 }
