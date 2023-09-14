@@ -63,6 +63,7 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
             }
 
             mockTestResult.CheckStartDate = DateTime.Now;
+
             var mockTestResultModel = new MockTestResultModel
             {
                 Id = mockTestResult.Id,
@@ -85,6 +86,7 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
 
             mockTestResult = _mockTestResultRepository.Update(mockTestResult);
             await _mockTestResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+
             methodResult.Result = mockTestResultModel;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
