@@ -216,18 +216,32 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 if (lessonResultIds != null && lessonResultIds.Any())
                 {
                     var videoResults = await _videoResultRepository.Queryable.Where(x => lessonResultIds.Contains(x.LessonResultId)).ToListAsync();
-                    var skillScores = videoResults.SelectMany(x => x.VideoSkillScores!).Where(x => x.Type == type && x.SkillScores != null && x.SkillScores.Any()).SelectMany(x => x.SkillScores!).GroupBy(x => x.Skill).Select(x => GetSkillScore(x)).ToList();
-                    var percent = skillScores.Any() ? NumberHelper.ConvertDoublePercent(skillScores.Average(x => x.Percent) * 24 / unitIds.Count) : default;
-                    skillScorePercents.Add((skillScores, percent));
+                    var videoSkillScore = videoResults.SelectMany(x => x.VideoSkillScores!).FirstOrDefault(x => x.Type == type && x.SkillScores != null && x.SkillScores.Any());
+                    if (videoSkillScore != null && videoSkillScore.SkillScores != null && videoSkillScore.SkillScores.Any())
+                    {
+                        var skillScores = videoSkillScore.SkillScores.GroupBy(x => x.Skill)
+                           .Select(x => GetSkillScore(x))
+                           .ToList();
+                        var percent = skillScores.Any() ? NumberHelper.ConvertDoublePercent(skillScores.Average(x => x.Percent) * 24 / unitIds.Count) : default;
+                        skillScorePercents.Add((skillScores, percent));
+                    }
                 }
             }
-            var skillScoreSkills = skillScorePercents.SelectMany(x => x.Item1).GroupBy(x => x.Skill).Select(x => GetSkillScore(x)).ToList();
-            return (skillScoreSkills, NumberHelper.ConvertDouble(skillScorePercents.Average(x => x.Item2)));
+            if (skillScorePercents.Any())
+            {
+                var skillScoreSkills = skillScorePercents.SelectMany(x => x.Item1).GroupBy(x => x.Skill).Select(x => GetSkillScore(x)).ToList();
+                return (skillScoreSkills, NumberHelper.ConvertDouble(skillScorePercents.Average(x => x.Item2)));
+            }
+
+            return (new List<SkillScores>(), default);
         }
 
         private async Task<(List<SkillScores>, double)> GetFinalTestSkillScore(Guid? finalTestId, Guid studentId)
         {
-            ArgumentNullException.ThrowIfNull(finalTestId);
+            if (finalTestId == null)
+            {
+                return (new List<SkillScores>(), default);
+            }
 
             var finalTestResult = await _finalTestResultRepository.Queryable.FirstOrDefaultAsync(x => x.FinalTestId == finalTestId && x.StudentId == studentId && x.Status == EnumResultStatus.Done);
             var skillScores = finalTestResult?.SkillScores?.GroupBy(x => x.Skill).Select(x => GetSkillScore(x)).ToList();
