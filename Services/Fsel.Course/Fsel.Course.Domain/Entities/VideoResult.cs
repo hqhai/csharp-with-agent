@@ -9,7 +9,7 @@ namespace Fsel.Course.Domain.Entities
     using Fsel.Core.Entities;
     using Fsel.Course.Domain.Entities.SkillScoresConfigs;
     using Fsel.Course.Domain.Enums;
-    using Fsel.Shared.Helpers;
+    using Newtonsoft.Json;
 
     public class VideoResult : Entity
     {
@@ -53,7 +53,11 @@ namespace Fsel.Course.Domain.Entities
         [NotMapped]
         public IList<VideoSkillScores>? VideoSkillScores
         {
-            get { return ConvertHelper.Deserialize<IList<VideoSkillScores>>(VideoSkillScoresStr); }
+            get
+            {
+                var a = ConvertHelper.Deserialize<IList<VideoSkillScores>>(VideoSkillScoresStr);
+                return a;
+            }
             set { VideoSkillScoresStr = ConvertHelper.Serialize(value); }
         }
 
