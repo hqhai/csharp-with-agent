@@ -55,8 +55,7 @@ namespace Fsel.Course.Domain.Entities
         {
             get
             {
-                var a = ConvertHelper.Deserialize<IList<VideoSkillScores>>(VideoSkillScoresStr);
-                return a;
+                return ConvertHelper.Deserialize<IList<VideoSkillScores>>(VideoSkillScoresStr);
             }
             set { VideoSkillScoresStr = ConvertHelper.Serialize(value); }
         }

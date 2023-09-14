@@ -191,28 +191,11 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
             lessonDashBoard.StatusVideo = statusVideo;
             lessonDashBoard.StatusClassForum = statusClassForum;
             lessonDashBoard.StatusHomeWork = statusHomeWork;
-            lessonDashBoard.PercentProgress = GetPercent(numberClassForum + numberVideo + numberHomeWork);
+            var count = numberClassForum + numberVideo + numberHomeWork;
+            lessonDashBoard.PercentProgress = count == 3 ? 100 : 33 * count;
             methodResult.Result = lessonDashBoard;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
-        }
-
-        private static double GetPercent(int number)
-        {
-            switch (number)
-            {
-                case 1:
-                    return 33;
-
-                case 2:
-                    return 67;
-
-                case 3:
-                    return 100;
-
-                default:
-                    return 0;
-            }
         }
 
         public (EnumResultStatus, int) GetStatusVideo(VideoResult? videoResult)
