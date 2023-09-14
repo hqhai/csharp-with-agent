@@ -121,7 +121,7 @@ namespace Fsel.System.Application.Queries.QuestBoardStudentQuery
             }
 
             int totalItem = questBoards.Count;
-            var lists = questBoards.OrderBy(x => x.CreatedDate).Skip((request!.Page - 1) * request!.PageSize).Take(request!.PageSize).ToList();
+            var lists = questBoards.OrderBy(x => x.CreatedDate).Skip((request.Page - 1) * request.PageSize).Take(request.PageSize).ToList();
             switch (request.Type)
             {
                 case EnumQuestBoardType.MainQuests:

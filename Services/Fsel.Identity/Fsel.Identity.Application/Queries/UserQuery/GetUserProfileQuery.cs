@@ -136,7 +136,12 @@ namespace Fsel.Identity.Application.Queries.UserQuery
                         userModel.CodeClass = classStudent.Content?.Result?.Code;
                         if (student.ParentStudents.Count > 0)
                         {
-                            userModel.Parent = _mapper.Map<ParentProfileModel>(student.ParentStudents.FirstOrDefault()?.Parent);
+                            var parent = student.ParentStudents.FirstOrDefault()?.Parent;
+                            if (parent != null)
+                            {
+                                userModel.Parent = _mapper.Map<ParentProfileModel>(parent.Human);
+                                userModel.Parent.Occupation = parent.Occupation;
+                            }
                         }
                         var package = await _orderService.GetPackages();
                         if (!package.IsSuccessStatusCode)
