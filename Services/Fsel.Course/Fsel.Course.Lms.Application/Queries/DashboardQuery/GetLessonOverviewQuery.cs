@@ -185,31 +185,53 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
             }
             var homeWorks = lessonResult.HomeWorkResults.Where(x => x.StudentId == studentId && x.LessonResultId == lessonResult.Id).ToList();
             var classForumResult = lessonResult.ClassForumResults.FirstOrDefault(x => x.StudentId == studentId && x.LessonResultId == lessonResult.Id);
-            lessonDashBoard.StatusVideo = GetStatusVideo(lessonResult.VideoResult);
-            lessonDashBoard.StatusClassForum = GetStatusClassForums(classForumResult, lessonDashBoard.StatusVideo);
-            lessonDashBoard.StatusHomeWork = GetStatusHomeWorks(homeWorks, lessonDashBoard.StatusClassForum);
+            var (statusVideo, numberVideo) = GetStatusVideo(lessonResult.VideoResult);
+            var (statusClassForum, numberClassForum) = GetStatusClassForums(classForumResult, lessonDashBoard.StatusVideo);
+            var (statusHomeWork, numberHomeWork) = GetStatusHomeWorks(homeWorks, lessonDashBoard.StatusClassForum);
+            lessonDashBoard.StatusVideo = statusVideo;
+            lessonDashBoard.StatusClassForum = statusClassForum;
+            lessonDashBoard.StatusHomeWork = statusHomeWork;
+            lessonDashBoard.PercentProgress = GetPercent(numberClassForum + numberVideo + numberHomeWork);
             methodResult.Result = lessonDashBoard;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }
 
-        public EnumResultStatus GetStatusVideo(VideoResult? videoResult)
+        private static double GetPercent(int number)
+        {
+            switch (number)
+            {
+                case 1:
+                    return 33;
+
+                case 2:
+                    return 67;
+
+                case 3:
+                    return 100;
+
+                default:
+                    return 0;
+            }
+        }
+
+        public (EnumResultStatus, int) GetStatusVideo(VideoResult? videoResult)
         {
             if (videoResult != null)
             {
                 if (videoResult.Status == EnumResultStatus.Process || videoResult.Status == EnumResultStatus.New)
                 {
-                    return EnumResultStatus.Process;
+                    return (EnumResultStatus.Process, 0);
                 }
                 else
                 {
-                    return videoResult.Status;
+                    return (EnumResultStatus.Done, 1);
                 }
             }
-            return EnumResultStatus.Unfinished;
+            return (EnumResultStatus.Unfinished, 0);
         }
 
-        public EnumResultStatus GetStatusHomeWorks(IList<HomeWorkResult>? homeWorkResults, EnumResultStatus status)
+        public (EnumResultStatus, int) GetStatusHomeWorks(IList<HomeWorkResult>? homeWorkResults, EnumResultStatus status)
         {
             var statusHomeWork = EnumResultStatus.Unfinished;
             if (status == EnumResultStatus.Done)
@@ -220,21 +242,21 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
             {
                 if (homeWorkResults.All(x => x.Status == EnumResultStatus.Done))
                 {
-                    return EnumResultStatus.Done;
+                    return (EnumResultStatus.Done, 1);
                 }
                 else if (homeWorkResults.All(x => x.Status == EnumResultStatus.Unfinished))
                 {
-                    return EnumResultStatus.Unfinished;
+                    return (EnumResultStatus.Unfinished, 0);
                 }
                 else if (homeWorkResults.Any(x => x.Status == EnumResultStatus.Process))
                 {
-                    return EnumResultStatus.Process;
+                    return (EnumResultStatus.Process, 0);
                 }
             }
-            return statusHomeWork;
+            return (statusHomeWork, 0);
         }
 
-        public EnumResultStatus GetStatusClassForums(ClassForumResult? classForumResult, EnumResultStatus status)
+        public (EnumResultStatus, int) GetStatusClassForums(ClassForumResult? classForumResult, EnumResultStatus status)
         {
             var statusClassForum = EnumResultStatus.Unfinished;
             if (status == EnumResultStatus.Done)
@@ -245,14 +267,14 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
             {
                 if (classForumResult.Status == EnumClassForumResultStatus.Graded)
                 {
-                    return EnumResultStatus.Done;
+                    return (EnumResultStatus.Done, 1);
                 }
                 else if (classForumResult.Status == EnumClassForumResultStatus.Pending || classForumResult.Status == EnumClassForumResultStatus.PendingForGrading)
                 {
-                    return EnumResultStatus.Process;
+                    return (EnumResultStatus.Process, 0);
                 }
             }
-            return statusClassForum;
+            return (statusClassForum, 0);
         }
     }
 }
