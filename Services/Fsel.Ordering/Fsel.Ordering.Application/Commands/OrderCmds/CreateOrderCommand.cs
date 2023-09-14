@@ -59,9 +59,15 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<OrderModel> methodResult = new MethodResult<OrderModel>();
+
             //var package = await _packageRepository.GetByIdAsync(request.PackageId);
 
+            #region Pilot
+
             var package = await _packageRepository.Queryable.FirstOrDefaultAsync(x => x.Code == EnumPackageCode.BASIC, cancellationToken);
+
+            #endregion Pilot
+
             if (package == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(package));
@@ -80,9 +86,15 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(code));
                 return methodResult;
             }
+
             //var classnew = await _trainingService.RegisterClassAsync(new RegisterClassCommandModel { Code = request.CodeClass, CourseId = request.CourseId, CourseLevel = request.CourseLevel, PackageId = request.PackageId, LiveDays = request.LiveDays, LiveTimeFrameId = request.LiveTimeFrameId });
 
+            #region Pilot
+
             var classnew = await _trainingService.RegisterClassAsync(new RegisterClassCommandModel { UserId = request.UserId, Code = request.CodeCourse, CourseId = request.CourseId, CourseLevel = request.CourseLevel, PackageId = package.Id, LiveDays = request.LiveDays, LiveTimeFrameId = request.LiveTimeFrameId });
+
+            #endregion Pilot
+
             if (!classnew.IsSuccessStatusCode)
             {
                 methodResult.AddError(classnew.Error);

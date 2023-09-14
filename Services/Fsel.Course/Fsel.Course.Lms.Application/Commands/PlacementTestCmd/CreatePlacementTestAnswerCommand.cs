@@ -241,7 +241,8 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
             });
             if (isLockNew)
             {
-                #region
+                #region Pilot
+
                 if (currentLevel.HasValue)
                 {
                     Random random = new Random();
@@ -260,7 +261,8 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
                     };
                     await _createOrderPublisher.Publish(createOrderQueueModel, cancellationToken);
                 }
-                #endregion
+
+                #endregion Pilot
 
                 var param = new SendStudentPTTemplateModel
                 {
