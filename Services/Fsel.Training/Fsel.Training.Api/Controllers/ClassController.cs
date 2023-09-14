@@ -73,7 +73,6 @@ namespace Fsel.Training.Api.Controllers
         [HttpPost("register-class")]
         [ProducesResponseType(typeof(MethodResult<ClassModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        [Authorize(Roles = nameof(EnumRole.Student))]
         public async Task<IActionResult> RegisterClass([FromBody] RegisterClassCommand command)
         {
             MethodResult<ClassModel> queryResult = await _mediator.Send(command).ConfigureAwait(false);

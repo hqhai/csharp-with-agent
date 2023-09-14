@@ -6,6 +6,7 @@ namespace Fsel.Ordering.Infrastructure.Configs
     using Fsel.Common.Helpers;
     using Fsel.Ordering.Domain.Entities;
     using Fsel.Ordering.Domain.Enums;
+    using Fsel.Shared.Enums;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
