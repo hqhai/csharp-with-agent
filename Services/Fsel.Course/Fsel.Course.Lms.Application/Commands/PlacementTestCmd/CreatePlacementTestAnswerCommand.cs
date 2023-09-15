@@ -226,19 +226,6 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
                     return methodResult;
                 }
             }
-
-            await _placementTestAnswerRepository.ExecuteTransactionAsync(async () =>
-            {
-                placementTestResult = _placementTestResultRepository.Add(placementTestResult);
-                await _placementTestResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
-
-                placementTestResults.Add(placementTestResult);
-                placementTestResults = placementTestResults.OrderBy(x => x.CreatedDate).ToList();
-
-                methodResult.StatusCode = StatusCodes.Status201Created;
-                methodResult.Result = _mapper.Map<IList<PlacementTestResultModel>>(placementTestResults);
-                return methodResult;
-            });
             if (isLockNew)
             {
                 #region Pilot
@@ -268,7 +255,21 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
                 }
 
                 #endregion Pilot
+            }
+            await _placementTestAnswerRepository.ExecuteTransactionAsync(async () =>
+            {
+                placementTestResult = _placementTestResultRepository.Add(placementTestResult);
+                await _placementTestResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
+                placementTestResults.Add(placementTestResult);
+                placementTestResults = placementTestResults.OrderBy(x => x.CreatedDate).ToList();
+
+                methodResult.StatusCode = StatusCodes.Status201Created;
+                methodResult.Result = _mapper.Map<IList<PlacementTestResultModel>>(placementTestResults);
+                return methodResult;
+            });
+            if (isLockNew)
+            {
                 var param = new SendStudentPTTemplateModel
                 {
                     StudentName = student?.Human?.FullName,
