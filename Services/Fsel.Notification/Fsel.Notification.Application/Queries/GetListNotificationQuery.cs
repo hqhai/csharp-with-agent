@@ -37,18 +37,9 @@ namespace Fsel.Notification.Application.Queries
 
             var notificationQuery = _notificationsRepository.Queryable.Include(x => x.NotificationType)
                                                                       .Where(x => x.UserId == _authContext.CurrentUserId);
-            var notificationSenderIds = notificationQuery.Select(x => x.SenderId).ToList();
+            var notificationSenderIds = notificationQuery.Where(p => p.SenderId.HasValue).Select(x => x.SenderId.ToString() ?? string.Empty).Distinct().ToList();
 
-            //Tạo 1 HashSet để loại bỏ những phần tử trùng.
-            HashSet<Guid?> uniqueSenderGuids = new HashSet<Guid?>(notificationSenderIds);
-            IList<string> uniqueStringSenderList = new List<string>();
-
-            // Chuyển sang kiểu Ilist<string> để truy vấn dữ liệu của listUserIds
-            if (uniqueSenderGuids.Count > 0)
-            {
-                uniqueStringSenderList = uniqueSenderGuids!.Select(guid => guid.ToString()).ToList()!;
-            }
-            var listSender = await _userService.GetUsersByIdsAsync(new GetUsersByIdsQueryModel { UserIds = uniqueStringSenderList });
+            var listSender = await _userService.GetUsersByIdsAsync(new GetUsersByIdsQueryModel { UserIds = notificationSenderIds });
 
             var listSenderInfo = listSender?.Content?.Result;
 
