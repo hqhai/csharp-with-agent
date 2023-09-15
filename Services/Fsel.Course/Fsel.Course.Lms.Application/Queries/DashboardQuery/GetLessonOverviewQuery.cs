@@ -191,8 +191,8 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
             lessonDashBoard.StatusVideo = statusVideo;
             lessonDashBoard.StatusClassForum = statusClassForum;
             lessonDashBoard.StatusHomeWork = statusHomeWork;
-            var count = numberClassForum + numberVideo + numberHomeWork;
-            lessonDashBoard.PercentProgress = Math.Round((double)100 / 3 * count, 0);
+            var numbers = new List<int> { numberClassForum, numberVideo, numberHomeWork };
+            lessonDashBoard.PercentProgress = Math.Round((double)numbers.Average() * 100, 0);
             methodResult.Result = lessonDashBoard;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
