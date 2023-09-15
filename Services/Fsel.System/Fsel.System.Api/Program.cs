@@ -28,6 +28,7 @@ builder.Services.AddScoped<IReferralDiscountConfigRepository, ReferralDiscountCo
 builder.Services.AddScoped<ILogActionRepository, LogActionRepository>();
 builder.Services.AddScoped<IQuestBoardRepository, QuestBoardRepository>();
 builder.Services.AddScoped<IQuestBoardConfigRepository, QuestBoardConfigRepository>();
+builder.Services.AddScoped<IFeatureAccessTimeRepository, FeatureAccessTimeRepository>();
 builder.Services.AddScoped<IQuestBoardStudentRepository, QuestBoardStudentRepository>();
 builder.AddRefitClients(typeof(IUserService), appSetting?.Services?.UserApiUrl);
 builder.AddRefitClients(typeof(ICourseService), appSetting?.Services?.LmsCourseApiUrl);
