@@ -45,11 +45,11 @@ namespace Fsel.System.Application.Commands.FeatureAccessTimeCmd
                 }
                 else
                 {
-                    if (request.AccessTime == 0)
+                    if (request.AccessTime == null)
                     {
                         featureAccessTime.Visit += 1;
                     }
-                    featureAccessTime.AccessTime += request.AccessTime;
+                    featureAccessTime.AccessTime += request.AccessTime ?? default;
                     featureAccessTime.LastVisited = DateTime.Now;
                     featureAccessTime = _featureAccessTimeRepository.Update(featureAccessTime);
                 }
