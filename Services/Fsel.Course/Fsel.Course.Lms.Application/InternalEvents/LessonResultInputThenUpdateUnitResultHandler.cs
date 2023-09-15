@@ -55,7 +55,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             }
         }
 
-        private async Task UpdateTheNextLesson(Domain.Entities.Unit? unit, LessonResult lessonResult, CancellationToken cancellationToken)
+        private async Task UpdateTheNextLesson(Fsel.Course.Domain.Entities.Unit? unit, LessonResult lessonResult, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(unit);
             var mockTestId = unit.UnitSkillMockTests.FirstOrDefault()?.MockTestId;

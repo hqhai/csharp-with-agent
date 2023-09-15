@@ -8,7 +8,7 @@ namespace Fsel.Course.Domain.Models.CommandModels.MockTestAnswers
     public class CreateMockTestAnswerCommandModel
     {
         public Guid MockTestResultId { get; set; }
-
+        public long AccessTime { get; set; }
         public IList<MockTestSectionGroupAnswerModel>? SectionGroups { get; set; }
     }
 

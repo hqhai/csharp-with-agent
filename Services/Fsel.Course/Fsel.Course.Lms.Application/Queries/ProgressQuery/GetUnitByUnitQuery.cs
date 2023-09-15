@@ -74,7 +74,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
                 return methodResult;
             }
 
-            var units = new List<Domain.Entities.Unit>();
+            var units = new List<Fsel.Course.Domain.Entities.Unit>();
             if (request.Type == EnumProcessType.LessonVideo)
             {
                 units = await _unitRepository.Queryable.Include(x => x.UnitLessons).ThenInclude(x => x.Lesson)
@@ -136,7 +136,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
             return methodResult;
         }
 
-        private async Task<(double, double)> GetCountDone(Domain.Entities.Unit x, EnumProcessType type, Guid? studentId)
+        private async Task<(double, double)> GetCountDone(Fsel.Course.Domain.Entities.Unit x, EnumProcessType type, Guid? studentId)
         {
             if (type == EnumProcessType.LessonVideo)
             {
@@ -191,7 +191,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
             return (0, 0);
         }
 
-        private UnitModel GetUnitModel(Domain.Entities.Unit x, Guid courseId, double totalDone, double countDone)
+        private UnitModel GetUnitModel(Fsel.Course.Domain.Entities.Unit x, Guid courseId, double totalDone, double countDone)
         {
             var unitModel = new UnitModel
             {

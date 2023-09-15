@@ -5,6 +5,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
+    using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
@@ -68,7 +69,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
                 methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.CourseNotTypeIElts));
                 return methodResult;
             }
-            List<Domain.Entities.Unit> units = new List<Domain.Entities.Unit>();
+            List<Fsel.Course.Domain.Entities.Unit> units = new List<Fsel.Course.Domain.Entities.Unit>();
             List<OverallScoreReportByMockTestModel> mockTestOverallScores = new List<OverallScoreReportByMockTestModel>();
             foreach (var item in course.CourseUnitMockTests)
             {

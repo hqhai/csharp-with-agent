@@ -8,6 +8,7 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkQuery
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
+    using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Services.UserServices;
@@ -59,7 +60,7 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkQuery
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(lessonResult));
                 return methodResult;
             }
-            if (lessonResult.Status == Domain.Enums.EnumResultStatus.Unfinished || lessonResult.Status == Domain.Enums.EnumResultStatus.New)
+            if (lessonResult.Status == EnumResultStatus.Unfinished || lessonResult.Status == EnumResultStatus.New)
             {
                 methodResult.Result = null;
                 methodResult.StatusCode = StatusCodes.Status200OK;

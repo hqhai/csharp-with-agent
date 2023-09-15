@@ -8,6 +8,7 @@ namespace Fsel.Course.Domain.Models.CommandModels.FinalTestAnswers
     {
         public Guid CourseId { get; set; }
         public Guid FinalTestId { get; set; }
+        public long AccessTime { get; set; }
         public IList<FinalTestAnswerSkillQuestionModel>? FinalTestAnswers { get; set; }
     }
 

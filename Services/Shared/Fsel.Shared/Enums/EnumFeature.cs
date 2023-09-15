@@ -7,5 +7,7 @@ namespace Fsel.Shared.Enums
         ClassForum,
         HomeWork,
         VideoLesson,
+        MockTest,
+        FinalTest
     }
 }

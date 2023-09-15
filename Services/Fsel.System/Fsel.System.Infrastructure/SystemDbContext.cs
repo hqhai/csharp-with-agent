@@ -20,15 +20,17 @@ namespace Fsel.System.Infrastructure
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             ArgumentNullException.ThrowIfNull(modelBuilder);
-            SeedQuestBoards(modelBuilder);
+            //SeedQuestBoards(modelBuilder);
             modelBuilder.ApplyConfiguration(new TeachingCostEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new ReferralDiscountConfigConfiguration());
             modelBuilder.ApplyConfiguration(new QuestBoardConfigConfigConfiguration());
             modelBuilder.ApplyConfiguration(new QuestBoardConfigConfiguration());
             modelBuilder.ApplyConfiguration(new QuestBoardStudentConfigConfiguration());
+            modelBuilder.ApplyConfiguration(new FeatureAccessTimeConfigConfiguration());
             base.OnModelCreating(modelBuilder);
         }
 
+        public DbSet<FeatureAccessTime> FeatureAccessTimes { get; set; }
         public DbSet<LiveTimeFrame> LiveTimeFrames { get; set; }
         public DbSet<CourseTimeConfig> CourseTimeConfigs { get; set; }
         public DbSet<ForbiddenWord> ForbiddenWords { get; set; }
