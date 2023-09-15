@@ -27,7 +27,14 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<bool> methodResult = new MethodResult<bool>();
-            var order = await _orderRepository.Queryable.FirstOrDefaultAsync(x => x.UserId == request.UserId && x.ClassId == request.ClassId && x.PackageId == request.PackageId && x.CourseId == request.CourseId, cancellationToken);
+            //var order = await _orderRepository.Queryable.FirstOrDefaultAsync(x => x.UserId == request.UserId && x.PackageId == request.PackageId && x.ClassId == request.ClassId && x.CourseId == request.CourseId, cancellationToken);
+
+            #region pilot
+
+            var order = await _orderRepository.Queryable.FirstOrDefaultAsync(x => x.UserId == request.UserId && x.ClassId == request.ClassId && x.CourseId == request.CourseId, cancellationToken);
+
+            #endregion pilot
+
             if (order == null)
             {
                 methodResult.Result = false;
