@@ -4,7 +4,6 @@ namespace Fsel.Course.Lms.Application.Services.SystemService
 {
     using Fsel.Common.ActionResults;
     using Fsel.Course.Lms.Application.Services.SystemService.Models;
-    using Fsel.Course.Lms.Domain.Models.EntityModels;
     using Microsoft.AspNetCore.Mvc;
     using Refit;
 
