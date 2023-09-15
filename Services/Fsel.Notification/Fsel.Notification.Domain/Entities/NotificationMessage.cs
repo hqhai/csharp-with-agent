@@ -7,6 +7,7 @@ namespace Fsel.Notification.Domain.Entities
     public class NotificationMessage : Entity
     {
         public Guid? UserId { get; set; }
+        public Guid? SenderId { get; set; }
 
         public Guid? RoleId { get; set; }
 

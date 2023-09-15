@@ -29,7 +29,8 @@ namespace Fsel.Course.Lms.Application.Queues.Publishers
                 Type = request.Type,
                 Content = request.Content,
                 ParamsMessage = request.ParamsMessage,
-                Roles = request.Roles
+                Roles = request.Roles,
+                SenderId = request.SenderId,
             }, cancellationToken);
         }
     }

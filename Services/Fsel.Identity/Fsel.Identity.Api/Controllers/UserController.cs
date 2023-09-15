@@ -89,5 +89,29 @@ namespace Fsel.Identity.Api.Controllers
             MethodResult<IList<UserModel>> commandResult = await _mediator.Send(query).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
+
+        /// <summary>
+        /// Get users by ids
+        /// </summary>
+        [HttpPost("get-users-by-ids")]
+        [ProducesResponseType(typeof(MethodResult<IList<HumanModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetUsersByIds([FromBody] GetUsersByIdsQuery query)
+        {
+            MethodResult<IList<HumanModel>> commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Get users by ids
+        /// </summary>
+        [HttpGet("get-user-by-id")]
+        [ProducesResponseType(typeof(MethodResult<HumanModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetUsersByIds([FromQuery] GetUserByIdQuery query)
+        {
+            MethodResult<HumanModel> commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
     }
 }

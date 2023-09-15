@@ -2,18 +2,19 @@
 
 namespace Fsel.Notification.Application.Services
 {
-    using System;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
     using Fsel.Notification.Application.Services.Models;
     using Fsel.Notification.Application.Services.UserServices;
-    using Microsoft.AspNetCore.Mvc;
     using Refit;
 
     public interface IUserService
     {
-        [Get("/student/get-by-user-id/{id}")]
-        Task<IApiResponse<MethodResult<StudentModel>>> GetStudentByUserIdAsync([FromRoute] Guid id);
+        [Post("/user/get-users-by-ids")]
+        Task<IApiResponse<MethodResult<IList<HumanModel>>>> GetUsersByIdsAsync([Body] GetUsersByIdsQueryModel model);
+
+        [Get("/user/get-user-by-id")]
+        Task<IApiResponse<MethodResult<HumanModel>>> GetUserByIdAsync([Query] string? id);
 
         [Get("/user/get-users-by-role")]
         Task<IApiResponse<MethodResult<IList<UserModel>>>> GetUserByRoleAsync([Query] GetUsersByRoleQueryModel query);

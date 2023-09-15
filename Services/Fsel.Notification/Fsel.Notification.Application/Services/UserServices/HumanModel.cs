@@ -2,7 +2,9 @@
 
 namespace Fsel.Notification.Application.Services.UserServices
 {
-    public class HumanModel
+    using Fsel.Core.Base.BaseModels;
+
+    public class HumanModel : BaseModel
     {
         public string? FullName { get; set; }
         public string? Birthday { get; set; }
