@@ -210,7 +210,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
             placementTestResult.PlacementTestAnswers = placementTestAnswers;
 
             var overallScore = NumberHelper.RoundNumberDouble(skillScores.Select(x => x.Scores).Average());
-            var (currentLevel, isLockNew) = request.Level.GetLevelInScore(placementTestResult.Level == EnumPlacementTestLevel.IELTS ? overallScore : placementTestResult.Percent, age);
+            var (currentLevel, isLockPT) = request.Level.GetLevelInScore(placementTestResult.Level == EnumPlacementTestLevel.IELTS ? overallScore : placementTestResult.Percent, age);
 
             if (currentLevel.HasValue)
             {
@@ -226,7 +226,36 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
                     return methodResult;
                 }
             }
+            if (isLockPT)
+            {
+                #region Pilot
 
+                if (currentLevel.HasValue)
+                {
+                    Random random = new Random();
+                    var courses = await _courseRepository.Queryable.Where(x => x.CourseLevel == currentLevel.Value && x.Status != EnumCourseStatus.New).ToListAsync(cancellationToken);
+                    var course = courses.OrderBy(x => random.Next(courses.Count)).FirstOrDefault();
+                    if (course == null)
+                    {
+                        methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(course));
+                        return methodResult;
+                    }
+                    CreateOrderQueueModel createOrderQueueModel = new CreateOrderQueueModel
+                    {
+                        Address = "Viet Nam",
+                        Country = "Viet Nam",
+                        CourseId = course.Id,
+                        CourseLevel = currentLevel.Value,
+                        FullName = student?.Human?.FullName,
+                        PaymentMethod = EnumPaymentMethodStatus.Card,
+                        CodeCourse = course.Code,
+                        UserId = _authContext.CurrentUserId
+                    };
+                    await _createOrderPublisher.Publish(createOrderQueueModel, cancellationToken);
+                }
+
+                #endregion Pilot
+            }
             await _placementTestAnswerRepository.ExecuteTransactionAsync(async () =>
             {
                 placementTestResult = _placementTestResultRepository.Add(placementTestResult);
@@ -239,31 +268,8 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
                 methodResult.Result = _mapper.Map<IList<PlacementTestResultModel>>(placementTestResults);
                 return methodResult;
             });
-            if (isLockNew)
+            if (isLockPT)
             {
-                #region Pilot
-
-                if (currentLevel.HasValue)
-                {
-                    Random random = new Random();
-                    var courses = await _courseRepository.Queryable.Where(x => x.CourseLevel == currentLevel.Value && x.Status != EnumCourseStatus.New).ToListAsync(cancellationToken);
-                    var course = courses.OrderBy(x => random.Next(courses.Count)).FirstOrDefault();
-                    CreateOrderQueueModel createOrderQueueModel = new CreateOrderQueueModel
-                    {
-                        Address = "Viet Nam",
-                        Country = "Viet Nam",
-                        CourseId = course?.Id ?? default,
-                        CourseLevel = currentLevel.Value,
-                        FullName = student?.Human?.FullName,
-                        PaymentMethod = EnumPaymentMethodStatus.Card,
-                        CodeCourse = course?.Code,
-                        UserId = _authContext.CurrentUserId
-                    };
-                    await _createOrderPublisher.Publish(createOrderQueueModel, cancellationToken);
-                }
-
-                #endregion Pilot
-
                 var param = new SendStudentPTTemplateModel
                 {
                     StudentName = student?.Human?.FullName,
