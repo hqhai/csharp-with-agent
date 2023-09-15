@@ -32,7 +32,8 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
             var unitQuery = await _unitRepository.Queryable
                                                      .Include(x => x.UnitLessons.Where(n => !n.IsDeleted))
                                                      .ThenInclude(x => x.Lesson)
-                                                     .Include(x => x.CourseUnitMockTests.Where(x => x.CourseId == request.CourseId).OrderBy(x => x.DisplayOrder))
+                                                     .Include(x => x.CourseUnitMockTests.OrderBy(x => x.DisplayOrder))
+                                                     .Where(x => x.CourseUnitMockTests.Select(x => x.CourseId).Contains(request.CourseId))
                                                      .AsNoTracking()
                                                      .Select(x => new UnitModel
                                                      {
