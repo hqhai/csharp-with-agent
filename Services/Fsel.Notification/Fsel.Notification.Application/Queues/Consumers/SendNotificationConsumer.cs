@@ -38,7 +38,8 @@ namespace Fsel.Notification.Application.Queues.Consumers
                     Message = message,
                     Link = link,
                     Roles = dataReceipt.Roles,
-                    NotificationTypeId = notificationType?.Id ?? default
+                    NotificationTypeId = notificationType?.Id ?? default,
+                    SenderId = dataReceipt.SenderId,
                 };
                 await _mediator.Send(model).ConfigureAwait(false);
             }

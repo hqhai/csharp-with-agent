@@ -108,6 +108,13 @@ namespace Fsel.Notification.Application.Commands
                 }
                 await _notificationsRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
+                string avatarPath = string.Empty;
+
+                if (request.SenderId.HasValue)
+                {
+                    var senderInfo = await _userService.GetUserByIdAsync(request.SenderId.ToString());
+                    avatarPath = senderInfo?.Content?.Result?.AvatarPath ?? string.Empty;
+                }
                 //Push notification
                 var notificationRealTime = new NotificationMessageModel()
                 {
@@ -115,7 +122,9 @@ namespace Fsel.Notification.Application.Commands
                     ObjectId = notificationNew.ObjectId,
                     Message = notificationNew.Message,
                     Link = notificationNew.Message,
-                    UserIds = listUserId
+                    UserIds = listUserId,
+                    SenderId = notificationNew.SenderId,
+                    AvatarPath = avatarPath
                 };
 
                 await _notificationMessagePublisher.Publish(notificationRealTime, cancellationToken).ConfigureAwait(false);
