@@ -24,7 +24,7 @@ namespace Fsel.Interaction.Domain.Models.EntityModels
 
         public IList<string>? FilePaths { get; set; }
 
-        public ICollection<TopicTagModel>? PostTags { get; set; }
+        public IList<TopicTagModel>? PostTags { get; set; }
 
         public int? LikeCount { get; set; }
 
