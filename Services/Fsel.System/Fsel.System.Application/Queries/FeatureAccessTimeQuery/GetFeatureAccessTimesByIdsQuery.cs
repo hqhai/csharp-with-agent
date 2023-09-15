@@ -4,7 +4,6 @@ namespace Fsel.System.Application.Queries.FeatureAccessTimeQuery
 {
     using AutoMapper;
     using Fsel.Common.ActionResults;
-    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.System.Domain.Entities;
     using Fsel.System.Domain.IRepositories;
     using MediatR;
@@ -41,7 +40,8 @@ namespace Fsel.System.Application.Queries.FeatureAccessTimeQuery
 
             if (featureAccessTimes == null || !featureAccessTimes.Any())
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(featureAccessTimes));
+                methodResult.Result = null;
+                methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
             }
 
