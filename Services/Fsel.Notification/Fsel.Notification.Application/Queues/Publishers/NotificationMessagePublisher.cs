@@ -28,6 +28,8 @@ namespace Fsel.Notification.Application.Queues.Publishers
                 Message = notification.Message,
                 Link = notification.Link,
                 UserIds = notification.UserIds,
+                AvatarPath = notification.AvatarPath,
+                SenderId = notification.SenderId,
             }, cancellationToken);
         }
     }

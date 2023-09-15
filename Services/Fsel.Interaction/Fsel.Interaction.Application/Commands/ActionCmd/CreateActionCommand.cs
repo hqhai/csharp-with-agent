@@ -94,7 +94,8 @@ namespace Fsel.Interaction.Application.Commands.ActionCmd
                         InterationType = action.Type,
                         Type = EnumNotificationType.LinkPage,
                         Content = EnumNotificationContent.FlagClassForum,
-                        UserId = _authContext.CurrentUserId,
+                        UserId = action.CreatedUserId,
+                        SenderId = _authContext.CurrentUserId
                     };
 
                     await _interationActionPublisher.Publish(model, cancellationToken).ConfigureAwait(false);
