@@ -248,15 +248,20 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
                     Random random = new Random();
                     var courses = await _courseRepository.Queryable.Where(x => x.CourseLevel == currentLevel.Value && x.Status != EnumCourseStatus.New).ToListAsync(cancellationToken);
                     var course = courses.OrderBy(x => random.Next(courses.Count)).FirstOrDefault();
+                    if (course == null)
+                    {
+                        methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(course));
+                        return methodResult;
+                    }
                     CreateOrderQueueModel createOrderQueueModel = new CreateOrderQueueModel
                     {
                         Address = "Viet Nam",
                         Country = "Viet Nam",
-                        CourseId = course?.Id ?? default,
+                        CourseId = course.Id,
                         CourseLevel = currentLevel.Value,
                         FullName = student?.Human?.FullName,
                         PaymentMethod = EnumPaymentMethodStatus.Card,
-                        CodeCourse = course?.Code,
+                        CodeCourse = course.Code,
                         UserId = _authContext.CurrentUserId
                     };
                     await _createOrderPublisher.Publish(createOrderQueueModel, cancellationToken);
