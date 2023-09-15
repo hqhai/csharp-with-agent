@@ -40,14 +40,17 @@ namespace Fsel.System.Application.Commands.FeatureAccessTimeCmd
                 {
                     featureAccessTime = _mapper.Map<FeatureAccessTime>(request);
                     featureAccessTime.Visit = 1;
+                    featureAccessTime.LastVisited = DateTime.Now;
                     featureAccessTime = _featureAccessTimeRepository.Add(featureAccessTime);
                 }
                 else
                 {
-                    featureAccessTime.EnumFeature = request.EnumFeature;
+                    if (request.AccessTime == 0)
+                    {
+                        featureAccessTime.Visit += 1;
+                    }
                     featureAccessTime.AccessTime += request.AccessTime;
                     featureAccessTime.LastVisited = DateTime.Now;
-                    featureAccessTime.Visit += 1;
                     featureAccessTime = _featureAccessTimeRepository.Update(featureAccessTime);
                 }
                 await _featureAccessTimeRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);

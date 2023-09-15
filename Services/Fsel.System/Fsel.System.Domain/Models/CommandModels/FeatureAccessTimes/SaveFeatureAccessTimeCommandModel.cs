@@ -8,7 +8,6 @@ namespace Fsel.System.Domain.Models.CommandModels.FeatureAccessTimes
     {
         public EnumFeature EnumFeature { get; set; }
         public long AccessTime { get; set; }
-        public DateTime LastVisited { get; set; } = DateTime.Now;
         public Guid ObjectId { get; set; }
     }
 }
