@@ -210,7 +210,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
             placementTestResult.PlacementTestAnswers = placementTestAnswers;
 
             var overallScore = NumberHelper.RoundNumberDouble(skillScores.Select(x => x.Scores).Average());
-            var (currentLevel, isLockNew) = request.Level.GetLevelInScore(placementTestResult.Level == EnumPlacementTestLevel.IELTS ? overallScore : placementTestResult.Percent, age);
+            var (currentLevel, isLockPT) = request.Level.GetLevelInScore(placementTestResult.Level == EnumPlacementTestLevel.IELTS ? overallScore : placementTestResult.Percent, age);
 
             if (currentLevel.HasValue)
             {
@@ -226,7 +226,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
                     return methodResult;
                 }
             }
-            if (isLockNew)
+            if (isLockPT)
             {
                 #region Pilot
 
@@ -268,7 +268,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
                 methodResult.Result = _mapper.Map<IList<PlacementTestResultModel>>(placementTestResults);
                 return methodResult;
             });
-            if (isLockNew)
+            if (isLockPT)
             {
                 var param = new SendStudentPTTemplateModel
                 {
