@@ -37,14 +37,6 @@ namespace Fsel.System.Application.Queries.FeatureAccessTimeQuery
             }
 
             var featureAccessTimes = await _featureAccessTimeRepository.GetByIdsAsync(request.Ids);
-
-            if (featureAccessTimes == null || !featureAccessTimes.Any())
-            {
-                methodResult.Result = null;
-                methodResult.StatusCode = StatusCodes.Status200OK;
-                return methodResult;
-            }
-
             methodResult.Result = _mapper.Map<IList<FeatureAccessTime>>(featureAccessTimes);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
