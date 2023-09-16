@@ -75,6 +75,7 @@ namespace Fsel.Course.Infrastructure
         public DbSet<ClassForumScore> ClassForumScores { get; set; }
         public DbSet<ClassForumResultFile> ClassForumResultFiles { get; set; }
         public DbSet<ClassForumFile> ClassForumFiles { get; set; }
+        public DbSet<StudentFeedback> StudentFeedbacks { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -137,6 +138,7 @@ namespace Fsel.Course.Infrastructure
             modelBuilder.ApplyConfiguration(new ClassForumScoreEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new ClassForumFileEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new ClassForumResultFileEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new StudentFeedbackEntityTypeConfiguration());
 
             base.OnModelCreating(modelBuilder);
         }

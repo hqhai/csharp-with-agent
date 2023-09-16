@@ -55,19 +55,7 @@ namespace Fsel.Course.Domain.Entities
             set { SkillScoresStr = ConvertHelper.Serialize(value); }
         }
 
-        /// <summary>
-        /// Số sao
-        /// </summary>
-        [Range(0, 5, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
-        public int? FeedBackStars { get; set; }
-
         public Guid? GradingTeacherId { get; set; }
-
-        /// <summary>
-        /// Trạng thái
-        /// </summary>
-        [Range(0, 10000, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
-        public string? FeedBackNote { get; set; }
 
         public Course? Course { get; set; }
 
