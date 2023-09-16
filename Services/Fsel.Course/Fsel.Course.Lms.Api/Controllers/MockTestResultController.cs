@@ -42,11 +42,11 @@ namespace Fsel.Course.Lms.Api.Controllers
         /// ReportFeedback Mock tesk result
         /// </summary>
         [HttpPost]
-        [ProducesResponseType(typeof(MethodResult<MockTestResultModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(MethodResult<StudentFeedbackModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> ReportFeedback([FromBody] ReportFeedbackMockTestCommand command)
         {
-            MethodResult<MockTestResultModel> queryResult = await _mediator.Send(command).ConfigureAwait(false);
+            MethodResult<StudentFeedbackModel> queryResult = await _mediator.Send(command).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
     }
