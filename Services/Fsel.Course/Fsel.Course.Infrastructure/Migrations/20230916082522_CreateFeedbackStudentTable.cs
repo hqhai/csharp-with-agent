@@ -6,11 +6,19 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Fsel.Course.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class CreateStudentFeedbackTable : Migration
+    public partial class CreateFeedbackStudentTable : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropColumn(
+                name: "FeedBackNote",
+                table: "MockTestResults");
+
+            migrationBuilder.DropColumn(
+                name: "FeedBackStars",
+                table: "MockTestResults");
+
             migrationBuilder.DropColumn(
                 name: "FeedBackNegativesStr",
                 table: "ClassForumResults");
@@ -48,7 +56,7 @@ namespace Fsel.Course.Infrastructure.Migrations
                     FeedBackNote = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: true),
                     FeedBackPositivesStr = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     FeedBackNegativesStr = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    ObjectId = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
+                    ObjectId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -61,6 +69,18 @@ namespace Fsel.Course.Infrastructure.Migrations
         {
             migrationBuilder.DropTable(
                 name: "StudentFeedbacks");
+
+            migrationBuilder.AddColumn<string>(
+                name: "FeedBackNote",
+                table: "MockTestResults",
+                type: "nvarchar(max)",
+                nullable: true);
+
+            migrationBuilder.AddColumn<int>(
+                name: "FeedBackStars",
+                table: "MockTestResults",
+                type: "int",
+                nullable: true);
 
             migrationBuilder.AddColumn<string>(
                 name: "FeedBackNegativesStr",

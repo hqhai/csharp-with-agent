@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fsel.Course.Infrastructure.Migrations
 {
     [DbContext(typeof(CourseDbContext))]
-    [Migration("20230915132310_CreateStudentFeedbackTable")]
-    partial class CreateStudentFeedbackTable
+    [Migration("20230916082522_CreateFeedbackStudentTable")]
+    partial class CreateFeedbackStudentTable
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -2729,12 +2729,6 @@ namespace Fsel.Course.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(103);
 
-                    b.Property<string>("FeedBackNote")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int?>("FeedBackStars")
-                        .HasColumnType("int");
-
                     b.Property<DateTime?>("GradingStartDate")
                         .HasColumnType("datetime2");
 
@@ -3779,7 +3773,7 @@ namespace Fsel.Course.Infrastructure.Migrations
                         .HasColumnType("bit")
                         .HasColumnOrder(110);
 
-                    b.Property<Guid?>("ObjectId")
+                    b.Property<Guid>("ObjectId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Type")

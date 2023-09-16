@@ -3,6 +3,7 @@
 namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
 {
     using System;
+    using System.Collections.Immutable;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base.BaseModels;
@@ -88,7 +89,7 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
                                  join cl in _classForumRepository.Queryable on baseQ.ClassForumId equals cl.Id
                                  join lr in _lessonResultRepository.Queryable on baseQ.LessonResultId equals lr.Id
                                  join c in _courseRepository.Queryable on lr.CourseId equals c.Id
-                                 join s in _studentFeedbackRepository.Queryable on cl.Id equals s.ObjectId
+                                 join s in _studentFeedbackRepository.Queryable on baseQ.Id equals s.ObjectId
                                  where baseQ.GradingTeacherId == request.TeacherId && baseQ.Status == EnumClassForumResultStatus.Graded
                                  select new ReviewTeacherRatingDetailModel
                                  {
@@ -99,12 +100,15 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
                                      CreatedUserId = baseQ.CreatedUserId,
                                      ReviewArea = nameof(ClassForum),
                                      Feedback = s.FeedBackNote,
-                                     Starts = s.FeedBackStars ?? default
+                                     Starts = s.FeedBackStars ?? default,
+                                     FeedbackNegative = s.FeedBackNegatives,
+                                     FeedbackPositive = s.FeedBackPositives,
                                  };
 
             var mockTestQuery = from baseQ in _mockTestResultRepository.Queryable
                                 join m in _mockTestRepository.Queryable on baseQ.MockTestId equals m.Id
                                 join c in _courseRepository.Queryable on baseQ.CourseId equals c.Id
+                                join s in _studentFeedbackRepository.Queryable on baseQ.Id equals s.ObjectId
                                 where baseQ.GradingTeacherId == request.TeacherId && baseQ.Status == EnumResultStatus.Done
                                 select new ReviewTeacherRatingDetailModel
                                 {
@@ -113,9 +117,11 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
                                     CreatedDate = baseQ.CreatedDate,
                                     CreatedFullName = baseQ.CreatedFullName,
                                     CreatedUserId = baseQ.CreatedUserId,
-                                    Feedback = baseQ.FeedBackNote,
                                     ReviewArea = nameof(MockTest),
-                                    Starts = baseQ.FeedBackStars ?? default
+                                    Feedback = s.FeedBackNote,
+                                    Starts = s.FeedBackStars ?? default,
+                                    FeedbackNegative = s.FeedBackNegatives,
+                                    FeedbackPositive = s.FeedBackPositives,
                                 };
 
             var query = mockTestQuery.AsEnumerable().Union(classFormQuery.AsEnumerable()).Union(videoResultQuery.AsEnumerable());

@@ -44,6 +44,6 @@ namespace Fsel.Course.Domain.Entities
             set { FeedBackNegativesStr = ConvertHelper.Serialize(value); }
         }
 
-        public Guid? ObjectId { get; set; }
+        public Guid ObjectId { get; set; }
     }
 }

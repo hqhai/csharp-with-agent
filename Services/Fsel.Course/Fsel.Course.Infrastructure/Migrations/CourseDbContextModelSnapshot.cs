@@ -2726,12 +2726,6 @@ namespace Fsel.Course.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(103);
 
-                    b.Property<string>("FeedBackNote")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int?>("FeedBackStars")
-                        .HasColumnType("int");
-
                     b.Property<DateTime?>("GradingStartDate")
                         .HasColumnType("datetime2");
 
@@ -3776,7 +3770,7 @@ namespace Fsel.Course.Infrastructure.Migrations
                         .HasColumnType("bit")
                         .HasColumnOrder(110);
 
-                    b.Property<Guid?>("ObjectId")
+                    b.Property<Guid>("ObjectId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Type")
