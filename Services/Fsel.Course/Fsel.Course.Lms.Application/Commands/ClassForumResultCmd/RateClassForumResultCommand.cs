@@ -39,13 +39,13 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<StudentFeedbackModel> methodResult = new MethodResult<StudentFeedbackModel>();
 
-            StudentFeedback studentFeed = _mapper.Map<StudentFeedback>(request);
+            StudentFeedback studentFeedback = _mapper.Map<StudentFeedback>(request);
             if (!EnumFeedBackHelper.IsCheckFeedBack(request.FeedBackNegatives, request.FeedBackPositives))
             {
                 methodResult.AddErrorBadRequest(nameof(EnumClassForumResultErrorCode.FeedbackPositiveOrFeedBackBothHaveValue));
                 return methodResult;
             }
-            if (studentFeed.FeedBackStars > 5)
+            if (studentFeedback.FeedBackStars > 5)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumClassForumResultErrorCode.FeedBackStarOnlyCanHane5));
                 return methodResult;
@@ -69,12 +69,12 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
 
             await _studentFeedbackRepository.ExecuteTransactionAsync(async () =>
             {
-                studentFeed.Feature = EnumFeature.MockTest;
-                studentFeed = _studentFeedbackRepository.Add(studentFeed);
+                studentFeedback.Feature = EnumFeature.MockTest;
+                studentFeedback = _studentFeedbackRepository.Add(studentFeedback);
                 await _studentFeedbackRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
                 methodResult.StatusCode = StatusCodes.Status201Created;
-                methodResult.Result = _mapper.Map<StudentFeedbackModel>(studentFeed);
+                methodResult.Result = _mapper.Map<StudentFeedbackModel>(studentFeedback);
                 return methodResult;
             });
 
