@@ -142,7 +142,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumQuery
                                     x.Status != EnumClassForumResultStatus.Draft &&
                                     x.Id != classForumResultCurrentStudent.Id &&
                                     (!classStudentIds?.Contains(x.StudentId) ?? false)
-                                    ).OrderBy(x => rand.Next()).Take(STUDENT_RANDOM_TAKE).ToList(); 
+                                    ).OrderBy(x => rand.Next()).Take(STUDENT_RANDOM_TAKE).ToList();
 
                     classForumByStudentModel.ClassForumResultRandomStudents = classForumResultAllStudents;
                 }
