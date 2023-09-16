@@ -67,6 +67,7 @@ namespace Fsel.Course.Lms.Application.Queries.UnitQuery
 
             if (currentUnitIndicator == null)
             {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.CourseId), request.CourseId);
                 return methodResult;
             }
             #endregion
