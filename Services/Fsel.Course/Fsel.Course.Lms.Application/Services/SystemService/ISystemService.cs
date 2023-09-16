@@ -4,6 +4,7 @@ namespace Fsel.Course.Lms.Application.Services.SystemService
 {
     using Fsel.Common.ActionResults;
     using Fsel.Course.Lms.Application.Services.SystemService.Models;
+    using Fsel.Course.Lms.Domain.Models.EntityModels;
     using Microsoft.AspNetCore.Mvc;
     using Refit;
 
@@ -17,5 +18,8 @@ namespace Fsel.Course.Lms.Application.Services.SystemService
 
         [Post("/log-action")]
         Task<IApiResponse<MethodResult<IList<LogActionDaysModel>>>> GetLogActionsByUserIdsAsync([FromBody] IList<Guid> ids);
+
+        [Post("/feature-access-time/{userId}")]
+        Task<IApiResponse<MethodResult<IList<FeatureAccessTimeModel>>>> GetFeatureAccessTimesByIdsAsync([FromBody] IList<Guid> ids, [FromRoute] Guid userId);
     }
 }

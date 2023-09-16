@@ -3,6 +3,7 @@
 namespace Fsel.Course.Domain.Models.EntityModels
 {
     using Fsel.Core.Base.BaseModels;
+    using Fsel.Shared.Enums;
 
     public class ReviewTeacherRatingDetailSearchModel
     {
@@ -16,5 +17,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public string? ReviewArea { get; set; }
         public double Starts { get; set; }
         public string? Feedback { get; set; }
+        public IList<EnumFeedBackPositive>? FeedbackPositive { get; set; }
+        public IList<EnumFeedBackNegative>? FeedbackNegative { get; set; }
     }
 }
