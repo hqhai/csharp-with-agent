@@ -111,7 +111,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumQuery
                 .Include(x => x.ClassForumScores)
                 .Where(x => x.ClassForumId == classForum.Id && !classStudentIds!.Contains(x.StudentId) && x.Status != EnumClassForumResultStatus.Draft)
                 .Skip(skip)
-                .Take(2)
+                .Take(STUDENT_RANDOM_TAKE)
                 .ToListAsync(cancellationToken);
 
 
