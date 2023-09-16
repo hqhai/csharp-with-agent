@@ -140,10 +140,11 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumQuery
 
 
                     // Lấy bài post ngẫu nhiên học sinh khác lớp
-                    var classForumResultRandomStudents = classForumResultsRandom.Where(x =>
-                                    x.ClassForumId == classForum.Id &&
-                                    x.Status != EnumClassForumResultStatus.Draft &&
-                                    x.Id != classForumResultCurrentStudent.Id).ToList();
+                    var classForumResultRandomStudents = classForumResultsRandom?.Where(x =>
+                                x.ClassForumId == classForum.Id &&
+                                x.Status != EnumClassForumResultStatus.Draft &&
+                                x.Id != classForumResultCurrentStudent?.Id).ToList() ?? new List<ClassForumResultModel>();
+
 
                     classForumByStudentModel.ClassForumResultRandomStudents = classForumResultRandomStudents;
                 }
