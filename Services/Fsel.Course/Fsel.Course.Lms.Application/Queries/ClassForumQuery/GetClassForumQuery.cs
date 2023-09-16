@@ -88,67 +88,97 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumQuery
             }
             var classForumByStudentModel = _mapper.Map<ClassForumByStudentModel>(classForum);
 
+            // Lấy list StudentId đang học trong class hiện tại
+            IList<Guid>? classStudentIds = new List<Guid>();
+            var currentClass = await _trainingService.GetClassByStudentId(student.Id);
+            classStudentIds = currentClass.Content?.Result?.ClassStudents?.Select(x => x.StudentId).ToList();
+
             var query = await _classForumResultRepository.Queryable
                 .Include(x => x.ClassForumResultFiles)
                 .Include(x => x.ClassForumScores)
-                .Where(x => x.ClassForumId == classForum.Id)
+                .Where(x => x.ClassForumId == classForum.Id && classStudentIds!.Contains(x.StudentId))
+                .ToListAsync(cancellationToken);
+
+
+            //Lấy ngẫu nhiên 2 học sinh khác lớp nhưng cùng lesson và course
+            var totalRecords = await _classForumResultRepository.Queryable
+                            .Where(x => x.ClassForumId == classForum.Id && !classStudentIds!.Contains(x.StudentId))
+                            .CountAsync(cancellationToken);
+
+            var skip = totalRecords < 2 ? 0 : new Random().Next(0, totalRecords - 2);
+            var queryRandomStudent = await _classForumResultRepository.Queryable
+                .Include(x => x.ClassForumResultFiles)
+                .Include(x => x.ClassForumScores)
+                .Where(x => x.ClassForumId == classForum.Id && !classStudentIds!.Contains(x.StudentId))
+                .Skip(skip)
+                .Take(2)
                 .ToListAsync(cancellationToken);
 
 
             var classForumResults = _mapper.Map<IList<ClassForumResultModel>>(query);
+            var classForumResultsRandom = _mapper.Map<IList<ClassForumResultModel>>(queryRandomStudent);
+
             if (classForumResults != null)
             {
-                var actionsResult = await _interactionService.GetsActionAsync(new InteractionActionCommandModel { ObjectIds = classForumResults.Select(x => x.Id).ToList(), UserId = _authContext.CurrentUserId });
-                var actions = actionsResult.Content?.Result;
+                classForumResults = await GetClassForumResult(classForumResults);
+                classForumResultsRandom = await GetClassForumResult(classForumResultsRandom);
 
-                if (actions != null)
-                {
-                    classForumResults = classForumResults.Where(x => !actions.Any(n => n.IsDisable && n.ObjectId == x.Id)).ToList();
-                    foreach (var item in classForumResults)
-                    {
-                        var action = actions.FirstOrDefault(x => x.ObjectId == item.Id);
-                        item.CommentNumber = action?.CommentNumber;
-                        item.LikeNumber = action?.LikeNumber;
-                        item.IsLiked = action?.IsLiked;
-                    }
-                }
 
+                //Lấy ClassForumCurrent - học sinh submit tài khoản hiện tại
                 var classForumResultCurrentStudent = classForumResults.FirstOrDefault(x => x.ClassForumId == classForum.Id && x.LessonResultId == request.LessonResultId);
                 classForumByStudentModel.ClassForumResultCurrentStudent = classForumResultCurrentStudent;
 
 
                 if (classForumResultCurrentStudent != null && classForumResultCurrentStudent.Status != EnumClassForumResultStatus.Draft)
                 {
-                    // Lấy list StudentId đang học trong class hiện tại
-                    IList<Guid>? classStudentIds = new List<Guid>();
-                    var currentClass = await _trainingService.GetClassByStudentId(classForumResultCurrentStudent.StudentId);
-                    classStudentIds = currentClass.Content?.Result?.ClassStudents?.Select(x => x.StudentId).ToList();
-
                     // Lấy bài post học sinh trong lớp
-                    var classForumResultAllStudents = classForumResults
-                        .Where(x => x.ClassForumId == classForum.Id &&
+                    var classForumResultAllStudents = classForumResults.Where(x => x.ClassForumId == classForum.Id &&
                                     x.Status != EnumClassForumResultStatus.Draft &&
-                                    x.Id != classForumResultCurrentStudent.Id &&
-                                    (classStudentIds?.Contains(x.StudentId) ?? false)
+                                    x.Id != classForumResultCurrentStudent.Id
                                     ).ToList();
                     classForumByStudentModel.ClassForumResultAllStudents = classForumResultAllStudents;
 
+
                     // Lấy bài post ngẫu nhiên học sinh khác lớp
-                    Random rand = new Random();
-                    var classForumResultRandomStudents = query.Where(x =>
+                    var classForumResultRandomStudents = classForumResultsRandom.Where(x =>
                                     x.ClassForumId == classForum.Id &&
                                     x.Status != EnumClassForumResultStatus.Draft &&
-                                    x.Id != classForumResultCurrentStudent.Id &&
-                                    (!classStudentIds?.Contains(x.StudentId) ?? false)
-                                    ).OrderBy(x => rand.Next()).Take(STUDENT_RANDOM_TAKE).ToList();
+                                    x.Id != classForumResultCurrentStudent.Id).ToList();
 
-                    classForumByStudentModel.ClassForumResultRandomStudents = classForumResultAllStudents;
+                    classForumByStudentModel.ClassForumResultRandomStudents = classForumResultRandomStudents;
                 }
             }
 
             methodResult.Result = classForumByStudentModel;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
+        }
+
+
+        /// <summary>
+        /// Trả về classForumResult với nghiệp vụ tương ứng
+        /// </summary>
+        /// <param name="classForumResults"></param>
+        /// <returns></returns>
+        public async Task<IList<ClassForumResultModel>> GetClassForumResult(IList<ClassForumResultModel> classForumResults)
+        {
+
+            var actionsResult = await _interactionService.GetsActionAsync(new InteractionActionCommandModel { ObjectIds = classForumResults.Select(x => x.Id).ToList(), UserId = _authContext.CurrentUserId });
+            var actions = actionsResult.Content?.Result;
+
+            if (actions != null)
+            {
+                classForumResults = classForumResults.Where(x => !actions.Any(n => n.IsDisable && n.ObjectId == x.Id)).ToList();
+                foreach (var item in classForumResults)
+                {
+                    var action = actions.FirstOrDefault(x => x.ObjectId == item.Id);
+                    item.CommentNumber = action?.CommentNumber;
+                    item.LikeNumber = action?.LikeNumber;
+                    item.IsLiked = action?.IsLiked;
+                }
+            }
+
+            return classForumResults;
         }
     }
 }
