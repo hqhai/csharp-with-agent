@@ -166,10 +166,10 @@ namespace Fsel.Course.Lms.Application.Queries.ManageProgressQuery
             if (units != null && units.Any())
             {
                 var unitResult = units.SelectMany(x => x.UnitResults).OrderBy(x => x.CreatedDate).FirstOrDefault(x => x.Status != EnumResultStatus.Unfinished);
-                displayOrderUnit = courseUnitMockTests.FirstOrDefault(x => x.UnitId == unitResult?.UnitId)?.DisplayOrder ?? default;
-                var unitContents = courseUnitMockTests.Where(x => x.DisplayOrder <= displayOrderUnit && x.UnitId != null).Select(x => x.UnitId ?? default).ToList();
                 if (unitResult != null)
                 {
+                    displayOrderUnit = courseUnitMockTests.FirstOrDefault(x => x.UnitId == unitResult.UnitId)?.DisplayOrder ?? default;
+                    var unitContents = courseUnitMockTests.Where(x => x.DisplayOrder <= displayOrderUnit && x.UnitId != null).Select(x => x.UnitId ?? default).ToList();
                     var lessonResult = await _lessonResultRepository.Queryable.OrderBy(x => x.CreatedDate).Where(x => x.UnitId == unitResult.UnitId && x.StudentId == studentId && x.Status != EnumResultStatus.Unfinished).FirstOrDefaultAsync();
                     if (lessonResult != null)
                     {
@@ -195,8 +195,8 @@ namespace Fsel.Course.Lms.Application.Queries.ManageProgressQuery
                 if (lessonResults != null && lessonResults.Any())
                 {
                     countVideo = lessonResults.Select(x => x.VideoResult).Where(x => x != null && x.Status == EnumResultStatus.Done && lessonResultIds.Contains(x.LessonResultId)).Count();
-                    countHomeWork = lessonResults.SelectMany(x => x.ClassForumResults).Where(x => x != null && x.Status == EnumClassForumResultStatus.Graded && lessonResultIds.Contains(x.LessonResultId)).Count();
-                    countClassForum = lessonResults.SelectMany(x => x.HomeWorkResults).Where(x => x != null && x.Status == EnumResultStatus.Done && lessonResultIds.Contains(x.LessonResultId)).Count();
+                    countClassForum = lessonResults.SelectMany(x => x.ClassForumResults).Where(x => x != null && x.Status == EnumClassForumResultStatus.Graded && lessonResultIds.Contains(x.LessonResultId)).Count();
+                    countHomeWork = lessonResults.SelectMany(x => x.HomeWorkResults).Where(x => x != null && x.Status == EnumResultStatus.Done && lessonResultIds.Contains(x.LessonResultId)).GroupBy(x => x.LessonResultId).Count();
                 }
             }
             return (countVideo + countClassForum + countHomeWork, lessonIds.Count * 3);
