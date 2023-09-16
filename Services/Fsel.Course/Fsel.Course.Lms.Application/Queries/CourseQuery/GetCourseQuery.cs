@@ -145,7 +145,8 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
                 UnitId = x.UnitId,
                 FinalTest = GetFinalTest(x.FinalTest, studentId, course.Id),
                 MockTest = GetMockTest(x.MockTest, studentId, course.Id),
-                Unit = GetUnit(x.Unit, studentId, course.Id)
+                Unit = GetUnit(x.Unit, studentId, course.Id),
+                Type = x.FinalTest != null ? nameof(x.FinalTest) : x.MockTest != null ? nameof(x.MockTest) : x.Unit != null ? nameof(x.Unit) : null
             }).ToList();
             courseModel.CourseTeachers = _mapper.Map<List<CourseTeacherModel>>(course.CourseTeachers);
             courseModel.CourseResult = _mapper.Map<CourseResultModel>(course.CourseResults.FirstOrDefault(x => x.StudentId == studentId));
