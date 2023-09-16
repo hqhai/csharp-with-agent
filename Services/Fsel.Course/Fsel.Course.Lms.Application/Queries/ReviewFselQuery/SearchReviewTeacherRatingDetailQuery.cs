@@ -32,17 +32,9 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
         private readonly IClassForumResultRepository _classForumResultRepository;
         private readonly IMockTestResultRepository _mockTestResultRepository;
         private readonly IMockTestRepository _mockTestRepository;
+        private readonly IStudentFeedbackRepository _studentFeedbackRepository;
 
-        public SearchReviewTeacherRatingDetailQueryHandler(IUserService userService
-            , IVideoResultRepository videoResultRepository
-            , IVideoRepository videoRepository
-            , ILessonResultRepository lessonResultRepository
-            , ICourseRepository courseRepository
-            , IClassForumRepository classForumRepository
-            , IClassForumResultRepository classForumResultRepository
-            , IMockTestResultRepository mockTestResultRepository
-            , IMockTestRepository mockTestRepository
-            )
+        public SearchReviewTeacherRatingDetailQueryHandler(IUserService userService, IVideoResultRepository videoResultRepository, IVideoRepository videoRepository, ILessonResultRepository lessonResultRepository, ICourseRepository courseRepository, IClassForumRepository classForumRepository, IClassForumResultRepository classForumResultRepository, IMockTestResultRepository mockTestResultRepository, IMockTestRepository mockTestRepository, IStudentFeedbackRepository studentFeedbackRepository)
         {
             _userService = userService;
             _videoResultRepository = videoResultRepository;
@@ -53,6 +45,7 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
             _classForumResultRepository = classForumResultRepository;
             _mockTestResultRepository = mockTestResultRepository;
             _mockTestRepository = mockTestRepository;
+            _studentFeedbackRepository = studentFeedbackRepository;
         }
 
         public async Task<MethodResult<ReviewTeacherRatingDetailSearchModel>> Handle(SearchReviewTeacherRatingDetailQuery request, CancellationToken cancellationToken)
@@ -95,6 +88,7 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
                                  join cl in _classForumRepository.Queryable on baseQ.ClassForumId equals cl.Id
                                  join lr in _lessonResultRepository.Queryable on baseQ.LessonResultId equals lr.Id
                                  join c in _courseRepository.Queryable on lr.CourseId equals c.Id
+                                 join s in _studentFeedbackRepository.Queryable on cl.Id equals s.ObjectId
                                  where baseQ.GradingTeacherId == request.TeacherId && baseQ.Status == EnumClassForumResultStatus.Graded
                                  select new ReviewTeacherRatingDetailModel
                                  {
@@ -103,9 +97,9 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
                                      CreatedDate = baseQ.CreatedDate,
                                      CreatedFullName = baseQ.CreatedFullName,
                                      CreatedUserId = baseQ.CreatedUserId,
-                                     Feedback = baseQ.FeedBackNote,
                                      ReviewArea = nameof(ClassForum),
-                                     Starts = baseQ.FeedBackStars ?? default
+                                     Feedback = s.FeedBackNote,
+                                     Starts = s.FeedBackStars ?? default
                                  };
 
             var mockTestQuery = from baseQ in _mockTestResultRepository.Queryable

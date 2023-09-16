@@ -2,6 +2,7 @@
 
 namespace Fsel.Course.Domain.Models.CommandModels.ClassForumResults
 {
+    using Fsel.Course.Domain.Enums;
     using Fsel.Shared.Enums;
 
     public class RateClassForumResultCommandModel
@@ -10,6 +11,10 @@ namespace Fsel.Course.Domain.Models.CommandModels.ClassForumResults
         public string? FeedBackNote { get; set; }
         public IList<EnumFeedBackPositive>? FeedBackPositives { get; set; }
         public IList<EnumFeedBackNegative>? FeedBackNegatives { get; set; }
-        public Guid ClassForumResultId { get; set; }
+        public Guid ObjectId { get; set; }
+
+        public EnumStudentFeedBackType? Type { get; set; }
+
+        public EnumFeature Feature { get; set; }
     }
 }
