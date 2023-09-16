@@ -117,16 +117,14 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumQuery
                 classForumByStudentModel.ClassForumResultCurrentStudent = classForumResultCurrentStudent;
 
 
-                IList<Guid>? classStudentIds = new List<Guid>();
-
-                if (classForumResultCurrentStudent != null)
-                {
-                    var currentClass = await _trainingService.GetClassByStudentId(classForumResultCurrentStudent.StudentId);
-                    classStudentIds = currentClass.Content?.Result?.ClassStudents?.Select(x => x.StudentId).ToList();
-                }
-
                 if (classForumResultCurrentStudent != null && classForumResultCurrentStudent.Status != EnumClassForumResultStatus.Draft)
                 {
+                    // Lấy list StudentId đang học trong class hiện tại
+                    IList<Guid>? classStudentIds = new List<Guid>();
+                    var currentClass = await _trainingService.GetClassByStudentId(classForumResultCurrentStudent.StudentId);
+                    classStudentIds = currentClass.Content?.Result?.ClassStudents?.Select(x => x.StudentId).ToList();
+
+                    // Lấy bài post học sinh trong lớp
                     var classForumResultAllStudents = classForumResults
                         .Where(x => x.ClassForumId == classForum.Id &&
                                     x.Status != EnumClassForumResultStatus.Draft &&
@@ -135,7 +133,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumQuery
                                     ).ToList();
                     classForumByStudentModel.ClassForumResultAllStudents = classForumResultAllStudents;
 
-
+                    // Lấy bài post ngẫu nhiên học sinh khác lớp
                     Random rand = new Random();
                     var classForumResultRandomStudents = query.Where(x =>
                                     x.ClassForumId == classForum.Id &&
