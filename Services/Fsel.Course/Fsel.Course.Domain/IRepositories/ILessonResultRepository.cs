@@ -7,5 +7,6 @@ namespace Fsel.Course.Domain.IRepositories
 
     public interface ILessonResultRepository : IRepository<LessonResult>
     {
+        Task<List<LessonResult>?> GetsByIds(IList<Guid>? ids);
     }
 }
