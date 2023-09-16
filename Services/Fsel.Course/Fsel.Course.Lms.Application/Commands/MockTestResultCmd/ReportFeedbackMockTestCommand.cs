@@ -6,6 +6,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestResultCmd
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Course.Domain.Entities;
+    using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.CommandModels.MockTestResults;
@@ -47,7 +48,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestResultCmd
                 methodResult.AddErrorBadRequest(nameof(EnumClassForumResultErrorCode.FeedBackStarOnlyCanHane5));
                 return methodResult;
             }
-            var isExistFeedback = await _studentFeedbackRepository.Queryable.AnyAsync(x => x.ObjectId == request.ObjectId && x.Type == request.Type, cancellationToken);
+            var isExistFeedback = await _studentFeedbackRepository.Queryable.AnyAsync(x => x.ObjectId == request.ObjectId, cancellationToken);
             if (isExistFeedback)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(isExistFeedback));
@@ -57,6 +58,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestResultCmd
             await _studentFeedbackRepository.ExecuteTransactionAsync(async () =>
             {
                 studentFeed.Feature = EnumFeature.MockTest;
+                studentFeed.Type = EnumStudentFeedBackType.Teacher;
                 studentFeed = _studentFeedbackRepository.Add(studentFeed);
                 await _studentFeedbackRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 

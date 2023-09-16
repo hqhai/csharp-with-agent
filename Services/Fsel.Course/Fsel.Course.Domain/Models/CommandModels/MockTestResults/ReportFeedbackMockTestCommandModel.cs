@@ -2,7 +2,6 @@
 
 namespace Fsel.Course.Domain.Models.CommandModels.MockTestResults
 {
-    using Fsel.Course.Domain.Enums;
     using Fsel.Shared.Enums;
 
     public class ReportFeedbackMockTestCommandModel
@@ -12,7 +11,5 @@ namespace Fsel.Course.Domain.Models.CommandModels.MockTestResults
         public IList<EnumFeedBackPositive>? FeedBackPositives { get; set; }
         public IList<EnumFeedBackNegative>? FeedBackNegatives { get; set; }
         public Guid ObjectId { get; set; }
-
-        public EnumStudentFeedBackType? Type { get; set; }
     }
 }
