@@ -2,6 +2,7 @@
 
 namespace Fsel.Course.Lms.Application.InternalEvents
 {
+    using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Entities.SkillScoresConfigs;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
@@ -14,7 +15,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
         {
         }
 
-        public async Task UpdateUnit(IList<Guid>? lessonResultIds, Domain.Entities.Unit? unit, Guid courseId, Guid studentId, CancellationToken cancellationToken)
+        public async Task UpdateUnit(IList<Guid>? lessonResultIds, Unit? unit, Guid courseId, Guid studentId, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(lessonResultIds);
             ArgumentNullException.ThrowIfNull(unit);

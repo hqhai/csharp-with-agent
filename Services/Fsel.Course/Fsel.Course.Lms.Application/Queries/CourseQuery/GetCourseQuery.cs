@@ -21,6 +21,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
+    using Unit = Fsel.Course.Domain.Entities.Unit;
 
     public class GetCourseQuery : IRequest<MethodResult<CourseModel>>
     {
@@ -204,7 +205,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
             await _courseRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
         }
 
-        public UnitModel? GetUnit(Domain.Entities.Unit? unit, Guid? studentId, Guid courseId)
+        public UnitModel? GetUnit(Unit? unit, Guid? studentId, Guid courseId)
         {
             if (unit == null)
             {
