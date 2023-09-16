@@ -5,59 +5,63 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestResultCmd
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
-    using Fsel.Core.Base;
+    using Fsel.Course.Domain.Entities;
+    using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.CommandModels.MockTestResults;
     using Fsel.Course.Domain.Models.EntityModels;
-    using Fsel.Course.Lms.Application.Services.UserServices;
+    using Fsel.Shared.Enums;
+    using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class ReportFeedbackMockTestCommand : ReportFeedbackMockTestCommandModel, IRequest<MethodResult<MockTestResultModel>>
+    public class ReportFeedbackMockTestCommand : ReportFeedbackMockTestCommandModel, IRequest<MethodResult<StudentFeedbackModel>>
     {
     }
 
-    public class ReportFeedbackMockTestCommandHandler : IRequestHandler<ReportFeedbackMockTestCommand, MethodResult<MockTestResultModel>>
+    public class ReportFeedbackMockTestCommandHandler : IRequestHandler<ReportFeedbackMockTestCommand, MethodResult<StudentFeedbackModel>>
     {
         private readonly IMapper _mapper;
-        private readonly IMockTestResultRepository _mockTestResultRepository;
-        private readonly AuthContext _authContext;
-        private readonly IUserService _userService;
+        private readonly IStudentFeedbackRepository _studentFeedbackRepository;
 
-        public ReportFeedbackMockTestCommandHandler(IMapper mapper, IMockTestResultRepository mockTestResultRepository, AuthContext authContext, IUserService userService)
+        public ReportFeedbackMockTestCommandHandler(IMapper mapper, IStudentFeedbackRepository studentFeedbackRepository)
         {
             _mapper = mapper;
-            _mockTestResultRepository = mockTestResultRepository;
-            _authContext = authContext;
-            _userService = userService;
+            _studentFeedbackRepository = studentFeedbackRepository;
         }
 
-        public async Task<MethodResult<MockTestResultModel>> Handle(ReportFeedbackMockTestCommand request, CancellationToken cancellationToken)
+        public async Task<MethodResult<StudentFeedbackModel>> Handle(ReportFeedbackMockTestCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            MethodResult<MockTestResultModel> methodResult = new MethodResult<MockTestResultModel>();
-            var student = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
-            if (!student.IsSuccessStatusCode)
+            MethodResult<StudentFeedbackModel> methodResult = new MethodResult<StudentFeedbackModel>();
+
+            StudentFeedback studentFeed = _mapper.Map<StudentFeedback>(request);
+            if (!EnumFeedBackHelper.IsCheckFeedBack(request.FeedBackNegatives, request.FeedBackPositives))
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student));
+                methodResult.AddErrorBadRequest(nameof(EnumClassForumResultErrorCode.FeedbackPositiveOrFeedBackBothHaveValue));
                 return methodResult;
             }
-            var studentId = student?.Content?.Result?.Id;
-            var mockTestResult = await _mockTestResultRepository.Queryable.Include(x => x.MockTestScores).Where(e => e.Id == request.MockTestResultId && e.StudentId == studentId).FirstOrDefaultAsync(cancellationToken);
-            if (mockTestResult == null)
+            if (studentFeed.FeedBackStars > 5)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(mockTestResult));
+                methodResult.AddErrorBadRequest(nameof(EnumClassForumResultErrorCode.FeedBackStarOnlyCanHane5));
+                return methodResult;
+            }
+            var isExistFeedback = await _studentFeedbackRepository.Queryable.AnyAsync(x => x.ObjectId == request.ObjectId && x.Type == request.Type, cancellationToken);
+            if (isExistFeedback)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(isExistFeedback));
                 return methodResult;
             }
 
-            await _mockTestResultRepository.ExecuteTransactionAsync(async () =>
+            await _studentFeedbackRepository.ExecuteTransactionAsync(async () =>
             {
-                _mockTestResultRepository.Update(mockTestResult);
-                await _mockTestResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+                studentFeed.Feature = EnumFeature.MockTest;
+                studentFeed = _studentFeedbackRepository.Add(studentFeed);
+                await _studentFeedbackRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
-                methodResult.StatusCode = StatusCodes.Status200OK;
-                methodResult.Result = _mapper.Map<MockTestResultModel>(mockTestResult);
+                methodResult.StatusCode = StatusCodes.Status201Created;
+                methodResult.Result = _mapper.Map<StudentFeedbackModel>(studentFeed);
                 return methodResult;
             });
 

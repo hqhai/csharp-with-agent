@@ -69,7 +69,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
 
             await _studentFeedbackRepository.ExecuteTransactionAsync(async () =>
             {
-                studentFeed.Feature = EnumFeature.ClassForum;
+                studentFeed.Feature = EnumFeature.MockTest;
                 studentFeed = _studentFeedbackRepository.Add(studentFeed);
                 await _studentFeedbackRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 

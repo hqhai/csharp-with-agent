@@ -6,6 +6,7 @@ namespace Fsel.Course.Infrastructure.Maps
     using Fsel.Core.Extensions;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Models.CommandModels.ClassForumResults;
+    using Fsel.Course.Domain.Models.CommandModels.MockTestResults;
     using Fsel.Course.Domain.Models.EntityModels;
 
     public class StudentFeedbackProfile : Profile
@@ -13,8 +14,8 @@ namespace Fsel.Course.Infrastructure.Maps
         public StudentFeedbackProfile()
         {
             CreateMap<StudentFeedback, StudentFeedbackModel>().IgnoreAllNonExisting();
-            
             CreateMap<RateClassForumResultCommandModel, StudentFeedback>().IgnoreAllNonExisting();
+            CreateMap<ReportFeedbackMockTestCommandModel, StudentFeedback>().IgnoreAllNonExisting();
         }
     }
 }
