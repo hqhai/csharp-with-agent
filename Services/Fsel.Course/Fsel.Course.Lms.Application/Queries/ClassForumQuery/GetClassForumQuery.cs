@@ -105,7 +105,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumQuery
                             .Where(x => x.ClassForumId == classForum.Id && !classStudentIds!.Contains(x.StudentId))
                             .CountAsync(cancellationToken);
 
-            var skip = totalRecords < 2 ? 0 : new Random().Next(0, totalRecords - 2);
+            var skip = totalRecords < STUDENT_RANDOM_TAKE ? 0 : new Random().Next(0, totalRecords - STUDENT_RANDOM_TAKE);
             var queryRandomStudent = await _classForumResultRepository.Queryable
                 .Include(x => x.ClassForumResultFiles)
                 .Include(x => x.ClassForumScores)
