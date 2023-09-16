@@ -90,18 +90,24 @@ namespace Fsel.Course.Lms.Application.Queries.ManageProgressQuery
                 }
                 manageStudentProgressModel.CourseType = courseResult.CourseType;
                 manageStudentProgressModel.CourseId = courseResult.CourseId;
-                var (currentProgress, progress, displayOrderUnit, displayOrderLesson) = await GetContentCompleted(courseResult.CourseId, courseResult.CourseType, courseResult.StudentId);
-                manageStudentProgressModel.DisplayOrderLesson = displayOrderLesson;
-                manageStudentProgressModel.DisplayOrderUnit = displayOrderUnit;
-                manageStudentProgressModel.ContentProgress = string.Format("{0} / {1}", currentProgress, progress);
+
                 manageStudents.Add(manageStudentProgressModel);
             }
             if (!string.IsNullOrEmpty(request.Keyword))
             {
                 manageStudents = manageStudents.Where(m => (m.FullName ?? string.Empty).Contains(request.Keyword)).ToList();
             }
+
             int totalItem = manageStudents.Count;
             var lists = manageStudents.Skip((request.Page - 1) * request.PageSize).Take(request.PageSize).ToList();
+            foreach (var item in lists)
+            {
+                var (currentProgress, progress, displayOrderUnit, displayOrderLesson) = await GetContentCompleted(item.CourseId, item.CourseType, item.StudentId);
+                item.DisplayOrderLesson = displayOrderLesson;
+                item.DisplayOrderUnit = displayOrderUnit;
+                item.ContentProgress = string.Format("{0} / {1}", currentProgress, progress);
+            }
+            methodResult.Result = new PagingItemsModel<ManageStudentProgressModel>(lists, request, totalItem);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }
@@ -127,7 +133,7 @@ namespace Fsel.Course.Lms.Application.Queries.ManageProgressQuery
             var courseUnitMockTests = course?.CourseUnitMockTests.ToList();
             var unitIds = courseUnitMockTests?.Where(x => x.UnitId != null).Select(x => x.UnitId ?? default).ToList();
             var (currentProgress, progress, displayOrderUnit, displayOrderLesson) = await GetDisplayOrder(unitIds, studentId, courseUnitMockTests);
-            var fullMockTest = courseUnitMockTests?.Select(x => x.MockTest).ToList();
+            var fullMockTest = courseUnitMockTests?.Where(x => x.MockTestId != null).Select(x => x.MockTest).ToList();
             var fullMockTestResults = fullMockTest?.SelectMany(x => x!.MockTestResults).Where(x => x.StudentId == studentId && x.CourseId == courseId).ToList();
             var count = fullMockTestResults?.Where(x => x.Status == EnumResultStatus.Done).Count() ?? default;
             return (currentProgress + count, progress + count, displayOrderUnit, displayOrderLesson);
@@ -142,8 +148,8 @@ namespace Fsel.Course.Lms.Application.Queries.ManageProgressQuery
             var courseUnitMockTests = course?.CourseUnitMockTests.ToList();
             var unitIds = courseUnitMockTests?.Where(x => x.UnitId != null).Select(x => x.UnitId ?? default).ToList();
             var (currentProgress, progress, displayOrderUnit, displayOrderLesson) = await GetDisplayOrder(unitIds, studentId, courseUnitMockTests);
-            var finalTest = courseUnitMockTests?.Select(x => x.FinalTest).ToList();
-            var finalTestResult = finalTest?.SelectMany(x => x!.FinalTestResults).FirstOrDefault(x => x.StudentId == studentId && x.CourseId == courseId);
+            var finalTest = courseUnitMockTests?.Where(x => x.FinalTestId != null).Select(x => x.FinalTest).ToList();
+            var finalTestResult = finalTest?.Where(x => x!.FinalTestResults.Any()).SelectMany(x => x!.FinalTestResults).FirstOrDefault(x => x.StudentId == studentId && x.CourseId == courseId);
             var count = finalTestResult?.Status == EnumResultStatus.Done ? 1 : default;
             return (currentProgress + count, progress + count, displayOrderUnit + count, displayOrderLesson);
         }
@@ -193,7 +199,7 @@ namespace Fsel.Course.Lms.Application.Queries.ManageProgressQuery
                     countClassForum = lessonResults.SelectMany(x => x.HomeWorkResults).Where(x => x != null && x.Status == EnumResultStatus.Done && lessonResultIds.Contains(x.LessonResultId)).Count();
                 }
             }
-            return (lessonIds.Count * 3, countVideo + countClassForum + countHomeWork);
+            return (countVideo + countClassForum + countHomeWork, lessonIds.Count * 3);
         }
     }
 }
