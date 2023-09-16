@@ -51,7 +51,7 @@ namespace Fsel.Identity.Application.Queries.AdminQuery
             }
             var query = lessonCommentResult.Content?.Result?.AsEnumerable();
             int totalItem = query?.Count() ?? 0;
-            var lists = query?.Skip((request!.Page - 1) * request!.PageSize).Take(request!.PageSize).ToList() ?? null;
+            var lists = query?.Skip((request.Page - 1) * request.PageSize).Take(request.PageSize).ToList() ?? null;
             methodResult.Result = new PagingItemsModel<StudentLessonCommentModel>(lists, request, totalItem);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;

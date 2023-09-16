@@ -97,7 +97,7 @@ namespace Fsel.Training.Application.Queries.ClassLiveQuery
                 .AsEnumerable();
             var query = a1.Union(a2);
             int totalItem = query.Count();
-            var lists = query.Skip((request!.Page - 1) * request!.PageSize).Take(request!.PageSize).ToList();
+            var lists = query.Skip((request.Page - 1) * request.PageSize).Take(request.PageSize).ToList();
             var courseIds = lists.Select(x => x.CourseId).ToList();
             var courseResults = await _courseService.GetListCourseByIds(courseIds);
             var courses = courseResults.Content?.Result;

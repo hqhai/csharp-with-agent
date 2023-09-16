@@ -35,9 +35,12 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 if (isClassForumDone && isHomeWorksDone)
                 {
                     lessonResult.Status = EnumResultStatus.Done;
+                    _lessonResultRepository.Update(lessonResult);
+                    await _lessonResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken);
+                    return;
                 }
                 _lessonResultRepository.Update(lessonResult);
-                await _lessonResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+                await _lessonResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             }
         }
     }

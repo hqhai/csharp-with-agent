@@ -128,7 +128,8 @@ NotificationMessagePublisher notificationMessagePublisher)
                     ObjectId = classForumResult.Id,
                     Roles = roles,
                     Content = EnumNotificationContent.CreateClassForumResult,
-                    Type = EnumNotificationType.Text
+                    Type = EnumNotificationType.Text,
+                    SenderId = _authContext.CurrentUserId
                 };
 
                 await _notificationMessagePublisher.Publish(model, cancellationToken);

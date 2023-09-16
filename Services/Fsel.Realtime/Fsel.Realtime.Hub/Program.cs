@@ -6,7 +6,6 @@ using Fsel.Realtime.Application.Hubs;
 using Fsel.Realtime.Application.Queues.Consumers;
 using Fsel.Shared.Constants;
 using MassTransit;
-using MassTransit.SignalR;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,12 +19,6 @@ queues: new Dictionary<string, Type>
 {
     { QueueSettings.RealtimeQueue.NameQueue.DiscussionBoard, typeof(DiscussionBoardConsumer) },
     { QueueSettings.NotificationQueue.NameQueue.Notification, typeof(NotificationConsumer) }
-},
-
-setHub: (IBusRegistrationConfigurator x) =>
-{
-    x.AddSignalRHub<DiscussionBoardHub>();
-    x.AddSignalRHub<NotificationHub>();
 });
 
 var app = builder.Build();

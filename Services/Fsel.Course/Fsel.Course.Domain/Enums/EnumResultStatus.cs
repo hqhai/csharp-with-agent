@@ -4,9 +4,9 @@ namespace Fsel.Course.Domain.Enums
 {
     public enum EnumResultStatus
     {
-        Unfinished,
-        New,
         Process,
-        Done
+        Done,
+        Unfinished,
+        New
     }
 }

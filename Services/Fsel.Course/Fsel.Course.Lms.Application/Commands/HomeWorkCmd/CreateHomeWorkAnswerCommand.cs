@@ -167,6 +167,9 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd
 
             #endregion Validation
 
+            _homeWorkResultRepository.Update(homeWorkResult);
+            await _homeWorkResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+
             await _homeWorkAnswerRepository.ExecuteTransactionAsync(async () =>
             {
                 if (homeWorkAnswers.Any())
@@ -174,10 +177,6 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd
                     _homeWorkAnswerRepository.UpdateList(homeWorkAnswers);
                     await _homeWorkAnswerRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
                 }
-
-                _homeWorkResultRepository.Update(homeWorkResult);
-                await _homeWorkResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
-
                 methodResult.StatusCode = StatusCodes.Status201Created;
                 methodResult.Result = true;
                 return methodResult;

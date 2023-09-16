@@ -58,6 +58,16 @@ namespace Fsel.Course.Lms.Application.Queries.StudentQuery
             int age = DateTimeHelper.GetYearOld(student?.Human?.Birthday);
             if (student != null)
             {
+                var placementTestResult = await _placementTestResultRepository.Queryable.Where(x => x.Status == EnumResultStatus.Done && x.StudentId == student.Id)
+                                                                               .OrderByDescending(x => x.CreatedDate)
+                                                                               .FirstOrDefaultAsync(cancellationToken);
+                var (levelNext, isLock) = placementTestResult?.Level.GetLevelInScore(placementTestResult.Percent, age) ?? (null, default);
+
+                settingStudentModel.Level = student.CourseLevel;
+                settingStudentModel.IsPlacementTest = placementTestResult != null;
+                settingStudentModel.ClassId = student.ClassId ?? null;
+                settingStudentModel.PTLevel = placementTestResult?.Level ?? null;
+                settingStudentModel.IsLockPT = isLock;
                 var classResult = await _trainingService.GetClassByStudentId(student.Id);
                 if (!classResult.IsSuccessStatusCode)
                 {
@@ -67,25 +77,18 @@ namespace Fsel.Course.Lms.Application.Queries.StudentQuery
                 var @class = classResult?.Content?.Result;
                 if (@class == null)
                 {
-                    var isLockOrder = await _orderService.IsCheckStatusUser(new IsCheckPaymentStatusByUserModel { ClassId = @class.Id, CourseId = @class.CourseId, PackageId = @class.PackageId, UserId = _authContext.CurrentUserId });
-                    if (!isLockOrder.IsSuccessStatusCode)
-                    {
-                        methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(isLockOrder));
-                        return methodResult;
-                    }
-                    settingStudentModel.IsLockOrder = isLockOrder?.Content?.Result ?? default;
+                    methodResult.StatusCode = StatusCodes.Status200OK;
+                    methodResult.Result = settingStudentModel;
+                    return methodResult;
                 }
 
-                var placementTestResult = await _placementTestResultRepository.Queryable.Where(x => x.Status == EnumResultStatus.Done && x.StudentId == student.Id)
-                                                                                .OrderByDescending(x => x.CreatedDate)
-                                                                                .FirstOrDefaultAsync(cancellationToken);
-                var (levelNext, isLock) = placementTestResult?.Level.GetLevelInScore(placementTestResult.Percent, age) ?? (null, default);
-
-                settingStudentModel.Level = student.CourseLevel;
-                settingStudentModel.IsPlacementTest = placementTestResult != null;
-                settingStudentModel.ClassId = student.ClassId ?? null;
-                settingStudentModel.PTLevel = placementTestResult?.Level ?? null;
-                settingStudentModel.IsLockPT = isLock;
+                var isLockOrder = await _orderService.IsCheckStatusUser(new IsCheckPaymentStatusByUserModel { ClassId = @class.Id, CourseId = @class.CourseId, PackageId = @class.PackageId, UserId = _authContext.CurrentUserId });
+                if (!isLockOrder.IsSuccessStatusCode)
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(isLockOrder));
+                    return methodResult;
+                }
+                settingStudentModel.IsLockOrder = isLockOrder?.Content?.Result ?? default;
             }
 
             methodResult.StatusCode = StatusCodes.Status200OK;

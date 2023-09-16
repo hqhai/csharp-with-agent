@@ -11,26 +11,29 @@ namespace Fsel.Interaction.Application.Queries.SurveyQuestionQuery
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class GetAllSurveyQuestQuery : IRequest<MethodResult<IList<SurveyQuestionModel>>>
+    public class GetAllSurveyQuestionQuery : IRequest<MethodResult<IList<SurveyQuestionModel>>>
     {
         public bool IsPilot { get; set; }
+
+        public int? DisplayLevel { get; set; } = 1;
     }
 
-    public class GetAllSurveyQuestQueryHandler : IRequestHandler<GetAllSurveyQuestQuery, MethodResult<IList<SurveyQuestionModel>>>
+    public class GetAllSurveyQuestionQueryHandler : IRequestHandler<GetAllSurveyQuestionQuery, MethodResult<IList<SurveyQuestionModel>>>
     {
         private readonly ISurveyQuestionRepository _surveyQuestionRepository;
 
-        public GetAllSurveyQuestQueryHandler(ISurveyQuestionRepository surveyQuestionRepository)
+        public GetAllSurveyQuestionQueryHandler(ISurveyQuestionRepository surveyQuestionRepository)
         {
             _surveyQuestionRepository = surveyQuestionRepository;
         }
 
-        public async Task<MethodResult<IList<SurveyQuestionModel>>> Handle(GetAllSurveyQuestQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<IList<SurveyQuestionModel>>> Handle(GetAllSurveyQuestionQuery request, CancellationToken cancellationToken)
         {
             var methodResult = new MethodResult<IList<SurveyQuestionModel>>();
 
             var surveyQuestionquery = await _surveyQuestionRepository.Queryable
-                .Where(x => x.IsPilot == request.IsPilot)
+                .Where(x => x.IsPilot == request.IsPilot && x.DisplayLevel == request.DisplayLevel )
+                .OrderBy(x => x.DisplayOrder)
                 .Select(x => new SurveyQuestionModel
                 {
                     Id = x.Id,
@@ -41,6 +44,7 @@ namespace Fsel.Interaction.Application.Queries.SurveyQuestionQuery
                     Question = x.Question,
                     Answers = x.Answers,
                     IsPilot = x.IsPilot,
+                    DisplayLevel = x.DisplayLevel,
                 }).ToListAsync(cancellationToken: cancellationToken);
 
             methodResult.Result = surveyQuestionquery;

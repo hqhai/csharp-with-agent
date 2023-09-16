@@ -2,6 +2,7 @@
 
 namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
 {
+    using System;
     using System.Globalization;
     using AutoMapper;
     using Fsel.Common.ActionResults;
@@ -16,6 +17,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Infrastructure.Common;
     using Fsel.Course.Lms.Application.Commands.SenderCmd;
+    using Fsel.Course.Lms.Application.Queues.Publishers;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Course.Lms.Application.Services.UserServices.Models;
     using Fsel.Shared.Constants;
@@ -23,6 +25,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
     using Fsel.Shared.Enums.ErrorCodes;
     using Fsel.Shared.Helpers;
     using Fsel.Shared.Models.SenderTemplates;
+    using Fsel.Shared.Models.ShareModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -36,19 +39,32 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
         private readonly IPlacementTestAnswerRepository _placementTestAnswerRepository;
         private readonly IPlacementTestResultRepository _placementTestResultRepository;
         private readonly IUserService _userService;
+        private readonly CreateOrderPublisher _createOrderPublisher;
         private readonly IQuestionRepository _questionRepository;
         private readonly IMapper _mapper;
+        private readonly ICourseRepository _courseRepository;
         private readonly AuthContext _authContext;
         private readonly AnswerTypeConverter _answerTypeConverter;
         private readonly IMediator _mediator;
 
-        public CreatePlacementTestAnswerCommandHandler(IPlacementTestAnswerRepository placementTestAnswerRepository, IPlacementTestResultRepository placementTestResultRepository, IUserService userService, IQuestionRepository questionRepository, IMapper mapper, AuthContext authContext, AnswerTypeConverter answerTypeConverter, IMediator mediator)
+        public CreatePlacementTestAnswerCommandHandler(IPlacementTestAnswerRepository placementTestAnswerRepository
+            , IPlacementTestResultRepository placementTestResultRepository
+            , IUserService userService
+            , CreateOrderPublisher createOrderPublisher
+            , IQuestionRepository questionRepository
+            , IMapper mapper
+            , ICourseRepository courseRepository
+            , AuthContext authContext
+            , AnswerTypeConverter answerTypeConverter
+            , IMediator mediator)
         {
             _placementTestAnswerRepository = placementTestAnswerRepository;
             _placementTestResultRepository = placementTestResultRepository;
             _userService = userService;
+            _createOrderPublisher = createOrderPublisher;
             _questionRepository = questionRepository;
             _mapper = mapper;
+            _courseRepository = courseRepository;
             _authContext = authContext;
             _answerTypeConverter = answerTypeConverter;
             _mediator = mediator;
@@ -194,7 +210,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
             placementTestResult.PlacementTestAnswers = placementTestAnswers;
 
             var overallScore = NumberHelper.RoundNumberDouble(skillScores.Select(x => x.Scores).Average());
-            var (currentLevel, isLockNew) = request.Level.GetLevelInScore(placementTestResult.Level == EnumPlacementTestLevel.IELTS ? overallScore : placementTestResult.Percent, age);
+            var (currentLevel, isLockPT) = request.Level.GetLevelInScore(placementTestResult.Level == EnumPlacementTestLevel.IELTS ? overallScore : placementTestResult.Percent, age);
 
             if (currentLevel.HasValue)
             {
@@ -207,9 +223,39 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
                 if (!isCheckResult.IsSuccessStatusCode)
                 {
                     methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError));
+                    return methodResult;
                 }
             }
+            if (isLockPT)
+            {
+                #region Pilot
 
+                if (currentLevel.HasValue)
+                {
+                    Random random = new Random();
+                    var courses = await _courseRepository.Queryable.Where(x => x.CourseLevel == currentLevel.Value && x.Status != EnumCourseStatus.New).ToListAsync(cancellationToken);
+                    var course = courses.OrderBy(x => random.Next(courses.Count)).FirstOrDefault();
+                    if (course == null)
+                    {
+                        methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(course));
+                        return methodResult;
+                    }
+                    CreateOrderQueueModel createOrderQueueModel = new CreateOrderQueueModel
+                    {
+                        Address = "Viet Nam",
+                        Country = "Viet Nam",
+                        CourseId = course.Id,
+                        CourseLevel = currentLevel.Value,
+                        FullName = student?.Human?.FullName,
+                        PaymentMethod = EnumPaymentMethodStatus.Card,
+                        CodeCourse = course.Code,
+                        UserId = _authContext.CurrentUserId
+                    };
+                    await _createOrderPublisher.Publish(createOrderQueueModel, cancellationToken);
+                }
+
+                #endregion Pilot
+            }
             await _placementTestAnswerRepository.ExecuteTransactionAsync(async () =>
             {
                 placementTestResult = _placementTestResultRepository.Add(placementTestResult);
@@ -222,7 +268,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
                 methodResult.Result = _mapper.Map<IList<PlacementTestResultModel>>(placementTestResults);
                 return methodResult;
             });
-            if (isLockNew)
+            if (isLockPT)
             {
                 var param = new SendStudentPTTemplateModel
                 {

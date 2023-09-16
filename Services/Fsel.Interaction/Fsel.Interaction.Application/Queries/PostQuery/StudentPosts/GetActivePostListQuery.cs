@@ -6,6 +6,7 @@ namespace Fsel.Interaction.Application.Queries.PostQuery.StudentPosts
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base;
     using Fsel.Core.Base.BaseModels;
+    using Fsel.Core.Extensions;
     using Fsel.Interaction.Application.Services.UserServices;
     using Fsel.Interaction.Domain.Entities;
     using Fsel.Interaction.Domain.IRepositories;
@@ -172,6 +173,7 @@ namespace Fsel.Interaction.Application.Queries.PostQuery.StudentPosts
             });
 
             var lists = await result
+                    .ApplySortAndPaging(request)
                     .AsNoTracking()
                     .ToListAsync(cancellationToken: cancellationToken)
                     .ConfigureAwait(false);

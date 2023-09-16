@@ -65,16 +65,32 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
             {
                 var csoResults = await _userService.GetCSOByUserId(_authContext.CurrentUserId);
                 var csoId = csoResults.Content?.Result?.Id;
-                classForumResult.CheckCsoId = csoId;
-                classForumResult.CheckStartDate = DateTime.Now;
+                if (classForumResult.CheckStartDate.HasValue && classForumResult.CheckStartDate.Value.AddMinutes(30) < DateTime.Now)
+                {
+                    classForumResult.CheckCsoId = null;
+                    classForumResult.CheckStartDate = null;
+                }
+                else
+                {
+                    classForumResult.CheckCsoId = csoId;
+                    classForumResult.CheckStartDate = DateTime.Now;
+                }
             }
 
             if (_authContext.Roles!.Contains(EnumRole.Teacher.ToString()))
             {
                 var teacherResult = await _userService.GetTeacherByUserIdAsync(_authContext.CurrentUserId);
                 var teacherId = teacherResult.Content?.Result?.Id;
-                classForumResult.GradingTeacherId = teacherId;
-                classForumResult.GradingStartDate = DateTime.Now;
+                if (classForumResult.GradingStartDate.HasValue && classForumResult.GradingStartDate.Value.AddMinutes(30) < DateTime.Now)
+                {
+                    classForumResult.GradingTeacherId = null;
+                    classForumResult.GradingStartDate = null;
+                }
+                else
+                {
+                    classForumResult.GradingTeacherId = teacherId;
+                    classForumResult.GradingStartDate = DateTime.Now;
+                }
             }
 
             var lesson = classForumResult.LessonResult?.Lesson?.UnitLessons.FirstOrDefault(y => y.UnitId == classForumResult.LessonResult.UnitId)?.DisplayOrder;

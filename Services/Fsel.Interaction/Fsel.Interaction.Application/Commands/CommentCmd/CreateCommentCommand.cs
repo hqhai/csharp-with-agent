@@ -83,7 +83,8 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
                             ObjectId = request.ObjectId,
                             UserId = postOwner!.CreatedUserId,
                             Content = EnumNotificationContent.Comment,
-                            Type = EnumNotificationType.LinkComment
+                            Type = EnumNotificationType.LinkComment,
+                            SenderId = _authContext.CurrentUserId,
 
                         };
                         await _classForumCommentPublisher.Publish(model, cancellationToken).ConfigureAwait(false);
@@ -104,7 +105,8 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
                             ObjectId = request.ObjectId,
                             UserId = commentOwnerId,
                             Content = EnumNotificationContent.ReplyComment,
-                            Type = EnumNotificationType.LinkComment
+                            Type = EnumNotificationType.LinkComment,
+                            SenderId = _authContext.CurrentUserId,
                         };
                         await _classForumCommentPublisher.Publish(model, cancellationToken).ConfigureAwait(false);
                         break;

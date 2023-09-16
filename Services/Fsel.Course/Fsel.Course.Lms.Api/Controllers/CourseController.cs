@@ -3,6 +3,7 @@
 using System.Net;
 using Fsel.Common.ActionResults;
 using Fsel.Common.Constants;
+using Fsel.Course.Domain.Entities.SkillScoresConfigs;
 using Fsel.Course.Domain.Models.EntityModels;
 using Fsel.Course.Lms.Application.Commands.CourseResultCmd;
 using Fsel.Course.Lms.Application.Queries.CourseQuery;

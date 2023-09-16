@@ -46,7 +46,7 @@ namespace Fsel.Identity.Application.Queries.AdminQuery
             var studentCourses = studentCourseResults.Content?.Result;
             var query = studentCourses!.AsEnumerable();
             int totalItem = query.Count();
-            var lists = query.Skip((request!.Page - 1) * request!.PageSize).Take(request!.PageSize).ToList();
+            var lists = query.Skip((request.Page - 1) * request.PageSize).Take(request.PageSize).ToList();
 
             methodResult.Result = new PagingItemsModel<StudentCourseModel>(lists, request, totalItem);
             methodResult.StatusCode = StatusCodes.Status200OK;
