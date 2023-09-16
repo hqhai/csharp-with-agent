@@ -2,8 +2,6 @@
 
 namespace Fsel.Course.Lms.Application.InternalEvents
 {
-    using System.Threading;
-    using System.Threading.Tasks;
     using Fsel.Core.Applications.InternalEvents;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums;
@@ -13,6 +11,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
     using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.EntityFrameworkCore;
+    using Unit = Course.Domain.Entities.Unit;
 
     public class LessonResultInputThenUpdateUnitResultHandler : BaseInternalUnitResultEventHandler,
         INotificationHandler<EntityChangedEvent<LessonResult>>
@@ -55,7 +54,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             }
         }
 
-        private async Task UpdateTheNextLesson(Domain.Entities.Unit? unit, LessonResult lessonResult, CancellationToken cancellationToken)
+        private async Task UpdateTheNextLesson(Unit? unit, LessonResult lessonResult, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(unit);
             var mockTestId = unit.UnitSkillMockTests.FirstOrDefault()?.MockTestId;

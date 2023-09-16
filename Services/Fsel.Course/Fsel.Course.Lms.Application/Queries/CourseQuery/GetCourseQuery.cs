@@ -21,6 +21,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
+    using Unit = Fsel.Course.Domain.Entities.Unit;
 
     public class GetCourseQuery : IRequest<MethodResult<CourseModel>>
     {
@@ -133,30 +134,23 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
             {
                 return null;
             }
-            return new CourseModel
+
+            var courseModel = _mapper.Map<CourseModel>(course);
+            courseModel.CourseUnitMockTests = course.CourseUnitMockTests.OrderBy(x => x!.DisplayOrder).Select(x => new CourseUnitMockTestModel
             {
-                Id = course.Id,
-                Name = course.Name,
-                Code = course.Code,
-                Status = course.Status,
-                CourseType = course.CourseType,
-                CreatedDate = course.CreatedDate,
-                InstructionContent = course.InstructionContent,
-                CourseLevel = course.CourseLevel,
-                CourseUnitMockTests = course.CourseUnitMockTests.OrderBy(x => x!.DisplayOrder).Select(x => new CourseUnitMockTestModel
-                {
-                    DisplayOrder = x.DisplayOrder,
-                    CourseId = x.CourseId,
-                    FinalTestId = x.FinalTestId,
-                    MockTestId = x.MockTestId,
-                    UnitId = x.UnitId,
-                    FinalTest = GetFinalTest(x.FinalTest, studentId, course.Id),
-                    MockTest = GetMockTest(x.MockTest, studentId, course.Id),
-                    Unit = GetUnit(x.Unit, studentId, course.Id)
-                }).ToList(),
-                CourseTeachers = _mapper.Map<List<CourseTeacherModel>>(course.CourseTeachers),
-                CourseResult = _mapper.Map<CourseResultModel>(course.CourseResults.FirstOrDefault(x => x.StudentId == studentId)),
-            };
+                DisplayOrder = x.DisplayOrder,
+                CourseId = x.CourseId,
+                FinalTestId = x.FinalTestId,
+                MockTestId = x.MockTestId,
+                UnitId = x.UnitId,
+                FinalTest = GetFinalTest(x.FinalTest, studentId, course.Id),
+                MockTest = GetMockTest(x.MockTest, studentId, course.Id),
+                Unit = GetUnit(x.Unit, studentId, course.Id),
+                Type = x.FinalTest != null ? nameof(x.FinalTest) : x.MockTest != null ? nameof(x.MockTest) : x.Unit != null ? nameof(x.Unit) : null
+            }).ToList();
+            courseModel.CourseTeachers = _mapper.Map<List<CourseTeacherModel>>(course.CourseTeachers);
+            courseModel.CourseResult = _mapper.Map<CourseResultModel>(course.CourseResults.FirstOrDefault(x => x.StudentId == studentId));
+            return courseModel;
         }
 
         public async Task UpdateCourse(Course? course, Guid? studentId, CancellationToken cancellationToken)
@@ -204,7 +198,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
             await _courseRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
         }
 
-        public UnitModel? GetUnit(Domain.Entities.Unit? unit, Guid? studentId, Guid courseId)
+        public UnitModel? GetUnit(Unit? unit, Guid? studentId, Guid courseId)
         {
             if (unit == null)
             {
