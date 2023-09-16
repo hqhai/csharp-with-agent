@@ -26,12 +26,12 @@ namespace Fsel.System.Api.Controllers
         /// <summary>
         /// Get List Feature Access Time
         /// </summary>
-        [HttpPost]
+        [HttpPost("{userId}")]
         [ProducesResponseType(typeof(MethodResult<IList<FeatureAccessTimeModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> Gets([FromBody] IList<Guid> ids)
+        public async Task<IActionResult> Gets([FromBody] IList<Guid> ids, [FromRoute] Guid userId)
         {
-            var queryResult = await _mediator.Send(new GetFeatureAccessTimesByIdsQuery { Ids = ids }).ConfigureAwait(false);
+            var queryResult = await _mediator.Send(new GetFeatureAccessTimesByIdsQuery { Ids = ids, UserId = userId }).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
 

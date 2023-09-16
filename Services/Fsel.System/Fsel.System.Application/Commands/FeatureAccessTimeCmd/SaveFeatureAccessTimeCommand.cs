@@ -4,6 +4,7 @@ namespace Fsel.System.Application.Commands.FeatureAccessTimeCmd
 {
     using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Core.Base;
     using Fsel.System.Domain.Entities;
     using Fsel.System.Domain.IRepositories;
     using Fsel.System.Domain.Models.CommandModels.FeatureAccessTimes;
@@ -20,11 +21,13 @@ namespace Fsel.System.Application.Commands.FeatureAccessTimeCmd
     {
         private readonly IMapper _mapper;
         private readonly IFeatureAccessTimeRepository _featureAccessTimeRepository;
+        private readonly AuthContext _authContext;
 
-        public SaveFeatureAccessTimeCommandHandler(IMapper mapper, IFeatureAccessTimeRepository featureAccessTimeRepository)
+        public SaveFeatureAccessTimeCommandHandler(IMapper mapper, IFeatureAccessTimeRepository featureAccessTimeRepository, AuthContext authContext)
         {
             _mapper = mapper;
             _featureAccessTimeRepository = featureAccessTimeRepository;
+            _authContext = authContext;
         }
 
         public async Task<MethodResult<FeatureAccessTimeModel>> Handle(SaveFeatureAccessTimeCommand request, CancellationToken cancellationToken)
@@ -34,7 +37,7 @@ namespace Fsel.System.Application.Commands.FeatureAccessTimeCmd
 
             await _featureAccessTimeRepository.ExecuteTransactionAsync(async () =>
             {
-                var featureAccessTime = await _featureAccessTimeRepository.Queryable.FirstOrDefaultAsync(x => x.ObjectId == request.ObjectId && x.EnumFeature == request.EnumFeature, cancellationToken);
+                var featureAccessTime = await _featureAccessTimeRepository.Queryable.FirstOrDefaultAsync(x => x.CreatedUserId == _authContext.CurrentUserId && x.ObjectId == request.ObjectId && x.EnumFeature == request.EnumFeature, cancellationToken);
 
                 if (featureAccessTime == null)
                 {
