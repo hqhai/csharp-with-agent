@@ -13,6 +13,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.CommandModels.ClassForumResults;
     using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.AspNetCore.Http;
@@ -68,6 +69,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
 
             await _studentFeedbackRepository.ExecuteTransactionAsync(async () =>
             {
+                studentFeed.Feature = EnumFeature.ClassForum;
                 studentFeed = _studentFeedbackRepository.Add(studentFeed);
                 await _studentFeedbackRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 

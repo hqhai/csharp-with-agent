@@ -14,7 +14,5 @@ namespace Fsel.Course.Domain.Models.CommandModels.ClassForumResults
         public Guid ObjectId { get; set; }
 
         public EnumStudentFeedBackType? Type { get; set; }
-
-        public EnumFeature Feature { get; set; }
     }
 }
