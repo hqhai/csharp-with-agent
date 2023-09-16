@@ -4,15 +4,16 @@ namespace Fsel.System.Application.Queries.FeatureAccessTimeQuery
 {
     using AutoMapper;
     using Fsel.Common.ActionResults;
-    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.System.Domain.Entities;
     using Fsel.System.Domain.IRepositories;
     using MediatR;
     using Microsoft.AspNetCore.Http;
+    using Microsoft.EntityFrameworkCore;
 
     public class GetFeatureAccessTimesByIdsQuery : IRequest<MethodResult<IList<FeatureAccessTime>>>
     {
         public IList<Guid>? Ids { get; set; }
+        public Guid UserId { get; set; }
     }
 
     public class GetFeatureAccessTimesByIdsQueryHandler : IRequestHandler<GetFeatureAccessTimesByIdsQuery, MethodResult<IList<FeatureAccessTime>>>
@@ -37,14 +38,7 @@ namespace Fsel.System.Application.Queries.FeatureAccessTimeQuery
                 return methodResult;
             }
 
-            var featureAccessTimes = await _featureAccessTimeRepository.GetByIdsAsync(request.Ids);
-
-            if (featureAccessTimes == null || !featureAccessTimes.Any())
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(featureAccessTimes));
-                return methodResult;
-            }
-
+            var featureAccessTimes = await _featureAccessTimeRepository.Queryable.Where(x => x.CreatedUserId == request.UserId && request.Ids.Contains(x.ObjectId)).ToListAsync(cancellationToken);
             methodResult.Result = _mapper.Map<IList<FeatureAccessTime>>(featureAccessTimes);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;

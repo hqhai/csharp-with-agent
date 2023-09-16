@@ -7,6 +7,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Core.Base;
     using Fsel.Ordering.Application.Queries.OrderQuery;
     using Fsel.Ordering.Application.Queues.Publishers;
     using Fsel.Ordering.Application.Services.TrainingService;
@@ -37,14 +38,15 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
         private readonly NotificationMessagePublisher _notificationMessagePublisher;
         private readonly ITrainingService _trainingService;
         private readonly IPackageRepository _packageRepository;
-
+        private readonly AuthContext _authContext;
         public CreateOrderCommandHandler(IMapper mapper,
             IOrderRepository orderRepository,
             IMediator mediator,
             IUserService userService,
             NotificationMessagePublisher notificationMessagePublisher,
             ITrainingService trainingService,
-            IPackageRepository packageRepository)
+            IPackageRepository packageRepository,
+            AuthContext authContext)
         {
             _mapper = mapper;
             _orderRepository = orderRepository;
@@ -53,6 +55,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
             _notificationMessagePublisher = notificationMessagePublisher;
             _trainingService = trainingService;
             _packageRepository = packageRepository;
+            _authContext = authContext;
         }
 
         public async Task<MethodResult<OrderModel>> Handle(CreateOrderCommand request, CancellationToken cancellationToken)
@@ -132,7 +135,8 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
                     Roles = new List<EnumRole> { EnumRole.Admin },
                     ObjectId = order.Id,
                     Type = EnumNotificationType.Text,
-                    Content = EnumNotificationContent.OrderCreate
+                    Content = EnumNotificationContent.OrderCreate,
+                    SenderId = order.CreatedUserId,
                 }, cancellationToken);
                 methodResult.StatusCode = StatusCodes.Status201Created;
                 methodResult.Result = _mapper.Map<OrderModel>(order);

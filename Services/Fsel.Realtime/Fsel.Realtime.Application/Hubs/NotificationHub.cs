@@ -2,13 +2,12 @@
 
 namespace Fsel.Realtime.Application.Hubs
 {
+    using Fsel.Core.Base;
     using Fsel.Shared.Constants;
     using Fsel.Shared.Models.ShareModels;
-    using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.SignalR;
 
-    [Authorize]
-    public class NotificationHub : Hub
+    public class NotificationHub : BaseHub
     {
         public void Send(NotificationQueueModel? model)
         {

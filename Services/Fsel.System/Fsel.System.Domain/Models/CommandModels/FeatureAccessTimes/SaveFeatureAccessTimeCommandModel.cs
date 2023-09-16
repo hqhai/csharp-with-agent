@@ -7,8 +7,7 @@ namespace Fsel.System.Domain.Models.CommandModels.FeatureAccessTimes
     public class SaveFeatureAccessTimeCommandModel
     {
         public EnumFeature EnumFeature { get; set; }
-        public long AccessTime { get; set; }
-        public DateTime LastVisited { get; set; } = DateTime.Now;
+        public long? AccessTime { get; set; }
         public Guid ObjectId { get; set; }
     }
 }

@@ -6,6 +6,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Core.Base;
     using Fsel.Ordering.Application.Queues.Publishers;
     using Fsel.Ordering.Application.Services.CourseService;
     using Fsel.Ordering.Application.Services.TrainingService;
@@ -34,18 +35,20 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
         private readonly IUserService _userService;
         private readonly ILmsCourseService _lmsCourseService;
         private readonly NotificationMessagePublisher _notificationMessagePublisher;
-
+        private readonly AuthContext _authContext;
         public ChangeStatusOrderCommandHandler(IOrderRepository orderRepository
             , ITrainingService trainingService
             , IUserService userService
             , ILmsCourseService lmsCourseService
-            , NotificationMessagePublisher notificationMessagePublisher)
+            , NotificationMessagePublisher notificationMessagePublisher,
+AuthContext authContext)
         {
             _orderRepository = orderRepository;
             _trainingService = trainingService;
             _userService = userService;
             _lmsCourseService = lmsCourseService;
             _notificationMessagePublisher = notificationMessagePublisher;
+            _authContext = authContext;
         }
 
         public async Task<MethodResult<bool>> Handle(ChangeStatusOrderCommand request, CancellationToken cancellationToken)
@@ -104,11 +107,12 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
                     }
                     await _notificationMessagePublisher.Publish(new NotificationQueueModel
                     {
-                        UserId = order.UserId,
+                        UserId = order.CreatedUserId,
                         ObjectId = order.Id,
                         ParamsMessage = new List<object> { course?.Name ?? string.Empty },
                         Type = EnumNotificationType.Text,
-                        Content = EnumNotificationContent.OrderChangeStatus
+                        Content = EnumNotificationContent.OrderChangeStatus,
+                        SenderId = _authContext.CurrentUserId
                     }, cancellationToken);
                 }
                 order.Status = request.OrderStatus;

@@ -16,6 +16,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
+    using Unit = Fsel.Course.Domain.Entities.Unit;
 
     public class GetOverallScoreByMockTestQuery : IRequest<MethodResult<IList<OverallScoreReportByMockTestModel>>>
     {
@@ -69,7 +70,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
                 methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.CourseNotTypeIElts));
                 return methodResult;
             }
-            List<Fsel.Course.Domain.Entities.Unit> units = new List<Fsel.Course.Domain.Entities.Unit>();
+            List<Unit> units = new List<Unit>();
             List<OverallScoreReportByMockTestModel> mockTestOverallScores = new List<OverallScoreReportByMockTestModel>();
             foreach (var item in course.CourseUnitMockTests)
             {

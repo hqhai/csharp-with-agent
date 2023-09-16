@@ -17,5 +17,6 @@ namespace Fsel.Notification.Domain.Model.CommandModels.Notification
 
         public Guid NotificationTypeId { get; set; }
         public Guid ObjectId { get; set; }
+        public Guid? SenderId { get; set; }
     }
 }
