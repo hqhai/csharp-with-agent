@@ -109,7 +109,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumQuery
             var queryRandomStudent = await _classForumResultRepository.Queryable
                 .Include(x => x.ClassForumResultFiles)
                 .Include(x => x.ClassForumScores)
-                .Where(x => x.ClassForumId == classForum.Id && !classStudentIds!.Contains(x.StudentId))
+                .Where(x => x.ClassForumId == classForum.Id && !classStudentIds!.Contains(x.StudentId) && x.Status != EnumClassForumResultStatus.Draft)
                 .Skip(skip)
                 .Take(2)
                 .ToListAsync(cancellationToken);
@@ -142,7 +142,6 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumQuery
                     // Lấy bài post ngẫu nhiên học sinh khác lớp
                     var classForumResultRandomStudents = classForumResultsRandom?.Where(x =>
                                 x.ClassForumId == classForum.Id &&
-                                x.Status != EnumClassForumResultStatus.Draft &&
                                 x.Id != classForumResultCurrentStudent?.Id).ToList() ?? new List<ClassForumResultModel>();
 
 
