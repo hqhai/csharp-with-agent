@@ -15,6 +15,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumQuery
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Services.InteractionService;
     using Fsel.Course.Lms.Application.Services.InteractionService.Models;
+    using Fsel.Course.Lms.Application.Services.TrainingServices;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using MediatR;
     using Microsoft.AspNetCore.Http;
@@ -35,6 +36,8 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumQuery
         private readonly IMapper _mapper;
         private readonly ILessonRepository _lessonRepository;
         private readonly IInteractionService _interactionService;
+        private readonly ITrainingService _trainingService;
+        private const int STUDENT_RANDOM_TAKE = 2; // lấy random 2 bài post của học sinh bất kì từ lớp khác, cùng unit, cùng level
 
         public GetClassForumQueryHandler(IClassForumRepository classForumRepository
             , IClassForumResultRepository classForumResultRepository
@@ -42,7 +45,8 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumQuery
             , AuthContext authContext
             , IMapper mapper
             , ILessonRepository lessonRepository
-            , IInteractionService interactionService)
+            , IInteractionService interactionService,
+              ITrainingService trainingService)
         {
             _classForumRepository = classForumRepository;
             _classForumResultRepository = classForumResultRepository;
@@ -51,6 +55,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumQuery
             _mapper = mapper;
             _lessonRepository = lessonRepository;
             _interactionService = interactionService;
+            _trainingService = trainingService;
         }
 
         public async Task<MethodResult<ClassForumByStudentModel>> Handle(GetClassForumQuery request, CancellationToken cancellationToken)
@@ -89,6 +94,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumQuery
                 .Where(x => x.ClassForumId == classForum.Id)
                 .ToListAsync(cancellationToken);
 
+
             var classForumResults = _mapper.Map<IList<ClassForumResultModel>>(query);
             if (classForumResults != null)
             {
@@ -110,13 +116,35 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumQuery
                 var classForumResultCurrentStudent = classForumResults.FirstOrDefault(x => x.ClassForumId == classForum.Id && x.LessonResultId == request.LessonResultId);
                 classForumByStudentModel.ClassForumResultCurrentStudent = classForumResultCurrentStudent;
 
+
+                IList<Guid>? classStudentIds = new List<Guid>();
+
+                if (classForumResultCurrentStudent != null)
+                {
+                    var currentClass = await _trainingService.GetClassByStudentId(classForumResultCurrentStudent.StudentId);
+                    classStudentIds = currentClass.Content?.Result?.ClassStudents?.Select(x => x.StudentId).ToList();
+                }
+
                 if (classForumResultCurrentStudent != null && classForumResultCurrentStudent.Status != EnumClassForumResultStatus.Draft)
                 {
                     var classForumResultAllStudents = classForumResults
                         .Where(x => x.ClassForumId == classForum.Id &&
                                     x.Status != EnumClassForumResultStatus.Draft &&
-                                    x.Id != classForumResultCurrentStudent.Id).ToList();
+                                    x.Id != classForumResultCurrentStudent.Id &&
+                                    (classStudentIds?.Contains(x.StudentId) ?? false)
+                                    ).ToList();
                     classForumByStudentModel.ClassForumResultAllStudents = classForumResultAllStudents;
+
+
+                    Random rand = new Random();
+                    var classForumResultRandomStudents = query.Where(x =>
+                                    x.ClassForumId == classForum.Id &&
+                                    x.Status != EnumClassForumResultStatus.Draft &&
+                                    x.Id != classForumResultCurrentStudent.Id &&
+                                    (!classStudentIds?.Contains(x.StudentId) ?? false)
+                                    ).OrderBy(x => rand.Next()).Take(STUDENT_RANDOM_TAKE).ToList(); 
+
+                    classForumByStudentModel.ClassForumResultRandomStudents = classForumResultAllStudents;
                 }
             }
 
