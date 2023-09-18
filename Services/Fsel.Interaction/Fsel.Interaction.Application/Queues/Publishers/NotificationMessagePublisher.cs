@@ -30,7 +30,7 @@ namespace Fsel.Interaction.Application.Queues.Publishers
                 Type = notification.Type,
                 Content = notification.Content,
                 ParamsMessage = notification.ParamsMessage,
-
+                SenderId = notification.SenderId,
             }, cancellationToken);
 
         }

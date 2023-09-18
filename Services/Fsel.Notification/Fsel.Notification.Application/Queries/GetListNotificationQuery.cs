@@ -8,6 +8,9 @@ using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Fsel.Core.Base;
+using Fsel.Notification.Application.Services;
+using Fsel.Notification.Application.Services.UserServices;
+using Fsel.Notification.Application.Services.Models;
 
 namespace Fsel.Notification.Application.Queries
 {
@@ -19,11 +22,12 @@ namespace Fsel.Notification.Application.Queries
     {
         private readonly INotificationsRepository _notificationsRepository;
         private readonly AuthContext _authContext;
-
-        public GetListNotificationQueryQueryHandler(INotificationsRepository notificationsRepository, AuthContext authContext)
+        private readonly IUserService _userService;
+        public GetListNotificationQueryQueryHandler(INotificationsRepository notificationsRepository, AuthContext authContext, IUserService userService)
         {
             _notificationsRepository = notificationsRepository;
             _authContext = authContext;
+            _userService = userService;
         }
 
         public async Task<MethodResult<PagingItemsModel<NotificationMessageModel>>> Handle(GetListNotificationQuery request, CancellationToken cancellationToken)
@@ -32,33 +36,50 @@ namespace Fsel.Notification.Application.Queries
             var methodResult = new MethodResult<PagingItemsModel<NotificationMessageModel>>();
 
             var notificationQuery = _notificationsRepository.Queryable.Include(x => x.NotificationType)
-                                                                      .Where(x => x.UserId == _authContext.CurrentUserId)
-                                                                      .Select(x => new NotificationMessageModel
-                                                                      {
-                                                                          Id = x.Id,
-                                                                          UserId = x.UserId,
-                                                                          RoleId = x.RoleId,
-                                                                          Status = x.Status,
-                                                                          Message = x.Message,
-                                                                          Link = x.Link,
-                                                                          ObjectId = x.ObjectId,
-                                                                          CreatedDate = x.CreatedDate,
-                                                                          CreatedUserId = x.CreatedUserId,
-                                                                          CreatedFullName = x.CreatedFullName,
-                                                                          NotificationTypeId = x.NotificationTypeId,
-                                                                      });
+                                                                      .Where(x => x.UserId == _authContext.CurrentUserId);
+            var notificationSenderIds = notificationQuery.Where(p => p.SenderId.HasValue).Select(x => x.SenderId.ToString() ?? string.Empty).Distinct().ToList();
+
+            var listSender = await _userService.GetUsersByIdsAsync(new GetUsersByIdsQueryModel { UserIds = notificationSenderIds });
+
+            var listSenderInfo = listSender?.Content?.Result;
+
+            var notificationResultQuery = notificationQuery.Select(x => new NotificationMessageModel
+            {
+                Id = x.Id,
+                UserId = x.UserId,
+                RoleId = x.RoleId,
+                Status = x.Status,
+                Message = x.Message,
+                AvatarPath = string.Empty,
+                Link = x.Link,
+                ObjectId = x.ObjectId,
+                CreatedDate = x.CreatedDate,
+                CreatedUserId = x.CreatedUserId,
+                CreatedFullName = x.CreatedFullName,
+                NotificationTypeId = x.NotificationTypeId,
+                SenderId = x.SenderId
+            });
 
             if (request.Status != null)
             {
-                notificationQuery = notificationQuery.Where(m => m.Status == request.Status);
+                notificationResultQuery = notificationResultQuery.Where(m => m.Status == request.Status);
             }
 
-            int totalItem = await notificationQuery.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
-            var lists = await notificationQuery
+            int totalItem = await notificationResultQuery.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
+            var lists = await notificationResultQuery
                     .ApplySortAndPaging(request)
                     .AsNoTracking()
                     .ToListAsync(cancellationToken: cancellationToken)
                     .ConfigureAwait(false);
+
+            // Gán lại AvatarPath cho các notificationMessage có người gửi
+            if (listSenderInfo != null)
+            {
+                foreach (var notify in lists)
+                {
+                    notify.AvatarPath = listSenderInfo.FirstOrDefault(x => notify.SenderId.HasValue && x.UserId == notify.SenderId.ToString())?.AvatarPath;
+                }
+            }
 
             methodResult.Result = new PagingItemsModel<NotificationMessageModel>(lists, request, totalItem);
             methodResult.StatusCode = StatusCodes.Status200OK;

@@ -67,6 +67,7 @@ namespace Fsel.Course.Lms.Application.Queries.UnitQuery
 
             if (currentUnitIndicator == null)
             {
+                methodResult.Result = new List<SkillScores>();
                 return methodResult;
             }
             #endregion
