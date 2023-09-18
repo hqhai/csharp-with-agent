@@ -6,7 +6,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
     using Fsel.Course.Domain.Enums;
     using Fsel.Shared.Enums;
 
-    public class LessonDashboardModel : BaseModel
+    public class LessonOverviewModel : BaseModel
     {
         public string? Name { get; set; }
         public string? InstructionContent { get; set; }

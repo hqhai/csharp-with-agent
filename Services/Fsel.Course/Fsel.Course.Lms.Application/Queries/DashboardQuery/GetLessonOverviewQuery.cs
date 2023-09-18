@@ -20,11 +20,11 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class GetLessonOverviewQuery : IRequest<MethodResult<LessonDashboardModel>>
+    public class GetLessonOverviewQuery : IRequest<MethodResult<LessonOverviewModel>>
     {
     }
 
-    public class GetLessonDashboardQueryHandler : IRequestHandler<GetLessonOverviewQuery, MethodResult<LessonDashboardModel>>
+    public class GetLessonOverviewQueryHandler : IRequestHandler<GetLessonOverviewQuery, MethodResult<LessonOverviewModel>>
     {
         private readonly IUserService _userService;
         private readonly ILessonResultRepository _lessonResultRepository;
@@ -35,7 +35,7 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
         private readonly ITrainingService _trainingService;
         private readonly AuthContext _authContext;
 
-        public GetLessonDashboardQueryHandler(IUserService userService,
+        public GetLessonOverviewQueryHandler(IUserService userService,
             ILessonResultRepository lessonResultRepository,
             ILessonRepository lessonRepository,
             ICourseRepository courseRepository,
@@ -54,10 +54,10 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
             _authContext = authContext;
         }
 
-        public async Task<MethodResult<LessonDashboardModel>> Handle(GetLessonOverviewQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<LessonOverviewModel>> Handle(GetLessonOverviewQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            MethodResult<LessonDashboardModel> methodResult = new MethodResult<LessonDashboardModel>();
+            MethodResult<LessonOverviewModel> methodResult = new MethodResult<LessonOverviewModel>();
 
             var studentsResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
             if (studentsResult == null)
@@ -94,24 +94,10 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
                                                                    .Include(x => x.VideoResult)
                                                                    .Include(x => x.HomeWorkResults.Where(x => x.StudentId == studentId))
                                                                    .Include(x => x.ClassForumResults.Where(x => x.StudentId == studentId))
-                                                                   .Where(x => x.StudentId == studentId && (x.Status == EnumResultStatus.New || x.Status == EnumResultStatus.Process))
+                                                                   .Where(x => x.StudentId == studentId && x.Status != EnumResultStatus.Unfinished)
+                                                                   .OrderBy(x => x.UpdatedDate)
                                                                    .AsNoTracking()
                                                                    .FirstOrDefaultAsync(cancellationToken);
-
-                if (lessonResult == null)
-                {
-                    lessonResult = await _lessonResultRepository.Queryable.Include(x => x.Unit)
-                                                                      .ThenInclude(x => x!.UnitSkillMockTests)
-                                                                      .Include(x => x.Lesson)
-                                                                      .ThenInclude(x => x!.LessonInstructions)
-                                                                      .Include(x => x.VideoResult)
-                                                                      .Include(x => x.HomeWorkResults.Where(x => x.StudentId == studentId))
-                                                                      .Include(x => x.ClassForumResults.Where(x => x.StudentId == studentId))
-                                                                      .Where(x => x.StudentId == studentId && x.Status == EnumResultStatus.Done)
-                                                                      .OrderByDescending(x => x.CreatedDate)
-                                                                      .AsNoTracking()
-                                                                      .FirstOrDefaultAsync(cancellationToken);
-                }
             }
             var lesson = lessonResult?.Lesson;
             if (lessonResult == null)
@@ -139,10 +125,10 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
             return methodResult;
         }
 
-        private LessonDashboardModel GetLessonOverview(Lesson? lesson, LessonResult? lessonResult, Guid? studentId)
+        private LessonOverviewModel GetLessonOverview(Lesson? lesson, LessonResult? lessonResult, Guid? studentId)
         {
             ArgumentNullException.ThrowIfNull(lesson);
-            var lessonDashBoard = new LessonDashboardModel
+            var lessonDashBoard = new LessonOverviewModel
             {
                 Id = lesson.Id,
                 Name = lesson.Name,
