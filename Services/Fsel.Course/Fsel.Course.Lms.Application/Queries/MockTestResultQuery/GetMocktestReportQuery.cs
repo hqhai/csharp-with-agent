@@ -9,6 +9,7 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
+    using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Services.UserServices;
@@ -49,7 +50,9 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
             }
             var studentId = student?.Content?.Result?.Id;
 
-            var mockTestResult = await _mockTestResultRepository.Queryable.Include(x => x.MockTestScores).OrderBy(x => x.CreatedDate)
+            var mockTestResult = await _mockTestResultRepository.Queryable
+                                    .Include(x => x.MockTestScores)
+                                    .ThenInclude(x => x.SectionGroup)
                                     .Where(x => x.Id == request.MockTestResultId && x.StudentId == studentId)
                                     .AsNoTracking()
                                     .Select(x => new MockTestResultModel
@@ -64,18 +67,28 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
                                         Status = x.Status,
                                         StudentId = x.StudentId,
                                         MockTestId = x.MockTestId,
-                                        MockTestScores = _mapper.Map<IList<MockTestScoreModel>>(x.MockTestScores.OrderBy(x => x.CreatedDate))
-                                    }).FirstOrDefaultAsync(cancellationToken);
-            if (mockTestResult == null)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(mockTestResult));
-                return methodResult;
-            }
+                                        MockTestScores = x.MockTestScores
+                                        .OrderBy(x => x.CreatedDate)
+                                        .Where(n => n.SectionGroup != null)
+                                        .Select(n => new
+                                        {
+                                            Skill = n.SectionGroup!.CourseSkill,
+                                            MockTestScore = n
+                                        })
+                                        .GroupBy(n => n.Skill)
+                                        .Select(n => new
+                                        {
+                                            Skill = n.Key,
+                                            MockTestScores = _mapper.Map<IList<MockTestScoreModel>>(n.Select(m => m.MockTestScore).ToList())
 
-            if (mockTestResult.SkillScores != null)
+                                        })
+                                    }).FirstOrDefaultAsync(cancellationToken);
+
+            if (mockTestResult?.SkillScores != null)
             {
                 mockTestResult.Scores = mockTestResult.SkillScores.Average(x => x.Scores);
             }
+
             methodResult.Result = mockTestResult;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
