@@ -43,9 +43,9 @@ namespace Fsel.Course.Lms.Api.Controllers
         [HttpGet("lesson-overview")]
         [ProducesResponseType(typeof(MethodResult<LessonDashboardModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetLessonOverview([FromQuery] GetLessonOverviewQuery query)
+        public async Task<IActionResult> GetLessonOverview()
         {
-            MethodResult<LessonDashboardModel> queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            MethodResult<LessonDashboardModel> queryResult = await _mediator.Send(new GetLessonOverviewQuery()).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
     }

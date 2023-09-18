@@ -13,14 +13,15 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Course.Lms.Application.Services.TrainingServices;
     using Fsel.Course.Lms.Application.Services.UserServices;
+    using Fsel.Shared.Enums.ErrorCodes;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
     public class GetLessonOverviewQuery : IRequest<MethodResult<LessonDashboardModel>>
     {
-        public Guid CourseId { get; set; }
     }
 
     public class GetLessonDashboardQueryHandler : IRequestHandler<GetLessonOverviewQuery, MethodResult<LessonDashboardModel>>
@@ -31,6 +32,7 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
         private readonly ICourseRepository _courseRepository;
         private readonly IUnitRepository _unitRepository;
         private readonly IMapper _mapper;
+        private readonly ITrainingService _trainingService;
         private readonly AuthContext _authContext;
 
         public GetLessonDashboardQueryHandler(IUserService userService,
@@ -39,6 +41,7 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
             ICourseRepository courseRepository,
             IUnitRepository unitRepository,
             IMapper mapper,
+            ITrainingService trainingService,
             AuthContext authContext)
         {
             _userService = userService;
@@ -47,6 +50,7 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
             _courseRepository = courseRepository;
             _unitRepository = unitRepository;
             _mapper = mapper;
+            _trainingService = trainingService;
             _authContext = authContext;
         }
 
@@ -61,9 +65,22 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(studentsResult));
                 return methodResult;
             }
-            LessonResult? lessonResult = default;
             var studentId = studentsResult.Content?.Result?.Id;
-            var course = await _courseRepository.Queryable.Include(x => x.UnitResults.Where(x => x.StudentId == studentId && x.CourseId == request.CourseId)).FirstOrDefaultAsync(x => x.Id == request.CourseId, cancellationToken);
+            var classResult = await _trainingService.GetClassByStudentId(studentId ?? default);
+            if (!classResult.IsSuccessStatusCode)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallTrainingServiceError));
+                return methodResult;
+            }
+            var @class = classResult?.Content?.Result;
+            if (@class == null)
+            {
+                methodResult.Result = default;
+                methodResult.StatusCode = StatusCodes.Status200OK;
+                return methodResult;
+            }
+            LessonResult? lessonResult = default;
+            var course = await _courseRepository.Queryable.Include(x => x.UnitResults.Where(x => x.StudentId == studentId && x.CourseId == @class.CourseId)).FirstOrDefaultAsync(x => x.Id == @class.CourseId, cancellationToken);
             if (course == null)
             {
                 methodResult.Result = null;
@@ -99,7 +116,7 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
             var lesson = lessonResult?.Lesson;
             if (lessonResult == null)
             {
-                var unitResult = course.UnitResults.FirstOrDefault(x => x.StudentId == studentId && x.CourseId == request.CourseId && x.Status != EnumResultStatus.Unfinished);
+                var unitResult = course.UnitResults.FirstOrDefault(x => x.StudentId == studentId && x.CourseId == @class.CourseId && x.Status != EnumResultStatus.Unfinished);
                 if (unitResult != null)
                 {
                     var unit = await _unitRepository.Queryable.Include(x => x.UnitLessons.Where(x => x.DisplayOrder == 0)).FirstOrDefaultAsync(x => x.Id == unitResult.UnitId, cancellationToken);
