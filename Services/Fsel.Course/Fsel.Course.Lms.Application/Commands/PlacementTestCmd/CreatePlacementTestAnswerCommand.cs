@@ -273,7 +273,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
                 var param = new SendStudentPTTemplateModel
                 {
                     StudentName = student?.Human?.FullName,
-                    CourseLevel = student!.CourseLevel,
+                    CourseLevel = placementTestResult.Level,
                     Percents = string.Join(Environment.NewLine, placementTestResults.Select((x, index) => $"- Module {index + 1}: {x.Percent} %")),
                 };
                 var subject = string.Format(CultureInfo.InvariantCulture, SenderSettings.SendPTResultSubject);
