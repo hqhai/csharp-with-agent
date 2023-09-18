@@ -30,6 +30,7 @@ namespace Fsel.Notification.Application.Queues.Publishers
                 UserIds = notification.UserIds,
                 AvatarPath = notification.AvatarPath,
                 SenderId = notification.SenderId,
+                Status = notification.Status,
             }, cancellationToken);
         }
     }
