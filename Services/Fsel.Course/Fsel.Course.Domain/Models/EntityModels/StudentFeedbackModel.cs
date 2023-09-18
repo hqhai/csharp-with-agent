@@ -2,10 +2,11 @@
 
 namespace Fsel.Course.Domain.Models.EntityModels
 {
+    using Fsel.Core.Base.BaseModels;
     using Fsel.Course.Domain.Enums;
     using Fsel.Shared.Enums;
 
-    public class StudentFeedbackModel
+    public class StudentFeedbackModel : BaseModel
     {
         public EnumStudentFeedBackType Type { get; set; }
 

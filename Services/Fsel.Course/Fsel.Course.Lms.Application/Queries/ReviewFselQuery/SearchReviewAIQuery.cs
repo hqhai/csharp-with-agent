@@ -29,8 +29,9 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
         private readonly ICourseUnitMockTestRepository _courseUnitMockTestRepository;
         private readonly IUnitRepository _unitRepository;
         private readonly IUnitLessonRepository _unitLessonRepository;
+        private readonly IStudentFeedbackRepository _studentFeedbackRepository;
 
-        public SearchReviewAIQueryHandler(ICourseRepository courseRepository, IClassForumResultRepository classForumResultRepository, ILessonResultRepository lessonResultRepository, ILessonRepository lessonRepository, ICourseUnitMockTestRepository courseUnitMockTestRepository, IUnitRepository unitRepository, IUnitLessonRepository unitLessonRepository)
+        public SearchReviewAIQueryHandler(ICourseRepository courseRepository, IClassForumResultRepository classForumResultRepository, ILessonResultRepository lessonResultRepository, ILessonRepository lessonRepository, ICourseUnitMockTestRepository courseUnitMockTestRepository, IUnitRepository unitRepository, IUnitLessonRepository unitLessonRepository, IStudentFeedbackRepository studentFeedbackRepository)
         {
             _courseRepository = courseRepository;
             _classForumResultRepository = classForumResultRepository;
@@ -39,6 +40,7 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
             _courseUnitMockTestRepository = courseUnitMockTestRepository;
             _unitRepository = unitRepository;
             _unitLessonRepository = unitLessonRepository;
+            _studentFeedbackRepository = studentFeedbackRepository;
         }
 
         public async Task<MethodResult<PagingItemsModel<ReviewCourseByClassForumAIModel>>> Handle(SearchReviewAIQuery request, CancellationToken cancellationToken)
@@ -64,8 +66,15 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
                             CourseId = c.Id,
                             CourseName = c.Name,
                             Code = c.Code,
-                            NumberOfStarts = cfr.FeedBackStars ?? default,
                         };
+
+            var numberOfStar = from baseQ in _classForumResultRepository.Queryable
+                               join s in _studentFeedbackRepository.Queryable on baseQ.Id equals s.ObjectId
+                               select new ReviewCourseByClassForumAIModel
+                               {
+                                   NumberOfStarts = s.FeedBackStars ?? default,
+                               };
+
             var groupedQuery = from result in query
                                group result by new { result.LessonId, result.UnitId, result.CourseId } into grouped
                                select new ReviewCourseByClassForumAIModel
