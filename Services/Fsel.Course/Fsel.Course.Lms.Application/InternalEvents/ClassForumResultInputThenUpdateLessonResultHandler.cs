@@ -27,10 +27,15 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             var lessonResult = await _lessonResultRepository.Queryable.FirstOrDefaultAsync(x => x.Id == classForumResult.LessonResultId, cancellationToken);
             if (lessonResult != null)
             {
-                if (classForumResult.Status == EnumClassForumResultStatus.Pending)
-                {
-                    await UpdateHomeWorks(classForumResult, cancellationToken);
-                }
+                #region TODO : Fix Demo 20/9/2023
+
+                //if (classForumResult.Status == EnumClassForumResultStatus.Pending)
+                //{
+                //    await UpdateHomeWorks(classForumResult, cancellationToken);
+                //}
+
+                #endregion TODO : Fix Demo 20/9/2023
+
                 await GetLessonResult(lessonResult, cancellationToken);
                 _lessonResultRepository.Update(lessonResult);
                 await _lessonResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);

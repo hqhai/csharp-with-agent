@@ -143,10 +143,22 @@ namespace Fsel.Course.Lms.Application.Commands.LessonCmd
                 lessonResult.HomeWorkResults = homeWorks.Select(x => new HomeWorkResult
                 {
                     HomeWorkId = x.Id,
-                    Status = EnumResultStatus.Unfinished,
+                    Status = EnumResultStatus.New,
                     StudentId = studentId ?? default,
                     CorrectTotal = x.HomeWorkQuestions.Select(x => x.Question).Sum(x => x!.CorrectTotal)
                 }).ToList();
+
+                #region TODO : Fix Demo 20/9/2023
+
+                //lessonResult.HomeWorkResults = homeWorks.Select(x => new HomeWorkResult
+                //{
+                //    HomeWorkId = x.Id,
+                //    Status = EnumResultStatus.Unfinished,
+                //    StudentId = studentId ?? default,
+                //    CorrectTotal = x.HomeWorkQuestions.Select(x => x.Question).Sum(x => x!.CorrectTotal)
+                //}).ToList();
+
+                #endregion TODO : Fix Demo 20/9/2023
 
                 lessonResult.Status = EnumResultStatus.Process;
                 lessonResult = _lessonResultRepository.Update(lessonResult);
