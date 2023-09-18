@@ -6,6 +6,7 @@ namespace Fsel.Course.Lms.Application.Queries.ManageProgressQuery
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Services.UserServices;
+    using Fsel.Shared.Enums.ErrorCodes;
     using MediatR;
     using Microsoft.AspNetCore.Http;
 
@@ -27,15 +28,15 @@ namespace Fsel.Course.Lms.Application.Queries.ManageProgressQuery
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<CourseProgressModel> methodResult = new MethodResult<CourseProgressModel>();
-            var student = await _userService.GetStudentsByStudentIdsAsync();
-            if (!student.IsSuccessStatusCode)
+            var studentResults = await _userService.GetStudentsByStudentIdsAsync(new List<Guid> { request.StudentId });
+            if (!studentResults.IsSuccessStatusCode)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student));
+                methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError), nameof(studentResults));
                 return methodResult;
             }
-            var studentId = student?.Content?.Result?.Id;
+            var student = studentResults?.Content?.Result?.FirstOrDefault();
 
-            methodResult.Result = lessonQuery;
+            methodResult.Result = default;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }
