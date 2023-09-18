@@ -157,13 +157,17 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             if (homeWorkResults != null)
             {
                 skillScores = homeWorkResults.Where(x => x.SkillScores != null && x.SkillScores.Any()).SelectMany(x => x.SkillScores!).GroupBy(x => x.Skill).Select(x => GetSkillScore(x)).ToList();
-                if (courseType != null && courseType == EnumCourseType.Academic)
+                if (courseType != null && courseType == EnumCourseType.Academic && skillScores.Any())
                 {
                     return (skillScores, NumberHelper.ConvertDoublePercent(skillScores.Average(x => x.Percent * ((double)14 * skillScores.Count))));
                 }
-                else if (courseType != null && courseType == EnumCourseType.Academic)
+                else if (courseType != null && courseType == EnumCourseType.Ielts && skillScores.Any())
                 {
                     return (skillScores, NumberHelper.ConvertDoublePercent(skillScores.Average(x => x.Percent * ((double)48 * skillScores.Count))));
+                }
+                else
+                {
+                    return (skillScores, 0);
                 }
             }
             return (skillScores, skillScores.Any() ? NumberHelper.ConvertDoublePercent(skillScores.Sum(x => x.Percent * percentSkill / skillScores.Count)) : default);
@@ -198,7 +202,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 skillScores.CountQuestion = x.Sum(x => x.CountQuestion);
                 skillScores.TotalCount = x.Sum(x => x.TotalCount);
                 skillScores.CorrectCount = x.Sum(x => x.CorrectCount);
-                skillScores.Percent = NumberHelper.ConvertDouble(x.Sum(x => x.CorrectCount) / x.Sum(x => x.TotalCount) * 100);
+                skillScores.Percent = x.Sum(x => x.TotalCount) > 0 ? NumberHelper.ConvertDouble(x.Sum(x => x.CorrectCount) / x.Sum(x => x.TotalCount) * 100) : 0;
                 return skillScores;
             };
             return skillScores;

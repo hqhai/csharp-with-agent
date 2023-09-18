@@ -36,7 +36,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                     var unitResult = await _unitResultRepository.Queryable.FirstOrDefaultAsync(x => x.UnitId == mockTestResult.UnitId && x.StudentId == mockTestResult.StudentId && x.CourseId == mockTestResult.CourseId, cancellationToken);
                     if (unitResult != null && unit.LessonResults.Count == unit.UnitLessons.Count)
                     {
-                        await UpdateUnit(lessonResulIds, unit, mockTestResult.CourseId, mockTestResult.StudentId, cancellationToken);
+                        await UpdateUnit(lessonResulIds, unit, mockTestResult.CourseId, mockTestResult.StudentId, true, cancellationToken);
                     }
                 }
             }

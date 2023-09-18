@@ -32,13 +32,19 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 var isHomeWorksDone = lessonResult.HomeWorkResults.All(x => x.StudentId == homeWorkResult.StudentId && x.LessonResultId == homeWorkResult.LessonResultId && x.Status == EnumResultStatus.Done);
                 var isClassForumDone = lessonResult.ClassForumResults.Any(x => x.StudentId == homeWorkResult.StudentId && x.LessonResultId == homeWorkResult.LessonResultId && (x.Status == EnumClassForumResultStatus.PendingForGrading || x.Status == EnumClassForumResultStatus.Graded));
                 await GetLessonResult(lessonResult, cancellationToken);
-                if (isClassForumDone && isHomeWorksDone)
-                {
-                    lessonResult.Status = EnumResultStatus.Done;
-                    _lessonResultRepository.Update(lessonResult);
-                    await _lessonResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
-                    return;
-                }
+
+                #region TODO : Fix Demo 20/9/2023
+
+                //if (isClassForumDone && isHomeWorksDone)
+                //{
+                //    lessonResult.Status = EnumResultStatus.Done;
+                //    _lessonResultRepository.Update(lessonResult);
+                //    await _lessonResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+                //    return;
+                //}
+
+                #endregion TODO : Fix Demo 20/9/2023
+
                 _lessonResultRepository.Update(lessonResult);
                 await _lessonResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             }
