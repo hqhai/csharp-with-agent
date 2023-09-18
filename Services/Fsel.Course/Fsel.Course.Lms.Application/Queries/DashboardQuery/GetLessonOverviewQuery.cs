@@ -102,7 +102,7 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
                 var unitResult = course.UnitResults.FirstOrDefault(x => x.StudentId == studentId && x.CourseId == request.CourseId && x.Status != EnumResultStatus.Unfinished);
                 if (unitResult != null)
                 {
-                    var unit = await _unitRepository.Queryable.Include(x => x.UnitLessons).FirstOrDefaultAsync(x => x.Id == unitResult.UnitId, cancellationToken);
+                    var unit = await _unitRepository.Queryable.Include(x => x.UnitLessons.Where(x => x.DisplayOrder == 0)).FirstOrDefaultAsync(x => x.Id == unitResult.UnitId, cancellationToken);
                     if (unit != null)
                     {
                         var lessonId = unit.UnitLessons.FirstOrDefault(x => x.DisplayOrder == 0)?.LessonId ?? default;
@@ -130,6 +130,7 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
                 Id = lesson.Id,
                 Name = lesson.Name,
                 CourseLevel = lesson.CourseLevel,
+                UnitId = lesson.UnitLessons.FirstOrDefault()?.UnitId ?? (lessonResult?.UnitId ?? default),
                 InstructionContent = lesson.InstructionContent,
                 LessonInstructions = _mapper.Map<IList<LessonInstructionModel>>(lesson.LessonInstructions.OrderBy(x => x.CreatedDate).ToList()),
                 LessonResult = _mapper.Map<LessonResultModel>(lessonResult),
