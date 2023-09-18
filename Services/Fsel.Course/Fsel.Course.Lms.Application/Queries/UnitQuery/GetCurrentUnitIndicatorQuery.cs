@@ -67,7 +67,7 @@ namespace Fsel.Course.Lms.Application.Queries.UnitQuery
 
             if (currentUnitIndicator == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.CourseId), request.CourseId);
+                methodResult.Result = new List<SkillScores>();
                 return methodResult;
             }
             #endregion
