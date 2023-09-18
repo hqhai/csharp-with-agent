@@ -33,5 +33,7 @@ namespace Fsel.Shared.Models.ShareModels
 
         public Guid? SenderId { get; set; }
         public string? AvatarPath { get; set; }
+
+        public EnumNotificationStatus Status { get; set; }
     }
 }

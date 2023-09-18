@@ -141,7 +141,7 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd
                                 CorrectCount = h.HomeWorkAnswers.Sum(x => x.CorrectCount),
                                 CorrectTotal = h.HomeWork.HomeWorkQuestions.Select(x => x.Question).Sum(x => x!.CorrectTotal),
                             }).FirstOrDefaultAsync(cancellationToken);
-            if (homeWorkResultLesson != null && homeWorkResultLesson.QuestionCompleted + request.Answers.Count == homeWorkResultLesson.QuestionTotal)
+            if (homeWorkResultLesson != null && request.Answers.Count == homeWorkResultLesson.QuestionTotal)
             {
                 homeWorkResult.CorrectCount = correctTotal;
                 homeWorkResult.Status = EnumResultStatus.Done;
@@ -151,7 +151,7 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd
                     Skill = homeWorkResult.HomeWork.CourseSkill,
                     CorrectCount = homeWorkResult.CorrectCount,
                     TotalCount = homeWorkResultLesson.CorrectTotal,
-                    CountQuestion = homeWorkResultLesson.QuestionCompleted + request.Answers.Count,
+                    CountQuestion = request.Answers.Count,
                     TotalQuestion = homeWorkResultLesson.QuestionTotal,
                     Percent = homeWorkResult.Percent,
                     Scores = 0

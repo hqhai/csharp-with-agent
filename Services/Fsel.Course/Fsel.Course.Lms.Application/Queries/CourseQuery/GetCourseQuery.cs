@@ -6,7 +6,6 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
     using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Common.ActionResults;
-    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums;
@@ -86,7 +85,8 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
             var isCheckUserOrder = orderResult?.Content?.Result ?? default;
             if (!isCheckUserOrder)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(isCheckUserOrder));
+                methodResult.Result = default;
+                methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
             }
             var course = await _courseRepository.Queryable

@@ -23,6 +23,6 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public Guid? GradingTeacherId { get; set; }
         public double Scores { get; set; }
         public IList<SkillScores>? SkillScores { get; set; }
-        public IList<MockTestScoreModel>? MockTestScores { get; set; }
+        public object? MockTestScores { get; set; }
     }
 }

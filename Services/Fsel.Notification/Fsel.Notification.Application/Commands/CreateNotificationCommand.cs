@@ -124,7 +124,8 @@ namespace Fsel.Notification.Application.Commands
                     Link = notificationNew.Message,
                     UserIds = listUserId,
                     SenderId = notificationNew.SenderId,
-                    AvatarPath = avatarPath
+                    AvatarPath = avatarPath,
+                    Status = notificationNew.Status,
                 };
 
                 await _notificationMessagePublisher.Publish(notificationRealTime, cancellationToken).ConfigureAwait(false);
