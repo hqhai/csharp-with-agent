@@ -1,6 +1,7 @@
 // Copyright (c) Atlantic. All rights reserved.
 
 using Fsel.Core.Base.Interfaces;
+using Fsel.Shared.Enums;
 using EntityCourse = Fsel.Course.Domain.Entities.Course;
 
 namespace Fsel.Course.Domain.IRepositories
@@ -12,5 +13,7 @@ namespace Fsel.Course.Domain.IRepositories
         Task<EntityCourse?> GetIncludeCourseUnitMockTestByIdAsync(Guid id);
 
         Task<EntityCourse?> GetIncludeCourseResult(Guid id, Guid? studentId);
+
+        Task<(double, double, int, int)> GetContentCompleted(Guid courseId, EnumCourseType courseType, Guid? studentId);
     }
 }
