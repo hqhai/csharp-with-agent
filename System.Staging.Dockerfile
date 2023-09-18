@@ -15,8 +15,6 @@ COPY ["Services/Fsel.System/Fsel.System.Application/Fsel.System.Application.cspr
 COPY ["Services/Fsel.System/Fsel.System.Infrastructure/Fsel.System.Infrastructure.csproj", "Services/Fsel.System/Fsel.System.Infrastructure/"]
 COPY ["Services/Fsel.System/Fsel.System.Domain/Fsel.System.Domain.csproj", "Services/Fsel.System/Fsel.System.Domain/"]
 COPY ["Services/Shared/Fsel.Shared/Fsel.Shared.csproj", "Services/Shared/Fsel.Shared/"]
-COPY ["Services/Shared/Fsel.Core/Fsel.Core.csproj", "Services/Shared/Fsel.Core/"]
-COPY ["Services/Shared/Fsel.Common/Fsel.Common.csproj", "Services/Shared/Fsel.Common/"]
 RUN dotnet restore "Services/Fsel.System/Fsel.System.Api/Fsel.System.Api.csproj"
 COPY . .
 WORKDIR "/src/Services/Fsel.System/Fsel.System.Api"
