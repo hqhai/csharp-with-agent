@@ -14,7 +14,7 @@ variables:
   dockerRegistryServiceConnection: 'acrlazytechvn'
   containerRegistry: 'fselacr.azurecr.io'
   repository: 'systemapi'
-  dockerfile: './Environments/Staging/System.Staging.Dockerfile'
+  dockerfile: 'System.Staging.Dockerfile'
   currentdate: $[format('{0:yyyyMMddHHmmss}', pipeline.startTime)]
   #tag: '$(Build.SourceBranchName)-$(shortCommitSha)-$(currentdate)'
 
