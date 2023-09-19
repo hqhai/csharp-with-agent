@@ -76,8 +76,6 @@ namespace Fsel.Interaction.Application.Queries.PostQuery.StudentPosts
                     .Any(postTag => topicTagId.Contains(postTag.TopicTagId)));
             }
 
-            //var actionLikes = ;
-
             IQueryable<Post> sortedQuery = postQuery;
             switch (request.PostType)
             {
