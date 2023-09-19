@@ -43,21 +43,6 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
                 return methodResult;
             }
 
-            /*var studentFeedback = _studentFeedbackRepository.Queryable
-
-                                    .Select(x => new StudentFeedbackModel
-                                    {
-                                        Id = x.Id,
-                                        CreatedDate = x.CreatedDate,
-                                        CreatedFullName = x.CreatedFullName,
-                                        CreatedUserId = x.CreatedUserId,
-                                        Feature = x.Feature,
-                                        FeedBackNegativesStr = x.FeedBackNegativesStr,
-                                        FeedBackNote = x.FeedBackNote,
-                                        FeedBackPositivesStr = x.FeedBackPositivesStr,
-                                        FeedBackStars = x.FeedBackStars,
-                                        Type = x.Type,
-                                    });*/
             var studentFeedback = from baseQ in _studentFeedbackRepository.Queryable
                                   join cfr in _classForumResultRepository.Queryable on baseQ.ObjectId equals cfr.Id
                                   join cf in _classForumRepository.Queryable on cfr.ClassForumId equals cf.Id
