@@ -3,6 +3,7 @@
 namespace Fsel.Course.Lms.Application.Queries.ManageProgressQuery
 {
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Services.OrderServices;
@@ -12,37 +13,35 @@ namespace Fsel.Course.Lms.Application.Queries.ManageProgressQuery
     using Fsel.Shared.Enums.ErrorCodes;
     using MediatR;
     using Microsoft.AspNetCore.Http;
-    using Microsoft.EntityFrameworkCore;
 
-    public class GetManageStudentProgressCourseQuery : IRequest<MethodResult<CourseProgressModel>>
+    public class GetManageStudentProgressCourseQuery : IRequest<MethodResult<ManagerCourseProgressModel>>
     {
         public Guid StudentId { get; set; }
+        public Guid CourseId { get; set; }
     }
 
-    public class GetManageStudentProgressCourseQueryHandler : IRequestHandler<GetManageStudentProgressCourseQuery, MethodResult<CourseProgressModel>>
+    public class GetManageStudentProgressCourseQueryHandler : IRequestHandler<GetManageStudentProgressCourseQuery, MethodResult<ManagerCourseProgressModel>>
     {
         private readonly IUserService _userService;
         private readonly ISystemService _systemService;
         private readonly IOrderService _orderService;
-        private readonly ICourseResultRepository _courseResultRepository;
         private readonly ICourseRepository _courseRepository;
         private readonly ITrainingService _trainingService;
 
-        public GetManageStudentProgressCourseQueryHandler(IUserService userService, ISystemService systemService, IOrderService orderService, ICourseResultRepository courseResultRepository, ICourseRepository courseRepository, ITrainingService trainingService)
+        public GetManageStudentProgressCourseQueryHandler(IUserService userService, ISystemService systemService, IOrderService orderService, ICourseRepository courseRepository, ITrainingService trainingService)
         {
             _userService = userService;
             _systemService = systemService;
             _orderService = orderService;
-            _courseResultRepository = courseResultRepository;
             _courseRepository = courseRepository;
             _trainingService = trainingService;
         }
 
-        public async Task<MethodResult<CourseProgressModel>> Handle(GetManageStudentProgressCourseQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<ManagerCourseProgressModel>> Handle(GetManageStudentProgressCourseQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            MethodResult<CourseProgressModel> methodResult = new MethodResult<CourseProgressModel>();
-            CourseProgressModel courseProgress = new CourseProgressModel();
+            MethodResult<ManagerCourseProgressModel> methodResult = new MethodResult<ManagerCourseProgressModel>();
+            ManagerCourseProgressModel managerCourseProgress = new ManagerCourseProgressModel();
             var studentResults = await _userService.GetStudentsByStudentIdsAsync(new List<Guid> { request.StudentId });
             if (!studentResults.IsSuccessStatusCode)
             {
@@ -66,23 +65,13 @@ namespace Fsel.Course.Lms.Application.Queries.ManageProgressQuery
             }
             var @classes = @classResults.Content?.Result;
 
-            courseProgress.FullName = student?.Human?.FullName;
-            courseProgress.StudentId = request.StudentId;
-            var courseResults = await _courseResultRepository.Queryable.Where(x => x.StudentId == request.StudentId).OrderBy(x => x.CreatedDate).ToListAsync(cancellationToken);
-            if (courseResults == null || courseResults.Any())
+            var course = await _courseRepository.GetByIdAsync(request.CourseId);
+            if (course == null)
             {
-                methodResult.Result = default;
-                methodResult.StatusCode = StatusCodes.Status200OK;
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(course));
                 return methodResult;
             }
-            var courseIds = courseResults.Select(x => x.CourseId).ToList();
-            var courses = await _courseRepository.GetByIdsAsync(courseIds);
-            if (courses == null || courses.Any())
-            {
-                methodResult.Result = default;
-                methodResult.StatusCode = StatusCodes.Status200OK;
-                return methodResult;
-            }
+            var courseIds = new List<Guid> { course.Id };
             var featureAccessTimeResults = await _systemService.GetFeatureAccessTimesByCourseIdsAsync(courseIds, student?.Human?.UserId ?? default);
             if (!featureAccessTimeResults.IsSuccessStatusCode)
             {
@@ -90,26 +79,25 @@ namespace Fsel.Course.Lms.Application.Queries.ManageProgressQuery
                 return methodResult;
             }
             var featureAccessTimes = featureAccessTimeResults.Content?.Result;
-            foreach (var item in courses)
+            var featureAccessTime = featureAccessTimes?.FirstOrDefault();
+            var @class = @classes?.FirstOrDefault(x => x.CourseId == course.Id);
+            var (currentProgress, progress, displayOrderUnit, displayOrderLesson) = await _courseRepository.GetContentCompleted(course.Id, course.CourseType, request.StudentId);
+            managerCourseProgress.FullName = student?.Human?.FullName;
+            managerCourseProgress.StudentId = request.StudentId;
+            managerCourseProgress.ContentCompleted = string.Format("{0} / {1}", currentProgress, progress);
+            managerCourseProgress.CourseName = course.Code;
+            managerCourseProgress.CourseId = course.Id;
+            managerCourseProgress.TotalVisit = featureAccessTime?.TotalVisit ?? default;
+            managerCourseProgress.TimeSpent = featureAccessTime?.AccessTime ?? default;
+            if (@class != null)
             {
-                CourseStudentProgressModel courseStudentProgress = new CourseStudentProgressModel();
-                var (currentProgress, progress, displayOrderUnit, displayOrderLesson) = await _courseRepository.GetContentCompleted(item.Id, item.CourseType, request.StudentId);
-                courseStudentProgress.ContentCompleted = string.Format("{0} / {1}", currentProgress, progress);
-                courseStudentProgress.CourseName = item.Code;
-                courseStudentProgress.CourseId = item.Id;
-                var featureAccessTime = featureAccessTimes?.FirstOrDefault(x => x.CourseId == item.Id);
-                courseStudentProgress.TimeSpent = featureAccessTime?.AccessTime ?? default;
-                var @class = @classes?.FirstOrDefault(x => x.CourseId == item.Id);
-                if (@class != null)
-                {
-                    courseStudentProgress.ClassId = @class.Id;
-                    courseStudentProgress.CodeClass = @class.Code;
-                    var package = packages?.FirstOrDefault(x => x.Id == @class.PackageId);
-                    courseStudentProgress.StartDate = @class.TimeStart;
-                    courseStudentProgress.EndDate = @class.TimeEnd;
-                    courseStudentProgress.PackageId = @class.PackageId;
-                    courseStudentProgress.PackageCode = package?.Code ?? default;
-                }
+                var package = packages?.FirstOrDefault(x => x.Id == @class.PackageId);
+                managerCourseProgress.ClassId = @class.Id;
+                managerCourseProgress.CodeClass = @class.Code;
+                managerCourseProgress.StartDate = @class.TimeStart;
+                managerCourseProgress.EndDate = @class.TimeEnd;
+                managerCourseProgress.PackageId = @class.PackageId;
+                managerCourseProgress.PackageCode = package?.Code ?? default;
             }
             methodResult.Result = default;
             methodResult.StatusCode = StatusCodes.Status200OK;

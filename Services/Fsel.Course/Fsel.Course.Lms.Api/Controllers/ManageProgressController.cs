@@ -8,9 +8,7 @@ namespace Fsel.Course.Lms.Api.Controllers
     using Fsel.Core.Base.BaseModels;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Queries.ManageProgressQuery;
-    using Fsel.Shared.Enums;
     using MediatR;
-    using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
 
     [ApiVersion(Settings.APIVersion)]
@@ -29,11 +27,11 @@ namespace Fsel.Course.Lms.Api.Controllers
         /// Get ManageProgress
         /// </summary>
         [HttpGet]
-        [ProducesResponseType(typeof(MethodResult<PagingItemsModel<ManageStudentProgressCourseModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(MethodResult<PagingItemsModel<ManageStudentProgressModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> Search([FromQuery] SearchManageStudentProgressQuery query)
         {
-            MethodResult<PagingItemsModel<ManageStudentProgressCourseModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            MethodResult<PagingItemsModel<ManageStudentProgressModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
     }

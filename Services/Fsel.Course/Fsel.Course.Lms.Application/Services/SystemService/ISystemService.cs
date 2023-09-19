@@ -23,5 +23,11 @@ namespace Fsel.Course.Lms.Application.Services.SystemService
 
         [Post("/feature-access-time/get-list-by-courseIds")]
         Task<IApiResponse<MethodResult<IList<FeatureAccessTimeCourseModel>>>> GetFeatureAccessTimesByCourseIdsAsync([FromBody] IList<Guid> courseIds, [FromQuery] Guid userId);
+
+        [Get("/feature-access-time/get-by-unit")]
+        Task<IApiResponse<MethodResult<FeatureAccessTimeCourseModel>>> GetFeatureAccessTimesByUnitIdAsync([FromQuery] GetFeatureAccessTimesByUnitIdQueryModel query);
+
+        [Get("/feature-access-time/get-by-test")]
+        Task<IApiResponse<MethodResult<FeatureAccessTimeCourseModel>>> GetFeatureAccessTimesByTestAsync([FromQuery] GetFeatureAccessTimesByTestQueryModel query);
     }
 }

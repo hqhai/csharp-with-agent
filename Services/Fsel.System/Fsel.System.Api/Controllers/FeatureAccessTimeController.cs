@@ -38,6 +38,30 @@ namespace Fsel.System.Api.Controllers
         }
 
         /// <summary>
+        /// Get Feature Access Time By Unit
+        /// </summary>
+        [HttpGet("get-by-unit")]
+        [ProducesResponseType(typeof(MethodResult<FeatureAccessTimeCourseModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetByUnit([FromQuery] GetFeatureAccessTimesByUnitIdQuery query)
+        {
+            var queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Get Feature Access Time By Test
+        /// </summary>
+        [HttpGet("get-by-test")]
+        [ProducesResponseType(typeof(MethodResult<FeatureAccessTimeCourseModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetByTest([FromQuery] GetFeatureAccessTimesByTestQuery query)
+        {
+            var queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
         /// Get List Feature Access Time By CourseIds
         /// </summary>
         [HttpPost("get-list-by-courseIds")]

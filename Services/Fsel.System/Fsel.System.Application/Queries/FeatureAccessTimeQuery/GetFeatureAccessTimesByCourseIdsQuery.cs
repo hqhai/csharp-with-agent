@@ -40,6 +40,7 @@ namespace Fsel.System.Application.Queries.FeatureAccessTimeQuery
                 {
                     CourseId = x.Key,
                     AccessTime = x.Sum(x => x.AccessTime),
+                    TotalVisit = x.Sum(x => x.Visit)
                 }).ToListAsync(cancellationToken);
             methodResult.Result = featureAccessTimes;
             methodResult.StatusCode = StatusCodes.Status200OK;

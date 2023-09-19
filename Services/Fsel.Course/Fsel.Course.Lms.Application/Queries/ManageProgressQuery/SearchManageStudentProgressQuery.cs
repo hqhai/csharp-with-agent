@@ -12,11 +12,11 @@ namespace Fsel.Course.Lms.Application.Queries.ManageProgressQuery
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class SearchManageStudentProgressQuery : SearchManageStudentProgressQueryModel, IRequest<MethodResult<PagingItemsModel<ManageStudentProgressCourseModel>>>
+    public class SearchManageStudentProgressQuery : SearchManageStudentProgressQueryModel, IRequest<MethodResult<PagingItemsModel<ManageStudentProgressModel>>>
     {
     }
 
-    public class SearchManageStudentProgressQueryHandler : IRequestHandler<SearchManageStudentProgressQuery, MethodResult<PagingItemsModel<ManageStudentProgressCourseModel>>>
+    public class SearchManageStudentProgressQueryHandler : IRequestHandler<SearchManageStudentProgressQuery, MethodResult<PagingItemsModel<ManageStudentProgressModel>>>
     {
         private readonly ICourseRepository _courseRepository;
         private readonly ICourseResultRepository _courseResultRepository;
@@ -31,10 +31,10 @@ namespace Fsel.Course.Lms.Application.Queries.ManageProgressQuery
             _userService = userService;
         }
 
-        public async Task<MethodResult<PagingItemsModel<ManageStudentProgressCourseModel>>> Handle(SearchManageStudentProgressQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<PagingItemsModel<ManageStudentProgressModel>>> Handle(SearchManageStudentProgressQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            var methodResult = new MethodResult<PagingItemsModel<ManageStudentProgressCourseModel>>();
+            var methodResult = new MethodResult<PagingItemsModel<ManageStudentProgressModel>>();
 
             if (request.PageSize > 100)
             {
@@ -67,10 +67,10 @@ namespace Fsel.Course.Lms.Application.Queries.ManageProgressQuery
             //var courseResults = await query.ToListAsync(cancellationToken);
             var studentResults = await _userService.GetStudentsByStudentIdsAsync(courseResults.Select(x => x.StudentId).ToList());
             var students = studentResults.Content?.Result;
-            var manageStudents = new List<ManageStudentProgressCourseModel>();
+            var manageStudents = new List<ManageStudentProgressModel>();
             foreach (var courseResult in courseResults)
             {
-                ManageStudentProgressCourseModel manageStudentProgressModel = new ManageStudentProgressCourseModel();
+                ManageStudentProgressModel manageStudentProgressModel = new ManageStudentProgressModel();
                 if (students != null && students.Any())
                 {
                     var student = students.FirstOrDefault(x => x.Id == courseResult.StudentId);
@@ -96,7 +96,7 @@ namespace Fsel.Course.Lms.Application.Queries.ManageProgressQuery
                 item.DisplayOrderUnit = displayOrderUnit;
                 item.ContentProgress = string.Format("{0} / {1}", currentProgress, progress);
             }
-            methodResult.Result = new PagingItemsModel<ManageStudentProgressCourseModel>(lists, request, totalItem);
+            methodResult.Result = new PagingItemsModel<ManageStudentProgressModel>(lists, request, totalItem);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }

@@ -6,5 +6,7 @@ namespace Fsel.Course.Lms.Application.Services.SystemService.Models
     {
         public Guid CourseId { get; set; }
         public long AccessTime { get; set; }
+        public int TotalVisit { get; set; }
+        public DateTime LastVisited { get; set; }
     }
 }

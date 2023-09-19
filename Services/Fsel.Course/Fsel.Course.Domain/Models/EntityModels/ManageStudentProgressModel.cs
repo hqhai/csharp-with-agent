@@ -4,7 +4,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
 {
     using Fsel.Shared.Enums;
 
-    public class ManageStudentProgressUnitModel
+    public class ManageStudentProgressModel
     {
         public string? FullName { get; set; }
         public Guid StudentId { get; set; }
