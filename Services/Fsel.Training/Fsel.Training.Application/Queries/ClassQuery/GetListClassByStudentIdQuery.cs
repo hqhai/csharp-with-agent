@@ -10,23 +10,23 @@ namespace Fsel.Training.Application.Queries.ClassQuery
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class GetClassByCourseIdsQuery : IRequest<MethodResult<IList<ClassModel>>>
+    public class GetListClassByStudentIdQuery : IRequest<MethodResult<IList<ClassModel>>>
     {
         public Guid StudentId { get; set; }
     }
 
-    public class GetClassByCourseIdsQueryHandler : IRequestHandler<GetClassByCourseIdsQuery, MethodResult<IList<ClassModel>>>
+    public class GetListClassByStudentIdQueryHandler : IRequestHandler<GetListClassByStudentIdQuery, MethodResult<IList<ClassModel>>>
     {
         private readonly IClassStudentRepository _classStudentRepository;
         private readonly IMapper _mapper;
 
-        public GetClassByCourseIdsQueryHandler(IClassStudentRepository classStudentRepository, IMapper mapper)
+        public GetListClassByStudentIdQueryHandler(IClassStudentRepository classStudentRepository, IMapper mapper)
         {
             _classStudentRepository = classStudentRepository;
             _mapper = mapper;
         }
 
-        public async Task<MethodResult<IList<ClassModel>>> Handle(GetClassByCourseIdsQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<IList<ClassModel>>> Handle(GetListClassByStudentIdQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<IList<ClassModel>> methodResult = new MethodResult<IList<ClassModel>>();

@@ -28,12 +28,24 @@ namespace Fsel.System.Api.Controllers
         /// <summary>
         /// Get List Feature Access Time
         /// </summary>
-        [HttpPost("{userId}")]
+        [HttpPost("get-list")]
         [ProducesResponseType(typeof(MethodResult<IList<FeatureAccessTimeModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> Gets([FromBody] IList<Guid> ids, [FromRoute] Guid userId)
+        public async Task<IActionResult> Gets([FromBody] IList<Guid> ids, [FromQuery] Guid userId, [FromQuery] Guid courseId, [FromQuery] Guid? unitId, [FromQuery] Guid? lessonId)
         {
-            var queryResult = await _mediator.Send(new GetFeatureAccessTimesByIdsQuery { Ids = ids, UserId = userId }).ConfigureAwait(false);
+            var queryResult = await _mediator.Send(new GetFeatureAccessTimesByIdsQuery { Ids = ids, UserId = userId, CourseId = courseId, UnitId = unitId, LessonId = lessonId }).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Get List Feature Access Time By CourseIds
+        /// </summary>
+        [HttpPost("get-list-by-courseIds")]
+        [ProducesResponseType(typeof(MethodResult<IList<FeatureAccessTimeCourseModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> Gets([FromBody] IList<Guid> courseIds, [FromQuery] Guid userId)
+        {
+            var queryResult = await _mediator.Send(new GetFeatureAccessTimesByCourseIdsQuery { CourseIds = courseIds, UserId = userId }).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
 

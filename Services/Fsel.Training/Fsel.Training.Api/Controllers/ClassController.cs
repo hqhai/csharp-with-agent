@@ -7,7 +7,6 @@ namespace Fsel.Training.Api.Controllers
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
     using Fsel.Core.Base.BaseModels;
-    using Fsel.Shared.Enums;
     using Fsel.Training.Application.Commands.ClassCmd;
     using Fsel.Training.Application.Commands.ClassLiveCmd;
     using Fsel.Training.Application.Commands.ClassStudentCmd;
@@ -16,7 +15,6 @@ namespace Fsel.Training.Api.Controllers
     using Fsel.Training.Application.Queries.ClassQuery.Admin;
     using Fsel.Training.Domain.Models.EntityModels;
     using MediatR;
-    using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
 
     [ApiVersion(Settings.APIVersion)]
@@ -136,6 +134,18 @@ namespace Fsel.Training.Api.Controllers
         public async Task<IActionResult> GetClassCourseStudent([FromRoute] Guid studentId)
         {
             MethodResult<IList<ClassStudentInfoModel>> queryResult = await _mediator.Send(new GetClassStudentInfoQuery { StudentId = studentId }).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Class Course by StudentId
+        /// </summary>
+        [HttpGet("get-classes/{studentId}")]
+        [ProducesResponseType(typeof(MethodResult<IList<ClassModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetListClassByStudentId([FromRoute] Guid studentId)
+        {
+            MethodResult<IList<ClassModel>> queryResult = await _mediator.Send(new GetListClassByStudentIdQuery { StudentId = studentId }).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
 

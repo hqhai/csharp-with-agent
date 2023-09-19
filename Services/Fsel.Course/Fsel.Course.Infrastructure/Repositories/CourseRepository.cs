@@ -12,13 +12,11 @@ namespace Fsel.Course.Infrastructure.Repositories
 {
     public class CourseRepository : BaseRepository<EntityCourse>, ICourseRepository
     {
-        private readonly ICourseRepository _courseRepository;
         private readonly IUnitRepository _unitRepository;
         private readonly ILessonResultRepository _lessonResultRepository;
 
-        public CourseRepository(CourseDbContext dbContext, AuthContext authContext, ICourseRepository courseRepository, IUnitRepository unitRepository, ILessonResultRepository lessonResultRepository) : base(dbContext, authContext)
+        public CourseRepository(CourseDbContext dbContext, AuthContext authContext, IUnitRepository unitRepository, ILessonResultRepository lessonResultRepository) : base(dbContext, authContext)
         {
-            _courseRepository = courseRepository;
             _unitRepository = unitRepository;
             _lessonResultRepository = lessonResultRepository;
         }
@@ -117,7 +115,7 @@ namespace Fsel.Course.Infrastructure.Repositories
 
         private async Task<(double, double, int, int)> GetCourseIELST(Guid courseId, Guid? studentId)
         {
-            var course = await _courseRepository.Queryable.Include(x => x.CourseUnitMockTests)
+            var course = await Queryable.Include(x => x.CourseUnitMockTests)
                                                          .ThenInclude(x => x.MockTest)
                                                          .ThenInclude(x => x!.MockTestResults.Where(x => x.StudentId == studentId && x.CourseId == courseId))
                                                          .FirstOrDefaultAsync(x => x.Id == courseId);
@@ -132,7 +130,7 @@ namespace Fsel.Course.Infrastructure.Repositories
 
         private async Task<(double, double, int, int)> GetCourseAcademic(Guid courseId, Guid? studentId)
         {
-            var course = await _courseRepository.Queryable.Include(x => x.CourseUnitMockTests)
+            var course = await Queryable.Include(x => x.CourseUnitMockTests)
                                                                           .ThenInclude(x => x.FinalTest)
                                                                           .ThenInclude(x => x!.FinalTestResults.Where(x => x.StudentId == studentId && x.CourseId == courseId))
                                                                           .FirstOrDefaultAsync(x => x.Id == courseId);
