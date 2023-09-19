@@ -76,6 +76,8 @@ namespace Fsel.Interaction.Application.Queries.PostQuery.StudentPosts
                     .Any(postTag => topicTagId.Contains(postTag.TopicTagId)));
             }
 
+            //var actionLikes = ;
+
             IQueryable<Post> sortedQuery = postQuery;
             switch (request.PostType)
             {
@@ -162,6 +164,7 @@ namespace Fsel.Interaction.Application.Queries.PostQuery.StudentPosts
                 UpdatedDate = post.UpdatedDate,
                 UpdatedUserId = post.UpdatedUserId,
                 FilePaths = post.FilePaths,
+                IsLiked = false,
                 PostTags = post.PostTags
                                .Select(postTag => new TopicTagModel
                                {
@@ -179,12 +182,17 @@ namespace Fsel.Interaction.Application.Queries.PostQuery.StudentPosts
 
             foreach (var post in lists)
             {
-                int likeCount = await _interactionActionRepository.Queryable
-                    .CountAsync(interaction => interaction.Type == EnumInteractionActionType.Like && interaction.ObjectId == post.Id, cancellationToken);
+                var likeQuery = _interactionActionRepository.Queryable
+                    .Where(interaction => interaction.Type == EnumInteractionActionType.Like && interaction.ObjectId == post.Id);
+
+                int? likeCount = likeQuery.Count();
 
                 int commentCount = await _commentRepository.Queryable
                     .CountAsync(comment => comment.ObjectId == post.Id, cancellationToken);
 
+                var likeAction = likeQuery.Any(i => i.UserId == _authContext.CurrentUserId);
+
+                post.IsLiked = likeAction;
                 post.LikeCount = likeCount;
                 post.CommentCount = commentCount;
             }
