@@ -97,6 +97,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumQuery
                 .Include(x => x.ClassForumResultFiles)
                 .Include(x => x.ClassForumScores)
                 .Where(x => x.ClassForumId == classForum.Id && classStudentIds!.Contains(x.StudentId))
+                .OrderBy(x => x.CreatedDate)
                 .ToListAsync(cancellationToken);
 
 
