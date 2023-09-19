@@ -7,5 +7,6 @@ namespace Fsel.Course.Domain.Models.QueryModels.ReviewFsels
     public class SearchStudentFeedbackQueryModel : BaseQueryModel
     {
         public int? FeedBackStars { get; set; }
+        public Guid? ClassForumId { get; set; }
     }
 }

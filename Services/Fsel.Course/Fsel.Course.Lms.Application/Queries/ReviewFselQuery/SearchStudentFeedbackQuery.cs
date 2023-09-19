@@ -23,10 +23,14 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
     public class SearchStudentFeedbackQueryHandler : IRequestHandler<SearchStudentFeedbackQuery, MethodResult<PagingItemsModel<StudentFeedbackModel>>>
     {
         private readonly IStudentFeedbackRepository _studentFeedbackRepository;
+        private readonly IClassForumRepository _classForumRepository;
+        private readonly IClassForumResultRepository _classForumResultRepository;
 
-        public SearchStudentFeedbackQueryHandler(IStudentFeedbackRepository studentFeedbackRepository)
+        public SearchStudentFeedbackQueryHandler(IStudentFeedbackRepository studentFeedbackRepository, IClassForumRepository classForumRepository, IClassForumResultRepository classForumResultRepository)
         {
             _studentFeedbackRepository = studentFeedbackRepository;
+            _classForumRepository = classForumRepository;
+            _classForumResultRepository = classForumResultRepository;
         }
 
         public async Task<MethodResult<PagingItemsModel<StudentFeedbackModel>>> Handle(SearchStudentFeedbackQuery request, CancellationToken cancellationToken)
@@ -39,7 +43,8 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
                 return methodResult;
             }
 
-            var studentFeedback = _studentFeedbackRepository.Queryable
+            /*var studentFeedback = _studentFeedbackRepository.Queryable
+
                                     .Select(x => new StudentFeedbackModel
                                     {
                                         Id = x.Id,
@@ -52,7 +57,24 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
                                         FeedBackPositivesStr = x.FeedBackPositivesStr,
                                         FeedBackStars = x.FeedBackStars,
                                         Type = x.Type,
-                                    });
+                                    });*/
+            var studentFeedback = from baseQ in _studentFeedbackRepository.Queryable
+                                  join cfr in _classForumResultRepository.Queryable on baseQ.ObjectId equals cfr.Id
+                                  join cf in _classForumRepository.Queryable on cfr.ClassForumId equals cf.Id
+                                  where cf.Id == request.ClassForumId
+                                  select new StudentFeedbackModel
+                                  {
+                                      Id = baseQ.Id,
+                                      CreatedDate = baseQ.CreatedDate,
+                                      CreatedFullName = baseQ.CreatedFullName,
+                                      CreatedUserId = baseQ.CreatedUserId,
+                                      Feature = baseQ.Feature,
+                                      FeedBackNegativesStr = baseQ.FeedBackNegativesStr,
+                                      FeedBackNote = baseQ.FeedBackNote,
+                                      FeedBackPositivesStr = baseQ.FeedBackPositivesStr,
+                                      FeedBackStars = baseQ.FeedBackStars,
+                                      Type = baseQ.Type,
+                                  };
 
             if (request.FeedBackStars != null)
             {
