@@ -27,7 +27,6 @@ namespace Fsel.Interaction.Api.Controllers
         /// <summary>
         /// Create a Customer Survey
         /// </summary>
-        [Authorize]
         [HttpPost]
         [ProducesResponseType(typeof(MethodResult<IList<CustomerSurveyModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
