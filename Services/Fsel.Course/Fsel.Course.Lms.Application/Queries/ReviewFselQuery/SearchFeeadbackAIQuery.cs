@@ -59,11 +59,11 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
 
             var query = from baseQ in _lessonRepository.Queryable
                         join cf in _classForumRepository.Queryable on baseQ.Id equals cf.LessonId
-                        join lr in _lessonResultRepository.Queryable on baseQ.Id equals lr.LessonId
                         join ul in _unitLessonRepository.Queryable on baseQ.Id equals ul.LessonId
                         join u in _unitRepository.Queryable on ul.UnitId equals u.Id
                         join cmt in _courseUnitMockTestRepository.Queryable on u.Id equals cmt.UnitId
                         join c in _courseRepository.Queryable on cmt.CourseId equals c.Id
+                        join lr in _lessonResultRepository.Queryable on new { LessonId = baseQ.Id, UnitId = u.Id, CourseId = c.Id } equals new { lr.LessonId, lr.UnitId, lr.CourseId }
                         join cfr in _classForumResultRepository.Queryable on lr.Id equals cfr.LessonResultId
                         join s in _studentFeedbackRepository.Queryable on cfr.Id equals s.ObjectId
                         select new FeedbackClassForumAIModel
