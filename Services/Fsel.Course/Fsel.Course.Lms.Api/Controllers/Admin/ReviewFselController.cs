@@ -58,7 +58,7 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
         [HttpGet("review-ai")]
         [ProducesResponseType(typeof(MethodResult<PagingItemsModel<FeedbackClassForumAIModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> SearchReviewAi([FromQuery] SearchFeeadbackAIQuery query)
+        public async Task<IActionResult> SearchReviewAi([FromQuery] SearchFeedbackAIQuery query)
         {
             MethodResult<PagingItemsModel<FeedbackClassForumAIModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();

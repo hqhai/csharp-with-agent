@@ -17,11 +17,11 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class SearchFeeadbackAIQuery : SearchFeeadbackAIQueryModel, IRequest<MethodResult<PagingItemsModel<FeedbackClassForumAIModel>>>
+    public class SearchFeedbackAIQuery : SearchFeedbackAIQueryModel, IRequest<MethodResult<PagingItemsModel<FeedbackClassForumAIModel>>>
     {
     }
 
-    public class SearchReviewAIQueryHandler : IRequestHandler<SearchFeeadbackAIQuery, MethodResult<PagingItemsModel<FeedbackClassForumAIModel>>>
+    public class SearchFeedbackAIQueryHandler : IRequestHandler<SearchFeedbackAIQuery, MethodResult<PagingItemsModel<FeedbackClassForumAIModel>>>
     {
         private readonly ICourseRepository _courseRepository;
         private readonly IClassForumResultRepository _classForumResultRepository;
@@ -33,7 +33,7 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
         private readonly IStudentFeedbackRepository _studentFeedbackRepository;
         private readonly IClassForumRepository _classForumRepository;
 
-        public SearchReviewAIQueryHandler(ICourseRepository courseRepository, IClassForumResultRepository classForumResultRepository, ILessonResultRepository lessonResultRepository, ILessonRepository lessonRepository, ICourseUnitMockTestRepository courseUnitMockTestRepository, IUnitRepository unitRepository, IUnitLessonRepository unitLessonRepository, IStudentFeedbackRepository studentFeedbackRepository, IClassForumRepository classForumRepository)
+        public SearchFeedbackAIQueryHandler(ICourseRepository courseRepository, IClassForumResultRepository classForumResultRepository, ILessonResultRepository lessonResultRepository, ILessonRepository lessonRepository, ICourseUnitMockTestRepository courseUnitMockTestRepository, IUnitRepository unitRepository, IUnitLessonRepository unitLessonRepository, IStudentFeedbackRepository studentFeedbackRepository, IClassForumRepository classForumRepository)
         {
             _courseRepository = courseRepository;
             _classForumResultRepository = classForumResultRepository;
@@ -46,7 +46,7 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
             _classForumRepository = classForumRepository;
         }
 
-        public async Task<MethodResult<PagingItemsModel<FeedbackClassForumAIModel>>> Handle(SearchFeeadbackAIQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<PagingItemsModel<FeedbackClassForumAIModel>>> Handle(SearchFeedbackAIQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<PagingItemsModel<FeedbackClassForumAIModel>>();
