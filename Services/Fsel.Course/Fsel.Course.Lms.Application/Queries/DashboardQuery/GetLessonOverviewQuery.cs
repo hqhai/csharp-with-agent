@@ -80,7 +80,7 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
                 return methodResult;
             }
             LessonResult? lessonResult = default;
-            var course = await _courseRepository.Queryable.Include(x => x.UnitResults.Where(x => x.StudentId == studentId && x.CourseId == @class.CourseId)).FirstOrDefaultAsync(x => x.Id == @class.CourseId, cancellationToken);
+            var course = await _courseRepository.Queryable.Include(x => x.CourseUnitMockTests).FirstOrDefaultAsync(x => x.Id == @class.CourseId, cancellationToken);
             if (course == null)
             {
                 methodResult.Result = null;
@@ -102,10 +102,10 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
             var lesson = lessonResult?.Lesson;
             if (lessonResult == null)
             {
-                var unitResult = course.UnitResults.FirstOrDefault(x => x.StudentId == studentId && x.CourseId == @class.CourseId && x.Status != EnumResultStatus.Unfinished);
-                if (unitResult != null)
+                var unitId = course.CourseUnitMockTests.FirstOrDefault(x => x.DisplayOrder == 1)?.UnitId;
+                if (unitId != null)
                 {
-                    var unit = await _unitRepository.Queryable.Include(x => x.UnitLessons.Where(x => x.DisplayOrder == 0)).FirstOrDefaultAsync(x => x.Id == unitResult.UnitId, cancellationToken);
+                    var unit = await _unitRepository.Queryable.Include(x => x.UnitLessons.Where(x => x.DisplayOrder == 0)).FirstOrDefaultAsync(x => x.Id == unitId, cancellationToken);
                     if (unit != null)
                     {
                         var lessonId = unit.UnitLessons.FirstOrDefault(x => x.DisplayOrder == 0)?.LessonId ?? default;
