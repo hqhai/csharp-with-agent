@@ -62,9 +62,9 @@ namespace Fsel.Course.Lms.Application.Queries.ManageProgressQuery
             }
             foreach (var item in courses)
             {
-                CourseStudentProgressModel courseStudentProgress = new CourseStudentProgressModel();
-                var (currentProgress, progress, displayOrderUnit, displayOrderLesson) = await _courseRepository.GetContentCompleted(item.Id, item.CourseType, request.StudentId);
-                courseStudentProgress.ContentCompleted = string.Format("{0} / {1}", currentProgress, progress);
+                //CourseStudentProgressModel courseStudentProgress = new CourseStudentProgressModel();
+                //var (currentProgress, progress, displayOrderUnit, displayOrderLesson) = await _courseRepository.GetContentCompleted(item.Id, item.CourseType, request.StudentId);
+                //courseStudentProgress.ContentCompleted = string.Format("{0} / {1}", currentProgress, progress);
             }
             methodResult.Result = default;
             methodResult.StatusCode = StatusCodes.Status200OK;

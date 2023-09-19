@@ -91,10 +91,10 @@ namespace Fsel.Course.Lms.Application.Queries.ManageProgressQuery
             var lists = manageStudents.Skip((request.Page - 1) * request.PageSize).Take(request.PageSize).ToList();
             foreach (var item in lists)
             {
-                var (currentProgress, progress, displayOrderUnit, displayOrderLesson) = await _courseRepository.GetContentCompleted(item.CourseId, item.CourseType, item.StudentId);
-                item.DisplayOrderLesson = displayOrderLesson;
-                item.DisplayOrderUnit = displayOrderUnit;
-                item.ContentProgress = string.Format("{0} / {1}", currentProgress, progress);
+                //var (currentProgress, progress, displayOrderUnit, displayOrderLesson) = await _courseRepository.GetContentCompleted(item.CourseId, item.CourseType, item.StudentId);
+                //item.DisplayOrderLesson = displayOrderLesson;
+                //item.DisplayOrderUnit = displayOrderUnit;
+                //item.ContentProgress = string.Format("{0} / {1}", currentProgress, progress);
             }
             methodResult.Result = new PagingItemsModel<ManageStudentProgressModel>(lists, request, totalItem);
             methodResult.StatusCode = StatusCodes.Status200OK;
