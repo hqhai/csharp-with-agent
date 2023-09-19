@@ -8,6 +8,7 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkQuery
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
+    using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Services.UserServices;
@@ -25,7 +26,6 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkQuery
         private readonly IUserService _userService;
         private readonly IHomeWorkRepository _homeWorkRepository;
         private readonly ILessonResultRepository _lessonResultRepository;
-        private readonly IHomeWorkResultRepository _homeWorkResultRepository;
         private readonly IMapper _mapper;
         private readonly AuthContext _authContext;
 
@@ -33,7 +33,6 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkQuery
             IUserService userService,
             IHomeWorkRepository homeWorkRepository,
             ILessonResultRepository lessonResultRepository,
-            IHomeWorkResultRepository homeWorkResultRepository,
             IMapper mapper
             )
         {
@@ -41,7 +40,6 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkQuery
             _userService = userService;
             _homeWorkRepository = homeWorkRepository;
             _lessonResultRepository = lessonResultRepository;
-            _homeWorkResultRepository = homeWorkResultRepository;
             _mapper = mapper;
         }
 
@@ -62,7 +60,7 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkQuery
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(lessonResult));
                 return methodResult;
             }
-            if (lessonResult.Status == Domain.Enums.EnumResultStatus.Unfinished)
+            if (lessonResult.Status == EnumResultStatus.Unfinished || lessonResult.Status == EnumResultStatus.New)
             {
                 methodResult.Result = null;
                 methodResult.StatusCode = StatusCodes.Status200OK;

@@ -82,18 +82,22 @@ namespace Fsel.Shared.Helpers
             if (enumPlacementTestLevel == EnumPlacementTestLevel.IELTS && value >= 3 && value <= 3.5)
             {
                 courseLevel = EnumCourseLevel.RFE;
+                isLock = true;
             }
             else if (enumPlacementTestLevel == EnumPlacementTestLevel.IELTS && value >= 4 && value <= 4.5)
             {
                 courseLevel = EnumCourseLevel.MS1;
+                isLock = true;
             }
             else if (enumPlacementTestLevel == EnumPlacementTestLevel.IELTS && value >= 5 && value <= 5.5)
             {
                 courseLevel = EnumCourseLevel.MS2;
+                isLock = true;
             }
             else if (enumPlacementTestLevel == EnumPlacementTestLevel.IELTS && value >= 6)
             {
                 courseLevel = EnumCourseLevel.MS3;
+                isLock = true;
             }
             else
             {
@@ -137,8 +141,16 @@ namespace Fsel.Shared.Helpers
                         break;
 
                     case EnumPlacementTestLevel.B1Plus:
-                        isLock = value < 75;
-                        courseLevel = !isLock ? EnumCourseLevel.B2 : EnumCourseLevel.B1Plus;
+                        if (yearOld <= 13)
+                        {
+                            isLock = true;
+                            courseLevel = value >= 75 ? EnumCourseLevel.B2 : EnumCourseLevel.B1;
+                        }
+                        else
+                        {
+                            isLock = value < 75;
+                            courseLevel = !isLock ? EnumCourseLevel.B2 : EnumCourseLevel.B1Plus;
+                        }
                         break;
 
                     case EnumPlacementTestLevel.B2:

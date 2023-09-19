@@ -8,15 +8,12 @@ namespace Fsel.Ordering.Api.Controllers
     using Fsel.Ordering.Application.Commands.OrderCmds;
     using Fsel.Ordering.Application.Queries.OrderQuery;
     using Fsel.Ordering.Domain.Models.EntityModels;
-    using Fsel.Shared.Enums;
     using MediatR;
-    using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
 
     [ApiVersion(Settings.APIVersion)]
     [Route(Settings.APIDefaultRoute + "/order")]
     [ApiController]
-    [Authorize(Roles = nameof(EnumRole.Student))]
     public class OrderController : ControllerBase
     {
         private readonly IMediator _mediator;

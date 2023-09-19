@@ -30,5 +30,10 @@ namespace Fsel.Shared.Models.ShareModels
 
         public IList<object>? ParamsMessage { get; set; }
         public IList<object>? ParamsLink { get; set; }
+
+        public Guid? SenderId { get; set; }
+        public string? AvatarPath { get; set; }
+
+        public EnumNotificationStatus Status { get; set; }
     }
 }

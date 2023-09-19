@@ -22,7 +22,7 @@ namespace Fsel.Interaction.Domain.Entities
         /// <summary>
         /// Content
         /// </summary>
-        [MaxLength(1000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
+        [MaxLength(255, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? Content { get; set; }
 
         public StudentReview? StudentReview { get; set; }

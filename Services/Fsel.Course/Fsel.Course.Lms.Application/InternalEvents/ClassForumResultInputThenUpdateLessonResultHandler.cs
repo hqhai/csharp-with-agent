@@ -27,24 +27,29 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             var lessonResult = await _lessonResultRepository.Queryable.FirstOrDefaultAsync(x => x.Id == classForumResult.LessonResultId, cancellationToken);
             if (lessonResult != null)
             {
+                #region TODO : Fix Demo 20/9/2023
+
+                //if (classForumResult.Status == EnumClassForumResultStatus.Pending)
+                //{
+                //    await UpdateHomeWorks(classForumResult, cancellationToken);
+                //}
+
+                #endregion TODO : Fix Demo 20/9/2023
+
                 await GetLessonResult(lessonResult, cancellationToken);
-                if (classForumResult.Status == EnumClassForumResultStatus.Pending)
-                {
-                    await UpdateHomeWorks(classForumResult, cancellationToken);
-                }
                 _lessonResultRepository.Update(lessonResult);
-                await _lessonResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+                await _lessonResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             }
         }
 
-        public async Task UpdateHomeWorks(ClassForumResult classForumResult, CancellationToken cancellationToken)
+        private async Task UpdateHomeWorks(ClassForumResult classForumResult, CancellationToken cancellationToken)
         {
             var homeWorkResults = await _homeWorkResultRepository.Queryable.Where(x => x.LessonResultId == classForumResult.LessonResultId).ToListAsync(cancellationToken);
             if (homeWorkResults != null)
             {
                 homeWorkResults = homeWorkResults.Select(x => { x.Status = EnumResultStatus.New; return x; }).ToList();
                 _homeWorkResultRepository.UpdateList(homeWorkResults);
-                await _lessonResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+                await _lessonResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             }
         }
     }

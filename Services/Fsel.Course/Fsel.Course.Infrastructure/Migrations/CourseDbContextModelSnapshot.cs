@@ -245,19 +245,6 @@ namespace Fsel.Course.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(103);
 
-                    b.Property<string>("FeedBackNegativesStr")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("FeedBackNote")
-                        .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)");
-
-                    b.Property<string>("FeedBackPositivesStr")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int?>("FeedBackStars")
-                        .HasColumnType("int");
-
                     b.Property<string>("GradingAlFeedback")
                         .HasMaxLength(10000)
                         .HasColumnType("nvarchar(max)");
@@ -535,6 +522,12 @@ namespace Fsel.Course.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(0);
 
+                    b.Property<int>("CorrectCount")
+                        .HasColumnType("int");
+
+                    b.Property<int>("CorrectTotal")
+                        .HasColumnType("int");
+
                     b.Property<Guid>("CourseId")
                         .HasColumnType("uniqueidentifier");
 
@@ -569,8 +562,11 @@ namespace Fsel.Course.Infrastructure.Migrations
                         .HasColumnType("bit")
                         .HasColumnOrder(110);
 
-                    b.Property<int>("Result")
-                        .HasColumnType("int");
+                    b.Property<double>("Percent")
+                        .HasColumnType("float");
+
+                    b.Property<string>("SkillScoresStr")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Status")
                         .IsRequired()
@@ -2730,11 +2726,8 @@ namespace Fsel.Course.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(103);
 
-                    b.Property<string>("FeedBackNote")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int?>("FeedBackStars")
-                        .HasColumnType("int");
+                    b.Property<DateTime?>("GradingStartDate")
+                        .HasColumnType("datetime2");
 
                     b.Property<Guid?>("GradingTeacherId")
                         .HasColumnType("uniqueidentifier");
@@ -3719,6 +3712,88 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.HasIndex("SectionId");
 
                     b.ToTable("SectionTimeCodes");
+                });
+
+            modelBuilder.Entity("Fsel.Course.Domain.Entities.StudentFeedback", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(0);
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(107);
+
+                    b.Property<string>("CreatedFullName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(104);
+
+                    b.Property<Guid>("CreatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(101);
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(109);
+
+                    b.Property<string>("DeletedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(106);
+
+                    b.Property<Guid?>("DeletedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(103);
+
+                    b.Property<string>("Feature")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("FeedBackNegativesStr")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("FeedBackNote")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<string>("FeedBackPositivesStr")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("FeedBackStars")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit")
+                        .HasColumnOrder(110);
+
+                    b.Property<Guid>("ObjectId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(108);
+
+                    b.Property<string>("UpdatedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(105);
+
+                    b.Property<Guid?>("UpdatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(102);
+
+                    b.HasKey("Id");
+
+                    b.ToTable("StudentFeedbacks");
                 });
 
             modelBuilder.Entity("Fsel.Course.Domain.Entities.TimeCodeExercise", b =>

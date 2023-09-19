@@ -2,6 +2,7 @@
 
 namespace Fsel.Hangfire.Host.Jobs
 {
+    using Fsel.Common.Constants;
     using Fsel.Core.Extensions;
     using Fsel.Hangfire.Application.Workers;
     using Fsel.Shared.Constants;

@@ -2,6 +2,7 @@
 
 namespace Fsel.Course.Lms.Application.InternalEvents
 {
+    using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Entities.SkillScoresConfigs;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
@@ -14,7 +15,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
         {
         }
 
-        public async Task UpdateUnit(IList<Guid>? lessonResultIds, Domain.Entities.Unit? unit, Guid courseId, Guid studentId, CancellationToken cancellationToken)
+        public async Task UpdateUnit(IList<Guid>? lessonResultIds, Unit? unit, Guid courseId, Guid studentId, bool isDone, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(lessonResultIds);
             ArgumentNullException.ThrowIfNull(unit);
@@ -24,7 +25,10 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 var (groupedSkillScores, percent) = await GetUnitSkillScores(lessonResultIds);
                 unitResult.CorrectCount = (int)groupedSkillScores.Sum(x => x.CorrectCount);
                 unitResult.CorrectTotal = (int)groupedSkillScores.Sum(x => x.TotalCount);
-                unitResult.Status = EnumResultStatus.Done;
+                if (isDone)
+                {
+                    unitResult.Status = EnumResultStatus.Done;
+                }
                 unitResult.Percent = percent;
                 unitResult.SkillScores = groupedSkillScores;
                 await _finishOneUnitPublisher.Publish(unitResult, cancellationToken);
@@ -33,7 +37,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             }
         }
 
-        public async Task<(List<SkillScores>, double)> GetUnitSkillScores(IList<Guid>? lessonResultIds)
+        private async Task<(List<SkillScores>, double)> GetUnitSkillScores(IList<Guid>? lessonResultIds)
         {
             ArgumentNullException.ThrowIfNull(lessonResultIds);
             var (videoSkillScores, percentVideo) = await GetVideoSkillScores(lessonResultIds, EnumTimeCodeType.Standalone, 18);

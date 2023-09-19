@@ -452,8 +452,8 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                         .HasColumnOrder(0);
 
                     b.Property<string>("Content")
-                        .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)");
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
 
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2")
@@ -821,8 +821,11 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                         .HasMaxLength(1000)
                         .HasColumnType("nvarchar(1000)");
 
-                    b.Property<int>("DisplayOrder")
+                    b.Property<int>("DisplayLevel")
                         .HasColumnType("int");
+
+                    b.Property<float>("DisplayOrder")
+                        .HasColumnType("real");
 
                     b.Property<string>("Icon")
                         .HasMaxLength(500)
@@ -871,7 +874,8 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             Description = "addd",
-                            DisplayOrder = 1,
+                            DisplayLevel = 1,
+                            DisplayOrder = 1f,
                             Icon = "addd",
                             IsDeleted = false,
                             IsPilot = false,
@@ -886,7 +890,8 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             Description = "addd",
-                            DisplayOrder = 2,
+                            DisplayLevel = 1,
+                            DisplayOrder = 2f,
                             Icon = "addd",
                             IsDeleted = false,
                             IsPilot = false,
@@ -901,7 +906,8 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             Description = "addd",
-                            DisplayOrder = 3,
+                            DisplayLevel = 1,
+                            DisplayOrder = 3f,
                             Icon = "fluent_target-arrow-16-filled.png",
                             IsDeleted = false,
                             IsPilot = false,
@@ -916,7 +922,8 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             Description = "addd",
-                            DisplayOrder = 4,
+                            DisplayLevel = 1,
+                            DisplayOrder = 4f,
                             Icon = "wideword.png",
                             IsDeleted = false,
                             IsPilot = false,
@@ -926,12 +933,13 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                         new
                         {
                             Id = new Guid("2be9a620-143d-41f6-815b-2038c21a7b23"),
-                            AnswerStr = "{\"birthday\":null,\"ageGenderQuestions\":[{\"id\":1,\"gender\":\"Male\"},{\"id\":2,\"gender\":\"Female\"},{\"id\":3,\"gender\":\"Other\"}]}",
+                            AnswerStr = "{\"birthday\":null,\"ageGenderQuestions\":[{\"id\":1,\"content\":\"Male\"},{\"id\":2,\"content\":\"Female\"},{\"id\":3,\"content\":\"Other\"}]}",
                             CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             Description = "addd",
-                            DisplayOrder = 5,
+                            DisplayLevel = 1,
+                            DisplayOrder = 5f,
                             Icon = "time.png",
                             IsDeleted = false,
                             IsPilot = false,
@@ -946,7 +954,8 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             Description = "Câu trả lời của bạn",
-                            DisplayOrder = 6,
+                            DisplayLevel = 1,
+                            DisplayOrder = 1.1f,
                             IsDeleted = false,
                             IsPilot = true,
                             Question = "Họ tên đầy đủ của bạn là gì",
@@ -955,12 +964,13 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                         new
                         {
                             Id = new Guid("f959d3d1-cab3-4fc6-8341-cb44bcbd3e30"),
-                            AnswerStr = "[{\"id\":1,\"district\":\"Ba \\u0110\\u00ECnh\"},{\"id\":2,\"district\":\"Ho\\u00E0n Ki\\u1EBFm\"},{\"id\":3,\"district\":\"T\\u00E2y H\\u1ED3\"},{\"id\":4,\"district\":\"Long Bi\\u00EAn\"},{\"id\":5,\"district\":\"C\\u1EA7u Gi\\u1EA5y\"},{\"id\":6,\"district\":\"\\u0110\\u1ED1ng \\u0110a\"},{\"id\":7,\"district\":\"Hai B\\u00E0 Tr\\u01B0ng\"},{\"id\":8,\"district\":\"Ho\\u00E0ng Mai\"},{\"id\":9,\"district\":\"Thanh Xu\\u00E2n\"},{\"id\":10,\"district\":\"H\\u00E0 \\u0110\\u00F4ng\"},{\"id\":11,\"district\":\"B\\u1EAFc T\\u1EEB Li\\u00EAm\"},{\"id\":12,\"district\":\"Nam T\\u1EEB Li\\u00EAm\"},{\"id\":13,\"district\":\"Ba V\\u00EC\"},{\"id\":14,\"district\":\"Ch\\u01B0\\u01A1ng M\\u1EF9\"},{\"id\":15,\"district\":\"\\u0110an Ph\\u01B0\\u1EE3ng\"},{\"id\":16,\"district\":\"\\u0110\\u00F4ng Anh\"},{\"id\":17,\"district\":\"Gia L\\u00E2m\"},{\"id\":18,\"district\":\"Ho\\u00E0i \\u0110\\u1EE9c\"},{\"id\":19,\"district\":\"M\\u00EA Linh\"},{\"id\":20,\"district\":\"Ph\\u00FA Xuy\\u00EAn\"},{\"id\":21,\"district\":\"Ph\\u00FAc Th\\u1ECD\"},{\"id\":22,\"district\":\"Qu\\u1ED1c Oai\"},{\"id\":23,\"district\":\"Th\\u1EA1ch Th\\u1EA5t\"},{\"id\":24,\"district\":\"Thanh Oai\"},{\"id\":25,\"district\":\"Thanh Tr\\u00EC\"},{\"id\":26,\"district\":\"Th\\u01B0\\u1EDDng T\\u00EDn\"},{\"id\":27,\"district\":\" \\u1EE8ng H\\u00F2a\"},{\"id\":28,\"district\":\"kh\\u00E1c\"}]",
+                            AnswerStr = "[{\"id\":1,\"content\":\"Ba \\u0110\\u00ECnh\",\"referenceQuestionId\":null},{\"id\":2,\"content\":\"Ho\\u00E0n Ki\\u1EBFm\",\"referenceQuestionId\":null},{\"id\":3,\"content\":\"T\\u00E2y H\\u1ED3\",\"referenceQuestionId\":null},{\"id\":4,\"content\":\"Long Bi\\u00EAn\",\"referenceQuestionId\":null},{\"id\":5,\"content\":\"C\\u1EA7u Gi\\u1EA5y\",\"referenceQuestionId\":null},{\"id\":6,\"content\":\"\\u0110\\u1ED1ng \\u0110a\",\"referenceQuestionId\":null},{\"id\":7,\"content\":\"Hai B\\u00E0 Tr\\u01B0ng\",\"referenceQuestionId\":null},{\"id\":8,\"content\":\"Ho\\u00E0ng Mai\",\"referenceQuestionId\":null},{\"id\":9,\"content\":\"Thanh Xu\\u00E2n\",\"referenceQuestionId\":null},{\"id\":10,\"content\":\"H\\u00E0 \\u0110\\u00F4ng\",\"referenceQuestionId\":null},{\"id\":11,\"content\":\"B\\u1EAFc T\\u1EEB Li\\u00EAm\",\"referenceQuestionId\":null},{\"id\":12,\"content\":\"Nam T\\u1EEB Li\\u00EAm\",\"referenceQuestionId\":null},{\"id\":13,\"content\":\"Ba V\\u00EC\",\"referenceQuestionId\":null},{\"id\":14,\"content\":\"Ch\\u01B0\\u01A1ng M\\u1EF9\",\"referenceQuestionId\":null},{\"id\":15,\"content\":\"\\u0110an Ph\\u01B0\\u1EE3ng\",\"referenceQuestionId\":null},{\"id\":16,\"content\":\"\\u0110\\u00F4ng Anh\",\"referenceQuestionId\":null},{\"id\":17,\"content\":\"Gia L\\u00E2m\",\"referenceQuestionId\":null},{\"id\":18,\"content\":\"Ho\\u00E0i \\u0110\\u1EE9c\",\"referenceQuestionId\":null},{\"id\":19,\"content\":\"M\\u00EA Linh\",\"referenceQuestionId\":null},{\"id\":20,\"content\":\"Ph\\u00FA Xuy\\u00EAn\",\"referenceQuestionId\":null},{\"id\":21,\"content\":\"Ph\\u00FAc Th\\u1ECD\",\"referenceQuestionId\":null},{\"id\":22,\"content\":\"Qu\\u1ED1c Oai\",\"referenceQuestionId\":null},{\"id\":23,\"content\":\"Th\\u1EA1ch Th\\u1EA5t\",\"referenceQuestionId\":null},{\"id\":24,\"content\":\"Thanh Oai\",\"referenceQuestionId\":null},{\"id\":25,\"content\":\"Thanh Tr\\u00EC\",\"referenceQuestionId\":null},{\"id\":26,\"content\":\"Th\\u01B0\\u1EDDng T\\u00EDn\",\"referenceQuestionId\":null},{\"id\":27,\"content\":\" \\u1EE8ng H\\u00F2a\",\"referenceQuestionId\":null},{\"id\":28,\"content\":\"kh\\u00E1c\",\"referenceQuestionId\":null}]",
                             CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             Description = "addd",
-                            DisplayOrder = 7,
+                            DisplayLevel = 1,
+                            DisplayOrder = 1.2f,
                             IsDeleted = false,
                             IsPilot = true,
                             Question = "Bạn Sống ở đâu",
@@ -974,7 +984,8 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             Description = "addd",
-                            DisplayOrder = 7,
+                            DisplayLevel = 1,
+                            DisplayOrder = 2f,
                             IsDeleted = false,
                             IsPilot = true,
                             Question = "Số điện thoại của bạn là gì",
@@ -988,136 +999,206 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             Description = "addd",
-                            DisplayOrder = 8,
+                            DisplayLevel = 1,
+                            DisplayOrder = 3.1f,
                             IsDeleted = false,
                             IsPilot = true,
-                            Question = "Họ tên đầy đủ của trẻ nhà bạn là gì",
+                            Question = "Họ tên đầy đủ của trẻ là gì",
                             Type = "ShortAnswer"
                         },
                         new
                         {
                             Id = new Guid("0f9df809-9ae9-4e8c-891d-ec645483f290"),
-                            AnswerStr = "[{\"id\":1,\"age\":\"\\u003C11\"},{\"id\":2,\"age\":\"11\"},{\"id\":3,\"age\":\"12\"},{\"id\":4,\"age\":\"13\"},{\"id\":5,\"age\":\"14\"},{\"id\":6,\"age\":\"15\"},{\"id\":7,\"age\":\"16\"},{\"id\":8,\"age\":\"17\"},{\"id\":9,\"age\":\"18\"},{\"id\":10,\"age\":\"19\\u002B\"}]",
+                            AnswerStr = "[{\"id\":1,\"content\":\"\\u003C11\",\"referenceQuestionId\":[\"98a97cf1-8562-4828-9cf2-6f5823bf09fe\",\"1fde61af-e1e0-4027-ad21-1176ad212119\"]},{\"id\":2,\"content\":\"11\",\"referenceQuestionId\":[\"73ab87b1-c0ae-40c6-ba37-1cdce350563a\",\"06b1a0df-eaef-4be9-a9da-9c2633e3a12a\",\"56628f4a-0384-426c-b849-81ab1671afa4\",\"f05b02dc-6393-41dd-a479-cc9c05d1da93\",\"651414ad-cbcf-462a-84b9-daf83880b25a\",\"ef128343-2e29-4735-82f7-9d8d2231dcc2\",\"20675350-89f2-47e3-8e64-b04f2da6290b\",\"98a97cf1-8562-4828-9cf2-6f5823bf09fe\",\"1fde61af-e1e0-4027-ad21-1176ad212119\"]},{\"id\":3,\"content\":\"12\",\"referenceQuestionId\":[\"73ab87b1-c0ae-40c6-ba37-1cdce350563a\",\"06b1a0df-eaef-4be9-a9da-9c2633e3a12a\",\"56628f4a-0384-426c-b849-81ab1671afa4\",\"f05b02dc-6393-41dd-a479-cc9c05d1da93\",\"651414ad-cbcf-462a-84b9-daf83880b25a\",\"ef128343-2e29-4735-82f7-9d8d2231dcc2\",\"20675350-89f2-47e3-8e64-b04f2da6290b\",\"98a97cf1-8562-4828-9cf2-6f5823bf09fe\",\"1fde61af-e1e0-4027-ad21-1176ad212119\"]},{\"id\":4,\"content\":\"13\",\"referenceQuestionId\":[\"73ab87b1-c0ae-40c6-ba37-1cdce350563a\",\"06b1a0df-eaef-4be9-a9da-9c2633e3a12a\",\"56628f4a-0384-426c-b849-81ab1671afa4\",\"f05b02dc-6393-41dd-a479-cc9c05d1da93\",\"651414ad-cbcf-462a-84b9-daf83880b25a\",\"ef128343-2e29-4735-82f7-9d8d2231dcc2\",\"20675350-89f2-47e3-8e64-b04f2da6290b\",\"98a97cf1-8562-4828-9cf2-6f5823bf09fe\",\"1fde61af-e1e0-4027-ad21-1176ad212119\"]},{\"id\":5,\"content\":\"14\",\"referenceQuestionId\":[\"73ab87b1-c0ae-40c6-ba37-1cdce350563a\",\"06b1a0df-eaef-4be9-a9da-9c2633e3a12a\",\"56628f4a-0384-426c-b849-81ab1671afa4\",\"f05b02dc-6393-41dd-a479-cc9c05d1da93\",\"651414ad-cbcf-462a-84b9-daf83880b25a\",\"ef128343-2e29-4735-82f7-9d8d2231dcc2\",\"20675350-89f2-47e3-8e64-b04f2da6290b\",\"98a97cf1-8562-4828-9cf2-6f5823bf09fe\",\"1fde61af-e1e0-4027-ad21-1176ad212119\"]},{\"id\":6,\"content\":\"15\",\"referenceQuestionId\":[\"73ab87b1-c0ae-40c6-ba37-1cdce350563a\",\"06b1a0df-eaef-4be9-a9da-9c2633e3a12a\",\"56628f4a-0384-426c-b849-81ab1671afa4\",\"f05b02dc-6393-41dd-a479-cc9c05d1da93\",\"651414ad-cbcf-462a-84b9-daf83880b25a\",\"ef128343-2e29-4735-82f7-9d8d2231dcc2\",\"20675350-89f2-47e3-8e64-b04f2da6290b\",\"98a97cf1-8562-4828-9cf2-6f5823bf09fe\",\"1fde61af-e1e0-4027-ad21-1176ad212119\"]},{\"id\":7,\"content\":\"16\",\"referenceQuestionId\":[\"a6f6b5dc-c72a-496c-859c-2fdc9d97f147\",\"06b1a0df-eaef-4be9-a9da-9c2633e3a12a\",\"56628f4a-0384-426c-b849-81ab1671afa4\",\"f05b02dc-6393-41dd-a479-cc9c05d1da93\",\"bb50bb8b-4e72-4a5b-a058-cdbc7837f4dc\",\"ef128343-2e29-4735-82f7-9d8d2231dcc2\",\"20675350-89f2-47e3-8e64-b04f2da6290b\",\"98a97cf1-8562-4828-9cf2-6f5823bf09fe\",\"1fde61af-e1e0-4027-ad21-1176ad212119\"]},{\"id\":8,\"content\":\"17\",\"referenceQuestionId\":[\"a6f6b5dc-c72a-496c-859c-2fdc9d97f147\",\"06b1a0df-eaef-4be9-a9da-9c2633e3a12a\",\"56628f4a-0384-426c-b849-81ab1671afa4\",\"f05b02dc-6393-41dd-a479-cc9c05d1da93\",\"bb50bb8b-4e72-4a5b-a058-cdbc7837f4dc\",\"ef128343-2e29-4735-82f7-9d8d2231dcc2\",\"20675350-89f2-47e3-8e64-b04f2da6290b\",\"98a97cf1-8562-4828-9cf2-6f5823bf09fe\",\"1fde61af-e1e0-4027-ad21-1176ad212119\"]},{\"id\":9,\"content\":\"18\",\"referenceQuestionId\":[\"a6f6b5dc-c72a-496c-859c-2fdc9d97f147\",\"06b1a0df-eaef-4be9-a9da-9c2633e3a12a\",\"56628f4a-0384-426c-b849-81ab1671afa4\",\"f05b02dc-6393-41dd-a479-cc9c05d1da93\",\"bb50bb8b-4e72-4a5b-a058-cdbc7837f4dc\",\"ef128343-2e29-4735-82f7-9d8d2231dcc2\",\"20675350-89f2-47e3-8e64-b04f2da6290b\",\"98a97cf1-8562-4828-9cf2-6f5823bf09fe\",\"1fde61af-e1e0-4027-ad21-1176ad212119\"]},{\"id\":10,\"content\":\"19\\u002B\",\"referenceQuestionId\":[\"98a97cf1-8562-4828-9cf2-6f5823bf09fe\",\"1fde61af-e1e0-4027-ad21-1176ad212119\"]}]",
                             CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             Description = "addd",
-                            DisplayOrder = 9,
+                            DisplayLevel = 1,
+                            DisplayOrder = 3.2f,
                             IsDeleted = false,
                             IsPilot = true,
-                            Question = "Xác định độ tuổi và giới tính",
+                            Question = "Trẻ bao nhiêu tuổi",
                             Type = "DropDown"
                         },
                         new
                         {
                             Id = new Guid("52548bc5-3536-478c-978b-05f98815bf31"),
-                            AnswerStr = "[{\"id\":1,\"gender\":\"Male\"},{\"id\":2,\"gender\":\"Female\"},{\"id\":3,\"gender\":\"Other\"}]",
+                            AnswerStr = "[{\"id\":1,\"content\":\"Nam\",\"referenceQuestionId\":null},{\"id\":2,\"content\":\"N\\u1EEF\",\"referenceQuestionId\":null},{\"id\":3,\"content\":\"Kh\\u00E1c\",\"referenceQuestionId\":null}]",
                             CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             Description = "addd",
-                            DisplayOrder = 10,
+                            DisplayLevel = 1,
+                            DisplayOrder = 3.3f,
                             IsDeleted = false,
                             IsPilot = true,
-                            Question = "Xác định độ tuổi và giới tính",
-                            Type = "AgeGender"
-                        },
-                        new
-                        {
-                            Id = new Guid("73ab87b1-c0ae-40c6-ba37-1cdce350563a"),
-                            AnswerStr = "[{\"id\":1,\"content\":\"Yes\"},{\"id\":2,\"content\":\"No\"}]",
-                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            CreatedFullName = "",
-                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            Description = "addd",
-                            DisplayOrder = 11,
-                            IsDeleted = false,
-                            IsPilot = true,
-                            Question = "Con bạn có thể cam kết hoàn thành khóa học thí điểm 6 tháng với tốc độ 3 buổi học mỗi tuần (7,5 giờ mỗi tuần) từ tháng 10 năm 2023 đến tháng 3 năm 2024 không?",
+                            Question = "Giới Tính của trẻ",
                             Type = "MultipleChoiceVertical"
                         },
                         new
                         {
-                            Id = new Guid("fcd14833-b79f-4cf4-9ee8-65b041a7daf1"),
-                            AnswerStr = "[{\"id\":1,\"content\":\"Yes\"},{\"id\":2,\"content\":\"No\"}]",
+                            Id = new Guid("73ab87b1-c0ae-40c6-ba37-1cdce350563a"),
+                            AnswerStr = "[{\"id\":1,\"content\":\"C\\u00F3\",\"referenceQuestionId\":null},{\"id\":2,\"content\":\"Kh\\u00F4ng\",\"referenceQuestionId\":null}]",
                             CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             Description = "addd",
-                            DisplayOrder = 12,
+                            DisplayLevel = 2,
+                            DisplayOrder = 4f,
                             IsDeleted = false,
                             IsPilot = true,
-                            Question = "Con bạn có thể cam kết hoàn thành khóa học thí điểm 4 tháng với tốc độ 3 buổi học mỗi tuần (5 giờ mỗi tuần) từ tháng 11 năm 2023 đến tháng 2 năm 2024 không?",
+                            Question = "Bạn nhà có thể cam kết hoàn thành khóa học 6 tháng với tốc độ 3 buổi học mỗi tuần (7,5 giờ mỗi tuần) từ tháng 10 năm 2023 đến tháng 3 năm 2024 không?",
+                            Type = "MultipleChoiceVertical"
+                        },
+                        new
+                        {
+                            Id = new Guid("a6f6b5dc-c72a-496c-859c-2fdc9d97f147"),
+                            AnswerStr = "[{\"id\":1,\"content\":\"C\\u00F3\",\"referenceQuestionId\":null},{\"id\":2,\"content\":\"Kh\\u00F4ng\",\"referenceQuestionId\":null}]",
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            Description = "addd",
+                            DisplayLevel = 2,
+                            DisplayOrder = 4f,
+                            IsDeleted = false,
+                            IsPilot = true,
+                            Question = "Bạn nhà có thể cam kết hoàn thành khóa học 4 tháng với tốc độ 2 buổi học mỗi tuần (5 giờ mỗi tuần) từ tháng 11 năm 2023 đến tháng 2 năm 2024 không?",
                             Type = "MultipleChoiceVertical"
                         },
                         new
                         {
                             Id = new Guid("06b1a0df-eaef-4be9-a9da-9c2633e3a12a"),
-                            AnswerStr = "[{\"id\":1,\"content\":\"Laptop\"},{\"id\":2,\"content\":\"PC\"},{\"id\":3,\"content\":\"Both\"},{\"id\":4,\"content\":\"No\"}]",
+                            AnswerStr = "[{\"id\":1,\"content\":\"M\\u00E1y t\\u00EDnh x\\u00E1ch tay\",\"referenceQuestionId\":\"83a5b867-c3a1-47b9-91e3-a6fd6086501e\"},{\"id\":2,\"content\":\"M\\u00E1y t\\u00EDnh \\u0111\\u1EC3 b\\u00E0n\",\"referenceQuestionId\":null},{\"id\":3,\"content\":\"C\\u1EA3 2\",\"referenceQuestionId\":\"83a5b867-c3a1-47b9-91e3-a6fd6086501e\"},{\"id\":4,\"content\":\"No\",\"referenceQuestionId\":null}]",
                             CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             Description = "addd",
-                            DisplayOrder = 13,
+                            DisplayLevel = 2,
+                            DisplayOrder = 5f,
                             IsDeleted = false,
                             IsPilot = true,
-                            Question = "Bạn có PC hoặc Laptop ở nhà để con bạn có thể sử dụng để truy cập khóa học không?",
+                            Question = "Bạn có máy tính để bàn hoặc máy tính xách tay ở nhà để con bạn có thể sử dụng để truy cập khóa học không?",
                             Type = "MultipleChoiceVertical"
                         },
                         new
                         {
                             Id = new Guid("83a5b867-c3a1-47b9-91e3-a6fd6086501e"),
-                            AnswerStr = "[{\"id\":1,\"content\":\"Yes\"},{\"id\":2,\"content\":\"No\"}]",
+                            AnswerStr = "[{\"id\":1,\"content\":\"C\\u00F3\",\"referenceQuestionId\":null},{\"id\":2,\"content\":\"Kh\\u00F4ng\",\"referenceQuestionId\":null}]",
                             CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             Description = "addd",
-                            DisplayOrder = 14,
+                            DisplayLevel = 2,
+                            DisplayOrder = 6f,
                             IsDeleted = false,
                             IsPilot = true,
-                            Question = "Con bạn có thể mượn máy tính xách tay và mang đến các buổi học thí điểm tại trung tâm chúng tôi để tham gia khóa học không?",
+                            Question = "Con bạn có thể mang máy tính xách tay đến các buổi học tại trung tâm chúng tôi để tham gia khóa học không?",
                             Type = "MultipleChoiceVertical"
                         },
                         new
                         {
                             Id = new Guid("56628f4a-0384-426c-b849-81ab1671afa4"),
-                            AnswerStr = "[{\"id\":1,\"content\":\"1 (Not willing at all)\"},{\"id\":2,\"content\":\"2\"},{\"id\":3,\"content\":\"3\"},{\"id\":4,\"content\":\"4\"},{\"id\":5,\"content\":\"5\"},{\"id\":6,\"content\":\"6\"},{\"id\":7,\"content\":\"7\"},{\"id\":8,\"content\":\"8\"},{\"id\":9,\"content\":\"9\"},{\"id\":10,\"content\":\"10 (Very Willing)\"}]",
+                            AnswerStr = "[{\"id\":1,\"content\":\"1 (Kh\\u00F4ng s\\u1EB5n l\\u00F2ng ch\\u00FAt n\\u00E0o)\",\"referenceQuestionId\":null},{\"id\":2,\"content\":\"2\",\"referenceQuestionId\":null},{\"id\":3,\"content\":\"3\",\"referenceQuestionId\":null},{\"id\":4,\"content\":\"4\",\"referenceQuestionId\":null},{\"id\":5,\"content\":\"5\",\"referenceQuestionId\":null},{\"id\":6,\"content\":\"6\",\"referenceQuestionId\":null},{\"id\":7,\"content\":\"7\",\"referenceQuestionId\":null},{\"id\":8,\"content\":\"8\",\"referenceQuestionId\":null},{\"id\":9,\"content\":\"9\",\"referenceQuestionId\":null},{\"id\":10,\"content\":\"10 (R\\u1EA5t s\\u1EB5n s\\u00E0ng)\",\"referenceQuestionId\":null}]",
                             CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             Description = "addd",
-                            DisplayOrder = 15,
+                            DisplayLevel = 2,
+                            DisplayOrder = 7f,
                             IsDeleted = false,
                             IsPilot = true,
-                            Question = "Chúng tôi sẽ tổ chức 4 buổi on-site (2 tiếng/buổi) tại trung tâm (33 Lạc Trung hoặc 125 Hoàng Ngân) để lấy ý kiến ​​phản hồi của các bạn trong thời gian thí điểm. Bạn sẵn sàng đưa con mình tham dự những buổi học này ở mức độ nào?",
+                            Question = "Chúng tôi sẽ tổ chức 2 buổi on-site (2 tiếng/buổi) tại trung tâm (33 Lạc Trung hoặc 125 Hoàng Ngân) để lấy ý kiến phản hồi của các bạn trong giai đoạn thử nghiệm. Bạn sẵn sàng đưa con mình tham dự những buổi học này ở mức độ nào?",
+                            Type = "MultipleChoiceHorizontal"
+                        },
+                        new
+                        {
+                            Id = new Guid("f05b02dc-6393-41dd-a479-cc9c05d1da93"),
+                            AnswerStr = "[{\"id\":1,\"content\":\"33 L\\u1EA1c Trung\",\"referenceQuestionId\":null},{\"id\":2,\"content\":\"125 Ho\\u00E0ng Ng\\u00E2n\",\"referenceQuestionId\":null},{\"id\":3,\"content\":\"T\\u00F4i \\u1ED5n v\\u1EDBi c\\u1EA3 hai\",\"referenceQuestionId\":null}]",
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            Description = "addd",
+                            DisplayLevel = 2,
+                            DisplayOrder = 8f,
+                            IsDeleted = false,
+                            IsPilot = true,
+                            Question = "Bạn mong muốn các buổi họp được tổ chức tại trung tâm nào hơn?",
+                            Type = "MultipleChoiceVertical"
+                        },
+                        new
+                        {
+                            Id = new Guid("bb50bb8b-4e72-4a5b-a058-cdbc7837f4dc"),
+                            AnswerStr = "[{\"id\":1,\"content\":\"C\\u00E1c bu\\u1ED5i t\\u1ED1i th\\u1EE9 Hai\",\"referenceQuestionId\":null},{\"id\":2,\"content\":\"C\\u00E1c bu\\u1ED5i t\\u1ED1i th\\u1EE9 Ba\",\"referenceQuestionId\":null},{\"id\":3,\"content\":\"C\\u00E1c bu\\u1ED5i t\\u1ED1i th\\u1EE9 T\\u01B0\",\"referenceQuestionId\":null},{\"id\":4,\"content\":\"C\\u00E1c bu\\u1ED5i t\\u1ED1i th\\u1EE9 N\\u0103m\",\"referenceQuestionId\":null},{\"id\":5,\"content\":\"C\\u00E1c bu\\u1ED5i t\\u1ED1i th\\u1EE9 S\\u00E1u\",\"referenceQuestionId\":null},{\"id\":6,\"content\":\"C\\u00E1c bu\\u1ED5i s\\u00E1ng th\\u1EE9 B\\u1EA3y\",\"referenceQuestionId\":null},{\"id\":7,\"content\":\"C\\u00E1c bu\\u1ED5i chi\\u1EC1u th\\u1EE9 B\\u1EA3y\",\"referenceQuestionId\":null},{\"id\":8,\"content\":\"C\\u00E1c bu\\u1ED5i t\\u1ED1i th\\u1EE9 B\\u1EA3y\",\"referenceQuestionId\":null},{\"id\":9,\"content\":\"C\\u00E1c bu\\u1ED5i s\\u00E1ng ch\\u1EE7 nh\\u1EADt\",\"referenceQuestionId\":null},{\"id\":10,\"content\":\"C\\u00E1c bu\\u1ED5i chi\\u1EC1u ch\\u1EE7 nh\\u1EADt\",\"referenceQuestionId\":null},{\"id\":11,\"content\":\"C\\u00E1c bu\\u1ED5i t\\u1ED1i ch\\u1EE7 nh\\u1EADt\",\"referenceQuestionId\":null}]",
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            Description = "addd",
+                            DisplayLevel = 2,
+                            DisplayOrder = 9f,
+                            IsDeleted = false,
+                            IsPilot = true,
+                            Question = "Ngày nào sau đây thuận tiện cho con bạn tham dự các buổi học trong giai đoạn thử nghiệm? Lưu ý rằng các buổi học sẽ chỉ được tổ chức khoảng một lần mỗi 2 tháng. (Chọn nhiều phương án)",
+                            Type = "CheckList"
+                        },
+                        new
+                        {
+                            Id = new Guid("651414ad-cbcf-462a-84b9-daf83880b25a"),
+                            AnswerStr = "[{\"id\":1,\"content\":\"C\\u00E1c bu\\u1ED5i t\\u1ED1i th\\u1EE9 Hai\",\"referenceQuestionId\":null},{\"id\":2,\"content\":\"C\\u00E1c bu\\u1ED5i t\\u1ED1i th\\u1EE9 Ba\",\"referenceQuestionId\":null},{\"id\":3,\"content\":\"C\\u00E1c bu\\u1ED5i t\\u1ED1i th\\u1EE9 T\\u01B0\",\"referenceQuestionId\":null},{\"id\":4,\"content\":\"C\\u00E1c bu\\u1ED5i t\\u1ED1i th\\u1EE9 N\\u0103m\",\"referenceQuestionId\":null},{\"id\":5,\"content\":\"C\\u00E1c bu\\u1ED5i t\\u1ED1i th\\u1EE9 S\\u00E1u\",\"referenceQuestionId\":null},{\"id\":6,\"content\":\"C\\u00E1c bu\\u1ED5i s\\u00E1ng th\\u1EE9 B\\u1EA3y\",\"referenceQuestionId\":null},{\"id\":7,\"content\":\"C\\u00E1c bu\\u1ED5i chi\\u1EC1u th\\u1EE9 B\\u1EA3y\",\"referenceQuestionId\":null},{\"id\":8,\"content\":\"C\\u00E1c bu\\u1ED5i t\\u1ED1i th\\u1EE9 B\\u1EA3y\",\"referenceQuestionId\":null},{\"id\":9,\"content\":\"C\\u00E1c bu\\u1ED5i s\\u00E1ng ch\\u1EE7 nh\\u1EADt\",\"referenceQuestionId\":null},{\"id\":10,\"content\":\"C\\u00E1c bu\\u1ED5i chi\\u1EC1u ch\\u1EE7 nh\\u1EADt\",\"referenceQuestionId\":null},{\"id\":11,\"content\":\"C\\u00E1c bu\\u1ED5i t\\u1ED1i ch\\u1EE7 nh\\u1EADt\",\"referenceQuestionId\":null}]",
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            Description = "addd",
+                            DisplayLevel = 2,
+                            DisplayOrder = 9f,
+                            IsDeleted = false,
+                            IsPilot = true,
+                            Question = "Ngày nào sau đây thuận tiện cho con bạn tham dự các buổi học trong giai đoạn thử nghiệm? Lưu ý rằng các buổi học sẽ chỉ được tổ chức khoảng một lần mỗi 3 tháng. (Chọn nhiều phương án)",
+                            Type = "CheckList"
+                        },
+                        new
+                        {
+                            Id = new Guid("ef128343-2e29-4735-82f7-9d8d2231dcc2"),
+                            AnswerStr = "[{\"id\":1,\"content\":\"1 (Kh\\u00F4ng s\\u1EB5n s\\u00E0ng)\",\"referenceQuestionId\":null},{\"id\":2,\"content\":\"2\",\"referenceQuestionId\":null},{\"id\":3,\"content\":\"3\",\"referenceQuestionId\":null},{\"id\":4,\"content\":\"4\",\"referenceQuestionId\":null},{\"id\":5,\"content\":\"5\",\"referenceQuestionId\":null},{\"id\":6,\"content\":\"6\",\"referenceQuestionId\":null},{\"id\":7,\"content\":\"7\",\"referenceQuestionId\":null},{\"id\":8,\"content\":\"8\",\"referenceQuestionId\":null},{\"id\":9,\"content\":\"9\",\"referenceQuestionId\":null},{\"id\":10,\"content\":\"10 (R\\u1EA5t s\\u1EB5n s\\u00E0ng)\",\"referenceQuestionId\":null}]",
+                            CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            Description = "addd",
+                            DisplayLevel = 2,
+                            DisplayOrder = 10f,
+                            IsDeleted = false,
+                            IsPilot = true,
+                            Question = "Bạn có sẵn sàng tham dự các buổi họp tại trung tâm để tham gia các cuộc phỏng vấn và các buổi họp nhóm tập trung cho phụ huynh không?",
                             Type = "MultipleChoiceHorizontal"
                         },
                         new
                         {
                             Id = new Guid("20675350-89f2-47e3-8e64-b04f2da6290b"),
-                            AnswerStr = "[{\"id\":1,\"content\":\"Monday evenings\"},{\"id\":2,\"content\":\"Tuesday evenings\"},{\"id\":3,\"content\":\"Wednesday evenings\"},{\"id\":4,\"content\":\"Thursday evenings\"},{\"id\":5,\"content\":\"Friday evenings\"},{\"id\":6,\"content\":\"Saturday mornings\"},{\"id\":7,\"content\":\"Saturday afternoons\"},{\"id\":8,\"content\":\"Saturday evenings\"},{\"id\":9,\"content\":\"Sunday mornings\"},{\"id\":10,\"content\":\"Sunday afternoons\"},{\"id\":11,\"content\":\"Sunday evenings\"}]",
+                            AnswerStr = "[{\"id\":1,\"content\":\"C\\u00E1c bu\\u1ED5i t\\u1ED1i th\\u1EE9 Hai\",\"referenceQuestionId\":null},{\"id\":2,\"content\":\"C\\u00E1c bu\\u1ED5i t\\u1ED1i th\\u1EE9 Ba\",\"referenceQuestionId\":null},{\"id\":3,\"content\":\"C\\u00E1c bu\\u1ED5i t\\u1ED1i th\\u1EE9 T\\u01B0\",\"referenceQuestionId\":null},{\"id\":4,\"content\":\"C\\u00E1c bu\\u1ED5i t\\u1ED1i th\\u1EE9 N\\u0103m\",\"referenceQuestionId\":null},{\"id\":5,\"content\":\"C\\u00E1c bu\\u1ED5i t\\u1ED1i th\\u1EE9 S\\u00E1u\",\"referenceQuestionId\":null},{\"id\":6,\"content\":\"C\\u00E1c bu\\u1ED5i s\\u00E1ng th\\u1EE9 B\\u1EA3y\",\"referenceQuestionId\":null},{\"id\":7,\"content\":\"C\\u00E1c bu\\u1ED5i chi\\u1EC1u th\\u1EE9 B\\u1EA3y\",\"referenceQuestionId\":null},{\"id\":8,\"content\":\"C\\u00E1c bu\\u1ED5i t\\u1ED1i th\\u1EE9 B\\u1EA3y\",\"referenceQuestionId\":null},{\"id\":9,\"content\":\"C\\u00E1c bu\\u1ED5i s\\u00E1ng ch\\u1EE7 nh\\u1EADt\",\"referenceQuestionId\":null},{\"id\":10,\"content\":\"C\\u00E1c bu\\u1ED5i chi\\u1EC1u ch\\u1EE7 nh\\u1EADt\",\"referenceQuestionId\":null},{\"id\":11,\"content\":\"C\\u00E1c bu\\u1ED5i t\\u1ED1i ch\\u1EE7 nh\\u1EADt\",\"referenceQuestionId\":null}]",
                             CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             Description = "addd",
-                            DisplayOrder = 16,
+                            DisplayLevel = 2,
+                            DisplayOrder = 11f,
                             IsDeleted = false,
                             IsPilot = true,
-                            Question = "Ngày nào sau đây thuận tiện cho con bạn tham dự các buổi học tại chỗ trong thời gian thí điểm? (Chọn nhiều phương án)",
+                            Question = "Ngày nào sau đây thuận tiện cho bạn tham dự các buổi họp tại trung tâm trong giai đoạn thử nghiệm? (Chọn nhiều phương án)",
                             Type = "CheckList"
                         },
                         new
                         {
-                            Id = new Guid("5317ae1a-46db-4f25-9625-f9c28bd3c688"),
+                            Id = new Guid("98a97cf1-8562-4828-9cf2-6f5823bf09fe"),
                             AnswerStr = "null",
                             CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             Description = "addd",
-                            DisplayOrder = 17,
+                            DisplayLevel = 2,
+                            DisplayOrder = 12f,
                             IsDeleted = false,
                             IsPilot = true,
-                            Question = "Bạn biết đến FSEL Pilot bằng cách nào?",
+                            Question = "Bạn biết đến chương trình học trải nghiệm của FSEL bằng cách nào?",
                             Type = "ShortAnswer"
                         },
                         new
@@ -1128,10 +1209,11 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             Description = "addd",
-                            DisplayOrder = 18,
+                            DisplayLevel = 2,
+                            DisplayOrder = 13f,
                             IsDeleted = false,
                             IsPilot = true,
-                            Question = "Tại sao bạn muốn đăng ký FSEL Pilot?",
+                            Question = "Tại sao bạn muốn đăng ký chương trình học trải nghiệm của FSEL?",
                             Type = "ShortAnswer"
                         });
                 });

@@ -6,12 +6,12 @@ namespace Fsel.Interaction.Application.Queries.PostQuery.StudentPosts
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base;
     using Fsel.Core.Base.BaseModels;
+    using Fsel.Core.Extensions;
     using Fsel.Interaction.Application.Services.UserServices;
     using Fsel.Interaction.Domain.Entities;
     using Fsel.Interaction.Domain.IRepositories;
     using Fsel.Interaction.Domain.Models.EntityModels;
     using Fsel.Interaction.Domain.Models.QueryModels.Posts;
-    using Fsel.Interaction.Infrastructure.Repositories;
     using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Http;
@@ -105,9 +105,9 @@ namespace Fsel.Interaction.Application.Queries.PostQuery.StudentPosts
                         {
                             Post = post,
                             InteractionCount = _interactionActionRepository.Queryable
-                                        .Count(interaction => interaction.ObjectId == post.Id && interaction.Type == EnumInteractionActionType.Like),
+                                                        .Count(interaction => interaction.ObjectId == post.Id && interaction.Type == EnumInteractionActionType.Like),
                             CommentCount = _commentRepository.Queryable
-                                        .Count(comment => comment.ObjectId == post.Id)
+                                                        .Count(comment => comment.ObjectId == post.Id)
                         })
                                         .Where(item => item.InteractionCount > 0 && item.Post.CreatedDate >= date7DaysAgo)
                                         .OrderByDescending(item => item.InteractionCount)
@@ -124,6 +124,7 @@ namespace Fsel.Interaction.Application.Queries.PostQuery.StudentPosts
                                             CreatedDate = item.Post.CreatedDate,
                                             UpdatedDate = item.Post.UpdatedDate,
                                             UpdatedUserId = item.Post.UpdatedUserId,
+                                            PostTags = item.Post.PostTags,
                                         });
 
                     break;
@@ -146,7 +147,6 @@ namespace Fsel.Interaction.Application.Queries.PostQuery.StudentPosts
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
             }
-
 
             var result = sortedQuery.Select(post => new PostSearchModel
             {
@@ -172,6 +172,7 @@ namespace Fsel.Interaction.Application.Queries.PostQuery.StudentPosts
             });
 
             var lists = await result
+                    .ApplySortAndPaging(request)
                     .AsNoTracking()
                     .ToListAsync(cancellationToken: cancellationToken)
                     .ConfigureAwait(false);

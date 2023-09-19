@@ -2,8 +2,6 @@
 
 namespace Fsel.Course.Lms.Application.InternalEvents
 {
-    using System.Threading;
-    using System.Threading.Tasks;
     using Fsel.Core.Applications.InternalEvents;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums;
@@ -13,6 +11,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
     using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.EntityFrameworkCore;
+    using Unit = Course.Domain.Entities.Unit;
 
     public class LessonResultInputThenUpdateUnitResultHandler : BaseInternalUnitResultEventHandler,
         INotificationHandler<EntityChangedEvent<LessonResult>>
@@ -25,37 +24,37 @@ namespace Fsel.Course.Lms.Application.InternalEvents
         {
             ArgumentNullException.ThrowIfNull(notification);
             var lessonResult = notification.Data;
-            var unit = await _unitRepository.Queryable.Include(x => x.LessonResults.Where(x => x.Status == EnumResultStatus.Done && x.StudentId == lessonResult.StudentId && x.CourseId == lessonResult.CourseId))
-                                                    .Include(x => x.UnitLessons)
+            var unit = await _unitRepository.Queryable.Include(x => x.UnitLessons)
                                                     .ThenInclude(x => x.Lesson)
                                                     .Include(x => x.UnitSkillMockTests)
                                                     .FirstOrDefaultAsync(x => x.Id == lessonResult.UnitId, cancellationToken);
 
+            var lessonResults = await _lessonResultRepository.Queryable.Where(x => x.Status == EnumResultStatus.Done && x.StudentId == lessonResult.StudentId && x.CourseId == lessonResult.CourseId).ToListAsync(cancellationToken);
             if (unit != null && lessonResult.Status == EnumResultStatus.Done)
             {
-                var lessonResultIds = unit.LessonResults.Select(x => x.Id).ToList();
-                if (unit.LessonResults.Count == unit.UnitLessons.Count && unit.UnitSkillMockTests.Count == 0)
+                var lessonResultIds = lessonResults.Select(x => x.Id).ToList();
+                if (lessonResults.Count == unit.UnitLessons.Count && unit.UnitSkillMockTests.Count == 0)
                 {
-                    await UpdateUnit(lessonResultIds, unit, lessonResult.CourseId, lessonResult.StudentId, cancellationToken);
+                    await UpdateUnit(lessonResultIds, unit, lessonResult.CourseId, lessonResult.StudentId, true, cancellationToken);
                 }
-                else if (unit.LessonResults.Count == unit.UnitLessons.Count && unit.UnitSkillMockTests.Count > 0)
+                else if (lessonResults.Count == unit.UnitLessons.Count && unit.UnitSkillMockTests.Count > 0)
                 {
-                    await UpdateUnit(lessonResultIds, unit, lessonResult.CourseId, lessonResult.StudentId, cancellationToken).ConfigureAwait(false);
-                    await UpdateTheNextLesson(unit, lessonResult, cancellationToken);
+                    await UpdateUnit(lessonResultIds, unit, lessonResult.CourseId, lessonResult.StudentId, true, cancellationToken).ConfigureAwait(false);
+                    await UpdateTheNextLesson(unit, lessonResult, cancellationToken).ConfigureAwait(false);
                 }
                 else
                 {
-                    var isCheck = unit.LessonResults.Any(x => x.Status == EnumResultStatus.New);
+                    var isCheck = lessonResults.Any(x => x.Status == EnumResultStatus.New);
                     if (!isCheck)
                     {
-                        await UpdateUnit(lessonResultIds, unit, lessonResult.CourseId, lessonResult.StudentId, cancellationToken).ConfigureAwait(false);
-                        await UpdateTheNextLesson(unit, lessonResult, cancellationToken);
+                        await UpdateUnit(lessonResultIds, unit, lessonResult.CourseId, lessonResult.StudentId, false, cancellationToken).ConfigureAwait(false);
+                        await UpdateTheNextLesson(unit, lessonResult, cancellationToken).ConfigureAwait(false);
                     }
                 }
             }
         }
 
-        private async Task UpdateTheNextLesson(Domain.Entities.Unit? unit, LessonResult lessonResult, CancellationToken cancellationToken)
+        private async Task UpdateTheNextLesson(Unit? unit, LessonResult lessonResult, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(unit);
             var mockTestId = unit.UnitSkillMockTests.FirstOrDefault()?.MockTestId;

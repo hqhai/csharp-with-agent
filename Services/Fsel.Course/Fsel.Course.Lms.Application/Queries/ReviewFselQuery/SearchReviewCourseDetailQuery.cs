@@ -66,6 +66,12 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
                 return methodResult;
             }
             var studentReviews = studentReviewResults?.Content?.Result?.Where(x => x.CourseId == request.CourseId).ToList() ?? new List<StudentReviewModel>();
+            if (!studentReviews.Any())
+            {
+                methodResult.Result = null;
+                methodResult.StatusCode = StatusCodes.Status200OK;
+                return methodResult;
+            }
             var starts = studentReviews.Where(x => x.StudentReviewDetails != null).SelectMany(x => x.StudentReviewDetails!).Average(x => x.VoteStars);
             var studentReviewQuery = studentReviews.Select(x => new ReviewCourseDetailModel
             {
@@ -88,7 +94,7 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
             }).AsEnumerable();
 
             int totalItem = studentReviewQuery.Count();
-            var lists = studentReviewQuery.OrderBy(x => x.CreatedDate).Skip((request!.Page - 1) * request!.PageSize).Take(request!.PageSize).ToList();
+            var lists = studentReviewQuery.OrderBy(x => x.CreatedDate).Skip((request.Page - 1) * request.PageSize).Take(request.PageSize).ToList();
 
             var studentIds = lists.Select(x => x.StudentId).ToList();
             var studentResults = await _userService.GetStudentsByStudentIdsAsync(studentIds);

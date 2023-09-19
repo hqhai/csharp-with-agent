@@ -9,6 +9,7 @@ namespace Fsel.Notification.Domain.Model.EntityModels
     {
 
         public Guid? UserId { get; set; }
+        public Guid? SenderId { get; set; }
 
         public Guid? RoleId { get; set; }
 
@@ -25,6 +26,7 @@ namespace Fsel.Notification.Domain.Model.EntityModels
         public string? TemplateMessage { get; set; }
 
         public string? TemplateLink { get; set; }
+        public string? AvatarPath { get; set; }
 
 
         public string? Icon { get; set; }

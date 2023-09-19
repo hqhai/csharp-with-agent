@@ -46,7 +46,7 @@ namespace Fsel.Course.Lms.Api.Controllers
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> Rate([FromBody] RateClassForumResultCommand command)
         {
-            MethodResult<bool> commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            MethodResult<StudentFeedbackModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
 

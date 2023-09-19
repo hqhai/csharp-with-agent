@@ -17,18 +17,17 @@ namespace Fsel.Realtime.Application.Queues.Consumers
 
         public async Task Consume(ConsumeContext<NotificationQueueModel> context)
         {
-
             if (context != null)
             {
                 var userId = context.Message.UserId.ToString();
                 if (userId != null && context!.Message!.UserIds!.Count == 0)
                 {
-                    await _notificationHubContext.Clients.User(userId!).SendAsync(RealtimeSettings.NotificationHub.Methods.NotificationMessage, context.Message);
+                    await _notificationHubContext.Clients.Group(userId!).SendAsync(RealtimeSettings.NotificationHub.Methods.NotificationMessage, context.Message);
                 }
                 else if (context!.Message!.UserIds!.Count > 0)
                 {
                     var userIds = context.Message.UserIds;
-                    await _notificationHubContext.Clients.Users(userIds).SendAsync(RealtimeSettings.NotificationHub.Methods.NotificationMessage, context.Message);
+                    await _notificationHubContext.Clients.Groups(userIds).SendAsync(RealtimeSettings.NotificationHub.Methods.NotificationMessage, context.Message);
                 }
             }
         }

@@ -89,6 +89,7 @@ builder.Services.AddScoped<IClassForumFileRepository, ClassForumFileRepository>(
 builder.Services.AddScoped<IClassForumResultRepository, ClassForumResultRepository>();
 builder.Services.AddScoped<IClassForumResultFileRepository, ClassForumResultFileRepository>();
 builder.Services.AddScoped<IClassForumScoreRepository, ClassForumScoreRepository>();
+builder.Services.AddScoped<IStudentFeedbackRepository, StudentFeedbackRepository>();
 
 // Converter
 builder.Services.AddScoped<ExtraPracticeConverter>();
@@ -107,6 +108,7 @@ builder.Services.AddScoped<FinishOneLevelPassPublisher>();
 builder.Services.AddScoped<FinishOneUnitPublisher>();
 builder.Services.AddScoped<FinishOneUnitTestPublisher>();
 builder.Services.AddScoped<NotificationMessagePublisher>();
+builder.Services.AddScoped<CreateOrderPublisher>();
 
 // Refit
 builder.AddRefitClients(typeof(IUserService), appSetting?.Services?.UserApiUrl);

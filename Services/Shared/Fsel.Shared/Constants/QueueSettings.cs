@@ -68,6 +68,7 @@ namespace Fsel.Shared.Constants
             {
                 public const string QuestBoardMainFinish = $"{KeyQueue}_QuestBoardMainFinish";
                 public const string SendNotification = $"{KeyQueue}_SendNotification";
+                public const string OrderCreateNotification = $"{KeyQueue}_OrderCreateNotification";
             }
         }
 
