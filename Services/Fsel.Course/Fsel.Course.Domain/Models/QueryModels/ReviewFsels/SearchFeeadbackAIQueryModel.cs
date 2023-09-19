@@ -4,9 +4,8 @@ namespace Fsel.Course.Domain.Models.QueryModels.ReviewFsels
 {
     using Fsel.Core.Base.BaseModels;
 
-    public class SearchStudentFeedbackQueryModel : BaseQueryModel
+    public class SearchFeeadbackAIQueryModel : BaseQueryModel
     {
-        public int? FeedBackStars { get; set; }
-        public Guid? ClassForumId { get; set; }
+        public int? NumberOfStarts { get; set; }
     }
 }

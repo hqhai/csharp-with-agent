@@ -56,11 +56,11 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
         /// Search Review ai
         /// </summary>
         [HttpGet("review-ai")]
-        [ProducesResponseType(typeof(MethodResult<PagingItemsModel<ReviewCourseByClassForumAIModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(MethodResult<PagingItemsModel<FeedbackClassForumAIModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> SearchReviewAi([FromQuery] SearchReviewAIQuery query)
+        public async Task<IActionResult> SearchReviewAi([FromQuery] SearchFeeadbackAIQuery query)
         {
-            MethodResult<PagingItemsModel<ReviewCourseByClassForumAIModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            MethodResult<PagingItemsModel<FeedbackClassForumAIModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
 
@@ -70,7 +70,7 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
         [HttpGet("student-star")]
         [ProducesResponseType(typeof(MethodResult<PagingItemsModel<StudentFeedbackModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> SearchStudentStar([FromQuery] SearchStudentFeedbackQuery query)
+        public async Task<IActionResult> SearchStudentStar([FromQuery] SearchStudentFeedbackAIQuery query)
         {
             MethodResult<PagingItemsModel<StudentFeedbackModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();

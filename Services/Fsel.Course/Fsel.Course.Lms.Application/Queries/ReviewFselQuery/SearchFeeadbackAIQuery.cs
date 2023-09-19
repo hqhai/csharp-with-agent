@@ -9,6 +9,7 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Core.Extensions;
+    using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Domain.Models.QueryModels.ReviewFsels;
@@ -16,11 +17,11 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class SearchReviewAIQuery : SearchReviewAIQueryModel, IRequest<MethodResult<PagingItemsModel<ReviewCourseByClassForumAIModel>>>
+    public class SearchFeeadbackAIQuery : SearchFeeadbackAIQueryModel, IRequest<MethodResult<PagingItemsModel<FeedbackClassForumAIModel>>>
     {
     }
 
-    public class SearchReviewAIQueryHandler : IRequestHandler<SearchReviewAIQuery, MethodResult<PagingItemsModel<ReviewCourseByClassForumAIModel>>>
+    public class SearchReviewAIQueryHandler : IRequestHandler<SearchFeeadbackAIQuery, MethodResult<PagingItemsModel<FeedbackClassForumAIModel>>>
     {
         private readonly ICourseRepository _courseRepository;
         private readonly IClassForumResultRepository _classForumResultRepository;
@@ -45,10 +46,10 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
             _classForumRepository = classForumRepository;
         }
 
-        public async Task<MethodResult<PagingItemsModel<ReviewCourseByClassForumAIModel>>> Handle(SearchReviewAIQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<PagingItemsModel<FeedbackClassForumAIModel>>> Handle(SearchFeeadbackAIQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            var methodResult = new MethodResult<PagingItemsModel<ReviewCourseByClassForumAIModel>>();
+            var methodResult = new MethodResult<PagingItemsModel<FeedbackClassForumAIModel>>();
 
             if (request.PageSize > 100)
             {
@@ -65,7 +66,7 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
                         join c in _courseRepository.Queryable on cmt.CourseId equals c.Id
                         join cfr in _classForumResultRepository.Queryable on lr.Id equals cfr.LessonResultId
                         join s in _studentFeedbackRepository.Queryable on cfr.Id equals s.ObjectId
-                        select new ReviewCourseByClassForumAIModel
+                        select new FeedbackClassForumAIModel
                         {
                             CourseId = c.Id,
                             CourseName = c.Name,
@@ -74,11 +75,13 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
                             LessonId = baseQ.Id,
                             ClassForumId = cf.Id,
                             NumberOfStarts = s.FeedBackStars ?? default,
+                            UnitDisplayOrder = cmt.DisplayOrder,
+                            LessonDisplayOrder = ul.DisplayOrder,
                         };
 
             var groupedQuery = (from result in query
                                 group result by new { result.LessonId, result.UnitId, result.CourseId } into grouped
-                                select new ReviewCourseByClassForumAIModel
+                                select new FeedbackClassForumAIModel
                                 {
                                     CourseId = grouped.Key.CourseId,
                                     LessonId = grouped.Key.LessonId,
@@ -93,6 +96,11 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
                 groupedQuery = groupedQuery.Where(m => (m.CourseName ?? string.Empty).Contains(request.Keyword));
             }
 
+            if (request.NumberOfStarts != null)
+            {
+                groupedQuery = groupedQuery.Where(m => m.NumberOfStarts == request.NumberOfStarts);
+            }
+
             int totalItem = await groupedQuery.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
             var lists = await groupedQuery
                     .ApplySortAndPaging(request)
@@ -100,7 +108,7 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
                     .ToListAsync(cancellationToken: cancellationToken)
                     .ConfigureAwait(false);
 
-            methodResult.Result = new PagingItemsModel<ReviewCourseByClassForumAIModel>(lists, request, totalItem);
+            methodResult.Result = new PagingItemsModel<FeedbackClassForumAIModel>(lists, request, totalItem);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }

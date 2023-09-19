@@ -2,7 +2,7 @@
 
 namespace Fsel.Course.Domain.Models.EntityModels
 {
-    public class ReviewCourseByClassForumAIModel
+    public class FeedbackClassForumAIModel
     {
         public Guid CourseId { get; set; }
         public Guid LessonId { get; set; }
@@ -12,5 +12,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public string? Code { get; set; }
         public double NumberOfStarts { get; set; }
         public int TotalRating { get; set; }
+        public int LessonDisplayOrder { get; set; }
+        public int UnitDisplayOrder { get; set; }
     }
 }

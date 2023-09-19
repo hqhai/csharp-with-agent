@@ -12,28 +12,29 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Domain.Models.QueryModels.ReviewFsels;
+    using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class SearchStudentFeedbackQuery : SearchStudentFeedbackQueryModel, IRequest<MethodResult<PagingItemsModel<StudentFeedbackModel>>>
+    public class SearchStudentFeedbackAIQuery : SearchStudentFeedbackAIQueryModel, IRequest<MethodResult<PagingItemsModel<StudentFeedbackModel>>>
     {
     }
 
-    public class SearchStudentFeedbackQueryHandler : IRequestHandler<SearchStudentFeedbackQuery, MethodResult<PagingItemsModel<StudentFeedbackModel>>>
+    public class SearchStudentFeedbackAIQueryHandler : IRequestHandler<SearchStudentFeedbackAIQuery, MethodResult<PagingItemsModel<StudentFeedbackModel>>>
     {
         private readonly IStudentFeedbackRepository _studentFeedbackRepository;
         private readonly IClassForumRepository _classForumRepository;
         private readonly IClassForumResultRepository _classForumResultRepository;
 
-        public SearchStudentFeedbackQueryHandler(IStudentFeedbackRepository studentFeedbackRepository, IClassForumRepository classForumRepository, IClassForumResultRepository classForumResultRepository)
+        public SearchStudentFeedbackAIQueryHandler(IStudentFeedbackRepository studentFeedbackRepository, IClassForumRepository classForumRepository, IClassForumResultRepository classForumResultRepository)
         {
             _studentFeedbackRepository = studentFeedbackRepository;
             _classForumRepository = classForumRepository;
             _classForumResultRepository = classForumResultRepository;
         }
 
-        public async Task<MethodResult<PagingItemsModel<StudentFeedbackModel>>> Handle(SearchStudentFeedbackQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<PagingItemsModel<StudentFeedbackModel>>> Handle(SearchStudentFeedbackAIQuery request, CancellationToken cancellationToken)
         {
             var methodResult = new MethodResult<PagingItemsModel<StudentFeedbackModel>>();
             ArgumentNullException.ThrowIfNull(request);
@@ -46,7 +47,7 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
             var studentFeedback = from baseQ in _studentFeedbackRepository.Queryable
                                   join cfr in _classForumResultRepository.Queryable on baseQ.ObjectId equals cfr.Id
                                   join cf in _classForumRepository.Queryable on cfr.ClassForumId equals cf.Id
-                                  where cf.Id == request.ClassForumId
+                                  where cf.Id == request.ClassForumId && baseQ.Feature == EnumFeature.ClassForum
                                   select new StudentFeedbackModel
                                   {
                                       Id = baseQ.Id,
@@ -64,6 +65,10 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
             if (request.FeedBackStars != null)
             {
                 studentFeedback = studentFeedback.Where(m => m.FeedBackStars == request.FeedBackStars);
+            }
+            if (!string.IsNullOrEmpty(request.Keyword))
+            {
+                studentFeedback = studentFeedback.Where(m => (m.CreatedFullName ?? string.Empty).Contains(request.Keyword));
             }
             int totalItem = await studentFeedback.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
             var lists = await studentFeedback
