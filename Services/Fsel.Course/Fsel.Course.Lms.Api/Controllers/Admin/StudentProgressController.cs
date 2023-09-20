@@ -38,7 +38,7 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
         /// <summary>
         /// Get Manage Student Courses
         /// </summary>
-        [HttpGet("student-courses")]
+        [HttpGet("courses")]
         [ProducesResponseType(typeof(MethodResult<IList<CourseStudentProgressModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetManageStudentCourse([FromQuery] GetStudentProgressCoursesQuery query)
@@ -50,7 +50,7 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
         /// <summary>
         /// Get Manage Student Lessons
         /// </summary>
-        [HttpGet("student-lessons")]
+        [HttpGet("lessons")]
         [ProducesResponseType(typeof(MethodResult<IList<LessonStudentProgressModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetManageStudentLesson([FromQuery] GetStudentProgressLessonsQuery query)
@@ -62,7 +62,7 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
         /// <summary>
         /// Get Student Units
         /// </summary>
-        [HttpGet("student-units")]
+        [HttpGet("units")]
         [ProducesResponseType(typeof(MethodResult<IList<UnitStudentProgressModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetManageStudentUnit([FromQuery] GetStudentProgressUnitsQuery query)
