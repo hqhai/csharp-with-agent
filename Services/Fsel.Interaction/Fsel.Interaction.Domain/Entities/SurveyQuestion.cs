@@ -21,7 +21,9 @@ namespace Fsel.Interaction.Domain.Entities
         [MaxLength(500, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? Icon { get; set; }
 
-        public int DisplayOrder { get; set; }
+        public float DisplayOrder { get; set; }
+
+        public int DisplayLevel { get; set; }
 
         public EnumSurveyQuestion Type { get; set; }
 
@@ -35,6 +37,7 @@ namespace Fsel.Interaction.Domain.Entities
             set { AnswerStr = ConvertHelper.Serialize(value); }
         }
 
+        public bool IsPilot { get; set; }
         public IList<CustomerSurvey> CustomerSurveys { get; set; } = new List<CustomerSurvey>();
     }
 }

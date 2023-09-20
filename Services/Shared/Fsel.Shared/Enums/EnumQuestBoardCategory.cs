@@ -7,7 +7,7 @@ namespace Fsel.Shared.Enums
     public enum EnumQuestBoardCategory
     {
         [Description("Kết thúc một bài học")]
-        FinishOnelesson,
+        FinishOneLesson,
 
         [Description("Hoàn thành một bài tập về nhà/dự án nhỏ")]
         FinishOneHomeworkMiniProject,

@@ -11,6 +11,7 @@ services:
             - ASPNETCORE_ENVIRONMENT=Testing
             - CONNECTIONSTRINGS__DEFAULTCONNECTION=Data Source=183.91.11.235;Initial Catalog=env-dev.user-service;User Id=sa;Password=FselTech@2023;TrustServerCertificate=true;
             - SERVICENAME=Auth
+            - SentryConfig__Dsn=https://530c364a1c006e0dade385d197373f4a@o4505797571444736.ingest.sentry.io/4505797729452032
             - JWT__SECRETKEY=JsonWebApiTokenWithSwaggerAuthorizationAuthenticationAspNetCore
             - JWT__ISSUER=baseWebApiIssuer
             - JWT__AUDIENCE=baseWebApiAudience
@@ -19,7 +20,7 @@ services:
             - JWT__REFRESHTOKENVALIDITYINDAYS=7
             - Otp__StepTime=3
             - Otp__StepDayWithAdmin=7
-            - ConstantUrl__ConfirmOtpUrl=https://lms-admin-dev.fsel.edu.vn/login/first-login?otp={0}
+            - ConstantUrl__ConfirmOtpUrl=http://42.96.58.145:4300/login/first-login?otp={0}
             - SERVICES_SenderApiUrl=http://42.96.58.145:5206/api/v1
             - SERVICES_InteractionApiUrl=http://42.96.58.145:5208/api/
             - SERVICES_ClassApiUrl=http://42.96.58.145:5207/api/v1
@@ -39,6 +40,7 @@ services:
             - ASPNETCORE_ENVIRONMENT=Testing
             - CONNECTIONSTRINGS__DEFAULTCONNECTION=Data Source=183.91.11.235;Initial Catalog=env-dev.user-service;User Id=sa;Password=FselTech@2023;TrustServerCertificate=true;
             - SERVICENAME=User
+            - SentryConfig__Dsn=https://530c364a1c006e0dade385d197373f4a@o4505797571444736.ingest.sentry.io/4505797729452032
             - JWT__SECRETKEY=JsonWebApiTokenWithSwaggerAuthorizationAuthenticationAspNetCore
             - JWT__ISSUER=baseWebApiIssuer
             - JWT__AUDIENCE=baseWebApiAudience
@@ -47,7 +49,7 @@ services:
             - JWT__REFRESHTOKENVALIDITYINDAYS=7
             - Otp__StepTime=3
             - Otp__StepDayWithAdmin=7
-            - ConstantUrl__ConfirmOtpUrl=https://lms-admin-dev.fsel.edu.vn/login/first-login?otp={0}
+            - ConstantUrl__ConfirmOtpUrl=http://42.96.58.145:4300/login/first-login?otp={0}
             - SERVICES_SenderApiUrl=http://42.96.58.145:5206/api/v1
             - SERVICES_InteractionApiUrl=http://42.96.58.145:5208/api/
             - SERVICES_ClassApiUrl=http://42.96.58.145:5207/api/v1

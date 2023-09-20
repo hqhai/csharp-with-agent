@@ -14,7 +14,10 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.CommandModels.ClassForumResults;
     using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Course.Lms.Application.Queues.Publishers;
     using Fsel.Course.Lms.Application.Services.UserServices;
+    using Fsel.Shared.Enums;
+    using Fsel.Shared.Models.ShareModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -31,13 +34,15 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
         private readonly IClassForumResultRepository _classForumResultRepository;
         private readonly IClassForumRepository _classForumRepository;
         private readonly ILessonResultRepository _lessonResultRepository;
+        private readonly NotificationMessagePublisher _notificationMessagePublisher;
 
         public CreateClassForumResultCommandHandler(IMapper mapper
             , AuthContext authContext
             , IUserService userService
             , IClassForumResultRepository classForumResultRepository
             , IClassForumRepository classForumRepository
-            , ILessonResultRepository lessonResultRepository)
+            , ILessonResultRepository lessonResultRepository,
+NotificationMessagePublisher notificationMessagePublisher)
         {
             _mapper = mapper;
             _authContext = authContext;
@@ -45,6 +50,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
             _classForumResultRepository = classForumResultRepository;
             _classForumRepository = classForumRepository;
             _lessonResultRepository = lessonResultRepository;
+            _notificationMessagePublisher = notificationMessagePublisher;
         }
 
         public async Task<MethodResult<ClassForumResultModel>> Handle(CreateClassForumResultCommand request, CancellationToken cancellationToken)
@@ -110,9 +116,23 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
 
             await _classForumResultRepository.ExecuteTransactionAsync(async () =>
             {
-                _classForumResultRepository.Add(classForumResult);
+                classForumResult = _classForumResultRepository.Add(classForumResult);
                 await _classForumResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
+                //mặc định gửi cho tất cả CSO
+                IList<EnumRole> roles = new List<EnumRole>();
+                roles.Add(EnumRole.CSO);
+
+                NotificationQueueModel model = new NotificationQueueModel()
+                {
+                    ObjectId = classForumResult.Id,
+                    Roles = roles,
+                    Content = EnumNotificationContent.CreateClassForumResult,
+                    Type = EnumNotificationType.Text,
+                    SenderId = _authContext.CurrentUserId
+                };
+
+                await _notificationMessagePublisher.Publish(model, cancellationToken);
                 methodResult.StatusCode = StatusCodes.Status201Created;
                 methodResult.Result = _mapper.Map<ClassForumResultModel>(classForumResult);
                 return methodResult;

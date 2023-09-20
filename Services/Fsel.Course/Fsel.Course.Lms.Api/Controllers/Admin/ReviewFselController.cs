@@ -7,6 +7,7 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
     using Fsel.Common.Constants;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Course.Lms.Application.Queries.CourseQuery;
     using Fsel.Course.Lms.Application.Queries.ReviewFselQuery;
     using Fsel.Course.Lms.Application.Services.UserServices.Models;
     using Fsel.Shared.Enums;
@@ -28,14 +29,14 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
         }
 
         /// <summary>
-        /// Search Communication
+        /// Search platform review
         /// </summary>
-        [HttpGet("communication")]
-        [ProducesResponseType(typeof(MethodResult<ReviewCommunicationSearchModel>), (int)HttpStatusCode.OK)]
+        [HttpGet("platform-review")]
+        [ProducesResponseType(typeof(MethodResult<ReviewPlatformSearchModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> SearchCommunication([FromQuery] SearchReviewCommunicationQuery query)
+        public async Task<IActionResult> SearchPlatformReview([FromQuery] SearchPlatformReviewQuery query)
         {
-            MethodResult<ReviewCommunicationSearchModel> queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            MethodResult<ReviewPlatformSearchModel> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
 
@@ -48,6 +49,30 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
         public async Task<IActionResult> SearchCourse([FromQuery] SearchReviewCourseQuery query)
         {
             MethodResult<ReviewCourseSearchModel> queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Search Review ai
+        /// </summary>
+        [HttpGet("review-ai")]
+        [ProducesResponseType(typeof(MethodResult<PagingItemsModel<FeedbackClassForumAIModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> SearchReviewAi([FromQuery] SearchFeedbackAIQuery query)
+        {
+            MethodResult<PagingItemsModel<FeedbackClassForumAIModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Search student star 
+        /// </summary>
+        [HttpGet("student-star")]
+        [ProducesResponseType(typeof(MethodResult<PagingItemsModel<StudentFeedbackModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> SearchStudentStar([FromQuery] SearchStudentFeedbackAIQuery query)
+        {
+            MethodResult<PagingItemsModel<StudentFeedbackModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
 

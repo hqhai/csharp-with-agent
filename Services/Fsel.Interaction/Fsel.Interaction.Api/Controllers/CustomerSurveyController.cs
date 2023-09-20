@@ -27,7 +27,6 @@ namespace Fsel.Interaction.Api.Controllers
         /// <summary>
         /// Create a Customer Survey
         /// </summary>
-        [Authorize]
         [HttpPost]
         [ProducesResponseType(typeof(MethodResult<IList<CustomerSurveyModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
@@ -36,6 +35,7 @@ namespace Fsel.Interaction.Api.Controllers
             MethodResult<IList<CustomerSurveyModel>> queryResult = await _mediator.Send(command).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
+
 
         /// <summary>
         /// Check Student by id

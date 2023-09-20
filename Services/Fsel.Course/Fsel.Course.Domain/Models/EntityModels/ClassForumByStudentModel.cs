@@ -9,5 +9,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public ClassForumResultModel? ClassForumResultCurrentStudent { get; set; }
 
         public IList<ClassForumResultModel>? ClassForumResultAllStudents { get; set; }
+
+        public IList<ClassForumResultModel>? ClassForumResultRandomStudents { get; set; }
     }
 }

@@ -37,7 +37,8 @@ namespace Fsel.System.Application.Commands.ForbiddenWordCmd
             var forbiddenWord = await _forbiddenWordRepository.GetByIdAsync(request.Id);
 
             #region Validation
-            string compareWord = request!.Word!.ToLower(CultureInfo.InvariantCulture).Trim();
+
+            string compareWord = request.Word!.ToLower(CultureInfo.InvariantCulture).Trim();
 
             var forbiddenWordName = await _forbiddenWordRepository.Queryable.AnyAsync(x => x!.Word!.ToLower().Trim() == compareWord && x.Id != request.Id, cancellationToken);
 

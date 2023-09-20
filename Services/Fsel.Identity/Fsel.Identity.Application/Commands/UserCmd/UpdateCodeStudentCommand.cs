@@ -13,6 +13,8 @@ namespace Fsel.Identity.Application.Commands.UserCmd
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Domain.Models.CommandModels.Users;
     using Fsel.Identity.Domain.Models.EntityModels;
+    using Fsel.Shared.Enums;
+    using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Identity;
@@ -42,7 +44,7 @@ namespace Fsel.Identity.Application.Commands.UserCmd
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<UserModel>();
-            var user = await _userManager.Users.Include(x => x.Human).FirstOrDefaultAsync(x => x.Id == _authContext.CurrentUserId.ToString(), cancellationToken);
+            var user = await _userManager.Users.Include(x => x.Human).ThenInclude(x => x!.Student).FirstOrDefaultAsync(x => x.Id == _authContext.CurrentUserId.ToString(), cancellationToken);
             if (user == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(user));
@@ -61,6 +63,16 @@ namespace Fsel.Identity.Application.Commands.UserCmd
                 code = $"HN_{weekNumber}{lastDigitOfYear}{number}{2}{lastOfBirthDay}{stt:000}";
             }
             user.Human!.Code = code;
+            int age = DateTimeHelper.GetYearOld(request.Birthday);
+            if (age <= 13)
+            {
+                user.Human!.Student!.CourseLevel = EnumCourseLevel.A2;
+            }
+            else if (age >= 14)
+            {
+                user.Human!.Student!.CourseLevel = EnumCourseLevel.B1;
+            }
+
             _mapper.Map(request, user.Human);
             await _userManager.UpdateAsync(user);
 

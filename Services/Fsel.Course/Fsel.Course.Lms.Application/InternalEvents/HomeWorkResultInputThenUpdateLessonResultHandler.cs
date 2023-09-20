@@ -8,42 +8,45 @@ namespace Fsel.Course.Lms.Application.InternalEvents
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
+    using Fsel.Course.Lms.Application.Queues.Publishers;
     using MediatR;
     using Microsoft.EntityFrameworkCore;
 
-    public class HomeWorkResultInputThenUpdateLessonResultHandler :
+    public class HomeWorkResultInputThenUpdateLessonResultHandler : BaseInternalLessonResultEventHandler,
         INotificationHandler<EntityChangedEvent<HomeWorkResult>>
     {
-        private readonly ILessonResultRepository _lessonResultRepository;
-
-        public HomeWorkResultInputThenUpdateLessonResultHandler(ILessonResultRepository lessonResultRepository)
+        public HomeWorkResultInputThenUpdateLessonResultHandler(IVideoResultRepository videoResultRepository, IClassForumResultRepository classForumResultRepository, IUnitResultRepository unitResultRepository, ILessonResultRepository lessonResultRepository, ICourseResultRepository courseResultRepository, ICourseRepository courseRepository, IUnitRepository unitRepository, IMockTestRepository mockTestRepository, IHomeWorkQuestionRepository homeWorkQuestionRepository, IHomeWorkAnswerRepository homeWorkAnswerRepository, IQuestionRepository questionRepository, IHomeWorkRepository homeWorkRepository, FinishOneUnitPublisher finishOneUnitPublisher, FinishOneLevelPassPublisher finishOneLevelPassPublisher, IFinalTestResultRepository finalTestResultRepository, IMockTestResultRepository mockTestResultRepository, IHomeWorkResultRepository homeWorkResultRepository) : base(videoResultRepository, classForumResultRepository, unitResultRepository, lessonResultRepository, courseResultRepository, courseRepository, unitRepository, mockTestRepository, homeWorkQuestionRepository, homeWorkAnswerRepository, questionRepository, homeWorkRepository, finishOneUnitPublisher, finishOneLevelPassPublisher, finalTestResultRepository, mockTestResultRepository, homeWorkResultRepository)
         {
-            _lessonResultRepository = lessonResultRepository;
         }
 
         public async Task Handle(EntityChangedEvent<HomeWorkResult> notification, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(notification);
             var homeWorkResult = notification.Data;
-            var lessonResult = await _lessonResultRepository.Queryable.Include(x => x.VideoResult).Include(x => x.HomeWorkResults).Include(x => x.ClassForumResults).ThenInclude(x => x.ClassForumScores)
-                                         .FirstOrDefaultAsync(x => x.Id == homeWorkResult.LessonResultId, cancellationToken);
-            if (lessonResult != null && lessonResult.VideoResult != null && lessonResult.HomeWorkResults != null && homeWorkResult.Status == EnumResultStatus.Done)
+            var lessonResult = await _lessonResultRepository.Queryable.Include(x => x.HomeWorkResults.Where(x => x.StudentId == homeWorkResult.StudentId && x.LessonResultId == homeWorkResult.LessonResultId))
+                                                                        .Include(x => x.VideoResult)
+                                                                        .Include(x => x.ClassForumResults.Where(x => x.StudentId == homeWorkResult.StudentId && x.LessonResultId == homeWorkResult.LessonResultId))
+                                                                        .FirstOrDefaultAsync(x => x.Id == homeWorkResult.LessonResultId, cancellationToken);
+            if (lessonResult != null)
             {
-                if (lessonResult.HomeWorkResults.All(x => x.Status == EnumResultStatus.Done))
-                {
-                    if (lessonResult.VideoResult.Status == EnumResultStatus.Done)
-                    {
-                        var classForumResult = lessonResult.ClassForumResults.FirstOrDefault();
-                        var isCheckclassForum = classForumResult?.Status == EnumClassForumResultStatus.Graded && classForumResult != null;
-                        var percentHomeWork = (double)lessonResult.HomeWorkResults.Average(x => x.Percent) * 30;
-                        var percentClassForum = isCheckclassForum ? ((double)classForumResult!.ClassForumScores.Sum(x => x.Score) / 36) * 30 : 0;
-                        var percentVideo = lessonResult.VideoResult.Percent * 40;
-                        var percent = (percentClassForum + percentHomeWork + percentVideo) / 100;
-                        lessonResult.Percent = percent;
-                        _lessonResultRepository.Update(lessonResult);
-                        await _lessonResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
-                    }
-                }
+                var isHomeWorksDone = lessonResult.HomeWorkResults.All(x => x.StudentId == homeWorkResult.StudentId && x.LessonResultId == homeWorkResult.LessonResultId && x.Status == EnumResultStatus.Done);
+                var isClassForumDone = lessonResult.ClassForumResults.Any(x => x.StudentId == homeWorkResult.StudentId && x.LessonResultId == homeWorkResult.LessonResultId && (x.Status == EnumClassForumResultStatus.PendingForGrading || x.Status == EnumClassForumResultStatus.Graded));
+                await GetLessonResult(lessonResult, cancellationToken);
+
+                #region TODO : Fix Demo 20/9/2023
+
+                //if (isClassForumDone && isHomeWorksDone)
+                //{
+                //    lessonResult.Status = EnumResultStatus.Done;
+                //    _lessonResultRepository.Update(lessonResult);
+                //    await _lessonResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+                //    return;
+                //}
+
+                #endregion TODO : Fix Demo 20/9/2023
+
+                _lessonResultRepository.Update(lessonResult);
+                await _lessonResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             }
         }
     }

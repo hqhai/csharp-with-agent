@@ -4,6 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using Fsel.Common.Enums.ErrorCodes;
 using Fsel.Core.Entities;
 using Fsel.Ordering.Domain.Enums;
+using Fsel.Shared.Enums;
 
 namespace Fsel.Ordering.Domain.Entities
 {

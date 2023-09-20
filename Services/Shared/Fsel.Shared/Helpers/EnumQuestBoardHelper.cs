@@ -9,7 +9,7 @@ namespace Fsel.Shared.Helpers
     {
         private static IList<KeyValuePair<EnumQuestBoardType, EnumQuestBoardCategory>> s_questboardTypeCategory = new List<KeyValuePair<EnumQuestBoardType, EnumQuestBoardCategory>>
         {
-            new KeyValuePair<EnumQuestBoardType, EnumQuestBoardCategory>(EnumQuestBoardType.MainQuests, EnumQuestBoardCategory.FinishOnelesson),
+            new KeyValuePair<EnumQuestBoardType, EnumQuestBoardCategory>(EnumQuestBoardType.MainQuests, EnumQuestBoardCategory.FinishOneLesson),
             new KeyValuePair<EnumQuestBoardType, EnumQuestBoardCategory>(EnumQuestBoardType.MainQuests, EnumQuestBoardCategory.FinishOneHomeworkMiniProject),
             new KeyValuePair<EnumQuestBoardType, EnumQuestBoardCategory>(EnumQuestBoardType.MainQuests, EnumQuestBoardCategory.FinishOneUnitTest),
             new KeyValuePair<EnumQuestBoardType, EnumQuestBoardCategory>(EnumQuestBoardType.MainQuests, EnumQuestBoardCategory.FinishOneUnit),

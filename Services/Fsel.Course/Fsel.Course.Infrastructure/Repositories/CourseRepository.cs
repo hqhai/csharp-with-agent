@@ -1,6 +1,8 @@
 // Copyright (c) Atlantic. All rights reserved.
 
+using System.Threading;
 using Fsel.Core.Base;
+using Fsel.Course.Domain.Entities;
 using Fsel.Course.Domain.IRepositories;
 using Microsoft.EntityFrameworkCore;
 using EntityCourse = Fsel.Course.Domain.Entities.Course;
@@ -56,6 +58,41 @@ namespace Fsel.Course.Infrastructure.Repositories
             {
                 throw;
             }
+        }
+
+        public async Task<EntityCourse?> GetIncludeCourseUnitMockTestByIdAsync(Guid id)
+        {
+            try
+            {
+                return await Queryable.Include(x => x.CourseUnitMockTests)
+                                                  .Include(x => x.UnitResults)
+                                                  .Include(x => x.MockTestResults)
+                                                  .Include(x => x.FinalTestResults)
+                                                  .FirstOrDefaultAsync(x => x.Id == id);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<EntityCourse?> GetIncludeCourseResult(Guid id, Guid? studentId)
+        {
+            return await Queryable
+                         .Include(x => x.CourseResults.Where(y => y.StudentId == studentId && y.CourseId == id))
+                         .Include(x => x.CourseUnitMockTests)
+                         .ThenInclude(x => x.Unit)
+                         .ThenInclude(x => x!.UnitResults.Where(y => y.StudentId == studentId && y.CourseId == id))
+                         .Include(x => x.CourseUnitMockTests)
+                         .ThenInclude(x => x.MockTest)
+                         .ThenInclude(x => x!.MockTestResults.Where(y => y.StudentId == studentId && y.CourseId == id))
+                         .Include(x => x.CourseUnitMockTests)
+                         .ThenInclude(x => x.FinalTest)
+                         .ThenInclude(x => x!.FinalTestResults.Where(y => y.StudentId == studentId && y.CourseId == id))
+                         .Include(x => x.CourseTeachers)
+                         .Where(x => x.Id == id)
+                         .AsNoTracking()
+                         .FirstOrDefaultAsync();
         }
     }
 }

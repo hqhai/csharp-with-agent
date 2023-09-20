@@ -4,7 +4,9 @@ namespace Fsel.System.Application.Services.CourseServices
 {
     using Fsel.Common.ActionResults;
     using Fsel.Shared.Enums;
+    using Fsel.Shared.Models.ShareModels;
     using Fsel.System.Application.Services.CourseServices.Models;
+    using global::System;
     using Microsoft.AspNetCore.Mvc;
     using Refit;
 
@@ -27,5 +29,14 @@ namespace Fsel.System.Application.Services.CourseServices
 
         [Post("/admin/course")]
         Task<IApiResponse<MethodResult<IList<CourseModel>>>> GetListCourseByIds([FromBody] IList<Guid> courseIds);
+
+        [Get("/quest-board/percent-video")]
+        Task<IApiResponse<MethodResult<QuestBoardCategoryModel>>> GetPercentVideoResult([Query] GetFinishOneLessonQueryModel query);
+
+        [Get("/quest-board/percent-unit")]
+        Task<IApiResponse<MethodResult<QuestBoardCategoryModel>>> GetPercentUnitResult([Query] GetFinishOneQueryModel query);
+
+        [Get("/quest-board/percent-course")]
+        Task<IApiResponse<MethodResult<QuestBoardCategoryModel>>> GetPercentCourseResult([Query] GetFinishOneQueryModel query);
     }
 }

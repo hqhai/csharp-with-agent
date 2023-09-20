@@ -35,7 +35,6 @@ namespace Fsel.Course.Infrastructure.Repositories
                 throw;
             }
         }
-
         public override async Task<Lesson?> GetIncludeByIdAsync(Guid id, int? siteId = null)
         {
             try

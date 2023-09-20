@@ -37,6 +37,9 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public double SettingFrequecy { get; set; }
 
         public double SettingPresence { get; set; }
+
         public IList<ClassForumFileModel>? ClassForumFiles { get; set; }
+
+        public IList<ClassForumResultModel>? ClassForumResults { get; set; }
     }
 }

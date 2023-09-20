@@ -8,6 +8,7 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkQuery
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
+    using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Services.UserServices;
@@ -23,22 +24,22 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkQuery
     public class GetListHomeworkQueryHandler : IRequestHandler<GetListHomeworkQuery, MethodResult<IList<LessonHomeWorkResultModel>>>
     {
         private readonly IUserService _userService;
+        private readonly IHomeWorkRepository _homeWorkRepository;
         private readonly ILessonResultRepository _lessonResultRepository;
-        private readonly IHomeWorkResultRepository _homeWorkResultRepository;
         private readonly IMapper _mapper;
         private readonly AuthContext _authContext;
 
         public GetListHomeworkQueryHandler(AuthContext authContext,
             IUserService userService,
+            IHomeWorkRepository homeWorkRepository,
             ILessonResultRepository lessonResultRepository,
-            IHomeWorkResultRepository homeWorkResultRepository,
             IMapper mapper
             )
         {
             _authContext = authContext;
             _userService = userService;
+            _homeWorkRepository = homeWorkRepository;
             _lessonResultRepository = lessonResultRepository;
-            _homeWorkResultRepository = homeWorkResultRepository;
             _mapper = mapper;
         }
 
@@ -59,29 +60,34 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkQuery
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(lessonResult));
                 return methodResult;
             }
-            var lessonSkillScoreQuery = await _homeWorkResultRepository.Queryable
-                                        .Include(x => x.HomeWork)
-                                        .ThenInclude(x => x!.LessonHomeWorks)
-                                        .Include(x => x.HomeWork)
-                                        .ThenInclude(x => x!.HomeWorkQuestions)
+            if (lessonResult.Status == EnumResultStatus.Unfinished || lessonResult.Status == EnumResultStatus.New)
+            {
+                methodResult.Result = null;
+                methodResult.StatusCode = StatusCodes.Status200OK;
+                return methodResult;
+            }
+            var homeWorks = await _homeWorkRepository.Queryable
+                                        .Include(x => x!.LessonHomeWorks)
+                                        .Include(x => x!.HomeWorkQuestions)
                                         .ThenInclude(x => x.Question)
-                                        .Include(x => x.HomeWorkAnswers)
-                                        .Where(x => x.LessonResultId == request.LessonResultId)
+                                        .Include(x => x.HomeWorkResults)
+                                        .ThenInclude(x => x.HomeWorkAnswers)
+                                        .Where(x => x.LessonHomeWorks.Any(x => x.LessonId == lessonResult.LessonId))
                                         .AsNoTracking()
                                         .Select(h => new LessonHomeWorkResultModel
                                         {
-                                            Id = h.HomeWork!.Id,
-                                            CreatedDate = h.HomeWork.LessonHomeWorks.FirstOrDefault(x => x.HomeWorkId == h.HomeWorkId && x.LessonId == lessonResult.LessonId)!.CreatedDate,
-                                            Code = h.HomeWork.Code,
-                                            Name = h.HomeWork.Name,
-                                            CourseSkill = h.HomeWork.CourseSkill,
-                                            CourseLevel = h.HomeWork.CourseLevel,
-                                            QuestionTotal = h.HomeWork.HomeWorkQuestions.Select(x => x.Question).Count(),
-                                            QuestionCompleted = h.HomeWorkAnswers.Count(),
-                                            HomeWorkResult = _mapper.Map<HomeWorkResultModel>(h)
-                                        }).OrderBy(x => x.CreatedDate).ToListAsync(cancellationToken);
-
-            methodResult.Result = lessonSkillScoreQuery;
+                                            Id = h.Id,
+                                            CreatedDate = h.LessonHomeWorks.FirstOrDefault(x => x.HomeWorkId == h.Id && x.LessonId == lessonResult.LessonId)!.CreatedDate,
+                                            Code = h.Code,
+                                            Name = h.Name,
+                                            CourseSkill = h.CourseSkill,
+                                            CourseLevel = h.CourseLevel,
+                                            QuestionTotal = h.HomeWorkQuestions.Select(x => x.Question).Count(),
+                                            QuestionCompleted = h.HomeWorkResults.FirstOrDefault(x => x.HomeWorkId == h.Id && x.LessonResultId == request.LessonResultId)!.HomeWorkAnswers.Count,
+                                            HomeWorkResult = _mapper.Map<HomeWorkResultModel>(h.HomeWorkResults.FirstOrDefault(x => x.HomeWorkId == h.Id && x.LessonResultId == request.LessonResultId))
+                                        })
+                                        .ToListAsync(cancellationToken);
+            methodResult.Result = homeWorks.OrderBy(x => x.CreatedDate).ToList();
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }

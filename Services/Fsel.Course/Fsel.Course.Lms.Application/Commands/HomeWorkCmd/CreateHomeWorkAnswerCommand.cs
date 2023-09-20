@@ -13,6 +13,7 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd
     using Fsel.Course.Domain.Models.CommandModels.HomeWorkAnswers;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Infrastructure.Common;
+    using Fsel.Course.Lms.Application.Queues.Publishers;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -26,12 +27,14 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd
         private readonly IHomeWorkResultRepository _homeWorkResultRepository;
         private readonly IHomeWorkQuestionRepository _homeWorkQuestionRepository;
         private readonly IHomeWorkAnswerRepository _homeWorkAnswerRepository;
+        private readonly FinishOneHomeWorkPublisher _finishOneHomeWorkPublisher;
         private readonly AnswerTypeConverter _answerTypeConverter;
         private readonly IQuestionRepository _questionRepository;
 
         public CreateHomeWorkAnswerCommandHandler(IHomeWorkResultRepository homeWorkResultRepository,
             IHomeWorkQuestionRepository homeWorkQuestionRepository,
             IHomeWorkAnswerRepository homeWorkAnswerRepository,
+            FinishOneHomeWorkPublisher finishOneHomeWorkPublisher,
             AnswerTypeConverter answerTypeConverter,
             IQuestionRepository questionRepository
             )
@@ -39,6 +42,7 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd
             _homeWorkResultRepository = homeWorkResultRepository;
             _homeWorkQuestionRepository = homeWorkQuestionRepository;
             _homeWorkAnswerRepository = homeWorkAnswerRepository;
+            _finishOneHomeWorkPublisher = finishOneHomeWorkPublisher;
             _answerTypeConverter = answerTypeConverter;
             _questionRepository = questionRepository;
         }
@@ -70,6 +74,7 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd
 
             var questionIds = request.Answers.Select(x => x.QuestionId).Distinct().ToList();
             var questions = await _questionRepository.GetByIdsAsync(questionIds);
+            var homeWorkAnswers = new List<HomeWorkAnswer>();
             int correctTotal = default;
             foreach (var item in request.Answers)
             {
@@ -92,23 +97,30 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd
                     methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(homeWorkQuestion));
                     return methodResult;
                 }
-                var isHomeWorkAnswer = await _homeWorkAnswerRepository.Queryable.AnyAsync(x => x.HomeWorkQuestionId == homeWorkQuestion.Id && x.HomeWorkResultId == request.HomeWorkResultId, cancellationToken);
-                if (!isHomeWorkAnswer && item.Answer != null)
+                var homeWorkAnswer = await _homeWorkAnswerRepository.Queryable.FirstOrDefaultAsync(x => x.HomeWorkQuestionId == homeWorkQuestion.Id && x.HomeWorkResultId == request.HomeWorkResultId, cancellationToken);
+                var (answerConfig, correctCount) = _answerTypeConverter.GetTotalCorrectByAsnwerType(item.Answer, question.Config, question.QuestionType);
+                if (answerConfig == null && !string.IsNullOrEmpty(item.Answer?.ToString()))
                 {
-                    var (answerConfig, correctCount) = _answerTypeConverter.GetTotalCorrectByAsnwerType(item.Answer, question.Config, question.QuestionType);
-                    if (answerConfig == null)
-                    {
-                        methodResult.AddErrorBadRequest(nameof(EnumHomeWorkAnswerErrorCode.AnswerIsInTheWrongFormat), nameof(answerConfig), answerConfig);
-                        return methodResult;
-                    }
+                    methodResult.AddErrorBadRequest(nameof(EnumHomeWorkAnswerErrorCode.AnswerIsInTheWrongFormat), nameof(answerConfig), answerConfig);
+                    return methodResult;
+                }
+                if (homeWorkAnswer == null)
+                {
                     correctTotal += correctCount;
-                    homeWorkResult.HomeWorkAnswers.Add(new HomeWorkAnswer
+                    homeWorkAnswers.Add(new HomeWorkAnswer
                     {
                         Answer = answerConfig,
                         CorrectCount = correctCount,
                         HomeWorkQuestionId = homeWorkQuestion.Id,
                         HomeWorkResultId = homeWorkResult.Id
                     });
+                }
+                else
+                {
+                    correctTotal += correctCount;
+                    homeWorkAnswer.Answer = answerConfig;
+                    homeWorkAnswer.CorrectCount = correctCount;
+                    homeWorkAnswers.Add(homeWorkAnswer);
                 }
             }
             var homeWorkResultLesson = await _homeWorkResultRepository.Queryable
@@ -129,9 +141,9 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd
                                 CorrectCount = h.HomeWorkAnswers.Sum(x => x.CorrectCount),
                                 CorrectTotal = h.HomeWork.HomeWorkQuestions.Select(x => x.Question).Sum(x => x!.CorrectTotal),
                             }).FirstOrDefaultAsync(cancellationToken);
-            if (homeWorkResultLesson != null && homeWorkResultLesson.QuestionCompleted + request.Answers.Count == homeWorkResultLesson.QuestionTotal)
+            if (homeWorkResultLesson != null && request.Answers.Count == homeWorkResultLesson.QuestionTotal)
             {
-                homeWorkResult.CorrectCount = homeWorkResultLesson.QuestionCompleted > 0 ? homeWorkResultLesson.CorrectCount + correctTotal : homeWorkResult.CorrectCount + request.Answers.Count;
+                homeWorkResult.CorrectCount = correctTotal;
                 homeWorkResult.Status = EnumResultStatus.Done;
                 homeWorkResult.Percent = homeWorkResult.CorrectTotal > 0 ? ((double)homeWorkResult.CorrectCount / homeWorkResult.CorrectTotal * 100) : 0;
                 var skillScores = new SkillScores
@@ -139,11 +151,12 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd
                     Skill = homeWorkResult.HomeWork.CourseSkill,
                     CorrectCount = homeWorkResult.CorrectCount,
                     TotalCount = homeWorkResultLesson.CorrectTotal,
-                    CountQuestion = homeWorkResultLesson.QuestionCompleted + request.Answers.Count,
+                    CountQuestion = request.Answers.Count,
                     TotalQuestion = homeWorkResultLesson.QuestionTotal,
                     Percent = homeWorkResult.Percent,
                     Scores = 0
                 };
+                await _finishOneHomeWorkPublisher.Publish(homeWorkResult, cancellationToken);
                 homeWorkResult.SkillScores = new List<SkillScores> { skillScores };
             }
             else
@@ -154,11 +167,16 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd
 
             #endregion Validation
 
+            _homeWorkResultRepository.Update(homeWorkResult);
+            await _homeWorkResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+
             await _homeWorkAnswerRepository.ExecuteTransactionAsync(async () =>
             {
-                _homeWorkResultRepository.Update(homeWorkResult);
-                await _homeWorkResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
-
+                if (homeWorkAnswers.Any())
+                {
+                    _homeWorkAnswerRepository.UpdateList(homeWorkAnswers);
+                    await _homeWorkAnswerRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+                }
                 methodResult.StatusCode = StatusCodes.Status201Created;
                 methodResult.Result = true;
                 return methodResult;

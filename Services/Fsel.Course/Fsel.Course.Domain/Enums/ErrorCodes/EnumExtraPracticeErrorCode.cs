@@ -10,18 +10,13 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         ExtraPracticeInActiveState,
 
         /// <summary>
-        /// Answer Is In The Wrong Formatl
+        /// Answer Is In The Wrong Format
         /// </summary>
         AnswerIsInTheWrongFormat,
 
         /// <summary>
-        /// ExtraPracticeExercises NUll
+        /// ExtraPracticeResult Not Status Done
         /// </summary>
-        ExtraPracticeExercisesNull,
-
-        /// <summary>
-        /// Code Already Exists
-        /// </summary>
-        CodeAlreadyExists
+        ExtraPracticeResultNotStatusDone,
     }
 }
