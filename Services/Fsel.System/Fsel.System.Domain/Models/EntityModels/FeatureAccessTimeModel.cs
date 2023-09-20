@@ -7,7 +7,7 @@ namespace Fsel.System.Domain.Models.EntityModels
 
     public class FeatureAccessTimeModel : BaseModel
     {
-        public EnumFeature EnumFeature { get; set; }
+        public EnumFeature? EnumFeature { get; set; }
         public int Visit { get; set; }
         public long AccessTime { get; set; }
         public DateTime? LastVisited { get; set; }

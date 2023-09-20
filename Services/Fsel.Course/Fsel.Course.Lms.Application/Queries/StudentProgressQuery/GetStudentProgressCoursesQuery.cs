@@ -78,7 +78,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                     return methodResult;
                 }
 
-                var featureAccessTimeResults = await _systemService.GetFeatureAccessTimesByCourseIdsAsync(new FeatureAccessTimesByCourseIdsQueryModel { CourseIds = courseIds, UserId = student?.Human?.UserId ?? default });
+                var featureAccessTimeResults = await _systemService.GetFeatureAccessTimesByCourseIdsAsync(new FeatureAccessTimesQueryModel { CourseIds = courseIds, UserId = student?.Human?.UserId ?? default });
                 if (!featureAccessTimeResults.IsSuccessStatusCode)
                 {
                     methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallSystemServiceError), nameof(featureAccessTimeResults));

@@ -16,13 +16,13 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class GetStudentProgressCourseQuery : IRequest<MethodResult<CourseStudentProgressModel>>
+    public class GetStudentProgressClassForumQuery : IRequest<MethodResult<CourseStudentProgressModel>>
     {
         public Guid StudentId { get; set; }
         public Guid CourseId { get; set; }
     }
 
-    public class GetStudentManageProgressCourseQueryHandler : IRequestHandler<GetStudentProgressCourseQuery, MethodResult<CourseStudentProgressModel>>
+    public class GetStudentProgressClassForumQueryHandler : IRequestHandler<GetStudentProgressClassForumQuery, MethodResult<CourseStudentProgressModel>>
     {
         private readonly IUserService _userService;
         private readonly ICourseResultRepository _courseResultRepository;
@@ -31,7 +31,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
         private readonly ICourseRepository _courseRepository;
         private readonly ITrainingService _trainingService;
 
-        public GetStudentManageProgressCourseQueryHandler(IUserService userService, ICourseResultRepository courseResultRepository, ISystemService systemService, IOrderService orderService, ICourseRepository courseRepository, ITrainingService trainingService)
+        public GetStudentProgressClassForumQueryHandler(IUserService userService, ICourseResultRepository courseResultRepository, ISystemService systemService, IOrderService orderService, ICourseRepository courseRepository, ITrainingService trainingService)
         {
             _userService = userService;
             _courseResultRepository = courseResultRepository;
@@ -41,7 +41,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             _trainingService = trainingService;
         }
 
-        public async Task<MethodResult<CourseStudentProgressModel>> Handle(GetStudentProgressCourseQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<CourseStudentProgressModel>> Handle(GetStudentProgressClassForumQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<CourseStudentProgressModel> methodResult = new MethodResult<CourseStudentProgressModel>();
@@ -54,6 +54,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             }
 
             var student = studentResults?.Content?.Result?.FirstOrDefault();
+            var userId = student?.Human?.UserId;
             var studentId = student?.Id;
             var packageResults = await _orderService.GetPackages();
             if (!packageResults.IsSuccessStatusCode)
@@ -76,7 +77,14 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(course));
                 return methodResult;
             }
-            var featureAccessTimeResults = await _systemService.GetFeatureAccessTimesByCourseIdsAsync(new FeatureAccessTimesQueryModel { CourseIds = new List<Guid> { request.CourseId }, UserId = student?.Human?.UserId ?? default });
+            var featureAccessTimeResults = await _systemService.GetFeatureAccessTimesAsync(new FeatureAccessTimesQueryModel
+            {
+                UserId = userId ?? default,
+                FeatureAccessTimes = new List<FeatureAccessTimeQueryModel>
+                {
+                    new FeatureAccessTimeQueryModel { UserId = userId ?? default,CourseId =  course.Id }
+                }
+            });
             if (!featureAccessTimeResults.IsSuccessStatusCode)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallSystemServiceError), nameof(featureAccessTimeResults));

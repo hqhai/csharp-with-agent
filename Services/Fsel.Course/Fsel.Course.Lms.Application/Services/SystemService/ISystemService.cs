@@ -18,19 +18,10 @@ namespace Fsel.Course.Lms.Application.Services.SystemService
         [Post("/log-action")]
         Task<IApiResponse<MethodResult<IList<LogActionDaysModel>>>> GetLogActionsByUserIdsAsync([FromBody] IList<Guid> ids);
 
-        [Post("/feature-access-time/get-list")]
-        Task<IApiResponse<MethodResult<IList<FeatureAccessTimeCourseModel>>>> GetFeatureAccessTimesByLessonIdsAsync([FromBody] FeatureAccessTimesByLessonIdsQueryModel query);
+        [Post("/feature-access-time/gets")]
+        Task<IApiResponse<MethodResult<IList<FeatureAccessTimeModel>>>> GetFeatureAccessTimesAsync([FromQuery] FeatureAccessTimesQueryModel query);
 
-        [Post("/feature-access-time/get-list-by-courseIds")]
-        Task<IApiResponse<MethodResult<IList<FeatureAccessTimeModel>>>> GetFeatureAccessTimesByCourseIdsAsync([FromBody] FeatureAccessTimesByCourseIdsQueryModel query);
-
-        [Post("/feature-access-time/get-by-unit")]
-        Task<IApiResponse<MethodResult<IList<FeatureAccessTimeCourseModel>>>> GetFeatureAccessTimesByUnitIdAsync([FromQuery] FeatureAccessTimesByUnitIdQueryModel query);
-
-        [Post("/feature-access-time/get-by-test")]
-        Task<IApiResponse<MethodResult<IList<FeatureAccessTimeCourseModel>>>> GetFeatureAccessTimesByTestAsync([FromQuery] FeatureAccessTimesByTestQueryModel query);
-
-        [Post("/feature-access-time/get-by-skill-test")]
-        Task<IApiResponse<MethodResult<FeatureAccessTimeCourseModel>>> GetFeatureAccessTimesBySkillMockTestAsync([FromQuery] FeatureAccessTimesByMockTestIdQueryModel query);
+        [Post("/feature-access-time/get-detail")]
+        Task<IApiResponse<MethodResult<FeatureAccessTimeModel>>> GetFeatureAccessTimeAsync([FromQuery] FeatureAccessTimeQueryModel query);
     }
 }

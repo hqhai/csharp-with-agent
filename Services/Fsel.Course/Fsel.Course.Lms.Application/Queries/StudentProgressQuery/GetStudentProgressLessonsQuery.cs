@@ -107,8 +107,8 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             {
                 var mockTestId = unit.UnitSkillMockTests.Select(x => x.MockTestId).FirstOrDefault();
                 var mockTestResult = await _mockTestResultRepository.Queryable.Where(x => x.MockTestId == mockTestId && x.StudentId == studentId).FirstOrDefaultAsync(cancellationToken);
-                var mockTestResults = await _systemService.GetFeatureAccessTimesBySkillMockTestAsync(new FeatureAccessTimesByMockTestIdQueryModel { CourseId = request.CourseId, ObjectId = mockTestId, UnitId = request.UnitId, UserId = userId ?? default });
-                var featureAccessTimeTest = mockTestResults?.Content?.Result;
+                var featureAccessTimeResult = await _systemService.GetFeatureAccessTimeAsync(new FeatureAccessTimeQueryModel { CourseId = request.CourseId, ObjectId = mockTestId, UserId = userId ?? default, EnumFeature = EnumFeature.MockTest });
+                var featureAccessTimeTest = featureAccessTimeResult?.Content?.Result;
                 managerCourseProgress.Add(await GetMockTestManager(request, mockTestId, featureAccessTimeTest));
             }
 
@@ -140,7 +140,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             return managerUnit;
         }
 
-        private async Task<LessonStudentProgressModel> GetMockTestManager(GetStudentProgressLessonsQuery request, Guid mockTestId, FeatureAccessTimeCourseModel? featureAccessTime)
+        private async Task<LessonStudentProgressModel> GetMockTestManager(GetStudentProgressLessonsQuery request, Guid mockTestId, FeatureAccessTimeModel? featureAccessTime)
         {
             LessonStudentProgressModel managerUnit = new LessonStudentProgressModel();
             var mockTest = await _mockTestRepository.Queryable.Include(x => x.MockTestResults.Where(x => x.MockTestId == mockTestId && x.CourseId == request.CourseId && x.StudentId == request.StudentId && x.UnitId == request.UnitId))
@@ -162,7 +162,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                     if (featureAccessTime != null)
                     {
                         managerUnit.TimeSpent = featureAccessTime.AccessTime;
-                        managerUnit.LastVisited = featureAccessTime.LastVisited;
+                        managerUnit.LastVisited = featureAccessTime.LastVisited ?? default;
                     }
                 }
             }

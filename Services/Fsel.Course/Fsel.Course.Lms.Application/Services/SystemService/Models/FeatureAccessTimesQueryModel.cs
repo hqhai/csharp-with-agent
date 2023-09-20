@@ -2,12 +2,9 @@
 
 namespace Fsel.Course.Lms.Application.Services.SystemService.Models
 {
-    using System;
-
-    public class FeatureAccessTimesByUnitIdQueryModel
+    public class FeatureAccessTimesQueryModel
     {
-        public Guid CourseId { get; set; }
-        public IList<Guid>? UnitIds { get; set; }
+        public IList<FeatureAccessTimeQueryModel>? FeatureAccessTimes { get; set; }
         public Guid UserId { get; set; }
     }
 }

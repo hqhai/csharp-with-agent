@@ -89,11 +89,30 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             else
             {
                 var mockTestIds = courseUnitMockTests.Where(x => x.MockTestId != null).Select(x => x.MockTestId ?? default).ToList();
-                var mockTestResults = await _systemService.GetFeatureAccessTimesByTestAsync(new FeatureAccessTimesByTestQueryModel { CourseId = request.CourseId, EnumFeature = EnumFeature.MockTest, ObjectIds = mockTestIds, UserId = userId ?? default });
+                var mockTestResults = await _systemService.GetFeatureAccessTimesAsync(new FeatureAccessTimesQueryModel
+                {
+                    UserId = userId ?? default,
+                    FeatureAccessTimes = mockTestIds.Select(x => new FeatureAccessTimeQueryModel
+                    {
+                        UserId = userId ?? default,
+                        ObjectId = x,
+                        EnumFeature = EnumFeature.MockTest,
+                        CourseId = course.Id
+                    }).ToList(),
+                });
                 featureAccessTimeTest = mockTestResults?.Content?.Result?.ToList();
             }
             var unitIds = courseUnitMockTests.Where(x => x.UnitId != null).Select(x => x.UnitId ?? default).ToList();
-            var unitResults = await _systemService.GetFeatureAccessTimesByUnitIdAsync(new FeatureAccessTimesByUnitIdQueryModel { CourseId = request.CourseId, UnitIds = unitIds, UserId = userId ?? default });
+            var unitResults = await _systemService.GetFeatureAccessTimesAsync(new FeatureAccessTimesQueryModel
+            {
+                UserId = userId ?? default,
+                FeatureAccessTimes = unitIds.Select(x => new FeatureAccessTimeQueryModel
+                {
+                    UserId = userId ?? default,
+                    UnitId = x,
+                    CourseId = course.Id
+                }).ToList(),
+            });
             var featureAccessTimeUnit = unitResults?.Content?.Result;
             foreach (var courseUnit in courseUnitMockTests)
             {
@@ -119,7 +138,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             return methodResult;
         }
 
-        private async Task<UnitStudentProgressModel> GetUnitManager(CourseUnitMockTest courseUnitMockTest, Guid? studentId, IList<FeatureAccessTimeCourseModel>? featureAccessTimeResults)
+        private async Task<UnitStudentProgressModel> GetUnitManager(CourseUnitMockTest courseUnitMockTest, Guid? studentId, IList<FeatureAccessTimeModel>? featureAccessTimeResults)
         {
             UnitStudentProgressModel managerUnit = new UnitStudentProgressModel();
             var unitId = courseUnitMockTest.UnitId;
@@ -156,7 +175,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             return managerUnit;
         }
 
-        private async Task<UnitStudentProgressModel> GetMockTestManager(CourseUnitMockTest courseUnitMockTest, Guid? studentId, IList<FeatureAccessTimeCourseModel>? featureAccessTimeResults)
+        private async Task<UnitStudentProgressModel> GetMockTestManager(CourseUnitMockTest courseUnitMockTest, Guid? studentId, IList<FeatureAccessTimeModel>? featureAccessTimeResults)
         {
             UnitStudentProgressModel managerUnit = new UnitStudentProgressModel();
             var mockTest = await _mockTestRepository.Queryable.Include(x => x.MockTestResults.Where(x => x.MockTestId == courseUnitMockTest.MockTestId && x.CourseId == courseUnitMockTest.CourseId && x.StudentId == studentId))
@@ -187,7 +206,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             return managerUnit;
         }
 
-        private async Task<UnitStudentProgressModel> GetFinalTestManager(CourseUnitMockTest courseUnitMockTest, Guid? studentId, IList<FeatureAccessTimeCourseModel>? featureAccessTimeResults)
+        private async Task<UnitStudentProgressModel> GetFinalTestManager(CourseUnitMockTest courseUnitMockTest, Guid? studentId, IList<FeatureAccessTimeModel>? featureAccessTimeResults)
         {
             UnitStudentProgressModel managerUnit = new UnitStudentProgressModel();
             var finalTest = await _finalTestRepository.Queryable.Include(x => x.FinalTestResults.Where(x => x.FinalTestId == courseUnitMockTest.FinalTestId && x.CourseId == courseUnitMockTest.CourseId && x.StudentId == studentId))
@@ -211,7 +230,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                     if (featureAccessTime != null)
                     {
                         managerUnit.TimeSpent = featureAccessTime.AccessTime;
-                        managerUnit.LastVisited = featureAccessTime.LastVisited;
+                        managerUnit.LastVisited = featureAccessTime.LastVisited ?? default;
                     }
                 }
             }

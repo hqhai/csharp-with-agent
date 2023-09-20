@@ -26,60 +26,24 @@ namespace Fsel.System.Api.Controllers
         }
 
         /// <summary>
-        /// Get List Feature Access Time
+        /// Get Feature Access Time Detail
         /// </summary>
-        [HttpPost("get-list")]
-        [ProducesResponseType(typeof(MethodResult<IList<FeatureAccessTimeModel>>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> Gets([FromBody] GetFeatureAccessTimesByLessonIdsQuery query)
-        {
-            var queryResult = await _mediator.Send(query).ConfigureAwait(false);
-            return queryResult.GetActionResult();
-        }
-
-        /// <summary>
-        /// Get Feature Access Time By Unit
-        /// </summary>
-        [HttpPost("get-by-unit")]
-        [ProducesResponseType(typeof(MethodResult<IList<FeatureAccessTimeModel>>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetByUnit([FromBody] GetFeatureAccessTimesByUnitIdQuery query)
-        {
-            var queryResult = await _mediator.Send(query).ConfigureAwait(false);
-            return queryResult.GetActionResult();
-        }
-
-        /// <summary>
-        /// Get Feature Access Time By Test
-        /// </summary>
-        [HttpPost("get-by-test")]
-        [ProducesResponseType(typeof(MethodResult<FeatureAccessTimeCourseModel>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetByTest([FromBody] GetFeatureAccessTimesByTestQuery query)
-        {
-            var queryResult = await _mediator.Send(query).ConfigureAwait(false);
-            return queryResult.GetActionResult();
-        }
-
-        /// <summary>
-        /// Get Feature Access Time By Skill MockTest
-        /// </summary>
-        [HttpPost("get-by-skill-test")]
+        [HttpPost("get-detail")]
         [ProducesResponseType(typeof(MethodResult<FeatureAccessTimeModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetBySkillMockTest([FromBody] GetFeatureAccessTimesByMockTestIdQuery query)
+        public async Task<IActionResult> GetDetail([FromBody] GetFeatureAccessTimeQuery query)
         {
             var queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
 
         /// <summary>
-        /// Get List Feature Access Time By CourseIds
+        /// Get Feature Access Times
         /// </summary>
-        [HttpPost("get-list-by-courseIds")]
-        [ProducesResponseType(typeof(MethodResult<IList<FeatureAccessTimeCourseModel>>), (int)HttpStatusCode.OK)]
+        [HttpPost("gets")]
+        [ProducesResponseType(typeof(MethodResult<IList<FeatureAccessTimeModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> Gets([FromBody] GetFeatureAccessTimesByCourseIdsQuery query)
+        public async Task<IActionResult> Gets([FromBody] GetFeatureAccessTimesQuery query)
         {
             var queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
