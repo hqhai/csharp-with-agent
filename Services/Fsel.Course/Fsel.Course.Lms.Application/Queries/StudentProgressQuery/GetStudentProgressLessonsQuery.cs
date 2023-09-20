@@ -84,7 +84,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                 return methodResult;
             }
             var lessonIds = unit.UnitLessons.OrderBy(x => x.CreatedDate).Select(x => x.LessonId).ToList();
-            var featureAccessTimeResults = await _systemService.GetFeatureAccessTimesByLessonIdsAsync(new FeatureAccessTimesByLessonIdsQueryModel { CourseId = request.CourseId, UnitId = request.UnitId, LessonIds = lessonIds, UserId = userId ?? default });
+            var featureAccessTimeResults = await _systemService.get(new FeatureAccessTimesByLessonIdsQueryModel { CourseId = request.CourseId, UnitId = request.UnitId, LessonIds = lessonIds, UserId = userId ?? default });
             if (!featureAccessTimeResults.IsSuccessStatusCode)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallSystemServiceError), nameof(featureAccessTimeResults));

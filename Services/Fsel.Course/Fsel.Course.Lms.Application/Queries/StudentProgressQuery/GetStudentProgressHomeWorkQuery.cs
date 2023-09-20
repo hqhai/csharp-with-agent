@@ -81,7 +81,9 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             {
                 UserId = userId ?? default,
                 FeatureAccessTimes = new List<FeatureAccessTimeQueryModel>
-            { new FeatureAccessTimeQueryModel { UserId = userId ?? default,CourseId =  course.Id } }
+                {
+                    new FeatureAccessTimeQueryModel { UserId = userId ?? default,CourseId =  course.Id }
+                }
             });
             if (!featureAccessTimeResults.IsSuccessStatusCode)
             {
