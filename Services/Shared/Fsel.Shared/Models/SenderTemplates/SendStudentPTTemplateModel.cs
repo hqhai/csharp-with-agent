@@ -6,7 +6,7 @@ namespace Fsel.Shared.Models.SenderTemplates
 
     public class SendStudentPTTemplateModel
     {
-        public EnumCourseLevel CourseLevel { get; set; }
+        public EnumPlacementTestLevel CourseLevel { get; set; }
 
         public string? StudentName { get; set; }
 

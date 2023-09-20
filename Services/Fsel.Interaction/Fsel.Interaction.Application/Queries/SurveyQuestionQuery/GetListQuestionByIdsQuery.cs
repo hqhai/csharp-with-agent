@@ -16,7 +16,7 @@ namespace Fsel.Interaction.Application.Queries.SurveyQuestionQuery
 
     public class GetListQuestionByIdsQuery : IRequest<MethodResult<IList<SurveyQuestionModel>>>
     {
-        public IList<Guid>? QuestionIds { get; set; }
+        public IList<Guid> QuestionIds { get; set; } = new List<Guid>();
     }
 
     public class GetListQuestionByIdsQueryHandler : IRequestHandler<GetListQuestionByIdsQuery, MethodResult<IList<SurveyQuestionModel>>>

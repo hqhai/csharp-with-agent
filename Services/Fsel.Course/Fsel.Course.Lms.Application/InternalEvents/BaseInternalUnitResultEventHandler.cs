@@ -15,7 +15,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
         {
         }
 
-        public async Task UpdateUnit(IList<Guid>? lessonResultIds, Unit? unit, Guid courseId, Guid studentId, CancellationToken cancellationToken)
+        public async Task UpdateUnit(IList<Guid>? lessonResultIds, Unit? unit, Guid courseId, Guid studentId, bool isDone, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(lessonResultIds);
             ArgumentNullException.ThrowIfNull(unit);
@@ -25,7 +25,10 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 var (groupedSkillScores, percent) = await GetUnitSkillScores(lessonResultIds);
                 unitResult.CorrectCount = (int)groupedSkillScores.Sum(x => x.CorrectCount);
                 unitResult.CorrectTotal = (int)groupedSkillScores.Sum(x => x.TotalCount);
-                unitResult.Status = EnumResultStatus.Done;
+                if (isDone)
+                {
+                    unitResult.Status = EnumResultStatus.Done;
+                }
                 unitResult.Percent = percent;
                 unitResult.SkillScores = groupedSkillScores;
                 await _finishOneUnitPublisher.Publish(unitResult, cancellationToken);

@@ -4,6 +4,7 @@ using Fsel.Interaction.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fsel.Interaction.Infrastructure.Migrations
 {
     [DbContext(typeof(InteractionDbContext))]
-    partial class InteractionDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230918082024_UpdateSurveyQuestionTableV4")]
+    partial class UpdateSurveyQuestionTableV4
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -102,7 +105,8 @@ namespace Fsel.Interaction.Infrastructure.Migrations
 
                     b.Property<string>("AnswerStr")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
 
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2")
@@ -451,8 +455,8 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                         .HasColumnOrder(0);
 
                     b.Property<string>("Content")
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
 
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2")
@@ -967,12 +971,12 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                             CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            Description = "Chọn Quận/Huyện",
+                            Description = "addd",
                             DisplayLevel = 1,
                             DisplayOrder = 1.2f,
                             IsDeleted = false,
                             IsPilot = true,
-                            Question = "Bạn sống ở đâu",
+                            Question = "Bạn Sống ở đâu",
                             Type = "DropDown"
                         },
                         new
@@ -982,7 +986,7 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                             CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            Description = "+84",
+                            Description = "addd",
                             DisplayLevel = 1,
                             DisplayOrder = 2f,
                             IsDeleted = false,
@@ -997,7 +1001,7 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                             CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            Description = "Họ tên",
+                            Description = "addd",
                             DisplayLevel = 1,
                             DisplayOrder = 3.1f,
                             IsDeleted = false,
@@ -1012,7 +1016,7 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                             CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            Description = "Tuổi",
+                            Description = "addd",
                             DisplayLevel = 1,
                             DisplayOrder = 3.2f,
                             IsDeleted = false,
@@ -1027,7 +1031,7 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                             CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            Description = "Giới tính",
+                            Description = "addd",
                             DisplayLevel = 1,
                             DisplayOrder = 3.3f,
                             IsDeleted = false,
@@ -1042,7 +1046,7 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                             CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            Description = "Câu trả lời của bạn",
+                            Description = "addd",
                             DisplayLevel = 2,
                             DisplayOrder = 4f,
                             IsDeleted = false,
@@ -1057,7 +1061,7 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                             CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            Description = "Câu trả lời của bạn",
+                            Description = "addd",
                             DisplayLevel = 2,
                             DisplayOrder = 4f,
                             IsDeleted = false,
@@ -1072,7 +1076,7 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                             CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            Description = "Câu trả lời của bạn",
+                            Description = "addd",
                             DisplayLevel = 2,
                             DisplayOrder = 5f,
                             IsDeleted = false,
@@ -1087,7 +1091,7 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                             CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            Description = "Câu trả lời của bạn",
+                            Description = "addd",
                             DisplayLevel = 2,
                             DisplayOrder = 6f,
                             IsDeleted = false,
@@ -1102,7 +1106,7 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                             CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            Description = "Câu trả lời của bạn",
+                            Description = "addd",
                             DisplayLevel = 2,
                             DisplayOrder = 7f,
                             IsDeleted = false,
@@ -1117,7 +1121,7 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                             CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            Description = "Câu trả lời của bạn",
+                            Description = "addd",
                             DisplayLevel = 2,
                             DisplayOrder = 8f,
                             IsDeleted = false,
@@ -1132,7 +1136,7 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                             CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            Description = "Câu trả lời của bạn",
+                            Description = "addd",
                             DisplayLevel = 2,
                             DisplayOrder = 9f,
                             IsDeleted = false,
@@ -1147,7 +1151,7 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                             CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            Description = "Câu trả lời của bạn",
+                            Description = "addd",
                             DisplayLevel = 2,
                             DisplayOrder = 9f,
                             IsDeleted = false,
@@ -1162,7 +1166,7 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                             CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            Description = "Câu trả lời của bạn",
+                            Description = "addd",
                             DisplayLevel = 2,
                             DisplayOrder = 10f,
                             IsDeleted = false,
@@ -1177,7 +1181,7 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                             CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            Description = "Câu trả lời của bạn",
+                            Description = "addd",
                             DisplayLevel = 2,
                             DisplayOrder = 11f,
                             IsDeleted = false,
@@ -1192,7 +1196,7 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                             CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            Description = "Câu trả lời của bạn",
+                            Description = "addd",
                             DisplayLevel = 2,
                             DisplayOrder = 12f,
                             IsDeleted = false,
@@ -1207,7 +1211,7 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                             CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            Description = "Câu trả lời của bạn",
+                            Description = "addd",
                             DisplayLevel = 2,
                             DisplayOrder = 13f,
                             IsDeleted = false,
