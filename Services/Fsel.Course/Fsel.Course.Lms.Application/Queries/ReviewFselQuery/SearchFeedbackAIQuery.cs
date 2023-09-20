@@ -90,7 +90,9 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
                                     CourseName = grouped.First().CourseName,
                                     Code = grouped.First().Code,
                                     NumberOfStarts = Math.Round(grouped.Select(x => x.NumberOfStarts).Average(), 0),
-                                    TotalRating = grouped.Select(x => x.NumberOfStarts).Where(x => x <= 2).Count()
+                                    TotalRating = grouped.Select(x => x.NumberOfStarts).Where(x => x <= 2).Count(),
+                                    UnitDisplayOrder = grouped.Select(x => x.UnitDisplayOrder).FirstOrDefault(),
+                                    LessonDisplayOrder = grouped.Select(x => x.LessonDisplayOrder).FirstOrDefault(),
                                 });
             if (!string.IsNullOrEmpty(request.Keyword))
             {
