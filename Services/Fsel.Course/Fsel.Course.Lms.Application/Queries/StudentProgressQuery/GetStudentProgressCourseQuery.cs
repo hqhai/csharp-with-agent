@@ -55,6 +55,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
 
             var student = studentResults?.Content?.Result?.FirstOrDefault();
             var studentId = student?.Id;
+            var userId = student?.Human?.UserId;
             var packageResults = await _orderService.GetPackages();
             if (!packageResults.IsSuccessStatusCode)
             {
@@ -76,7 +77,17 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(course));
                 return methodResult;
             }
-            var featureAccessTimeResults = await _systemService.GetFeatureAccessTimesByCourseIdsAsync(new FeatureAccessTimesQueryModel { CourseIds = new List<Guid> { request.CourseId }, UserId = student?.Human?.UserId ?? default });
+            var featureAccessTimeResults = await _systemService.GetFeatureAccessTimesAsync(new FeatureAccessTimesQueryModel
+            {
+                FeatureAccessTimes = new List<FeatureAccessTimeQueryModel>
+                {
+                    new FeatureAccessTimeQueryModel
+                    {
+                        CourseId = request.CourseId,
+                        UserId = userId ?? default
+                    },
+                }
+            });
             if (!featureAccessTimeResults.IsSuccessStatusCode)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallSystemServiceError), nameof(featureAccessTimeResults));

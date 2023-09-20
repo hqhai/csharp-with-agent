@@ -84,7 +84,17 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                 return methodResult;
             }
             var lessonIds = unit.UnitLessons.OrderBy(x => x.CreatedDate).Select(x => x.LessonId).ToList();
-            var featureAccessTimeResults = await _systemService.get(new FeatureAccessTimesByLessonIdsQueryModel { CourseId = request.CourseId, UnitId = request.UnitId, LessonIds = lessonIds, UserId = userId ?? default });
+            var featureAccessTimeResults = await _systemService.GetFeatureAccessTimesAsync(new FeatureAccessTimesQueryModel
+            {
+                FeatureAccessTimes = lessonIds.Select(x => new FeatureAccessTimeQueryModel
+                {
+                    CourseId = request.CourseId,
+                    UnitId = request.UnitId,
+                    LessonId = x,
+                    UserId = userId ?? default
+                }).ToList(),
+                UserId = userId ?? default
+            });
             if (!featureAccessTimeResults.IsSuccessStatusCode)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallSystemServiceError), nameof(featureAccessTimeResults));
@@ -98,7 +108,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                 if (featureAccessTime != null)
                 {
                     managerUnit.TimeSpent = featureAccessTime.AccessTime;
-                    managerUnit.LastVisited = featureAccessTime.LastVisited;
+                    managerUnit.LastVisited = featureAccessTime.LastVisited ?? default;
                     managerUnit.Visit = featureAccessTime.Visit;
                 }
                 managerCourseProgress.Add(managerUnit);

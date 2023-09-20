@@ -133,11 +133,52 @@ namespace Fsel.Course.Infrastructure.Repositories
             return (displayOrderUnit, displayOrderLesson);
         }
 
+        //public async Task<(int, int)> GetContentComplete(CourseResultModel courseResult)
+        //{
+        //    ArgumentNullException.ThrowIfNull(courseResult);
+        //    var counts = new List<int>();
+        //    var countTests = new List<(int, int)>();
+        //    var lessonResults = await _lessonResultRepository.GetByCourseResult(courseResult);
+        //    if (lessonResults != null && lessonResults.Any())
+        //    {
+        //        var lessonResultIds = lessonResults.Select(x => x.Id).ToList();
+        //        counts.Add(lessonResults.Select(x => x.VideoResult).Where(x => x != null && x.Status == EnumResultStatus.Done && lessonResultIds.Contains(x.LessonResultId)).Count());
+        //        counts.Add(lessonResults.SelectMany(x => x.ClassForumResults).Where(x => x != null && x.Status == EnumClassForumResultStatus.Graded && lessonResultIds.Contains(x.LessonResultId)).Count());
+        //        counts.Add(lessonResults.SelectMany(x => x.HomeWorkResults).Where(x => x != null && x.Status == EnumResultStatus.Done && lessonResultIds.Contains(x.LessonResultId)).GroupBy(x => x.LessonResultId).Count());
+        //    }
+        //    if (courseResult.CourseType == EnumCourseType.Academic)
+        //    {
+        //        var finalTestResult = await _finalTestResultRepository.Queryable.Where(x => x.StudentId == courseResult.StudentId && x.CourseId == courseResult.CourseId).FirstOrDefaultAsync();
+        //        countTests.Add((finalTestResult?.Status == EnumResultStatus.Done ? 1 : 0, 1));
+        //    }
+        //    else
+        //    {
+        //        var mockTestResults = await _mockTestResultRepository.Queryable.Where(x => x.StudentId == courseResult.StudentId && x.CourseId == courseResult.CourseId).ToListAsync();
+        //        countTests.Add((mockTestResults.Where(x => x.Status == EnumResultStatus.Done).Count(), mockTestResults?.Count ?? default));
+        //    }
+        //    return (counts.Sum() + countTests.Sum(x => x.Item1), (lessonResults?.Count ?? default) * 3 + countTests.Sum(x => x.Item2));
+        //}
+
         public async Task<(int, int)> GetContentComplete(CourseResultModel courseResult)
         {
             ArgumentNullException.ThrowIfNull(courseResult);
+            var lessonIds = new List<Guid>();
             var counts = new List<int>();
             var countTests = new List<(int, int)>();
+            var course = await Queryable.Include(x => x.CourseUnitMockTests).Where(x => x.Id == courseResult.CourseId).FirstOrDefaultAsync();
+            var unitIds = course?.CourseUnitMockTests.Where(x => x.UnitId != null).Select(x => x.UnitId ?? default).ToList();
+            if (unitIds != null && unitIds.Any())
+            {
+                var units = await _unitRepository.Queryable.Include(x => x.UnitSkillMockTests).Include(x => x.UnitLessons).Where(x => unitIds.Contains(x.Id)).ToListAsync();
+                if (units != null && units.Any())
+                {
+                    lessonIds = units.SelectMany(x => x.UnitLessons).Select(x => x.LessonId).ToList();
+                    var mockTestIds = units.SelectMany(x => x.UnitSkillMockTests).Select(x => x.MockTestId).ToList();
+                    var mockTestResults = await _mockTestResultRepository.Queryable.Where(x => x.StudentId == courseResult.StudentId && x.UnitId != null && x.CourseId == courseResult.CourseId).ToListAsync();
+                    countTests.Add((mockTestResults.Where(x => x.Status == EnumResultStatus.Done).Count(), mockTestIds?.Count ?? default));
+                }
+            }
+
             var lessonResults = await _lessonResultRepository.GetByCourseResult(courseResult);
             if (lessonResults != null && lessonResults.Any())
             {
@@ -153,10 +194,10 @@ namespace Fsel.Course.Infrastructure.Repositories
             }
             else
             {
-                var mockTestResults = await _mockTestResultRepository.Queryable.Where(x => x.StudentId == courseResult.StudentId && x.CourseId == courseResult.CourseId).ToListAsync();
+                var mockTestResults = await _mockTestResultRepository.Queryable.Where(x => x.StudentId == courseResult.StudentId && x.UnitId == null && x.CourseId == courseResult.CourseId).ToListAsync();
                 countTests.Add((mockTestResults.Where(x => x.Status == EnumResultStatus.Done).Count(), mockTestResults?.Count ?? default));
             }
-            return (counts.Sum() + countTests.Sum(x => x.Item1), (lessonResults?.Count ?? default) * 3 + countTests.Sum(x => x.Item2));
+            return (counts.Sum() + countTests.Sum(x => x.Item1), (lessonIds?.Count ?? default) * 3 + countTests.Sum(x => x.Item2));
         }
     }
 }

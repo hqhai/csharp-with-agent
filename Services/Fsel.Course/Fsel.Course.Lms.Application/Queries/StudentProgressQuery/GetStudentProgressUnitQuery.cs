@@ -72,8 +72,8 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                 var lessonIds = unit.UnitLessons.Select(x => x.LessonId).ToList();
                 var mockTestId = unit.UnitSkillMockTests.Any() ? unit.UnitSkillMockTests.FirstOrDefault()?.Id : null;
                 var (currentProgress, progress) = await GetContentComplete(lessonIds, request, mockTestId);
-                var featureAccessTimeResults = await _systemService.GetFeatureAccessTimesByUnitIdAsync(new FeatureAccessTimesByUnitIdQueryModel { CourseId = request.CourseId, UnitIds = new List<Guid> { request.UnitId }, UserId = userId ?? default });
-                var featureAccessTimes = featureAccessTimeResults?.Content?.Result;
+                var featureAccessTimeResult = await _systemService.GetFeatureAccessTimeAsync(new FeatureAccessTimeQueryModel { CourseId = request.CourseId, UnitId = request.UnitId, UserId = userId ?? default });
+                var featureAccessTime = featureAccessTimeResult?.Content?.Result;
                 var unitResult = unit.UnitResults.FirstOrDefault(x => x.StudentId == studentId && x.UnitId == unit.Id && x.CourseId == request.CourseId);
                 managerCourseProgress.Type = nameof(unitResult.Unit);
                 managerCourseProgress.ObjectId = unit.Id;
@@ -87,10 +87,10 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
 
                 managerCourseProgress.ContentProgress = string.Format("{0} / {1}", currentProgress, progress);
                 managerCourseProgress.TotalLesson = lessonIds.Count;
-                if (featureAccessTimes != null && featureAccessTimes.Any())
+                if (featureAccessTime != null)
                 {
-                    managerCourseProgress.TimeSpent = featureAccessTimes.FirstOrDefault()!.AccessTime;
-                    managerCourseProgress.LastVisited = featureAccessTimes.FirstOrDefault()!.LastVisited;
+                    managerCourseProgress.TimeSpent = featureAccessTime.AccessTime;
+                    managerCourseProgress.LastVisited = featureAccessTime.LastVisited ?? default;
                 }
             }
             methodResult.Result = managerCourseProgress;

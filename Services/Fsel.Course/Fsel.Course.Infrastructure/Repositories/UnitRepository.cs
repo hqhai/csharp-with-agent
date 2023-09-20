@@ -39,12 +39,7 @@ namespace Fsel.Course.Infrastructure.Repositories
             {
                 return null;
             }
-            return await Queryable.Include(x => x.UnitResults.Where(x => x.StudentId == studentId && ids.Contains(x.UnitId)))
-                                                    .Include(x => x.UnitLessons)
-                                                        .ThenInclude(x => x.Lesson)
-                                                    .Include(x => x.LessonResults.Where(x => x.StudentId == studentId && ids.Contains(x.UnitId)))
-                                                    .Where(x => ids.Contains(x.Id))
-                                                    .ToListAsync();
+            return await Queryable.Include(x => x.UnitSkillMockTests).Include(x => x.UnitLessons).Where(x => ids.Contains(x.Id)).ToListAsync();
         }
 
         public async Task<bool> IsUnitUsed(Guid id)

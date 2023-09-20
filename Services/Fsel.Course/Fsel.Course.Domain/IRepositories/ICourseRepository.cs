@@ -2,7 +2,6 @@
 
 using Fsel.Core.Base.Interfaces;
 using Fsel.Course.Domain.Models.EntityModels;
-using Fsel.Shared.Enums;
 using EntityCourse = Fsel.Course.Domain.Entities.Course;
 
 namespace Fsel.Course.Domain.IRepositories

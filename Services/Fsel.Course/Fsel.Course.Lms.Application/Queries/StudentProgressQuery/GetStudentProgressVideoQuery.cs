@@ -3,49 +3,48 @@
 namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
 {
     using Fsel.Common.ActionResults;
-    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
-    using Fsel.Course.Lms.Application.Services.OrderServices;
+    using Fsel.Course.Infrastructure.Common;
     using Fsel.Course.Lms.Application.Services.SystemService;
     using Fsel.Course.Lms.Application.Services.SystemService.Models;
-    using Fsel.Course.Lms.Application.Services.TrainingServices;
     using Fsel.Course.Lms.Application.Services.UserServices;
+    using Fsel.Shared.Enums;
     using Fsel.Shared.Enums.ErrorCodes;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class GetStudentProgressCourseQuery : IRequest<MethodResult<CourseStudentProgressModel>>
+    public class GetStudentProgressVideoQuery : IRequest<MethodResult<VideoStudentProgressModel>>
     {
         public Guid StudentId { get; set; }
+        public Guid UnitId { get; set; }
         public Guid CourseId { get; set; }
+        public Guid LessonId { get; set; }
     }
 
-    public class GetStudentManageProgressCourseQueryHandler : IRequestHandler<GetStudentProgressCourseQuery, MethodResult<CourseStudentProgressModel>>
+    public class GetStudentProgressVideoQueryHandler : IRequestHandler<GetStudentProgressVideoQuery, MethodResult<VideoStudentProgressModel>>
     {
         private readonly IUserService _userService;
-        private readonly ICourseResultRepository _courseResultRepository;
         private readonly ISystemService _systemService;
-        private readonly IOrderService _orderService;
-        private readonly ICourseRepository _courseRepository;
-        private readonly ITrainingService _trainingService;
+        private readonly IVideoResultRepository _videoResultRepository;
+        private readonly ILessonResultRepository _lessonResultRepository;
+        private readonly VideoConverter _videoConverter;
 
-        public GetStudentManageProgressCourseQueryHandler(IUserService userService, ICourseResultRepository courseResultRepository, ISystemService systemService, IOrderService orderService, ICourseRepository courseRepository, ITrainingService trainingService)
+        public GetStudentProgressVideoQueryHandler(IUserService userService, ISystemService systemService, IVideoResultRepository videoResultRepository, ILessonResultRepository lessonResultRepository, VideoConverter videoConverter)
         {
             _userService = userService;
-            _courseResultRepository = courseResultRepository;
             _systemService = systemService;
-            _orderService = orderService;
-            _courseRepository = courseRepository;
-            _trainingService = trainingService;
+            _videoResultRepository = videoResultRepository;
+            _lessonResultRepository = lessonResultRepository;
+            _videoConverter = videoConverter;
         }
 
-        public async Task<MethodResult<CourseStudentProgressModel>> Handle(GetStudentProgressCourseQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<VideoStudentProgressModel>> Handle(GetStudentProgressVideoQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            MethodResult<CourseStudentProgressModel> methodResult = new MethodResult<CourseStudentProgressModel>();
-            CourseStudentProgressModel managerCourseProgress = new CourseStudentProgressModel();
+            MethodResult<VideoStudentProgressModel> methodResult = new MethodResult<VideoStudentProgressModel>();
+            VideoStudentProgressModel videoStudentProgress = new VideoStudentProgressModel();
             var studentResults = await _userService.GetStudentsByStudentIdsAsync(new List<Guid> { request.StudentId });
             if (!studentResults.IsSuccessStatusCode)
             {
@@ -54,67 +53,54 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             }
 
             var student = studentResults?.Content?.Result?.FirstOrDefault();
-            var studentId = student?.Id;
-            var packageResults = await _orderService.GetPackages();
-            if (!packageResults.IsSuccessStatusCode)
+            var userId = student?.Human?.UserId ?? default;
+            var lessonResult = await _lessonResultRepository.Queryable.FirstOrDefaultAsync(x => x.UnitId == request.UnitId && x.CourseId == request.CourseId && x.LessonId == request.LessonId && x.StudentId == request.StudentId, cancellationToken);
+            if (lessonResult == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallOrderServiceError), nameof(packageResults));
+                methodResult.Result = null;
+                methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
             }
-            var packages = packageResults.Content?.Result;
-            var @classResults = await _trainingService.GetListClassByStudentIdAsync(student?.Id ?? default);
-            if (!@classResults.IsSuccessStatusCode)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallTrainingServiceError), nameof(@classResults));
-                return methodResult;
-            }
-            var @classes = @classResults.Content?.Result;
 
-            var course = await _courseRepository.GetByIdAsync(request.CourseId);
-            if (course == null)
+            var videoResult = await _videoResultRepository.Queryable.Include(x => x.Video).FirstOrDefaultAsync(x => x.LessonResultId == lessonResult.Id && x.StudentId == request.StudentId, cancellationToken);
+            if (videoResult == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(course));
+                methodResult.Result = null;
+                methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
             }
-            var featureAccessTimeResults = await _systemService.GetFeatureAccessTimesByCourseIdsAsync(new FeatureAccessTimesQueryModel { CourseIds = new List<Guid> { request.CourseId }, UserId = student?.Human?.UserId ?? default });
-            if (!featureAccessTimeResults.IsSuccessStatusCode)
+            var featureAccessTimeResult = await _systemService.GetFeatureAccessTimeAsync(new FeatureAccessTimeQueryModel
             {
-                methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallSystemServiceError), nameof(featureAccessTimeResults));
+                UserId = userId,
+                UnitId = request.UnitId,
+                LessonId = request.LessonId,
+                CourseId = request.CourseId,
+                EnumFeature = EnumFeature.VideoLesson,
+                ObjectId = videoResult.Id
+            });
+            if (!featureAccessTimeResult.IsSuccessStatusCode)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallSystemServiceError), nameof(featureAccessTimeResult));
                 return methodResult;
             }
-            var featureAccessTimes = featureAccessTimeResults.Content?.Result;
-            var featureAccessTime = featureAccessTimes?.FirstOrDefault();
-            var @class = @classes?.FirstOrDefault(x => x.CourseId == course.Id);
-            var courseResult = await _courseResultRepository.Queryable.Include(x => x.Course).FirstOrDefaultAsync(x => x.StudentId == studentId && x.CourseId == course.Id, cancellationToken);
-            if (courseResult != null)
+            var featureAccessTime = featureAccessTimeResult.Content?.Result;
+            videoStudentProgress.Name = videoResult.Video?.Name;
+            videoStudentProgress.Status = videoResult.Status;
+            var method = await _videoConverter.GetVideoResultDone(videoResult, cancellationToken).ConfigureAwait(false);
+            if (!method.IsOK)
             {
-                var courseResultModel = new CourseResultModel
-                {
-                    CourseType = courseResult.Course?.CourseType,
-                    CourseId = courseResult.CourseId,
-                    StudentId = courseResult.StudentId
-                };
-                var (currentProgress, progress) = await _courseRepository.GetContentComplete(courseResultModel);
-                managerCourseProgress.ContentCompleted = string.Format("{0} / {1}", currentProgress, progress);
+                methodResult.AddErrorBadRequest(method.ErrorMessages);
+                return methodResult;
             }
-            managerCourseProgress.CourseName = course.Code;
-            managerCourseProgress.CourseId = course.Id;
+            videoStudentProgress.VideoSkillScores = videoResult.VideoSkillScores;
             if (featureAccessTime != null)
             {
-                managerCourseProgress.Visit = featureAccessTime.Visit;
-                managerCourseProgress.TimeSpent = featureAccessTime.AccessTime;
+                videoStudentProgress.Visit = featureAccessTime.Visit;
+                videoStudentProgress.LastVisited = featureAccessTime.LastVisited ?? default;
+                videoStudentProgress.TimeSpent = featureAccessTime.AccessTime;
             }
-            if (@class != null)
-            {
-                var package = packages?.FirstOrDefault(x => x.Id == @class.PackageId);
-                managerCourseProgress.ClassId = @class.Id;
-                managerCourseProgress.CodeClass = @class.Code;
-                managerCourseProgress.StartDate = @class.TimeStart;
-                managerCourseProgress.EndDate = @class.TimeEnd;
-                managerCourseProgress.PackageId = @class.PackageId;
-                managerCourseProgress.PackageCode = package?.Code ?? default;
-            }
-            methodResult.Result = managerCourseProgress;
+
+            methodResult.Result = videoStudentProgress;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }

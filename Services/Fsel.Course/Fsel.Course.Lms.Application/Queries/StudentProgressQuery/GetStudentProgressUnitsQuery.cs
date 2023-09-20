@@ -79,11 +79,21 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                 return methodResult;
             }
 
-            var featureAccessTimeTest = new List<FeatureAccessTimeCourseModel>();
+            var featureAccessTimeTest = new List<FeatureAccessTimeModel>();
             if (course.CourseType == EnumCourseType.Academic)
             {
                 var finalTestIds = courseUnitMockTests.Where(x => x.FinalTestId != null).Select(x => x.FinalTestId ?? default).ToList();
-                var finalTestResults = await _systemService.GetFeatureAccessTimesByTestAsync(new FeatureAccessTimesByTestQueryModel { CourseId = request.CourseId, EnumFeature = EnumFeature.FinalTest, ObjectIds = finalTestIds, UserId = userId ?? default });
+                var finalTestResults = await _systemService.GetFeatureAccessTimesAsync(new FeatureAccessTimesQueryModel
+                {
+                    UserId = userId ?? default,
+                    FeatureAccessTimes = finalTestIds.Select(x => new FeatureAccessTimeQueryModel
+                    {
+                        UserId = userId ?? default,
+                        ObjectId = x,
+                        EnumFeature = EnumFeature.MockTest,
+                        CourseId = course.Id
+                    }).ToList(),
+                });
                 featureAccessTimeTest = finalTestResults?.Content?.Result?.ToList();
             }
             else
@@ -169,7 +179,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                 if (featureAccessTime != null)
                 {
                     managerUnit.TimeSpent = featureAccessTime.AccessTime;
-                    managerUnit.LastVisited = featureAccessTime.LastVisited;
+                    managerUnit.LastVisited = featureAccessTime.LastVisited ?? default;
                 }
             }
             return managerUnit;
@@ -199,7 +209,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                     if (featureAccessTime != null)
                     {
                         managerUnit.TimeSpent = featureAccessTime.AccessTime;
-                        managerUnit.LastVisited = featureAccessTime.LastVisited;
+                        managerUnit.LastVisited = featureAccessTime.LastVisited ?? default;
                     }
                 }
             }

@@ -89,9 +89,45 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
         [HttpGet("unit")]
         [ProducesResponseType(typeof(MethodResult<UnitStudentProgressModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetManageStudentProgressUnit([FromQuery] GetStudentProgressUnitQuery query)
+        public async Task<IActionResult> GetStudentProgressUnit([FromQuery] GetStudentProgressUnitQuery query)
         {
             MethodResult<UnitStudentProgressModel> queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Get Student Progress HOmeWork
+        /// </summary>
+        [HttpGet("home-work")]
+        [ProducesResponseType(typeof(MethodResult<HomeWorkStudentProgressModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetStudentProgressHomeWork([FromQuery] GetStudentProgressHomeWorkQuery query)
+        {
+            MethodResult<HomeWorkStudentProgressModel> queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Get Student Progress HomeWork
+        /// </summary>
+        [HttpGet("class-forum")]
+        [ProducesResponseType(typeof(MethodResult<ClassForumStudentProgressModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetStudentProgressClassForum([FromQuery] GetStudentProgressClassForumQuery query)
+        {
+            MethodResult<ClassForumStudentProgressModel> queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Get Student Progress Video
+        /// </summary>
+        [HttpGet("video")]
+        [ProducesResponseType(typeof(MethodResult<VideoStudentProgressModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetStudentProgressVideo([FromQuery] GetStudentProgressVideoQuery query)
+        {
+            MethodResult<VideoStudentProgressModel> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
     }

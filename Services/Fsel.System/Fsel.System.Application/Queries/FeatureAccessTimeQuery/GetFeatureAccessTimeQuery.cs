@@ -52,8 +52,20 @@ namespace Fsel.System.Application.Queries.FeatureAccessTimeQuery
             {
                 query = query.Where(x => x.EnumFeature == request.EnumFeature);
             }
-
-            if (request.LessonId != null)
+            if (request.ObjectId != null)
+            {
+                featureAccessTime = await query.GroupBy(x => new { x.CourseId, x.UnitId, x.LessonId, x.ObjectId }).Select(x => new FeatureAccessTimeModel
+                {
+                    AccessTime = x.Sum(x => x.AccessTime),
+                    Visit = x.Sum(x => x.Visit),
+                    LastVisited = x.Select(x => x.LastVisited).OrderByDescending(x => x).FirstOrDefault(),
+                    CourseId = x.Key.CourseId,
+                    UnitId = x.Key.UnitId,
+                    LessonId = x.Key.LessonId,
+                    ObjectId = x.Key.ObjectId,
+                }).FirstOrDefaultAsync(cancellationToken);
+            }
+            else if (request.LessonId != null)
             {
                 featureAccessTime = await query.GroupBy(x => new { x.CourseId, x.UnitId, x.LessonId, x.ObjectId }).Select(x => new FeatureAccessTimeModel
                 {
