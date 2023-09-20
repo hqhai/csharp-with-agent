@@ -16,7 +16,6 @@ namespace Fsel.Ordering.Application.Commands.VoucherCmds
     using Fsel.Ordering.Domain.Models.EntityModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
-    using Microsoft.EntityFrameworkCore;
 
     public class UpdateVoucherCommand : UpdateVoucherCommandModel, IRequest<MethodResult<VoucherModel>>
     {
@@ -48,7 +47,7 @@ namespace Fsel.Ordering.Application.Commands.VoucherCmds
                 return methodResult;
             }
 
-            var voucher = await _voucherRepository.Queryable.Include(x => x.VoucherPackages).Where(x => x.Id == request.Id).FirstOrDefaultAsync(cancellationToken);
+            var voucher = await _voucherRepository.GetIncludeByIdAsync(request.Id);
             if (voucher == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(voucher));
@@ -62,11 +61,13 @@ namespace Fsel.Ordering.Application.Commands.VoucherCmds
 
             #endregion Validation
 
-            _mapper.Map(request, voucher);
-
+            voucher.VoucherPackages = request.VoucherPackages!.Select((x) => new VoucherPackage
+            {
+                Percentage = x.Percentage,
+                PackageId = x.PackageId
+            }).ToList();
             await _voucherRepository.ExecuteTransactionAsync(async () =>
             {
-                 
                 voucher = _voucherRepository.Update(voucher);
                 await _voucherRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
