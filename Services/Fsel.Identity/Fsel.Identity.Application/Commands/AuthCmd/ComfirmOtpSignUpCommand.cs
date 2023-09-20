@@ -134,7 +134,7 @@ IStudentRepository studentRepository)
                     CreatedByParent = false,
                     Occupation = "Student"
                 };
-                human.Code = $"HN_{weekNumber}{stt:000}";
+                human.Code = $"HN_{weekNumber}{stt:000000000}";
             }
             else if (roles.Contains(EnumRoleRegister.Parent.ToString()))
             {
