@@ -2,7 +2,7 @@
 
 namespace Fsel.System.Domain.Models.EntityModels
 {
-    public class FeatureAccessTimeCourseModel
+    public class FeatureAccessTimeLessonQuery
     {
         public Guid CourseId { get; set; }
         public long AccessTime { get; set; }

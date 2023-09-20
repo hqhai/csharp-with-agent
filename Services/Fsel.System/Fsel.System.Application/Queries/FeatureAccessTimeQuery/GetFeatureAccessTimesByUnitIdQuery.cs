@@ -5,6 +5,7 @@ namespace Fsel.System.Application.Queries.FeatureAccessTimeQuery
     using Fsel.Common.ActionResults;
     using Fsel.System.Domain.IRepositories;
     using Fsel.System.Domain.Models.EntityModels;
+    using global::System.Linq;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -12,7 +13,7 @@ namespace Fsel.System.Application.Queries.FeatureAccessTimeQuery
     public class GetFeatureAccessTimesByUnitIdQuery : IRequest<MethodResult<FeatureAccessTimeCourseModel>>
     {
         public Guid CourseId { get; set; }
-        public Guid UnitId { get; set; }
+        public IList<Guid>? UnitIds { get; set; }
         public Guid UserId { get; set; }
     }
 
@@ -29,8 +30,13 @@ namespace Fsel.System.Application.Queries.FeatureAccessTimeQuery
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<FeatureAccessTimeCourseModel> methodResult = new MethodResult<FeatureAccessTimeCourseModel>();
-
-            var featureAccessTimes = await _featureAccessTimeRepository.Queryable.Where(x => x.CreatedUserId == request.UserId && x.CourseId == request.CourseId && x.UnitId == request.UnitId)
+            if (request.UnitIds == null || !request.UnitIds.Any())
+            {
+                methodResult.Result = null;
+                methodResult.StatusCode = StatusCodes.Status200OK;
+                return methodResult;
+            }
+            var featureAccessTimes = await _featureAccessTimeRepository.Queryable.Where(x => x.CreatedUserId == request.UserId && x.CourseId == request.CourseId && request.UnitIds.Contains(x.UnitId ?? default))
                 .GroupBy(x => x.CourseId)
                 .Select(x => new FeatureAccessTimeCourseModel
                 {

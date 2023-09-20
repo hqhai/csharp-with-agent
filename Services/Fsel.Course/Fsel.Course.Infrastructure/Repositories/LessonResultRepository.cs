@@ -29,6 +29,15 @@ namespace Fsel.Course.Infrastructure.Repositories
                                                      .ToListAsync();
         }
 
+        public async Task<LessonResult?> GetByLessonId(Guid? lessonId, Guid? studentId)
+        {
+            return await Queryable.Include(x => x.ClassForumResults.Where(x => x.StudentId == studentId))
+                                    .Include(x => x.VideoResult)
+                                    .Include(x => x.Lesson)
+                                    .Include(x => x.HomeWorkResults.Where(x => x.StudentId == studentId))
+                                    .FirstOrDefaultAsync(x => x.LessonId == lessonId && x.StudentId == studentId);
+        }
+
         public async Task<List<LessonResult>?> GetsByLessonIds(IList<Guid>? lessonIds, Guid? studentId)
         {
             if (lessonIds == null || !lessonIds.Any())

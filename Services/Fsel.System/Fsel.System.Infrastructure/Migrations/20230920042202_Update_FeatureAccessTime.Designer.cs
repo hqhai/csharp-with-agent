@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fsel.System.Infrastructure.Migrations
 {
     [DbContext(typeof(SystemDbContext))]
-    [Migration("20230915110515_Update_FeatureAccessTime")]
+    [Migration("20230920042202_Update_FeatureAccessTime")]
     partial class Update_FeatureAccessTime
     {
         /// <inheritdoc />
@@ -100,6 +100,9 @@ namespace Fsel.System.Infrastructure.Migrations
                     b.Property<long>("AccessTime")
                         .HasColumnType("bigint");
 
+                    b.Property<Guid>("CourseId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2")
                         .HasColumnOrder(107);
@@ -139,7 +142,13 @@ namespace Fsel.System.Infrastructure.Migrations
                     b.Property<DateTime?>("LastVisited")
                         .HasColumnType("datetime2");
 
+                    b.Property<Guid?>("LessonId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<Guid>("ObjectId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("UnitId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime?>("UpdatedDate")

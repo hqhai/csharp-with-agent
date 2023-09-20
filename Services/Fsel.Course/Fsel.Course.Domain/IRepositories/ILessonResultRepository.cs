@@ -10,5 +10,7 @@ namespace Fsel.Course.Domain.IRepositories
         Task<List<LessonResult>?> GetsByIds(IList<Guid>? ids);
 
         Task<List<LessonResult>?> GetsByLessonIds(IList<Guid>? lessonIds, Guid? studentId);
+
+        Task<LessonResult?> GetByLessonId(Guid? lessonId, Guid? studentId);
     }
 }

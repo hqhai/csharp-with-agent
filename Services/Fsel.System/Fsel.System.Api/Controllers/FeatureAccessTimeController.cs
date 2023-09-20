@@ -31,9 +31,9 @@ namespace Fsel.System.Api.Controllers
         [HttpPost("get-list")]
         [ProducesResponseType(typeof(MethodResult<IList<FeatureAccessTimeModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> Gets([FromBody] IList<Guid> ids, [FromQuery] Guid userId, [FromQuery] Guid courseId, [FromQuery] Guid? unitId, [FromQuery] Guid? lessonId)
+        public async Task<IActionResult> Gets([FromBody] GetFeatureAccessTimesByLessonIdsQuery query)
         {
-            var queryResult = await _mediator.Send(new GetFeatureAccessTimesByIdsQuery { Ids = ids, UserId = userId, CourseId = courseId, UnitId = unitId, LessonId = lessonId }).ConfigureAwait(false);
+            var queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
 

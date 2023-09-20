@@ -6,7 +6,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
     using Fsel.Course.Domain.Enums;
     using Fsel.Ordering.Domain.Enums;
 
-    public class ManagerCourseProgressModel
+    public class CourseManagerProgressModel
     {
         public string? FullName { get; set; }
         public Guid StudentId { get; set; }

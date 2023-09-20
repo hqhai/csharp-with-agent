@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Course.Lms.Application.Queries.ManageProgressQuery
+namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
 {
     using Fsel.Common.ActionResults;
     using Fsel.Course.Domain.IRepositories;
@@ -14,12 +14,12 @@ namespace Fsel.Course.Lms.Application.Queries.ManageProgressQuery
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class GetManageStudentCourseQuery : IRequest<MethodResult<CourseProgressModel>>
+    public class GetStudentProgressCourseQuery : IRequest<MethodResult<CourseProgressModel>>
     {
         public Guid StudentId { get; set; }
     }
 
-    public class GetManageStudentCourseQueryHandler : IRequestHandler<GetManageStudentCourseQuery, MethodResult<CourseProgressModel>>
+    public class GetManageStudentCourseQueryHandler : IRequestHandler<GetStudentProgressCourseQuery, MethodResult<CourseProgressModel>>
     {
         private readonly IUserService _userService;
         private readonly ISystemService _systemService;
@@ -38,7 +38,7 @@ namespace Fsel.Course.Lms.Application.Queries.ManageProgressQuery
             _trainingService = trainingService;
         }
 
-        public async Task<MethodResult<CourseProgressModel>> Handle(GetManageStudentCourseQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<CourseProgressModel>> Handle(GetStudentProgressCourseQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<CourseProgressModel> methodResult = new MethodResult<CourseProgressModel>();
