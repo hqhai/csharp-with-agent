@@ -40,7 +40,7 @@ namespace Fsel.System.Api.Controllers
         /// <summary>
         /// Get Feature Access Time By Unit
         /// </summary>
-        [HttpGet("get-by-unit")]
+        [HttpPost("get-by-unit")]
         [ProducesResponseType(typeof(MethodResult<FeatureAccessTimeCourseModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetByUnit([FromQuery] GetFeatureAccessTimesByUnitIdQuery query)
@@ -52,7 +52,7 @@ namespace Fsel.System.Api.Controllers
         /// <summary>
         /// Get Feature Access Time By Test
         /// </summary>
-        [HttpGet("get-by-test")]
+        [HttpPost("get-by-test")]
         [ProducesResponseType(typeof(MethodResult<FeatureAccessTimeCourseModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetByTest([FromQuery] GetFeatureAccessTimesByTestQuery query)
@@ -67,9 +67,9 @@ namespace Fsel.System.Api.Controllers
         [HttpPost("get-list-by-courseIds")]
         [ProducesResponseType(typeof(MethodResult<IList<FeatureAccessTimeCourseModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> Gets([FromBody] IList<Guid> courseIds, [FromQuery] Guid userId)
+        public async Task<IActionResult> Gets([FromBody] GetFeatureAccessTimesByCourseIdsQuery query)
         {
-            var queryResult = await _mediator.Send(new GetFeatureAccessTimesByCourseIdsQuery { CourseIds = courseIds, UserId = userId }).ConfigureAwait(false);
+            var queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
 

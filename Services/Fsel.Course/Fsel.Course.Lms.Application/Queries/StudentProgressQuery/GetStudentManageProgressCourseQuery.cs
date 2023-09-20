@@ -8,6 +8,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Services.OrderServices;
     using Fsel.Course.Lms.Application.Services.SystemService;
+    using Fsel.Course.Lms.Application.Services.SystemService.Models;
     using Fsel.Course.Lms.Application.Services.TrainingServices;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Shared.Enums.ErrorCodes;
@@ -71,7 +72,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(course));
                 return methodResult;
             }
-            var featureAccessTimeResults = await _systemService.GetFeatureAccessTimesByCourseIdsAsync(new List<Guid> { course.Id }, student?.Human?.UserId ?? default);
+            var featureAccessTimeResults = await _systemService.GetFeatureAccessTimesByCourseIdsAsync(new FeatureAccessTimesByCourseIdsQueryModel { CourseIds = new List<Guid> { request.CourseId }, UserId = student?.Human?.UserId ?? default });
             if (!featureAccessTimeResults.IsSuccessStatusCode)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallSystemServiceError), nameof(featureAccessTimeResults));
@@ -101,7 +102,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                 managerCourseProgress.PackageId = @class.PackageId;
                 managerCourseProgress.PackageCode = package?.Code ?? default;
             }
-            methodResult.Result = default;
+            methodResult.Result = managerCourseProgress;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }

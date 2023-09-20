@@ -43,7 +43,7 @@ namespace Fsel.System.Application.Queries.FeatureAccessTimeQuery
                 {
                     CourseId = x.CourseId,
                     AccessTime = x.AccessTime,
-                    TotalVisit = x.Visit,
+                    Visit = x.Visit,
                     LastVisited = x.LastVisited ?? default
                 }).FirstOrDefaultAsync(cancellationToken);
             methodResult.Result = featureAccessTime;

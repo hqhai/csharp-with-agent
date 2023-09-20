@@ -27,7 +27,7 @@ namespace Fsel.Course.Lms.Application.Services.TrainingServices
         [Post("/class/classes-by-studentids")]
         Task<IApiResponse<MethodResult<IList<ClassStudentModel>>>> GetClassByStudentIdsAsync([FromBody] GetClassListByStudentIdsModel query);
 
-        [Post("/class/get-classes/{studentId}")]
+        [Get("/class/get-classes/{studentId}")]
         Task<IApiResponse<MethodResult<IList<ClassModel>>>> GetListClassByStudentIdAsync([FromRoute] Guid studentId);
     }
 }

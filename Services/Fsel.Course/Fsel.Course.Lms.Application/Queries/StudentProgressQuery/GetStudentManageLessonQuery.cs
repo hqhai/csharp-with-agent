@@ -102,7 +102,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                 managerCourseProgress.Add(managerUnit);
             }
 
-            methodResult.Result = default;
+            methodResult.Result = managerCourseProgress;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }

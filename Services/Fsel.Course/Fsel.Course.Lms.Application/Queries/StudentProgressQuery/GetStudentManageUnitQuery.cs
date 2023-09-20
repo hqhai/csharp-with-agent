@@ -109,10 +109,11 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                 {
                     managerUnit = await GetMockTestManager(courseUnit, studentId, featureAccessTimeTest);
                 }
+                managerUnit.Type = courseUnit.FinalTestId != null ? nameof(courseUnit.FinalTest) : courseUnit.MockTestId != null ? nameof(courseUnit.MockTest) : courseUnit.UnitId != null ? nameof(courseUnit.Unit) : null;
                 managerCourseProgress.Add(managerUnit);
             }
 
-            methodResult.Result = default;
+            methodResult.Result = managerCourseProgress;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }

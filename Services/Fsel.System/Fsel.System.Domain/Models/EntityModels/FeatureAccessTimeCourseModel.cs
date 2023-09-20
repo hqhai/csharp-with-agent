@@ -4,9 +4,10 @@ namespace Fsel.System.Domain.Models.EntityModels
 {
     public class FeatureAccessTimeCourseModel
     {
-        public Guid CourseId { get; set; }
+        public int Visit { get; set; }
         public long AccessTime { get; set; }
-        public int TotalVisit { get; set; }
-        public DateTime? LastVisited { get; set; }
+        public DateTime LastVisited { get; set; }
+        public Guid ObjectId { get; set; }
+        public Guid CourseId { get; set; }
     }
 }

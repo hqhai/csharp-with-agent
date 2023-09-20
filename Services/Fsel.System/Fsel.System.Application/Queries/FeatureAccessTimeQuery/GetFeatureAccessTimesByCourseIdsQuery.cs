@@ -5,14 +5,13 @@ namespace Fsel.System.Application.Queries.FeatureAccessTimeQuery
     using Fsel.Common.ActionResults;
     using Fsel.System.Domain.IRepositories;
     using Fsel.System.Domain.Models.EntityModels;
+    using Fsel.System.Domain.Models.QueryModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class GetFeatureAccessTimesByCourseIdsQuery : IRequest<MethodResult<IList<FeatureAccessTimeCourseModel>>>
+    public class GetFeatureAccessTimesByCourseIdsQuery : GetFeatureAccessTimesByCourseIdsQueryModel, IRequest<MethodResult<IList<FeatureAccessTimeCourseModel>>>
     {
-        public IList<Guid>? CourseIds { get; set; }
-        public Guid UserId { get; set; }
     }
 
     public class GetFeatureAccessTimesByCourseIdsQueryHandler : IRequestHandler<GetFeatureAccessTimesByCourseIdsQuery, MethodResult<IList<FeatureAccessTimeCourseModel>>>
@@ -40,7 +39,8 @@ namespace Fsel.System.Application.Queries.FeatureAccessTimeQuery
                 {
                     CourseId = x.Key,
                     AccessTime = x.Sum(x => x.AccessTime),
-                    TotalVisit = x.Sum(x => x.Visit)
+                    Visit = x.Sum(x => x.Visit),
+                    LastVisited = x.OrderBy(x => x.CreatedDate).FirstOrDefault()!.LastVisited ?? DateTime.Now,
                 }).ToListAsync(cancellationToken);
             methodResult.Result = featureAccessTimes;
             methodResult.StatusCode = StatusCodes.Status200OK;
