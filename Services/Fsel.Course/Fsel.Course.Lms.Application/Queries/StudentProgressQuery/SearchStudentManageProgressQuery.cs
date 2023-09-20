@@ -12,17 +12,17 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class SearchStudentStudentProgressQuery : SearchManageStudentProgressQueryModel, IRequest<MethodResult<PagingItemsModel<StudentManageProgressModel>>>
+    public class SearchStudentProgressQuery : SearchManageStudentProgressQueryModel, IRequest<MethodResult<PagingItemsModel<StudentProgressModel>>>
     {
     }
 
-    public class SearchManageStudentProgressQueryHandler : IRequestHandler<SearchStudentStudentProgressQuery, MethodResult<PagingItemsModel<StudentManageProgressModel>>>
+    public class SearchStudentProgressQueryHandler : IRequestHandler<SearchStudentProgressQuery, MethodResult<PagingItemsModel<StudentProgressModel>>>
     {
         private readonly ICourseRepository _courseRepository;
         private readonly ICourseResultRepository _courseResultRepository;
         private readonly IUserService _userService;
 
-        public SearchManageStudentProgressQueryHandler(ICourseRepository courseRepository,
+        public SearchStudentProgressQueryHandler(ICourseRepository courseRepository,
             ICourseResultRepository courseResultRepository,
             IUserService userService)
         {
@@ -31,55 +31,42 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             _userService = userService;
         }
 
-        public async Task<MethodResult<PagingItemsModel<StudentManageProgressModel>>> Handle(SearchStudentStudentProgressQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<PagingItemsModel<StudentProgressModel>>> Handle(SearchStudentProgressQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            var methodResult = new MethodResult<PagingItemsModel<StudentManageProgressModel>>();
+            var methodResult = new MethodResult<PagingItemsModel<StudentProgressModel>>();
 
             if (request.PageSize > 100)
             {
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 return methodResult;
             }
-            var sortedResults = await _courseResultRepository.Queryable
-                .Where(cr => !cr.IsDeleted)
-                .OrderBy(cr => cr.CreatedDate)
-                .ToListAsync(cancellationToken);
-
-            var sortedCourses = await _courseRepository.Queryable
-                .Where(c => !c.IsDeleted)
-                .ToListAsync(cancellationToken);
-
-            var courseResults = sortedResults
+            var courseResults = await _courseResultRepository.Queryable.Include(x => x.Course)
                 .GroupBy(r => new { r.StudentId, r.CourseId })
-                .Select(group => new
+                .Select(group => new CourseResultModel
                 {
                     StudentId = group.Key.StudentId,
                     CourseId = group.Key.CourseId,
-                    CourseType = sortedCourses.FirstOrDefault(c => c.Id == group.Key.CourseId)?.CourseType ?? default,
-                    MaxCreatedDate = group.Max(r => r.CreatedDate)
+                    CourseType = group.Select(x => x.Course).FirstOrDefault(c => c!.Id == group.Key.CourseId)!.CourseType,
+                    CreatedDate = group.Max(r => r.CreatedDate)
                 })
-                .OrderByDescending(x => x.MaxCreatedDate)
-                .ToList();
+                .OrderByDescending(x => x.CreatedDate)
+                .ToListAsync(cancellationToken);
 
-            //var courseResults = query.AsEnumerable().ToList();
-
-            //var courseResults = await query.ToListAsync(cancellationToken);
             var studentResults = await _userService.GetStudentsByStudentIdsAsync(courseResults.Select(x => x.StudentId).ToList());
             var students = studentResults.Content?.Result;
-            var manageStudents = new List<StudentManageProgressModel>();
+            var manageStudents = new List<StudentProgressModel>();
             foreach (var courseResult in courseResults)
             {
-                StudentManageProgressModel manageStudentProgressModel = new StudentManageProgressModel();
+                StudentProgressModel manageStudentProgressModel = new StudentProgressModel();
                 if (students != null && students.Any())
                 {
                     var student = students.FirstOrDefault(x => x.Id == courseResult.StudentId);
                     manageStudentProgressModel.StudentId = courseResult.StudentId;
                     manageStudentProgressModel.FullName = student?.Human?.FullName;
                 }
-                manageStudentProgressModel.CourseType = courseResult.CourseType;
+                manageStudentProgressModel.CourseType = courseResult.CourseType ?? default;
                 manageStudentProgressModel.CourseId = courseResult.CourseId;
-
                 manageStudents.Add(manageStudentProgressModel);
             }
             if (!string.IsNullOrEmpty(request.Keyword))
@@ -91,12 +78,17 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             var lists = manageStudents.Skip((request.Page - 1) * request.PageSize).Take(request.PageSize).ToList();
             foreach (var item in lists)
             {
-                var (currentProgress, progress, displayOrderUnit, displayOrderLesson) = await _courseRepository.GetContentCompleted(item.CourseId, item.CourseType, item.StudentId);
-                item.DisplayOrderLesson = displayOrderLesson;
-                item.DisplayOrderUnit = displayOrderUnit;
-                item.ContentProgress = string.Format("{0} / {1}", currentProgress, progress);
+                var courseResult = courseResults.FirstOrDefault(x => x.CourseId == item.CourseId && x.StudentId == item.StudentId);
+                if (courseResult != null)
+                {
+                    var (currentProgress, progress) = await _courseRepository.GetDisplayOrder(courseResult);
+                    var (displayOrderUnit, displayOrderLesson) = await _courseRepository.GetContentComplete(courseResult);
+                    item.DisplayOrderLesson = displayOrderLesson;
+                    item.DisplayOrderUnit = displayOrderUnit;
+                    item.ContentProgress = string.Format("{0} / {1}", currentProgress, progress);
+                }
             }
-            methodResult.Result = new PagingItemsModel<StudentManageProgressModel>(lists, request, totalItem);
+            methodResult.Result = new PagingItemsModel<StudentProgressModel>(lists, request, totalItem);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }

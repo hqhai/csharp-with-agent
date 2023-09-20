@@ -5,7 +5,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
     using Fsel.Course.Domain.Entities.SkillScoresConfigs;
     using Fsel.Course.Domain.Enums;
 
-    public class LessonManagerProgressModel
+    public class LessonStudentProgressModel
     {
         public string? Type { get; set; }
         public Guid ObjectId { get; set; }

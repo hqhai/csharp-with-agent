@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Course.Lms.Api.Controllers
+namespace Fsel.Course.Lms.Api.Controllers.Admin
 {
     using System.Net;
     using Fsel.Common.ActionResults;
@@ -24,74 +24,74 @@ namespace Fsel.Course.Lms.Api.Controllers
         }
 
         /// <summary>
-        /// Search ManageProgress
+        /// Search Student Progress
         /// </summary>
         [HttpGet]
-        [ProducesResponseType(typeof(MethodResult<PagingItemsModel<StudentManageProgressModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(MethodResult<PagingItemsModel<StudentProgressModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> Search([FromQuery] SearchStudentStudentProgressQuery query)
+        public async Task<IActionResult> Search([FromQuery] SearchStudentProgressQuery query)
         {
-            MethodResult<PagingItemsModel<StudentManageProgressModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            MethodResult<PagingItemsModel<StudentProgressModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
 
         /// <summary>
         /// Get Manage Student Course
         /// </summary>
-        [HttpGet("manage-student-course")]
-        [ProducesResponseType(typeof(MethodResult<CourseProgressModel>), (int)HttpStatusCode.OK)]
+        [HttpGet("student-course")]
+        [ProducesResponseType(typeof(MethodResult<IList<CourseStudentProgressModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetManageStudentCourse([FromQuery] GetStudentProgressCourseQuery query)
+        public async Task<IActionResult> GetManageStudentCourse([FromQuery] GetStudentCoursesQuery query)
         {
-            MethodResult<CourseProgressModel> queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            MethodResult<IList<CourseStudentProgressModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
 
         /// <summary>
         /// Get Manage Student Lesson
         /// </summary>
-        [HttpGet("manage-student-lesson")]
-        [ProducesResponseType(typeof(MethodResult<IList<LessonManagerProgressModel>>), (int)HttpStatusCode.OK)]
+        [HttpGet("student-lesson")]
+        [ProducesResponseType(typeof(MethodResult<IList<LessonStudentProgressModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetManageStudentLesson([FromQuery] GetStudentManageLessonQuery query)
+        public async Task<IActionResult> GetManageStudentLesson([FromQuery] GetStudentLessonsQuery query)
         {
-            MethodResult<IList<LessonManagerProgressModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            MethodResult<IList<LessonStudentProgressModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
 
         /// <summary>
-        /// Get Manage Student Unit
+        /// Get Student Unit
         /// </summary>
-        [HttpGet("manage-student-unit")]
-        [ProducesResponseType(typeof(MethodResult<IList<UnitManagerProgressModel>>), (int)HttpStatusCode.OK)]
+        [HttpGet("student-unit")]
+        [ProducesResponseType(typeof(MethodResult<IList<UnitStudentProgressModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetManageStudentUnit([FromQuery] GetStudentManageUnitQuery query)
+        public async Task<IActionResult> GetManageStudentUnit([FromQuery] GetStudentUnitsQuery query)
         {
-            MethodResult<IList<UnitManagerProgressModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            MethodResult<IList<UnitStudentProgressModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
 
         /// <summary>
         /// Get Manage Student Progress Course
         /// </summary>
-        [HttpGet("manage-student-progress-course")]
-        [ProducesResponseType(typeof(MethodResult<CourseManagerProgressModel>), (int)HttpStatusCode.OK)]
+        [HttpGet("student-progress-course")]
+        [ProducesResponseType(typeof(MethodResult<CourseStudentProgressModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetManageStudentProgressCourse([FromQuery] GetStudentManageProgressCourseQuery query)
+        public async Task<IActionResult> GetManageStudentProgressCourse([FromQuery] GetStudentProgressCourseQuery query)
         {
-            MethodResult<CourseManagerProgressModel> queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            MethodResult<CourseStudentProgressModel> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
 
         /// <summary>
-        /// Get Manage Student Progress Unit
+        /// Get Student Progress Unit
         /// </summary>
-        [HttpGet("manage-student-progress-unit")]
-        [ProducesResponseType(typeof(MethodResult<UnitManagerProgressModel>), (int)HttpStatusCode.OK)]
+        [HttpGet("student-progress-unit")]
+        [ProducesResponseType(typeof(MethodResult<UnitStudentProgressModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetManageStudentProgressUnit([FromQuery] GetStudentManageProgressUnitQuery query)
+        public async Task<IActionResult> GetManageStudentProgressUnit([FromQuery] GetStudentProgressUnitQuery query)
         {
-            MethodResult<UnitManagerProgressModel> queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            MethodResult<UnitStudentProgressModel> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
     }

@@ -18,14 +18,14 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class GetStudentManageLessonQuery : IRequest<MethodResult<IList<LessonManagerProgressModel>>>
+    public class GetStudentLessonsQuery : IRequest<MethodResult<IList<LessonStudentProgressModel>>>
     {
         public Guid StudentId { get; set; }
         public Guid CourseId { get; set; }
         public Guid UnitId { get; set; }
     }
 
-    public class GetStudentManageLessonQueryHandler : IRequestHandler<GetStudentManageLessonQuery, MethodResult<IList<LessonManagerProgressModel>>>
+    public class GetStudentManageLessonQueryHandler : IRequestHandler<GetStudentLessonsQuery, MethodResult<IList<LessonStudentProgressModel>>>
     {
         private readonly ICourseRepository _courseRepository;
         private readonly IMockTestResultRepository _mockTestResultRepository;
@@ -46,11 +46,11 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             _systemService = systemService;
         }
 
-        public async Task<MethodResult<IList<LessonManagerProgressModel>>> Handle(GetStudentManageLessonQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<IList<LessonStudentProgressModel>>> Handle(GetStudentLessonsQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            MethodResult<IList<LessonManagerProgressModel>> methodResult = new MethodResult<IList<LessonManagerProgressModel>>();
-            IList<LessonManagerProgressModel> managerCourseProgress = new List<LessonManagerProgressModel>();
+            MethodResult<IList<LessonStudentProgressModel>> methodResult = new MethodResult<IList<LessonStudentProgressModel>>();
+            IList<LessonStudentProgressModel> managerCourseProgress = new List<LessonStudentProgressModel>();
             var studentResults = await _userService.GetStudentsByStudentIdsAsync(new List<Guid> { request.StudentId });
             if (!studentResults.IsSuccessStatusCode)
             {
@@ -117,35 +117,32 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             return methodResult;
         }
 
-        private async Task<LessonManagerProgressModel> GetManagerLesson(Guid? lessonId, Guid? studentId)
+        private async Task<LessonStudentProgressModel> GetManagerLesson(Guid? lessonId, Guid? studentId)
         {
-            LessonManagerProgressModel managerUnit = new LessonManagerProgressModel();
-            var countVideo = 0;
-            var countHomeWork = 0;
-            var countClassForum = 0;
+            LessonStudentProgressModel managerUnit = new LessonStudentProgressModel();
+            var counts = new List<int>();
             var lessonResult = await _lessonResultRepository.GetByLessonId(lessonId, studentId);
             if (lessonResult != null)
             {
                 var lesson = lessonResult.Lesson;
-                countVideo = lessonResult.VideoResult?.Status == EnumResultStatus.Done ? 1 : 0;
-                countClassForum = lessonResult.ClassForumResults.Where(x => x != null && x.Status == EnumClassForumResultStatus.Graded && x.StudentId == studentId).Count();
-                countHomeWork = lessonResult.HomeWorkResults.Where(x => x != null && x.Status == EnumResultStatus.Done && x.StudentId == studentId).GroupBy(x => x.LessonResultId).Count();
-                var list = new List<int> { countHomeWork, countClassForum, countVideo };
+                counts.Add(lessonResult.VideoResult?.Status == EnumResultStatus.Done ? 1 : 0);
+                counts.Add(lessonResult.ClassForumResults.Where(x => x != null && x.Status == EnumClassForumResultStatus.Graded && x.StudentId == studentId).Count());
+                counts.Add(lessonResult.HomeWorkResults.Where(x => x != null && x.Status == EnumResultStatus.Done && x.StudentId == studentId).GroupBy(x => x.LessonResultId).Count());
                 if (lesson != null)
                 {
                     managerUnit.ObjectId = lesson.Id;
                     managerUnit.Name = lesson.Name;
                 }
                 managerUnit.Status = lessonResult.Status;
-                managerUnit.Percent = NumberHelper.ConvertPercentDouble(list.Average());
-                managerUnit.ContentCompleted = string.Format("{0} / {1}", list.Sum(), 3);
+                managerUnit.Percent = NumberHelper.ConvertPercentDouble(counts.Average());
+                managerUnit.ContentCompleted = string.Format("{0} / {1}", counts.Sum(), 3);
             }
             return managerUnit;
         }
 
-        private async Task<LessonManagerProgressModel> GetMockTestManager(GetStudentManageLessonQuery request, Guid mockTestId, FeatureAccessTimeCourseModel? featureAccessTime)
+        private async Task<LessonStudentProgressModel> GetMockTestManager(GetStudentLessonsQuery request, Guid mockTestId, FeatureAccessTimeCourseModel? featureAccessTime)
         {
-            LessonManagerProgressModel managerUnit = new LessonManagerProgressModel();
+            LessonStudentProgressModel managerUnit = new LessonStudentProgressModel();
             var mockTest = await _mockTestRepository.Queryable.Include(x => x.MockTestResults.Where(x => x.MockTestId == mockTestId && x.CourseId == request.CourseId && x.StudentId == request.StudentId && x.UnitId == request.UnitId))
                         .FirstOrDefaultAsync(x => x.Id == mockTestId);
             if (mockTest != null)

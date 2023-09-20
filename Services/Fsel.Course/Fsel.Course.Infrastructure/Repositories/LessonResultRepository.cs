@@ -8,6 +8,7 @@ namespace Fsel.Course.Infrastructure.Repositories
     using Fsel.Core.Base;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.IRepositories;
+    using Fsel.Course.Domain.Models.EntityModels;
     using Microsoft.EntityFrameworkCore;
 
     public class LessonResultRepository : BaseRepository<LessonResult>, ILessonResultRepository
@@ -49,6 +50,14 @@ namespace Fsel.Course.Infrastructure.Repositories
                                                      .Include(x => x.HomeWorkResults.Where(x => x.StudentId == studentId))
                                                         .Where(x => lessonIds.Contains(x.LessonId) && x.StudentId == studentId)
                                                      .ToListAsync();
+        }
+
+        public async Task<List<LessonResult>?> GetByCourseResult(CourseResultModel courseResult)
+        {
+            return await Queryable.Include(x => x.ClassForumResults.Where(x => x.StudentId == courseResult.StudentId))
+                                     .Include(x => x.VideoResult)
+                                     .Include(x => x.HomeWorkResults.Where(x => x.StudentId == courseResult.StudentId))
+                                     .Where(x => x.CourseId == courseResult.CourseId && x.StudentId == courseResult.StudentId).ToListAsync();
         }
     }
 }

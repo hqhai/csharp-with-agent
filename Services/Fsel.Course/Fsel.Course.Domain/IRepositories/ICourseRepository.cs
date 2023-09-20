@@ -1,6 +1,7 @@
 // Copyright (c) Atlantic. All rights reserved.
 
 using Fsel.Core.Base.Interfaces;
+using Fsel.Course.Domain.Models.EntityModels;
 using Fsel.Shared.Enums;
 using EntityCourse = Fsel.Course.Domain.Entities.Course;
 
@@ -14,6 +15,8 @@ namespace Fsel.Course.Domain.IRepositories
 
         Task<EntityCourse?> GetIncludeCourseResult(Guid id, Guid? studentId);
 
-        Task<(double, double, int, int)> GetContentCompleted(Guid courseId, EnumCourseType courseType, Guid? studentId);
+        Task<(int, int)> GetDisplayOrder(CourseResultModel courseResult);
+
+        Task<(int, int)> GetContentComplete(CourseResultModel courseResult);
     }
 }
