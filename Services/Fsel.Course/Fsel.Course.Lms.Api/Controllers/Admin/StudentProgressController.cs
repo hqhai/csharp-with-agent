@@ -36,36 +36,36 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
         }
 
         /// <summary>
-        /// Get Manage Student Course
+        /// Get Manage Student Courses
         /// </summary>
-        [HttpGet("student-course")]
+        [HttpGet("student-courses")]
         [ProducesResponseType(typeof(MethodResult<IList<CourseStudentProgressModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetManageStudentCourse([FromQuery] GetStudentCoursesQuery query)
+        public async Task<IActionResult> GetManageStudentCourse([FromQuery] GetStudentProgressCoursesQuery query)
         {
             MethodResult<IList<CourseStudentProgressModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
 
         /// <summary>
-        /// Get Manage Student Lesson
+        /// Get Manage Student Lessons
         /// </summary>
-        [HttpGet("student-lesson")]
+        [HttpGet("student-lessons")]
         [ProducesResponseType(typeof(MethodResult<IList<LessonStudentProgressModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetManageStudentLesson([FromQuery] GetStudentLessonsQuery query)
+        public async Task<IActionResult> GetManageStudentLesson([FromQuery] GetStudentProgressLessonsQuery query)
         {
             MethodResult<IList<LessonStudentProgressModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
 
         /// <summary>
-        /// Get Student Unit
+        /// Get Student Units
         /// </summary>
-        [HttpGet("student-unit")]
+        [HttpGet("student-units")]
         [ProducesResponseType(typeof(MethodResult<IList<UnitStudentProgressModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetManageStudentUnit([FromQuery] GetStudentUnitsQuery query)
+        public async Task<IActionResult> GetManageStudentUnit([FromQuery] GetStudentProgressUnitsQuery query)
         {
             MethodResult<IList<UnitStudentProgressModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
@@ -74,7 +74,7 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
         /// <summary>
         /// Get Manage Student Progress Course
         /// </summary>
-        [HttpGet("student-progress-course")]
+        [HttpGet("course")]
         [ProducesResponseType(typeof(MethodResult<CourseStudentProgressModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetManageStudentProgressCourse([FromQuery] GetStudentProgressCourseQuery query)
@@ -86,7 +86,7 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
         /// <summary>
         /// Get Student Progress Unit
         /// </summary>
-        [HttpGet("student-progress-unit")]
+        [HttpGet("unit")]
         [ProducesResponseType(typeof(MethodResult<UnitStudentProgressModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetManageStudentProgressUnit([FromQuery] GetStudentProgressUnitQuery query)

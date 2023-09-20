@@ -18,13 +18,13 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class GetStudentUnitsQuery : IRequest<MethodResult<IList<UnitStudentProgressModel>>>
+    public class GetStudentProgressUnitsQuery : IRequest<MethodResult<IList<UnitStudentProgressModel>>>
     {
         public Guid StudentId { get; set; }
         public Guid CourseId { get; set; }
     }
 
-    public class GetManageStudentUnitQueryHandler : IRequestHandler<GetStudentUnitsQuery, MethodResult<IList<UnitStudentProgressModel>>>
+    public class GetManageStudentUnitQueryHandler : IRequestHandler<GetStudentProgressUnitsQuery, MethodResult<IList<UnitStudentProgressModel>>>
     {
         private readonly ICourseRepository _courseRepository;
         private readonly IMockTestResultRepository _mockTestResultRepository;
@@ -49,7 +49,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             _courseUnitMockTestRepository = courseUnitMockTestRepository;
         }
 
-        public async Task<MethodResult<IList<UnitStudentProgressModel>>> Handle(GetStudentUnitsQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<IList<UnitStudentProgressModel>>> Handle(GetStudentProgressUnitsQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<IList<UnitStudentProgressModel>> methodResult = new MethodResult<IList<UnitStudentProgressModel>>();
