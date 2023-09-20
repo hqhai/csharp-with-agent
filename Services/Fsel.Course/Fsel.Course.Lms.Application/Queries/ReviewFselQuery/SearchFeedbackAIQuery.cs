@@ -80,9 +80,10 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
                         };
 
             var groupedQuery = (from result in query
-                                group result by new { result.LessonId, result.UnitId, result.CourseId } into grouped
+                                group result by new { result.LessonId, result.UnitId, result.CourseId, result.ClassForumId } into grouped
                                 select new FeedbackClassForumAIModel
                                 {
+                                    ClassForumId = grouped.Key.ClassForumId,
                                     CourseId = grouped.Key.CourseId,
                                     LessonId = grouped.Key.LessonId,
                                     UnitId = grouped.Key.UnitId,
