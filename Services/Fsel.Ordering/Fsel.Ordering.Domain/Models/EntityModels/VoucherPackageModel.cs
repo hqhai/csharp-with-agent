@@ -11,7 +11,6 @@ namespace Fsel.Ordering.Domain.Models.EntityModels
         public double DiscountedPrice { get; set; }
         public Guid PackageId { get; set; }
         public Guid VoucherId { get; set; }
-
         public double Price { get; set; }
         public PackageModel? Package { get; set; }
     }

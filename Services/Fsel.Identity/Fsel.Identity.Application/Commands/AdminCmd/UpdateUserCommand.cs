@@ -4,8 +4,8 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
 {
     using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Identity.Domain.Entities;
-    using Fsel.Identity.Domain.Enums.ErrorCodes;
     using Fsel.Identity.Domain.Models.CommandModels.Users;
     using Fsel.Identity.Domain.Models.EntityModels;
     using Fsel.Shared.Enums;
@@ -38,7 +38,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
 
             if (user == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumUserErrorCode.UserNotExist));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(user));
                 return methodResult;
             }
 
@@ -50,7 +50,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
                                                         .FirstOrDefaultAsync(x => x.Id == request.Id.ToString(), cancellationToken);
                 if (user == null)
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumUserErrorCode.UserNotExist));
+                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(user));
                     return methodResult;
                 }
                 _mapper.Map(request, user.Human?.Teacher);
@@ -64,7 +64,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
                 user = await _userManager.Users.Include(x => x.Human).ThenInclude(x => x!.CSO).FirstOrDefaultAsync(x => x.Id == request.Id.ToString(), cancellationToken);
                 if (user == null)
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumUserErrorCode.UserNotExist));
+                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(user));
                     return methodResult;
                 }
                 _mapper.Map(request, user.Human?.CSO);
@@ -74,7 +74,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
                 user = await _userManager.Users.Include(x => x.Human).FirstOrDefaultAsync(x => x.Id == request.Id.ToString(), cancellationToken);
                 if (user == null)
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumUserErrorCode.UserNotExist));
+                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(user));
                     return methodResult;
                 }
             }

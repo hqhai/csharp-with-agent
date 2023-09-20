@@ -55,6 +55,8 @@ namespace Fsel.Course.Domain.Entities
             set { SkillScoresStr = ConvertHelper.Serialize(value); }
         }
 
+        public Guid? GradingTeacherId { get; set; }
+
         public Course? Course { get; set; }
 
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
@@ -69,7 +71,9 @@ namespace Fsel.Course.Domain.Entities
 
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         public Guid StudentId { get; set; }
+        public DateTime? GradingStartDate { get; set; }
 
         public ICollection<MockTestAnswer> MockTestAnswers { get; set; } = new List<MockTestAnswer>();
+        public ICollection<MockTestScore> MockTestScores { get; set; } = new List<MockTestScore>();
     }
 }

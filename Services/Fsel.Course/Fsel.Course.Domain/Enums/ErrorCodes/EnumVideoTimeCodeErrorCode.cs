@@ -8,25 +8,5 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         /// Number of DisplayTime >1
         /// </summary>
         DisplayTimeGreaterThan1,
-
-        /// <summary>
-        /// Video Time Code does not exist
-        /// </summary>
-        VideoTimeCodeNotExist,
-
-        /// <summary>
-        /// Video Time Codes does not exist
-        /// </summary>
-        VideoTimeCodesNotExist,
-
-        /// <summary>
-        /// Video Time Codes Is Null
-        /// </summary>
-        VideoTimeCodesNull,
-
-        /// <summary>
-        /// Video Time Code Is Null
-        /// </summary>
-        VideoTimeCodeNull
     }
 }

@@ -8,7 +8,6 @@ namespace Fsel.Course.Domain.Models.CommandModels.ClassForumScores
     public class GradeClassForumCommandModel
     {
         public Guid ClassForumResultId { get; set; }
-
         public IList<CreateClassForumScoreCommandModel>? ClassForumScores { get; set; }
     }
 }

@@ -4,12 +4,12 @@ namespace Fsel.Course.Lms.Application.Queries.ExtraPracticeQuery
 {
     using System.Linq;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Core.Extensions;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums;
-    using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Domain.Models.QueryModels.ExtraPractices;
@@ -45,7 +45,7 @@ namespace Fsel.Course.Lms.Application.Queries.ExtraPracticeQuery
             var studentsResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
             if (studentsResult == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumVideoErrorCode.UserNotExist));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(studentsResult));
                 return methodResult;
             }
             var studentId = studentsResult.Content!.Result!.Id;
@@ -55,6 +55,7 @@ namespace Fsel.Course.Lms.Application.Queries.ExtraPracticeQuery
                         .Include(x => x.LessonExtraPractices)
                             .ThenInclude(x => x.Lesson)
                                 .ThenInclude(x => x!.UnitLessons)
+                                    .ThenInclude(x => x!.Unit)
                         .Include(x => x.PlacementTest)
                             .ThenInclude(x => x!.PlacementTestSections)
                             .ThenInclude(x => x.SectionGroup)
@@ -78,11 +79,14 @@ namespace Fsel.Course.Lms.Application.Queries.ExtraPracticeQuery
                 Code = x.Code,
                 Name = x.Name,
                 CreatedDate = x.CreatedDate,
+                ImagePath = x.ImagePath,
                 Type = x.Type,
                 CourseLevel = x.CourseLevel,
                 CourseSkills = GetCourseSkills(x),
-                UnitId = x.LessonExtraPractices.Select(x => x.Lesson).SelectMany(x => x!.UnitLessons).FirstOrDefault() != null ? x.LessonExtraPractices.Select(x => x.Lesson).SelectMany(x => x!.UnitLessons).FirstOrDefault()!.UnitId : null,
+                UnitId = x.LessonExtraPractices.Select(x => x.Lesson).SelectMany(x => x!.UnitLessons).FirstOrDefault() != null ? x.LessonExtraPractices.Select(x => x.Lesson).SelectMany(x => x!.UnitLessons).FirstOrDefault()!.Unit!.Id : default,
+                NameUnit = x.LessonExtraPractices.Select(x => x.Lesson).SelectMany(x => x!.UnitLessons).FirstOrDefault() != null ? x.LessonExtraPractices.Select(x => x.Lesson).SelectMany(x => x!.UnitLessons).FirstOrDefault()!.Unit!.Name : default,
                 Percent = x.ExtraPracticeResults.FirstOrDefault(y => y.ExtraPracticeId == x.Id && y.StudentId == studentId) != null ? x.ExtraPracticeResults.FirstOrDefault(y => y.ExtraPracticeId == x.Id && y.StudentId == studentId)!.Percent : null,
+                Status = x.ExtraPracticeResults.FirstOrDefault(y => y.ExtraPracticeId == x.Id && y.StudentId == studentId) != null ? x.ExtraPracticeResults.FirstOrDefault(y => y.ExtraPracticeId == x.Id && y.StudentId == studentId)!.Status : EnumResultStatus.Unfinished,
                 AccessCount = x.ExtraPracticeResults.Count
             });
 
@@ -108,20 +112,26 @@ namespace Fsel.Course.Lms.Application.Queries.ExtraPracticeQuery
                 extraPracticeQuery = extraPracticeQuery.Where(x => extraPracticeModels.Select(y => y.Id).Contains(x.Id));
             }
 
+            int totalItem = await extraPracticeQuery.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
+            var lists = await extraPracticeQuery
+                    .ApplySortAndPaging(request)
+                    .AsNoTracking()
+                    .ToListAsync(cancellationToken: cancellationToken)
+                    .ConfigureAwait(false);
             if (request.SortFilter != null)
             {
                 switch (request.SortFilter)
                 {
                     case EnumSortFilter.Newest:
-                        extraPracticeQuery = extraPracticeQuery.OrderBy(x => x.CreatedDate);
+                        lists = lists.OrderByDescending(x => x.CreatedDate).ToList();
                         break;
 
                     case EnumSortFilter.Oldest:
-                        extraPracticeQuery = extraPracticeQuery.OrderByDescending(x => x.CreatedDate);
+                        lists = lists.OrderBy(x => x.CreatedDate).ToList();
                         break;
 
                     case EnumSortFilter.MostPopular:
-                        extraPracticeQuery = extraPracticeQuery.OrderByDescending(x => x.AccessCount);
+                        lists = lists.OrderByDescending(x => x.AccessCount).ToList();
                         break;
 
                     case EnumSortFilter.TrendingNow:
@@ -130,13 +140,13 @@ namespace Fsel.Course.Lms.Application.Queries.ExtraPracticeQuery
                         DateTime startDate = currentDate.AddDays(-(int)currentDayOfWeek); // Ngày đầu tiên của tuần
                         DateTime endDate = startDate.AddDays(6); // Ngày cuối cùng của tuần
 
-                        var objectsInWeek = extraPracticeQuery.Where(obj => obj.CreatedDate >= startDate && obj.CreatedDate <= endDate);
-                        extraPracticeQuery = extraPracticeQuery.OrderByDescending(obj => obj.AccessCount);
+                        var objectsInWeek = lists.Where(obj => obj.CreatedDate >= startDate && obj.CreatedDate <= endDate).ToList();
+                        lists = lists.OrderByDescending(obj => obj.AccessCount).ToList();
 
                         if (objectsInWeek.Any())
                         {
-                            extraPracticeQuery = extraPracticeQuery.Except(objectsInWeek).OrderByDescending(obj => obj.AccessCount);
-                            extraPracticeQuery = objectsInWeek.OrderByDescending(obj => obj.AccessCount).Concat(extraPracticeQuery);
+                            lists = lists.Except(objectsInWeek).OrderByDescending(obj => obj.AccessCount).ToList();
+                            lists = objectsInWeek.OrderByDescending(obj => obj.AccessCount).Concat(extraPracticeQuery).ToList();
                         }
                         break;
 
@@ -146,20 +156,12 @@ namespace Fsel.Course.Lms.Application.Queries.ExtraPracticeQuery
             }
             if (request.Progresses != null && request.Progresses.Count != 0)
             {
-                extraPracticeQuery = extraPracticeQuery.Where(x =>
-                    (request.Progresses.Contains(EnumExtraPracticeProgress.UnOpened) && x.Percent == 0) ||
-                    (request.Progresses.Contains(EnumExtraPracticeProgress.InProgress) && x.Percent <= 100 && x.Percent >= 0) ||
-                    (request.Progresses.Contains(EnumExtraPracticeProgress.Completed) && x.Percent == 100)
-                );
+                lists = lists.Where(x =>
+                    (request.Progresses.Contains(EnumExtraPracticeProgress.UnOpened) && x.Status == EnumResultStatus.Unfinished) ||
+                    (request.Progresses.Contains(EnumExtraPracticeProgress.InProgress) && (x.Status == EnumResultStatus.Process || x.Status == EnumResultStatus.New)) ||
+                    (request.Progresses.Contains(EnumExtraPracticeProgress.Completed) && x.Status == EnumResultStatus.Done)
+                ).ToList();
             }
-
-            int totalItem = await extraPracticeQuery.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
-            var lists = await extraPracticeQuery
-                    .ApplySortAndPaging(request)
-                    .AsNoTracking()
-                    .ToListAsync(cancellationToken: cancellationToken)
-                    .ConfigureAwait(false);
-
             methodResult.Result = new PagingItemsModel<ExtraPracticeSearchModel>(lists, request, totalItem);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
@@ -172,7 +174,7 @@ namespace Fsel.Course.Lms.Application.Queries.ExtraPracticeQuery
             switch (extraPractice.Type)
             {
                 case EnumExtraPracticeType.Book:
-                    courseSkills = extraPractice.ExtraPracticeChapters.SelectMany(x => x.ExtraPracticeExercises).Select(x => x.Exercise).Distinct().Select(x => x!.CourseSkill).ToList();
+                    courseSkills = extraPractice.ExtraPracticeChapters.SelectMany(x => x.ExtraPracticeExercises).Select(x => x.Exercise).Select(x => x!.CourseSkill).Distinct().ToList();
                     break;
 
                 case EnumExtraPracticeType.VideoEmbed:

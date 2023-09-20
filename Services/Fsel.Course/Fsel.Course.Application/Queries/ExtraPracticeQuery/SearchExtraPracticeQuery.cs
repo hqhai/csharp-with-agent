@@ -61,6 +61,10 @@ namespace Fsel.Course.Application.Queries.ExtraPracticeQuery
             {
                 extraPracticeQuery = extraPracticeQuery.Where(m => m.Type == request.Type);
             }
+            if (request.IsActive != null)
+            {
+                extraPracticeQuery = extraPracticeQuery.Where(m => m.IsActive == request.IsActive);
+            }
             int totalItem = await extraPracticeQuery.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
             var lists = await extraPracticeQuery
                     .ApplySortAndPaging(request)

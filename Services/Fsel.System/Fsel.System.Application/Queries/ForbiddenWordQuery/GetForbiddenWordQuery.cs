@@ -4,7 +4,7 @@ namespace Fsel.System.Application.Querys.ForbiddenWordQuery
 {
     using AutoMapper;
     using Fsel.Common.ActionResults;
-    using Fsel.System.Domain.Enums.ErrorCodes;
+    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.System.Domain.IRepositories;
     using Fsel.System.Domain.Models.EntityModels;
     using global::System;
@@ -36,7 +36,7 @@ namespace Fsel.System.Application.Querys.ForbiddenWordQuery
 
             if (course == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumForbiddenWordErrorCode.ForbiddenWordsNotExist), nameof(request.Id), request.Id);
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(course));
                 return methodResult;
             }
 

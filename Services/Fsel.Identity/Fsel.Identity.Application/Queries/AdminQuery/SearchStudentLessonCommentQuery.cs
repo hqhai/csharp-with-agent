@@ -3,10 +3,10 @@
 namespace Fsel.Identity.Application.Queries.AdminQuery
 {
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Identity.Application.Services.LmsCourseService;
     using Fsel.Identity.Domain.Entities;
-    using Fsel.Identity.Domain.Enums.ErrorCodes;
     using Fsel.Identity.Domain.Models.EntityModels;
     using Fsel.Shared.Enums.ErrorCodes;
     using MediatR;
@@ -40,7 +40,7 @@ namespace Fsel.Identity.Application.Queries.AdminQuery
                                         .FirstOrDefaultAsync(x => x.Human != null && x.Human.Student != null && x.Human.Student.Id == request.StudentId, cancellationToken);
             if (user == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumStudentErrorCode.StudentNotExist));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(user));
                 return methodResult;
             }
             var lessonCommentResult = await _courseService.GetLessonCommentByStudent(request.StudentId);
@@ -51,7 +51,7 @@ namespace Fsel.Identity.Application.Queries.AdminQuery
             }
             var query = lessonCommentResult.Content?.Result?.AsEnumerable();
             int totalItem = query?.Count() ?? 0;
-            var lists = query?.Skip((request!.Page - 1) * request!.PageSize).Take(request!.PageSize).ToList() ?? null;
+            var lists = query?.Skip((request.Page - 1) * request.PageSize).Take(request.PageSize).ToList() ?? null;
             methodResult.Result = new PagingItemsModel<StudentLessonCommentModel>(lists, request, totalItem);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;

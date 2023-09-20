@@ -8,15 +8,12 @@ namespace Fsel.Ordering.Api.Controllers
     using Fsel.Ordering.Application.Commands.OrderCmds;
     using Fsel.Ordering.Application.Queries.OrderQuery;
     using Fsel.Ordering.Domain.Models.EntityModels;
-    using Fsel.Shared.Enums;
     using MediatR;
-    using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
 
     [ApiVersion(Settings.APIVersion)]
     [Route(Settings.APIDefaultRoute + "/order")]
     [ApiController]
-    [Authorize(Roles = nameof(EnumRole.Student))]
     public class OrderController : ControllerBase
     {
         private readonly IMediator _mediator;
@@ -27,14 +24,26 @@ namespace Fsel.Ordering.Api.Controllers
         }
 
         /// <summary>
-        /// Generate Ramdom Order
+        /// Generate Random Order
         /// </summary>
         [HttpGet("")]
         [ProducesResponseType(typeof(MethodResult<GenerateRamdomOrderModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GenerateRamdomOrder([FromQuery] GenerateRamdomOrderQuery query)
+        public async Task<IActionResult> GenerateRandomOrder([FromQuery] GenerateRamdomOrderQuery query)
         {
             MethodResult<GenerateRamdomOrderModel> commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Check Status User
+        /// </summary>
+        [HttpGet("is-status-payment")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> IsCheckStatusUser([FromQuery] GetStatusOrderByUserQuery query)
+        {
+            MethodResult<bool> commandResult = await _mediator.Send(query).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
 

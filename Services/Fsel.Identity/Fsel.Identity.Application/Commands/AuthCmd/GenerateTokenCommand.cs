@@ -4,9 +4,12 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using Fsel.Common.ActionResults;
+using Fsel.Common.Constants;
 using Fsel.Common.Helpers;
-using Fsel.Identity.Application.Services.LmsCourseService;
 using Fsel.Identity.Application.Services.InteractionService;
+using Fsel.Identity.Application.Services.LmsCourseService;
+using Fsel.Identity.Application.Services.OrderService;
+using Fsel.Identity.Application.Services.OrderServices.Model;
 using Fsel.Identity.Application.Services.TrainingService;
 using Fsel.Identity.Domain.Entities;
 using Fsel.Identity.Domain.IRepositories;
@@ -35,6 +38,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
         private readonly ILmsCourseService _lmsCourseService;
         private readonly IUserTokenRepository _userTokenRepository;
         private readonly IHumanRepository _humanRepository;
+        private readonly IOrderService _orderService;
         private readonly AppSetting _appSetting;
 
         public GenerateTokenCommandHandler(UserManager<User> userManager,
@@ -43,6 +47,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             ILmsCourseService lmsCourseService,
             IUserTokenRepository userTokenRepository,
             IHumanRepository humanRepository,
+            IOrderService orderService,
             AppSetting appSetting)
         {
             _userManager = userManager;
@@ -51,6 +56,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             _lmsCourseService = lmsCourseService;
             _userTokenRepository = userTokenRepository;
             _humanRepository = humanRepository;
+            _orderService = orderService;
             _appSetting = appSetting;
         }
 
@@ -69,17 +75,17 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             var jti = Guid.NewGuid().ToString();
             var authClaims = new List<Claim>
             {
-                new Claim(JwtRegisteredClaimNames.Name, user.UserName ?? string.Empty),
-                new Claim(JwtRegisteredClaimNames.GivenName, user.FullName ?? string.Empty),
-                new Claim(JwtRegisteredClaimNames.Email, user.Email ?? string.Empty),
-                new Claim(JwtRegisteredClaimNames.NameId, user.Id ?? string.Empty),
-                new Claim(JwtRegisteredClaimNames.Sub, _appSetting.Jwt?.Subject ?? string.Empty),
-                new Claim(JwtRegisteredClaimNames.Jti, jti),
+                new Claim(JwtClaimNames.UserName, user.UserName ?? string.Empty),
+                new Claim(JwtClaimNames.FullName, user.FullName ?? string.Empty),
+                new Claim(JwtClaimNames.Email, user.Email ?? string.Empty),
+                new Claim(JwtClaimNames.UserId, user.Id ?? string.Empty),
+                new Claim(JwtClaimNames.Sub, _appSetting.Jwt?.Subject ?? string.Empty),
+                new Claim(JwtClaimNames.Jti, jti),
             };
 
             foreach (var userRole in userRoles)
             {
-                authClaims.Add(new Claim(ClaimTypes.Role, userRole));
+                authClaims.Add(new Claim(JwtClaimNames.Role, userRole));
             }
 
             var secretKeyBytes = Encoding.ASCII.GetBytes(_appSetting.Jwt?.SecretKey ?? string.Empty);
@@ -116,12 +122,20 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
 
             if (userRoles.Contains(EnumRole.Student.ToString()))
             {
+                tokenLogin.IsOrder = false;
                 tokenLogin.ClassId = await GetClassId(user.Id);
                 var classStudent = await _trainingService.GetClassByStudentId(user.Human?.Student?.Id ?? default);
-                tokenLogin.ClassCode = classStudent?.Content?.Result?.Code;
+                var @class = classStudent?.Content?.Result;
                 var isPlacementTest = await _lmsCourseService.IsPlacementTestAsync(user.Human?.Student?.Id ?? default);
                 tokenLogin.IsPlacementTest = isPlacementTest?.Content?.Result;
                 var isSurvey = await _interactionService.IsSurveyCompleted(Guid.Parse(request.Id ?? string.Empty));
+                if (@class != null)
+                {
+                    var isOrder = await _orderService.IsCheckStatusUser(new IsCheckPaymentStatusByUserModel { CourseId = @class.CourseId, ClassId = @class.Id, PackageId = @class.PackageId, UserId = Guid.Parse(request.Id ?? string.Empty) });
+                    tokenLogin.ClassCode = @class.Code;
+                    tokenLogin.IsOrder = isOrder?.Content?.Result;
+                }
+
                 if (isSurvey.IsSuccessStatusCode)
                 {
                     tokenLogin.IsSurvey = isSurvey?.Content?.Result;

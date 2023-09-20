@@ -6,6 +6,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
     using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums;
@@ -13,8 +14,10 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.CommandModels.ClassForumResults;
     using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Course.Lms.Application.Queues.Publishers;
     using Fsel.Course.Lms.Application.Services.UserServices;
-    using Fsel.Shared.Helpers;
+    using Fsel.Shared.Enums;
+    using Fsel.Shared.Models.ShareModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -29,16 +32,17 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
         private readonly AuthContext _authContext;
         private readonly IUserService _userService;
         private readonly IClassForumResultRepository _classForumResultRepository;
-
         private readonly IClassForumRepository _classForumRepository;
         private readonly ILessonResultRepository _lessonResultRepository;
+        private readonly NotificationMessagePublisher _notificationMessagePublisher;
 
         public CreateClassForumResultCommandHandler(IMapper mapper
             , AuthContext authContext
             , IUserService userService
             , IClassForumResultRepository classForumResultRepository
             , IClassForumRepository classForumRepository
-            , ILessonResultRepository lessonResultRepository)
+            , ILessonResultRepository lessonResultRepository,
+NotificationMessagePublisher notificationMessagePublisher)
         {
             _mapper = mapper;
             _authContext = authContext;
@@ -46,6 +50,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
             _classForumResultRepository = classForumResultRepository;
             _classForumRepository = classForumRepository;
             _lessonResultRepository = lessonResultRepository;
+            _notificationMessagePublisher = notificationMessagePublisher;
         }
 
         public async Task<MethodResult<ClassForumResultModel>> Handle(CreateClassForumResultCommand request, CancellationToken cancellationToken)
@@ -56,20 +61,20 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
             var student = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
             if (!student.IsSuccessStatusCode)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumLessonErrorCode.UserNotExist), nameof(student), _authContext.CurrentUserId.ToString());
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student));
                 return methodResult;
             }
             var lessonResult = await _lessonResultRepository.GetByIdAsync(request.LessonResultId);
             if (lessonResult == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumLessonResultErrorCode.LessonResultsNotExist), nameof(student), _authContext.CurrentUserId.ToString());
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student));
                 return methodResult;
             }
 
             var classForum = await _classForumRepository.Queryable.FirstOrDefaultAsync(x => x.LessonId == lessonResult.LessonId, cancellationToken);
             if (classForum == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumClassForumErrorCode.ClassForumNull), nameof(student), _authContext.CurrentUserId.ToString());
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(classForum));
                 return methodResult;
             }
             var studentId = student?.Content?.Result?.Id;
@@ -86,7 +91,8 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
                     LessonResultId = request.LessonResultId,
                     Status = request.IsSubmit ? EnumClassForumResultStatus.Pending : EnumClassForumResultStatus.Draft,
                     ClassForumId = classForum.Id,
-                    FilePath = request.FilePath
+                    WordContent = request.WordContent,
+                    GradingAlFeedback = request.GradingAlFeedback,
                 };
             }
             else if (classForumResult.Status == EnumClassForumResultStatus.Draft || classForumResult.Status == EnumClassForumResultStatus.Denied)
@@ -108,51 +114,25 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
                 }).ToList();
             }
 
-            #region Fix hashcode
-
-            classForumResult.Status = EnumClassForumResultStatus.Graded;
-            var score = 0;
-
-            if (classForum.CourseSkill == Shared.Enums.EnumCourseSkill.Speaking && request.TimeLimit >= classForum.TaggetWordLimit)
-            {
-                score = 100;
-            }
-            else if (classForum.CourseSkill == Shared.Enums.EnumCourseSkill.Writing && StringHelper.RemoveHTMLTags(classForumResult.Content!)!.Length >= classForum.TaggetWordLimit)
-            {
-                score = 100;
-            }
-
-            classForumResult.ClassForumScores = new List<ClassForumScore>
-                {
-                    new ClassForumScore
-                    {
-                        Score= score,
-                        Criteria = EnumClassForumScoreCriteria.Content
-                    },
-                    new ClassForumScore
-                    {
-                        Score= score,
-                        Criteria = EnumClassForumScoreCriteria.Achievement
-                    },
-                    new ClassForumScore
-                    {
-                        Score= score,
-                        Criteria = EnumClassForumScoreCriteria.Organisation
-                    },
-                    new ClassForumScore
-                    {
-                        Score= score,
-                        Criteria = EnumClassForumScoreCriteria.Language
-                    }
-                };
-
-            #endregion Fix hashcode
-
             await _classForumResultRepository.ExecuteTransactionAsync(async () =>
             {
-                _classForumResultRepository.Add(classForumResult);
+                classForumResult = _classForumResultRepository.Add(classForumResult);
                 await _classForumResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
+                //mặc định gửi cho tất cả CSO
+                IList<EnumRole> roles = new List<EnumRole>();
+                roles.Add(EnumRole.CSO);
+
+                NotificationQueueModel model = new NotificationQueueModel()
+                {
+                    ObjectId = classForumResult.Id,
+                    Roles = roles,
+                    Content = EnumNotificationContent.CreateClassForumResult,
+                    Type = EnumNotificationType.Text,
+                    SenderId = _authContext.CurrentUserId
+                };
+
+                await _notificationMessagePublisher.Publish(model, cancellationToken);
                 methodResult.StatusCode = StatusCodes.Status201Created;
                 methodResult.Result = _mapper.Map<ClassForumResultModel>(classForumResult);
                 return methodResult;

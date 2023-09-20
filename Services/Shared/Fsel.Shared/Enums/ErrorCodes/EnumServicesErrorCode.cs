@@ -22,6 +22,16 @@ namespace Fsel.Shared.Enums.ErrorCodes
         /// <summary>
         /// Call to service InteractionService error
         /// </summary>
-        CallInteractionServiceError
+        CallInteractionServiceError,
+
+        /// <summary>
+        /// Call to service SystemService error
+        /// </summary>
+        CallSystemServiceError,
+
+        /// <summary>
+        /// Call to service OrderService error
+        /// </summary>
+        CallOrderServiceError
     }
 }

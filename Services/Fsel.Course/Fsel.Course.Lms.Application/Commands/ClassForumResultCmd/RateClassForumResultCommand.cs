@@ -7,77 +7,74 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
     using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Common.ActionResults;
-    using Fsel.Core.Base;
-    using Fsel.Course.Domain.Enums;
+    using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.CommandModels.ClassForumResults;
-    using Fsel.Course.Lms.Application.Services.UserServices;
+    using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Shared.Enums;
+    using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.AspNetCore.Http;
+    using Microsoft.EntityFrameworkCore;
 
-    public class RateClassForumResultCommand : RateClassForumResultCommandModel, IRequest<MethodResult<bool>>
+    public class RateClassForumResultCommand : RateClassForumResultCommandModel, IRequest<MethodResult<StudentFeedbackModel>>
     {
     }
 
-    public class RateClassForumResultCommandHandler : IRequestHandler<RateClassForumResultCommand, MethodResult<bool>>
+    public class RateClassForumResultCommandHandler : IRequestHandler<RateClassForumResultCommand, MethodResult<StudentFeedbackModel>>
     {
         private readonly IMapper _mapper;
-        private readonly AuthContext _authContext;
-        private readonly IUserService _userService;
-        private readonly IClassForumResultRepository _classForumResultRepository;
+        private readonly IStudentFeedbackRepository _studentFeedbackRepository;
 
-        public RateClassForumResultCommandHandler(IMapper mapper, AuthContext authContext, IUserService userService, IClassForumResultRepository classForumResultRepository)
+        public RateClassForumResultCommandHandler(IMapper mapper, IStudentFeedbackRepository studentFeedbackRepository)
         {
             _mapper = mapper;
-            _authContext = authContext;
-            _userService = userService;
-            _classForumResultRepository = classForumResultRepository;
+            _studentFeedbackRepository = studentFeedbackRepository;
         }
 
-        public async Task<MethodResult<bool>> Handle(RateClassForumResultCommand request, CancellationToken cancellationToken)
+        public async Task<MethodResult<StudentFeedbackModel>> Handle(RateClassForumResultCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            MethodResult<bool> methodResult = new MethodResult<bool>();
-            var student = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
-            if (!student.IsSuccessStatusCode)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumLessonErrorCode.UserNotExist), nameof(student), _authContext.CurrentUserId.ToString());
-                return methodResult;
-            }
-            var studentId = student?.Content?.Result?.Id;
+            MethodResult<StudentFeedbackModel> methodResult = new MethodResult<StudentFeedbackModel>();
 
-            var classForumResult = await _classForumResultRepository.GetByIdAsync(request.ClassForumResultId);
-
-            if (classForumResult == null)
+            StudentFeedback studentFeedback = _mapper.Map<StudentFeedback>(request);
+            if (!EnumFeedBackHelper.IsCheckFeedBack(request.FeedBackNegatives, request.FeedBackPositives))
             {
-                methodResult.AddErrorBadRequest(nameof(EnumClassForumResultErrorCode.ClassForumResultNotExist), nameof(request.ClassForumResultId), request.ClassForumResultId);
+                methodResult.AddErrorBadRequest(nameof(EnumClassForumResultErrorCode.FeedbackPositiveOrFeedBackBothHaveValue));
                 return methodResult;
             }
-            if (studentId != classForumResult.StudentId)
+            if (studentFeedback.FeedBackStars > 5)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumClassForumResultErrorCode.ResultNotFromStudent));
+                methodResult.AddErrorBadRequest(nameof(EnumClassForumResultErrorCode.FeedBackStarOnlyCanHane5));
                 return methodResult;
             }
-            if (classForumResult.FeedBackStars > 5)
+            var isExistFeedback = await _studentFeedbackRepository.Queryable.AnyAsync(x => x.ObjectId == request.ObjectId && x.Type == request.Type, cancellationToken);
+            if (isExistFeedback)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumClassForumResultErrorCode.ClassForumResultStatusNotGraded));
-                return methodResult;
-            }
-            if (classForumResult.Status != EnumClassForumResultStatus.Graded)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumClassForumResultErrorCode.ClassForumResultStatusNotGraded));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(isExistFeedback));
                 return methodResult;
             }
 
-            _mapper.Map(request, classForumResult);
-            await _classForumResultRepository.ExecuteTransactionAsync(async () =>
+            #region temporary delete
+
+            /* if (classForumResult.Status != EnumClassForumResultStatus.Graded)
+             {
+                 methodResult.AddErrorBadRequest(nameof(EnumClassForumResultErrorCode.ClassForumResultStatusNotGraded));
+                 return methodResult;
+             }*/
+
+            #endregion temporary delete
+
+            await _studentFeedbackRepository.ExecuteTransactionAsync(async () =>
             {
-                classForumResult = _classForumResultRepository.Update(classForumResult);
-                await _classForumResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+                studentFeedback.Feature = EnumFeature.MockTest;
+                studentFeedback = _studentFeedbackRepository.Add(studentFeedback);
+                await _studentFeedbackRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
                 methodResult.StatusCode = StatusCodes.Status201Created;
-                methodResult.Result = true;
+                methodResult.Result = _mapper.Map<StudentFeedbackModel>(studentFeedback);
                 return methodResult;
             });
 

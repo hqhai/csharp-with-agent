@@ -7,6 +7,7 @@ namespace Fsel.Course.Lms.Application.Commands.LessonCmd
     using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums;
@@ -78,7 +79,7 @@ namespace Fsel.Course.Lms.Application.Commands.LessonCmd
             var course = await _courseRepository.Queryable.Include(x => x.CourseResults).FirstOrDefaultAsync(x => x.Id == request.CourseId, cancellationToken);
             if (course == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.CourseNotExist), nameof(request.CourseId), request.CourseId);
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(course));
                 return methodResult;
             }
             else if (course.Status == EnumCourseStatus.New)
@@ -97,20 +98,20 @@ namespace Fsel.Course.Lms.Application.Commands.LessonCmd
             var unit = await _unitRepository.Queryable.Include(x => x.LessonResults).Include(x => x.UnitResults).FirstOrDefaultAsync(x => x.Id == request.UnitId, cancellationToken);
             if (unit == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumUnitErrorCode.UnitNotExist), nameof(request.UnitId), request.UnitId);
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(unit));
                 return methodResult;
             }
             var lessonResultNew = unit.LessonResults.FirstOrDefault(x => x.LessonId == request.LessonId && x.UnitId == request.UnitId && x.CourseId == request.CourseId && x.StudentId == studentId && x.Status == EnumResultStatus.New);
             if (lessonResultNew == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumLessonResultErrorCode.LessonResultNotExistNew));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(lessonResultNew));
                 return methodResult;
             }
 
             var lesson = await _lessonRepository.Queryable.Include(x => x.LessonVideos).FirstOrDefaultAsync(x => x.Id == request.LessonId, cancellationToken);
             if (lesson == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumLessonErrorCode.LessonNotExist));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(lesson));
                 return methodResult;
             }
 
@@ -134,7 +135,7 @@ namespace Fsel.Course.Lms.Application.Commands.LessonCmd
                 }
                 lessonResult.VideoResult = new VideoResult
                 {
-                    VideoId = lesson.LessonVideos.FirstOrDefault()!.VideoId,
+                    VideoId = lesson.LessonVideos.FirstOrDefault()?.VideoId ?? default,
                     Status = EnumResultStatus.Process,
                     StudentId = studentId ?? default,
                 };
@@ -142,10 +143,23 @@ namespace Fsel.Course.Lms.Application.Commands.LessonCmd
                 lessonResult.HomeWorkResults = homeWorks.Select(x => new HomeWorkResult
                 {
                     HomeWorkId = x.Id,
-                    Status = EnumResultStatus.Unfinished,
+                    Status = EnumResultStatus.New,
                     StudentId = studentId ?? default,
                     CorrectTotal = x.HomeWorkQuestions.Select(x => x.Question).Sum(x => x!.CorrectTotal)
                 }).ToList();
+
+                #region TODO : Fix Demo 20/9/2023
+
+                //lessonResult.HomeWorkResults = homeWorks.Select(x => new HomeWorkResult
+                //{
+                //    HomeWorkId = x.Id,
+                //    Status = EnumResultStatus.Unfinished,
+                //    StudentId = studentId ?? default,
+                //    CorrectTotal = x.HomeWorkQuestions.Select(x => x.Question).Sum(x => x!.CorrectTotal)
+                //}).ToList();
+
+                #endregion TODO : Fix Demo 20/9/2023
+
                 lessonResult.Status = EnumResultStatus.Process;
                 lessonResult = _lessonResultRepository.Update(lessonResult);
                 await _lessonResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);

@@ -5,6 +5,8 @@ namespace Fsel.Shared.Enums
     public enum EnumSenderTemplate
     {
         SendOtp,
-        SendOtpAndLink
+        SendOtpAndLink,
+        SendStudentPTOnline,
+        SendSurveyToParentStudent
     }
 }

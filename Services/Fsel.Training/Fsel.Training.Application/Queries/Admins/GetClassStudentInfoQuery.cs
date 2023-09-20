@@ -49,13 +49,20 @@ namespace Fsel.Training.Application.Queries.Admins
                                                 Status = x.Status,
                                             })
                                             .ToListAsync(cancellationToken: cancellationToken);
-            var packages = await _orderService.GetPackages();
-            var courses = await _courseService.GetListCourseByIds(classStudents.Select(x => x.CourseId).ToList());
+            var packagesReq = _orderService.GetPackages();
+            var coursesReq = _courseService.GetListCourseByIds(classStudents.Select(x => x.CourseId).ToList());
+            await Task.WhenAll(packagesReq, coursesReq);
+
+            var coursesResult = coursesReq.GetAwaiter().GetResult();
+            var packagesResult = packagesReq.GetAwaiter().GetResult();
+
+            var courses = coursesResult.Content?.Result;
+            var packages = packagesResult.Content?.Result;
 
             foreach (var classStudent in classStudents)
             {
-                var course = courses.Content?.Result?.FirstOrDefault(x => x.Id == classStudent.CourseId);
-                var package = packages.Content?.Result?.FirstOrDefault(x => x.Id == classStudent.PackageId);
+                var course = courses?.FirstOrDefault(x => x.Id == classStudent.CourseId);
+                var package = packages?.FirstOrDefault(x => x.Id == classStudent.PackageId);
                 classStudent.CourseName = course?.Code;
                 classStudent.Membership = package?.Code.ToString();
             }

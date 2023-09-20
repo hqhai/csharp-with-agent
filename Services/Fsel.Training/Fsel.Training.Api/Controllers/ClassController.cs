@@ -9,6 +9,7 @@ namespace Fsel.Training.Api.Controllers
     using Fsel.Core.Base.BaseModels;
     using Fsel.Shared.Enums;
     using Fsel.Training.Application.Commands.ClassCmd;
+    using Fsel.Training.Application.Commands.ClassLiveCmd;
     using Fsel.Training.Application.Commands.ClassStudentCmd;
     using Fsel.Training.Application.Queries.Admins;
     using Fsel.Training.Application.Queries.ClassQuery;
@@ -72,7 +73,6 @@ namespace Fsel.Training.Api.Controllers
         [HttpPost("register-class")]
         [ProducesResponseType(typeof(MethodResult<ClassModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        [Authorize(Roles = nameof(EnumRole.Student))]
         public async Task<IActionResult> RegisterClass([FromBody] RegisterClassCommand command)
         {
             MethodResult<ClassModel> queryResult = await _mediator.Send(command).ConfigureAwait(false);
@@ -136,6 +136,30 @@ namespace Fsel.Training.Api.Controllers
         public async Task<IActionResult> GetClassCourseStudent([FromRoute] Guid studentId)
         {
             MethodResult<IList<ClassStudentInfoModel>> queryResult = await _mediator.Send(new GetClassStudentInfoQuery { StudentId = studentId }).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Classes by StudentIds
+        /// </summary>
+        [HttpPost("classes-by-studentids")]
+        [ProducesResponseType(typeof(MethodResult<IList<ClassStudentDetailModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetClassByStudentIds([FromBody] GetListClassByStudentIdsQuery query)
+        {
+            MethodResult<IList<ClassStudentDetailModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Approve teacher
+        /// </summary>
+        [HttpPut("approve-auto")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> ApproveAuto()
+        {
+            var queryResult = await _mediator.Send(new UpdateClassLiveAssignmentCommand()).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
     }

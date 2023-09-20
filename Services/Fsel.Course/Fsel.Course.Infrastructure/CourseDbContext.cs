@@ -63,6 +63,8 @@ namespace Fsel.Course.Infrastructure
         public DbSet<SectionQuestion> SectionQuestions { get; set; }
         public DbSet<SectionTimeCode> SectionTimeCodes { get; set; }
         public DbSet<MockTestSection> MockTestSections { get; set; }
+        public DbSet<MockTestScore> MockTestScores { get; set; }
+
         public DbSet<FinalTest> FinalTests { get; set; }
         public DbSet<MockTestResult> MockTestResults { get; set; }
         public DbSet<MockTestAnswer> MockTestAnswers { get; set; }
@@ -73,6 +75,7 @@ namespace Fsel.Course.Infrastructure
         public DbSet<ClassForumScore> ClassForumScores { get; set; }
         public DbSet<ClassForumResultFile> ClassForumResultFiles { get; set; }
         public DbSet<ClassForumFile> ClassForumFiles { get; set; }
+        public DbSet<StudentFeedback> StudentFeedbacks { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -135,6 +138,7 @@ namespace Fsel.Course.Infrastructure
             modelBuilder.ApplyConfiguration(new ClassForumScoreEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new ClassForumFileEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new ClassForumResultFileEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new StudentFeedbackEntityTypeConfiguration());
 
             base.OnModelCreating(modelBuilder);
         }

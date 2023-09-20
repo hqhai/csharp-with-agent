@@ -33,7 +33,7 @@ namespace Fsel.System.Application.Commands.TeachingCostCmd
 
             await _teachingCostRepository.ExecuteTransactionAsync(async () =>
             {
-                var teachingCost = await _teachingCostRepository.GetByIdAsync(request.Id);
+                var teachingCost = await _teachingCostRepository.GetByIdAsync(request.Id ?? default);
 
                 if (teachingCost != null)
                 {

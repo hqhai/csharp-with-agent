@@ -3,11 +3,10 @@
 using System.Globalization;
 using System.Text;
 using Fsel.Common.ActionResults;
-using Fsel.Common.Constants;
+using Fsel.Common.Enums.ErrorCodes;
 using Fsel.Common.Helpers;
 using Fsel.Identity.Domain.Entities;
 using Fsel.Identity.Domain.Enums;
-using Fsel.Identity.Domain.Enums.ErrorCodes;
 using Fsel.Identity.Domain.IRepositories;
 using Fsel.Identity.Infrastructure.ValueSettings;
 using Fsel.Shared.Constants;
@@ -50,14 +49,15 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             MethodResult<bool> methodResult = new MethodResult<bool>();
             if (string.IsNullOrEmpty(request.Email))
             {
-                methodResult.AddErrorBadRequest(nameof(EnumAuthErrorCode.EmailNull), nameof(request.Email), request.Email);
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Email));
                 return methodResult;
             }
 
             var user = await _userManager.FindByEmailAsync(request.Email);
             if (user == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumAuthErrorCode.EmailNotExist), nameof(request.Email), request.Email);
+                methodResult.Result = true;
+                methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
             }
 
@@ -90,14 +90,13 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             var param = new SendOtpTemplateModel
             {
                 OtpCode = otp,
-                AccessLink = string.Format(CultureInfo.InvariantCulture, _appSetting.ConstantUrl!.ConfirmOtpUrl!, otp),
                 OtpValidTime = string.Format(CultureInfo.InvariantCulture, SenderSettings.OtpValidMinute, _appSetting!.Otp!.StepTime)
             };
             var subject = string.Format(CultureInfo.InvariantCulture, SenderSettings.SendOtpSubjectFullName, user.FullName);
             var sendResult = new MethodResult<bool>();
             if (!string.IsNullOrEmpty(request.Email))
             {
-                sendResult = await _mediator.Send(new SenderCommand { Email = user.Email, Subject = subject, Params = param, Template = EnumSenderTemplate.SendOtpAndLink }, cancellationToken).ConfigureAwait(false);
+                sendResult = await _mediator.Send(new SenderCommand { Email = user.Email, Subject = subject, Params = param, Template = EnumSenderTemplate.SendOtp }, cancellationToken).ConfigureAwait(false);
             }
 
             if (!sendResult.IsOK)

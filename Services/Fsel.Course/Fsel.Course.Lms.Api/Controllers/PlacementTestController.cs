@@ -16,11 +16,11 @@ namespace Fsel.Course.Lms.Api.Controllers
     [ApiVersion(Settings.APIVersion)]
     [Route(Settings.APIDefaultRoute + "/placement-test")]
     [ApiController]
-    public class PlacmentTestController : ControllerBase
+    public class PlacementTestController : ControllerBase
     {
         private readonly IMediator _mediator;
 
-        public PlacmentTestController(IMediator mediator)
+        public PlacementTestController(IMediator mediator)
         {
             _mediator = mediator;
         }
@@ -51,6 +51,18 @@ namespace Fsel.Course.Lms.Api.Controllers
         }
 
         /// <summary>
+        /// count result by StudentId
+        /// </summary>
+        [HttpGet("count-result/{studentId}")]
+        [ProducesResponseType(typeof(MethodResult<int>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> CountResultByStudentId([FromRoute] Guid studentId)
+        {
+            MethodResult<int> queryResult = await _mediator.Send(new GetCountPlacementTestResultQuery { StudentId = studentId }).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
         /// get PlacementTest Result
         /// </summary>
         [HttpGet("get-result")]
@@ -60,6 +72,19 @@ namespace Fsel.Course.Lms.Api.Controllers
         public async Task<IActionResult> GetResult()
         {
             MethodResult<PlacementTestResultModel> queryResult = await _mediator.Send(new GetPlacementTestResultQuery()).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// get list PlacementTest Result
+        /// </summary>
+        [HttpGet("get-list-result")]
+        [Authorize(Roles = nameof(EnumRole.Student))]
+        [ProducesResponseType(typeof(MethodResult<IList<PlacementTestResultModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetListResult()
+        {
+            MethodResult<IList<PlacementTestResultModel>> queryResult = await _mediator.Send(new GetListPlacementTestResultQuery()).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
 

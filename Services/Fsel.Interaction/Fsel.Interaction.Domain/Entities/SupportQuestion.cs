@@ -3,8 +3,8 @@
 namespace Fsel.Interaction.Domain.Entities
 {
     using System;
-    using Fsel.Common.Enums.ErrorCodes;
     using System.ComponentModel.DataAnnotations;
+    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Entities;
 
     public class SupportQuestion : Entity
@@ -17,6 +17,7 @@ namespace Fsel.Interaction.Domain.Entities
         public string? Name { get; set; }
 
         public bool IsFrequent { get; set; }
+
         /// <summary>
         /// Tiêu đề
         /// </summary>
@@ -31,6 +32,5 @@ namespace Fsel.Interaction.Domain.Entities
         public SupportCategory? SupportCategory { get; set; }
 
         public ICollection<SupportTicket> SupportTickets { get; set; } = new List<SupportTicket>();
-
     }
 }

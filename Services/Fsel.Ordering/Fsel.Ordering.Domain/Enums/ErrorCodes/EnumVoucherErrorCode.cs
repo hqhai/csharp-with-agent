@@ -5,11 +5,6 @@ namespace Fsel.Ordering.Domain.Enums.ErrorCodes
     public enum EnumVoucherErrorCode
     {
         /// <summary>
-        /// Voucher Does Not Exist
-        /// </summary>
-        VoucherNotExist,
-
-        /// <summary>
         /// Voucher Start Time Must be Sooner Than the End Time
         /// </summary>
         VoucherStartTimeMustSoonerThanEndTime,

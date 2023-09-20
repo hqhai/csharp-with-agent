@@ -36,6 +36,8 @@ namespace Fsel.Interaction.Application.Queries.SurveyQuestionQuery
                                                                                 Icon = x.Icon,
                                                                                 Question = x.Question,
                                                                                 Type = x.Type,
+                                                                                DisplayLevel = x.DisplayLevel,
+                                                                                IsPilot = x.IsPilot,
                                                                                 Answer = x.CustomerSurveys.FirstOrDefault(y => y.SurveyQuestionId == x.Id && y.UserId == request.Id)!.Answer
                                                                             }).ToListAsync(cancellationToken);
 

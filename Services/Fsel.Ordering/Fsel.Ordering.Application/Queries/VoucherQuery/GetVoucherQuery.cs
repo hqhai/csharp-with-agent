@@ -6,9 +6,10 @@ namespace Fsel.Ordering.Application.Queries.VoucherQuery
     using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Common.ActionResults;
-    using Fsel.Ordering.Domain.Enums.ErrorCodes;
+    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Ordering.Domain.IRepositories;
     using Fsel.Ordering.Domain.Models.EntityModels;
+    using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -57,14 +58,14 @@ namespace Fsel.Ordering.Application.Queries.VoucherQuery
                                             PackageId = x.PackageId,
                                             Percentage = x.Percentage,
                                             VoucherId = x.VoucherId,
-                                            DiscountedPrice = (double)x.Package!.Price - (x.Percentage * (double)x.Package!.Price / 100),
+                                            DiscountedPrice = (double)x.Package!.Price - NumberHelper.ConvertDoublePercent(x.Percentage * (double)x.Package!.Price),
                                             Price = (double)x.Package!.Price,
                                         }).ToList(),
                                     }).FirstOrDefaultAsync(cancellationToken);
 
             if (voucherQuery == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumVoucherErrorCode.VoucherNotExist), nameof(request.Id), request.Id);
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(voucherQuery));
                 return methodResult;
             }
             var voucherModel = _mapper.Map<VoucherModel>(voucherQuery);

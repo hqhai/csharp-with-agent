@@ -1,0 +1,103 @@
+// Copyright (c) Atlantic. All rights reserved.
+
+namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
+{
+    using Fsel.Common.ActionResults;
+    using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Core.Base;
+    using Fsel.Course.Domain.Entities.SkillScoresConfigs;
+    using Fsel.Course.Domain.Enums;
+    using Fsel.Course.Domain.IRepositories;
+    using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Course.Lms.Application.Services.UserServices;
+    using MediatR;
+    using Microsoft.AspNetCore.Http;
+    using Microsoft.EntityFrameworkCore;
+
+    public class GetOverallScoreQuery : IRequest<MethodResult<OverallScoreModel>>
+    {
+        public Guid CourseId { get; set; }
+    }
+
+    public class GetOverallScoreQueryHandler : IRequestHandler<GetOverallScoreQuery, MethodResult<OverallScoreModel>>
+    {
+        private readonly AuthContext _authContext;
+        private readonly ICourseRepository _courseRepository;
+        private readonly IPlacementTestResultRepository _placementTestResultRepository;
+        private readonly IUnitResultRepository _unitResultRepository;
+        private readonly IUserService _userService;
+
+        public GetOverallScoreQueryHandler(AuthContext authContext
+            , ICourseRepository courseRepository
+            , IPlacementTestResultRepository placementTestResultRepository
+            , IUnitResultRepository unitResultRepository
+            , IUserService userService)
+        {
+            _authContext = authContext;
+            _courseRepository = courseRepository;
+            _placementTestResultRepository = placementTestResultRepository;
+            _unitResultRepository = unitResultRepository;
+            _userService = userService;
+        }
+
+        public async Task<MethodResult<OverallScoreModel>> Handle(GetOverallScoreQuery request, CancellationToken cancellationToken)
+        {
+            ArgumentNullException.ThrowIfNull(request);
+            MethodResult<OverallScoreModel> methodResult = new MethodResult<OverallScoreModel>();
+            OverallScoreModel overallScoreModel = new OverallScoreModel();
+            var studentResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
+            if (!studentResult.IsSuccessStatusCode)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(studentResult));
+                return methodResult;
+            }
+            var student = studentResult?.Content?.Result;
+            var level = student?.CourseLevel;
+            var studentId = student?.Id;
+            var course = await _courseRepository.GetByIdAsync(request.CourseId);
+            if (course == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(course));
+                return methodResult;
+            }
+            var unitResults = await _unitResultRepository.Queryable.Include(x => x.Unit)
+                                                            .Where(x => x.StudentId == studentId && x.Status == EnumResultStatus.Done && x.CourseId == request.CourseId)
+                                                            .ToArrayAsync(cancellationToken);
+            if (unitResults != null && unitResults.Any())
+            {
+                overallScoreModel.SkillScores = unitResults.Where(x => x.SkillScores != null && x.SkillScores.Any())
+                    .SelectMany(x => x.SkillScores!)
+                    .GroupBy(x => x.Skill)
+                    .Select(x => new SkillScores
+                    {
+                        Skill = x.Key,
+                        CorrectCount = x.Sum(x => x.CorrectCount),
+                        TotalCount = x.Sum(x => x.TotalCount),
+                        Scores = x.Average(x => x.Scores),
+                        CountQuestion = x.Sum(x => x.CountQuestion),
+                        TotalQuestion = x.Sum(x => x.TotalQuestion),
+                        Percent = x.Average(x => x.Percent)
+                    }).ToList();
+                overallScoreModel.IsPlacement = false;
+                overallScoreModel.Percent = unitResults.Average(x => x.Percent);
+            }
+            else
+            {
+                var placementTestScore = await _placementTestResultRepository.Queryable.OrderByDescending(x => x.CreatedDate).FirstOrDefaultAsync(x => x.StudentId == studentId && x.Status == EnumResultStatus.Done, cancellationToken);
+                if (placementTestScore == null)
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(placementTestScore));
+                    return methodResult;
+                }
+                overallScoreModel.SkillScores = placementTestScore.SkillScores;
+                overallScoreModel.IsPlacement = true;
+                overallScoreModel.Percent = placementTestScore.Percent;
+            }
+            overallScoreModel.CourseLevel = level ?? default;
+            overallScoreModel.CourseType = course.CourseType;
+            methodResult.StatusCode = StatusCodes.Status200OK;
+            methodResult.Result = overallScoreModel;
+            return methodResult;
+        }
+    }
+}

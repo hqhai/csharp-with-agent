@@ -40,6 +40,5 @@ namespace Fsel.Course.Domain.Entities
         public SectionTimeCode? SectionTimeCode { get; set; }
         public Guid? SectionId { get; set; }
         public Section? Section { get; set; }
-
     }
 }

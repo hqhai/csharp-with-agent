@@ -2,12 +2,12 @@
 
 namespace Fsel.Interaction.Domain.Entities
 {
-    using Fsel.Common.Enums.ErrorCodes;
     using System.ComponentModel.DataAnnotations;
+    using System.ComponentModel.DataAnnotations.Schema;
+    using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Common.Helpers;
     using Fsel.Core.Entities;
     using Fsel.Shared.Enums;
-    using Fsel.Common.Helpers;
-    using System.ComponentModel.DataAnnotations.Schema;
 
     public class SupportTicket : Entity
     {
@@ -17,36 +17,42 @@ namespace Fsel.Interaction.Domain.Entities
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         [MaxLength(250, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? Code { get; set; }
+
         /// <summary>
         /// Họ tên
         /// </summary>
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         [MaxLength(250, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? FullName { get; set; }
+
         /// <summary>
         /// Số điện thoại
         /// </summary>
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         [MaxLength(250, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? PhoneNumber { get; set; }
+
         /// <summary>
         /// Người dùng code
         /// </summary>
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         [MaxLength(250, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? UserCode { get; set; }
+
         /// <summary>
         /// Email
         /// </summary>
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         [MaxLength(250, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? Email { get; set; }
+
         /// <summary>
         /// Nội dung
         /// </summary>
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         [MaxLength(1000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? Content { get; set; }
+
         /// <summary>
         /// file
         /// </summary>
@@ -60,8 +66,9 @@ namespace Fsel.Interaction.Domain.Entities
             get { return ConvertHelper.Deserialize<IList<string>>(FilePathsStr); }
             set { FilePathsStr = ConvertHelper.Serialize(value); }
         }
+
         /// <summary>
-        /// Vấn đề khác 
+        /// Vấn đề khác
         /// </summary>
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         [MaxLength(1000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]

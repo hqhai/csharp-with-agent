@@ -2,10 +2,10 @@
 
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using Fsel.Shared.Enums;
 using Fsel.Common.Enums.ErrorCodes;
 using Fsel.Common.Helpers;
 using Fsel.Core.Entities;
+using Fsel.Shared.Enums;
 
 namespace Fsel.Interaction.Domain.Entities
 {
@@ -21,7 +21,9 @@ namespace Fsel.Interaction.Domain.Entities
         [MaxLength(500, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? Icon { get; set; }
 
-        public int DisplayOrder { get; set; }
+        public float DisplayOrder { get; set; }
+
+        public int DisplayLevel { get; set; }
 
         public EnumSurveyQuestion Type { get; set; }
 
@@ -35,6 +37,7 @@ namespace Fsel.Interaction.Domain.Entities
             set { AnswerStr = ConvertHelper.Serialize(value); }
         }
 
+        public bool IsPilot { get; set; }
         public IList<CustomerSurvey> CustomerSurveys { get; set; } = new List<CustomerSurvey>();
     }
 }

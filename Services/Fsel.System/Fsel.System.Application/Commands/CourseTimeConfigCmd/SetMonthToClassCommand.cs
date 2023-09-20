@@ -4,7 +4,7 @@ namespace Fsel.System.Application.Commands.CourseTimeConfigCmd
 {
     using AutoMapper;
     using Fsel.Common.ActionResults;
-    using Fsel.System.Domain.Entities;
+    using Fsel.System.Domain.Entities.Configs;
     using Fsel.System.Domain.IRepositories;
     using Fsel.System.Domain.Models.CommandModels.CourseTimeConfigs;
     using Fsel.System.Domain.Models.EntityModels;

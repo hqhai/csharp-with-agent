@@ -2,7 +2,7 @@
 
 using AutoMapper;
 using Fsel.Common.ActionResults;
-using Fsel.Course.Domain.Enums.ErrorCodes;
+using Fsel.Common.Enums.ErrorCodes;
 using Fsel.Course.Domain.IRepositories;
 using Fsel.Course.Domain.Models.EntityModels;
 using MediatR;
@@ -34,7 +34,7 @@ namespace Fsel.Course.Application.Queries.LessonQuery
 
             if (lesson == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumLessonErrorCode.LessonNotExist), nameof(request.Id), request.Id);
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(lesson));
                 return methodResult;
             }
 
@@ -44,6 +44,7 @@ namespace Fsel.Course.Application.Queries.LessonQuery
             lessonModel.Video = _mapper.Map<VideoModel>(video);
             lessonModel.VideoId = video?.Id;
             lessonModel.HomeWorks = _mapper.Map<IList<HomeWorkModel>>(lesson.LessonHomeWorks.OrderBy(x => x!.CreatedDate).Select(x => x.HomeWork));
+            lessonModel.ExtraPracticeIds = lesson.LessonExtraPractices.OrderBy(x => x!.CreatedDate).Select(x => x.ExtracPraticeId).ToList();
             lessonModel.ClassForum = _mapper.Map<ClassForumModel>(lesson.ClassForum);
             lessonModel.IsActive = lesson.UnitLessons.Any();
             methodResult.Result = lessonModel;

@@ -2,15 +2,16 @@
 
 namespace Fsel.Course.Lms.Api.Controllers
 {
-    using Fsel.Common.ActionResults;
     using System.Net;
+    using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
+    using Fsel.Course.Domain.Entities.SkillScoresConfigs;
     using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Course.Lms.Application.Queries.UnitQuery;
     using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
-    using Fsel.Course.Lms.Application.Queries.UnitQuery;
 
     [ApiVersion(Settings.APIVersion)]
     [Route(Settings.APIDefaultRoute + "/unit-result")]
@@ -34,6 +35,21 @@ namespace Fsel.Course.Lms.Api.Controllers
         public async Task<IActionResult> GetListLessonByUnitId([FromQuery] GetUnitScoreQuery query)
         {
             MethodResult<IList<UnitResultModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+
+        /// <summary>
+        /// Get Current Unit Indicator
+        /// </summary>
+        /// <param name="query"></param>
+        /// <returns></returns>
+        [HttpGet("current-unit-indicator")]
+        [ProducesResponseType(typeof(MethodResult<IList<SkillScores>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetCurrentUnitIndicator([FromQuery] GetCurrentUnitIndicatorQuery query)
+        {
+            MethodResult<IList<SkillScores>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
     }

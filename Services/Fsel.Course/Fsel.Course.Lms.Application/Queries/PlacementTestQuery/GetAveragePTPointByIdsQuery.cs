@@ -36,7 +36,6 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestQuery
 
             var ptResult = await _placementTestResultRepository.Queryable.Where(x => studentIds.Contains(x.StudentId)).OrderByDescending(p => p.CreatedDate).ToListAsync(cancellationToken);
 
-
             foreach (var item in request.PointByIdQueryModels)
             {
                 var averagePT = new AveragePTPointModel();
