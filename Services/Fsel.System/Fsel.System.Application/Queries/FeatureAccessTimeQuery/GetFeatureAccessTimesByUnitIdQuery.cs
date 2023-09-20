@@ -10,14 +10,14 @@ namespace Fsel.System.Application.Queries.FeatureAccessTimeQuery
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class GetFeatureAccessTimesByUnitIdQuery : IRequest<MethodResult<FeatureAccessTimeModel>>
+    public class GetFeatureAccessTimesByUnitIdQuery : IRequest<MethodResult<IList<FeatureAccessTimeModel>>>
     {
         public Guid CourseId { get; set; }
-        public IList<Guid>? UnitIds { get; set; }
+        public IList<Guid> UnitIds { get; set; } = new List<Guid>();
         public Guid UserId { get; set; }
     }
 
-    public class GetFeatureAccessTimesByUnitIdQueryHandler : IRequestHandler<GetFeatureAccessTimesByUnitIdQuery, MethodResult<FeatureAccessTimeModel>>
+    public class GetFeatureAccessTimesByUnitIdQueryHandler : IRequestHandler<GetFeatureAccessTimesByUnitIdQuery, MethodResult<IList<FeatureAccessTimeModel>>>
     {
         private readonly IFeatureAccessTimeRepository _featureAccessTimeRepository;
 
@@ -26,16 +26,10 @@ namespace Fsel.System.Application.Queries.FeatureAccessTimeQuery
             _featureAccessTimeRepository = featureAccessTimeRepository;
         }
 
-        public async Task<MethodResult<FeatureAccessTimeModel>> Handle(GetFeatureAccessTimesByUnitIdQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<IList<FeatureAccessTimeModel>>> Handle(GetFeatureAccessTimesByUnitIdQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            MethodResult<FeatureAccessTimeModel> methodResult = new MethodResult<FeatureAccessTimeModel>();
-            if (request.UnitIds == null || !request.UnitIds.Any())
-            {
-                methodResult.Result = null;
-                methodResult.StatusCode = StatusCodes.Status200OK;
-                return methodResult;
-            }
+            MethodResult<IList<FeatureAccessTimeModel>> methodResult = new MethodResult<IList<FeatureAccessTimeModel>>();
             var featureAccessTimes = await _featureAccessTimeRepository.Queryable.Where(x => x.CreatedUserId == request.UserId && x.CourseId == request.CourseId && request.UnitIds.Contains(x.UnitId ?? default))
                 .GroupBy(x => x.CourseId)
                 .Select(x => new FeatureAccessTimeModel
@@ -45,7 +39,7 @@ namespace Fsel.System.Application.Queries.FeatureAccessTimeQuery
                     AccessTime = x.Sum(x => x.AccessTime),
                     Visit = x.Sum(x => x.Visit),
                     LastVisited = x.OrderByDescending(x => x.LastVisited).FirstOrDefault()!.LastVisited ?? DateTime.Now,
-                }).FirstOrDefaultAsync(cancellationToken);
+                }).ToListAsync(cancellationToken);
             methodResult.Result = featureAccessTimes;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;

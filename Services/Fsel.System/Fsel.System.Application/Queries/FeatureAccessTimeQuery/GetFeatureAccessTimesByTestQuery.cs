@@ -14,7 +14,7 @@ namespace Fsel.System.Application.Queries.FeatureAccessTimeQuery
     {
         public Guid CourseId { get; set; }
         public Guid UserId { get; set; }
-        public IList<Guid>? ObjectIds { get; set; }
+        public IList<Guid> ObjectIds { get; set; } = new List<Guid>();
         public EnumFeature EnumFeature { get; set; }
     }
 
@@ -31,12 +31,7 @@ namespace Fsel.System.Application.Queries.FeatureAccessTimeQuery
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<FeatureAccessTimeCourseModel> methodResult = new MethodResult<FeatureAccessTimeCourseModel>();
-            if (request.ObjectIds == null || !request.ObjectIds.Any())
-            {
-                methodResult.Result = null;
-                methodResult.StatusCode = StatusCodes.Status200OK;
-                return methodResult;
-            }
+
             var featureAccessTime = await _featureAccessTimeRepository.Queryable.Where(x => x.CreatedUserId == request.UserId && x.CourseId == request.CourseId)
                 .Where(x => request.ObjectIds.Contains(x.ObjectId) && x.EnumFeature == request.EnumFeature)
                 .Select(x => new FeatureAccessTimeCourseModel

@@ -31,12 +31,6 @@ namespace Fsel.System.Application.Queries.FeatureAccessTimeQuery
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<IList<FeatureAccessTimeModel>> methodResult = new MethodResult<IList<FeatureAccessTimeModel>>();
-            if (request.LessonIds == null || !request.LessonIds.Any())
-            {
-                methodResult.Result = null;
-                methodResult.StatusCode = StatusCodes.Status200OK;
-                return methodResult;
-            }
             var featureAccessTimes = await _featureAccessTimeRepository.Queryable.Where(x => x.CreatedUserId == request.UserId && x.CourseId == request.CourseId && x.UnitId == request.UnitId && request.LessonIds.Contains(x.LessonId ?? default)).ToListAsync(cancellationToken);
             methodResult.Result = _mapper.Map<IList<FeatureAccessTimeModel>>(featureAccessTimes);
             methodResult.StatusCode = StatusCodes.Status200OK;

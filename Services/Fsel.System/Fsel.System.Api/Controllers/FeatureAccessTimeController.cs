@@ -41,9 +41,9 @@ namespace Fsel.System.Api.Controllers
         /// Get Feature Access Time By Unit
         /// </summary>
         [HttpPost("get-by-unit")]
-        [ProducesResponseType(typeof(MethodResult<FeatureAccessTimeCourseModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(MethodResult<IList<FeatureAccessTimeModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetByUnit([FromQuery] GetFeatureAccessTimesByUnitIdQuery query)
+        public async Task<IActionResult> GetByUnit([FromBody] GetFeatureAccessTimesByUnitIdQuery query)
         {
             var queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
@@ -55,7 +55,7 @@ namespace Fsel.System.Api.Controllers
         [HttpPost("get-by-test")]
         [ProducesResponseType(typeof(MethodResult<FeatureAccessTimeCourseModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetByTest([FromQuery] GetFeatureAccessTimesByTestQuery query)
+        public async Task<IActionResult> GetByTest([FromBody] GetFeatureAccessTimesByTestQuery query)
         {
             var queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();

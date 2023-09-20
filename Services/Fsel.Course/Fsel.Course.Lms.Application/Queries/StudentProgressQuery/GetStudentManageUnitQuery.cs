@@ -13,6 +13,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Enums.ErrorCodes;
+    using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -145,6 +146,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
 
                 managerUnit.ContentProgress = string.Format("{0} / {1}", currentProgress, progress);
                 managerUnit.TotalLesson = lessonIds.Count;
+                managerUnit.Percent = NumberHelper.ConvertPercentDouble((double)currentProgress / progress);
                 if (featureAccessTime != null)
                 {
                     managerUnit.TimeSpent = featureAccessTime.AccessTime;
@@ -157,11 +159,11 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
         private async Task<UnitManagerProgressModel> GetMockTestManager(CourseUnitMockTest courseUnitMockTest, Guid? studentId, IList<FeatureAccessTimeCourseModel>? featureAccessTimeResults)
         {
             UnitManagerProgressModel managerUnit = new UnitManagerProgressModel();
-            var mockTest = await _mockTestRepository.Queryable.Include(x => x.MockTestResults.Where(x => x.MockTestId == courseUnitMockTest.MockTestId && x.CourseId == courseUnitMockTest.CourseId && x.StudentId == x.StudentId))
+            var mockTest = await _mockTestRepository.Queryable.Include(x => x.MockTestResults.Where(x => x.MockTestId == courseUnitMockTest.MockTestId && x.CourseId == courseUnitMockTest.CourseId && x.StudentId == studentId))
                         .FirstOrDefaultAsync(x => x.Id == courseUnitMockTest.MockTestId);
             if (mockTest != null)
             {
-                var mockTestResult = mockTest.MockTestResults.FirstOrDefault(x => x.MockTestId == courseUnitMockTest.MockTestId && x.CourseId == courseUnitMockTest.CourseId && x.StudentId == x.StudentId);
+                var mockTestResult = mockTest.MockTestResults.FirstOrDefault(x => x.MockTestId == courseUnitMockTest.MockTestId && x.CourseId == courseUnitMockTest.CourseId && x.StudentId == studentId);
                 managerUnit.Type = nameof(courseUnitMockTest.FinalTest);
                 managerUnit.ObjectId = mockTest.Id;
                 managerUnit.Name = mockTest.Name;
@@ -171,7 +173,10 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                     managerUnit.Status = mockTestResult.Status;
                     managerUnit.PercentObject = mockTestResult.Percent;
                     managerUnit.SkillScores = mockTestResult.SkillScores;
-                    managerUnit.ContentProgress = string.Format("{0} / {1}", mockTestResult.Status == EnumResultStatus.Done ? 4 : 0, 4);
+                    var isDone = mockTestResult.Status == EnumResultStatus.Done;
+                    managerUnit.ContentProgress = string.Format("{0} / {1}", isDone ? 1 : 0, 1);
+                    managerUnit.Percent = NumberHelper.ConvertPercentDouble((double)(isDone ? 4 : 0) / 4);
+                    managerUnit.TotalSkill = 4;
                     if (featureAccessTime != null)
                     {
                         managerUnit.TimeSpent = featureAccessTime.AccessTime;
@@ -185,11 +190,11 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
         private async Task<UnitManagerProgressModel> GetFinalTestManager(CourseUnitMockTest courseUnitMockTest, Guid? studentId, IList<FeatureAccessTimeCourseModel>? featureAccessTimeResults)
         {
             UnitManagerProgressModel managerUnit = new UnitManagerProgressModel();
-            var finalTest = await _finalTestRepository.Queryable.Include(x => x.FinalTestResults.Where(x => x.FinalTestId == courseUnitMockTest.FinalTestId && x.CourseId == courseUnitMockTest.CourseId && x.StudentId == x.StudentId))
+            var finalTest = await _finalTestRepository.Queryable.Include(x => x.FinalTestResults.Where(x => x.FinalTestId == courseUnitMockTest.FinalTestId && x.CourseId == courseUnitMockTest.CourseId && x.StudentId == studentId))
                        .FirstOrDefaultAsync(x => x.Id == courseUnitMockTest.FinalTestId);
             if (finalTest != null)
             {
-                var finalTestResult = finalTest.FinalTestResults.FirstOrDefault(x => x.FinalTestId == courseUnitMockTest.FinalTestId && x.CourseId == courseUnitMockTest.CourseId && x.StudentId == x.StudentId);
+                var finalTestResult = finalTest.FinalTestResults.FirstOrDefault(x => x.FinalTestId == courseUnitMockTest.FinalTestId && x.CourseId == courseUnitMockTest.CourseId && x.StudentId == studentId);
                 managerUnit.Type = nameof(courseUnitMockTest.FinalTest);
                 managerUnit.ObjectId = finalTest.Id;
                 managerUnit.Name = finalTest.Name;
@@ -199,7 +204,10 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                     managerUnit.Status = finalTestResult.Status;
                     managerUnit.PercentObject = finalTestResult.Percent;
                     managerUnit.SkillScores = finalTestResult.SkillScores;
-                    managerUnit.ContentProgress = string.Format("{0} / {1}", finalTestResult.Status == EnumResultStatus.Done ? 3 : 0, 3);
+                    var isDone = finalTestResult.Status == EnumResultStatus.Done;
+                    managerUnit.ContentProgress = string.Format("{0} / {1}", isDone ? 1 : 0, 1);
+                    managerUnit.Percent = NumberHelper.ConvertPercentDouble((double)(isDone ? 3 : 0) / 3);
+                    managerUnit.TotalSkill = 3;
                     if (featureAccessTime != null)
                     {
                         managerUnit.TimeSpent = featureAccessTime.AccessTime;
