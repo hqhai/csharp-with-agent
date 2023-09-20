@@ -8,6 +8,7 @@ namespace Fsel.Interaction.Application.Queries.SurveyQuestionQuery
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Interaction.Domain.IRepositories;
     using Fsel.Interaction.Domain.Models.EntityModels;
     using MediatR;
@@ -31,6 +32,12 @@ namespace Fsel.Interaction.Application.Queries.SurveyQuestionQuery
         public async Task<MethodResult<IList<SurveyQuestionModel>>> Handle(GetListQuestionByIdsQuery request, CancellationToken cancellationToken)
         {
             var methodResult = new MethodResult<IList<SurveyQuestionModel>>();
+
+            if (request?.QuestionIds == null || !request.QuestionIds.Any())
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.QuestionIds));
+                return methodResult;
+            }
 
             var surveyQuestionquery = await _surveyQuestionRepository.Queryable
                 .Where(x => request.QuestionIds!.Contains(x.Id))
