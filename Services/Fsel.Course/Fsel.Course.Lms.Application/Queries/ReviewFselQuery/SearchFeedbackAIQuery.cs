@@ -80,16 +80,19 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
                         };
 
             var groupedQuery = (from result in query
-                                group result by new { result.LessonId, result.UnitId, result.CourseId } into grouped
+                                group result by new { result.LessonId, result.UnitId, result.CourseId, result.ClassForumId } into grouped
                                 select new FeedbackClassForumAIModel
                                 {
+                                    ClassForumId = grouped.Key.ClassForumId,
                                     CourseId = grouped.Key.CourseId,
                                     LessonId = grouped.Key.LessonId,
                                     UnitId = grouped.Key.UnitId,
                                     CourseName = grouped.First().CourseName,
                                     Code = grouped.First().Code,
                                     NumberOfStarts = Math.Round(grouped.Select(x => x.NumberOfStarts).Average(), 0),
-                                    TotalRating = grouped.Select(x => x.NumberOfStarts).Where(x => x <= 2).Count()
+                                    TotalRating = grouped.Select(x => x.NumberOfStarts).Where(x => x <= 2).Count(),
+                                    UnitDisplayOrder = grouped.Select(x => x.UnitDisplayOrder).FirstOrDefault(),
+                                    LessonDisplayOrder = grouped.Select(x => x.LessonDisplayOrder).FirstOrDefault(),
                                 });
             if (!string.IsNullOrEmpty(request.Keyword))
             {
