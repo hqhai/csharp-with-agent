@@ -7,10 +7,12 @@ namespace Fsel.Course.Domain.Models.EntityModels
 
     public class LessonManagerProgressModel
     {
+        public string? Type { get; set; }
         public Guid ObjectId { get; set; }
         public string? Name { get; set; }
         public EnumResultStatus Status { get; set; }
         public double Percent { get; set; }
+        public double PercentObject { get; set; }
         public long TimeSpent { get; set; }
         public DateTime LastVisited { get; set; }
         public string? ContentCompleted { get; set; }

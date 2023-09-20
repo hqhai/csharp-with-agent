@@ -29,5 +29,8 @@ namespace Fsel.Course.Lms.Application.Services.SystemService
 
         [Post("/feature-access-time/get-by-test")]
         Task<IApiResponse<MethodResult<IList<FeatureAccessTimeCourseModel>>>> GetFeatureAccessTimesByTestAsync([FromQuery] FeatureAccessTimesByTestQueryModel query);
+
+        [Post("/feature-access-time/get-by-skill-test")]
+        Task<IApiResponse<MethodResult<FeatureAccessTimeCourseModel>>> GetFeatureAccessTimesBySkillMockTestAsync([FromQuery] FeatureAccessTimesByMockTestIdQueryModel query);
     }
 }

@@ -62,6 +62,18 @@ namespace Fsel.System.Api.Controllers
         }
 
         /// <summary>
+        /// Get Feature Access Time By Skill MockTest
+        /// </summary>
+        [HttpPost("get-by-skill-test")]
+        [ProducesResponseType(typeof(MethodResult<FeatureAccessTimeModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetBySkillMockTest([FromBody] GetFeatureAccessTimesByMockTestIdQuery query)
+        {
+            var queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
         /// Get List Feature Access Time By CourseIds
         /// </summary>
         [HttpPost("get-list-by-courseIds")]

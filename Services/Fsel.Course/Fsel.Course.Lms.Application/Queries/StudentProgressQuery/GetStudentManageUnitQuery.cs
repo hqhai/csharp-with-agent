@@ -164,7 +164,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             if (mockTest != null)
             {
                 var mockTestResult = mockTest.MockTestResults.FirstOrDefault(x => x.MockTestId == courseUnitMockTest.MockTestId && x.CourseId == courseUnitMockTest.CourseId && x.StudentId == studentId);
-                managerUnit.Type = nameof(courseUnitMockTest.FinalTest);
+                managerUnit.Type = nameof(courseUnitMockTest.MockTest);
                 managerUnit.ObjectId = mockTest.Id;
                 managerUnit.Name = mockTest.Name;
                 if (mockTestResult != null)
