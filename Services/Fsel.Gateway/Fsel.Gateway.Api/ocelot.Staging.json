@@ -140,6 +140,20 @@
           "Port": 80
         }
       ]
+    },
+    // System Service
+    {
+      "SwaggerKey": "system",
+      "UpstreamPathTemplate": "/system-gateway/{everything}",
+      "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ],
+      "DownstreamPathTemplate": "/api/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "20.187.250.110",
+          "Port": 80
+        }
+      ]
     }
   ],
   "SwaggerEndPoints": [
@@ -230,6 +244,16 @@
           "Name": "Ordering API",
           "Version": "v1",
           "Url": "http://20.24.110.45/swagger/v1/swagger.json"
+        }
+      ]
+    },
+    {
+      "Key": "system",
+      "Config": [
+        {
+          "Name": "System API",
+          "Version": "v1",
+          "Url": "http://20.187.250.110/swagger/v1/swagger.json"
         }
       ]
     }
