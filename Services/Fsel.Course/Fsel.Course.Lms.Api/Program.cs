@@ -91,6 +91,7 @@ builder.Services.AddScoped<IClassForumResultRepository, ClassForumResultReposito
 builder.Services.AddScoped<IClassForumResultFileRepository, ClassForumResultFileRepository>();
 builder.Services.AddScoped<IClassForumScoreRepository, ClassForumScoreRepository>();
 builder.Services.AddScoped<IStudentFeedbackRepository, StudentFeedbackRepository>();
+builder.Services.AddScoped<IMockTestScoreRepository, MockTestScoreRepository>();
 
 // Converter
 builder.Services.AddScoped<ExtraPracticeConverter>();

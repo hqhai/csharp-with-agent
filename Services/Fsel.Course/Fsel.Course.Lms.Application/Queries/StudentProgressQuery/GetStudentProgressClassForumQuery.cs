@@ -64,7 +64,12 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             }
 
             var classForum = await _classForumRepository.Queryable.FirstOrDefaultAsync(x => x.LessonId == request.LessonId, cancellationToken);
-
+            if (classForum == null)
+            {
+                methodResult.Result = null;
+                methodResult.StatusCode = StatusCodes.Status200OK;
+                return methodResult;
+            }
             var classForumResult = await _classForumResultRepository.Queryable.Include(x => x.ClassForumScores).FirstOrDefaultAsync(x => x.LessonResultId == lessonResult.Id && x.StudentId == request.StudentId, cancellationToken);
             if (classForumResult != null)
             {
@@ -92,11 +97,11 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             }
             classForumStudentProgress.SkillScores = new SkillScores
             {
-                Skill = classForum?.CourseSkill ?? default,
+                Skill = classForum.CourseSkill,
                 TotalCount = 36,
                 CorrectCount = classForumResult?.ClassForumScores.Sum(x => x.Score) ?? default,
             };
-            classForumStudentProgress.ClassForumId = classForum?.Id ?? default;
+            classForumStudentProgress.ClassForumId = classForum.Id;
             classForumStudentProgress.Status = classForumResult != null ? (classForumResult.Status != EnumClassForumResultStatus.PendingForGrading) ? EnumResultStatus.Done : EnumResultStatus.Process : EnumResultStatus.Unfinished;
 
             methodResult.Result = classForumStudentProgress;
