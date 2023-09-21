@@ -27,13 +27,15 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
     public class GetStudentProgressClassForumQueryHandler : IRequestHandler<GetStudentProgressClassForumQuery, MethodResult<ClassForumStudentProgressModel>>
     {
         private readonly IUserService _userService;
+        private readonly IClassForumRepository _classForumRepository;
         private readonly ISystemService _systemService;
         private readonly IClassForumResultRepository _classForumResultRepository;
         private readonly ILessonResultRepository _lessonResultRepository;
 
-        public GetStudentProgressClassForumQueryHandler(IUserService userService, ISystemService systemService, IClassForumResultRepository classForumResultRepository, ILessonResultRepository lessonResultRepository)
+        public GetStudentProgressClassForumQueryHandler(IUserService userService, IClassForumRepository classForumRepository, ISystemService systemService, IClassForumResultRepository classForumResultRepository, ILessonResultRepository lessonResultRepository)
         {
             _userService = userService;
+            _classForumRepository = classForumRepository;
             _systemService = systemService;
             _classForumResultRepository = classForumResultRepository;
             _lessonResultRepository = lessonResultRepository;
@@ -61,7 +63,9 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                 return methodResult;
             }
 
-            var classForumResult = await _classForumResultRepository.Queryable.Include(x => x.ClassForum).Include(x => x.ClassForumScores).FirstOrDefaultAsync(x => x.LessonResultId == lessonResult.Id && x.StudentId == request.StudentId, cancellationToken);
+            var classForum = await _classForumRepository.Queryable.FirstOrDefaultAsync(x => x.LessonId == request.LessonId, cancellationToken);
+
+            var classForumResult = await _classForumResultRepository.Queryable.Include(x => x.ClassForumScores).FirstOrDefaultAsync(x => x.LessonResultId == lessonResult.Id && x.StudentId == request.StudentId, cancellationToken);
             if (classForumResult != null)
             {
                 var featureAccessTimeResult = await _systemService.GetFeatureAccessTimeAsync(new FeatureAccessTimeQueryModel
@@ -86,7 +90,6 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                     classForumStudentProgress.TimeSpent = featureAccessTime.AccessTime;
                 }
             }
-            var classForum = classForumResult?.ClassForum;
             classForumStudentProgress.SkillScores = new SkillScores
             {
                 Skill = classForum?.CourseSkill ?? default,

@@ -55,7 +55,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
 
             var student = studentResults?.Content?.Result?.FirstOrDefault();
             var studentId = student?.Id;
-            var userId = student?.Human?.UserId;
+            var userId = student?.Human?.UserId ?? default;
             var packageResults = await _orderService.GetPackages();
             if (!packageResults.IsSuccessStatusCode)
             {
@@ -84,9 +84,10 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                     new FeatureAccessTimeQueryModel
                     {
                         CourseId = request.CourseId,
-                        UserId = userId ?? default
+                        UserId = userId
                     },
-                }
+                },
+                UserId = userId
             });
             if (!featureAccessTimeResults.IsSuccessStatusCode)
             {

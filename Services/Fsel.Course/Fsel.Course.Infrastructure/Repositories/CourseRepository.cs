@@ -113,7 +113,7 @@ namespace Fsel.Course.Infrastructure.Repositories
 
             var displayOrderLesson = 0;
             var displayOrderUnit = 0;
-            var unitResult = await _unitResultRepository.Queryable.Include(x => x.Unit).ThenInclude(x => x!.CourseUnitMockTests).Where(x => x.StudentId == courseResult.StudentId && x.CourseId == courseResult.CourseId && x.Status != EnumResultStatus.Unfinished).OrderBy(x => x.CreatedDate).ThenBy(x => x.UpdatedDate).FirstOrDefaultAsync();
+            var unitResult = await _unitResultRepository.Queryable.Include(x => x.Unit).ThenInclude(x => x!.CourseUnitMockTests).Where(x => x.StudentId == courseResult.StudentId && x.CourseId == courseResult.CourseId && x.Status != EnumResultStatus.Unfinished).OrderByDescending(x => x.CreatedDate).ThenByDescending(x => x.UpdatedDate).FirstOrDefaultAsync();
             if (unitResult != null)
             {
                 displayOrderUnit = unitResult.Unit?.CourseUnitMockTests.FirstOrDefault()?.DisplayOrder ?? default;
