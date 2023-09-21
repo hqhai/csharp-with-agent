@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Fsel.System.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class Update_FeatureAccessTime : Migration
+    public partial class Update_FeatureAccessTime_2 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
