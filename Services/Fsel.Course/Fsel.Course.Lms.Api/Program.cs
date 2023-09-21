@@ -8,6 +8,7 @@ using Fsel.Course.Infrastructure.Repositories;
 using Fsel.Course.Infrastructure.ValueSettings;
 using Fsel.Course.Lms.Application.Queues.Publishers;
 using Fsel.Course.Lms.Application.Services.InteractionService;
+using Fsel.Course.Lms.Application.Services.NotificationServices;
 using Fsel.Course.Lms.Application.Services.OrderServices;
 using Fsel.Course.Lms.Application.Services.SenderService;
 using Fsel.Course.Lms.Application.Services.SystemService;
@@ -117,6 +118,7 @@ builder.AddRefitClients(typeof(IInteractionService), appSetting?.Services?.Inter
 builder.AddRefitClients(typeof(ISystemService), appSetting?.Services?.SystemApiUrl);
 builder.AddRefitClients(typeof(IOrderService), appSetting?.Services?.OrderApiUrl);
 builder.AddRefitClients(typeof(ISenderService), appSetting?.Services?.SenderApiUrl);
+builder.AddRefitClients(typeof(INotificationService), appSetting?.Services?.NotificationApiUrl);
 
 builder.AddMassTransit(appSetting);
 
