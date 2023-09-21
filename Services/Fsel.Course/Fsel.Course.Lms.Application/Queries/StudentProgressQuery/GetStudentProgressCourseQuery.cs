@@ -121,8 +121,8 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                 var package = packages?.FirstOrDefault(x => x.Id == @class.PackageId);
                 courseProgress.ClassId = @class.Id;
                 courseProgress.CodeClass = @class.Code;
-                courseProgress.StartDate = @class.TimeStart;
-                courseProgress.EndDate = @class.TimeEnd;
+                courseProgress.StartDate = @class.StartDate;
+                courseProgress.EndDate = @class.EndDate;
                 courseProgress.PackageId = @class.PackageId;
                 courseProgress.PackageCode = package?.Code ?? default;
             }

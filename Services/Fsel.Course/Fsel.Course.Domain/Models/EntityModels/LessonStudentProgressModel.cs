@@ -12,7 +12,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public string? Name { get; set; }
         public EnumResultStatus Status { get; set; }
         public double Percent { get; set; }
-        public double PercentObject { get; set; }
+        public double CorrectPercent { get; set; }
         public long TimeSpent { get; set; }
         public DateTime LastVisited { get; set; }
         public string? ContentCompleted { get; set; }

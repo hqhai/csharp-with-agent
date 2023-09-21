@@ -96,6 +96,30 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
         }
 
         /// <summary>
+        /// Get Student Progress Final
+        /// </summary>
+        [HttpGet("final-test")]
+        [ProducesResponseType(typeof(MethodResult<UnitStudentProgressModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetStudentProgressFinalTest([FromQuery] GetStudentProgressFinalTestQuery query)
+        {
+            MethodResult<UnitStudentProgressModel> queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Get Student Progress Final
+        /// </summary>
+        [HttpGet("mock-tests")]
+        [ProducesResponseType(typeof(MethodResult<IList<UnitStudentProgressModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetStudentProgressMockTests([FromQuery] GetStudentProgressMockTestsQuery query)
+        {
+            MethodResult<IList<UnitStudentProgressModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
         /// Get Student Progress HOmeWork
         /// </summary>
         [HttpGet("home-work")]

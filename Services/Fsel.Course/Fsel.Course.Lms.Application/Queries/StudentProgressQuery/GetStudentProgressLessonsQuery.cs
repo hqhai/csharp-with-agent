@@ -5,6 +5,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
     using System.Collections.Generic;
     using System.Linq.Dynamic.Core;
     using Fsel.Common.ActionResults;
+    using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
@@ -105,7 +106,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             {
                 var lessonProgress = await GetLesson(item, studentId);
                 var featureAccessTime = featureAccessTimes?.FirstOrDefault(x => x.LessonId == item);
-                lessonProgress.Type = nameof(lessonProgress.Type);
+                lessonProgress.Type = nameof(Lesson);
                 if (featureAccessTime != null)
                 {
                     lessonProgress.TimeSpent = featureAccessTime.AccessTime;
@@ -166,7 +167,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                 if (mockTestResult != null)
                 {
                     mockTestProgress.Status = mockTestResult.Status;
-                    mockTestProgress.PercentObject = mockTestResult.Percent;
+                    mockTestProgress.CorrectPercent = mockTestResult.Percent;
                     mockTestProgress.SkillScores = mockTestResult.SkillScores;
                     var isDone = mockTestResult.Status == EnumResultStatus.Done;
                     mockTestProgress.ContentCompleted = string.Format("{0} / {1}", isDone ? 1 : 0, 1);

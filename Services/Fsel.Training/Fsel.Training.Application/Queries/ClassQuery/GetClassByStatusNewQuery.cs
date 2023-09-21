@@ -6,7 +6,6 @@ namespace Fsel.Training.Application.Queries.ClassQuery
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Common.Helpers;
-    using Fsel.Ordering.Domain.Enums;
     using Fsel.Shared.Enums;
     using Fsel.Training.Application.Services.OrderServices;
     using Fsel.Training.Domain.Entities;
