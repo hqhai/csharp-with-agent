@@ -3,9 +3,7 @@
 namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
 {
     using System;
-    using System.Collections.Generic;
     using System.Linq;
-    using System.Text;
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
@@ -17,6 +15,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Domain.Models.QueryModels.ClassForumResults;
     using Fsel.Course.Lms.Application.Services.TrainingServices;
+    using Fsel.Course.Lms.Application.Services.UserServices;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -24,17 +23,20 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
     public class SearchClassForumResultByCsoQuery : SearchClassForumResultQueryModel, IRequest<MethodResult<PagingItemsModel<ClassForumResultSearchModel>>>
     {
     }
+
     public class SearchClassForumResultByCsoQueryHandler : IRequestHandler<SearchClassForumResultByCsoQuery, MethodResult<PagingItemsModel<ClassForumResultSearchModel>>>
     {
         private readonly IClassForumResultRepository _classForumResultRepository;
         private readonly ITrainingService _trainingService;
         private readonly AuthContext _authContext;
+        private readonly IUserService _userService;
 
-        public SearchClassForumResultByCsoQueryHandler(IClassForumResultRepository classForumResultRepository, ITrainingService trainingService, AuthContext authContext)
+        public SearchClassForumResultByCsoQueryHandler(IClassForumResultRepository classForumResultRepository, ITrainingService trainingService, AuthContext authContext, IUserService userService)
         {
             _classForumResultRepository = classForumResultRepository;
             _trainingService = trainingService;
             _authContext = authContext;
+            _userService = userService;
         }
 
         public async Task<MethodResult<PagingItemsModel<ClassForumResultSearchModel>>> Handle(SearchClassForumResultByCsoQuery request, CancellationToken cancellationToken)
@@ -46,6 +48,12 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 return methodResult;
             }
+            var csoResults = await _userService.GetCSOByUserId(_authContext.CurrentUserId);
+            var csoId = csoResults.Content?.Result?.Id;
+
+            var studentsResult = await _trainingService.GetClassesByCsoIdAsync(csoId ?? default);
+            var students = studentsResult.Content!.Result;
+            var studentIds = students?.SelectMany(x => x.ClassStudents!).Select(x => x.StudentId).ToList();
 
             var classForumResultQuery = _classForumResultRepository.Queryable
                                     .Include(x => x.LessonResult)
@@ -54,13 +62,14 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
                                     .ThenInclude(x => x.Unit)
                                     .ThenInclude(x => x!.CourseUnitMockTests)
                                     .Include(x => x.ClassForum)
-                                    .Where(x => x.Status == EnumClassForumResultStatus.Pending && (x.CheckCsoId == null || x.CheckCsoId == _authContext.CurrentUserId))
+                                    .Where(x => x.Status == EnumClassForumResultStatus.Pending && (x.CheckCsoId == null || x.CheckCsoId == csoId) && studentIds!.Contains(x.StudentId))
                                     .Select(x => new ClassForumResultSearchModel
                                     {
                                         Id = x.Id,
                                         CreatedDate = x.CreatedDate,
                                         CreatedUserId = x.CreatedUserId,
                                         CreatedFullName = x.CreatedFullName,
+                                        StudentId = x.StudentId,
                                         ClassForum = x.ClassForum!.ClassForumResults!.Select(x => x.ClassForum).Select(x => new ClassForumModel
                                         {
                                             Id = x!.Id,
@@ -116,6 +125,11 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
                 {
                     item.ClassCode = classResult!.Content!.Result.Code;
                 }
+                /*var csoResult = await _trainingService.GetCsoByStudentAsync(studentId);
+                if (csoResult.Content!.Result != null)
+                {
+                    item.CsoId = csoResult!.Content!.Result.;
+                }*/
             }
 
             methodResult.Result = new PagingItemsModel<ClassForumResultSearchModel>(lists, request, totalItem);

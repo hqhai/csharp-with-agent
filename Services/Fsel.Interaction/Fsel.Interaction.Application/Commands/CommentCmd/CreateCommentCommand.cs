@@ -17,15 +17,14 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
     using Fsel.Shared.Enums;
     using Fsel.Shared.Models.ShareModels;
     using MassTransit.Initializers;
-    using Fsel.Shared.Constants;
-    using Kros.Extensions;
     using Fsel.Interaction.Application.Services.CourseServices;
+    using Fsel.Interaction.Domain.Models.EntityModels;
 
-    public class CreateCommentCommand : CreateCommentCommandModel, IRequest<MethodResult<bool>>
+    public class CreateCommentCommand : CreateCommentCommandModel, IRequest<MethodResult<CommentModel>>
     {
     }
 
-    public class CreateCommentCommandHandler : IRequestHandler<CreateCommentCommand, MethodResult<bool>>
+    public class CreateCommentCommandHandler : IRequestHandler<CreateCommentCommand, MethodResult<CommentModel>>
     {
         private readonly IMapper _mapper;
         private readonly ICommentRepository _commentRepository;
@@ -44,10 +43,10 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
             _courseService = courseService;
         }
 
-        public async Task<MethodResult<bool>> Handle(CreateCommentCommand request, CancellationToken cancellationToken)
+        public async Task<MethodResult<CommentModel>> Handle(CreateCommentCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            MethodResult<bool> methodResult = new MethodResult<bool>();
+            MethodResult<CommentModel> methodResult = new MethodResult<CommentModel>();
             Comment comment = _mapper.Map<Comment>(request);
             await _commentRepository.Queryable.FirstOrDefaultAsync(x => x.ObjectId == request.ObjectId, cancellationToken);
             comment.UserId = _authContext.CurrentUserId;
@@ -60,6 +59,7 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
             {
                 comment = _commentRepository.Add(comment);
                 await _commentRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+
                 NotificationQueueModel model = new NotificationQueueModel();
                 switch (request.Type)
                 {
@@ -113,7 +113,7 @@ namespace Fsel.Interaction.Application.Commands.CommentCmd
                 }
 
                 methodResult.StatusCode = StatusCodes.Status201Created;
-                methodResult.Result = true;
+                methodResult.Result = _mapper.Map<CommentModel>(comment);
                 return methodResult;
             });
 

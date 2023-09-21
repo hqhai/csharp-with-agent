@@ -34,6 +34,8 @@ namespace Fsel.Course.Domain.Models.EntityModels
 
         public bool? IsLiked { get; set; }
 
+        public bool IsTurnedOffNotification { get; set; }
+
         public string? WordContent { get; set; }
 
         public string? GradingAlFeedback { get; set; }

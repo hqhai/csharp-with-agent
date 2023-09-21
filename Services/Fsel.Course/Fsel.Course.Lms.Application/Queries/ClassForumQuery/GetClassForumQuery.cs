@@ -15,8 +15,11 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumQuery
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Services.InteractionService;
     using Fsel.Course.Lms.Application.Services.InteractionService.Models;
+    using Fsel.Course.Lms.Application.Services.NotificationServices;
+    using Fsel.Course.Lms.Application.Services.NotificationServices.Models;
     using Fsel.Course.Lms.Application.Services.TrainingServices;
     using Fsel.Course.Lms.Application.Services.UserServices;
+    using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -37,6 +40,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumQuery
         private readonly ILessonRepository _lessonRepository;
         private readonly IInteractionService _interactionService;
         private readonly ITrainingService _trainingService;
+        private readonly INotificationService _notificationService;
         private const int STUDENT_RANDOM_TAKE = 2; // lấy random 2 bài post của học sinh bất kì từ lớp khác, cùng unit, cùng level
 
         public GetClassForumQueryHandler(IClassForumRepository classForumRepository
@@ -46,7 +50,8 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumQuery
             , IMapper mapper
             , ILessonRepository lessonRepository
             , IInteractionService interactionService,
-              ITrainingService trainingService)
+              ITrainingService trainingService,
+              INotificationService notificationService)
         {
             _classForumRepository = classForumRepository;
             _classForumResultRepository = classForumResultRepository;
@@ -56,6 +61,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumQuery
             _lessonRepository = lessonRepository;
             _interactionService = interactionService;
             _trainingService = trainingService;
+            _notificationService = notificationService;
         }
 
         public async Task<MethodResult<ClassForumByStudentModel>> Handle(GetClassForumQuery request, CancellationToken cancellationToken)
@@ -167,6 +173,15 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumQuery
             var actionsResult = await _interactionService.GetsActionAsync(new InteractionActionCommandModel { ObjectIds = classForumResults.Select(x => x.Id).ToList(), UserId = _authContext.CurrentUserId });
             var actions = actionsResult.Content?.Result;
 
+            GetListNotificationRemindQuery query = new GetListNotificationRemindQuery
+            {
+                ObjectIds = classForumResults.Select(x => x.Id).ToList(),
+                Status = EnumNotificationRemindStatus.Off
+            };
+            var notificationRemind = await _notificationService.GetListNotificationRemind(query);
+            var notificationTurnOff = notificationRemind.Content?.Result;
+
+
             if (actions != null)
             {
                 classForumResults = classForumResults.Where(x => !actions.Any(n => n.IsDisable && n.ObjectId == x.Id)).ToList();
@@ -176,6 +191,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumQuery
                     item.CommentNumber = action?.CommentNumber;
                     item.LikeNumber = action?.LikeNumber;
                     item.IsLiked = action?.IsLiked;
+                    item.IsTurnedOffNotification = notificationTurnOff!.Any(x => x.ObjectId == item.Id);
                 }
             }
 

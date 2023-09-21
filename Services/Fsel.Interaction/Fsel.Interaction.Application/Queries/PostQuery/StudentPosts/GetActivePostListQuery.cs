@@ -7,6 +7,8 @@ namespace Fsel.Interaction.Application.Queries.PostQuery.StudentPosts
     using Fsel.Core.Base;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Core.Extensions;
+    using Fsel.Interaction.Application.Services.NotificationService;
+    using Fsel.Interaction.Application.Services.NotificationService.Models;
     using Fsel.Interaction.Application.Services.UserServices;
     using Fsel.Interaction.Domain.Entities;
     using Fsel.Interaction.Domain.IRepositories;
@@ -29,6 +31,7 @@ namespace Fsel.Interaction.Application.Queries.PostQuery.StudentPosts
         private readonly IUserService _userService;
         private readonly ICommentRepository _commentRepository;
         private readonly ITopicTagRepository _topicTagRepository;
+        private readonly INotificationService _notificationService;
 
         public GetActivePostListQueryHandler
             (
@@ -37,7 +40,7 @@ namespace Fsel.Interaction.Application.Queries.PostQuery.StudentPosts
              AuthContext authContext, IUserService userService,
              ICommentRepository commentRepository,
              ITopicTagRepository topicTagRepository
-
+, INotificationService notificationService
             )
         {
             _postRepository = postRepository;
@@ -46,6 +49,7 @@ namespace Fsel.Interaction.Application.Queries.PostQuery.StudentPosts
             _userService = userService;
             _commentRepository = commentRepository;
             _topicTagRepository = topicTagRepository;
+            _notificationService = notificationService;
         }
 
         public async Task<MethodResult<PagingItemsModel<PostSearchModel>>> Handle(GetActivePostListQuery request, CancellationToken cancellationToken)
@@ -163,11 +167,13 @@ namespace Fsel.Interaction.Application.Queries.PostQuery.StudentPosts
                 UpdatedUserId = post.UpdatedUserId,
                 FilePaths = post.FilePaths,
                 IsLiked = false,
+                IsTurnedOffNotification = false,
                 PostTags = post.PostTags
                                .Select(postTag => new TopicTagModel
                                {
                                    Name = postTag.TopicTag!.Name,
                                    Color = postTag.TopicTag!.Color,
+                                   Id = postTag.TopicTag!.Id,
                                }).ToList()
 
             });
@@ -177,6 +183,15 @@ namespace Fsel.Interaction.Application.Queries.PostQuery.StudentPosts
                     .AsNoTracking()
                     .ToListAsync(cancellationToken: cancellationToken)
                     .ConfigureAwait(false);
+
+
+            GetListNotificationRemindQueryModel query = new GetListNotificationRemindQueryModel
+            {
+                ObjectIds = lists.Select(x => x.Id).ToList(),
+                Status = EnumNotificationRemindStatus.Off
+            };
+            var notificationRemind = await _notificationService.GetListNotificationRemind(query);
+            var notificationTurnOff = notificationRemind.Content?.Result;
 
             foreach (var post in lists)
             {
@@ -193,6 +208,7 @@ namespace Fsel.Interaction.Application.Queries.PostQuery.StudentPosts
                 post.IsLiked = likeAction;
                 post.LikeCount = likeCount;
                 post.CommentCount = commentCount;
+                post.IsTurnedOffNotification = notificationTurnOff?.Any(p => p.ObjectId == post.Id) ?? false;
             }
 
             methodResult.Result = new PagingItemsModel<PostSearchModel>(lists, request, totalItem);
