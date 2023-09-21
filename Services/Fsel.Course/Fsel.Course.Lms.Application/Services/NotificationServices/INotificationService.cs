@@ -4,13 +4,13 @@ namespace Fsel.Course.Lms.Application.Services.NotificationServices
 {
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
+    using Fsel.Course.Lms.Application.Services.NotificationService.Models;
     using Fsel.Course.Lms.Application.Services.NotificationServices.Models;
-    using Microsoft.AspNetCore.Mvc;
     using Refit;
 
     public interface INotificationService
     {
-        [Get("/notification/remind-by-status")]
-        Task<IApiResponse<MethodResult<NotificationRemindModel>>> GetStudentByUserIdAsync([FromQuery] GetListNotificationRemindQuery query);
+        [Post("/notifications/remind-by-status")]
+        Task<IApiResponse<MethodResult<IList<NotificationRemindModel>>>> GetListNotificationRemind([Body] GetListNotificationRemindCommand cmd);
     }
 }
