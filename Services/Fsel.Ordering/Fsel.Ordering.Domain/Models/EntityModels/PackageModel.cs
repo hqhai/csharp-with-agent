@@ -3,7 +3,7 @@
 namespace Fsel.Ordering.Domain.Models.EntityModels
 {
     using Fsel.Ordering.Domain.Entities.PackageConfigs;
-    using Fsel.Ordering.Domain.Enums;
+    using Fsel.Shared.Enums;
 
     public class PackageModel
     {

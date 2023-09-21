@@ -26,9 +26,11 @@ builder.Services.AddScoped<IQuestionRepository, QuestionRepository>();
 builder.Services.AddScoped<ITimeCodeExerciseRepository, TimeCodeExerciseRepository>();
 builder.Services.AddScoped<IUnitRepository, UnitRepository>();
 builder.Services.AddScoped<IUnitLessonRepository, UnitLessonRepository>();
+builder.Services.AddScoped<IUnitResultRepository, UnitResultRepository>();
 builder.Services.AddScoped<IVideoTimeCodeRepository, VideoTimeCodeRepository>();
 builder.Services.AddScoped<IVideoRepository, VideoRepository>();
 builder.Services.AddScoped<IVideoTimeCodeAnswerRepository, VideoTimeCodeAnswerRepository>();
+builder.Services.AddScoped<ILessonResultRepository, LessonResultRepository>();
 builder.Services.AddScoped<IVideoResultRepository, VideoResultRepository>();
 builder.Services.AddScoped<IExtraPracticeRepository, ExtraPracticeRepository>();
 builder.Services.AddScoped<IExtraPracticeExerciseRepository, ExtraPracticeExerciseRepository>();
@@ -44,6 +46,7 @@ builder.Services.AddScoped<ICourseRepository, CourseRepository>();
 builder.Services.AddScoped<ICourseTeacherRepository, CourseTeacherRepository>();
 builder.Services.AddScoped<ICourseUnitMockTestRepository, CourseUnitMockTestRepository>();
 builder.Services.AddScoped<IMockTestRepository, MockTestRepository>();
+builder.Services.AddScoped<IMockTestResultRepository, MockTestResultRepository>();
 builder.Services.AddScoped<ICourseResultRepository, CourseResultRepository>();
 builder.Services.AddScoped<IQuestionFormRepository, QuestionFormRepository>();
 builder.Services.AddScoped<ILessonInstructionRepository, LessonInstructionRepository>();
@@ -73,6 +76,7 @@ builder.Services.AddScoped<VideoConverter>();
 builder.Services.AddScoped<CourseHelper>();
 builder.Services.AddScoped<UnitHelper>();
 builder.AddRefitClients(typeof(IUserService), appSetting?.Services?.UserApiUrl);
+
 var app = builder.Build();
 
 app.UseServices();

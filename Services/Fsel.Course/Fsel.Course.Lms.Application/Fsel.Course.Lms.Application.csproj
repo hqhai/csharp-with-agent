@@ -10,8 +10,4 @@
     <ProjectReference Include="..\Fsel.Course.Infrastructure\Fsel.Course.Infrastructure.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Queues\Consumers\" />
-  </ItemGroup>
-
 </Project>

@@ -97,6 +97,9 @@ namespace Fsel.System.Infrastructure.Migrations
                     b.Property<long>("AccessTime")
                         .HasColumnType("bigint");
 
+                    b.Property<Guid>("CourseId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2")
                         .HasColumnOrder(107);
@@ -136,7 +139,13 @@ namespace Fsel.System.Infrastructure.Migrations
                     b.Property<DateTime?>("LastVisited")
                         .HasColumnType("datetime2");
 
+                    b.Property<Guid?>("LessonId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<Guid>("ObjectId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("UnitId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime?>("UpdatedDate")

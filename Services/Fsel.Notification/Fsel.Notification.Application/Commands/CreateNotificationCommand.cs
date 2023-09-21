@@ -18,6 +18,8 @@ namespace Fsel.Notification.Application.Commands
     using Fsel.Notification.Application.Services.Models;
     using Fsel.Shared.Enums;
     using Microsoft.EntityFrameworkCore;
+    using Fsel.Common.Models;
+    using Fsel.Core.Base.Interfaces;
 
     public class CreateNotificationCommand : CreateNotificationCommandModel, IRequest<MethodResult<NotificationMessageModel>>
     {
@@ -31,8 +33,9 @@ namespace Fsel.Notification.Application.Commands
         private readonly NotificationMessagePublisher _notificationMessagePublisher;
         private readonly IUserService _userService;
         private readonly INotificationRemindRepository _notificationRemindRepository;
+        private readonly IOneSignalProvider _oneSignalProvider;
 
-        public CreateNotificationCommandHandler(INotificationsRepository notificationsRepository, IMapper mapper, INotificationTypeRepository notificationTypeRepository, NotificationMessagePublisher notificationMessagePublisher, IUserService userService, INotificationRemindRepository notificationRemindRepository)
+        public CreateNotificationCommandHandler(INotificationsRepository notificationsRepository, IMapper mapper, INotificationTypeRepository notificationTypeRepository, NotificationMessagePublisher notificationMessagePublisher, IUserService userService, INotificationRemindRepository notificationRemindRepository, IOneSignalProvider oneSignalProvider)
         {
             _notificationsRepository = notificationsRepository;
             _mapper = mapper;
@@ -40,6 +43,7 @@ namespace Fsel.Notification.Application.Commands
             _notificationMessagePublisher = notificationMessagePublisher;
             _userService = userService;
             _notificationRemindRepository = notificationRemindRepository;
+            _oneSignalProvider = oneSignalProvider;
         }
 
         public async Task<MethodResult<NotificationMessageModel>> Handle(CreateNotificationCommand request, CancellationToken cancellationToken)
@@ -83,6 +87,7 @@ namespace Fsel.Notification.Application.Commands
             }
 
             #endregion Validation
+
             List<NotificationMessage> listNotificationMessage = new List<NotificationMessage>();
             if (listUserId.Count > 0)
             {
@@ -95,6 +100,7 @@ namespace Fsel.Notification.Application.Commands
             }
 
             #region Handler
+
             await _notificationsRepository.ExecuteTransactionAsync(async () =>
             {
                 //Save into Database
@@ -115,18 +121,15 @@ namespace Fsel.Notification.Application.Commands
                     var senderInfo = await _userService.GetUserByIdAsync(request.SenderId.ToString());
                     avatarPath = senderInfo?.Content?.Result?.AvatarPath ?? string.Empty;
                 }
+
+                //Push notification to onesignal
+                var oneSignalMessage = _mapper.Map<OneSignalMessageModel>(notificationNew);
+                await _oneSignalProvider.CreateNotificationAsync(oneSignalMessage, cancellationToken);
+
                 //Push notification
-                var notificationRealTime = new NotificationMessageModel()
-                {
-                    UserId = notificationNew.UserId,
-                    ObjectId = notificationNew.ObjectId,
-                    Message = notificationNew.Message,
-                    Link = notificationNew.Message,
-                    UserIds = listUserId,
-                    SenderId = notificationNew.SenderId,
-                    AvatarPath = avatarPath,
-                    Status = notificationNew.Status,
-                };
+                var notificationRealTime = _mapper.Map<NotificationMessageModel>(notificationNew);
+                notificationRealTime.UserIds = listUserId;
+                notificationRealTime.AvatarPath = avatarPath;
 
                 await _notificationMessagePublisher.Publish(notificationRealTime, cancellationToken).ConfigureAwait(false);
 

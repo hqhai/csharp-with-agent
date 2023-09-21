@@ -1,0 +1,34 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: realtime-api
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: realtime-api
+  template:
+    metadata:
+      labels:
+        app: realtime-api
+    spec:
+      containers:
+      - name: realtime
+        image: fselacr.azurecr.io/realtimeapi
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 80
+# service type loadbalancer       
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: realtime-api-svc
+spec:
+  selector:
+    app: realtime-api
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+  type: LoadBalancer

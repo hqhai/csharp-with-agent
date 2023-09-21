@@ -2,7 +2,7 @@
 
 namespace Fsel.Course.Lms.Application.Services.OrderServices.Model
 {
-    using Fsel.Ordering.Domain.Enums;
+    using Fsel.Shared.Enums;
 
     public class PackageModel
     {
