@@ -88,7 +88,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                 if (featureAccessTime != null)
                 {
                     unitProgress.TimeSpent = featureAccessTime.AccessTime;
-                    unitProgress.LastVisited = featureAccessTime.LastVisited ?? default;
+                    unitProgress.LastVisited = featureAccessTime.LastVisited ?? null;
                 }
             }
             methodResult.Result = unitProgress;

@@ -11,7 +11,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public string? Name { get; set; }
         public EnumResultStatus Status { get; set; }
         public long TimeSpent { get; set; }
-        public DateTime LastVisited { get; set; }
+        public DateTime? LastVisited { get; set; }
         public int Visit { get; set; }
     }
 }

@@ -162,7 +162,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                 if (featureAccessTime != null)
                 {
                     mockTestProgress.TimeSpent = featureAccessTime.AccessTime;
-                    mockTestProgress.LastVisited = featureAccessTime.LastVisited ?? default;
+                    mockTestProgress.LastVisited = featureAccessTime.LastVisited ?? null;
                 }
                 mockTestProgress.DisplayOrder = courseUnitMockTests.FirstOrDefault(x => x.MockTestId == item.MockTestId)?.DisplayOrder ?? default;
                 mockTestProgress.Type = nameof(item.MockTest);
