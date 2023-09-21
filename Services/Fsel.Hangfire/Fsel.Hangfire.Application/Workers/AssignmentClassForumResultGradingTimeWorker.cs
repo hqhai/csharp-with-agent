@@ -6,16 +6,12 @@ namespace Fsel.Hangfire.Application.Workers
     using Fsel.Core.Base.Interfaces;
     using Fsel.Hangfire.Application.Queues.Publishers;
 
-    public class AssignmentCsoTimeWorker : IWorker
+    public class AssignmentClassForumResultGradingTimeWorker : IWorker
     {
-        private readonly UpdateClassForumResultPublisher _updateClassForumResultPublisher;
-        public AssignmentCsoTimeWorker(UpdateClassForumResultPublisher updateClassForumResultPublisher)
+        private readonly UpdateClassForumResultGradingTimePublisher _updateClassForumResultPublisher;
+        public AssignmentClassForumResultGradingTimeWorker(UpdateClassForumResultGradingTimePublisher updateClassForumResultPublisher)
         {
             _updateClassForumResultPublisher = updateClassForumResultPublisher;
-        }
-        public async Task RunAsync<T>(T? data = null) where T : class
-        {
-            await _updateClassForumResultPublisher.Publish(CancellationToken.None);
         }
 
         public async Task RunAsync()

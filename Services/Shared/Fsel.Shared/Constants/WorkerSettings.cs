@@ -8,7 +8,8 @@ namespace Fsel.Shared.Constants
         {
             public const string TestWorkerJob = "TestWorkerJob";
             public const string AssignmentScheduleJob = "AssignmentScheduleJob";
-            public const string ClassForumResultTime = "ClassForumResultTime";
+            public const string ClassForumResultCheckTime = "ClassForumResultCheckTime";
+            public const string ClassForumResultGradingTime = "ClassForumResultGradingTime";
         }
     }
 }

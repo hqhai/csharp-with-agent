@@ -13,7 +13,8 @@ namespace Fsel.Hangfire.Host.Jobs
         {
             JobExtensions.SetEnqueueJob<TestWorker>();
             JobExtensions.SetRecurringJob<AssignmentScheduleWorker>(WorkerSettings.JobName.AssignmentScheduleJob, Cron.MinuteInterval(1));
-            JobExtensions.SetRecurringJob<AssignmentCsoTimeWorker>(WorkerSettings.JobName.ClassForumResultTime, Cron.MinuteInterval(30));
+            JobExtensions.SetRecurringJob<AssignmentClassForumResultGradingTimeWorker>(WorkerSettings.JobName.ClassForumResultCheckTime, Cron.MinuteInterval(1));
+            JobExtensions.SetRecurringJob<AssignmentClassForumResultCheckTimeWorker>(WorkerSettings.JobName.ClassForumResultGradingTime, Cron.MinuteInterval(1));
             //JobExtensions.SetRecurringJob<TestWorker>(WorkerSettings.JobName.TestWorkerJob, Cron.Daily);
         }
     }

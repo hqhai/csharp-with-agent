@@ -2,24 +2,23 @@
 
 namespace Fsel.Course.Lms.Application.Queues.Consumers
 {
-    using System.Threading.Tasks;
     using Fsel.Core.Base.BaseModels;
-    using Fsel.Course.Lms.Application.Queries.ClassForumResultQuery;
+    using Fsel.Course.Lms.Application.Commands.ClassForumResultCmd;
     using MassTransit;
-    using MassTransit.Mediator;
+    using MediatR;
 
-    public class UpdateClassForumResultTime : IConsumer<BaseQueueModel>
+    public class UpdateClassForumResultTimeConsumer : IConsumer<BaseQueueModel>
     {
         private readonly IMediator _mediator;
 
-        public UpdateClassForumResultTime(IMediator mediator)
+        public UpdateClassForumResultTimeConsumer(IMediator mediator)
         {
             _mediator = mediator;
         }
 
         public async Task Consume(ConsumeContext<BaseQueueModel> context)
         {
-            await _mediator.Send(new GetClassForumResultQuery()).ConfigureAwait(false);
+            await _mediator.Send(new UpdateTeacherGradingInClassForumAndMockTestCommand()).ConfigureAwait(false);
         }
     }
 }
