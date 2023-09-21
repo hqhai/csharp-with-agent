@@ -55,27 +55,27 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
 
             var studentResults = await _userService.GetStudentsByStudentIdsAsync(courseResults.Select(x => x.StudentId).ToList());
             var students = studentResults.Content?.Result;
-            var manageStudents = new List<StudentProgressModel>();
+            var studentProgress = new List<StudentProgressModel>();
             foreach (var courseResult in courseResults)
             {
-                StudentProgressModel manageStudentProgressModel = new StudentProgressModel();
+                StudentProgressModel studentProgressModel = new StudentProgressModel();
                 if (students != null && students.Any())
                 {
                     var student = students.FirstOrDefault(x => x.Id == courseResult.StudentId);
-                    manageStudentProgressModel.StudentId = courseResult.StudentId;
-                    manageStudentProgressModel.FullName = student?.Human?.FullName;
+                    studentProgressModel.StudentId = courseResult.StudentId;
+                    studentProgressModel.FullName = student?.Human?.FullName;
                 }
-                manageStudentProgressModel.CourseType = courseResult.CourseType ?? default;
-                manageStudentProgressModel.CourseId = courseResult.CourseId;
-                manageStudents.Add(manageStudentProgressModel);
+                studentProgressModel.CourseType = courseResult.CourseType ?? default;
+                studentProgressModel.CourseId = courseResult.CourseId;
+                studentProgress.Add(studentProgressModel);
             }
             if (!string.IsNullOrEmpty(request.Keyword))
             {
-                manageStudents = manageStudents.Where(m => (m.FullName ?? string.Empty).Contains(request.Keyword)).ToList();
+                studentProgress = studentProgress.Where(m => (m.FullName ?? string.Empty).Contains(request.Keyword)).ToList();
             }
 
-            int totalItem = manageStudents.Count;
-            var lists = manageStudents.Skip((request.Page - 1) * request.PageSize).Take(request.PageSize).ToList();
+            int totalItem = studentProgress.Count;
+            var lists = studentProgress.Skip((request.Page - 1) * request.PageSize).Take(request.PageSize).ToList();
             foreach (var item in lists)
             {
                 var courseResult = courseResults.FirstOrDefault(x => x.CourseId == item.CourseId && x.StudentId == item.StudentId);

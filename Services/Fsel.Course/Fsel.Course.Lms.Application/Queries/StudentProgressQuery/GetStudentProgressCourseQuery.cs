@@ -45,7 +45,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<CourseStudentProgressModel> methodResult = new MethodResult<CourseStudentProgressModel>();
-            CourseStudentProgressModel managerCourseProgress = new CourseStudentProgressModel();
+            CourseStudentProgressModel courseProgress = new CourseStudentProgressModel();
             var studentResults = await _userService.GetStudentsByStudentIdsAsync(new List<Guid> { request.StudentId });
             if (!studentResults.IsSuccessStatusCode)
             {
@@ -107,26 +107,26 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                     StudentId = courseResult.StudentId
                 };
                 var (currentProgress, progress) = await _courseRepository.GetContentComplete(courseResultModel);
-                managerCourseProgress.ContentCompleted = string.Format("{0} / {1}", currentProgress, progress);
+                courseProgress.ContentCompleted = string.Format("{0} / {1}", currentProgress, progress);
             }
-            managerCourseProgress.CourseName = course.Code;
-            managerCourseProgress.CourseId = course.Id;
+            courseProgress.CourseName = course.Code;
+            courseProgress.CourseId = course.Id;
             if (featureAccessTime != null)
             {
-                managerCourseProgress.Visit = featureAccessTime.Visit;
-                managerCourseProgress.TimeSpent = featureAccessTime.AccessTime;
+                courseProgress.Visit = featureAccessTime.Visit;
+                courseProgress.TimeSpent = featureAccessTime.AccessTime;
             }
             if (@class != null)
             {
                 var package = packages?.FirstOrDefault(x => x.Id == @class.PackageId);
-                managerCourseProgress.ClassId = @class.Id;
-                managerCourseProgress.CodeClass = @class.Code;
-                managerCourseProgress.StartDate = @class.TimeStart;
-                managerCourseProgress.EndDate = @class.TimeEnd;
-                managerCourseProgress.PackageId = @class.PackageId;
-                managerCourseProgress.PackageCode = package?.Code ?? default;
+                courseProgress.ClassId = @class.Id;
+                courseProgress.CodeClass = @class.Code;
+                courseProgress.StartDate = @class.TimeStart;
+                courseProgress.EndDate = @class.TimeEnd;
+                courseProgress.PackageId = @class.PackageId;
+                courseProgress.PackageCode = package?.Code ?? default;
             }
-            methodResult.Result = managerCourseProgress;
+            methodResult.Result = courseProgress;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }

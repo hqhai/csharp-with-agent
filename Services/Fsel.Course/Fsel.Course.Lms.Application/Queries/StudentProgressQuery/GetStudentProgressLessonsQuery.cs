@@ -103,16 +103,16 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             var featureAccessTimes = featureAccessTimeResults.Content?.Result;
             foreach (var item in lessonIds)
             {
-                var managerUnit = await GetLesson(item, studentId);
+                var lessonProgress = await GetLesson(item, studentId);
                 var featureAccessTime = featureAccessTimes?.FirstOrDefault(x => x.LessonId == item);
-                managerUnit.Type = nameof(managerUnit.Type);
+                lessonProgress.Type = nameof(lessonProgress.Type);
                 if (featureAccessTime != null)
                 {
-                    managerUnit.TimeSpent = featureAccessTime.AccessTime;
-                    managerUnit.LastVisited = featureAccessTime.LastVisited ?? default;
-                    managerUnit.Visit = featureAccessTime.Visit;
+                    lessonProgress.TimeSpent = featureAccessTime.AccessTime;
+                    lessonProgress.LastVisited = featureAccessTime.LastVisited ?? default;
+                    lessonProgress.Visit = featureAccessTime.Visit;
                 }
-                listLessonProgress.Add(managerUnit);
+                listLessonProgress.Add(lessonProgress);
             }
             if (unit.UnitSkillMockTests.Any())
             {
