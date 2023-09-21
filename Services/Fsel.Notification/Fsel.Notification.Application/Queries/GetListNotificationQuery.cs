@@ -11,6 +11,7 @@ using Fsel.Core.Base;
 using Fsel.Notification.Application.Services;
 using Fsel.Notification.Application.Services.UserServices;
 using Fsel.Notification.Application.Services.Models;
+using AutoMapper;
 
 namespace Fsel.Notification.Application.Queries
 {
@@ -23,11 +24,14 @@ namespace Fsel.Notification.Application.Queries
         private readonly INotificationsRepository _notificationsRepository;
         private readonly AuthContext _authContext;
         private readonly IUserService _userService;
-        public GetListNotificationQueryQueryHandler(INotificationsRepository notificationsRepository, AuthContext authContext, IUserService userService)
+        private readonly IMapper _mapper;
+
+        public GetListNotificationQueryQueryHandler(INotificationsRepository notificationsRepository, AuthContext authContext, IUserService userService, IMapper mapper)
         {
             _notificationsRepository = notificationsRepository;
             _authContext = authContext;
             _userService = userService;
+            _mapper = mapper;
         }
 
         public async Task<MethodResult<PagingItemsModel<NotificationMessageModel>>> Handle(GetListNotificationQuery request, CancellationToken cancellationToken)
@@ -43,22 +47,7 @@ namespace Fsel.Notification.Application.Queries
 
             var listSenderInfo = listSender?.Content?.Result;
 
-            var notificationResultQuery = notificationQuery.Select(x => new NotificationMessageModel
-            {
-                Id = x.Id,
-                UserId = x.UserId,
-                RoleId = x.RoleId,
-                Status = x.Status,
-                Message = x.Message,
-                AvatarPath = string.Empty,
-                Link = x.Link,
-                ObjectId = x.ObjectId,
-                CreatedDate = x.CreatedDate,
-                CreatedUserId = x.CreatedUserId,
-                CreatedFullName = x.CreatedFullName,
-                NotificationTypeId = x.NotificationTypeId,
-                SenderId = x.SenderId
-            });
+            var notificationResultQuery = notificationQuery.Select(x => _mapper.Map<NotificationMessageModel>(x));
 
             if (request.Status != null)
             {
