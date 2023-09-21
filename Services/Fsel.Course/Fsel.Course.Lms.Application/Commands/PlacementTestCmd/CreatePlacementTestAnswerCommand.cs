@@ -214,7 +214,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
 
             if (currentLevel.HasValue)
             {
-                var updateStudent = new UpdateStudentByLevelModel
+                var updateStudent = new NotificationRemindModel
                 {
                     Id = _authContext.CurrentUserId,
                     Level = currentLevel.Value
