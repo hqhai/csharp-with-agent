@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fsel.System.Infrastructure.Migrations
 {
     [DbContext(typeof(SystemDbContext))]
-    [Migration("20230920042202_Update_FeatureAccessTime")]
-    partial class Update_FeatureAccessTime
+    [Migration("20230921033045_Update_FeatureAccessTime_2")]
+    partial class Update_FeatureAccessTime_2
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

@@ -48,6 +48,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                     StudentId = group.Key.StudentId,
                     CourseId = group.Key.CourseId,
                     CourseType = group.Select(x => x.Course).FirstOrDefault(c => c!.Id == group.Key.CourseId)!.CourseType,
+                    CourseLevel = group.Select(x => x.Course).FirstOrDefault(c => c!.Id == group.Key.CourseId)!.CourseLevel,
                     CreatedDate = group.Max(r => r.CreatedDate)
                 })
                 .OrderByDescending(x => x.CreatedDate)
@@ -65,6 +66,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                     studentProgressModel.StudentId = courseResult.StudentId;
                     studentProgressModel.FullName = student?.Human?.FullName;
                 }
+                studentProgressModel.Level = courseResult.CourseLevel ?? default;
                 studentProgressModel.CourseType = courseResult.CourseType ?? default;
                 studentProgressModel.CourseId = courseResult.CourseId;
                 studentProgress.Add(studentProgressModel);
@@ -72,6 +74,16 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             if (!string.IsNullOrEmpty(request.Keyword))
             {
                 studentProgress = studentProgress.Where(m => (m.FullName ?? string.Empty).Contains(request.Keyword)).ToList();
+            }
+
+            if (request.CourseType != null)
+            {
+                studentProgress = studentProgress.Where(m => m.CourseType == request.CourseType).ToList();
+            }
+
+            if (request.Level != null)
+            {
+                studentProgress = studentProgress.Where(m => m.Level == request.Level).ToList();
             }
 
             int totalItem = studentProgress.Count;

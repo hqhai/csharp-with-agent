@@ -173,6 +173,7 @@ namespace Fsel.Interaction.Application.Queries.PostQuery.StudentPosts
                                {
                                    Name = postTag.TopicTag!.Name,
                                    Color = postTag.TopicTag!.Color,
+                                   Id = postTag.TopicTag!.Id,
                                }).ToList()
 
             });
