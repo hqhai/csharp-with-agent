@@ -4,6 +4,6 @@ namespace Fsel.Course.Domain.Enums
 {
     public enum EnumStudentFeedBackType
     {
-        Teacher, AM
+        Teacher, AI
     }
 }

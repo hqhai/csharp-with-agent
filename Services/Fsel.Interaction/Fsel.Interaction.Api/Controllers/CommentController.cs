@@ -27,11 +27,12 @@ namespace Fsel.Interaction.Api.Controllers
         /// Create action
         /// </summary>
         [HttpPost]
-        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+
+        [ProducesResponseType(typeof(MethodResult<CommentModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> Create([FromBody] CreateCommentCommand command)
         {
-            MethodResult<bool> queryResult = await _mediator.Send(command).ConfigureAwait(false);
+            MethodResult<CommentModel> queryResult = await _mediator.Send(command).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
 
