@@ -14,11 +14,6 @@ namespace Fsel.Hangfire.Application.Workers
             _updateClassLiveAssignmentPublisher = updateClassLiveAssignmentPublisher;
         }
 
-        public async Task RunAsync<T>(T? data = null) where T : class
-        {
-            await _updateClassLiveAssignmentPublisher.Publish(CancellationToken.None);
-        }
-
         public async Task RunAsync()
         {
             await _updateClassLiveAssignmentPublisher.Publish(CancellationToken.None);

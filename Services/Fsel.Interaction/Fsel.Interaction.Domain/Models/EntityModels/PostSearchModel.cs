@@ -31,5 +31,6 @@ namespace Fsel.Interaction.Domain.Models.EntityModels
         public int? CommentCount { get; set; }
 
         public bool IsLiked { get; set; }
+        public bool IsTurnedOffNotification { get; set; }
     }
 }
