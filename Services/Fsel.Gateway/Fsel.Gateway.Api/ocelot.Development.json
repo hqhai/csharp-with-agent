@@ -1,6 +1,6 @@
 {
   "GlobalConfiguration": {
-    "BaseUrl": "http://20.187.163.186:80"
+    "BaseUrl": "http://localhost:5200"
   },
   "Routes": [
     // Auth Service
@@ -12,8 +12,8 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "20.239.224.16",
-          "Port": 80
+          "Host": "localhost",
+          "Port": 5201
         }
       ]
     },
@@ -26,8 +26,8 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "20.24.120.47",
-          "Port": 80
+          "Host": "localhost",
+          "Port": 5202
         }
       ],
       "AuthenticationOptions": {
@@ -44,8 +44,8 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "20.187.190.125",
-          "Port": 80
+          "Host": "localhost",
+          "Port": 5203
         }
       ],
       "AuthenticationOptions": {
@@ -62,8 +62,8 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "20.187.186.116",
-          "Port": 80
+          "Host": "localhost",
+          "Port": 5204
         }
       ],
       "AuthenticationOptions": {
@@ -80,8 +80,8 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "20.239.31.13",
-          "Port": 80
+          "Host": "localhost",
+          "Port": 5205
         }
       ]
     },
@@ -94,8 +94,8 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "20.239.120.173",
-          "Port": 80
+          "Host": "localhost",
+          "Port": 5206
         }
       ]
     },
@@ -108,8 +108,8 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "20.239.121.201",
-          "Port": 80
+          "Host": "localhost",
+          "Port": 5207
         }
       ]
     },
@@ -122,8 +122,8 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "20.239.29.104",
-          "Port": 80
+          "Host": "localhost",
+          "Port": 5208
         }
       ]
     },
@@ -136,22 +136,8 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "20.24.110.45",
-          "Port": 80
-        }
-      ]
-    },
-    // System Service
-    {
-      "SwaggerKey": "system",
-      "UpstreamPathTemplate": "/system-gateway/{everything}",
-      "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ],
-      "DownstreamPathTemplate": "/api/{everything}",
-      "DownstreamScheme": "http",
-      "DownstreamHostAndPorts": [
-        {
-          "Host": "20.187.250.110",
-          "Port": 80
+          "Host": "localhost",
+          "Port": 5209
         }
       ]
     },
@@ -164,8 +150,8 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "20.255.132.57",
-          "Port": 80
+          "Host": "localhost",
+          "Port": 5501
         }
       ]
     },
@@ -178,8 +164,8 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "20.255.135.179",
-          "Port": 80
+          "Host": "localhost",
+          "Port": 5502
         }
       ]
     }
@@ -191,7 +177,7 @@
         {
           "Name": "Auths API",
           "Version": "v1",
-          "Url": "http://20.239.224.16/swagger/v1/swagger.json"
+          "Url": "http://localhost:5201/swagger/v1/swagger.json"
         }
       ]
     },
@@ -201,7 +187,7 @@
         {
           "Name": "Users API",
           "Version": "v1",
-          "Url": "http://20.24.120.47/swagger/v1/swagger.json"
+          "Url": "http://localhost:5202/swagger/v1/swagger.json"
         }
       ]
     },
@@ -211,7 +197,7 @@
         {
           "Name": "Lcms Courses API",
           "Version": "v1",
-          "Url": "http://20.187.190.125/swagger/v1/swagger.json"
+          "Url": "http://localhost:5203/swagger/v1/swagger.json"
         }
       ]
     },
@@ -221,7 +207,7 @@
         {
           "Name": "Lms Courses API",
           "Version": "v1",
-          "Url": "http://20.187.186.116/swagger/v1/swagger.json"
+          "Url": "http://localhost:5204/swagger/v1/swagger.json"
         }
       ]
     },
@@ -231,7 +217,7 @@
         {
           "Name": "Storage API",
           "Version": "v1",
-          "Url": "http://20.239.31.13/swagger/v1/swagger.json"
+          "Url": "http://localhost:5205/swagger/v1/swagger.json"
         }
       ]
     },
@@ -241,7 +227,7 @@
         {
           "Name": "Senders API",
           "Version": "v1",
-          "Url": "http://20.239.120.173/swagger/v1/swagger.json"
+          "Url": "http://localhost:5206/swagger/v1/swagger.json"
         }
       ]
     },
@@ -251,7 +237,7 @@
         {
           "Name": "Training API",
           "Version": "v1",
-          "Url": "http://20.239.121.201/swagger/v1/swagger.json"
+          "Url": "http://localhost:5207/swagger/v1/swagger.json"
         }
       ]
     },
@@ -261,7 +247,7 @@
         {
           "Name": "Interaction API",
           "Version": "v1",
-          "Url": "http://20.239.29.104/swagger/v1/swagger.json"
+          "Url": "http://localhost:5208/swagger/v1/swagger.json"
         }
       ]
     },
@@ -271,7 +257,7 @@
         {
           "Name": "Ordering API",
           "Version": "v1",
-          "Url": "http://20.24.110.45/swagger/v1/swagger.json"
+          "Url": "http://localhost:5209/swagger/v1/swagger.json"
         }
       ]
     },
@@ -281,7 +267,7 @@
         {
           "Name": "System API",
           "Version": "v1",
-          "Url": "http://20.187.250.110/swagger/v1/swagger.json"
+          "Url": "http://localhost:52010/swagger/v1/swagger.json"
         }
       ]
     },
@@ -291,7 +277,7 @@
         {
           "Name": "Realtime API",
           "Version": "v1",
-          "Url": "http://20.255.132.57/swagger/v1/swagger.json"
+          "Url": "http://localhost:5501/swagger/v1/swagger.json"
         }
       ]
     },
@@ -301,7 +287,7 @@
         {
           "Name": "Notification API",
           "Version": "v1",
-          "Url": "http://20.255.135.179/swagger/v1/swagger.json"
+          "Url": "http://localhost:5502/swagger/v1/swagger.json"
         }
       ]
     }
