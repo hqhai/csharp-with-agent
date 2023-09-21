@@ -11,21 +11,21 @@ namespace Fsel.Training.Application.Queries.ClassStudentQuery
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class GetCsoIdByStudentIdQuery : IRequest<MethodResult<IList<ClassModel>>>
+    public class GetClassesByCsoIdQuery : IRequest<MethodResult<IList<ClassModel>>>
     {
         public Guid? CsoId { get; set; }
     }
 
-    public class GetCsoIdByStudentIdQueryHandler : IRequestHandler<GetCsoIdByStudentIdQuery, MethodResult<IList<ClassModel>>>
+    public class GetClassesByCsoIdQueryHandler : IRequestHandler<GetClassesByCsoIdQuery, MethodResult<IList<ClassModel>>>
     {
         private readonly IClassRepository _classRepository;
 
-        public GetCsoIdByStudentIdQueryHandler(IClassRepository classRepository)
+        public GetClassesByCsoIdQueryHandler(IClassRepository classRepository)
         {
             _classRepository = classRepository;
         }
 
-        public async Task<MethodResult<IList<ClassModel>>> Handle(GetCsoIdByStudentIdQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<IList<ClassModel>>> Handle(GetClassesByCsoIdQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<IList<ClassModel>> methodResult = new MethodResult<IList<ClassModel>>();

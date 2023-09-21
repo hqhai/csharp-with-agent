@@ -51,7 +51,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
             var csoResults = await _userService.GetCSOByUserId(_authContext.CurrentUserId);
             var csoId = csoResults.Content?.Result?.Id;
 
-            var studentsResult = await _trainingService.GetCsoByStudentAsync(csoId ?? default);
+            var studentsResult = await _trainingService.GetClassesByCsoIdAsync(csoId ?? default);
             var students = studentsResult.Content!.Result;
             var student = students?.SelectMany(x => x.ClassStudents!).Select(x => x.StudentId).ToList();
 
