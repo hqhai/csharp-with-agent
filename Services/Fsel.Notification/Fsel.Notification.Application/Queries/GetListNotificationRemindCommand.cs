@@ -47,7 +47,6 @@ namespace Fsel.Notification.Application.Queries
                         .Where(x => request.ObjectIds.Contains(x.ObjectId) && x.UserId == _authContext.CurrentUserId && x.Status == request.Status).ToListAsync(cancellationToken);
 
             methodResult.Result = _mapper.Map<IList<NotificationRemindModel>>(query);
-            methodResult.Result = _mapper.Map<IList<NotificationRemindModel>>(query);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }
