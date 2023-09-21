@@ -3,6 +3,7 @@
 namespace Fsel.Notification.Application.Commands
 {
     using System;
+    using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
@@ -27,13 +28,15 @@ namespace Fsel.Notification.Application.Commands
         private readonly AuthContext _authContext;
         private readonly NotificationMessagePublisher _notificationMessagePublisher;
         private readonly IUserService _userService;
+        private readonly IMapper _mapper;
 
-        public UpdateStatusNotificationCommandHandler(INotificationsRepository notificationsRepository, AuthContext authContext, NotificationMessagePublisher notificationMessagePublisher, IUserService userService)
+        public UpdateStatusNotificationCommandHandler(INotificationsRepository notificationsRepository, AuthContext authContext, NotificationMessagePublisher notificationMessagePublisher, IUserService userService, IMapper mapper)
         {
             _notificationsRepository = notificationsRepository;
             _authContext = authContext;
             _notificationMessagePublisher = notificationMessagePublisher;
             _userService = userService;
+            _mapper = mapper;
         }
 
         public async Task<MethodResult<bool>> Handle(UpdateStatusNotificationCommand request, CancellationToken cancellationToken)
@@ -53,17 +56,19 @@ namespace Fsel.Notification.Application.Commands
             }
 
             #region validate
+
             if (listNotificationMessage == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request), _authContext.CurrentUserId);
                 return methodResult;
             }
-            #endregion
+
+            #endregion validate
 
             #region Handler
+
             await _notificationsRepository.ExecuteTransactionAsync(async () =>
             {
-
                 foreach (var item in listNotificationMessage)
                 {
                     item.Status = EnumNotificationStatus.Read;
@@ -76,17 +81,9 @@ namespace Fsel.Notification.Application.Commands
                         avatarPath = senderInfo?.Content?.Result?.AvatarPath ?? string.Empty;
                     }
 
-                    //Push notification with 
-                    var notificationRealTime = new NotificationMessageModel()
-                    {
-                        UserId = item.UserId,
-                        ObjectId = item.ObjectId,
-                        Message = item.Message,
-                        Link = item.Message,
-                        SenderId = item.SenderId,
-                        Status = EnumNotificationStatus.Read,
-                        AvatarPath = avatarPath,
-                    };
+                    //Push notification with
+                    var notificationRealTime = _mapper.Map<NotificationMessageModel>(item);
+                    notificationRealTime.AvatarPath = avatarPath;
 
                     await _notificationMessagePublisher.Publish(notificationRealTime, cancellationToken).ConfigureAwait(false);
                 }
@@ -99,6 +96,7 @@ namespace Fsel.Notification.Application.Commands
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
             });
+
             #endregion Handler
 
             return methodResult;

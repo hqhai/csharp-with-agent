@@ -5,7 +5,6 @@ namespace Fsel.System.Application.Queries.QuestBoardQuery
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
-    using Fsel.Ordering.Domain.Enums;
     using Fsel.Shared.Enums;
     using Fsel.System.Application.Services.OrderServices;
     using Fsel.System.Domain.IRepositories;

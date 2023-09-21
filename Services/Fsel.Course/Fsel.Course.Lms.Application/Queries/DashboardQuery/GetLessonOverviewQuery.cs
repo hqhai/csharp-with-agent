@@ -209,11 +209,11 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
             }
             if (classForumResult != null)
             {
-                if (classForumResult.Status == EnumClassForumResultStatus.Graded)
+                if (classForumResult.Status == EnumClassForumResultStatus.PendingForGrading)
                 {
                     return (EnumResultStatus.Done, 1);
                 }
-                else if (classForumResult.Status == EnumClassForumResultStatus.Pending || classForumResult.Status == EnumClassForumResultStatus.PendingForGrading)
+                else if (classForumResult.Status == EnumClassForumResultStatus.Pending)
                 {
                     return (EnumResultStatus.Process, 0);
                 }

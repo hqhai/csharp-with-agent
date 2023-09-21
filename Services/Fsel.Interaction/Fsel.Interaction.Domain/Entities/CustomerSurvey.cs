@@ -11,7 +11,6 @@ namespace Fsel.Interaction.Domain.Entities
     public class CustomerSurvey : Entity
     {
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
-        [MaxLength(250, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? AnswerStr { get; set; }
 
         [NotMapped]
