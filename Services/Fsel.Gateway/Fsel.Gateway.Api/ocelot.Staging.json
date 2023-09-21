@@ -164,8 +164,8 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "42.96.58.145",
-          "Port": 5501
+          "Host": "20.255.132.57",
+          "Port": 80
         }
       ]
     },
@@ -178,8 +178,8 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "42.96.58.145",
-          "Port": 5502
+          "Host": "20.255.135.179",
+          "Port": 80
         }
       ]
     }
@@ -291,7 +291,7 @@
         {
           "Name": "Realtime API",
           "Version": "v1",
-          "Url": "http://42.96.58.145:5501/swagger/v1/swagger.json"
+          "Url": "http://20.255.132.57/swagger/v1/swagger.json"
         }
       ]
     },
@@ -301,7 +301,7 @@
         {
           "Name": "Notification API",
           "Version": "v1",
-          "Url": "http://42.96.58.145:5502/swagger/v1/swagger.json"
+          "Url": "http://20.255.135.179/swagger/v1/swagger.json"
         }
       ]
     }
