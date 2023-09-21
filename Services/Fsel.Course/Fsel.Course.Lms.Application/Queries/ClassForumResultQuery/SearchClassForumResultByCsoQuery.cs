@@ -3,9 +3,7 @@
 namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
 {
     using System;
-    using System.Collections.Generic;
     using System.Linq;
-    using System.Text;
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
@@ -25,6 +23,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
     public class SearchClassForumResultByCsoQuery : SearchClassForumResultQueryModel, IRequest<MethodResult<PagingItemsModel<ClassForumResultSearchModel>>>
     {
     }
+
     public class SearchClassForumResultByCsoQueryHandler : IRequestHandler<SearchClassForumResultByCsoQuery, MethodResult<PagingItemsModel<ClassForumResultSearchModel>>>
     {
         private readonly IClassForumResultRepository _classForumResultRepository;

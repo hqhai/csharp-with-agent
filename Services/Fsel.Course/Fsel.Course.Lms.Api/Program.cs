@@ -6,6 +6,7 @@ using Fsel.Course.Infrastructure;
 using Fsel.Course.Infrastructure.Common;
 using Fsel.Course.Infrastructure.Repositories;
 using Fsel.Course.Infrastructure.ValueSettings;
+using Fsel.Course.Lms.Application.Queues.Consumers;
 using Fsel.Course.Lms.Application.Queues.Publishers;
 using Fsel.Course.Lms.Application.Services.InteractionService;
 using Fsel.Course.Lms.Application.Services.OrderServices;
@@ -118,7 +119,11 @@ builder.AddRefitClients(typeof(ISystemService), appSetting?.Services?.SystemApiU
 builder.AddRefitClients(typeof(IOrderService), appSetting?.Services?.OrderApiUrl);
 builder.AddRefitClients(typeof(ISenderService), appSetting?.Services?.SenderApiUrl);
 
-builder.AddMassTransit(appSetting);
+builder.AddMassTransit(appSetting,
+queues: new Dictionary<string, Type>
+{
+    { QueueSettings.LmsQueue.NameQueue.ClassForumResultTime, typeof(UpdateClassForumResultTime) }
+});
 
 var app = builder.Build();
 app.UseServices();
