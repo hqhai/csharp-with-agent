@@ -15,13 +15,13 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public EnumResultStatus Status { get; set; }
         public long TimeSpent { get; set; }
         public DateTime LastVisited { get; set; }
-        public double PercentObject { get; set; }
+        public double CorrectPercent { get; set; }
         public string? ContentProgress { get; set; }
         public int TotalLesson { get; set; }
         public int TotalSkill { get; set; }
         public int DisplayOrder { get; set; }
-        public IList<SkillScoresStatus> SkillScores { get; set; } = new List<SkillScoresStatus>();
-        public double Percent { get; set; }
+        public IList<TestSkillScores> SkillScores { get; set; } = new List<TestSkillScores>();
+        public double ProcessPercent { get; set; }
         public double Scores { get; set; }
     }
 }

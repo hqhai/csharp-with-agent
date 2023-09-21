@@ -119,7 +119,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                     var correctCount = sectionQuestions.SelectMany(x => x.FinalTestAnswers).Sum(x => x!.CorrectCount);
                     var totalQuestion = sectionQuestions.Select(x => x.Question).Count();
                     var countQuestion = sectionQuestions.SelectMany(x => x.FinalTestAnswers).Count();
-                    var skillScores = new SkillScoresStatus
+                    var skillScores = new TestSkillScores
                     {
                         Skill = x.CourseSkill,
                         CorrectCount = correctCount,
@@ -136,9 +136,9 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             var isDone = finalTestResult.Status == EnumResultStatus.Done;
 
             finalStudentProgress.Status = finalTestResult.Status;
-            finalStudentProgress.PercentObject = Math.Round(finalStudentProgress.SkillScores.Average(x => x.Percent), 0);
+            finalStudentProgress.CorrectPercent = Math.Round(finalStudentProgress.SkillScores.Average(x => x.Percent), 0);
             finalStudentProgress.ContentProgress = string.Format("{0} / {1}", isDone ? 1 : 0, 1);
-            finalStudentProgress.Percent = NumberHelper.ConvertPercentDouble(finalStudentProgress.SkillScores.Average(x => x.CountQuestion / x.TotalQuestion));
+            finalStudentProgress.ProcessPercent = NumberHelper.ConvertPercentDouble(finalStudentProgress.SkillScores.Average(x => x.CountQuestion / x.TotalQuestion));
             finalStudentProgress.TotalSkill = totalSkill;
             if (featureAccessTime != null)
             {

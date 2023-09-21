@@ -123,7 +123,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                 mockTestProgress.SkillScores = skillMockTest.Select(x =>
                 {
                     var skillScore = x.MockTestResult?.SkillScores?.FirstOrDefault(z => z.Skill == x.Skill);
-                    var skillScores = new SkillScoresStatus
+                    var skillScores = new TestSkillScores
                     {
                         Skill = x.Skill,
                         CorrectCount = skillScore?.CorrectCount ?? default,
@@ -154,10 +154,10 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                 }
                 var isDone = item.Status == EnumResultStatus.Done;
                 mockTestProgress.ContentProgress = string.Format("{0} / {1}", isDone ? 1 : 0, 1);
-                mockTestProgress.Percent = NumberHelper.ConvertPercentDouble(mockTestProgress.SkillScores.Where(x => x.TotalQuestion != 0).Average(x => x.CountQuestion / x.TotalQuestion));
+                mockTestProgress.ProcessPercent = NumberHelper.ConvertPercentDouble(mockTestProgress.SkillScores.Average(x => x.CountQuestion / (x.TotalQuestion > 0 ? x.TotalQuestion : 1)));
                 mockTestProgress.Scores = Math.Round(mockTestProgress.SkillScores.Average(x => x.Scores), 1);
                 mockTestProgress.Status = item.Status;
-                mockTestProgress.PercentObject = item.Percent;
+                mockTestProgress.CorrectPercent = item.Percent;
                 var featureAccessTime = featureAccessTimeTest?.FirstOrDefault(x => x.ObjectId == item.Id);
                 if (featureAccessTime != null)
                 {

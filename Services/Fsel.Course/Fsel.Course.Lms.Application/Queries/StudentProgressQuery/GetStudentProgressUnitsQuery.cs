@@ -124,12 +124,12 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                 if (unitResult != null)
                 {
                     unitProgress.Status = unitResult.Status;
-                    unitProgress.PercentObject = unitResult.Percent;
+                    unitProgress.CorrectPercent = unitResult.Percent;
                 }
 
                 unitProgress.ContentProgress = string.Format("{0} / {1}", currentProgress, progress);
                 unitProgress.TotalLesson = lessonIds.Count;
-                unitProgress.Percent = NumberHelper.ConvertPercentDouble((double)currentProgress / progress);
+                unitProgress.ProcessPercent = NumberHelper.ConvertPercentDouble((double)currentProgress / progress);
                 if (featureAccessTime != null)
                 {
                     unitProgress.TimeSpent = featureAccessTime.AccessTime;

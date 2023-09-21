@@ -167,7 +167,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                 if (mockTestResult != null)
                 {
                     mockTestProgress.Status = mockTestResult.Status;
-                    mockTestProgress.PercentObject = mockTestResult.Percent;
+                    mockTestProgress.CorrectPercent = mockTestResult.Percent;
                     mockTestProgress.SkillScores = mockTestResult.SkillScores;
                     var isDone = mockTestResult.Status == EnumResultStatus.Done;
                     mockTestProgress.ContentCompleted = string.Format("{0} / {1}", isDone ? 1 : 0, 1);
