@@ -185,12 +185,12 @@ namespace Fsel.Interaction.Application.Queries.PostQuery.StudentPosts
                     .ConfigureAwait(false);
 
 
-            GetListNotificationRemindCommand cmd = new GetListNotificationRemindCommand
+            GetListNotificationRemindQueryModel query = new GetListNotificationRemindQueryModel
             {
                 ObjectIds = lists.Select(x => x.Id).ToList(),
                 Status = EnumNotificationRemindStatus.Off
             };
-            var notificationRemind = await _notificationService.GetListNotificationRemind(cmd);
+            var notificationRemind = await _notificationService.GetListNotificationRemind(query);
             var notificationTurnOff = notificationRemind.Content?.Result;
 
             foreach (var post in lists)

@@ -173,12 +173,12 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumQuery
             var actionsResult = await _interactionService.GetsActionAsync(new InteractionActionCommandModel { ObjectIds = classForumResults.Select(x => x.Id).ToList(), UserId = _authContext.CurrentUserId });
             var actions = actionsResult.Content?.Result;
 
-            GetListNotificationRemindCommand cmd = new GetListNotificationRemindCommand
+            GetListNotificationRemindQuery query = new GetListNotificationRemindQuery
             {
                 ObjectIds = classForumResults.Select(x => x.Id).ToList(),
                 Status = EnumNotificationRemindStatus.Off
             };
-            var notificationRemind = await _notificationService.GetListNotificationRemind(cmd);
+            var notificationRemind = await _notificationService.GetListNotificationRemind(query);
             var notificationTurnOff = notificationRemind.Content?.Result;
 
 

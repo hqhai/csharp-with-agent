@@ -72,9 +72,9 @@ namespace Fsel.Notification.Api.Controllers
         [HttpPost("remind-by-status")]
         [ProducesResponseType(typeof(MethodResult<IList<NotificationRemindModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetListNotificationRemind([FromBody] GetListNotificationRemindCommand cmd)
+        public async Task<IActionResult> GetListNotificationRemind([FromBody] GetListNotificationRemindQuery query)
         {
-            MethodResult<IList<NotificationRemindModel>> commandResult = await _mediator.Send(cmd).ConfigureAwait(false);
+            MethodResult<IList<NotificationRemindModel>> commandResult = await _mediator.Send(query).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
 

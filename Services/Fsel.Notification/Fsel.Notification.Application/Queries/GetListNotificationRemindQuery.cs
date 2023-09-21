@@ -10,27 +10,27 @@ using Fsel.Shared.Enums;
 
 namespace Fsel.Notification.Application.Queries
 {
-    public class GetListNotificationRemindCommand : IRequest<MethodResult<IList<NotificationRemindModel>>>
+    public class GetListNotificationRemindQuery : IRequest<MethodResult<IList<NotificationRemindModel>>>
     {
         public IList<Guid>? ObjectIds { get; set; }
 
         public EnumNotificationRemindStatus Status { get; set; }
     }
 
-    public class GetListNotificationRemindQueryQueryHandler : IRequestHandler<GetListNotificationRemindCommand, MethodResult<IList<NotificationRemindModel>>>
+    public class GetListNotificationRemindQueryHandler : IRequestHandler<GetListNotificationRemindQuery, MethodResult<IList<NotificationRemindModel>>>
     {
         private readonly INotificationRemindRepository _notificationRemindRepository;
         private readonly AuthContext _authContext;
         private readonly IMapper _mapper;
 
-        public GetListNotificationRemindQueryQueryHandler(AuthContext authContext, IMapper mapper, INotificationRemindRepository notificationRemindRepository)
+        public GetListNotificationRemindQueryHandler(AuthContext authContext, IMapper mapper, INotificationRemindRepository notificationRemindRepository)
         {
             _authContext = authContext;
             _mapper = mapper;
             _notificationRemindRepository = notificationRemindRepository;
         }
 
-        public async Task<MethodResult<IList<NotificationRemindModel>>> Handle(GetListNotificationRemindCommand request, CancellationToken cancellationToken)
+        public async Task<MethodResult<IList<NotificationRemindModel>>> Handle(GetListNotificationRemindQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<IList<NotificationRemindModel>>();
