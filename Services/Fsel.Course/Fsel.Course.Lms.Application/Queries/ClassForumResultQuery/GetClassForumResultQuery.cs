@@ -124,7 +124,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
             };
 
             classForumResult = _classForumResultRepository.Update(classForumResult);
-            await _classForumResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+            await _classForumResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             methodResult.Result = classForumResultModel;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
