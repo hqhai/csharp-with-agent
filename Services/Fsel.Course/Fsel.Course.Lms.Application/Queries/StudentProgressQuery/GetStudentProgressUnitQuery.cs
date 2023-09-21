@@ -54,7 +54,6 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             }
 
             var student = studentResults?.Content?.Result?.FirstOrDefault();
-            var studentId = student?.Id;
             var userId = student?.Human?.UserId;
             var course = await _courseRepository.GetByIdAsync(request.CourseId);
             if (course == null)
@@ -63,7 +62,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
             }
-            var unit = await _unitRepository.Queryable.Include(x => x.UnitResults.Where(x => x.StudentId == studentId && x.UnitId == request.UnitId))
+            var unit = await _unitRepository.Queryable.Include(x => x.UnitResults.Where(x => x.StudentId == request.StudentId && x.UnitId == request.UnitId))
                                                          .Include(x => x.UnitLessons)
                                                          .Include(x => x.UnitSkillMockTests)
                                                          .FirstOrDefaultAsync(x => x.Id == request.UnitId, cancellationToken);
@@ -74,7 +73,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                 var (currentProgress, progress) = await GetContentComplete(lessonIds, request, mockTestId);
                 var featureAccessTimeResult = await _systemService.GetFeatureAccessTimeAsync(new FeatureAccessTimeQueryModel { CourseId = request.CourseId, UnitId = request.UnitId, UserId = userId ?? default });
                 var featureAccessTime = featureAccessTimeResult?.Content?.Result;
-                var unitResult = unit.UnitResults.FirstOrDefault(x => x.StudentId == studentId && x.UnitId == unit.Id && x.CourseId == request.CourseId);
+                var unitResult = unit.UnitResults.FirstOrDefault(x => x.StudentId == request.StudentId && x.UnitId == unit.Id && x.CourseId == request.CourseId);
                 unitProgress.Type = nameof(unitResult.Unit);
                 unitProgress.ObjectId = unit.Id;
                 unitProgress.Name = unit.Name;
@@ -82,7 +81,6 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                 {
                     unitProgress.Status = unitResult.Status;
                     unitProgress.PercentObject = unitResult.Percent;
-                    unitProgress.SkillScores = unitResult.SkillScores;
                 }
 
                 unitProgress.ContentProgress = string.Format("{0} / {1}", currentProgress, progress);

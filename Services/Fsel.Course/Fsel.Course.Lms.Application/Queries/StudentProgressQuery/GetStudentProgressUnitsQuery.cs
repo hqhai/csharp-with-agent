@@ -11,7 +11,6 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
     using Fsel.Course.Lms.Application.Services.SystemService;
     using Fsel.Course.Lms.Application.Services.SystemService.Models;
     using Fsel.Course.Lms.Application.Services.UserServices;
-    using Fsel.Shared.Enums;
     using Fsel.Shared.Enums.ErrorCodes;
     using Fsel.Shared.Helpers;
     using MediatR;
@@ -30,20 +29,16 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
         private readonly IMockTestResultRepository _mockTestResultRepository;
         private readonly ILessonResultRepository _lessonResultRepository;
         private readonly IUnitRepository _unitRepository;
-        private readonly IMockTestRepository _mockTestRepository;
-        private readonly IFinalTestRepository _finalTestRepository;
         private readonly IUserService _userService;
         private readonly ISystemService _systemService;
         private readonly ICourseUnitMockTestRepository _courseUnitMockTestRepository;
 
-        public GetStudentProgressUnitsQueryHandler(ICourseRepository courseRepository, IMockTestResultRepository mockTestResultRepository, ILessonResultRepository lessonResultRepository, IUnitRepository unitRepository, IMockTestRepository mockTestRepository, IFinalTestRepository finalTestRepository, IUserService userService, ISystemService systemService, ICourseUnitMockTestRepository courseUnitMockTestRepository)
+        public GetStudentProgressUnitsQueryHandler(ICourseRepository courseRepository, IMockTestResultRepository mockTestResultRepository, ILessonResultRepository lessonResultRepository, IUnitRepository unitRepository, IUserService userService, ISystemService systemService, ICourseUnitMockTestRepository courseUnitMockTestRepository)
         {
             _courseRepository = courseRepository;
             _mockTestResultRepository = mockTestResultRepository;
             _lessonResultRepository = lessonResultRepository;
             _unitRepository = unitRepository;
-            _mockTestRepository = mockTestRepository;
-            _finalTestRepository = finalTestRepository;
             _userService = userService;
             _systemService = systemService;
             _courseUnitMockTestRepository = courseUnitMockTestRepository;
@@ -62,7 +57,6 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             }
 
             var student = studentResults?.Content?.Result?.FirstOrDefault();
-            var studentId = student?.Id;
             var userId = student?.Human?.UserId;
             var course = await _courseRepository.GetByIdAsync(request.CourseId);
             if (course == null)
@@ -80,38 +74,6 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             }
 
             var featureAccessTimeTest = new List<FeatureAccessTimeModel>();
-            if (course.CourseType == EnumCourseType.Academic)
-            {
-                var finalTestIds = courseUnitMockTests.Where(x => x.FinalTestId != null).Select(x => x.FinalTestId ?? default).ToList();
-                var finalTestResults = await _systemService.GetFeatureAccessTimesAsync(new FeatureAccessTimesQueryModel
-                {
-                    UserId = userId ?? default,
-                    FeatureAccessTimes = finalTestIds.Select(x => new FeatureAccessTimeQueryModel
-                    {
-                        UserId = userId ?? default,
-                        ObjectId = x,
-                        EnumFeature = EnumFeature.MockTest,
-                        CourseId = course.Id
-                    }).ToList(),
-                });
-                featureAccessTimeTest = finalTestResults?.Content?.Result?.ToList();
-            }
-            else
-            {
-                var mockTestIds = courseUnitMockTests.Where(x => x.MockTestId != null).Select(x => x.MockTestId ?? default).ToList();
-                var mockTestResults = await _systemService.GetFeatureAccessTimesAsync(new FeatureAccessTimesQueryModel
-                {
-                    UserId = userId ?? default,
-                    FeatureAccessTimes = mockTestIds.Select(x => new FeatureAccessTimeQueryModel
-                    {
-                        UserId = userId ?? default,
-                        ObjectId = x,
-                        EnumFeature = EnumFeature.MockTest,
-                        CourseId = course.Id
-                    }).ToList(),
-                });
-                featureAccessTimeTest = mockTestResults?.Content?.Result?.ToList();
-            }
             var unitIds = courseUnitMockTests.Where(x => x.UnitId != null).Select(x => x.UnitId ?? default).ToList();
             var unitResults = await _systemService.GetFeatureAccessTimesAsync(new FeatureAccessTimesQueryModel
             {
@@ -126,21 +88,13 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             var featureAccessTimeUnit = unitResults?.Content?.Result;
             foreach (var courseUnit in courseUnitMockTests)
             {
-                UnitStudentProgressModel unitProgress = new UnitStudentProgressModel();
                 if (courseUnit.UnitId != null)
                 {
-                    unitProgress = await GetUnitManager(courseUnit, studentId, featureAccessTimeUnit);
+                    UnitStudentProgressModel unitProgress = new UnitStudentProgressModel();
+                    unitProgress = await GetUnitManager(courseUnit, request.StudentId, featureAccessTimeUnit);
+                    unitProgress.Type = nameof(courseUnit.Unit);
+                    unitStudentProgress.Add(unitProgress);
                 }
-                else if (course.CourseType == EnumCourseType.Academic && courseUnit.FinalTestId != null)
-                {
-                    unitProgress = await GetFinalTestManager(courseUnit, studentId, featureAccessTimeTest);
-                }
-                else if (course.CourseType == EnumCourseType.Ielts && courseUnit.MockTestId != null)
-                {
-                    unitProgress = await GetMockTestManager(courseUnit, studentId, featureAccessTimeTest);
-                }
-                unitProgress.Type = courseUnit.FinalTestId != null ? nameof(courseUnit.FinalTest) : courseUnit.MockTestId != null ? nameof(courseUnit.MockTest) : courseUnit.UnitId != null ? nameof(courseUnit.Unit) : null;
-                unitStudentProgress.Add(unitProgress);
             }
 
             methodResult.Result = unitStudentProgress;
@@ -166,11 +120,11 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                 unitProgress.Type = nameof(courseUnitMockTest.Unit);
                 unitProgress.ObjectId = unit.Id;
                 unitProgress.Name = unit.Name;
+                unitProgress.DisplayOrder = courseUnitMockTest.DisplayOrder;
                 if (unitResult != null)
                 {
                     unitProgress.Status = unitResult.Status;
                     unitProgress.PercentObject = unitResult.Percent;
-                    unitProgress.SkillScores = unitResult.SkillScores;
                 }
 
                 unitProgress.ContentProgress = string.Format("{0} / {1}", currentProgress, progress);
@@ -180,68 +134,6 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                 {
                     unitProgress.TimeSpent = featureAccessTime.AccessTime;
                     unitProgress.LastVisited = featureAccessTime.LastVisited ?? default;
-                }
-            }
-            return unitProgress;
-        }
-
-        private async Task<UnitStudentProgressModel> GetMockTestManager(CourseUnitMockTest courseUnitMockTest, Guid? studentId, IList<FeatureAccessTimeModel>? featureAccessTimeResults)
-        {
-            UnitStudentProgressModel unitProgress = new UnitStudentProgressModel();
-            var mockTest = await _mockTestRepository.Queryable.Include(x => x.MockTestResults.Where(x => x.MockTestId == courseUnitMockTest.MockTestId && x.CourseId == courseUnitMockTest.CourseId && x.StudentId == studentId))
-                        .FirstOrDefaultAsync(x => x.Id == courseUnitMockTest.MockTestId);
-            if (mockTest != null)
-            {
-                var mockTestResult = mockTest.MockTestResults.FirstOrDefault(x => x.MockTestId == courseUnitMockTest.MockTestId && x.CourseId == courseUnitMockTest.CourseId && x.StudentId == studentId);
-                unitProgress.Type = nameof(courseUnitMockTest.MockTest);
-                unitProgress.ObjectId = mockTest.Id;
-                unitProgress.Name = mockTest.Name;
-                if (mockTestResult != null)
-                {
-                    var featureAccessTime = featureAccessTimeResults?.FirstOrDefault(x => x.ObjectId == mockTestResult.Id);
-                    unitProgress.Status = mockTestResult.Status;
-                    unitProgress.PercentObject = mockTestResult.Percent;
-                    unitProgress.SkillScores = mockTestResult.SkillScores;
-                    var isDone = mockTestResult.Status == EnumResultStatus.Done;
-                    unitProgress.ContentProgress = string.Format("{0} / {1}", isDone ? 1 : 0, 1);
-                    unitProgress.Percent = NumberHelper.ConvertPercentDouble((double)(isDone ? 4 : 0) / 4);
-                    unitProgress.TotalSkill = 4;
-                    if (featureAccessTime != null)
-                    {
-                        unitProgress.TimeSpent = featureAccessTime.AccessTime;
-                        unitProgress.LastVisited = featureAccessTime.LastVisited ?? default;
-                    }
-                }
-            }
-            return unitProgress;
-        }
-
-        private async Task<UnitStudentProgressModel> GetFinalTestManager(CourseUnitMockTest courseUnitMockTest, Guid? studentId, IList<FeatureAccessTimeModel>? featureAccessTimeResults)
-        {
-            UnitStudentProgressModel unitProgress = new UnitStudentProgressModel();
-            var finalTest = await _finalTestRepository.Queryable.Include(x => x.FinalTestResults.Where(x => x.FinalTestId == courseUnitMockTest.FinalTestId && x.CourseId == courseUnitMockTest.CourseId && x.StudentId == studentId))
-                       .FirstOrDefaultAsync(x => x.Id == courseUnitMockTest.FinalTestId);
-            if (finalTest != null)
-            {
-                var finalTestResult = finalTest.FinalTestResults.FirstOrDefault(x => x.FinalTestId == courseUnitMockTest.FinalTestId && x.CourseId == courseUnitMockTest.CourseId && x.StudentId == studentId);
-                unitProgress.Type = nameof(courseUnitMockTest.FinalTest);
-                unitProgress.ObjectId = finalTest.Id;
-                unitProgress.Name = finalTest.Name;
-                if (finalTestResult != null)
-                {
-                    var featureAccessTime = featureAccessTimeResults?.FirstOrDefault(x => x.ObjectId == finalTestResult.Id);
-                    unitProgress.Status = finalTestResult.Status;
-                    unitProgress.PercentObject = finalTestResult.Percent;
-                    unitProgress.SkillScores = finalTestResult.SkillScores;
-                    var isDone = finalTestResult.Status == EnumResultStatus.Done;
-                    unitProgress.ContentProgress = string.Format("{0} / {1}", isDone ? 1 : 0, 1);
-                    unitProgress.Percent = NumberHelper.ConvertPercentDouble((double)(isDone ? 3 : 0) / 3);
-                    unitProgress.TotalSkill = 3;
-                    if (featureAccessTime != null)
-                    {
-                        unitProgress.TimeSpent = featureAccessTime.AccessTime;
-                        unitProgress.LastVisited = featureAccessTime.LastVisited ?? default;
-                    }
                 }
             }
             return unitProgress;

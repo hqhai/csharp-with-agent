@@ -2,7 +2,7 @@
 
 namespace Fsel.Course.Domain.Models.EntityModels
 {
-    using Fsel.Ordering.Domain.Enums;
+    using Fsel.Shared.Enums;
 
     public class CourseStudentProgressModel
     {

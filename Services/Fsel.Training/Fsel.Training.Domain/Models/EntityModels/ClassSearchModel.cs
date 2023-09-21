@@ -3,7 +3,6 @@
 namespace Fsel.Training.Domain.Models.EntityModels
 {
     using System;
-    using Fsel.Ordering.Domain.Enums;
     using Fsel.Shared.Enums;
 
     public class ClassSearchModel

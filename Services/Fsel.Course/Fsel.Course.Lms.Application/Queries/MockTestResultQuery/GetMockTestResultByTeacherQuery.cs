@@ -67,7 +67,6 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
 
             var isCheckFull = mockTest!.MockTestType == EnumMockTestType.FullMockTest;
 
-
             var teacherResult = await _userService.GetTeacherByUserIdAsync(_authContext.CurrentUserId);
             var teacherId = teacherResult.Content?.Result?.Id;
 
