@@ -8,5 +8,7 @@ namespace Fsel.Course.Domain.IRepositories
     public interface IUnitRepository : IRepository<Unit>
     {
         Task<bool> IsUnitUsed(Guid id);
+
+        Task<List<Unit>?> GetListAsync(IList<Guid>? ids, Guid? studentId);
     }
 }

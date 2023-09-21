@@ -16,7 +16,6 @@ namespace Fsel.Course.Lms.Application.Services.TrainingServices.Models
         public EnumStatusClass Status { get; set; }
         public Guid CourseId { get; set; }
         public Guid PackageId { get; set; }
-
         public IList<ClassStudentModel>? ClassStudents { get; set; }
     }
 }

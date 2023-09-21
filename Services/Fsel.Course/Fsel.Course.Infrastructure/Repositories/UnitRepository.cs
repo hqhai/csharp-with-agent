@@ -33,6 +33,15 @@ namespace Fsel.Course.Infrastructure.Repositories
             }
         }
 
+        public async Task<List<Unit>?> GetListAsync(IList<Guid>? ids, Guid? studentId)
+        {
+            if (ids == null || !ids.Any())
+            {
+                return null;
+            }
+            return await Queryable.Include(x => x.UnitSkillMockTests).Include(x => x.UnitLessons).Where(x => ids.Contains(x.Id)).ToListAsync();
+        }
+
         public async Task<bool> IsUnitUsed(Guid id)
         {
             return await Queryable

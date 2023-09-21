@@ -17,6 +17,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Domain.Models.QueryModels.ClassForumResults;
     using Fsel.Course.Lms.Application.Services.TrainingServices;
+    using Fsel.Course.Lms.Application.Services.UserServices;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -29,12 +30,14 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
         private readonly IClassForumResultRepository _classForumResultRepository;
         private readonly ITrainingService _trainingService;
         private readonly AuthContext _authContext;
+        private readonly IUserService _userService;
 
-        public SearchClassForumResultByCsoQueryHandler(IClassForumResultRepository classForumResultRepository, ITrainingService trainingService, AuthContext authContext)
+        public SearchClassForumResultByCsoQueryHandler(IClassForumResultRepository classForumResultRepository, ITrainingService trainingService, AuthContext authContext, IUserService userService)
         {
             _classForumResultRepository = classForumResultRepository;
             _trainingService = trainingService;
             _authContext = authContext;
+            _userService = userService;
         }
 
         public async Task<MethodResult<PagingItemsModel<ClassForumResultSearchModel>>> Handle(SearchClassForumResultByCsoQuery request, CancellationToken cancellationToken)
@@ -46,6 +49,8 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 return methodResult;
             }
+            var csoResults = await _userService.GetCSOByUserId(_authContext.CurrentUserId);
+            var csoId = csoResults.Content?.Result?.Id;
 
             var classForumResultQuery = _classForumResultRepository.Queryable
                                     .Include(x => x.LessonResult)
@@ -54,7 +59,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
                                     .ThenInclude(x => x.Unit)
                                     .ThenInclude(x => x!.CourseUnitMockTests)
                                     .Include(x => x.ClassForum)
-                                    .Where(x => x.Status == EnumClassForumResultStatus.Pending && (x.CheckCsoId == null || x.CheckCsoId == _authContext.CurrentUserId))
+                                    .Where(x => x.Status == EnumClassForumResultStatus.Pending && (x.CheckCsoId == null || x.CheckCsoId == csoId))
                                     .Select(x => new ClassForumResultSearchModel
                                     {
                                         Id = x.Id,
