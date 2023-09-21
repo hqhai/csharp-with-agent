@@ -53,7 +53,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
 
             var studentsResult = await _trainingService.GetClassesByCsoIdAsync(csoId ?? default);
             var students = studentsResult.Content!.Result;
-            var student = students?.SelectMany(x => x.ClassStudents!).Select(x => x.StudentId).ToList();
+            var studentIds = students?.SelectMany(x => x.ClassStudents!).Select(x => x.StudentId).ToList();
 
             var classForumResultQuery = _classForumResultRepository.Queryable
                                     .Include(x => x.LessonResult)
@@ -62,7 +62,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
                                     .ThenInclude(x => x.Unit)
                                     .ThenInclude(x => x!.CourseUnitMockTests)
                                     .Include(x => x.ClassForum)
-                                    .Where(x => x.Status == EnumClassForumResultStatus.Pending && (x.CheckCsoId == null || x.CheckCsoId == csoId) && student!.Contains(x.StudentId))
+                                    .Where(x => x.Status == EnumClassForumResultStatus.Pending && (x.CheckCsoId == null || x.CheckCsoId == csoId) && studentIds!.Contains(x.StudentId))
                                     .Select(x => new ClassForumResultSearchModel
                                     {
                                         Id = x.Id,
