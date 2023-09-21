@@ -73,7 +73,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             }
             if (!string.IsNullOrEmpty(request.Keyword))
             {
-                studentProgress = studentProgress.Where(m => (m.FullName ?? string.Empty).Contains(request.Keyword)).ToList();
+                studentProgress = studentProgress.Where(m => (m.FullName ?? string.Empty).Contains(request.Keyword, StringComparison.CurrentCulture)).ToList();
             }
 
             if (request.CourseType != null)
@@ -87,7 +87,8 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             }
 
             int totalItem = studentProgress.Count;
-            var lists = studentProgress.Skip((request.Page - 1) * request.PageSize).Take(request.PageSize).ToList();
+            var studentProgressOrder = request.IsSortDesc ? studentProgress.OrderByDescending(m => m.FullName) : studentProgress.OrderBy(m => m.FullName);
+            var lists = studentProgressOrder.Skip((request.Page - 1) * request.PageSize).Take(request.PageSize).ToList();
             foreach (var item in lists)
             {
                 var courseResult = courseResults.FirstOrDefault(x => x.CourseId == item.CourseId && x.StudentId == item.StudentId);

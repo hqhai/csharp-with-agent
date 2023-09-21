@@ -119,7 +119,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                     var correctCount = sectionQuestions.SelectMany(x => x.FinalTestAnswers).Sum(x => x!.CorrectCount);
                     var totalQuestion = sectionQuestions.Select(x => x.Question).Count();
                     var countQuestion = sectionQuestions.SelectMany(x => x.FinalTestAnswers).Count();
-                    var skillScores = new SkillScores
+                    var skillScores = new SkillScoresStatus
                     {
                         Skill = x.CourseSkill,
                         CorrectCount = correctCount,

@@ -20,7 +20,8 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public int TotalLesson { get; set; }
         public int TotalSkill { get; set; }
         public int DisplayOrder { get; set; }
-        public IList<SkillScores> SkillScores { get; set; } = new List<SkillScores>();
+        public IList<SkillScoresStatus> SkillScores { get; set; } = new List<SkillScoresStatus>();
         public double Percent { get; set; }
+        public double Scores { get; set; }
     }
 }

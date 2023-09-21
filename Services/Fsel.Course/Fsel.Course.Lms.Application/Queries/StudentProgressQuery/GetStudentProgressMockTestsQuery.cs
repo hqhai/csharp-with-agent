@@ -5,7 +5,6 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
     using System.Linq.Dynamic.Core;
     using System.Threading;
     using Fsel.Common.ActionResults;
-    using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Entities.SkillScoresConfigs;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
@@ -104,83 +103,76 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             foreach (var item in mockTestResults)
             {
                 UnitStudentProgressModel mockTestProgress = new UnitStudentProgressModel();
-                var mockTestResult = mockTestResults.FirstOrDefault(x => x.MockTestId == item.MockTestId);
-                if (mockTestResult != null)
+                var query = from baseQ in _mockTestRepository.Queryable
+                            join msg in _mockTestSectionRepository.Queryable on baseQ.Id equals msg.MockTestId
+                            join sg in _sectionGroupRepository.Queryable on msg.SectionGroupId equals sg.Id
+                            join mr in _mockTestResultRepository.Queryable on baseQ.Id equals mr.MockTestId into mrGroupG
+                            from mrGroup in mrGroupG.DefaultIfEmpty()
+                            join ms in _mockTestScoreRepository.Queryable on mrGroup.Id equals ms.MockTestResultId into msGroupG
+                            from msGroup in msGroupG.DefaultIfEmpty()
+                            where baseQ.Id == item.MockTestId && mrGroup.StudentId == request.StudentId
+                            group new { sg, mrGroup, msGroup } by new { sg.CourseSkill } into g
+                            select new
+                            {
+                                Skill = g.Key.CourseSkill,
+                                MockTestResult = g.Select(x => x.mrGroup).FirstOrDefault(),
+                                MockTestScores = g.Select(x => x.msGroup).ToList()
+                            };
+
+                var skillMockTest = await query.ToListAsync(cancellationToken);
+                mockTestProgress.SkillScores = skillMockTest.Select(x =>
                 {
-                    var query = from baseQ in _mockTestRepository.Queryable
-                                join msg in _mockTestSectionRepository.Queryable on baseQ.Id equals msg.MockTestId
-                                join sg in _sectionGroupRepository.Queryable on msg.SectionGroupId equals sg.Id
-                                join mr in _mockTestResultRepository.Queryable on baseQ.Id equals mr.MockTestId into mrGroupG
-                                from mrGroup in mrGroupG.DefaultIfEmpty()
-                                join ms in _mockTestScoreRepository.Queryable on mrGroup.Id equals ms.MockTestResultId
-                                where baseQ.Id == item.MockTestId && mrGroup.StudentId == request.StudentId
-                                group new { sg, mrGroup, ms } by new { sg.CourseSkill } into g
-                                select new
-                                {
-                                    Skill = g.Key.CourseSkill,
-                                    SkillScores = g.Select(x => x.mrGroup.SkillScores),
-                                    MockTestScores = g.Select(x => x.ms).ToList()
-                                };
-
-                    var skillMockTest = await query.ToListAsync(cancellationToken);
-                    var mockTest = mockTestResult.MockTest;
-                    if (mockTest != null)
+                    var skillScore = x.MockTestResult?.SkillScores?.FirstOrDefault(z => z.Skill == x.Skill);
+                    var skillScores = new SkillScoresStatus
                     {
-                        mockTestProgress.ObjectId = mockTest.Id;
-                        mockTestProgress.Name = mockTest.Name;
-                        mockTestProgress = await GetMockTest(mockTest);
-                    }
-                    var isDone = mockTestResult.Status == EnumResultStatus.Done;
-                    mockTestProgress.ContentProgress = string.Format("{0} / {1}", isDone ? 1 : 0, 1);
-                    mockTestProgress.Percent = NumberHelper.ConvertPercentDouble((double)(isDone ? 4 : 0) / 4);
-                    mockTestProgress.Status = mockTestResult.Status;
-                    mockTestProgress.PercentObject = mockTestResult.Percent;
-                    var featureAccessTime = featureAccessTimeTest?.FirstOrDefault(x => x.ObjectId == mockTestResult.Id);
-                    if (featureAccessTime != null)
+                        Skill = x.Skill,
+                        CorrectCount = skillScore?.CorrectCount ?? default,
+                        TotalCount = skillScore?.TotalCount ?? default,
+                        CountQuestion = skillScore?.CountQuestion ?? default,
+                        TotalQuestion = skillScore?.TotalQuestion ?? default,
+                        Scores = skillScore?.Scores ?? default,
+                        Percent = skillScore?.Percent ?? default,
+                    };
+                    if (x.Skill == EnumCourseSkill.Speaking || x.Skill == EnumCourseSkill.Writing)
                     {
-                        mockTestProgress.TimeSpent = featureAccessTime.AccessTime;
-                        mockTestProgress.LastVisited = featureAccessTime.LastVisited ?? default;
+                        if (x.MockTestScores.Any() && x.MockTestScores.All(x => x != null))
+                        {
+                            skillScores.Status = EnumResultStatus.Done;
+                        }
+                        else
+                        {
+                            skillScores.Status = EnumResultStatus.Process;
+                        }
                     }
+                    return skillScores;
+                }).ToList();
+                var mockTest = item.MockTest;
+                if (mockTest != null)
+                {
+                    mockTestProgress.ObjectId = mockTest.Id;
+                    mockTestProgress.Name = mockTest.Name;
                 }
-
+                var isDone = item.Status == EnumResultStatus.Done;
+                mockTestProgress.ContentProgress = string.Format("{0} / {1}", isDone ? 1 : 0, 1);
+                mockTestProgress.Percent = NumberHelper.ConvertPercentDouble(mockTestProgress.SkillScores.Where(x => x.TotalQuestion != 0).Average(x => x.CountQuestion / x.TotalQuestion));
+                mockTestProgress.Scores = Math.Round(mockTestProgress.SkillScores.Average(x => x.Scores), 1);
+                mockTestProgress.Status = item.Status;
+                mockTestProgress.PercentObject = item.Percent;
+                var featureAccessTime = featureAccessTimeTest?.FirstOrDefault(x => x.ObjectId == item.Id);
+                if (featureAccessTime != null)
+                {
+                    mockTestProgress.TimeSpent = featureAccessTime.AccessTime;
+                    mockTestProgress.LastVisited = featureAccessTime.LastVisited ?? default;
+                }
                 mockTestProgress.DisplayOrder = courseUnitMockTests.FirstOrDefault(x => x.MockTestId == item.MockTestId)?.DisplayOrder ?? default;
                 mockTestProgress.Type = nameof(item.MockTest);
-                mockTestProgress.Type = nameof(mockTestResult.MockTest);
-                mockTestProgress.TotalSkill = 4;
+                mockTestProgress.TotalSkill = skillMockTest.Count;
                 mockTestStudentProgress.Add(mockTestProgress);
             }
 
             methodResult.Result = mockTestStudentProgress;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
-        }
-
-        private async Task<UnitStudentProgressModel> GetMockTest(MockTest? mockTest)
-        {
-            ArgumentNullException.ThrowIfNull(mockTest);
-            UnitStudentProgressModel mockTestProgress = new UnitStudentProgressModel();
-
-            mockTestProgress.SkillScores = mockTest.MockTestSections.Select(x => x.SectionGroup).Select(x =>
-            {
-                var sectionQuestions = x!.Sections.SelectMany(x => x.SectionQuestions).ToList();
-                var correctTotal = sectionQuestions.Select(x => x.Question).Sum(x => x!.CorrectTotal);
-                var correctCount = sectionQuestions.SelectMany(x => x.FinalTestAnswers).Sum(x => x!.CorrectCount);
-                var totalQuestion = sectionQuestions.Select(x => x.Question).Count();
-                var countQuestion = sectionQuestions.SelectMany(x => x.FinalTestAnswers).Count();
-                var skillScores = new SkillScores
-                {
-                    Skill = x.CourseSkill,
-                    CorrectCount = correctCount,
-                    TotalCount = correctTotal,
-                    Percent = NumberHelper.ConvertPercentDouble(correctTotal > 0 ? correctCount / correctTotal : default),
-                    CountQuestion = countQuestion,
-                    TotalQuestion = totalQuestion
-                };
-
-                return skillScores;
-            }).ToList();
-
-            return mockTestProgress;
         }
     }
 }
