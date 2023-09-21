@@ -123,8 +123,8 @@ builder.AddRefitClients(typeof(ISenderService), appSetting?.Services?.SenderApiU
 builder.AddMassTransit(appSetting,
 queues: new Dictionary<string, Type>
 {
-    { QueueSettings.LmsQueue.NameQueue.ClassForumResultAndMockTestGradingTime, typeof(UpdateClassForumResultCheckTimeConsumer) },
-    { QueueSettings.LmsQueue.NameQueue.ClassForumResultCheckTime, typeof(UpdateClassForumResultTimeConsumer) }
+    { QueueSettings.LmsQueue.NameQueue.UpdateTeacherGradingInClassForumAndMockTest, typeof(UpdateOcCheckInClassForumResultConsumer) },
+    { QueueSettings.LmsQueue.NameQueue.UpdateOcCheckInClassForumResult, typeof(UpdateTeacherGradingInClassForumAndMockTestConsumer) }
 });
 
 var app = builder.Build();

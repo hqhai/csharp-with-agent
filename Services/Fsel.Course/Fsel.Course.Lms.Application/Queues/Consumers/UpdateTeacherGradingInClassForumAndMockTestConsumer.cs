@@ -7,18 +7,18 @@ namespace Fsel.Course.Lms.Application.Queues.Consumers
     using MassTransit;
     using MediatR;
 
-    public class UpdateClassForumResultCheckTimeConsumer : IConsumer<BaseQueueModel>
+    public class UpdateTeacherGradingInClassForumAndMockTestConsumer : IConsumer<BaseQueueModel>
     {
         private readonly IMediator _mediator;
 
-        public UpdateClassForumResultCheckTimeConsumer(IMediator mediator)
+        public UpdateTeacherGradingInClassForumAndMockTestConsumer(IMediator mediator)
         {
             _mediator = mediator;
         }
 
         public async Task Consume(ConsumeContext<BaseQueueModel> context)
         {
-            await _mediator.Send(new UpdateOcCheckInClassForumResultCommand()).ConfigureAwait(false);
+            await _mediator.Send(new UpdateTeacherGradingInClassForumAndMockTestCommand()).ConfigureAwait(false);
         }
     }
 }

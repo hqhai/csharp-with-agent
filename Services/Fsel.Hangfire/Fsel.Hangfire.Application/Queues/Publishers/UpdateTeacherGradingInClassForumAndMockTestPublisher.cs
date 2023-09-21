@@ -11,17 +11,17 @@ namespace Fsel.Hangfire.Application.Queues.Publishers
     using Fsel.Core.Base.Interfaces;
     using Fsel.Shared.Constants;
 
-    public class UpdateOcCheckTimePublisher
+    public class UpdateTeacherGradingInClassForumAndMockTestPublisher
     {
         private readonly IQueueProvider _queueProvider;
 
-        public UpdateOcCheckTimePublisher(IQueueProvider queueProvider)
+        public UpdateTeacherGradingInClassForumAndMockTestPublisher(IQueueProvider queueProvider)
         {
             _queueProvider = queueProvider;
         }
         public async Task Publish(CancellationToken cancellationToken)
         {
-            await _queueProvider.Publish(QueueSettings.LmsQueue.NameQueue.ClassForumResultCheckTime, new BaseQueueModel { QueueId = Guid.NewGuid().ToString() }, cancellationToken);
+            await _queueProvider.Publish(QueueSettings.LmsQueue.NameQueue.UpdateOcCheckInClassForumResult, new BaseQueueModel { QueueId = Guid.NewGuid().ToString() }, cancellationToken);
         }
     }
 }

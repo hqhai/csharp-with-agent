@@ -69,8 +69,8 @@ namespace Fsel.Shared.Constants
                 public const string QuestBoardMainFinish = $"{KeyQueue}_QuestBoardMainFinish";
                 public const string SendNotification = $"{KeyQueue}_SendNotification";
                 public const string OrderCreateNotification = $"{KeyQueue}_OrderCreateNotification";
-                public const string ClassForumResultAndMockTestGradingTime = $"{KeyQueue}_ClassForumResultAndMockTestGradingTime";
-                public const string ClassForumResultCheckTime = $"{KeyQueue}_ClassForumResultCheckTime";
+                public const string UpdateTeacherGradingInClassForumAndMockTest = $"{KeyQueue}_UpdateTeacherGradingInClassForumAndMockTest";
+                public const string UpdateOcCheckInClassForumResult = $"{KeyQueue}_UpdateOcCheckInClassForumResult";
             }
         }
 

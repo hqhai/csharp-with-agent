@@ -6,10 +6,10 @@ namespace Fsel.Hangfire.Application.Workers
     using Fsel.Core.Base.Interfaces;
     using Fsel.Hangfire.Application.Queues.Publishers;
 
-    public class AssignmentClassForumResultGradingTimeWorker : IWorker
+    public class UpdateTeacherGradingInClassForumAndMockTestWorker : IWorker
     {
-        private readonly UpdateClassForumResultGradingTimePublisher _updateClassForumResultPublisher;
-        public AssignmentClassForumResultGradingTimeWorker(UpdateClassForumResultGradingTimePublisher updateClassForumResultPublisher)
+        private readonly UpdateOcCheckInClassForumResultPublisher _updateClassForumResultPublisher;
+        public UpdateTeacherGradingInClassForumAndMockTestWorker(UpdateOcCheckInClassForumResultPublisher updateClassForumResultPublisher)
         {
             _updateClassForumResultPublisher = updateClassForumResultPublisher;
         }
