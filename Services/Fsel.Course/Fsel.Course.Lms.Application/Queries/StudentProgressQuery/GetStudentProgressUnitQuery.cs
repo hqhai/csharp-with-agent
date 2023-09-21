@@ -45,7 +45,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<UnitStudentProgressModel> methodResult = new MethodResult<UnitStudentProgressModel>();
-            UnitStudentProgressModel managerCourseProgress = new UnitStudentProgressModel();
+            UnitStudentProgressModel unitProgress = new UnitStudentProgressModel();
             var studentResults = await _userService.GetStudentsByStudentIdsAsync(new List<Guid> { request.StudentId });
             if (!studentResults.IsSuccessStatusCode)
             {
@@ -75,25 +75,25 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                 var featureAccessTimeResult = await _systemService.GetFeatureAccessTimeAsync(new FeatureAccessTimeQueryModel { CourseId = request.CourseId, UnitId = request.UnitId, UserId = userId ?? default });
                 var featureAccessTime = featureAccessTimeResult?.Content?.Result;
                 var unitResult = unit.UnitResults.FirstOrDefault(x => x.StudentId == studentId && x.UnitId == unit.Id && x.CourseId == request.CourseId);
-                managerCourseProgress.Type = nameof(unitResult.Unit);
-                managerCourseProgress.ObjectId = unit.Id;
-                managerCourseProgress.Name = unit.Name;
+                unitProgress.Type = nameof(unitResult.Unit);
+                unitProgress.ObjectId = unit.Id;
+                unitProgress.Name = unit.Name;
                 if (unitResult != null)
                 {
-                    managerCourseProgress.Status = unitResult.Status;
-                    managerCourseProgress.PercentObject = unitResult.Percent;
-                    managerCourseProgress.SkillScores = unitResult.SkillScores;
+                    unitProgress.Status = unitResult.Status;
+                    unitProgress.PercentObject = unitResult.Percent;
+                    unitProgress.SkillScores = unitResult.SkillScores;
                 }
 
-                managerCourseProgress.ContentProgress = string.Format("{0} / {1}", currentProgress, progress);
-                managerCourseProgress.TotalLesson = lessonIds.Count;
+                unitProgress.ContentProgress = string.Format("{0} / {1}", currentProgress, progress);
+                unitProgress.TotalLesson = lessonIds.Count;
                 if (featureAccessTime != null)
                 {
-                    managerCourseProgress.TimeSpent = featureAccessTime.AccessTime;
-                    managerCourseProgress.LastVisited = featureAccessTime.LastVisited ?? default;
+                    unitProgress.TimeSpent = featureAccessTime.AccessTime;
+                    unitProgress.LastVisited = featureAccessTime.LastVisited ?? default;
                 }
             }
-            methodResult.Result = managerCourseProgress;
+            methodResult.Result = unitProgress;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }

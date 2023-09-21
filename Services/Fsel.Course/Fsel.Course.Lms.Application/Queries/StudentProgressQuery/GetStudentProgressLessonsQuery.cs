@@ -50,7 +50,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<IList<LessonStudentProgressModel>> methodResult = new MethodResult<IList<LessonStudentProgressModel>>();
-            IList<LessonStudentProgressModel> managerCourseProgress = new List<LessonStudentProgressModel>();
+            IList<LessonStudentProgressModel> listLessonProgress = new List<LessonStudentProgressModel>();
             var studentResults = await _userService.GetStudentsByStudentIdsAsync(new List<Guid> { request.StudentId });
             if (!studentResults.IsSuccessStatusCode)
             {
@@ -105,13 +105,14 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             {
                 var managerUnit = await GetLesson(item, studentId);
                 var featureAccessTime = featureAccessTimes?.FirstOrDefault(x => x.LessonId == item);
+                managerUnit.Type = nameof(managerUnit.Type);
                 if (featureAccessTime != null)
                 {
                     managerUnit.TimeSpent = featureAccessTime.AccessTime;
                     managerUnit.LastVisited = featureAccessTime.LastVisited ?? default;
                     managerUnit.Visit = featureAccessTime.Visit;
                 }
-                managerCourseProgress.Add(managerUnit);
+                listLessonProgress.Add(managerUnit);
             }
             if (unit.UnitSkillMockTests.Any())
             {
@@ -119,19 +120,20 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                 var mockTestResult = await _mockTestResultRepository.Queryable.Where(x => x.MockTestId == mockTestId && x.StudentId == studentId).FirstOrDefaultAsync(cancellationToken);
                 var featureAccessTimeResult = await _systemService.GetFeatureAccessTimeAsync(new FeatureAccessTimeQueryModel { CourseId = request.CourseId, ObjectId = mockTestId, UserId = userId ?? default, EnumFeature = EnumFeature.MockTest });
                 var featureAccessTimeTest = featureAccessTimeResult?.Content?.Result;
-                managerCourseProgress.Add(await GetMockTest(request, mockTestId, featureAccessTimeTest));
+                listLessonProgress.Add(await GetMockTest(request, mockTestId, featureAccessTimeTest));
             }
 
-            methodResult.Result = managerCourseProgress;
+            methodResult.Result = listLessonProgress;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }
 
         private async Task<LessonStudentProgressModel> GetLesson(Guid? lessonId, Guid? studentId)
         {
-            LessonStudentProgressModel managerUnit = new LessonStudentProgressModel();
+            LessonStudentProgressModel lessonProgress = new LessonStudentProgressModel();
             var counts = new List<int>();
             var lessonResult = await _lessonResultRepository.GetAsync(lessonId, studentId);
+            lessonProgress.Type = nameof(lessonResult.Lesson);
             if (lessonResult != null)
             {
                 var lesson = lessonResult.Lesson;
@@ -140,43 +142,43 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                 counts.Add(lessonResult.HomeWorkResults.Where(x => x != null && x.Status == EnumResultStatus.Done && x.StudentId == studentId).GroupBy(x => x.LessonResultId).Count());
                 if (lesson != null)
                 {
-                    managerUnit.ObjectId = lesson.Id;
-                    managerUnit.Name = lesson.Name;
+                    lessonProgress.ObjectId = lesson.Id;
+                    lessonProgress.Name = lesson.Name;
                 }
-                managerUnit.Status = lessonResult.Status;
-                managerUnit.Percent = NumberHelper.ConvertPercentDouble(counts.Average());
-                managerUnit.ContentCompleted = string.Format("{0} / {1}", counts.Sum(), 3);
+                lessonProgress.Status = lessonResult.Status;
+                lessonProgress.Percent = NumberHelper.ConvertPercentDouble(counts.Average());
+                lessonProgress.ContentCompleted = string.Format("{0} / {1}", counts.Sum(), 3);
             }
-            return managerUnit;
+            return lessonProgress;
         }
 
         private async Task<LessonStudentProgressModel> GetMockTest(GetStudentProgressLessonsQuery request, Guid mockTestId, FeatureAccessTimeModel? featureAccessTime)
         {
-            LessonStudentProgressModel managerUnit = new LessonStudentProgressModel();
+            LessonStudentProgressModel mockTestProgress = new LessonStudentProgressModel();
             var mockTest = await _mockTestRepository.Queryable.Include(x => x.MockTestResults.Where(x => x.MockTestId == mockTestId && x.CourseId == request.CourseId && x.StudentId == request.StudentId && x.UnitId == request.UnitId))
                         .FirstOrDefaultAsync(x => x.Id == mockTestId);
             if (mockTest != null)
             {
                 var mockTestResult = mockTest.MockTestResults.FirstOrDefault(x => x.MockTestId == mockTestId && x.CourseId == request.CourseId && x.StudentId == request.StudentId && x.UnitId == request.UnitId);
-                managerUnit.Type = nameof(mockTestResult.MockTest);
-                managerUnit.ObjectId = mockTest.Id;
-                managerUnit.Name = mockTest.Name;
+                mockTestProgress.Type = nameof(mockTestResult.MockTest);
+                mockTestProgress.ObjectId = mockTest.Id;
+                mockTestProgress.Name = mockTest.Name;
                 if (mockTestResult != null)
                 {
-                    managerUnit.Status = mockTestResult.Status;
-                    managerUnit.PercentObject = mockTestResult.Percent;
-                    managerUnit.SkillScores = mockTestResult.SkillScores;
+                    mockTestProgress.Status = mockTestResult.Status;
+                    mockTestProgress.PercentObject = mockTestResult.Percent;
+                    mockTestProgress.SkillScores = mockTestResult.SkillScores;
                     var isDone = mockTestResult.Status == EnumResultStatus.Done;
-                    managerUnit.ContentCompleted = string.Format("{0} / {1}", isDone ? 1 : 0, 1);
-                    managerUnit.Percent = isDone ? 100 : 0;
+                    mockTestProgress.ContentCompleted = string.Format("{0} / {1}", isDone ? 1 : 0, 1);
+                    mockTestProgress.Percent = isDone ? 100 : 0;
                     if (featureAccessTime != null)
                     {
-                        managerUnit.TimeSpent = featureAccessTime.AccessTime;
-                        managerUnit.LastVisited = featureAccessTime.LastVisited ?? default;
+                        mockTestProgress.TimeSpent = featureAccessTime.AccessTime;
+                        mockTestProgress.LastVisited = featureAccessTime.LastVisited ?? default;
                     }
                 }
             }
-            return managerUnit;
+            return mockTestProgress;
         }
     }
 }
