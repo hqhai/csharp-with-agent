@@ -41,8 +41,8 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
             , IUserService userService
             , IClassForumResultRepository classForumResultRepository
             , IClassForumRepository classForumRepository
-            , ILessonResultRepository lessonResultRepository,
-NotificationMessagePublisher notificationMessagePublisher)
+            , ILessonResultRepository lessonResultRepository
+            , NotificationMessagePublisher notificationMessagePublisher)
         {
             _mapper = mapper;
             _authContext = authContext;
