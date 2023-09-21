@@ -24,6 +24,9 @@ services:
             - SERVICES_UserApiUrl=http://42.96.58.145:5202/api/v1
             - SERVICES_OrderApiUrl=http://42.96.58.145:5209/api/v1
             - SERVICES_LmsCourseApiUrl=http://42.96.58.145:5204/api/v1
+            - OneSignalConfig__BasePath=https://onesignal.com/api/v1
+            - OneSignalConfig__AppId=dac94d2c-f3e6-48f0-9581-86992e42a563
+            - OneSignalConfig__ApiKey=NmM3NzMxMWYtZjEyYi00NTMzLTliNjAtYzAyZjljYTY2ZWI3
         ports:
             - 5502:80
             - 7502:443
