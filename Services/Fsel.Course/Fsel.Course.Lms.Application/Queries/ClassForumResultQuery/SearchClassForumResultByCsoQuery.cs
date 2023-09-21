@@ -3,9 +3,7 @@
 namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
 {
     using System;
-    using System.Collections.Generic;
     using System.Linq;
-    using System.Text;
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
@@ -25,6 +23,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
     public class SearchClassForumResultByCsoQuery : SearchClassForumResultQueryModel, IRequest<MethodResult<PagingItemsModel<ClassForumResultSearchModel>>>
     {
     }
+
     public class SearchClassForumResultByCsoQueryHandler : IRequestHandler<SearchClassForumResultByCsoQuery, MethodResult<PagingItemsModel<ClassForumResultSearchModel>>>
     {
         private readonly IClassForumResultRepository _classForumResultRepository;
@@ -52,6 +51,10 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
             var csoResults = await _userService.GetCSOByUserId(_authContext.CurrentUserId);
             var csoId = csoResults.Content?.Result?.Id;
 
+            var studentsResult = await _trainingService.GetCsoByStudentAsync(csoId ?? default);
+            var students = studentsResult.Content!.Result;
+            var student = students?.SelectMany(x => x.ClassStudents!).Select(x => x.StudentId).ToList();
+
             var classForumResultQuery = _classForumResultRepository.Queryable
                                     .Include(x => x.LessonResult)
                                     .ThenInclude(x => x!.Lesson)
@@ -59,13 +62,14 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
                                     .ThenInclude(x => x.Unit)
                                     .ThenInclude(x => x!.CourseUnitMockTests)
                                     .Include(x => x.ClassForum)
-                                    .Where(x => x.Status == EnumClassForumResultStatus.Pending && (x.CheckCsoId == null || x.CheckCsoId == csoId))
+                                    .Where(x => x.Status == EnumClassForumResultStatus.Pending && (x.CheckCsoId == null || x.CheckCsoId == csoId) && student!.Contains(x.StudentId))
                                     .Select(x => new ClassForumResultSearchModel
                                     {
                                         Id = x.Id,
                                         CreatedDate = x.CreatedDate,
                                         CreatedUserId = x.CreatedUserId,
                                         CreatedFullName = x.CreatedFullName,
+                                        StudentId = x.StudentId,
                                         ClassForum = x.ClassForum!.ClassForumResults!.Select(x => x.ClassForum).Select(x => new ClassForumModel
                                         {
                                             Id = x!.Id,
@@ -121,6 +125,11 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
                 {
                     item.ClassCode = classResult!.Content!.Result.Code;
                 }
+                /*var csoResult = await _trainingService.GetCsoByStudentAsync(studentId);
+                if (csoResult.Content!.Result != null)
+                {
+                    item.CsoId = csoResult!.Content!.Result.;
+                }*/
             }
 
             methodResult.Result = new PagingItemsModel<ClassForumResultSearchModel>(lists, request, totalItem);
