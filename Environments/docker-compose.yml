@@ -96,6 +96,7 @@ services:
             - SERVICES_ClassApiUrl=http://42.96.58.145:5207/api/v1
             - SERVICES_InteractionApiUrl=http://42.96.58.145:5208/api/v1
             - SERVICES_SystemApiUrl=http://42.96.58.145:52010/api/v1
+            - SERVICES_NotificationApiUrl=http://42.96.58.145:5502/api/v1
         ports:
             - 5204:80
             - 7204:443
