@@ -8,12 +8,12 @@ namespace Fsel.Course.Domain.IRepositories
 
     public interface ILessonResultRepository : IRepository<LessonResult>
     {
-        Task<List<LessonResult>?> GetsByIds(IList<Guid>? ids);
+        Task<List<LessonResult>?> GetListAsync(IList<Guid>? ids);
 
-        Task<List<LessonResult>?> GetsByLessonIds(IList<Guid>? lessonIds, Guid? studentId);
+        Task<List<LessonResult>?> GetListAsync(IList<Guid>? lessonIds, Guid? studentId);
 
-        Task<LessonResult?> GetByLessonId(Guid? lessonId, Guid? studentId);
+        Task<LessonResult?> GetAsync(Guid? lessonId, Guid? studentId);
 
-        Task<List<LessonResult>?> GetByCourseResult(CourseResultModel courseResult);
+        Task<List<LessonResult>?> GetListAsync(CourseResultModel courseResult);
     }
 }

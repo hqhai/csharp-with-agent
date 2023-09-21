@@ -6,13 +6,13 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
     using Fsel.Core.Base.BaseModels;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
-    using Fsel.Course.Domain.Models.QueryModels.ManageProgress;
+    using Fsel.Course.Domain.Models.QueryModels.StudentProgress;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class SearchStudentProgressQuery : SearchManageStudentProgressQueryModel, IRequest<MethodResult<PagingItemsModel<StudentProgressModel>>>
+    public class SearchStudentProgressQuery : SearchStudentProgressQueryModel, IRequest<MethodResult<PagingItemsModel<StudentProgressModel>>>
     {
     }
 

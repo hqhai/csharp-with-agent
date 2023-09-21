@@ -22,7 +22,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
         public Guid CourseId { get; set; }
     }
 
-    public class GetStudentManageProgressCourseQueryHandler : IRequestHandler<GetStudentProgressCourseQuery, MethodResult<CourseStudentProgressModel>>
+    public class GetStudentProgressCourseQueryHandler : IRequestHandler<GetStudentProgressCourseQuery, MethodResult<CourseStudentProgressModel>>
     {
         private readonly IUserService _userService;
         private readonly ICourseResultRepository _courseResultRepository;
@@ -31,7 +31,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
         private readonly ICourseRepository _courseRepository;
         private readonly ITrainingService _trainingService;
 
-        public GetStudentManageProgressCourseQueryHandler(IUserService userService, ICourseResultRepository courseResultRepository, ISystemService systemService, IOrderService orderService, ICourseRepository courseRepository, ITrainingService trainingService)
+        public GetStudentProgressCourseQueryHandler(IUserService userService, ICourseResultRepository courseResultRepository, ISystemService systemService, IOrderService orderService, ICourseRepository courseRepository, ITrainingService trainingService)
         {
             _userService = userService;
             _courseResultRepository = courseResultRepository;

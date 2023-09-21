@@ -24,7 +24,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
         public Guid CourseId { get; set; }
     }
 
-    public class GetManageStudentUnitQueryHandler : IRequestHandler<GetStudentProgressUnitsQuery, MethodResult<IList<UnitStudentProgressModel>>>
+    public class GetStudentProgressUnitsQueryHandler : IRequestHandler<GetStudentProgressUnitsQuery, MethodResult<IList<UnitStudentProgressModel>>>
     {
         private readonly ICourseRepository _courseRepository;
         private readonly IMockTestResultRepository _mockTestResultRepository;
@@ -36,7 +36,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
         private readonly ISystemService _systemService;
         private readonly ICourseUnitMockTestRepository _courseUnitMockTestRepository;
 
-        public GetManageStudentUnitQueryHandler(ICourseRepository courseRepository, IMockTestResultRepository mockTestResultRepository, ILessonResultRepository lessonResultRepository, IUnitRepository unitRepository, IMockTestRepository mockTestRepository, IFinalTestRepository finalTestRepository, IUserService userService, ISystemService systemService, ICourseUnitMockTestRepository courseUnitMockTestRepository)
+        public GetStudentProgressUnitsQueryHandler(ICourseRepository courseRepository, IMockTestResultRepository mockTestResultRepository, ILessonResultRepository lessonResultRepository, IUnitRepository unitRepository, IMockTestRepository mockTestRepository, IFinalTestRepository finalTestRepository, IUserService userService, ISystemService systemService, ICourseUnitMockTestRepository courseUnitMockTestRepository)
         {
             _courseRepository = courseRepository;
             _mockTestResultRepository = mockTestResultRepository;
@@ -255,7 +255,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             var countMockTest = 0;
             if (lessonIds != null && lessonIds.Any())
             {
-                var lessonResults = await _lessonResultRepository.GetsByLessonIds(lessonIds, studentId);
+                var lessonResults = await _lessonResultRepository.GetListAsync(lessonIds, studentId);
                 if (lessonResults != null && lessonResults.Any())
                 {
                     countVideo = lessonResults.Select(x => x.VideoResult).Where(x => x != null && x.Status == EnumResultStatus.Done && x.StudentId == studentId).Count();

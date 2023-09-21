@@ -33,7 +33,7 @@ namespace Fsel.Course.Infrastructure.Repositories
             }
         }
 
-        public async Task<List<Unit>?> GetsByIds(IList<Guid>? ids, Guid? studentId)
+        public async Task<List<Unit>?> GetListAsync(IList<Guid>? ids, Guid? studentId)
         {
             if (ids == null || !ids.Any())
             {

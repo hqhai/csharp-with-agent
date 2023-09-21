@@ -22,7 +22,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
         public Guid UnitId { get; set; }
     }
 
-    public class GetStudentManageProgressUnitQueryHandler : IRequestHandler<GetStudentProgressUnitQuery, MethodResult<UnitStudentProgressModel>>
+    public class GetStudentProgressUnitQueryHandler : IRequestHandler<GetStudentProgressUnitQuery, MethodResult<UnitStudentProgressModel>>
     {
         private readonly ICourseRepository _courseRepository;
         private readonly IMockTestResultRepository _mockTestResultRepository;
@@ -31,7 +31,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
         private readonly IUserService _userService;
         private readonly ISystemService _systemService;
 
-        public GetStudentManageProgressUnitQueryHandler(ICourseRepository courseRepository, IMockTestResultRepository mockTestResultRepository, ILessonResultRepository lessonResultRepository, IUnitRepository unitRepository, IUserService userService, ISystemService systemService)
+        public GetStudentProgressUnitQueryHandler(ICourseRepository courseRepository, IMockTestResultRepository mockTestResultRepository, ILessonResultRepository lessonResultRepository, IUnitRepository unitRepository, IUserService userService, ISystemService systemService)
         {
             _courseRepository = courseRepository;
             _mockTestResultRepository = mockTestResultRepository;
@@ -103,7 +103,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             var counts = new List<int>();
             if (lessonIds != null && lessonIds.Any())
             {
-                var lessonResults = await _lessonResultRepository.GetsByLessonIds(lessonIds, request.StudentId);
+                var lessonResults = await _lessonResultRepository.GetListAsync(lessonIds, request.StudentId);
                 if (lessonResults != null && lessonResults.Any())
                 {
                     counts.Add(lessonResults.Select(x => x.VideoResult).Where(x => x != null && x.Status == EnumResultStatus.Done && x.StudentId == request.StudentId).Count());

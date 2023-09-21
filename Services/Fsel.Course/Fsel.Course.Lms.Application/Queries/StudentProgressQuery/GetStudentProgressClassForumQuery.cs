@@ -95,11 +95,9 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                 Skill = classForum?.CourseSkill ?? default,
                 TotalCount = 36,
                 CorrectCount = classForumResult?.ClassForumScores.Sum(x => x.Score) ?? default,
-                CountQuestion = (classForumResult?.Status == EnumClassForumResultStatus.Draft || classForumResult?.Status == EnumClassForumResultStatus.Pending) ? default : 1,
-                TotalQuestion = 1,
             };
             classForumStudentProgress.ClassForumId = classForum?.Id ?? default;
-            classForumStudentProgress.Status = classForumResult != null ? (classForumResult?.Status != EnumClassForumResultStatus.PendingForGrading) ? EnumResultStatus.Done : EnumResultStatus.Process : EnumResultStatus.Unfinished;
+            classForumStudentProgress.Status = classForumResult != null ? (classForumResult.Status != EnumClassForumResultStatus.PendingForGrading) ? EnumResultStatus.Done : EnumResultStatus.Process : EnumResultStatus.Unfinished;
 
             methodResult.Result = classForumStudentProgress;
             methodResult.StatusCode = StatusCodes.Status200OK;

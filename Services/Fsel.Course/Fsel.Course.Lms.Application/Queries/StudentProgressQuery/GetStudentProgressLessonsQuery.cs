@@ -25,7 +25,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
         public Guid UnitId { get; set; }
     }
 
-    public class GetStudentManageLessonQueryHandler : IRequestHandler<GetStudentProgressLessonsQuery, MethodResult<IList<LessonStudentProgressModel>>>
+    public class GetStudentProgressLessonsQueryHandler : IRequestHandler<GetStudentProgressLessonsQuery, MethodResult<IList<LessonStudentProgressModel>>>
     {
         private readonly ICourseRepository _courseRepository;
         private readonly IMockTestResultRepository _mockTestResultRepository;
@@ -35,7 +35,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
         private readonly IUserService _userService;
         private readonly ISystemService _systemService;
 
-        public GetStudentManageLessonQueryHandler(ICourseRepository courseRepository, IMockTestResultRepository mockTestResultRepository, IMockTestRepository mockTestRepository, ILessonResultRepository lessonResultRepository, IUnitRepository unitRepository, IUserService userService, ISystemService systemService)
+        public GetStudentProgressLessonsQueryHandler(ICourseRepository courseRepository, IMockTestResultRepository mockTestResultRepository, IMockTestRepository mockTestRepository, ILessonResultRepository lessonResultRepository, IUnitRepository unitRepository, IUserService userService, ISystemService systemService)
         {
             _courseRepository = courseRepository;
             _mockTestResultRepository = mockTestResultRepository;
@@ -103,7 +103,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             var featureAccessTimes = featureAccessTimeResults.Content?.Result;
             foreach (var item in lessonIds)
             {
-                var managerUnit = await GetManagerLesson(item, studentId);
+                var managerUnit = await GetLesson(item, studentId);
                 var featureAccessTime = featureAccessTimes?.FirstOrDefault(x => x.LessonId == item);
                 if (featureAccessTime != null)
                 {
@@ -119,7 +119,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                 var mockTestResult = await _mockTestResultRepository.Queryable.Where(x => x.MockTestId == mockTestId && x.StudentId == studentId).FirstOrDefaultAsync(cancellationToken);
                 var featureAccessTimeResult = await _systemService.GetFeatureAccessTimeAsync(new FeatureAccessTimeQueryModel { CourseId = request.CourseId, ObjectId = mockTestId, UserId = userId ?? default, EnumFeature = EnumFeature.MockTest });
                 var featureAccessTimeTest = featureAccessTimeResult?.Content?.Result;
-                managerCourseProgress.Add(await GetMockTestManager(request, mockTestId, featureAccessTimeTest));
+                managerCourseProgress.Add(await GetMockTest(request, mockTestId, featureAccessTimeTest));
             }
 
             methodResult.Result = managerCourseProgress;
@@ -127,11 +127,11 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             return methodResult;
         }
 
-        private async Task<LessonStudentProgressModel> GetManagerLesson(Guid? lessonId, Guid? studentId)
+        private async Task<LessonStudentProgressModel> GetLesson(Guid? lessonId, Guid? studentId)
         {
             LessonStudentProgressModel managerUnit = new LessonStudentProgressModel();
             var counts = new List<int>();
-            var lessonResult = await _lessonResultRepository.GetByLessonId(lessonId, studentId);
+            var lessonResult = await _lessonResultRepository.GetAsync(lessonId, studentId);
             if (lessonResult != null)
             {
                 var lesson = lessonResult.Lesson;
@@ -150,7 +150,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             return managerUnit;
         }
 
-        private async Task<LessonStudentProgressModel> GetMockTestManager(GetStudentProgressLessonsQuery request, Guid mockTestId, FeatureAccessTimeModel? featureAccessTime)
+        private async Task<LessonStudentProgressModel> GetMockTest(GetStudentProgressLessonsQuery request, Guid mockTestId, FeatureAccessTimeModel? featureAccessTime)
         {
             LessonStudentProgressModel managerUnit = new LessonStudentProgressModel();
             var mockTest = await _mockTestRepository.Queryable.Include(x => x.MockTestResults.Where(x => x.MockTestId == mockTestId && x.CourseId == request.CourseId && x.StudentId == request.StudentId && x.UnitId == request.UnitId))

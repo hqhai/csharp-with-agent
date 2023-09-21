@@ -17,7 +17,7 @@ namespace Fsel.Course.Infrastructure.Repositories
         {
         }
 
-        public async Task<List<LessonResult>?> GetsByIds(IList<Guid>? ids)
+        public async Task<List<LessonResult>?> GetListAsync(IList<Guid>? ids)
         {
             if (ids == null || !ids.Any())
             {
@@ -30,7 +30,7 @@ namespace Fsel.Course.Infrastructure.Repositories
                                                      .ToListAsync();
         }
 
-        public async Task<LessonResult?> GetByLessonId(Guid? lessonId, Guid? studentId)
+        public async Task<LessonResult?> GetAsync(Guid? lessonId, Guid? studentId)
         {
             return await Queryable.Include(x => x.ClassForumResults.Where(x => x.StudentId == studentId))
                                     .Include(x => x.VideoResult)
@@ -39,7 +39,7 @@ namespace Fsel.Course.Infrastructure.Repositories
                                     .FirstOrDefaultAsync(x => x.LessonId == lessonId && x.StudentId == studentId);
         }
 
-        public async Task<List<LessonResult>?> GetsByLessonIds(IList<Guid>? lessonIds, Guid? studentId)
+        public async Task<List<LessonResult>?> GetListAsync(IList<Guid>? lessonIds, Guid? studentId)
         {
             if (lessonIds == null || !lessonIds.Any())
             {
@@ -52,7 +52,7 @@ namespace Fsel.Course.Infrastructure.Repositories
                                                      .ToListAsync();
         }
 
-        public async Task<List<LessonResult>?> GetByCourseResult(CourseResultModel courseResult)
+        public async Task<List<LessonResult>?> GetListAsync(CourseResultModel courseResult)
         {
             return await Queryable.Include(x => x.ClassForumResults.Where(x => x.StudentId == courseResult.StudentId))
                                      .Include(x => x.VideoResult)

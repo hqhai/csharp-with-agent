@@ -179,7 +179,7 @@ namespace Fsel.Course.Infrastructure.Repositories
                 }
             }
 
-            var lessonResults = await _lessonResultRepository.GetByCourseResult(courseResult);
+            var lessonResults = await _lessonResultRepository.GetListAsync(courseResult);
             if (lessonResults != null && lessonResults.Any())
             {
                 var lessonResultIds = lessonResults.Select(x => x.Id).ToList();
