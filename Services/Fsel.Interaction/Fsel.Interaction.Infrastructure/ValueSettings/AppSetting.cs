@@ -22,6 +22,7 @@ namespace Fsel.Interaction.Infrastructure.ValueSettings
         public string? TrainingApiUrl { get; set; }
         public string? OrderApiUrl { get; set; }
         public string? LmsCourseApiUrl { get; set; }
+        public string? NotificationApiUrl { get; set; }
     }
 
     public class Smtp
