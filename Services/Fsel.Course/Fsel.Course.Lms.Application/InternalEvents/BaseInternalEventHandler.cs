@@ -262,9 +262,11 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 if (course != null)
                 {
                     var courseUnitMockTests = course.CourseUnitMockTests.OrderBy(x => x.DisplayOrder).ToList();
-                    var displayOrder = courseUnitMockTests.FirstOrDefault(x => x.UnitId == unitResult.UnitId)?.DisplayOrder;
-                    var courseUnitMockTest = courseUnitMockTests.FirstOrDefault(x => x.DisplayOrder > displayOrder);
-                    await UpdateStatusProcess(courseUnitMockTest, unitResult.StudentId, cancellationToken);
+                    var index = courseUnitMockTests.FindIndex(x => x.UnitId == unitResult.UnitId) + 1;
+                    if (index < courseUnitMockTests.Count)
+                    {
+                        await UpdateStatusProcess(courseUnitMockTests[index], unitResult.StudentId, cancellationToken);
+                    }
                 }
             }
         }
