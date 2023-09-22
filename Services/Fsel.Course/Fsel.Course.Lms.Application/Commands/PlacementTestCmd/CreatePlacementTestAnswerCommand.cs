@@ -233,7 +233,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
                 if (currentLevel.HasValue)
                 {
                     Random random = new Random();
-                    var courses = await _courseRepository.Queryable.Where(x => x.CourseLevel == currentLevel.Value && x.Status != EnumCourseStatus.New).ToListAsync(cancellationToken);
+                    var courses = await _courseRepository.Queryable.Where(x => x.CourseLevel == currentLevel.Value && x.Status == EnumCourseStatus.Active).ToListAsync(cancellationToken);
                     var course = courses.OrderBy(x => random.Next(courses.Count)).FirstOrDefault();
                     if (course == null)
                     {
