@@ -6,6 +6,6 @@ namespace Fsel.Course.Domain.Models.QueryModels.ReviewFsels
 
     public class SearchPlatformReviewQueryModel : BaseQueryModel
     {
-        public bool IsSortDescStart { get; set; }
+        public bool IsSortStarts { get; set; }
     }
 }
