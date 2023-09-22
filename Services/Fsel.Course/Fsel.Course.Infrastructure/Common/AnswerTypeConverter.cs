@@ -194,9 +194,15 @@ namespace Fsel.Course.Infrastructure.Common
             var dataQuestion = configQuestion.Deserialize<ShortAnswerQuestionWordBaseQuestion>();
             int number = 0;
 
-            if (dataAnswer != null && dataAnswer.Answers != null && dataQuestion != null && dataQuestion.Contents != null && dataQuestion.Contents.Count > 0)
+            if (dataAnswer != null && dataAnswer.Answers != null && dataQuestion != null && dataQuestion.Contents != null && dataQuestion.Contents.Count > 0 && dataQuestion.Content != null
+                )
             {
                 if (dataQuestion.Contents.Any(p => IsShortAnswer(p, dataAnswer.Answers)))
+                {
+                    dataAnswer.IsExact = true;
+                    number++;
+                }
+                else if (dataQuestion.Content.Any(p => IsShortAnswer(p, dataAnswer.Answers)))
                 {
                     dataAnswer.IsExact = true;
                     number++;
