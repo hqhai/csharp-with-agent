@@ -46,7 +46,7 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
                 return methodResult;
             }
             var studentReviews = studentReviewResults?.Content?.Result?.ToList() ?? new List<StudentReviewModel>();
-            var starts = studentReviews.Where(x => x.StudentReviewDetails != null).SelectMany(x => x.StudentReviewDetails!).Average(x => x.VoteStars);
+            var starts = Math.Round(studentReviews.Where(x => x.StudentReviewDetails != null).SelectMany(x => x.StudentReviewDetails!).Average(x => x.VoteStars), 1);
             var studentReviewQuery = studentReviews.Select(x => new ReviewPlatformModel
             {
                 Id = x.Id,
@@ -66,10 +66,13 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
             }).AsEnumerable();
 
             int totalItem = studentReviewQuery.Count();
-            var sortName = request.IsSortDesc ? studentReviewQuery.OrderByDescending(m => m.CreatedFullName) : studentReviewQuery.OrderBy(m => m.CreatedFullName);
-            var sortStarts = request.IsSortStarts ? sortName.OrderByDescending(m => m.Starts) : sortName.OrderBy(m => m.Starts);
-            var lists = sortStarts.OrderBy(x => x.CreatedDate).Skip((request.Page - 1) * request.PageSize).Take(request.PageSize).ToList();
 
+            var lists = studentReviewQuery.OrderBy(x => x.CreatedDate).Skip((request.Page - 1) * request.PageSize).Take(request.PageSize).ToList();
+            lists = request.IsSortDesc ? lists.OrderByDescending(m => m.CreatedFullName).ToList() : lists.OrderBy(m => m.CreatedFullName).ToList();
+            if (request.IsSortStarts.HasValue)
+            {
+                lists = request.IsSortStarts.Value ? lists.OrderByDescending(m => m.Starts).ToList() : lists.OrderBy(m => m.Starts).ToList();
+            }
             methodResult.Result = new ReviewPlatformSearchModel { Starts = starts, PagingItems = new PagingItemsModel<ReviewPlatformModel>(lists, request, totalItem) };
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
