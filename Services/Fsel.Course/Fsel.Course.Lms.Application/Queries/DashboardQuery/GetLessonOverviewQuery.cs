@@ -95,7 +95,7 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
                                                                    .Include(x => x.HomeWorkResults.Where(x => x.StudentId == studentId))
                                                                    .Include(x => x.ClassForumResults.Where(x => x.StudentId == studentId))
                                                                    .Where(x => x.StudentId == studentId && x.Status != EnumResultStatus.Unfinished)
-                                                                   .OrderBy(x => x.UpdatedDate)
+                                                                   .OrderByDescending(x => x.UpdatedDate)
                                                                    .AsNoTracking()
                                                                    .FirstOrDefaultAsync(cancellationToken);
             }
@@ -148,8 +148,8 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
                 var homeWorks = lessonResult.HomeWorkResults.Where(x => x.StudentId == studentId && x.LessonResultId == lessonResult.Id).ToList();
                 var classForumResult = lessonResult.ClassForumResults.FirstOrDefault(x => x.StudentId == studentId && x.LessonResultId == lessonResult.Id);
                 var (statusVideo, numberVideo) = GetStatusVideo(lessonResult.VideoResult);
-                var (statusClassForum, numberClassForum) = GetStatusClassForums(classForumResult, lessonDashBoard.StatusVideo);
-                var (statusHomeWork, numberHomeWork) = GetStatusHomeWorks(homeWorks, lessonDashBoard.StatusClassForum);
+                var (statusClassForum, numberClassForum) = GetStatusClassForums(classForumResult, statusVideo);
+                var (statusHomeWork, numberHomeWork) = GetStatusHomeWorks(homeWorks, statusClassForum);
                 var numbers = new List<int> { numberClassForum, numberVideo, numberHomeWork };
                 lessonDashBoard.StatusVideo = statusVideo;
                 lessonDashBoard.StatusClassForum = statusClassForum;
@@ -178,7 +178,7 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
         private static (EnumResultStatus, int) GetStatusHomeWorks(IList<HomeWorkResult>? homeWorkResults, EnumResultStatus status)
         {
             var statusHomeWork = EnumResultStatus.Unfinished;
-            if (status == EnumResultStatus.Done)
+            if (status == EnumResultStatus.Process || status == EnumResultStatus.Done)
             {
                 statusHomeWork = EnumResultStatus.Process;
             }
@@ -187,14 +187,6 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
                 if (homeWorkResults.All(x => x.Status == EnumResultStatus.Done))
                 {
                     return (EnumResultStatus.Done, 1);
-                }
-                else if (homeWorkResults.All(x => x.Status == EnumResultStatus.Unfinished))
-                {
-                    return (EnumResultStatus.Unfinished, 0);
-                }
-                else if (homeWorkResults.Any(x => x.Status == EnumResultStatus.Process))
-                {
-                    return (EnumResultStatus.Process, 0);
                 }
             }
             return (statusHomeWork, 0);
