@@ -104,10 +104,13 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
             }
             var starts = lessonStars.Count > 0 ? Math.Round(lessonStars.Sum(x => x.TotalStart) / lessonStars.Sum(x => x.TotalResult), 1) : default;
             int totalItem = lessonStars.Count;
-            var sortName = request.IsSortDesc ? lessonStars.OrderByDescending(m => m.Name) : lessonStars.OrderBy(m => m.Name);
-            var sortStarts = request.IsSortStarts ? sortName.OrderByDescending(m => m.Starts) : sortName.OrderBy(m => m.Starts);
-            var lists = sortStarts.OrderBy(x => x.CreatedDate).Skip((request.Page - 1) * request.PageSize).Take(request.PageSize).ToList();
 
+            var lists = lessonStars.OrderBy(x => x.CreatedDate).Skip((request.Page - 1) * request.PageSize).Take(request.PageSize).ToList();
+            lists = request.IsSortDesc ? lists.OrderByDescending(m => m.Name).ToList() : lists.OrderBy(m => m.Name).ToList();
+            if (request.IsSortStarts.HasValue)
+            {
+                lists = request.IsSortStarts.Value ? lists.OrderByDescending(m => m.Starts).ToList() : lists.OrderBy(m => m.Starts).ToList();
+            }
             var teacherResults = await _userService.GetTeacherByIdsAsync(new GetTeacherByIdsQueryModel { Ids = lists.Select(x => x.TeacherId).Distinct().ToList() });
             var teachers = teacherResults.Content?.Result;
             if (teachers != null && teachers.Count > 0)

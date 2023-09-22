@@ -7,6 +7,6 @@ namespace Fsel.Course.Domain.Models.QueryModels.ReviewFsels
     public class SearchReviewCourseDetailQueryModel : BaseQueryModel
     {
         public Guid CourseId { get; set; }
-        public bool IsSortStarts { get; set; }
+        public bool? IsSortStarts { get; set; }
     }
 }

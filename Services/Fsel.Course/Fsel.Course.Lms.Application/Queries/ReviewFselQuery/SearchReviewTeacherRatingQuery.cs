@@ -3,7 +3,6 @@
 namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
 {
     using System.Linq;
-    using System.Security.Cryptography.X509Certificates;
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Course.Domain.Enums;
@@ -86,23 +85,30 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
             }
 
             int totalItem = teacherRatingQuery!.Count();
-            var sortName = request.IsSortDesc ? teacherRatingQuery?.OrderByDescending(m => m.FullName) : teacherRatingQuery?.OrderBy(m => m.FullName);
-            var lists = sortName!.OrderBy(x => x.CreatedDate).Skip((request.Page - 1) * request.PageSize).Take(request.PageSize).ToList();
 
-            foreach (var item in lists)
+            var lists = teacherRatingQuery?.OrderBy(x => x.CreatedDate).Skip((request.Page - 1) * request.PageSize).Take(request.PageSize).ToList();
+            lists = request.IsSortDesc ? lists?.OrderByDescending(m => m.FullName).ToList() : lists?.OrderBy(m => m.FullName).ToList();
+
+            if (lists != null && lists.Count > 0)
             {
-                var listVideo = videos.Where(x => x.TeacherId == item.Id).ToList();
-                var videoResults = listVideo.Where(x => x.VideoResults.Count > 0).SelectMany(x => x.VideoResults).Where(x => x.Status == EnumResultStatus.Done).ToList();
-                var listMockTest = mockTests.SelectMany(x => x.MockTestResults).Where(x => x.GradingTeacherId == item.Id).ToList();
-                var listClassForum = classForums.SelectMany(x => x.ClassForumResults).Where(x => x.GradingTeacherId == item.Id).ToList();
+                foreach (var item in lists)
+                {
+                    var listVideo = videos.Where(x => x.TeacherId == item.Id).ToList();
+                    var videoResults = listVideo.Where(x => x.VideoResults.Count > 0).SelectMany(x => x.VideoResults).Where(x => x.Status == EnumResultStatus.Done).ToList();
+                    var listMockTest = mockTests.SelectMany(x => x.MockTestResults).Where(x => x.GradingTeacherId == item.Id).ToList();
+                    var listClassForum = classForums.SelectMany(x => x.ClassForumResults).Where(x => x.GradingTeacherId == item.Id).ToList();
 
-                var starts = new List<double>();
-                starts.Add(videoResults.Any() ? Math.Round(videoResults.Average(x => x.NumberOfStars), 1) : default);
-                starts.Add(feedbackClassForumResults.Any() ? Math.Round(feedbackClassForumResults.Average(x => x.FeedBackStars ?? default), 1) : default);
-                starts.Add(feedbackMockTestResults.Any() ? Math.Round(feedbackMockTestResults.Average(x => x.FeedBackStars ?? default), 1) : default);
-                item.Starts = starts.Any() ? Math.Round(starts.Average(), 1) : default;
+                    var starts = new List<double>();
+                    starts.Add(videoResults.Any() ? Math.Round(videoResults.Average(x => x.NumberOfStars), 1) : default);
+                    starts.Add(feedbackClassForumResults.Any() ? Math.Round(feedbackClassForumResults.Average(x => x.FeedBackStars ?? default), 1) : default);
+                    starts.Add(feedbackMockTestResults.Any() ? Math.Round(feedbackMockTestResults.Average(x => x.FeedBackStars ?? default), 1) : default);
+                    item.Starts = starts.Any() ? Math.Round(starts.Average(), 1) : default;
+                }
+                if (request.IsSortStarts.HasValue)
+                {
+                    lists = request.IsSortStarts.Value ? lists.OrderByDescending(m => m.Starts).ToList() : lists.OrderBy(m => m.Starts).ToList();
+                }
             }
-            lists = request.IsSortStarts ? lists.OrderByDescending(m => m.Starts).ToList() : lists.OrderBy(m => m.Starts).ToList();
 
             methodResult.Result = new PagingItemsModel<ReviewTeacherRatingSearchModel>(lists, request, totalItem);
             methodResult.StatusCode = StatusCodes.Status200OK;
