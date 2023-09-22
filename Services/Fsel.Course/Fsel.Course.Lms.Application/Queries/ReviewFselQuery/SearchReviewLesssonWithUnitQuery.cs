@@ -107,7 +107,9 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
 
             var starts = unitStars.Count > 0 ? Math.Round(unitStars.Average(x => x.Starts), 1) : default;
             int totalItem = unitStars.Count;
-            var lists = unitStars.OrderBy(x => x.CreatedDate).Skip((request.Page - 1) * request.PageSize).Take(request.PageSize).ToList();
+            var sortName = request.IsSortDesc ? unitStars.OrderByDescending(m => m.Code) : unitStars.OrderBy(m => m.Code);
+            var sortStarts = request.IsSortStarts ? sortName.OrderByDescending(m => m.Starts) : sortName.OrderBy(m => m.Starts);
+            var lists = sortStarts.OrderBy(x => x.CreatedDate).Skip((request.Page - 1) * request.PageSize).Take(request.PageSize).ToList();
 
             var teacherIds = lists.Where(x => x.TeacherIds != null && x.TeacherIds.Count > 0).SelectMany(x => x.TeacherIds!).Distinct().ToList();
             var teacherResults = await _userService.GetTeacherByIdsAsync(new GetTeacherByIdsQueryModel { Ids = teacherIds });

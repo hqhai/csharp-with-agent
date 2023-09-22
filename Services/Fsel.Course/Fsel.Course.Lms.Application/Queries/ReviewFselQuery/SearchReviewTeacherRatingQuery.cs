@@ -3,6 +3,7 @@
 namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
 {
     using System.Linq;
+    using System.Security.Cryptography.X509Certificates;
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Course.Domain.Enums;
@@ -85,7 +86,8 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
             }
 
             int totalItem = teacherRatingQuery!.Count();
-            var lists = teacherRatingQuery!.OrderBy(x => x.CreatedDate).Skip((request.Page - 1) * request.PageSize).Take(request.PageSize).ToList();
+            var sortName = request.IsSortDesc ? teacherRatingQuery?.OrderByDescending(m => m.FullName) : teacherRatingQuery?.OrderBy(m => m.FullName);
+            var lists = sortName!.OrderBy(x => x.CreatedDate).Skip((request.Page - 1) * request.PageSize).Take(request.PageSize).ToList();
 
             foreach (var item in lists)
             {
@@ -100,6 +102,7 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
                 starts.Add(feedbackMockTestResults.Any() ? Math.Round(feedbackMockTestResults.Average(x => x.FeedBackStars ?? default), 1) : default);
                 item.Starts = starts.Any() ? Math.Round(starts.Average(), 1) : default;
             }
+            lists = request.IsSortStarts ? lists.OrderByDescending(m => m.Starts).ToList() : lists.OrderBy(m => m.Starts).ToList();
 
             methodResult.Result = new PagingItemsModel<ReviewTeacherRatingSearchModel>(lists, request, totalItem);
             methodResult.StatusCode = StatusCodes.Status200OK;

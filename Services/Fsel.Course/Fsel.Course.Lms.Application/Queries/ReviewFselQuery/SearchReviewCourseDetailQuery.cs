@@ -94,7 +94,9 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
             }).AsEnumerable();
 
             int totalItem = studentReviewQuery.Count();
-            var lists = studentReviewQuery.OrderBy(x => x.CreatedDate).Skip((request.Page - 1) * request.PageSize).Take(request.PageSize).ToList();
+            var sortName = request.IsSortDesc ? studentReviewQuery.OrderByDescending(m => m.CreatedFullName) : studentReviewQuery.OrderBy(m => m.CreatedFullName);
+            var sortStarts = request.IsSortStarts ? sortName.OrderByDescending(m => m.Starts) : sortName.OrderBy(m => m.Starts);
+            var lists = sortStarts.OrderBy(x => x.CreatedDate).Skip((request.Page - 1) * request.PageSize).Take(request.PageSize).ToList();
 
             var studentIds = lists.Select(x => x.StudentId).ToList();
             var studentResults = await _userService.GetStudentsByStudentIdsAsync(studentIds);
