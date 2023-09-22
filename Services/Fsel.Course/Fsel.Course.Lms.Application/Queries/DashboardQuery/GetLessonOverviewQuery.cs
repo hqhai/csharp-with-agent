@@ -197,7 +197,7 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
             var statusClassForum = EnumResultStatus.Unfinished;
             if (status == EnumResultStatus.Done)
             {
-                statusClassForum = EnumResultStatus.Process;
+                statusClassForum = EnumResultStatus.New;
             }
             if (classForumResult != null)
             {

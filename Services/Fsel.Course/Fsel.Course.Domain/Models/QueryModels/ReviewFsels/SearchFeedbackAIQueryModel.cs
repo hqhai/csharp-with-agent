@@ -6,6 +6,8 @@ namespace Fsel.Course.Domain.Models.QueryModels.ReviewFsels
 
     public class SearchFeedbackAIQueryModel : BaseQueryModel
     {
+        public bool? IsSortDescStarts { get; set; }
+
         public int? NumberOfStarts { get; set; }
     }
 }
