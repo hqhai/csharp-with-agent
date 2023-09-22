@@ -274,7 +274,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
                 {
                     StudentName = student?.Human?.FullName,
                     CourseLevel = placementTestResult.Level,
-                    Percents = string.Join(Environment.NewLine, placementTestResults.Select((x, index) => $"- Module {index + 1}: {x.Percent} %")),
+                    Percents = string.Join(Environment.NewLine, placementTestResults.Select((x, index) => $"- Module {index + 1}: {Math.Round(x.Percent, MidpointRounding.AwayFromZero)} %")),
                 };
                 var subject = string.Format(CultureInfo.InvariantCulture, SenderSettings.SendPTResultSubject);
                 var sendResult = new MethodResult<bool>();
