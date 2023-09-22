@@ -11,6 +11,7 @@ namespace Fsel.Interaction.Application.Queries.CommentQuery
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base;
     using Fsel.Interaction.Application.Services.UserServices;
+    using Fsel.Interaction.Domain.Entities;
     using Fsel.Interaction.Domain.IRepositories;
     using Fsel.Interaction.Domain.Models.EntityModels;
     using Fsel.Shared.Enums;
@@ -62,8 +63,9 @@ namespace Fsel.Interaction.Application.Queries.CommentQuery
             var commentQuery = from c in _commentRepository.Queryable
                                join ca in _interactionActionRepository.Queryable on c.Id equals ca.ObjectId into caJ
                                from p in caJ.DefaultIfEmpty()
-                               where c.ObjectId == objectId && (p == null || !(p.Type == EnumInteractionActionType.Disable && p.UserId == _authContext.CurrentUserId))
-                               select c;
+                               group p by c into commentG
+                               where commentG.Key.ObjectId == objectId && !(commentG.Any(x => x.Type == EnumInteractionActionType.Disable && x.UserId == _authContext.CurrentUserId))
+                               select commentG.Key;
 
             var comments = await commentQuery.ToListAsync();
             var userResult = await _userService.GetStudentByUserIdsAsync(comments.Select(x => x.UserId.ToString()).ToList());

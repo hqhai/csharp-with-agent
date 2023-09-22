@@ -13,8 +13,8 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public Guid PackageId { get; set; }
         public int Visit { get; set; }
         public EnumPackageCode PackageCode { get; set; }
-        public DateTime StartDate { get; set; }
-        public DateTime EndDate { get; set; }
+        public DateTime? StartDate { get; set; }
+        public DateTime? EndDate { get; set; }
         public long TimeSpent { get; set; }
         public string? ContentCompleted { get; set; }
     }
