@@ -11,11 +11,11 @@ services:
             - ASPNETCORE_ENVIRONMENT=Testing
             - SERVICENAME=Sender
             - SentryConfig__Dsn=https://530c364a1c006e0dade385d197373f4a@o4505797571444736.ingest.sentry.io/4505797729452032
-            - SMTP__FROM=duongphanthtb@gmail.com
+            - SMTP__FROM=fsel@atlantic.edu.vn
             - SMTP__SMTPSERVER=smtp.gmail.com
             - SMTP__PORT=465
-            - SMTP__USERNAME=duongphanthtb@gmail.com
-            - SMTP__PASSWORD=ncfigfdzuxiueyvv
+            - SMTP__USERNAME=fsel@atlantic.edu.vn
+            - SMTP__PASSWORD=klnghinrhonlvgbf
         ports:
             - 5206:80
             - 7206:443
