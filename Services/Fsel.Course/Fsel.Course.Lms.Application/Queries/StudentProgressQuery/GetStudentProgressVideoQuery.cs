@@ -86,7 +86,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             var featureAccessTime = featureAccessTimeResult.Content?.Result;
             videoStudentProgress.Name = videoResult.Video?.Name;
             videoStudentProgress.Status = videoResult.Status;
-            var method = await _videoConverter.GetVideoResultDone(videoResult, cancellationToken).ConfigureAwait(false);
+            var method = await _videoConverter.GetVideoSkillScores(videoResult, cancellationToken).ConfigureAwait(false);
             if (!method.IsOK)
             {
                 methodResult.AddErrorBadRequest(method.ErrorMessages);
@@ -96,7 +96,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             if (featureAccessTime != null)
             {
                 videoStudentProgress.Visit = featureAccessTime.Visit;
-                videoStudentProgress.LastVisited = featureAccessTime.LastVisited ?? default;
+                videoStudentProgress.LastVisited = featureAccessTime.LastVisited ?? null;
                 videoStudentProgress.TimeSpent = featureAccessTime.AccessTime;
             }
 
