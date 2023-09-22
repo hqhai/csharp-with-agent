@@ -18,6 +18,8 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
     using Fsel.Course.Infrastructure.Common;
     using Fsel.Course.Lms.Application.Commands.SenderCmd;
     using Fsel.Course.Lms.Application.Queues.Publishers;
+    using Fsel.Course.Lms.Application.Services.OrderServices;
+    using Fsel.Course.Lms.Application.Services.OrderServices.Model;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Course.Lms.Application.Services.UserServices.Models;
     using Fsel.Shared.Constants;
@@ -25,7 +27,6 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
     using Fsel.Shared.Enums.ErrorCodes;
     using Fsel.Shared.Helpers;
     using Fsel.Shared.Models.SenderTemplates;
-    using Fsel.Shared.Models.ShareModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -39,6 +40,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
         private readonly IPlacementTestAnswerRepository _placementTestAnswerRepository;
         private readonly IPlacementTestResultRepository _placementTestResultRepository;
         private readonly IUserService _userService;
+        private readonly IOrderService _orderService;
         private readonly CreateOrderPublisher _createOrderPublisher;
         private readonly IQuestionRepository _questionRepository;
         private readonly IMapper _mapper;
@@ -50,6 +52,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
         public CreatePlacementTestAnswerCommandHandler(IPlacementTestAnswerRepository placementTestAnswerRepository
             , IPlacementTestResultRepository placementTestResultRepository
             , IUserService userService
+            , IOrderService orderService
             , CreateOrderPublisher createOrderPublisher
             , IQuestionRepository questionRepository
             , IMapper mapper
@@ -61,6 +64,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
             _placementTestAnswerRepository = placementTestAnswerRepository;
             _placementTestResultRepository = placementTestResultRepository;
             _userService = userService;
+            _orderService = orderService;
             _createOrderPublisher = createOrderPublisher;
             _questionRepository = questionRepository;
             _mapper = mapper;
@@ -240,7 +244,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
                         methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(course));
                         return methodResult;
                     }
-                    CreateOrderQueueModel createOrderQueueModel = new CreateOrderQueueModel
+                    await _orderService.CreateOrder(new CreateOrderCommandModel
                     {
                         Address = "Viet Nam",
                         Country = "Viet Nam",
@@ -250,8 +254,19 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
                         PaymentMethod = EnumPaymentMethodStatus.Card,
                         CodeCourse = course.Code,
                         UserId = _authContext.CurrentUserId
-                    };
-                    await _createOrderPublisher.Publish(createOrderQueueModel, cancellationToken);
+                    }).ConfigureAwait(false);
+                    //CreateOrderQueueModel createOrderQueueModel = new CreateOrderQueueModel
+                    //{
+                    //    Address = "Viet Nam",
+                    //    Country = "Viet Nam",
+                    //    CourseId = course.Id,
+                    //    CourseLevel = currentLevel.Value,
+                    //    FullName = student?.Human?.FullName,
+                    //    PaymentMethod = EnumPaymentMethodStatus.Card,
+                    //    CodeCourse = course.Code,
+                    //    UserId = _authContext.CurrentUserId
+                    //};
+                    //await _createOrderPublisher.Publish(createOrderQueueModel, cancellationToken);
                 }
 
                 #endregion Pilot
