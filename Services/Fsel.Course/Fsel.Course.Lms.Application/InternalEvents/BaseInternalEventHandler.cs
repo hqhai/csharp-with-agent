@@ -261,8 +261,9 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 var course = await _courseRepository.GetIncludeCourseUnitMockTestByIdAsync(courseId);
                 if (course != null)
                 {
-                    var displayOrder = course.CourseUnitMockTests.FirstOrDefault(x => x.UnitId == unitResult.UnitId)?.DisplayOrder;
-                    var courseUnitMockTest = course.CourseUnitMockTests.FirstOrDefault(x => x.DisplayOrder == displayOrder + 1);
+                    var courseUnitMockTests = course.CourseUnitMockTests.OrderBy(x => x.DisplayOrder).ToList();
+                    var displayOrder = courseUnitMockTests.FirstOrDefault(x => x.UnitId == unitResult.UnitId)?.DisplayOrder;
+                    var courseUnitMockTest = courseUnitMockTests.FirstOrDefault(x => x.DisplayOrder > displayOrder);
                     await UpdateStatusProcess(courseUnitMockTest, unitResult.StudentId, cancellationToken);
                 }
             }

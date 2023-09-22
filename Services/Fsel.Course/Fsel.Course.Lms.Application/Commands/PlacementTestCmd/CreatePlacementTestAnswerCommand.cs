@@ -206,7 +206,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
             placementTestResult.CorrectTotal = Convert.ToInt32(skillScores.Sum(x => x.TotalCount));
             placementTestResult.Status = EnumResultStatus.Done;
             placementTestResult.SkillScores = skillScores;
-            placementTestResult.Percent = placementTestResult.CorrectTotal > 0 ? ((double)placementTestResult.CorrectCount / placementTestResult.CorrectTotal * 100) : default;
+            placementTestResult.Percent = placementTestResult.CorrectTotal > 0 ? NumberHelper.ConvertPercentDouble((double)placementTestResult.CorrectCount / placementTestResult.CorrectTotal) : default;
             placementTestResult.PlacementTestAnswers = placementTestAnswers;
 
             var overallScore = NumberHelper.RoundNumberDouble(skillScores.Select(x => x.Scores).Average());

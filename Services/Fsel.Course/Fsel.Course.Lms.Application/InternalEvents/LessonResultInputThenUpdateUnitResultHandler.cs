@@ -29,7 +29,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                                                     .Include(x => x.UnitSkillMockTests)
                                                     .FirstOrDefaultAsync(x => x.Id == lessonResult.UnitId, cancellationToken);
 
-            var lessonResults = await _lessonResultRepository.Queryable.Where(x => x.Status == EnumResultStatus.Done && x.StudentId == lessonResult.StudentId && x.CourseId == lessonResult.CourseId).ToListAsync(cancellationToken);
+            var lessonResults = await _lessonResultRepository.Queryable.Where(x => x.Status == EnumResultStatus.Done && (!(unit != null) || x.UnitId == unit.Id) && x.StudentId == lessonResult.StudentId && x.CourseId == lessonResult.CourseId).ToListAsync(cancellationToken);
             if (unit != null && lessonResult.Status == EnumResultStatus.Done)
             {
                 var lessonResultIds = lessonResults.Select(x => x.Id).ToList();
