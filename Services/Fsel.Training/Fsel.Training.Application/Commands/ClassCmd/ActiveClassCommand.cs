@@ -46,40 +46,44 @@ namespace Fsel.Training.Application.Commands.ClassCmd
                 methodResult.AddErrorBadRequest(nameof(EnumClassErrorCode.StatusOfClassIsNotNew));
                 return methodResult;
             }
-            List<Guid> courseIds = new List<Guid>();
-            courseIds.Add(classes.CourseId);
-            var courseTimeConfigResult = await _systemService.GetCourseTimeConfigByCourseId(courseIds);
-            if (!courseTimeConfigResult.IsSuccessStatusCode)
-            {
-                methodResult.AddError(courseTimeConfigResult.Error);
-                return methodResult;
-            }
-            var courseTimeConfig = courseTimeConfigResult.Content?.Result;
-            var endTime = courseTimeConfig!.FirstOrDefault(p => p.CourseId == classes.CourseId);
-            if (endTime == null)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumClassErrorCode.CourseTimeNotInstalled));
-                return methodResult;
-            }
-            classes.StartDate = DateTime.Now;
-            classes.EndDate = DateTime.Now.AddMonths(endTime.DurationMonth);
-            classes.Status = EnumStatusClass.Active;
 
             if (classes.LiveTimeFrameId.HasValue && classes.LiveDays != null)
             {
-                for (DateTime date = DateTime.Now; date <= classes.EndDate; date = date.AddDays(1))
+                List<Guid> courseIds = new List<Guid>();
+                courseIds.Add(classes.CourseId);
+                var courseTimeConfigResult = await _systemService.GetCourseTimeConfigByCourseId(courseIds);
+                if (!courseTimeConfigResult.IsSuccessStatusCode)
                 {
-                    if (classes.LiveDays!.Contains(date.DayOfWeek))
+                    methodResult.AddError(courseTimeConfigResult.Error);
+                    return methodResult;
+                }
+                var courseTimeConfig = courseTimeConfigResult.Content?.Result;
+                var endTime = courseTimeConfig!.FirstOrDefault(p => p.CourseId == classes.CourseId);
+                if (endTime == null)
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumClassErrorCode.CourseTimeNotInstalled));
+                    return methodResult;
+                }
+                classes.StartDate = DateTime.Now;
+                classes.EndDate = DateTime.Now.AddMonths(endTime.DurationMonth);
+                classes.Status = EnumStatusClass.Active;
+
+                if (classes.LiveTimeFrameId.HasValue && classes.LiveDays != null)
+                {
+                    for (DateTime date = DateTime.Now; date <= classes.EndDate; date = date.AddDays(1))
                     {
-                        ClassLiveCalendar classLiveCalendar = new ClassLiveCalendar()
+                        if (classes.LiveDays!.Contains(date.DayOfWeek))
                         {
-                            LiveTimeFrameId = classes.LiveTimeFrameId ?? default,
-                            LiveDate = date,
-                            Status = EnumClassLiveCalendarStatus.NotStudied,
-                            ClassId = classes.Id,
-                            TeacherId = classes.TeacherApprovalStatus == EnumTeacherApprovalStatus.Approved ? classes.TeacherId : default,
-                        };
-                        classes.ClassLiveCalendars.Add(classLiveCalendar);
+                            ClassLiveCalendar classLiveCalendar = new ClassLiveCalendar()
+                            {
+                                LiveTimeFrameId = classes.LiveTimeFrameId ?? default,
+                                LiveDate = date,
+                                Status = EnumClassLiveCalendarStatus.NotStudied,
+                                ClassId = classes.Id,
+                                TeacherId = classes.TeacherApprovalStatus == EnumTeacherApprovalStatus.Approved ? classes.TeacherId : default,
+                            };
+                            classes.ClassLiveCalendars.Add(classLiveCalendar);
+                        }
                     }
                 }
             }

@@ -8,6 +8,7 @@ namespace Fsel.Ordering.Domain.Models.EntityModels
 
     public class OrderSearchModel : BaseModel
     {
+        public string? FullName { get; set; }
         public string? Code { get; set; }
         public EnumCourseLevel? CourseName { get; set; }
         public EnumPaymentMethodStatus PaymentMethod { get; set; }
