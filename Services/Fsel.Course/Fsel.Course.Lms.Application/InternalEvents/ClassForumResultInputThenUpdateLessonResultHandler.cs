@@ -37,8 +37,16 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 #endregion TODO : Fix Demo 20/9/2023
 
                 await GetLessonResult(lessonResult, cancellationToken);
-                _lessonResultRepository.Update(lessonResult);
-                await _lessonResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                if (classForumResult.Status == EnumClassForumResultStatus.Graded)
+                {
+                    _lessonResultRepository.Update(lessonResult);
+                    await _lessonResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+                }
+                else
+                {
+                    _lessonResultRepository.Update(lessonResult);
+                    await _lessonResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                }
             }
         }
 

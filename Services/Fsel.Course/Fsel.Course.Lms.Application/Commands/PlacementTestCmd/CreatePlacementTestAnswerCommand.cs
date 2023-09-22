@@ -206,7 +206,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
             placementTestResult.CorrectTotal = Convert.ToInt32(skillScores.Sum(x => x.TotalCount));
             placementTestResult.Status = EnumResultStatus.Done;
             placementTestResult.SkillScores = skillScores;
-            placementTestResult.Percent = placementTestResult.CorrectTotal > 0 ? ((double)placementTestResult.CorrectCount / placementTestResult.CorrectTotal * 100) : default;
+            placementTestResult.Percent = placementTestResult.CorrectTotal > 0 ? NumberHelper.ConvertPercentDouble((double)placementTestResult.CorrectCount / placementTestResult.CorrectTotal) : default;
             placementTestResult.PlacementTestAnswers = placementTestAnswers;
 
             var overallScore = NumberHelper.RoundNumberDouble(skillScores.Select(x => x.Scores).Average());
@@ -274,7 +274,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
                 {
                     StudentName = student?.Human?.FullName,
                     CourseLevel = placementTestResult.Level,
-                    Percents = string.Join(Environment.NewLine, placementTestResults.Select((x, index) => $"- Module {index + 1}: {x.Percent} %")),
+                    Percents = string.Join(Environment.NewLine, placementTestResults.Select((x, index) => $"- Module {index + 1}: {Math.Round(x.Percent, MidpointRounding.AwayFromZero)} %")),
                 };
                 var subject = string.Format(CultureInfo.InvariantCulture, SenderSettings.SendPTResultSubject);
                 var sendResult = new MethodResult<bool>();
