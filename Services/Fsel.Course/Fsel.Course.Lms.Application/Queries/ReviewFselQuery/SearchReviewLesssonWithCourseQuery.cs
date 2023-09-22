@@ -89,7 +89,9 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
             var starts = courseStars.Count > 0 ? Math.Round(courseStars.Average(x => x.Starts), 1) : default;
 
             int totalItem = courseStars.Count;
-            var lists = courseStars.OrderBy(x => x.CreatedDate).Skip((request.Page - 1) * request.PageSize).Take(request.PageSize).ToList();
+            var sortName = request.IsSortDesc ? courseStars.OrderByDescending(m => m.CreatedFullName) : courseStars.OrderBy(m => m.CreatedFullName);
+            var sortStarts = request.IsSortStarts ? sortName.OrderByDescending(m => m.Starts) : sortName.OrderBy(m => m.Starts);
+            var lists = sortStarts.OrderBy(x => x.CreatedDate).Skip((request.Page - 1) * request.PageSize).Take(request.PageSize).ToList();
 
             methodResult.Result = new ReviewLesssonWithCourseSearchModel { Starts = starts, PagingItemsModel = new PagingItemsModel<ReviewLesssonWithCourseModel>(lists, request, totalItem) };
             methodResult.StatusCode = StatusCodes.Status200OK;
