@@ -74,7 +74,7 @@ namespace Fsel.Interaction.Application.Queries.ReviewFselQuery
                     CourseId = x.CourseId,
                     ReviewType = x.ReviewType,
                     StudentId = x.StudentId,
-                    Starts = x.StudentReviewDetails.Average(x => x.VoteStars),
+                    Stars = x.StudentReviewDetails.Average(x => x.VoteStars),
                     StudentReviewQuestionTypes = x.StudentReviewDetails.Select(x => new StudentReviewQuestionTypeModel
                     {
                         Id = x.Id,
@@ -84,7 +84,8 @@ namespace Fsel.Interaction.Application.Queries.ReviewFselQuery
                     }).ToList(),
                 });
 
-            var starts = NumberHelper.ConvertDoubleDecimal(await query.AverageAsync(x => x.Starts, cancellationToken).ConfigureAwait(false));
+            var result = await query.ToListAsync(cancellationToken);
+            var stars = NumberHelper.ConvertDoubleDecimal(result.Average(x => x.Stars));
             int totalItem = await query.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
             var lists = await query
                     .ApplySortAndPaging(request)
@@ -107,7 +108,7 @@ namespace Fsel.Interaction.Application.Queries.ReviewFselQuery
                 item.ClassCode = classStudent?.Code;
             }
 
-            methodResult.Result = new StudentReviewSearchModel { Starts = starts, Code = course.Code, PagingItems = new PagingItemsModel<StudentReviewTypeModel>(lists, request, totalItem) };
+            methodResult.Result = new StudentReviewSearchModel { Stars = stars, Code = course.Code, PagingItems = new PagingItemsModel<StudentReviewTypeModel>(lists, request, totalItem) };
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }

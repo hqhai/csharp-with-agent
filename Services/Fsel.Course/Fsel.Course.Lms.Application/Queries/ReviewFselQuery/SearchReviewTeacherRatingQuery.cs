@@ -25,16 +25,16 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
     {
         private readonly IUserService _userService;
         private readonly IVideoRepository _videoRepository;
-        private readonly IClassForumRepository _classForumRepository;
-        private readonly IMockTestRepository _mockTestRepository;
+        private readonly IClassForumResultRepository _classForumResultRepository;
+        private readonly IMockTestResultRepository _mockTestResultRepository;
         private readonly IStudentFeedbackRepository _studentFeedbackRepository;
 
-        public SearchReviewTeacherRatingQueryHandler(IUserService userService, IVideoRepository videoRepository, IClassForumRepository classForumRepository, IMockTestRepository mockTestRepository, IStudentFeedbackRepository studentFeedbackRepository)
+        public SearchReviewTeacherRatingQueryHandler(IUserService userService, IVideoRepository videoRepository, IClassForumResultRepository classForumResultRepository, IMockTestResultRepository mockTestResultRepository, IStudentFeedbackRepository studentFeedbackRepository)
         {
             _userService = userService;
             _videoRepository = videoRepository;
-            _classForumRepository = classForumRepository;
-            _mockTestRepository = mockTestRepository;
+            _classForumResultRepository = classForumResultRepository;
+            _mockTestResultRepository = mockTestResultRepository;
             _studentFeedbackRepository = studentFeedbackRepository;
         }
 
@@ -50,16 +50,18 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
             }
 
             var videos = await _videoRepository.Queryable.Include(x => x.VideoResults).Where(x => x.VideoResults.Count > 0).ToListAsync(cancellationToken);
-            var mockTests = await _mockTestRepository.Queryable.Include(x => x.MockTestResults).ToListAsync(cancellationToken);
-            var classForums = await _classForumRepository.Queryable.Include(x => x.ClassForumResults).ToListAsync(cancellationToken);
-            var classForumResultIds = classForums.SelectMany(x => x.ClassForumResults).Select(x => x.Id).ToList();
+            var mockTestResults = await _mockTestResultRepository.Queryable.Where(x => x.GradingTeacherId != null).ToListAsync(cancellationToken);
+            var classForumResults = await _classForumResultRepository.Queryable.Where(x => x.GradingTeacherId != null).ToListAsync(cancellationToken);
+
+            var classForumResultIds = classForumResults.Select(x => x.Id).ToList();
+            var mockTestResultIds = mockTestResults.Select(x => x.Id).ToList();
+
             var feedbackClassForumResults = await _studentFeedbackRepository.Queryable.Where(x => classForumResultIds.Contains(x.ObjectId)).ToListAsync(cancellationToken);
-            var mockTestResultIds = mockTests.SelectMany(x => x.MockTestResults).Select(x => x.Id).ToList();
             var feedbackMockTestResults = await _studentFeedbackRepository.Queryable.Where(x => mockTestResultIds.Contains(x.ObjectId)).ToListAsync(cancellationToken);
 
-            var teacherVideoIds = videos.Select(x => x.TeacherId).Distinct().AsEnumerable();
-            var teacherMockTestIds = mockTests.SelectMany(x => x.MockTestResults).Where(x => x.GradingTeacherId != null).Select(x => x.GradingTeacherId ?? default).Distinct().AsEnumerable();
-            var teacherClassForumIds = classForums.SelectMany(x => x.ClassForumResults).Where(x => x.GradingTeacherId != null).Select(x => x.GradingTeacherId ?? default).Distinct().AsEnumerable();
+            var teacherVideoIds = videos.Select(x => x.TeacherId).Distinct().ToList();
+            var teacherMockTestIds = mockTestResults.Select(x => x.GradingTeacherId ?? default).Distinct().ToList();
+            var teacherClassForumIds = classForumResults.Select(x => x.GradingTeacherId ?? default).Distinct().ToList();
 
             var teacherIds = teacherVideoIds.Union(teacherMockTestIds).Union(teacherClassForumIds).Distinct().ToList();
             var teacherResults = await _userService.GetTeacherByIdsAsync(new GetTeacherByIdsQueryModel { Ids = teacherIds });
@@ -94,18 +96,14 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
                 {
                     var listVideo = videos.Where(x => x.TeacherId == item.Id).ToList();
                     var videoResults = listVideo.Where(x => x.VideoResults.Count > 0).SelectMany(x => x.VideoResults).Where(x => x.Status == EnumResultStatus.Done).ToList();
-                    var listMockTest = mockTests.SelectMany(x => x.MockTestResults).Where(x => x.GradingTeacherId == item.Id).ToList();
-                    var listClassForum = classForums.SelectMany(x => x.ClassForumResults).Where(x => x.GradingTeacherId == item.Id).ToList();
+                    var listMockTest = mockTestResults.Where(x => x.GradingTeacherId == item.Id).ToList();
+                    var listClassForum = classForumResults.Where(x => x.GradingTeacherId == item.Id).ToList();
 
                     var stars = new List<double>();
                     stars.Add(videoResults.Any() ? NumberHelper.ConvertDoubleDecimal(videoResults.Average(x => x.NumberOfStars)) : default);
                     stars.Add(feedbackClassForumResults.Any() ? NumberHelper.ConvertDoubleDecimal(feedbackClassForumResults.Average(x => x.FeedBackStars ?? default)) : default);
                     stars.Add(feedbackMockTestResults.Any() ? NumberHelper.ConvertDoubleDecimal(feedbackMockTestResults.Average(x => x.FeedBackStars ?? default)) : default);
                     item.Stars = stars.Any() ? NumberHelper.ConvertDoubleDecimal(stars.Average()) : default;
-                }
-                if (request.IsSortStarts.HasValue)
-                {
-                    lists = request.IsSortStarts.Value ? lists.OrderByDescending(m => m.Stars).ToList() : lists.OrderBy(m => m.Stars).ToList();
                 }
             }
 

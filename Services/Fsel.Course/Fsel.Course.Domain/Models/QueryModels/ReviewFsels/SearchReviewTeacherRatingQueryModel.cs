@@ -6,6 +6,5 @@ namespace Fsel.Course.Domain.Models.QueryModels.ReviewFsels
 
     public class SearchReviewTeacherRatingQueryModel : BaseQueryModel
     {
-        public bool? IsSortStarts { get; set; }
     }
 }

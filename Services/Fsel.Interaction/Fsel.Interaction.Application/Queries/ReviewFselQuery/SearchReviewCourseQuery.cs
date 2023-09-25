@@ -77,7 +77,8 @@ namespace Fsel.Interaction.Application.Queries.ReviewFselQuery
                 CourseId = x.CourseId,
                 Stars = x.StudentReviewDetails.Average(x => x.VoteStars)
             });
-            var starts = NumberHelper.ConvertDoubleDecimal(await query.AverageAsync(x => x.Stars, cancellationToken));
+            var result = await query.ToListAsync(cancellationToken);
+            var stars = NumberHelper.ConvertDoubleDecimal(result.Average(x => x.Stars));
             int totalItem = await query.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
             var lists = await query
                     .ApplySortAndPaging(request)
@@ -89,10 +90,11 @@ namespace Fsel.Interaction.Application.Queries.ReviewFselQuery
                 var course = courses?.FirstOrDefault(x => x.Id == item.CourseId);
                 if (course != null)
                 {
+                    item.Code = course.Code;
                     item.CourseLevel = course.CourseLevel;
                 }
             }
-            methodResult.Result = new CourseReviewSearchModel { Starts = starts, PagingItemsModel = new PagingItemsModel<CourseReviewModel>(lists, request, totalItem) };
+            methodResult.Result = new CourseReviewSearchModel { Stars = stars, PagingItemsModel = new PagingItemsModel<CourseReviewModel>(lists, request, totalItem) };
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }

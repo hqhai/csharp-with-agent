@@ -8,6 +8,5 @@ namespace Fsel.Course.Domain.Models.QueryModels.ReviewFsels
     {
         public Guid? TeacherId { get; set; }
         public Guid CourseId { get; set; }
-        public bool? IsSortStarts { get; set; }
     }
 }

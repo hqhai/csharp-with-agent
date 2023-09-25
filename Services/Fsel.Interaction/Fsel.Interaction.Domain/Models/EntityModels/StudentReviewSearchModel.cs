@@ -7,7 +7,7 @@ namespace Fsel.Interaction.Domain.Models.EntityModels
 
     public class StudentReviewSearchModel
     {
-        public double Starts { get; set; }
+        public double Stars { get; set; }
         public string? Code { get; set; }
         public PagingItemsModel<StudentReviewTypeModel> PagingItems { get; set; } = new PagingItemsModel<StudentReviewTypeModel>();
     }
@@ -18,7 +18,7 @@ namespace Fsel.Interaction.Domain.Models.EntityModels
         public Guid StudentId { get; set; }
         public Guid? CourseId { get; set; }
         public EnumCourseLevel? CourseLevel { get; set; }
-        public double Starts { get; set; }
+        public double Stars { get; set; }
         public string? Code { get; set; }
         public string? CodeStudent { get; set; }
         public string? ClassCode { get; set; }

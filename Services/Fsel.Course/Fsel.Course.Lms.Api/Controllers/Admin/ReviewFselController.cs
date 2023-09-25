@@ -42,10 +42,10 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
         /// <summary>
         /// Search student star
         /// </summary>
-        [HttpGet("student-star")]
+        [HttpGet("student-stars")]
         [ProducesResponseType(typeof(MethodResult<PagingItemsModel<StudentFeedbackModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> SearchStudentStar([FromQuery] SearchStudentFeedbackAIQuery query)
+        public async Task<IActionResult> SearchStudentStars([FromQuery] SearchStudentFeedbackAIQuery query)
         {
             MethodResult<PagingItemsModel<StudentFeedbackModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();

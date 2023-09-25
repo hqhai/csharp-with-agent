@@ -53,7 +53,7 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
             }
-            var lessonResultQuery = _lessonResultRepository.Queryable.Include(x => x.VideoResult)
+            var query = _lessonResultRepository.Queryable.Include(x => x.VideoResult)
                                                         .Where(x => x.VideoResult != null && x.LessonId == request.LessonId && x.Status == EnumResultStatus.Done)
                                                         .Select(x => new ReviewLessonDetailModel
                                                         {
@@ -63,9 +63,10 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
                                                             Stars = x.VideoResult != null ? x.VideoResult.NumberOfStars : default
                                                         });
 
-            var stars = NumberHelper.ConvertDoubleDecimal(await lessonResultQuery.AverageAsync(x => x.Stars, cancellationToken: cancellationToken).ConfigureAwait(false));
-            int totalItem = await lessonResultQuery.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
-            var lists = await lessonResultQuery
+            var result = await query.ToListAsync(cancellationToken);
+            var stars = NumberHelper.ConvertDoubleDecimal(result.Average(x => x.Stars));
+            int totalItem = await query.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
+            var lists = await query
                     .ApplySortAndPaging(request)
                     .AsNoTracking()
                     .ToListAsync(cancellationToken: cancellationToken)

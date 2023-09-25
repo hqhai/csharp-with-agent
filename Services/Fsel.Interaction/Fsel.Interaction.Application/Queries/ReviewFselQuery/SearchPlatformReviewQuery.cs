@@ -49,7 +49,7 @@ namespace Fsel.Interaction.Application.Queries.ReviewFselQuery
                     CreatedUserId = x.CreatedUserId,
                     ReviewType = x.ReviewType,
                     StudentId = x.StudentId,
-                    Starts = Math.Round(x.StudentReviewDetails.Average(x => x.VoteStars), 1),
+                    Stars = Math.Round(x.StudentReviewDetails.Average(x => x.VoteStars), 1),
                     StudentReviewQuestionTypes = x.StudentReviewDetails.Select(x => new StudentReviewQuestionTypeModel
                     {
                         Id = x.Id,
@@ -58,14 +58,15 @@ namespace Fsel.Interaction.Application.Queries.ReviewFselQuery
                         VoteStars = x.VoteStars,
                     }).ToList()
                 });
-            var starts = NumberHelper.ConvertDoubleDecimal(await query.AverageAsync(x => x.Starts, cancellationToken).ConfigureAwait(false));
+            var result = await query.ToListAsync(cancellationToken);
+            var stars = NumberHelper.ConvertDoubleDecimal(result.Average(x => x.Stars));
             int totalItem = await query.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
             var lists = await query
                     .ApplySortAndPaging(request)
                     .AsNoTracking()
                     .ToListAsync(cancellationToken: cancellationToken)
                     .ConfigureAwait(false);
-            methodResult.Result = new StudentReviewSearchModel { Starts = starts, PagingItems = new PagingItemsModel<StudentReviewTypeModel>(lists, request, totalItem) };
+            methodResult.Result = new StudentReviewSearchModel { Stars = stars, PagingItems = new PagingItemsModel<StudentReviewTypeModel>(lists, request, totalItem) };
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }

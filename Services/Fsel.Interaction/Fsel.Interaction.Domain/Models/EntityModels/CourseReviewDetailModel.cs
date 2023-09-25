@@ -7,14 +7,14 @@ namespace Fsel.Interaction.Domain.Models.EntityModels
 
     public class CourseReviewDetailsModel
     {
-        public double Starts { get; set; }
-        public PagingItemsModel<ReviewCourseModel> PagingItemsModel { get; set; } = new PagingItemsModel<ReviewCourseModel>();
+        public double Stars { get; set; }
+        public PagingItemsModel<ReviewCourseModel> PagingItems { get; set; } = new PagingItemsModel<ReviewCourseModel>();
     }
 
     public class ReviewCourseModel : BaseModel
     {
         public string? Code { get; set; }
         public EnumCourseLevel? CourseLevel { get; set; }
-        public double Starts { get; set; }
+        public double Stars { get; set; }
     }
 }

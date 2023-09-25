@@ -77,16 +77,17 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
                               };
 
             var query = courseQuery
-                .GroupBy(c => new { c.Id, c.Code, c.CourseLevel, c.CreatedDate }) // Nhóm dữ liệu theo Id của khóa học
+                .GroupBy(c => new { c.Id, c.Code, c.CourseLevel, c.CreatedDate })
                 .Select(group => new ReviewLessonWithCourseModel
                 {
                     Id = group.Key.Id,
                     Code = group.Key.Code,
                     CourseLevel = group.Key.CourseLevel,
                     CreatedDate = group.Key.CreatedDate,
-                    Stars = NumberHelper.ConvertDoubleDecimal(group.Select(x => x.Stars).Average())
+                    Stars = NumberHelper.ConvertDoubleDecimal(group.Average(x => x.Stars))
                 });
-            var stars = NumberHelper.ConvertDoubleDecimal(await query.AverageAsync(x => x.Stars, cancellationToken: cancellationToken).ConfigureAwait(false));
+            var result = await query.ToListAsync(cancellationToken);
+            var stars = NumberHelper.ConvertDoubleDecimal(result.Average(x => x.Stars));
             int totalItem = await query.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
             var lists = await query
                     .ApplySortAndPaging(request)

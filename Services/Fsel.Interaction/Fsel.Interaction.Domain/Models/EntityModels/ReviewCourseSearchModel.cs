@@ -7,7 +7,7 @@ namespace Fsel.Interaction.Domain.Models.EntityModels
 
     public class CourseReviewSearchModel
     {
-        public double Starts { get; set; }
+        public double Stars { get; set; }
         public PagingItemsModel<CourseReviewModel> PagingItemsModel { get; set; } = new PagingItemsModel<CourseReviewModel>();
     }
 
