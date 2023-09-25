@@ -60,10 +60,10 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
                                                             Id = x.Id,
                                                             StudentId = x.StudentId,
                                                             CreatedDate = x.CreatedDate,
-                                                            Starts = x.VideoResult != null ? x.VideoResult.NumberOfStars : default
+                                                            Stars = x.VideoResult != null ? x.VideoResult.NumberOfStars : default
                                                         });
 
-            var starts = NumberHelper.ConvertDoubleDecimal(await lessonResultQuery.AverageAsync(x => x.Starts, cancellationToken: cancellationToken).ConfigureAwait(false));
+            var stars = NumberHelper.ConvertDoubleDecimal(await lessonResultQuery.AverageAsync(x => x.Stars, cancellationToken: cancellationToken).ConfigureAwait(false));
             int totalItem = await lessonResultQuery.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
             var lists = await lessonResultQuery
                     .ApplySortAndPaging(request)
@@ -84,7 +84,7 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
                 item.Code = student?.Human?.Code;
                 item.ClassCode = classStudent?.Code;
             }
-            methodResult.Result = new ReviewLessonDetailSearchModel { Starts = starts, Name = lesson.Name, PagingItemsModel = new PagingItemsModel<ReviewLessonDetailModel>(lists, request, totalItem) };
+            methodResult.Result = new ReviewLessonDetailSearchModel { Stars = stars, Name = lesson.Name, PagingItemsModel = new PagingItemsModel<ReviewLessonDetailModel>(lists, request, totalItem) };
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }

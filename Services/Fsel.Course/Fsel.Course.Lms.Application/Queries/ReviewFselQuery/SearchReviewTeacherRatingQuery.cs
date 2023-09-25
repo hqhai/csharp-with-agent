@@ -12,6 +12,7 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Course.Lms.Application.Services.UserServices.Models;
     using Fsel.Shared.Enums.ErrorCodes;
+    using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -96,15 +97,15 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
                     var listMockTest = mockTests.SelectMany(x => x.MockTestResults).Where(x => x.GradingTeacherId == item.Id).ToList();
                     var listClassForum = classForums.SelectMany(x => x.ClassForumResults).Where(x => x.GradingTeacherId == item.Id).ToList();
 
-                    var starts = new List<double>();
-                    starts.Add(videoResults.Any() ? Math.Round(videoResults.Average(x => x.NumberOfStars), 1) : default);
-                    starts.Add(feedbackClassForumResults.Any() ? Math.Round(feedbackClassForumResults.Average(x => x.FeedBackStars ?? default), 1) : default);
-                    starts.Add(feedbackMockTestResults.Any() ? Math.Round(feedbackMockTestResults.Average(x => x.FeedBackStars ?? default), 1) : default);
-                    item.Starts = starts.Any() ? Math.Round(starts.Average(), 1) : default;
+                    var stars = new List<double>();
+                    stars.Add(videoResults.Any() ? NumberHelper.ConvertDoubleDecimal(videoResults.Average(x => x.NumberOfStars)) : default);
+                    stars.Add(feedbackClassForumResults.Any() ? NumberHelper.ConvertDoubleDecimal(feedbackClassForumResults.Average(x => x.FeedBackStars ?? default)) : default);
+                    stars.Add(feedbackMockTestResults.Any() ? NumberHelper.ConvertDoubleDecimal(feedbackMockTestResults.Average(x => x.FeedBackStars ?? default)) : default);
+                    item.Stars = stars.Any() ? NumberHelper.ConvertDoubleDecimal(stars.Average()) : default;
                 }
                 if (request.IsSortStarts.HasValue)
                 {
-                    lists = request.IsSortStarts.Value ? lists.OrderByDescending(m => m.Starts).ToList() : lists.OrderBy(m => m.Starts).ToList();
+                    lists = request.IsSortStarts.Value ? lists.OrderByDescending(m => m.Stars).ToList() : lists.OrderBy(m => m.Stars).ToList();
                 }
             }
 

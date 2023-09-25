@@ -8,6 +8,5 @@ namespace Fsel.Course.Domain.Models.QueryModels.ReviewFsels
     public class SearchReviewCourseQueryModel : BaseQueryModel
     {
         public EnumCourseLevel? CourseLevel { get; set; }
-        public bool? IsSortStarts { get; set; }
     }
 }
