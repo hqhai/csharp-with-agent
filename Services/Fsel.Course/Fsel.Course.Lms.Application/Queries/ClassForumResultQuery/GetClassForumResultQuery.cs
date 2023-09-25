@@ -109,10 +109,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
                 GradingStartDate = classForumResult.GradingStartDate,
                 CheckCsoId = classForumResult.CheckCsoId,
                 GradingTeacherId = classForumResult.GradingTeacherId ?? default,
-                ClassForumResultFiles = classForumResult.ClassForumResultFiles == null ? null : classForumResult.ClassForumResultFiles.Select(x => new ClassForumResultFileModel
-                {
-                    FilePath = x.FilePath,
-                }).ToList(),
+                FilePaths = classForumResult.ClassForumResultFiles == null ? null : classForumResult.ClassForumResultFiles.Select(x => x.FilePath ?? string.Empty).ToList(),
                 ClassForumScores = classForumResult.ClassForumScores == null ? null : classForumResult.ClassForumScores.Select(x => new ClassForumScoreModel
                 {
                     Id = x.Id,
