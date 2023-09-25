@@ -35,6 +35,7 @@ namespace Fsel.Course.Lms.Application.Queries.LessonNoteQuery
 
             var lessonNotes = await _lessonNoteRepository.Queryable
                                         .Where(x => x.LessonResultId == request.LessonResultId)
+                                        .OrderBy(x => x.CreatedDate)
                                         .Select(lessonResult => new LessonNoteModel
                                         {
                                             Id = lessonResult.Id,
