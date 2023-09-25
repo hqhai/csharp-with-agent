@@ -4,18 +4,21 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
 {
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base.BaseModels;
+    using Fsel.Core.Extensions;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Domain.Models.QueryModels.ReviewFsels;
+    using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.AspNetCore.Http;
+    using Microsoft.EntityFrameworkCore;
 
-    public class SearchReviewLesssonWithCourseQuery : SearchReviewCourseQueryModel, IRequest<MethodResult<ReviewLesssonWithCourseSearchModel>>
+    public class SearchReviewLessonWithCourseQuery : SearchReviewCourseQueryModel, IRequest<MethodResult<ReviewLessonWithCourseSearchModel>>
     {
     }
 
-    public class SearchReviewLesssonCourseQueryHandler : IRequestHandler<SearchReviewLesssonWithCourseQuery, MethodResult<ReviewLesssonWithCourseSearchModel>>
+    public class SearchReviewLessonCourseQueryHandler : IRequestHandler<SearchReviewLessonWithCourseQuery, MethodResult<ReviewLessonWithCourseSearchModel>>
     {
         private readonly ICourseRepository _courseRepository;
         private readonly IVideoResultRepository _videoResultRepository;
@@ -26,7 +29,7 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
         private readonly ICourseUnitMockTestRepository _courseUnitMockTestRepository;
         private readonly IVideoRepository _videoRepository;
 
-        public SearchReviewLesssonCourseQueryHandler(ICourseRepository courseRepository
+        public SearchReviewLessonCourseQueryHandler(ICourseRepository courseRepository
             , IVideoResultRepository videoResultRepository
             , ILessonVideoRepository lessonVideoRepository
             , ILessonRepository lessonRepository
@@ -45,10 +48,10 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
             _videoRepository = videoRepository;
         }
 
-        public async Task<MethodResult<ReviewLesssonWithCourseSearchModel>> Handle(SearchReviewLesssonWithCourseQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<ReviewLessonWithCourseSearchModel>> Handle(SearchReviewLessonWithCourseQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            var methodResult = new MethodResult<ReviewLesssonWithCourseSearchModel>();
+            var methodResult = new MethodResult<ReviewLessonWithCourseSearchModel>();
 
             if (request.PageSize > 100)
             {
@@ -70,33 +73,40 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
                                   Code = c.Code,
                                   CourseLevel = c.CourseLevel,
                                   CreatedDate = c.CreatedDate,
-                                  Starts = baseQ.NumberOfStars
+                                  Stars = baseQ.NumberOfStars
                               };
 
-            var courseStars = courseQuery
-                .GroupBy(c => new { c.Id, c.Code, c.CourseLevel, c.CreatedDate }) // Nhóm dữ liệu theo Id của khóa học
-                .Select(group => new ReviewLesssonWithCourseModel
+            var query = courseQuery
+                .GroupBy(c => new { c.Id, c.Code, c.CourseLevel, c.CreatedDate })
+                .Select(group => new ReviewLessonWithCourseModel
                 {
                     Id = group.Key.Id,
                     Code = group.Key.Code,
                     CourseLevel = group.Key.CourseLevel,
                     CreatedDate = group.Key.CreatedDate,
-                    Starts = Math.Round(group.Select(x => x.Starts).Average(), 1)
-                })
-                .ToList();
+                    Stars = group.Average(x => x.Stars)
+                });
 
-            courseStars = request.CourseLevel != null ? courseStars.Where(x => x.CourseLevel == request.CourseLevel).ToList() : courseStars;
-            var starts = courseStars.Count > 0 ? Math.Round(courseStars.Average(x => x.Starts), 1) : default;
-
-            int totalItem = courseStars.Count;
-
-            var lists = courseStars.OrderBy(x => x.CreatedDate).Skip((request.Page - 1) * request.PageSize).Take(request.PageSize).ToList();
-            lists = request.IsSortDesc ? lists.OrderByDescending(m => m.CreatedFullName).ToList() : lists.OrderBy(m => m.CreatedFullName).ToList();
-            if (request.IsSortStarts.HasValue)
+            if (request.NumberOfStars != null)
             {
-                lists = request.IsSortStarts.Value ? lists.OrderByDescending(m => m.Starts).ToList() : lists.OrderBy(m => m.Starts).ToList();
+                query = query.Where(x => x.Stars >= request.NumberOfStars && x.Stars < request.NumberOfStars + 0.5);
             }
-            methodResult.Result = new ReviewLesssonWithCourseSearchModel { Starts = starts, PagingItemsModel = new PagingItemsModel<ReviewLesssonWithCourseModel>(lists, request, totalItem) };
+
+            //var result = await query.ToListAsync(cancellationToken);
+            var stars = NumberHelper.ConvertDoubleDecimal(await query.AverageAsync(x => x.Stars, cancellationToken));
+            int totalItem = await query.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
+            var lists = await query
+                    .ApplySortAndPaging(request)
+                    .AsNoTracking()
+                    .ToListAsync(cancellationToken: cancellationToken)
+                    .ConfigureAwait(false);
+
+            foreach (var item in lists)
+            {
+                item.Stars = NumberHelper.ConvertDoubleDecimal(item.Stars);
+            }
+
+            methodResult.Result = new ReviewLessonWithCourseSearchModel { Stars = stars, PagingItemsModel = new PagingItemsModel<ReviewLessonWithCourseModel>(lists, request, totalItem) };
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }

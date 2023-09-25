@@ -12,11 +12,12 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
     using Fsel.Course.Lms.Application.Services.TrainingServices;
     using Fsel.Course.Lms.Application.Services.TrainingServices.Models;
     using Fsel.Course.Lms.Application.Services.UserServices;
+    using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class SearchReviewLessonDetailQuery : SearchReviewLesssonDetailQueryModel, IRequest<MethodResult<ReviewLessonDetailSearchModel>>
+    public class SearchReviewLessonDetailQuery : SearchReviewLessonDetailQueryModel, IRequest<MethodResult<ReviewLessonDetailSearchModel>>
     {
     }
 
@@ -52,19 +53,24 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
             }
-            var lessonResultQuery = _lessonResultRepository.Queryable.Include(x => x.VideoResult)
+            var query = _lessonResultRepository.Queryable.Include(x => x.VideoResult)
                                                         .Where(x => x.VideoResult != null && x.LessonId == request.LessonId && x.Status == EnumResultStatus.Done)
                                                         .Select(x => new ReviewLessonDetailModel
                                                         {
                                                             Id = x.Id,
                                                             StudentId = x.StudentId,
                                                             CreatedDate = x.CreatedDate,
-                                                            Starts = x.VideoResult!.NumberOfStars
+                                                            Feedback = x.VideoResult != null ? x.VideoResult.Feedback : default,
+                                                            Stars = x.VideoResult != null ? x.VideoResult.NumberOfStars : default
                                                         });
-
-            var starts = await lessonResultQuery.AverageAsync(x => x.Starts, cancellationToken: cancellationToken).ConfigureAwait(false);
-            int totalItem = await lessonResultQuery.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
-            var lists = await lessonResultQuery
+            if (request.NumberOfStars != null)
+            {
+                query = query.Where(x => x.Stars >= request.NumberOfStars && x.Stars < request.NumberOfStars + 0.5);
+            }
+            var result = await query.ToListAsync(cancellationToken);
+            var stars = NumberHelper.ConvertDoubleDecimal(result.Average(x => x.Stars));
+            int totalItem = await query.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
+            var lists = await query
                     .ApplySortAndPaging(request)
                     .AsNoTracking()
                     .ToListAsync(cancellationToken: cancellationToken)
@@ -78,12 +84,13 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
             var classeStudents = classStudentResults.Content?.Result;
             foreach (var item in lists)
             {
+                item.Stars = NumberHelper.ConvertDoubleDecimal(item.Stars);
                 var student = students?.FirstOrDefault(x => x.Id == item.StudentId);
                 var classStudent = classeStudents?.FirstOrDefault(x => x.StudentId == item.StudentId);
                 item.Code = student?.Human?.Code;
                 item.ClassCode = classStudent?.Code;
             }
-            methodResult.Result = new ReviewLessonDetailSearchModel { Starts = Math.Round(starts, 1), Name = lesson.Name, PagingItemsModel = new PagingItemsModel<ReviewLessonDetailModel>(lists, request, totalItem) };
+            methodResult.Result = new ReviewLessonDetailSearchModel { Stars = stars, Name = lesson.Name, PagingItemsModel = new PagingItemsModel<ReviewLessonDetailModel>(lists, request, totalItem) };
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }

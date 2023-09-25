@@ -24,20 +24,24 @@ namespace Fsel.Course.Lms.Application.InternalEvents
         {
             ArgumentNullException.ThrowIfNull(notification);
             var classForumResult = notification.Data;
-            var lessonResult = await _lessonResultRepository.Queryable.FirstOrDefaultAsync(x => x.Id == classForumResult.LessonResultId, cancellationToken);
+            var lessonResult = await _lessonResultRepository.Queryable.Include(x => x.HomeWorkResults.Where(x => x.StudentId == classForumResult.StudentId && x.LessonResultId == classForumResult.LessonResultId))
+                                                                         .Include(x => x.ClassForumResults.Where(x => x.StudentId == classForumResult.StudentId && x.LessonResultId == classForumResult.LessonResultId))
+                                                                         .FirstOrDefaultAsync(x => x.Id == classForumResult.LessonResultId, cancellationToken);
             if (lessonResult != null)
             {
                 #region TODO : Fix Demo 20/9/2023
 
-                //if (classForumResult.Status == EnumClassForumResultStatus.Pending)
-                //{
-                //    await UpdateHomeWorks(classForumResult, cancellationToken);
-                //}
+                if (classForumResult.Status == EnumClassForumResultStatus.Pending && lessonResult.ClassForumResults.Count > 1)
+                {
+                    await UpdateHomeWorks(classForumResult, cancellationToken);
+                }
 
                 #endregion TODO : Fix Demo 20/9/2023
 
+                var isHomeWorksDone = lessonResult.HomeWorkResults.All(x => x.StudentId == classForumResult.StudentId && x.LessonResultId == classForumResult.LessonResultId && x.Status == EnumResultStatus.Done);
+                var isClassForumDone = lessonResult.ClassForumResults.Any(x => x.StudentId == classForumResult.StudentId && x.LessonResultId == classForumResult.LessonResultId && (x.Status == EnumClassForumResultStatus.PendingForGrading || x.Status == EnumClassForumResultStatus.Graded));
                 await GetLessonResult(lessonResult, cancellationToken);
-                if (classForumResult.Status == EnumClassForumResultStatus.Graded)
+                if (isClassForumDone && isHomeWorksDone)
                 {
                     _lessonResultRepository.Update(lessonResult);
                     await _lessonResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);

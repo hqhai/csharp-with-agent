@@ -10,7 +10,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public Guid ClassForumId { get; set; }
         public string? CourseName { get; set; }
         public string? Code { get; set; }
-        public double NumberOfStarts { get; set; }
+        public double NumberOfStars { get; set; }
         public int TotalRating { get; set; }
         public int LessonDisplayOrder { get; set; }
         public int UnitDisplayOrder { get; set; }
