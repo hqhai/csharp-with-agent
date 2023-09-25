@@ -67,7 +67,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
             var lessonResult = await _lessonResultRepository.GetByIdAsync(request.LessonResultId);
             if (lessonResult == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(lessonResult));
                 return methodResult;
             }
 
@@ -94,11 +94,29 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
                     WordContent = request.WordContent,
                     GradingAlFeedback = request.GradingAlFeedback,
                 };
+                if (request.FilePaths != null)
+                {
+                    classForumResult.ClassForumResultFiles = request.FilePaths.Select(x => new ClassForumResultFile
+                    {
+                        FilePath = x,
+                    }).ToList();
+                }
+                classForumResult = _classForumResultRepository.Add(classForumResult);
             }
             else if (classForumResult.Status == EnumClassForumResultStatus.Draft || classForumResult.Status == EnumClassForumResultStatus.Denied)
             {
                 _mapper.Map(request, classForumResult);
                 classForumResult.Status = request.IsSubmit ? EnumClassForumResultStatus.Pending : EnumClassForumResultStatus.Draft;
+
+                if (request.FilePaths != null)
+                {
+                    classForumResult.ClassForumResultFiles = request.FilePaths.Select(x => new ClassForumResultFile
+                    {
+                        FilePath = x,
+                    }).ToList();
+                }
+
+                classForumResult = _classForumResultRepository.Update(classForumResult);
             }
             else
             {
@@ -106,17 +124,8 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
                 return methodResult;
             }
 
-            if (request.FilePaths != null)
-            {
-                classForumResult.ClassForumResultFiles = request.FilePaths.Select(x => new ClassForumResultFile
-                {
-                    FilePath = x,
-                }).ToList();
-            }
-
             await _classForumResultRepository.ExecuteTransactionAsync(async () =>
             {
-                classForumResult = _classForumResultRepository.Add(classForumResult);
                 await _classForumResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
                 //mặc định gửi cho tất cả CSO
