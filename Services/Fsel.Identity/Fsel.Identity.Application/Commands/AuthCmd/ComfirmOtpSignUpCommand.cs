@@ -133,11 +133,6 @@ IStudentRepository studentRepository)
                     CreatedByParent = false,
                     Occupation = "Student"
                 };
-
-                #region Is pilot
-                var stt = await _studentRepository.Queryable.CountAsync();
-                human.Code = $"HN_{weekNumber}{stt:000000000}";
-                #endregion
             }
             else if (roles.Contains(EnumRoleRegister.Parent.ToString()))
             {

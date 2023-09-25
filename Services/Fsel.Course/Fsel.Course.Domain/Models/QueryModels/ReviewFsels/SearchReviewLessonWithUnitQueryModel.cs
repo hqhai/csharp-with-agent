@@ -4,8 +4,10 @@ namespace Fsel.Course.Domain.Models.QueryModels.ReviewFsels
 {
     using Fsel.Core.Base.BaseModels;
 
-    public class SearchReviewCourseDetailQueryModel : BaseQueryModel
+    public class SearchReviewLessonWithUnitQueryModel : BaseQueryModel
     {
+        public Guid? TeacherId { get; set; }
         public Guid CourseId { get; set; }
+        public int? NumberOfStars { get; set; }
     }
 }

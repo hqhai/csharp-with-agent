@@ -95,7 +95,8 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
                                                                    .Include(x => x.HomeWorkResults.Where(x => x.StudentId == studentId))
                                                                    .Include(x => x.ClassForumResults.Where(x => x.StudentId == studentId))
                                                                    .Where(x => x.StudentId == studentId && x.Status != EnumResultStatus.Unfinished)
-                                                                   .OrderByDescending(x => x.UpdatedDate)
+                                                                   .OrderByDescending(x => x.CreatedDate)
+                                                                   .ThenByDescending(x => x.UpdatedDate)
                                                                    .AsNoTracking()
                                                                    .FirstOrDefaultAsync(cancellationToken);
             }
@@ -197,7 +198,7 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
             var statusClassForum = EnumResultStatus.Unfinished;
             if (status == EnumResultStatus.Done)
             {
-                statusClassForum = EnumResultStatus.Process;
+                statusClassForum = EnumResultStatus.New;
             }
             if (classForumResult != null)
             {

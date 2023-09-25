@@ -7,7 +7,7 @@ namespace Fsel.Interaction.Application.Commands.StudentReviewCmd
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
     using Fsel.Interaction.Application.Services.CourseServices;
-    using Fsel.Interaction.Application.Services.TrainingService;
+    using Fsel.Interaction.Application.Services.TrainingServices;
     using Fsel.Interaction.Application.Services.UserServices;
     using Fsel.Interaction.Domain.Entities;
     using Fsel.Interaction.Domain.IRepositories;
@@ -85,6 +85,16 @@ namespace Fsel.Interaction.Application.Commands.StudentReviewCmd
             await _studentReviewRepository.ExecuteTransactionAsync(async () =>
             {
                 var studentReview = await _studentReviewRepository.Queryable.Include(x => x.StudentReviewDetails).FirstOrDefaultAsync(x => x.StudentId == studentId && x.ReviewType == request.ReviewType, cancellationToken);
+
+                var studentReviewDetails = _mapper.Map<List<StudentReviewDetail>>(request.StudentReviewDetails);
+                foreach (var studentReviewDetail in studentReviewDetails)
+                {
+                    if (!studentReviewDetail.IsValid())
+                    {
+                        methodResult.AddErrorBadRequest(studentReviewDetail.ErrorMessages);
+                        return methodResult;
+                    }
+                }
                 if (studentReview == null)
                 {
                     studentReview = _mapper.Map<StudentReview>(request);

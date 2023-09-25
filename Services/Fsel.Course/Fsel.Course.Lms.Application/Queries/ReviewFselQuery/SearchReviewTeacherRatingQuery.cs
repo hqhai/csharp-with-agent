@@ -5,6 +5,7 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
     using System.Linq;
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base.BaseModels;
+    using Fsel.Core.Extensions;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
@@ -12,6 +13,7 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Course.Lms.Application.Services.UserServices.Models;
     using Fsel.Shared.Enums.ErrorCodes;
+    using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -24,19 +26,17 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
     {
         private readonly IUserService _userService;
         private readonly IVideoRepository _videoRepository;
-        private readonly IClassForumRepository _classForumRepository;
-        private readonly IMockTestRepository _mockTestRepository;
-        private readonly IStudentFeedbackRepository _studentFeedbackRepository;
         private readonly IClassForumResultRepository _classForumResultRepository;
+        private readonly IMockTestResultRepository _mockTestResultRepository;
+        private readonly IStudentFeedbackRepository _studentFeedbackRepository;
 
-        public SearchReviewTeacherRatingQueryHandler(IUserService userService, IVideoRepository videoRepository, IClassForumRepository classForumRepository, IMockTestRepository mockTestRepository, IStudentFeedbackRepository studentFeedbackRepository, IClassForumResultRepository classForumResultRepository)
+        public SearchReviewTeacherRatingQueryHandler(IUserService userService, IVideoRepository videoRepository, IClassForumResultRepository classForumResultRepository, IMockTestResultRepository mockTestResultRepository, IStudentFeedbackRepository studentFeedbackRepository)
         {
             _userService = userService;
             _videoRepository = videoRepository;
-            _classForumRepository = classForumRepository;
-            _mockTestRepository = mockTestRepository;
-            _studentFeedbackRepository = studentFeedbackRepository;
             _classForumResultRepository = classForumResultRepository;
+            _mockTestResultRepository = mockTestResultRepository;
+            _studentFeedbackRepository = studentFeedbackRepository;
         }
 
         public async Task<MethodResult<PagingItemsModel<ReviewTeacherRatingSearchModel>>> Handle(SearchReviewTeacherRatingQuery request, CancellationToken cancellationToken)
@@ -51,16 +51,18 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
             }
 
             var videos = await _videoRepository.Queryable.Include(x => x.VideoResults).Where(x => x.VideoResults.Count > 0).ToListAsync(cancellationToken);
-            var mockTests = await _mockTestRepository.Queryable.Include(x => x.MockTestResults).ToListAsync(cancellationToken);
-            var classForums = await _classForumRepository.Queryable.Include(x => x.ClassForumResults).ToListAsync(cancellationToken);
-            var classForumResultIds = classForums.SelectMany(x => x.ClassForumResults).Select(x => x.Id).ToList();
+            var mockTestResults = await _mockTestResultRepository.Queryable.Where(x => x.GradingTeacherId != null).ToListAsync(cancellationToken);
+            var classForumResults = await _classForumResultRepository.Queryable.Where(x => x.GradingTeacherId != null).ToListAsync(cancellationToken);
+
+            var classForumResultIds = classForumResults.Select(x => x.Id).ToList();
+            var mockTestResultIds = mockTestResults.Select(x => x.Id).ToList();
+
             var feedbackClassForumResults = await _studentFeedbackRepository.Queryable.Where(x => classForumResultIds.Contains(x.ObjectId)).ToListAsync(cancellationToken);
-            var mockTestResultIds = mockTests.SelectMany(x => x.MockTestResults).Select(x => x.Id).ToList();
             var feedbackMockTestResults = await _studentFeedbackRepository.Queryable.Where(x => mockTestResultIds.Contains(x.ObjectId)).ToListAsync(cancellationToken);
 
-            var teacherVideoIds = videos.Select(x => x.TeacherId).Distinct().AsEnumerable();
-            var teacherMockTestIds = mockTests.SelectMany(x => x.MockTestResults).Where(x => x.GradingTeacherId != null).Select(x => x.GradingTeacherId ?? default).Distinct().AsEnumerable();
-            var teacherClassForumIds = classForums.SelectMany(x => x.ClassForumResults).Where(x => x.GradingTeacherId != null).Select(x => x.GradingTeacherId ?? default).Distinct().AsEnumerable();
+            var teacherVideoIds = videos.Select(x => x.TeacherId).Distinct().ToList();
+            var teacherMockTestIds = mockTestResults.Select(x => x.GradingTeacherId ?? default).Distinct().ToList();
+            var teacherClassForumIds = classForumResults.Select(x => x.GradingTeacherId ?? default).Distinct().ToList();
 
             var teacherIds = teacherVideoIds.Union(teacherMockTestIds).Union(teacherClassForumIds).Distinct().ToList();
             var teacherResults = await _userService.GetTeacherByIdsAsync(new GetTeacherByIdsQueryModel { Ids = teacherIds });
@@ -70,37 +72,55 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
                 return methodResult;
             }
             var teachers = teacherResults.Content?.Result;
-
-            var teacherRatingQuery = teachers?.OrderBy(x => x.CreatedDate).Select(x => new ReviewTeacherRatingSearchModel
+            if (teachers == null || !teachers.Any())
+            {
+                methodResult.Result = default;
+                methodResult.StatusCode = StatusCodes.Status200OK;
+                return methodResult;
+            }
+            var query = teachers.OrderBy(x => x.CreatedDate).Select(x => new ReviewTeacherRatingSearchModel
             {
                 Id = x.Id,
                 Code = x.Human!.Code,
                 CreatedDate = x.CreatedDate,
                 FullName = x.Human.FullName,
-            }).AsEnumerable();
+            }).ToList();
 
             if (!string.IsNullOrEmpty(request.Keyword))
             {
-                teacherRatingQuery = teacherRatingQuery?.Where(m => m.Id.ToString() == request.Keyword || (m.FullName != null && m.FullName.Contains(request.Keyword, StringComparison.CurrentCulture)));
+                query = query.Where(m => m.Id.ToString() == request.Keyword || (m.FullName != null && m.FullName.Contains(request.Keyword, StringComparison.CurrentCulture))).ToList();
             }
-
-            int totalItem = teacherRatingQuery!.Count();
-            var lists = teacherRatingQuery!.OrderBy(x => x.CreatedDate).Skip((request.Page - 1) * request.PageSize).Take(request.PageSize).ToList();
-
-            foreach (var item in lists)
+            foreach (var item in query)
             {
                 var listVideo = videos.Where(x => x.TeacherId == item.Id).ToList();
                 var videoResults = listVideo.Where(x => x.VideoResults.Count > 0).SelectMany(x => x.VideoResults).Where(x => x.Status == EnumResultStatus.Done).ToList();
-                var listMockTest = mockTests.SelectMany(x => x.MockTestResults).Where(x => x.GradingTeacherId == item.Id).ToList();
-                var listClassForum = classForums.SelectMany(x => x.ClassForumResults).Where(x => x.GradingTeacherId == item.Id).ToList();
+                mockTestResultIds = mockTestResults.Where(x => x.GradingTeacherId == item.Id).Select(x => x.Id).ToList();
+                classForumResultIds = classForumResults.Where(x => x.GradingTeacherId == item.Id).Select(x => x.Id).ToList();
+                var mockTestFeedbacks = feedbackMockTestResults.Where(x => mockTestResultIds.Contains(x.ObjectId));
+                var classForumFeedbacks = feedbackClassForumResults.Where(x => classForumResultIds.Contains(x.ObjectId));
 
-                var starts = new List<double>();
-                starts.Add(videoResults.Any() ? Math.Round(videoResults.Average(x => x.NumberOfStars), 1) : default);
-                starts.Add(feedbackClassForumResults.Any() ? Math.Round(feedbackClassForumResults.Average(x => x.FeedBackStars ?? default), 1) : default);
-                starts.Add(feedbackMockTestResults.Any() ? Math.Round(feedbackMockTestResults.Average(x => x.FeedBackStars ?? default), 1) : default);
-                item.Starts = starts.Any() ? Math.Round(starts.Average(), 1) : default;
+                var stars = new List<double>();
+                if (videoResults.Any())
+                {
+                    stars.Add(NumberHelper.ConvertDoubleDecimal(videoResults.Average(x => x.NumberOfStars)));
+                }
+                if (classForumFeedbacks.Any())
+                {
+                    stars.Add(NumberHelper.ConvertDoubleDecimal(classForumFeedbacks.Average(x => x.FeedBackStars ?? default)));
+                }
+                if (mockTestFeedbacks.Any())
+                {
+                    stars.Add(NumberHelper.ConvertDoubleDecimal(mockTestFeedbacks.Average(x => x.FeedBackStars ?? default)));
+                }
+                item.Stars = stars.Any() ? NumberHelper.ConvertDoubleDecimal(stars.Average()) : default;
             }
 
+            if (request.NumberOfStars != null)
+            {
+                query = query.Where(x => x.Stars >= request.NumberOfStars && x.Stars < request.NumberOfStars + 0.5).ToList();
+            }
+            int totalItem = query.Count;
+            var lists = query.ApplySortAndPaging(request).ToList();
             methodResult.Result = new PagingItemsModel<ReviewTeacherRatingSearchModel>(lists, request, totalItem);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;

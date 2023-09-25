@@ -3,7 +3,6 @@
 namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
 {
     using System;
-    using System.Collections.Immutable;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base.BaseModels;
@@ -15,6 +14,7 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
     using Fsel.Course.Domain.Models.QueryModels.ReviewFsels;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Shared.Enums.ErrorCodes;
+    using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.AspNetCore.Http;
 
@@ -82,7 +82,7 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
                                        CreatedUserId = baseQ.CreatedUserId,
                                        Feedback = baseQ.Feedback,
                                        ReviewArea = nameof(Video),
-                                       Starts = baseQ.NumberOfStars
+                                       Stars = baseQ.NumberOfStars
                                    };
 
             var classFormQuery = from baseQ in _classForumResultRepository.Queryable
@@ -100,7 +100,7 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
                                      CreatedUserId = baseQ.CreatedUserId,
                                      ReviewArea = nameof(ClassForum),
                                      Feedback = s.FeedBackNote,
-                                     Starts = s.FeedBackStars ?? default,
+                                     Stars = s.FeedBackStars ?? default,
                                      FeedbackNegative = s.FeedBackNegatives,
                                      FeedbackPositive = s.FeedBackPositives,
                                  };
@@ -119,7 +119,7 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
                                     CreatedUserId = baseQ.CreatedUserId,
                                     ReviewArea = nameof(MockTest),
                                     Feedback = s.FeedBackNote,
-                                    Starts = s.FeedBackStars ?? default,
+                                    Stars = s.FeedBackStars ?? default,
                                     FeedbackNegative = s.FeedBackNegatives,
                                     FeedbackPositive = s.FeedBackPositives,
                                 };
@@ -129,9 +129,16 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
             {
                 query = query.Where(m => m.Id.ToString() == request.Keyword || (m.CreatedFullName != null && m.CreatedFullName.Contains(request.Keyword, StringComparison.CurrentCulture)));
             }
+            if (request.NumberOfStars != null)
+            {
+                query = query.Where(x => x.Stars >= request.NumberOfStars && x.Stars < request.NumberOfStars + 0.5);
+            }
             int totalItem = query.Count();
-            var lists = query.OrderBy(x => x.CreatedDate).Skip((request.Page - 1) * request.PageSize).Take(request.PageSize).ToList();
-
+            var lists = query.ApplySortAndPaging(request).ToList();
+            foreach (var item in lists)
+            {
+                item.Stars = NumberHelper.ConvertDoubleDecimal(item.Stars);
+            }
             methodResult.Result = new ReviewTeacherRatingDetailSearchModel { FullName = teacher?.Human?.FullName, PagingItemsModel = new PagingItemsModel<ReviewTeacherRatingDetailModel>(lists, request, totalItem) };
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
