@@ -5,6 +5,7 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
     using System.Linq;
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base.BaseModels;
+    using Fsel.Core.Extensions;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
@@ -71,42 +72,50 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
                 return methodResult;
             }
             var teachers = teacherResults.Content?.Result;
-
-            var teacherRatingQuery = teachers?.OrderBy(x => x.CreatedDate).Select(x => new ReviewTeacherRatingSearchModel
+            if (teachers == null || !teachers.Any())
+            {
+                methodResult.Result = default;
+                methodResult.StatusCode = StatusCodes.Status200OK;
+                return methodResult;
+            }
+            var query = teachers.OrderBy(x => x.CreatedDate).Select(x => new ReviewTeacherRatingSearchModel
             {
                 Id = x.Id,
                 Code = x.Human!.Code,
                 CreatedDate = x.CreatedDate,
                 FullName = x.Human.FullName,
-            }).AsEnumerable();
+            }).ToList();
 
             if (!string.IsNullOrEmpty(request.Keyword))
             {
-                teacherRatingQuery = teacherRatingQuery?.Where(m => m.Id.ToString() == request.Keyword || (m.FullName != null && m.FullName.Contains(request.Keyword, StringComparison.CurrentCulture)));
+                query = query.Where(m => m.Id.ToString() == request.Keyword || (m.FullName != null && m.FullName.Contains(request.Keyword, StringComparison.CurrentCulture))).ToList();
             }
-
-            int totalItem = teacherRatingQuery!.Count();
-
-            var lists = teacherRatingQuery?.OrderBy(x => x.CreatedDate).Skip((request.Page - 1) * request.PageSize).Take(request.PageSize).ToList();
-            lists = request.IsSortDesc ? lists?.OrderByDescending(m => m.FullName).ToList() : lists?.OrderBy(m => m.FullName).ToList();
-
-            if (lists != null && lists.Count > 0)
+            foreach (var item in query)
             {
-                foreach (var item in lists)
+                var listVideo = videos.Where(x => x.TeacherId == item.Id).ToList();
+                var videoResults = listVideo.Where(x => x.VideoResults.Count > 0).SelectMany(x => x.VideoResults).Where(x => x.Status == EnumResultStatus.Done).ToList();
+                mockTestResultIds = mockTestResults.Where(x => x.GradingTeacherId == item.Id).Select(x => x.Id).ToList();
+                classForumResultIds = classForumResults.Where(x => x.GradingTeacherId == item.Id).Select(x => x.Id).ToList();
+                var mockTestFeedbacks = feedbackMockTestResults.Where(x => mockTestResultIds.Contains(x.ObjectId));
+                var classForumFeedbacks = feedbackClassForumResults.Where(x => classForumResultIds.Contains(x.ObjectId));
+
+                var stars = new List<double>();
+                if (videoResults.Any())
                 {
-                    var listVideo = videos.Where(x => x.TeacherId == item.Id).ToList();
-                    var videoResults = listVideo.Where(x => x.VideoResults.Count > 0).SelectMany(x => x.VideoResults).Where(x => x.Status == EnumResultStatus.Done).ToList();
-                    var listMockTest = mockTestResults.Where(x => x.GradingTeacherId == item.Id).ToList();
-                    var listClassForum = classForumResults.Where(x => x.GradingTeacherId == item.Id).ToList();
-
-                    var stars = new List<double>();
-                    stars.Add(videoResults.Any() ? NumberHelper.ConvertDoubleDecimal(videoResults.Average(x => x.NumberOfStars)) : default);
-                    stars.Add(feedbackClassForumResults.Any() ? NumberHelper.ConvertDoubleDecimal(feedbackClassForumResults.Average(x => x.FeedBackStars ?? default)) : default);
-                    stars.Add(feedbackMockTestResults.Any() ? NumberHelper.ConvertDoubleDecimal(feedbackMockTestResults.Average(x => x.FeedBackStars ?? default)) : default);
-                    item.Stars = stars.Any() ? NumberHelper.ConvertDoubleDecimal(stars.Average()) : default;
+                    stars.Add(NumberHelper.ConvertDoubleDecimal(videoResults.Average(x => x.NumberOfStars)));
                 }
+                if (classForumFeedbacks.Any())
+                {
+                    stars.Add(NumberHelper.ConvertDoubleDecimal(classForumFeedbacks.Average(x => x.FeedBackStars ?? default)));
+                }
+                if (mockTestFeedbacks.Any())
+                {
+                    stars.Add(NumberHelper.ConvertDoubleDecimal(mockTestFeedbacks.Average(x => x.FeedBackStars ?? default)));
+                }
+                item.Stars = stars.Any() ? NumberHelper.ConvertDoubleDecimal(stars.Average()) : default;
             }
-
+            int totalItem = query.Count;
+            var lists = query.ApplySortAndPaging(request).ToList();
             methodResult.Result = new PagingItemsModel<ReviewTeacherRatingSearchModel>(lists, request, totalItem);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;

@@ -46,7 +46,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             ArgumentNullException.ThrowIfNull(request);
             ArgumentNullException.ThrowIfNull(_appSetting.Otp);
             var methodResult = new MethodResult<bool>();
-            var user = await _userManager.FindByIdAsync(_authContext.CurrentUserId.ToString());
+            var user = await _userManager.Users.Include(x => x.Human).FirstOrDefaultAsync(x => x.Id == _authContext.CurrentUserId.ToString(), cancellationToken);
 
             if (user != null)
             {
@@ -71,11 +71,13 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                 if (!string.IsNullOrEmpty(request.Email))
                 {
                     user.Email = request.Email;
+                    user.Human!.Email = request.Email;
                     await _userManager.UpdateAsync(user);
                 }
                 else if (!string.IsNullOrEmpty(request.PhoneNumber))
                 {
                     user.PhoneNumber = request.PhoneNumber;
+                    user.Human!.PhoneNumber = request.PhoneNumber;
                     await _userManager.UpdateAsync(user);
                 }
             }
