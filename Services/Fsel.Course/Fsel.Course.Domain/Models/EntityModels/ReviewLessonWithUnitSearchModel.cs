@@ -7,7 +7,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
     public class ReviewLessonWithUnitSearchModel
     {
         public string? Code { get; set; }
-        public double Starts { get; set; }
+        public double Stars { get; set; }
         public PagingItemsModel<ReviewLessonWithUnitModel> PagingItemsModel { get; set; } = new PagingItemsModel<ReviewLessonWithUnitModel>();
     }
 
@@ -16,6 +16,6 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public string? Code { get; set; }
         public IList<Guid>? TeacherIds { get; set; }
         public IList<string>? TeacherNames { get; set; }
-        public double Starts { get; set; }
+        public double Stars { get; set; }
     }
 }

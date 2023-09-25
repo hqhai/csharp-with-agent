@@ -7,20 +7,23 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base.BaseModels;
+    using Fsel.Core.Extensions;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Domain.Models.QueryModels.ReviewFsels;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Course.Lms.Application.Services.UserServices.Models;
+    using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.AspNetCore.Http;
+    using Microsoft.EntityFrameworkCore;
 
-    public class SearchReviewLesssonWithUnitQuery : SearchReviewLesssonWithUnitQueryModel, IRequest<MethodResult<ReviewLessonWithUnitSearchModel>>
+    public class SearchReviewLessonWithUnitQuery : SearchReviewLessonWithUnitQueryModel, IRequest<MethodResult<ReviewLessonWithUnitSearchModel>>
     {
     }
 
-    public class SearchReviewLesssonWithUnitQueryHandler : IRequestHandler<SearchReviewLesssonWithUnitQuery, MethodResult<ReviewLessonWithUnitSearchModel>>
+    public class SearchReviewLessonWithUnitQueryHandler : IRequestHandler<SearchReviewLessonWithUnitQuery, MethodResult<ReviewLessonWithUnitSearchModel>>
     {
         private readonly ICourseRepository _courseRepository;
         private readonly IUserService _userService;
@@ -32,7 +35,7 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
         private readonly ICourseUnitMockTestRepository _courseUnitMockTestRepository;
         private readonly IVideoRepository _videoRepository;
 
-        public SearchReviewLesssonWithUnitQueryHandler(ICourseRepository courseRepository
+        public SearchReviewLessonWithUnitQueryHandler(ICourseRepository courseRepository
             , IUserService userService
             , IVideoResultRepository videoResultRepository
             , ILessonVideoRepository lessonVideoRepository
@@ -53,7 +56,7 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
             _videoRepository = videoRepository;
         }
 
-        public async Task<MethodResult<ReviewLessonWithUnitSearchModel>> Handle(SearchReviewLesssonWithUnitQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<ReviewLessonWithUnitSearchModel>> Handle(SearchReviewLessonWithUnitQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<ReviewLessonWithUnitSearchModel>();
@@ -85,35 +88,32 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
                                 Code = u.Code,
                                 CourseLevel = u.CourseLevel,
                                 CreatedDate = u.CreatedDate,
-                                Starts = baseQ.NumberOfStars,
+                                Stars = baseQ.NumberOfStars,
                                 TeacherId = v.TeacherId,
                             };
 
-            var unitStars = unitQuery
+            var query = unitQuery
                 .GroupBy(c => new { c.Id, c.Code, c.CreatedDate }) // Nhóm dữ liệu theo Id của khóa học
                 .Select(group => new ReviewLessonWithUnitModel
                 {
                     Id = group.Key.Id,
                     Code = group.Key.Code,
                     CreatedDate = group.Key.CreatedDate,
-                    Starts = Math.Round(group.Select(x => x.Starts).Average(), 1),
+                    Stars = Math.Round(group.Select(x => x.Stars).Average(), 1),
                     TeacherIds = group.Select(x => x.TeacherId).Distinct().ToList()
-                })
-                .ToList();
+                });
             if (request.TeacherId != null)
             {
-                unitStars = unitStars.Where(x => x.TeacherIds != null && x.TeacherIds!.Contains(request.TeacherId ?? default)).ToList();
+                query = query.Where(x => x.TeacherIds != null && x.TeacherIds.Contains(request.TeacherId ?? default));
             }
 
-            var starts = unitStars.Count > 0 ? Math.Round(unitStars.Average(x => x.Starts), 1) : default;
-            int totalItem = unitStars.Count;
-
-            var lists = unitStars.OrderBy(x => x.CreatedDate).Skip((request.Page - 1) * request.PageSize).Take(request.PageSize).ToList();
-            lists = request.IsSortDesc ? lists.OrderByDescending(m => m.Code).ToList() : lists.OrderBy(m => m.Code).ToList();
-            if (request.IsSortStarts.HasValue)
-            {
-                lists = request.IsSortStarts.Value ? lists.OrderByDescending(m => m.Starts).ToList() : lists.OrderBy(m => m.Starts).ToList();
-            }
+            var stars = NumberHelper.ConvertDoubleDecimal(await query.AverageAsync(x => x.Stars, cancellationToken: cancellationToken).ConfigureAwait(false));
+            int totalItem = await query.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
+            var lists = await query
+                    .ApplySortAndPaging(request)
+                    .AsNoTracking()
+                    .ToListAsync(cancellationToken: cancellationToken)
+                    .ConfigureAwait(false);
             var teacherIds = lists.Where(x => x.TeacherIds != null && x.TeacherIds.Count > 0).SelectMany(x => x.TeacherIds!).Distinct().ToList();
             var teacherResults = await _userService.GetTeacherByIdsAsync(new GetTeacherByIdsQueryModel { Ids = teacherIds });
             var teachers = teacherResults.Content?.Result;
@@ -133,7 +133,7 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
                 }
             }
 
-            methodResult.Result = new ReviewLessonWithUnitSearchModel { Starts = starts, Code = course.Code, PagingItemsModel = new PagingItemsModel<ReviewLessonWithUnitModel>(lists, request, totalItem) };
+            methodResult.Result = new ReviewLessonWithUnitSearchModel { Stars = stars, Code = course.Code, PagingItemsModel = new PagingItemsModel<ReviewLessonWithUnitModel>(lists, request, totalItem) };
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }

@@ -4,8 +4,10 @@ namespace Fsel.Course.Domain.Models.QueryModels.ReviewFsels
 {
     using Fsel.Core.Base.BaseModels;
 
-    public class SearchPlatformReviewQueryModel : BaseQueryModel
+    public class SearchReviewLessonWithUnitQueryModel : BaseQueryModel
     {
+        public Guid? TeacherId { get; set; }
+        public Guid CourseId { get; set; }
         public bool? IsSortStarts { get; set; }
     }
 }

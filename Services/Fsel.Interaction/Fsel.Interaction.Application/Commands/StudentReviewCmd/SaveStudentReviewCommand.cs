@@ -7,7 +7,7 @@ namespace Fsel.Interaction.Application.Commands.StudentReviewCmd
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
     using Fsel.Interaction.Application.Services.CourseServices;
-    using Fsel.Interaction.Application.Services.TrainingService;
+    using Fsel.Interaction.Application.Services.TrainingServices;
     using Fsel.Interaction.Application.Services.UserServices;
     using Fsel.Interaction.Domain.Entities;
     using Fsel.Interaction.Domain.IRepositories;

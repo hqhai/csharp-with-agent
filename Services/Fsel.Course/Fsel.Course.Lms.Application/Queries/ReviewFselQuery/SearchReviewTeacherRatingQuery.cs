@@ -27,16 +27,14 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
         private readonly IClassForumRepository _classForumRepository;
         private readonly IMockTestRepository _mockTestRepository;
         private readonly IStudentFeedbackRepository _studentFeedbackRepository;
-        private readonly IClassForumResultRepository _classForumResultRepository;
 
-        public SearchReviewTeacherRatingQueryHandler(IUserService userService, IVideoRepository videoRepository, IClassForumRepository classForumRepository, IMockTestRepository mockTestRepository, IStudentFeedbackRepository studentFeedbackRepository, IClassForumResultRepository classForumResultRepository)
+        public SearchReviewTeacherRatingQueryHandler(IUserService userService, IVideoRepository videoRepository, IClassForumRepository classForumRepository, IMockTestRepository mockTestRepository, IStudentFeedbackRepository studentFeedbackRepository)
         {
             _userService = userService;
             _videoRepository = videoRepository;
             _classForumRepository = classForumRepository;
             _mockTestRepository = mockTestRepository;
             _studentFeedbackRepository = studentFeedbackRepository;
-            _classForumResultRepository = classForumResultRepository;
         }
 
         public async Task<MethodResult<PagingItemsModel<ReviewTeacherRatingSearchModel>>> Handle(SearchReviewTeacherRatingQuery request, CancellationToken cancellationToken)

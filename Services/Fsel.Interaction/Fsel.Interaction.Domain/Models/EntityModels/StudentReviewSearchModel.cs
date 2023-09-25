@@ -1,35 +1,35 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Course.Domain.Models.EntityModels
+namespace Fsel.Interaction.Domain.Models.EntityModels
 {
     using Fsel.Core.Base.BaseModels;
     using Fsel.Shared.Enums;
 
-    public class ReviewCourseDetailSearchModel
+    public class StudentReviewSearchModel
     {
         public double Starts { get; set; }
         public string? Code { get; set; }
-        public PagingItemsModel<ReviewCourseDetailModel> PagingItemsModel { get; set; } = new PagingItemsModel<ReviewCourseDetailModel>();
+        public PagingItemsModel<StudentReviewTypeModel> PagingItems { get; set; } = new PagingItemsModel<StudentReviewTypeModel>();
     }
 
-    public class ReviewCourseDetailModel : BaseModel
+    public class StudentReviewTypeModel : BaseModel
     {
         public EnumReviewType ReviewType { get; set; }
         public Guid StudentId { get; set; }
         public Guid? CourseId { get; set; }
+        public EnumCourseLevel? CourseLevel { get; set; }
+        public double Starts { get; set; }
         public string? Code { get; set; }
         public string? CodeStudent { get; set; }
         public string? ClassCode { get; set; }
-        public EnumCourseLevel? CourseLevel { get; set; }
-        public double Starts { get; set; }
-        public IList<ReviewCourseDetailInfoModel>? StudentReviewDetails { get; set; }
+        public IList<StudentReviewQuestionTypeModel>? StudentReviewQuestionTypes { get; set; }
     }
 
-    public class ReviewCourseDetailInfoModel
+    public class StudentReviewQuestionTypeModel
     {
         public Guid Id { get; set; }
         public EnumReviewQuestionType ReviewQuestionType { get; set; }
-        public int VoteStars { get; set; }
+        public double VoteStars { get; set; }
         public string? Content { get; set; }
     }
 }

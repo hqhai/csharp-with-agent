@@ -12,11 +12,12 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
     using Fsel.Course.Lms.Application.Services.TrainingServices;
     using Fsel.Course.Lms.Application.Services.TrainingServices.Models;
     using Fsel.Course.Lms.Application.Services.UserServices;
+    using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class SearchReviewLessonDetailQuery : SearchReviewLesssonDetailQueryModel, IRequest<MethodResult<ReviewLessonDetailSearchModel>>
+    public class SearchReviewLessonDetailQuery : SearchReviewLessonDetailQueryModel, IRequest<MethodResult<ReviewLessonDetailSearchModel>>
     {
     }
 
@@ -59,10 +60,10 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
                                                             Id = x.Id,
                                                             StudentId = x.StudentId,
                                                             CreatedDate = x.CreatedDate,
-                                                            Starts = x.VideoResult!.NumberOfStars
+                                                            Starts = x.VideoResult != null ? x.VideoResult.NumberOfStars : default
                                                         });
 
-            var starts = await lessonResultQuery.AverageAsync(x => x.Starts, cancellationToken: cancellationToken).ConfigureAwait(false);
+            var starts = NumberHelper.ConvertDoubleDecimal(await lessonResultQuery.AverageAsync(x => x.Starts, cancellationToken: cancellationToken).ConfigureAwait(false));
             int totalItem = await lessonResultQuery.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
             var lists = await lessonResultQuery
                     .ApplySortAndPaging(request)
@@ -83,7 +84,7 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
                 item.Code = student?.Human?.Code;
                 item.ClassCode = classStudent?.Code;
             }
-            methodResult.Result = new ReviewLessonDetailSearchModel { Starts = Math.Round(starts, 1), Name = lesson.Name, PagingItemsModel = new PagingItemsModel<ReviewLessonDetailModel>(lists, request, totalItem) };
+            methodResult.Result = new ReviewLessonDetailSearchModel { Starts = starts, Name = lesson.Name, PagingItemsModel = new PagingItemsModel<ReviewLessonDetailModel>(lists, request, totalItem) };
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }
