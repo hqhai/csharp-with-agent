@@ -159,7 +159,7 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
                     {
                         lesson.IsClassForumLock = false;
                     }
-                    if (classForumResult != null && (classForumResult.Status == EnumClassForumResultStatus.PendingForGrading || classForumResult.Status == EnumClassForumResultStatus.Graded))
+                    if (classForumResult != null && (classForumResult.Status != EnumClassForumResultStatus.Draft && classForumResult.Status != EnumClassForumResultStatus.Denied))
                     {
                         lesson.IsHomeWorkLock = false;
                     }
