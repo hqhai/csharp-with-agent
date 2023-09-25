@@ -77,6 +77,11 @@ namespace Fsel.Interaction.Application.Queries.ReviewFselQuery
                 CourseId = x.CourseId,
                 Stars = x.StudentReviewDetails.Average(x => x.VoteStars)
             });
+
+            if (request.NumberOfStars != null)
+            {
+                query = query.Where(x => x.Stars >= request.NumberOfStars && x.Stars < request.NumberOfStars + 0.5);
+            }
             var result = await query.ToListAsync(cancellationToken);
             var stars = NumberHelper.ConvertDoubleDecimal(result.Average(x => x.Stars));
             int totalItem = await query.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
@@ -87,6 +92,7 @@ namespace Fsel.Interaction.Application.Queries.ReviewFselQuery
                     .ConfigureAwait(false);
             foreach (var item in lists)
             {
+                item.Stars = NumberHelper.ConvertDoubleDecimal(item.Stars);
                 var course = courses?.FirstOrDefault(x => x.Id == item.CourseId);
                 if (course != null)
                 {

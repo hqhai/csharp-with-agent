@@ -93,20 +93,23 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
                             };
 
             var query = unitQuery
-                .GroupBy(c => new { c.Id, c.Code, c.CreatedDate }) // Nhóm dữ liệu theo Id của khóa học
+                .GroupBy(c => new { c.Id, c.Code, c.CreatedDate })
                 .Select(group => new ReviewLessonWithUnitModel
                 {
                     Id = group.Key.Id,
                     Code = group.Key.Code,
                     CreatedDate = group.Key.CreatedDate,
-                    Stars = Math.Round(group.Select(x => x.Stars).Average(), 1),
+                    Stars = NumberHelper.ConvertDoubleDecimal(group.Average(x => x.Stars)),
                     TeacherIds = group.Select(x => x.TeacherId).Distinct().ToList()
                 });
             if (request.TeacherId != null)
             {
                 query = query.Where(x => x.TeacherIds != null && x.TeacherIds.Contains(request.TeacherId ?? default));
             }
-
+            if (request.NumberOfStars != null)
+            {
+                query = query.Where(x => x.Stars >= request.NumberOfStars && x.Stars < request.NumberOfStars + 0.5);
+            }
             var result = await query.ToListAsync(cancellationToken);
             var stars = NumberHelper.ConvertDoubleDecimal(result.Average(x => x.Stars));
             int totalItem = await query.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
@@ -122,6 +125,7 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
             {
                 foreach (var item in lists)
                 {
+                    item.Stars = NumberHelper.ConvertDoubleDecimal(item.Stars);
                     if (item.TeacherIds != null)
                     {
                         item.TeacherNames = new List<string>();

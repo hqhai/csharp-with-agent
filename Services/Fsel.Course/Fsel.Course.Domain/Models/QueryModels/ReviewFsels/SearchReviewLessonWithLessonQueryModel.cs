@@ -9,5 +9,6 @@ namespace Fsel.Course.Domain.Models.QueryModels.ReviewFsels
         public Guid CourseId { get; set; }
         public Guid UnitId { get; set; }
         public Guid? TeacherId { get; set; }
+        public int? NumberOfStars { get; set; }
     }
 }

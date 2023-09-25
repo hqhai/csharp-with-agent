@@ -8,7 +8,7 @@ namespace Fsel.Interaction.Domain.Models.QueryModels.FselReviews
     public class SearchReviewFselQueryModel : BaseQueryModel
     {
         public Guid? CourseId { get; set; }
-        public int NumberOfStars { get; set; }
+        public int? NumberOfStars { get; set; }
         public EnumCourseLevel? CourseLevel { get; set; }
     }
 }

@@ -114,6 +114,11 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
                 }
                 item.Stars = stars.Any() ? NumberHelper.ConvertDoubleDecimal(stars.Average()) : default;
             }
+
+            if (request.NumberOfStars != null)
+            {
+                query = query.Where(x => x.Stars >= request.NumberOfStars && x.Stars < request.NumberOfStars + 0.5).ToList();
+            }
             int totalItem = query.Count;
             var lists = query.ApplySortAndPaging(request).ToList();
             methodResult.Result = new PagingItemsModel<ReviewTeacherRatingSearchModel>(lists, request, totalItem);

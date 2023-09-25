@@ -58,6 +58,10 @@ namespace Fsel.Interaction.Application.Queries.ReviewFselQuery
                         VoteStars = x.VoteStars,
                     }).ToList()
                 });
+            if (request.NumberOfStars != null)
+            {
+                query = query.Where(x => x.Stars >= request.NumberOfStars && x.Stars < request.NumberOfStars + 0.5);
+            }
             var result = await query.ToListAsync(cancellationToken);
             var stars = NumberHelper.ConvertDoubleDecimal(result.Average(x => x.Stars));
             int totalItem = await query.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
@@ -66,6 +70,10 @@ namespace Fsel.Interaction.Application.Queries.ReviewFselQuery
                     .AsNoTracking()
                     .ToListAsync(cancellationToken: cancellationToken)
                     .ConfigureAwait(false);
+            foreach (var item in lists)
+            {
+                item.Stars = NumberHelper.ConvertDoubleDecimal(item.Stars);
+            }
             methodResult.Result = new StudentReviewSearchModel { Stars = stars, PagingItems = new PagingItemsModel<StudentReviewTypeModel>(lists, request, totalItem) };
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;

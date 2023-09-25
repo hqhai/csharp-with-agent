@@ -60,7 +60,7 @@ namespace Fsel.Shared.Helpers
 
         public static double ConvertDoubleDecimal(double value)
         {
-            double convertedValue = Math.Round(value, 1);
+            double convertedValue = Math.Round(value, 0);
             return convertedValue;
         }
 

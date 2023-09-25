@@ -84,16 +84,28 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
                     Code = group.Key.Code,
                     CourseLevel = group.Key.CourseLevel,
                     CreatedDate = group.Key.CreatedDate,
-                    Stars = NumberHelper.ConvertDoubleDecimal(group.Average(x => x.Stars))
+                    Stars = group.Average(x => x.Stars)
                 });
-            var result = await query.ToListAsync(cancellationToken);
-            var stars = NumberHelper.ConvertDoubleDecimal(result.Average(x => x.Stars));
+
+            if (request.NumberOfStars != null)
+            {
+                query = query.Where(x => x.Stars >= request.NumberOfStars && x.Stars < request.NumberOfStars + 0.5);
+            }
+
+            //var result = await query.ToListAsync(cancellationToken);
+            var stars = NumberHelper.ConvertDoubleDecimal(await query.AverageAsync(x => x.Stars, cancellationToken));
             int totalItem = await query.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
             var lists = await query
                     .ApplySortAndPaging(request)
                     .AsNoTracking()
                     .ToListAsync(cancellationToken: cancellationToken)
                     .ConfigureAwait(false);
+
+            foreach (var item in lists)
+            {
+                item.Stars = NumberHelper.ConvertDoubleDecimal(item.Stars);
+            }
+
             methodResult.Result = new ReviewLessonWithCourseSearchModel { Stars = stars, PagingItemsModel = new PagingItemsModel<ReviewLessonWithCourseModel>(lists, request, totalItem) };
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
