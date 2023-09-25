@@ -13,5 +13,6 @@ namespace Fsel.Shared.Enums
         MultipleChoiceVertical,
         MultipleChoiceHorizontal,
         CheckList,
+        YearInput,
     }
 }

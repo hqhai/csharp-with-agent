@@ -353,12 +353,12 @@
   {
     "id": "0f9df809-9ae9-4e8c-891d-ec645483f290",
     "createdDate": "2023-07-21",
-    "question": "Trẻ bao nhiêu tuổi",
-    "description": "Tuổi",
+    "question": "Năm sinh của trẻ",
+    "description": "Năm sinh",
     "icon": null,
     "displayOrder": 3.2,
     "displayLevel": 1,
-    "type": "DropDown",
+    "type": "YearInput",
     "isPilot": true,
     "answers": [
       {
