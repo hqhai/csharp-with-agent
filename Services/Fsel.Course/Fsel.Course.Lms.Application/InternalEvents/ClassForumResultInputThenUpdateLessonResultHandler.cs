@@ -14,7 +14,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
     using Microsoft.EntityFrameworkCore;
 
     public class ClassForumResultInputThenUpdateLessonResultHandler : BaseInternalLessonResultEventHandler,
-        INotificationHandler<EntityChangedEvent<ClassForumResult>>
+        INotificationHandler<EntityChangedEvent<ClassForumResult>>, INotificationHandler<EntityCreatedEvent<ClassForumResult>>
     {
         public ClassForumResultInputThenUpdateLessonResultHandler(IVideoResultRepository videoResultRepository, IClassForumResultRepository classForumResultRepository, IUnitResultRepository unitResultRepository, ILessonResultRepository lessonResultRepository, ICourseResultRepository courseResultRepository, ICourseRepository courseRepository, IUnitRepository unitRepository, IMockTestRepository mockTestRepository, IHomeWorkQuestionRepository homeWorkQuestionRepository, IHomeWorkAnswerRepository homeWorkAnswerRepository, IQuestionRepository questionRepository, IHomeWorkRepository homeWorkRepository, FinishOneUnitPublisher finishOneUnitPublisher, FinishOneLevelPassPublisher finishOneLevelPassPublisher, IFinalTestResultRepository finalTestResultRepository, IMockTestResultRepository mockTestResultRepository, IHomeWorkResultRepository homeWorkResultRepository) : base(videoResultRepository, classForumResultRepository, unitResultRepository, lessonResultRepository, courseResultRepository, courseRepository, unitRepository, mockTestRepository, homeWorkQuestionRepository, homeWorkAnswerRepository, questionRepository, homeWorkRepository, finishOneUnitPublisher, finishOneLevelPassPublisher, finalTestResultRepository, mockTestResultRepository, homeWorkResultRepository)
         {
@@ -23,7 +23,18 @@ namespace Fsel.Course.Lms.Application.InternalEvents
         public async Task Handle(EntityChangedEvent<ClassForumResult> notification, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(notification);
-            var classForumResult = notification.Data;
+            await ExecuteEvent(notification.Data, cancellationToken);
+        }
+
+        public async Task Handle(EntityCreatedEvent<ClassForumResult> notification, CancellationToken cancellationToken)
+        {
+            ArgumentNullException.ThrowIfNull(notification);
+            await ExecuteEvent(notification.Data, cancellationToken);
+        }
+
+        private async Task ExecuteEvent(ClassForumResult classForumResult, CancellationToken cancellationToken)
+        {
+            ArgumentNullException.ThrowIfNull(classForumResult);
             var lessonResult = await _lessonResultRepository.Queryable.Include(x => x.HomeWorkResults.Where(x => x.StudentId == classForumResult.StudentId && x.LessonResultId == classForumResult.LessonResultId))
                                                                          .Include(x => x.ClassForumResults.Where(x => x.StudentId == classForumResult.StudentId && x.LessonResultId == classForumResult.LessonResultId))
                                                                          .FirstOrDefaultAsync(x => x.Id == classForumResult.LessonResultId, cancellationToken);
@@ -31,9 +42,9 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             {
                 #region TODO : Fix Demo 20/9/2023
 
-                if (classForumResult.Status == EnumClassForumResultStatus.Pending && lessonResult.ClassForumResults.Count > 1)
+                if (classForumResult.Status == EnumClassForumResultStatus.Pending && lessonResult.ClassForumResults.Count == 1)
                 {
-                    await UpdateHomeWorks(classForumResult, cancellationToken);
+                    await UpdateHomeWorks(classForumResult, cancellationToken).ConfigureAwait(false);
                 }
 
                 #endregion TODO : Fix Demo 20/9/2023
