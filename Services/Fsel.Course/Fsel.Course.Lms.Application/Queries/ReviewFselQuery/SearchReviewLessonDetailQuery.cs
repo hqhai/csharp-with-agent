@@ -60,6 +60,7 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
                                                             Id = x.Id,
                                                             StudentId = x.StudentId,
                                                             CreatedDate = x.CreatedDate,
+                                                            Feedback = x.VideoResult != null ? x.VideoResult.Feedback : default,
                                                             Stars = x.VideoResult != null ? x.VideoResult.NumberOfStars : default
                                                         });
             if (request.NumberOfStars != null)
