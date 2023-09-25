@@ -35,12 +35,12 @@ builder.AddRefitClients(typeof(IUserService), appSetting?.Services?.UserApiUrl);
 builder.AddRefitClients(typeof(ILmsCourseService), appSetting?.Services?.LmsCourseApiUrl);
 builder.AddRefitClients(typeof(ITrainingService), appSetting?.Services?.ClassApiUrl);
 builder.AddRefitClients(typeof(ISystemService), appSetting?.Services?.SystemApiUrl);
-
-builder.AddMassTransit(appSetting,
-queues: new Dictionary<string, Type>
-{
-    { QueueSettings.LmsQueue.NameQueue.OrderCreateNotification, typeof(CreateOrderConsumer) }
-});
+builder.AddMassTransit(appSetting);
+//builder.AddMassTransit(appSetting,
+//queues: new Dictionary<string, Type>
+//{
+//    { QueueSettings.LmsQueue.NameQueue.OrderCreateNotification, typeof(CreateOrderConsumer) }
+//});
 var app = builder.Build();
 app.UseServices();
 app.Run();

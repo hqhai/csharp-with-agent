@@ -15,7 +15,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
     {
         public string? Code { get; set; }
         public string? ReviewArea { get; set; }
-        public double Starts { get; set; }
+        public double Stars { get; set; }
         public string? Feedback { get; set; }
         public IList<EnumFeedBackPositive>? FeedbackPositive { get; set; }
         public IList<EnumFeedBackNegative>? FeedbackNegative { get; set; }

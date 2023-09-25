@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Interaction.Application.Services.TrainingService.Models
+namespace Fsel.Interaction.Application.Services.TrainingServices.Models
 {
     using System;
     using Fsel.Core.Base.BaseModels;

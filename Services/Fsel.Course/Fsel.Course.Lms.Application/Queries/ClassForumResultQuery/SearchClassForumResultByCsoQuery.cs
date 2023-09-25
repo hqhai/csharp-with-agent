@@ -110,13 +110,12 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
                                        Status = x.Status,
                                        CheckStartDate = x.CheckStartDate,
                                        CourseCode = x.LessonResult!.Course!.Code,
-                                       LessonName = x.ClassForum!.Lesson!.Name,
+                                       LessonName = x.ClassForum!.Lesson!.Name, 
                                        LessonDisplayOrder = x.LessonResult.Lesson!.UnitLessons.Where(y => y.UnitId == x.LessonResult.UnitId).Select(x => x.DisplayOrder).FirstOrDefault(),
                                        UnitDisplayOrder = x.LessonResult.Unit!.CourseUnitMockTests.Where(y => y.CourseId == x.LessonResult.CourseId).Select(x => x.DisplayOrder).FirstOrDefault(),
                                        UnitName = x.ClassForum.Lesson.UnitLessons.Select(x => x.Unit).Select(x => x!.Name).FirstOrDefault(),
                                        TeacherId = x.GradingTeacherId
-                                   });
-            
+                                   });  
 
             if (!string.IsNullOrEmpty(request.Keyword))
             {

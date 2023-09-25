@@ -58,6 +58,12 @@ namespace Fsel.Shared.Helpers
             return convertedValue;
         }
 
+        public static double ConvertDoubleDecimal(double value)
+        {
+            double convertedValue = Math.Round(value, 0);
+            return convertedValue;
+        }
+
         public static double ConvertPercentDouble(double value)
         {
             double convertedValue = Math.Round(value * 100, 0);

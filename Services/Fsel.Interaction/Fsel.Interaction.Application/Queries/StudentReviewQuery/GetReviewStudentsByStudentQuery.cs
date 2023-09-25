@@ -8,7 +8,7 @@ namespace Fsel.Interaction.Application.Queries.StudentReviewQuery
     using Fsel.Core.Base;
     using Fsel.Interaction.Application.Services.CourseServices;
     using Fsel.Interaction.Application.Services.CourseServices.Models;
-    using Fsel.Interaction.Application.Services.TrainingService;
+    using Fsel.Interaction.Application.Services.TrainingServices;
     using Fsel.Interaction.Application.Services.UserServices;
     using Fsel.Interaction.Domain.IRepositories;
     using Fsel.Interaction.Domain.Models.EntityModels;

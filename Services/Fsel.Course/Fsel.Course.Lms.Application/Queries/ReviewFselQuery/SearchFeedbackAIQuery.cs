@@ -74,7 +74,7 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
                             UnitId = u.Id,
                             LessonId = baseQ.Id,
                             ClassForumId = cf.Id,
-                            NumberOfStarts = s.FeedBackStars ?? default,
+                            NumberOfStars = s.FeedBackStars ?? default,
                             UnitDisplayOrder = cmt.DisplayOrder,
                             LessonDisplayOrder = ul.DisplayOrder,
                         };
@@ -89,8 +89,8 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
                                     UnitId = grouped.Key.UnitId,
                                     CourseName = grouped.First().CourseName,
                                     Code = grouped.First().Code,
-                                    NumberOfStarts = Math.Round(grouped.Select(x => x.NumberOfStarts).Average(), 0),
-                                    TotalRating = grouped.Select(x => x.NumberOfStarts).Where(x => x <= 2).Count(),
+                                    NumberOfStars = Math.Round(grouped.Select(x => x.NumberOfStars).Average(), 0),
+                                    TotalRating = grouped.Select(x => x.NumberOfStars).Where(x => x <= 2).Count(),
                                     UnitDisplayOrder = grouped.Select(x => x.UnitDisplayOrder).FirstOrDefault(),
                                     LessonDisplayOrder = grouped.Select(x => x.LessonDisplayOrder).FirstOrDefault(),
                                 });
@@ -99,9 +99,9 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
                 groupedQuery = groupedQuery.Where(m => (m.CourseName ?? string.Empty).Contains(request.Keyword));
             }
 
-            if (request.NumberOfStarts != null)
+            if (request.NumberOfStars != null)
             {
-                groupedQuery = groupedQuery.Where(m => m.NumberOfStarts == request.NumberOfStarts);
+                groupedQuery = groupedQuery.Where(m => m.NumberOfStars == request.NumberOfStars);
             }
 
             int totalItem = await groupedQuery.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);

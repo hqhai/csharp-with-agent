@@ -6,6 +6,6 @@ namespace Fsel.Course.Domain.Models.QueryModels.ReviewFsels
 
     public class SearchFeedbackAIQueryModel : BaseQueryModel
     {
-        public int? NumberOfStarts { get; set; }
+        public int? NumberOfStars { get; set; }
     }
 }
