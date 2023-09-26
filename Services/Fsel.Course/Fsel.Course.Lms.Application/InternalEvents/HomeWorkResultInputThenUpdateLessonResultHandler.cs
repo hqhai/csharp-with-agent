@@ -37,7 +37,6 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                     lessonResult.Status = EnumResultStatus.Done;
                     _lessonResultRepository.Update(lessonResult);
                     await _lessonResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
-                    return;
                 }
                 else
                 {
