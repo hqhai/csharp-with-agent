@@ -12,6 +12,8 @@ namespace Fsel.Interaction.Application.Queries.ReviewFselQuery
     using Fsel.Interaction.Application.Services.TrainingServices;
     using Fsel.Interaction.Application.Services.TrainingServices.Models;
     using Fsel.Interaction.Application.Services.UserServices;
+    using Fsel.Interaction.Application.Services.UserServices.Models;
+    using Fsel.Interaction.Domain.Entities;
     using Fsel.Interaction.Domain.IRepositories;
     using Fsel.Interaction.Domain.Models.EntityModels;
     using Fsel.Interaction.Domain.Models.QueryModels.FselReviews;
@@ -64,56 +66,58 @@ namespace Fsel.Interaction.Application.Queries.ReviewFselQuery
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
             }
-            var query = _studentReviewRepository.Queryable.Include(x => x.StudentReviewDetails)
-                .Where(x => x.ReviewType == EnumReviewType.Course && x.CourseId == request.CourseId).Select(x => new StudentReviewTypeModel
-                {
-                    Id = x.Id,
-                    CreatedDate = x.CreatedDate,
-                    CreatedFullName = x.CreatedFullName,
-                    CreatedUserId = x.CreatedUserId,
-                    CourseId = x.CourseId,
-                    ReviewType = x.ReviewType,
-                    StudentId = x.StudentId,
-                    Stars = x.StudentReviewDetails.Average(x => x.VoteStars),
-                    StudentReviewQuestionTypes = x.StudentReviewDetails.Select(x => new StudentReviewQuestionTypeModel
-                    {
-                        Id = x.Id,
-                        Content = x.Content,
-                        ReviewQuestionType = x.ReviewQuestionType,
-                        VoteStars = x.VoteStars,
-                    }).ToList(),
-                });
+            var studentReviews = await _studentReviewRepository.Queryable.Include(x => x.StudentReviewDetails)
+                                                                            .Where(x => x.ReviewType == EnumReviewType.Course && x.CourseId == request.CourseId)
+                                                                            .ToListAsync(cancellationToken);
+            var studentIds = studentReviews.Select(x => x.StudentId).ToList();
+            var classStudentResults = await _trainingService.GetClassByStudentIdsAsync(new GetClassListByStudentIdsModel { CourseId = request.CourseId, StudentIds = studentIds });
+            var studentResults = await _userService.GetStudentsByStudentIdsAsync(studentIds);
+            var classeStudents = classStudentResults.Content?.Result;
+            var students = studentResults.Content?.Result;
+            var query = studentReviews.Select(x => GetStudentReview(students, x, classeStudents)).ToList();
             if (request.NumberOfStars != null)
             {
-                query = query.Where(x => x.Stars >= request.NumberOfStars && x.Stars < request.NumberOfStars + 0.5);
+                query = query.Where(x => x.Stars + 0.5 >= request.NumberOfStars && x.Stars < request.NumberOfStars + 0.5).ToList();
             }
-            var stars = await query.AnyAsync(cancellationToken) ? NumberHelper.ConvertDoubleDecimal(await query.AverageAsync(x => x.Stars, cancellationToken)) : default;
-            int totalItem = await query.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
-            var lists = await query
-                    .ApplySortAndPaging(request)
-                    .AsNoTracking()
-                    .ToListAsync(cancellationToken: cancellationToken)
-                    .ConfigureAwait(false);
+            var stars = query.Any() ? NumberHelper.ConvertDoubleDecimal(query.Average(x => x.Stars)) : default;
+            int totalItem = query.Count;
+            var lists = query.ApplySortAndPaging(request).ToList();
 
-            var studentIds = lists.Select(x => x.StudentId).ToList();
-            var studentResults = await _userService.GetStudentsByStudentIdsAsync(studentIds);
-            var students = studentResults.Content?.Result;
-
-            var classStudentResults = await _trainingService.GetClassByStudentIdsAsync(new GetClassListByStudentIdsModel { CourseId = request.CourseId, StudentIds = studentIds });
-            var classeStudents = classStudentResults.Content?.Result;
             foreach (var item in lists)
             {
-                var student = students?.FirstOrDefault(x => x.Id == item.StudentId);
                 item.Stars = NumberHelper.ConvertDoubleDecimal(item.Stars);
-                var classStudent = classeStudents?.FirstOrDefault(x => x.StudentId == item.StudentId);
                 item.Code = course.Code;
-                item.CodeStudent = student?.Human?.Code;
-                item.ClassCode = classStudent?.Code;
             }
 
             methodResult.Result = new StudentReviewSearchModel { Stars = stars, Code = course.Code, PagingItems = new PagingItemsModel<StudentReviewTypeModel>(lists, request, totalItem) };
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
+        }
+
+        private static StudentReviewTypeModel GetStudentReview(IList<StudentModel>? students, StudentReview x, IList<ClassStudentModel>? classStudents)
+        {
+            var student = students?.FirstOrDefault(y => y.Id == x.StudentId);
+            var classStudent = classStudents?.FirstOrDefault(x => x.StudentId == x.StudentId);
+            return new StudentReviewTypeModel
+            {
+                Id = x.Id,
+                CreatedDate = x.CreatedDate,
+                CreatedFullName = x.CreatedFullName,
+                CreatedUserId = x.CreatedUserId,
+                CourseId = x.CourseId,
+                ReviewType = x.ReviewType,
+                StudentId = x.StudentId,
+                CodeStudent = student?.Human?.Code,
+                ClassCode = classStudent?.Code,
+                Stars = x.StudentReviewDetails.Average(x => x.VoteStars),
+                StudentReviewQuestionTypes = x.StudentReviewDetails.Select(x => new StudentReviewQuestionTypeModel
+                {
+                    Id = x.Id,
+                    Content = x.Content,
+                    ReviewQuestionType = x.ReviewQuestionType,
+                    VoteStars = x.VoteStars,
+                }).ToList(),
+            };
         }
     }
 }

@@ -32,11 +32,9 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 var isClassForumDone = lessonResult.ClassForumResults.Any(x => x.StudentId == homeWorkResult.StudentId && x.LessonResultId == homeWorkResult.LessonResultId && (x.Status == EnumClassForumResultStatus.PendingForGrading || x.Status == EnumClassForumResultStatus.Graded));
                 await GetLessonResult(lessonResult, cancellationToken);
 
-                #region TODO : Fix Demo 20/9/2023
-
                 if (isClassForumDone && isHomeWorksDone)
                 {
-                    // lessonResult.Status = EnumResultStatus.Done;
+                    lessonResult.Status = EnumResultStatus.Done;
                     _lessonResultRepository.Update(lessonResult);
                     await _lessonResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
                     return;
@@ -46,8 +44,6 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                     _lessonResultRepository.Update(lessonResult);
                     await _lessonResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
                 }
-
-                #endregion TODO : Fix Demo 20/9/2023
             }
         }
     }

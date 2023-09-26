@@ -40,20 +40,16 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                                                                          .FirstOrDefaultAsync(x => x.Id == classForumResult.LessonResultId, cancellationToken);
             if (lessonResult != null)
             {
-                #region TODO : Fix Demo 20/9/2023
-
                 if (classForumResult.Status == EnumClassForumResultStatus.Pending && lessonResult.ClassForumResults.Count == 1)
                 {
                     await UpdateHomeWorks(classForumResult, cancellationToken).ConfigureAwait(false);
                 }
-
-                #endregion TODO : Fix Demo 20/9/2023
-
                 var isHomeWorksDone = lessonResult.HomeWorkResults.All(x => x.StudentId == classForumResult.StudentId && x.LessonResultId == classForumResult.LessonResultId && x.Status == EnumResultStatus.Done);
                 var isClassForumDone = lessonResult.ClassForumResults.Any(x => x.StudentId == classForumResult.StudentId && x.LessonResultId == classForumResult.LessonResultId && (x.Status == EnumClassForumResultStatus.PendingForGrading || x.Status == EnumClassForumResultStatus.Graded));
                 await GetLessonResult(lessonResult, cancellationToken);
                 if (isClassForumDone && isHomeWorksDone)
                 {
+                    lessonResult.Status = EnumResultStatus.Done;
                     _lessonResultRepository.Update(lessonResult);
                     await _lessonResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
                 }

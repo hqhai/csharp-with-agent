@@ -36,16 +36,9 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 lessonResult.Percent = NumberHelper.ConvertDoublePercent(videoResult.Percent * 40);
                 lessonResult.SkillScores = skillScores;
                 await _finishOneLessonPublisher.Publish(lessonResult, cancellationToken);
-
-                #region TODO : Fix Demo 20/9/2023
-
                 await GetLessonResult(lessonResult, cancellationToken);
-                lessonResult.Status = EnumResultStatus.Done;
-
-                #endregion TODO : Fix Demo 20/9/2023
-
                 _lessonResultRepository.Update(lessonResult);
-                await _lessonResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+                await _lessonResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             }
         }
     }
