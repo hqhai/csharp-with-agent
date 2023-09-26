@@ -60,14 +60,13 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                 methodResult.AddError(nameof(EnumSystemErrorCode.ImportFileRequired));
                 return methodResult;
             }
-            var usersEntity = await _userManager.Users.ToListAsync(cancellationToken);
             var result = request.FormFile.ImportAndValidateExcel(async (ImportStudentToCourseModel x, int rowIndex, IList<ValidateExcelModel> errors) =>
             {
                 if (string.IsNullOrEmpty(x.Email))
                 {
                     errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.Email), Message = "Email is null" });
                 }
-                else if (usersEntity.Select(p => p.Email).Contains(x.Email) || usersEntity.Select(p => p.UserName).Contains(x.Email))
+                else if (_userManager.Users.Any(p => p.Email == x.Email || p.UserName == x.Email))
                 {
                     errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.Email), Message = "Email Already exist" });
                 }
