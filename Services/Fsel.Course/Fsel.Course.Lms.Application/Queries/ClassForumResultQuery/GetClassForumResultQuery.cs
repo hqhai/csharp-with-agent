@@ -10,6 +10,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
+    using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Services.UserServices;
@@ -46,8 +47,11 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
                 .Include(x => x.LessonResult)
                 .ThenInclude(x => x!.Lesson)
                 .ThenInclude(x => x!.UnitLessons)
-                .ThenInclude(x => x.Unit)
+                .Include(x => x.LessonResult)
+                .ThenInclude(x => x!.Unit)
                 .ThenInclude(x => x!.CourseUnitMockTests)
+                .Include(x => x.LessonResult)
+                .ThenInclude(x => x!.Course)
                 .Include(x => x.ClassForum)
                 .Include(x => x.ClassForumResultFiles)
                 .Include(x => x.ClassForumScores)
@@ -94,6 +98,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
 
             var lesson = classForumResult.LessonResult?.Lesson?.UnitLessons.FirstOrDefault(y => y.UnitId == classForumResult.LessonResult.UnitId)?.DisplayOrder;
             var unit = classForumResult.LessonResult?.Unit?.CourseUnitMockTests.FirstOrDefault(y => y.CourseId == classForumResult.LessonResult.CourseId)?.DisplayOrder;
+            var course = classForumResult.LessonResult?.Course?.Code;
 
             var classForumResultModel = new ClassForumResultModel
             {
@@ -103,8 +108,6 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
                 Status = classForumResult.Status,
                 ClassForumId = classForumResult.ClassForumId,
                 ClassForum = _mapper.Map<ClassForumModel>(classForumResult.ClassForum),
-                LessonDisplayOrder = lesson ?? default,
-                UnitDisplayOrder = unit ?? default,
                 CreatedDate = classForumResult.CreatedDate,
                 CheckStartDate = classForumResult.CheckStartDate,
                 GradingStartDate = classForumResult.GradingStartDate,
@@ -118,6 +121,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
                     Criteria = x.Criteria,
                     Score = x.Score
                 }).ToList(),
+                PostArea = "L" + lesson + "_" + "U" + unit + "_" + course
             };
 
             classForumResult = _classForumResultRepository.Update(classForumResult);
