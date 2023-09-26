@@ -95,7 +95,7 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
                     Id = group.Key.Id,
                     Name = group.Key.Name,
                     CreatedDate = group.Key.CreatedDate,
-                    Stars = Math.Round(group.Select(x => x.Stars).Average(), 1),
+                    Stars = group.Select(x => x.Stars).Average(),
                     TeacherId = group.Key.TeacherId,
                     TotalStart = group.Sum(x => x.Stars),
                     TotalResult = group.Select(x => x.Stars).Count()

@@ -79,12 +79,7 @@ namespace Fsel.Shared.Helpers
         {
             EnumCourseLevel? courseLevel;
             bool isLock = false;
-            if (enumPlacementTestLevel == EnumPlacementTestLevel.IELTS && value >= 3 && value <= 3.5)
-            {
-                courseLevel = EnumCourseLevel.RFE;
-                isLock = true;
-            }
-            else if (enumPlacementTestLevel == EnumPlacementTestLevel.IELTS && value >= 4 && value <= 4.5)
+            if (enumPlacementTestLevel == EnumPlacementTestLevel.IELTS && value >= 4 && value <= 4.5)
             {
                 courseLevel = EnumCourseLevel.MS1;
                 isLock = true;

@@ -49,7 +49,7 @@ namespace Fsel.Interaction.Application.Queries.ReviewFselQuery
                     CreatedUserId = x.CreatedUserId,
                     ReviewType = x.ReviewType,
                     StudentId = x.StudentId,
-                    Stars = Math.Round(x.StudentReviewDetails.Average(x => x.VoteStars), 1),
+                    Stars = x.StudentReviewDetails.Average(x => x.VoteStars),
                     StudentReviewQuestionTypes = x.StudentReviewDetails.Select(x => new StudentReviewQuestionTypeModel
                     {
                         Id = x.Id,

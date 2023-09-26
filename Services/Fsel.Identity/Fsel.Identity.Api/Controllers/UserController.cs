@@ -55,7 +55,7 @@ namespace Fsel.Identity.Api.Controllers
         /// <summary>
         /// Update Code Student
         /// </summary>
-        [Authorize(Roles = nameof(EnumRole.Student))]
+/*        [Authorize(Roles = nameof(EnumRole.Student))]*/
         [HttpPut("update-code-student")]
         [ProducesResponseType(typeof(MethodResult<UserModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
