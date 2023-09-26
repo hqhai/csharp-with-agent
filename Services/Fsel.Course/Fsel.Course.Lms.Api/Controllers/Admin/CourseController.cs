@@ -46,5 +46,17 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
             MethodResult<PagingItemsModel<CourseSearchModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
+
+        /// <summary>
+        /// get course by code
+        /// </summary>
+        [HttpGet("get-course-by-code/{code}")]
+        [ProducesResponseType(typeof(MethodResult<CourseModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetCourseByCode([FromRoute] string code)
+        {
+            MethodResult<CourseModel> queryResult = await _mediator.Send(new GetCourseByCodeQuery { CourseCode = code }).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
     }
 }

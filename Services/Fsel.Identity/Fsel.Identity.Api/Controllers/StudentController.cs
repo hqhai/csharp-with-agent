@@ -130,5 +130,23 @@ namespace Fsel.Identity.Api.Controllers
             MethodResult<bool> commandResult = await _mediator.Send(new DeleteStudentFromClassCommand { Id = id }).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
+
+        /// <summary>
+        /// Get list student by student ids
+        /// </summary>
+        [HttpPost("import-student-to-course")]
+        [ProducesResponseType(typeof(MethodResult<Stream>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> ImportStudent([FromForm] ImportStudentToCourseCommand command)
+        {
+            ArgumentNullException.ThrowIfNull(command);
+
+            MethodResult<Stream> commandResult = await _mediator.Send(new ImportStudentToCourseCommand { FormFile = command.FormFile }).ConfigureAwait(false);
+            if (!commandResult.IsOK || commandResult.Result == null)
+            {
+                return commandResult.GetActionResult();
+            }
+            return File(commandResult.Result, Settings.Excels.ContentType, "import-student-to-course.xlsx");
+        }
     }
 }
