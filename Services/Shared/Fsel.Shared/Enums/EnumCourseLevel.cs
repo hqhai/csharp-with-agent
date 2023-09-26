@@ -24,9 +24,6 @@ namespace Fsel.Shared.Enums
         [Description("Think C1")]
         C1,
 
-        [Description("Foundation")]
-        RFE,
-
         [Description("Mindset 1")]
         MS1,
 
