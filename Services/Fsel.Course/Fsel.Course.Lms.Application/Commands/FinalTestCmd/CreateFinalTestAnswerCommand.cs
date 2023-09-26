@@ -16,6 +16,7 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd
     using Fsel.Course.Infrastructure.Common;
     using Fsel.Course.Lms.Application.Queues.Publishers;
     using Fsel.Course.Lms.Application.Services.UserServices;
+    using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -68,7 +69,7 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd
 
             #region Validation
 
-            if (request.FinalTestAnswers == null || request.FinalTestAnswers.Any(x => x.Answers == null || x.Answers.Count == 0))
+            if (request.FinalTestAnswers == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.FinalTestAnswers));
                 return methodResult;
@@ -169,7 +170,17 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd
                         finalTestResult.FinalTestAnswers.Add(finalAnswer);
                     }
                 }
-                skillScores.Add(new SkillScores { Skill = item.Skill, TotalCount = questions.Sum(x => x.CorrectTotal), CorrectCount = count, CountQuestion = item.Answers.Count, TotalQuestion = item.Answers.Count, Percent = questions.Sum(x => x.CorrectTotal) > 0 ? (double)questions.Sum(x => x.CorrectTotal) / count * 100 : default });
+                var totalCount = questions.Sum(x => x.CorrectTotal);
+                skillScores.Add(new SkillScores
+                {
+                    Skill = item.Skill,
+                    TotalCount = totalCount,
+                    CorrectCount = count,
+                    CountQuestion = item.Answers.Count,
+                    TotalQuestion = questions.Count,
+                    Percent = totalCount > 0 ? NumberHelper.ConvertPercentDouble(count / totalCount) : default
+                }
+                );
             }
 
             #endregion Validation
@@ -180,7 +191,7 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd
                 finalTestResult.CorrectTotal = Convert.ToInt32(skillScores.Sum(x => x.TotalCount));
                 finalTestResult.Status = EnumResultStatus.Done;
                 finalTestResult.SkillScores = skillScores;
-                finalTestResult.Percent = finalTestResult.CorrectTotal > 0 ? ((double)finalTestResult.CorrectCount / finalTestResult.CorrectTotal * 100) : 0;
+                finalTestResult.Percent = finalTestResult.CorrectTotal > 0 ? NumberHelper.ConvertPercentDouble((double)finalTestResult.CorrectCount / finalTestResult.CorrectTotal) : 0;
                 await _finishOneFinalTestPublisher.Publish(finalTestResult, cancellationToken);
                 finalTestResult = _finalTestResultRepository.Update(finalTestResult);
                 await _finalTestResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);

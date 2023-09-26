@@ -9,10 +9,10 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Core.Extensions;
-    using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Domain.Models.QueryModels.ReviewFsels;
+    using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -89,7 +89,7 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
                                     UnitId = grouped.Key.UnitId,
                                     CourseName = grouped.First().CourseName,
                                     Code = grouped.First().Code,
-                                    NumberOfStars = Math.Round(grouped.Select(x => x.NumberOfStars).Average(), 0),
+                                    NumberOfStars = grouped.Select(x => x.NumberOfStars).Average(),
                                     TotalRating = grouped.Select(x => x.NumberOfStars).Where(x => x <= 2).Count(),
                                     UnitDisplayOrder = grouped.Select(x => x.UnitDisplayOrder).FirstOrDefault(),
                                     LessonDisplayOrder = grouped.Select(x => x.LessonDisplayOrder).FirstOrDefault(),
@@ -101,7 +101,7 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
 
             if (request.NumberOfStars != null)
             {
-                groupedQuery = groupedQuery.Where(m => m.NumberOfStars == request.NumberOfStars);
+                groupedQuery = groupedQuery.Where(x => x.NumberOfStars + 0.5 >= request.NumberOfStars && x.NumberOfStars < request.NumberOfStars + 0.5);
             }
 
             int totalItem = await groupedQuery.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
@@ -110,7 +110,10 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
                     .AsNoTracking()
                     .ToListAsync(cancellationToken: cancellationToken)
                     .ConfigureAwait(false);
-
+            foreach (var item in lists)
+            {
+                item.NumberOfStars = NumberHelper.ConvertDoubleDecimal(item.NumberOfStars);
+            }
             methodResult.Result = new PagingItemsModel<FeedbackClassForumAIModel>(lists, request, totalItem);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;

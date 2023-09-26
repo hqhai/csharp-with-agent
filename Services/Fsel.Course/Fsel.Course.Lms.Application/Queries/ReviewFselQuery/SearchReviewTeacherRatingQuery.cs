@@ -117,7 +117,7 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
 
             if (request.NumberOfStars != null)
             {
-                query = query.Where(x => x.Stars >= request.NumberOfStars && x.Stars < request.NumberOfStars + 0.5).ToList();
+                query = query.Where(x => x.Stars + 0.5 >= request.NumberOfStars && x.Stars < request.NumberOfStars + 0.5).ToList();
             }
             int totalItem = query.Count;
             var lists = query.ApplySortAndPaging(request).ToList();

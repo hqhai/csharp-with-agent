@@ -70,7 +70,7 @@ namespace Fsel.Interaction.Application.Queries.ReviewFselQuery
             .Select(x => GetCourse(x, courses)).ToListAsync(cancellationToken);
             if (request.NumberOfStars != null)
             {
-                query = query.Where(x => x.Stars >= request.NumberOfStars && x.Stars < request.NumberOfStars + 0.5).ToList();
+                query = query.Where(x => x.Stars + 0.5 >= request.NumberOfStars && x.Stars < request.NumberOfStars + 0.5).ToList();
             }
 
             if (request.CourseLevel != null)
