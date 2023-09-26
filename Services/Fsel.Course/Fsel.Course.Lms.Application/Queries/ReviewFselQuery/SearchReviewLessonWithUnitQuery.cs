@@ -99,7 +99,7 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
                     Id = group.Key.Id,
                     Code = group.Key.Code,
                     CreatedDate = group.Key.CreatedDate,
-                    Stars = NumberHelper.ConvertDoubleDecimal(group.Average(x => x.Stars)),
+                    Stars = group.Average(x => x.Stars),
                     TeacherIds = group.Select(x => x.TeacherId).Distinct().ToList()
                 });
             if (request.TeacherId != null)

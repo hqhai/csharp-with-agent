@@ -52,8 +52,13 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             }
 
             var student = studentResults?.Content?.Result?.FirstOrDefault();
-            var studentId = student?.Id;
-            var userId = student?.Human?.UserId;
+            if (student == null)
+            {
+                methodResult.Result = default;
+                methodResult.StatusCode = StatusCodes.Status200OK;
+                return methodResult;
+            }
+            var userId = student.Human?.UserId;
             var packageResults = await _orderService.GetPackages();
             if (!packageResults.IsSuccessStatusCode)
             {
@@ -61,7 +66,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                 return methodResult;
             }
             var packages = packageResults.Content?.Result;
-            var @classResults = await _trainingService.GetListClassByStudentIdAsync(student?.Id ?? default);
+            var @classResults = await _trainingService.GetListClassByStudentIdAsync(request.StudentId);
             if (!@classResults.IsSuccessStatusCode)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallTrainingServiceError), nameof(@classResults));
@@ -96,7 +101,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                 var featureAccessTimes = featureAccessTimeResults.Content?.Result?.ToList();
                 foreach (var item in courses)
                 {
-                    var courseResult = await _courseResultRepository.Queryable.Include(x => x.Course).FirstOrDefaultAsync(x => x.StudentId == studentId && x.CourseId == item.Id, cancellationToken);
+                    var courseResult = await _courseResultRepository.Queryable.Include(x => x.Course).FirstOrDefaultAsync(x => x.StudentId == request.StudentId && x.CourseId == item.Id, cancellationToken);
                     CourseStudentProgressModel courseStudentProgress = new CourseStudentProgressModel();
                     if (courseResult != null)
                     {

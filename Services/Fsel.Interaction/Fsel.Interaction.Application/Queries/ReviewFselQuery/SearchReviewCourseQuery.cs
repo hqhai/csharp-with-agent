@@ -9,6 +9,8 @@ namespace Fsel.Interaction.Application.Queries.ReviewFselQuery
     using Fsel.Core.Base.BaseModels;
     using Fsel.Core.Extensions;
     using Fsel.Interaction.Application.Services.CourseServices;
+    using Fsel.Interaction.Application.Services.CourseServices.Models;
+    using Fsel.Interaction.Domain.Entities;
     using Fsel.Interaction.Domain.IRepositories;
     using Fsel.Interaction.Domain.Models.EntityModels;
     using Fsel.Interaction.Domain.Models.QueryModels.FselReviews;
@@ -63,46 +65,47 @@ namespace Fsel.Interaction.Application.Queries.ReviewFselQuery
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
             }
-            var query = _studentReviewRepository.Queryable.Include(x => x.StudentReviewDetails)
+            var query = await _studentReviewRepository.Queryable.Include(x => x.StudentReviewDetails)
             .Where(x => x.ReviewType == EnumReviewType.Course && x.CourseId.HasValue && courseIds.Contains(x.CourseId.Value))
-            .Select(x => new CourseReviewModel
+            .Select(x => GetCourse(x, courses)).ToListAsync(cancellationToken);
+            if (request.NumberOfStars != null)
+            {
+                query = query.Where(x => x.Stars >= request.NumberOfStars && x.Stars < request.NumberOfStars + 0.5).ToList();
+            }
+
+            if (request.CourseLevel != null)
+            {
+                query = query.Where(x => x.CourseLevel == request.CourseLevel).ToList();
+            }
+            var stars = query.Any() ? NumberHelper.ConvertDoubleDecimal(query.Average(x => x.Stars)) : default;
+            int totalItem = query.Count;
+            var lists = query.ApplySortAndPaging(request).ToList();
+            foreach (var item in lists)
+            {
+                item.Stars = NumberHelper.ConvertDoubleDecimal(item.Stars);
+            }
+            methodResult.Result = new CourseReviewSearchModel { Stars = stars, PagingItemsModel = new PagingItemsModel<CourseReviewModel>(lists, request, totalItem) };
+            methodResult.StatusCode = StatusCodes.Status200OK;
+            return methodResult;
+        }
+
+        private static CourseReviewModel GetCourse(StudentReview x, IList<CourseModel>? courses)
+        {
+            var course = courses?.FirstOrDefault(y => y.Id == x.CourseId);
+            return new CourseReviewModel
             {
                 Id = x.Id,
                 CreatedDate = x.CreatedDate,
                 CreatedFullName = x.CreatedFullName,
                 CreatedUserId = x.CreatedUserId,
+                Code = course?.Code,
+                CourseLevel = course?.CourseLevel ?? default,
                 UpdatedDate = x.UpdatedDate,
                 UpdatedFullName = x.UpdatedFullName,
                 UpdatedUserId = x.UpdatedUserId,
                 CourseId = x.CourseId,
                 Stars = x.StudentReviewDetails.Average(x => x.VoteStars)
-            });
-
-            if (request.NumberOfStars != null)
-            {
-                query = query.Where(x => x.Stars >= request.NumberOfStars && x.Stars < request.NumberOfStars + 0.5);
-            }
-            var result = await query.ToListAsync(cancellationToken);
-            var stars = NumberHelper.ConvertDoubleDecimal(result.Average(x => x.Stars));
-            int totalItem = await query.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
-            var lists = await query
-                    .ApplySortAndPaging(request)
-                    .AsNoTracking()
-                    .ToListAsync(cancellationToken: cancellationToken)
-                    .ConfigureAwait(false);
-            foreach (var item in lists)
-            {
-                item.Stars = NumberHelper.ConvertDoubleDecimal(item.Stars);
-                var course = courses?.FirstOrDefault(x => x.Id == item.CourseId);
-                if (course != null)
-                {
-                    item.Code = course.Code;
-                    item.CourseLevel = course.CourseLevel;
-                }
-            }
-            methodResult.Result = new CourseReviewSearchModel { Stars = stars, PagingItemsModel = new PagingItemsModel<CourseReviewModel>(lists, request, totalItem) };
-            methodResult.StatusCode = StatusCodes.Status200OK;
-            return methodResult;
+            };
         }
     }
 }
