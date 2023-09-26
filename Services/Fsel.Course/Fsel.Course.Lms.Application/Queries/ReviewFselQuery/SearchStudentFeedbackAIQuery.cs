@@ -44,34 +44,34 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
                 return methodResult;
             }
 
-            var studentFeedback = from baseQ in _studentFeedbackRepository.Queryable
-                                  join cfr in _classForumResultRepository.Queryable on baseQ.ObjectId equals cfr.Id
-                                  join cf in _classForumRepository.Queryable on cfr.ClassForumId equals cf.Id
-                                  where cf.Id == request.ClassForumId && baseQ.Feature == EnumFeature.ClassForum
-                                  select new StudentFeedbackModel
-                                  {
-                                      Id = baseQ.Id,
-                                      CreatedDate = baseQ.CreatedDate,
-                                      CreatedFullName = baseQ.CreatedFullName,
-                                      CreatedUserId = baseQ.CreatedUserId,
-                                      Feature = baseQ.Feature,
-                                      FeedBackNegativesStr = baseQ.FeedBackNegativesStr,
-                                      FeedBackNote = baseQ.FeedBackNote,
-                                      FeedBackPositivesStr = baseQ.FeedBackPositivesStr,
-                                      FeedBackStars = baseQ.FeedBackStars,
-                                      Type = baseQ.Type,
-                                  };
+            var query = from baseQ in _studentFeedbackRepository.Queryable
+                        join cfr in _classForumResultRepository.Queryable on baseQ.ObjectId equals cfr.Id
+                        join cf in _classForumRepository.Queryable on cfr.ClassForumId equals cf.Id
+                        where cf.Id == request.ClassForumId && baseQ.Feature == EnumFeature.ClassForum
+                        select new StudentFeedbackModel
+                        {
+                            Id = baseQ.Id,
+                            CreatedDate = baseQ.CreatedDate,
+                            CreatedFullName = baseQ.CreatedFullName,
+                            CreatedUserId = baseQ.CreatedUserId,
+                            Feature = baseQ.Feature,
+                            FeedBackNegativesStr = baseQ.FeedBackNegativesStr,
+                            FeedBackNote = baseQ.FeedBackNote,
+                            FeedBackPositivesStr = baseQ.FeedBackPositivesStr,
+                            FeedBackStars = baseQ.FeedBackStars,
+                            Type = baseQ.Type,
+                        };
 
-            if (request.FeedBackStars != null)
+            if (request.NumberOfStars != null)
             {
-                studentFeedback = studentFeedback.Where(m => m.FeedBackStars == request.FeedBackStars);
+                query = query.Where(x => x.FeedBackStars + 0.5 >= request.NumberOfStars && x.FeedBackStars < request.NumberOfStars + 0.5);
             }
             if (!string.IsNullOrEmpty(request.Keyword))
             {
-                studentFeedback = studentFeedback.Where(m => (m.CreatedFullName ?? string.Empty).Contains(request.Keyword));
+                query = query.Where(m => (m.CreatedFullName ?? string.Empty).Contains(request.Keyword));
             }
-            int totalItem = await studentFeedback.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
-            var lists = await studentFeedback
+            int totalItem = await query.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
+            var lists = await query
                     .ApplySortAndPaging(request)
                     .AsNoTracking()
                     .ToListAsync(cancellationToken: cancellationToken)
