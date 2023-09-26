@@ -23,6 +23,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
 
         public string? UnitName { get; set; }
 
+        public string? PostArea { get; set; }
         public Guid? TeacherId { get; set; }
 
         public EnumCourseSkill CourseSkill { get; set; }
