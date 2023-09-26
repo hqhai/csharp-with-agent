@@ -313,7 +313,7 @@ namespace Fsel.Course.Infrastructure.Common
                                                     CorrectCount = answerTimeCodeQJ.CorrectCount,
                                                     TotalQuestion = questionTimeCodeQJ.TotalQuestion,
                                                     CountQuestion = answerTimeCodeQJ.TotalAnswer,
-                                                    Percent = questionTimeCodeQJ.TotalCount > 0 ? NumberHelper.ConvertDouble(answerTimeCodeQJ.CorrectCount / questionTimeCodeQJ.TotalCount * 100) : default
+                                                    Percent = questionTimeCodeQJ.TotalCount > 0 ? NumberHelper.ConvertPercentDouble(answerTimeCodeQJ.CorrectCount / questionTimeCodeQJ.TotalCount) : default
                                                 }).ToList()
                              };
             var skillScores = scoreQuery.Where(x => x.Type == EnumTimeCodeType.Standalone && x.SkillScores?.Count > 0).SelectMany(x => x.SkillScores!).ToList();
