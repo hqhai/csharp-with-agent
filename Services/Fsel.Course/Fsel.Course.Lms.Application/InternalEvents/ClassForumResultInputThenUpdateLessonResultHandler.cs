@@ -40,6 +40,10 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                                                                          .FirstOrDefaultAsync(x => x.Id == classForumResult.LessonResultId, cancellationToken);
             if (lessonResult != null)
             {
+                if (classForumResult.Status == EnumClassForumResultStatus.Pending && lessonResult.ClassForumResults.Count == 1)
+                {
+                    await UpdateHomeWorks(classForumResult, cancellationToken).ConfigureAwait(false);
+                }
                 var isHomeWorksDone = lessonResult.HomeWorkResults.All(x => x.StudentId == classForumResult.StudentId && x.LessonResultId == classForumResult.LessonResultId && x.Status == EnumResultStatus.Done);
                 var isClassForumDone = lessonResult.ClassForumResults.Any(x => x.StudentId == classForumResult.StudentId && x.LessonResultId == classForumResult.LessonResultId && (x.Status == EnumClassForumResultStatus.PendingForGrading || x.Status == EnumClassForumResultStatus.Graded));
                 await GetLessonResult(lessonResult, cancellationToken);
@@ -54,6 +58,17 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                     _lessonResultRepository.Update(lessonResult);
                     await _lessonResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
                 }
+            }
+        }
+
+        private async Task UpdateHomeWorks(ClassForumResult classForumResult, CancellationToken cancellationToken)
+        {
+            var homeWorkResults = await _homeWorkResultRepository.Queryable.Where(x => x.LessonResultId == classForumResult.LessonResultId && x.Status == EnumResultStatus.Unfinished).ToListAsync(cancellationToken);
+            if (homeWorkResults != null && homeWorkResults.Any())
+            {
+                homeWorkResults = homeWorkResults.Select(x => { x.Status = EnumResultStatus.New; return x; }).ToList();
+                _homeWorkResultRepository.UpdateList(homeWorkResults);
+                await _lessonResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             }
         }
     }
