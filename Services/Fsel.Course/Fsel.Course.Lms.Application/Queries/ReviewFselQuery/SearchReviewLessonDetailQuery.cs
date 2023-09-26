@@ -2,9 +2,11 @@
 
 namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
 {
+    using System.Linq;
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Core.Extensions;
+    using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
@@ -12,6 +14,7 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
     using Fsel.Course.Lms.Application.Services.TrainingServices;
     using Fsel.Course.Lms.Application.Services.TrainingServices.Models;
     using Fsel.Course.Lms.Application.Services.UserServices;
+    using Fsel.Course.Lms.Application.Services.UserServices.Models;
     using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.AspNetCore.Http;
@@ -26,13 +29,15 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
         private readonly IUserService _userService;
         private readonly ILessonRepository _lessonRepository;
         private readonly ILessonResultRepository _lessonResultRepository;
+        private readonly IVideoResultRepository _videoResultRepository;
         private readonly ITrainingService _trainingService;
 
-        public SearchReviewLessonDetailQueryHandler(IUserService userService, ILessonRepository lessonRepository, ILessonResultRepository lessonResultRepository, ITrainingService trainingService)
+        public SearchReviewLessonDetailQueryHandler(IUserService userService, ILessonRepository lessonRepository, ILessonResultRepository lessonResultRepository, IVideoResultRepository videoResultRepository, ITrainingService trainingService)
         {
             _userService = userService;
             _lessonRepository = lessonRepository;
             _lessonResultRepository = lessonResultRepository;
+            _videoResultRepository = videoResultRepository;
             _trainingService = trainingService;
         }
 
@@ -53,46 +58,50 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
             }
-            var query = _lessonResultRepository.Queryable.Include(x => x.VideoResult)
-                                                        .Where(x => x.VideoResult != null && x.LessonId == request.LessonId && x.Status == EnumResultStatus.Done)
-                                                        .Select(x => new ReviewLessonDetailModel
-                                                        {
-                                                            Id = x.Id,
-                                                            StudentId = x.StudentId,
-                                                            CreatedDate = x.CreatedDate,
-                                                            Feedback = x.VideoResult != null ? x.VideoResult.Feedback : default,
-                                                            Stars = x.VideoResult != null ? x.VideoResult.NumberOfStars : default
-                                                        });
-            if (request.NumberOfStars != null)
-            {
-                query = query.Where(x => x.Stars + 0.5 >= request.NumberOfStars && x.Stars < request.NumberOfStars + 0.5);
-            }
-            var result = await query.ToListAsync(cancellationToken);
-            var stars = NumberHelper.ConvertDoubleDecimal(result.Average(x => x.Stars));
-            int totalItem = await query.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
-            var lists = await query
-                    .ApplySortAndPaging(request)
-                    .AsNoTracking()
-                    .ToListAsync(cancellationToken: cancellationToken)
-                    .ConfigureAwait(false);
-
-            var studentIds = lists.Select(x => x.StudentId).Distinct().ToList();
+            var lessonResultIds = await _lessonResultRepository.Queryable.Where(x => x.LessonId == request.LessonId).Select(x => x.Id).ToListAsync(cancellationToken);
+            var videoResults = await _videoResultRepository.Queryable.Where(x => lessonResultIds.Contains(x.LessonResultId) && x.Status == EnumResultStatus.Done)
+                                                       .ToListAsync(cancellationToken);
+            var studentIds = videoResults.Select(x => x.StudentId).Distinct().ToList();
             var studentResults = await _userService.GetStudentsByStudentIdsAsync(studentIds);
             var students = studentResults.Content?.Result;
 
             var classStudentResults = await _trainingService.GetClassByStudentIdsAsync(new GetClassListByStudentIdsModel { StudentIds = studentIds });
             var classeStudents = classStudentResults.Content?.Result;
+            var query = videoResults.Select(x => GetReview(students, classeStudents, x));
+            if (request.NumberOfStars != null)
+            {
+                query = query.Where(x => x.Stars + 0.5 >= request.NumberOfStars && x.Stars < request.NumberOfStars + 0.5);
+            }
+            query = query.ToList();
+            int totalItem = query.Count();
+            var stars = query.Any() ? NumberHelper.ConvertDoubleDecimal(query.Average(x => x.Stars)) : default;
+
+            var lists = query.ApplySortAndPaging(request).ToList();
+
             foreach (var item in lists)
             {
                 item.Stars = NumberHelper.ConvertDoubleDecimal(item.Stars);
-                var student = students?.FirstOrDefault(x => x.Id == item.StudentId);
-                var classStudent = classeStudents?.FirstOrDefault(x => x.StudentId == item.StudentId);
-                item.Code = student?.Human?.Code;
-                item.ClassCode = classStudent?.Code;
             }
             methodResult.Result = new ReviewLessonDetailSearchModel { Stars = stars, Name = lesson.Name, PagingItemsModel = new PagingItemsModel<ReviewLessonDetailModel>(lists, request, totalItem) };
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
+        }
+
+        private static ReviewLessonDetailModel GetReview(IList<StudentModel>? students, IList<ClassStudentModel>? classeStudents, VideoResult x)
+        {
+            var student = students?.FirstOrDefault(y => y.Id == x.StudentId);
+            var classStudent = classeStudents?.FirstOrDefault(y => y.StudentId == x.StudentId);
+            return new ReviewLessonDetailModel
+            {
+                Id = x.Id,
+                Code = student?.Human?.Code,
+                FullName = student?.Human?.FullName,
+                ClassCode = classStudent?.Code,
+                StudentId = x.StudentId,
+                CreatedDate = x.CreatedDate,
+                Feedback = x.Feedback,
+                Stars = x.NumberOfStars
+            };
         }
     }
 }
