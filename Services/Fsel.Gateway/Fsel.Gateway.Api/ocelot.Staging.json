@@ -1,6 +1,6 @@
 {
   "GlobalConfiguration": {
-    "BaseUrl": "http://20.187.163.186:80"
+    "BaseUrl": "https://fsel-gate-way-api.fsel.edu.vn"
   },
   "Routes": [
     // Auth Service
@@ -9,11 +9,11 @@
       "UpstreamPathTemplate": "/auth-gateway/{everything}",
       "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ],
       "DownstreamPathTemplate": "/api/{everything}",
-      "DownstreamScheme": "http",
+      "DownstreamScheme": "https",
       "DownstreamHostAndPorts": [
         {
-          "Host": "20.239.224.16",
-          "Port": 80
+          "Host": "fsel-auth-api.fsel.edu.vn",
+          "Port": 443
         }
       ]
     },
@@ -23,11 +23,11 @@
       "UpstreamPathTemplate": "/user-gateway/{everything}",
       "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ],
       "DownstreamPathTemplate": "/api/{everything}",
-      "DownstreamScheme": "http",
+      "DownstreamScheme": "https",
       "DownstreamHostAndPorts": [
         {
-          "Host": "20.24.120.47",
-          "Port": 80
+          "Host": "fsel-user-api.fsel.edu.vn",
+          "Port": 443
         }
       ],
       "AuthenticationOptions": {
@@ -41,11 +41,11 @@
       "UpstreamPathTemplate": "/lcms-course-gateway/{everything}",
       "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ],
       "DownstreamPathTemplate": "/api/{everything}",
-      "DownstreamScheme": "http",
+      "DownstreamScheme": "https",
       "DownstreamHostAndPorts": [
         {
-          "Host": "20.187.190.125",
-          "Port": 80
+          "Host": "fsel-lcms-api.fsel.edu.vn",
+          "Port": 443
         }
       ],
       "AuthenticationOptions": {
@@ -59,11 +59,11 @@
       "UpstreamPathTemplate": "/lms-course-gateway/{everything}",
       "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ],
       "DownstreamPathTemplate": "/api/{everything}",
-      "DownstreamScheme": "http",
+      "DownstreamScheme": "https",
       "DownstreamHostAndPorts": [
         {
-          "Host": "20.187.186.116",
-          "Port": 80
+          "Host": "fsel-lms-api.fsel.edu.vn",
+          "Port": 443
         }
       ],
       "AuthenticationOptions": {
@@ -77,11 +77,11 @@
       "UpstreamPathTemplate": "/storage-gateway/{everything}",
       "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ],
       "DownstreamPathTemplate": "/api/{everything}",
-      "DownstreamScheme": "http",
+      "DownstreamScheme": "https",
       "DownstreamHostAndPorts": [
         {
-          "Host": "20.239.31.13",
-          "Port": 80
+          "Host": "fsel-storage-api.fsel.edu.vn",
+          "Port": 443
         }
       ]
     },
@@ -91,11 +91,11 @@
       "UpstreamPathTemplate": "/sender-gateway/{everything}",
       "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ],
       "DownstreamPathTemplate": "/api/{everything}",
-      "DownstreamScheme": "http",
+      "DownstreamScheme": "https",
       "DownstreamHostAndPorts": [
         {
-          "Host": "20.239.120.173",
-          "Port": 80
+          "Host": "fsel-sender-api.fsel.edu.vn",
+          "Port": 443
         }
       ]
     },
@@ -105,11 +105,11 @@
       "UpstreamPathTemplate": "/training-gateway/{everything}",
       "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ],
       "DownstreamPathTemplate": "/api/{everything}",
-      "DownstreamScheme": "http",
+      "DownstreamScheme": "https",
       "DownstreamHostAndPorts": [
         {
-          "Host": "20.239.121.201",
-          "Port": 80
+          "Host": "fsel-training-api.fsel.edu.vn",
+          "Port": 443
         }
       ]
     },
@@ -119,11 +119,11 @@
       "UpstreamPathTemplate": "/interaction-gateway/{everything}",
       "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ],
       "DownstreamPathTemplate": "/api/{everything}",
-      "DownstreamScheme": "http",
+      "DownstreamScheme": "https",
       "DownstreamHostAndPorts": [
         {
-          "Host": "20.239.29.104",
-          "Port": 80
+          "Host": "fsel-interaction-api.fsel.edu.vn",
+          "Port": 443
         }
       ]
     },
@@ -133,11 +133,11 @@
       "UpstreamPathTemplate": "/ordering-gateway/{everything}",
       "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ],
       "DownstreamPathTemplate": "/api/{everything}",
-      "DownstreamScheme": "http",
+      "DownstreamScheme": "https",
       "DownstreamHostAndPorts": [
         {
-          "Host": "20.24.110.45",
-          "Port": 80
+          "Host": "fsel-ordering-api.fsel.edu.vn",
+          "Port": 443
         }
       ]
     },
@@ -147,11 +147,11 @@
       "UpstreamPathTemplate": "/system-gateway/{everything}",
       "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ],
       "DownstreamPathTemplate": "/api/{everything}",
-      "DownstreamScheme": "http",
+      "DownstreamScheme": "https",
       "DownstreamHostAndPorts": [
         {
-          "Host": "20.187.250.110",
-          "Port": 80
+          "Host": "fsel-system-api.fsel.edu.vn",
+          "Port": 443
         }
       ]
     },
@@ -161,11 +161,11 @@
       "UpstreamPathTemplate": "/realtime-gateway/{everything}",
       "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ],
       "DownstreamPathTemplate": "/api/{everything}",
-      "DownstreamScheme": "http",
+      "DownstreamScheme": "https",
       "DownstreamHostAndPorts": [
         {
-          "Host": "20.255.132.57",
-          "Port": 80
+          "Host": "fsel-realtime-api.fsel.edu.vn",
+          "Port": 443
         }
       ]
     },
@@ -175,11 +175,11 @@
       "UpstreamPathTemplate": "/notification-gateway/{everything}",
       "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ],
       "DownstreamPathTemplate": "/api/{everything}",
-      "DownstreamScheme": "http",
+      "DownstreamScheme": "https",
       "DownstreamHostAndPorts": [
         {
-          "Host": "20.255.135.179",
-          "Port": 80
+          "Host": "fsel-notification-api.fsel.edu.vn",
+          "Port": 443
         }
       ]
     }
@@ -191,7 +191,7 @@
         {
           "Name": "Auths API",
           "Version": "v1",
-          "Url": "http://20.239.224.16/swagger/v1/swagger.json"
+          "Url": "https://fsel-auth-api.fsel.edu.vn/swagger/v1/swagger.json"
         }
       ]
     },
@@ -201,7 +201,7 @@
         {
           "Name": "Users API",
           "Version": "v1",
-          "Url": "http://20.24.120.47/swagger/v1/swagger.json"
+          "Url": "https://fsel-user-api.fsel.edu.vn/swagger/v1/swagger.json"
         }
       ]
     },
@@ -211,7 +211,7 @@
         {
           "Name": "Lcms Courses API",
           "Version": "v1",
-          "Url": "http://20.187.190.125/swagger/v1/swagger.json"
+          "Url": "https://fsel-lcms-api.fsel.edu.vn/swagger/v1/swagger.json"
         }
       ]
     },
@@ -221,7 +221,7 @@
         {
           "Name": "Lms Courses API",
           "Version": "v1",
-          "Url": "http://20.187.186.116/swagger/v1/swagger.json"
+          "Url": "https://fsel-lms-api.fsel.edu.vn/swagger/v1/swagger.json"
         }
       ]
     },
@@ -231,7 +231,7 @@
         {
           "Name": "Storage API",
           "Version": "v1",
-          "Url": "http://20.239.31.13/swagger/v1/swagger.json"
+          "Url": "https://fsel-storage-api.fsel.edu.vn/swagger/v1/swagger.json"
         }
       ]
     },
@@ -241,7 +241,7 @@
         {
           "Name": "Senders API",
           "Version": "v1",
-          "Url": "http://20.239.120.173/swagger/v1/swagger.json"
+          "Url": "https://fsel-sender-api.fsel.edu.vn/swagger/v1/swagger.json"
         }
       ]
     },
@@ -251,7 +251,7 @@
         {
           "Name": "Training API",
           "Version": "v1",
-          "Url": "http://20.239.121.201/swagger/v1/swagger.json"
+          "Url": "https://fsel-training-api.fsel.edu.vn/swagger/v1/swagger.json"
         }
       ]
     },
@@ -261,7 +261,7 @@
         {
           "Name": "Interaction API",
           "Version": "v1",
-          "Url": "http://20.239.29.104/swagger/v1/swagger.json"
+          "Url": "https://fsel-interaction-api.fsel.edu.vn/swagger/v1/swagger.json"
         }
       ]
     },
@@ -271,7 +271,7 @@
         {
           "Name": "Ordering API",
           "Version": "v1",
-          "Url": "http://20.24.110.45/swagger/v1/swagger.json"
+          "Url": "https://fsel-ordering-api.fsel.edu.vn/swagger/v1/swagger.json"
         }
       ]
     },
@@ -281,7 +281,7 @@
         {
           "Name": "System API",
           "Version": "v1",
-          "Url": "http://20.187.250.110/swagger/v1/swagger.json"
+          "Url": "https://fsel-system-api.fsel.edu.vn/swagger/v1/swagger.json"
         }
       ]
     },
@@ -291,7 +291,7 @@
         {
           "Name": "Realtime API",
           "Version": "v1",
-          "Url": "http://20.255.132.57/swagger/v1/swagger.json"
+          "Url": "https://fsel-realtime-api.fsel.edu.vn/swagger/v1/swagger.json"
         }
       ]
     },
@@ -301,7 +301,7 @@
         {
           "Name": "Notification API",
           "Version": "v1",
-          "Url": "http://20.255.135.179/swagger/v1/swagger.json"
+          "Url": "https://fsel-notification-api.fsel.edu.vn/swagger/v1/swagger.json"
         }
       ]
     }
