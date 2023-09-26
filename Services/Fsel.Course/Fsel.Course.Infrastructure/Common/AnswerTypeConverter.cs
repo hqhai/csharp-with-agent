@@ -166,7 +166,7 @@ namespace Fsel.Course.Infrastructure.Common
 
             if (dataAnswer != null && dataAnswer.Answers != null && dataQuestion != null)
             {
-                var answerStrs = dataAnswer.Answers.Split(' ');
+                var answerStrs = dataAnswer.Answers.Trim().Split(' ');
                 if (answerStrs != null && answerStrs.Length >= dataQuestion.ExactWordCount)
                 {
                     dataAnswer.IsExact = true;
@@ -194,15 +194,21 @@ namespace Fsel.Course.Infrastructure.Common
             var dataQuestion = configQuestion.Deserialize<ShortAnswerQuestionWordBaseQuestion>();
             int number = 0;
 
-            if (dataAnswer != null && dataAnswer.Answers != null && dataQuestion != null && dataQuestion.Contents != null && dataQuestion.Contents.Count > 0 && dataQuestion.Content != null
-                )
+            if (dataAnswer != null && dataAnswer.Answers != null && dataQuestion != null && dataQuestion.Contents != null && dataQuestion.Contents.Count > 0)
             {
                 if (dataQuestion.Contents.Any(p => IsShortAnswer(p, dataAnswer.Answers)))
                 {
                     dataAnswer.IsExact = true;
                     number++;
                 }
-                else if (dataQuestion.Content.Any(p => IsShortAnswer(p, dataAnswer.Answers)))
+                else
+                {
+                    dataAnswer.IsExact = false;
+                }
+            }
+            if (dataAnswer != null && dataAnswer.Answers != null && dataQuestion != null && dataQuestion.Content != null && dataQuestion.Content.Count > 0)
+            {
+                if (dataQuestion.Content.Any(p => IsShortAnswer(p, dataAnswer.Answers)))
                 {
                     dataAnswer.IsExact = true;
                     number++;

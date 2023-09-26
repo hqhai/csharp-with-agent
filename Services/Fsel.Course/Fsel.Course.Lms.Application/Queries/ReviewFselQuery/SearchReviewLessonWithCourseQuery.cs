@@ -91,9 +91,11 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
             {
                 query = query.Where(x => x.Stars >= request.NumberOfStars && x.Stars < request.NumberOfStars + 0.5);
             }
-
-            //var result = await query.ToListAsync(cancellationToken);
-            var stars = NumberHelper.ConvertDoubleDecimal(await query.AverageAsync(x => x.Stars, cancellationToken));
+            if (request.CourseLevel != null)
+            {
+                query = query.Where(x => x.CourseLevel == request.CourseLevel);
+            }
+            var stars = await query.AnyAsync(cancellationToken) ? NumberHelper.ConvertDoubleDecimal(await query.AverageAsync(x => x.Stars, cancellationToken)) : default;
             int totalItem = await query.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
             var lists = await query
                     .ApplySortAndPaging(request)
