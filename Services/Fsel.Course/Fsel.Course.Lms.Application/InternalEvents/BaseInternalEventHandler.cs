@@ -102,7 +102,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 skillScores = videoResult.VideoSkillScores.Where(x => x.Type == type && x.SkillScores != null && x.SkillScores.Any()).SelectMany(x => x.SkillScores!).GroupBy(x => x.Skill).Select(x => GetSkillScore(x)).ToList();
                 if (courseType == EnumCourseType.Academic)
                 {
-                    return (skillScores, skillScores.Any() ? NumberHelper.ConvertDoublePercent(skillScores.Average(x => x.Percent * ((double)9 * skillScores.Count))) : default);
+                    return (skillScores, skillScores.Any() ? NumberHelper.ConvertDoublePercent(skillScores.Average(x => x.Percent * (9 * skillScores.Count))) : default);
                 }
                 else if (courseType != null)
                 {
@@ -202,7 +202,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 skillScores.CountQuestion = x.Sum(x => x.CountQuestion);
                 skillScores.TotalCount = x.Sum(x => x.TotalCount);
                 skillScores.CorrectCount = x.Sum(x => x.CorrectCount);
-                skillScores.Percent = x.Sum(x => x.TotalCount) > 0 ? NumberHelper.ConvertDouble(x.Sum(x => x.CorrectCount) / x.Sum(x => x.TotalCount) * 100) : 0;
+                skillScores.Percent = x.Sum(x => x.TotalCount) > 0 ? NumberHelper.ConvertPercentDouble(x.Sum(x => x.CorrectCount) / x.Sum(x => x.TotalCount)) : 0;
                 return skillScores;
             };
             return skillScores;

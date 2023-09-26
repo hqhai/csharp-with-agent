@@ -110,8 +110,25 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                 CorrectCount = classForumResult?.ClassForumScores.Sum(x => x.Score) ?? default,
             };
             classForumStudentProgress.ClassForumId = classForum.Id;
-            classForumStudentProgress.Status = videoResult.Status == EnumResultStatus.Done ? (classForumResult != null ? (classForumResult.Status != EnumClassForumResultStatus.PendingForGrading) ? EnumResultStatus.Done : EnumResultStatus.Process : EnumResultStatus.New) : EnumResultStatus.Unfinished;
-
+            if (videoResult.Status == EnumResultStatus.Done)
+            {
+                if (classForumResult != null)
+                {
+                    classForumStudentProgress.Status = EnumResultStatus.New;
+                    if (classForumResult.Status == EnumClassForumResultStatus.PendingForGrading || classForumResult.Status == EnumClassForumResultStatus.Graded)
+                    {
+                        classForumStudentProgress.Status = EnumResultStatus.Done;
+                    }
+                    else
+                    {
+                        classForumStudentProgress.Status = EnumResultStatus.Process;
+                    }
+                }
+            }
+            else
+            {
+                classForumStudentProgress.Status = EnumResultStatus.Unfinished;
+            }
             methodResult.Result = classForumStudentProgress;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
