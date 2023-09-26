@@ -62,11 +62,11 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
                 return methodResult;
             }
 
-            if (classForumResult.CheckCsoId != csoId)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumClassForumResultErrorCode.CsoInvalid), nameof(classForumResult.CheckCsoId));
-                return methodResult;
-            }
+            //if (classForumResult.CheckCsoId != csoId)
+            //{
+            //    methodResult.AddErrorBadRequest(nameof(EnumClassForumResultErrorCode.CsoInvalid), nameof(classForumResult.CheckCsoId));
+            //    return methodResult;
+            //}
             await _classForumResultRepository.ExecuteTransactionAsync(async () =>
             {
                 if (request.IsApprove)

@@ -110,7 +110,7 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
                 query = query.Where(x => x.Stars + 0.5 >= request.NumberOfStars && x.Stars < request.NumberOfStars + 0.5);
             }
             var result = await query.ToListAsync(cancellationToken);
-            var stars = NumberHelper.ConvertDoubleDecimal(result.Average(x => x.Stars));
+            var stars = result.Any() ? NumberHelper.ConvertDoubleDecimal(result.Average(x => x.Stars)) : default;
             int totalItem = await query.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
             var lists = await query
                     .ApplySortAndPaging(request)
@@ -124,7 +124,7 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
                 foreach (var item in lists)
                 {
                     item.Stars = NumberHelper.ConvertDoubleDecimal(item.Stars);
-                    var teacher = teachers.FirstOrDefault(x => x.Id == request.TeacherId);
+                    var teacher = teachers.FirstOrDefault(x => x.Id == item.TeacherId);
                     item.FullName = teacher?.Human?.FullName;
                 }
             }
