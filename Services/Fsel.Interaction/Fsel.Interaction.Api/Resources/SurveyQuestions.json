@@ -363,8 +363,8 @@
     "answers": [
       {
         "id": 1,
-        "min": "0",
-        "max": "10",
+        "min": 0,
+        "max": 10,
         "referenceQuestionId": [
           "98a97cf1-8562-4828-9cf2-6f5823bf09fe",
           "1fde61af-e1e0-4027-ad21-1176ad212119"
@@ -372,8 +372,8 @@
       },
       {
         "id": 2,
-        "min": "11",
-        "max": "15",
+        "min": 11,
+        "max": 15,
         "referenceQuestionId": [
           "73ab87b1-c0ae-40c6-ba37-1cdce350563a",
           "06b1a0df-eaef-4be9-a9da-9c2633e3a12a",
@@ -388,8 +388,8 @@
       },
       {
         "id": 7,
-        "min": "16",
-        "max": "18",
+        "min": 16,
+        "max": 18,
         "referenceQuestionId": [
           "a6f6b5dc-c72a-496c-859c-2fdc9d97f147",
           "06b1a0df-eaef-4be9-a9da-9c2633e3a12a",
@@ -404,8 +404,8 @@
       },
       {
         "id": 10,
-        "min": "19",
-        "max": "1000",
+        "min": 19,
+        "max": 1000,
         "referenceQuestionId": [
           "98a97cf1-8562-4828-9cf2-6f5823bf09fe",
           "1fde61af-e1e0-4027-ad21-1176ad212119"

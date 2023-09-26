@@ -99,6 +99,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
             {
                 Id = classForumResult.Id,
                 Content = classForumResult.Content,
+                WordContent = classForumResult.WordContent,
                 Status = classForumResult.Status,
                 ClassForumId = classForumResult.ClassForumId,
                 ClassForum = _mapper.Map<ClassForumModel>(classForumResult.ClassForum),
