@@ -171,7 +171,7 @@ namespace Fsel.Training.Api.Controllers.Admin
         /// <summary>
         /// get list teacher or cso in class
         /// </summary>
-        [HttpGet("get-teacher-or-cso-in-class")]
+        [HttpGet("get-list-teacher-or-cso-in-class")]
         [ProducesResponseType(typeof(MethodResult<IList<CSOTeacherModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> Get([FromQuery] GetListTeacherOrCSOInClassQuery query)
