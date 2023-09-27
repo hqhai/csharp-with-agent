@@ -112,9 +112,9 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             classForumStudentProgress.ClassForumId = classForum.Id;
             if (videoResult.Status == EnumResultStatus.Done)
             {
+                classForumStudentProgress.Status = EnumResultStatus.New;
                 if (classForumResult != null)
                 {
-                    classForumStudentProgress.Status = EnumResultStatus.New;
                     if (classForumResult.Status == EnumClassForumResultStatus.PendingForGrading || classForumResult.Status == EnumClassForumResultStatus.Graded)
                     {
                         classForumStudentProgress.Status = EnumResultStatus.Done;
