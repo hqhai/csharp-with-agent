@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fsel.System.Infrastructure.Migrations
 {
     [DbContext(typeof(SystemDbContext))]
-    [Migration("20230927102623_Create_GameVocabularyTable_And_GameCenterTable")]
+    [Migration("20230927132900_Create_GameVocabularyTable_And_GameCenterTable")]
     partial class Create_GameVocabularyTable_And_GameCenterTable
     {
         /// <inheritdoc />
@@ -300,7 +300,7 @@ namespace Fsel.System.Infrastructure.Migrations
                         new
                         {
                             Id = new Guid("c9c55ef5-01e0-4fa6-b68a-3aaea1089548"),
-                            CreatedDate = new DateTime(2023, 9, 27, 17, 26, 23, 146, DateTimeKind.Local).AddTicks(418),
+                            CreatedDate = new DateTime(2023, 9, 27, 20, 28, 59, 971, DateTimeKind.Local).AddTicks(8393),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             IsDeleted = false,
@@ -391,13 +391,16 @@ namespace Fsel.System.Infrastructure.Migrations
                         .HasColumnOrder(0);
 
                     b.Property<string>("AlternateSpellingStr")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<string>("Antonym")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<string>("AudioPath")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<string>("CefrLevel")
                         .IsRequired()
@@ -405,6 +408,7 @@ namespace Fsel.System.Infrastructure.Migrations
                         .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("Code")
+                        .IsRequired()
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
 
@@ -428,7 +432,8 @@ namespace Fsel.System.Infrastructure.Migrations
                         .HasColumnOrder(101);
 
                     b.Property<string>("Definition")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<DateTime?>("DeletedDate")
                         .HasColumnType("datetime2")
@@ -444,16 +449,19 @@ namespace Fsel.System.Infrastructure.Migrations
                         .HasColumnOrder(103);
 
                     b.Property<string>("ExampleSentence")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<Guid?>("GameCenterId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Hint")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<string>("ImagePath")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit")
@@ -469,10 +477,12 @@ namespace Fsel.System.Infrastructure.Migrations
                         .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("PhoneticTranscription")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<string>("Synonym")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<string>("UnitOrder")
                         .IsRequired()
@@ -493,7 +503,8 @@ namespace Fsel.System.Infrastructure.Migrations
                         .HasColumnOrder(102);
 
                     b.Property<string>("UsEquivalent")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<Guid?>("WordCategoryId")
                         .HasColumnType("uniqueidentifier");

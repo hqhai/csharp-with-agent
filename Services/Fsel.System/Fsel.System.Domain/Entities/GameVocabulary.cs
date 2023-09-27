@@ -10,6 +10,7 @@ namespace Fsel.System.Domain.Entities
 
     public class GameVocabulary : Entity
     {
+        [Required]
         [MaxLength(500, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? Code { get; set; }
         [Required]
@@ -18,6 +19,7 @@ namespace Fsel.System.Domain.Entities
         public EnumGameCefrLevel CefrLevel { get; set; }
         public EnumGameCourseLevel CourseLevel { get; set; }
         public EnumUnitOrder UnitOrder { get; set; }
+        [MaxLength(500, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? AlternateSpellingStr { get; set; }
 
         [NotMapped]
@@ -35,16 +37,24 @@ namespace Fsel.System.Domain.Entities
                 }
             }
         }
-
+        [MaxLength(500, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? UsEquivalent { get; set; }
         public EnumPartSpeech? PartSpeech { get; set; }
+        [MaxLength(500, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? Definition { get; set; }
+        [MaxLength(500, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? Hint { get; set; }
+        [MaxLength(500, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? ExampleSentence { get; set; }
+        [MaxLength(500, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? ImagePath { get; set; }
+        [MaxLength(500, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? AudioPath { get; set; }
+        [MaxLength(500, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? Synonym { get; set; }
+        [MaxLength(500, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? Antonym { get; set; }
+        [MaxLength(500, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? PhoneticTranscription { get; set; }
         public Guid? GameCenterId { get; set; }
         public Guid? WordCategoryId { get; set; }

@@ -48,22 +48,22 @@ namespace Fsel.System.Infrastructure.Migrations
                     UpdatedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     DeletedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false),
-                    Code = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
+                    Code = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false),
                     Key = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false),
                     CefrLevel = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     CourseLevel = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     UnitOrder = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    AlternateSpellingStr = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    UsEquivalent = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    AlternateSpellingStr = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
+                    UsEquivalent = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
                     PartSpeech = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
-                    Definition = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Hint = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    ExampleSentence = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    ImagePath = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    AudioPath = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Synonym = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Antonym = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    PhoneticTranscription = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Definition = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
+                    Hint = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
+                    ExampleSentence = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
+                    ImagePath = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
+                    AudioPath = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
+                    Synonym = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
+                    Antonym = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
+                    PhoneticTranscription = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
                     GameCenterId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     WordCategoryId = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
                 },
@@ -87,7 +87,7 @@ namespace Fsel.System.Infrastructure.Migrations
             migrationBuilder.InsertData(
                 table: "GameCenters",
                 columns: new[] { "Id", "CreatedDate", "CreatedFullName", "CreatedUserId", "DeletedDate", "DeletedFullName", "DeletedUserId", "IsDeleted", "Name", "UpdatedDate", "UpdatedFullName", "UpdatedUserId" },
-                values: new object[] { new Guid("c9c55ef5-01e0-4fa6-b68a-3aaea1089548"), new DateTime(2023, 9, 27, 17, 26, 23, 146, DateTimeKind.Local).AddTicks(418), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, false, "Planet Defender Parameters", null, null, null });
+                values: new object[] { new Guid("c9c55ef5-01e0-4fa6-b68a-3aaea1089548"), new DateTime(2023, 9, 27, 20, 28, 59, 971, DateTimeKind.Local).AddTicks(8393), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, false, "Planet Defender Parameters", null, null, null });
 
             migrationBuilder.CreateIndex(
                 name: "IX_GameVocabularies_GameCenterId",
