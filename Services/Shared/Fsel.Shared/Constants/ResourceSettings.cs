@@ -7,5 +7,6 @@ namespace Fsel.Shared.Constants
         public const string NotificationType = "Resources//NotificationType.json";
         public const string QuestBoardFileName = "Resources//QuestBoardConfig.json";
         public const string GameCenterFileName = "Resources//GameCenterConfig.json";
+        public const string SurveyQuestionFileName = "Resources//SurveyQuestions.json";
     }
 }
