@@ -185,7 +185,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
             }
             else if (type == EnumProcessType.ClassForum)
             {
-                var countDone = x.LessonResults.SelectMany(x => x.ClassForumResults).Where(x => x.StudentId == studentId && x.Status == EnumClassForumResultStatus.Graded).Count();
+                var countDone = x.LessonResults.SelectMany(x => x.ClassForumResults).Where(x => x.StudentId == studentId && (x.Status == EnumClassForumResultStatus.Graded || x.Status == EnumClassForumResultStatus.PendingForGrading)).Count();
                 var totalDone = x.UnitLessons.Select(x => x.Lesson).Select(x => x!.ClassForum).Count();
                 return (countDone, totalDone);
             }

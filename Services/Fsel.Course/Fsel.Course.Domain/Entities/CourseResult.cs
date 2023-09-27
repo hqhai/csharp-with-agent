@@ -43,9 +43,9 @@ namespace Fsel.Course.Domain.Entities
         public int CorrectTotal { get; set; }
 
         /// <summary>
-        /// Trạng thái của Couse
+        /// Trạng thái của Couse Result
         /// </summary>
-        public EnumCourseStatus Status { get; set; }
+        public EnumResultStatus Status { get; set; }
 
         public Course? Course { get; set; }
         public Guid CourseId { get; set; }

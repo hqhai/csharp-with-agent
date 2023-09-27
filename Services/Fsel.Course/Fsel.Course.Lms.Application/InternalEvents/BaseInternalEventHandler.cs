@@ -32,6 +32,9 @@ namespace Fsel.Course.Lms.Application.InternalEvents
         protected readonly IFinalTestResultRepository _finalTestResultRepository;
         protected readonly IMockTestResultRepository _mockTestResultRepository;
         protected readonly IHomeWorkResultRepository _homeWorkResultRepository;
+        private const int TotalScoreClassForum = 36;
+        private const int PercentClassForumAcademic = 20;
+        private const int PercentClassForumIELST = 32;
 
         public BaseInternalEventHandler(IVideoResultRepository videoResultRepository,
             IClassForumResultRepository classForumResultRepository,
@@ -96,13 +99,13 @@ namespace Fsel.Course.Lms.Application.InternalEvents
         {
             ArgumentNullException.ThrowIfNull(lessonResultIds);
             List<SkillScores> skillScores = new List<SkillScores>();
-            var videoResult = await _videoResultRepository.Queryable.FirstOrDefaultAsync(x => x.Status == EnumResultStatus.Done && lessonResultIds.Contains(x.LessonResultId));
-            if (videoResult != null && videoResult.VideoSkillScores != null)
+            var videoResults = await _videoResultRepository.Queryable.Where(x => x.Status == EnumResultStatus.Done && lessonResultIds.Contains(x.LessonResultId)).ToListAsync();
+            if (videoResults != null && videoResults.Any())
             {
-                skillScores = videoResult.VideoSkillScores.Where(x => x.Type == type && x.SkillScores != null && x.SkillScores.Any()).SelectMany(x => x.SkillScores!).GroupBy(x => x.Skill).Select(x => GetSkillScore(x)).ToList();
+                skillScores = videoResults.SelectMany(x => x.VideoSkillScores).Where(x => x.Type == type && x.SkillScores != null && x.SkillScores.Any()).SelectMany(x => x.SkillScores!).GroupBy(x => x.Skill).Select(x => GetSkillScore(x)).ToList();
                 if (courseType == EnumCourseType.Academic)
                 {
-                    return (skillScores, skillScores.Any() ? NumberHelper.ConvertDoublePercent(skillScores.Average(x => x.Percent * (9 * skillScores.Count))) : default);
+                    return (skillScores, GetDoublePercent(skillScores, 9));
                 }
                 else if (courseType != null)
                 {
@@ -116,7 +119,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                     })) : default);
                 }
             }
-            return (skillScores, skillScores.Any() ? NumberHelper.ConvertDoublePercent(skillScores.Sum(x => x.Percent * percentSkill / skillScores.Count)) : default);
+            return (skillScores, GetDoublePercentUnit(skillScores, percentSkill));
         }
 
         public async Task<(List<SkillScores>, double)> GetClassForumSkillScores(IList<Guid>? lessonResultIds, int percentSkill = 0, EnumCourseType? courseType = null)
@@ -132,21 +135,21 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                     skillScore.Skill = x.ClassForum!.CourseSkill;
                     skillScore.TotalQuestion = 1;
                     skillScore.CountQuestion = 1;
-                    skillScore.TotalCount = 36;
+                    skillScore.TotalCount = TotalScoreClassForum;
                     skillScore.CorrectCount = x.ClassForumScores.Sum(x => x.Score);
-                    skillScore.Percent = NumberHelper.ConvertDouble(x.ClassForumScores.Sum(x => x.Score) / 36 * 100);
+                    skillScore.Percent = NumberHelper.ConvertDouble(x.ClassForumScores.Sum(x => x.Score) / TotalScoreClassForum * 100);
                     return skillScore;
                 }).ToList().GroupBy(x => x.Skill).Select(x => GetSkillScore(x)).ToList();
                 if (courseType != null && courseType == EnumCourseType.Academic)
                 {
-                    return (skillScores, skillScores.Any() ? NumberHelper.ConvertDoublePercent(skillScores.Average(x => x.Percent * (20 * skillScores.Count))) : default);
+                    return (skillScores, GetDoublePercent(skillScores, PercentClassForumAcademic));
                 }
                 else if (courseType != null && courseType == EnumCourseType.Ielts)
                 {
-                    return (skillScores, skillScores.Any() ? NumberHelper.ConvertDoublePercent(skillScores.Average(x => x.Percent * (32 * skillScores.Count))) : default);
+                    return (skillScores, GetDoublePercent(skillScores, PercentClassForumIELST));
                 }
             }
-            return (skillScores, skillScores.Any() ? NumberHelper.ConvertDouble(skillScores.Average(x => x.Percent * (percentSkill * skillScores.Count))) : default);
+            return (skillScores, GetDoublePercentUnit(skillScores, percentSkill));
         }
 
         public async Task<(List<SkillScores>, double)> GetHomeWordsSkillScores(IList<Guid>? lessonResultIds, int percentSkill = 0, EnumCourseType? courseType = null)
@@ -159,18 +162,36 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 skillScores = homeWorkResults.Where(x => x.SkillScores != null && x.SkillScores.Any()).SelectMany(x => x.SkillScores!).GroupBy(x => x.Skill).Select(x => GetSkillScore(x)).ToList();
                 if (courseType != null && courseType == EnumCourseType.Academic && skillScores.Any())
                 {
-                    return (skillScores, NumberHelper.ConvertDoublePercent(skillScores.Average(x => x.Percent * ((double)14 * skillScores.Count))));
+                    return (skillScores, GetDoublePercent(skillScores, 14));
                 }
                 else if (courseType != null && courseType == EnumCourseType.Ielts && skillScores.Any())
                 {
-                    return (skillScores, NumberHelper.ConvertDoublePercent(skillScores.Average(x => x.Percent * ((double)48 * skillScores.Count))));
+                    return (skillScores, GetDoublePercent(skillScores, 48));
                 }
                 else
                 {
-                    return (skillScores, 0);
+                    return (skillScores, GetDoublePercentUnit(skillScores, percentSkill));
                 }
             }
-            return (skillScores, skillScores.Any() ? NumberHelper.ConvertDoublePercent(skillScores.Sum(x => x.Percent * percentSkill / skillScores.Count)) : default);
+            return (skillScores, 0);
+        }
+
+        private static double GetDoublePercent(IList<SkillScores>? skillScores, int percent)
+        {
+            if (skillScores != null && skillScores.Any())
+            {
+                return NumberHelper.ConvertDoublePercent(skillScores.Average(x => x.Percent * percent / skillScores.Count));
+            }
+            return default;
+        }
+
+        private static double GetDoublePercentUnit(IList<SkillScores>? skillScores, int percent)
+        {
+            if (skillScores != null && skillScores.Any())
+            {
+                return NumberHelper.ConvertDoublePercent(skillScores.Sum(x => x.Percent * percent / skillScores.Count));
+            }
+            return default;
         }
 
         public static SkillScores GetSumSkillScore(IGrouping<EnumCourseSkill, SkillScores>? group)
@@ -367,7 +388,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             if (courseResult != null)
             {
                 await _finishOneLevelPassPublisher.Publish(courseResult, cancellationToken);
-                courseResult.Status = EnumCourseStatus.InActive;
+                courseResult.Status = EnumResultStatus.Done;
                 _courseResultRepository.Update(courseResult);
                 await _courseResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             }
