@@ -4,7 +4,6 @@ namespace Fsel.System.Domain.Models.EntityModels
 {
     using Fsel.Core.Base.BaseModels;
     using Fsel.Shared.Enums;
-    using Fsel.System.Domain.Enums;
 
     public class GameTopicModel : BaseModel
     {
@@ -14,6 +13,6 @@ namespace Fsel.System.Domain.Models.EntityModels
 
         public EnumCourseSkill Skill { get; set; }
 
-        public EnumCourseLevel CourseLevel { get; set; }
+        public EnumGameCourseLevel CourseLevel { get; set; }
     }
 }

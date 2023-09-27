@@ -28,7 +28,9 @@ namespace Fsel.System.Infrastructure
             modelBuilder.ApplyConfiguration(new QuestBoardStudentConfigConfiguration());
             modelBuilder.ApplyConfiguration(new FeatureAccessTimeConfigConfiguration());
             modelBuilder.ApplyConfiguration(new GameTopicEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new GameVocabularyEntityTypeConfiguration());
             base.OnModelCreating(modelBuilder);
+            SeedGameCenter(modelBuilder);
         }
 
         public DbSet<FeatureAccessTime> FeatureAccessTimes { get; set; }
@@ -42,6 +44,9 @@ namespace Fsel.System.Infrastructure
         public DbSet<QuestBoard> QuestBoards { get; set; }
         public DbSet<QuestBoardConfig> QuestBoardConfigs { get; set; }
         public DbSet<GameTopic> GameTopics { get; set; }
+        public DbSet<GameVocabulary> GameVocabularies { get; set; }
+        public DbSet<GameCenter> GameCenters { get; set; }
+
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             ArgumentNullException.ThrowIfNull(optionsBuilder);
@@ -59,10 +64,18 @@ namespace Fsel.System.Infrastructure
 
         private static void SeedQuestBoards(ModelBuilder builder)
         {
-            var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, QuestBoardSettings.QuestBoardFileName);
+            var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ResourceSettings.QuestBoardFileName);
             var questBoardConfigs = ConvertHelper.DeserializeFromFilePath<IList<QuestBoardConfig>>(path);
             ArgumentNullException.ThrowIfNull(questBoardConfigs);
             builder.Entity<QuestBoardConfig>().HasData(questBoardConfigs);
+        }
+
+        private static void SeedGameCenter(ModelBuilder builder)
+        {
+            var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ResourceSettings.GameCenterFileName);
+            var gameCenter = ConvertHelper.DeserializeFromFilePath<IList<GameCenter>>(path);
+            ArgumentNullException.ThrowIfNull(gameCenter);
+            builder.Entity<GameCenter>().HasData(gameCenter);
         }
 
         private static void SeedCourselevel(ModelBuilder builder)

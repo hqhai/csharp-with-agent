@@ -4,19 +4,14 @@ namespace Fsel.System.Domain.Entities
 {
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Entities;
-    using Fsel.Shared.Enums;
     using global::System.ComponentModel.DataAnnotations;
 
-    public class GameTopic : Entity
+    public class GameCenter : Entity
     {
-        public EnumUnitOrder UnitOrder { get; set; }
-
+        [Required]
         [MaxLength(500, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
-        public string? Value { get; set; }
+        public string? Name { get; set; }
 
-        public EnumCourseSkill Skill { get; set; }
-
-        public EnumGameCourseLevel CourseLevel { get; set; }
         public ICollection<GameVocabulary> GameVocabularies { get; set; } = new List<GameVocabulary>();
     }
 }
