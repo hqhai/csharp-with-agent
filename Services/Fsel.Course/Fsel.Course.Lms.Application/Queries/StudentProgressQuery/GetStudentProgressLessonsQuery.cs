@@ -156,7 +156,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                 }
                 lessonProgress.Status = lessonResult.Status;
                 lessonProgress.Percent = NumberHelper.ConvertPercentDouble(counts.Average());
-                lessonProgress.ContentCompleted = string.Format("{0} / {1}", counts.Sum(), 3);
+                lessonProgress.ContentCompleted = string.Format("{0} / {1}", counts.Sum(), counts.Count);
             }
             return lessonProgress;
         }
