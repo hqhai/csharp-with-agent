@@ -42,6 +42,7 @@ namespace Fsel.System.Application.Queries.GameTopicQuery
                         .GroupBy(x => x.UnitOrder)
                         .Select(x => new GameTopicsModel
                         {
+                            UnitOrder = x.Key,
                             GameTopics = x.Select(x => new GameTopicModel
                             {
                                 Id = x.Id,
