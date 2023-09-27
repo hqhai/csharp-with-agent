@@ -64,7 +64,7 @@ namespace Fsel.System.Infrastructure
 
         private static void SeedQuestBoards(ModelBuilder builder)
         {
-            var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, QuestBoardSettings.QuestBoardFileName);
+            var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ResourceSettings.QuestBoardFileName);
             var questBoardConfigs = ConvertHelper.DeserializeFromFilePath<IList<QuestBoardConfig>>(path);
             ArgumentNullException.ThrowIfNull(questBoardConfigs);
             builder.Entity<QuestBoardConfig>().HasData(questBoardConfigs);
@@ -72,7 +72,7 @@ namespace Fsel.System.Infrastructure
 
         private static void SeedGameCenter(ModelBuilder builder)
         {
-            var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, QuestBoardSettings.GameCenterFileName);
+            var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ResourceSettings.GameCenterFileName);
             var gameCenter = ConvertHelper.DeserializeFromFilePath<IList<GameCenter>>(path);
             ArgumentNullException.ThrowIfNull(gameCenter);
             builder.Entity<GameCenter>().HasData(gameCenter);
