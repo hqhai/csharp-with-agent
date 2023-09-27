@@ -64,7 +64,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
                 return methodResult;
             }
             var courseResult = await _courseResultRepository.Queryable.Where(x => x.StudentId == studentId && x.CourseId == request.CourseId).FirstOrDefaultAsync(cancellationToken);
-            if (courseResult != null && courseResult.Status == EnumCourseStatus.InActive)
+            if (courseResult != null && courseResult.Status == EnumResultStatus.Done)
             {
                 overallScoreModel.SkillScores = courseResult.SkillScores;
                 overallScoreModel.IsPlacement = false;
