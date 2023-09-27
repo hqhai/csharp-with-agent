@@ -19,7 +19,7 @@ namespace Fsel.System.Application.Queries.GameTopicQuery
     {
         public string? Value { get; set; }
 
-        public EnumCourseLevel? CourseLevel { get; set; }
+        public EnumGameCourseLevel? CourseLevel { get; set; }
     }
 
     public class GetListGameTopicQueryHandler : IRequestHandler<GetListGameTopicQuery, MethodResult<IList<GameTopicsModel>>>

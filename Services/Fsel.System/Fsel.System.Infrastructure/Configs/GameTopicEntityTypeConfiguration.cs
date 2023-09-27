@@ -25,7 +25,7 @@ namespace Fsel.System.Infrastructure.Configs
                 .HasMaxLength(100)
                 .HasConversion(
                     v => v.ToString(),
-                    v => v.EnumParse<EnumCourseLevel>());
+                    v => v.EnumParse<EnumGameCourseLevel>());
 
             builder.Property(e => e.UnitOrder)
                 .HasMaxLength(100)

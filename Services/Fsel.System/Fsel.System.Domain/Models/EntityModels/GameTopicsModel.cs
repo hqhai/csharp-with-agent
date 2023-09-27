@@ -2,7 +2,7 @@
 
 namespace Fsel.System.Domain.Models.EntityModels
 {
-    using Fsel.System.Domain.Enums;
+    using Fsel.Shared.Enums;
     using global::System.Collections.Generic;
 
     public class GameTopicsModel

@@ -1,41 +1,19 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.System.Domain.Entities
+namespace Fsel.System.Domain.Models.EntityModels
 {
-    using Fsel.Common.Enums.ErrorCodes;
-    using Fsel.Core.Entities;
+    using Fsel.Core.Base.BaseModels;
     using Fsel.Shared.Enums;
-    using global::System.ComponentModel.DataAnnotations;
-    using global::System.ComponentModel.DataAnnotations.Schema;
 
-    public class GameVocabulary : Entity
+    public class GameVocabularyModel : BaseModel
     {
-        [MaxLength(500, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? Code { get; set; }
-        [Required]
-        [MaxLength(500, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? Key { get; set; }
         public EnumGameCefrLevel CefrLevel { get; set; }
         public EnumGameCourseLevel CourseLevel { get; set; }
         public EnumUnitOrder UnitOrder { get; set; }
         public string? AlternateSpellingStr { get; set; }
-
-        [NotMapped]
-        public IList<string>? AlternateSpelling
-        {
-            get
-            {
-                if (!string.IsNullOrEmpty(AlternateSpellingStr))
-                {
-                    return AlternateSpellingStr.Split(';').ToList();
-                }
-                else
-                {
-                    return null;
-                }
-            }
-        }
-
+        public IList<string>? AlternateSpelling { get; set; }
         public string? UsEquivalent { get; set; }
         public EnumPartSpeech? PartSpeech { get; set; }
         public string? Definition { get; set; }
@@ -48,7 +26,7 @@ namespace Fsel.System.Domain.Entities
         public string? PhoneticTranscription { get; set; }
         public Guid? GameCenterId { get; set; }
         public Guid? WordCategoryId { get; set; }
-        public GameCenter? GameCenter { get; set; }
-        public GameTopic? GameTopic { get; set; }
+        public string? NameOfGame { get; set; }
+        public string? WordCategory { get; set; }
     }
 }

@@ -37,6 +37,10 @@ namespace Fsel.System.Infrastructure.Configs
                .WithMany(b => b.GameVocabularies)
                .HasForeignKey(b => b.GameCenterId)
                .OnDelete(DeleteBehavior.Cascade);
+            builder.HasOne(a => a.GameTopic)
+              .WithMany(b => b.GameVocabularies)
+              .HasForeignKey(b => b.WordCategoryId)
+              .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

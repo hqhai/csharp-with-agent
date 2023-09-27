@@ -5,7 +5,6 @@ namespace Fsel.System.Domain.Entities
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Entities;
     using Fsel.Shared.Enums;
-    using Fsel.System.Domain.Enums;
     using global::System.ComponentModel.DataAnnotations;
 
     public class GameTopic : Entity
@@ -17,6 +16,7 @@ namespace Fsel.System.Domain.Entities
 
         public EnumCourseSkill Skill { get; set; }
 
-        public EnumCourseLevel CourseLevel { get; set; }
+        public EnumGameCourseLevel CourseLevel { get; set; }
+        public ICollection<GameVocabulary> GameVocabularies { get; set; } = new List<GameVocabulary>();
     }
 }

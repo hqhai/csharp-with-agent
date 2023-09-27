@@ -4,5 +4,11 @@ namespace Fsel.Shared.Enums
 {
     public enum EnumPartSpeech
     {
+        Adjective,
+        Adverb,
+        Expression,
+        Noun,
+        Verb,
+        VerbPhrase
     }
 }
