@@ -18,5 +18,11 @@ namespace Fsel.Identity.Application.Services.OrderService
 
         [Get("/order/is-status-payment")]
         Task<IApiResponse<MethodResult<bool>>> IsCheckStatusUser([FromQuery] IsCheckPaymentStatusByUserModel query);
+
+        [Post("/order")]
+        Task<IApiResponse<MethodResult<OrderModel>>> CreateOrder([Body] CreateOrderCommandModel command);
+
+        [Put("/admin/order/change-status-order")]
+        Task<IApiResponse<MethodResult<bool>>> ChangeStatusOrder([Body] ChangeStatusOrderCommandModel command);
     }
 }
