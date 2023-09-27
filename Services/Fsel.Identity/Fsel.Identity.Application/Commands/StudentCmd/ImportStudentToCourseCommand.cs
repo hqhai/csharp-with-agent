@@ -88,6 +88,16 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                 return await Task.FromResult(errors.Count == 0);
             });
 
+            foreach (var item in result.Datas)
+            {
+                var checkExistCode = await _lmsCourseService.GetCourseByCode(item.CodeCourse!);
+                if (!checkExistCode.IsSuccessStatusCode)
+                {
+                    methodResult.AddErrorBadRequest("Code Course not exist");
+                    return methodResult;
+                }
+            }
+
             var duplicateEmails = result.Datas.GroupBy(user => user.Email).Where(group => group.Count() > 1).Select(group => group.Key);
 
             if (duplicateEmails.Any())
