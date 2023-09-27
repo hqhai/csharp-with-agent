@@ -58,7 +58,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             var student = studentResults?.Content?.Result?.FirstOrDefault();
             var userId = student?.Human?.UserId ?? default;
             var lessonResult = await _lessonResultRepository.Queryable.FirstOrDefaultAsync(x => x.UnitId == request.UnitId && x.CourseId == request.CourseId && x.LessonId == request.LessonId && x.StudentId == request.StudentId, cancellationToken);
-            if (lessonResult == null)
+            if (lessonResult == null || lessonResult.Status == EnumResultStatus.Unfinished)
             {
                 methodResult.Result = null;
                 methodResult.StatusCode = StatusCodes.Status200OK;
@@ -114,10 +114,10 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                                       })
                                       .ToListAsync(cancellationToken);
             homeWorkStudentProgress.Status = GetStatusHomeWorks(homeWorks.Select(x => x.HomeWorkResult ?? new HomeWorkResultModel()).ToList());
-            if(featureAccessTimes != null && featureAccessTimes.Any())
+            if (featureAccessTimes != null && featureAccessTimes.Any())
             {
                 homeWorkStudentProgress.Visit = featureAccessTimes.Sum(x => x.Visit);
-                homeWorkStudentProgress.LastVisited = featureAccessTimes.Select(x => x.LastVisited ?? default).OrderBy(x => x).FirstOrDefault();
+                homeWorkStudentProgress.LastVisited = featureAccessTimes.Any(x => x.LastVisited != null) ? featureAccessTimes.Select(x => x.LastVisited ?? default).OrderByDescending(x => x).FirstOrDefault() : null;
                 homeWorkStudentProgress.TimeSpent = featureAccessTimes.Sum(x => x.AccessTime);
             }
             homeWorkStudentProgress.HomeWorks = homeWorks;

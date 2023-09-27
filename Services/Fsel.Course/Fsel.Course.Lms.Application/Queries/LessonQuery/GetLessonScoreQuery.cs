@@ -11,6 +11,7 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Shared.Enums;
+    using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -158,7 +159,7 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
                     var totalCountTimeCode = item.SkillScores.Select(x => x.TotalCount).Sum();
                     if (totalCountTimeCode != 0)
                     {
-                        item.Percent = (correctCountTimeCode / (double)totalCountTimeCode) * 100;
+                        item.Percent = NumberHelper.ConvertPercentDouble((double)correctCountTimeCode / totalCountTimeCode);
                     }
                 }
             }
@@ -166,7 +167,7 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
             var totalCount = scoreQuery.Select(x => x.TotalCount).Sum();
             if (totalCount != 0)
             {
-                lessonScore.Percent = (correctCount / (double)totalCount) * 100;
+                lessonScore.Percent = NumberHelper.ConvertPercentDouble((double)correctCount / totalCount);
                 lessonScore.TotalCount = totalCount;
                 lessonScore.CorrectCount = correctCount;
             }
