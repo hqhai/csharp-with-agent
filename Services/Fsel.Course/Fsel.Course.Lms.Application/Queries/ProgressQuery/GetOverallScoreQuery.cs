@@ -23,18 +23,21 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
     {
         private readonly AuthContext _authContext;
         private readonly ICourseRepository _courseRepository;
+        private readonly ICourseResultRepository _courseResultRepository;
         private readonly IPlacementTestResultRepository _placementTestResultRepository;
         private readonly IUnitResultRepository _unitResultRepository;
         private readonly IUserService _userService;
 
         public GetOverallScoreQueryHandler(AuthContext authContext
             , ICourseRepository courseRepository
+            , ICourseResultRepository courseResultRepository
             , IPlacementTestResultRepository placementTestResultRepository
             , IUnitResultRepository unitResultRepository
             , IUserService userService)
         {
             _authContext = authContext;
             _courseRepository = courseRepository;
+            _courseResultRepository = courseResultRepository;
             _placementTestResultRepository = placementTestResultRepository;
             _unitResultRepository = unitResultRepository;
             _userService = userService;
@@ -60,38 +63,48 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(course));
                 return methodResult;
             }
-            var unitResults = await _unitResultRepository.Queryable.Include(x => x.Unit)
-                                                            .Where(x => x.StudentId == studentId && x.Status == EnumResultStatus.Done && x.CourseId == request.CourseId)
-                                                            .ToArrayAsync(cancellationToken);
-            if (unitResults != null && unitResults.Any())
+            var courseResult = await _courseResultRepository.Queryable.Where(x => x.StudentId == studentId && x.CourseId == request.CourseId).FirstOrDefaultAsync(cancellationToken);
+            if (courseResult != null && courseResult.Status == EnumCourseStatus.InActive)
             {
-                overallScoreModel.SkillScores = unitResults.Where(x => x.SkillScores != null && x.SkillScores.Any())
-                    .SelectMany(x => x.SkillScores!)
-                    .GroupBy(x => x.Skill)
-                    .Select(x => new SkillScores
-                    {
-                        Skill = x.Key,
-                        CorrectCount = x.Sum(x => x.CorrectCount),
-                        TotalCount = x.Sum(x => x.TotalCount),
-                        Scores = x.Average(x => x.Scores),
-                        CountQuestion = x.Sum(x => x.CountQuestion),
-                        TotalQuestion = x.Sum(x => x.TotalQuestion),
-                        Percent = x.Average(x => x.Percent)
-                    }).ToList();
+                overallScoreModel.SkillScores = courseResult.SkillScores;
                 overallScoreModel.IsPlacement = false;
-                overallScoreModel.Percent = unitResults.Average(x => x.Percent);
+                overallScoreModel.Percent = courseResult.Percent;
             }
             else
             {
-                var placementTestScore = await _placementTestResultRepository.Queryable.OrderByDescending(x => x.CreatedDate).FirstOrDefaultAsync(x => x.StudentId == studentId && x.Status == EnumResultStatus.Done, cancellationToken);
-                if (placementTestScore == null)
+                var unitResults = await _unitResultRepository.Queryable.Include(x => x.Unit)
+                                                            .Where(x => x.StudentId == studentId && x.Status == EnumResultStatus.Done && x.CourseId == request.CourseId)
+                                                            .ToArrayAsync(cancellationToken);
+                if (unitResults != null && unitResults.Any())
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(placementTestScore));
-                    return methodResult;
+                    overallScoreModel.SkillScores = unitResults.Where(x => x.SkillScores != null && x.SkillScores.Any())
+                        .SelectMany(x => x.SkillScores!)
+                        .GroupBy(x => x.Skill)
+                        .Select(x => new SkillScores
+                        {
+                            Skill = x.Key,
+                            CorrectCount = x.Sum(x => x.CorrectCount),
+                            TotalCount = x.Sum(x => x.TotalCount),
+                            Scores = x.Average(x => x.Scores),
+                            CountQuestion = x.Sum(x => x.CountQuestion),
+                            TotalQuestion = x.Sum(x => x.TotalQuestion),
+                            Percent = x.Average(x => x.Percent)
+                        }).ToList();
+                    overallScoreModel.IsPlacement = false;
+                    overallScoreModel.Percent = unitResults.Average(x => x.Percent);
                 }
-                overallScoreModel.SkillScores = placementTestScore.SkillScores;
-                overallScoreModel.IsPlacement = true;
-                overallScoreModel.Percent = placementTestScore.Percent;
+                else
+                {
+                    var placementTestScore = await _placementTestResultRepository.Queryable.OrderByDescending(x => x.CreatedDate).FirstOrDefaultAsync(x => x.StudentId == studentId && x.Status == EnumResultStatus.Done, cancellationToken);
+                    if (placementTestScore == null)
+                    {
+                        methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(placementTestScore));
+                        return methodResult;
+                    }
+                    overallScoreModel.SkillScores = placementTestScore.SkillScores;
+                    overallScoreModel.IsPlacement = true;
+                    overallScoreModel.Percent = placementTestScore.Percent;
+                }
             }
             overallScoreModel.CourseLevel = level ?? default;
             overallScoreModel.CourseType = course.CourseType;
