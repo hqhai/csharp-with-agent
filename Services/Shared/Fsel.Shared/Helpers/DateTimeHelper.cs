@@ -16,10 +16,12 @@ namespace Fsel.Shared.Helpers
         {
             DateTime today = DateTime.Today;
             int age = today.Year - birthday?.Year ?? default;
-            if (today > birthday?.AddYears(age))
-            {
-                age--;
-            }
+            #region Bỏ check tuổi theo ngày chỉ tính năm sinh
+            //if (today > birthday?.AddYears(age))
+            //{
+            //    age--;
+            //}
+            #endregion
             return age;
         }
 

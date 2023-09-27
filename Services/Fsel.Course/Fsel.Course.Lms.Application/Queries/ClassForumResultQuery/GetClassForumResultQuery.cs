@@ -10,7 +10,6 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
-    using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Services.UserServices;
@@ -75,8 +74,11 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
                 }
                 else
                 {
-                    classForumResult.CheckCsoId = csoId;
-                    classForumResult.CheckStartDate = DateTime.Now;
+                    if (classForumResult.CheckCsoId == null)
+                    {
+                        classForumResult.CheckCsoId = csoId;
+                        classForumResult.CheckStartDate = DateTime.Now;
+                    }
                 }
             }
 
@@ -91,8 +93,11 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
                 }
                 else
                 {
-                    classForumResult.GradingTeacherId = teacherId;
-                    classForumResult.GradingStartDate = DateTime.Now;
+                    if (classForumResult.GradingTeacherId == null)
+                    {
+                        classForumResult.GradingTeacherId = teacherId;
+                        classForumResult.GradingStartDate = DateTime.Now;
+                    }
                 }
             }
 

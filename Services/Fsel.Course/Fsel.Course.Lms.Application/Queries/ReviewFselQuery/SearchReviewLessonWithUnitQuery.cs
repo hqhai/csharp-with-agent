@@ -91,7 +91,10 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
                                 Stars = baseQ.NumberOfStars,
                                 TeacherId = v.TeacherId,
                             };
-
+            if (request.TeacherId != null)
+            {
+                unitQuery = unitQuery.Where(x => x.TeacherId == request.TeacherId);
+            }
             var query = unitQuery
                 .GroupBy(c => new { c.Id, c.Code, c.CreatedDate })
                 .Select(group => new ReviewLessonWithUnitModel
@@ -102,16 +105,13 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
                     Stars = group.Average(x => x.Stars),
                     TeacherIds = group.Select(x => x.TeacherId).Distinct().ToList()
                 });
-            if (request.TeacherId != null)
-            {
-                query = query.Where(x => x.TeacherIds != null && x.TeacherIds.Contains(request.TeacherId ?? default));
-            }
+
             if (request.NumberOfStars != null)
             {
-                query = query.Where(x => x.Stars >= request.NumberOfStars && x.Stars < request.NumberOfStars + 0.5);
+                query = query.Where(x => x.Stars + 0.5 >= request.NumberOfStars && x.Stars < request.NumberOfStars + 0.5);
             }
             var result = await query.ToListAsync(cancellationToken);
-            var stars = NumberHelper.ConvertDoubleDecimal(result.Average(x => x.Stars));
+            var stars = result.Any() ? NumberHelper.ConvertDoubleDecimal(result.Average(x => x.Stars)) : default;
             int totalItem = await query.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
             var lists = await query
                     .ApplySortAndPaging(request)

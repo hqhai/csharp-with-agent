@@ -61,9 +61,9 @@ namespace Fsel.Course.Lms.Application.Commands.CourseResultCmd
 
             #endregion Validation
 
-            if (courseResult.Status == EnumCourseStatus.New)
+            if (courseResult.Status == EnumResultStatus.New)
             {
-                courseResult.Status = EnumCourseStatus.Active;
+                courseResult.Status = EnumResultStatus.Process;
                 _courseResultRepository.Update(courseResult);
                 await _courseResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             }

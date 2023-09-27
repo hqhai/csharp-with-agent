@@ -1,6 +1,6 @@
 {
   "GlobalConfiguration": {
-    "BaseUrl": "https://fsel-gate-way-api.fsel.edu.vn"
+    "BaseUrl": "http://gateway-staging.fsel-staging.svc"
   },
   "Routes": [
     // Auth Service
@@ -9,11 +9,11 @@
       "UpstreamPathTemplate": "/auth-gateway/{everything}",
       "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ],
       "DownstreamPathTemplate": "/api/{everything}",
-      "DownstreamScheme": "https",
+      "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "fsel-auth-api.fsel.edu.vn",
-          "Port": 443
+          "Host": "auth-staging.fsel-staging.svc",
+          "Port": 80
         }
       ]
     },
@@ -23,11 +23,11 @@
       "UpstreamPathTemplate": "/user-gateway/{everything}",
       "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ],
       "DownstreamPathTemplate": "/api/{everything}",
-      "DownstreamScheme": "https",
+      "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "fsel-user-api.fsel.edu.vn",
-          "Port": 443
+          "Host": "user-staging.fsel-staging.svc",
+          "Port": 80
         }
       ],
       "AuthenticationOptions": {
@@ -41,11 +41,11 @@
       "UpstreamPathTemplate": "/lcms-course-gateway/{everything}",
       "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ],
       "DownstreamPathTemplate": "/api/{everything}",
-      "DownstreamScheme": "https",
+      "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "fsel-lcms-api.fsel.edu.vn",
-          "Port": 443
+          "Host": "lcmsapi-staging.fsel-staging.svc",
+          "Port": 80
         }
       ],
       "AuthenticationOptions": {
@@ -59,11 +59,11 @@
       "UpstreamPathTemplate": "/lms-course-gateway/{everything}",
       "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ],
       "DownstreamPathTemplate": "/api/{everything}",
-      "DownstreamScheme": "https",
+      "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "fsel-lms-api.fsel.edu.vn",
-          "Port": 443
+          "Host": "lmsapi-staging.fsel-staging.svc",
+          "Port": 80
         }
       ],
       "AuthenticationOptions": {
@@ -77,11 +77,11 @@
       "UpstreamPathTemplate": "/storage-gateway/{everything}",
       "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ],
       "DownstreamPathTemplate": "/api/{everything}",
-      "DownstreamScheme": "https",
+      "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "fsel-storage-api.fsel.edu.vn",
-          "Port": 443
+          "Host": "storage-staging.fsel-staging.svc",
+          "Port": 80
         }
       ]
     },
@@ -91,11 +91,11 @@
       "UpstreamPathTemplate": "/sender-gateway/{everything}",
       "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ],
       "DownstreamPathTemplate": "/api/{everything}",
-      "DownstreamScheme": "https",
+      "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "fsel-sender-api.fsel.edu.vn",
-          "Port": 443
+          "Host": "sender-staging.fsel-staging.svc",
+          "Port": 80
         }
       ]
     },
@@ -105,11 +105,11 @@
       "UpstreamPathTemplate": "/training-gateway/{everything}",
       "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ],
       "DownstreamPathTemplate": "/api/{everything}",
-      "DownstreamScheme": "https",
+      "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "fsel-training-api.fsel.edu.vn",
-          "Port": 443
+          "Host": "training-staging.fsel-staging.svc",
+          "Port": 80
         }
       ]
     },
@@ -119,11 +119,11 @@
       "UpstreamPathTemplate": "/interaction-gateway/{everything}",
       "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ],
       "DownstreamPathTemplate": "/api/{everything}",
-      "DownstreamScheme": "https",
+      "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "fsel-interaction-api.fsel.edu.vn",
-          "Port": 443
+          "Host": "interaction-staging.fsel-staging.svc",
+          "Port": 80
         }
       ]
     },
@@ -133,11 +133,11 @@
       "UpstreamPathTemplate": "/ordering-gateway/{everything}",
       "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ],
       "DownstreamPathTemplate": "/api/{everything}",
-      "DownstreamScheme": "https",
+      "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "fsel-ordering-api.fsel.edu.vn",
-          "Port": 443
+          "Host": "ordering-staging.fsel-staging.svc",
+          "Port": 80
         }
       ]
     },
@@ -147,11 +147,11 @@
       "UpstreamPathTemplate": "/system-gateway/{everything}",
       "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ],
       "DownstreamPathTemplate": "/api/{everything}",
-      "DownstreamScheme": "https",
+      "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "fsel-system-api.fsel.edu.vn",
-          "Port": 443
+          "Host": "system-staging.fsel-staging.svc",
+          "Port": 80
         }
       ]
     },
@@ -161,11 +161,11 @@
       "UpstreamPathTemplate": "/realtime-gateway/{everything}",
       "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ],
       "DownstreamPathTemplate": "/api/{everything}",
-      "DownstreamScheme": "https",
+      "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "fsel-realtime-api.fsel.edu.vn",
-          "Port": 443
+          "Host": "realtime-staging.fsel-staging.svc",
+          "Port": 80
         }
       ]
     },
@@ -175,11 +175,11 @@
       "UpstreamPathTemplate": "/notification-gateway/{everything}",
       "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ],
       "DownstreamPathTemplate": "/api/{everything}",
-      "DownstreamScheme": "https",
+      "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "fsel-notification-api.fsel.edu.vn",
-          "Port": 443
+          "Host": "notification-staging.fsel-staging.svc",
+          "Port": 80
         }
       ]
     }
@@ -191,7 +191,7 @@
         {
           "Name": "Auths API",
           "Version": "v1",
-          "Url": "https://fsel-auth-api.fsel.edu.vn/swagger/v1/swagger.json"
+          "Url": "http://auth-staging.fsel-staging.svc/swagger/v1/swagger.json"
         }
       ]
     },
@@ -201,7 +201,7 @@
         {
           "Name": "Users API",
           "Version": "v1",
-          "Url": "https://fsel-user-api.fsel.edu.vn/swagger/v1/swagger.json"
+          "Url": "http://user-staging.fsel-staging.svc/swagger/v1/swagger.json"
         }
       ]
     },
@@ -211,7 +211,7 @@
         {
           "Name": "Lcms Courses API",
           "Version": "v1",
-          "Url": "https://fsel-lcms-api.fsel.edu.vn/swagger/v1/swagger.json"
+          "Url": "http://lcmsapi-staging.fsel-staging.svc/swagger/v1/swagger.json"
         }
       ]
     },
@@ -221,7 +221,7 @@
         {
           "Name": "Lms Courses API",
           "Version": "v1",
-          "Url": "https://fsel-lms-api.fsel.edu.vn/swagger/v1/swagger.json"
+          "Url": "http://lmsapi-staging.fsel-staging.svc/swagger/v1/swagger.json"
         }
       ]
     },
@@ -231,7 +231,7 @@
         {
           "Name": "Storage API",
           "Version": "v1",
-          "Url": "https://fsel-storage-api.fsel.edu.vn/swagger/v1/swagger.json"
+          "Url": "http://storage-staging.fsel-staging.svc/swagger/v1/swagger.json"
         }
       ]
     },
@@ -241,7 +241,7 @@
         {
           "Name": "Senders API",
           "Version": "v1",
-          "Url": "https://fsel-sender-api.fsel.edu.vn/swagger/v1/swagger.json"
+          "Url": "http://sender-staging.fsel-staging.svc/swagger/v1/swagger.json"
         }
       ]
     },
@@ -251,7 +251,7 @@
         {
           "Name": "Training API",
           "Version": "v1",
-          "Url": "https://fsel-training-api.fsel.edu.vn/swagger/v1/swagger.json"
+          "Url": "http://training-staging.fsel-staging.svc/swagger/v1/swagger.json"
         }
       ]
     },
@@ -261,7 +261,7 @@
         {
           "Name": "Interaction API",
           "Version": "v1",
-          "Url": "https://fsel-interaction-api.fsel.edu.vn/swagger/v1/swagger.json"
+          "Url": "http://interaction-staging.fsel-staging.svc/swagger/v1/swagger.json"
         }
       ]
     },
@@ -271,7 +271,7 @@
         {
           "Name": "Ordering API",
           "Version": "v1",
-          "Url": "https://fsel-ordering-api.fsel.edu.vn/swagger/v1/swagger.json"
+          "Url": "http://ordering-staging.fsel-staging.svc/swagger/v1/swagger.json"
         }
       ]
     },
@@ -281,7 +281,7 @@
         {
           "Name": "System API",
           "Version": "v1",
-          "Url": "https://fsel-system-api.fsel.edu.vn/swagger/v1/swagger.json"
+          "Url": "http://system-staging.fsel-staging.svc/swagger/v1/swagger.json"
         }
       ]
     },
@@ -291,7 +291,7 @@
         {
           "Name": "Realtime API",
           "Version": "v1",
-          "Url": "https://fsel-realtime-api.fsel.edu.vn/swagger/v1/swagger.json"
+          "Url": "http://realtime-staging.fsel-staging.svc/swagger/v1/swagger.json"
         }
       ]
     },
@@ -301,7 +301,7 @@
         {
           "Name": "Notification API",
           "Version": "v1",
-          "Url": "https://fsel-notification-api.fsel.edu.vn/swagger/v1/swagger.json"
+          "Url": "http://notification-staging.fsel-staging.svc/swagger/v1/swagger.json"
         }
       ]
     }

@@ -14,7 +14,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
     public class ReviewLessonWithUnitModel : BaseModel
     {
         public string? Code { get; set; }
-        public IList<Guid>? TeacherIds { get; set; }
+        public IList<Guid> TeacherIds { get; set; } = new List<Guid>();
         public IList<string>? TeacherNames { get; set; }
         public double Stars { get; set; }
     }
