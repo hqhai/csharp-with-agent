@@ -42,13 +42,14 @@ namespace Fsel.System.Application.Commands.GameTopicCmd
             }
             var gameTopicIds = request.GameTopics.Select(x => x.Id).ToArray();
             var deleteGameTopics = await _gameTopicRepository.Queryable.Where(x => !gameTopicIds.Contains(x.Id)).ToListAsync(cancellationToken);
+            var gameTopics = await _gameTopicRepository.GetByIdsAsync(request.GameTopics.Select(x => x.Id ?? default).ToList());
 
             foreach (var item in request.GameTopics)
             {
                 GameTopic? gameTopic;
                 if (item.Id.HasValue)
                 {
-                    gameTopic = await _gameTopicRepository.GetByIdAsync(item.Id.Value);
+                    gameTopic = gameTopics.FirstOrDefault(x => x.Id == item.Id.Value);
                     if (gameTopic == null)
                     {
                         methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(gameTopic));

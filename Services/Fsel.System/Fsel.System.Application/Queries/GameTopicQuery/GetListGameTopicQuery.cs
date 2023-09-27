@@ -15,14 +15,14 @@ namespace Fsel.System.Application.Queries.GameTopicQuery
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class GetListGameTopicQuery : BaseQueryModel, IRequest<MethodResult<IList<GameTopicModel>>>
+    public class GetListGameTopicQuery : BaseQueryModel, IRequest<MethodResult<IList<GameTopicsModel>>>
     {
         public string? Value { get; set; }
 
         public EnumCourseLevel? CourseLevel { get; set; }
     }
 
-    public class GetListGameTopicQueryHandler : IRequestHandler<GetListGameTopicQuery, MethodResult<IList<GameTopicModel>>>
+    public class GetListGameTopicQueryHandler : IRequestHandler<GetListGameTopicQuery, MethodResult<IList<GameTopicsModel>>>
     {
         private readonly IGameTopicRepository _gameTopicRepository;
         private readonly IMapper _mapper;
@@ -33,32 +33,37 @@ namespace Fsel.System.Application.Queries.GameTopicQuery
             _mapper = mapper;
         }
 
-        public async Task<MethodResult<IList<GameTopicModel>>> Handle(GetListGameTopicQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<IList<GameTopicsModel>>> Handle(GetListGameTopicQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            MethodResult<IList<GameTopicModel>> methodResult = new MethodResult<IList<GameTopicModel>>();
+            MethodResult<IList<GameTopicsModel>> methodResult = new MethodResult<IList<GameTopicsModel>>();
 
             var gameTopic = await _gameTopicRepository.Queryable
-                        .Select(x => new GameTopicModel
+                        .GroupBy(x => x.UnitOrder)
+                        .Select(x => new GameTopicsModel
                         {
-                            Id = x.Id,
-                            CreatedDate = x.CreatedDate,
-                            CreatedFullName = x.CreatedFullName,
-                            CourseLevel = x.CourseLevel,
-                            Skill = x.Skill,
-                            UnitOrder = x.UnitOrder,
-                            Value = x.Value,
+                            GameTopics = x.Select(x => new GameTopicModel
+                            {
+                                Id = x.Id,
+                                CreatedDate = x.CreatedDate,
+                                CreatedFullName = x.CreatedFullName,
+                                CourseLevel = x.CourseLevel,
+                                Skill = x.Skill,
+                                UnitOrder = x.UnitOrder,
+                                Value = x.Value,
+                            }).ToList(),
                         }).ToListAsync(cancellationToken);
 
             if (!string.IsNullOrEmpty(request.Keyword))
             {
-                gameTopic = gameTopic.Where(m => m.Id.ToString() == request.Keyword || (m.Value ?? string.Empty).Contains(request.Keyword, StringComparison.OrdinalIgnoreCase)).ToList();
+                gameTopic = gameTopic.Where(m => m.GameTopics?.Select(x => x.Id).ToString() == request.Keyword || (m.GameTopics?.Select(x => x.Value).FirstOrDefault() ?? string.Empty).Contains(request.Keyword, StringComparison.OrdinalIgnoreCase)).ToList();
             }
 
             if (request.CourseLevel != null)
             {
-                gameTopic = gameTopic.Where(x => x.CourseLevel == request.CourseLevel).ToList();
+                gameTopic = gameTopic.Where(x => x.GameTopics?.Select(x => x.CourseLevel).FirstOrDefault() == request.CourseLevel).ToList();
             }
+ 
             methodResult.Result = gameTopic;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
