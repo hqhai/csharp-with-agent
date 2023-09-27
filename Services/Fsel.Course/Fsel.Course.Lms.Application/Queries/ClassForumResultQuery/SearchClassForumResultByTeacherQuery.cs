@@ -60,11 +60,13 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
                                         CreatedDate = x.CreatedDate,
                                         CreatedUserId = x.CreatedUserId,
                                         CreatedFullName = x.CreatedFullName,
+                                        CourseSkill = x.ClassForum!.CourseSkill,
                                         ClassForum = x.ClassForum!.ClassForumResults!.Select(x => x.ClassForum).Select(x => new ClassForumModel
                                         {
                                             Id = x!.Id,
                                             CreatedUserId = x.CreatedUserId,
                                             CreatedFullName = x.CreatedFullName,
+                                            CourseSkill = x.CourseSkill,
                                         }).FirstOrDefault(),
                                         Status = x.Status,
                                         GradingStartDate = x.GradingStartDate,
