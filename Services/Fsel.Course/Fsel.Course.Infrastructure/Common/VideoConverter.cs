@@ -256,13 +256,46 @@ namespace Fsel.Course.Infrastructure.Common
         {
             ArgumentNullException.ThrowIfNull(videoResult);
             VoidMethodResult methodResult = new VoidMethodResult();
+
+            //var answerQuery = from baseQ in _videoResultRepository.Queryable
+            //                  join vtca in _videoTimeCodeAnswerRepository.Queryable on baseQ.Id equals vtca.VideoResultId
+            //                  join e in _exerciseRepository.Queryable on vtca.ExerciseId equals e.Id
+            //                  //join te in _timeCodeExerciseRepository.Queryable on e.Id equals te.ExerciseId
+            //                  join vt in _videoTimeCodeRepository.Queryable on vtca.VideoTimeCodeId equals vt.Id
+            //                  where baseQ.Id == videoResult.Id
+            //                  group new { vt, vtca, e } by new { e.CourseSkill, vt.TimeCodeType } into g
+            //                  select new
+            //                  {
+            //                      Type = g.Key.TimeCodeType,
+            //                      Skill = g.Key.CourseSkill,
+            //                      CorrectCount = g.Sum(x => x.vtca.CorrectCount),
+            //                      TotalAnswer = g.Select(x => x.vtca).Count()
+            //                  };
+
             var answerQuery = from baseQ in _videoResultRepository.Queryable
-                              join vtca in _videoTimeCodeAnswerRepository.Queryable on baseQ.Id equals vtca.VideoResultId
-                              join e in _exerciseRepository.Queryable on vtca.ExerciseId equals e.Id
-                              join te in _timeCodeExerciseRepository.Queryable on e.Id equals te.ExerciseId
-                              join vt in _videoTimeCodeRepository.Queryable on te.VideoTimeCodeId equals vt.Id
-                              where baseQ.Id == videoResult.Id
-                              group new { vt, vtca } by new { vt.TimeCodeType, e.CourseSkill } into g
+                              join v in _videoRepository.Queryable on baseQ.VideoId equals v.Id
+                              join vt in _videoTimeCodeRepository.Queryable on v.Id equals vt.VideoId
+                              join te in _timeCodeExerciseRepository.Queryable on vt.Id equals te.VideoTimeCodeId
+                              join e in _exerciseRepository.Queryable on te.ExerciseId equals e.Id
+                              join eq in _exerciseQuestionRepository.Queryable on e.Id equals eq.ExerciseId
+                              join q in _questionRepository.Queryable on eq.QuestionId equals q.Id
+                              join vtca in _videoTimeCodeAnswerRepository.Queryable on new
+                              {
+                                  VideoResultId = baseQ.Id,
+                                  ExerciseId = e.Id,
+                                  VideoTimeCodeId = vt.Id,
+                                  QuestionId = q.Id
+                              }
+                              equals
+                              new
+                              {
+                                  vtca.VideoResultId,
+                                  vtca.ExerciseId,
+                                  vtca.VideoTimeCodeId,
+                                  vtca.QuestionId,
+                              }
+                              where baseQ.Id == videoResult.Id && q.QuestionType != EnumQuestionType.ExercisePreparation
+                              group new { vt, vtca, e } by new { e.CourseSkill, vt.TimeCodeType } into g
                               select new
                               {
                                   Type = g.Key.TimeCodeType,
@@ -279,7 +312,7 @@ namespace Fsel.Course.Infrastructure.Common
                                 join eq in _exerciseQuestionRepository.Queryable on e.Id equals eq.ExerciseId
                                 join q in _questionRepository.Queryable on eq.QuestionId equals q.Id
                                 where baseQ.Id == videoResult.Id && q.QuestionType != EnumQuestionType.ExercisePreparation
-                                group new { vt, q } by new { vt.TimeCodeType, e.CourseSkill } into g
+                                group new { vt, q, e } by new { vt.TimeCodeType, e.CourseSkill } into g
                                 select new
                                 {
                                     Type = g.Key.TimeCodeType,
