@@ -77,6 +77,14 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                 {
                     errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.CodeCourse), Message = "Code Course is null" });
                 }
+                else
+                {
+                    var checkExistCode = await _lmsCourseService.GetCourseByCode(x.CodeCourse);
+                    if (!checkExistCode.IsSuccessStatusCode || checkExistCode.Content?.Result == null)
+                    {
+                        errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.CodeCourse), Message = "Code Course is not exist" });
+                    }
+                }
                 if (string.IsNullOrEmpty(x.CodePackage))
                 {
                     errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.CodePackage), Message = "Code Package is null" });
@@ -87,16 +95,6 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                 }
                 return await Task.FromResult(errors.Count == 0);
             });
-
-            foreach (var item in result.Datas)
-            {
-                var checkExistCode = await _lmsCourseService.GetCourseByCode(item.CodeCourse!);
-                if (!checkExistCode.IsSuccessStatusCode)
-                {
-                    methodResult.AddErrorBadRequest("Code Course not exist");
-                    return methodResult;
-                }
-            }
 
             var duplicateEmails = result.Datas.GroupBy(user => user.Email).Where(group => group.Count() > 1).Select(group => group.Key);
 
