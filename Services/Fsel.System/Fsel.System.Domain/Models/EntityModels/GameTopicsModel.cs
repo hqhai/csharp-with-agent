@@ -1,0 +1,14 @@
+// Copyright (c) Atlantic. All rights reserved.
+
+namespace Fsel.System.Domain.Models.EntityModels
+{
+    using Fsel.System.Domain.Enums;
+    using global::System.Collections.Generic;
+
+    public class GameTopicsModel
+    {
+        public EnumUnitOrder UnitOrder { get; set; }
+
+        public IList<GameTopicModel>? GameTopics { get; set; }
+    }
+}
