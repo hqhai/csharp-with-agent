@@ -38,8 +38,19 @@ namespace Fsel.System.Application.Queries.GameTopicQuery
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<IList<GameTopicsModel>> methodResult = new MethodResult<IList<GameTopicsModel>>();
 
-            var gameTopic = await _gameTopicRepository.Queryable
-                        .GroupBy(x => x.UnitOrder)
+            var query = _gameTopicRepository.Queryable;
+
+            if (!string.IsNullOrEmpty(request.Keyword))
+            {
+                query = query.Where(m => m.Id.ToString() == request.Keyword || (m.Value ?? string.Empty).Contains(request.Keyword, StringComparison.OrdinalIgnoreCase));
+            }
+
+            if (request.CourseLevel != null)
+            {
+                query = query.Where(x => x.CourseLevel == request.CourseLevel);
+            }
+
+            var gameTopics = await query.GroupBy(x => x.UnitOrder)
                         .Select(x => new GameTopicsModel
                         {
                             UnitOrder = x.Key,
@@ -55,17 +66,7 @@ namespace Fsel.System.Application.Queries.GameTopicQuery
                             }).ToList(),
                         }).ToListAsync(cancellationToken);
 
-            if (!string.IsNullOrEmpty(request.Keyword))
-            {
-                gameTopic = gameTopic.Where(m => m.GameTopics?.Select(x => x.Id).ToString() == request.Keyword || (m.GameTopics?.Select(x => x.Value).FirstOrDefault() ?? string.Empty).Contains(request.Keyword, StringComparison.OrdinalIgnoreCase)).ToList();
-            }
-
-            if (request.CourseLevel != null)
-            {
-                gameTopic = gameTopic.Where(x => x.GameTopics?.Select(x => x.CourseLevel).FirstOrDefault() == request.CourseLevel).ToList();
-            }
- 
-            methodResult.Result = gameTopic;
+            methodResult.Result = gameTopics;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }
