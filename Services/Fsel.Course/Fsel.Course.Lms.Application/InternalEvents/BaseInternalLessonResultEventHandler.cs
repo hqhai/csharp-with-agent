@@ -16,6 +16,11 @@ namespace Fsel.Course.Lms.Application.InternalEvents
         {
         }
 
+        private const int TotalClassForum = 36;
+        private const int PercentOccupyHomeWork = 30;
+        private const int PercentOccupyVideo = 40;
+        private const int PercentOccupyClassForum = 40;
+
         public async Task GetLessonResult(LessonResult lessonResult, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(lessonResult);
@@ -50,11 +55,11 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                                     }).ToList();
             lessonResult.CorrectCount = (int)(correctVideo + correctClassForum + correctHomeWork ?? default);
             lessonResult.CorrectTotal = (int)(totalVideo + totalHomeWork + totalClassForum ?? default);
-            lessonResult.Percent = NumberHelper.ConvertDoublePercent(percentVideo * 40 + percentHomeWork * 30 + percentClassForum * 40 ?? default);
+            lessonResult.Percent = NumberHelper.ConvertDoublePercent(percentVideo * PercentOccupyVideo + percentHomeWork * PercentOccupyHomeWork + percentClassForum * PercentOccupyClassForum);
             lessonResult.SkillScores = groupedSkillScores;
         }
 
-        private async Task<(double?, double?, double?, IList<SkillScores>?)> GetVideoResult(Guid lessonResultId, CancellationToken cancellationToken)
+        private async Task<(double?, double?, double, IList<SkillScores>?)> GetVideoResult(Guid lessonResultId, CancellationToken cancellationToken)
         {
             var videoResult = await _videoResultRepository.Queryable.FirstOrDefaultAsync(x => x.LessonResultId == lessonResultId, cancellationToken);
             if (videoResult != null)
@@ -81,10 +86,10 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                     CorrectCount = classForumResult.ClassForumScores?.Sum(x => x.Score) ?? default,
                     CountQuestion = 1,
                     TotalQuestion = 1,
-                    TotalCount = 36,
+                    TotalCount = TotalClassForum,
                     Skill = classForumResult.ClassForum?.CourseSkill ?? default,
                 };
-                skillScores.Percent = NumberHelper.ConvertDouble((double)skillScores.CorrectCount / skillScores.TotalCount * 100);
+                skillScores.Percent = NumberHelper.ConvertPercentDouble((double)skillScores.CorrectCount / skillScores.TotalCount);
                 return (skillScores.CorrectCount, skillScores.TotalCount, skillScores.Percent, new List<SkillScores> { skillScores });
             }
 
@@ -99,8 +104,8 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 return (null, null, default, null);
             }
             var skillScores = homeWorkResults.Where(x => x.SkillScores != null && x.SkillScores.Any()).SelectMany(x => x.SkillScores!).ToList();
-            skillScores.ForEach(x => x.Percent = x.TotalCount > 0 ? NumberHelper.ConvertDouble(x.CorrectCount / x.TotalCount * 100) : default);
-            return (skillScores.Sum(x => x.TotalCount), skillScores.Sum(x => x.TotalCount), skillScores.Average(x => x.Scores), skillScores);
+            skillScores.ForEach(x => x.Percent = x.TotalCount > 0 ? NumberHelper.ConvertPercentDouble((double)x.CorrectCount / x.TotalCount) : default);
+            return (skillScores.Sum(x => x.TotalCount), skillScores.Sum(x => x.TotalCount), NumberHelper.ConvertDoubleDecimal(skillScores.Average(x => x.Scores)), skillScores);
         }
     }
 }
