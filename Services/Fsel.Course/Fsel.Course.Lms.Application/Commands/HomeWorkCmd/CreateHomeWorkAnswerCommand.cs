@@ -129,11 +129,13 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd
             }
             var homeWork = await _homeWorkRepository.Queryable
                             .Include(x => x!.HomeWorkQuestions)
+                            .ThenInclude(x => x.Question)
                             .Where(x => x.Id == homeWorkResult.HomeWorkId)
                             .Select(h => new LessonHomeWorkResultModel
                             {
                                 Id = h.Id,
                                 QuestionTotal = h.HomeWorkQuestions.Count(),
+                                CorrectTotal = h.HomeWorkQuestions.Select(x => x.Question).Sum(x => x!.CorrectTotal),
                             }).FirstOrDefaultAsync(cancellationToken);
             if (homeWork != null && request.Answers.Count == homeWork.QuestionTotal)
             {

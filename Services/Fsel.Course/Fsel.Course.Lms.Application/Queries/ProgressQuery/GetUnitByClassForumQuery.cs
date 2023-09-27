@@ -85,7 +85,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
                 {
                     Id = x.Id,
                     CorrectCount = x.ClassForumScores.Count > 0 ? x.ClassForumScores.Sum(x => x.Score) : default,
-                    TotalCorrect = 30,
+                    TotalCorrect = 36,
                     Status = x.Status,
                 }).FirstOrDefault(),
             }).ToList();

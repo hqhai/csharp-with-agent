@@ -112,6 +112,11 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
             }
+            courseModel.CourseClass = new CourseClassModel
+            {
+                Code = @class.Code,
+                CourseId = course?.Id ?? default
+            };
             var teachersResult = await _userService.GetTeacherByIdsAsync(new GetTeacherByIdsQueryModel { Ids = course?.CourseTeachers?.Select(x => x.TeacherId).ToList() });
             var teachers = teachersResult?.Content?.Result;
             if (teachersResult != null && teachersResult.IsSuccessStatusCode && teachers != null && courseModel.CourseTeachers != null)
@@ -162,7 +167,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
             course.CourseResults.Add(new CourseResult
             {
                 StudentId = studentId ?? default,
-                Status = EnumCourseStatus.Active
+                Status = EnumResultStatus.Process
             });
             var unitIds = course.CourseUnitMockTests.Where(x => x.UnitId != null).OrderBy(x => x.DisplayOrder).Select(x => x.UnitId).ToList();
             var finalTestIds = course.CourseUnitMockTests.Where(x => x.FinalTestId != null).Select(x => x.FinalTestId).ToList();

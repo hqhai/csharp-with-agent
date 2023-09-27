@@ -58,9 +58,10 @@ namespace Fsel.Course.Lms.Application.Queries.StudentQuery
             int age = DateTimeHelper.GetYearOld(student?.Human?.Birthday);
             if (student != null)
             {
-                var placementTestResult = await _placementTestResultRepository.Queryable.Where(x => x.Status == EnumResultStatus.Done && x.StudentId == student.Id)
-                                                                               .OrderByDescending(x => x.CreatedDate)
-                                                                               .FirstOrDefaultAsync(cancellationToken);
+                var placementTestResults = await _placementTestResultRepository.Queryable.Where(x => x.Status == EnumResultStatus.Done && x.StudentId == student.Id)
+                                                                               .ToListAsync(cancellationToken);
+
+                var placementTestResult = placementTestResults.OrderByDescending(x => x.CreatedDate).FirstOrDefault();
                 var (levelNext, isLock) = placementTestResult?.Level.GetLevelInScore(placementTestResult.Percent, age) ?? (null, default);
 
                 settingStudentModel.Level = student.CourseLevel;
@@ -68,6 +69,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentQuery
                 settingStudentModel.ClassId = student.ClassId ?? null;
                 settingStudentModel.PTLevel = placementTestResult?.Level ?? null;
                 settingStudentModel.IsLockPT = isLock;
+                settingStudentModel.StartPTLevel = placementTestResults.OrderBy(x => x.CreatedDate).FirstOrDefault()?.Level;
                 var classResult = await _trainingService.GetClassByStudentId(student.Id);
                 if (!classResult.IsSuccessStatusCode)
                 {

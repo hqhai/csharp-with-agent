@@ -30,6 +30,7 @@ builder.Services.AddScoped<IQuestBoardRepository, QuestBoardRepository>();
 builder.Services.AddScoped<IQuestBoardConfigRepository, QuestBoardConfigRepository>();
 builder.Services.AddScoped<IFeatureAccessTimeRepository, FeatureAccessTimeRepository>();
 builder.Services.AddScoped<IQuestBoardStudentRepository, QuestBoardStudentRepository>();
+builder.Services.AddScoped<IGameTopicRepository, GameTopicRepository>();
 builder.AddRefitClients(typeof(IUserService), appSetting?.Services?.UserApiUrl);
 builder.AddRefitClients(typeof(ICourseService), appSetting?.Services?.LmsCourseApiUrl);
 builder.AddRefitClients(typeof(IOrderService), appSetting?.Services?.OrderApiUrl);

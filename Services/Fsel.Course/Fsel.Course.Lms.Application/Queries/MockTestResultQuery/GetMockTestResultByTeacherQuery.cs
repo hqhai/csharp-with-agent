@@ -77,8 +77,11 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
             }
             else
             {
-                mockTestResult.GradingTeacherId = teacherId;
-                mockTestResult.GradingStartDate = DateTime.Now;
+                if (mockTestResult.GradingTeacherId == null)
+                {
+                    mockTestResult.GradingTeacherId = teacherId;
+                    mockTestResult.GradingStartDate = DateTime.Now;
+                }
             }
             var mockTestModel = new MockTestModel
             {
