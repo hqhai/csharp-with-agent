@@ -15,7 +15,14 @@ namespace Fsel.Course.Lms.Application.InternalEvents
         {
         }
 
+        private const int PercentOccupyVideo = 18;
+        private const int PercentOccupySkillTest = 10;
+        private const int PercentOccupyUnitTest = 30;
+        private const int PercentOccupyHomeWork = 22;
+        private const int PercentOccupyClassForum = 20;
+
         public async Task UpdateUnit(IList<Guid>? lessonResultIds, Unit? unit, Guid courseId, Guid studentId, bool isDone, CancellationToken cancellationToken)
+
         {
             ArgumentNullException.ThrowIfNull(lessonResultIds);
             ArgumentNullException.ThrowIfNull(unit);
@@ -40,11 +47,19 @@ namespace Fsel.Course.Lms.Application.InternalEvents
         private async Task<(List<SkillScores>, double)> GetUnitSkillScores(IList<Guid>? lessonResultIds)
         {
             ArgumentNullException.ThrowIfNull(lessonResultIds);
-            var (videoSkillScores, percentVideo) = await GetVideoSkillScores(lessonResultIds, EnumTimeCodeType.Standalone, 18);
-            var (unitTestSkillScores, percentUnitTest) = await GetVideoSkillScores(lessonResultIds, EnumTimeCodeType.UnitTest, 30);
-            var (skillTestSkillScores, percentSkillTest) = await GetVideoSkillScores(lessonResultIds, EnumTimeCodeType.SkillTest, 10);
-            var (homeWorkSkillScores, percentHomeWork) = await GetHomeWordsSkillScores(lessonResultIds, 22);
-            var (classForumSkillScores, percentClassForum) = await GetClassForumSkillScores(lessonResultIds, 20);
+            var (videoSkillScores, percentVideo) = await GetVideoSkillScores(lessonResultIds, EnumTimeCodeType.Standalone, PercentOccupyVideo);
+            var (unitTestSkillScores, percentUnitTest) = await GetVideoSkillScores(lessonResultIds, EnumTimeCodeType.UnitTest, PercentOccupyUnitTest);
+            if (!unitTestSkillScores.Any())
+            {
+                percentUnitTest = PercentOccupyUnitTest;
+            }
+            var (skillTestSkillScores, percentSkillTest) = await GetVideoSkillScores(lessonResultIds, EnumTimeCodeType.SkillTest, PercentOccupySkillTest);
+            if (!skillTestSkillScores.Any())
+            {
+                percentUnitTest = PercentOccupySkillTest;
+            }
+            var (homeWorkSkillScores, percentHomeWork) = await GetHomeWordsSkillScores(lessonResultIds, PercentOccupyHomeWork);
+            var (classForumSkillScores, percentClassForum) = await GetClassForumSkillScores(lessonResultIds, PercentOccupyClassForum);
             List<SkillScores> mergedSkillScores = videoSkillScores.Concat(homeWorkSkillScores).Concat(classForumSkillScores).Concat(skillTestSkillScores).Concat(unitTestSkillScores).ToList();
             List<SkillScores> groupedSkillScores = mergedSkillScores.GroupBy(x => x.Skill).Select(group => GetSumSkillScore(group)).ToList();
             var percent = percentClassForum + percentHomeWork + percentSkillTest + percentUnitTest + percentVideo;
