@@ -96,10 +96,10 @@ namespace Fsel.Course.Lms.Application.InternalEvents
         {
             ArgumentNullException.ThrowIfNull(lessonResultIds);
             List<SkillScores> skillScores = new List<SkillScores>();
-            var videoResult = await _videoResultRepository.Queryable.FirstOrDefaultAsync(x => x.Status == EnumResultStatus.Done && lessonResultIds.Contains(x.LessonResultId));
-            if (videoResult != null && videoResult.VideoSkillScores != null)
+            var videoResults = await _videoResultRepository.Queryable.Where(x => x.Status == EnumResultStatus.Done && lessonResultIds.Contains(x.LessonResultId)).ToListAsync();
+            if (videoResults != null && videoResults.Any())
             {
-                skillScores = videoResult.VideoSkillScores.Where(x => x.Type == type && x.SkillScores != null && x.SkillScores.Any()).SelectMany(x => x.SkillScores!).GroupBy(x => x.Skill).Select(x => GetSkillScore(x)).ToList();
+                skillScores = videoResults.SelectMany(x => x.VideoSkillScores).Where(x => x.Type == type && x.SkillScores != null && x.SkillScores.Any()).SelectMany(x => x.SkillScores!).GroupBy(x => x.Skill).Select(x => GetSkillScore(x)).ToList();
                 if (courseType == EnumCourseType.Academic)
                 {
                     return (skillScores, skillScores.Any() ? NumberHelper.ConvertDoublePercent(skillScores.Average(x => x.Percent * (9 * skillScores.Count))) : default);
@@ -167,10 +167,10 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 }
                 else
                 {
-                    return (skillScores, 0);
+                    return (skillScores, skillScores.Any() ? NumberHelper.ConvertDoublePercent(skillScores.Sum(x => x.Percent * percentSkill / skillScores.Count)) : default);
                 }
             }
-            return (skillScores, skillScores.Any() ? NumberHelper.ConvertDoublePercent(skillScores.Sum(x => x.Percent * percentSkill / skillScores.Count)) : default);
+            return (skillScores, 0);
         }
 
         public static SkillScores GetSumSkillScore(IGrouping<EnumCourseSkill, SkillScores>? group)

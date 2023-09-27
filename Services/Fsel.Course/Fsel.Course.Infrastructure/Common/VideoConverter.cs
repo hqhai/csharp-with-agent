@@ -284,7 +284,7 @@ namespace Fsel.Course.Infrastructure.Common
                                 {
                                     Type = g.Key.TimeCodeType,
                                     Skill = g.Key.CourseSkill,
-                                    TotalCount = g.Sum(x => x.q.CorrectTotal),
+                                    TotalCount = g.Where(x => x.q.Ungraded != true).Sum(x => x.q.CorrectTotal),
                                     TotalQuestion = g.Select(x => x.q).Count()
                                 };
             var questions = await questionQuery.ToListAsync(cancellationToken);

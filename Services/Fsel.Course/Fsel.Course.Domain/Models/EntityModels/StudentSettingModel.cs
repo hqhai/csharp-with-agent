@@ -10,6 +10,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public Guid? ClassId { get; set; }
         public EnumCourseLevel Level { get; set; }
         public EnumPlacementTestLevel? PTLevel { get; set; }
+        public EnumPlacementTestLevel? CurrentLevel { get; set; }
         public bool IsLockPT { get; set; }
         public bool IsLockOrder { get; set; }
     }
