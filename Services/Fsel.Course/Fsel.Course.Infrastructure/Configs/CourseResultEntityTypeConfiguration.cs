@@ -17,7 +17,7 @@ namespace Fsel.Course.Infrastructure.Configs
                 .HasMaxLength(100)
                 .HasConversion(
                     v => v.ToString(),
-                    v => v.EnumParse<EnumCourseStatus>());
+                    v => v.EnumParse<EnumResultStatus>());
 
             builder.HasOne(a => a.Course)
                  .WithMany(b => b.CourseResults)

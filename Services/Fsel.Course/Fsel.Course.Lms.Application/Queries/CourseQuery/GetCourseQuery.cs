@@ -167,7 +167,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
             course.CourseResults.Add(new CourseResult
             {
                 StudentId = studentId ?? default,
-                Status = EnumCourseStatus.Active
+                Status = EnumResultStatus.Process
             });
             var unitIds = course.CourseUnitMockTests.Where(x => x.UnitId != null).OrderBy(x => x.DisplayOrder).Select(x => x.UnitId).ToList();
             var finalTestIds = course.CourseUnitMockTests.Where(x => x.FinalTestId != null).Select(x => x.FinalTestId).ToList();
