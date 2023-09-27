@@ -3,13 +3,17 @@
 namespace Fsel.System.Domain.Models.EntityModels
 {
     using Fsel.Core.Base.BaseModels;
-    using global::System;
-    using global::System.Collections.Generic;
-    using global::System.Linq;
-    using global::System.Text;
-    using global::System.Threading.Tasks;
+    using Fsel.Shared.Enums;
+    using Fsel.System.Domain.Enums;
 
     public class GameTopicModel : BaseModel
     {
+        public EnumUnitOrder UnitOrder { get; set; }
+
+        public string? Value { get; set; }
+
+        public EnumCourseSkill Skill { get; set; }
+
+        public EnumCourseLevel CourseLevel { get; set; }
     }
 }
