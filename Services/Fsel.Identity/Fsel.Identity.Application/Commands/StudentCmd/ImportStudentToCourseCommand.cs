@@ -60,6 +60,9 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                 methodResult.AddError(nameof(EnumSystemErrorCode.ImportFileRequired));
                 return methodResult;
             }
+
+            var packagesResult = await _orderService.GetPackages();
+
             var result = request.FormFile.ImportAndValidateExcel(async (ImportStudentToCourseModel x, int rowIndex, IList<ValidateExcelModel> errors) =>
             {
                 if (string.IsNullOrEmpty(x.Email))
@@ -76,17 +79,30 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                 }
                 if (string.IsNullOrEmpty(x.CodePackage))
                 {
-                    errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.CodeCourse), Message = "Code Package is null" });
+                    errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.CodePackage), Message = "Code Package is null" });
+                }
+                else if (!packagesResult.Content!.Result!.Any(p => p.Code == x.CodePackage))
+                {
+                    errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.CodePackage), Message = "Code Package is not exist" });
                 }
                 return await Task.FromResult(errors.Count == 0);
             });
+
+            var duplicateEmails = result.Datas.GroupBy(user => user.Email).Where(group => group.Count() > 1).Select(group => group.Key);
+
+            if (duplicateEmails.Any())
+            {
+                methodResult.AddErrorBadRequest("Dupilcate Emails");
+                return methodResult;
+            }
+
             if (result.Stream != null)
             {
                 methodResult.Result = result.Stream;
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 return methodResult;
             }
-            var packagesResult = await _orderService.GetPackages();
+
             var users = new List<User>();
 
             try
