@@ -119,7 +119,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                     })) : default);
                 }
             }
-            return (skillScores, GetDoublePercent(skillScores, percentSkill));
+            return (skillScores, GetDoublePercentUnit(skillScores, percentSkill));
         }
 
         public async Task<(List<SkillScores>, double)> GetClassForumSkillScores(IList<Guid>? lessonResultIds, int percentSkill = 0, EnumCourseType? courseType = null)
@@ -149,7 +149,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                     return (skillScores, GetDoublePercent(skillScores, PercentClassForumIELST));
                 }
             }
-            return (skillScores, GetDoublePercent(skillScores, percentSkill));
+            return (skillScores, GetDoublePercentUnit(skillScores, percentSkill));
         }
 
         public async Task<(List<SkillScores>, double)> GetHomeWordsSkillScores(IList<Guid>? lessonResultIds, int percentSkill = 0, EnumCourseType? courseType = null)
@@ -170,7 +170,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 }
                 else
                 {
-                    return (skillScores, GetDoublePercent(skillScores, percentSkill));
+                    return (skillScores, GetDoublePercentUnit(skillScores, percentSkill));
                 }
             }
             return (skillScores, 0);
@@ -181,6 +181,15 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             if (skillScores != null && skillScores.Any())
             {
                 return NumberHelper.ConvertDoublePercent(skillScores.Average(x => x.Percent * percent / skillScores.Count));
+            }
+            return default;
+        }
+
+        private static double GetDoublePercentUnit(IList<SkillScores>? skillScores, int percent)
+        {
+            if (skillScores != null && skillScores.Any())
+            {
+                return NumberHelper.ConvertDoublePercent(skillScores.Sum(x => x.Percent * percent / skillScores.Count));
             }
             return default;
         }
