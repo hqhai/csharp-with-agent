@@ -81,7 +81,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
 
             #region Validation
 
-            if (request.Skills == null || request.Skills.Count == 0 || request.Skills.Any(x => x.Answers == null || x.Answers.Count == 0))
+            if (request.Skills == null || request.Skills.Count == 0)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Skills));
                 return methodResult;
@@ -93,6 +93,10 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
                 return methodResult;
             }
             var student = studentResult?.Content?.Result;
+            if (request.Level != EnumPlacementTestLevel.IELTS)
+            {
+                request.Level = student?.CourseLevel.GetPlacementTestLevelByCourseLevel() ?? default;
+            }
             var studentId = student?.Id;
             var placementTestResultDone = await _placementTestResultRepository.Queryable.Where(x => x.Status == EnumResultStatus.Done && x.StudentId == studentId)
                                                                            .OrderByDescending(x => x.CreatedDate)
@@ -103,7 +107,12 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
                 var (levelNext, isLock) = placementTestResultDone.Level.GetLevelInScore(placementTestResultDone.Percent, age);
                 if (isLock)
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumPlacementTestErrorCode.PlacementTestLock), nameof(levelNext));
+                    methodResult.AddErrorBadRequest(nameof(EnumPlacementTestErrorCode.PlacementTestLock), nameof(isLock));
+                    return methodResult;
+                }
+                if (levelNext != student?.CourseLevel)
+                {
+                    methodResult.AddErrorBadRequest(nameof(levelNext));
                     return methodResult;
                 }
             }
@@ -287,15 +296,15 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
             {
                 var param = new SendStudentPTTemplateModel
                 {
-                    StudentName = student?.Human?.FullName,
+                    StudentName = student!.Human?.FullName,
                     CourseLevel = placementTestResult.Level,
                     Percents = string.Join(Environment.NewLine, placementTestResults.Select((x, index) => $"- Module {index + 1}: {Math.Round(x.Percent, MidpointRounding.AwayFromZero)} %")),
                 };
                 var subject = string.Format(CultureInfo.InvariantCulture, SenderSettings.SendPTResultSubject);
                 var sendResult = new MethodResult<bool>();
-                if (!string.IsNullOrEmpty(student!.Human?.Email))
+                if (!string.IsNullOrEmpty(student.Human?.Email))
                 {
-                    sendResult = await _mediator.Send(new SenderCommand { Email = student!.Human?.Email, Subject = subject, Params = param, Template = EnumSenderTemplate.SendStudentPTOnline }, cancellationToken).ConfigureAwait(false);
+                    sendResult = await _mediator.Send(new SenderCommand { Email = student.Human?.Email, Subject = subject, Params = param, Template = EnumSenderTemplate.SendStudentPTOnline }, cancellationToken).ConfigureAwait(false);
                 }
             }
             return methodResult;

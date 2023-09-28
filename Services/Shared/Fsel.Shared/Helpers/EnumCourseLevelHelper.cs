@@ -57,7 +57,19 @@ namespace Fsel.Shared.Helpers
                     return item;
                 }
             }
-            return EnumCourseLevel.MS3;
+            return default;
+        }
+
+        public static EnumPlacementTestLevel GetPlacementTestLevelByCourseLevel(this EnumCourseLevel level)
+        {
+            foreach (var item in ConvertHelper.EnumToList<EnumPlacementTestLevel>())
+            {
+                if (item.ToString() == level.ToString())
+                {
+                    return item;
+                }
+            }
+            return EnumPlacementTestLevel.IELTS;
         }
 
         public static object GetEnumCourseLevels()
