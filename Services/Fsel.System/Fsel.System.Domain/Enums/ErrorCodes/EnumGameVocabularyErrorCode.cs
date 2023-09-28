@@ -32,6 +32,16 @@ namespace Fsel.System.Domain.Enums.ErrorCodes
         /// <summary>
         /// Game Vocabulary not exist
         /// </summary>
-        GameVocabularyNotExist
+        GameVocabularyNotExist,
+
+        /// <summary>
+        /// Duplicate Codes
+        /// </summary>
+        DuplicateCodes,
+
+        /// <summary>
+        /// Duplicate Keys
+        /// </summary>
+        DuplicateKeys,
     }
 }

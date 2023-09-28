@@ -79,7 +79,6 @@ namespace Fsel.System.Application.Commands.GameVocabularyCmd
                     var countGameVocabulary = await _gameVocabularyRepository.Queryable.CountAsync(cancellationToken);
                     while (true)
                     {
-                        countGameVocabulary++;
                         gameVocabulary.Code = countGameVocabulary.ToString("D7", CultureInfo.CurrentCulture);
                         if (!_gameVocabularyRepository.Queryable.Any(p => p.Code == gameVocabulary.Code))
                         {
