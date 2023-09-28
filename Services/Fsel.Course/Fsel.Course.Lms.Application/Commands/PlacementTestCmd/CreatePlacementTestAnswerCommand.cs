@@ -103,7 +103,12 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
                 var (levelNext, isLock) = placementTestResultDone.Level.GetLevelInScore(placementTestResultDone.Percent, age);
                 if (isLock)
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumPlacementTestErrorCode.PlacementTestLock), nameof(levelNext));
+                    methodResult.AddErrorBadRequest(nameof(EnumPlacementTestErrorCode.PlacementTestLock), nameof(isLock));
+                    return methodResult;
+                }
+                if (levelNext != request.Level.GetCourseLevelByPlacementTestLevel())
+                {
+                    methodResult.AddErrorBadRequest(nameof(levelNext));
                     return methodResult;
                 }
             }
