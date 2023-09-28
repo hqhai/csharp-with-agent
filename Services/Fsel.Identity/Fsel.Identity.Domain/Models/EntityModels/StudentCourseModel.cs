@@ -12,6 +12,6 @@ namespace Fsel.Identity.Domain.Models.EntityModels
         public string? Membership { get; set; }
         public DateTime? StartDate { get; set; }
         public DateTime? EndDate { get; set; }
-        public EnumStatusClass Status { get; set; }
+        public EnumClassStatus Status { get; set; }
     }
 }

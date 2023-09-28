@@ -2,9 +2,9 @@
 
 namespace Fsel.Identity.Domain.Enums
 {
-    public enum EnumOtpCodeStatus
+    public enum EnumUserPlatformStatus
     {
-        New,
-        Verified
+        Active,
+        InActive,
     }
 }

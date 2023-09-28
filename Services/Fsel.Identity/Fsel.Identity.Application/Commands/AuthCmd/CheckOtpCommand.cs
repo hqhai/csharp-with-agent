@@ -37,7 +37,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             var methodResult = new MethodResult<bool>();
 
             var user = await _userManager.Users.Include(x => x.UserOtpCodes)
-                               .FirstOrDefaultAsync(x => x.UserOtpCodes.Any(x => x.Status == EnumStatusUser.New && x.OTPCode == request.Otp), cancellationToken);
+                               .FirstOrDefaultAsync(x => x.UserOtpCodes.Any(x => x.Status == EnumOtpCodeStatus.New && x.OTPCode == request.Otp), cancellationToken);
 
             if (user == null)
             {
@@ -46,7 +46,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             }
 
             var userOtpCode = await _userOtpCodeRepository.Queryable
-                       .FirstOrDefaultAsync(x => x.UserId == user!.Id && x.Status == EnumStatusUser.New && !x.IsDeleted && x.OTPCode == request.Otp, cancellationToken);
+                       .FirstOrDefaultAsync(x => x.UserId == user!.Id && x.Status == EnumOtpCodeStatus.New && !x.IsDeleted && x.OTPCode == request.Otp, cancellationToken);
             if (userOtpCode == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Otp));
