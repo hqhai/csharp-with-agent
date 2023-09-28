@@ -16,12 +16,16 @@ namespace Fsel.Shared.Helpers
         {
             DateTime today = DateTime.Today;
             int age = today.Year - birthday?.Year ?? default;
+
             #region Bỏ check tuổi theo ngày chỉ tính năm sinh
+
             //if (today > birthday?.AddYears(age))
             //{
             //    age--;
             //}
-            #endregion
+
+            #endregion Bỏ check tuổi theo ngày chỉ tính năm sinh
+
             return age;
         }
 
@@ -50,6 +54,29 @@ namespace Fsel.Shared.Helpers
                 return (count, isDaysStreakIncrease);
             }
             return (0, false);
+        }
+
+        public static DateTime GetLastDayOfTheMonth(DateTime dtInput)
+        {
+            DateTime dtResult = dtInput;
+            dtResult = dtResult.AddMonths(1);
+            dtResult = dtResult.AddDays(-(dtResult.Day));
+            return dtResult;
+        }
+
+        public static int GetDayInMonth(DateTime dtInput)
+        {
+            DateTime dtResult = dtInput;
+            dtResult = dtResult.AddMonths(1);
+            dtResult = dtResult.AddDays(-(dtResult.Day));
+            return dtResult.Day;
+        }
+
+        public static DateTime GetFistDayOfTheMonth(DateTime dtInput)
+        {
+            DateTime dtResult = dtInput;
+            dtResult = dtResult.AddDays((-dtResult.Day) + 1);
+            return dtResult;
         }
     }
 }

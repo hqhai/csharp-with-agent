@@ -3,6 +3,8 @@
 namespace Fsel.System.Application.Commands.QuestBoardStudentCmd
 {
     using Fsel.Common.ActionResults;
+    using Fsel.Core.Base.Interfaces;
+    using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Models.ShareModels;
     using Fsel.System.Domain.IRepositories;
@@ -19,12 +21,15 @@ namespace Fsel.System.Application.Commands.QuestBoardStudentCmd
     public class QuestBoardMainFinishCommandHandler : IRequestHandler<QuestBoardMainFinishCommand, MethodResult<bool>>
     {
         private readonly IQuestBoardRepository _questBoardRepository;
+        private readonly IQueueProvider _queueProvider;
         private readonly IQuestBoardStudentRepository _questBoardStudentRepository;
 
         public QuestBoardMainFinishCommandHandler(IQuestBoardRepository questBoardRepository
+            , IQueueProvider queueProvider
             , IQuestBoardStudentRepository questBoardStudentRepository)
         {
             _questBoardRepository = questBoardRepository;
+            _queueProvider = queueProvider;
             _questBoardStudentRepository = questBoardStudentRepository;
         }
 
@@ -45,6 +50,7 @@ namespace Fsel.System.Application.Commands.QuestBoardStudentCmd
                 return methodResult;
             }
             questBoardStudent.Status = EnumQuestBoardStudentStatus.Done;
+
             await _questBoardStudentRepository.ExecuteTransactionAsync(async () =>
             {
                 questBoardStudent = _questBoardStudentRepository.Update(questBoardStudent);
@@ -53,7 +59,13 @@ namespace Fsel.System.Application.Commands.QuestBoardStudentCmd
                 methodResult.Result = true;
                 return methodResult;
             });
-
+            var questBoards = await _questBoardRepository.Queryable.Where(x => x.Type == request.QuestBoardType).ToListAsync(cancellationToken);
+            var questBoardIds = questBoards.Select(x => x.Id).ToList();
+            var questBoardStudents = await _questBoardStudentRepository.Queryable.Where(x => x.CreatedDate.Date == date.Date && questBoardIds.Contains(x.QuestBoardId)).ToListAsync(cancellationToken);
+            await _queueProvider.Publish(QueueSettings.SystemQueue.NameQueue.CreateStudentDailyStreak, new CreateStudentDailyStreakQueueModel
+            {
+                StudentId = questBoardStudent.StudentId,
+            }, cancellationToken);
             return methodResult;
         }
     }

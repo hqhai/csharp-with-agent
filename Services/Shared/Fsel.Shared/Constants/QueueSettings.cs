@@ -19,6 +19,7 @@ namespace Fsel.Shared.Constants
 
             public static class NameQueue
             {
+                public const string UpdateStudentsDailyStreak = $"{KeyQueue}_UpdateStudentsDailyStreak";
             }
         }
 
@@ -101,6 +102,7 @@ namespace Fsel.Shared.Constants
 
             public static class NameQueue
             {
+                public const string CreateStudentDailyStreak = $"{KeyQueue}_CreateStudentDailyStreak";
             }
         }
 
