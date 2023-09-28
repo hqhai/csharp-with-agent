@@ -52,21 +52,21 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
             TeacherBankAccount? teacherBankAccount = null;
             if (request.Status && sl == 2)
             {
-                teacherBankAccount = user.Human?.Teacher?.TeacherBankAccounts?.FirstOrDefault(x => x.Status == EnumStatusBank.Approve);
+                teacherBankAccount = user.Human?.Teacher?.TeacherBankAccounts?.FirstOrDefault(x => x.Status == EnumBankStatus.Approve);
                 if (teacherBankAccount == null)
                 {
                     methodResult.AddErrorBadRequest(nameof(EnumTeacherErrorCode.TeacherBankAccountNotExistsApprove));
                     return methodResult;
                 }
                 user.Human?.Teacher?.TeacherBankAccounts?.Remove(teacherBankAccount);
-                var teacherBankAccountNew = user.Human?.Teacher?.TeacherBankAccounts?.FirstOrDefault(x => x.Status == EnumStatusBank.New);
-                teacherBankAccountNew!.Status = EnumStatusBank.Approve;
+                var teacherBankAccountNew = user.Human?.Teacher?.TeacherBankAccounts?.FirstOrDefault(x => x.Status == EnumBankStatus.New);
+                teacherBankAccountNew!.Status = EnumBankStatus.Approve;
                 _teacherBankAccountRepository.Update(teacherBankAccountNew);
                 await _teacherBankAccountRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
             }
             else
             {
-                teacherBankAccount = user.Human?.Teacher?.TeacherBankAccounts?.FirstOrDefault(x => x.Status == EnumStatusBank.New);
+                teacherBankAccount = user.Human?.Teacher?.TeacherBankAccounts?.FirstOrDefault(x => x.Status == EnumBankStatus.New);
                 if (teacherBankAccount == null)
                 {
                     methodResult.AddErrorBadRequest(nameof(EnumTeacherErrorCode.TeacherBankAccountNotExistsApprove));

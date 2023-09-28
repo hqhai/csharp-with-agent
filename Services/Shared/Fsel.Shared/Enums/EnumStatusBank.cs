@@ -2,7 +2,7 @@
 
 namespace Fsel.Shared.Enums
 {
-    public enum EnumStatusBank
+    public enum EnumBankStatus
     {
         New,
         Approve

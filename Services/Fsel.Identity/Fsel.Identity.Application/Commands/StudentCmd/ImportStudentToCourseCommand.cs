@@ -19,6 +19,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
     using Fsel.Identity.Domain.Enums;
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Domain.Models.CommandModels.Students;
+    using Fsel.Identity.Infrastructure.Repositories;
     using Fsel.Ordering.Domain.Enums;
     using Fsel.Shared.Enums;
     using MediatR;
@@ -39,8 +40,10 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
         private readonly IHumanRepository _humanRepository;
         private readonly ILmsCourseService _lmsCourseService;
         private readonly IInteractionService _interactionService;
+        private readonly IPlatformRepository _platformRepository;
+        private const string DefaultPassword = "Hello.123";
 
-        public ImportStudentToCourseCommandHandler(IMediator mediator, UserManager<User> userManager, IOrderService orderService, IHumanRepository humanRepository, ILmsCourseService lmsCourseService, IInteractionService interactionService)
+        public ImportStudentToCourseCommandHandler(IMediator mediator, UserManager<User> userManager, IOrderService orderService, IHumanRepository humanRepository, ILmsCourseService lmsCourseService, IInteractionService interactionService, IPlatformRepository platformRepository)
         {
             _mediator = mediator;
             _userManager = userManager;
@@ -48,6 +51,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
             _humanRepository = humanRepository;
             _lmsCourseService = lmsCourseService;
             _interactionService = interactionService;
+            _platformRepository = platformRepository;
         }
 
         public async Task<MethodResult<Stream>> Handle(ImportStudentToCourseCommand request, CancellationToken cancellationToken)
@@ -123,7 +127,19 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                     user.Email = student.Email;
                     user.FullName = student.Email;
                     user.EmailConfirmed = true;
-                    identityResult = await _userManager.CreateAsync(user, "Hello.123");
+
+                    #region Add Platform to User
+                    var platform = await _platformRepository.GetPlatformAsync(EnumPlatformCode.LMS, cancellationToken);
+                    if (platform != null)
+                    {
+                        user.UserPlatforms.Add(new UserPlatform
+                        {
+                            PlatformId = platform.Id
+                        });
+                    }
+                    #endregion
+
+                    identityResult = await _userManager.CreateAsync(user, DefaultPassword);
                     if (!identityResult.Succeeded)
                     {
                         methodResult.AddErrorBadRequest(nameof(EnumAuthErrorCode.UserFailToCreate));

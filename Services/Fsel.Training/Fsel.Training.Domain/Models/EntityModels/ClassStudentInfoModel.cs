@@ -14,6 +14,6 @@ namespace Fsel.Training.Domain.Models.EntityModels
         public DateTime? EndDate { get; set; }
         public Guid PackageId { get; set; }
         public string? Membership { get; set; }
-        public EnumStatusClass Status { get; set; }
+        public EnumClassStatus Status { get; set; }
     }
 }
