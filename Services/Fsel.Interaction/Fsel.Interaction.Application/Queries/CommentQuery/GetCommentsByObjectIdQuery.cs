@@ -11,7 +11,6 @@ namespace Fsel.Interaction.Application.Queries.CommentQuery
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base;
     using Fsel.Interaction.Application.Services.UserServices;
-    using Fsel.Interaction.Domain.Entities;
     using Fsel.Interaction.Domain.IRepositories;
     using Fsel.Interaction.Domain.Models.EntityModels;
     using Fsel.Shared.Enums;
@@ -69,7 +68,7 @@ namespace Fsel.Interaction.Application.Queries.CommentQuery
 
             var comments = await commentQuery.ToListAsync();
             var userResult = await _userService.GetStudentByUserIdsAsync(comments.Select(x => x.UserId.ToString()).ToList());
-
+            var csoResult = await _userService.GetCsoByUserIdsAsync(comments.Select(x => x.UserId.ToString()).ToList());
             var results = new List<CommentModel>();
             if (comments != null && comments.Count > 0)
             {
@@ -77,9 +76,8 @@ namespace Fsel.Interaction.Application.Queries.CommentQuery
                 foreach (var item in commentModels)
                 {
                     var actionLikes = _interactionActionRepository.Queryable.Where(x => x.ObjectId == item.Id && x.Type == EnumInteractionActionType.Like).ToList();
-
                     item.AvatarPath = userResult.Content?.Result?.FirstOrDefault(x => x.Human?.UserId == item.UserId.ToString())?.Human?.AvatarPath;
-                    item.FullName = userResult.Content?.Result?.FirstOrDefault(x => x.Human?.UserId == item.UserId.ToString())?.Human?.FullName;
+                    item.FullName = userResult.Content?.Result?.FirstOrDefault(x => x.Human?.UserId == item.UserId.ToString())?.Human?.FullName ?? csoResult.Content?.Result?.FirstOrDefault(x => x.Human?.UserId == item.UserId.ToString())?.Human?.FullName;
                     item.CourseLevel = userResult.Content?.Result?.FirstOrDefault(x => x.Human?.UserId == item.UserId.ToString())?.CourseLevel ?? default;
                     item.Comments = await GetCommentsByObjectIdAsync(item.Id);
                     item.CommentNumber = item.Comments?.Count ?? default;
@@ -98,9 +96,11 @@ namespace Fsel.Interaction.Application.Queries.CommentQuery
                     case EnumCommentFilter.Newest:
                         results = results.OrderByDescending(x => x.CreatedDate).ToList();
                         break;
+
                     case EnumCommentFilter.MostPopular:
                         results = results.OrderByDescending(x => x.LikeNumber).ToList();
                         break;
+
                     case EnumCommentFilter.AllComment:
                         results = results.OrderBy(x => x.CreatedDate).ToList();
                         break;

@@ -35,6 +35,7 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
                                                      .Include(x => x.CourseUnitMockTests.OrderBy(x => x.DisplayOrder))
                                                      .Where(x => x.CourseUnitMockTests.Select(x => x.CourseId).Contains(request.CourseId))
                                                      .AsNoTracking()
+                                                     .OrderBy(x => x.UnitLessons.Select(x => x.DisplayOrder).FirstOrDefault())
                                                      .Select(x => new UnitModel
                                                      {
                                                          Id = x.Id,

@@ -61,7 +61,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public IList<EnumFeedBackPositive>? FeedBackPositives { get; set; }
         public IList<EnumFeedBackNegative>? FeedBackNegatives { get; set; }
         public IList<string>? FilePaths { get; set; }
-
+        public IList<ClassForumResultFileModel>? ClassForumResultFiles { get; set; }
         public IList<ClassForumScoreModel>? ClassForumScores { get; set; }
     }
 }
