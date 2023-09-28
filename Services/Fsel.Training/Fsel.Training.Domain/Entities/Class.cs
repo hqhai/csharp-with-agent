@@ -39,7 +39,7 @@ namespace Fsel.Training.Domain.Entities
         /// <summary>
         /// Status
         /// </summary>
-        public EnumStatusClass Status { get; set; }
+        public EnumClassStatus Status { get; set; }
 
         public EnumTeacherApprovalStatus? TeacherApprovalStatus { get; set; }
 
