@@ -126,6 +126,7 @@ namespace Fsel.Interaction.Application.Queries.PostQuery.StudentPosts
                                             UserId = item.Post.UserId,
                                             CreatedUserId = item.Post.CreatedUserId,
                                             CreatedDate = item.Post.CreatedDate,
+                                            CreatedFullName = item.Post.CreatedFullName,
                                             UpdatedDate = item.Post.UpdatedDate,
                                             UpdatedUserId = item.Post.UpdatedUserId,
                                             PostTags = item.Post.PostTags,
