@@ -256,6 +256,7 @@ namespace Fsel.Course.Infrastructure.Common
         {
             ArgumentNullException.ThrowIfNull(videoResult);
             VoidMethodResult methodResult = new VoidMethodResult();
+
             var answerQuery = from baseQ in _videoResultRepository.Queryable
                               join vtca in _videoTimeCodeAnswerRepository.Queryable on baseQ.Id equals vtca.VideoResultId
                               join e in _exerciseRepository.Queryable on vtca.ExerciseId equals e.Id

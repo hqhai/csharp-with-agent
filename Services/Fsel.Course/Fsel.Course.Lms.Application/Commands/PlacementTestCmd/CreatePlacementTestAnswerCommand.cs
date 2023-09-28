@@ -216,20 +216,6 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
             var overallScore = NumberHelper.RoundNumberDouble(skillScores.Select(x => x.Scores).Average());
             var (currentLevel, isLockPT) = request.Level.GetLevelInScore(placementTestResult.Level == EnumPlacementTestLevel.IELTS ? overallScore : placementTestResult.Percent, age);
 
-            if (currentLevel.HasValue)
-            {
-                var updateStudent = new UpdateStudentByLevelModel
-                {
-                    Id = _authContext.CurrentUserId,
-                    Level = currentLevel.Value
-                };
-                var isCheckResult = await _userService.UpdateStudentByLevelAsync(updateStudent);
-                if (!isCheckResult.IsSuccessStatusCode)
-                {
-                    methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError));
-                    return methodResult;
-                }
-            }
             if (isLockPT)
             {
                 #region Pilot
@@ -270,6 +256,20 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
                 }
 
                 #endregion Pilot
+            }
+            if (currentLevel.HasValue)
+            {
+                var updateStudent = new UpdateStudentByLevelModel
+                {
+                    Id = _authContext.CurrentUserId,
+                    Level = currentLevel.Value
+                };
+                var isCheckResult = await _userService.UpdateStudentByLevelAsync(updateStudent);
+                if (!isCheckResult.IsSuccessStatusCode)
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError));
+                    return methodResult;
+                }
             }
             await _placementTestAnswerRepository.ExecuteTransactionAsync(async () =>
             {
