@@ -10,6 +10,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
+    using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Services.UserServices;
@@ -118,7 +119,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
                 GradingStartDate = classForumResult.GradingStartDate,
                 CheckCsoId = classForumResult.CheckCsoId,
                 GradingTeacherId = classForumResult.GradingTeacherId ?? default,
-                FilePaths = classForumResult.ClassForumResultFiles == null ? null : classForumResult.ClassForumResultFiles.Select(x => x.FilePath ?? string.Empty).ToList(),
+                ClassForumResultFiles = _mapper.Map<IList<ClassForumResultFileModel>>(classForumResult.ClassForumResultFiles),
                 ClassForumScores = classForumResult.ClassForumScores == null ? null : classForumResult.ClassForumScores.Select(x => new ClassForumScoreModel
                 {
                     Id = x.Id,
