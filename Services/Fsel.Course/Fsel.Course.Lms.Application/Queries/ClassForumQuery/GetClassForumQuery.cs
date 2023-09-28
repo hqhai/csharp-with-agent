@@ -120,12 +120,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumQuery
                 .Take(STUDENT_RANDOM_TAKE)
                 .ToListAsync(cancellationToken);
 
-            var classForumResults = (IList<ClassForumResultModel>)query.Select(x =>
-            {
-                var classForumResult = _mapper.Map<ClassForumResultModel>(x);
-                classForumResult.FilePaths = x.ClassForumResultFiles.Select(n => n.FilePath ?? string.Empty).ToList();
-                return classForumResult;
-            }).ToList();
+            var classForumResults = _mapper.Map<IList<ClassForumResultModel>>(query);
             var classForumResultsRandom = _mapper.Map<IList<ClassForumResultModel>>(queryRandomStudent);
 
             if (classForumResults != null)
