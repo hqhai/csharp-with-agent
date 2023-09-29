@@ -47,11 +47,11 @@ namespace Fsel.Identity.Application.Queries.StudentQuery
             var studentDailyQuery = student.StudentDailyStreaks.Where(x => x.DailyDate.Date >= startDate && x.DailyDate.Date <= endDate);
             var studentDailyStreak = new StudentDailyStreakModel();
             studentDailyStreak.NumberOfShield = student.NumberOfShield;
-            studentDailyStreak.NumberOfGift = studentDailyQuery.Where(x => x.IsReceiveGift).Count();
+            studentDailyStreak.NumberOfGift = studentDailyQuery.Where(x => x.IsGiftReceive).Count();
             studentDailyStreak.DailyDayOfGifts = studentDailyQuery.OrderBy(x => x.DailyDate).Select(x => new StudentConsecutiveDayModel
             {
                 Id = x.Id,
-                IsReceiveGift = x.IsReceiveGift,
+                IsGiftReceive = x.IsGiftReceive,
                 DailyDate = x.DailyDate,
                 LevelOfGift = x.LevelOfGift ?? default
             }).ToList();

@@ -47,8 +47,8 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                 return methodResult;
             }
             var date = DateTime.Now.Date;
-            var studentDailyStreaks = student.StudentDailyStreaks.Where(x => request.Ids.Contains(x.Id) && x.LevelOfGift != null && !x.IsReceiveGift).ToList();
-            studentDailyStreaks.ForEach(x => x.IsReceiveGift = true);
+            var studentDailyStreaks = student.StudentDailyStreaks.Where(x => request.Ids.Contains(x.Id) && x.LevelOfGift != null && !x.IsGiftReceive).ToList();
+            studentDailyStreaks.ForEach(x => x.IsGiftReceive = true);
             student.NumberOfToken += NumberTokenHelper.GetNumbersToken(studentDailyStreaks.Select(x => x.LevelOfGift ?? default).ToList());
             await _studentDailyStreakRepository.ExecuteTransactionAsync(async () =>
             {
