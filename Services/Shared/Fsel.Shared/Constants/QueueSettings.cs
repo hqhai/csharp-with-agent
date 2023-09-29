@@ -19,6 +19,7 @@ namespace Fsel.Shared.Constants
 
             public static class NameQueue
             {
+                public const string LeaderBoard = $"{KeyQueue}_LeaderBoard";
             }
         }
 
@@ -29,6 +30,7 @@ namespace Fsel.Shared.Constants
             public static class NameQueue
             {
                 public const string DiscussionBoard = $"{KeyQueue}_DiscussionBoard";
+                public const string LeaderBoard = $"{KeyQueue}_LeaderBoard";
                 public const string ClassForum = $"{KeyQueue}_ClassForum";
             }
         }

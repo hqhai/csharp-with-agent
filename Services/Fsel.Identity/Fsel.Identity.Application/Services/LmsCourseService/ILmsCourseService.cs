@@ -21,5 +21,9 @@ namespace Fsel.Identity.Application.Services.LmsCourseService
 
         [Get("/admin/lesson/{studentId}")]
         Task<IApiResponse<MethodResult<IList<StudentLessonCommentModel>>>> GetLessonCommentByStudent([FromRoute] Guid studentId);
+
+        [Get("/dashboard/leader-board/{id}")]
+        Task<IApiResponse<MethodResult<LeaderBoardSearchModel>>> GetLeaderBoard(Guid id);
+
     }
 }

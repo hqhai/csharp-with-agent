@@ -2,7 +2,6 @@
 
 namespace Fsel.Hangfire.Host.Jobs
 {
-    using Fsel.Common.Constants;
     using Fsel.Core.Extensions;
     using Fsel.Hangfire.Application.Workers;
     using Fsel.Shared.Constants;
@@ -14,6 +13,7 @@ namespace Fsel.Hangfire.Host.Jobs
         {
             JobExtensions.SetEnqueueJob<TestWorker>();
             JobExtensions.SetRecurringJob<AssignmentScheduleWorker>(WorkerSettings.JobName.AssignmentScheduleJob, Cron.MinuteInterval(1));
+            JobExtensions.SetRecurringJob<LeaderBoardWorker>(WorkerSettings.JobName.LeaderBoardJob, Cron.MinuteInterval(3));
             //JobExtensions.SetRecurringJob<TestWorker>(WorkerSettings.JobName.TestWorkerJob, Cron.Daily);
         }
     }

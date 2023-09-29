@@ -15,7 +15,6 @@ namespace Fsel.Course.Lms.Api.Controllers
     [ApiVersion(Settings.APIVersion)]
     [Route(Settings.APIDefaultRoute + "/dashboard")]
     [ApiController]
-    [Authorize(Roles = nameof(EnumRole.Student))]
     public class DashboardController : ControllerBase
     {
         private readonly IMediator _mediator;
@@ -28,12 +27,12 @@ namespace Fsel.Course.Lms.Api.Controllers
         /// <summary>
         /// Get Leader Board
         /// </summary>
-        [HttpGet("leader-board")]
+        [HttpGet("leader-board/{id}")]
         [ProducesResponseType(typeof(MethodResult<LeaderBoardSearchModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetLeaderBoard()
+        public async Task<IActionResult> GetLeaderBoard(Guid id)
         {
-            MethodResult<LeaderBoardSearchModel> queryResult = await _mediator.Send(new GetLeaderBoardQuery()).ConfigureAwait(false);
+            MethodResult<LeaderBoardSearchModel> queryResult = await _mediator.Send(new GetLeaderBoardQuery { UserId = id }).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
 

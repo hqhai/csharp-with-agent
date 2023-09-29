@@ -1,9 +1,14 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Course.Domain.Models.EntityModels
+namespace Fsel.Identity.Application.Services.LmsCourseService.Model
 {
-    using System;
     using Fsel.Shared.Enums;
+
+    public class LeaderBoardSearchModel
+    {
+        public IList<LeaderBoardModel>? LeaderBoards { get; set; }
+        public LeaderBoardModel? LeaderBoard { get; set; }
+    }
 
     public class LeaderBoardModel
     {
@@ -13,9 +18,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public string? FullName { get; set; }
         public int DailyStreak { get; set; }
         public int TotalScore { get; set; }
-
         public Guid UserId { get; set; }
-
         public EnumCourseLevel Level { get; set; }
     }
 }

@@ -18,6 +18,7 @@ builder.AddMassTransit(appSetting,
 queues: new Dictionary<string, Type>
 {
     { QueueSettings.RealtimeQueue.NameQueue.DiscussionBoard, typeof(DiscussionBoardConsumer) },
+    { QueueSettings.RealtimeQueue.NameQueue.LeaderBoard, typeof(LeaderBoardConsumer) },
     { QueueSettings.NotificationQueue.NameQueue.Notification, typeof(NotificationConsumer) }
 });
 
@@ -25,4 +26,5 @@ var app = builder.Build();
 app.UseServices();
 app.UseHubs<DiscussionBoardHub>(RealtimeSettings.DiscussionBoardHub.Pattern);
 app.UseHubs<NotificationHub>(RealtimeSettings.NotificationHub.Pattern);
+app.UseHubs<NotificationHub>(RealtimeSettings.LeaderBoardHub.Pattern);
 app.Run();

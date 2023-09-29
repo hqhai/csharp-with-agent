@@ -5,7 +5,6 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
     using System.Collections.Generic;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
-    using Fsel.Core.Base;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
@@ -18,23 +17,21 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
 
     public class GetLeaderBoardQuery : IRequest<MethodResult<LeaderBoardSearchModel>>
     {
+        public Guid UserId { get; set; }
     }
 
     public class GetLeaderBoardQueryHandler : IRequestHandler<GetLeaderBoardQuery, MethodResult<LeaderBoardSearchModel>>
     {
-        private readonly AuthContext _authContext;
         private readonly IUserService _userService;
         private readonly ISystemService _systemService;
         private readonly IUnitResultRepository _unitResultRepository;
         private readonly ICourseResultRepository _courseResultRepository;
 
-        public GetLeaderBoardQueryHandler(AuthContext authContext
-            , IUserService userService
+        public GetLeaderBoardQueryHandler(IUserService userService
             , ISystemService systemService
             , IUnitResultRepository unitResultRepository
             , ICourseResultRepository courseResultRepository)
         {
-            _authContext = authContext;
             _userService = userService;
             _systemService = systemService;
             _unitResultRepository = unitResultRepository;
@@ -45,7 +42,7 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<LeaderBoardSearchModel> methodResult = new MethodResult<LeaderBoardSearchModel>();
-            var studentResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
+            var studentResult = await _userService.GetStudentByUserIdAsync(request.UserId);
             if (!studentResult.IsSuccessStatusCode)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(studentResult));
@@ -61,7 +58,7 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
                 methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError), nameof(studentResults));
                 return methodResult;
             }
-            var students = studentResults?.Content?.Result;
+            var students = studentResults?.Content?.Result?.Where(x=>x.CourseLevel == student!.CourseLevel);
             LeaderBoardSearchModel leaderBoardSearch = new LeaderBoardSearchModel();
             IList<LeaderBoardModel> leaderBoards = new List<LeaderBoardModel>();
             var userIds = students?.Select(x => x.Human).Where(x => x != null && x.UserId != null).Select(x => x!.UserId ?? default).ToList();
@@ -84,7 +81,9 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
                         AvatarPath = item.Human?.AvatarPath,
                         FullName = item.Human?.FullName,
                         DailyStreak = logAction?.NumberOfDaysStreak ?? default,
-                        TotalScore = scores
+                        TotalScore = scores,
+                        UserId = item.Human?.UserId ?? default,
+                        Level = item.CourseLevel
                     };
                     leaderBoards.Add(leaderBoard);
                 }
