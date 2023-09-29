@@ -4,6 +4,7 @@ namespace Fsel.System.Application.Commands.GameVocabularyCmd
 {
     using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.System.Application.Services.UserServices;
     using Fsel.System.Domain.Enums.ErrorCodes;
     using Fsel.System.Domain.IRepositories;
     using Fsel.System.Domain.Models.CommandModels.GameVocabularies;
@@ -20,16 +21,15 @@ namespace Fsel.System.Application.Commands.GameVocabularyCmd
     public class UpdateGameVocabularyCommandHandler : IRequestHandler<UpdateGameVocabularyCommand, MethodResult<GameVocabularyModel>>
     {
         private readonly IGameVocabularyRepository _gameVocabularyRepository;
-        private readonly IGameCenterRepository _gameCenterRepository;
         private readonly IGameTopicRepository _gameTopicRepository;
         private readonly IMapper _mapper;
-
-        public UpdateGameVocabularyCommandHandler(IGameVocabularyRepository gameVocabularyRepository, IGameCenterRepository gameCenterRepository, IGameTopicRepository gameTopicRepository, IMapper mapper)
+        private readonly IUserService _userService;
+        public UpdateGameVocabularyCommandHandler(IGameVocabularyRepository gameVocabularyRepository, IGameTopicRepository gameTopicRepository, IMapper mapper, IUserService userService)
         {
             _gameVocabularyRepository = gameVocabularyRepository;
-            _gameCenterRepository = gameCenterRepository;
             _gameTopicRepository = gameTopicRepository;
             _mapper = mapper;
+            _userService = userService;
         }
 
         public async Task<MethodResult<GameVocabularyModel>> Handle(UpdateGameVocabularyCommand request, CancellationToken cancellationToken)
@@ -63,16 +63,26 @@ namespace Fsel.System.Application.Commands.GameVocabularyCmd
                 return methodResult;
             }
 
-            if (request.GameCenterId.HasValue && !_gameCenterRepository.Queryable.Any(p => p.Id == request.GameCenterId))
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumGameVocabularyErrorCode.GameCenterNotExist));
-                return methodResult;
-            }
-
             if (request.WordCategoryId.HasValue && !_gameTopicRepository.Queryable.Any(p => p.Id == request.WordCategoryId))
             {
                 methodResult.AddErrorBadRequest(nameof(EnumGameVocabularyErrorCode.GameTopicNotExist));
                 return methodResult;
+            }
+
+            if (request.PlatformId.HasValue)
+            {
+                var platformsResult = await _userService.GetAllPlatform();
+                if (!platformsResult.IsSuccessStatusCode || platformsResult.Content?.Result == null)
+                {
+                    methodResult.AddError(platformsResult.Error);
+                    return methodResult;
+                }
+                var platforms = platformsResult.Content.Result;
+                if (!platforms.Any(p => p.Id == request.PlatformId))
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumGameVocabularyErrorCode.PlatformNotExist));
+                    return methodResult;
+                }
             }
             #endregion validate
 
@@ -83,9 +93,8 @@ namespace Fsel.System.Application.Commands.GameVocabularyCmd
                     var countGameVocabulary = await _gameVocabularyRepository.Queryable.CountAsync(cancellationToken);
                     while (true)
                     {
-                        countGameVocabulary++;
                         request.Code = countGameVocabulary.ToString("D7", CultureInfo.CurrentCulture);
-                        if (!_gameVocabularyRepository.Queryable.Any(p => p.Code == request.Code))
+                        if (!_gameVocabularyRepository.Queryable.Any(p => p.Code == request.Code && p.Id != gameVocabulary.Id))
                         {
                             break;
                         }

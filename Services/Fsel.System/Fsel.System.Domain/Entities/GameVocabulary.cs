@@ -56,9 +56,8 @@ namespace Fsel.System.Domain.Entities
         public string? Antonym { get; set; }
         [MaxLength(500, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? PhoneticTranscription { get; set; }
-        public Guid? GameCenterId { get; set; }
+        public Guid? PlatformId { get; set; }
         public Guid? WordCategoryId { get; set; }
-        public GameCenter? GameCenter { get; set; }
         public GameTopic? GameTopic { get; set; }
     }
 }

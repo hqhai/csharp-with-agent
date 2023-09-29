@@ -85,5 +85,17 @@ namespace Fsel.System.Api.Controllers
             var queryResult = await _mediator.Send(new GetGameVocabularyByIdQuery { Id = id }).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
+
+        /// <summary>
+        /// Mass upload game vocabulary
+        /// </summary>
+        [HttpPost("mass-upload")]
+        [ProducesResponseType(typeof(MethodResult<IList<GameVocabularyModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> MassUpload([FromBody] MassUploadVocabularyCommand command)
+        {
+            var commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
     }
 }

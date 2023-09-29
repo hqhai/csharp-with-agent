@@ -33,10 +33,6 @@ namespace Fsel.System.Infrastructure.Configs
                .HasConversion(
                    v => v.ToString(),
                    v => v.EnumParse<EnumPartSpeech>());
-            builder.HasOne(a => a.GameCenter)
-               .WithMany(b => b.GameVocabularies)
-               .HasForeignKey(b => b.GameCenterId)
-               .OnDelete(DeleteBehavior.Cascade);
             builder.HasOne(a => a.GameTopic)
               .WithMany(b => b.GameVocabularies)
               .HasForeignKey(b => b.WordCategoryId)
