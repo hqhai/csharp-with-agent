@@ -18,7 +18,7 @@ namespace Fsel.System.Domain.Entities
         public string? Key { get; set; }
         public EnumGameCefrLevel CefrLevel { get; set; }
         public EnumGameCourseLevel CourseLevel { get; set; }
-        public EnumUnitOrder UnitOrder { get; set; }
+        public EnumUnitNumber UnitOrder { get; set; }
         [MaxLength(500, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? AlternateSpellingStr { get; set; }
 

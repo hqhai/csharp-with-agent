@@ -11,7 +11,7 @@ namespace Fsel.System.Domain.Models.EntityModels
         public string? Key { get; set; }
         public EnumGameCefrLevel CefrLevel { get; set; }
         public EnumGameCourseLevel CourseLevel { get; set; }
-        public EnumUnitOrder UnitOrder { get; set; }
+        public EnumUnitNumber UnitOrder { get; set; }
         public string? AlternateSpellingStr { get; set; }
         public IList<string>? AlternateSpelling { get; set; }
         public string? UsEquivalent { get; set; }
