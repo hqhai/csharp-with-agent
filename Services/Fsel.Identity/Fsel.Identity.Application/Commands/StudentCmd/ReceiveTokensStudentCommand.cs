@@ -2,6 +2,7 @@
 
 namespace Fsel.Identity.Application.Commands.StudentCmd
 {
+    using System.Collections.Generic;
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base;
     using Fsel.Identity.Domain.IRepositories;
@@ -12,7 +13,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
 
     public class ReceiveTokensStudentCommand : IRequest<MethodResult<bool>>
     {
-        public IList<Guid>? Ids { get; set; }
+        public Guid Id { get; set; }
     }
 
     public class ReceiveTokensStudentCommandHandler : IRequestHandler<ReceiveTokensStudentCommand, MethodResult<bool>>
@@ -32,12 +33,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<bool> methodResult = new MethodResult<bool>();
-            if (request.Ids == null || !request.Ids.Any())
-            {
-                methodResult.Result = false;
-                methodResult.StatusCode = StatusCodes.Status200OK;
-                return methodResult;
-            }
+            IList<(int, bool)> receiveTokens;
             var student = await _studentRepository.Queryable.Include(x => x.StudentDailyStreaks).Include(x => x.Human)
                                                   .FirstOrDefaultAsync(x => x.Human != null && x.Human.UserId == _authContext.CurrentUserId.ToString(), cancellationToken: cancellationToken);
             if (student == null)
@@ -47,20 +43,27 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                 return methodResult;
             }
             var date = DateTime.Now.Date;
-            var studentDailyStreaks = student.StudentDailyStreaks.Where(x => request.Ids.Contains(x.Id) && x.LevelOfGift != null && !x.IsGiftReceive).ToList();
-            studentDailyStreaks.ForEach(x => x.IsGiftReceive = true);
-            student.NumberOfToken += NumberTokenHelper.GetNumbersToken(studentDailyStreaks.Select(x => x.LevelOfGift ?? default).ToList());
-            await _studentDailyStreakRepository.ExecuteTransactionAsync(async () =>
+            var studentDailyStreak = student.StudentDailyStreaks.FirstOrDefault(x => x.Id == request.Id && x.LevelOfGift != null && !x.IsGiftReceive);
+            if (studentDailyStreak == null)
             {
-                _studentRepository.Update(student);
-                await _studentRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
-
-                _studentDailyStreakRepository.UpdateList(studentDailyStreaks);
-                await _studentDailyStreakRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
-                methodResult.StatusCode = StatusCodes.Status201Created;
-                methodResult.Result = true;
+                methodResult.Result = false;
+                methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
-            });
+            }
+            studentDailyStreak.IsGiftReceive = true;
+            student.NumberOfToken += studentDailyStreak.LevelOfGift.GetNumberToken().Item1;
+            studentDailyStreak.IsArmorialReceive = studentDailyStreak.LevelOfGift.GetNumberToken().Item2;
+            await _studentDailyStreakRepository.ExecuteTransactionAsync(async () =>
+             {
+                 _studentRepository.Update(student);
+                 await _studentRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+
+                 _studentDailyStreakRepository.Update(studentDailyStreak);
+                 await _studentDailyStreakRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+                 methodResult.StatusCode = StatusCodes.Status201Created;
+                 methodResult.Result = true;
+                 return methodResult;
+             });
             return methodResult;
         }
     }

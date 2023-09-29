@@ -29,21 +29,45 @@ namespace Fsel.Identity.Api.Controllers
         [HttpPost("receive-token")]
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> ReceiveToken([FromBody] IList<Guid> ids)
+        public async Task<IActionResult> ReceiveToken([FromBody] ReceiveTokensStudentCommand command)
         {
-            MethodResult<bool> commandResult = await _mediator.Send(new ReceiveTokensStudentCommand { Ids = ids }).ConfigureAwait(false);
+            MethodResult<bool> commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
 
         /// <summary>
         /// Get Consecutive Days
         /// </summary>
-        [HttpGet("get-consecutive")]
+        [HttpGet("consecutive")]
         [ProducesResponseType(typeof(MethodResult<StudentDailyStreakModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetConsecutiveDays()
         {
             MethodResult<StudentDailyStreakModel> commandResult = await _mediator.Send(new GetStudentConsecutiveDaysQuery()).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Get Years
+        /// </summary>
+        [HttpGet("year")]
+        [ProducesResponseType(typeof(MethodResult<IList<int>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetYears()
+        {
+            MethodResult<IList<int>> commandResult = await _mediator.Send(new GetYearDailyStreakQuery()).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Get Student Armorial
+        /// </summary>
+        [HttpGet("armorial")]
+        [ProducesResponseType(typeof(MethodResult<IList<DateTime>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetStudentArmorial([FromQuery] GetStudentArmorialQuery query)
+        {
+            MethodResult<IList<DateTime>> commandResult = await _mediator.Send(query).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
     }
