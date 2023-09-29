@@ -9,7 +9,7 @@ namespace Fsel.System.Domain.Entities
 
     public class GameTopic : Entity
     {
-        public EnumUnitOrder UnitOrder { get; set; }
+        public EnumUnitNumber UnitOrder { get; set; }
 
         [MaxLength(500, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? Value { get; set; }

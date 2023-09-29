@@ -10,7 +10,7 @@ namespace Fsel.System.Domain.Models.CommandModels.GameVocabularies
         public string? Key { get; set; }
         public EnumGameCefrLevel CefrLevel { get; set; }
         public EnumGameCourseLevel CourseLevel { get; set; }
-        public EnumUnitOrder UnitOrder { get; set; }
+        public EnumUnitNumber UnitOrder { get; set; }
         public string? AlternateSpellingStr { get; set; }
         public string? UsEquivalent { get; set; }
         public EnumPartSpeech? PartSpeech { get; set; }
