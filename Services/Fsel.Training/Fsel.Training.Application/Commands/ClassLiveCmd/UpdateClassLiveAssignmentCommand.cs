@@ -103,7 +103,7 @@ namespace Fsel.Training.Application.Commands.ClassLiveCmd
                 {
                     classes.ForEach(x =>
                     {
-                        if (x.Status == EnumStatusClass.Active)
+                        if (x.Status == EnumClassStatus.Active)
                         {
                             var classLiveCalendars = x.ClassLiveCalendars.Where(classLive => classLive.LiveDate.Date > DateTime.Now)
                                          .Select(classLive =>

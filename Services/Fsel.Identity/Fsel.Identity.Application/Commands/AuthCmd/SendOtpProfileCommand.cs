@@ -61,7 +61,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                 return methodResult;
             }
             var userOtpCode = await _userOtpCodeRepository.Queryable
-                                  .FirstOrDefaultAsync(x => x.UserId == user.Id && x.Status == EnumStatusUser.New && !x.IsDeleted, cancellationToken);
+                                  .FirstOrDefaultAsync(x => x.UserId == user.Id && x.Status == EnumOtpCodeStatus.New && !x.IsDeleted, cancellationToken);
             if (userOtpCode == null)
             {
                 var randomSecure = new RandomSecureHelper();
@@ -72,7 +72,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                 {
                     UserId = user.Id,
                     OTPCode = otp,
-                    Status = EnumStatusUser.New,
+                    Status = EnumOtpCodeStatus.New,
                     ExpiredTime = DateTime.Now.AddMinutes(_appSetting!.Otp!.StepTime)
                 };
                 _userOtpCodeRepository.Add(userOtpCode);

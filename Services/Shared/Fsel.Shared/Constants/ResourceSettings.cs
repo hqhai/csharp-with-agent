@@ -8,5 +8,6 @@ namespace Fsel.Shared.Constants
         public const string QuestBoardFileName = "Resources//QuestBoardConfig.json";
         public const string GameCenterFileName = "Resources//GameCenterConfig.json";
         public const string SurveyQuestionFileName = "Resources//SurveyQuestions.json";
+        public const string PlatformFileName = "Resources//Platform.json";
     }
 }

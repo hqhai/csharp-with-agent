@@ -2,10 +2,10 @@
 
 namespace Fsel.Shared.Enums
 {
-    public enum EnumClassStatus
+    public enum EnumPlatformCode
     {
-        New,
-        Active,
-        Done
+        LCMS = 1,
+        LMS,
+        PlanetDefender,
     }
 }
