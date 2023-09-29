@@ -24,9 +24,9 @@ namespace Fsel.System.Domain.Models.EntityModels
         public string? Synonym { get; set; }
         public string? Antonym { get; set; }
         public string? PhoneticTranscription { get; set; }
-        public Guid? GameCenterId { get; set; }
+        public Guid? PlatformId { get; set; }
         public Guid? WordCategoryId { get; set; }
-        public string? NameOfGame { get; set; }
+        public string? PlatformName { get; set; }
         public string? WordCategory { get; set; }
     }
 }

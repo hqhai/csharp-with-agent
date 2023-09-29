@@ -4,6 +4,7 @@ namespace Fsel.System.Application.Commands.GameVocabularyCmd
 {
     using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.System.Application.Services.UserServices;
     using Fsel.System.Domain.Entities;
     using Fsel.System.Domain.Enums.ErrorCodes;
     using Fsel.System.Domain.IRepositories;
@@ -21,16 +22,16 @@ namespace Fsel.System.Application.Commands.GameVocabularyCmd
     public class MassUploadVocabularyCommandHandler : IRequestHandler<MassUploadVocabularyCommand, MethodResult<IList<GameVocabularyModel>>>
     {
         private readonly IGameVocabularyRepository _gameVocabularyRepository;
-        private readonly IGameCenterRepository _gameCenterRepository;
         private readonly IGameTopicRepository _gameTopicRepository;
         private readonly IMapper _mapper;
+        private readonly IUserService _userService;
 
-        public MassUploadVocabularyCommandHandler(IGameVocabularyRepository gameVocabularyRepository, IGameCenterRepository gameCenterRepository, IGameTopicRepository gameTopicRepository, IMapper mapper)
+        public MassUploadVocabularyCommandHandler(IGameVocabularyRepository gameVocabularyRepository, IGameTopicRepository gameTopicRepository, IMapper mapper, IUserService userService)
         {
             _gameVocabularyRepository = gameVocabularyRepository;
-            _gameCenterRepository = gameCenterRepository;
             _gameTopicRepository = gameTopicRepository;
             _mapper = mapper;
+            _userService = userService;
         }
 
         public async Task<MethodResult<IList<GameVocabularyModel>>> Handle(MassUploadVocabularyCommand request, CancellationToken cancellationToken)
@@ -44,14 +45,6 @@ namespace Fsel.System.Application.Commands.GameVocabularyCmd
             }
 
             #region Validate
-
-            var gameCenterIds = request.GameVocabularies.Where(x => x.GameCenterId.HasValue).Select(n => n.GameCenterId).ToList();
-            var gameCenters = await _gameCenterRepository.Queryable.Where(p => gameCenterIds.Contains(p.Id)).ToListAsync(cancellationToken);
-            if (gameCenters.Count != gameCenterIds.Count)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumGameVocabularyErrorCode.GameCenterNotExist));
-                return methodResult;
-            }
 
             var gameTopicIds = request.GameVocabularies.Where(x => x.WordCategoryId.HasValue).Select(n => n.WordCategoryId).ToList();
             var gameTopics = await _gameTopicRepository.Queryable.Where(p => gameTopicIds.Contains(p.Id)).ToListAsync(cancellationToken);
@@ -89,7 +82,26 @@ namespace Fsel.System.Application.Commands.GameVocabularyCmd
                 methodResult.AddErrorBadRequest(nameof(EnumGameVocabularyErrorCode.KeyAlreadyExist));
                 return methodResult;
             }
+
+            var platformIds = request.GameVocabularies.Where(x => x.PlatformId.HasValue).Select(n => n.PlatformId).ToList();
+            if (platformIds.Count > 0)
+            {
+                var platformsResult = await _userService.GetAllPlatform();
+                if (!platformsResult.IsSuccessStatusCode || platformsResult.Content?.Result == null)
+                {
+                    methodResult.AddError(platformsResult.Error);
+                    return methodResult;
+                }
+                var platformEntityIds = platformsResult.Content.Result.Select(p => p.Id).ToList();
+
+                if (platformIds.Any(p => !platformEntityIds.Contains(p!.Value)))
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumGameVocabularyErrorCode.PlatformNotExist));
+                    return methodResult;
+                };
+            }
             var countGameVocabulary = await _gameVocabularyRepository.Queryable.CountAsync(cancellationToken);
+
             #endregion Validate
 
             await _gameVocabularyRepository.ExecuteTransactionAsync(async () =>

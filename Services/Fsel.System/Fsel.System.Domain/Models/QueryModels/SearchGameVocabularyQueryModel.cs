@@ -11,7 +11,7 @@ namespace Fsel.System.Domain.Models.QueryModels
         public EnumUnitOrder? UnitOrder { get; set; }
         public Guid? WordCategoryId { get; set; }
         public EnumPartSpeech? PartSpeech { get; set; }
-        public Guid? GameCenterId { get; set; }
+        public Guid? PlatformId { get; set; }
 
     }
 }

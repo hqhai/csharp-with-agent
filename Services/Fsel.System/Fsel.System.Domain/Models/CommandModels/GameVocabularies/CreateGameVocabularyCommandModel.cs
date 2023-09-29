@@ -22,7 +22,7 @@ namespace Fsel.System.Domain.Models.CommandModels.GameVocabularies
         public string? Synonym { get; set; }
         public string? Antonym { get; set; }
         public string? PhoneticTranscription { get; set; }
-        public Guid? GameCenterId { get; set; }
+        public Guid? PlatformId { get; set; }
         public Guid? WordCategoryId { get; set; }
     }
 }

@@ -4,6 +4,7 @@ namespace Fsel.System.Application.Commands.GameVocabularyCmd
 {
     using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.System.Application.Services.UserServices;
     using Fsel.System.Domain.Entities;
     using Fsel.System.Domain.Enums.ErrorCodes;
     using Fsel.System.Domain.IRepositories;
@@ -22,16 +23,15 @@ namespace Fsel.System.Application.Commands.GameVocabularyCmd
     public class CreateGameVocabularyCommandHandler : IRequestHandler<CreateGameVocabularyCommand, MethodResult<GameVocabularyModel>>
     {
         private readonly IGameVocabularyRepository _gameVocabularyRepository;
-        private readonly IGameCenterRepository _gameCenterRepository;
         private readonly IGameTopicRepository _gameTopicRepository;
         private readonly IMapper _mapper;
-
-        public CreateGameVocabularyCommandHandler(IGameVocabularyRepository gameVocabularyRepository, IGameCenterRepository gameCenterRepository, IGameTopicRepository gameTopicRepository, IMapper mapper)
+        private readonly IUserService _userService;
+        public CreateGameVocabularyCommandHandler(IGameVocabularyRepository gameVocabularyRepository, IGameTopicRepository gameTopicRepository, IMapper mapper, IUserService userService)
         {
             _gameVocabularyRepository = gameVocabularyRepository;
-            _gameCenterRepository = gameCenterRepository;
             _gameTopicRepository = gameTopicRepository;
             _mapper = mapper;
+            _userService = userService;
         }
 
         public async Task<MethodResult<GameVocabularyModel>> Handle(CreateGameVocabularyCommand request, CancellationToken cancellationToken)
@@ -58,16 +58,25 @@ namespace Fsel.System.Application.Commands.GameVocabularyCmd
                 return methodResult;
             }
 
-            if (request.GameCenterId.HasValue && !_gameCenterRepository.Queryable.Any(p => p.Id == request.GameCenterId))
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumGameVocabularyErrorCode.GameCenterNotExist));
-                return methodResult;
-            }
-
             if (request.WordCategoryId.HasValue && !_gameTopicRepository.Queryable.Any(p => p.Id == request.WordCategoryId))
             {
                 methodResult.AddErrorBadRequest(nameof(EnumGameVocabularyErrorCode.GameTopicNotExist));
                 return methodResult;
+            }
+            if (request.PlatformId.HasValue)
+            {
+                var platformsResult = await _userService.GetAllPlatform();
+                if (!platformsResult.IsSuccessStatusCode || platformsResult.Content?.Result == null)
+                {
+                    methodResult.AddError(platformsResult.Error);
+                    return methodResult;
+                }
+                var platforms = platformsResult.Content.Result;
+                if (!platforms.Any(p => p.Id == request.PlatformId))
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumGameVocabularyErrorCode.PlatformNotExist));
+                    return methodResult;
+                }
             }
             #endregion
 

@@ -17,7 +17,7 @@ namespace Fsel.System.Domain.Enums.ErrorCodes
         /// <summary>
         /// Game Center Not Exist
         /// </summary>
-        GameCenterNotExist,
+        PlatformNotExist,
 
         /// <summary>
         /// Game Topic Not Exist
