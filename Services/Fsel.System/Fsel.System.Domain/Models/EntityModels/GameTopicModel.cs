@@ -7,7 +7,7 @@ namespace Fsel.System.Domain.Models.EntityModels
 
     public class GameTopicModel : BaseModel
     {
-        public EnumUnitOrder UnitOrder { get; set; }
+        public EnumUnitNumber UnitOrder { get; set; }
 
         public string? Value { get; set; }
 
