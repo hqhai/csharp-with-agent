@@ -46,5 +46,17 @@ namespace Fsel.Identity.Api.Controllers
             MethodResult<CSOModel> commandResult = await _mediator.Send(new GetCsoByUserIdQuery { UserId = id }).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
+
+        /// <summary>
+        /// Get cso by userid
+        /// </summary>
+        [HttpPost("get-cso-by-userIds")]
+        [ProducesResponseType(typeof(MethodResult<IList<CSOModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetCsosByUserIds([FromBody] IList<string> userIds)
+        {
+            MethodResult<IList<CSOModel>> commandResult = await _mediator.Send(new GetCsoByUserIdsQuery { UserIds = userIds }).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
     }
 }
