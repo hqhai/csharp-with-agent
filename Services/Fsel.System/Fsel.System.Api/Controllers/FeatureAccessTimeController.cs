@@ -28,10 +28,10 @@ namespace Fsel.System.Api.Controllers
         /// <summary>
         /// Get Feature Access Time Detail
         /// </summary>
-        [HttpPost("get-detail")]
+        [HttpGet("get-detail")]
         [ProducesResponseType(typeof(MethodResult<FeatureAccessTimeModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetDetail([FromBody] GetFeatureAccessTimeQuery query)
+        public async Task<IActionResult> GetDetail([FromQuery] GetFeatureAccessTimeQuery query)
         {
             var queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
