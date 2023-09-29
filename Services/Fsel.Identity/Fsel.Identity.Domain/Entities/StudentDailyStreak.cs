@@ -16,6 +16,8 @@ namespace Fsel.Identity.Domain.Entities
         /// </summary>
         public bool IsUseShield { get; set; }
 
+        public bool IsReceiveGift { get; set; }
+
         /// <summary>
         /// Daily
         /// </summary>

@@ -16,6 +16,7 @@ namespace Fsel.Hangfire.Application.Workers
 
         public async Task RunAsync()
         {
+
             await _updateStudentsDailyStreakPublisher.Publish(CancellationToken.None);
         }
     }

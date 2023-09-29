@@ -38,28 +38,37 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student));
                 return methodResult;
             }
+            var date = DateTime.Now;
+            var isStudentDate = student.StudentDailyStreaks.Any(x => x.DailyDate.Date == date.Date);
+            if (isStudentDate)
+            {
+                methodResult.Result = true;
+                methodResult.StatusCode = StatusCodes.Status200OK;
+                return methodResult;
+            }
             var studentDailyStreak = new StudentDailyStreak
             {
                 StudentId = request.StudentId,
-                DailyDate = DateTime.Now,
+                DailyDate = date,
                 IsUseShield = request.IsUseShield,
             };
-            var countStudentDaily = student.StudentDailyStreaks.Count;
+            var startDate = DateTimeHelper.GetFistDayOfTheMonth(date);
+            var endDate = DateTimeHelper.GetFistDayOfTheMonth(date);
+
+            var countStudentDaily = student.StudentDailyStreaks.Where(x => x.CreatedDate.Date >= startDate && x.CreatedDate.Date <= endDate).Count();
             if (student.StudentDailyStreaks.Any())
             {
                 if (countStudentDaily == 3)
                 {
                     studentDailyStreak.LevelOfGift = 1;
-                    student.NumberOfToken += 1;
                 }
                 else if (countStudentDaily == 15)
                 {
                     studentDailyStreak.LevelOfGift = 2;
-                    student.NumberOfToken += 3;
                 }
-                else if (countStudentDaily == DateTimeHelper.GetDayInMonth(DateTime.Now))
+                else if (countStudentDaily == DateTimeHelper.GetDayInMonth(date))
                 {
-                    studentDailyStreak.LevelOfGift += 10;
+                    studentDailyStreak.LevelOfGift = 3;
                 }
             }
             student.StudentDailyStreaks.Add(studentDailyStreak);

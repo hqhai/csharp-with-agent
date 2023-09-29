@@ -50,7 +50,6 @@ namespace Fsel.System.Application.Commands.QuestBoardStudentCmd
                 return methodResult;
             }
             questBoardStudent.Status = EnumQuestBoardStudentStatus.Done;
-
             await _questBoardStudentRepository.ExecuteTransactionAsync(async () =>
             {
                 questBoardStudent = _questBoardStudentRepository.Update(questBoardStudent);
@@ -62,10 +61,14 @@ namespace Fsel.System.Application.Commands.QuestBoardStudentCmd
             var questBoards = await _questBoardRepository.Queryable.Where(x => x.Type == request.QuestBoardType).ToListAsync(cancellationToken);
             var questBoardIds = questBoards.Select(x => x.Id).ToList();
             var questBoardStudents = await _questBoardStudentRepository.Queryable.Where(x => x.CreatedDate.Date == date.Date && questBoardIds.Contains(x.QuestBoardId)).ToListAsync(cancellationToken);
-            await _queueProvider.Publish(QueueSettings.SystemQueue.NameQueue.CreateStudentDailyStreak, new CreateStudentDailyStreakQueueModel
+            if (questBoardStudents.Count == questBoards.Count)
             {
-                StudentId = questBoardStudent.StudentId,
-            }, cancellationToken);
+                await _queueProvider.Publish(QueueSettings.SystemQueue.NameQueue.CreateStudentDailyStreak, new CreateStudentDailyStreakQueueModel
+                {
+                    StudentId = request.StudentId,
+                }, cancellationToken);
+            }
+
             return methodResult;
         }
     }

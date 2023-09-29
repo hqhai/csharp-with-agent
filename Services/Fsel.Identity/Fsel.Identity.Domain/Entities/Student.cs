@@ -23,7 +23,7 @@ namespace Fsel.Identity.Domain.Entities
 
         public bool CreatedByParent { get; set; }
         public long NumberOfToken { get; set; }
-        public long NumberOfShield { get; set; }
+        public int NumberOfShield { get; set; }
         public Guid? ClassId { get; set; }
 
         public Human? Human { get; set; }

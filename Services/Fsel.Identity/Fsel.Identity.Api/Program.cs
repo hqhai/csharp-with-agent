@@ -36,6 +36,7 @@ builder.Services.AddScoped<IParentRepository, ParentRepository>();
 builder.Services.AddScoped<IStudentRepository, StudentRepository>();
 builder.Services.AddScoped<IUserOtpCodeRepository, UserOtpCodeRepository>();
 builder.Services.AddScoped<IParentStudentRepository, ParentStudentRepository>();
+builder.Services.AddScoped<IStudentDailyStreakRepository, StudentDailyStreakRepository>();
 builder.Services.AddScoped<ICSORepository, CSORepository>();
 builder.Services.AddScoped<ITeacherBankAccountRepository, TeacherBankAccountRepository>();
 builder.Services.AddScoped<IUserSettingRepository, UserSettingRepository>();
@@ -49,7 +50,8 @@ builder.AddRefitClients(typeof(ILmsCourseService), appSetting?.Services?.LmsCour
 builder.AddMassTransit(appSetting,
 queues: new Dictionary<string, Type>
 {
-    { QueueSettings.SystemQueue.NameQueue.CreateStudentDailyStreak, typeof(CreateStudentDailyStreakConsumer) }
+    { QueueSettings.SystemQueue.NameQueue.CreateStudentDailyStreak, typeof(CreateStudentDailyStreakConsumer) },
+    { QueueSettings.UserQueue.NameQueue.UpdateStudentsDailyStreak, typeof(UpdateStudentsDailyStreakConsumer) }
 });
 var app = builder.Build();
 app.UseServices();

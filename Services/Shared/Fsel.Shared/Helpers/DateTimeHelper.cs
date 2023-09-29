@@ -60,7 +60,7 @@ namespace Fsel.Shared.Helpers
         {
             DateTime dtResult = dtInput;
             dtResult = dtResult.AddMonths(1);
-            dtResult = dtResult.AddDays(-(dtResult.Day));
+            dtResult = dtResult.AddDays(-(dtResult.Day)).Date;
             return dtResult;
         }
 
@@ -75,7 +75,7 @@ namespace Fsel.Shared.Helpers
         public static DateTime GetFistDayOfTheMonth(DateTime dtInput)
         {
             DateTime dtResult = dtInput;
-            dtResult = dtResult.AddDays((-dtResult.Day) + 1);
+            dtResult = dtResult.AddDays((-dtResult.Day) + 1).Date;
             return dtResult;
         }
     }
