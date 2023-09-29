@@ -21,7 +21,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public Guid UnitId { get; set; }
 
         public Guid LessonId { get; set; }
-
+        public int DisplayOrder { get; set; }
         public Guid StudentId { get; set; }
         public IList<LessonNoteModel>? LessonNotes { get; set; }
     }

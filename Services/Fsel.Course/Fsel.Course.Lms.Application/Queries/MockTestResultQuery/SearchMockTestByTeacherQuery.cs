@@ -120,7 +120,7 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
                         if (courseUnitMockTest != null && courseUnitMockTest.Unit != null && courseUnitMockTest.Unit.UnitSkillMockTests.FirstOrDefault(x => x.MockTestId == item.MockTestId) != null)
                         {
                             item.UnitName = courseUnitMockTest.Unit.Name;
-                            item.PostArea = "U" + courseUnitMockTest.DisplayOrder + "_" + course.Name;
+                            item.PostArea = "U" + courseUnitMockTest.Number + "_" + course.Name;
                         }
                     }
                     else
