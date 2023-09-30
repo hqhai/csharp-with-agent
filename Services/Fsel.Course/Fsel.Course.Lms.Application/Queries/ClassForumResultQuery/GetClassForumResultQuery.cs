@@ -53,6 +53,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
                 .Include(x => x.LessonResult)
                 .ThenInclude(x => x!.Course)
                 .Include(x => x.ClassForum)
+                .ThenInclude(x => x!.ClassForumFiles)
                 .Include(x => x.ClassForumResultFiles)
                 .Include(x => x.ClassForumScores)
                 .Where(x => x.Id == request.ClassForumResultId)
