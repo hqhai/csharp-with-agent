@@ -88,7 +88,7 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
                     leaderBoards.Add(leaderBoard);
                 }
             }
-            leaderBoards = leaderBoards.OrderByDescending(x => x.TotalScore).ThenBy(x => x.DailyStreak).Select((x, index) => { x.DisplayOrder = index; return x; }).ToList();
+            leaderBoards = leaderBoards.OrderByDescending(x => x.TotalScore).ThenBy(x => x.DailyStreak).Select((x, index) => { x.DisplayOrder = index + 1; return x; }).ToList();
             leaderBoardSearch.LeaderBoards = leaderBoards.Take(30).ToList();
             leaderBoardSearch.LeaderBoard = leaderBoards.FirstOrDefault(x => x.Id == studentId);
             methodResult.Result = leaderBoardSearch;

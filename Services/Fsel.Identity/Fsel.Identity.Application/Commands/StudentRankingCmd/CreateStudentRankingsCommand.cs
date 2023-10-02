@@ -52,8 +52,8 @@ namespace Fsel.Identity.Application.Commands.StudentRankingCmd
             MethodResult<List<StudentRankingModel>> methodResult = new MethodResult<List<StudentRankingModel>>();
 
             // Lấy dữ liệu leaderboard hiện tại
-            //var userIDcontext = new Guid("c0b6a166-02c3-4de4-a770-2d76052c9507");
-            var currentLeaderBoard = await _lmsCourseService.GetLeaderBoard(_authContext.CurrentUserId).ConfigureAwait(false);
+            var userIDcontext = new Guid("c0b6a166-02c3-4de4-a770-2d76052c9507");
+            var currentLeaderBoard = await _lmsCourseService.GetLeaderBoard(userIDcontext).ConfigureAwait(false);
             var currentLeaderBoardResult = currentLeaderBoard?.Content?.Result;
 
             if (currentLeaderBoardResult == null || currentLeaderBoardResult!.LeaderBoards?.Count == 0)
@@ -113,11 +113,13 @@ namespace Fsel.Identity.Application.Commands.StudentRankingCmd
                 }
                 else
                 {
-                    int positionChange = current.CurrentPosition - previous.CurrentPosition;
+                    int positionChange = previous.CurrentPosition - current.CurrentPosition;
                     if (positionChange != 0)
                     {
-                        current.PositionChange = positionChange;
-                        toUpdate.Add(current);
+                        previous.PositionChange = positionChange;
+                        previous.CurrentPosition = current.CurrentPosition;
+                        previous.TotalScore = current.TotalScore;
+                        toUpdate.Add(previous);
                     }
                 }
             }
@@ -136,7 +138,7 @@ namespace Fsel.Identity.Application.Commands.StudentRankingCmd
             await _studentRankingRepository.ExecuteTransactionAsync(async () =>
             {
                 //Cập nhật vào bảng StudentRanking
-                if (toDelete.Count <= 0)
+                if (toDelete.Count > 0)
                 {
                     await _studentRankingRepository.DeleteListAsync(toDelete);
                 }
