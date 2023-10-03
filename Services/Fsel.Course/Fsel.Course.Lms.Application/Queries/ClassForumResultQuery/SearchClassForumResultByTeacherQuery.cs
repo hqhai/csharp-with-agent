@@ -103,6 +103,10 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
             {
                 classForumResultQuery = classForumResultQuery.Where(m => m.UnitDisplayOrder == request.UnitDisplayOrder);
             }
+            if (request.CourseCode != null)
+            {
+                classForumResultQuery = classForumResultQuery.Where(m => m.CourseCode == request.CourseCode);
+            }
             int totalItem = await classForumResultQuery.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
             var lists = await classForumResultQuery
                     .ApplySortAndPaging(request)

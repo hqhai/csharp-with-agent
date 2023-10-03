@@ -9,5 +9,9 @@ namespace Fsel.Course.Domain.Models.QueryModels.MockTests
     {
         public EnumMockTestFilter? MockTestFilter { get; set; }
         public IList<Guid>? CourseIds { get; set; }
+
+        public int? UnitDisplayOrder { get; set; }
+
+        public string? CourseCode { get; set; }
     }
 }

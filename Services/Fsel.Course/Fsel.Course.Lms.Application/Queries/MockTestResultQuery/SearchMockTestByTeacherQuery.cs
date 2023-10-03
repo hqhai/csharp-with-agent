@@ -67,6 +67,7 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
                                                                             Type = x.MockTest!.MockTestType,
                                                                             CourseSkill = x.MockTest.MockTestSections.Select(x => x.SectionGroup).Select(x => x!.CourseSkill).FirstOrDefault(),
                                                                         });
+
             mockTestResultQuery = mockTestResultQuery.Where(x => x.CourseSkill == EnumCourseSkill.Speaking || x.CourseSkill == EnumCourseSkill.Writing || x.Type == EnumMockTestType.FullMockTest);
             //Keyword
             if (!string.IsNullOrEmpty(request.Keyword))
@@ -95,42 +96,49 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
             {
                 mockTestResultQuery = mockTestResultQuery.Where(m => request.CourseIds.Contains(m.CourseId));
             }
-
-            int totalItem = await mockTestResultQuery.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
-            var lists = await mockTestResultQuery
-                    .ApplySortAndPaging(request)
-                    .AsNoTracking()
-                    .ToListAsync(cancellationToken: cancellationToken)
-                    .ConfigureAwait(false);
+            var lists = await mockTestResultQuery.ToListAsync(cancellationToken: cancellationToken);
             var courses = await _courseRepository.Queryable.Include(x => x.CourseUnitMockTests)
-                                                        .ThenInclude(x => x.Unit)
-                                                        .ThenInclude(x => x!.UnitSkillMockTests)
-                                                        .Include(x => x.CourseUnitMockTests)
-                                                        .Where(x => lists.Select(y => y.CourseId).Contains(x.Id))
-                                                        .ToListAsync(cancellationToken: cancellationToken);
+                                                       .ThenInclude(x => x.Unit)
+                                                       .ThenInclude(x => x!.UnitSkillMockTests)
+                                                       .Include(x => x.CourseUnitMockTests)
+                                                       .Where(x => lists.Select(y => y.CourseId).Contains(x.Id))
+                                                       .ToListAsync(cancellationToken: cancellationToken);
             foreach (var item in lists)
             {
                 var course = courses.FirstOrDefault(x => x.Id == item.CourseId);
                 if (course != null)
                 {
-                    item.CourseName = course.Name;
+                    item.CourseCode = course.Code;
                     if (item.Type == EnumMockTestType.SkillMockTest)
                     {
                         var courseUnitMockTest = course.CourseUnitMockTests.FirstOrDefault(x => x.Unit != null && x!.UnitId == item.UnitId);
                         if (courseUnitMockTest != null && courseUnitMockTest.Unit != null && courseUnitMockTest.Unit.UnitSkillMockTests.FirstOrDefault(x => x.MockTestId == item.MockTestId) != null)
                         {
                             item.UnitName = courseUnitMockTest.Unit.Name;
+                            item.Number = courseUnitMockTest.Number;
                             item.PostArea = "U" + courseUnitMockTest.Number + "_" + course.Name;
                         }
                     }
                     else
                     {
-                        var number = course.CourseUnitMockTests.FirstOrDefault(x => x.MockTestId == item.MockTestId)?.DisplayOrder;
+                        var number = course.CourseUnitMockTests.FirstOrDefault(x => x.MockTestId == item.MockTestId)?.DisplayOrder ?? default;
+                        item.Number = number;
                         item.PostArea = "FM" + number + "_" + course.Name;
                     }
                 }
             }
 
+            if (request.UnitDisplayOrder.HasValue)
+            {
+                lists = lists.Where(m => m.Number == request.UnitDisplayOrder).ToList();
+            }
+            if (request.CourseCode != null)
+            {
+                lists = lists.Where(m => m.CourseCode == request.CourseCode).ToList();
+            }
+
+            int totalItem = lists.Count;
+            lists = lists.ApplySortAndPaging(request).ToList();
             methodResult.Result = new PagingItemsModel<MockTestResultSearchModel>(lists, request, totalItem);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
