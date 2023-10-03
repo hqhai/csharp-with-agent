@@ -95,7 +95,7 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
                                                                    .Include(x => x.HomeWorkResults.Where(x => x.StudentId == studentId))
                                                                    .Include(x => x.ClassForumResults.Where(x => x.StudentId == studentId))
                                                                    .Where(x => x.StudentId == studentId && x.Status != EnumResultStatus.Unfinished)
-                                                                   .OrderBy(x => x.CreatedDate)
+                                                                   .OrderByDescending(x => x.CreatedDate)
                                                                    .ThenByDescending(x => x.UpdatedDate)
                                                                    .AsNoTracking()
                                                                    .FirstOrDefaultAsync(cancellationToken);
