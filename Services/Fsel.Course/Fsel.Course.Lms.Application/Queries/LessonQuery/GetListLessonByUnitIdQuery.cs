@@ -44,7 +44,7 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
                             .Select(x => new LessonModel
                             {
                                 CreatedDate = x.CreatedDate,
-                                Number = x.LessonResults.Select(x => x.Unit).SelectMany(x => x.CourseUnitMockTests).Select(x => x.Number).FirstOrDefault(),
+                                Number = x.LessonResults.Select(x => x.Unit).SelectMany(x => x!.CourseUnitMockTests).Select(x => x.DisplayOrder).FirstOrDefault(),
                             }).ApplySort(request).ToListAsync(cancellationToken);
 
             methodResult.Result = lessons;

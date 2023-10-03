@@ -43,7 +43,7 @@ namespace Fsel.Course.Lms.Application.Queries.UnitQuery
                             {
                                 Id = x.Id,
                                 CreatedDate = x.CreatedDate,
-                                DisplayOrder = x.UnitLessons.Select(x => x.DisplayOrder).FirstOrDefault(),
+                                DisplayOrder = x.UnitLessons.Select(x => x.Unit).Select(x => x.CourseUnitMockTests).Select(x => x.Select(x => x.Number).FirstOrDefault()).FirstOrDefault(),
                             }).ApplySort(request).ToListAsync(cancellationToken);
             methodResult.Result = units;
             methodResult.StatusCode = StatusCodes.Status200OK;

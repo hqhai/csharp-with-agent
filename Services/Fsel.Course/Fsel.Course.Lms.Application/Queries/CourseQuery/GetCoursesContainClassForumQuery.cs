@@ -43,7 +43,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
                                     Id = x.Id,
                                     Name = x.Name,
                                     CreatedDate = x.CreatedDate,
-                                    Number = x.CourseUnitMockTests.Select(x => x.Number).FirstOrDefault(),
+                                    Number = x.CourseUnitMockTests.Select(x => x.DisplayOrder).FirstOrDefault(),
                                 }).ApplySort(request).ToListAsync(cancellationToken);
 
             methodResult.Result = course;
