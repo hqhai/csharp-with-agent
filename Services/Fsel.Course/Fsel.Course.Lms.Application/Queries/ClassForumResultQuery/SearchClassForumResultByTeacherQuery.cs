@@ -52,6 +52,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
                                     .ThenInclude(x => x!.UnitLessons)
                                     .ThenInclude(x => x.Unit)
                                     .ThenInclude(x => x!.CourseUnitMockTests)
+                                    .ThenInclude(x => x.Course)
                                     .Include(x => x.ClassForum)
                                     .Where(x => x.Status == EnumClassForumResultStatus.PendingForGrading && (x.GradingTeacherId == null || x.GradingTeacherId == _authContext.CurrentUserId))
                                     .Select(x => new ClassForumResultSearchModel
@@ -61,6 +62,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
                                         CreatedUserId = x.CreatedUserId,
                                         CreatedFullName = x.CreatedFullName,
                                         CourseSkill = x.ClassForum!.CourseSkill,
+                                        CourseId = x.LessonResult!.CourseId,
                                         ClassForum = x.ClassForum!.ClassForumResults!.Select(x => x.ClassForum).Select(x => new ClassForumModel
                                         {
                                             Id = x!.Id,
@@ -103,9 +105,9 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
             {
                 classForumResultQuery = classForumResultQuery.Where(m => m.UnitDisplayOrder == request.UnitDisplayOrder);
             }
-            if (request.CourseCode != null)
+            if (request.CourseId != null)
             {
-                classForumResultQuery = classForumResultQuery.Where(m => m.CourseCode == request.CourseCode);
+                classForumResultQuery = classForumResultQuery.Where(m => m.CourseId == request.CourseId);
             }
             int totalItem = await classForumResultQuery.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
             var lists = await classForumResultQuery
