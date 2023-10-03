@@ -139,12 +139,12 @@ namespace Fsel.Course.Lms.Application.Queries.VideoQuery
                 if (videoTimeCode.VideoTimeCodeAnswers.Any() && videoTimeCode.VideoTimeCodeAnswers.All(y => y.VideoResultId == videoResultId && y.Status == EnumCurrentStatus.Done))
                 {
                     timeCodeStatus = EnumCurrentStatus.Done;
+                    IsLockTimeCode = false;
                 }
                 else if (videoTimeCode.VideoTimeCodeAnswers.All(y => y.VideoResultId == videoResultId && y.Status == EnumCurrentStatus.Process) || index == 0)
                 {
                     timeCodeStatus = EnumCurrentStatus.Process;
                 }
-                IsLockTimeCode = false;
                 return timeCodeStatus;
             }
             IsLockTimeCode = true;
