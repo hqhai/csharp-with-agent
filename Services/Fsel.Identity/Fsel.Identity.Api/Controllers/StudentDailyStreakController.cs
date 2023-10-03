@@ -29,9 +29,9 @@ namespace Fsel.Identity.Api.Controllers
         [HttpPost("receive-token")]
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> ReceiveToken([FromBody] IList<Guid> ids)
+        public async Task<IActionResult> ReceiveToken([FromBody] Guid id)
         {
-            MethodResult<bool> commandResult = await _mediator.Send(new ReceiveTokensStudentCommand { Ids = ids }).ConfigureAwait(false);
+            MethodResult<bool> commandResult = await _mediator.Send(new ReceiveTokensStudentCommand { Id = id }).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
 

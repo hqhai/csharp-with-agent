@@ -7,7 +7,6 @@ namespace Fsel.Identity.Application.Commands.DailyStreakCmd
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.IRepositories;
-    using Fsel.Shared.Helpers;
     using Fsel.Shared.Models.ShareModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
