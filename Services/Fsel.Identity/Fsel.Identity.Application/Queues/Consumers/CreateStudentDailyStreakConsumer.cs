@@ -1,4 +1,4 @@
-using Fsel.Identity.Application.Commands.StudentCmd;
+using Fsel.Identity.Application.Commands.DailyStreakCmd;
 using Fsel.Shared.Models.ShareModels;
 using MassTransit;
 using MediatR;

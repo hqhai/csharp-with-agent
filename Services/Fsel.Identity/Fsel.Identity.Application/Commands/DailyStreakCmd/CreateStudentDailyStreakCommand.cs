@@ -1,7 +1,8 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Identity.Application.Commands.StudentCmd
+namespace Fsel.Identity.Application.Commands.DailyStreakCmd
 {
+    using System;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Identity.Domain.Entities;
@@ -28,7 +29,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
         public async Task<MethodResult<bool>> Handle(CreateStudentDailyStreakCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            MethodResult<bool> methodResult = new MethodResult<bool>();
+            var methodResult = new MethodResult<bool>();
 
             var student = await _studentRepository.Queryable.Include(x => x.StudentDailyStreaks)
                                                   .FirstOrDefaultAsync(x => x.Id == request.StudentId, cancellationToken: cancellationToken);
@@ -52,10 +53,10 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                 DailyDate = date,
                 IsUseShield = request.IsUseShield,
             };
-            var startDate = DateTimeHelper.GetFistDayOfTheMonth(date);
-            var endDate = DateTimeHelper.GetFistDayOfTheMonth(date);
+            var startDay = new DateTime(date.Year, date.Month, 1).Day;
+            var endDay = DateTime.DaysInMonth(date.Year, date.Month);
 
-            var countStudentDaily = student.StudentDailyStreaks.Where(x => x.CreatedDate.Date >= startDate && x.CreatedDate.Date <= endDate).Count();
+            var countStudentDaily = student.StudentDailyStreaks.Where(x => x.DailyDate.Day >= startDay && x.DailyDate.Day <= endDay).Count();
             if (student.StudentDailyStreaks.Any())
             {
                 if (countStudentDaily == 3)
@@ -66,7 +67,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                 {
                     studentDailyStreak.LevelOfGift = 2;
                 }
-                else if (countStudentDaily == DateTimeHelper.GetDayInMonth(date))
+                else if (countStudentDaily == endDay)
                 {
                     studentDailyStreak.LevelOfGift = 3;
                 }

@@ -1,15 +1,15 @@
 using Fsel.Core.Base.BaseModels;
-using Fsel.Identity.Application.Commands.StudentCmd;
+using Fsel.Identity.Application.Commands.DailyStreakCmd;
 using MassTransit;
 using MediatR;
 
 namespace Fsel.Identity.Application.Queues.Consumers
 {
-    public class UpdateStudentsDailyStreakConsumer : IConsumer<BaseQueueModel>
+    public class SyncStudentShieldForDailyStreakEveryDayConsumer : IConsumer<BaseQueueModel>
     {
         private readonly IMediator _mediator;
 
-        public UpdateStudentsDailyStreakConsumer(IMediator mediator)
+        public SyncStudentShieldForDailyStreakEveryDayConsumer(IMediator mediator)
         {
             _mediator = mediator;
         }

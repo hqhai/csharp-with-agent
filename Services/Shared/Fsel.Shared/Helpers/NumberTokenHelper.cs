@@ -4,14 +4,14 @@ namespace Fsel.Shared.Helpers
 {
     public class NumberTokenConfig
     {
-        public NumberTokenConfig(int number, int numberOfToken, bool isArmorialReceive)
+        public NumberTokenConfig(int levelOfGift, int numberOfToken, bool isArmorialReceive)
         {
-            Number = number;
+            LevelOfGift = levelOfGift;
             NumberOfToken = numberOfToken;
             IsArmorialReceive = isArmorialReceive;
         }
 
-        public int Number { get; set; }
+        public int LevelOfGift { get; set; }
         public int NumberOfToken { get; set; }
         public bool IsArmorialReceive { get; set; }
     }
@@ -25,9 +25,9 @@ namespace Fsel.Shared.Helpers
             new NumberTokenConfig(3, 10,true),
         };
 
-        public static (int, bool) GetNumberToken(this int? number)
+        public static (int, bool) GetNumberToken(this int? levelOfGift)
         {
-            var config = s_numberTokenConfigs.OrderBy(x => x.Number).FirstOrDefault(x => x.Number == number);
+            var config = s_numberTokenConfigs.OrderBy(x => x.LevelOfGift).FirstOrDefault(x => x.LevelOfGift == levelOfGift);
             if (config != null)
             {
                 return (config.NumberOfToken, config.IsArmorialReceive);
