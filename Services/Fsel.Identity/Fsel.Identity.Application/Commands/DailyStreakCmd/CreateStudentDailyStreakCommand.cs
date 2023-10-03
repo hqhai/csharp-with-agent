@@ -38,11 +38,16 @@ namespace Fsel.Identity.Application.Commands.DailyStreakCmd
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student));
                 return methodResult;
             }
-            var date = DateTime.Now;
+
+            var date = request.DailyDate ?? DateTime.Now;
+            if (request.IsUseShield)
+            {
+                student.NumberOfShield--;
+            }
             var isStudentDate = student.StudentDailyStreaks.Any(x => x.DailyDate.Date == date.Date);
             if (isStudentDate)
             {
-                methodResult.Result = true;
+                methodResult.Result = false;
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
             }
@@ -52,10 +57,9 @@ namespace Fsel.Identity.Application.Commands.DailyStreakCmd
                 DailyDate = date,
                 IsUseShield = request.IsUseShield,
             };
-            var startDay = new DateTime(date.Year, date.Month, 1).Day;
             var endDay = DateTime.DaysInMonth(date.Year, date.Month);
-
-            var countStudentDaily = student.StudentDailyStreaks.Where(x => x.DailyDate.Day >= startDay && x.DailyDate.Day <= endDay).Count();
+            student.StudentDailyStreaks.Add(studentDailyStreak);
+            var countStudentDaily = student.StudentDailyStreaks.Where(x => x.DailyDate.Month == date.Month && x.DailyDate.Year == date.Year).Count();
             if (student.StudentDailyStreaks.Any())
             {
                 if (countStudentDaily == 3)
@@ -69,9 +73,9 @@ namespace Fsel.Identity.Application.Commands.DailyStreakCmd
                 else if (countStudentDaily == endDay)
                 {
                     studentDailyStreak.LevelOfGift = 3;
+                    studentDailyStreak.IsArmorialReceive = true;
                 }
             }
-            student.StudentDailyStreaks.Add(studentDailyStreak);
             await _studentRepository.ExecuteTransactionAsync(async () =>
             {
                 student = _studentRepository.Update(student);

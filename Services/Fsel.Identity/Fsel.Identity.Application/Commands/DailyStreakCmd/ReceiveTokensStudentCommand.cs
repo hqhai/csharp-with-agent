@@ -40,27 +40,28 @@ namespace Fsel.Identity.Application.Commands.DailyStreakCmd
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
             }
-            var date = DateTime.Now.Date;
-            var studentDailyStreak = student.StudentDailyStreaks.FirstOrDefault(x => x.Id == request.Id && x.LevelOfGift != null && !x.IsReceiveGift);
+            var studentDailyStreak = student.StudentDailyStreaks.FirstOrDefault(x => x.Id == request.Id && x.LevelOfGift != null && !x.IsGiftReceive);
             if (studentDailyStreak == null)
             {
                 methodResult.Result = false;
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
             }
-            studentDailyStreak.IsReceiveGift = true;
+
+            var date = DateTime.Now.Date;
+            studentDailyStreak.IsGiftReceive = true;
             student.NumberOfToken += studentDailyStreak.LevelOfGift.HasValue ? studentDailyStreak.LevelOfGift.Value.GetNumberToken() : default;
             await _studentDailyStreakRepository.ExecuteTransactionAsync(async () =>
-            {
-                _studentRepository.Update(student);
-                await _studentRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+             {
+                 _studentRepository.Update(student);
+                 await _studentRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
-                _studentDailyStreakRepository.Update(studentDailyStreak);
-                await _studentDailyStreakRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
-                methodResult.StatusCode = StatusCodes.Status200OK;
-                methodResult.Result = true;
-                return methodResult;
-            });
+                 _studentDailyStreakRepository.Update(studentDailyStreak);
+                 await _studentDailyStreakRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+                 methodResult.StatusCode = StatusCodes.Status200OK;
+                 methodResult.Result = true;
+                 return methodResult;
+             });
             return methodResult;
         }
     }
