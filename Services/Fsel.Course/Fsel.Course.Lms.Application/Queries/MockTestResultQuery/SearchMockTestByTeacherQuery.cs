@@ -71,7 +71,7 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
                                                                             Type = x.MockTest!.MockTestType,
                                                                             CourseSkill = x.MockTest.MockTestSections.Select(x => x.SectionGroup).Select(x => x!.CourseSkill).FirstOrDefault(),
                                                                             UnitDisplayOrder = x.MockTest.CourseUnitMockTests.Select(x => x.Number).FirstOrDefault(),
-                                                                            CourseName = x.MockTest.MockTestResults.Select(x => x.Course).FirstOrDefault()!.Name,
+                                                                            CourseCode = x.MockTest.MockTestResults.Select(x => x.Course).FirstOrDefault()!.Code,
                                                                         });
             mockTestResultQuery = mockTestResultQuery.Where(x => x.CourseSkill == EnumCourseSkill.Speaking || x.CourseSkill == EnumCourseSkill.Writing || x.Type == EnumMockTestType.FullMockTest);
             //Keyword
@@ -118,11 +118,11 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
             {
                 if (item.Type == EnumMockTestType.SkillMockTest)
                 {
-                    item.PostArea = "U" + item.UnitDisplayOrder + "_" + item.CourseName;
+                    item.PostArea = "U" + item.UnitDisplayOrder + "_" + item.CourseCode;
                 }
                 else
                 {
-                    item.PostArea = "FM" + item.UnitDisplayOrder + "_" + item.CourseName;
+                    item.PostArea = "FM" + item.UnitDisplayOrder + "_" + item.CourseCode;
                 }
             }
 

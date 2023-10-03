@@ -13,7 +13,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public Guid CourseId { get; set; }
         public Guid MockTestId { get; set; }
         public string? PostArea { get; set; }
-        public string? CourseName { get; set; }
+        public string? CourseCode { get; set; }
         public EnumCourseSkill? CourseSkill { get; set; }
         public int? UnitDisplayOrder { get; set; }
     }
