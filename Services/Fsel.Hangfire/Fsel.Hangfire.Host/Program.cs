@@ -21,7 +21,7 @@ builder.Services.AddHangfireServer();
 builder.Services.AddScoped<UpdateClassLiveAssignmentPublisher>();
 builder.Services.AddScoped<UpdateOcCheckInClassForumResultPublisher>();
 builder.Services.AddScoped<UpdateTeacherGradingInClassForumAndMockTestPublisher>();
-
+builder.Services.AddScoped<UpdateStudentsDailyStreakPublisher>();
 var app = builder.Build();
 
 app.UseServices();

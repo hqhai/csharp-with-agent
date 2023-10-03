@@ -44,6 +44,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
             }
             student.ClassId = request.ClassId;
             student.PackageId = request.PackageId;
+            student.NumberOfShield += request.NumberOfShield;
             await _studentRepository.ExecuteTransactionAsync(async () =>
             {
                 student = _studentRepository.Update(student);

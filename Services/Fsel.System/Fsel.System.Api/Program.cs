@@ -3,6 +3,7 @@
 using Fsel.Core.Extensions;
 using Fsel.Shared.Constants;
 using Fsel.System.Application.Queues.Consumers;
+using Fsel.System.Application.Queues.Publishers;
 using Fsel.System.Application.Services.CourseServices;
 using Fsel.System.Application.Services.OrderServices;
 using Fsel.System.Application.Services.UserServices;
@@ -36,10 +37,11 @@ builder.AddRefitClients(typeof(IUserService), appSetting?.Services?.UserApiUrl);
 builder.AddRefitClients(typeof(ICourseService), appSetting?.Services?.LmsCourseApiUrl);
 builder.AddRefitClients(typeof(IOrderService), appSetting?.Services?.OrderApiUrl);
 
+builder.Services.AddScoped<CreateStudentDailyStreakPublisher>();
 builder.AddMassTransit(appSetting,
 queues: new Dictionary<string, Type>
 {
-    { QueueSettings.LmsQueue.NameQueue.QuestBoardMainFinish, typeof(QuestBoardMainFinishConsumer) },
+    { QueueSettings.LmsQueue.NameQueue.QuestBoardMainFinish, typeof(QuestBoardFinishConsumer) },
 });
 
 var app = builder.Build();

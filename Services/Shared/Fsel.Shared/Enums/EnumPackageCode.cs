@@ -4,7 +4,7 @@ namespace Fsel.Shared.Enums
 {
     public enum EnumPackageCode
     {
-        BASIC,
+        BASIC = 1,
         STANDARD,
         PREMIUM
     }
