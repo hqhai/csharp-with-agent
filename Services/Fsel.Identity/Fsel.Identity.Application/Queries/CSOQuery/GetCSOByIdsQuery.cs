@@ -40,7 +40,10 @@ namespace Fsel.Identity.Application.Queries.CSOQuery
             human = await _csoRepository.Queryable.Where(p => request.Ids.Contains(p.Id)).Include(i => i.Human).Select(x => new HumanModel
             {
                 Id = x.Id,
-                FullName = x.Human!.FullName
+                FullName = x.Human!.FullName,
+                Email = x.Human!.Email,
+                PhoneNumber = x.Human!.PhoneNumber,
+
             }).ToListAsync(cancellationToken);
 
             methodResult.Result = human;
