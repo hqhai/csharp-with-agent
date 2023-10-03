@@ -11,6 +11,7 @@ namespace Fsel.Identity.Application.Commands.StudentRankingCmd
     using Fsel.Core.Base;
     using Fsel.Identity.Application.Queues.Publishers;
     using Fsel.Identity.Application.Services.LmsCourseService;
+    using Fsel.Identity.Application.Services.LmsCourseService.Model;
     using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Domain.Models.CommandModels.StudentRanking;
@@ -32,7 +33,8 @@ namespace Fsel.Identity.Application.Commands.StudentRankingCmd
         private readonly LeaderBoardPublisher _leaderBoardPublisher;
         private readonly IStudentDailyStreakRepository _studentDailyStreakRepository;
         private readonly AuthContext _authContext;
-        private const int POSITION_CHANGE = 31;
+        private const int POSITION_CHANGE = 31; // Vị trí nằm ngoài leaderboard là 31 (của tất cả học sinh)
+        private const int TOP_LEADER = 30; //top leaderboard sẽ lấy
 
         public CreateStudentRankingsCommandHandler(IMapper mapper,
             IStudentRankingRepository studentRankingRepository,
@@ -54,8 +56,7 @@ namespace Fsel.Identity.Application.Commands.StudentRankingCmd
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<List<StudentRankingModel>> methodResult = new MethodResult<List<StudentRankingModel>>();
 
-            // Lấy dữ liệu leaderboard hiện tại
-
+            // Tổng hợp dữ liệu LeaderBoard
             var testUserId = new Guid("c0b6a166-02c3-4de4-a770-2d76052c9507");
             var currentLeaderBoard = await _lmsCourseService.GetLeaderBoard(testUserId).ConfigureAwait(false);
             var currentLeaderBoardResult = currentLeaderBoard?.Content?.Result;
@@ -73,15 +74,95 @@ namespace Fsel.Identity.Application.Commands.StudentRankingCmd
                 methodResult.Result = new List<StudentRankingModel>();
                 return methodResult;
             }
-
             var dailyStreaks = _studentDailyStreakRepository.Queryable
                                 .Where(s => studentIds.Contains(s.StudentId))
                                 .OrderBy(s => s.StudentId)
                                 .ThenByDescending(s => s.DailyDate)
                                 .ToList();
 
-            var studentStreaks = new Dictionary<Guid, int>(); // <StudentId, StreakCount>
+            //Tính toán chuỗi dailystreak của học sinh
+            var studentStreaks = CalculateStudentDailyStreaks(studentIds, dailyStreaks);
 
+            //Lấy danh sách leaderboard hiện tại
+            List<StudentRanking> studentRankings = GetCurrentLeaderBoard(currentLeaderBoardResult, studentStreaks);
+            if (studentRankings.Count == 0)
+            {
+                methodResult.Result = new List<StudentRankingModel>();
+                return methodResult;
+            }
+
+            // Lấy dữ liệu leaderboard trước đó
+            var previousLeaderBoard = await _studentRankingRepository.Queryable.ToListAsync(cancellationToken);
+            var previousLeaderBoardResult = _mapper.Map<List<StudentRanking>>(previousLeaderBoard);
+
+
+            //Kiểm tra sự thay đổi của 2 danh sách, nếu không có thay đổi thì không làm gì cả
+            bool allElementsMatch = studentRankings.All(currentItem =>
+                previousLeaderBoardResult.Exists(prevItem =>
+                    prevItem.StudentId == currentItem.StudentId &&
+                    prevItem.CurrentPosition == currentItem.CurrentPosition &&
+                    prevItem.Level == currentItem.Level));
+
+            if (allElementsMatch)
+            {
+                methodResult.Result = _mapper.Map<List<StudentRankingModel>>(previousLeaderBoardResult);
+                return methodResult;
+            }
+
+            // Tính toán thứ hạng thay đổi khi so sánh 2 danh sách trước đó và hiện tại
+            var (toAdd, toUpdate, toDelete) = CalculateRankingChanges(studentRankings, previousLeaderBoardResult);
+
+            //Thực hiện các hành động lưu xuống database , gửi lên websocket
+            await _studentRankingRepository.ExecuteTransactionAsync(async () =>
+            {
+                await UpdateStudentRankingDatabase(toAdd, toUpdate, toDelete);
+
+                var studentRankingRealTime = _mapper.Map<List<StudentRankingRealTime>>(studentRankings);
+                await SendToWebSocket(studentRankingRealTime, cancellationToken);
+
+                methodResult.StatusCode = StatusCodes.Status201Created;
+                methodResult.Result = _mapper.Map<List<StudentRankingModel>>(studentRankings);
+                return methodResult;
+            });
+
+            return methodResult;
+        }
+
+        #region Handler Data
+        /// <summary>
+        /// Lấy LeaderBoard hiện tại
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        private static List<StudentRanking> GetCurrentLeaderBoard(LeaderBoardSearchModel currentLeaderBoardResult, Dictionary<Guid, int> studentStreaks)
+        {
+            List<StudentRanking> studentRankings = new List<StudentRanking>();
+            foreach (var item in currentLeaderBoardResult.LeaderBoards!)
+            {
+                var studentRanking = new StudentRanking
+                {
+                    StudentId = item.Id,
+                    DailyStreak = studentStreaks.ContainsKey(item.Id) ? studentStreaks[item.Id] : 0,  // Gán giá trị từ studentStreaks
+                    CurrentPosition = item.DisplayOrder,
+                    TotalScore = item.TotalScore,
+                    Level = item.Level,
+                };
+                studentRankings.Add(studentRanking);
+            }
+
+            return studentRankings.OrderByDescending(sr => sr.DailyStreak).Take(TOP_LEADER).ToList();
+        }
+
+
+        /// <summary>
+        /// Tính toán chuỗi dailystreaks của học sinh
+        /// </summary>
+        /// <param name="studentIds"></param>
+        /// <param name="dailyStreaks"></param>
+        /// <returns></returns>
+        private static Dictionary<Guid, int> CalculateStudentDailyStreaks(List<Guid> studentIds, List<StudentDailyStreak> dailyStreaks)
+        {
+            Dictionary<Guid, int> studentStreaks = new Dictionary<Guid, int>();
             foreach (var studentId in studentIds)
             {
                 var studentData = dailyStreaks.Where(s => s.StudentId == studentId).ToList();
@@ -116,115 +197,95 @@ namespace Fsel.Identity.Application.Commands.StudentRankingCmd
                 studentStreaks[studentId] = streak;
             }
 
-            List<StudentRanking> studentRankings = new List<StudentRanking>();
-            foreach (var item in currentLeaderBoardResult.LeaderBoards!)
-            {
-                var studentRanking = new StudentRanking
-                {
-                    StudentId = item.Id,
-                    DailyStreak = studentStreaks.ContainsKey(item.Id) ? studentStreaks[item.Id] : 0,  // Gán giá trị từ studentStreaks
-                    CurrentPosition = item.DisplayOrder,
-                    TotalScore = item.TotalScore,
-                    Level = item.Level,
-                };
-                studentRankings.Add(studentRanking);
-            }
+            return studentStreaks;
+        }
 
-            if (studentRankings.Count == 0)
-            {
-                methodResult.Result = new List<StudentRankingModel>();
-                return methodResult;
-            }
-
-
-            // Lấy dữ liệu leaderboard trước đó
-            var previousLeaderBoard = await _studentRankingRepository.Queryable.ToListAsync(cancellationToken);
-            var previousLeaderBoardResult = _mapper.Map<List<StudentRanking>>(previousLeaderBoard);
-
-            bool allElementsMatch = studentRankings.All(currentItem =>
-                previousLeaderBoardResult.Exists(prevItem =>
-                    prevItem.StudentId == currentItem.StudentId &&
-                    prevItem.CurrentPosition == currentItem.CurrentPosition &&
-                    prevItem.Level == currentItem.Level));
-
-            if (allElementsMatch)
-            {
-                methodResult.Result = _mapper.Map<List<StudentRankingModel>>(previousLeaderBoardResult);
-                return methodResult;
-            }
-
-            // Tính toán thứ hạng
-            List<StudentRanking> toUpdate = new List<StudentRanking>();
+        /// <summary>
+        /// Tính toán thứ hạng
+        /// </summary>
+        /// <param name="current"></param>
+        /// <param name="previous"></param>
+        /// <returns></returns>
+        private static (List<StudentRanking> ToAdd, List<StudentRanking> ToUpdate, List<StudentRanking> ToDelete) CalculateRankingChanges(List<StudentRanking> current, List<StudentRanking> previous)
+        {
             List<StudentRanking> toAdd = new List<StudentRanking>();
+            List<StudentRanking> toUpdate = new List<StudentRanking>();
+            List<StudentRanking> toDelete = new List<StudentRanking>();
 
-            foreach (var current in studentRankings)
+            foreach (var currentRanking in current)
             {
-                var previous = previousLeaderBoardResult.FirstOrDefault(p => p.StudentId == current.StudentId);
-                if (previous == null)
+                var prevRanking = previous.FirstOrDefault(p => p.StudentId == currentRanking.StudentId);
+
+                if (prevRanking == null)
                 {
-                    current.PositionChange = POSITION_CHANGE - current.CurrentPosition;
-                    toAdd.Add(current);
+                    // Học sinh này không có trong leaderboard trước đó, nên cần thêm vào.
+                    currentRanking.PositionChange = POSITION_CHANGE - currentRanking.CurrentPosition;
+                    toAdd.Add(currentRanking);
                 }
                 else
                 {
-                    int positionChange = previous.CurrentPosition - current.CurrentPosition;
+                    // Học sinh này đã có trong leaderboard trước đó, nên cần so sánh và cập nhật.
+                    int positionChange = prevRanking.CurrentPosition - currentRanking.CurrentPosition;
                     if (positionChange != 0)
                     {
-                        previous.PositionChange = positionChange;
-                        previous.CurrentPosition = current.CurrentPosition;
-                        previous.TotalScore = current.TotalScore;
-                        toUpdate.Add(previous);
+                        prevRanking.PositionChange = positionChange;
+                        prevRanking.CurrentPosition = currentRanking.CurrentPosition;
+                        prevRanking.TotalScore = currentRanking.TotalScore;
+                        toUpdate.Add(prevRanking);
                     }
                 }
             }
-            //Lấy list học sinh bị rớt khỏi bảng xếp hạng
-            var toDelete = previousLeaderBoardResult
-                .Where(prev => !studentRankings.Any(curr => curr.StudentId == prev.StudentId))
-                .ToList();
 
-            //// Cập nhật PositionChange cho StudentRanking
-            //foreach (var item in toAdd.Concat(toUpdate))
-            //{
-            //    var target = studentRankings.First(s => s.StudentId == item.StudentId);
-            //    target.PositionChange = item.PositionChange;
-            //}
+            // Xác định những học sinh bị rớt khỏi leaderboard hiện tại.
+            toDelete = previous.Where(prev => !current.Any(curr => curr.StudentId == prev.StudentId)).ToList();
 
-            await _studentRankingRepository.ExecuteTransactionAsync(async () =>
-            {
-                //Cập nhật vào bảng StudentRanking
-                if (toDelete.Count > 0)
-                {
-                    await _studentRankingRepository.DeleteListAsync(toDelete);
-                }
-
-                if (toUpdate.Count > 0)
-                {
-                    _studentRankingRepository.UpdateList(toUpdate);
-                }
-
-                if (toAdd.Count > 0)
-                {
-                    await _studentRankingRepository.AddList(toAdd);
-                }
-                await _studentRankingRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
-
-                var studentRankingRealTime = _mapper.Map<List<StudentRankingRealTime>>(studentRankings);
-
-
-                // Gửi dữ liệu qua websocket
-                LeaderBoardQueueModel leaderBoards = new LeaderBoardQueueModel
-                {
-                    StudentRankings = studentRankingRealTime,
-                    UserId = _authContext.CurrentUserId
-                };
-
-                await _leaderBoardPublisher.Publish(leaderBoards, cancellationToken);
-                methodResult.StatusCode = StatusCodes.Status201Created;
-                methodResult.Result = _mapper.Map<List<StudentRankingModel>>(studentRankings);
-                return methodResult;
-            });
-
-            return methodResult;
+            return (ToAdd: toAdd, ToUpdate: toUpdate, ToDelete: toDelete);
         }
+
+
+        /// <summary>
+        /// Gửi dữ liệu qua webSocket
+        /// </summary>
+        /// <param name="studentRankingRealTime"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        private async Task SendToWebSocket(List<StudentRankingRealTime> studentRankingRealTime, CancellationToken cancellationToken)
+        {
+            LeaderBoardQueueModel leaderBoards = new LeaderBoardQueueModel
+            {
+                StudentRankings = studentRankingRealTime,
+                UserId = _authContext.CurrentUserId
+            };
+
+            await _leaderBoardPublisher.Publish(leaderBoards, cancellationToken);
+        }
+
+        /// <summary>
+        /// Lưu dữ liệu xuống database
+        /// </summary>
+        /// <param name="toAdd"></param>
+        /// <param name="toUpdate"></param>
+        /// <param name="toDelete"></param>
+        /// <returns></returns>
+        private async Task UpdateStudentRankingDatabase(List<StudentRanking> toAdd, List<StudentRanking> toUpdate, List<StudentRanking> toDelete)
+        {
+            if (toDelete.Count > 0)
+            {
+                await _studentRankingRepository.DeleteListAsync(toDelete);
+            }
+
+            if (toUpdate.Count > 0)
+            {
+                _studentRankingRepository.UpdateList(toUpdate);
+            }
+
+            if (toAdd.Count > 0)
+            {
+                await _studentRankingRepository.AddList(toAdd);
+            }
+
+            await _studentRankingRepository.UnitOfWork.SaveEntitiesAsync();
+        }
+        #endregion
     }
 }

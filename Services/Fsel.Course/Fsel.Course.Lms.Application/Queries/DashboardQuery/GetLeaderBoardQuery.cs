@@ -26,7 +26,7 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
         private readonly ISystemService _systemService;
         private readonly IUnitResultRepository _unitResultRepository;
         private readonly ICourseResultRepository _courseResultRepository;
-        private const int LEADERBOARD_TOP = 20; // Chỉ lấy ra 50 người đứng đầu , sau đó sẽ lọc theo daily streak để lấy ra 30 người đứng đầu
+        private const int LEADERBOARD_TOP = 50; // Chỉ lấy ra 50 người đứng đầu , sau đó sẽ lọc theo daily streak để lấy ra 30 người đứng đầu
 
         public GetLeaderBoardQueryHandler(IUserService userService
             , ISystemService systemService
