@@ -52,10 +52,11 @@ namespace Fsel.Identity.Application.Commands.DailyStreakCmd
                 DailyDate = date,
                 IsUseShield = request.IsUseShield,
             };
-            var startDay = new DateTime(date.Year, date.Month, 1).Day;
+            var startDate = new DateTime(date.Year, date.Month, 1);
             var endDay = DateTime.DaysInMonth(date.Year, date.Month);
+            var endDate = new DateTime(date.Year, date.Month, endDay);
 
-            var countStudentDaily = student.StudentDailyStreaks.Where(x => x.DailyDate.Day >= startDay && x.DailyDate.Day <= endDay).Count();
+            var countStudentDaily = student.StudentDailyStreaks.Where(x => x.DailyDate.Date >= startDate && x.DailyDate.Date <= endDate).Count();
             if (student.StudentDailyStreaks.Any())
             {
                 if (countStudentDaily == 3)

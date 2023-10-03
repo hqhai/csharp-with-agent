@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Identity.Application.Queries.StudentQuery
+namespace Fsel.Identity.Application.Queries.DailyStreakQuery
 {
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
@@ -32,7 +32,7 @@ namespace Fsel.Identity.Application.Queries.StudentQuery
         {
             ArgumentNullException.ThrowIfNull(request);
 
-            MethodResult<IList<DateTime>> methodResult = new MethodResult<IList<DateTime>>();
+            var methodResult = new MethodResult<IList<DateTime>>();
 
             var student = await _studentRepository.Queryable.Include(x => x.StudentDailyStreaks)
                             .Include(i => i.Human)

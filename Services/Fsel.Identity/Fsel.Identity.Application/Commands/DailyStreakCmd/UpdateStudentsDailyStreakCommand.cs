@@ -27,9 +27,10 @@ namespace Fsel.Identity.Application.Commands.DailyStreakCmd
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<bool>();
             var date = DateTime.Now.Date.AddDays(-1);
-            var startDay = new DateTime(date.Year, date.Month, 1).Day;
+            var startDate = new DateTime(date.Year, date.Month, 1);
             var endDay = DateTime.DaysInMonth(date.Year, date.Month);
-            var students = await _studentRepository.Queryable.Where(x => x.NumberOfShield > 0 && !x.StudentDailyStreaks.Any(x => x.DailyDate.Date == date)).Include(x => x.StudentDailyStreaks).ToListAsync(cancellationToken);
+            var endDate = new DateTime(date.Year, date.Month, endDay);
+            var students = await _studentRepository.Queryable.Include(x => x.StudentDailyStreaks).Where(x => x.NumberOfShield > 0 && !x.StudentDailyStreaks.Any(x => x.DailyDate.Date == date)).ToListAsync(cancellationToken);
             var studentUpdates = new List<Student>();
             foreach (var item in students)
             {
@@ -40,9 +41,9 @@ namespace Fsel.Identity.Application.Commands.DailyStreakCmd
                     DailyDate = date,
                     IsUseShield = true,
                 };
-                var countStudentDaily = item.StudentDailyStreaks.Where(x => x.DailyDate.Day >= startDay && x.DailyDate.Day <= endDay).Count();
                 if (item.StudentDailyStreaks.Any())
                 {
+                    var countStudentDaily = item.StudentDailyStreaks.Where(x => x.DailyDate.Date >= startDate && x.DailyDate.Date <= endDate).Count();
                     if (countStudentDaily == 3)
                     {
                         studentDailyStreak.LevelOfGift = 1;
@@ -55,9 +56,9 @@ namespace Fsel.Identity.Application.Commands.DailyStreakCmd
                     {
                         studentDailyStreak.LevelOfGift = 3;
                     }
-                    item.StudentDailyStreaks.Add(studentDailyStreak);
-                    studentUpdates.Add(item);
                 }
+                item.StudentDailyStreaks.Add(studentDailyStreak);
+                studentUpdates.Add(item);
             }
             await _studentRepository.ExecuteTransactionAsync(async () =>
             {

@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Identity.Application.Queries.StudentQuery
+namespace Fsel.Identity.Application.Queries.DailyStreakQuery
 {
     using System;
     using System.Collections.Generic;
