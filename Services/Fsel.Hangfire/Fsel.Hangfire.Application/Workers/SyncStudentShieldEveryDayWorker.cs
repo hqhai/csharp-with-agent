@@ -5,18 +5,17 @@ namespace Fsel.Hangfire.Application.Workers
     using Fsel.Core.Base.Interfaces;
     using Fsel.Hangfire.Application.Queues.Publishers;
 
-    public class UpdateStudentsDailyStreakWorker : IWorker
+    public class SyncStudentShieldEveryDayWorker : IWorker
     {
-        private readonly UpdateStudentsDailyStreakPublisher _updateStudentsDailyStreakPublisher;
+        private readonly SyncStudentShieldEveryDayPublisher _updateStudentsDailyStreakPublisher;
 
-        public UpdateStudentsDailyStreakWorker(UpdateStudentsDailyStreakPublisher updateStudentsDailyStreakPublisher)
+        public SyncStudentShieldEveryDayWorker(SyncStudentShieldEveryDayPublisher updateStudentsDailyStreakPublisher)
         {
             _updateStudentsDailyStreakPublisher = updateStudentsDailyStreakPublisher;
         }
 
         public async Task RunAsync()
         {
-
             await _updateStudentsDailyStreakPublisher.Publish(CancellationToken.None);
         }
     }

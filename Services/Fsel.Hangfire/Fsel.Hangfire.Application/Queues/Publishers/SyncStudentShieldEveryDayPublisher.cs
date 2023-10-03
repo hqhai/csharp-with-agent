@@ -8,18 +8,18 @@ namespace Fsel.Hangfire.Application.Queues.Publishers
     using Fsel.Core.Base.Interfaces;
     using Fsel.Shared.Constants;
 
-    public class UpdateStudentsDailyStreakPublisher
+    public class SyncStudentShieldEveryDayPublisher
     {
         private readonly IQueueProvider _queueProvider;
 
-        public UpdateStudentsDailyStreakPublisher(IQueueProvider queueProvider)
+        public SyncStudentShieldEveryDayPublisher(IQueueProvider queueProvider)
         {
             _queueProvider = queueProvider;
         }
 
         public async Task Publish(CancellationToken cancellationToken)
         {
-            await _queueProvider.Publish(QueueSettings.UserQueue.NameQueue.UpdateStudentsDailyStreak, new BaseQueueModel { QueueId = Guid.NewGuid().ToString() }, cancellationToken);
+            await _queueProvider.Publish(QueueSettings.UserQueue.NameQueue.SyncStudentShieldEveryDay, cancellationToken);
         }
     }
 }

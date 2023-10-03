@@ -9,11 +9,11 @@ namespace Fsel.Identity.Application.Commands.DailyStreakCmd
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class UpdateStudentsDailyStreakCommand : IRequest<MethodResult<bool>>
+    public class SyncStudentShieldEveryDayCommand : IRequest<MethodResult<bool>>
     {
     }
 
-    public class UpdateStudentsDailyStreakCommandHandler : IRequestHandler<UpdateStudentsDailyStreakCommand, MethodResult<bool>>
+    public class UpdateStudentsDailyStreakCommandHandler : IRequestHandler<SyncStudentShieldEveryDayCommand, MethodResult<bool>>
     {
         private readonly IStudentRepository _studentRepository;
 
@@ -22,7 +22,7 @@ namespace Fsel.Identity.Application.Commands.DailyStreakCmd
             _studentRepository = studentRepository;
         }
 
-        public async Task<MethodResult<bool>> Handle(UpdateStudentsDailyStreakCommand request, CancellationToken cancellationToken)
+        public async Task<MethodResult<bool>> Handle(SyncStudentShieldEveryDayCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<bool>();
