@@ -19,7 +19,8 @@ namespace Fsel.Realtime.Application.Queues.Consumers
         {
             if (context != null)
             {
-                await _leaderBoardHubContext.Clients.All.SendAsync(RealtimeSettings.LeaderBoardHub.Methods.LeaderBoardMessage, context.Message);
+                var userId = context.Message.UserId.ToString();
+                await _leaderBoardHubContext.Clients.Group(userId!).SendAsync(RealtimeSettings.NotificationHub.Methods.NotificationMessage, context.Message);
             }
         }
     }

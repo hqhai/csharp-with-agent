@@ -26,6 +26,7 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
         private readonly ISystemService _systemService;
         private readonly IUnitResultRepository _unitResultRepository;
         private readonly ICourseResultRepository _courseResultRepository;
+        private const int LEADERBOARD_TOP = 30; // Chỉ lấy ra 30 người đứng đầu bảng xếp hạng
 
         public GetLeaderBoardQueryHandler(IUserService userService
             , ISystemService systemService
@@ -58,7 +59,7 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
                 methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError), nameof(studentResults));
                 return methodResult;
             }
-            var students = studentResults?.Content?.Result?.Where(x=>x.CourseLevel == student!.CourseLevel);
+            var students = studentResults?.Content?.Result?.Where(x => x.CourseLevel == student!.CourseLevel);
             LeaderBoardSearchModel leaderBoardSearch = new LeaderBoardSearchModel();
             IList<LeaderBoardModel> leaderBoards = new List<LeaderBoardModel>();
             var userIds = students?.Select(x => x.Human).Where(x => x != null && x.UserId != null).Select(x => x!.UserId ?? default).ToList();
@@ -89,7 +90,7 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
                 }
             }
             leaderBoards = leaderBoards.OrderByDescending(x => x.TotalScore).ThenBy(x => x.DailyStreak).Select((x, index) => { x.DisplayOrder = index + 1; return x; }).ToList();
-            leaderBoardSearch.LeaderBoards = leaderBoards.Take(30).ToList();
+            leaderBoardSearch.LeaderBoards = leaderBoards.Take(LEADERBOARD_TOP).ToList();
             leaderBoardSearch.LeaderBoard = leaderBoards.FirstOrDefault(x => x.Id == studentId);
             methodResult.Result = leaderBoardSearch;
             methodResult.StatusCode = StatusCodes.Status200OK;

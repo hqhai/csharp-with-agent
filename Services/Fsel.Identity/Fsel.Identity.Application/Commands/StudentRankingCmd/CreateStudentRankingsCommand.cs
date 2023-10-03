@@ -52,8 +52,7 @@ namespace Fsel.Identity.Application.Commands.StudentRankingCmd
             MethodResult<List<StudentRankingModel>> methodResult = new MethodResult<List<StudentRankingModel>>();
 
             // Lấy dữ liệu leaderboard hiện tại
-            var userIDcontext = new Guid("c0b6a166-02c3-4de4-a770-2d76052c9507");
-            var currentLeaderBoard = await _lmsCourseService.GetLeaderBoard(userIDcontext).ConfigureAwait(false);
+            var currentLeaderBoard = await _lmsCourseService.GetLeaderBoard(_authContext.CurrentUserId).ConfigureAwait(false);
             var currentLeaderBoardResult = currentLeaderBoard?.Content?.Result;
 
             if (currentLeaderBoardResult == null || currentLeaderBoardResult!.LeaderBoards?.Count == 0)
@@ -67,7 +66,7 @@ namespace Fsel.Identity.Application.Commands.StudentRankingCmd
             {
                 var studentRanking = new StudentRanking
                 {
-                    StudentId = item.UserId,
+                    StudentId = item.Id,
                     DailyStreak = item.DailyStreak,
                     CurrentPosition = item.DisplayOrder,
                     TotalScore = item.TotalScore,
@@ -128,12 +127,12 @@ namespace Fsel.Identity.Application.Commands.StudentRankingCmd
                 .Where(prev => !studentRankings.Any(curr => curr.StudentId == prev.StudentId))
                 .ToList();
 
-            // Cập nhật PositionChange cho Studentranking
-            foreach (var item in toAdd.Concat(toUpdate))
-            {
-                var target = studentRankings.First(s => s.StudentId == item.StudentId);
-                target.PositionChange = item.PositionChange;
-            }
+            //// Cập nhật PositionChange cho StudentRanking
+            //foreach (var item in toAdd.Concat(toUpdate))
+            //{
+            //    var target = studentRankings.First(s => s.StudentId == item.StudentId);
+            //    target.PositionChange = item.PositionChange;
+            //}
 
             await _studentRankingRepository.ExecuteTransactionAsync(async () =>
             {
@@ -147,6 +146,7 @@ namespace Fsel.Identity.Application.Commands.StudentRankingCmd
                 {
                     _studentRankingRepository.UpdateList(toUpdate);
                 }
+
                 if (toAdd.Count > 0)
                 {
                     await _studentRankingRepository.AddList(toAdd);
@@ -154,7 +154,16 @@ namespace Fsel.Identity.Application.Commands.StudentRankingCmd
                 await _studentRankingRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
                 var studentRankingRealTime = _mapper.Map<List<StudentRankingRealTime>>(studentRankings);
-                await _leaderBoardPublisher.Publish(studentRankingRealTime, cancellationToken);
+
+
+                // Gửi dữ liệu qua websocket
+                LeaderBoardQueueModel leaderBoards = new LeaderBoardQueueModel
+                {
+                    StudentRankings = studentRankingRealTime,
+                    UserId = _authContext.CurrentUserId
+                };
+
+                await _leaderBoardPublisher.Publish(leaderBoards, cancellationToken);
                 methodResult.StatusCode = StatusCodes.Status201Created;
                 methodResult.Result = _mapper.Map<List<StudentRankingModel>>(studentRankings);
                 return methodResult;

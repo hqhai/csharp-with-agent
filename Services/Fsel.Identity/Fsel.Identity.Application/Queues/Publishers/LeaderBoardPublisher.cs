@@ -13,11 +13,12 @@ namespace Fsel.Identity.Application.Queues.Publishers
             _queueProvider = queueProvider;
         }
 
-        public async Task Publish(IList<StudentRankingRealTime> studentRankings, CancellationToken cancellationToken)
+        public async Task Publish(LeaderBoardQueueModel leaderBoards, CancellationToken cancellationToken)
         {
             await _queueProvider.Publish(QueueSettings.RealtimeQueue.NameQueue.LeaderBoard, new LeaderBoardQueueModel
             {
-                StudentRankings = studentRankings
+                StudentRankings = leaderBoards?.StudentRankings,
+                UserId = leaderBoards!.UserId
             }, cancellationToken);
 
         }
