@@ -133,26 +133,28 @@ namespace Fsel.Course.Lms.Application.Queries.VideoQuery
                     ExecutionTime = item.ExecutionTime,
                     TimeCodeType = item.TimeCodeType,
                     VideoId = item.VideoId,
-                    Status = indexProcess.HasValue ? GetStatusTimeCode(indexProcess.Value, indexTimeCode) : EnumCurrentStatus.Done
+                    Status = GetStatusTimeCode(indexProcess, indexTimeCode)
                 });
             }
             return videoTimeCodeModels;
         }
 
-        private static EnumCurrentStatus GetStatusTimeCode(int indexProcess, int indexTimeCode)
+        private static EnumCurrentStatus GetStatusTimeCode(int? indexProcess, int indexTimeCode)
         {
+            var timeCodeStatus = EnumCurrentStatus.Lock;
             if (indexProcess < indexTimeCode)
             {
-                return EnumCurrentStatus.Lock;
+                return timeCodeStatus;
             }
-            else if (indexProcess > indexTimeCode)
+            else if (indexProcess == indexTimeCode)
             {
-                return EnumCurrentStatus.Done;
+                timeCodeStatus = EnumCurrentStatus.Process;
             }
-            else
+            else if (indexProcess > indexTimeCode || indexProcess == null)
             {
-                return EnumCurrentStatus.Process;
+                timeCodeStatus = EnumCurrentStatus.Done;
             }
+            return timeCodeStatus;
         }
 
         private static int? GetIndexProcess(List<VideoTimeCode> videoTimeCodes, Guid videoResultId)
