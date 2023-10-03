@@ -26,7 +26,7 @@ namespace Fsel.Identity.Api.Controllers
         /// <summary>
         /// Receive Tokens Student
         /// </summary>
-        [HttpPost("receive-token")]
+        [HttpPost("receive-tokens")]
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> ReceiveToken([FromBody] ReceiveTokensStudentCommand command)
@@ -38,7 +38,7 @@ namespace Fsel.Identity.Api.Controllers
         /// <summary>
         /// Get Consecutive Days
         /// </summary>
-        [HttpGet("consecutive")]
+        [HttpGet("consecutive-days")]
         [ProducesResponseType(typeof(MethodResult<StudentDailyStreakModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetConsecutiveDays()
@@ -50,7 +50,7 @@ namespace Fsel.Identity.Api.Controllers
         /// <summary>
         /// Get Years
         /// </summary>
-        [HttpGet("year")]
+        [HttpGet("years")]
         [ProducesResponseType(typeof(MethodResult<IList<int>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetYears()
@@ -60,9 +60,9 @@ namespace Fsel.Identity.Api.Controllers
         }
 
         /// <summary>
-        /// Get Student Armorial
+        /// Get Student Armorials
         /// </summary>
-        [HttpGet("armorial")]
+        [HttpGet("armorials")]
         [ProducesResponseType(typeof(MethodResult<IList<DateTime>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetStudentArmorial([FromQuery] GetStudentArmorialQuery query)

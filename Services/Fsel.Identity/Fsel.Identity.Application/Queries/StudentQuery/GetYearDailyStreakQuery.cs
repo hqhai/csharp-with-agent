@@ -43,7 +43,7 @@ namespace Fsel.Identity.Application.Queries.StudentQuery
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student));
                 return methodResult;
             }
-            var years = await _studentDailyStreakRepository.Queryable.Where(x => x.StudentId == student.Id).GroupBy(x => x.CreatedDate.Year).Select(x => x.Key).ToListAsync(cancellationToken);
+            var years = await _studentDailyStreakRepository.Queryable.Where(x => x.StudentId == student.Id).GroupBy(x => x.DailyDate.Year).Select(x => x.Key).ToListAsync(cancellationToken);
             methodResult.Result = years;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
