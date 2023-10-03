@@ -16,7 +16,6 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
     using Fsel.Ordering.Domain.Enums.ErrorCodes;
     using Fsel.Ordering.Domain.IRepositories;
     using Fsel.Ordering.Domain.Models.CommandModels.Orders;
-    using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Enums.ErrorCodes;
     using Fsel.Shared.Models.ShareModels;
@@ -90,6 +89,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
                 return methodResult;
             }
             var package = await _packageRepository.GetByIdAsync(order.PackageId);
+            var numberOfShield = (package != null && package.Code.HasValue) ? (int)package.Code.Value : default;
             var course = courseResults.Content?.Result?.FirstOrDefault();
             await _orderRepository.ExecuteTransactionAsync(async () =>
             {
@@ -104,7 +104,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
                 }
                 else if (request.OrderStatus == EnumOrderStatus.Payment)
                 {
-                    var updateStudentByClass = await _userService.UpdateStudentByClassAsync(new UpdateStudentByClassIdModel { ClassId = classes.Content?.Result?.Id, StudentId = student.Content!.Result!.Id, PackageId = request.PackageId });
+                    var updateStudentByClass = await _userService.UpdateStudentByClassAsync(new UpdateStudentByClassIdModel { ClassId = classes.Content?.Result?.Id, StudentId = student.Content!.Result!.Id, PackageId = request.PackageId, NumberOfShield = numberOfShield });
                     if (!updateStudentByClass.IsSuccessStatusCode)
                     {
                         methodResult.AddErrorBadRequest(nameof(EnumOrderErrorCode.UpdateNotSuccess));

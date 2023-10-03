@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Identity.Application.Commands.StudentCmd
+namespace Fsel.Identity.Application.Commands.DailyStreakCmd
 {
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base;
@@ -31,7 +31,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
         public async Task<MethodResult<bool>> Handle(ReceiveTokensStudentCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            MethodResult<bool> methodResult = new MethodResult<bool>();
+            var methodResult = new MethodResult<bool>();
             if (request.Ids == null || !request.Ids.Any())
             {
                 methodResult.Result = false;

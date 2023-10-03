@@ -5,14 +5,14 @@ namespace Fsel.Identity.Api.Controllers
     using System.Net;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
-    using Fsel.Identity.Application.Commands.StudentCmd;
-    using Fsel.Identity.Application.Queries.StudentQuery;
+    using Fsel.Identity.Application.Commands.DailyStreakCmd;
+    using Fsel.Identity.Application.Queries.DailyStreakQuery;
     using Fsel.Identity.Domain.Models.EntityModels;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
 
     [ApiVersion(Settings.APIVersion)]
-    [Route(Settings.APIDefaultRoute + "/student")]
+    [Route(Settings.APIDefaultRoute + "/student-daily-streak")]
     [ApiController]
     public class StudentDailyStreakController : ControllerBase
     {

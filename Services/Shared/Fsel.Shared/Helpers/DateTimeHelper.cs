@@ -55,28 +55,5 @@ namespace Fsel.Shared.Helpers
             }
             return (0, false);
         }
-
-        public static DateTime GetLastDayOfTheMonth(DateTime dtInput)
-        {
-            DateTime dtResult = dtInput;
-            dtResult = dtResult.AddMonths(1);
-            dtResult = dtResult.AddDays(-(dtResult.Day)).Date;
-            return dtResult;
-        }
-
-        public static int GetDayInMonth(DateTime dtInput)
-        {
-            DateTime dtResult = dtInput;
-            dtResult = dtResult.AddMonths(1);
-            dtResult = dtResult.AddDays(-(dtResult.Day));
-            return dtResult.Day;
-        }
-
-        public static DateTime GetFistDayOfTheMonth(DateTime dtInput)
-        {
-            DateTime dtResult = dtInput;
-            dtResult = dtResult.AddDays((-dtResult.Day) + 1).Date;
-            return dtResult;
-        }
     }
 }

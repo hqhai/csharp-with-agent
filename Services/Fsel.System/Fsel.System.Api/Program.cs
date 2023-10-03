@@ -42,7 +42,7 @@ builder.Services.AddScoped<CreateStudentDailyStreakPublisher>();
 builder.AddMassTransit(appSetting,
 queues: new Dictionary<string, Type>
 {
-    { QueueSettings.LmsQueue.NameQueue.QuestBoardMainFinish, typeof(QuestBoardMainFinishConsumer) },
+    { QueueSettings.LmsQueue.NameQueue.QuestBoardMainFinish, typeof(QuestBoardFinishConsumer) },
 });
 
 var app = builder.Build();

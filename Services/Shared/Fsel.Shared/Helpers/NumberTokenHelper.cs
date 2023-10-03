@@ -4,13 +4,13 @@ namespace Fsel.Shared.Helpers
 {
     public class NumberTokenConfig
     {
-        public NumberTokenConfig(int number, int numberOfToken)
+        public NumberTokenConfig(int levelOfGift, int numberOfToken)
         {
-            Number = number;
+            LevelOfGift = levelOfGift;
             NumberOfToken = numberOfToken;
         }
 
-        public int Number { get; set; }
+        public int LevelOfGift { get; set; }
         public int NumberOfToken { get; set; }
     }
 
@@ -23,9 +23,9 @@ namespace Fsel.Shared.Helpers
             new NumberTokenConfig(3, 10),
         };
 
-        public static int GetNumberToken(this int number)
+        public static int GetNumberToken(this int levelOfGift)
         {
-            var config = s_numberTokenConfigs.OrderBy(x => x.Number).FirstOrDefault(x => x.Number == number);
+            var config = s_numberTokenConfigs.OrderBy(x => x.LevelOfGift).FirstOrDefault(x => x.LevelOfGift == levelOfGift);
             if (config != null)
             {
                 return config.NumberOfToken;
@@ -33,11 +33,11 @@ namespace Fsel.Shared.Helpers
             return default;
         }
 
-        public static int GetNumbersToken(IList<int>? numbers)
+        public static int GetNumbersToken(IList<int>? levelOfGifts)
         {
-            if (numbers != null && numbers.Any())
+            if (levelOfGifts != null && levelOfGifts.Any())
             {
-                return s_numberTokenConfigs.Where(x => numbers.Contains(x.Number)).Sum(x => x.NumberOfToken);
+                return s_numberTokenConfigs.Where(x => levelOfGifts.Contains(x.LevelOfGift)).Sum(x => x.NumberOfToken);
             }
 
             return default;

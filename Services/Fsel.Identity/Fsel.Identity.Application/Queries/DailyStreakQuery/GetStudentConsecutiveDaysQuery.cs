@@ -1,13 +1,12 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Identity.Application.Queries.StudentQuery
+namespace Fsel.Identity.Application.Queries.DailyStreakQuery
 {
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Domain.Models.EntityModels;
-    using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -31,7 +30,7 @@ namespace Fsel.Identity.Application.Queries.StudentQuery
         {
             ArgumentNullException.ThrowIfNull(request);
 
-            MethodResult<StudentDailyStreakModel> methodResult = new MethodResult<StudentDailyStreakModel>();
+            var methodResult = new MethodResult<StudentDailyStreakModel>();
 
             var student = await _studentRepository.Queryable.Include(x => x.StudentDailyStreaks)
                                         .Include(i => i.Human)
@@ -42,9 +41,9 @@ namespace Fsel.Identity.Application.Queries.StudentQuery
                 return methodResult;
             }
             var date = DateTime.Now;
-            var startDate = DateTimeHelper.GetFistDayOfTheMonth(date);
-            var endDate = DateTimeHelper.GetLastDayOfTheMonth(date);
-            var studentDailyQuery = student.StudentDailyStreaks.Where(x => x.DailyDate.Date >= startDate && x.DailyDate.Date <= endDate);
+            var startDay = new DateTime(date.Year, date.Month, 1).Day;
+            var endDay = DateTime.DaysInMonth(date.Year, date.Month);
+            var studentDailyQuery = student.StudentDailyStreaks.Where(x => x.DailyDate.Day >= startDay && x.DailyDate.Day <= endDay);
             var studentDailyStreak = new StudentDailyStreakModel();
             studentDailyStreak.NumberOfShield = student.NumberOfShield;
             studentDailyStreak.NumberOfGift = studentDailyQuery.Where(x => x.IsReceiveGift).Count();
