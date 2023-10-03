@@ -46,7 +46,6 @@ builder.AddRefitClients(typeof(IInteractionService), appSetting?.Services?.Inter
 builder.AddRefitClients(typeof(ITrainingService), appSetting?.Services?.ClassApiUrl);
 builder.AddRefitClients(typeof(ILmsCourseService), appSetting?.Services?.LmsCourseApiUrl);
 //App config
-builder.AddMassTransit(appSetting);
 var app = builder.Build();
 app.UseServices();
 app.Run();
