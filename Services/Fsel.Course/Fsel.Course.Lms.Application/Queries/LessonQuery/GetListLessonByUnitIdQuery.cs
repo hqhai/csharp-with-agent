@@ -39,8 +39,9 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
                             .Where(x => x.UnitLessons.Select(x => x.UnitId).Contains(request.UnitId))
                             .Select(x => new LessonModel
                             {
+                                Id = x.Id,
                                 CreatedDate = x.CreatedDate,
-                                Number = x.UnitLessons.Select(x => x.DisplayOrder).FirstOrDefault(),
+                                DisplayOrder = x.UnitLessons.Select(x => x.DisplayOrder).FirstOrDefault(),
                             }).ApplySort(request).ToListAsync(cancellationToken);
 
             methodResult.Result = lessons;

@@ -25,6 +25,6 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public IList<SkillScores>? SkillScores { get; set; }
         public object? MockTestScores { get; set; }
         public int? UnitDisplayOrder { get; set; }
-        public string? CourseName { get; set; }
+        public string? CourseCode { get; set; }
     }
 }

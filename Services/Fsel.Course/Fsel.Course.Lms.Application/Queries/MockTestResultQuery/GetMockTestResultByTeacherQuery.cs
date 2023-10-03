@@ -121,17 +121,17 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
                     GradingStartDate = x.GradingStartDate,
                     GradingTeacherId = x.GradingTeacherId,
                     UnitDisplayOrder = x.MockTest!.CourseUnitMockTests.Select(x => x.Number).FirstOrDefault(),
-                    CourseName = x.MockTest.MockTestResults.Select(x => x.Course).FirstOrDefault()!.Name,
+                    CourseCode = x.MockTest.MockTestResults.Select(x => x.Course).FirstOrDefault()!.Code,
                 }).FirstOrDefault()
             };
 
             if (mockTestModel.MockTestType == EnumMockTestType.SkillMockTest)
             {
-                mockTestModel.PostArea = "U" + mockTestModel.MockTestResult?.UnitDisplayOrder + "_" + mockTestModel.MockTestResult?.CourseName;
+                mockTestModel.PostArea = "U" + mockTestModel.MockTestResult?.UnitDisplayOrder + "_" + mockTestModel.MockTestResult?.CourseCode;
             }
             else
             {
-                mockTestModel.PostArea = "FM" + mockTestModel.MockTestResult?.UnitDisplayOrder + "_" + mockTestModel.MockTestResult?.CourseName;
+                mockTestModel.PostArea = "FM" + mockTestModel.MockTestResult?.UnitDisplayOrder + "_" + mockTestModel.MockTestResult?.CourseCode;
             }
             mockTestResult = _mockTestResultRepository.Update(mockTestResult);
             await _mockTestResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
