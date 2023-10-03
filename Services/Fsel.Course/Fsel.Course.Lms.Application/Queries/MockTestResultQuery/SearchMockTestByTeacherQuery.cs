@@ -71,7 +71,7 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
                                                                             Type = x.MockTest!.MockTestType,
                                                                             CourseSkill = x.MockTest.MockTestSections.Select(x => x.SectionGroup).Select(x => x!.CourseSkill).FirstOrDefault(),
                                                                             UnitDisplayOrder = x.MockTest.CourseUnitMockTests.Select(x => x.Number).FirstOrDefault(),
-                                                                            CourseCode = x.MockTest.MockTestResults.Select(x => x.Course).FirstOrDefault()!.Code,
+                                                                            CourseCode = x.MockTest.MockTestResults.Select(x => x.Course!.Code).FirstOrDefault(),
                                                                         });
             mockTestResultQuery = mockTestResultQuery.Where(x => x.CourseSkill == EnumCourseSkill.Speaking || x.CourseSkill == EnumCourseSkill.Writing || x.Type == EnumMockTestType.FullMockTest);
             //Keyword

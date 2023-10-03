@@ -121,7 +121,7 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
                     GradingStartDate = x.GradingStartDate,
                     GradingTeacherId = x.GradingTeacherId,
                     UnitDisplayOrder = x.MockTest!.CourseUnitMockTests.Select(x => x.Number).FirstOrDefault(),
-                    CourseCode = x.MockTest.MockTestResults.Select(x => x.Course).FirstOrDefault()!.Code,
+                    CourseCode = x.MockTest.MockTestResults.Select(x => x.Course?.Code).FirstOrDefault(),
                 }).FirstOrDefault()
             };
 
