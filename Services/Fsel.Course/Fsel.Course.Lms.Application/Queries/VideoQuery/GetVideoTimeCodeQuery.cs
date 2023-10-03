@@ -8,6 +8,7 @@ namespace Fsel.Course.Lms.Application.Queries.VideoQuery
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
+    using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Services.UserServices;
@@ -28,6 +29,7 @@ namespace Fsel.Course.Lms.Application.Queries.VideoQuery
         private readonly IVideoResultRepository _videoResultRepository;
         private readonly AuthContext _authContext;
         private readonly IUserService _userService;
+        private static bool IsLockTimeCode;
 
         public GetVideoTimeCodeQueryHandler(IVideoRepository videoRepository,
             IVideoResultRepository videoResultRepository,
@@ -64,6 +66,7 @@ namespace Fsel.Course.Lms.Application.Queries.VideoQuery
             var video = await _videoRepository.Queryable
                                 .Include(x => x.LessonVideos)
                                 .Include(i => i.VideoTimeCodes)
+                                .ThenInclude(x => x.VideoTimeCodeAnswers.Where(x => x.VideoResultId == videoResult.Id))
                                 .Include(i => i.VideoResults)
                                 .Where(x => x.Id == request.VideoId)
                                 .AsNoTracking()
@@ -85,15 +88,15 @@ namespace Fsel.Course.Lms.Application.Queries.VideoQuery
                 CourseLevel = video.CourseLevel,
                 SubFilePath = video.SubFilePath,
                 Type = video.Type,
-                VideoTimeCodes = video.VideoTimeCodes.OrderBy(x => x!.DisplayTime).Select(x => new VideoTimeCodeModel
+                VideoTimeCodes = video.VideoTimeCodes.OrderBy(x => x!.DisplayTime).Select((x, index) => new VideoTimeCodeModel
                 {
                     Id = x.Id,
-                    TotalCount = x.TimeCodeExercises.Where(x => !x.IsDeleted && x.Exercise != null).Select(x => x.Exercise).SelectMany(x => x!.ExerciseQuestions.Where(x => !x.IsDeleted && x.Question != null)).Select(m => m.Question).Count(),
+                    TotalCount = GetTotalQuestion(x),
                     DisplayTime = x.DisplayTime,
                     ExecutionTime = x.ExecutionTime,
                     TimeCodeType = x.TimeCodeType,
                     VideoId = x.VideoId,
-                    Status = (x.VideoTimeCodeAnswers.Count > 0 && x.VideoTimeCodeAnswers.All(y => videoResult != null && y.VideoResultId == videoResult.Id && y.Status == EnumCurrentStatus.Done)) ? EnumCurrentStatus.Done : EnumCurrentStatus.Process,
+                    Status = GetTimeCodeStatus(x, videoResult.Id, index)
                 }).ToList(),
                 VideoResult = video.VideoResults.Where(x => x.Id == videoResult.Id).Select(x => new VideoResultModel
                 {
@@ -113,6 +116,39 @@ namespace Fsel.Course.Lms.Application.Queries.VideoQuery
             methodResult.Result = videoModel;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
+        }
+
+        private static int GetTotalQuestion(VideoTimeCode videoTimeCode)
+        {
+            return videoTimeCode.TimeCodeExercises.Where(x => !x.IsDeleted && x.Exercise != null)
+                                                  .Select(x => x.Exercise)
+                                                  .SelectMany(x => x!.ExerciseQuestions.Where(x => !x.IsDeleted && x.Question != null))
+                                                  .Select(m => m.Question)
+                                                  .Count();
+        }
+
+        private static EnumCurrentStatus GetTimeCodeStatus(VideoTimeCode videoTimeCode, Guid videoResultId, int index)
+        {
+            var timeCodeStatus = EnumCurrentStatus.Lock;
+            if (IsLockTimeCode)
+            {
+                timeCodeStatus = EnumCurrentStatus.Process;
+            }
+            if (videoTimeCode.VideoTimeCodeAnswers.Count > 0 || index == 0)
+            {
+                if (videoTimeCode.VideoTimeCodeAnswers.All(y => y.VideoResultId == videoResultId && y.Status == EnumCurrentStatus.Done))
+                {
+                    timeCodeStatus = EnumCurrentStatus.Done;
+                }
+                else if (videoTimeCode.VideoTimeCodeAnswers.All(y => y.VideoResultId == videoResultId && y.Status == EnumCurrentStatus.Process) || index == 0)
+                {
+                    timeCodeStatus = EnumCurrentStatus.Process;
+                }
+                IsLockTimeCode = false;
+                return timeCodeStatus;
+            }
+            IsLockTimeCode = true;
+            return timeCodeStatus;
         }
     }
 }
