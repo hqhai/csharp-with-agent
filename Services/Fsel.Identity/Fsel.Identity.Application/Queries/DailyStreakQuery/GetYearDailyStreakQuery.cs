@@ -35,7 +35,7 @@ namespace Fsel.Identity.Application.Queries.DailyStreakQuery
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<IList<int>>();
 
-            var student = await _studentRepository.Queryable.Include(x => x.StudentDailyStreaks)
+            var student = await _studentRepository.Queryable
                             .Include(i => i.Human)
                             .FirstOrDefaultAsync(i => i.Human != null && i.Human.UserId == _authContext.CurrentUserId.ToString(), cancellationToken);
             if (student == null)

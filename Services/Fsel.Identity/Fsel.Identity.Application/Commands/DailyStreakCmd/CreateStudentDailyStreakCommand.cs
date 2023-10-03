@@ -42,7 +42,7 @@ namespace Fsel.Identity.Application.Commands.DailyStreakCmd
             var isStudentDate = student.StudentDailyStreaks.Any(x => x.DailyDate.Date == date.Date);
             if (isStudentDate)
             {
-                methodResult.Result = true;
+                methodResult.Result = false;
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
             }
@@ -52,11 +52,8 @@ namespace Fsel.Identity.Application.Commands.DailyStreakCmd
                 DailyDate = date,
                 IsUseShield = request.IsUseShield,
             };
-            var startDate = new DateTime(date.Year, date.Month, 1);
             var endDay = DateTime.DaysInMonth(date.Year, date.Month);
-            var endDate = new DateTime(date.Year, date.Month, endDay);
-
-            var countStudentDaily = student.StudentDailyStreaks.Where(x => x.DailyDate.Date >= startDate && x.DailyDate.Date <= endDate).Count();
+            var countStudentDaily = student.StudentDailyStreaks.Where(x => x.DailyDate.Month == date.Month && x.DailyDate.Year == date.Year).Count();
             if (student.StudentDailyStreaks.Any())
             {
                 if (countStudentDaily == 3)
