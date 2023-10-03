@@ -3,7 +3,6 @@
 using System.Net;
 using Fsel.Common.ActionResults;
 using Fsel.Common.Constants;
-using Fsel.Course.Domain.Entities.SkillScoresConfigs;
 using Fsel.Course.Domain.Models.EntityModels;
 using Fsel.Course.Lms.Application.Commands.CourseResultCmd;
 using Fsel.Course.Lms.Application.Queries.CourseQuery;
@@ -49,18 +48,6 @@ namespace Fsel.Course.Lms.Api.Controllers
         {
             MethodResult<CourseResultModel> commandResult = await _mediator.Send(new StartCourseResultCommand { CourseResultId = courseResultId }).ConfigureAwait(false);
             return commandResult.GetActionResult();
-        }
-
-        /// <summary>
-        /// Get course
-        /// </summary>
-        [HttpGet("list-courses-contain-class-forum")]
-        [ProducesResponseType(typeof(MethodResult<IList<CourseModel>>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetListCourse([FromQuery] GetCoursesContainClassForumQuery query)
-        {
-            MethodResult<IList<CourseModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
-            return queryResult.GetActionResult();
         }
     }
 }

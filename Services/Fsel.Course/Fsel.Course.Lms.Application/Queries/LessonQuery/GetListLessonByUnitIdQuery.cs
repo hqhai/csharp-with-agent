@@ -36,15 +36,14 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
             var methodResult = new MethodResult<IList<LessonModel>>();
 
             var lessons = await _lessonRepository.Queryable
-                            .Include(x => x.LessonResults)
                             .Include(x => x.UnitLessons)
                             .ThenInclude(x => x.Unit)
-                            .ThenInclude(x => x.CourseUnitMockTests)
-                            .Where(x => x.LessonResults.Select(x => x.UnitId).FirstOrDefault() == request.UnitId && x.LessonResults.Select(x => x.Unit).SelectMany(x => x.CourseUnitMockTests).Select(x => x.CourseId).FirstOrDefault() == request.CourseId)
+                            .ThenInclude(x => x!.CourseUnitMockTests)
+                            .Where(x => x.UnitLessons.Select(x => x.UnitId).FirstOrDefault() == request.UnitId && x.UnitLessons.Select(x => x.Unit).SelectMany(x => x.CourseUnitMockTests).Select(x => x.CourseId).FirstOrDefault() == request.CourseId)
                             .Select(x => new LessonModel
                             {
                                 CreatedDate = x.CreatedDate,
-                                Number = x.LessonResults.Select(x => x.Unit).SelectMany(x => x!.CourseUnitMockTests).Select(x => x.DisplayOrder).FirstOrDefault(),
+                                Number = x.UnitLessons.Select(x => x.DisplayOrder).FirstOrDefault(),
                             }).ApplySort(request).ToListAsync(cancellationToken);
 
             methodResult.Result = lessons;

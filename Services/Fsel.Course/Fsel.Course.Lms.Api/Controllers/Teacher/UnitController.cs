@@ -1,18 +1,21 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Course.Lms.Api.Controllers
+namespace Fsel.Course.Lms.Api.Controllers.Teacher
 {
-    using System.Net;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Queries.UnitQuery;
+    using Fsel.Shared.Enums;
     using MediatR;
+    using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
+    using System.Net;
 
     [ApiVersion(Settings.APIVersion)]
-    [Route(Settings.APIDefaultRoute + "/unit")]
+    [Route(Settings.APIDefaultRoute + "/teacher/unit")]
     [ApiController]
+    [Authorize(Roles = nameof(EnumRole.Teacher))]
     public class UnitController : ControllerBase
     {
         private readonly IMediator _mediator;

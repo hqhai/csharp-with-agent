@@ -36,14 +36,13 @@ namespace Fsel.Course.Lms.Application.Queries.UnitQuery
             var methodResult = new MethodResult<IList<UnitModel>>();
 
             var units = await _unitRepository.Queryable
-                            .Include(x => x.UnitLessons)
-                            .Include(x => x.LessonResults)
-                            .Where(x => x.LessonResults.Select(x => x.CourseId).FirstOrDefault() == request.CourseId)
+                            .Include(x => x.CourseUnitMockTests)
+                            .Where(x => x.CourseUnitMockTests.Select(x => x.CourseId).FirstOrDefault() == request.CourseId)
                             .Select(x => new UnitModel
                             {
                                 Id = x.Id,
                                 CreatedDate = x.CreatedDate,
-                                DisplayOrder = x.UnitLessons.Select(x => x.Unit).Select(x => x.CourseUnitMockTests).Select(x => x.Select(x => x.Number).FirstOrDefault()).FirstOrDefault(),
+                                DisplayOrder = x.CourseUnitMockTests.Select(x => x.Number).FirstOrDefault(),
                             }).ApplySort(request).ToListAsync(cancellationToken);
             methodResult.Result = units;
             methodResult.StatusCode = StatusCodes.Status200OK;

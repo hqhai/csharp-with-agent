@@ -61,17 +61,5 @@ namespace Fsel.Course.Lms.Api.Controllers
             MethodResult<LessonResultModel> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
-
-        /// <summary>
-        /// Get course
-        /// </summary>
-        [HttpGet("lesson-display-order")]
-        [ProducesResponseType(typeof(MethodResult<IList<LessonModel>>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetListLessonByUnitId([FromQuery] GetListLessonByUnitIdQuery query)
-        {
-            MethodResult<IList<LessonModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
-            return queryResult.GetActionResult();
-        }
     }
 }
