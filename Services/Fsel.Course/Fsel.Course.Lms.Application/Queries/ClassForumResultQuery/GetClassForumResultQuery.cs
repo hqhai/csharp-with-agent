@@ -104,7 +104,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
             }
 
             var lesson = classForumResult.LessonResult?.Lesson?.UnitLessons.FirstOrDefault(y => y.UnitId == classForumResult.LessonResult.UnitId)?.DisplayOrder;
-            var unit = classForumResult.LessonResult?.Unit?.CourseUnitMockTests.FirstOrDefault(y => y.CourseId == classForumResult.LessonResult.CourseId)?.DisplayOrder;
+            var unit = classForumResult.LessonResult?.Unit?.CourseUnitMockTests.FirstOrDefault(y => y.CourseId == classForumResult.LessonResult.CourseId)?.Number;
             var course = classForumResult.LessonResult?.Course?.Code;
 
             var classForumResultModel = new ClassForumResultModel

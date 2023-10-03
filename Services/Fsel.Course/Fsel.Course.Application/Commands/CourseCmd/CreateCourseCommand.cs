@@ -62,6 +62,19 @@ namespace Fsel.Course.Application.Commands.CourseCmd
 
             #endregion Validation
 
+            course.CourseUnitMockTests.ForEach(x =>
+            {
+                var query = course.CourseUnitMockTests.OrderBy(n => n.DisplayOrder);
+                if (x.UnitId != null)
+                {
+                    x.Number = query.Where(n => n.UnitId != null).ToList().IndexOf(x) + 1;
+                }
+                else if (x.MockTestId != null)
+                {
+                    x.Number = query.Where(n => n.MockTestId != null).ToList().IndexOf(x) + 1;
+                }
+            });
+
             await _courseRepository.ExecuteTransactionAsync(async () =>
             {
                 course = _courseRepository.Add(course);
