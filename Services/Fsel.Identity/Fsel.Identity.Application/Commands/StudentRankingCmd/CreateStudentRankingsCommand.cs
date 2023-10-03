@@ -30,6 +30,7 @@ namespace Fsel.Identity.Application.Commands.StudentRankingCmd
         private readonly IStudentRankingRepository _studentRankingRepository;
         private readonly ILmsCourseService _lmsCourseService;
         private readonly LeaderBoardPublisher _leaderBoardPublisher;
+        private readonly IStudentDailyStreakRepository _studentDailyStreakRepository;
         private readonly AuthContext _authContext;
         private const int POSITION_CHANGE = 31;
 
@@ -37,13 +38,15 @@ namespace Fsel.Identity.Application.Commands.StudentRankingCmd
             IStudentRankingRepository studentRankingRepository,
             ILmsCourseService lmsCourseService,
             LeaderBoardPublisher leaderBoardPublisher,
-            AuthContext authContext)
+            AuthContext authContext,
+            IStudentDailyStreakRepository studentDailyStreakRepository)
         {
             _mapper = mapper;
             _studentRankingRepository = studentRankingRepository;
             _lmsCourseService = lmsCourseService;
             _leaderBoardPublisher = leaderBoardPublisher;
             _authContext = authContext;
+            _studentDailyStreakRepository = studentDailyStreakRepository;
         }
 
         public async Task<MethodResult<List<StudentRankingModel>>> Handle(CreateStudentRankingsCommand request, CancellationToken cancellationToken)
@@ -52,7 +55,9 @@ namespace Fsel.Identity.Application.Commands.StudentRankingCmd
             MethodResult<List<StudentRankingModel>> methodResult = new MethodResult<List<StudentRankingModel>>();
 
             // Lấy dữ liệu leaderboard hiện tại
-            var currentLeaderBoard = await _lmsCourseService.GetLeaderBoard(_authContext.CurrentUserId).ConfigureAwait(false);
+
+            var testUserId = new Guid("c0b6a166-02c3-4de4-a770-2d76052c9507");
+            var currentLeaderBoard = await _lmsCourseService.GetLeaderBoard(testUserId).ConfigureAwait(false);
             var currentLeaderBoardResult = currentLeaderBoard?.Content?.Result;
 
             if (currentLeaderBoardResult == null || currentLeaderBoardResult!.LeaderBoards?.Count == 0)
@@ -61,13 +66,63 @@ namespace Fsel.Identity.Application.Commands.StudentRankingCmd
                 return methodResult;
             }
 
+            // Lấy dữ liệu DailyStreak của list học sinh
+            var studentIds = currentLeaderBoardResult!.LeaderBoards?.Select(x => x.Id).ToList();
+            if (studentIds == null || !studentIds.Any())
+            {
+                methodResult.Result = new List<StudentRankingModel>();
+                return methodResult;
+            }
+
+            var dailyStreaks = _studentDailyStreakRepository.Queryable
+                                .Where(s => studentIds.Contains(s.StudentId))
+                                .OrderBy(s => s.StudentId)
+                                .ThenByDescending(s => s.DailyDate)
+                                .ToList();
+
+            var studentStreaks = new Dictionary<Guid, int>(); // <StudentId, StreakCount>
+
+            foreach (var studentId in studentIds)
+            {
+                var studentData = dailyStreaks.Where(s => s.StudentId == studentId).ToList();
+                int streak = 0;
+                DateTime currentDate = DateTime.Now.Date;
+
+                // Kiểm tra bản ghi gần nhất với currentDate
+                var nearestRecord = studentData.FirstOrDefault();
+                if (nearestRecord == null || nearestRecord.DailyDate != currentDate)
+                {
+                    studentStreaks[studentId] = 0; // Không có bản ghi cho ngày hiện tại
+                    continue;
+                }
+
+                DateTime lastValidDate = nearestRecord.DailyDate;
+                streak++; // Bản ghi cho ngày hiện tại
+
+                // Đếm chuỗi ngày liên tiếp từ bản ghi gần nhất với currentDate
+                foreach (var record in studentData.Skip(1))
+                {
+                    if ((record.DailyDate - lastValidDate).Days == -1) // đi ngược về ngày trước đó
+                    {
+                        streak++;
+                        lastValidDate = record.DailyDate;
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+
+                studentStreaks[studentId] = streak;
+            }
+
             List<StudentRanking> studentRankings = new List<StudentRanking>();
             foreach (var item in currentLeaderBoardResult.LeaderBoards!)
             {
                 var studentRanking = new StudentRanking
                 {
                     StudentId = item.Id,
-                    DailyStreak = item.DailyStreak,
+                    DailyStreak = studentStreaks.ContainsKey(item.Id) ? studentStreaks[item.Id] : 0,  // Gán giá trị từ studentStreaks
                     CurrentPosition = item.DisplayOrder,
                     TotalScore = item.TotalScore,
                     Level = item.Level,

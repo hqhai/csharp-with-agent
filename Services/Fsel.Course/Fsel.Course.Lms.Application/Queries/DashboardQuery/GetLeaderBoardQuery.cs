@@ -26,7 +26,7 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
         private readonly ISystemService _systemService;
         private readonly IUnitResultRepository _unitResultRepository;
         private readonly ICourseResultRepository _courseResultRepository;
-        private const int LEADERBOARD_TOP = 30; // Chỉ lấy ra 30 người đứng đầu bảng xếp hạng
+        private const int LEADERBOARD_TOP = 20; // Chỉ lấy ra 50 người đứng đầu , sau đó sẽ lọc theo daily streak để lấy ra 30 người đứng đầu
 
         public GetLeaderBoardQueryHandler(IUserService userService
             , ISystemService systemService
@@ -81,7 +81,6 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
                         Id = item.Id,
                         AvatarPath = item.Human?.AvatarPath,
                         FullName = item.Human?.FullName,
-                        DailyStreak = logAction?.NumberOfDaysStreak ?? default,
                         TotalScore = scores,
                         UserId = item.Human?.UserId ?? default,
                         Level = item.CourseLevel
@@ -89,7 +88,7 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
                     leaderBoards.Add(leaderBoard);
                 }
             }
-            leaderBoards = leaderBoards.OrderByDescending(x => x.TotalScore).ThenBy(x => x.DailyStreak).Select((x, index) => { x.DisplayOrder = index + 1; return x; }).ToList();
+            leaderBoards = leaderBoards.OrderByDescending(x => x.TotalScore).Select((x, index) => { x.DisplayOrder = index + 1; return x; }).ToList();
             leaderBoardSearch.LeaderBoards = leaderBoards.Take(LEADERBOARD_TOP).ToList();
             leaderBoardSearch.LeaderBoard = leaderBoards.FirstOrDefault(x => x.Id == studentId);
             methodResult.Result = leaderBoardSearch;

@@ -1,3 +1,5 @@
+// Copyright (c) Atlantic. All rights reserved.
+
 using Fsel.Core.Base.BaseModels;
 using Fsel.Identity.Application.Commands.StudentRankingCmd;
 using MassTransit;
