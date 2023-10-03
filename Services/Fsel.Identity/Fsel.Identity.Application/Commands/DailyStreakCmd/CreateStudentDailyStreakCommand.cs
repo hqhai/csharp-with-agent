@@ -39,10 +39,10 @@ namespace Fsel.Identity.Application.Commands.DailyStreakCmd
                 return methodResult;
             }
 
-            var date = DateTime.Now;
-            if (request.DailyDate.HasValue)
+            var date = request.DailyDate ?? DateTime.Now;
+            if (request.IsUseShield)
             {
-                date = request.DailyDate.Value;
+                student.NumberOfShield--;
             }
             var isStudentDate = student.StudentDailyStreaks.Any(x => x.DailyDate.Date == date.Date);
             if (isStudentDate)
@@ -58,27 +58,23 @@ namespace Fsel.Identity.Application.Commands.DailyStreakCmd
                 IsUseShield = request.IsUseShield,
             };
             var endDay = DateTime.DaysInMonth(date.Year, date.Month);
+            student.StudentDailyStreaks.Add(studentDailyStreak);
             var countStudentDaily = student.StudentDailyStreaks.Where(x => x.DailyDate.Month == date.Month && x.DailyDate.Year == date.Year).Count();
             if (student.StudentDailyStreaks.Any())
             {
-                if (countStudentDaily == 2)
+                if (countStudentDaily == 3)
                 {
                     studentDailyStreak.LevelOfGift = 1;
                 }
-                else if (countStudentDaily == 14)
+                else if (countStudentDaily == 15)
                 {
                     studentDailyStreak.LevelOfGift = 2;
                 }
-                else if (countStudentDaily == endDay - 1)
+                else if (countStudentDaily == endDay)
                 {
                     studentDailyStreak.LevelOfGift = 3;
                     studentDailyStreak.IsArmorialReceive = true;
                 }
-            }
-            student.StudentDailyStreaks.Add(studentDailyStreak);
-            if (request.NumberOfShield.HasValue)
-            {
-                student.NumberOfShield = request.NumberOfShield.Value;
             }
             await _studentRepository.ExecuteTransactionAsync(async () =>
             {

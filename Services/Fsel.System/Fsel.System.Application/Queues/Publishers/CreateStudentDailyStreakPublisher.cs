@@ -24,7 +24,6 @@ namespace Fsel.System.Application.Queues.Publishers
             await _queueProvider.Publish(QueueSettings.SystemQueue.NameQueue.CreateStudentDailyStreak, new CreateStudentDailyStreakQueueModel
             {
                 StudentId = questBoardStudent.StudentId,
-                IsUseShield = false
             }, cancellationToken);
         }
     }

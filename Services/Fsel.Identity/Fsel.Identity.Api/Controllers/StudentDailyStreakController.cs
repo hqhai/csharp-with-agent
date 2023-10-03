@@ -25,9 +25,9 @@ namespace Fsel.Identity.Api.Controllers
         }
 
         /// <summary>
-        /// Receive Tokens Student
+        /// Receive Token Student
         /// </summary>
-        [HttpPost("receive-tokens")]
+        [HttpPost("receive-token")]
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> ReceiveToken([FromBody] ReceiveTokensStudentCommand command)
@@ -66,7 +66,7 @@ namespace Fsel.Identity.Api.Controllers
         [HttpGet("armorials")]
         [ProducesResponseType(typeof(MethodResult<IList<DateTime>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetStudentArmorial([FromQuery] GetStudentArmorialQuery query)
+        public async Task<IActionResult> GetStudentArmorials([FromQuery] GetStudentArmorialQuery query)
         {
             MethodResult<IList<DateTime>> commandResult = await _mediator.Send(query).ConfigureAwait(false);
             return commandResult.GetActionResult();

@@ -34,12 +34,11 @@ namespace Fsel.Identity.Application.Commands.DailyStreakCmd
             var studentUpdates = new List<Student>();
             foreach (var item in students)
             {
-                item.NumberOfShield--;
                 await _mediator.Send(new CreateStudentDailyStreakCommand
                 {
                     StudentId = item.Id,
                     DailyDate = date,
-                    IsUseShield = true
+                    IsUseShield = true,
                 }, cancellationToken).ConfigureAwait(false);
             }
             methodResult.StatusCode = StatusCodes.Status200OK;
