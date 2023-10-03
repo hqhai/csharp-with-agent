@@ -203,7 +203,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
                         Scores = count.GetIeltsScore(sectionGroup.CourseSkill),
                         CountQuestion = item.Answers.Count,
                         TotalQuestion = item.Answers.Count,
-                        Percent = questionCount > 0 ? NumberHelper.ConvertPercentDouble((double)count / questionCount) : default
+                        Percent = (double)questionCount / count * 100
                     };
                     skillScores.Add(skillScore);
                 }
