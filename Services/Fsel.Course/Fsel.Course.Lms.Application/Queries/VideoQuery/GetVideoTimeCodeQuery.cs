@@ -130,13 +130,13 @@ namespace Fsel.Course.Lms.Application.Queries.VideoQuery
         private static EnumCurrentStatus GetTimeCodeStatus(VideoTimeCode videoTimeCode, Guid videoResultId, int index)
         {
             var timeCodeStatus = EnumCurrentStatus.Lock;
-            if (IsLockTimeCode)
+            if (!IsLockTimeCode)
             {
                 timeCodeStatus = EnumCurrentStatus.Process;
             }
             if (videoTimeCode.VideoTimeCodeAnswers.Count > 0 || index == 0)
             {
-                if (videoTimeCode.VideoTimeCodeAnswers.All(y => y.VideoResultId == videoResultId && y.Status == EnumCurrentStatus.Done))
+                if (videoTimeCode.VideoTimeCodeAnswers.Any() && videoTimeCode.VideoTimeCodeAnswers.All(y => y.VideoResultId == videoResultId && y.Status == EnumCurrentStatus.Done))
                 {
                     timeCodeStatus = EnumCurrentStatus.Done;
                 }
