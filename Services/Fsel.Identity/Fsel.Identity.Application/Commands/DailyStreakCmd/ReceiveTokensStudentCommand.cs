@@ -2,7 +2,6 @@
 
 namespace Fsel.Identity.Application.Commands.DailyStreakCmd
 {
-    using System.Collections.Generic;
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base;
     using Fsel.Identity.Domain.IRepositories;
@@ -32,8 +31,7 @@ namespace Fsel.Identity.Application.Commands.DailyStreakCmd
         public async Task<MethodResult<bool>> Handle(ReceiveTokensStudentCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            MethodResult<bool> methodResult = new MethodResult<bool>();
-            IList<(int, bool)> receiveTokens;
+            var methodResult = new MethodResult<bool>();
             var student = await _studentRepository.Queryable.Include(x => x.StudentDailyStreaks).Include(x => x.Human)
                                                   .FirstOrDefaultAsync(x => x.Human != null && x.Human.UserId == _authContext.CurrentUserId.ToString(), cancellationToken: cancellationToken);
             if (student == null)
@@ -51,8 +49,7 @@ namespace Fsel.Identity.Application.Commands.DailyStreakCmd
                 return methodResult;
             }
             studentDailyStreak.IsGiftReceive = true;
-            student.NumberOfToken += studentDailyStreak.LevelOfGift.GetNumberToken().Item1;
-            studentDailyStreak.IsArmorialReceive = studentDailyStreak.LevelOfGift.GetNumberToken().Item2;
+            student.NumberOfToken += studentDailyStreak.LevelOfGift.HasValue ? studentDailyStreak.LevelOfGift.Value.GetNumberToken() : default;
             await _studentDailyStreakRepository.ExecuteTransactionAsync(async () =>
              {
                  _studentRepository.Update(student);
@@ -60,7 +57,7 @@ namespace Fsel.Identity.Application.Commands.DailyStreakCmd
 
                  _studentDailyStreakRepository.Update(studentDailyStreak);
                  await _studentDailyStreakRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
-                 methodResult.StatusCode = StatusCodes.Status201Created;
+                 methodResult.StatusCode = StatusCodes.Status200OK;
                  methodResult.Result = true;
                  return methodResult;
              });
