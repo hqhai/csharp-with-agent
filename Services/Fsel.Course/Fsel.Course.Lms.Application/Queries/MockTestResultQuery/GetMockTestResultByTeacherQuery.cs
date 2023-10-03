@@ -27,14 +27,16 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
         private readonly SectionConverter _sectionConverter;
         private readonly AuthContext _authContext;
         private readonly IUserService _userService;
+        private readonly ICourseRepository _courseRepository;
 
-        public GetMockTestResultByTeacherQueryHandler(IMockTestResultRepository mockTestResultRepository, IMockTestRepository mockTestRepository, SectionConverter sectionConverter, AuthContext authContext, IUserService userService)
+        public GetMockTestResultByTeacherQueryHandler(IMockTestResultRepository mockTestResultRepository, IMockTestRepository mockTestRepository, SectionConverter sectionConverter, AuthContext authContext, IUserService userService, ICourseRepository courseRepository)
         {
             _mockTestResultRepository = mockTestResultRepository;
             _mockTestRepository = mockTestRepository;
             _sectionConverter = sectionConverter;
             _authContext = authContext;
             _userService = userService;
+            _courseRepository = courseRepository;
         }
 
         public async Task<MethodResult<MockTestModel>> Handle(GetMockTestResultByTeacherQuery request, CancellationToken cancellationToken)
@@ -117,6 +119,27 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
                     GradingTeacherId = x.GradingTeacherId,
                 }).FirstOrDefault()
             };
+            var courses = await _courseRepository.Queryable.Include(x => x.CourseUnitMockTests)
+                                                        .ThenInclude(x => x.Unit)
+                                                        .ThenInclude(x => x!.UnitSkillMockTests)
+                                                        .Include(x => x.CourseUnitMockTests)
+                                                        .Where(x => mockTestModel.MockTestResult!.Id == request.MockTestResultId)
+                                                        .ToListAsync(cancellationToken: cancellationToken);
+            var course = courses.FirstOrDefault(x => mockTest.MockTestResults.Select(x => x.CourseId).Contains(x.Id));
+            if (mockTestModel.MockTestType == EnumMockTestType.SkillMockTest)
+            {
+                var courseUnitMockTest = course!.CourseUnitMockTests.FirstOrDefault(x => x.Unit != null && x!.UnitId == mockTestModel.MockTestResult!.UnitId);
+                if (courseUnitMockTest != null && courseUnitMockTest.Unit != null && courseUnitMockTest.Unit.UnitSkillMockTests.FirstOrDefault(x => x.MockTestId == mockTestModel.Id) != null)
+                {
+                    mockTestModel.UnitName = courseUnitMockTest.Unit.Name;
+                    mockTestModel.PostArea = "U" + courseUnitMockTest.Number + "_" + course.Name;
+                }
+            }
+            else
+            {
+                var number = course!.CourseUnitMockTests.FirstOrDefault(x => x.MockTestId == mockTestModel.Id)?.DisplayOrder;
+                mockTestModel.PostArea = "FM" + number + "_" + course.Name;
+            }
             mockTestResult = _mockTestResultRepository.Update(mockTestResult);
             await _mockTestResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
             methodResult.Result = mockTestModel;

@@ -116,11 +116,8 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
                 if (classResult!.Content!.Result != null)
                 {
                     item.ClassCode = classResult!.Content!.Result.Code;
-                }
-                var lesson = classForumResultQuery.Select(x => x.LessonDisplayOrder).FirstOrDefault();
-                var unit = classForumResultQuery.Select(x => x.UnitDisplayOrder).FirstOrDefault();
-                var course = classForumResultQuery.Select(x => x.CourseCode).FirstOrDefault();
-                item.PostArea = "L" + lesson + "_" + "U" + unit + "_" + course;
+                } 
+                item.PostArea = "L" + item.LessonDisplayOrder + "_" + "U" + item.UnitDisplayOrder + "_" + item.CourseCode;
             }
 
             methodResult.Result = new PagingItemsModel<ClassForumResultSearchModel>(lists, request, totalItem);

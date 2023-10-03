@@ -37,7 +37,7 @@ namespace Fsel.Course.Lms.Application.Queries.UnitQuery
 
             var units = await _unitRepository.Queryable
                             .Include(x => x.CourseUnitMockTests)
-                            .Where(x => x.CourseUnitMockTests.Select(x => x.CourseId).FirstOrDefault() == request.CourseId)
+                            .Where(x => x.CourseUnitMockTests.Select(x => x.CourseId).Contains(request.CourseId))
                             .Select(x => new UnitModel
                             {
                                 Id = x.Id,

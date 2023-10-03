@@ -38,8 +38,7 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
             var lessons = await _lessonRepository.Queryable
                             .Include(x => x.UnitLessons)
                             .ThenInclude(x => x.Unit)
-                            .ThenInclude(x => x!.CourseUnitMockTests)
-                            .Where(x => x.UnitLessons.Select(x => x.UnitId).FirstOrDefault() == request.UnitId && x.UnitLessons.Select(x => x.Unit).SelectMany(x => x.CourseUnitMockTests).Select(x => x.CourseId).FirstOrDefault() == request.CourseId)
+                            .Where(x => x.UnitLessons.Select(x => x.UnitId).Contains(request.UnitId) && x.UnitLessons.Select(x => x.Unit).SelectMany(x => x.CourseUnitMockTests).Select(x => x.CourseId).Contains(request.CourseId))
                             .Select(x => new LessonModel
                             {
                                 CreatedDate = x.CreatedDate,
