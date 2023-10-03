@@ -284,7 +284,7 @@ namespace Fsel.Course.Infrastructure.Common
                                 {
                                     Type = g.Key.TimeCodeType,
                                     Skill = g.Key.CourseSkill,
-                                    TotalCount = g.Sum(x => x.q.CorrectTotal),
+                                    TotalCount = g.Where(x => x.q.Ungraded != true).Sum(x => x.q.CorrectTotal),
                                     TotalQuestion = g.Select(x => x.q).Count()
                                 };
             var questions = await questionQuery.ToListAsync(cancellationToken);
@@ -313,7 +313,7 @@ namespace Fsel.Course.Infrastructure.Common
                                                     CorrectCount = answerTimeCodeQJ.CorrectCount,
                                                     TotalQuestion = questionTimeCodeQJ.TotalQuestion,
                                                     CountQuestion = answerTimeCodeQJ.TotalAnswer,
-                                                    Percent = questionTimeCodeQJ.TotalCount > 0 ? NumberHelper.ConvertDouble(answerTimeCodeQJ.CorrectCount / questionTimeCodeQJ.TotalCount * 100) : default
+                                                    Percent = questionTimeCodeQJ.TotalCount > 0 ? NumberHelper.ConvertPercentDouble(answerTimeCodeQJ.CorrectCount / questionTimeCodeQJ.TotalCount) : default
                                                 }).ToList()
                              };
             var skillScores = scoreQuery.Where(x => x.Type == EnumTimeCodeType.Standalone && x.SkillScores?.Count > 0).SelectMany(x => x.SkillScores!).ToList();
@@ -321,6 +321,69 @@ namespace Fsel.Course.Infrastructure.Common
             videoResult.CorrectTotal = (int)skillScores.Sum(x => x.TotalCount);
             videoResult.Status = EnumResultStatus.Done;
             videoResult.Percent = videoResult.CorrectTotal > 0 ? (NumberHelper.ConvertDouble((double)videoResult.CorrectCount / videoResult.CorrectTotal) * 100) : default;
+            videoResult.VideoSkillScores = scoreQuery.ToList();
+            return methodResult;
+        }
+
+        public async Task<VoidMethodResult> GetVideoSkillScores(VideoResult videoResult, CancellationToken cancellationToken)
+        {
+            ArgumentNullException.ThrowIfNull(videoResult);
+            VoidMethodResult methodResult = new VoidMethodResult();
+            var answerQuery = from baseQ in _videoResultRepository.Queryable
+                              join vtca in _videoTimeCodeAnswerRepository.Queryable on baseQ.Id equals vtca.VideoResultId
+                              join e in _exerciseRepository.Queryable on vtca.ExerciseId equals e.Id
+                              join te in _timeCodeExerciseRepository.Queryable on e.Id equals te.ExerciseId
+                              join vt in _videoTimeCodeRepository.Queryable on te.VideoTimeCodeId equals vt.Id
+                              where baseQ.Id == videoResult.Id
+                              group new { vt, vtca } by new { vt.TimeCodeType, e.CourseSkill } into g
+                              select new
+                              {
+                                  Type = g.Key.TimeCodeType,
+                                  Skill = g.Key.CourseSkill,
+                                  CorrectCount = g.Sum(x => x.vtca.CorrectCount),
+                                  TotalAnswer = g.Select(x => x.vtca).Count()
+                              };
+
+            var questionQuery = from baseQ in _videoResultRepository.Queryable
+                                join v in _videoRepository.Queryable on baseQ.VideoId equals v.Id
+                                join vt in _videoTimeCodeRepository.Queryable on v.Id equals vt.VideoId
+                                join te in _timeCodeExerciseRepository.Queryable on vt.Id equals te.VideoTimeCodeId
+                                join e in _exerciseRepository.Queryable on te.ExerciseId equals e.Id
+                                join eq in _exerciseQuestionRepository.Queryable on e.Id equals eq.ExerciseId
+                                join q in _questionRepository.Queryable on eq.QuestionId equals q.Id
+                                where baseQ.Id == videoResult.Id && q.QuestionType != EnumQuestionType.ExercisePreparation
+                                group new { vt, q } by new { vt.TimeCodeType, e.CourseSkill } into g
+                                select new
+                                {
+                                    Type = g.Key.TimeCodeType,
+                                    Skill = g.Key.CourseSkill,
+                                    TotalCount = g.Sum(x => x.q.CorrectTotal),
+                                    TotalQuestion = g.Select(x => x.q).Count()
+                                };
+            var questions = await questionQuery.ToListAsync(cancellationToken);
+            var answers = await answerQuery.ToListAsync(cancellationToken);
+            var skills = Enum.GetValues(typeof(EnumCourseSkill)).Cast<EnumCourseSkill>();
+            var types = Enum.GetValues(typeof(EnumTimeCodeType)).Cast<EnumTimeCodeType>();
+            var scoreQuery = from type in types
+                             select new VideoSkillScores
+                             {
+                                 Type = type,
+                                 SkillScores = (from skill in skills
+                                                join questionTimeCodeQ in questions on skill equals questionTimeCodeQ.Skill into questionTimeCodeQ_jointable
+                                                from questionTimeCodeQJ in questionTimeCodeQ_jointable.DefaultIfEmpty()
+                                                join answerTimeCodeQ in answerQuery on skill equals answerTimeCodeQ.Skill into answerTimeCodeQ_jointable
+                                                from answerTimeCodeQJ in answerTimeCodeQ_jointable.DefaultIfEmpty()
+                                                where questionTimeCodeQJ != null && questionTimeCodeQJ.Type == type && (!(answerTimeCodeQJ != null) || answerTimeCodeQJ.Type == type)
+                                                select new SkillScores
+                                                {
+                                                    Skill = skill,
+                                                    TotalCount = questionTimeCodeQJ.TotalCount,
+                                                    CorrectCount = answerTimeCodeQJ != null ? answerTimeCodeQJ.CorrectCount : default,
+                                                    TotalQuestion = questionTimeCodeQJ.TotalQuestion,
+                                                    CountQuestion = answerTimeCodeQJ != null ? answerTimeCodeQJ.TotalAnswer : default,
+                                                    Percent = (questionTimeCodeQJ.TotalCount > 0 && answerTimeCodeQJ != null) ? NumberHelper.ConvertDouble(answerTimeCodeQJ.CorrectCount / questionTimeCodeQJ.TotalCount * 100) : default
+                                                }).ToList()
+                             };
             videoResult.VideoSkillScores = scoreQuery.ToList();
             return methodResult;
         }

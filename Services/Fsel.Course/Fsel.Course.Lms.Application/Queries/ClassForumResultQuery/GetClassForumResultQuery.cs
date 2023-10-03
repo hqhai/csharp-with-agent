@@ -14,7 +14,6 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Shared.Enums;
-    using Fsel.Shared.Enums.ErrorCodes;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -47,8 +46,11 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
                 .Include(x => x.LessonResult)
                 .ThenInclude(x => x!.Lesson)
                 .ThenInclude(x => x!.UnitLessons)
-                .ThenInclude(x => x.Unit)
+                .Include(x => x.LessonResult)
+                .ThenInclude(x => x!.Unit)
                 .ThenInclude(x => x!.CourseUnitMockTests)
+                .Include(x => x.LessonResult)
+                .ThenInclude(x => x!.Course)
                 .Include(x => x.ClassForum)
                 .Include(x => x.ClassForumResultFiles)
                 .Include(x => x.ClassForumScores)
@@ -72,8 +74,11 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
                 }
                 else
                 {
-                    classForumResult.CheckCsoId = csoId;
-                    classForumResult.CheckStartDate = DateTime.Now;
+                    if (classForumResult.CheckCsoId == null)
+                    {
+                        classForumResult.CheckCsoId = csoId;
+                        classForumResult.CheckStartDate = DateTime.Now;
+                    }
                 }
             }
 
@@ -88,32 +93,32 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
                 }
                 else
                 {
-                    classForumResult.GradingTeacherId = teacherId;
-                    classForumResult.GradingStartDate = DateTime.Now;
+                    if (classForumResult.GradingTeacherId == null)
+                    {
+                        classForumResult.GradingTeacherId = teacherId;
+                        classForumResult.GradingStartDate = DateTime.Now;
+                    }
                 }
             }
 
             var lesson = classForumResult.LessonResult?.Lesson?.UnitLessons.FirstOrDefault(y => y.UnitId == classForumResult.LessonResult.UnitId)?.DisplayOrder;
             var unit = classForumResult.LessonResult?.Unit?.CourseUnitMockTests.FirstOrDefault(y => y.CourseId == classForumResult.LessonResult.CourseId)?.DisplayOrder;
+            var course = classForumResult.LessonResult?.Course?.Code;
 
             var classForumResultModel = new ClassForumResultModel
             {
                 Id = classForumResult.Id,
                 Content = classForumResult.Content,
+                WordContent = classForumResult.WordContent,
                 Status = classForumResult.Status,
                 ClassForumId = classForumResult.ClassForumId,
                 ClassForum = _mapper.Map<ClassForumModel>(classForumResult.ClassForum),
-                LessonDisplayOrder = lesson ?? default,
-                UnitDisplayOrder = unit ?? default,
                 CreatedDate = classForumResult.CreatedDate,
                 CheckStartDate = classForumResult.CheckStartDate,
                 GradingStartDate = classForumResult.GradingStartDate,
                 CheckCsoId = classForumResult.CheckCsoId,
                 GradingTeacherId = classForumResult.GradingTeacherId ?? default,
-                ClassForumResultFiles = classForumResult.ClassForumResultFiles == null ? null : classForumResult.ClassForumResultFiles.Select(x => new ClassForumResultFileModel
-                {
-                    FilePath = x.FilePath,
-                }).ToList(),
+                FilePaths = classForumResult.ClassForumResultFiles == null ? null : classForumResult.ClassForumResultFiles.Select(x => x.FilePath ?? string.Empty).ToList(),
                 ClassForumScores = classForumResult.ClassForumScores == null ? null : classForumResult.ClassForumScores.Select(x => new ClassForumScoreModel
                 {
                     Id = x.Id,
@@ -121,6 +126,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
                     Criteria = x.Criteria,
                     Score = x.Score
                 }).ToList(),
+                PostArea = "L" + lesson + "_" + "U" + unit + "_" + course
             };
 
             classForumResult = _classForumResultRepository.Update(classForumResult);

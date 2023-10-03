@@ -17,5 +17,7 @@ namespace Fsel.Identity.Domain.Entities
         public virtual ICollection<UserOtpCode> UserOtpCodes { get; set; } = new List<UserOtpCode>();
 
         public virtual ICollection<UserSetting> UserSettings { get; set; } = new List<UserSetting>();
+
+        public virtual ICollection<UserPlatform> UserPlatforms { get; set; } = new List<UserPlatform>();
     }
 }

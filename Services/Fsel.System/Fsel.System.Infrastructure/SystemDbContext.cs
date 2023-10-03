@@ -27,6 +27,8 @@ namespace Fsel.System.Infrastructure
             modelBuilder.ApplyConfiguration(new QuestBoardConfigConfiguration());
             modelBuilder.ApplyConfiguration(new QuestBoardStudentConfigConfiguration());
             modelBuilder.ApplyConfiguration(new FeatureAccessTimeConfigConfiguration());
+            modelBuilder.ApplyConfiguration(new GameTopicEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new GameVocabularyEntityTypeConfiguration());
             base.OnModelCreating(modelBuilder);
         }
 
@@ -40,6 +42,8 @@ namespace Fsel.System.Infrastructure
         public DbSet<QuestBoardStudent> QuestBoardStudents { get; set; }
         public DbSet<QuestBoard> QuestBoards { get; set; }
         public DbSet<QuestBoardConfig> QuestBoardConfigs { get; set; }
+        public DbSet<GameTopic> GameTopics { get; set; }
+        public DbSet<GameVocabulary> GameVocabularies { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -58,7 +62,7 @@ namespace Fsel.System.Infrastructure
 
         private static void SeedQuestBoards(ModelBuilder builder)
         {
-            var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, QuestBoardSettings.QuestBoardFileName);
+            var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ResourceSettings.QuestBoardFileName);
             var questBoardConfigs = ConvertHelper.DeserializeFromFilePath<IList<QuestBoardConfig>>(path);
             ArgumentNullException.ThrowIfNull(questBoardConfigs);
             builder.Entity<QuestBoardConfig>().HasData(questBoardConfigs);

@@ -12,6 +12,7 @@ namespace Fsel.Course.Domain.Entities.QuestionTypeConfigs.Questions
         [JsonRequired]
         public IList<string>? Contents { get; set; }
 
+        public IList<string>? Content { get; set; }
         public bool IsSpeakRequired { get; set; }
     }
 }

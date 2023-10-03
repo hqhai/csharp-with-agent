@@ -4,6 +4,7 @@ namespace Fsel.Identity.Application.Services.InteractionService
 {
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
+    using Fsel.Identity.Application.Services.InteractionService.Models;
     using Fsel.Identity.Domain.Models.EntityModels;
     using Microsoft.AspNetCore.Mvc;
     using Refit;
@@ -15,5 +16,8 @@ namespace Fsel.Identity.Application.Services.InteractionService
 
         [Get("/surveyQuestion/{userId}")]
         Task<IApiResponse<MethodResult<IList<StudentSurveyQuestionModel>>>> SurveyQuestionsByUserId([FromRoute] string userId);
+
+        [Post("/customerSurvey")]
+        Task<IApiResponse<MethodResult<IList<CustomerSurveyModel>>>> CreateSurvey([FromBody] CreateCustomerSurveyCommandModel model);
     }
 }

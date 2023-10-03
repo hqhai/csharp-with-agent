@@ -88,9 +88,9 @@ namespace Fsel.Course.Lms.Application.Commands.LessonCmd
                 return methodResult;
             }
             var courseResult = course.CourseResults.FirstOrDefault(x => x.StudentId == studentId && x.CourseId == request.CourseId);
-            if (courseResult != null && courseResult.Status == EnumCourseStatus.New)
+            if (courseResult != null && courseResult.Status == EnumResultStatus.New)
             {
-                courseResult.Status = EnumCourseStatus.Active;
+                courseResult.Status = EnumResultStatus.Process;
                 _courseResultRepository.Update(courseResult);
                 await _courseResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             }
@@ -143,22 +143,10 @@ namespace Fsel.Course.Lms.Application.Commands.LessonCmd
                 lessonResult.HomeWorkResults = homeWorks.Select(x => new HomeWorkResult
                 {
                     HomeWorkId = x.Id,
-                    Status = EnumResultStatus.New,
+                    Status = EnumResultStatus.Unfinished,
                     StudentId = studentId ?? default,
                     CorrectTotal = x.HomeWorkQuestions.Select(x => x.Question).Sum(x => x!.CorrectTotal)
                 }).ToList();
-
-                #region TODO : Fix Demo 20/9/2023
-
-                //lessonResult.HomeWorkResults = homeWorks.Select(x => new HomeWorkResult
-                //{
-                //    HomeWorkId = x.Id,
-                //    Status = EnumResultStatus.Unfinished,
-                //    StudentId = studentId ?? default,
-                //    CorrectTotal = x.HomeWorkQuestions.Select(x => x.Question).Sum(x => x!.CorrectTotal)
-                //}).ToList();
-
-                #endregion TODO : Fix Demo 20/9/2023
 
                 lessonResult.Status = EnumResultStatus.Process;
                 lessonResult = _lessonResultRepository.Update(lessonResult);

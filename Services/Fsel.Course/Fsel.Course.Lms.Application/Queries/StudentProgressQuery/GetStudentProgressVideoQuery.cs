@@ -3,6 +3,7 @@
 namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
 {
     using Fsel.Common.ActionResults;
+    using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Infrastructure.Common;
@@ -55,7 +56,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             var student = studentResults?.Content?.Result?.FirstOrDefault();
             var userId = student?.Human?.UserId ?? default;
             var lessonResult = await _lessonResultRepository.Queryable.FirstOrDefaultAsync(x => x.UnitId == request.UnitId && x.CourseId == request.CourseId && x.LessonId == request.LessonId && x.StudentId == request.StudentId, cancellationToken);
-            if (lessonResult == null)
+            if (lessonResult == null || lessonResult.Status == EnumResultStatus.Unfinished)
             {
                 methodResult.Result = null;
                 methodResult.StatusCode = StatusCodes.Status200OK;
@@ -86,7 +87,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             var featureAccessTime = featureAccessTimeResult.Content?.Result;
             videoStudentProgress.Name = videoResult.Video?.Name;
             videoStudentProgress.Status = videoResult.Status;
-            var method = await _videoConverter.GetVideoResultDone(videoResult, cancellationToken).ConfigureAwait(false);
+            var method = await _videoConverter.GetVideoSkillScores(videoResult, cancellationToken).ConfigureAwait(false);
             if (!method.IsOK)
             {
                 methodResult.AddErrorBadRequest(method.ErrorMessages);
@@ -96,7 +97,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             if (featureAccessTime != null)
             {
                 videoStudentProgress.Visit = featureAccessTime.Visit;
-                videoStudentProgress.LastVisited = featureAccessTime.LastVisited ?? default;
+                videoStudentProgress.LastVisited = featureAccessTime.LastVisited ?? null;
                 videoStudentProgress.TimeSpent = featureAccessTime.AccessTime;
             }
 

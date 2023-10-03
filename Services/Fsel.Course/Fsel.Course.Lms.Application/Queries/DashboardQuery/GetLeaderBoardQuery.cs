@@ -52,7 +52,7 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
             var student = studentResult?.Content?.Result;
             var studentId = student?.Id;
 
-            var studentIds = await _courseResultRepository.Queryable.Where(x => x.Status != EnumCourseStatus.New).Select(c => c.StudentId).Distinct().ToListAsync(cancellationToken);
+            var studentIds = await _courseResultRepository.Queryable.Where(x => x.Status != EnumResultStatus.New).Select(c => c.StudentId).Distinct().ToListAsync(cancellationToken);
             var studentResults = await _userService.GetStudentsByStudentIdsAsync(studentIds);
             if (!studentResults.IsSuccessStatusCode)
             {

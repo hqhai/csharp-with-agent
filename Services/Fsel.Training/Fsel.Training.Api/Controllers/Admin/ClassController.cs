@@ -166,5 +166,18 @@ namespace Fsel.Training.Api.Controllers.Admin
             MethodResult<IList<UserClassModel>> commandResult = await _mediator.Send(new GetClassByCSOIdsQuery { CSOIds = ids }).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
+
+
+        /// <summary>
+        /// get list teacher or cso in class
+        /// </summary>
+        [HttpGet("get-list-teacher-or-cso-in-class")]
+        [ProducesResponseType(typeof(MethodResult<IList<CSOTeacherModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> Get([FromQuery] GetListTeacherOrCSOInClassQuery query)
+        {
+            MethodResult<IList<CSOTeacherModel>> commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
     }
 }

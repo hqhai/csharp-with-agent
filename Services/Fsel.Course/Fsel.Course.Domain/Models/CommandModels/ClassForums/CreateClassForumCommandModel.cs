@@ -8,7 +8,7 @@ namespace Fsel.Course.Domain.Models.CommandModels.ClassForums
     public class CreateClassForumCommandModel
     {
         public EnumGradingStyle GradingStyle { get; set; }
-
+        public string? PromptName { get; set; }
         public long TaggetWordLimit { get; set; }
         public double TaggetTimeLimit { get; set; }
 

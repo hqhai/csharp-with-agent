@@ -67,7 +67,6 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
 
             var isCheckFull = mockTest!.MockTestType == EnumMockTestType.FullMockTest;
 
-
             var teacherResult = await _userService.GetTeacherByUserIdAsync(_authContext.CurrentUserId);
             var teacherId = teacherResult.Content?.Result?.Id;
 
@@ -78,8 +77,11 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
             }
             else
             {
-                mockTestResult.GradingTeacherId = teacherId;
-                mockTestResult.GradingStartDate = DateTime.Now;
+                if (mockTestResult.GradingTeacherId == null)
+                {
+                    mockTestResult.GradingTeacherId = teacherId;
+                    mockTestResult.GradingStartDate = DateTime.Now;
+                }
             }
             var mockTestModel = new MockTestModel
             {

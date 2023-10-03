@@ -19,6 +19,9 @@ builder.AddMassTransit(appSetting);
 builder.Services.AddHangfire(x => x.UseSqlServerStorage(builder.Configuration.GetConnectionString(Settings.DefaultConnection)));
 builder.Services.AddHangfireServer();
 builder.Services.AddScoped<UpdateClassLiveAssignmentPublisher>();
+builder.Services.AddScoped<UpdateOcCheckInClassForumResultPublisher>();
+builder.Services.AddScoped<UpdateTeacherGradingInClassForumAndMockTestPublisher>();
+builder.Services.AddScoped<UpdateStudentsDailyStreakPublisher>();
 builder.Services.AddScoped<LeaderBoardPublisher>();
 
 var app = builder.Build();

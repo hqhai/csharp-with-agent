@@ -1,9 +1,11 @@
 // Copyright (c) Atlantic. All rights reserved.
 
 using Fsel.Common.Constants;
+using Fsel.Common.Helpers;
 using Fsel.Core.Base;
 using Fsel.Identity.Domain.Entities;
 using Fsel.Identity.Infrastructure.Configs;
+using Fsel.Shared.Constants;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -20,7 +22,8 @@ namespace Fsel.Identity.Infrastructure
         protected override void OnModelCreating(ModelBuilder builder)
         {
             ArgumentNullException.ThrowIfNull(builder);
-            //SeedRoles(builder);
+
+            SeedPlatforms(builder);
 
             builder.ApplyConfiguration(new HumanEntityTypeConfiguration());
             builder.ApplyConfiguration(new TeacherEntityTypeConfiguration());
@@ -32,6 +35,9 @@ namespace Fsel.Identity.Infrastructure
             builder.ApplyConfiguration(new UserEntityTypeConfiguration());
             builder.ApplyConfiguration(new UserOtpCodeEntityTypeConfiguration());
             builder.ApplyConfiguration(new UserSettingEntityTypeConfiguration());
+            builder.ApplyConfiguration(new PlatformEntityTypeConfiguration());
+            builder.ApplyConfiguration(new UserPlatformEntityTypeConfiguration());
+
             builder.ApplyConfiguration(new StudenrRankingEntityTypeConfiguration());
             base.OnModelCreating(builder);
         }
@@ -50,6 +56,8 @@ namespace Fsel.Identity.Infrastructure
         public DbSet<ParentStudent> ParentStudents { get; set; }
         public DbSet<UserOtpCode> UserOtpCodes { get; set; }
         public DbSet<UserSetting> UserSettings { get; set; }
+        public DbSet<Platform> Platform { get; set; }
+        public DbSet<UserPlatform> UserPlatforms { get; set; }
         public DbSet<StudentRanking> StudentRankings { get; set; }
 
         #endregion Db Set
@@ -67,6 +75,17 @@ namespace Fsel.Identity.Infrastructure
                 optionsBuilder.UseSqlServer(
                     configuration.GetConnectionString(Settings.DefaultConnection),
                     options => options.MigrationsAssembly(GetType().Assembly.GetName().Name));
+            }
+        }
+
+        private static void SeedPlatforms(ModelBuilder builder)
+        {
+            var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ResourceSettings.PlatformFileName);
+            var platforms = ConvertHelper.DeserializeFromFilePath<IList<Platform>>(path);
+            if (platforms != null)
+            {
+                ArgumentNullException.ThrowIfNull(platforms);
+                builder.Entity<Platform>().HasData(platforms);
             }
         }
 

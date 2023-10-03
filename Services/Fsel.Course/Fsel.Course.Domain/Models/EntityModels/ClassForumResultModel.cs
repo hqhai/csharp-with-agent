@@ -34,6 +34,10 @@ namespace Fsel.Course.Domain.Models.EntityModels
 
         public bool? IsLiked { get; set; }
 
+        public string? PostArea { get; set; }
+
+        public bool IsTurnedOffNotification { get; set; }
+
         public string? WordContent { get; set; }
 
         public string? GradingAlFeedback { get; set; }
@@ -56,7 +60,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public int UnitDisplayOrder { get; set; }
         public IList<EnumFeedBackPositive>? FeedBackPositives { get; set; }
         public IList<EnumFeedBackNegative>? FeedBackNegatives { get; set; }
-        public IList<ClassForumResultFileModel>? ClassForumResultFiles { get; set; }
+        public IList<string>? FilePaths { get; set; }
 
         public IList<ClassForumScoreModel>? ClassForumScores { get; set; }
     }

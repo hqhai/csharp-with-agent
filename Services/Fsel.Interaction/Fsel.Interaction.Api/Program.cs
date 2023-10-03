@@ -1,15 +1,16 @@
 // Copyright (c) Atlantic. All rights reserved.
 
 using Fsel.Core.Extensions;
+using Fsel.Interaction.Application.Queues.Publishers;
 using Fsel.Interaction.Application.Services.CourseServices;
-using Fsel.Interaction.Application.Services.TrainingService;
+using Fsel.Interaction.Application.Services.NotificationService;
+using Fsel.Interaction.Application.Services.SenderServices;
+using Fsel.Interaction.Application.Services.TrainingServices;
 using Fsel.Interaction.Application.Services.UserServices;
 using Fsel.Interaction.Domain.IRepositories;
 using Fsel.Interaction.Infrastructure;
 using Fsel.Interaction.Infrastructure.Repositories;
 using Fsel.Interaction.Infrastructure.ValueSettings;
-using Fsel.Interaction.Application.Queues.Publishers;
-using Fsel.Interaction.Application.Services.SenderServices;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -40,6 +41,7 @@ builder.AddRefitClients(typeof(IUserService), appSetting?.Services?.UserApiUrl);
 builder.AddRefitClients(typeof(ITrainingService), appSetting?.Services?.TrainingApiUrl);
 builder.AddRefitClients(typeof(ICourseService), appSetting?.Services?.LmsCourseApiUrl);
 builder.AddRefitClients(typeof(ISenderService), appSetting?.Services?.SenderApiUrl);
+builder.AddRefitClients(typeof(INotificationService), appSetting?.Services?.NotificationApiUrl);
 builder.AddMassTransit(appSetting);
 
 var app = builder.Build();

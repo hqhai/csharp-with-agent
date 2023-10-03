@@ -24,7 +24,6 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             ArgumentNullException.ThrowIfNull(notification);
             var homeWorkResult = notification.Data;
             var lessonResult = await _lessonResultRepository.Queryable.Include(x => x.HomeWorkResults.Where(x => x.StudentId == homeWorkResult.StudentId && x.LessonResultId == homeWorkResult.LessonResultId))
-                                                                        .Include(x => x.VideoResult)
                                                                         .Include(x => x.ClassForumResults.Where(x => x.StudentId == homeWorkResult.StudentId && x.LessonResultId == homeWorkResult.LessonResultId))
                                                                         .FirstOrDefaultAsync(x => x.Id == homeWorkResult.LessonResultId, cancellationToken);
             if (lessonResult != null)
@@ -33,20 +32,17 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 var isClassForumDone = lessonResult.ClassForumResults.Any(x => x.StudentId == homeWorkResult.StudentId && x.LessonResultId == homeWorkResult.LessonResultId && (x.Status == EnumClassForumResultStatus.PendingForGrading || x.Status == EnumClassForumResultStatus.Graded));
                 await GetLessonResult(lessonResult, cancellationToken);
 
-                #region TODO : Fix Demo 20/9/2023
-
-                //if (isClassForumDone && isHomeWorksDone)
-                //{
-                //    lessonResult.Status = EnumResultStatus.Done;
-                //    _lessonResultRepository.Update(lessonResult);
-                //    await _lessonResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
-                //    return;
-                //}
-
-                #endregion TODO : Fix Demo 20/9/2023
-
-                _lessonResultRepository.Update(lessonResult);
-                await _lessonResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                if (isClassForumDone && isHomeWorksDone)
+                {
+                    lessonResult.Status = EnumResultStatus.Done;
+                    _lessonResultRepository.Update(lessonResult);
+                    await _lessonResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+                }
+                else
+                {
+                    _lessonResultRepository.Update(lessonResult);
+                    await _lessonResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                }
             }
         }
     }

@@ -8,6 +8,9 @@ namespace Fsel.Shared.Constants
         {
             public const string TestWorkerJob = "TestWorkerJob";
             public const string AssignmentScheduleJob = "AssignmentScheduleJob";
+            public const string UpdateStudentsDailyStreakJob = "UpdateStudentsDailyStreakJob";
+            public const string UpdateOcCheckInClassForumResultJob = "UpdateOcCheckInClassForumResultJob";
+            public const string UpdateTeacherGradingInClassForumAndMockTestJob = "UpdateTeacherGradingInClassForumAndMockTestJob";
             public const string LeaderBoardJob = "LeaderBoardJob";
         }
     }

@@ -4,7 +4,10 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
 {
     using System.Collections.Generic;
     using System.Linq.Dynamic.Core;
+    using System.Threading;
     using Fsel.Common.ActionResults;
+    using Fsel.Course.Domain.Entities;
+    using Fsel.Course.Domain.Entities.SkillScoresConfigs;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
@@ -28,6 +31,9 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
     public class GetStudentProgressLessonsQueryHandler : IRequestHandler<GetStudentProgressLessonsQuery, MethodResult<IList<LessonStudentProgressModel>>>
     {
         private readonly ICourseRepository _courseRepository;
+        private readonly ISectionGroupRepository _sectionGroupRepository;
+        private readonly IMockTestSectionRepository _mockTestSectionRepository;
+        private readonly IMockTestScoreRepository _mockTestScoreRepository;
         private readonly IMockTestResultRepository _mockTestResultRepository;
         private readonly IMockTestRepository _mockTestRepository;
         private readonly ILessonResultRepository _lessonResultRepository;
@@ -35,9 +41,12 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
         private readonly IUserService _userService;
         private readonly ISystemService _systemService;
 
-        public GetStudentProgressLessonsQueryHandler(ICourseRepository courseRepository, IMockTestResultRepository mockTestResultRepository, IMockTestRepository mockTestRepository, ILessonResultRepository lessonResultRepository, IUnitRepository unitRepository, IUserService userService, ISystemService systemService)
+        public GetStudentProgressLessonsQueryHandler(ICourseRepository courseRepository, ISectionGroupRepository sectionGroupRepository, IMockTestSectionRepository mockTestSectionRepository, IMockTestScoreRepository mockTestScoreRepository, IMockTestResultRepository mockTestResultRepository, IMockTestRepository mockTestRepository, ILessonResultRepository lessonResultRepository, IUnitRepository unitRepository, IUserService userService, ISystemService systemService)
         {
             _courseRepository = courseRepository;
+            _sectionGroupRepository = sectionGroupRepository;
+            _mockTestSectionRepository = mockTestSectionRepository;
+            _mockTestScoreRepository = mockTestScoreRepository;
             _mockTestResultRepository = mockTestResultRepository;
             _mockTestRepository = mockTestRepository;
             _lessonResultRepository = lessonResultRepository;
@@ -105,11 +114,11 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             {
                 var lessonProgress = await GetLesson(item, studentId);
                 var featureAccessTime = featureAccessTimes?.FirstOrDefault(x => x.LessonId == item);
-                lessonProgress.Type = nameof(lessonProgress.Type);
+                lessonProgress.Type = nameof(Lesson);
                 if (featureAccessTime != null)
                 {
                     lessonProgress.TimeSpent = featureAccessTime.AccessTime;
-                    lessonProgress.LastVisited = featureAccessTime.LastVisited ?? default;
+                    lessonProgress.LastVisited = featureAccessTime.LastVisited ?? null;
                     lessonProgress.Visit = featureAccessTime.Visit;
                 }
                 listLessonProgress.Add(lessonProgress);
@@ -138,7 +147,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             {
                 var lesson = lessonResult.Lesson;
                 counts.Add(lessonResult.VideoResult?.Status == EnumResultStatus.Done ? 1 : 0);
-                counts.Add(lessonResult.ClassForumResults.Where(x => x != null && x.Status == EnumClassForumResultStatus.Graded && x.StudentId == studentId).Count());
+                counts.Add(lessonResult.ClassForumResults.Where(x => x != null && (x.Status == EnumClassForumResultStatus.PendingForGrading || x.Status == EnumClassForumResultStatus.Graded) && x.StudentId == studentId).Count());
                 counts.Add(lessonResult.HomeWorkResults.Where(x => x != null && x.Status == EnumResultStatus.Done && x.StudentId == studentId).GroupBy(x => x.LessonResultId).Count());
                 if (lesson != null)
                 {
@@ -147,7 +156,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                 }
                 lessonProgress.Status = lessonResult.Status;
                 lessonProgress.Percent = NumberHelper.ConvertPercentDouble(counts.Average());
-                lessonProgress.ContentCompleted = string.Format("{0} / {1}", counts.Sum(), 3);
+                lessonProgress.ContentCompleted = string.Format("{0} / {1}", counts.Sum(), counts.Count);
             }
             return lessonProgress;
         }
@@ -159,22 +168,64 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                         .FirstOrDefaultAsync(x => x.Id == mockTestId);
             if (mockTest != null)
             {
+                var query = from baseQ in _mockTestRepository.Queryable
+                            join msg in _mockTestSectionRepository.Queryable on baseQ.Id equals msg.MockTestId
+                            join sg in _sectionGroupRepository.Queryable on msg.SectionGroupId equals sg.Id
+                            join mr in _mockTestResultRepository.Queryable on baseQ.Id equals mr.MockTestId into mrGroupG
+                            from mrGroup in mrGroupG.DefaultIfEmpty()
+                            join ms in _mockTestScoreRepository.Queryable on mrGroup.Id equals ms.MockTestResultId into msGroupG
+                            from msGroup in msGroupG.DefaultIfEmpty()
+                            where baseQ.Id == mockTestId && mrGroup.StudentId == request.StudentId
+                            group new { sg, mrGroup, msGroup } by new { sg.CourseSkill } into g
+                            select new
+                            {
+                                Skill = g.Key.CourseSkill,
+                                MockTestResult = g.Select(x => x.mrGroup).FirstOrDefault(),
+                                MockTestScores = g.Select(x => x.msGroup).ToList()
+                            };
+                var skillMockTest = await query.ToListAsync();
+                mockTestProgress.TestSkillScores = skillMockTest.Select(x =>
+                {
+                    var skillScore = x.MockTestResult?.SkillScores?.FirstOrDefault(z => z.Skill == x.Skill);
+                    var skillScores = new TestSkillScores
+                    {
+                        Skill = x.Skill,
+                        CorrectCount = skillScore?.CorrectCount ?? default,
+                        TotalCount = skillScore?.TotalCount ?? default,
+                        CountQuestion = skillScore?.CountQuestion ?? default,
+                        TotalQuestion = skillScore?.TotalQuestion ?? default,
+                        Scores = skillScore?.Scores ?? default,
+                        Percent = skillScore?.Percent ?? default,
+                    };
+                    if (x.Skill == EnumCourseSkill.Speaking || x.Skill == EnumCourseSkill.Writing)
+                    {
+                        if (x.MockTestScores.Any() && x.MockTestScores.All(x => x != null))
+                        {
+                            skillScores.Status = EnumResultStatus.Done;
+                        }
+                        else
+                        {
+                            skillScores.Status = EnumResultStatus.Process;
+                        }
+                    }
+                    return skillScores;
+                }).FirstOrDefault();
                 var mockTestResult = mockTest.MockTestResults.FirstOrDefault(x => x.MockTestId == mockTestId && x.CourseId == request.CourseId && x.StudentId == request.StudentId && x.UnitId == request.UnitId);
                 mockTestProgress.Type = nameof(mockTestResult.MockTest);
                 mockTestProgress.ObjectId = mockTest.Id;
                 mockTestProgress.Name = mockTest.Name;
+
                 if (mockTestResult != null)
                 {
                     mockTestProgress.Status = mockTestResult.Status;
-                    mockTestProgress.PercentObject = mockTestResult.Percent;
-                    mockTestProgress.SkillScores = mockTestResult.SkillScores;
+                    mockTestProgress.CorrectPercent = mockTestResult.Percent;
                     var isDone = mockTestResult.Status == EnumResultStatus.Done;
                     mockTestProgress.ContentCompleted = string.Format("{0} / {1}", isDone ? 1 : 0, 1);
                     mockTestProgress.Percent = isDone ? 100 : 0;
                     if (featureAccessTime != null)
                     {
                         mockTestProgress.TimeSpent = featureAccessTime.AccessTime;
-                        mockTestProgress.LastVisited = featureAccessTime.LastVisited ?? default;
+                        mockTestProgress.LastVisited = featureAccessTime.LastVisited ?? null;
                     }
                 }
             }

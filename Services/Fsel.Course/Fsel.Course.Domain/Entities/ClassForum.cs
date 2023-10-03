@@ -17,6 +17,9 @@ namespace Fsel.Course.Domain.Entities
         /// </summary>
         public EnumGradingStyle GradingStyle { get; set; }
 
+        [MaxLength(250, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
+        public string? PromptName { get; set; }
+
         /// <summary>
         /// Số từ giới hạn
         /// </summary>

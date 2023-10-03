@@ -96,6 +96,7 @@ services:
             - SERVICES_ClassApiUrl=http://42.96.58.145:5207/api/v1
             - SERVICES_InteractionApiUrl=http://42.96.58.145:5208/api/v1
             - SERVICES_SystemApiUrl=http://42.96.58.145:52010/api/v1
+            - SERVICES_NotificationApiUrl=http://42.96.58.145:5502/api/v1
         ports:
             - 5204:80
             - 7204:443
@@ -135,11 +136,11 @@ services:
         environment:
             - ASPNETCORE_ENVIRONMENT=Testing
             - SERVICENAME=Sender
-            - SMTP__FROM=duongphanthtb@gmail.com
+            - SMTP__FROM=fsel@atlantic.edu.vn
             - SMTP__SMTPSERVER=smtp.gmail.com
             - SMTP__PORT=465
-            - SMTP__USERNAME=duongphanthtb@gmail.com
-            - SMTP__PASSWORD=ncfigfdzuxiueyvv
+            - SMTP__USERNAME=fsel@atlantic.edu.vn
+            - SMTP__PASSWORD=klnghinrhonlvgbf
         ports:
             - 5206:80
             - 7206:443

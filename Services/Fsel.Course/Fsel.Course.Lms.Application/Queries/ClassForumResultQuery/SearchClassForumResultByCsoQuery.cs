@@ -6,6 +6,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
+    using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base;
     using Fsel.Core.Base.BaseModels;
@@ -30,13 +31,15 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
         private readonly ITrainingService _trainingService;
         private readonly AuthContext _authContext;
         private readonly IUserService _userService;
+        private readonly IMapper _mapper;
 
-        public SearchClassForumResultByCsoQueryHandler(IClassForumResultRepository classForumResultRepository, ITrainingService trainingService, AuthContext authContext, IUserService userService)
+        public SearchClassForumResultByCsoQueryHandler(IClassForumResultRepository classForumResultRepository, ITrainingService trainingService, AuthContext authContext, IUserService userService, IMapper mapper)
         {
             _classForumResultRepository = classForumResultRepository;
             _trainingService = trainingService;
             _authContext = authContext;
             _userService = userService;
+            _mapper = mapper;
         }
 
         public async Task<MethodResult<PagingItemsModel<ClassForumResultSearchModel>>> Handle(SearchClassForumResultByCsoQuery request, CancellationToken cancellationToken)
@@ -48,11 +51,14 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 return methodResult;
             }
-            var csoResults = await _userService.GetCSOByUserId(_authContext.CurrentUserId);
+
+            #region update cso to class
+
+            /*var csoResults = await _userService.GetCSOByUserId(_authContext.CurrentUserId);
             var csoId = csoResults.Content?.Result?.Id;
 
             var studentsResult = await _trainingService.GetClassesByCsoIdAsync(csoId ?? default);
-            var students = studentsResult.Content!.Result;
+            var students = studentsResult.Content?.Result;
             var studentIds = students?.SelectMany(x => x.ClassStudents!).Select(x => x.StudentId).ToList();
 
             var classForumResultQuery = _classForumResultRepository.Queryable
@@ -62,7 +68,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
                                     .ThenInclude(x => x.Unit)
                                     .ThenInclude(x => x!.CourseUnitMockTests)
                                     .Include(x => x.ClassForum)
-                                    .Where(x => x.Status == EnumClassForumResultStatus.Pending && (x.CheckCsoId == null || x.CheckCsoId == csoId) && studentIds!.Contains(x.StudentId))
+                                    .Where(x => x.Status == EnumClassForumResultStatus.Pending && (x.CheckCsoId == null || x.CheckCsoId == csoId) && (studentIds == null || studentIds.Contains(x.StudentId)))
                                     .Select(x => new ClassForumResultSearchModel
                                     {
                                         Id = x.Id,
@@ -70,21 +76,46 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
                                         CreatedUserId = x.CreatedUserId,
                                         CreatedFullName = x.CreatedFullName,
                                         StudentId = x.StudentId,
-                                        ClassForum = x.ClassForum!.ClassForumResults!.Select(x => x.ClassForum).Select(x => new ClassForumModel
-                                        {
-                                            Id = x!.Id,
-                                            CreatedUserId = x.CreatedUserId,
-                                            CreatedFullName = x.CreatedFullName,
-                                        }).FirstOrDefault(),
+                                        ClassForum = _mapper.Map<ClassForumModel>(x.ClassForum),
                                         Status = x.Status,
                                         CheckStartDate = x.CheckStartDate,
                                         CourseCode = x.LessonResult!.Course!.Code,
                                         LessonName = x.ClassForum!.Lesson!.Name,
-                                        LessonDisplayOrder = x.LessonResult.Lesson!.UnitLessons.FirstOrDefault(y => y.UnitId == x.LessonResult.UnitId)!.DisplayOrder,
-                                        UnitDisplayOrder = x.LessonResult.Unit!.CourseUnitMockTests.FirstOrDefault(y => y.CourseId == x.LessonResult.CourseId)!.DisplayOrder,
+                                        LessonDisplayOrder = x.LessonResult.Lesson!.UnitLessons.Where(y => y.UnitId == x.LessonResult.UnitId).Select(x => x.DisplayOrder).FirstOrDefault(),
+                                        UnitDisplayOrder = x.LessonResult.Unit!.CourseUnitMockTests.Where(y => y.CourseId == x.LessonResult.CourseId).Select(x => x.DisplayOrder).FirstOrDefault(),
                                         UnitName = x.ClassForum.Lesson.UnitLessons.Select(x => x.Unit).Select(x => x!.Name).FirstOrDefault(),
                                         TeacherId = x.GradingTeacherId
-                                    });
+                                    });*/
+
+            #endregion update cso to class
+
+            var csoResults = await _userService.GetCSOByUserId(_authContext.CurrentUserId);
+            var csoId = csoResults.Content?.Result?.Id;
+            var classForumResultQuery = _classForumResultRepository.Queryable
+                                   .Include(x => x.LessonResult)
+                                   .ThenInclude(x => x!.Lesson)
+                                   .ThenInclude(x => x!.UnitLessons)
+                                   .ThenInclude(x => x.Unit)
+                                   .ThenInclude(x => x!.CourseUnitMockTests)
+                                   .Include(x => x.ClassForum)
+                                   .Where(x => x.Status == EnumClassForumResultStatus.Pending && (x.CheckCsoId == null || x.CheckCsoId == csoId))
+                                   .Select(x => new ClassForumResultSearchModel
+                                   {
+                                       Id = x.Id,
+                                       CreatedDate = x.CreatedDate,
+                                       CreatedUserId = x.CreatedUserId,
+                                       CreatedFullName = x.CreatedFullName,
+                                       StudentId = x.StudentId,
+                                       ClassForum = _mapper.Map<ClassForumModel>(x.ClassForum),
+                                       Status = x.Status,
+                                       CheckStartDate = x.CheckStartDate,
+                                       CourseCode = x.LessonResult!.Course!.Code,
+                                       LessonName = x.ClassForum!.Lesson!.Name, 
+                                       LessonDisplayOrder = x.LessonResult.Lesson!.UnitLessons.Where(y => y.UnitId == x.LessonResult.UnitId).Select(x => x.DisplayOrder).FirstOrDefault(),
+                                       UnitDisplayOrder = x.LessonResult.Unit!.CourseUnitMockTests.Where(y => y.CourseId == x.LessonResult.CourseId).Select(x => x.DisplayOrder).FirstOrDefault(),
+                                       UnitName = x.ClassForum.Lesson.UnitLessons.Select(x => x.Unit).Select(x => x!.Name).FirstOrDefault(),
+                                       TeacherId = x.GradingTeacherId
+                                   });  
 
             if (!string.IsNullOrEmpty(request.Keyword))
             {
@@ -125,11 +156,6 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
                 {
                     item.ClassCode = classResult!.Content!.Result.Code;
                 }
-                /*var csoResult = await _trainingService.GetCsoByStudentAsync(studentId);
-                if (csoResult.Content!.Result != null)
-                {
-                    item.CsoId = csoResult!.Content!.Result.;
-                }*/
             }
 
             methodResult.Result = new PagingItemsModel<ClassForumResultSearchModel>(lists, request, totalItem);

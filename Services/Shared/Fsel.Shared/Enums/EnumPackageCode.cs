@@ -1,10 +1,10 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Ordering.Domain.Enums
+namespace Fsel.Shared.Enums
 {
     public enum EnumPackageCode
     {
-        BASIC,
+        BASIC = 1,
         STANDARD,
         PREMIUM
     }

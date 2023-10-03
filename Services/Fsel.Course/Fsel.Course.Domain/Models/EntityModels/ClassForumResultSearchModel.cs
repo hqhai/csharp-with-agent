@@ -23,6 +23,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
 
         public string? UnitName { get; set; }
 
+        public string? PostArea { get; set; }
         public Guid? TeacherId { get; set; }
 
         public EnumCourseSkill CourseSkill { get; set; }
@@ -45,7 +46,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public DateTime? GradingStartDate { get; set; }
 
         public Guid? CsoId { get; set; }
-        public IList<ClassForumResultFileModel>? ClassForumResultFiles { get; set; }
+        public IList<string>? FilePaths { get; set; }
 
         public IList<ClassForumScoreModel>? ClassForumScores { get; set; }
     }

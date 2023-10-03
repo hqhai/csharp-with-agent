@@ -3,9 +3,7 @@
 namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
 {
     using System;
-    using System.Collections.Generic;
     using System.Linq;
-    using System.Text;
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
@@ -24,6 +22,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
     public class SearchClassForumResultByTeacherQuery : SearchClassForumResultQueryModel, IRequest<MethodResult<PagingItemsModel<ClassForumResultSearchModel>>>
     {
     }
+
     public class SearchClassForumResultByTeacherQueryHandler : IRequestHandler<SearchClassForumResultByTeacherQuery, MethodResult<PagingItemsModel<ClassForumResultSearchModel>>>
     {
         private readonly IClassForumResultRepository _classForumResultRepository;
@@ -36,6 +35,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
             _trainingService = trainingService;
             _authContext = authContext;
         }
+
         public async Task<MethodResult<PagingItemsModel<ClassForumResultSearchModel>>> Handle(SearchClassForumResultByTeacherQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
@@ -60,11 +60,13 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
                                         CreatedDate = x.CreatedDate,
                                         CreatedUserId = x.CreatedUserId,
                                         CreatedFullName = x.CreatedFullName,
+                                        CourseSkill = x.ClassForum!.CourseSkill,
                                         ClassForum = x.ClassForum!.ClassForumResults!.Select(x => x.ClassForum).Select(x => new ClassForumModel
                                         {
                                             Id = x!.Id,
                                             CreatedUserId = x.CreatedUserId,
                                             CreatedFullName = x.CreatedFullName,
+                                            CourseSkill = x.CourseSkill,
                                         }).FirstOrDefault(),
                                         Status = x.Status,
                                         GradingStartDate = x.GradingStartDate,
@@ -115,6 +117,10 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
                 {
                     item.ClassCode = classResult!.Content!.Result.Code;
                 }
+                var lesson = classForumResultQuery.Select(x => x.LessonDisplayOrder).FirstOrDefault();
+                var unit = classForumResultQuery.Select(x => x.UnitDisplayOrder).FirstOrDefault();
+                var course = classForumResultQuery.Select(x => x.CourseCode).FirstOrDefault();
+                item.PostArea = "L" + lesson + "_" + "U" + unit + "_" + course;
             }
 
             methodResult.Result = new PagingItemsModel<ClassForumResultSearchModel>(lists, request, totalItem);

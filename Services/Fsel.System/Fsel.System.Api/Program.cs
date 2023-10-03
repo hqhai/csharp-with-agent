@@ -3,6 +3,7 @@
 using Fsel.Core.Extensions;
 using Fsel.Shared.Constants;
 using Fsel.System.Application.Queues.Consumers;
+using Fsel.System.Application.Queues.Publishers;
 using Fsel.System.Application.Services.CourseServices;
 using Fsel.System.Application.Services.OrderServices;
 using Fsel.System.Application.Services.UserServices;
@@ -30,14 +31,17 @@ builder.Services.AddScoped<IQuestBoardRepository, QuestBoardRepository>();
 builder.Services.AddScoped<IQuestBoardConfigRepository, QuestBoardConfigRepository>();
 builder.Services.AddScoped<IFeatureAccessTimeRepository, FeatureAccessTimeRepository>();
 builder.Services.AddScoped<IQuestBoardStudentRepository, QuestBoardStudentRepository>();
+builder.Services.AddScoped<IGameTopicRepository, GameTopicRepository>();
+builder.Services.AddScoped<IGameVocabularyRepository, GameVocabularyRepository>();
 builder.AddRefitClients(typeof(IUserService), appSetting?.Services?.UserApiUrl);
 builder.AddRefitClients(typeof(ICourseService), appSetting?.Services?.LmsCourseApiUrl);
 builder.AddRefitClients(typeof(IOrderService), appSetting?.Services?.OrderApiUrl);
 
+builder.Services.AddScoped<CreateStudentDailyStreakPublisher>();
 builder.AddMassTransit(appSetting,
 queues: new Dictionary<string, Type>
 {
-    { QueueSettings.LmsQueue.NameQueue.QuestBoardMainFinish, typeof(QuestBoardMainFinishConsumer) },
+    { QueueSettings.LmsQueue.NameQueue.QuestBoardMainFinish, typeof(QuestBoardFinishConsumer) },
 });
 
 var app = builder.Build();
