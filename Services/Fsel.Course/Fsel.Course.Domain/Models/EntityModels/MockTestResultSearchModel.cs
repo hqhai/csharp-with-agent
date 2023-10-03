@@ -10,12 +10,11 @@ namespace Fsel.Course.Domain.Models.EntityModels
     {
         public EnumMockTestType Type { get; set; }
         public Guid? UnitId { get; set; }
-        public string? UnitName { get; set; }
         public Guid CourseId { get; set; }
         public Guid MockTestId { get; set; }
-        public string? CourseCode { get; set; }
         public string? PostArea { get; set; }
-        public int Number { get;set; }
+        public string? CourseName { get; set; }
         public EnumCourseSkill? CourseSkill { get; set; }
+        public int? UnitDisplayOrder { get; set; }
     }
 }

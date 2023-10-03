@@ -63,6 +63,9 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
                                      .Include(x => x!.MockTestSections)
                                         .ThenInclude(x => x.SectionGroup)
                                         .ThenInclude(x => x!.MockTestScores)
+                                        .Include(x => x!.MockTestResults)
+                                        .ThenInclude(x => x.Course)
+                                        .ThenInclude(x => x!.CourseUnitMockTests)
                                     .Where(x => x.Id == mockTestResult.MockTestId)
                                     .AsNoTracking()
                                     .FirstOrDefaultAsync(cancellationToken);
@@ -117,28 +120,18 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
                     UnitId = x.UnitId,
                     GradingStartDate = x.GradingStartDate,
                     GradingTeacherId = x.GradingTeacherId,
+                    UnitDisplayOrder = x.MockTest!.CourseUnitMockTests.Select(x => x.Number).FirstOrDefault(),
+                    CourseName = x.MockTest.MockTestResults.Select(x => x.Course).FirstOrDefault()!.Name,
                 }).FirstOrDefault()
             };
-            var courses = await _courseRepository.Queryable.Include(x => x.CourseUnitMockTests)
-                                                        .ThenInclude(x => x.Unit)
-                                                        .ThenInclude(x => x!.UnitSkillMockTests)
-                                                        .Include(x => x.CourseUnitMockTests)
-                                                        .Where(x => mockTestModel.MockTestResult!.Id == request.MockTestResultId)
-                                                        .ToListAsync(cancellationToken: cancellationToken);
-            var course = courses.FirstOrDefault(x => mockTest.MockTestResults.Select(x => x.CourseId).Contains(x.Id));
+
             if (mockTestModel.MockTestType == EnumMockTestType.SkillMockTest)
             {
-                var courseUnitMockTest = course!.CourseUnitMockTests.FirstOrDefault(x => x.Unit != null && x!.UnitId == mockTestModel.MockTestResult!.UnitId);
-                if (courseUnitMockTest != null && courseUnitMockTest.Unit != null && courseUnitMockTest.Unit.UnitSkillMockTests.FirstOrDefault(x => x.MockTestId == mockTestModel.Id) != null)
-                {
-                    mockTestModel.UnitName = courseUnitMockTest.Unit.Name;
-                    mockTestModel.PostArea = "U" + courseUnitMockTest.Number + "_" + course.Name;
-                }
+                mockTestModel.PostArea = "U" + mockTestModel.MockTestResult?.UnitDisplayOrder + "_" + mockTestModel.MockTestResult?.CourseName;
             }
             else
             {
-                var number = course!.CourseUnitMockTests.FirstOrDefault(x => x.MockTestId == mockTestModel.Id)?.DisplayOrder;
-                mockTestModel.PostArea = "FM" + number + "_" + course.Name;
+                mockTestModel.PostArea = "FM" + mockTestModel.MockTestResult?.UnitDisplayOrder + "_" + mockTestModel.MockTestResult?.CourseName;
             }
             mockTestResult = _mockTestResultRepository.Update(mockTestResult);
             await _mockTestResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);

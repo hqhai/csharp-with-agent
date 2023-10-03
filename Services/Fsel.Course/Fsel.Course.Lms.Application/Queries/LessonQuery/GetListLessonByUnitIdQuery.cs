@@ -18,7 +18,6 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
     public class GetListLessonByUnitIdQuery : BaseQueryModel, IRequest<MethodResult<IList<LessonModel>>>
     {
         public Guid UnitId { get; set; }
-        public Guid CourseId { get; set; }
     }
 
     public class GetListLessonByUnitIdQueryHandler : IRequestHandler<GetListLessonByUnitIdQuery, MethodResult<IList<LessonModel>>>
@@ -37,8 +36,7 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
 
             var lessons = await _lessonRepository.Queryable
                             .Include(x => x.UnitLessons)
-                            .ThenInclude(x => x.Unit)
-                            .Where(x => x.UnitLessons.Select(x => x.UnitId).Contains(request.UnitId) && x.UnitLessons.Select(x => x.Unit).SelectMany(x => x.CourseUnitMockTests).Select(x => x.CourseId).Contains(request.CourseId))
+                            .Where(x => x.UnitLessons.Select(x => x.UnitId).Contains(request.UnitId))
                             .Select(x => new LessonModel
                             {
                                 CreatedDate = x.CreatedDate,

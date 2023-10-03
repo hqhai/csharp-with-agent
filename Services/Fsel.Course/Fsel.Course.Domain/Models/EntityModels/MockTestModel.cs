@@ -20,7 +20,5 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public EnumCourseSkill? Skill { get; set; }
         public IList<EnumCourseSkill>? CourseSkills { get; set; }
         public string? PostArea { get; set; }
-
-        public string? UnitName { get; set; }
     }
 }

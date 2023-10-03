@@ -120,7 +120,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
                 if (classResult!.Content!.Result != null)
                 {
                     item.ClassCode = classResult!.Content!.Result.Code;
-                } 
+                }
                 item.PostArea = "L" + item.LessonDisplayOrder + "_" + "U" + item.UnitDisplayOrder + "_" + item.CourseCode;
             }
 

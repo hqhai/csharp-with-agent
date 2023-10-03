@@ -24,5 +24,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public double Scores { get; set; }
         public IList<SkillScores>? SkillScores { get; set; }
         public object? MockTestScores { get; set; }
+        public int? UnitDisplayOrder { get; set; }
+        public string? CourseName { get; set; }
     }
 }
