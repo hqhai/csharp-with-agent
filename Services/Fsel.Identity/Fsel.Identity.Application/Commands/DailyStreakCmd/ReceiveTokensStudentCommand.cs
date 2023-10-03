@@ -40,7 +40,6 @@ namespace Fsel.Identity.Application.Commands.DailyStreakCmd
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
             }
-            var date = DateTime.Now.Date;
             var studentDailyStreak = student.StudentDailyStreaks.FirstOrDefault(x => x.Id == request.Id && x.LevelOfGift != null && !x.IsGiftReceive);
             if (studentDailyStreak == null)
             {
@@ -48,6 +47,8 @@ namespace Fsel.Identity.Application.Commands.DailyStreakCmd
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
             }
+
+            var date = DateTime.Now.Date;
             studentDailyStreak.IsGiftReceive = true;
             student.NumberOfToken += studentDailyStreak.LevelOfGift.HasValue ? studentDailyStreak.LevelOfGift.Value.GetNumberToken() : default;
             await _studentDailyStreakRepository.ExecuteTransactionAsync(async () =>

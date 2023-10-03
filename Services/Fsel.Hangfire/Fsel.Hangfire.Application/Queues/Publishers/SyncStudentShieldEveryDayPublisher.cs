@@ -2,9 +2,7 @@
 
 namespace Fsel.Hangfire.Application.Queues.Publishers
 {
-    using System;
     using System.Threading.Tasks;
-    using Fsel.Core.Base.BaseModels;
     using Fsel.Core.Base.Interfaces;
     using Fsel.Shared.Constants;
 

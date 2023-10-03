@@ -7,16 +7,16 @@ namespace Fsel.Hangfire.Application.Workers
 
     public class SyncStudentShieldEveryDayWorker : IWorker
     {
-        private readonly SyncStudentShieldEveryDayPublisher _updateStudentsDailyStreakPublisher;
+        private readonly SyncStudentShieldEveryDayPublisher _syncStudentShieldEveryDayPublisher;
 
-        public SyncStudentShieldEveryDayWorker(SyncStudentShieldEveryDayPublisher updateStudentsDailyStreakPublisher)
+        public SyncStudentShieldEveryDayWorker(SyncStudentShieldEveryDayPublisher syncStudentShieldEveryDayPublisher)
         {
-            _updateStudentsDailyStreakPublisher = updateStudentsDailyStreakPublisher;
+            _syncStudentShieldEveryDayPublisher = syncStudentShieldEveryDayPublisher;
         }
 
         public async Task RunAsync()
         {
-            await _updateStudentsDailyStreakPublisher.Publish(CancellationToken.None);
+            await _syncStudentShieldEveryDayPublisher.Publish(CancellationToken.None);
         }
     }
 }

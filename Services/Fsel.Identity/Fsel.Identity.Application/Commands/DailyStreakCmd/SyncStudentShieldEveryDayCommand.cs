@@ -16,10 +16,12 @@ namespace Fsel.Identity.Application.Commands.DailyStreakCmd
     public class UpdateStudentsDailyStreakCommandHandler : IRequestHandler<SyncStudentShieldEveryDayCommand, MethodResult<bool>>
     {
         private readonly IStudentRepository _studentRepository;
+        private readonly IMediator _mediator;
 
-        public UpdateStudentsDailyStreakCommandHandler(IStudentRepository studentRepository)
+        public UpdateStudentsDailyStreakCommandHandler(IStudentRepository studentRepository, IMediator mediator)
         {
             _studentRepository = studentRepository;
+            _mediator = mediator;
         }
 
         public async Task<MethodResult<bool>> Handle(SyncStudentShieldEveryDayCommand request, CancellationToken cancellationToken)
@@ -33,42 +35,15 @@ namespace Fsel.Identity.Application.Commands.DailyStreakCmd
             foreach (var item in students)
             {
                 item.NumberOfShield--;
-                var studentDailyStreak = new StudentDailyStreak
+                await _mediator.Send(new CreateStudentDailyStreakCommand
                 {
                     StudentId = item.Id,
                     DailyDate = date,
-                    IsUseShield = true,
-                };
-                if (item.StudentDailyStreaks.Any())
-                {
-                    var countStudentDaily = item.StudentDailyStreaks.Where(x => x.DailyDate.Month == date.Month && x.DailyDate.Year == date.Year).Count();
-                    if (countStudentDaily == 3)
-                    {
-                        studentDailyStreak.LevelOfGift = 1;
-                    }
-                    else if (countStudentDaily == 15)
-                    {
-                        studentDailyStreak.LevelOfGift = 2;
-                    }
-                    else if (countStudentDaily == endDay)
-                    {
-                        studentDailyStreak.LevelOfGift = 3;
-                    }
-                }
-                item.StudentDailyStreaks.Add(studentDailyStreak);
-                studentUpdates.Add(item);
+                    IsUseShield = true
+                }, cancellationToken).ConfigureAwait(false);
             }
-            await _studentRepository.ExecuteTransactionAsync(async () =>
-            {
-                if (studentUpdates.Any())
-                {
-                    _studentRepository.UpdateList(studentUpdates);
-                    await _studentRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
-                }
-                methodResult.StatusCode = StatusCodes.Status200OK;
-                methodResult.Result = true;
-                return methodResult;
-            });
+            methodResult.StatusCode = StatusCodes.Status200OK;
+            methodResult.Result = true;
             return methodResult;
         }
     }

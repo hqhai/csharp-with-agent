@@ -38,7 +38,12 @@ namespace Fsel.Identity.Application.Commands.DailyStreakCmd
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student));
                 return methodResult;
             }
+
             var date = DateTime.Now;
+            if (request.DailyDate.HasValue)
+            {
+                date = request.DailyDate.Value;
+            }
             var isStudentDate = student.StudentDailyStreaks.Any(x => x.DailyDate.Date == date.Date);
             if (isStudentDate)
             {
@@ -56,21 +61,25 @@ namespace Fsel.Identity.Application.Commands.DailyStreakCmd
             var countStudentDaily = student.StudentDailyStreaks.Where(x => x.DailyDate.Month == date.Month && x.DailyDate.Year == date.Year).Count();
             if (student.StudentDailyStreaks.Any())
             {
-                if (countStudentDaily == 3)
+                if (countStudentDaily == 2)
                 {
                     studentDailyStreak.LevelOfGift = 1;
                 }
-                else if (countStudentDaily == 15)
+                else if (countStudentDaily == 14)
                 {
                     studentDailyStreak.LevelOfGift = 2;
                 }
-                else if (countStudentDaily == endDay)
+                else if (countStudentDaily == endDay - 1)
                 {
                     studentDailyStreak.LevelOfGift = 3;
                     studentDailyStreak.IsArmorialReceive = true;
                 }
             }
             student.StudentDailyStreaks.Add(studentDailyStreak);
+            if (request.NumberOfShield.HasValue)
+            {
+                student.NumberOfShield = request.NumberOfShield.Value;
+            }
             await _studentRepository.ExecuteTransactionAsync(async () =>
             {
                 student = _studentRepository.Update(student);
