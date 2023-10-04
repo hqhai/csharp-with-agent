@@ -11,21 +11,21 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class GetListLessonByCourseQuery : IRequest<MethodResult<object>>
+    public class GetListUnitAndLessonByCourseQuery : IRequest<MethodResult<object>>
     {
         public Guid CourseId { get; set; }
     }
 
-    public class GetListLessonByCourseQueryHandler : IRequestHandler<GetListLessonByCourseQuery, MethodResult<object>>
+    public class GetListUnitAndLessonByCourseQueryHandler : IRequestHandler<GetListUnitAndLessonByCourseQuery, MethodResult<object>>
     {
         private readonly IUnitRepository _unitRepository;
 
-        public GetListLessonByCourseQueryHandler(IUnitRepository unitRepository)
+        public GetListUnitAndLessonByCourseQueryHandler(IUnitRepository unitRepository)
         {
             _unitRepository = unitRepository;
         }
 
-        public async Task<MethodResult<object>> Handle(GetListLessonByCourseQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<object>> Handle(GetListUnitAndLessonByCourseQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<object> methodResult = new MethodResult<object>();
