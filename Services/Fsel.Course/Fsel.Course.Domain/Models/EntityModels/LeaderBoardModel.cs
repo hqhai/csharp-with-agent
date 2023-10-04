@@ -16,6 +16,6 @@ namespace Fsel.Course.Domain.Models.EntityModels
 
         public Guid UserId { get; set; }
 
-        public EnumCourseLevel Level { get; set; }
+        public EnumCourseLevel CourseLevel { get; set; }
     }
 }

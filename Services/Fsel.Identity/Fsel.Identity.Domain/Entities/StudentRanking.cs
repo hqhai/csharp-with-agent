@@ -17,6 +17,6 @@ namespace Fsel.Identity.Domain.Entities
 
         public int CurrentPosition { get; set; }
 
-        public EnumCourseLevel Level { get; set; }
+        public EnumCourseLevel CourseLevel { get; set; }
     }
 }

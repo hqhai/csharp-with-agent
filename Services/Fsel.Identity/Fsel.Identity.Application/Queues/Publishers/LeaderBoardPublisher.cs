@@ -18,7 +18,7 @@ namespace Fsel.Identity.Application.Queues.Publishers
             await _queueProvider.Publish(QueueSettings.RealtimeQueue.NameQueue.LeaderBoard, new LeaderBoardQueueModel
             {
                 StudentRankings = leaderBoards?.StudentRankings,
-                UserId = leaderBoards!.UserId
+                CourseLevel = leaderBoards!.CourseLevel,
             }, cancellationToken);
 
         }

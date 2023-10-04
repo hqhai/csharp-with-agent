@@ -7,9 +7,7 @@ namespace Fsel.Course.Lms.Api.Controllers
     using Fsel.Common.Constants;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Queries.DashboardQuery;
-    using Fsel.Shared.Enums;
     using MediatR;
-    using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
 
     [ApiVersion(Settings.APIVersion)]
@@ -27,12 +25,12 @@ namespace Fsel.Course.Lms.Api.Controllers
         /// <summary>
         /// Get Leader Board
         /// </summary>
-        [HttpGet("leader-board/{id}")]
+        [HttpGet("leader-board")]
         [ProducesResponseType(typeof(MethodResult<LeaderBoardSearchModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetLeaderBoard(Guid id)
+        public async Task<IActionResult> GetLeaderBoard()
         {
-            MethodResult<LeaderBoardSearchModel> queryResult = await _mediator.Send(new GetLeaderBoardQuery { UserId = id }).ConfigureAwait(false);
+            MethodResult<LeaderBoardSearchModel> queryResult = await _mediator.Send(new GetLeaderBoardQuery()).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
 

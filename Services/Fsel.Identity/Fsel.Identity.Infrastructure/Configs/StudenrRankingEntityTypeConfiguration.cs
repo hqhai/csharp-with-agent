@@ -14,7 +14,7 @@ namespace Fsel.Identity.Infrastructure.Configs
         public void Configure(EntityTypeBuilder<StudentRanking> builder)
         {
             ArgumentNullException.ThrowIfNull(builder);
-            builder.Property(e => e.Level)
+            builder.Property(e => e.CourseLevel)
                    .HasMaxLength(100)
                    .HasConversion(
                         v => v.ToString(),

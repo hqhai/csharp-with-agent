@@ -19,8 +19,8 @@ namespace Fsel.Realtime.Application.Queues.Consumers
         {
             if (context != null)
             {
-                var userId = context.Message.UserId.ToString();
-                await _leaderBoardHubContext.Clients.Group(userId!).SendAsync(RealtimeSettings.NotificationHub.Methods.NotificationMessage, context.Message);
+                var courseLevel = context.Message.CourseLevel.ToString();
+                await _leaderBoardHubContext.Clients.Group(courseLevel!).SendAsync(RealtimeSettings.NotificationHub.Methods.NotificationMessage, context.Message);
             }
         }
     }

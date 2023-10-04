@@ -4,12 +4,12 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
 {
     using System.Collections.Generic;
     using Fsel.Common.ActionResults;
-    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Services.SystemService;
     using Fsel.Course.Lms.Application.Services.UserServices;
+    using Fsel.Shared.Enums;
     using Fsel.Shared.Enums.ErrorCodes;
     using MediatR;
     using Microsoft.AspNetCore.Http;
@@ -17,7 +17,6 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
 
     public class GetLeaderBoardQuery : IRequest<MethodResult<LeaderBoardSearchModel>>
     {
-        public Guid UserId { get; set; }
     }
 
     public class GetLeaderBoardQueryHandler : IRequestHandler<GetLeaderBoardQuery, MethodResult<LeaderBoardSearchModel>>
@@ -43,15 +42,11 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<LeaderBoardSearchModel> methodResult = new MethodResult<LeaderBoardSearchModel>();
-            var studentResult = await _userService.GetStudentByUserIdAsync(request.UserId);
-            if (!studentResult.IsSuccessStatusCode)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(studentResult));
-                return methodResult;
-            }
-            var student = studentResult?.Content?.Result;
-            var studentId = student?.Id;
 
+            //List CourseLevel hiện có
+            EnumCourseLevel[] enumValues = (EnumCourseLevel[])Enum.GetValues(typeof(EnumCourseLevel));
+
+            // Lấy ra danh sách StudentId đã hoàn thành khóa học
             var studentIds = await _courseResultRepository.Queryable.Where(x => x.Status != EnumResultStatus.New).Select(c => c.StudentId).Distinct().ToListAsync(cancellationToken);
             var studentResults = await _userService.GetStudentsByStudentIdsAsync(studentIds);
             if (!studentResults.IsSuccessStatusCode)
@@ -59,19 +54,29 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
                 methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError), nameof(studentResults));
                 return methodResult;
             }
-            var students = studentResults?.Content?.Result?.Where(x => x.CourseLevel == student!.CourseLevel);
+
             LeaderBoardSearchModel leaderBoardSearch = new LeaderBoardSearchModel();
             IList<LeaderBoardModel> leaderBoards = new List<LeaderBoardModel>();
-            var userIds = students?.Select(x => x.Human).Where(x => x != null && x.UserId != null).Select(x => x!.UserId ?? default).ToList();
-            var logActionResults = await _systemService.GetLogActionsByUserIdsAsync(userIds ?? new List<Guid>());
-            if (!logActionResults.IsSuccessStatusCode)
+
+            // Duyệt dữ liệu của từng Level
+            foreach (EnumCourseLevel courseLevel in enumValues)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallSystemServiceError), nameof(logActionResults));
-                return methodResult;
-            }
-            var logActions = logActionResults?.Content?.Result;
-            if (students != null && students.Any())
-            {
+                var students = studentResults?.Content?.Result?.Where(x => x.CourseLevel == courseLevel);
+                if (students == null || !students.Any())
+                {
+                    continue;
+                }
+
+                var userIds = students.Select(x => x.Human).Where(x => x != null && x.UserId != null).Select(x => x!.UserId ?? default).ToList();
+                var logActionResults = await _systemService.GetLogActionsByUserIdsAsync(userIds ?? new List<Guid>());
+
+                if (!logActionResults.IsSuccessStatusCode)
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallSystemServiceError), nameof(logActionResults));
+                    return methodResult;
+                }
+                var logActions = logActionResults?.Content?.Result;
+
                 foreach (var item in students)
                 {
                     var logAction = logActions?.FirstOrDefault(x => x.Id == item.Human?.UserId);
@@ -83,14 +88,26 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
                         FullName = item.Human?.FullName,
                         TotalScore = scores,
                         UserId = item.Human?.UserId ?? default,
-                        Level = item.CourseLevel
+                        CourseLevel = item.CourseLevel
                     };
                     leaderBoards.Add(leaderBoard);
                 }
             }
-            leaderBoards = leaderBoards.OrderByDescending(x => x.TotalScore).Select((x, index) => { x.DisplayOrder = index + 1; return x; }).ToList();
-            leaderBoardSearch.LeaderBoards = leaderBoards.Take(LEADERBOARD_TOP).ToList();
-            leaderBoardSearch.LeaderBoard = leaderBoards.FirstOrDefault(x => x.Id == studentId);
+
+            // Nhóm dữ liệu theo CourseLevel
+            var finalLeaderBoards = leaderBoards
+                                    .GroupBy(x => x.CourseLevel)
+                                    .SelectMany(group => group
+                                        .OrderByDescending(x => x.TotalScore)
+                                        .Select((item, index) => { item.DisplayOrder = index + 1; return item; })
+                                        .Take(LEADERBOARD_TOP)
+                                    )
+                                    .OrderBy(x => x.CourseLevel)
+                                    .ToList();
+
+
+            leaderBoardSearch.LeaderBoards = finalLeaderBoards;
+
             methodResult.Result = leaderBoardSearch;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;

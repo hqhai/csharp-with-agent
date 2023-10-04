@@ -8,7 +8,7 @@ namespace Fsel.Shared.Models.ShareModels
     {
         public IList<StudentRankingRealTime>? StudentRankings { get; set; }
 
-        public Guid UserId { get; set; }
+        public EnumCourseLevel CourseLevel { get; set; }
     }
 
     public class StudentRankingRealTime
@@ -23,7 +23,7 @@ namespace Fsel.Shared.Models.ShareModels
 
         public int CurrentPosition { get; set; }
 
-        public EnumCourseLevel Level { get; set; }
+        public EnumCourseLevel CourseLevel { get; set; }
 
     }
 }

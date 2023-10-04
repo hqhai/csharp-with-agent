@@ -19,6 +19,6 @@ namespace Fsel.Identity.Application.Services.LmsCourseService.Model
         public int DailyStreak { get; set; }
         public int TotalScore { get; set; }
         public Guid UserId { get; set; }
-        public EnumCourseLevel Level { get; set; }
+        public EnumCourseLevel CourseLevel { get; set; }
     }
 }

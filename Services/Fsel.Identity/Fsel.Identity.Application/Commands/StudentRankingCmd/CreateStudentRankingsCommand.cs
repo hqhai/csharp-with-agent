@@ -8,7 +8,6 @@ namespace Fsel.Identity.Application.Commands.StudentRankingCmd
     using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Common.ActionResults;
-    using Fsel.Core.Base;
     using Fsel.Identity.Application.Queues.Publishers;
     using Fsel.Identity.Application.Services.LmsCourseService;
     using Fsel.Identity.Application.Services.LmsCourseService.Model;
@@ -16,6 +15,7 @@ namespace Fsel.Identity.Application.Commands.StudentRankingCmd
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Domain.Models.CommandModels.StudentRanking;
     using Fsel.Identity.Domain.Models.EntityModels;
+    using Fsel.Shared.Enums;
     using Fsel.Shared.Models.ShareModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
@@ -32,7 +32,6 @@ namespace Fsel.Identity.Application.Commands.StudentRankingCmd
         private readonly ILmsCourseService _lmsCourseService;
         private readonly LeaderBoardPublisher _leaderBoardPublisher;
         private readonly IStudentDailyStreakRepository _studentDailyStreakRepository;
-        private readonly AuthContext _authContext;
         private const int POSITION_CHANGE = 31; // Vị trí nằm ngoài leaderboard là 31 (của tất cả học sinh)
         private const int TOP_LEADER = 30; //top leaderboard sẽ lấy(30 học sinh đầu tiên của level)
 
@@ -40,14 +39,12 @@ namespace Fsel.Identity.Application.Commands.StudentRankingCmd
             IStudentRankingRepository studentRankingRepository,
             ILmsCourseService lmsCourseService,
             LeaderBoardPublisher leaderBoardPublisher,
-            AuthContext authContext,
             IStudentDailyStreakRepository studentDailyStreakRepository)
         {
             _mapper = mapper;
             _studentRankingRepository = studentRankingRepository;
             _lmsCourseService = lmsCourseService;
             _leaderBoardPublisher = leaderBoardPublisher;
-            _authContext = authContext;
             _studentDailyStreakRepository = studentDailyStreakRepository;
         }
 
@@ -57,7 +54,7 @@ namespace Fsel.Identity.Application.Commands.StudentRankingCmd
             MethodResult<List<StudentRankingModel>> methodResult = new MethodResult<List<StudentRankingModel>>();
 
             // Tổng hợp dữ liệu LeaderBoard
-            var currentLeaderBoard = await _lmsCourseService.GetLeaderBoard(_authContext.CurrentUserId).ConfigureAwait(false);
+            var currentLeaderBoard = await _lmsCourseService.GetLeaderBoard().ConfigureAwait(false);
             var currentLeaderBoardResult = currentLeaderBoard?.Content?.Result;
 
             if (currentLeaderBoardResult == null || currentLeaderBoardResult!.LeaderBoards?.Count == 0)
@@ -100,7 +97,7 @@ namespace Fsel.Identity.Application.Commands.StudentRankingCmd
                 previousLeaderBoardResult.Exists(prevItem =>
                     prevItem.StudentId == currentItem.StudentId &&
                     prevItem.CurrentPosition == currentItem.CurrentPosition &&
-                    prevItem.Level == currentItem.Level &&
+                    prevItem.CourseLevel == currentItem.CourseLevel &&
                     prevItem.DailyStreak == currentItem.DailyStreak
                     ));
 
@@ -137,21 +134,28 @@ namespace Fsel.Identity.Application.Commands.StudentRankingCmd
         /// <returns></returns>
         private static List<StudentRanking> GetCurrentLeaderBoard(LeaderBoardSearchModel currentLeaderBoardResult, Dictionary<Guid, int> studentStreaks)
         {
-            List<StudentRanking> studentRankings = new List<StudentRanking>();
-            foreach (var item in currentLeaderBoardResult.LeaderBoards!)
-            {
-                var studentRanking = new StudentRanking
-                {
-                    StudentId = item.Id,
-                    DailyStreak = studentStreaks.ContainsKey(item.Id) ? studentStreaks[item.Id] : 0,  // Gán giá trị từ studentStreaks
-                    CurrentPosition = item.DisplayOrder,
-                    TotalScore = item.TotalScore,
-                    Level = item.Level,
-                };
-                studentRankings.Add(studentRanking);
-            }
+            List<StudentRanking> studentRankings = currentLeaderBoardResult.LeaderBoards!
+                                                   .Select(item => new StudentRanking
+                                                   {
+                                                       StudentId = item.Id,
+                                                       DailyStreak = studentStreaks.ContainsKey(item.Id) ? studentStreaks[item.Id] : 0,
+                                                       CurrentPosition = item.DisplayOrder,
+                                                       TotalScore = item.TotalScore,
+                                                       CourseLevel = item.CourseLevel,
+                                                   })
+                                                   .ToList();
 
-            return studentRankings.OrderByDescending(x => x.TotalScore).ThenByDescending(x => x.DailyStreak).Select((x, index) => { x.CurrentPosition = index + 1; return x; }).Take(TOP_LEADER).ToList();
+            var groupedStudentRankings = studentRankings
+                .GroupBy(x => x.CourseLevel)
+                .SelectMany(group => group
+                    .OrderByDescending(x => x.TotalScore)
+                    .ThenByDescending(x => x.DailyStreak)
+                    .Select((x, index) => { x.CurrentPosition = index + 1; return x; })
+                    .Take(TOP_LEADER)
+                )
+                .ToList();
+
+            return groupedStudentRankings;
         }
 
 
@@ -255,13 +259,22 @@ namespace Fsel.Identity.Application.Commands.StudentRankingCmd
         /// <returns></returns>
         private async Task SendToWebSocket(List<StudentRankingRealTime> studentRankingRealTime, CancellationToken cancellationToken)
         {
-            LeaderBoardQueueModel leaderBoards = new LeaderBoardQueueModel
-            {
-                StudentRankings = studentRankingRealTime,
-                UserId = _authContext.CurrentUserId
-            };
+            EnumCourseLevel[] enumValues = (EnumCourseLevel[])Enum.GetValues(typeof(EnumCourseLevel));
 
-            await _leaderBoardPublisher.Publish(leaderBoards, cancellationToken);
+            foreach (EnumCourseLevel courseLevel in enumValues)
+            {
+
+                LeaderBoardQueueModel leaderBoards = new LeaderBoardQueueModel
+                {
+                    StudentRankings = studentRankingRealTime.Where(x => x.CourseLevel == courseLevel).ToList(),
+                    CourseLevel = courseLevel
+                };
+
+                await _leaderBoardPublisher.Publish(leaderBoards, cancellationToken);
+            }
+
+
+
         }
 
         /// <summary>
