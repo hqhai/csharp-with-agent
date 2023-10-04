@@ -34,7 +34,7 @@ namespace Fsel.Identity.Application.Commands.StudentRankingCmd
         private readonly IStudentDailyStreakRepository _studentDailyStreakRepository;
         private readonly AuthContext _authContext;
         private const int POSITION_CHANGE = 31; // Vị trí nằm ngoài leaderboard là 31 (của tất cả học sinh)
-        private const int TOP_LEADER = 30; //top leaderboard sẽ lấy
+        private const int TOP_LEADER = 30; //top leaderboard sẽ lấy(30 học sinh đầu tiên của level)
 
         public CreateStudentRankingsCommandHandler(IMapper mapper,
             IStudentRankingRepository studentRankingRepository,
@@ -57,8 +57,7 @@ namespace Fsel.Identity.Application.Commands.StudentRankingCmd
             MethodResult<List<StudentRankingModel>> methodResult = new MethodResult<List<StudentRankingModel>>();
 
             // Tổng hợp dữ liệu LeaderBoard
-            var testUserId = new Guid("c0b6a166-02c3-4de4-a770-2d76052c9507");
-            var currentLeaderBoard = await _lmsCourseService.GetLeaderBoard(testUserId).ConfigureAwait(false);
+            var currentLeaderBoard = await _lmsCourseService.GetLeaderBoard(_authContext.CurrentUserId).ConfigureAwait(false);
             var currentLeaderBoardResult = currentLeaderBoard?.Content?.Result;
 
             if (currentLeaderBoardResult == null || currentLeaderBoardResult!.LeaderBoards?.Count == 0)
@@ -101,7 +100,9 @@ namespace Fsel.Identity.Application.Commands.StudentRankingCmd
                 previousLeaderBoardResult.Exists(prevItem =>
                     prevItem.StudentId == currentItem.StudentId &&
                     prevItem.CurrentPosition == currentItem.CurrentPosition &&
-                    prevItem.Level == currentItem.Level));
+                    prevItem.Level == currentItem.Level &&
+                    prevItem.DailyStreak == currentItem.DailyStreak
+                    ));
 
             if (allElementsMatch)
             {
@@ -150,7 +151,7 @@ namespace Fsel.Identity.Application.Commands.StudentRankingCmd
                 studentRankings.Add(studentRanking);
             }
 
-            return studentRankings.OrderByDescending(sr => sr.DailyStreak).Take(TOP_LEADER).ToList();
+            return studentRankings.OrderByDescending(x => x.TotalScore).ThenByDescending(x => x.DailyStreak).Select((x, index) => { x.CurrentPosition = index + 1; return x; }).Take(TOP_LEADER).ToList();
         }
 
 
@@ -171,14 +172,17 @@ namespace Fsel.Identity.Application.Commands.StudentRankingCmd
 
                 // Kiểm tra bản ghi gần nhất với currentDate
                 var nearestRecord = studentData.FirstOrDefault();
-                if (nearestRecord == null || nearestRecord.DailyDate != currentDate)
+                if (nearestRecord == null || nearestRecord.DailyDate > currentDate)
                 {
                     studentStreaks[studentId] = 0; // Không có bản ghi cho ngày hiện tại
                     continue;
                 }
+                else if (nearestRecord.DailyDate == currentDate)
+                {
+                    streak++; // Bản ghi cho ngày hiện tại
+                }
 
                 DateTime lastValidDate = nearestRecord.DailyDate;
-                streak++; // Bản ghi cho ngày hiện tại
 
                 // Đếm chuỗi ngày liên tiếp từ bản ghi gần nhất với currentDate
                 foreach (var record in studentData.Skip(1))
