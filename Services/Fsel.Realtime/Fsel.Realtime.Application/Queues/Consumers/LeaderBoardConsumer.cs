@@ -1,3 +1,4 @@
+using Fsel.Core.Extensions;
 using Fsel.Realtime.Application.Hubs;
 using Fsel.Shared.Constants;
 using Fsel.Shared.Models.ShareModels;
@@ -20,7 +21,7 @@ namespace Fsel.Realtime.Application.Queues.Consumers
             if (context != null)
             {
                 var courseLevel = context.Message.CourseLevel.ToString();
-                await _leaderBoardHubContext.Clients.Group(courseLevel!).SendAsync(RealtimeSettings.NotificationHub.Methods.NotificationMessage, context.Message);
+                await _leaderBoardHubContext.GetGroup(courseLevel!).SendAsync(RealtimeSettings.LeaderBoardHub.Methods.LeaderBoardMessage, context.Message);
             }
         }
     }

@@ -26,5 +26,5 @@ var app = builder.Build();
 app.UseServices();
 app.UseHubs<DiscussionBoardHub>(RealtimeSettings.DiscussionBoardHub.Pattern);
 app.UseHubs<NotificationHub>(RealtimeSettings.NotificationHub.Pattern);
-app.UseHubs<NotificationHub>(RealtimeSettings.LeaderBoardHub.Pattern);
+app.UseHubs<LeaderBoardHub>(RealtimeSettings.LeaderBoardHub.Pattern);
 app.Run();

@@ -30,7 +30,7 @@ namespace Fsel.Identity.Api.Controllers
         [HttpPost]
         [ProducesResponseType(typeof(MethodResult<List<StudentRankingModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GradeClassForum()
+        public async Task<IActionResult> CreateStudentRanking()
         {
             MethodResult<List<StudentRankingModel>> commandResult = await _mediator.Send(new CreateStudentRankingsCommand()).ConfigureAwait(false);
             return commandResult.GetActionResult();
