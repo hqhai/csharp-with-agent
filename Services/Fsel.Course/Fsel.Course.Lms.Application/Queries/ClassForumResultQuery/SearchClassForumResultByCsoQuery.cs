@@ -100,6 +100,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
                                    .ThenInclude(x => x!.CourseUnitMockTests)
                                    .Include(x => x.ClassForum)
                                    .Where(x => x.Status == EnumClassForumResultStatus.Pending && (x.CheckCsoId == null || x.CheckCsoId == csoId))
+                                   .OrderByDescending(x => x.CreatedDate)
                                    .Select(x => new ClassForumResultSearchModel
                                    {
                                        Id = x.Id,
@@ -151,11 +152,14 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
                     .ConfigureAwait(false);
             foreach (var item in lists)
             {
-                var studentId = item.CreatedUserId;
-                var classResult = await _trainingService.GetClassByStudentId(studentId);
-                if (classResult!.Content!.Result != null)
+                var userId = item.CreatedUserId;
+                var studentResult = await _userService.GetStudentByUserIdAsync(userId);
+                var studentId = studentResult.Content?.Result?.Id;
+
+                var classResult = await _trainingService.GetClassByStudentId(studentId ?? default);
+                if (classResult.Content?.Result != null)
                 {
-                    item.ClassCode = classResult!.Content!.Result.Code;
+                    item.ClassCode = classResult.Content.Result.Code;
                     item.PostArea = "L" + item.LessonDisplayOrder + "_" + "U" + item.UnitDisplayOrder + "_" + item.CourseCode;
                 }
             }
