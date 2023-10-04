@@ -10,6 +10,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Services.UserServices;
+    using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -94,7 +95,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
                 CorrectCount = x.SelectMany(x => x!.VideoTimeCodeAnswers).Sum(x => x.CorrectCount),
                 TotalCount = x.SelectMany(x => x!.ExerciseQuestions).Select(x => x.Question).Sum(x => x!.CorrectTotal),
             }).ToList();
-            skillScores.ForEach(x => x.Percent = x.TotalCount > 0 ? x.CorrectCount / x.TotalCount * 100 : default);
+            skillScores.ForEach(x => x.Percent = x.TotalCount > 0 ? NumberHelper.ConvertPercentDouble(x.CorrectCount / x.TotalCount) : default);
             overallScoreReport.SkillScores = skillScores;
             overallScoreReport.CountQuestion = skillScores.Sum(x => x.CountQuestion);
             overallScoreReport.TotalQuestion = skillScores.Sum(x => x.TotalQuestion);

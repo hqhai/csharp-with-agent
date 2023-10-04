@@ -14,6 +14,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Shared.Enums;
+    using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -178,6 +179,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
                     TotalQuestion = x.SelectMany(x => x!.VideoTimeCodeAnswers).Count(),
                     CorrectCount = x.SelectMany(x => x!.VideoTimeCodeAnswers).Sum(x => x.CorrectCount),
                     TotalCount = x.SelectMany(x => x!.ExerciseQuestions).Select(x => x.Question).Sum(x => x!.CorrectTotal),
+                    Percent = NumberHelper.ConvertPercentDouble(x.SelectMany(x => x!.VideoTimeCodeAnswers).Sum(x => x.CorrectCount) / x.SelectMany(x => x!.ExerciseQuestions).Select(x => x.Question).Sum(x => x!.CorrectTotal))
                 }).ToList();
                 var countDone = skillScores.Sum(x => x.CountQuestion);
                 var totalDone = skillScores.Sum(x => x.TotalQuestion);
@@ -209,7 +211,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
                 UpdatedFullName = x.UpdatedFullName,
                 UpdatedUserId = x.UpdatedUserId,
                 UnitResult = _mapper.Map<UnitResultModel>(x.UnitResults.FirstOrDefault()),
-                Percent = totalDone > 0 ? countDone / totalDone * 100 : default,
+                Percent = totalDone > 0 ? NumberHelper.ConvertPercentDouble(countDone / totalDone) : default,
             };
             return unitModel;
         }

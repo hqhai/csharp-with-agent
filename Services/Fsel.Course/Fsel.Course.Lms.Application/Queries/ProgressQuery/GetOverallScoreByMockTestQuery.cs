@@ -90,7 +90,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
                             Status = x.Status,
                             SkillScores = x.SkillScores,
                         }).ToList();
-                    overallScoreReportByMockTest.Percent = overallScoreReportSkills.Any(x => x.Status == EnumResultStatus.Done) ? overallScoreReportSkills.Average(x => x.Percent) : default;
+                    overallScoreReportByMockTest.Percent = overallScoreReportSkills.Any(x => x.Status == EnumResultStatus.Done) ? NumberHelper.ConvertDoubleDecimal(overallScoreReportSkills.Average(x => x.Percent)) : default;
                     overallScoreReportByMockTest.OverallScoreReportSkills = overallScoreReportSkills;
                     mockTestOverallScores.Add(overallScoreReportByMockTest);
                     units.Clear();
