@@ -107,6 +107,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
             }).ToList();
             skillScores.ForEach(x => x.Percent = NumberHelper.ConvertPercentDouble(x.CorrectCount / x.TotalCount));
             overallScoreReport.SkillScores = skillScores;
+            overallScoreReport.CourseSkills = skillScores.Select(x => x.Skill).ToList();
             overallScoreReport.CountQuestion = overallScoreReport.SkillScores.Sum(x => x.CountQuestion);
             overallScoreReport.TotalQuestion = overallScoreReport.SkillScores.Sum(x => x.TotalQuestion);
             methodResult.StatusCode = StatusCodes.Status200OK;

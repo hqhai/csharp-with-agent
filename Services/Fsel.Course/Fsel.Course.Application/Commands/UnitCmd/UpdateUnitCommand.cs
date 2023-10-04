@@ -41,6 +41,12 @@ namespace Fsel.Course.Application.Commands.UnitCmd
 
             #region Validation
 
+            if (request.LessonIds == null || !request.LessonIds.Any())
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.LessonIds), request.LessonIds);
+                return methodResult;
+            }
+
             var unit = await _unitRepository.Queryable
                                     .Include(e => e.UnitLessons)
                                     .Include(e => e.UnitSkillMockTests)
@@ -71,7 +77,7 @@ namespace Fsel.Course.Application.Commands.UnitCmd
             {
                 unit.UnitLessons = request.LessonIds!.Select((x, index) => new UnitLesson
                 {
-                    DisplayOrder = index,
+                    DisplayOrder = index + 1,
                     LessonId = x
                 }).ToList();
                 if (request.MockTestId != null)
