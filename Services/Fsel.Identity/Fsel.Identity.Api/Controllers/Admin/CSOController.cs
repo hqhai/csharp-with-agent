@@ -30,7 +30,7 @@ namespace Fsel.Identity.Api.Controllers.Admin
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetCSOByIds([FromBody] IList<Guid>? ids)
         {
-            MethodResult<IList<HumanModel>> commandResult = await _mediator.Send(new GetCSOByIdsQuery { Ids = ids }).ConfigureAwait(false);
+            MethodResult<IList<HumanModel>> commandResult = await _mediator.Send(new GetCsoByIdsQuery { Ids = ids }).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
 
@@ -42,7 +42,7 @@ namespace Fsel.Identity.Api.Controllers.Admin
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetAllCSO()
         {
-            MethodResult<IList<CSOModel>> commandResult = await _mediator.Send(new GetAllCSOQuery { }).ConfigureAwait(false);
+            MethodResult<IList<CSOModel>> commandResult = await _mediator.Send(new GetAllCsoQuery { }).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
     }

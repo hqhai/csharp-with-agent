@@ -88,7 +88,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                     LessonId = request.LessonId,
                     CourseId = request.CourseId,
                     EnumFeature = EnumFeature.ClassForum,
-                    ObjectId = classForumResult.Id
+                    ObjectId = classForum.Id
                 });
                 if (!featureAccessTimeResult.IsSuccessStatusCode)
                 {
