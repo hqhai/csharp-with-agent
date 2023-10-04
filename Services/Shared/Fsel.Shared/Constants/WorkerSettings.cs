@@ -11,6 +11,7 @@ namespace Fsel.Shared.Constants
             public const string SyncStudentShieldEveryDayJob = "SyncStudentShieldEveryDayJob";
             public const string UpdateOcCheckInClassForumResultJob = "UpdateOcCheckInClassForumResultJob";
             public const string UpdateTeacherGradingInClassForumAndMockTestJob = "UpdateTeacherGradingInClassForumAndMockTestJob";
+            public const string LeaderBoardJob = "LeaderBoardJob";
         }
     }
 }

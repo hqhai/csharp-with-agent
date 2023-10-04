@@ -4,13 +4,12 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
 {
     using System.Collections.Generic;
     using Fsel.Common.ActionResults;
-    using Fsel.Common.Enums.ErrorCodes;
-    using Fsel.Core.Base;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Services.SystemService;
     using Fsel.Course.Lms.Application.Services.UserServices;
+    using Fsel.Shared.Enums;
     using Fsel.Shared.Enums.ErrorCodes;
     using MediatR;
     using Microsoft.AspNetCore.Http;
@@ -22,19 +21,17 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
 
     public class GetLeaderBoardQueryHandler : IRequestHandler<GetLeaderBoardQuery, MethodResult<LeaderBoardSearchModel>>
     {
-        private readonly AuthContext _authContext;
         private readonly IUserService _userService;
         private readonly ISystemService _systemService;
         private readonly IUnitResultRepository _unitResultRepository;
         private readonly ICourseResultRepository _courseResultRepository;
+        private const int LEADERBOARD_TOP = 50; // Chỉ lấy ra 50 người đứng đầu , sau đó sẽ lọc theo daily streak để lấy ra 30 người đứng đầu
 
-        public GetLeaderBoardQueryHandler(AuthContext authContext
-            , IUserService userService
+        public GetLeaderBoardQueryHandler(IUserService userService
             , ISystemService systemService
             , IUnitResultRepository unitResultRepository
             , ICourseResultRepository courseResultRepository)
         {
-            _authContext = authContext;
             _userService = userService;
             _systemService = systemService;
             _unitResultRepository = unitResultRepository;
@@ -45,53 +42,76 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<LeaderBoardSearchModel> methodResult = new MethodResult<LeaderBoardSearchModel>();
-            var studentResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
-            if (!studentResult.IsSuccessStatusCode)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(studentResult));
-                return methodResult;
-            }
-            var student = studentResult?.Content?.Result;
-            var studentId = student?.Id;
 
+            //List CourseLevel hiện có
+            EnumCourseLevel[] enumValues = (EnumCourseLevel[])Enum.GetValues(typeof(EnumCourseLevel));
+
+            // Lấy ra danh sách StudentId đã hoàn thành khóa học
             var studentIds = await _courseResultRepository.Queryable.Where(x => x.Status != EnumResultStatus.New).Select(c => c.StudentId).Distinct().ToListAsync(cancellationToken);
+
             var studentResults = await _userService.GetStudentsByStudentIdsAsync(studentIds);
             if (!studentResults.IsSuccessStatusCode)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError), nameof(studentResults));
                 return methodResult;
             }
-            var students = studentResults?.Content?.Result;
+
             LeaderBoardSearchModel leaderBoardSearch = new LeaderBoardSearchModel();
             IList<LeaderBoardModel> leaderBoards = new List<LeaderBoardModel>();
-            var userIds = students?.Select(x => x.Human).Where(x => x != null && x.UserId != null).Select(x => x!.UserId ?? default).ToList();
-            var logActionResults = await _systemService.GetLogActionsByUserIdsAsync(userIds ?? new List<Guid>());
-            if (!logActionResults.IsSuccessStatusCode)
+
+            // Duyệt dữ liệu của từng Level
+            foreach (EnumCourseLevel courseLevel in enumValues!)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallSystemServiceError), nameof(logActionResults));
-                return methodResult;
-            }
-            var logActions = logActionResults?.Content?.Result;
-            if (students != null && students.Any())
-            {
-                foreach (var item in students)
+                var students = studentResults?.Content?.Result?.Where(x => x.CourseLevel == courseLevel);
+                if (students == null || !students.Any())
                 {
-                    var logAction = logActions?.FirstOrDefault(x => x.Id == item.Human?.UserId);
-                    var scores = await _unitResultRepository.Queryable.Where(x => x.StudentId == item.Id && x.Status != EnumResultStatus.Unfinished).SumAsync(x => x.CorrectCount, cancellationToken);
-                    var leaderBoard = new LeaderBoardModel
+                    continue;
+                }
+
+                var userIds = students.Select(x => x.Human).Where(x => x != null && x.UserId != null).Select(x => x!.UserId ?? default).ToList();
+                var logActionResults = await _systemService.GetLogActionsByUserIdsAsync(userIds ?? new List<Guid>());
+
+                if (!logActionResults.IsSuccessStatusCode)
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallSystemServiceError), nameof(logActionResults));
+                    return methodResult;
+                }
+
+                var logActions = logActionResults?.Content?.Result;
+
+                var leaderBoardsToAdd = students.Select(student =>
+                {
+                    var logAction = logActions?.FirstOrDefault(x => x.Id == student.Human?.UserId);
+                    var scores = _unitResultRepository.Queryable.Where(x => x.StudentId == student.Id && x.Status != EnumResultStatus.Unfinished).Sum(x => x.CorrectCount); // Assuming this isn't async, otherwise LINQ won't be directly applicable
+                    return new LeaderBoardModel
                     {
-                        Id = item.Id,
-                        AvatarPath = item.Human?.AvatarPath,
-                        FullName = item.Human?.FullName,
-                        DailyStreak = logAction?.NumberOfDaysStreak ?? default,
-                        TotalScore = scores
+                        Id = student.Id,
+                        TotalScore = scores,
+                        CourseLevel = student.CourseLevel
                     };
-                    leaderBoards.Add(leaderBoard);
+                }).ToList();
+
+                // Add items to leaderBoards
+                foreach (var leaderBoardToAdd in leaderBoardsToAdd)
+                {
+                    leaderBoards.Add(leaderBoardToAdd);
                 }
             }
-            leaderBoards = leaderBoards.OrderByDescending(x => x.TotalScore).ThenBy(x => x.DailyStreak).Select((x, index) => { x.DisplayOrder = index; return x; }).ToList();
-            leaderBoardSearch.LeaderBoards = leaderBoards.Take(30).ToList();
-            leaderBoardSearch.LeaderBoard = leaderBoards.FirstOrDefault(x => x.Id == studentId);
+
+            // Nhóm dữ liệu theo CourseLevel
+            var finalLeaderBoards = leaderBoards
+                                    .GroupBy(x => x.CourseLevel)
+                                    .SelectMany(group => group
+                                        .OrderByDescending(x => x.TotalScore)
+                                        .Select((item, index) => { item.DisplayOrder = index + 1; return item; })
+                                        .Take(LEADERBOARD_TOP)
+                                    )
+                                    .OrderBy(x => x.CourseLevel)
+                                    .ToList();
+
+
+            leaderBoardSearch.LeaderBoards = finalLeaderBoards;
+
             methodResult.Result = leaderBoardSearch;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;

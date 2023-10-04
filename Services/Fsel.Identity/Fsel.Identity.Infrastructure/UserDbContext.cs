@@ -38,6 +38,7 @@ namespace Fsel.Identity.Infrastructure
             builder.ApplyConfiguration(new PlatformEntityTypeConfiguration());
             builder.ApplyConfiguration(new UserPlatformEntityTypeConfiguration());
 
+            builder.ApplyConfiguration(new StudenrRankingEntityTypeConfiguration());
             base.OnModelCreating(builder);
         }
 
@@ -57,6 +58,7 @@ namespace Fsel.Identity.Infrastructure
         public DbSet<UserSetting> UserSettings { get; set; }
         public DbSet<Platform> Platform { get; set; }
         public DbSet<UserPlatform> UserPlatforms { get; set; }
+        public DbSet<StudentRanking> StudentRankings { get; set; }
 
         #endregion Db Set
 

@@ -2,6 +2,7 @@
 
 using Fsel.Core.Extensions;
 using Fsel.Identity.Application.Queues.Consumers;
+using Fsel.Identity.Application.Queues.Publishers;
 using Fsel.Identity.Application.Services;
 using Fsel.Identity.Application.Services.InteractionService;
 using Fsel.Identity.Application.Services.LmsCourseService;
@@ -39,12 +40,16 @@ builder.Services.AddScoped<ITeacherBankAccountRepository, TeacherBankAccountRepo
 builder.Services.AddScoped<IUserSettingRepository, UserSettingRepository>();
 builder.Services.AddScoped<IPlatformRepository, PlatformRepository>();
 builder.Services.AddScoped<IStudentDailyStreakRepository, StudentDailyStreakRepository>();
+builder.Services.AddScoped<IStudentRankingRepository, StudentRankingRepository>();
+builder.Services.AddScoped<LeaderBoardPublisher>();
 
 builder.AddRefitClients(typeof(ISenderService), appSetting?.Services?.SenderApiUrl);
 builder.AddRefitClients(typeof(IOrderService), appSetting?.Services?.OrderApiUrl);
 builder.AddRefitClients(typeof(IInteractionService), appSetting?.Services?.InteractionApiUrl);
 builder.AddRefitClients(typeof(ITrainingService), appSetting?.Services?.ClassApiUrl);
 builder.AddRefitClients(typeof(ILmsCourseService), appSetting?.Services?.LmsCourseApiUrl);
+builder.AddMassTransit(appSetting);
+
 //App config
 var app = builder.Build();
 app.UseServices();
