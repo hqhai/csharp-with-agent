@@ -10,6 +10,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Services.UserServices;
+    using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -18,6 +19,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
     {
         public Guid CourseId { get; set; }
         public Guid UnitId { get; set; }
+        public EnumTimeCodeType? Type { get; set; }
     }
 
     public class GetUnitByUnitTestQueryHandler : IRequestHandler<GetUnitByUnitTestQuery, MethodResult<OverallScoreReportModel>>
@@ -82,7 +84,12 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(videos));
                 return methodResult;
             }
-            var videoTimeCodes = videos.SelectMany(x => x.VideoTimeCodes).Where(x => x.TimeCodeType == EnumTimeCodeType.UnitTest).ToList();
+            if (!request.Type.HasValue)
+            {
+                request.Type = EnumTimeCodeType.UnitTest;
+            }
+
+            var videoTimeCodes = videos.SelectMany(x => x.VideoTimeCodes).Where(x => x.TimeCodeType == request.Type).ToList();
             var exercises = videoTimeCodes.SelectMany(x => x.TimeCodeExercises).Select(x => x.Exercise).ToList();
 
             var skillScores = exercises.GroupBy(x => x!.CourseSkill).Select(x =>
@@ -98,7 +105,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
                 };
                 return skillScore;
             }).ToList();
-            skillScores.ForEach(x => x.Percent = x.CorrectCount / x.TotalCount);
+            skillScores.ForEach(x => x.Percent = NumberHelper.ConvertPercentDouble(x.CorrectCount / x.TotalCount));
             overallScoreReport.SkillScores = skillScores;
             overallScoreReport.CountQuestion = overallScoreReport.SkillScores.Sum(x => x.CountQuestion);
             overallScoreReport.TotalQuestion = overallScoreReport.SkillScores.Sum(x => x.TotalQuestion);
