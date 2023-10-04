@@ -48,6 +48,7 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
 
             // Lấy ra danh sách StudentId đã hoàn thành khóa học
             var studentIds = await _courseResultRepository.Queryable.Where(x => x.Status != EnumResultStatus.New).Select(c => c.StudentId).Distinct().ToListAsync(cancellationToken);
+
             var studentResults = await _userService.GetStudentsByStudentIdsAsync(studentIds);
             if (!studentResults.IsSuccessStatusCode)
             {
@@ -59,7 +60,7 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
             IList<LeaderBoardModel> leaderBoards = new List<LeaderBoardModel>();
 
             // Duyệt dữ liệu của từng Level
-            foreach (EnumCourseLevel courseLevel in enumValues)
+            foreach (EnumCourseLevel courseLevel in enumValues!)
             {
                 var students = studentResults?.Content?.Result?.Where(x => x.CourseLevel == courseLevel);
                 if (students == null || !students.Any())
@@ -75,21 +76,25 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
                     methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallSystemServiceError), nameof(logActionResults));
                     return methodResult;
                 }
+
                 var logActions = logActionResults?.Content?.Result;
 
-                foreach (var item in students)
+                var leaderBoardsToAdd = students.Select(student =>
                 {
-                    var logAction = logActions?.FirstOrDefault(x => x.Id == item.Human?.UserId);
-                    var scores = await _unitResultRepository.Queryable.Where(x => x.StudentId == item.Id && x.Status != EnumResultStatus.Unfinished).SumAsync(x => x.CorrectCount, cancellationToken);
-                    var leaderBoard = new LeaderBoardModel
+                    var logAction = logActions?.FirstOrDefault(x => x.Id == student.Human?.UserId);
+                    var scores = _unitResultRepository.Queryable.Where(x => x.StudentId == student.Id && x.Status != EnumResultStatus.Unfinished).Sum(x => x.CorrectCount); // Assuming this isn't async, otherwise LINQ won't be directly applicable
+                    return new LeaderBoardModel
                     {
-                        Id = item.Id,
-                        AvatarPath = item.Human?.AvatarPath,
-                        FullName = item.Human?.FullName,
+                        Id = student.Id,
                         TotalScore = scores,
-                        CourseLevel = item.CourseLevel
+                        CourseLevel = student.CourseLevel
                     };
-                    leaderBoards.Add(leaderBoard);
+                }).ToList();
+
+                // Add items to leaderBoards
+                foreach (var leaderBoardToAdd in leaderBoardsToAdd)
+                {
+                    leaderBoards.Add(leaderBoardToAdd);
                 }
             }
 
