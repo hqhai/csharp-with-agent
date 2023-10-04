@@ -21,6 +21,7 @@ builder.Services.AddHangfireServer();
 builder.Services.AddScoped<UpdateClassLiveAssignmentPublisher>();
 builder.Services.AddScoped<UpdateOcCheckInClassForumResultPublisher>();
 builder.Services.AddScoped<UpdateTeacherGradingInClassForumAndMockTestPublisher>();
+builder.Services.AddScoped<SyncStudentShieldEveryDayPublisher>();
 builder.Services.AddScoped<UpdateStudentsDailyStreakPublisher>();
 builder.Services.AddScoped<LeaderBoardPublisher>();
 

@@ -23,7 +23,7 @@ namespace Fsel.Identity.Infrastructure
         {
             ArgumentNullException.ThrowIfNull(builder);
 
-            SeedPlatforms(builder);
+            //SeedPlatforms(builder);
 
             builder.ApplyConfiguration(new HumanEntityTypeConfiguration());
             builder.ApplyConfiguration(new TeacherEntityTypeConfiguration());

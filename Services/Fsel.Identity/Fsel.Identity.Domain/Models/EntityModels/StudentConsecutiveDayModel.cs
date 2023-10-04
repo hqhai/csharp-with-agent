@@ -8,7 +8,7 @@ namespace Fsel.Identity.Domain.Models.EntityModels
     {
         public Guid Id { get; set; }
         public DateTime DailyDate { get; set; }
-        public bool IsReceiveGift { get; set; }
+        public bool IsGiftReceive { get; set; }
         public int LevelOfGift { get; set; }
     }
 }

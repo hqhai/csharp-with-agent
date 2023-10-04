@@ -41,16 +41,14 @@ namespace Fsel.Identity.Application.Queries.DailyStreakQuery
                 return methodResult;
             }
             var date = DateTime.Now;
-            var startDay = new DateTime(date.Year, date.Month, 1).Day;
-            var endDay = DateTime.DaysInMonth(date.Year, date.Month);
-            var studentDailyQuery = student.StudentDailyStreaks.Where(x => x.DailyDate.Day >= startDay && x.DailyDate.Day <= endDay);
+            var studentDailyQuery = student.StudentDailyStreaks.Where(x => x.DailyDate.Month == date.Month && x.DailyDate.Year == date.Year);
             var studentDailyStreak = new StudentDailyStreakModel();
             studentDailyStreak.NumberOfShield = student.NumberOfShield;
-            studentDailyStreak.NumberOfGift = studentDailyQuery.Where(x => x.IsReceiveGift).Count();
+            studentDailyStreak.NumberOfGift = studentDailyQuery.Where(x => x.IsGiftReceive).Count();
             studentDailyStreak.DailyDayOfGifts = studentDailyQuery.OrderBy(x => x.DailyDate).Select(x => new StudentConsecutiveDayModel
             {
                 Id = x.Id,
-                IsReceiveGift = x.IsReceiveGift,
+                IsGiftReceive = x.IsGiftReceive,
                 DailyDate = x.DailyDate,
                 LevelOfGift = x.LevelOfGift ?? default
             }).ToList();

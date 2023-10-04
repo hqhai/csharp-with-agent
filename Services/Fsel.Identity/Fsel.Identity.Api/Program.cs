@@ -55,6 +55,7 @@ builder.AddMassTransit(appSetting,
 queues: new Dictionary<string, Type>
 {
     { QueueSettings.SystemQueue.NameQueue.CreateStudentDailyStreak, typeof(CreateStudentDailyStreakConsumer) },
+    { QueueSettings.UserQueue.NameQueue.SyncStudentShieldEveryDay, typeof(SyncStudentShieldForDailyStreakEveryDayConsumer) }
     { QueueSettings.UserQueue.NameQueue.UpdateStudentsDailyStreak, typeof(SyncStudentShieldForDailyStreakEveryDayConsumer) },
     { QueueSettings.UserQueue.NameQueue.LeaderBoard, typeof(LeaderBoardConsumer) }
 });

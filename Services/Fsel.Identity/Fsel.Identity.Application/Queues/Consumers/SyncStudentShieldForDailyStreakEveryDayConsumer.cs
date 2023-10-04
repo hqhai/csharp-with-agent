@@ -16,7 +16,7 @@ namespace Fsel.Identity.Application.Queues.Consumers
 
         public async Task Consume(ConsumeContext<BaseQueueModel> context)
         {
-            await _mediator.Send(new UpdateStudentsDailyStreakCommand()).ConfigureAwait(false);
+            await _mediator.Send(new SyncStudentShieldEveryDayCommand()).ConfigureAwait(false);
         }
     }
 }

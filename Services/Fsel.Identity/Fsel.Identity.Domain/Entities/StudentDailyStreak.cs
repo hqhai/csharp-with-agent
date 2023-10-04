@@ -16,7 +16,15 @@ namespace Fsel.Identity.Domain.Entities
         /// </summary>
         public bool IsUseShield { get; set; }
 
-        public bool IsReceiveGift { get; set; }
+        /// <summary>
+        /// Gift Receive
+        /// </summary>
+        public bool IsGiftReceive { get; set; }
+
+        /// <summary>
+        /// Armorial Receive
+        /// </summary>
+        public bool IsArmorialReceive { get; set; }
 
         /// <summary>
         /// Daily
