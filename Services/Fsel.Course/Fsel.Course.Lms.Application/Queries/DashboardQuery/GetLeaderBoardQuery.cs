@@ -87,7 +87,6 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
                         AvatarPath = item.Human?.AvatarPath,
                         FullName = item.Human?.FullName,
                         TotalScore = scores,
-                        UserId = item.Human?.UserId ?? default,
                         CourseLevel = item.CourseLevel
                     };
                     leaderBoards.Add(leaderBoard);

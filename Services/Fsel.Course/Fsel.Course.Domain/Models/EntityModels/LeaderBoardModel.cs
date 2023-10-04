@@ -14,8 +14,6 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public int DailyStreak { get; set; }
         public int TotalScore { get; set; }
 
-        public Guid UserId { get; set; }
-
         public EnumCourseLevel CourseLevel { get; set; }
     }
 }
