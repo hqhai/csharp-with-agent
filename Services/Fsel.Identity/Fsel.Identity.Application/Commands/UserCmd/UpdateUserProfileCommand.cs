@@ -95,7 +95,7 @@ namespace Fsel.Identity.Application.Commands.UserCmd
             var teacherBankAccounts = userView.Human?.Teacher?.TeacherBankAccounts;
             if (teacherBankAccounts != null && teacherBankAccounts.Any())
             {
-                var teacherBankAccountNew = teacherBankAccounts.FirstOrDefault(x => x.Status == EnumBankStatus.New);
+                var teacherBankAccountNew = teacherBankAccounts.FirstOrDefault(x => x.Status == EnumStatusBank.New);
                 if (teacherBankAccountNew != null)
                 {
                     return default;
@@ -103,7 +103,7 @@ namespace Fsel.Identity.Application.Commands.UserCmd
                 if (request.TeacherBankAccount != null)
                 {
                     var teacherBankAccount = _mapper.Map<TeacherBankAccount>(request.TeacherBankAccount);
-                    teacherBankAccount.Status = EnumBankStatus.New;
+                    teacherBankAccount.Status = EnumStatusBank.New;
                     userView.Human?.Teacher?.TeacherBankAccounts?.Add(teacherBankAccount);
                 }
             }
