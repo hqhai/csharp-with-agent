@@ -35,7 +35,7 @@ namespace Fsel.Realtime.Application.Hubs
 
         public void Send(DiscussionBoardQueueModel? model)
         {
-            Clients.All.SendAsync(RealtimeSettings.DiscussionBoardHub.Methods.CommentLikeMessage, model);
+            Clients.All.SendAsync(RealtimeSettings.LeaderBoardHub.Methods.LeaderBoardMessage, model);
         }
 
 
