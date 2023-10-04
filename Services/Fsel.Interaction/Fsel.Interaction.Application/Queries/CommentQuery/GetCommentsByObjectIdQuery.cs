@@ -17,6 +17,7 @@ namespace Fsel.Interaction.Application.Queries.CommentQuery
     using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Http;
+    using Microsoft.AspNetCore.Http.HttpResults;
     using Microsoft.EntityFrameworkCore;
 
     public class GetCommentsByObjectIdQuery : IRequest<MethodResult<IList<CommentModel>>>
@@ -79,7 +80,7 @@ namespace Fsel.Interaction.Application.Queries.CommentQuery
                     var actionLikes = _interactionActionRepository.Queryable.Where(x => x.ObjectId == item.Id && x.Type == EnumInteractionActionType.Like).ToList();
                     item.AvatarPath = userResult.Content?.Result?.FirstOrDefault(x => x.UserId == item.UserId.ToString())?.AvatarPath;
                     item.FullName = userResult.Content?.Result?.FirstOrDefault(x => x.UserId == item.UserId.ToString())?.FullName;
-                    item.Comments = await GetCommentsByObjectIdAsync(item.Id);
+                    item.Comments = await GetCommentsByObjectIdAsync(item.Id, filter);
                     item.CommentNumber = item.Comments?.Count ?? default;
                     item.LikeNumber = actionLikes.Count;
                     item.IsLiked = actionLikes.Any(x => x.UserId == _authContext.CurrentUserId);
