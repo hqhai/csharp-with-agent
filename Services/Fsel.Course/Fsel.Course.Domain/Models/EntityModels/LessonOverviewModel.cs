@@ -13,7 +13,6 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public EnumCourseLevel CourseLevel { get; set; }
         public double PercentProgress { get; set; }
         public Guid? MockTestId { get; set; }
-        public Guid? FinalTestId { get; set; }
         public LessonResultModel? LessonResult { get; set; }
         public Guid UnitId { get; set; }
         public IList<LessonInstructionModel>? LessonInstructions { get; set; }
