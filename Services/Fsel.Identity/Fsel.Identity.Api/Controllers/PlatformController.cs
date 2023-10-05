@@ -5,7 +5,6 @@ namespace Fsel.Identity.Api.Controllers
     using System.Net;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
-    using Fsel.Core.Base.BaseModels;
     using Fsel.Identity.Application.Commands.UserCmd;
     using Fsel.Identity.Application.Queries.PlatformQuery;
     using Fsel.Identity.Application.Queries.StudentQuery;
@@ -52,12 +51,12 @@ namespace Fsel.Identity.Api.Controllers
         /// <summary>
         /// Get all platform
         /// </summary>
-        [HttpGet("search-user-platform")]
-        [ProducesResponseType(typeof(MethodResult<PagingItemsModel<StudentInPlatformModel>>), (int)HttpStatusCode.OK)]
+        [HttpGet("get-students-in-platform")]
+        [ProducesResponseType(typeof(MethodResult<IList<StudentInPlatformModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetAll([FromQuery] SearchStudentInPlatformQuery query)
+        public async Task<IActionResult> GetStudentsInPlatform([FromQuery] GetStudentsInPlatformQuery query)
         {
-            MethodResult<PagingItemsModel<StudentInPlatformModel>> commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            MethodResult<IList<StudentInPlatformModel>> commandResult = await _mediator.Send(query).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
 

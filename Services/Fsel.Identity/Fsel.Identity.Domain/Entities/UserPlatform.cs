@@ -4,7 +4,7 @@ namespace Fsel.Identity.Domain.Entities
 {
     using System;
     using Fsel.Core.Entities;
-    using Fsel.Identity.Domain.Enums;
+    using Fsel.Shared.Enums;
 
     public class UserPlatform : Entity
     {

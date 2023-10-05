@@ -5,10 +5,6 @@ namespace Fsel.Identity.Application.Queries.StudentQuery
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
-    using Fsel.Core.Base.BaseModels;
-    using Fsel.Core.Extensions;
-    using Fsel.Identity.Application.Services.CMSPlanetDefenderService;
-    using Fsel.Identity.Application.Services.CMSPlanetDefenderService.Models;
     using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Domain.Models.EntityModels;
@@ -18,37 +14,35 @@ namespace Fsel.Identity.Application.Queries.StudentQuery
     using Microsoft.AspNetCore.Identity;
     using Microsoft.EntityFrameworkCore;
 
-    public class SearchStudentInPlatformQuery : SearchStudentInPlatformQueryModel, IRequest<MethodResult<PagingItemsModel<StudentInPlatformModel>>>
+    public class GetStudentsInPlatformQuery : GetStudentInPlatformQueryModel, IRequest<MethodResult<IList<StudentInPlatformModel>>>
     {
     }
 
-    public class SearchStudentInPlatformQueryHandler : IRequestHandler<SearchStudentInPlatformQuery, MethodResult<PagingItemsModel<StudentInPlatformModel>>>
+    public class GetStudentsInPlatformQueryHandler : IRequestHandler<GetStudentsInPlatformQuery, MethodResult<IList<StudentInPlatformModel>>>
     {
         private readonly IPlatformRepository _platformRepository;
         private readonly IUserPlatformRepository _userPlatformRepository;
         private readonly UserManager<User> _userManager;
         private readonly IHumanRepository _humanRepository;
         private readonly IStudentRepository _studentRepository;
-        private readonly ICMSPlanetDefenderService _cmsPlanetDefenderService;
         private readonly RoleManager<Role> _roleManager;
         private readonly IUserRoleRepository _userRoleRepository;
 
-        public SearchStudentInPlatformQueryHandler(IPlatformRepository platformRepository, IUserPlatformRepository userPlatformRepository, UserManager<User> userManager, IHumanRepository humanRepository, IStudentRepository studentRepository, ICMSPlanetDefenderService cmsPlanetDefenderService, RoleManager<Role> roleManager, IUserRoleRepository userRoleRepository)
+        public GetStudentsInPlatformQueryHandler(IPlatformRepository platformRepository, IUserPlatformRepository userPlatformRepository, UserManager<User> userManager, IHumanRepository humanRepository, IStudentRepository studentRepository, RoleManager<Role> roleManager, IUserRoleRepository userRoleRepository)
         {
             _platformRepository = platformRepository;
             _userPlatformRepository = userPlatformRepository;
             _userManager = userManager;
             _humanRepository = humanRepository;
             _studentRepository = studentRepository;
-            _cmsPlanetDefenderService = cmsPlanetDefenderService;
             _roleManager = roleManager;
             _userRoleRepository = userRoleRepository;
         }
 
-        public async Task<MethodResult<PagingItemsModel<StudentInPlatformModel>>> Handle(SearchStudentInPlatformQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<IList<StudentInPlatformModel>>> Handle(GetStudentsInPlatformQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            var methodResult = new MethodResult<PagingItemsModel<StudentInPlatformModel>>();
+            var methodResult = new MethodResult<IList<StudentInPlatformModel>>();
 
             Guid? platformId = null;
             if (request.PlatformCode.HasValue)
@@ -78,31 +72,11 @@ namespace Fsel.Identity.Application.Queries.StudentQuery
             {
                 query = query.Where(p => (!string.IsNullOrEmpty(p.UserName) && p.UserName.Contains(request.Keyword)) || (!string.IsNullOrEmpty(p.Code) && p.Code.Contains(request.Keyword)));
             }
-            var getLevelOfStudentsResult = await _cmsPlanetDefenderService.GetLevelOfStudentByStudentIds(new GetLevelOfStudentsByStudentIdsQueryModel
-            {
-                StudentIds = query.Select(p => p.StudentId).Distinct().ToList(),
-            });
-            var getLevelOfStudents = getLevelOfStudentsResult.Content?.Result;
-            if (request.Level.HasValue)
-            {
-                var levelOfStudents = getLevelOfStudents?.Where(p => p.Level.HasValue && p.Level == request.Level).ToList();
-                query = query.Where(p => levelOfStudents != null && levelOfStudents.Select(x => x.StudentId).Contains(p.StudentId));
-            }
             if (request.Role.HasValue)
             {
                 query = query.Where(p => p.Role == request.Role.ToString());
             }
-            int totalItem = await query.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
-            var lists = await query
-                    .ApplySortAndPaging(request)
-                    .AsNoTracking()
-                    .ToListAsync(cancellationToken: cancellationToken)
-                    .ConfigureAwait(false);
-            lists.ForEach(x =>
-            {
-                x.Level = getLevelOfStudents?.FirstOrDefault(p => p.StudentId == x.StudentId)?.Level;
-            });
-            methodResult.Result = new PagingItemsModel<StudentInPlatformModel>(lists, request, totalItem);
+            methodResult.Result = query.ToList();
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }

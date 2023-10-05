@@ -4,9 +4,11 @@ namespace Fsel.Cms.PlanetDefender.Api.Controllers
 {
     using System.Net;
     using Fsel.Cms.PlanetDefender.Application.Queries.StudentGameInfoQuery;
+    using Fsel.Cms.PlanetDefender.Application.Services.UserServices.Models;
     using Fsel.Cms.PlanetDefender.Domain.Models.EntityModels;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
+    using Fsel.Core.Base.BaseModels;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
 
@@ -23,14 +25,14 @@ namespace Fsel.Cms.PlanetDefender.Api.Controllers
         }
 
         /// <summary>
-        /// Get level of students by studentids
+        /// Search students in platform
         /// </summary>
-        [HttpPost("get-level-by-studentids")]
-        [ProducesResponseType(typeof(MethodResult<IList<StudentGameInfoModel>>), (int)HttpStatusCode.OK)]
+        [HttpGet("search-students-in-platform")]
+        [ProducesResponseType(typeof(MethodResult<PagingItemsModel<StudentInPlatformModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetLevelOfStudentsByStudentids([FromBody] GetLevelOfStudentsByStudentIdsQuery query)
+        public async Task<IActionResult> GetLevelOfStudentsByStudentids([FromQuery] SearchStudentsInPlatformQuery query)
         {
-            MethodResult<IList<StudentGameInfoModel>> commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            MethodResult<PagingItemsModel<StudentInPlatformModel>> commandResult = await _mediator.Send(query).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
     }

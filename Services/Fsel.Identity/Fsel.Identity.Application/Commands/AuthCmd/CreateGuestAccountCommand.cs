@@ -98,7 +98,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                         methodResult.AddErrorBadRequest(nameof(EnumAuthErrorCode.UserFailToCreate));
                         return methodResult;
                     }
-                    await _userManager.AddToRoleAsync(user, EnumRole.Student.ToString());
+                    await _userManager.AddToRoleAsync(user, EnumRole.Guest.ToString());
 
                     #endregion Create user and add role to user
 

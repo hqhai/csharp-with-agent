@@ -10,4 +10,8 @@
     <ProjectReference Include="..\Fsel.Identity.Infrastructure\Fsel.Identity.Infrastructure.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Services\CMSPlanetDefenderService\Models\" />
+  </ItemGroup>
+
 </Project>
