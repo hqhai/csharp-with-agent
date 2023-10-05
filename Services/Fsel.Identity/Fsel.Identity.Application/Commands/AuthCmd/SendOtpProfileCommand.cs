@@ -62,12 +62,16 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             }
             var userOtpCode = await _userOtpCodeRepository.Queryable
                                   .FirstOrDefaultAsync(x => x.UserId == user.Id && x.Status == EnumOtpCodeStatus.New && !x.IsDeleted, cancellationToken);
+            if (userOtpCode != null && DateTime.Compare(DateTime.Now, userOtpCode.ExpiredTime) > 0)
+            {
+                userOtpCode.OTPCode = GetRandomCode();
+                userOtpCode.ExpiredTime = DateTime.Now.AddMinutes(_appSetting!.Otp!.StepTime);
+                _userOtpCodeRepository.Update(userOtpCode);
+                await _userOtpCodeRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+            }
             if (userOtpCode == null)
             {
-                var randomSecure = new RandomSecureHelper();
-                var totp = new Totp(Encoding.UTF8.GetBytes(randomSecure.Secretstrings()));
-                var otp = totp.ComputeTotp();
-
+                var otp = GetRandomCode();
                 userOtpCode = new UserOtpCode
                 {
                     UserId = user.Id,
@@ -104,6 +108,13 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             methodResult.StatusCode = StatusCodes.Status200OK;
             methodResult.Result = true;
             return methodResult;
+        }
+
+        private static string GetRandomCode()
+        {
+            var randomSecure = new RandomSecureHelper();
+            var totp = new Totp(Encoding.UTF8.GetBytes(randomSecure.Secretstrings()));
+            return totp.ComputeTotp();
         }
     }
 }
