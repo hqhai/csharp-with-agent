@@ -10,6 +10,7 @@ namespace Fsel.Identity.Application.Queries.CSOQuery
     using Fsel.Identity.Domain.Models.EntityModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
+    using Microsoft.EntityFrameworkCore;
 
     public class GetCsoByIdQuery : IRequest<MethodResult<CSOModel>>
     {
@@ -19,12 +20,12 @@ namespace Fsel.Identity.Application.Queries.CSOQuery
     public class GetCsoByIdQueryHandler : IRequestHandler<GetCsoByIdQuery, MethodResult<CSOModel>>
     {
         private readonly IMapper _mapper;
-        private readonly ITeacherRepository _teacherRepository;
+        private readonly ICSORepository _csoRepository;
 
-        public GetCsoByIdQueryHandler(IMapper mapper, ITeacherRepository teacherRepository)
+        public GetCsoByIdQueryHandler(IMapper mapper, ICSORepository csoRepository)
         {
             _mapper = mapper;
-            _teacherRepository = teacherRepository;
+            _csoRepository = csoRepository;
         }
 
         public async Task<MethodResult<CSOModel>> Handle(GetCsoByIdQuery request, CancellationToken cancellationToken)
@@ -32,8 +33,8 @@ namespace Fsel.Identity.Application.Queries.CSOQuery
             ArgumentNullException.ThrowIfNull(request);
 
             MethodResult<CSOModel> methodResult = new MethodResult<CSOModel>();
-            var teacher = await _teacherRepository.GetByIdAsync(request.Id);
-            methodResult.Result = _mapper.Map<CSOModel>(teacher);
+            var cso = await _csoRepository.Queryable.Include(p => p.Human).FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
+            methodResult.Result = _mapper.Map<CSOModel>(cso);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }

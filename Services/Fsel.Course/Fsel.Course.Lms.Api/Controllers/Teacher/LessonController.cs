@@ -1,16 +1,20 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Course.Lms.Api.Controllers.Cso
+namespace Fsel.Course.Lms.Api.Controllers.Teacher
 {
     using System.Net;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
+    using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Queries.LessonQuery;
+    using Fsel.Shared.Enums;
     using MediatR;
+    using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
 
     [ApiVersion(Settings.APIVersion)]
-    [Route(Settings.APIDefaultRoute + "/cso/lesson")]
+    [Route(Settings.APIDefaultRoute + "/teacher/lesson")]
+    [Authorize(Roles = nameof(EnumRole.Teacher))]
     [ApiController]
     public class LessonController : ControllerBase
     {
@@ -22,14 +26,14 @@ namespace Fsel.Course.Lms.Api.Controllers.Cso
         }
 
         /// <summary>
-        /// Get List lesson by Course
+        /// Get course
         /// </summary>
-        [HttpGet]
-        [ProducesResponseType(typeof(MethodResult<object>), (int)HttpStatusCode.OK)]
+        [HttpGet("lesson-display-order")]
+        [ProducesResponseType(typeof(MethodResult<IList<LessonModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetListLessonByCourseId([FromQuery] GetListUnitAndLessonByCourseQuery query)
+        public async Task<IActionResult> GetListLessonByUnitId([FromQuery] GetListLessonByUnitIdQuery query)
         {
-            MethodResult<object> queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            MethodResult<IList<LessonModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
     }

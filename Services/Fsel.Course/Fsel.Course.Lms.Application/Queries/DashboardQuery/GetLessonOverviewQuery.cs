@@ -4,6 +4,7 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
 {
     using System;
     using System.Linq;
+    using System.Threading;
     using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Common.ActionResults;
@@ -58,7 +59,6 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<LessonOverviewModel> methodResult = new MethodResult<LessonOverviewModel>();
-
             var studentsResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
             if (studentsResult == null)
             {
@@ -94,25 +94,17 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
                                                                    .Include(x => x.VideoResult)
                                                                    .Include(x => x.HomeWorkResults.Where(x => x.StudentId == studentId))
                                                                    .Include(x => x.ClassForumResults.Where(x => x.StudentId == studentId))
-                                                                   .Where(x => x.StudentId == studentId && x.Status != EnumResultStatus.Unfinished)
+                                                                   .Where(x => x.StudentId == studentId && x.Status != EnumResultStatus.Unfinished && x.CourseId == course.Id)
                                                                    .OrderBy(x => x.CreatedDate)
                                                                    .ThenByDescending(x => x.UpdatedDate)
                                                                    .AsNoTracking()
                                                                    .FirstOrDefaultAsync(cancellationToken);
             }
             var lesson = lessonResult?.Lesson;
-            if (lessonResult == null)
+            if ((lessonResult != null && lessonResult.Status == EnumResultStatus.Done) || lessonResult == null)
             {
-                var unitId = course.CourseUnitMockTests.FirstOrDefault(x => x.DisplayOrder == 1)?.UnitId;
-                if (unitId != null)
-                {
-                    var unit = await _unitRepository.Queryable.Include(x => x.UnitLessons.Where(x => x.DisplayOrder == 0)).FirstOrDefaultAsync(x => x.Id == unitId, cancellationToken);
-                    if (unit != null)
-                    {
-                        var lessonId = unit.UnitLessons.FirstOrDefault(x => x.DisplayOrder == 0)?.LessonId ?? default;
-                        lesson = await _lessonRepository.Queryable.Include(x => x.LessonInstructions).FirstOrDefaultAsync(x => x.Id == lessonId, cancellationToken);
-                    }
-                }
+                lesson = await GetLesson(lessonResult, course, cancellationToken);
+                lessonResult = default;
             }
 
             if (lesson == null)
@@ -160,6 +152,37 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
             return lessonDashBoard;
         }
 
+        private async Task<Lesson?> GetLesson(LessonResult? lessonResult, Course course, CancellationToken cancellationToken)
+        {
+            Guid? unitId = default;
+            var courseUnitMockTests = course.CourseUnitMockTests.OrderBy(x => x.DisplayOrder).ToList();
+            if (lessonResult != null && lessonResult.Status == EnumResultStatus.Done)
+            {
+                var courseUnitMockTest = courseUnitMockTests.FirstOrDefault(x => x.UnitId == lessonResult.UnitId);
+                if (courseUnitMockTest != null)
+                {
+                    var index = courseUnitMockTests.IndexOf(courseUnitMockTest);
+                    unitId = courseUnitMockTests[index + 1].UnitId;
+                }
+            }
+            if (lessonResult == null)
+            {
+                unitId = courseUnitMockTests.FirstOrDefault()?.UnitId;
+            }
+
+            if (unitId != null)
+            {
+                var unit = await _unitRepository.Queryable.Include(x => x.UnitLessons).FirstOrDefaultAsync(x => x.Id == unitId, cancellationToken);
+                if (unit != null)
+                {
+                    var lessonId = unit.UnitLessons.OrderBy(x => x.DisplayOrder).FirstOrDefault()?.LessonId ?? default;
+                    return await _lessonRepository.Queryable.Include(x => x.LessonInstructions).FirstOrDefaultAsync(x => x.Id == lessonId, cancellationToken);
+                }
+            }
+
+            return default;
+        }
+
         private static (EnumResultStatus, int) GetStatusVideo(VideoResult? videoResult)
         {
             if (videoResult != null)
@@ -202,7 +225,7 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
             }
             if (classForumResult != null)
             {
-                if (classForumResult.Status == EnumClassForumResultStatus.PendingForGrading)
+                if (classForumResult.Status == EnumClassForumResultStatus.PendingForGrading || classForumResult.Status == EnumClassForumResultStatus.Graded)
                 {
                     return (EnumResultStatus.Done, 1);
                 }

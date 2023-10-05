@@ -19,9 +19,9 @@ namespace Fsel.Course.Lms.Application.Services.SystemService
         Task<IApiResponse<MethodResult<IList<LogActionDaysModel>>>> GetLogActionsByUserIdsAsync([FromBody] IList<Guid> ids);
 
         [Post("/feature-access-time/gets")]
-        Task<IApiResponse<MethodResult<IList<FeatureAccessTimeModel>>>> GetFeatureAccessTimesAsync([FromQuery] FeatureAccessTimesQueryModel query);
+        Task<IApiResponse<MethodResult<IList<FeatureAccessTimeModel>>>> GetFeatureAccessTimesAsync([FromBody] FeatureAccessTimesQueryModel query);
 
-        [Post("/feature-access-time/get-detail")]
+        [Get("/feature-access-time/get-detail")]
         Task<IApiResponse<MethodResult<FeatureAccessTimeModel>>> GetFeatureAccessTimeAsync([FromQuery] FeatureAccessTimeQueryModel query);
     }
 }

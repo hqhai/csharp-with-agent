@@ -44,6 +44,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumQuery
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<ClassForumModel> methodResult = new MethodResult<ClassForumModel>();
             var classForumQuery = await _classForumRepository.Queryable
+                                   .Include(x => x.ClassForumFiles)
                                    .Include(x => x.ClassForumResults!.OrderBy(x => x.CreatedDate))
                                    .ThenInclude(x => x.ClassForumResultFiles)
                                    .Where(x => x.ClassForumResults!.Any(x => x.Status == EnumClassForumResultStatus.PendingForGrading || x.Status == EnumClassForumResultStatus.Graded))
