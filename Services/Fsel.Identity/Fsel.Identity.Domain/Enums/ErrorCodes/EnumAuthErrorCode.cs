@@ -119,5 +119,10 @@ namespace Fsel.Identity.Domain.Enums.ErrorCodes
         /// Packageids entered is incorrect
         /// </summary>
         PackageIdsEnteredIsIncorrect,
+
+        /// <summary>
+        /// User is not on any platform
+        /// </summary>
+        UserIsNotOnAnyPlatform,
     }
 }

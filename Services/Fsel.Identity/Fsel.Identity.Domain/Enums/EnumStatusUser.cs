@@ -2,7 +2,7 @@
 
 namespace Fsel.Identity.Domain.Enums
 {
-    public enum EnumStatusUser
+    public enum EnumOtpCodeStatus
     {
         New,
         Verified

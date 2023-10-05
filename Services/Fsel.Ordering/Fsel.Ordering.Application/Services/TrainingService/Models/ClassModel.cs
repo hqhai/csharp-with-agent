@@ -12,7 +12,7 @@ namespace Fsel.Ordering.Application.Services.TrainingService.Models
         public DateTime StartTime { get; set; }
         public DateTime EndTime { get; set; }
         public EnumTeacherApprovalStatus TeacherApprovalStatus { get; set; }
-        public EnumStatusClass Status { get; set; }
+        public EnumClassStatus Status { get; set; }
         public Guid CourseId { get; set; }
         public EnumCourseLevel? CourseLevel { get; set; }
         public Guid? LiveTimeFrameId { get; set; }
