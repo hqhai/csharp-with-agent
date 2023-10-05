@@ -21,5 +21,14 @@ namespace Fsel.Shared.Constants
                 public const string NotificationMessage = $"NotificationMessage";
             }
         }
+
+        public static class LeaderBoardHub
+        {
+            public const string Pattern = $"/leader-board";
+            public static class Methods
+            {
+                public const string LeaderBoardMessage = $"LeaderBoardMessage";
+            }
+        }
     }
 }

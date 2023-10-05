@@ -10,7 +10,7 @@ namespace Fsel.Identity.Domain.Entities
         public string? OTPCode { get; set; }
         public DateTime ExpiredTime { get; set; }
         public virtual User? User { get; set; }
-        public EnumStatusUser Status { get; set; }
+        public EnumOtpCodeStatus Status { get; set; }
         public string? UserId { get; set; }
     }
 }

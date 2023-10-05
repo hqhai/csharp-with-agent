@@ -130,7 +130,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
                 userView.EmailConfirmed = false;
                 userView.UserName = isCheckEmail ? request.Email : isCheckPhone ? request.PhoneNumber : userView.UserName;
 
-                var userOtpCode = await _userOtpCodeRepository.Queryable.FirstOrDefaultAsync(x => x.UserId == userView.Id && x.Status == EnumStatusUser.New && !x.IsDeleted, cancellationToken);
+                var userOtpCode = await _userOtpCodeRepository.Queryable.FirstOrDefaultAsync(x => x.UserId == userView.Id && x.Status == EnumOtpCodeStatus.New && !x.IsDeleted, cancellationToken);
                 if (userOtpCode == null)
                 {
                     var randomSecure = new RandomSecureHelper();
@@ -141,7 +141,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
                     {
                         UserId = userView.Id,
                         OTPCode = otp,
-                        Status = EnumStatusUser.New,
+                        Status = EnumOtpCodeStatus.New,
                         ExpiredTime = DateTime.Now.AddDays(_appSetting!.Otp!.StepDayWithAdmin)
                     };
                     _userOtpCodeRepository.Add(userOtpCode);

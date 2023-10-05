@@ -12,6 +12,7 @@ namespace Fsel.Identity.Application.Commands.ParentCmd
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Domain.Models.CommandModels.Parents;
     using Fsel.Identity.Domain.Models.EntityModels;
+    using Fsel.Identity.Infrastructure.Repositories;
     using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Identity;
@@ -28,18 +29,21 @@ namespace Fsel.Identity.Application.Commands.ParentCmd
         private readonly AuthContext _authContext;
         private readonly IHumanRepository _humanRepository;
         private readonly IParentRepository _parentRepository;
+        private readonly IPlatformRepository _platformRepository;
 
         public CreateStudentByParentCommandHandler(UserManager<User> userManager,
             IMapper mapper,
             AuthContext authContext,
             IParentRepository parentRepository,
-            IHumanRepository humanRepository)
+            IHumanRepository humanRepository,
+            IPlatformRepository platformRepository)
         {
             _userManager = userManager;
             _mapper = mapper;
             _authContext = authContext;
             _parentRepository = parentRepository;
             _humanRepository = humanRepository;
+            _platformRepository = platformRepository;
         }
 
         public async Task<MethodResult<UserModel>> Handle(CreateStudentByParentCommand request, CancellationToken cancellationToken)
@@ -75,7 +79,7 @@ namespace Fsel.Identity.Application.Commands.ParentCmd
 
             #endregion Validation
 
-            var user = await CreateUserStudentAsync(request, parent);
+            var user = await CreateUserStudentAsync(request, parent, cancellationToken);
             if (user == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumParentErrorCode.CreateStudentFail));
@@ -86,12 +90,22 @@ namespace Fsel.Identity.Application.Commands.ParentCmd
             return methodResult;
         }
 
-        private async Task<User?> CreateUserStudentAsync(CreateStudentByParentCommandModel request, Parent parent)
+        private async Task<User?> CreateUserStudentAsync(CreateStudentByParentCommandModel request, Parent parent, CancellationToken cancellationToken)
         {
             var user = _mapper.Map<User>(request);
 
-            var identityResult = await _userManager.CreateAsync(user, request.Password ?? string.Empty);
+            #region Add Platform to User
+            var platform = await _platformRepository.GetPlatformAsync(EnumPlatformCode.LMS, cancellationToken);
+            if (platform != null)
+            {
+                user.UserPlatforms.Add(new UserPlatform
+                {
+                    PlatformId = platform.Id
+                });
+            }
+            #endregion
 
+            var identityResult = await _userManager.CreateAsync(user, request.Password ?? string.Empty);
             if (!identityResult.Succeeded)
             {
                 return null;

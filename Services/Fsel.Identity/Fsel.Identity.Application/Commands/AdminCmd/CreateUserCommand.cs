@@ -40,6 +40,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
         private readonly AppSetting _appSetting;
         private readonly ITeacherRepository _teacherRepository;
         private readonly ICSORepository _cSORepository;
+        private readonly IPlatformRepository _platformRepository;
         private readonly IHumanRepository _humanRepository;
 
         public CreateUserCommandHandler(UserManager<User> userManager,
@@ -51,6 +52,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
             AppSetting appSetting,
             ITeacherRepository teacherRepository,
             ICSORepository cSORepository,
+            IPlatformRepository platformRepository,
             IHumanRepository humanRepository)
         {
             _userManager = userManager;
@@ -62,6 +64,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
             _appSetting = appSetting;
             _teacherRepository = teacherRepository;
             _cSORepository = cSORepository;
+            _platformRepository = platformRepository;
             _humanRepository = humanRepository;
         }
 
@@ -120,6 +123,18 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
                 user = new();
                 _mapper.Map(request, user);
                 user.UserName = request.Email;
+
+                #region Add Platform to User
+                var platform = await _platformRepository.GetPlatformAsync(EnumPlatformCode.LMS, cancellationToken);
+                if (platform != null)
+                {
+                    user.UserPlatforms.Add(new UserPlatform
+                    {
+                        PlatformId = platform.Id
+                    });
+                }
+                #endregion
+
                 result = await _userManager.CreateAsync(user, newPassword);
                 if (!result.Succeeded)
                 {
@@ -134,7 +149,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
                 #region Send Code OTP
 
                 var userOtpCode = await _userOtpCodeRepository.Queryable
-                        .FirstOrDefaultAsync(x => x.UserId == user.Id && x.Status == EnumStatusUser.New && !x.IsDeleted, cancellationToken);
+                        .FirstOrDefaultAsync(x => x.UserId == user.Id && x.Status == EnumOtpCodeStatus.New && !x.IsDeleted, cancellationToken);
 
                 var randomSecure = new RandomSecureHelper();
                 var totp = new Totp(Encoding.UTF8.GetBytes(randomSecure.Secretstrings()));
@@ -145,7 +160,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
                     {
                         UserId = user.Id,
                         OTPCode = otp,
-                        Status = EnumStatusUser.New,
+                        Status = EnumOtpCodeStatus.New,
                         ExpiredTime = DateTime.Now.AddDays(_appSetting!.Otp!.StepDayWithAdmin)
                     };
                     _userOtpCodeRepository.Add(userOtpCode);
@@ -198,7 +213,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
                     BankAccountName = request.BankAccountName,
                     BankAccountNumber = request.BankAccountNumber,
                     BankName = request.BankName,
-                    Status = EnumStatusBank.Approve
+                    Status = EnumBankStatus.Approve
                 });
                 human.Code = $"TC_{stt:0000}";
             }

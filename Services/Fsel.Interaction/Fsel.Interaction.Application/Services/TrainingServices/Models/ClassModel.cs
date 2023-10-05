@@ -12,7 +12,7 @@ namespace Fsel.Interaction.Application.Services.TrainingServices.Models
         public string? Name { get; set; }
         public DateTime TimeStart { get; set; }
         public DateTime TimeEnd { get; set; }
-        public EnumStatusClass Status { get; set; }
+        public EnumClassStatus Status { get; set; }
         public EnumTeacherApprovalStatus TeacherApprovalStatus { get; set; }
         public Guid CourseId { get; set; }
         public Guid PackageId { get; set; }
