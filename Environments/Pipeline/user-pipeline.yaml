@@ -4,9 +4,9 @@ trigger:
     - staging
   paths:
     include:
-    - Services/Fsel.System/*
+    - Services/Fsel.Identity/*
     - Services/Shared/*
-    - System.Staging.Dockerfile
+    - User.Staging.Dockerfile
 
  
 pool:
@@ -16,8 +16,8 @@ pool:
 variables:
   dockerRegistryServiceConnection: 'fsel'
   containerRegistry: 'fselacr.azurecr.io'
-  repository: 'systemapi'
-  dockerfile: 'System.Staging.Dockerfile'
+  repository: 'userapi'
+  dockerfile: 'User.Staging.Dockerfile'
   currentdate: $[format('{0:yyyyMMddHHmmss}', pipeline.startTime)]
   #tag: '$(Build.SourceBranchName)-$(shortCommitSha)-$(currentdate)'
 
