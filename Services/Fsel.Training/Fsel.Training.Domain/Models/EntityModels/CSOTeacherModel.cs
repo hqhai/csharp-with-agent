@@ -14,6 +14,7 @@ namespace Fsel.Training.Domain.Models.EntityModels
         public string? Phonenumber { get; set; }
         public string? Email { get; set; }
         public int CountClass { get; set; }
+        public string? AvatarPath { get; set; }
         public IList<EnumCourseLevel>? CourseLevels { get; set; }
     }
 }
