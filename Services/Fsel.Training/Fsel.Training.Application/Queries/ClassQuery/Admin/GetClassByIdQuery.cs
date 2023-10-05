@@ -27,13 +27,14 @@ namespace Fsel.Training.Application.Queries.ClassQuery.Admin
         private readonly IMapper _mapper;
         private readonly IOrderService _orderService;
         private readonly IUserService _userService;
-
-        public GetClassByIdQueryHandler(IClassRepository classRepository, IMapper mapper, IOrderService orderService, IUserService userService)
+        private readonly IClassStudentRepository _classStudentRepository;
+        public GetClassByIdQueryHandler(IClassRepository classRepository, IMapper mapper, IOrderService orderService, IUserService userService, IClassStudentRepository classStudentRepository)
         {
             _classRepository = classRepository;
             _mapper = mapper;
             _orderService = orderService;
             _userService = userService;
+            _classStudentRepository = classStudentRepository;
         }
 
         public async Task<MethodResult<ClassModel>> Handle(GetClassByIdQuery request, CancellationToken cancellationToken)
@@ -48,7 +49,7 @@ namespace Fsel.Training.Application.Queries.ClassQuery.Admin
                 return methodResult;
             }
             var classModel = _mapper.Map<ClassModel>(classes);
-
+            classModel.NumberOfStudent = await _classStudentRepository.Queryable.Where(p => p.ClassId == classes.Id).CountAsync(cancellationToken);
             var packageResult = await _orderService.GetPackages();
             classModel.PackageCode = packageResult.Content?.Result?.FirstOrDefault(p => p.Id == classModel.PackageId)?.Code;
 
@@ -63,6 +64,7 @@ namespace Fsel.Training.Application.Queries.ClassQuery.Admin
                     Phonenumber = teacher?.Human?.PhoneNumber,
                     Email = teacher?.Human?.Email,
                     CountClass = countClass,
+                    AvatarPath = teacher?.Human?.AvatarPath,
                 };
             }
             if (classModel.CsoId.HasValue)
@@ -76,6 +78,7 @@ namespace Fsel.Training.Application.Queries.ClassQuery.Admin
                     Phonenumber = cso?.PhoneNumber,
                     Email = cso?.Email,
                     CountClass = countClass,
+                    AvatarPath = cso?.AvatarPath
                 };
             }
 
