@@ -10,6 +10,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
+    using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Services.UserServices;
@@ -52,6 +53,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
                 .Include(x => x.LessonResult)
                 .ThenInclude(x => x!.Course)
                 .Include(x => x.ClassForum)
+                .ThenInclude(x => x!.ClassForumFiles)
                 .Include(x => x.ClassForumResultFiles)
                 .Include(x => x.ClassForumScores)
                 .Where(x => x.Id == request.ClassForumResultId)
@@ -102,7 +104,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
             }
 
             var lesson = classForumResult.LessonResult?.Lesson?.UnitLessons.FirstOrDefault(y => y.UnitId == classForumResult.LessonResult.UnitId)?.DisplayOrder;
-            var unit = classForumResult.LessonResult?.Unit?.CourseUnitMockTests.FirstOrDefault(y => y.CourseId == classForumResult.LessonResult.CourseId)?.DisplayOrder;
+            var unit = classForumResult.LessonResult?.Unit?.CourseUnitMockTests.FirstOrDefault(y => y.CourseId == classForumResult.LessonResult.CourseId)?.Number;
             var course = classForumResult.LessonResult?.Course?.Code;
 
             var classForumResultModel = new ClassForumResultModel
@@ -118,7 +120,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
                 GradingStartDate = classForumResult.GradingStartDate,
                 CheckCsoId = classForumResult.CheckCsoId,
                 GradingTeacherId = classForumResult.GradingTeacherId ?? default,
-                FilePaths = classForumResult.ClassForumResultFiles == null ? null : classForumResult.ClassForumResultFiles.Select(x => x.FilePath ?? string.Empty).ToList(),
+                ClassForumResultFiles = _mapper.Map<IList<ClassForumResultFileModel>>(classForumResult.ClassForumResultFiles),
                 ClassForumScores = classForumResult.ClassForumScores == null ? null : classForumResult.ClassForumScores.Select(x => new ClassForumScoreModel
                 {
                     Id = x.Id,

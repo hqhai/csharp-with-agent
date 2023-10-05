@@ -11,6 +11,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
     using Fsel.Core.Base;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Core.Extensions;
+    using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
@@ -99,6 +100,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
                                    .ThenInclude(x => x!.CourseUnitMockTests)
                                    .Include(x => x.ClassForum)
                                    .Where(x => x.Status == EnumClassForumResultStatus.Pending && (x.CheckCsoId == null || x.CheckCsoId == csoId))
+                                   .OrderByDescending(x => x.CreatedDate)
                                    .Select(x => new ClassForumResultSearchModel
                                    {
                                        Id = x.Id,
@@ -110,12 +112,12 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
                                        Status = x.Status,
                                        CheckStartDate = x.CheckStartDate,
                                        CourseCode = x.LessonResult!.Course!.Code,
-                                       LessonName = x.ClassForum!.Lesson!.Name, 
+                                       LessonName = x.ClassForum!.Lesson!.Name,
                                        LessonDisplayOrder = x.LessonResult.Lesson!.UnitLessons.Where(y => y.UnitId == x.LessonResult.UnitId).Select(x => x.DisplayOrder).FirstOrDefault(),
-                                       UnitDisplayOrder = x.LessonResult.Unit!.CourseUnitMockTests.Where(y => y.CourseId == x.LessonResult.CourseId).Select(x => x.DisplayOrder).FirstOrDefault(),
+                                       UnitDisplayOrder = x.LessonResult.Unit!.CourseUnitMockTests.Where(y => y.CourseId == x.LessonResult.CourseId).Select(x => x.Number).FirstOrDefault(),
                                        UnitName = x.ClassForum.Lesson.UnitLessons.Select(x => x.Unit).Select(x => x!.Name).FirstOrDefault(),
                                        TeacherId = x.GradingTeacherId
-                                   });  
+                                   });
 
             if (!string.IsNullOrEmpty(request.Keyword))
             {
@@ -150,11 +152,15 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
                     .ConfigureAwait(false);
             foreach (var item in lists)
             {
-                var studentId = item.CreatedUserId;
-                var classResult = await _trainingService.GetClassByStudentId(studentId);
-                if (classResult!.Content!.Result != null)
+                var userId = item.CreatedUserId;
+                var studentResult = await _userService.GetStudentByUserIdAsync(userId);
+                var studentId = studentResult.Content?.Result?.Id;
+
+                var classResult = await _trainingService.GetClassByStudentId(studentId ?? default);
+                if (classResult.Content?.Result != null)
                 {
-                    item.ClassCode = classResult!.Content!.Result.Code;
+                    item.ClassCode = classResult.Content.Result.Code;
+                    item.PostArea = "L" + item.LessonDisplayOrder + "_" + "U" + item.UnitDisplayOrder + "_" + item.CourseCode;
                 }
             }
 

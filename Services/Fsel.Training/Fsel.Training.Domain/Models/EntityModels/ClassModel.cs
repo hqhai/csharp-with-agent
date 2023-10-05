@@ -22,6 +22,7 @@ namespace Fsel.Training.Domain.Models.EntityModels
         public Guid CourseId { get; set; }
 
         public Guid PackageId { get; set; }
+        public EnumPackageCode? PackageCode { get; set; }
         public Guid? LiveTimeFrameId { get; set; }
 
         public IList<DayOfWeek>? LiveDays { get; set; }
@@ -38,5 +39,7 @@ namespace Fsel.Training.Domain.Models.EntityModels
 
         public IList<ClassStudentModel>? ClassStudents { get; set; }
         public IList<ClassLiveCalendarModel>? ClassLiveCalendars { get; set; }
+        public CSOTeacherModel? Teacher { get; set; }
+        public CSOTeacherModel? Cso { get; set; }
     }
 }

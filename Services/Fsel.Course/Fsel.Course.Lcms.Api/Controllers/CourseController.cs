@@ -2,6 +2,7 @@
 
 using System.Net;
 using Fsel.Common.ActionResults;
+using Fsel.Common.Attributes;
 using Fsel.Common.Constants;
 using Fsel.Core.Base.BaseModels;
 using Fsel.Course.Application.Commands.CourseCmd;
@@ -9,7 +10,6 @@ using Fsel.Course.Application.Queries.CourseQuery;
 using Fsel.Course.Domain.Models.EntityModels;
 using Fsel.Shared.Enums;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Fsel.Course.Lcms.Api.Controllers
@@ -17,7 +17,7 @@ namespace Fsel.Course.Lcms.Api.Controllers
     [ApiVersion(Settings.APIVersion)]
     [Route(Settings.APIDefaultRoute + "/course")]
     [ApiController]
-    [Authorize(Roles = nameof(EnumRole.MasterAdmin))]
+    [Permission(role: nameof(EnumRole.MasterAdmin))]
     public class CourseController : ControllerBase
     {
         private readonly IMediator _mediator;
