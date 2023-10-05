@@ -97,7 +97,7 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
             if ((lessonResult != null && lessonResult.Status == EnumResultStatus.Done) || lessonResult == null)
             {
                 lesson = await GetLesson(lessonResult, course, cancellationToken);
-                if (lesson != null)
+                if (lessonResult != null && lesson != null && lessonResult.LessonId != lesson.Id)
                 {
                     lessonResult = default;
                 }
@@ -126,10 +126,18 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
         private async Task<Lesson?> GetLesson(LessonResult? lessonResult, Course course, CancellationToken cancellationToken)
         {
             var unitId = await GetUnitId(lessonResult, course);
-            var unit = await _unitRepository.Queryable.Include(x => x.UnitLessons).FirstOrDefaultAsync(x => x.Id == unitId, cancellationToken);
+            var unit = await _unitRepository.Queryable.Include(x => x.UnitLessons).Include(x => x.LessonResults).FirstOrDefaultAsync(x => x.Id == unitId, cancellationToken);
             if (unit != null)
             {
-                var lessonId = unit.UnitLessons.OrderBy(x => x.DisplayOrder).FirstOrDefault()?.LessonId ?? default;
+                Guid? lessonId = default;
+                if (unit.LessonResults.Any())
+                {
+                    lessonId = unit.LessonResults.OrderByDescending(x => x.CreatedDate).ThenBy(x => x.UpdatedDate).FirstOrDefault()?.LessonId;
+                }
+                else
+                {
+                    lessonId = unit.UnitLessons.OrderBy(x => x.DisplayOrder).FirstOrDefault()?.LessonId;
+                }
                 return await _lessonRepository.Queryable.Include(x => x.LessonInstructions).FirstOrDefaultAsync(x => x.Id == lessonId, cancellationToken);
             }
             return default;
