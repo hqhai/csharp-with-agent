@@ -7,11 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Fsel.Identity.Infrastructure\Fsel.Identity.Infrastructure.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Services\CMSPlanetDefenderService\Models\" />
+    <ProjectReference Include="..\..\Shared\Fsel.Shared\Fsel.Shared.csproj" />
   </ItemGroup>
 
 </Project>
