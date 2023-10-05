@@ -16,21 +16,21 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
     using Microsoft.AspNetCore.Identity;
     using Microsoft.EntityFrameworkCore;
 
-    public class ConFirmOtpProfileCommand : IRequest<MethodResult<bool>>
+    public class ConfirmOtpProfileCommand : IRequest<MethodResult<bool>>
     {
         public string? Email { get; set; }
         public string? PhoneNumber { get; set; }
         public string? OTP { get; set; }
     }
 
-    public class ConFirmOtpProfileCommandHandler : IRequestHandler<ConFirmOtpProfileCommand, MethodResult<bool>>
+    public class ConfirmOtpProfileCommandHandler : IRequestHandler<ConfirmOtpProfileCommand, MethodResult<bool>>
     {
         private readonly UserManager<User> _userManager;
         private readonly AuthContext _authContext;
         private readonly IUserOtpCodeRepository _userOtpCodeRepository;
         private readonly AppSetting _appSetting;
 
-        public ConFirmOtpProfileCommandHandler(UserManager<User> userManager
+        public ConfirmOtpProfileCommandHandler(UserManager<User> userManager
             , AuthContext authContext
             , IUserOtpCodeRepository userOtpCodeRepository
             , AppSetting appSetting)
@@ -41,7 +41,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             _appSetting = appSetting;
         }
 
-        public async Task<MethodResult<bool>> Handle(ConFirmOtpProfileCommand request, CancellationToken cancellationToken)
+        public async Task<MethodResult<bool>> Handle(ConfirmOtpProfileCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             ArgumentNullException.ThrowIfNull(_appSetting.Otp);
