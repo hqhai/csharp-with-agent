@@ -3,6 +3,7 @@
 using Fsel.Core.Extensions;
 using Fsel.Identity.Application.Queues.Consumers;
 using Fsel.Identity.Application.Services;
+using Fsel.Identity.Application.Services.CMSPlanetDefenderService;
 using Fsel.Identity.Application.Services.InteractionService;
 using Fsel.Identity.Application.Services.LmsCourseService;
 using Fsel.Identity.Application.Services.OrderService;
@@ -41,12 +42,15 @@ builder.Services.AddScoped<ICSORepository, CSORepository>();
 builder.Services.AddScoped<ITeacherBankAccountRepository, TeacherBankAccountRepository>();
 builder.Services.AddScoped<IUserSettingRepository, UserSettingRepository>();
 builder.Services.AddScoped<IPlatformRepository, PlatformRepository>();
+builder.Services.AddScoped<IUserPlatformRepository, UserPlatformRepository>();
+builder.Services.AddScoped<IUserRoleRepository, UserRoleRepository>();
 
 builder.AddRefitClients(typeof(ISenderService), appSetting?.Services?.SenderApiUrl);
 builder.AddRefitClients(typeof(IOrderService), appSetting?.Services?.OrderApiUrl);
 builder.AddRefitClients(typeof(IInteractionService), appSetting?.Services?.InteractionApiUrl);
 builder.AddRefitClients(typeof(ITrainingService), appSetting?.Services?.ClassApiUrl);
 builder.AddRefitClients(typeof(ILmsCourseService), appSetting?.Services?.LmsCourseApiUrl);
+builder.AddRefitClients(typeof(ICMSPlanetDefenderService), appSetting?.Services?.CMSPlanetDefender);
 
 builder.AddMassTransit(appSetting,
 queues: new Dictionary<string, Type>
