@@ -19,6 +19,9 @@ namespace Fsel.Shared.Constants
 
             public static class NameQueue
             {
+                public const string SyncStudentShieldEveryDay = $"{KeyQueue}_SyncStudentShieldEveryDay";
+                public const string UpdateStudentsDailyStreak = $"{KeyQueue}_UpdateStudentsDailyStreak";
+                public const string LeaderBoard = $"{KeyQueue}_LeaderBoard";
             }
         }
 
@@ -29,6 +32,7 @@ namespace Fsel.Shared.Constants
             public static class NameQueue
             {
                 public const string DiscussionBoard = $"{KeyQueue}_DiscussionBoard";
+                public const string LeaderBoard = $"{KeyQueue}_LeaderBoard";
                 public const string ClassForum = $"{KeyQueue}_ClassForum";
             }
         }
@@ -101,6 +105,7 @@ namespace Fsel.Shared.Constants
 
             public static class NameQueue
             {
+                public const string CreateStudentDailyStreak = $"{KeyQueue}_CreateStudentDailyStreak";
             }
         }
 

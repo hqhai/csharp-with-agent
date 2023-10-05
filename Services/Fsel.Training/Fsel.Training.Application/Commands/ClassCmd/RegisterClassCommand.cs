@@ -58,7 +58,7 @@ namespace Fsel.Training.Application.Commands.ClassCmd
                 {
                     classnew = await CreateClassAsync(code, request.CourseId, request.PackageId, request.LiveTimeFrameId, request.LiveDays);
                 }
-                else if (classnew.ClassStudents.Count > 99 || classnew.Status == EnumStatusClass.Active)
+                else if (classnew.ClassStudents.Count > 99 || classnew.Status == EnumClassStatus.Active)
                 {
                     var code = await _mediator.Send(new GetNewClassCodeQuery { Code = request.Code, CourseLevel = request.CourseLevel }, cancellationToken).ConfigureAwait(false);
                     classnew = await CreateClassAsync(code.Result, request.CourseId, request.PackageId, request.LiveTimeFrameId, request.LiveDays).ConfigureAwait(false);
