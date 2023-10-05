@@ -56,7 +56,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             var (skillTestSkillScores, percentSkillTest) = await GetVideoSkillScores(lessonResultIds, EnumTimeCodeType.SkillTest, PercentOccupySkillTest);
             if (!skillTestSkillScores.Any())
             {
-                percentUnitTest = PercentOccupySkillTest;
+                percentSkillTest = PercentOccupySkillTest;
             }
             var (homeWorkSkillScores, percentHomeWork) = await GetHomeWordsSkillScores(lessonResultIds, PercentOccupyHomeWork);
             var (classForumSkillScores, percentClassForum) = await GetClassForumSkillScores(lessonResultIds, PercentOccupyClassForum);
