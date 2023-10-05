@@ -82,7 +82,6 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                 _userOtpCodeRepository.Add(userOtpCode);
                 await _userOtpCodeRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             }
-
             var param = new SendOtpTemplateModel
             {
                 OtpCode = userOtpCode.OTPCode,
