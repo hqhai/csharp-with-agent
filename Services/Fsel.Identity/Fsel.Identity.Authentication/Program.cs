@@ -1,10 +1,8 @@
 // Copyright (c) Atlantic. All rights reserved.
 
 using Fsel.Core.Extensions;
-using Fsel.Identity.Application.Queues.Consumers;
 using Fsel.Identity.Application.Queues.Publishers;
 using Fsel.Identity.Application.Services;
-using Fsel.Identity.Application.Services.CMSPlanetDefenderService;
 using Fsel.Identity.Application.Services.InteractionService;
 using Fsel.Identity.Application.Services.LmsCourseService;
 using Fsel.Identity.Application.Services.OrderService;
@@ -14,7 +12,6 @@ using Fsel.Identity.Domain.IRepositories;
 using Fsel.Identity.Infrastructure;
 using Fsel.Identity.Infrastructure.Repositories;
 using Fsel.Identity.Infrastructure.ValueSettings;
-using Fsel.Shared.Constants;
 using Microsoft.AspNetCore.Identity;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -52,8 +49,6 @@ builder.AddRefitClients(typeof(IInteractionService), appSetting?.Services?.Inter
 builder.AddRefitClients(typeof(ITrainingService), appSetting?.Services?.ClassApiUrl);
 builder.AddRefitClients(typeof(ILmsCourseService), appSetting?.Services?.LmsCourseApiUrl);
 builder.AddMassTransit(appSetting);
-
-builder.AddRefitClients(typeof(ICMSPlanetDefenderService), appSetting?.Services?.CMSPlanetDefender);
 //App config
 var app = builder.Build();
 app.UseServices();
