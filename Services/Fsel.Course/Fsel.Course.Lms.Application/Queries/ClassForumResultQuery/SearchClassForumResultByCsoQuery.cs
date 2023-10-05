@@ -131,10 +131,6 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
             {
                 classForumResultQuery = classForumResultQuery.Where(m => m.CourseId == request.CourseId);
             }
-            if (request.CourseCode != null)
-            {
-                classForumResultQuery = classForumResultQuery.Where(m => m.CourseCode == request.CourseCode);
-            }
             if (request.LessonName != null)
             {
                 classForumResultQuery = classForumResultQuery.Where(m => (m.LessonName ?? string.Empty).Contains(request.LessonName));
