@@ -8,6 +8,7 @@ namespace Fsel.Training.Application.Commands.ClassCmd
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Shared.Enums;
+    using Fsel.Training.Application.Services.OrderServices;
     using Fsel.Training.Application.Services.SystemServices;
     using Fsel.Training.Domain.Entities;
     using Fsel.Training.Domain.Enums.ErrorCodes;
@@ -23,11 +24,12 @@ namespace Fsel.Training.Application.Commands.ClassCmd
     {
         private readonly IClassRepository _classRepository;
         private readonly ISystemService _systemService;
-
-        public ActiveClassCommandHandler(IClassRepository classRepository, ISystemService systemService)
+        private readonly IOrderService _orderService;
+        public ActiveClassCommandHandler(IClassRepository classRepository, ISystemService systemService, IOrderService orderService)
         {
             _classRepository = classRepository;
             _systemService = systemService;
+            _orderService = orderService;
         }
 
         public async Task<MethodResult<bool>> Handle(ActiveClassCommand request, CancellationToken cancellationToken)
@@ -46,8 +48,15 @@ namespace Fsel.Training.Application.Commands.ClassCmd
                 methodResult.AddErrorBadRequest(nameof(EnumClassErrorCode.StatusOfClassIsNotNew));
                 return methodResult;
             }
-
-            if (classes.LiveTimeFrameId.HasValue && classes.LiveDays != null)
+            var packagesResult = await _orderService.GetPackages();
+            var packages = packagesResult.Content?.Result;
+            var package = packages?.FirstOrDefault(p => p.Id == classes.PackageId);
+            if (package?.Code == EnumPackageCode.PREMIUM && (!classes.LiveTimeFrameId.HasValue || classes.LiveDays == null))
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumClassErrorCode.LiveTimeFrameNullOrLiveDaysNull));
+                return methodResult;
+            }
+            if (package?.Code == EnumPackageCode.PREMIUM)
             {
                 List<Guid> courseIds = new List<Guid>();
                 courseIds.Add(classes.CourseId);
@@ -66,8 +75,6 @@ namespace Fsel.Training.Application.Commands.ClassCmd
                 }
                 classes.StartDate = DateTime.Now;
                 classes.EndDate = DateTime.Now.AddMonths(endTime.DurationMonth);
-                classes.Status = EnumClassStatus.Active;
-
                 if (classes.LiveTimeFrameId.HasValue && classes.LiveDays != null)
                 {
                     for (DateTime date = DateTime.Now; date <= classes.EndDate; date = date.AddDays(1))
@@ -90,6 +97,7 @@ namespace Fsel.Training.Application.Commands.ClassCmd
 
             await _classRepository.ExecuteTransactionAsync(async () =>
             {
+                classes.Status = EnumClassStatus.Active;
                 _classRepository.Update(classes);
                 await _classRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
                 methodResult.StatusCode = StatusCodes.Status200OK;
