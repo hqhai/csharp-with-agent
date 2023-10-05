@@ -61,6 +61,7 @@ namespace Fsel.Training.Application.Queries.ClassQuery.Admin
                 PackageId = p.PackageId,
                 CourseId = p.CourseId,
                 StudentIds = p.ClassStudents.Select(x => x.StudentId).ToList(),
+                CreatedDate = p.CreatedDate,
             }).ToListAsync(cancellationToken);
             if (request.Status.HasValue)
             {
