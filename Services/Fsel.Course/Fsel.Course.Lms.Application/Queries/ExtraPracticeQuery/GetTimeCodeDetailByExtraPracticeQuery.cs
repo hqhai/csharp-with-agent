@@ -9,11 +9,12 @@ namespace Fsel.Course.Lms.Application.Queries.ExtraPracticeQuery
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
+    using Fsel.Course.Domain.Entities;
+    using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Infrastructure.Common;
     using Fsel.Course.Lms.Application.Services.UserServices;
-    using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -63,7 +64,11 @@ namespace Fsel.Course.Lms.Application.Queries.ExtraPracticeQuery
             var studentId = studentsResult.Content?.Result?.Id;
 
             var extraPracticeResult = await _extraPracticeResultRepository.Queryable.FirstOrDefaultAsync(x => x.ExtraPracticeId == request.ExtraPracticeId && x.StudentId == studentId, cancellationToken);
-
+            if (extraPracticeResult == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(extraPracticeResult));
+                return methodResult;
+            }
             var videoTimeCode = await _videoTimeCodeRepository.Queryable
                                     .Include(x => x.TimeCodeExercises.Where(x => !x.IsDeleted && x.Exercise != null))
                                     .ThenInclude(x => x.Exercise)
@@ -79,17 +84,17 @@ namespace Fsel.Course.Lms.Application.Queries.ExtraPracticeQuery
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.VideoId), request.VideoId);
                 return methodResult;
             }
-
+            var isCheckDone = extraPracticeResult.Status == EnumResultStatus.Done;
             var videoTimeCodeModel = new VideoTimeCodeModel
             {
                 Id = videoTimeCode.Id,
-                TotalCount = videoTimeCode.TimeCodeExercises.Where(x => !x.IsDeleted && x.Exercise != null).Select(x => x.Exercise).SelectMany(x => x!.ExerciseQuestions.Where(x => !x.IsDeleted && x.Question != null)).Select(m => m.Question).Count(),
+                TotalCount = GetQuestionCount(videoTimeCode),
                 DisplayTime = videoTimeCode.DisplayTime,
                 ExecutionTime = videoTimeCode.ExecutionTime,
                 TimeCodeType = videoTimeCode.TimeCodeType,
                 VideoId = videoTimeCode.VideoId,
                 Ungraded = videoTimeCode.TimeCodeExercises.Select(x => x.Exercise).SelectMany(x => x!.ExerciseQuestions).Select(x => x.Question).FirstOrDefault()?.Ungraded ?? default,
-                CorrectCount = videoTimeCode.VideoTimeCodeAnswers.Count > 0 ? videoTimeCode.VideoTimeCodeAnswers.Sum(x => x.CorrectCount) : 0,
+                CorrectCount = GetCorrectcount(videoTimeCode),
                 CorrectTotal = videoTimeCode.TimeCodeExercises.Select(x => x.Exercise).SelectMany(x => x!.ExerciseQuestions).Select(x => x.Question).Sum(x => x!.CorrectTotal),
                 Exercises = videoTimeCode.TimeCodeExercises.OrderBy(x => x!.CreatedDate).Select(n => n.Exercise).Select(n => new ExerciseModel
                 {
@@ -104,7 +109,7 @@ namespace Fsel.Course.Lms.Application.Queries.ExtraPracticeQuery
                         CorrectTotal = m.CorrectTotal,
                         Explanation = m.Explanation,
                         Ungraded = m.Ungraded,
-                        Config = _questionTypeConverter.QuestionTypeConverterObject(m.Config, m.QuestionType, isDisableAnswers: !(m.VideoTimeCodeAnswers.FirstOrDefault()?.Status == EnumCurrentStatus.Done)).Item1,
+                        Config = GetAnswerConfig(m, isCheckDone),
                         ResultAnswer = _mapper.Map<AnswerModel>(m.ExtraPracticeAnswers!.FirstOrDefault())
                     }).ToList()
                 }).ToList(),
@@ -112,6 +117,25 @@ namespace Fsel.Course.Lms.Application.Queries.ExtraPracticeQuery
             methodResult.Result = videoTimeCodeModel;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
+        }
+
+        private static int GetQuestionCount(VideoTimeCode videoTimeCode)
+        {
+            return videoTimeCode.TimeCodeExercises.Where(x => !x.IsDeleted && x.Exercise != null).Select(x => x.Exercise).SelectMany(x => x!.ExerciseQuestions.Where(x => !x.IsDeleted && x.Question != null)).Select(m => m.Question).Count();
+        }
+
+        private static int GetCorrectcount(VideoTimeCode videoTimeCode)
+        {
+            return videoTimeCode.ExtraPracticeAnswers.Count > 0 ? videoTimeCode.ExtraPracticeAnswers.Sum(x => x.CorrectCount) : default;
+        }
+
+        private object? GetAnswerConfig(Question? question, bool isCheckDone)
+        {
+            if (question == null)
+            {
+                return default;
+            }
+            return _questionTypeConverter.QuestionTypeConverterObject(question.Config, question.QuestionType, isDisableAnswers: !isCheckDone).Item1;
         }
     }
 }

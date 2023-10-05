@@ -106,7 +106,7 @@ namespace Fsel.Course.Lms.Application.Queries.VideoQuery
                     Ungraded = x.TimeCodeExercises.Select(x => x.Exercise).SelectMany(x => x!.ExerciseQuestions).Select(x => x.Question).FirstOrDefault()?.Ungraded ?? default,
                     CorrectCount = x.VideoTimeCodeAnswers.Count > 0 ? x.VideoTimeCodeAnswers.Sum(x => x.CorrectCount) : 0,
                     CorrectTotal = x.TimeCodeExercises.Select(x => x.Exercise).SelectMany(x => x!.ExerciseQuestions).Select(x => x.Question).Sum(x => x!.CorrectTotal),
-                    Status = (x.VideoTimeCodeAnswers.Count > 0 && x.VideoTimeCodeAnswers.All(y => videoResult != null && y.VideoResultId == videoResult.Id && y.Status == EnumCurrentStatus.Done)) ? EnumCurrentStatus.Done : EnumCurrentStatus.Process,
+                    Status = (x.VideoTimeCodeAnswers.Count > 0 && x.VideoTimeCodeAnswers.All(y => videoResult != null && y.VideoResultId == videoResult.Id && y.Status == EnumTimeCodeStatus.Done)) ? EnumTimeCodeStatus.Done : EnumTimeCodeStatus.Process,
                     Exercises = x.TimeCodeExercises.OrderBy(x => x!.CreatedDate).Select(n => n.Exercise).Select(n => new ExerciseModel
                     {
                         Id = n!.Id,
@@ -120,7 +120,7 @@ namespace Fsel.Course.Lms.Application.Queries.VideoQuery
                             CorrectTotal = m.CorrectTotal,
                             Explanation = m.Explanation,
                             Ungraded = m.Ungraded,
-                            Config = _questionTypeConverter.QuestionTypeConverterObject(m.Config, m.QuestionType, isDisableAnswers: !(m.VideoTimeCodeAnswers.FirstOrDefault()?.Status == EnumCurrentStatus.Done)).Item1,
+                            Config = _questionTypeConverter.QuestionTypeConverterObject(m.Config, m.QuestionType, isDisableAnswers: !(m.VideoTimeCodeAnswers.FirstOrDefault()?.Status == EnumTimeCodeStatus.Done)).Item1,
                             ResultAnswer = _mapper.Map<AnswerModel>(m.VideoTimeCodeAnswers!.FirstOrDefault())
                         }).ToList()
                     }).ToList(),

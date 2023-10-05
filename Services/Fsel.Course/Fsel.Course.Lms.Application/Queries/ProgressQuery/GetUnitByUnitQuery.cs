@@ -157,7 +157,8 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
                 var videoIds = x.UnitLessons.Select(x => x.Lesson).SelectMany(x => x!.LessonVideos).Select(x => x!.VideoId).ToList();
                 var videoResultIds = await _videoResultRepository.Queryable.Where(x => x.StudentId == studentId && videoIds.Contains(x.VideoId)).Select(x => x.Id).ToListAsync();
                 var videos = await _videoRepository.Queryable.Include(x => x.VideoTimeCodes)
-                                                            .ThenInclude(x => x.VideoTimeCodeAnswers.Where(y => videoResultIds.Contains(y.VideoResultId)))
+                                                            .ThenInclude(x => x.VideoTimeCodeResults.Where(y => videoResultIds.Contains(y.VideoResultId)))
+                                                            .ThenInclude(x => x.VideoTimeCodeAnswers)
                                                             .Include(x => x.VideoTimeCodes)
                                                             .ThenInclude(x => x.TimeCodeExercises)
                                                             .ThenInclude(x => x.Exercise)

@@ -1,0 +1,35 @@
+// Copyright (c) Atlantic. All rights reserved.
+
+namespace Fsel.Course.Domain.Entities
+{
+    using Fsel.Common.Enums.ErrorCodes;
+    using System.ComponentModel.DataAnnotations;
+    using Fsel.Core.Entities;
+    using Fsel.Course.Domain.Enums;
+
+    public class BaseResult : Entity
+    {
+        /// <summary>
+        /// Số câu trả lời đúng của Student
+        /// </summary>
+        [Range(0, 10000_0000, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
+        public int CorrectCount { get; set; }
+
+        /// <summary>
+        /// Tổng số câu trả lời đúng
+        /// </summary>
+        [Range(0, 10000_0000, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
+        public int CorrectTotal { get; set; }
+
+        /// <summary>
+        /// Phần trăm câu trả lời đúng
+        /// </summary>
+        [Range(0, 100, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
+        public double Percent { get; set; }
+
+        /// <summary>
+        /// Trạng thái
+        /// </summary>
+        public EnumResultStatus Status { get; set; }
+    }
+}

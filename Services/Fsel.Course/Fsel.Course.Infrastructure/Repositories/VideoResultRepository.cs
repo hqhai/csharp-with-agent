@@ -17,7 +17,7 @@ namespace Fsel.Course.Infrastructure.Repositories
         {
             try
             {
-                return await Queryable.Include(x => x.VideoTimeCodeAnswers)
+                return await Queryable.Include(x => x.VideoTimeCodeResults).ThenInclude(x => x.VideoTimeCodeAnswers)
                                       .FirstOrDefaultAsync(x => x.VideoId == videoId && x.LessonResultId == lessonResultId && x.StudentId == studentId);
             }
             catch (Exception)

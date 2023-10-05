@@ -17,15 +17,11 @@ namespace Fsel.Course.Infrastructure.Configs
                   .HasMaxLength(100)
                   .HasConversion(
                       v => v.ToString(),
-                      v => v.EnumParse<EnumCurrentStatus>());
-            builder.HasOne(a => a.VideoResult)
-              .WithMany(b => b.VideoTimeCodeAnswers)
-              .HasForeignKey(b => b.VideoResultId)
-              .OnDelete(DeleteBehavior.Cascade);
+                      v => v.EnumParse<EnumTimeCodeStatus>());
 
-            builder.HasOne(a => a.VideoTimeCode)
+            builder.HasOne(a => a.VideoTimeCodeResult)
                           .WithMany(b => b.VideoTimeCodeAnswers)
-                          .HasForeignKey(b => b.VideoTimeCodeId)
+                          .HasForeignKey(b => b.VideoTimeCodeResultId)
                           .OnDelete(DeleteBehavior.NoAction);
 
             builder.HasOne(a => a.Exercise)

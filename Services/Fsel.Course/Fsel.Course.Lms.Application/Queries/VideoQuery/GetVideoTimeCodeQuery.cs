@@ -65,7 +65,8 @@ namespace Fsel.Course.Lms.Application.Queries.VideoQuery
             var video = await _videoRepository.Queryable
                                 .Include(x => x.LessonVideos)
                                 .Include(i => i.VideoTimeCodes)
-                                .ThenInclude(x => x.VideoTimeCodeAnswers.Where(x => x.VideoResultId == videoResult.Id))
+                                .ThenInclude(i => i.VideoTimeCodeResults.Where(x => x.VideoResultId == videoResult.Id))
+                                .ThenInclude(x => x.VideoTimeCodeAnswers)
                                 .Include(i => i.VideoResults)
                                 .Where(x => x.Id == request.VideoId)
                                 .AsNoTracking()
@@ -133,33 +134,33 @@ namespace Fsel.Course.Lms.Application.Queries.VideoQuery
                     ExecutionTime = item.ExecutionTime,
                     TimeCodeType = item.TimeCodeType,
                     VideoId = item.VideoId,
-                    Status = GetStatusTimeCode(indexProcess, indexTimeCode)
+                    Status = GetTimeCodeStatus(indexProcess, indexTimeCode)
                 });
             }
             return videoTimeCodeModels;
         }
 
-        private static EnumCurrentStatus GetStatusTimeCode(int? indexProcess, int indexTimeCode)
+        private static EnumTimeCodeStatus GetTimeCodeStatus(int? indexProcess, int indexTimeCode)
         {
-            var timeCodeStatus = EnumCurrentStatus.Lock;
+            var timeCodeStatus = EnumTimeCodeStatus.Lock;
             if (indexProcess < indexTimeCode)
             {
                 return timeCodeStatus;
             }
             else if (indexProcess == indexTimeCode)
             {
-                timeCodeStatus = EnumCurrentStatus.Process;
+                timeCodeStatus = EnumTimeCodeStatus.Process;
             }
             else if (indexProcess > indexTimeCode || indexProcess == null)
             {
-                timeCodeStatus = EnumCurrentStatus.Done;
+                timeCodeStatus = EnumTimeCodeStatus.Done;
             }
             return timeCodeStatus;
         }
 
         private static int? GetIndexProcess(List<VideoTimeCode> videoTimeCodes, Guid videoResultId)
         {
-            var timeCode = videoTimeCodes.Where(x => !x.VideoTimeCodeAnswers.Any() || x.VideoTimeCodeAnswers.Any(x => x.VideoResultId == videoResultId && x.Status != EnumCurrentStatus.Done)).FirstOrDefault();
+            var timeCode = videoTimeCodes.Where(x => !x.VideoTimeCodeAnswers.Any() || x.VideoTimeCodeAnswers.Any(x => x.VideoResultId == videoResultId && x.Status != EnumTimeCodeStatus.Done)).FirstOrDefault();
             if (timeCode == null)
             {
                 return null;

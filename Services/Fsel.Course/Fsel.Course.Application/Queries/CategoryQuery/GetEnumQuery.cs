@@ -65,7 +65,7 @@ namespace Fsel.Course.Application.Queries.CategoryQuery
                     break;
 
                 case EnumCourseSourceData.CurrentStatus:
-                    methodResult.Result = ConvertHelper.EnumToListModel<EnumCurrentStatus>();
+                    methodResult.Result = ConvertHelper.EnumToListModel<EnumTimeCodeStatus>();
                     break;
 
                 case EnumCourseSourceData.WorkFlowType:
