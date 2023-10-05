@@ -2,6 +2,7 @@
 
 using AutoMapper;
 using Fsel.Common.ActionResults;
+using Fsel.Common.Enums.ErrorCodes;
 using Fsel.Course.Domain.Entities;
 using Fsel.Course.Domain.IRepositories;
 using Fsel.Course.Domain.Models.CommandModels.Units;
@@ -36,7 +37,11 @@ namespace Fsel.Course.Application.Commands.UnitCmd
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<UnitModel> methodResult = new MethodResult<UnitModel>();
-
+            if (request.LessonIds == null || !request.LessonIds.Any())
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.LessonIds), request.LessonIds);
+                return methodResult;
+            }
             Unit unit = _mapper.Map<Unit>(request);
             var method = await _unitHelper.Validate(unit, request);
             if (!method.IsOK)
@@ -46,19 +51,19 @@ namespace Fsel.Course.Application.Commands.UnitCmd
             }
             await _unitRepository.ExecuteTransactionAsync(async () =>
             {
-                unit.UnitLessons = request.LessonIds!.Select((x, index) => new UnitLesson
+                unit.UnitLessons = request.LessonIds.Select((x, index) => new UnitLesson
                 {
-                    DisplayOrder = index,
+                    DisplayOrder = index + 1,
                     LessonId = x
                 }).ToList();
                 if (request.MockTestId != null)
                 {
                     unit.UnitSkillMockTests = new List<UnitSkillMockTest>
                     {
-                    new UnitSkillMockTest
-                    {
-                        MockTestId = request.MockTestId ?? default,
-                    }
+                        new UnitSkillMockTest
+                        {
+                            MockTestId = request.MockTestId ?? default,
+                        }
                     };
                 }
                 unit = _unitRepository.Add(unit);

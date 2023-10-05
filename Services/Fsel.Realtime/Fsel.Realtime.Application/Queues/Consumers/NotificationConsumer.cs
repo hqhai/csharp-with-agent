@@ -1,3 +1,4 @@
+using Fsel.Core.Extensions;
 using Fsel.Realtime.Application.Hubs;
 using Fsel.Shared.Constants;
 using Fsel.Shared.Models.ShareModels;
@@ -22,12 +23,12 @@ namespace Fsel.Realtime.Application.Queues.Consumers
                 var userId = context.Message.UserId.ToString();
                 if (userId != null && context!.Message!.UserIds!.Count == 0)
                 {
-                    await _notificationHubContext.Clients.Group(userId!).SendAsync(RealtimeSettings.NotificationHub.Methods.NotificationMessage, context.Message);
+                    await _notificationHubContext.GetGroup(userId!).SendAsync(RealtimeSettings.NotificationHub.Methods.NotificationMessage, context.Message);
                 }
                 else if (context!.Message!.UserIds!.Count > 0)
                 {
                     var userIds = context.Message.UserIds;
-                    await _notificationHubContext.Clients.Groups(userIds).SendAsync(RealtimeSettings.NotificationHub.Methods.NotificationMessage, context.Message);
+                    await _notificationHubContext.GetGroups(userIds).SendAsync(RealtimeSettings.NotificationHub.Methods.NotificationMessage, context.Message);
                 }
             }
         }

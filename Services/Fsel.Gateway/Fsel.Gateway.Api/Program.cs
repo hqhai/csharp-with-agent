@@ -16,6 +16,11 @@ builder.Configuration
     .AddEnvironmentVariables();
 builder.Services.AddOcelot(builder.Configuration);
 
+builder.WebHost.UseKestrel(options =>
+{
+    options.Limits.MaxRequestBodySize = null;
+});
+
 var app = builder.Build();
 app.UseGatewayServices();
 

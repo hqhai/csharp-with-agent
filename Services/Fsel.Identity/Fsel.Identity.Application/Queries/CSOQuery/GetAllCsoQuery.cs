@@ -12,27 +12,27 @@ namespace Fsel.Identity.Application.Queries.CSOQuery
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class GetAllCSOQuery : IRequest<MethodResult<IList<CSOModel>>>
+    public class GetAllCsoQuery : IRequest<MethodResult<IList<CSOModel>>>
     {
     }
 
-    public class GetAllCSOQueryHandler : IRequestHandler<GetAllCSOQuery, MethodResult<IList<CSOModel>>>
+    public class GetAllCsoQueryHandler : IRequestHandler<GetAllCsoQuery, MethodResult<IList<CSOModel>>>
     {
-        private readonly ICSORepository _cSORepository;
+        private readonly ICSORepository _csoRepository;
         private readonly IMapper _mapper;
 
-        public GetAllCSOQueryHandler(ICSORepository cSORepository, IMapper mapper)
+        public GetAllCsoQueryHandler(ICSORepository csoRepository, IMapper mapper)
         {
-            _cSORepository = cSORepository;
+            _csoRepository = csoRepository;
             _mapper = mapper;
         }
 
-        public async Task<MethodResult<IList<CSOModel>>> Handle(GetAllCSOQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<IList<CSOModel>>> Handle(GetAllCsoQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<IList<CSOModel>>();
 
-            var allCSo = await _cSORepository.Queryable.Include(p => p.Human).ToListAsync(cancellationToken);
+            var allCSo = await _csoRepository.Queryable.Include(p => p.Human).ToListAsync(cancellationToken);
             methodResult.Result = _mapper.Map<IList<CSOModel>>(allCSo);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;

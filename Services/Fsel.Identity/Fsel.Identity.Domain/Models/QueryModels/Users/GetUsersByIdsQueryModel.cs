@@ -1,4 +1,4 @@
-// Copyright (c) Atlantic. All rights reserved.
+    // Copyright (c) Atlantic. All rights reserved.
 
 namespace Fsel.Identity.Domain.Models.QueryModels.Users
 {

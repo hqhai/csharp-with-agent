@@ -734,6 +734,9 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.Property<Guid?>("MockTestId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<int>("Number")
+                        .HasColumnType("int");
+
                     b.Property<Guid?>("UnitId")
                         .HasColumnType("uniqueidentifier");
 

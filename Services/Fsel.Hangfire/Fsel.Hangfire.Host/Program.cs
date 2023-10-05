@@ -22,6 +22,8 @@ builder.Services.AddScoped<UpdateClassLiveAssignmentPublisher>();
 builder.Services.AddScoped<UpdateOcCheckInClassForumResultPublisher>();
 builder.Services.AddScoped<UpdateTeacherGradingInClassForumAndMockTestPublisher>();
 builder.Services.AddScoped<SyncStudentShieldEveryDayPublisher>();
+builder.Services.AddScoped<LeaderBoardPublisher>();
+
 var app = builder.Build();
 
 app.UseServices();

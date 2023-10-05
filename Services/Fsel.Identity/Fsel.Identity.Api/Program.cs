@@ -2,6 +2,7 @@
 
 using Fsel.Core.Extensions;
 using Fsel.Identity.Application.Queues.Consumers;
+using Fsel.Identity.Application.Queues.Publishers;
 using Fsel.Identity.Application.Services;
 using Fsel.Identity.Application.Services.CMSPlanetDefenderService;
 using Fsel.Identity.Application.Services.InteractionService;
@@ -42,6 +43,8 @@ builder.Services.AddScoped<ICSORepository, CSORepository>();
 builder.Services.AddScoped<ITeacherBankAccountRepository, TeacherBankAccountRepository>();
 builder.Services.AddScoped<IUserSettingRepository, UserSettingRepository>();
 builder.Services.AddScoped<IPlatformRepository, PlatformRepository>();
+builder.Services.AddScoped<IStudentRankingRepository, StudentRankingRepository>();
+builder.Services.AddScoped<LeaderBoardPublisher>();
 builder.Services.AddScoped<IUserPlatformRepository, UserPlatformRepository>();
 builder.Services.AddScoped<IUserRoleRepository, UserRoleRepository>();
 
@@ -56,7 +59,9 @@ builder.AddMassTransit(appSetting,
 queues: new Dictionary<string, Type>
 {
     { QueueSettings.SystemQueue.NameQueue.CreateStudentDailyStreak, typeof(CreateStudentDailyStreakConsumer) },
-    { QueueSettings.UserQueue.NameQueue.SyncStudentShieldEveryDay, typeof(SyncStudentShieldForDailyStreakEveryDayConsumer) }
+    { QueueSettings.UserQueue.NameQueue.SyncStudentShieldEveryDay, typeof(SyncStudentShieldForDailyStreakEveryDayConsumer) },
+    { QueueSettings.UserQueue.NameQueue.UpdateStudentsDailyStreak, typeof(SyncStudentShieldForDailyStreakEveryDayConsumer) },
+    { QueueSettings.UserQueue.NameQueue.LeaderBoard, typeof(LeaderBoardConsumer) }
 });
 var app = builder.Build();
 app.UseServices();
