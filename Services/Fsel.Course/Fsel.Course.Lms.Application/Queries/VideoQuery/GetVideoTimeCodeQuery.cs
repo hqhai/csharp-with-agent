@@ -160,7 +160,7 @@ namespace Fsel.Course.Lms.Application.Queries.VideoQuery
 
         private static int? GetIndexProcess(List<VideoTimeCode> videoTimeCodes, Guid videoResultId)
         {
-            var timeCode = videoTimeCodes.Where(x => !x.VideoTimeCodeAnswers.Any() || x.VideoTimeCodeAnswers.Any(x => x.VideoResultId == videoResultId && x.Status != EnumTimeCodeStatus.Done)).FirstOrDefault();
+            var timeCode = videoTimeCodes.Where(x => !x.VideoTimeCodeResults.Any() || x.VideoTimeCodeResults.Any(x => x.VideoResultId == videoResultId)).FirstOrDefault();
             if (timeCode == null)
             {
                 return null;
