@@ -134,8 +134,8 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd
                             .Select(h => new LessonHomeWorkResultModel
                             {
                                 Id = h.Id,
-                                QuestionTotal = h.HomeWorkQuestions.Count(),
-                                CorrectTotal = h.HomeWorkQuestions.Select(x => x.Question).Sum(x => x!.CorrectTotal),
+                                QuestionTotal = h.HomeWorkQuestions.Select(x => x.Question).Where(x => x!.QuestionType != EnumQuestionType.ExercisePreparation).Count(),
+                                CorrectTotal = h.HomeWorkQuestions.Select(x => x.Question).Where(x => x!.QuestionType != EnumQuestionType.ExercisePreparation).Sum(x => x!.CorrectTotal),
                             }).FirstOrDefaultAsync(cancellationToken);
             if (homeWork != null && request.Answers.Count == homeWork.QuestionTotal)
             {
