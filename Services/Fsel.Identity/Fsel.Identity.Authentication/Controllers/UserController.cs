@@ -64,7 +64,7 @@ namespace Fsel.Identity.Authentication.Controllers
         [HttpPost("confirm-otp-reset-password")]
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> ConfirmOTPResetPassword([FromBody] ConFirmOTPResetPasswordCommand command)
+        public async Task<IActionResult> ConfirmOTPResetPassword([FromBody] ConfirmOtpResetPasswordCommand command)
         {
             MethodResult<bool> commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();
@@ -100,7 +100,7 @@ namespace Fsel.Identity.Authentication.Controllers
         [HttpGet("confirm-otp-profile")]
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> ConfirmOtpProfile([FromQuery] ConFirmOtpProfileCommand command)
+        public async Task<IActionResult> ConfirmOtpProfile([FromQuery] ConfirmOtpProfileCommand command)
         {
             MethodResult<bool> commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();
