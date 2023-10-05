@@ -93,7 +93,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumQuery
                 return methodResult;
             }
             var classForumByStudentModel = _mapper.Map<ClassForumByStudentModel>(classForum);
-            
+
             // Lấy list StudentId đang học trong class hiện tại
             IList<Guid>? classStudentIds = new List<Guid>();
             var currentClass = await _trainingService.GetClassByStudentId(student.Id);
@@ -122,9 +122,8 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumQuery
 
             var classForumResults = _mapper.Map<IList<ClassForumResultModel>>(query);
             var classForumResultsRandom = _mapper.Map<IList<ClassForumResultModel>>(queryRandomStudent);
-            /*var studentclass =classForumResults.Select(x => x.CourseLevel).FirstOrDefault();
-            studentclass = student.CourseLevel;*/
-            foreach( var classForumResult in classForumResults)
+
+            foreach (var classForumResult in classForumResults)
             {
                 classForumResult.CourseLevel = student.CourseLevel;
             }
