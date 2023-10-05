@@ -12,22 +12,22 @@ namespace Fsel.Identity.Application.Commands.UserCmd
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class ChangeStatusAccountCommand : ChangeStatusAccountCommandModel, IRequest<MethodResult<bool>>
+    public class ChangeAccountStatusCommand : ChangeAccountStatusCommandModel, IRequest<MethodResult<bool>>
     {
     }
 
-    public class ChangeStatusAccountCommandHandler : IRequestHandler<ChangeStatusAccountCommand, MethodResult<bool>>
+    public class ChangeAccountStatusCommandHandler : IRequestHandler<ChangeAccountStatusCommand, MethodResult<bool>>
     {
         private readonly IPlatformRepository _platformRepository;
         private readonly IUserPlatformRepository _userPlatformRepository;
 
-        public ChangeStatusAccountCommandHandler(IPlatformRepository platformRepository, IUserPlatformRepository userPlatformRepository)
+        public ChangeAccountStatusCommandHandler(IPlatformRepository platformRepository, IUserPlatformRepository userPlatformRepository)
         {
             _platformRepository = platformRepository;
             _userPlatformRepository = userPlatformRepository;
         }
 
-        public async Task<MethodResult<bool>> Handle(ChangeStatusAccountCommand request, CancellationToken cancellationToken)
+        public async Task<MethodResult<bool>> Handle(ChangeAccountStatusCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<bool>();

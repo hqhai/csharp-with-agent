@@ -51,7 +51,6 @@ namespace Fsel.Cms.PlanetDefender.Application.Queries.StudentGameInfoQuery
             });
 
 
-
             if (request.Level.HasValue)
             {
                 studentsInPlatform = studentsInPlatform.Where(p => p.Level == request.Level).ToList();

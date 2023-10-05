@@ -66,7 +66,7 @@ namespace Fsel.Identity.Api.Controllers
         [HttpPost("change-status-account")]
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetAll([FromBody] ChangeStatusAccountCommand command)
+        public async Task<IActionResult> GetAll([FromBody] ChangeAccountStatusCommand command)
         {
             MethodResult<bool> commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();
