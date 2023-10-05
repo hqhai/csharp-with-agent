@@ -6,6 +6,7 @@ namespace Fsel.Identity.Api.Controllers
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
     using Fsel.Core.Base.BaseModels;
+    using Fsel.Identity.Application.Commands.UserCmd;
     using Fsel.Identity.Application.Queries.PlatformQuery;
     using Fsel.Identity.Application.Queries.StudentQuery;
     using Fsel.Identity.Domain.Models.EntityModels;
@@ -57,6 +58,18 @@ namespace Fsel.Identity.Api.Controllers
         public async Task<IActionResult> GetAll([FromQuery] SearchStudentInPlatformQuery query)
         {
             MethodResult<PagingItemsModel<StudentInPlatformModel>> commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// change status account
+        /// </summary>
+        [HttpPost("change-status-account")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetAll([FromBody] ChangeStatusAccountCommand command)
+        {
+            MethodResult<bool> commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
     }
