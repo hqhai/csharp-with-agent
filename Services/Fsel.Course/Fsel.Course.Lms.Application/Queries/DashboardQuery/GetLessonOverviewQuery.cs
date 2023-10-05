@@ -32,6 +32,7 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
         private readonly ILessonRepository _lessonRepository;
         private readonly ICourseRepository _courseRepository;
         private readonly IUnitRepository _unitRepository;
+        private readonly IMockTestResultRepository _mockTestResultRepository;
         private readonly IMapper _mapper;
         private readonly ITrainingService _trainingService;
         private readonly AuthContext _authContext;
@@ -41,6 +42,7 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
             ILessonRepository lessonRepository,
             ICourseRepository courseRepository,
             IUnitRepository unitRepository,
+            IMockTestResultRepository mockTestResultRepository,
             IMapper mapper,
             ITrainingService trainingService,
             AuthContext authContext)
@@ -50,6 +52,7 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
             _lessonRepository = lessonRepository;
             _courseRepository = courseRepository;
             _unitRepository = unitRepository;
+            _mockTestResultRepository = mockTestResultRepository;
             _mapper = mapper;
             _trainingService = trainingService;
             _authContext = authContext;
@@ -104,7 +107,14 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
             if ((lessonResult != null && lessonResult.Status == EnumResultStatus.Done) || lessonResult == null)
             {
                 lesson = await GetLesson(lessonResult, course, cancellationToken);
-                lessonResult = default;
+                if (lesson != null)
+                {
+                    lessonResult = default;
+                }
+                else
+                {
+                    lesson = lessonResult?.Lesson;
+                }
             }
 
             if (lesson == null)
@@ -152,34 +162,53 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
             return lessonDashBoard;
         }
 
-        private async Task<Lesson?> GetLesson(LessonResult? lessonResult, Course course, CancellationToken cancellationToken)
+        private async Task<Guid?> GetUnitId(LessonResult? lessonResult, Course course)
         {
             Guid? unitId = default;
             var courseUnitMockTests = course.CourseUnitMockTests.OrderBy(x => x.DisplayOrder).ToList();
+            var courseUnits = courseUnitMockTests.Where(x => x.UnitId.HasValue).ToList();
             if (lessonResult != null && lessonResult.Status == EnumResultStatus.Done)
             {
-                var courseUnitMockTest = courseUnitMockTests.FirstOrDefault(x => x.UnitId == lessonResult.UnitId);
-                if (courseUnitMockTest != null)
+                var courseUnit = courseUnits.FirstOrDefault(x => x.UnitId == lessonResult.UnitId);
+                if (courseUnit != null)
                 {
-                    var index = courseUnitMockTests.IndexOf(courseUnitMockTest);
-                    unitId = courseUnitMockTests[index + 1].UnitId;
+                    var index = courseUnitMockTests.IndexOf(courseUnit);
+                    var courseUnitMockTest = courseUnitMockTests[index + 1];
+                    if (courseUnitMockTest.MockTestId.HasValue)
+                    {
+                        unitId = lessonResult.UnitId;
+                        var mockTestResult = await _mockTestResultRepository.Queryable.Where(x => x.MockTestId == courseUnitMockTest.MockTestId.Value && x.CourseId == course.Id).FirstOrDefaultAsync();
+                        if (mockTestResult != null && mockTestResult.Status == EnumResultStatus.Done)
+                        {
+                            courseUnitMockTest = courseUnitMockTests[courseUnitMockTests.IndexOf(courseUnitMockTest) + 1];
+                            if (courseUnitMockTest != null)
+                            {
+                                unitId = courseUnitMockTest.UnitId;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        unitId = courseUnitMockTest.UnitId;
+                    }
                 }
             }
-            if (lessonResult == null)
+            else if (lessonResult == null)
             {
                 unitId = courseUnitMockTests.FirstOrDefault()?.UnitId;
             }
+            return unitId;
+        }
 
-            if (unitId != null)
+        private async Task<Lesson?> GetLesson(LessonResult? lessonResult, Course course, CancellationToken cancellationToken)
+        {
+            var unitId = await GetUnitId(lessonResult, course);
+            var unit = await _unitRepository.Queryable.Include(x => x.UnitLessons).FirstOrDefaultAsync(x => x.Id == unitId, cancellationToken);
+            if (unit != null)
             {
-                var unit = await _unitRepository.Queryable.Include(x => x.UnitLessons).FirstOrDefaultAsync(x => x.Id == unitId, cancellationToken);
-                if (unit != null)
-                {
-                    var lessonId = unit.UnitLessons.OrderBy(x => x.DisplayOrder).FirstOrDefault()?.LessonId ?? default;
-                    return await _lessonRepository.Queryable.Include(x => x.LessonInstructions).FirstOrDefaultAsync(x => x.Id == lessonId, cancellationToken);
-                }
+                var lessonId = unit.UnitLessons.OrderBy(x => x.DisplayOrder).FirstOrDefault()?.LessonId ?? default;
+                return await _lessonRepository.Queryable.Include(x => x.LessonInstructions).FirstOrDefaultAsync(x => x.Id == lessonId, cancellationToken);
             }
-
             return default;
         }
 
