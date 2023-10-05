@@ -127,6 +127,7 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd
                     homeWorkAnswers.Add(homeWorkAnswer);
                 }
             }
+
             var homeWork = await _homeWorkRepository.Queryable
                             .Include(x => x!.HomeWorkQuestions)
                             .ThenInclude(x => x.Question)
