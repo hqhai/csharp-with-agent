@@ -10,10 +10,10 @@ namespace Fsel.Ordering.Application.Queries.UserVoucher
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base;
-    using Fsel.Ordering.Domain.Entities.PackageConfigs;
     using Fsel.Ordering.Domain.IRepositories;
     using Fsel.Ordering.Domain.Models.EntityModels;
     using Fsel.Shared.Enums;
+    using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -60,7 +60,7 @@ namespace Fsel.Ordering.Application.Queries.UserVoucher
                                     CreatedDate = x.CreatedDate,
                                     Percentage = x.Percentage,
                                     PackageId = x.PackageId,
-                                    DiscountedPrice = (double)x.Package!.Price - (x.Percentage * (double)x.Package!.Price / 100),
+                                    DiscountedPrice = (double)x.Package!.Price - NumberHelper.ConvertDoublePercent(x.Percentage * (double)x.Package!.Price),
                                     Package = _mapper.Map<PackageModel>(x.Package)
                                 }).ToList(),
                             }).ToListAsync(cancellationToken);

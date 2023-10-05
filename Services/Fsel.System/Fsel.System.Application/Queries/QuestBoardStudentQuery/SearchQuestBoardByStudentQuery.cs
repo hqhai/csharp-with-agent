@@ -87,40 +87,41 @@ namespace Fsel.System.Application.Queries.QuestBoardStudentQuery
                                          StartDate = baseQ.StartDate,
                                          EndDate = baseQ.EndDate ?? null,
                                          NumberOfStars = baseQ.NumberOfStars,
-                                         Status = baseQ.QuestBoardStudents.Any(x => x.StudentId == student.Id && x.QuestBoardId == baseQ.Id) ? baseQ.QuestBoardStudents.FirstOrDefault(x => x.StudentId == student.Id && x.QuestBoardId == baseQ.Id)!.Status : null,
+                                         Status = baseQ.QuestBoardStudents.Any(x => x.StudentId == student.Id && x.QuestBoardId == baseQ.Id && x.CreatedDate.Date == DateTime.Now.Date) ? baseQ.QuestBoardStudents.FirstOrDefault(x => x.StudentId == student.Id && x.QuestBoardId == baseQ.Id && x.CreatedDate.Date == DateTime.Now.Date)!.Status : null,
                                      }).ToListAsync(cancellationToken);
 
             questBoards = questBoards.Where(baseQ => baseQ.PackageIds != null && baseQ.PackageIds.Count > 0 && baseQ.PackageIds.Any(x => x == student.PackageId)).ToList();
 
             var questBoardDepentDoneIds = questBoards.Where(x => x.Status == EnumQuestBoardStudentStatus.Completed).Select(x => x.Id).ToList();
+            if (questBoardDepentDoneIds.Any())
+            {
+                var questBoardDepents = await _questBoardRepository.Queryable
+                                        .Include(x => x.QuestBoardStudents)
+                                        .Where(x => x.DependentId != null && x.IsActive && questBoardDepentDoneIds.Any(y => y == (x.DependentId ?? default)))
+                                        .Select(baseQ => new QuestBoardByStudentModel
+                                        {
+                                            Id = baseQ.Id,
+                                            CreatedDate = baseQ.CreatedDate,
+                                            CreatedFullName = baseQ.CreatedFullName,
+                                            CreatedUserId = baseQ.CreatedUserId,
+                                            UpdatedDate = baseQ.UpdatedDate,
+                                            UpdatedFullName = baseQ.UpdatedFullName,
+                                            UpdatedUserId = baseQ.UpdatedUserId,
+                                            Name = baseQ.Name,
+                                            PackageIds = baseQ.PackageIds,
+                                            RepeatType = baseQ.RepeatType ?? null,
+                                            Category = baseQ.Category,
+                                            StartDate = baseQ.StartDate,
+                                            EndDate = baseQ.EndDate ?? null,
+                                            NumberOfStars = baseQ.NumberOfStars,
+                                            Status = baseQ.QuestBoardStudents.Any(x => x.StudentId == student.Id && x.QuestBoardId == baseQ.Id) ? baseQ.QuestBoardStudents.FirstOrDefault(x => x.StudentId == student.Id && x.QuestBoardId == baseQ.Id)!.Status : null,
+                                        }).ToListAsync(cancellationToken);
+                questBoardDepents = questBoardDepents.Where(baseQ => baseQ.PackageIds != null && baseQ.PackageIds.Count > 0 && baseQ.PackageIds.Any(x => x == student.PackageId)).ToList();
+                questBoards = questBoards.Union(questBoardDepents).ToList();
+            }
 
-            var questBoardDepents = await _questBoardRepository.Queryable
-                                    .Include(x => x.QuestBoardStudents)
-                                    .Where(x => x.DependentId != null && x.IsActive && questBoardDepentDoneIds.Any(y => y == (x.DependentId ?? default)))
-                                    .Select(baseQ => new QuestBoardByStudentModel
-                                    {
-                                        Id = baseQ.Id,
-                                        CreatedDate = baseQ.CreatedDate,
-                                        CreatedFullName = baseQ.CreatedFullName,
-                                        CreatedUserId = baseQ.CreatedUserId,
-                                        UpdatedDate = baseQ.UpdatedDate,
-                                        UpdatedFullName = baseQ.UpdatedFullName,
-                                        UpdatedUserId = baseQ.UpdatedUserId,
-                                        Name = baseQ.Name,
-                                        PackageIds = baseQ.PackageIds,
-                                        RepeatType = baseQ.RepeatType ?? null,
-                                        Category = baseQ.Category,
-                                        StartDate = baseQ.StartDate,
-                                        EndDate = baseQ.EndDate ?? null,
-                                        NumberOfStars = baseQ.NumberOfStars,
-                                        Status = baseQ.QuestBoardStudents.Any(x => x.StudentId == student.Id && x.QuestBoardId == baseQ.Id) ? baseQ.QuestBoardStudents.FirstOrDefault(x => x.StudentId == student.Id && x.QuestBoardId == baseQ.Id)!.Status : null,
-                                    }).ToListAsync(cancellationToken);
-
-            questBoardDepents = questBoardDepents.Where(baseQ => baseQ.PackageIds != null && baseQ.PackageIds.Count > 0 && baseQ.PackageIds.Any(x => x == student.PackageId)).ToList();
-
-            var query = questBoards.Union(questBoardDepents);
-            int totalItem = query.Count();
-            var lists = query.OrderBy(x => x.CreatedDate).Skip((request!.Page - 1) * request!.PageSize).Take(request!.PageSize).ToList();
+            int totalItem = questBoards.Count;
+            var lists = questBoards.OrderBy(x => x.CreatedDate).Skip((request.Page - 1) * request.PageSize).Take(request.PageSize).ToList();
             switch (request.Type)
             {
                 case EnumQuestBoardType.MainQuests:
@@ -158,19 +159,25 @@ namespace Fsel.System.Application.Queries.QuestBoardStudentQuery
             {
                 switch (item.Category)
                 {
-                    case EnumQuestBoardCategory.FinishOnelesson:
-                        var finishOnelesson = await _courseService.GetPercentVideoResult(new GetFinishOneLessonQueryModel { EndDate = item.EndDate, StartDate = item.StartDate, RepeatType = item.RepeatType, StudentId = studentId });
-                        item.Percent = finishOnelesson.Content?.Result ?? default;
+                    case EnumQuestBoardCategory.FinishOneLesson:
+                        var finishOnelessonResult = await _courseService.GetPercentVideoResult(new GetFinishOneLessonQueryModel { EndDate = item.EndDate, StartDate = item.StartDate, RepeatType = item.RepeatType, StudentId = studentId });
+                        var finishOnelesson = finishOnelessonResult.Content?.Result ?? default;
+                        item.Percent = finishOnelesson?.Percent ?? default;
+                        item.ObjectId = finishOnelesson?.ObjectId;
                         break;
 
                     case EnumQuestBoardCategory.FinishOneUnit:
-                        var finishOneUnit = await _courseService.GetPercentUnitResult(new GetFinishOneQueryModel { CurrentUserId = currentUserId, StudentId = studentId });
-                        item.Percent = finishOneUnit.Content?.Result ?? default;
+                        var finishOneUnitResult = await _courseService.GetPercentUnitResult(new GetFinishOneQueryModel { CurrentUserId = currentUserId, StudentId = studentId });
+                        var finishOneUnit = finishOneUnitResult.Content?.Result ?? default;
+                        item.Percent = finishOneUnit?.Percent ?? default;
+                        item.ObjectId = finishOneUnit?.ObjectId;
                         break;
 
                     case EnumQuestBoardCategory.FinishOneLevelPass:
-                        var finishOneLevelPass = await _courseService.GetPercentCourseResult(new GetFinishOneQueryModel { CurrentUserId = currentUserId, StudentId = studentId });
-                        item.Percent = finishOneLevelPass.Content?.Result ?? default;
+                        var finishOneLevelPassResult = await _courseService.GetPercentCourseResult(new GetFinishOneQueryModel { CurrentUserId = currentUserId, StudentId = studentId });
+                        var finishOneLevelPass = finishOneLevelPassResult.Content?.Result ?? default;
+                        item.Percent = finishOneLevelPass?.Percent ?? default;
+                        item.ObjectId = finishOneLevelPass?.ObjectId;
                         break;
 
                     default:

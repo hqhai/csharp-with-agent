@@ -154,6 +154,34 @@
           "Port": 52010
         }
       ]
+    },
+    // Realtime Service
+    {
+      "SwaggerKey": "realtime",
+      "UpstreamPathTemplate": "/realtime-gateway/{everything}",
+      "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ],
+      "DownstreamPathTemplate": "/api/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "42.96.58.145",
+          "Port": 5501
+        }
+      ]
+    },
+    // Notification Service
+    {
+      "SwaggerKey": "notification",
+      "UpstreamPathTemplate": "/notification-gateway/{everything}",
+      "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ],
+      "DownstreamPathTemplate": "/api/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "42.96.58.145",
+          "Port": 5502
+        }
+      ]
     }
   ],
   "SwaggerEndPoints": [
@@ -254,6 +282,26 @@
           "Name": "System API",
           "Version": "v1",
           "Url": "http://42.96.58.145:52010/swagger/v1/swagger.json"
+        }
+      ]
+    },
+    {
+      "Key": "realtime",
+      "Config": [
+        {
+          "Name": "Realtime API",
+          "Version": "v1",
+          "Url": "http://42.96.58.145:5501/swagger/v1/swagger.json"
+        }
+      ]
+    },
+    {
+      "Key": "notification",
+      "Config": [
+        {
+          "Name": "Notification API",
+          "Version": "v1",
+          "Url": "http://42.96.58.145:5502/swagger/v1/swagger.json"
         }
       ]
     }

@@ -15,7 +15,6 @@ namespace Fsel.Shared.Helpers
             new KeyValuePair<EnumCourseType, EnumCourseLevel>(EnumCourseType.Academic, EnumCourseLevel.B1Plus),
             new KeyValuePair<EnumCourseType, EnumCourseLevel>(EnumCourseType.Academic, EnumCourseLevel.B2),
             new KeyValuePair<EnumCourseType, EnumCourseLevel>(EnumCourseType.Academic, EnumCourseLevel.C1),
-            new KeyValuePair<EnumCourseType, EnumCourseLevel>(EnumCourseType.Ielts, EnumCourseLevel.RFE),
             new KeyValuePair<EnumCourseType, EnumCourseLevel>(EnumCourseType.Ielts, EnumCourseLevel.MS1),
             new KeyValuePair<EnumCourseType, EnumCourseLevel>(EnumCourseType.Ielts, EnumCourseLevel.MS2),
             new KeyValuePair<EnumCourseType, EnumCourseLevel>(EnumCourseType.Ielts, EnumCourseLevel.MS3),
@@ -58,7 +57,19 @@ namespace Fsel.Shared.Helpers
                     return item;
                 }
             }
-            return EnumCourseLevel.MS3;
+            return default;
+        }
+
+        public static EnumPlacementTestLevel GetPlacementTestLevelByCourseLevel(this EnumCourseLevel level)
+        {
+            foreach (var item in ConvertHelper.EnumToList<EnumPlacementTestLevel>())
+            {
+                if (item.ToString() == level.ToString())
+                {
+                    return item;
+                }
+            }
+            return EnumPlacementTestLevel.IELTS;
         }
 
         public static object GetEnumCourseLevels()

@@ -130,7 +130,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
                             if (mockTestAnswer == null)
                             {
                                 var (answerConfig, correctCount) = _answerTypeConverter.GetTotalCorrectByAsnwerType(answer.Answer, question.Config, question.QuestionType);
-                                if (answerConfig == null)
+                                if (!string.IsNullOrEmpty(answer.Answer?.ToString()) && answerConfig == null)
                                 {
                                     methodResult.AddErrorBadRequest(nameof(EnumMockTestAnswerErrorCode.AnswerIsInTheWrongFormat), nameof(answer.Answer), answer.Answer);
                                     return methodResult;
@@ -203,7 +203,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
                         Scores = count.GetIeltsScore(sectionGroup.CourseSkill),
                         CountQuestion = item.Answers.Count,
                         TotalQuestion = item.Answers.Count,
-                        Percent = (double)questionCount / count * 100
+                        Percent = questionCount > 0 ? NumberHelper.ConvertPercentDouble((double)count / questionCount) : default
                     };
                     skillScores.Add(skillScore);
                 }
@@ -212,6 +212,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
             {
                 mockTestResult.CorrectCount = (int)skillScores.Sum(x => x.CorrectCount);
                 mockTestResult.CorrectTotal = (int)skillScores.Sum(x => x.TotalCount);
+                mockTestResult.Percent = (int)skillScores.Sum(x => x.TotalCount) > 0 ? NumberHelper.ConvertPercentDouble(skillScores.Sum(x => x.CorrectCount) / skillScores.Sum(x => x.TotalCount)) : default;
                 mockTestResult.Status = EnumResultStatus.Done;
                 mockTestResult.SkillScores = skillScores;
             }

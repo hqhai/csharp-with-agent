@@ -98,6 +98,7 @@ namespace Fsel.Sender.Application.Commands.SendEmailCmd
             {
                 try
                 {
+                    client.ServerCertificateValidationCallback = (s, c, h, e) => true;
                     await client.ConnectAsync(_appSetting?.Smtp?.SmtpServer ?? string.Empty, _appSetting?.Smtp?.Port ?? 0, true);
                     client.AuthenticationMechanisms.Remove("XOAUTH2");
                     await client.AuthenticateAsync(_appSetting?.Smtp?.Username ?? string.Empty, _appSetting?.Smtp?.Password ?? string.Empty);

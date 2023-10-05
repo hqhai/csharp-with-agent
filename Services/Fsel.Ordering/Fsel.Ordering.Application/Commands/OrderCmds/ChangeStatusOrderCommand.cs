@@ -6,6 +6,9 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Core.Base;
+    using Fsel.Ordering.Application.Queues.Publishers;
+    using Fsel.Ordering.Application.Services.CourseService;
     using Fsel.Ordering.Application.Services.TrainingService;
     using Fsel.Ordering.Application.Services.UserService;
     using Fsel.Ordering.Application.Services.UserService.Models;
@@ -13,6 +16,9 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
     using Fsel.Ordering.Domain.Enums.ErrorCodes;
     using Fsel.Ordering.Domain.IRepositories;
     using Fsel.Ordering.Domain.Models.CommandModels.Orders;
+    using Fsel.Shared.Enums;
+    using Fsel.Shared.Enums.ErrorCodes;
+    using Fsel.Shared.Models.ShareModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -26,12 +32,26 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
         private readonly IOrderRepository _orderRepository;
         private readonly ITrainingService _trainingService;
         private readonly IUserService _userService;
+        private readonly IPackageRepository _packageRepository;
+        private readonly ILmsCourseService _lmsCourseService;
+        private readonly NotificationMessagePublisher _notificationMessagePublisher;
+        private readonly AuthContext _authContext;
 
-        public ChangeStatusOrderCommandHandler(IOrderRepository orderRepository, ITrainingService trainingService, IUserService userService)
+        public ChangeStatusOrderCommandHandler(IOrderRepository orderRepository
+            , ITrainingService trainingService
+            , IUserService userService
+            , IPackageRepository packageRepository
+            , ILmsCourseService lmsCourseService
+            , NotificationMessagePublisher notificationMessagePublisher
+            , AuthContext authContext)
         {
             _orderRepository = orderRepository;
             _trainingService = trainingService;
             _userService = userService;
+            _packageRepository = packageRepository;
+            _lmsCourseService = lmsCourseService;
+            _notificationMessagePublisher = notificationMessagePublisher;
+            _authContext = authContext;
         }
 
         public async Task<MethodResult<bool>> Handle(ChangeStatusOrderCommand request, CancellationToken cancellationToken)
@@ -62,6 +82,15 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(classes));
                 return methodResult;
             }
+            var courseResults = await _lmsCourseService.GetCoursesByIdsAsync(new List<Guid> { order.CourseId });
+            if (!courseResults.IsSuccessStatusCode)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallCourseServiceError), nameof(courseResults));
+                return methodResult;
+            }
+            var package = await _packageRepository.GetByIdAsync(order.PackageId);
+            var numberOfShield = (package != null && package.Code.HasValue) ? (int)package.Code.Value : default;
+            var course = courseResults.Content?.Result?.FirstOrDefault();
             await _orderRepository.ExecuteTransactionAsync(async () =>
             {
                 if (request.OrderStatus == EnumOrderStatus.Reject)
@@ -75,19 +104,40 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
                 }
                 else if (request.OrderStatus == EnumOrderStatus.Payment)
                 {
-                    var updateStudentByClass = await _userService.UpdateStudentByClassAsync(new UpdateStudentByClassIdModel { ClassId = classes.Content?.Result?.Id, StudentId = student.Content!.Result!.Id, PackageId = request.PackageId });
+                    var updateStudentByClass = await _userService.UpdateStudentByClassAsync(new UpdateStudentByClassIdModel { ClassId = classes.Content?.Result?.Id, StudentId = student.Content!.Result!.Id, PackageId = request.PackageId, NumberOfShield = numberOfShield });
                     if (!updateStudentByClass.IsSuccessStatusCode)
                     {
                         methodResult.AddErrorBadRequest(nameof(EnumOrderErrorCode.UpdateNotSuccess));
                         return methodResult;
                     }
+                    await _notificationMessagePublisher.Publish(new NotificationQueueModel
+                    {
+                        UserId = order.CreatedUserId,
+                        ObjectId = order.Id,
+                        ParamsMessage = new List<object> { course?.Name ?? string.Empty },
+                        Type = EnumNotificationType.Text,
+                        Content = EnumNotificationContent.OrderChangeStatus,
+                        SenderId = _authContext.CurrentUserId
+                    }, cancellationToken);
                 }
                 order.Status = request.OrderStatus;
                 order = _orderRepository.Update(order);
                 await _orderRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
                 var orders = await _orderRepository.Queryable.Where(p => p.ClassId == order.ClassId && p.Status == EnumOrderStatus.Payment).ToListAsync(cancellationToken);
-                if (orders.Count == 12)
+                //if (orders.Count == 12)
+                //{
+                //    var activeClassResult = await _trainingService.ActiveClass(order.ClassId);
+                //    if (!activeClassResult.IsSuccessStatusCode)
+                //    {
+                //        methodResult.AddError(activeClassResult.Error);
+                //        return methodResult;
+                //    }
+                //}
+
+                #region for pilot
+
+                if (orders.Count == 100)
                 {
                     var activeClassResult = await _trainingService.ActiveClass(order.ClassId);
                     if (!activeClassResult.IsSuccessStatusCode)
@@ -96,7 +146,10 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
                         return methodResult;
                     }
                 }
-                methodResult.StatusCode = StatusCodes.Status201Created;
+
+                #endregion for pilot
+
+                methodResult.StatusCode = StatusCodes.Status200OK;
                 methodResult.Result = true;
                 return methodResult;
             });

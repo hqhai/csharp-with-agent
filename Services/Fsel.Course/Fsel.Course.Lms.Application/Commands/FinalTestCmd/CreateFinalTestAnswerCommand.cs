@@ -14,7 +14,9 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd
     using Fsel.Course.Domain.Models.CommandModels.FinalTestAnswers;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Infrastructure.Common;
+    using Fsel.Course.Lms.Application.Queues.Publishers;
     using Fsel.Course.Lms.Application.Services.UserServices;
+    using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -30,6 +32,7 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd
         private readonly IFinalTestResultRepository _finalTestResultRepository;
         private readonly IFinalTestRepository _finalTestRepository;
         private readonly IMapper _mapper;
+        private readonly FinishOneFinalTestPublisher _finishOneFinalTestPublisher;
         private readonly AuthContext _authContext;
         private readonly IUserService _userService;
         private readonly ICourseRepository _courseRepository;
@@ -41,6 +44,7 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd
             , IFinalTestResultRepository finalTestResultRepository
             , IFinalTestRepository finalTestRepository
             , IMapper mapper
+            , FinishOneFinalTestPublisher finishOneFinalTestPublisher
             , AuthContext authContext
             , IUserService userService
             , ICourseRepository courseRepository
@@ -51,6 +55,7 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd
             _finalTestResultRepository = finalTestResultRepository;
             _finalTestRepository = finalTestRepository;
             _mapper = mapper;
+            _finishOneFinalTestPublisher = finishOneFinalTestPublisher;
             _authContext = authContext;
             _userService = userService;
             _courseRepository = courseRepository;
@@ -64,7 +69,7 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd
 
             #region Validation
 
-            if (request.FinalTestAnswers == null || request.FinalTestAnswers.Any(x => x.Answers == null || x.Answers.Count == 0))
+            if (request.FinalTestAnswers == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.FinalTestAnswers));
                 return methodResult;
@@ -150,22 +155,32 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd
                     if (finalAnswer == null)
                     {
                         var (answerConfig, correctCount) = _answerTypeConverter.GetTotalCorrectByAsnwerType(answer.Answer, question.Config, question.QuestionType);
-                        if (answerConfig == null)
+                        if (!string.IsNullOrEmpty(answer.Answer?.ToString()) && answerConfig == null)
                         {
                             methodResult.AddErrorBadRequest(nameof(EnumFinalTestAnswerErrorCode.AnswerIsInTheWrongFormat), nameof(answer.Answer), answer.Answer);
                             return methodResult;
                         }
-                        count += correctCount;
                         finalAnswer = new FinalTestAnswer
                         {
                             CorrectCount = correctCount,
-                            Answer = answerConfig,
+                            Answer = answerConfig ?? answer.Answer,
                             SectionQuestionId = sectionQuestionId
                         };
+                        count += correctCount;
                         finalTestResult.FinalTestAnswers.Add(finalAnswer);
                     }
                 }
-                skillScores.Add(new SkillScores { Skill = item.Skill, TotalCount = questions.Sum(x => x.CorrectTotal), CorrectCount = count, CountQuestion = item.Answers.Count, TotalQuestion = item.Answers.Count, Percent = questions.Sum(x => x.CorrectTotal) > 0 ? (double)questions.Sum(x => x.CorrectTotal) / count * 100 : default });
+                var totalCount = questions.Sum(x => x.CorrectTotal);
+                skillScores.Add(new SkillScores
+                {
+                    Skill = item.Skill,
+                    TotalCount = totalCount,
+                    CorrectCount = count,
+                    CountQuestion = item.Answers.Count,
+                    TotalQuestion = questions.Count,
+                    Percent = totalCount > 0 ? NumberHelper.ConvertPercentDouble(count / totalCount) : default
+                }
+                );
             }
 
             #endregion Validation
@@ -176,8 +191,8 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd
                 finalTestResult.CorrectTotal = Convert.ToInt32(skillScores.Sum(x => x.TotalCount));
                 finalTestResult.Status = EnumResultStatus.Done;
                 finalTestResult.SkillScores = skillScores;
-                finalTestResult.Percent = finalTestResult.CorrectTotal > 0 ? ((double)finalTestResult.CorrectCount / finalTestResult.CorrectTotal * 100) : 0;
-
+                finalTestResult.Percent = finalTestResult.CorrectTotal > 0 ? NumberHelper.ConvertPercentDouble((double)finalTestResult.CorrectCount / finalTestResult.CorrectTotal) : 0;
+                await _finishOneFinalTestPublisher.Publish(finalTestResult, cancellationToken);
                 finalTestResult = _finalTestResultRepository.Update(finalTestResult);
                 await _finalTestResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 

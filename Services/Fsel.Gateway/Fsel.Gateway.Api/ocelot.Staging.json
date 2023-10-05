@@ -1,6 +1,6 @@
 {
   "GlobalConfiguration": {
-    "BaseUrl": "http://20.187.163.186:80"
+    "BaseUrl": "http://gateway-staging.fsel-staging.svc"
   },
   "Routes": [
     // Auth Service
@@ -12,7 +12,7 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "20.239.224.16",
+          "Host": "auth-staging.fsel-staging.svc",
           "Port": 80
         }
       ]
@@ -26,7 +26,7 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "20.24.120.47",
+          "Host": "user-staging.fsel-staging.svc",
           "Port": 80
         }
       ],
@@ -44,7 +44,7 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "20.187.190.125",
+          "Host": "lcmsapi-staging.fsel-staging.svc",
           "Port": 80
         }
       ],
@@ -62,7 +62,7 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "20.187.186.116",
+          "Host": "lmsapi-staging.fsel-staging.svc",
           "Port": 80
         }
       ],
@@ -80,7 +80,7 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "20.239.31.13",
+          "Host": "storage-staging.fsel-staging.svc",
           "Port": 80
         }
       ]
@@ -94,7 +94,7 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "20.239.120.173",
+          "Host": "sender-staging.fsel-staging.svc",
           "Port": 80
         }
       ]
@@ -108,7 +108,7 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "20.239.121.201",
+          "Host": "training-staging.fsel-staging.svc",
           "Port": 80
         }
       ]
@@ -122,7 +122,7 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "20.239.29.104",
+          "Host": "interaction-staging.fsel-staging.svc",
           "Port": 80
         }
       ]
@@ -136,7 +136,49 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "20.24.110.45",
+          "Host": "ordering-staging.fsel-staging.svc",
+          "Port": 80
+        }
+      ]
+    },
+    // System Service
+    {
+      "SwaggerKey": "system",
+      "UpstreamPathTemplate": "/system-gateway/{everything}",
+      "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ],
+      "DownstreamPathTemplate": "/api/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "system-staging.fsel-staging.svc",
+          "Port": 80
+        }
+      ]
+    },
+    // Realtime Service
+    {
+      "SwaggerKey": "realtime",
+      "UpstreamPathTemplate": "/realtime-gateway/{everything}",
+      "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ],
+      "DownstreamPathTemplate": "/api/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "realtime-staging.fsel-staging.svc",
+          "Port": 80
+        }
+      ]
+    },
+    // Notification Service
+    {
+      "SwaggerKey": "notification",
+      "UpstreamPathTemplate": "/notification-gateway/{everything}",
+      "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ],
+      "DownstreamPathTemplate": "/api/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "notification-staging.fsel-staging.svc",
           "Port": 80
         }
       ]
@@ -149,7 +191,7 @@
         {
           "Name": "Auths API",
           "Version": "v1",
-          "Url": "http://20.239.224.16/swagger/v1/swagger.json"
+          "Url": "http://auth-staging.fsel-staging.svc/swagger/v1/swagger.json"
         }
       ]
     },
@@ -159,7 +201,7 @@
         {
           "Name": "Users API",
           "Version": "v1",
-          "Url": "http://20.24.120.47/swagger/v1/swagger.json"
+          "Url": "http://user-staging.fsel-staging.svc/swagger/v1/swagger.json"
         }
       ]
     },
@@ -169,7 +211,7 @@
         {
           "Name": "Lcms Courses API",
           "Version": "v1",
-          "Url": "http://20.187.190.125/swagger/v1/swagger.json"
+          "Url": "http://lcmsapi-staging.fsel-staging.svc/swagger/v1/swagger.json"
         }
       ]
     },
@@ -179,7 +221,7 @@
         {
           "Name": "Lms Courses API",
           "Version": "v1",
-          "Url": "http://20.187.186.116/swagger/v1/swagger.json"
+          "Url": "http://lmsapi-staging.fsel-staging.svc/swagger/v1/swagger.json"
         }
       ]
     },
@@ -189,7 +231,7 @@
         {
           "Name": "Storage API",
           "Version": "v1",
-          "Url": "http://20.239.31.13/swagger/v1/swagger.json"
+          "Url": "http://storage-staging.fsel-staging.svc/swagger/v1/swagger.json"
         }
       ]
     },
@@ -199,7 +241,7 @@
         {
           "Name": "Senders API",
           "Version": "v1",
-          "Url": "http://20.239.120.173/swagger/v1/swagger.json"
+          "Url": "http://sender-staging.fsel-staging.svc/swagger/v1/swagger.json"
         }
       ]
     },
@@ -209,7 +251,7 @@
         {
           "Name": "Training API",
           "Version": "v1",
-          "Url": "http://20.239.121.201/swagger/v1/swagger.json"
+          "Url": "http://training-staging.fsel-staging.svc/swagger/v1/swagger.json"
         }
       ]
     },
@@ -219,7 +261,7 @@
         {
           "Name": "Interaction API",
           "Version": "v1",
-          "Url": "http://20.239.29.104/swagger/v1/swagger.json"
+          "Url": "http://interaction-staging.fsel-staging.svc/swagger/v1/swagger.json"
         }
       ]
     },
@@ -229,7 +271,37 @@
         {
           "Name": "Ordering API",
           "Version": "v1",
-          "Url": "http://20.24.110.45/swagger/v1/swagger.json"
+          "Url": "http://ordering-staging.fsel-staging.svc/swagger/v1/swagger.json"
+        }
+      ]
+    },
+    {
+      "Key": "system",
+      "Config": [
+        {
+          "Name": "System API",
+          "Version": "v1",
+          "Url": "http://system-staging.fsel-staging.svc/swagger/v1/swagger.json"
+        }
+      ]
+    },
+    {
+      "Key": "realtime",
+      "Config": [
+        {
+          "Name": "Realtime API",
+          "Version": "v1",
+          "Url": "http://realtime-staging.fsel-staging.svc/swagger/v1/swagger.json"
+        }
+      ]
+    },
+    {
+      "Key": "notification",
+      "Config": [
+        {
+          "Name": "Notification API",
+          "Version": "v1",
+          "Url": "http://notification-staging.fsel-staging.svc/swagger/v1/swagger.json"
         }
       ]
     }

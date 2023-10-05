@@ -14,6 +14,7 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
     using Fsel.Course.Domain.Models.QueryModels.ReviewFsels;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Shared.Enums.ErrorCodes;
+    using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.AspNetCore.Http;
 
@@ -32,17 +33,9 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
         private readonly IClassForumResultRepository _classForumResultRepository;
         private readonly IMockTestResultRepository _mockTestResultRepository;
         private readonly IMockTestRepository _mockTestRepository;
+        private readonly IStudentFeedbackRepository _studentFeedbackRepository;
 
-        public SearchReviewTeacherRatingDetailQueryHandler(IUserService userService
-            , IVideoResultRepository videoResultRepository
-            , IVideoRepository videoRepository
-            , ILessonResultRepository lessonResultRepository
-            , ICourseRepository courseRepository
-            , IClassForumRepository classForumRepository
-            , IClassForumResultRepository classForumResultRepository
-            , IMockTestResultRepository mockTestResultRepository
-            , IMockTestRepository mockTestRepository
-            )
+        public SearchReviewTeacherRatingDetailQueryHandler(IUserService userService, IVideoResultRepository videoResultRepository, IVideoRepository videoRepository, ILessonResultRepository lessonResultRepository, ICourseRepository courseRepository, IClassForumRepository classForumRepository, IClassForumResultRepository classForumResultRepository, IMockTestResultRepository mockTestResultRepository, IMockTestRepository mockTestRepository, IStudentFeedbackRepository studentFeedbackRepository)
         {
             _userService = userService;
             _videoResultRepository = videoResultRepository;
@@ -53,6 +46,7 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
             _classForumResultRepository = classForumResultRepository;
             _mockTestResultRepository = mockTestResultRepository;
             _mockTestRepository = mockTestRepository;
+            _studentFeedbackRepository = studentFeedbackRepository;
         }
 
         public async Task<MethodResult<ReviewTeacherRatingDetailSearchModel>> Handle(SearchReviewTeacherRatingDetailQuery request, CancellationToken cancellationToken)
@@ -88,13 +82,14 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
                                        CreatedUserId = baseQ.CreatedUserId,
                                        Feedback = baseQ.Feedback,
                                        ReviewArea = nameof(Video),
-                                       Starts = baseQ.NumberOfStars
+                                       Stars = baseQ.NumberOfStars
                                    };
 
             var classFormQuery = from baseQ in _classForumResultRepository.Queryable
                                  join cl in _classForumRepository.Queryable on baseQ.ClassForumId equals cl.Id
                                  join lr in _lessonResultRepository.Queryable on baseQ.LessonResultId equals lr.Id
                                  join c in _courseRepository.Queryable on lr.CourseId equals c.Id
+                                 join s in _studentFeedbackRepository.Queryable on baseQ.Id equals s.ObjectId
                                  where baseQ.GradingTeacherId == request.TeacherId && baseQ.Status == EnumClassForumResultStatus.Graded
                                  select new ReviewTeacherRatingDetailModel
                                  {
@@ -103,14 +98,17 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
                                      CreatedDate = baseQ.CreatedDate,
                                      CreatedFullName = baseQ.CreatedFullName,
                                      CreatedUserId = baseQ.CreatedUserId,
-                                     Feedback = baseQ.FeedBackNote,
                                      ReviewArea = nameof(ClassForum),
-                                     Starts = baseQ.FeedBackStars ?? default
+                                     Feedback = s.FeedBackNote,
+                                     Stars = s.FeedBackStars ?? default,
+                                     FeedbackNegative = s.FeedBackNegatives,
+                                     FeedbackPositive = s.FeedBackPositives,
                                  };
 
             var mockTestQuery = from baseQ in _mockTestResultRepository.Queryable
                                 join m in _mockTestRepository.Queryable on baseQ.MockTestId equals m.Id
                                 join c in _courseRepository.Queryable on baseQ.CourseId equals c.Id
+                                join s in _studentFeedbackRepository.Queryable on baseQ.Id equals s.ObjectId
                                 where baseQ.GradingTeacherId == request.TeacherId && baseQ.Status == EnumResultStatus.Done
                                 select new ReviewTeacherRatingDetailModel
                                 {
@@ -119,9 +117,11 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
                                     CreatedDate = baseQ.CreatedDate,
                                     CreatedFullName = baseQ.CreatedFullName,
                                     CreatedUserId = baseQ.CreatedUserId,
-                                    Feedback = baseQ.FeedBackNote,
                                     ReviewArea = nameof(MockTest),
-                                    Starts = baseQ.FeedBackStars ?? default
+                                    Feedback = s.FeedBackNote,
+                                    Stars = s.FeedBackStars ?? default,
+                                    FeedbackNegative = s.FeedBackNegatives,
+                                    FeedbackPositive = s.FeedBackPositives,
                                 };
 
             var query = mockTestQuery.AsEnumerable().Union(classFormQuery.AsEnumerable()).Union(videoResultQuery.AsEnumerable());
@@ -129,9 +129,16 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
             {
                 query = query.Where(m => m.Id.ToString() == request.Keyword || (m.CreatedFullName != null && m.CreatedFullName.Contains(request.Keyword, StringComparison.CurrentCulture)));
             }
+            if (request.NumberOfStars != null)
+            {
+                query = query.Where(x => x.Stars + 0.5 >= request.NumberOfStars && x.Stars < request.NumberOfStars + 0.5);
+            }
             int totalItem = query.Count();
-            var lists = query.OrderBy(x => x.CreatedDate).Skip((request!.Page - 1) * request!.PageSize).Take(request!.PageSize).ToList();
-
+            var lists = query.ApplySortAndPaging(request).ToList();
+            foreach (var item in lists)
+            {
+                item.Stars = NumberHelper.ConvertDoubleDecimal(item.Stars);
+            }
             methodResult.Result = new ReviewTeacherRatingDetailSearchModel { FullName = teacher?.Human?.FullName, PagingItemsModel = new PagingItemsModel<ReviewTeacherRatingDetailModel>(lists, request, totalItem) };
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;

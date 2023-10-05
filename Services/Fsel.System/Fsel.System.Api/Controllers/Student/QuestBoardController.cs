@@ -54,12 +54,12 @@ namespace Fsel.System.Api.Controllers.Student
         /// <summary>
         /// Taking Mission Student
         /// </summary>
-        [HttpPost("taking-mission/{id}")]
+        [HttpPost("taking-mission")]
         [ProducesResponseType(typeof(MethodResult<PagingItemsModel<bool>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> TakingMissionStudent([FromRoute] Guid id)
+        public async Task<IActionResult> TakingMissionStudent([FromBody] TakingMissionCommand command)
         {
-            var queryResult = await _mediator.Send(new TakingMissionCommand { Id = id }).ConfigureAwait(false);
+            var queryResult = await _mediator.Send(command).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
     }

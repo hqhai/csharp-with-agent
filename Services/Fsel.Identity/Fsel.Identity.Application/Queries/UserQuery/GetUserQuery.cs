@@ -126,7 +126,7 @@ namespace Fsel.Identity.Application.Queries.UserQuery
 
                 if (userRoles.FirstOrDefault() == EnumRole.Teacher.ToString() && userView.Human?.Teacher != null)
                 {
-                    userModel!.TeacherBankAccounts = _mapper.Map<IList<TeacherBankAccountModel>>(userView!.Human!.Teacher!.TeacherBankAccounts?.Where(x => x.Status == EnumStatusBank.Approve).ToList());
+                    userModel!.TeacherBankAccounts = _mapper.Map<IList<TeacherBankAccountModel>>(userView!.Human!.Teacher!.TeacherBankAccounts?.Where(x => x.Status == EnumBankStatus.Approve).ToList());
                     _mapper.Map(userView!.Human!.Teacher, userModel);
                 }
 

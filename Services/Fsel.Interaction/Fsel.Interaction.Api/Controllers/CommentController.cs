@@ -27,11 +27,12 @@ namespace Fsel.Interaction.Api.Controllers
         /// Create action
         /// </summary>
         [HttpPost]
-        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+
+        [ProducesResponseType(typeof(MethodResult<CommentModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> Create([FromBody] CreateCommentCommand command)
         {
-            MethodResult<bool> queryResult = await _mediator.Send(command).ConfigureAwait(false);
+            MethodResult<CommentModel> queryResult = await _mediator.Send(command).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
 
@@ -56,6 +57,18 @@ namespace Fsel.Interaction.Api.Controllers
         public async Task<IActionResult> Approve([FromBody] ApproveCommentFlaggedCommand command)
         {
             var commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Delete a comment
+        /// </summary>
+        [HttpDelete("{id}")]
+        [ProducesResponseType(typeof(MethodResult<CommentModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> Delete([FromRoute] Guid id)
+        {
+            MethodResult<bool> commandResult = await _mediator.Send(new DeleteCommentCommand { Id = id }).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
     }

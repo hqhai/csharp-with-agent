@@ -55,7 +55,7 @@ namespace Fsel.Identity.Api.Controllers
         /// <summary>
         /// Update Code Student
         /// </summary>
-        [Authorize(Roles = nameof(EnumRole.Student))]
+/*        [Authorize(Roles = nameof(EnumRole.Student))]*/
         [HttpPut("update-code-student")]
         [ProducesResponseType(typeof(MethodResult<UserModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
@@ -75,6 +75,42 @@ namespace Fsel.Identity.Api.Controllers
         public async Task<IActionResult> GetProfileUser()
         {
             MethodResult<UserProfileModel> commandResult = await _mediator.Send(new GetUserProfileQuery()).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Get users by role
+        /// </summary>
+        [HttpGet("get-users-by-role")]
+        [ProducesResponseType(typeof(MethodResult<IList<UserModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetUsersByRole([FromQuery] GetUsersByRoleQuery query)
+        {
+            MethodResult<IList<UserModel>> commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Get users by ids
+        /// </summary>
+        [HttpPost("get-users-by-ids")]
+        [ProducesResponseType(typeof(MethodResult<IList<HumanModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetUsersByIds([FromBody] GetUsersByIdsQuery query)
+        {
+            MethodResult<IList<HumanModel>> commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Get users by ids
+        /// </summary>
+        [HttpGet("get-user-by-id")]
+        [ProducesResponseType(typeof(MethodResult<HumanModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetUsersByIds([FromQuery] GetUserByIdQuery query)
+        {
+            MethodResult<HumanModel> commandResult = await _mediator.Send(query).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
     }

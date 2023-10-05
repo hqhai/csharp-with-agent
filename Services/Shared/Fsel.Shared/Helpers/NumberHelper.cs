@@ -45,5 +45,29 @@ namespace Fsel.Shared.Helpers
 
             return orderCode;
         }
+
+        public static double ConvertDoublePercent(double value)
+        {
+            double convertedValue = Math.Round(value / 100, 2);
+            return convertedValue;
+        }
+
+        public static double ConvertDouble(double value)
+        {
+            double convertedValue = Math.Round(value, 2);
+            return convertedValue;
+        }
+
+        public static double ConvertDoubleDecimal(double value)
+        {
+            double convertedValue = Math.Round(value, 0);
+            return convertedValue;
+        }
+
+        public static double ConvertPercentDouble(double value)
+        {
+            double convertedValue = Math.Round(value * 100, 0);
+            return convertedValue;
+        }
     }
 }

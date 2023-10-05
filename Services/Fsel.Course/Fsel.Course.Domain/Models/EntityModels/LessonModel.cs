@@ -11,6 +11,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public string? InstructionContent { get; set; }
         public bool IsActive { get; set; }
         public int? DisplayOrder { get; set; }
+        public int? Number { get { return DisplayOrder; } }
         public EnumCourseLevel CourseLevel { get; set; }
         public Guid? VideoId { get; set; }
         public VideoModel? Video { get; set; }
@@ -19,5 +20,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public IList<Guid>? ExtraPracticeIds { get; set; }
         public IList<LessonInstructionModel>? LessonInstructions { get; set; }
         public ClassForumModel? ClassForum { get; set; }
+        public bool IsClassForumLock { get; set; } = true;
+        public bool IsHomeWorkLock { get; set; } = true;
     }
 }

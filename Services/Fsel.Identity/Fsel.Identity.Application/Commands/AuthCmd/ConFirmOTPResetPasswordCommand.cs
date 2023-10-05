@@ -53,7 +53,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             }
 
             var user = await _userManager.Users.Include(x => x.UserOtpCodes)
-                                .FirstOrDefaultAsync(x => x.UserOtpCodes.Where(x => x.Status == EnumStatusUser.New).Select(x => x.OTPCode).Contains(request.Otp), cancellationToken);
+                                .FirstOrDefaultAsync(x => x.UserOtpCodes.Where(x => x.Status == EnumOtpCodeStatus.New).Select(x => x.OTPCode).Contains(request.Otp), cancellationToken);
 
             if (user == null)
             {
@@ -62,7 +62,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             }
 
             var userOtpCode = await _userOtpCodeRepository.Queryable
-                       .FirstOrDefaultAsync(x => x.UserId == user!.Id && x.Status == EnumStatusUser.New && !x.IsDeleted && x.OTPCode == request.Otp, cancellationToken);
+                       .FirstOrDefaultAsync(x => x.UserId == user!.Id && x.Status == EnumOtpCodeStatus.New && !x.IsDeleted && x.OTPCode == request.Otp, cancellationToken);
             if (userOtpCode == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Otp));
@@ -75,7 +75,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                 return methodResult;
             }
 
-            userOtpCode.Status = EnumStatusUser.Verified;
+            userOtpCode.Status = EnumOtpCodeStatus.Verified;
             _userOtpCodeRepository.Update(userOtpCode);
             await _userOtpCodeRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
             if (!user.EmailConfirmed)

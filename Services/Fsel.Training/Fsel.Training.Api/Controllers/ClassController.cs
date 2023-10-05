@@ -7,15 +7,15 @@ namespace Fsel.Training.Api.Controllers
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
     using Fsel.Core.Base.BaseModels;
-    using Fsel.Shared.Enums;
     using Fsel.Training.Application.Commands.ClassCmd;
+    using Fsel.Training.Application.Commands.ClassLiveCmd;
     using Fsel.Training.Application.Commands.ClassStudentCmd;
     using Fsel.Training.Application.Queries.Admins;
     using Fsel.Training.Application.Queries.ClassQuery;
     using Fsel.Training.Application.Queries.ClassQuery.Admin;
+    using Fsel.Training.Application.Queries.ClassStudentQuery;
     using Fsel.Training.Domain.Models.EntityModels;
     using MediatR;
-    using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
 
     [ApiVersion(Settings.APIVersion)]
@@ -72,7 +72,6 @@ namespace Fsel.Training.Api.Controllers
         [HttpPost("register-class")]
         [ProducesResponseType(typeof(MethodResult<ClassModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        [Authorize(Roles = nameof(EnumRole.Student))]
         public async Task<IActionResult> RegisterClass([FromBody] RegisterClassCommand command)
         {
             MethodResult<ClassModel> queryResult = await _mediator.Send(command).ConfigureAwait(false);
@@ -140,6 +139,30 @@ namespace Fsel.Training.Api.Controllers
         }
 
         /// <summary>
+        /// Class by StudentId
+        /// </summary>
+        [HttpGet("get-classes-by-csoId/{csoId}")]
+        [ProducesResponseType(typeof(MethodResult<IList<ClassModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetClassesByCsoId([FromRoute] Guid csoId)
+        {
+            MethodResult<IList<ClassModel>> queryResult = await _mediator.Send(new GetClassesByCsoIdQuery { CsoId = csoId }).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Class Course by StudentId
+        /// </summary>
+        [HttpGet("get-classes/{studentId}")]
+        [ProducesResponseType(typeof(MethodResult<IList<ClassModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetListClassByStudentId([FromRoute] Guid studentId)
+        {
+            MethodResult<IList<ClassModel>> queryResult = await _mediator.Send(new GetListClassByStudentIdQuery { StudentId = studentId }).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
         /// Classes by StudentIds
         /// </summary>
         [HttpPost("classes-by-studentids")]
@@ -148,6 +171,18 @@ namespace Fsel.Training.Api.Controllers
         public async Task<IActionResult> GetClassByStudentIds([FromBody] GetListClassByStudentIdsQuery query)
         {
             MethodResult<IList<ClassStudentDetailModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Approve teacher
+        /// </summary>
+        [HttpPut("approve-auto")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> ApproveAuto()
+        {
+            var queryResult = await _mediator.Send(new UpdateClassLiveAssignmentCommand()).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
     }

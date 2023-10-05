@@ -22,6 +22,8 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public int CorrectTotal { get; set; }
         public IList<SkillScores>? SkillScores { get; set; }
         public EnumPlacementTestLevel Level { get; set; }
+        public EnumCourseLevel? CourseLevel { get; set; }
+        public bool IsLock { get; set; }
         public EnumResultStatus Status { get; set; }
         public Guid StudentId { get; set; }
     }

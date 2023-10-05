@@ -4,6 +4,8 @@ namespace Fsel.Identity.Application.Services.OrderService
 {
     using Fsel.Common.ActionResults;
     using Fsel.Identity.Application.Services.OrderService.Model;
+    using Fsel.Identity.Application.Services.OrderServices.Model;
+    using Microsoft.AspNetCore.Mvc;
     using Refit;
 
     public interface IOrderService
@@ -13,5 +15,14 @@ namespace Fsel.Identity.Application.Services.OrderService
 
         [Post("/user-referral")]
         Task<IApiResponse<MethodResult<bool>>> CreateUserReferralAsync([Body] CreateUserReferralCommandModel command);
+
+        [Get("/order/is-status-payment")]
+        Task<IApiResponse<MethodResult<bool>>> IsCheckStatusUser([FromQuery] IsCheckPaymentStatusByUserModel query);
+
+        [Post("/order")]
+        Task<IApiResponse<MethodResult<OrderModel>>> CreateOrder([Body] CreateOrderCommandModel command);
+
+        [Put("/admin/order/change-status-order")]
+        Task<IApiResponse<MethodResult<bool>>> ChangeStatusOrder([Body] ChangeStatusOrderCommandModel command);
     }
 }

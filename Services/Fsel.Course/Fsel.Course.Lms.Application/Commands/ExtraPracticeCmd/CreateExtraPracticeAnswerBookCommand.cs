@@ -30,7 +30,6 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
     {
         private readonly AuthContext _authContext;
         private readonly IUserService _userService;
-        private readonly IExtraPracticeRepository _extraPracticeRepository;
         private readonly IMapper _mapper;
         private readonly IExtraPracticeExerciseRepository _extraPracticeExerciseRepository;
         private readonly IExtraPracticeAnswerRepository _extraPracticeAnswerRepository;
@@ -41,7 +40,6 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
 
         public CreateExtraPracticeAnswerBookCommandHandler(AuthContext authContext
             , IUserService userService
-            , IExtraPracticeRepository extraPracticeRepository
             , IMapper mapper
             , IExtraPracticeExerciseRepository extraPracticeExerciseRepository
             , IExtraPracticeAnswerRepository extraPracticeAnswerRepository
@@ -52,7 +50,6 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
         {
             _authContext = authContext;
             _userService = userService;
-            _extraPracticeRepository = extraPracticeRepository;
             _mapper = mapper;
             _extraPracticeExerciseRepository = extraPracticeExerciseRepository;
             _extraPracticeAnswerRepository = extraPracticeAnswerRepository;
@@ -154,8 +151,12 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
             }
             await _extraPracticeResultRepository.ExecuteTransactionAsync(async () =>
             {
-                extraPracticeExerciseResult = _extraPracticeExerciseResultRepository.Update(extraPracticeExerciseResult ?? new ExtraPracticeExerciseResult());
-                await _extraPracticeExerciseResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+                if (extraPracticeExerciseResult != null)
+                {
+                    extraPracticeExerciseResult = _extraPracticeExerciseResultRepository.Update(extraPracticeExerciseResult);
+                    await _extraPracticeExerciseResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+                }
+
                 methodResult.Result = _mapper.Map<ExtraPracticeExerciseResultModel>(extraPracticeExerciseResult);
                 methodResult.StatusCode = StatusCodes.Status201Created;
                 return methodResult;
@@ -163,11 +164,12 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
             return methodResult;
         }
 
-        public async Task<VoidMethodResult> AddExtraPracticeExerciseResult(dynamic extraPracticeExerciseResult, IList<Question>? questions, CreateExtraPracticeAnswerBookCommand? request, CancellationToken cancellationToken)
+        public async Task<VoidMethodResult> AddExtraPracticeExerciseResult(ExtraPracticeExerciseResult extraPracticeExerciseResult, IList<Question>? questions, CreateExtraPracticeAnswerBookCommand? request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             ArgumentNullException.ThrowIfNull(request.Answers);
             ArgumentNullException.ThrowIfNull(questions);
+            ArgumentNullException.ThrowIfNull(extraPracticeExerciseResult);
             VoidMethodResult methodResult = new VoidMethodResult();
 
             foreach (var item in request.Answers)
@@ -183,40 +185,25 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
                     methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(question), question);
                     return methodResult;
                 }
-                var method = await AddTypeBook(extraPracticeExerciseResult, item, question, cancellationToken);
-                if (!method.IsOK)
+                var extraPracticeAnswer = await _extraPracticeAnswerRepository.Queryable
+                       .FirstOrDefaultAsync(x => x.ExtraPracticeExerciseResultId == extraPracticeExerciseResult.Id && x.QuestionId == item.QuestionId, cancellationToken);
+                if (extraPracticeAnswer == null)
                 {
-                    methodResult.AddErrorBadRequest(method.ErrorMessages);
-                    return methodResult;
+                    var (answerConfig, correctCount) = _answerTypeConverter.GetTotalCorrectByAsnwerType(item.Answer, question.Config, question.QuestionType);
+                    if (answerConfig == null && !string.IsNullOrEmpty(item.Answer?.ToString()))
+                    {
+                        methodResult.AddErrorBadRequest(nameof(EnumExtraPracticeErrorCode.AnswerIsInTheWrongFormat), nameof(item.Answer), item.Answer);
+                        return methodResult;
+                    }
+                    extraPracticeExerciseResult.ExtraPracticeAnswers.Add(new ExtraPracticeAnswer
+                    {
+                        Answer = answerConfig,
+                        CorrectCount = correctCount,
+                        ExtraPracticeExerciseResultId = extraPracticeExerciseResult.Id,
+                        ExtraPracticeResultId = extraPracticeExerciseResult.ExtraPracticeResultId,
+                        QuestionId = item.QuestionId
+                    });
                 }
-            }
-            return methodResult;
-        }
-
-        public async Task<VoidMethodResult> AddTypeBook(ExtraPracticeExerciseResult extraPracticeExerciseResult, ExtraPracticeAnswerTypeBookModel extraPracticeAnswerQuestion, Question question, CancellationToken cancellationToken)
-        {
-            ArgumentNullException.ThrowIfNull(extraPracticeAnswerQuestion);
-            ArgumentNullException.ThrowIfNull(extraPracticeExerciseResult);
-            ArgumentNullException.ThrowIfNull(question);
-            VoidMethodResult methodResult = new VoidMethodResult();
-            var extraPracticeAnswer = await _extraPracticeAnswerRepository.Queryable
-                    .FirstOrDefaultAsync(x => x.ExtraPracticeExerciseResultId == extraPracticeExerciseResult.Id && x.QuestionId == extraPracticeAnswerQuestion.QuestionId, cancellationToken);
-            if (extraPracticeAnswer == null)
-            {
-                var (answerConfig, correctCount) = _answerTypeConverter.GetTotalCorrectByAsnwerType(extraPracticeAnswerQuestion.Answer, question.Config, question.QuestionType);
-                if (answerConfig == null)
-                {
-                    methodResult.AddErrorBadRequest(nameof(EnumExtraPracticeErrorCode.AnswerIsInTheWrongFormat), nameof(extraPracticeAnswerQuestion.Answer), extraPracticeAnswerQuestion.Answer);
-                    return methodResult;
-                }
-                extraPracticeExerciseResult.ExtraPracticeAnswers.Add(new ExtraPracticeAnswer
-                {
-                    Answer = answerConfig,
-                    CorrectCount = correctCount,
-                    ExtraPracticeExerciseResultId = extraPracticeExerciseResult.Id,
-                    ExtraPracticeResultId = extraPracticeExerciseResult.ExtraPracticeResultId,
-                    QuestionId = extraPracticeAnswerQuestion.QuestionId
-                });
             }
             return methodResult;
         }

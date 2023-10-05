@@ -20,15 +20,19 @@ namespace Fsel.System.Infrastructure
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             ArgumentNullException.ThrowIfNull(modelBuilder);
-            SeedQuestBoards(modelBuilder);
+            //SeedQuestBoards(modelBuilder);
             modelBuilder.ApplyConfiguration(new TeachingCostEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new ReferralDiscountConfigConfiguration());
             modelBuilder.ApplyConfiguration(new QuestBoardConfigConfigConfiguration());
             modelBuilder.ApplyConfiguration(new QuestBoardConfigConfiguration());
             modelBuilder.ApplyConfiguration(new QuestBoardStudentConfigConfiguration());
+            modelBuilder.ApplyConfiguration(new FeatureAccessTimeConfigConfiguration());
+            modelBuilder.ApplyConfiguration(new GameTopicEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new GameVocabularyEntityTypeConfiguration());
             base.OnModelCreating(modelBuilder);
         }
 
+        public DbSet<FeatureAccessTime> FeatureAccessTimes { get; set; }
         public DbSet<LiveTimeFrame> LiveTimeFrames { get; set; }
         public DbSet<CourseTimeConfig> CourseTimeConfigs { get; set; }
         public DbSet<ForbiddenWord> ForbiddenWords { get; set; }
@@ -38,6 +42,8 @@ namespace Fsel.System.Infrastructure
         public DbSet<QuestBoardStudent> QuestBoardStudents { get; set; }
         public DbSet<QuestBoard> QuestBoards { get; set; }
         public DbSet<QuestBoardConfig> QuestBoardConfigs { get; set; }
+        public DbSet<GameTopic> GameTopics { get; set; }
+        public DbSet<GameVocabulary> GameVocabularies { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -56,7 +62,7 @@ namespace Fsel.System.Infrastructure
 
         private static void SeedQuestBoards(ModelBuilder builder)
         {
-            var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, QuestBoardSettings.QuestBoardFileName);
+            var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ResourceSettings.QuestBoardFileName);
             var questBoardConfigs = ConvertHelper.DeserializeFromFilePath<IList<QuestBoardConfig>>(path);
             ArgumentNullException.ThrowIfNull(questBoardConfigs);
             builder.Entity<QuestBoardConfig>().HasData(questBoardConfigs);

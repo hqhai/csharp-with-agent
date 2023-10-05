@@ -14,5 +14,8 @@ namespace Fsel.Course.Lms.Application.Services.OrderServices
 
         [Get("/order/is-status-payment")]
         Task<IApiResponse<MethodResult<bool>>> IsCheckStatusUser([FromQuery] IsCheckPaymentStatusByUserModel query);
+
+        [Post("/order")]
+        Task<IApiResponse<MethodResult<OrderModel>>> CreateOrder([Body] CreateOrderCommandModel command);
     }
 }

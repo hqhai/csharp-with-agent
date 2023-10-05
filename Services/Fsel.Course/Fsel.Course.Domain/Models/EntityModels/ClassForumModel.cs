@@ -9,7 +9,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
     public class ClassForumModel : BaseModel
     {
         public EnumGradingStyle GradingStyle { get; set; }
-
+        public string? PromptName { get; set; }
         public long TaggetWordLimit { get; set; }
         public double TaggetTimeLimit { get; set; }
 
@@ -37,6 +37,9 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public double SettingFrequecy { get; set; }
 
         public double SettingPresence { get; set; }
+
         public IList<ClassForumFileModel>? ClassForumFiles { get; set; }
+
+        public IList<ClassForumResultModel>? ClassForumResults { get; set; }
     }
 }

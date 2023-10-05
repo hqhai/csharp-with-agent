@@ -2,14 +2,14 @@
 
 namespace Fsel.Ordering.Domain.Models.CommandModels.Orders
 {
-    using Fsel.Ordering.Domain.Enums;
     using Fsel.Shared.Enums;
 
     public class CreateOrderCommandModel
     {
-        public string? CodeClass { get; set; }
+        //public string? CodeClass { get; set; }
+        //public string? Code { get; set; }
         public EnumCourseLevel CourseLevel { get; set; }
-        public string? Code { get; set; }
+
         public string? FullName { get; set; }
         public string? Country { get; set; }
         public string? Address { get; set; }
@@ -17,7 +17,9 @@ namespace Fsel.Ordering.Domain.Models.CommandModels.Orders
         public Guid CourseId { get; set; }
         public Guid PackageId { get; set; }
         public Guid? LiveTimeFrameId { get; set; }
-
         public IList<DayOfWeek>? LiveDays { get; set; }
+
+        public string? CodeCourse { get; set; }
+        public Guid UserId { get; set; }
     }
 }

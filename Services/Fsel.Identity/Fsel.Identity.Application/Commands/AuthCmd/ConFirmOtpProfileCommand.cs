@@ -46,12 +46,12 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             ArgumentNullException.ThrowIfNull(request);
             ArgumentNullException.ThrowIfNull(_appSetting.Otp);
             var methodResult = new MethodResult<bool>();
-            var user = await _userManager.FindByIdAsync(_authContext.CurrentUserId.ToString());
+            var user = await _userManager.Users.Include(x => x.Human).FirstOrDefaultAsync(x => x.Id == _authContext.CurrentUserId.ToString(), cancellationToken);
 
             if (user != null)
             {
                 var userOtpCode = await _userOtpCodeRepository.Queryable
-                        .FirstOrDefaultAsync(x => x.UserId == user!.Id && x.Status == EnumStatusUser.New && !x.IsDeleted && x.OTPCode == request.OTP, cancellationToken);
+                        .FirstOrDefaultAsync(x => x.UserId == user!.Id && x.Status == EnumOtpCodeStatus.New && !x.IsDeleted && x.OTPCode == request.OTP, cancellationToken);
                 if (userOtpCode == null)
                 {
                     methodResult.AddErrorBadRequest(nameof(EnumAuthErrorCode.InvalidOTP), nameof(request.OTP), request.OTP);
@@ -64,18 +64,20 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                     return methodResult;
                 }
 
-                userOtpCode.Status = EnumStatusUser.Verified;
+                userOtpCode.Status = EnumOtpCodeStatus.Verified;
                 _userOtpCodeRepository.Update(userOtpCode);
                 await _userOtpCodeRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
                 if (!string.IsNullOrEmpty(request.Email))
                 {
                     user.Email = request.Email;
+                    user.Human!.Email = request.Email;
                     await _userManager.UpdateAsync(user);
                 }
                 else if (!string.IsNullOrEmpty(request.PhoneNumber))
                 {
                     user.PhoneNumber = request.PhoneNumber;
+                    user.Human!.PhoneNumber = request.PhoneNumber;
                     await _userManager.UpdateAsync(user);
                 }
             }

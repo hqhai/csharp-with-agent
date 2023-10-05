@@ -8,7 +8,7 @@ namespace Fsel.Ordering.Domain.Entities
     using Fsel.Common.Helpers;
     using Fsel.Core.Entities;
     using Fsel.Ordering.Domain.Entities.PackageConfigs;
-    using Fsel.Ordering.Domain.Enums;
+    using Fsel.Shared.Enums;
 
     public class Package : Entity
     {

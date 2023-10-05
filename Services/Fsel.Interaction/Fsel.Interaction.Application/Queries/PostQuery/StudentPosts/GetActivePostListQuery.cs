@@ -6,12 +6,14 @@ namespace Fsel.Interaction.Application.Queries.PostQuery.StudentPosts
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base;
     using Fsel.Core.Base.BaseModels;
+    using Fsel.Core.Extensions;
+    using Fsel.Interaction.Application.Services.NotificationService;
+    using Fsel.Interaction.Application.Services.NotificationService.Models;
     using Fsel.Interaction.Application.Services.UserServices;
     using Fsel.Interaction.Domain.Entities;
     using Fsel.Interaction.Domain.IRepositories;
     using Fsel.Interaction.Domain.Models.EntityModels;
     using Fsel.Interaction.Domain.Models.QueryModels.Posts;
-    using Fsel.Interaction.Infrastructure.Repositories;
     using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Http;
@@ -29,6 +31,7 @@ namespace Fsel.Interaction.Application.Queries.PostQuery.StudentPosts
         private readonly IUserService _userService;
         private readonly ICommentRepository _commentRepository;
         private readonly ITopicTagRepository _topicTagRepository;
+        private readonly INotificationService _notificationService;
 
         public GetActivePostListQueryHandler
             (
@@ -37,7 +40,7 @@ namespace Fsel.Interaction.Application.Queries.PostQuery.StudentPosts
              AuthContext authContext, IUserService userService,
              ICommentRepository commentRepository,
              ITopicTagRepository topicTagRepository
-
+, INotificationService notificationService
             )
         {
             _postRepository = postRepository;
@@ -46,6 +49,7 @@ namespace Fsel.Interaction.Application.Queries.PostQuery.StudentPosts
             _userService = userService;
             _commentRepository = commentRepository;
             _topicTagRepository = topicTagRepository;
+            _notificationService = notificationService;
         }
 
         public async Task<MethodResult<PagingItemsModel<PostSearchModel>>> Handle(GetActivePostListQuery request, CancellationToken cancellationToken)
@@ -105,9 +109,9 @@ namespace Fsel.Interaction.Application.Queries.PostQuery.StudentPosts
                         {
                             Post = post,
                             InteractionCount = _interactionActionRepository.Queryable
-                                        .Count(interaction => interaction.ObjectId == post.Id && interaction.Type == EnumInteractionActionType.Like),
+                                                        .Count(interaction => interaction.ObjectId == post.Id && interaction.Type == EnumInteractionActionType.Like),
                             CommentCount = _commentRepository.Queryable
-                                        .Count(comment => comment.ObjectId == post.Id)
+                                                        .Count(comment => comment.ObjectId == post.Id)
                         })
                                         .Where(item => item.InteractionCount > 0 && item.Post.CreatedDate >= date7DaysAgo)
                                         .OrderByDescending(item => item.InteractionCount)
@@ -122,8 +126,10 @@ namespace Fsel.Interaction.Application.Queries.PostQuery.StudentPosts
                                             UserId = item.Post.UserId,
                                             CreatedUserId = item.Post.CreatedUserId,
                                             CreatedDate = item.Post.CreatedDate,
+                                            CreatedFullName = item.Post.CreatedFullName,
                                             UpdatedDate = item.Post.UpdatedDate,
                                             UpdatedUserId = item.Post.UpdatedUserId,
+                                            PostTags = item.Post.PostTags,
                                         });
 
                     break;
@@ -147,7 +153,6 @@ namespace Fsel.Interaction.Application.Queries.PostQuery.StudentPosts
                 return methodResult;
             }
 
-
             var result = sortedQuery.Select(post => new PostSearchModel
             {
                 Id = post.Id,
@@ -162,30 +167,49 @@ namespace Fsel.Interaction.Application.Queries.PostQuery.StudentPosts
                 UpdatedDate = post.UpdatedDate,
                 UpdatedUserId = post.UpdatedUserId,
                 FilePaths = post.FilePaths,
+                IsLiked = false,
+                IsTurnedOffNotification = false,
                 PostTags = post.PostTags
                                .Select(postTag => new TopicTagModel
                                {
                                    Name = postTag.TopicTag!.Name,
                                    Color = postTag.TopicTag!.Color,
+                                   Id = postTag.TopicTag!.Id,
                                }).ToList()
 
             });
 
             var lists = await result
+                    .ApplySortAndPaging(request)
                     .AsNoTracking()
                     .ToListAsync(cancellationToken: cancellationToken)
                     .ConfigureAwait(false);
 
+
+            GetListNotificationRemindQueryModel query = new GetListNotificationRemindQueryModel
+            {
+                ObjectIds = lists.Select(x => x.Id).ToList(),
+                Status = EnumNotificationRemindStatus.Off
+            };
+            var notificationRemind = await _notificationService.GetListNotificationRemind(query);
+            var notificationTurnOff = notificationRemind.Content?.Result;
+
             foreach (var post in lists)
             {
-                int likeCount = await _interactionActionRepository.Queryable
-                    .CountAsync(interaction => interaction.Type == EnumInteractionActionType.Like && interaction.ObjectId == post.Id, cancellationToken);
+                var likeQuery = _interactionActionRepository.Queryable
+                    .Where(interaction => interaction.Type == EnumInteractionActionType.Like && interaction.ObjectId == post.Id);
+
+                int? likeCount = likeQuery.Count();
 
                 int commentCount = await _commentRepository.Queryable
                     .CountAsync(comment => comment.ObjectId == post.Id, cancellationToken);
 
+                var likeAction = likeQuery.Any(i => i.UserId == _authContext.CurrentUserId);
+
+                post.IsLiked = likeAction;
                 post.LikeCount = likeCount;
                 post.CommentCount = commentCount;
+                post.IsTurnedOffNotification = notificationTurnOff?.Any(p => p.ObjectId == post.Id) ?? false;
             }
 
             methodResult.Result = new PagingItemsModel<PostSearchModel>(lists, request, totalItem);

@@ -3,9 +3,7 @@
 namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
 {
     using System;
-    using System.Collections.Generic;
     using System.Linq;
-    using System.Text;
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
@@ -24,6 +22,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
     public class SearchClassForumResultByTeacherQuery : SearchClassForumResultQueryModel, IRequest<MethodResult<PagingItemsModel<ClassForumResultSearchModel>>>
     {
     }
+
     public class SearchClassForumResultByTeacherQueryHandler : IRequestHandler<SearchClassForumResultByTeacherQuery, MethodResult<PagingItemsModel<ClassForumResultSearchModel>>>
     {
         private readonly IClassForumResultRepository _classForumResultRepository;
@@ -36,6 +35,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
             _trainingService = trainingService;
             _authContext = authContext;
         }
+
         public async Task<MethodResult<PagingItemsModel<ClassForumResultSearchModel>>> Handle(SearchClassForumResultByTeacherQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
@@ -52,6 +52,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
                                     .ThenInclude(x => x!.UnitLessons)
                                     .ThenInclude(x => x.Unit)
                                     .ThenInclude(x => x!.CourseUnitMockTests)
+                                    .ThenInclude(x => x.Course)
                                     .Include(x => x.ClassForum)
                                     .Where(x => x.Status == EnumClassForumResultStatus.PendingForGrading && (x.GradingTeacherId == null || x.GradingTeacherId == _authContext.CurrentUserId))
                                     .Select(x => new ClassForumResultSearchModel
@@ -60,18 +61,21 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
                                         CreatedDate = x.CreatedDate,
                                         CreatedUserId = x.CreatedUserId,
                                         CreatedFullName = x.CreatedFullName,
+                                        CourseSkill = x.ClassForum!.CourseSkill,
+                                        CourseId = x.LessonResult!.CourseId,
                                         ClassForum = x.ClassForum!.ClassForumResults!.Select(x => x.ClassForum).Select(x => new ClassForumModel
                                         {
                                             Id = x!.Id,
                                             CreatedUserId = x.CreatedUserId,
                                             CreatedFullName = x.CreatedFullName,
+                                            CourseSkill = x.CourseSkill,
                                         }).FirstOrDefault(),
                                         Status = x.Status,
                                         GradingStartDate = x.GradingStartDate,
                                         CourseCode = x.LessonResult!.Course!.Code,
                                         LessonName = x.ClassForum!.Lesson!.Name,
-                                        LessonDisplayOrder = x.LessonResult.Lesson!.UnitLessons.FirstOrDefault(y => y.UnitId == x.LessonResult.UnitId)!.DisplayOrder,
-                                        UnitDisplayOrder = x.LessonResult.Unit!.CourseUnitMockTests.FirstOrDefault(y => y.CourseId == x.LessonResult.CourseId)!.DisplayOrder,
+                                        LessonDisplayOrder = x.LessonResult.Lesson!.UnitLessons.Where(y => y.UnitId == x.LessonResult.UnitId).Select(x => x.DisplayOrder).FirstOrDefault(),
+                                        UnitDisplayOrder = x.LessonResult.Unit!.CourseUnitMockTests.Where(y => y.CourseId == x.LessonResult.CourseId).Select(x => x.Number).FirstOrDefault(),
                                         UnitName = x.ClassForum.Lesson.UnitLessons.Select(x => x.Unit).Select(x => x!.Name).FirstOrDefault(),
                                         TeacherId = x.GradingTeacherId
                                     });
@@ -101,6 +105,10 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
             {
                 classForumResultQuery = classForumResultQuery.Where(m => m.UnitDisplayOrder == request.UnitDisplayOrder);
             }
+            if (request.CourseId != null)
+            {
+                classForumResultQuery = classForumResultQuery.Where(m => m.CourseId == request.CourseId);
+            }
             int totalItem = await classForumResultQuery.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
             var lists = await classForumResultQuery
                     .ApplySortAndPaging(request)
@@ -115,6 +123,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
                 {
                     item.ClassCode = classResult!.Content!.Result.Code;
                 }
+                item.PostArea = "L" + item.LessonDisplayOrder + "_" + "U" + item.UnitDisplayOrder + "_" + item.CourseCode;
             }
 
             methodResult.Result = new PagingItemsModel<ClassForumResultSearchModel>(lists, request, totalItem);

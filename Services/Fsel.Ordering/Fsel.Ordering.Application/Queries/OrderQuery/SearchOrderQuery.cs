@@ -53,6 +53,7 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery
                 Status = x.Status,
                 PaymentMethod = x.PaymentMethod,
                 PackageId = x.PackageId,
+                FullName = x.FullName,
             });
             if (request.Status.HasValue)
             {

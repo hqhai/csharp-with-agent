@@ -14,11 +14,13 @@ namespace Fsel.Course.Domain.Entities
         [Range(0, 10000_0000, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
         public int DisplayOrder { get; set; }
 
+        [Range(0, 10000_0000, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
+        public int Number { get; set; }
+
         public Unit? Unit { get; set; }
         public Course? Course { get; set; }
         public MockTest? MockTest { get; set; }
         public FinalTest? FinalTest { get; set; }
-
         public Guid? UnitId { get; set; }
         public Guid? FinalTestId { get; set; }
         public Guid CourseId { get; set; }

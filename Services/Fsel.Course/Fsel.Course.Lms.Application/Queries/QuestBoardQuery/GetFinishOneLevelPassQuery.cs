@@ -12,17 +12,18 @@ namespace Fsel.Course.Lms.Application.Queries.QuestBoardQuery
     using Fsel.Course.Lms.Application.Services.OrderServices.Model;
     using Fsel.Course.Lms.Application.Services.TrainingServices;
     using Fsel.Shared.Enums.ErrorCodes;
+    using Fsel.Shared.Models.ShareModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class GetFinishOneLevelPassQuery : IRequest<MethodResult<double>>
+    public class GetFinishOneLevelPassQuery : IRequest<MethodResult<QuestBoardCategoryModel>>
     {
         public Guid StudentId { get; set; }
         public Guid CurrentUserId { get; set; }
     }
 
-    public class GetFinishOneLevelPassQueryHandler : IRequestHandler<GetFinishOneLevelPassQuery, MethodResult<double>>
+    public class GetFinishOneLevelPassQueryHandler : IRequestHandler<GetFinishOneLevelPassQuery, MethodResult<QuestBoardCategoryModel>>
     {
         private readonly ITrainingService _trainingService;
         private readonly IOrderService _orderService;
@@ -37,10 +38,10 @@ namespace Fsel.Course.Lms.Application.Queries.QuestBoardQuery
             _courseRepository = courseRepository;
         }
 
-        public async Task<MethodResult<double>> Handle(GetFinishOneLevelPassQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<QuestBoardCategoryModel>> Handle(GetFinishOneLevelPassQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            MethodResult<double> methodResult = new MethodResult<double>();
+            MethodResult<QuestBoardCategoryModel> methodResult = new MethodResult<QuestBoardCategoryModel>();
             var classResult = await _trainingService.GetClassByStudentId(request.StudentId);
             if (!classResult.IsSuccessStatusCode)
             {
@@ -66,13 +67,19 @@ namespace Fsel.Course.Lms.Application.Queries.QuestBoardQuery
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(isCheckUserOrder));
                 return methodResult;
             }
-            var course = await _courseRepository.Queryable.Include(x => x.UnitResults.Where(x => x.StudentId == request.StudentId)).Include(x => x.CourseUnitMockTests).FirstOrDefaultAsync(x => x.Id == @class.CourseId, cancellationToken);
+            var course = await _courseRepository.Queryable.Include(x => x.UnitResults.Where(x => x.StudentId == request.StudentId))
+                                                        .Include(x => x.CourseResults.Where(x => x.StudentId == request.StudentId && x.CourseId == @class.CourseId))
+                                                        .Include(x => x.CourseUnitMockTests)
+                                                        .FirstOrDefaultAsync(x => x.Id == @class.CourseId, cancellationToken);
             if (course == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(course));
                 return methodResult;
             }
-            methodResult.Result = (double)course.UnitResults.Where(x => x.Status == EnumResultStatus.Done).ToList().Count / course.CourseUnitMockTests.Where(x => x.UnitId != null).ToList().Count;
+            QuestBoardCategoryModel questBoardCategoryModel = new QuestBoardCategoryModel();
+            questBoardCategoryModel.Percent = (double)course.UnitResults.Where(x => x.Status == EnumResultStatus.Done).ToList().Count / course.CourseUnitMockTests.Where(x => x.UnitId != null).ToList().Count;
+            questBoardCategoryModel.ObjectId = course.CourseResults.FirstOrDefault(x => x.StudentId == request.StudentId && x.CourseId == @class.CourseId)?.Id;
+            methodResult.Result = questBoardCategoryModel;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }

@@ -6,29 +6,13 @@ namespace Fsel.Course.Lms.Application.InternalEvents
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
+    using Fsel.Course.Lms.Application.Queues.Publishers;
     using MediatR;
 
     public class UnitResultInputThenUpdateCourseResultHandler : BaseInternalEventHandler,
         INotificationHandler<EntityChangedEvent<UnitResult>>
     {
-        public UnitResultInputThenUpdateCourseResultHandler(IUnitResultRepository unitResultRepository
-            , ILessonResultRepository lessonResultRepository
-            , IVideoResultRepository videoResultRepository
-            , IClassForumResultRepository classForumResultRepository
-            , IHomeWorkResultRepository homeWorkResultRepository
-            , ICourseRepository courseRepository
-            , ICourseResultRepository courseResultRepository
-            , IMockTestResultRepository mockTestResultRepository
-            , IFinalTestResultRepository finalTestResultRepository
-            ) : base(videoResultRepository,
-                classForumResultRepository,
-                unitResultRepository,
-                lessonResultRepository,
-                courseResultRepository,
-                courseRepository,
-                finalTestResultRepository,
-                mockTestResultRepository,
-                homeWorkResultRepository)
+        public UnitResultInputThenUpdateCourseResultHandler(IVideoResultRepository videoResultRepository, IClassForumResultRepository classForumResultRepository, IUnitResultRepository unitResultRepository, ILessonResultRepository lessonResultRepository, ICourseResultRepository courseResultRepository, ICourseRepository courseRepository, IUnitRepository unitRepository, IMockTestRepository mockTestRepository, IHomeWorkQuestionRepository homeWorkQuestionRepository, IHomeWorkAnswerRepository homeWorkAnswerRepository, IQuestionRepository questionRepository, IHomeWorkRepository homeWorkRepository, FinishOneUnitPublisher finishOneUnitPublisher, FinishOneLevelPassPublisher finishOneLevelPassPublisher, IFinalTestResultRepository finalTestResultRepository, IMockTestResultRepository mockTestResultRepository, IHomeWorkResultRepository homeWorkResultRepository) : base(videoResultRepository, classForumResultRepository, unitResultRepository, lessonResultRepository, courseResultRepository, courseRepository, unitRepository, mockTestRepository, homeWorkQuestionRepository, homeWorkAnswerRepository, questionRepository, homeWorkRepository, finishOneUnitPublisher, finishOneLevelPassPublisher, finalTestResultRepository, mockTestResultRepository, homeWorkResultRepository)
         {
         }
 
@@ -36,6 +20,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
         {
             ArgumentNullException.ThrowIfNull(notification);
             var unitResult = notification.Data;
+            await UpdateCourse(unitResult.CourseId, unitResult.StudentId, cancellationToken).ConfigureAwait(false);
             if (unitResult.Status == EnumResultStatus.Done)
             {
                 await UpdateProcessUnit(unitResult, cancellationToken);

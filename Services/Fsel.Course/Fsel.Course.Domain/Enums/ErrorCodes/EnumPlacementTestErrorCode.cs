@@ -20,8 +20,8 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         PlacementTestResultMaxThree,
 
         /// <summary>
-        ///  The level is right for the level
+        ///  PlacementTest Lock
         /// </summary>
-        TheLevelIsRightForTheLevel
+        PlacementTestLock
     }
 }

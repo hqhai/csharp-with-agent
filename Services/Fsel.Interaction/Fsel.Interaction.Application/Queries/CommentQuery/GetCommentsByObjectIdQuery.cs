@@ -11,16 +11,20 @@ namespace Fsel.Interaction.Application.Queries.CommentQuery
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base;
     using Fsel.Interaction.Application.Services.UserServices;
+    using Fsel.Interaction.Application.Services.UserServices.Models;
     using Fsel.Interaction.Domain.IRepositories;
     using Fsel.Interaction.Domain.Models.EntityModels;
     using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Http;
+    using Microsoft.AspNetCore.Http.HttpResults;
     using Microsoft.EntityFrameworkCore;
 
     public class GetCommentsByObjectIdQuery : IRequest<MethodResult<IList<CommentModel>>>
     {
         public Guid ObjectId { get; set; }
+
+        public EnumCommentFilter Filter { get; set; }
     }
 
     public class GetCommentsByObjectIdQueryHandler : IRequestHandler<GetCommentsByObjectIdQuery, MethodResult<IList<CommentModel>>>
@@ -50,21 +54,22 @@ namespace Fsel.Interaction.Application.Queries.CommentQuery
 
             MethodResult<IList<CommentModel>> methodResult = new MethodResult<IList<CommentModel>>();
 
-            methodResult.Result = await GetCommentsByObjectIdAsync(request.ObjectId);
+            methodResult.Result = await GetCommentsByObjectIdAsync(request.ObjectId, request.Filter);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }
 
-        public async Task<IList<CommentModel>?> GetCommentsByObjectIdAsync(Guid objectId)
+        public async Task<IList<CommentModel>?> GetCommentsByObjectIdAsync(Guid objectId, EnumCommentFilter? filter = null)
         {
             var commentQuery = from c in _commentRepository.Queryable
                                join ca in _interactionActionRepository.Queryable on c.Id equals ca.ObjectId into caJ
                                from p in caJ.DefaultIfEmpty()
-                               where c.ObjectId == objectId && (p == null || (p.Type != EnumInteractionActionType.Disable && p.UserId == _authContext.CurrentUserId))
-                               select c;
+                               group p by c into commentG
+                               where commentG.Key.ObjectId == objectId && !(commentG.Any(x => x.Type == EnumInteractionActionType.Disable && x.UserId == _authContext.CurrentUserId))
+                               select commentG.Key;
 
             var comments = await commentQuery.ToListAsync();
-            var userResult = await _userService.GetStudentByUserIdsAsync(comments.Select(x => x.UserId.ToString()).ToList());
+            var userResult = await _userService.GetUsersByIdsAsync(new GetUsersByIdsQueryModel { UserIds = comments.Select(x => x.UserId.ToString()).ToList() });
 
             var results = new List<CommentModel>();
             if (comments != null && comments.Count > 0)
@@ -73,11 +78,9 @@ namespace Fsel.Interaction.Application.Queries.CommentQuery
                 foreach (var item in commentModels)
                 {
                     var actionLikes = _interactionActionRepository.Queryable.Where(x => x.ObjectId == item.Id && x.Type == EnumInteractionActionType.Like).ToList();
-
-                    item.AvatarPath = userResult.Content?.Result?.FirstOrDefault(x => x.Human?.UserId == item.UserId.ToString())?.Human?.AvatarPath;
-                    item.FullName = userResult.Content?.Result?.FirstOrDefault(x => x.Human?.UserId == item.UserId.ToString())?.Human?.FullName;
-                    item.CourseLevel = userResult.Content?.Result?.FirstOrDefault(x => x.Human?.UserId == item.UserId.ToString())?.CourseLevel ?? default;
-                    item.Comments = await GetCommentsByObjectIdAsync(item.Id);
+                    item.AvatarPath = userResult.Content?.Result?.FirstOrDefault(x => x.UserId == item.UserId.ToString())?.AvatarPath;
+                    item.FullName = userResult.Content?.Result?.FirstOrDefault(x => x.UserId == item.UserId.ToString())?.FullName;
+                    item.Comments = await GetCommentsByObjectIdAsync(item.Id, filter);
                     item.CommentNumber = item.Comments?.Count ?? default;
                     item.LikeNumber = actionLikes.Count;
                     item.IsLiked = actionLikes.Any(x => x.UserId == _authContext.CurrentUserId);
@@ -86,7 +89,26 @@ namespace Fsel.Interaction.Application.Queries.CommentQuery
 
                 results.AddRange(commentModels);
             }
-            return results.OrderBy(x => x.CreatedDate).ToList();
+
+            if (filter.HasValue)
+            {
+                switch (filter.Value)
+                {
+                    case EnumCommentFilter.Newest:
+                        results = results.OrderByDescending(x => x.CreatedDate).ToList();
+                        break;
+
+                    case EnumCommentFilter.MostPopular:
+                        results = results.OrderByDescending(x => x.LikeNumber).ToList();
+                        break;
+
+                    case EnumCommentFilter.AllComment:
+                        results = results.OrderBy(x => x.CreatedDate).ToList();
+                        break;
+                }
+            }
+
+            return results;
         }
     }
 }

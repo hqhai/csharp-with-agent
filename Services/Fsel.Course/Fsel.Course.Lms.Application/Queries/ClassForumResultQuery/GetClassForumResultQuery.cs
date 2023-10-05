@@ -10,11 +10,11 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
+    using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Shared.Enums;
-    using Fsel.Shared.Enums.ErrorCodes;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -47,9 +47,13 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
                 .Include(x => x.LessonResult)
                 .ThenInclude(x => x!.Lesson)
                 .ThenInclude(x => x!.UnitLessons)
-                .ThenInclude(x => x.Unit)
+                .Include(x => x.LessonResult)
+                .ThenInclude(x => x!.Unit)
                 .ThenInclude(x => x!.CourseUnitMockTests)
+                .Include(x => x.LessonResult)
+                .ThenInclude(x => x!.Course)
                 .Include(x => x.ClassForum)
+                .ThenInclude(x => x!.ClassForumFiles)
                 .Include(x => x.ClassForumResultFiles)
                 .Include(x => x.ClassForumScores)
                 .Where(x => x.Id == request.ClassForumResultId)
@@ -65,39 +69,58 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
             {
                 var csoResults = await _userService.GetCSOByUserId(_authContext.CurrentUserId);
                 var csoId = csoResults.Content?.Result?.Id;
-                classForumResult.CheckCsoId = csoId;
-                classForumResult.CheckStartDate = DateTime.Now;
+                if (classForumResult.CheckStartDate.HasValue && classForumResult.CheckStartDate.Value.AddMinutes(30) < DateTime.Now)
+                {
+                    classForumResult.CheckCsoId = null;
+                    classForumResult.CheckStartDate = null;
+                }
+                else
+                {
+                    if (classForumResult.CheckCsoId == null)
+                    {
+                        classForumResult.CheckCsoId = csoId;
+                        classForumResult.CheckStartDate = DateTime.Now;
+                    }
+                }
             }
 
             if (_authContext.Roles!.Contains(EnumRole.Teacher.ToString()))
             {
                 var teacherResult = await _userService.GetTeacherByUserIdAsync(_authContext.CurrentUserId);
                 var teacherId = teacherResult.Content?.Result?.Id;
-                classForumResult.GradingTeacherId = teacherId;
-                classForumResult.GradingStartDate = DateTime.Now;
+                if (classForumResult.GradingStartDate.HasValue && classForumResult.GradingStartDate.Value.AddMinutes(30) < DateTime.Now)
+                {
+                    classForumResult.GradingTeacherId = null;
+                    classForumResult.GradingStartDate = null;
+                }
+                else
+                {
+                    if (classForumResult.GradingTeacherId == null)
+                    {
+                        classForumResult.GradingTeacherId = teacherId;
+                        classForumResult.GradingStartDate = DateTime.Now;
+                    }
+                }
             }
 
             var lesson = classForumResult.LessonResult?.Lesson?.UnitLessons.FirstOrDefault(y => y.UnitId == classForumResult.LessonResult.UnitId)?.DisplayOrder;
-            var unit = classForumResult.LessonResult?.Unit?.CourseUnitMockTests.FirstOrDefault(y => y.CourseId == classForumResult.LessonResult.CourseId)?.DisplayOrder;
+            var unit = classForumResult.LessonResult?.Unit?.CourseUnitMockTests.FirstOrDefault(y => y.CourseId == classForumResult.LessonResult.CourseId)?.Number;
+            var course = classForumResult.LessonResult?.Course?.Code;
 
             var classForumResultModel = new ClassForumResultModel
             {
                 Id = classForumResult.Id,
                 Content = classForumResult.Content,
+                WordContent = classForumResult.WordContent,
                 Status = classForumResult.Status,
                 ClassForumId = classForumResult.ClassForumId,
                 ClassForum = _mapper.Map<ClassForumModel>(classForumResult.ClassForum),
-                LessonDisplayOrder = lesson ?? default,
-                UnitDisplayOrder = unit ?? default,
                 CreatedDate = classForumResult.CreatedDate,
                 CheckStartDate = classForumResult.CheckStartDate,
                 GradingStartDate = classForumResult.GradingStartDate,
                 CheckCsoId = classForumResult.CheckCsoId,
                 GradingTeacherId = classForumResult.GradingTeacherId ?? default,
-                ClassForumResultFiles = classForumResult.ClassForumResultFiles == null ? null : classForumResult.ClassForumResultFiles.Select(x => new ClassForumResultFileModel
-                {
-                    FilePath = x.FilePath,
-                }).ToList(),
+                ClassForumResultFiles = _mapper.Map<IList<ClassForumResultFileModel>>(classForumResult.ClassForumResultFiles),
                 ClassForumScores = classForumResult.ClassForumScores == null ? null : classForumResult.ClassForumScores.Select(x => new ClassForumScoreModel
                 {
                     Id = x.Id,
@@ -105,10 +128,11 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
                     Criteria = x.Criteria,
                     Score = x.Score
                 }).ToList(),
+                PostArea = "L" + lesson + "_" + "U" + unit + "_" + course
             };
 
             classForumResult = _classForumResultRepository.Update(classForumResult);
-            await _classForumResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+            await _classForumResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             methodResult.Result = classForumResultModel;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;

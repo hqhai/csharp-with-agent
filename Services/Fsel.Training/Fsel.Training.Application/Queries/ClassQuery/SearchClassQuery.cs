@@ -45,9 +45,6 @@ namespace Fsel.Training.Application.Queries.ClassQuery
                 return methodResult;
             }
 
-            var coursesResult = await _courseService.GetCoursesByLevelAsync(request.Level);
-            var courses = coursesResult.Content?.Result;
-
             var classQuery = _classRepository.Queryable
                             .Select(x => new ClassModel
                             {
@@ -60,7 +57,10 @@ namespace Fsel.Training.Application.Queries.ClassQuery
 
             if (request.Level.HasValue)
             {
-                classQuery = classQuery.Where(m => courses != null && courses.Select(x => x.Id).Contains(m.CourseId));
+                var coursesResult = await _courseService.GetCoursesByLevelAsync(request.Level);
+                var courseIds = coursesResult.Content?.Result?.Select(p => p.Id).ToList();
+
+                classQuery = classQuery.Where(m => courseIds != null && courseIds.Contains(m.CourseId));
             }
 
             if (!string.IsNullOrEmpty(request.Keyword))

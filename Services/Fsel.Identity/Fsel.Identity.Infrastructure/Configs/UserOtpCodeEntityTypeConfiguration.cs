@@ -25,7 +25,7 @@ namespace Fsel.Identity.Infrastructure.Configs
                    .HasMaxLength(100)
                    .HasConversion(
                         v => v.ToString(),
-                        v => v.EnumParse<EnumStatusUser>());
+                        v => v.EnumParse<EnumOtpCodeStatus>());
         }
     }
 }

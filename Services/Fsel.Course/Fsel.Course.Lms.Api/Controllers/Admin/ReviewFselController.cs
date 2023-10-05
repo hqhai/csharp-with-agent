@@ -28,38 +28,26 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
         }
 
         /// <summary>
-        /// Search Communication
+        /// Search Review ai
         /// </summary>
-        [HttpGet("communication")]
-        [ProducesResponseType(typeof(MethodResult<ReviewCommunicationSearchModel>), (int)HttpStatusCode.OK)]
+        [HttpGet("review-ai")]
+        [ProducesResponseType(typeof(MethodResult<PagingItemsModel<FeedbackClassForumAIModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> SearchCommunication([FromQuery] SearchReviewCommunicationQuery query)
+        public async Task<IActionResult> SearchReviewAi([FromQuery] SearchFeedbackAIQuery query)
         {
-            MethodResult<ReviewCommunicationSearchModel> queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            MethodResult<PagingItemsModel<FeedbackClassForumAIModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
 
         /// <summary>
-        /// Search Course
+        /// Search student star
         /// </summary>
-        [HttpGet("course")]
-        [ProducesResponseType(typeof(MethodResult<ReviewCourseSearchModel>), (int)HttpStatusCode.OK)]
+        [HttpGet("student-stars")]
+        [ProducesResponseType(typeof(MethodResult<PagingItemsModel<StudentFeedbackModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> SearchCourse([FromQuery] SearchReviewCourseQuery query)
+        public async Task<IActionResult> SearchStudentStars([FromQuery] SearchStudentFeedbackAIQuery query)
         {
-            MethodResult<ReviewCourseSearchModel> queryResult = await _mediator.Send(query).ConfigureAwait(false);
-            return queryResult.GetActionResult();
-        }
-
-        /// <summary>
-        /// Search Course Detail
-        /// </summary>
-        [HttpGet("course-detail")]
-        [ProducesResponseType(typeof(MethodResult<ReviewCourseDetailSearchModel>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> SearchCourseDetail([FromQuery] SearchReviewCourseDetailQuery query)
-        {
-            MethodResult<ReviewCourseDetailSearchModel> queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            MethodResult<PagingItemsModel<StudentFeedbackModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
 
@@ -79,11 +67,11 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
         /// Search Review Lesson With Course
         /// </summary>
         [HttpGet("lesson-with-course")]
-        [ProducesResponseType(typeof(MethodResult<ReviewLesssonWithCourseSearchModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(MethodResult<ReviewLessonWithCourseSearchModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> SearchReviewLessonWithCourse([FromQuery] SearchReviewLesssonWithCourseQuery query)
+        public async Task<IActionResult> SearchReviewLessonWithCourse([FromQuery] SearchReviewLessonWithCourseQuery query)
         {
-            MethodResult<ReviewLesssonWithCourseSearchModel> queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            MethodResult<ReviewLessonWithCourseSearchModel> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
 
@@ -93,7 +81,7 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
         [HttpGet("lesson-with-unit")]
         [ProducesResponseType(typeof(MethodResult<ReviewLessonWithUnitSearchModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> SearchReviewLessonWithUnit([FromQuery] SearchReviewLesssonWithUnitQuery query)
+        public async Task<IActionResult> SearchReviewLessonWithUnit([FromQuery] SearchReviewLessonWithUnitQuery query)
         {
             MethodResult<ReviewLessonWithUnitSearchModel> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
@@ -105,7 +93,7 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
         [HttpGet("lesson-with-lesson")]
         [ProducesResponseType(typeof(MethodResult<ReviewLessonWithLessonSearchModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> SearchReviewLessonWithLesson([FromQuery] SearchReviewLesssonWithLessonQuery query)
+        public async Task<IActionResult> SearchReviewLessonWithLesson([FromQuery] SearchReviewLessonWithLessonQuery query)
         {
             MethodResult<ReviewLessonWithLessonSearchModel> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();

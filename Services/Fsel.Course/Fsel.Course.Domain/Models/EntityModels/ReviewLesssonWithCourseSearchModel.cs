@@ -5,16 +5,16 @@ namespace Fsel.Course.Domain.Models.EntityModels
     using Fsel.Core.Base.BaseModels;
     using Fsel.Shared.Enums;
 
-    public class ReviewLesssonWithCourseSearchModel
+    public class ReviewLessonWithCourseSearchModel
     {
-        public double Starts { get; set; }
-        public PagingItemsModel<ReviewLesssonWithCourseModel> PagingItemsModel { get; set; } = new PagingItemsModel<ReviewLesssonWithCourseModel>();
+        public double Stars { get; set; }
+        public PagingItemsModel<ReviewLessonWithCourseModel> PagingItemsModel { get; set; } = new PagingItemsModel<ReviewLessonWithCourseModel>();
     }
 
-    public class ReviewLesssonWithCourseModel : BaseModel
+    public class ReviewLessonWithCourseModel : BaseModel
     {
         public string? Code { get; set; }
         public EnumCourseLevel CourseLevel { get; set; }
-        public double Starts { get; set; }
+        public double Stars { get; set; }
     }
 }
