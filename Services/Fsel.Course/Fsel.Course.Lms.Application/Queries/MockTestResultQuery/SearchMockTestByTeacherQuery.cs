@@ -57,7 +57,7 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
                                                                         .ThenInclude(x => x.Course)
                                                                         .ThenInclude(x => x!.CourseUnitMockTests)
                                                                         .Include(x => x.MockTestScores)
-                                                                        .Where(x => x.Status == EnumResultStatus.Done && x.MockTestScores.Count == 0 && (x.GradingTeacherId == null || x.GradingTeacherId == teacherId))
+                                                                        .Where(x => x.Status == EnumResultStatus.Done && !x.MockTestScores.Any() && (x.GradingTeacherId == null || x.GradingTeacherId == teacherId))
                                                                         .AsNoTracking()
                                                                         .Select(x => new MockTestResultSearchModel
                                                                         {

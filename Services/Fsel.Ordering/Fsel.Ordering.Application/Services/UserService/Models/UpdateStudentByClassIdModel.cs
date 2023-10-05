@@ -9,5 +9,6 @@ namespace Fsel.Ordering.Application.Services.UserService.Models
         public Guid? ClassId { get; set; }
         public Guid StudentId { get; set; }
         public Guid? PackageId { get; set; }
+        public int NumberOfShield { get; set; }
     }
 }

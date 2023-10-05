@@ -76,7 +76,7 @@ IStudentRepository studentRepository)
                 return methodResult;
             }
             var userOtpCode = await _userOtpCodeRepository.Queryable
-                        .FirstOrDefaultAsync(x => x.UserId == user.Id && x.Status == EnumStatusUser.New && !x.IsDeleted && x.OTPCode == request.OTP, cancellationToken);
+                        .FirstOrDefaultAsync(x => x.UserId == user.Id && x.Status == EnumOtpCodeStatus.New && !x.IsDeleted && x.OTPCode == request.OTP, cancellationToken);
             if (userOtpCode == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Email));
@@ -89,7 +89,7 @@ IStudentRepository studentRepository)
                 return methodResult;
             }
 
-            userOtpCode.Status = EnumStatusUser.Verified;
+            userOtpCode.Status = EnumOtpCodeStatus.Verified;
             _userOtpCodeRepository.Update(userOtpCode);
             await _userOtpCodeRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 

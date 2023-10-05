@@ -155,22 +155,27 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
         private async Task<Lesson?> GetLesson(LessonResult? lessonResult, Course course, CancellationToken cancellationToken)
         {
             Guid? unitId = default;
+            var courseUnitMockTests = course.CourseUnitMockTests.OrderBy(x => x.DisplayOrder).ToList();
             if (lessonResult != null && lessonResult.Status == EnumResultStatus.Done)
             {
-                var displayOrderUnit = course.CourseUnitMockTests.FirstOrDefault(x => x.UnitId == lessonResult.UnitId)?.DisplayOrder;
-                unitId = course.CourseUnitMockTests.FirstOrDefault(x => x.DisplayOrder == displayOrderUnit + 1)?.UnitId;
+                var courseUnitMockTest = courseUnitMockTests.FirstOrDefault(x => x.UnitId == lessonResult.UnitId);
+                if (courseUnitMockTest != null)
+                {
+                    var index = courseUnitMockTests.IndexOf(courseUnitMockTest);
+                    unitId = courseUnitMockTests[index + 1].UnitId;
+                }
             }
             if (lessonResult == null)
             {
-                unitId = course.CourseUnitMockTests.FirstOrDefault(x => x.DisplayOrder == 1)?.UnitId;
+                unitId = courseUnitMockTests.FirstOrDefault()?.UnitId;
             }
 
             if (unitId != null)
             {
-                var unit = await _unitRepository.Queryable.Include(x => x.UnitLessons.Where(x => x.DisplayOrder == 0)).FirstOrDefaultAsync(x => x.Id == unitId, cancellationToken);
+                var unit = await _unitRepository.Queryable.Include(x => x.UnitLessons).FirstOrDefaultAsync(x => x.Id == unitId, cancellationToken);
                 if (unit != null)
                 {
-                    var lessonId = unit.UnitLessons.FirstOrDefault(x => x.DisplayOrder == 0)?.LessonId ?? default;
+                    var lessonId = unit.UnitLessons.OrderBy(x => x.DisplayOrder).FirstOrDefault()?.LessonId ?? default;
                     return await _lessonRepository.Queryable.Include(x => x.LessonInstructions).FirstOrDefaultAsync(x => x.Id == lessonId, cancellationToken);
                 }
             }

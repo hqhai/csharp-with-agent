@@ -8,6 +8,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Services.UserServices;
+    using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -78,7 +79,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
                 Id = x.Id,
                 Name = x.Lesson?.Name,
                 CourseSkill = x.CourseSkill,
-                TotalCorrect = 30,
+                TotalCorrect = 36,
                 LessonId = x.LessonId,
                 LessonResultId = x.Lesson?.LessonResults.FirstOrDefault(y => y.LessonId == x.LessonId && y.StudentId == studentId)?.Id,
                 ClassForumResultScore = x.ClassForumResults.Select(x => new ClassForumResultScoreModel
@@ -87,6 +88,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
                     CorrectCount = x.ClassForumScores.Count > 0 ? x.ClassForumScores.Sum(x => x.Score) : default,
                     TotalCorrect = 36,
                     Status = x.Status,
+                    Percent = x.ClassForumScores.Count > 0 ? NumberHelper.ConvertPercentDouble(x.ClassForumScores.Sum(x => x.Score) / 36) : default,
                 }).FirstOrDefault(),
             }).ToList();
             methodResult.StatusCode = StatusCodes.Status200OK;

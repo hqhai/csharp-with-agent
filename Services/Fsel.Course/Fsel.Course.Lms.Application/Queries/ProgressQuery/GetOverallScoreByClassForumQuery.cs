@@ -96,7 +96,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
                 CorrectCount = x.SelectMany(x => x.ClassForumResults).SelectMany(x => x.ClassForumScores).Sum(x => x.Score),
                 TotalCount = 36,
             }).ToList();
-            skillScores.ForEach(x => x.Percent = x.TotalCount > 0 ? x.CorrectCount / x.TotalCount : default);
+            skillScores.ForEach(x => x.Percent = x.TotalCount > 0 ? NumberHelper.ConvertDoublePercent(x.CorrectCount / x.TotalCount) : default);
             overallScoreReport.SkillScores = skillScores;
             overallScoreReport.CourseSkills = classForums.Select(x => x.CourseSkill).Distinct().ToList();
             methodResult.StatusCode = StatusCodes.Status200OK;
