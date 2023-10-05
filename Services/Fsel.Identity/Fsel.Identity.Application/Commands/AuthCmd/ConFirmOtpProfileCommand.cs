@@ -16,21 +16,21 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
     using Microsoft.AspNetCore.Identity;
     using Microsoft.EntityFrameworkCore;
 
-    public class ComfirmOtpProfileCommand : IRequest<MethodResult<bool>>
+    public class ConfirmOtpProfileCommand : IRequest<MethodResult<bool>>
     {
         public string? Email { get; set; }
         public string? PhoneNumber { get; set; }
         public string? OTP { get; set; }
     }
 
-    public class ComfirmOtpProfileCommandHandler : IRequestHandler<ComfirmOtpProfileCommand, MethodResult<bool>>
+    public class ConfirmOtpProfileCommandHandler : IRequestHandler<ConfirmOtpProfileCommand, MethodResult<bool>>
     {
         private readonly UserManager<User> _userManager;
         private readonly AuthContext _authContext;
         private readonly IUserOtpCodeRepository _userOtpCodeRepository;
         private readonly AppSetting _appSetting;
 
-        public ComfirmOtpProfileCommandHandler(UserManager<User> userManager
+        public ConfirmOtpProfileCommandHandler(UserManager<User> userManager
             , AuthContext authContext
             , IUserOtpCodeRepository userOtpCodeRepository
             , AppSetting appSetting)
@@ -41,7 +41,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             _appSetting = appSetting;
         }
 
-        public async Task<MethodResult<bool>> Handle(ComfirmOtpProfileCommand request, CancellationToken cancellationToken)
+        public async Task<MethodResult<bool>> Handle(ConfirmOtpProfileCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             ArgumentNullException.ThrowIfNull(_appSetting.Otp);
@@ -51,7 +51,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             if (user != null)
             {
                 var userOtpCode = await _userOtpCodeRepository.Queryable
-                        .FirstOrDefaultAsync(x => x.UserId == user!.Id && x.Status == EnumOtpCodeStatus.New && !x.IsDeleted && x.OTPCode == request.OTP, cancellationToken);
+                        .FirstOrDefaultAsync(x => x.UserId == user.Id && x.Status == EnumOtpCodeStatus.New && !x.IsDeleted && x.OTPCode == request.OTP, cancellationToken);
                 if (userOtpCode == null)
                 {
                     methodResult.AddErrorBadRequest(nameof(EnumAuthErrorCode.InvalidOTP), nameof(request.OTP), request.OTP);

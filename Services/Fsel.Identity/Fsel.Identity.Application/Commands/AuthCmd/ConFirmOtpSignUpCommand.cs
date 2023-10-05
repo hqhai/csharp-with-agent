@@ -14,17 +14,15 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
     using Fsel.Identity.Domain.Models.EntityModels;
     using Fsel.Identity.Infrastructure.ValueSettings;
     using Fsel.Shared.Enums;
-    using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.AspNetCore.Identity;
     using Microsoft.EntityFrameworkCore;
-    using static System.Runtime.InteropServices.JavaScript.JSType;
 
-    public class ComfirmOTPSignUpCommand : ConfirmOTPCommandModel, IRequest<MethodResult<ConfirmOtpModel>>
+    public class ConfirmOtpSignUpCommand : ConfirmOTPCommandModel, IRequest<MethodResult<ConfirmOtpModel>>
     {
     }
 
-    public class ComfirmOTPSignUpCommandHandler : IRequestHandler<ComfirmOTPSignUpCommand, MethodResult<ConfirmOtpModel>>
+    public class ConfirmOtpSignUpCommandHandler : IRequestHandler<ConfirmOtpSignUpCommand, MethodResult<ConfirmOtpModel>>
     {
         private readonly UserManager<User> _userManager;
         private readonly IMediator _mediator;
@@ -33,16 +31,14 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
         private readonly IHumanRepository _humanRepository;
         private readonly IMapper _mapper;
         private readonly IParentRepository _parentRepository;
-        private readonly IStudentRepository _studentRepository;
 
-        public ComfirmOTPSignUpCommandHandler(UserManager<User> userManager
+        public ConfirmOtpSignUpCommandHandler(UserManager<User> userManager
             , IMediator mediator
             , IUserOtpCodeRepository userOtpCodeRepository
             , AppSetting appSetting
             , IHumanRepository humanRepository
             , IMapper mapper
-            , IParentRepository parentRepository,
-IStudentRepository studentRepository)
+            , IParentRepository parentRepository)
         {
             _userManager = userManager;
             _mediator = mediator;
@@ -51,10 +47,9 @@ IStudentRepository studentRepository)
             _humanRepository = humanRepository;
             _mapper = mapper;
             _parentRepository = parentRepository;
-            _studentRepository = studentRepository;
         }
 
-        public async Task<MethodResult<ConfirmOtpModel>> Handle(ComfirmOTPSignUpCommand request, CancellationToken cancellationToken)
+        public async Task<MethodResult<ConfirmOtpModel>> Handle(ConfirmOtpSignUpCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             ArgumentNullException.ThrowIfNull(_appSetting.Otp);
@@ -118,7 +113,7 @@ IStudentRepository studentRepository)
             return methodResult;
         }
 
-        private async Task<Human> CreateHuman(ComfirmOTPSignUpCommand request, IList<string> roles, User user)
+        private async Task<Human> CreateHuman(ConfirmOtpSignUpCommand request, IList<string> roles, User user)
         {
             Human human = _mapper.Map<Human>(request);
             human.UserId = user.Id;

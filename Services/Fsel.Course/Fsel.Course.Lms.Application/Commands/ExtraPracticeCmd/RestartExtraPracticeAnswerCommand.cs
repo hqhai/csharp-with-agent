@@ -16,12 +16,12 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class RestartExtraPracticeAnswerVideoCommand : IRequest<MethodResult<ExtraPracticeResultModel>>
+    public class RestartExtraPracticeAnswerCommand : IRequest<MethodResult<ExtraPracticeResultModel>>
     {
         public Guid ExtraPracticeResultId { get; set; }
     }
 
-    public class RestartExtraPracticeAnswerVideoCommandHandler : IRequestHandler<RestartExtraPracticeAnswerVideoCommand, MethodResult<ExtraPracticeResultModel>>
+    public class RestartExtraPracticeAnswerCommandHandler : IRequestHandler<RestartExtraPracticeAnswerCommand, MethodResult<ExtraPracticeResultModel>>
     {
         private readonly IExtraPracticeResultRepository _extraPracticeResultRepository;
         private readonly AuthContext _authContext;
@@ -29,7 +29,7 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
         private readonly IUserService _userService;
         private readonly IExtraPracticeAnswerRepository _extraPracticeAnswerRepository;
 
-        public RestartExtraPracticeAnswerVideoCommandHandler(IExtraPracticeResultRepository extraPracticeResultRepository
+        public RestartExtraPracticeAnswerCommandHandler(IExtraPracticeResultRepository extraPracticeResultRepository
             , AuthContext authContext
             , IMapper mapper
             , IUserService userService
@@ -42,7 +42,7 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
             _extraPracticeAnswerRepository = extraPracticeAnswerRepository;
         }
 
-        public async Task<MethodResult<ExtraPracticeResultModel>> Handle(RestartExtraPracticeAnswerVideoCommand request, CancellationToken cancellationToken)
+        public async Task<MethodResult<ExtraPracticeResultModel>> Handle(RestartExtraPracticeAnswerCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<ExtraPracticeResultModel> methodResult = new MethodResult<ExtraPracticeResultModel>();
@@ -80,11 +80,12 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
 
             await _extraPracticeResultRepository.ExecuteTransactionAsync(async () =>
             {
+                extraPracticeResult.Status = EnumResultStatus.New;
                 extraPracticeResult.CurrentVideoTimeCodeId = null;
                 _extraPracticeResultRepository.Update(extraPracticeResult);
                 await _extraPracticeResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
                 methodResult.Result = _mapper.Map<ExtraPracticeResultModel>(extraPracticeResult);
-                methodResult.StatusCode = StatusCodes.Status201Created;
+                methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
             });
             return methodResult;
