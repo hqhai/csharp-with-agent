@@ -21,10 +21,10 @@ services:
             - QueueConfig__RootUri=rabbitmq://42.96.58.145
             - QueueConfig__Username=admin
             - QueueConfig__Password=Fsel@2023
-            - SERVICES_SenderApiUrl=http://42.96.58.145:5206/api/v1
-            - SERVICES_UserApiUrl=http://42.96.58.145:5202/api/v1
-            - SERVICES_TrainingApiUrl=http://42.96.58.145:5207/api/v1
-            - SERVICES_LmsCourseApiUrl=http://42.96.58.145:5203/api/v1
+            - SERVICES_SenderApiUrl=http://sender-testing.fsel-testing.svc/api/v1
+            - SERVICES_UserApiUrl=http://user-testing.fsel-testing.svc/api/v1
+            - SERVICES_TrainingApiUrl=http://training-testing.fsel-testing.svc/api/v1
+            - SERVICES_LmsCourseApiUrl=http://lcmsapi-testing.fsel-testing.svc/api/v1
         ports:
             - 5207:80
             - 7207:443

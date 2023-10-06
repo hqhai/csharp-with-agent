@@ -18,9 +18,9 @@ services:
             - JWT__SUBJECT=baseWebApiSubject
             - JWT__TOKENVALIDITYINMINUTES=1440
             - JWT__REFRESHTOKENVALIDITYINDAYS=7
-            - SERVICES_UserApiUrl=http://42.96.58.145:5202/api/v1
-            - SERVICES_OrderApiUrl=http://42.96.58.145:5209/api/v1
-            - SERVICES_LmsCourseApiUrl=http://42.96.58.145:5204/api/v1
+            - SERVICES_UserApiUrl=http://user-testing.fsel-testing.svc/api/v1
+            - SERVICES_OrderApiUrl=http://ordering-testing.fsel-testing.svc/api/v1
+            - SERVICES_LmsCourseApiUrl=http://lmsapi-testing.fsel-testing.svc/api/v1
         ports:
             - 52010:80
             - 7010:443
