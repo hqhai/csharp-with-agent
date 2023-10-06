@@ -2,6 +2,7 @@
 
 namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
 {
+    using System.Globalization;
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Core.Extensions;
@@ -75,7 +76,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             }
             if (!string.IsNullOrEmpty(request.Keyword))
             {
-                studentProgress = studentProgress.Where(m => (m.FullName ?? string.Empty).Contains(request.Keyword, StringComparison.CurrentCulture)).ToList();
+                studentProgress = studentProgress.Where(m => (m.FullName ?? string.Empty).ToLower(CultureInfo.CurrentCulture).Contains(request.Keyword.ToLower(CultureInfo.CurrentCulture), StringComparison.CurrentCulture)).ToList();
             }
 
             if (request.CourseType != null)

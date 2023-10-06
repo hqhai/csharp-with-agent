@@ -145,7 +145,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                     skillScore.CountQuestion = 1;
                     skillScore.TotalCount = TotalScoreClassForum;
                     skillScore.CorrectCount = x.ClassForumScores.Sum(x => x.Score);
-                    skillScore.Percent = NumberHelper.ConvertPercentDouble(x.ClassForumScores.Sum(x => x.Score) / TotalScoreClassForum);
+                    skillScore.Percent = NumberHelper.ConvertPercentDouble((double)x.ClassForumScores.Sum(x => x.Score) / TotalScoreClassForum);
                     return skillScore;
                 }).ToList().GroupBy(x => x.Skill).Select(x => GetSkillScore(x)).ToList();
                 if (courseType != null && courseType == EnumCourseType.Academic)
