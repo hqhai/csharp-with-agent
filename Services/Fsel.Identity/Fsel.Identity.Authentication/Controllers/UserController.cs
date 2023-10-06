@@ -105,5 +105,17 @@ namespace Fsel.Identity.Authentication.Controllers
             MethodResult<bool> commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
+
+        /// <summary>
+        /// Sign Up as Guest
+        /// </summary>
+        [HttpPost("sign-up-as-guest")]
+        [ProducesResponseType(typeof(MethodResult<TokenModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> SignUpAsGuest([FromBody] CreateGuestAccountCommand command)
+        {
+            MethodResult<TokenModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
     }
 }
