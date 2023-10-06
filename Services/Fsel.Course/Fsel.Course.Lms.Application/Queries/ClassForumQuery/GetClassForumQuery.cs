@@ -123,10 +123,6 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumQuery
             var classForumResults = _mapper.Map<IList<ClassForumResultModel>>(query);
             var classForumResultsRandom = _mapper.Map<IList<ClassForumResultModel>>(queryRandomStudent);
 
-            foreach (var classForumResult in classForumResults)
-            {
-                classForumResult.CourseLevel = student.CourseLevel;
-            }
             if (classForumResults != null)
             {
                 classForumResults = await GetClassForumResult(classForumResults);
@@ -164,29 +160,41 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumQuery
         /// </summary>
         /// <param name="classForumResults"></param>
         /// <returns></returns>
-        public async Task<IList<ClassForumResultModel>> GetClassForumResult(IList<ClassForumResultModel> classForumResults)
+        public async Task<IList<ClassForumResultModel>?> GetClassForumResult(IList<ClassForumResultModel>? classForumResults)
         {
-            var actionsResult = await _interactionService.GetsActionAsync(new InteractionActionCommandModel { ObjectIds = classForumResults.Select(x => x.Id).ToList(), UserId = _authContext.CurrentUserId });
-            var actions = actionsResult.Content?.Result;
-
-            GetListNotificationRemindQuery query = new GetListNotificationRemindQuery
+            if (classForumResults != null && classForumResults.Any())
             {
-                ObjectIds = classForumResults.Select(x => x.Id).ToList(),
-                Status = EnumNotificationRemindStatus.Off
-            };
-            var notificationRemind = await _notificationService.GetListNotificationRemind(query);
-            var notificationTurnOff = notificationRemind.Content?.Result;
+                var actionsResult = await _interactionService.GetsActionAsync(new InteractionActionCommandModel { ObjectIds = classForumResults.Select(x => x.Id).ToList(), UserId = _authContext.CurrentUserId });
+                var actions = actionsResult.Content?.Result;
 
-            if (actions != null)
-            {
-                classForumResults = classForumResults.Where(x => !actions.Any(n => n.IsDisable && n.ObjectId == x.Id)).ToList();
-                foreach (var item in classForumResults)
+                var studentResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
+                var student = studentResult?.Content?.Result;
+                if (student != null)
                 {
-                    var action = actions.FirstOrDefault(x => x.ObjectId == item.Id);
-                    item.CommentNumber = action?.CommentNumber;
-                    item.LikeNumber = action?.LikeNumber;
-                    item.IsLiked = action?.IsLiked;
-                    item.IsTurnedOffNotification = notificationTurnOff!.Any(x => x.ObjectId == item.Id);
+                    foreach (var classForumResult in classForumResults)
+                    {
+                        classForumResult.CourseLevel = student.CourseLevel;
+                    }
+                }
+                GetListNotificationRemindQuery query = new GetListNotificationRemindQuery
+                {
+                    ObjectIds = classForumResults.Select(x => x.Id).ToList(),
+                    Status = EnumNotificationRemindStatus.Off
+                };
+                var notificationRemind = await _notificationService.GetListNotificationRemind(query);
+                var notificationTurnOff = notificationRemind.Content?.Result;
+
+                if (actions != null)
+                {
+                    classForumResults = classForumResults.Where(x => !actions.Any(n => n.IsDisable && n.ObjectId == x.Id)).ToList();
+                    foreach (var item in classForumResults)
+                    {
+                        var action = actions.FirstOrDefault(x => x.ObjectId == item.Id);
+                        item.CommentNumber = action?.CommentNumber;
+                        item.LikeNumber = action?.LikeNumber;
+                        item.IsLiked = action?.IsLiked;
+                        item.IsTurnedOffNotification = notificationTurnOff!.Any(x => x.ObjectId == item.Id);
+                    }
                 }
             }
 
