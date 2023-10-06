@@ -2,7 +2,7 @@
 
 namespace Fsel.Shared.Enums
 {
-    public enum EnumProcessType
+    public enum EnumLearnProcessType
     {
         LessonVideo,
         HomeWork,
