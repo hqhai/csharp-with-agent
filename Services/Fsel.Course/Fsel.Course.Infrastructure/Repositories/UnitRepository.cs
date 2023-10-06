@@ -45,21 +45,22 @@ namespace Fsel.Course.Infrastructure.Repositories
 
         public async Task<List<Unit>?> GetListAsync(Guid? studentId, Guid courseId, EnumProcessType type)
         {
+            var query = Queryable.Include(x => x.UnitResults.Where(x => x.StudentId == studentId && x.CourseId == courseId))
+                               .Include(x => x.CourseUnitMockTests)
+                               .Where(x => x.CourseUnitMockTests.Any(x => x.CourseId == courseId));
             if (type == EnumProcessType.LessonVideo)
             {
-                return await Queryable.Include(x => x.UnitLessons).ThenInclude(x => x.Lesson)
-                               .Include(x => x.UnitResults.Where(x => x.StudentId == studentId && x.CourseId == courseId))
-                               .Include(x => x.CourseUnitMockTests)
+                return await query.Include(x => x.UnitLessons).ThenInclude(x => x.Lesson)
                                .Include(x => x.LessonResults.Where(x => x.StudentId == studentId))
-                               .Where(x => x.CourseUnitMockTests.Any(x => x.CourseId == courseId))
                                .AsNoTracking()
                                .ToListAsync();
             }
             else if (type == EnumProcessType.HomeWork)
             {
-                return await Queryable.Include(x => x.UnitLessons).ThenInclude(x => x.Lesson).ThenInclude(x => x!.LessonHomeWorks).ThenInclude(x => x.HomeWork)
-                                .Include(x => x.UnitResults.Where(x => x.StudentId == studentId && x.CourseId == courseId))
-                                .Include(x => x.CourseUnitMockTests)
+                return await query.Include(x => x.UnitLessons)
+                                    .ThenInclude(x => x.Lesson)
+                                    .ThenInclude(x => x!.LessonHomeWorks)
+                                    .ThenInclude(x => x.HomeWork)
                                 .Include(x => x.LessonResults.Where(x => x.StudentId == studentId))
                                 .ThenInclude(x => x.HomeWorkResults.Where(x => x.StudentId == studentId))
                                 .Where(x => x.CourseUnitMockTests.Any(x => x.CourseId == courseId))
@@ -68,24 +69,18 @@ namespace Fsel.Course.Infrastructure.Repositories
             }
             else if (type == EnumProcessType.ClassForum)
             {
-                return await Queryable.Include(x => x.UnitLessons).ThenInclude(x => x.Lesson).ThenInclude(x => x!.ClassForum)
-                              .Include(x => x.UnitResults.Where(x => x.StudentId == studentId && x.CourseId == courseId))
-                              .Include(x => x.CourseUnitMockTests)
+                return await query.Include(x => x.UnitLessons).ThenInclude(x => x.Lesson).ThenInclude(x => x!.ClassForum)
                               .Include(x => x.LessonResults.Where(x => x.StudentId == studentId))
                               .ThenInclude(x => x.ClassForumResults.Where(x => x.StudentId == studentId))
-                              .Where(x => x.CourseUnitMockTests.Any(x => x.CourseId == courseId))
                               .AsNoTracking()
                               .ToListAsync();
             }
             else
             {
-                return await Queryable.Include(x => x.UnitResults.Where(x => x.StudentId == studentId && x.CourseId == courseId))
-                               .Include(x => x.LessonResults.Where(x => x.StudentId == studentId && x.CourseId == courseId))
+                return await query.Include(x => x.LessonResults.Where(x => x.StudentId == studentId && x.CourseId == courseId))
                                .Include(x => x.UnitLessons)
                                .ThenInclude(x => x.Lesson)
                                .ThenInclude(x => x!.LessonVideos)
-                               .Include(x => x.CourseUnitMockTests)
-                               .Where(x => x.CourseUnitMockTests.Any(x => x.CourseId == courseId))
                                .AsNoTracking()
                                .ToListAsync();
             }
