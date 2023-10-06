@@ -5,9 +5,11 @@ namespace Fsel.System.Application.Queries.QuestBoardQuery
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Core.Extensions;
+    using Fsel.Shared.Helpers;
     using Fsel.System.Domain.IRepositories;
     using Fsel.System.Domain.Models.EntityModels;
     using Fsel.System.Domain.Models.QueryModels;
+    using global::System.Globalization;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -59,7 +61,7 @@ namespace Fsel.System.Application.Queries.QuestBoardQuery
                                 });
             if (!string.IsNullOrEmpty(request.Keyword))
             {
-                questBoardQuery = questBoardQuery.Where(m => m.Id.ToString() == request.Keyword || (m.Name ?? string.Empty).Contains(request.Keyword));
+                questBoardQuery = questBoardQuery.Where(m => m.Id.ToString() == request.Keyword || (m.Name ?? string.Empty).ToLower().Trim().Contains(request.Keyword.ToLower().Trim()));
             }
             int totalItem = await questBoardQuery.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
             var lists = await questBoardQuery

@@ -4,6 +4,7 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
 {
     using System;
     using System.Collections.Generic;
+    using System.Globalization;
     using System.Linq;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
@@ -96,7 +97,7 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
                                 });
             if (!string.IsNullOrEmpty(request.Keyword))
             {
-                groupedQuery = groupedQuery.Where(m => (m.CourseName ?? string.Empty).Contains(request.Keyword));
+                groupedQuery = groupedQuery.Where(m => (m.CourseName ?? string.Empty).ToLower().Trim().Contains(request.Keyword.ToLower().Trim()));
             }
 
             if (request.NumberOfStars != null)

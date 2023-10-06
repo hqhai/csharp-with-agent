@@ -24,6 +24,7 @@ namespace Fsel.System.Application.Commands.GameVocabularyCmd
         private readonly IGameTopicRepository _gameTopicRepository;
         private readonly IMapper _mapper;
         private readonly IUserService _userService;
+
         public UpdateGameVocabularyCommandHandler(IGameVocabularyRepository gameVocabularyRepository, IGameTopicRepository gameTopicRepository, IMapper mapper, IUserService userService)
         {
             _gameVocabularyRepository = gameVocabularyRepository;
@@ -45,6 +46,7 @@ namespace Fsel.System.Application.Commands.GameVocabularyCmd
             }
 
             #region validate
+
             if (!string.IsNullOrEmpty(request.Key) && _gameVocabularyRepository.Queryable.Any(p => p.Key == request.Key && p.Id != gameVocabulary.Id))
             {
                 methodResult.AddErrorBadRequest(nameof(EnumGameVocabularyErrorCode.KeyAlreadyExist));
@@ -84,6 +86,7 @@ namespace Fsel.System.Application.Commands.GameVocabularyCmd
                     return methodResult;
                 }
             }
+
             #endregion validate
 
             await _gameVocabularyRepository.ExecuteTransactionAsync(async () =>

@@ -76,7 +76,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             }
             if (!string.IsNullOrEmpty(request.Keyword))
             {
-                studentProgress = studentProgress.Where(m => (m.FullName ?? string.Empty).ToLower(CultureInfo.CurrentCulture).Contains(request.Keyword.ToLower(CultureInfo.CurrentCulture), StringComparison.CurrentCulture)).ToList();
+                studentProgress = studentProgress.Where(m => (m.FullName ?? string.Empty).ToLower().Trim().Contains(request.Keyword.ToLower().Trim())).ToList();
             }
 
             if (request.CourseType != null)

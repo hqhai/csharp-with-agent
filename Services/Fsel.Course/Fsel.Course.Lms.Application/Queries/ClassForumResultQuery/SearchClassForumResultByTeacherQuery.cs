@@ -3,6 +3,7 @@
 namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
 {
     using System;
+    using System.Globalization;
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
@@ -15,6 +16,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Domain.Models.QueryModels.ClassForumResults;
     using Fsel.Course.Lms.Application.Services.TrainingServices;
+    using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -82,7 +84,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
 
             if (!string.IsNullOrEmpty(request.Keyword))
             {
-                classForumResultQuery = classForumResultQuery.Where(m => m.Id.ToString() == request.Keyword || (m.CreatedFullName ?? string.Empty).Contains(request.Keyword));
+                classForumResultQuery = classForumResultQuery.Where(m => m.Id.ToString() == request.Keyword || (m.CreatedFullName ?? string.Empty).ToLower().Trim().Contains(request.Keyword.ToLower().Trim()));
             }
             if (request.TeacherId != null)
             {
@@ -91,11 +93,11 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
 
             if (request.LessonName != null)
             {
-                classForumResultQuery = classForumResultQuery.Where(m => (m.LessonName ?? string.Empty).Contains(request.LessonName));
+                classForumResultQuery = classForumResultQuery.Where(m => (m.LessonName ?? string.Empty).ToLower().Trim().Contains(request.LessonName.ToLower().Trim()));
             }
             if (request.UnitName != null)
             {
-                classForumResultQuery = classForumResultQuery.Where(m => (m.UnitName ?? string.Empty).Contains(request.UnitName));
+                classForumResultQuery = classForumResultQuery.Where(m => (m.UnitName ?? string.Empty).ToLower().Trim().Contains(request.UnitName.ToLower().Trim()));
             }
             if (request.LessonDisplayOrder != null)
             {

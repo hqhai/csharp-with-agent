@@ -88,7 +88,7 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
 
             if (!string.IsNullOrEmpty(request.Keyword))
             {
-                query = query.Where(m => m.Id.ToString() == request.Keyword || (m.FullName != null && m.FullName.Contains(request.Keyword, StringComparison.CurrentCulture))).ToList();
+                query = query.Where(m => m.Id.ToString() == request.Keyword || (m.FullName ?? string.Empty).ToLower().Trim().Contains(request.Keyword.ToLower().Trim())).ToList();
             }
             foreach (var item in query)
             {

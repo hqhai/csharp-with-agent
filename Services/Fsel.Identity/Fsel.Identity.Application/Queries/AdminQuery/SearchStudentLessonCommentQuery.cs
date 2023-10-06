@@ -38,11 +38,6 @@ namespace Fsel.Identity.Application.Queries.AdminQuery
             var user = await _userManager.Users.Include(x => x.Human)
                                         .ThenInclude(x => x!.Student)
                                         .FirstOrDefaultAsync(x => x.Human != null && x.Human.Student != null && x.Human.Student.Id == request.StudentId, cancellationToken);
-            if (user == null)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(user));
-                return methodResult;
-            }
             var lessonCommentResult = await _courseService.GetLessonCommentByStudent(request.StudentId);
             if (!lessonCommentResult.IsSuccessStatusCode)
             {
