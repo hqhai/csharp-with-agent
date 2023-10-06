@@ -7,7 +7,7 @@ namespace Fsel.Cms.PlanetDefender.Domain.Models.CommandModel
 
     public class CreateQuestBankCommandModel : BaseCommandModel
     {
-        public Guid GameVocabulary { get; set; }
+        public Guid GameVocabularyId { get; set; }
 
         public bool IsActive { get; set; }
     }

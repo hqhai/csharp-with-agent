@@ -6,6 +6,7 @@ namespace Fsel.Cms.PlanetDefender.Infrastructure.Maps
     using Fsel.Cms.PlanetDefender.Domain.Entities;
     using Fsel.Cms.PlanetDefender.Domain.Models.CommandModel;
     using Fsel.Cms.PlanetDefender.Domain.Models.EntityModels;
+    using Fsel.Cms.PlanetDefender.Domain.Models.QueryModels.QuestBanks;
     using Fsel.Core.Extensions;
 
     public class QuestBankProfile : Profile
@@ -14,6 +15,7 @@ namespace Fsel.Cms.PlanetDefender.Infrastructure.Maps
         {
             CreateMap<QuestBank, QuestBankModel>().IgnoreAllNonExisting();
             CreateMap<CreateQuestBankCommandModel, QuestBank>().IgnoreAllNonExisting();
+            CreateMap<SearchQuestBankQueryModel, SearchGameVocabularyQueryModel>().IgnoreAllNonExisting();
         }
     }
 }
