@@ -22,5 +22,7 @@ namespace Fsel.Identity.Domain.Models.CommandModels.Auths
         public EnumRoleRegister Role { get; set; }
 
         public string? ReferralCode { get; set; }
+
+        public EnumPlatformCode? PlatformCode { get; set; }
     }
 }

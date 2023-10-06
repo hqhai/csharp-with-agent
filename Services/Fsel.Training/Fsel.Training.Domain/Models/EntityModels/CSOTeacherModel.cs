@@ -11,7 +11,10 @@ namespace Fsel.Training.Domain.Models.EntityModels
         public Guid Id { get; set; }
         public string? Name { get; set; }
         public string? Code { get; set; }
+        public string? Phonenumber { get; set; }
+        public string? Email { get; set; }
         public int CountClass { get; set; }
+        public string? AvatarPath { get; set; }
         public IList<EnumCourseLevel>? CourseLevels { get; set; }
     }
 }

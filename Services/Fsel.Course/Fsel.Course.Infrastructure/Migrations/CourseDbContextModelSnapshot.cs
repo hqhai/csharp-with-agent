@@ -734,6 +734,9 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.Property<Guid?>("MockTestId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<int>("Number")
+                        .HasColumnType("int");
+
                     b.Property<Guid?>("UnitId")
                         .HasColumnType("uniqueidentifier");
 
@@ -1081,6 +1084,10 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.Property<Guid?>("SectionTimeCodeId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<string>("Status")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
                     b.Property<DateTime?>("UpdatedDate")
                         .HasColumnType("datetime2")
                         .HasColumnOrder(108);
@@ -1094,6 +1101,9 @@ namespace Fsel.Course.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(102);
 
+                    b.Property<Guid?>("VideoTimeCodeId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.HasKey("Id");
 
                     b.HasIndex("ExtraPracticeExerciseResultId");
@@ -1105,6 +1115,8 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.HasIndex("SectionId");
 
                     b.HasIndex("SectionTimeCodeId");
+
+                    b.HasIndex("VideoTimeCodeId");
 
                     b.ToTable("ExtraPracticeAnswers");
                 });
@@ -4685,6 +4697,11 @@ namespace Fsel.Course.Infrastructure.Migrations
                         .HasForeignKey("SectionTimeCodeId")
                         .OnDelete(DeleteBehavior.Cascade);
 
+                    b.HasOne("Fsel.Course.Domain.Entities.VideoTimeCode", "VideoTimeCode")
+                        .WithMany("ExtraPracticeAnswers")
+                        .HasForeignKey("VideoTimeCodeId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
                     b.Navigation("ExtraPracticeExerciseResult");
 
                     b.Navigation("ExtraPracticeResult");
@@ -4694,6 +4711,8 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.Navigation("Section");
 
                     b.Navigation("SectionTimeCode");
+
+                    b.Navigation("VideoTimeCode");
                 });
 
             modelBuilder.Entity("Fsel.Course.Domain.Entities.ExtraPracticeChapter", b =>
@@ -5592,6 +5611,8 @@ namespace Fsel.Course.Infrastructure.Migrations
 
             modelBuilder.Entity("Fsel.Course.Domain.Entities.VideoTimeCode", b =>
                 {
+                    b.Navigation("ExtraPracticeAnswers");
+
                     b.Navigation("TimeCodeExercises");
 
                     b.Navigation("VideoTimeCodeAnswers");

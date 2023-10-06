@@ -14,5 +14,7 @@ namespace Fsel.Course.Domain.Models.QueryModels.ClassForumResults
         public int? LessonDisplayOrder { get; set; }
 
         public int? UnitDisplayOrder { get; set; }
+
+        public Guid? CourseId { get; set; }
     }
 }

@@ -4,6 +4,7 @@ namespace Fsel.Identity.Domain.Entities
 {
     using System;
     using System.ComponentModel.DataAnnotations;
+    using Fsel.Common.Attributes;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Entities;
     using Fsel.Identity.Domain.Enums;
@@ -19,6 +20,7 @@ namespace Fsel.Identity.Domain.Entities
 
         public DateTime? Birthday { get; set; }
 
+        [PhoneValid(ErrorMessage = nameof(EnumSystemErrorCode.InValidFormat))]
         public string? PhoneNumber { get; set; }
 
         [MaxLength(250, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]

@@ -115,8 +115,8 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                 Expiration = token.ValidTo.ConvertTimeFromUtc(TimeZoneInfo.Local),
                 FullName = user.FullName,
                 Roles = userRoles.ToList(),
+                Code = user.Human?.Code
             };
-            tokenLogin.Code = user.Human?.Code;
             if (userRoles.Contains(EnumRole.Student.ToString()))
             {
                 var student = user.Human?.Student;

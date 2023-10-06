@@ -23,7 +23,7 @@ namespace Fsel.Identity.Domain.Entities
 
         public bool CreatedByParent { get; set; }
         public long NumberOfToken { get; set; }
-
+        public int NumberOfShield { get; set; }
         public Guid? ClassId { get; set; }
 
         public Human? Human { get; set; }
@@ -31,5 +31,6 @@ namespace Fsel.Identity.Domain.Entities
         public Guid HumanId { get; set; }
 
         public ICollection<ParentStudent> ParentStudents { get; set; } = new List<ParentStudent>();
+        public ICollection<StudentDailyStreak> StudentDailyStreaks { get; set; } = new List<StudentDailyStreak>();
     }
 }

@@ -4,6 +4,7 @@ namespace Fsel.Interaction.Domain.Entities
 {
     using System.ComponentModel.DataAnnotations;
     using System.ComponentModel.DataAnnotations.Schema;
+    using Fsel.Common.Attributes;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Common.Helpers;
     using Fsel.Core.Entities;
@@ -30,6 +31,7 @@ namespace Fsel.Interaction.Domain.Entities
         /// </summary>
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         [MaxLength(250, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
+        [PhoneValid(ErrorMessage = nameof(EnumSystemErrorCode.InValidFormat))]
         public string? PhoneNumber { get; set; }
 
         /// <summary>
