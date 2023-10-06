@@ -101,9 +101,9 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
                 {
                     lessonResult = default;
                 }
-                else
+                else if (lessonResult != null)
                 {
-                    lesson = lessonResult?.Lesson;
+                    lesson = lessonResult.Lesson;
                 }
             }
 
