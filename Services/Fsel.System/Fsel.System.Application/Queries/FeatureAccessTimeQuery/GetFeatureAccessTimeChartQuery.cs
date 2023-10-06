@@ -3,6 +3,7 @@
 namespace Fsel.System.Application.Queries.FeatureAccessTimeQuery
 {
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Helpers;
     using Fsel.Core.Base;
     using Fsel.Shared.Enums;
     using Fsel.System.Domain.Entities;
@@ -23,6 +24,8 @@ namespace Fsel.System.Application.Queries.FeatureAccessTimeQuery
     {
         private readonly IFeatureAccessTimeRepository _featureAccessTimeRepository;
         private readonly AuthContext _authContext;
+        private const int MaxHour = 24;
+        private const int MaxWeek = 7;
 
         public GetFeatureAccessTimeChartQueryHandler(IFeatureAccessTimeRepository featureAccessTimeRepository, AuthContext authContext)
         {
@@ -41,17 +44,29 @@ namespace Fsel.System.Application.Queries.FeatureAccessTimeQuery
                 .ToListAsync(cancellationToken);
 
             List<FeatureAcessTimeChartModel> chartData = new List<FeatureAcessTimeChartModel>();
+            var socialFeatures = new[] { EnumFeature.ClassForum, EnumFeature.DiscussionBoard };
+            var learnFeatures = Enum.GetValues(typeof(EnumFeature)).Cast<EnumFeature>().Except(socialFeatures).Except(new[] { EnumFeature.Other }).ToArray();
 
             switch (request.Type)
             {
                 case EnumFeatureTimeType.Day:
-                    chartData.Add(CaculateFeatureAccessTimeADay(featureAccessTimes.AsReadOnly()));
+
+                    chartData = new List<FeatureAcessTimeChartModel>
+                        {
+                            CreateFeatureAccessTimeADay(featureAccessTimes.AsReadOnly(), socialFeatures, EnumFeatureBussinessType.Social),
+                            CreateFeatureAccessTimeADay(featureAccessTimes.AsReadOnly(), new[] { EnumFeature.Other }, EnumFeatureBussinessType.Other),
+                            CreateFeatureAccessTimeADay(featureAccessTimes.AsReadOnly(), learnFeatures, EnumFeatureBussinessType.Learn)
+                        };
                     break;
                 case EnumFeatureTimeType.Week:
-                    // Implement logic for week here
+                    chartData = new List<FeatureAcessTimeChartModel>
+                        {
+                            CreateFeatureAccessTimeAWeek(featureAccessTimes.AsReadOnly(), socialFeatures, EnumFeatureBussinessType.Social),
+                            CreateFeatureAccessTimeAWeek(featureAccessTimes.AsReadOnly(), new[] { EnumFeature.Other }, EnumFeatureBussinessType.Other),
+                            CreateFeatureAccessTimeAWeek(featureAccessTimes.AsReadOnly(), learnFeatures, EnumFeatureBussinessType.Learn)
+                        };
                     break;
-                default:
-                    break;
+
             }
 
             methodResult.Result = chartData;
@@ -59,36 +74,51 @@ namespace Fsel.System.Application.Queries.FeatureAccessTimeQuery
             return methodResult;
         }
 
-        public static FeatureAcessTimeChartModel CaculateFeatureAccessTimeADay(ReadOnlyCollection<FeatureAccessTime> featureAccessTimes)
+        private static FeatureAcessTimeChartModel CreateFeatureAccessTimeADay(ReadOnlyCollection<FeatureAccessTime> featureAccessTimes, EnumFeature[] features, EnumFeatureBussinessType type)
         {
+            var chartModel = new FeatureAcessTimeChartModel();
 
-            FeatureAcessTimeChartModel chartModel = new FeatureAcessTimeChartModel();
+            var currentDate = DateTime.Now.Date;
 
-            if (featureAccessTimes == null || featureAccessTimes.Count == 0)
-            {
-                return chartModel;
-            }
-
-            chartModel.FeatureBussinessType = EnumFeatureBussinessType.Learn;
-            chartModel.Label = EnumFeatureBussinessType.Learn.ToString();
-
-            var groupedData = featureAccessTimes!
-                .Where(f => f.LastVisited.HasValue)
+            var groupedData = featureAccessTimes
+                .Where(f =>
+                    f.LastVisited.HasValue &&
+                    f.LastVisited.Value.Date == currentDate && 
+                    features.Contains(f.EnumFeature))
                 .GroupBy(f => f.LastVisited!.Value.Hour)
                 .ToDictionary(g => g.Key, g => g.Sum(f => f.AccessTime));
 
-            chartModel.ChartData = new double[24];
+            chartModel.FeatureBussinessType = type;
+            chartModel.Label = type.ToString();
+            chartModel.ChartData = new double[MaxHour];
 
-            for (int i = 0; i < 24; i++)
+            for (int i = 0; i < MaxHour; i++)
             {
-                if (groupedData.ContainsKey(i))
-                {
-                    chartModel.ChartData[i] = groupedData[i];
-                }
-                else
-                {
-                    chartModel.ChartData[i] = 0;
-                }
+                chartModel.ChartData[i] = groupedData.ContainsKey(i) ? groupedData[i] : 0;
+            }
+
+            return chartModel;
+        }
+
+        private static FeatureAcessTimeChartModel CreateFeatureAccessTimeAWeek(ReadOnlyCollection<FeatureAccessTime> featureAccessTimes, EnumFeature[] features, EnumFeatureBussinessType type)
+        {
+            var chartModel = new FeatureAcessTimeChartModel();
+
+            var groupedData = featureAccessTimes
+                .Where(f => f.LastVisited.HasValue && features.Contains(f.EnumFeature))
+                .GroupBy(f => f.LastVisited!.Value.DayOfWeek)
+                .ToDictionary(g => g.Key, g => g.Sum(f => f.AccessTime));
+
+            chartModel.FeatureBussinessType = type;
+            chartModel.Label = type.ToString();
+            chartModel.ChartData = new double[MaxWeek];
+
+            var daysOfWeek = EnumHelper.GetList<DayOfWeek>()!.Select(day => Enum.Parse<DayOfWeek>(day))
+                           .ToList();
+
+            for (int i = 0; i < daysOfWeek!.Count; i++)
+            {
+                chartModel.ChartData[i] = groupedData.ContainsKey(daysOfWeek[i]) ? groupedData[daysOfWeek[i]] : 0;
             }
 
             return chartModel;
