@@ -57,7 +57,12 @@ namespace Fsel.Training.Domain.Enums.ErrorCodes
         /// <summary>
         /// Class End Date And Start Date Is Null
         /// </summary>
-        ClassEndDateAndStartDateIsNull
+        ClassEndDateAndStartDateIsNull,
+
+        /// <summary>
+        /// LiveTimeFrame Null Or LiveDays Null
+        /// </summary>
+        LiveTimeFrameNullOrLiveDaysNull
 
 ,
     }
