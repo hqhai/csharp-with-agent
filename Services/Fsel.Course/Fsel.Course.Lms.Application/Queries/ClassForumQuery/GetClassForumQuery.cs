@@ -165,6 +165,9 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumQuery
             var actionsResult = await _interactionService.GetsActionAsync(new InteractionActionCommandModel { ObjectIds = classForumResults.Select(x => x.Id).ToList(), UserId = _authContext.CurrentUserId });
             var actions = actionsResult.Content?.Result;
 
+            var studentResult = await _userService.GetStudentByUserIdsAsync(classForumResults.Select(x => x.CreatedUserId.ToString()).ToList());
+            var students = studentResult?.Content?.Result;
+
             GetListNotificationRemindQuery query = new GetListNotificationRemindQuery
             {
                 ObjectIds = classForumResults.Select(x => x.Id).ToList(),
@@ -178,8 +181,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumQuery
                 classForumResults = classForumResults.Where(x => !actions.Any(n => n.IsDisable && n.ObjectId == x.Id)).ToList();
                 foreach (var item in classForumResults)
                 {
-                    var studentResult = await _userService.GetStudentByUserIdAsync(item.CreatedUserId);
-                    var student = studentResult?.Content?.Result;
+                    var student = students?.FirstOrDefault(x => x.Human?.UserId == item.CreatedUserId);
                     var action = actions.FirstOrDefault(x => x.ObjectId == item.Id);
                     item.CommentNumber = action?.CommentNumber;
                     item.LikeNumber = action?.LikeNumber;
