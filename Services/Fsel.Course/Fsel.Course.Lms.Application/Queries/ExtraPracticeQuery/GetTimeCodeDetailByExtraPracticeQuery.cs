@@ -63,13 +63,17 @@ namespace Fsel.Course.Lms.Application.Queries.ExtraPracticeQuery
             var studentId = studentsResult.Content?.Result?.Id;
 
             var extraPracticeResult = await _extraPracticeResultRepository.Queryable.FirstOrDefaultAsync(x => x.ExtraPracticeId == request.ExtraPracticeId && x.StudentId == studentId, cancellationToken);
-
-            var videoTimeCode = await _videoTimeCodeRepository.Queryable
+            if (extraPracticeResult == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(extraPracticeResult));
+                return methodResult;
+            }
+            var videoTimeCode = await _videoTimeCodeRepository.Queryable.Include(x => x!.ExtraPracticeAnswers)
                                     .Include(x => x.TimeCodeExercises.Where(x => !x.IsDeleted && x.Exercise != null))
                                     .ThenInclude(x => x.Exercise)
                                     .ThenInclude(x => x!.ExerciseQuestions.Where(x => !x.IsDeleted))
                                     .ThenInclude(x => x.Question)
-                                    .ThenInclude(x => x!.ExtraPracticeAnswers!.Where(x => extraPracticeResult != null && x.ExtraPracticeResultId == extraPracticeResult.Id))
+                                    .ThenInclude(x => x!.ExtraPracticeAnswers)
                                 .Where(x => x.Id == request.VideoTimeCodeId && x.VideoId == request.VideoId)
                                 .AsNoTracking()
                                 .FirstOrDefaultAsync(cancellationToken: cancellationToken);
@@ -88,8 +92,9 @@ namespace Fsel.Course.Lms.Application.Queries.ExtraPracticeQuery
                 ExecutionTime = videoTimeCode.ExecutionTime,
                 TimeCodeType = videoTimeCode.TimeCodeType,
                 VideoId = videoTimeCode.VideoId,
+                Status = (videoTimeCode.ExtraPracticeAnswers.Count > 0 && videoTimeCode.ExtraPracticeAnswers.All(y => y.ExtraPracticeResultId == extraPracticeResult.Id && y.Status == EnumCurrentStatus.Done)) ? EnumCurrentStatus.Done : EnumCurrentStatus.Process,
                 Ungraded = videoTimeCode.TimeCodeExercises.Select(x => x.Exercise).SelectMany(x => x!.ExerciseQuestions).Select(x => x.Question).FirstOrDefault()?.Ungraded ?? default,
-                CorrectCount = videoTimeCode.VideoTimeCodeAnswers.Count > 0 ? videoTimeCode.VideoTimeCodeAnswers.Sum(x => x.CorrectCount) : 0,
+                CorrectCount = videoTimeCode.ExtraPracticeAnswers.Count > 0 ? videoTimeCode.ExtraPracticeAnswers.Sum(x => x.CorrectCount) : 0,
                 CorrectTotal = videoTimeCode.TimeCodeExercises.Select(x => x.Exercise).SelectMany(x => x!.ExerciseQuestions).Select(x => x.Question).Sum(x => x!.CorrectTotal),
                 Exercises = videoTimeCode.TimeCodeExercises.OrderBy(x => x!.CreatedDate).Select(n => n.Exercise).Select(n => new ExerciseModel
                 {
@@ -105,10 +110,11 @@ namespace Fsel.Course.Lms.Application.Queries.ExtraPracticeQuery
                         Explanation = m.Explanation,
                         Ungraded = m.Ungraded,
                         Config = _questionTypeConverter.QuestionTypeConverterObject(m.Config, m.QuestionType, isDisableAnswers: !(m.VideoTimeCodeAnswers.FirstOrDefault()?.Status == EnumCurrentStatus.Done)).Item1,
-                        ResultAnswer = _mapper.Map<AnswerModel>(m.ExtraPracticeAnswers!.FirstOrDefault())
+                        ResultAnswer = _mapper.Map<AnswerModel>(m.ExtraPracticeAnswers!.FirstOrDefault(x => x.ExtraPracticeResultId == extraPracticeResult?.Id))
                     }).ToList()
                 }).ToList(),
             };
+
             methodResult.Result = videoTimeCodeModel;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;

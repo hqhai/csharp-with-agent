@@ -139,7 +139,7 @@ namespace Fsel.Shared.Helpers
                         if (yearOld <= 13)
                         {
                             isLock = true;
-                            courseLevel = value >= 75 ? EnumCourseLevel.B2 : EnumCourseLevel.B1;
+                            courseLevel = value >= 75 ? EnumCourseLevel.B2 : EnumCourseLevel.B1Plus;
                         }
                         else
                         {
@@ -149,8 +149,15 @@ namespace Fsel.Shared.Helpers
                         break;
 
                     case EnumPlacementTestLevel.B2:
-                        isLock = value < 75;
-                        courseLevel = !isLock ? EnumCourseLevel.C1 : EnumCourseLevel.B2;
+                        isLock = true;
+                        if (yearOld <= 13)
+                        {
+                            courseLevel = value >= 75 ? EnumCourseLevel.B2 : EnumCourseLevel.B1;
+                        }
+                        else
+                        {
+                            courseLevel = value >= 75 ? EnumCourseLevel.C1 : EnumCourseLevel.B2;
+                        }
                         break;
 
                     case EnumPlacementTestLevel.C1:

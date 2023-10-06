@@ -2,16 +2,19 @@ trigger:
   branches:
     include:
     - staging
+  paths:
+    include:
+    - Services/Fsel.System/*
+    - Services/Shared/*
+    - System.Staging.Dockerfile
 
  
-
 pool:
   vmImage: 'ubuntu-latest'
 
  
-
 variables:
-  dockerRegistryServiceConnection: 'acrlazytechvn'
+  dockerRegistryServiceConnection: 'fsel'
   containerRegistry: 'fselacr.azurecr.io'
   repository: 'systemapi'
   dockerfile: 'System.Staging.Dockerfile'
@@ -19,7 +22,6 @@ variables:
   #tag: '$(Build.SourceBranchName)-$(shortCommitSha)-$(currentdate)'
 
  
-
 stages:
   - stage: build_image_docker
     displayName: Build and push image
@@ -30,8 +32,6 @@ stages:
       - script: |
           SHORT_COMMIT_SHA=$(echo $(Build.SourceVersion) | cut -c1-8)
           echo "##vso[task.setvariable variable=shortCommitSha]${SHORT_COMMIT_SHA}"
-      - script: |
-          echo "Short commit SHA from variable: $(shortCommitSha)"
       - task: Docker@2
         displayName: Build and push an image to container registry
         inputs:

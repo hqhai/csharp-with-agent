@@ -19,5 +19,8 @@ namespace Fsel.Interaction.Application.Services.UserServices
 
         [Post("/student/get-by-student-ids")]
         Task<IApiResponse<MethodResult<IList<StudentModel>>>> GetStudentsByStudentIdsAsync([Body] IList<Guid> studentIds);
+
+        [Post("/user/get-users-by-ids")]
+        Task<IApiResponse<MethodResult<IList<HumanModel>>>> GetUsersByIdsAsync([Body] GetUsersByIdsQueryModel model);
     }
 }
