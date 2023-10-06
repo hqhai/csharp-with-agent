@@ -61,5 +61,24 @@ namespace Fsel.System.Api.Controllers
             var queryResult = await _mediator.Send(command).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
+
+        /// <summary>
+        /// Get Student Feature Access Time
+        /// </summary>
+        /// <param name="command"></param>
+        /// <returns></returns>
+        [HttpGet("access-time-chart")]
+        [ProducesResponseType(typeof(MethodResult<IList<FeatureAcessTimeChartModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Authorize(Roles = nameof(EnumRole.Student))]
+        public async Task<IActionResult> GetStudentFeatureAccessTime([FromQuery] GetFeatureAccessTimeChartQuery query)
+        {
+            MethodResult<IList<FeatureAcessTimeChartModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+
+
+
     }
 }
