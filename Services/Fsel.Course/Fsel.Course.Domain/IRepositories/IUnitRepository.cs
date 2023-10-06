@@ -12,6 +12,6 @@ namespace Fsel.Course.Domain.IRepositories
 
         Task<List<Unit>?> GetListAsync(IList<Guid>? ids, Guid? studentId);
 
-        Task<List<Unit>?> GetListAsync(Guid? studentId, Guid courseId, EnumProcessType type);
+        Task<List<Unit>?> GetListAsync(Guid? studentId, Guid courseId, EnumLearnProcessType type);
     }
 }

@@ -24,7 +24,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
     public class GetUnitByUnitQuery : IRequest<MethodResult<IList<UnitModel>>>
     {
         public Guid CourseId { get; set; }
-        public EnumProcessType Type { get; set; }
+        public EnumLearnProcessType Type { get; set; }
     }
 
     public class GetUnitByUnitVideoQueryHandler : IRequestHandler<GetUnitByUnitQuery, MethodResult<IList<UnitModel>>>
@@ -71,7 +71,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(course));
                 return methodResult;
             }
-            else if (course.CourseType == EnumCourseType.Ielts && request.Type == EnumProcessType.UnitTest)
+            else if (course.CourseType == EnumCourseType.Ielts && request.Type == EnumLearnProcessType.UnitTest)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.CourseNotTypeAcademic), nameof(course));
                 return methodResult;
@@ -95,21 +95,21 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
             return methodResult;
         }
 
-        private async Task<(double, double)> GetCountDone(Unit x, EnumProcessType type, Guid? studentId)
+        private async Task<(double, double)> GetCountDone(Unit x, EnumLearnProcessType type, Guid? studentId)
         {
-            if (type == EnumProcessType.LessonVideo)
+            if (type == EnumLearnProcessType.LessonVideo)
             {
                 var countDone = x.LessonResults.Where(x => x.StudentId == studentId && x.Status == EnumResultStatus.Done).Count();
                 var totalDone = x.UnitLessons.Select(x => x.Lesson).Count();
                 return (countDone, totalDone);
             }
-            else if (type == EnumProcessType.HomeWork)
+            else if (type == EnumLearnProcessType.HomeWork)
             {
                 var homeWorks = x.UnitLessons.Select(x => x.Lesson).SelectMany(x => x.LessonHomeWorks).Select(x => x.HomeWork).ToList();
                 var countDone = x.LessonResults.SelectMany(x => x.HomeWorkResults).Where(x => x.StudentId == studentId && x.Status == EnumResultStatus.Done).Count();
                 return (countDone, homeWorks.Count);
             }
-            else if (type == EnumProcessType.UnitTest)
+            else if (type == EnumLearnProcessType.UnitTest)
             {
                 var lessonResultIds = x.LessonResults.Select(x => x.Id).ToList();
                 var videoIds = x.UnitLessons.Select(x => x.Lesson).SelectMany(x => x!.LessonVideos).Select(x => x!.VideoId).ToList();
@@ -127,7 +127,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
                 var totalDone = skillScores.Sum(x => x.TotalQuestion);
                 return (countDone, totalDone);
             }
-            else if (type == EnumProcessType.ClassForum)
+            else if (type == EnumLearnProcessType.ClassForum)
             {
                 var countDone = x.LessonResults.SelectMany(x => x.ClassForumResults).Where(x => x.StudentId == studentId && (x.Status == EnumClassForumResultStatus.Graded || x.Status == EnumClassForumResultStatus.PendingForGrading)).Count();
                 var totalDone = x.UnitLessons.Select(x => x.Lesson).Select(x => x!.ClassForum).Count();
