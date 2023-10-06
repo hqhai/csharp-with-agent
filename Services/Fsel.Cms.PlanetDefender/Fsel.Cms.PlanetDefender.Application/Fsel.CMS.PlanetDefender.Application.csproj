@@ -10,8 +10,4 @@
     <ProjectReference Include="..\Fsel.Cms.PlanetDefender.Infrastructure\Fsel.Cms.PlanetDefender.Infrastructure.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Services\SystemServices\Models\" />
-  </ItemGroup>
-
 </Project>

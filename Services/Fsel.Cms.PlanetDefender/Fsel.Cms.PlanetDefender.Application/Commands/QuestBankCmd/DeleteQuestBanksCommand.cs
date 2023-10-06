@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Cms.PlanetDefender.Application.Commands
+namespace Fsel.Cms.PlanetDefender.Application.Commands.QuestBankCmd
 {
     using System;
     using System.Collections.Generic;
@@ -30,7 +30,7 @@ namespace Fsel.Cms.PlanetDefender.Application.Commands
         public async Task<MethodResult<bool>> Handle(DeleteQuestBanksCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            MethodResult<bool> methodResult = new MethodResult<bool>();
+            var methodResult = new MethodResult<bool>();
 
             if (request.Ids == null || request.Ids.Count == 0)
             {

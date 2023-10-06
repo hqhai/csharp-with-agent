@@ -1,5 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
+using Fsel.Cms.PlanetDefender.Application.Services.SystemServices;
 using Fsel.Cms.PlanetDefender.Application.Services.UserServices;
 using Fsel.Cms.PlanetDefender.Domain.IRepositories;
 using Fsel.Cms.PlanetDefender.Infrastructure;
@@ -17,7 +18,9 @@ builder.AddAuthenticationJwtBearers(appSetting);
 builder.AddDbContexts<CmsPlanetDefenderDbContext>();
 
 builder.Services.AddScoped<IStudentGameInfoRepository, StudentGameInfoRepository>();
+builder.Services.AddScoped<IQuestBankRepository, QuestBankRepository>();
 
+builder.AddRefitClients(typeof(ISystemService), appSetting?.Services?.SystemApiUrl);
 builder.AddRefitClients(typeof(IUserService), appSetting?.Services?.UserApiUrl);
 
 var app = builder.Build();

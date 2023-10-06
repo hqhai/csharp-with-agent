@@ -2,13 +2,16 @@
 
 namespace Fsel.Cms.PlanetDefender.Api.Controllers
 {
-    using Fsel.Cms.PlanetDefender.Application.Commands;
     using Fsel.Common.ActionResults;
     using System.Net;
     using Microsoft.AspNetCore.Mvc;
     using Fsel.Cms.PlanetDefender.Domain.Models.EntityModels;
     using MediatR;
     using Fsel.Common.Constants;
+    using Fsel.Cms.PlanetDefender.Application.Commands.QuestBankCmd;
+    using Fsel.Cms.PlanetDefender.Application.Services.SystemServices.Models;
+    using Fsel.Core.Base.BaseModels;
+    using Fsel.Cms.PlanetDefender.Application.Queries.QuestBankQuery;
 
     [ApiVersion(Settings.APIVersion)]
     [Route(Settings.APIDefaultRoute + "/quest-bank")]
@@ -44,6 +47,18 @@ namespace Fsel.Cms.PlanetDefender.Api.Controllers
         {
             var commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Search game vocabulary
+        /// </summary>
+        [HttpGet]
+        [ProducesResponseType(typeof(MethodResult<PagingItemsModel<GameVocabularyModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> Search([FromQuery] SearchQuestBankQuery query)
+        {
+            var queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
         }
     }
 }

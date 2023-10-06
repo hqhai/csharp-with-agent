@@ -2,13 +2,14 @@
 
 namespace Fsel.Cms.PlanetDefender.Application.Services.SystemServices
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
-    using System.Threading.Tasks;
+    using Fsel.Cms.PlanetDefender.Application.Services.SystemServices.Models;
+    using Fsel.Common.ActionResults;
+    using Fsel.Core.Base.BaseModels;
+    using Refit;
 
     public interface ISystemService
     {
+        [Get("/game-vocabulary")]
+        Task<IApiResponse<MethodResult<PagingItemsModel<GameVocabularyModel>>>> SearchGameVocabularyAsync([Query] SearchGameVocabularyQueryModel model);
     }
 }

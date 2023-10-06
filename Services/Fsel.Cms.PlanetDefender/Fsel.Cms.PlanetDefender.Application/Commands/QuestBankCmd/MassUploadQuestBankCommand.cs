@@ -1,11 +1,9 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Cms.PlanetDefender.Application.Commands
+namespace Fsel.Cms.PlanetDefender.Application.Commands.QuestBankCmd
 {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
     using System.Threading;
     using System.Threading.Tasks;
     using AutoMapper;
@@ -20,6 +18,7 @@ namespace Fsel.Cms.PlanetDefender.Application.Commands
     public class MassUploadQuestBankCommand : MassUploadQuestBankCommandModel, IRequest<MethodResult<IList<QuestBankModel>>>
     {
     }
+
     public class MassUploadQuestBankCommandHandler : IRequestHandler<MassUploadQuestBankCommand, MethodResult<IList<QuestBankModel>>>
     {
         private readonly IQuestBankRepository _questBankRepository;
@@ -34,7 +33,7 @@ namespace Fsel.Cms.PlanetDefender.Application.Commands
         public async Task<MethodResult<IList<QuestBankModel>>> Handle(MassUploadQuestBankCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            MethodResult<IList<QuestBankModel>> methodResult = new MethodResult<IList<QuestBankModel>>();
+            var methodResult = new MethodResult<IList<QuestBankModel>>();
 
             if (request.QuestBanks == null || request.QuestBanks.Count == 0)
             {
