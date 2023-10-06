@@ -165,10 +165,6 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumQuery
             var actionsResult = await _interactionService.GetsActionAsync(new InteractionActionCommandModel { ObjectIds = classForumResults.Select(x => x.Id).ToList(), UserId = _authContext.CurrentUserId });
             var actions = actionsResult.Content?.Result;
 
-            /*var userIds = classForumResults.Select(x => x.CreatedUserId.ToString()).ToList();
-            var studentResult = await _userService.GetStudentByUserIdsAsync(userIds);
-            var student = studentResult?.Content?.Result;*/
-
             GetListNotificationRemindQuery query = new GetListNotificationRemindQuery
             {
                 ObjectIds = classForumResults.Select(x => x.Id).ToList(),
