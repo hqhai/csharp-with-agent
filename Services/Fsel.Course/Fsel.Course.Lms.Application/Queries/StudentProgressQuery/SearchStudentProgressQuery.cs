@@ -74,6 +74,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                 studentProgressModel.CreatedDate = courseResult.CreatedDate ?? default;
                 studentProgress.Add(studentProgressModel);
             }
+
             if (!string.IsNullOrEmpty(request.Keyword))
             {
                 studentProgress = studentProgress.Where(m => (m.FullName ?? string.Empty).ToLower(CultureInfo.CurrentCulture).Contains(request.Keyword.ToLower(CultureInfo.CurrentCulture), StringComparison.CurrentCulture)).ToList();
