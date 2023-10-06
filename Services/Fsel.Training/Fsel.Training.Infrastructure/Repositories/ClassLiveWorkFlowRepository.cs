@@ -9,7 +9,7 @@ namespace Fsel.Training.Infrastructure.Repositories
 
     public class ClassLiveWorkFlowRepository : BaseRepository<ClassLiveWorkFlow>, IClassLiveWorkFlowRepository
     {
-        public ClassLiveWorkFlowRepository(TrainingDbContext dbContext, AuthContext authContext) : base(dbContext, authContext)
+        public ClassLiveWorkFlowRepository(TrainingDbContext dbContext, AuthContext authContext, AutoMapper.IMapper mapper) : base(dbContext, authContext, mapper)
         {
         }
 

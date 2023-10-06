@@ -6,7 +6,9 @@ using Fsel.Common.Attributes;
 using Fsel.Common.Constants;
 using Fsel.Core.Base.BaseModels;
 using Fsel.Course.Application.Commands.CourseCmd;
+using Fsel.Course.Application.Queries;
 using Fsel.Course.Application.Queries.CourseQuery;
+using Fsel.Course.Domain.IRepositories;
 using Fsel.Course.Domain.Models.EntityModels;
 using Fsel.Shared.Enums;
 using MediatR;
@@ -17,7 +19,7 @@ namespace Fsel.Course.Lcms.Api.Controllers
     [ApiVersion(Settings.APIVersion)]
     [Route(Settings.APIDefaultRoute + "/course")]
     [ApiController]
-    [Permission(role: nameof(EnumRole.MasterAdmin))]
+    //[Permission(role: nameof(EnumRole.MasterAdmin))]
     public class CourseController : ControllerBase
     {
         private readonly IMediator _mediator;
@@ -25,6 +27,18 @@ namespace Fsel.Course.Lcms.Api.Controllers
         public CourseController(IMediator mediator)
         {
             _mediator = mediator;
+        }
+
+        /// <summary>
+        /// Search Course
+        /// </summary>
+        [HttpPost("get-all")]
+        [ProducesResponseType(typeof(MethodResult<PagingItemsModel<CourseSearchModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> Search([FromBody] SearchAllQuery query)
+        {
+            var queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
         }
 
         /// <summary>

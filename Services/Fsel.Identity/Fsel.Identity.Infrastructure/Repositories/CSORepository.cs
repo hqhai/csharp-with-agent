@@ -9,7 +9,7 @@ namespace Fsel.Identity.Infrastructure.Repositories
 
     public class CSORepository : BaseRepository<CSO>, ICSORepository
     {
-        public CSORepository(UserDbContext dbContext, AuthContext authContext) : base(dbContext, authContext)
+        public CSORepository(UserDbContext dbContext, AuthContext authContext, AutoMapper.IMapper mapper) : base(dbContext, authContext, mapper)
         {
         }
 

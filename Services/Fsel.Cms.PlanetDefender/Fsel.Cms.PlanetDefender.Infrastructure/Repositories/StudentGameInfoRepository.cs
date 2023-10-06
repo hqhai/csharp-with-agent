@@ -8,7 +8,7 @@ namespace Fsel.Cms.PlanetDefender.Infrastructure.Repositories
 
     public class StudentGameInfoRepository : BaseRepository<StudentGameInfo>, IStudentGameInfoRepository
     {
-        public StudentGameInfoRepository(CmsPlanetDefenderDbContext dbContext, AuthContext authContext) : base(dbContext, authContext)
+        public StudentGameInfoRepository(CmsPlanetDefenderDbContext dbContext, AuthContext authContext, AutoMapper.IMapper mapper) : base(dbContext, authContext, mapper)
         {
         }
     }

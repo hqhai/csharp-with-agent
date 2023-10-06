@@ -8,7 +8,7 @@ namespace Fsel.System.Infrastructure.Repositories
 
     public class ForbiddenWordRepository : BaseRepository<ForbiddenWord>, IForbiddenWordRepository
     {
-        public ForbiddenWordRepository(SystemDbContext dbContext, AuthContext authContext) : base(dbContext, authContext)
+        public ForbiddenWordRepository(SystemDbContext dbContext, AuthContext authContext, AutoMapper.IMapper mapper) : base(dbContext, authContext, mapper)
         {
         }
     }

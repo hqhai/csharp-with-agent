@@ -6,4 +6,8 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\..\Fsel_core\Fsel.Core\Fsel.Core.csproj" />
+  </ItemGroup>
+
 </Project>
