@@ -2,14 +2,12 @@
 
 namespace Fsel.Identity.Application.Queries.StudentQuery
 {
-    using System.Globalization;
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Core.Extensions;
     using Fsel.Identity.Application.Services.LmsCourseService;
-    using Fsel.Identity.Application.Services.TrainingService;
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Domain.Models.EntityModels;
     using MediatR;
@@ -18,19 +16,17 @@ namespace Fsel.Identity.Application.Queries.StudentQuery
 
     public class SearchStudentsInClassQuery : BaseQueryModel, IRequest<MethodResult<PagingItemsModel<SearchStudentsInClassModel>>>
     {
-        public Guid ClassId { get; set; }
+        public Guid? ClassId { get; set; }
     }
 
     public class SearchStudentsInClassQueryHandler : IRequestHandler<SearchStudentsInClassQuery, MethodResult<PagingItemsModel<SearchStudentsInClassModel>>>
     {
         private readonly IStudentRepository _studentRepository;
-        private readonly ITrainingService _trainingService;
         private readonly ILmsCourseService _lmsCourseService;
 
-        public SearchStudentsInClassQueryHandler(IStudentRepository studentRepository, ITrainingService trainingService, ILmsCourseService lmsCourseService)
+        public SearchStudentsInClassQueryHandler(IStudentRepository studentRepository, ILmsCourseService lmsCourseService)
         {
             _studentRepository = studentRepository;
-            _trainingService = trainingService;
             _lmsCourseService = lmsCourseService;
         }
 
@@ -44,15 +40,8 @@ namespace Fsel.Identity.Application.Queries.StudentQuery
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 return methodResult;
             }
-            var studentIdsResult = await _trainingService.GetStudentIdsByClassId(request.ClassId);
-            if (!studentIdsResult.IsSuccessStatusCode)
-            {
-                methodResult.AddError(studentIdsResult.Error?.Content, studentIdsResult.StatusCode);
-                return methodResult;
-            }
-            var studentIds = studentIdsResult.Content?.Result;
 
-            var students = _studentRepository.Queryable.Where(p => studentIds != null && studentIds!.Contains(p.Id)).Include(x => x.Human).Select(i => new SearchStudentsInClassModel
+            var students = _studentRepository.Queryable.Where(p => p.ClassId.HasValue).Include(x => x.Human).Select(i => new SearchStudentsInClassModel
             {
                 Id = i.Id,
                 FullName = i.Human!.FullName,
@@ -60,11 +49,16 @@ namespace Fsel.Identity.Application.Queries.StudentQuery
                 Code = i.Human.Code,
                 CreatedDate = i.CreatedDate,
                 Email = i.Human.Email,
+                ClassId = i.ClassId
             });
 
             if (!string.IsNullOrEmpty(request.Keyword))
             {
-                students = students.Where(m => (m.FullName ?? string.Empty).ToLower(CultureInfo.CurrentCulture).Trim().Contains(request.Keyword.ToLower(CultureInfo.CurrentCulture).Trim()));
+                students = students.Where(m => !string.IsNullOrEmpty(m.FullName) && m.FullName.ToLower().Contains(request.Keyword.ToLower()));
+            }
+            if (request.ClassId.HasValue)
+            {
+                students = students.Where(p => p.ClassId == request.ClassId);
             }
 
             int totalItem = await students.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
@@ -74,7 +68,7 @@ namespace Fsel.Identity.Application.Queries.StudentQuery
                     .ToListAsync(cancellationToken: cancellationToken)
                     .ConfigureAwait(false);
 
-            if (studentIds?.Count > 0)
+            if (lists.Count > 0)
             {
                 var ptrResult = await _lmsCourseService.GetPTPointByIds(lists.Select(p => p.Id).ToList());
                 var ptr = ptrResult.Content?.Result;
