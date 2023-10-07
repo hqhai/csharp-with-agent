@@ -5,6 +5,7 @@ namespace Fsel.Identity.Application.Queries.AdminQuery
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base.BaseModels;
+    using Fsel.Core.Extensions;
     using Fsel.Identity.Application.Services.TrainingService;
     using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.Models.EntityModels;
@@ -42,7 +43,7 @@ namespace Fsel.Identity.Application.Queries.AdminQuery
             var studentCourses = studentCourseResults.Content?.Result;
             var query = studentCourses?.AsEnumerable();
             int totalItem = query?.Count() ?? default;
-            var lists = query?.Skip((request.Page - 1) * request.PageSize).Take(request.PageSize).ToList();
+            var lists = query?.ApplySortAndPaging(request).ToList();
 
             methodResult.Result = new PagingItemsModel<StudentCourseModel>(lists, request, totalItem);
             methodResult.StatusCode = StatusCodes.Status200OK;

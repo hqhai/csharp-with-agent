@@ -109,7 +109,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                                           CourseSkill = h.CourseSkill,
                                           CourseLevel = h.CourseLevel,
                                           QuestionTotal = h.HomeWorkQuestions.Select(x => x.Question).Count(),
-                                          QuestionCompleted = h.HomeWorkResults.FirstOrDefault(x => x.HomeWorkId == h.Id && x.LessonResultId == lessonResult.Id)!.HomeWorkAnswers.Count,
+                                          QuestionCompleted = h.HomeWorkResults.FirstOrDefault(x => x.HomeWorkId == h.Id && x.LessonResultId == lessonResult.Id) != null ? h.HomeWorkResults.FirstOrDefault(x => x.HomeWorkId == h.Id && x.LessonResultId == lessonResult.Id)!.HomeWorkAnswers.Count : default,
                                           HomeWorkResult = _mapper.Map<HomeWorkResultModel>(h.HomeWorkResults.FirstOrDefault(x => x.HomeWorkId == h.Id && x.LessonResultId == lessonResult.Id))
                                       })
                                       .ToListAsync(cancellationToken);

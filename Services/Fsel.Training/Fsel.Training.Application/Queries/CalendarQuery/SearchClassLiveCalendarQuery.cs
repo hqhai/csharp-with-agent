@@ -81,7 +81,7 @@ namespace Fsel.Training.Application.Queries.CalendarQuery
                                     });
 
             int totalItem = query.Count();
-            var lists = query.Skip((request.Page - 1) * request.PageSize).Take(request.PageSize).OrderBy(x => x.LiveDate).ToList();
+            var lists = query.ApplySortAndPaging(request).ToList();
             var courseIds = lists.Select(x => x.CourseId).Distinct().ToList();
             var courseResults = await _courseService.GetListCourseByIds(courseIds);
             var courses = courseResults.Content?.Result;
