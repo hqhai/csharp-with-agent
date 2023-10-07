@@ -11,6 +11,6 @@ namespace Fsel.Identity.Domain.Models.EntityModels
         public string? Code { get; set; }
         public string? Email { get; set; }
         public DateTime? BirthDay { get; set; }
-        public long PTPoint { get; set; }
+        public double PTPoint { get; set; }
     }
 }
