@@ -27,6 +27,7 @@ namespace Fsel.Course.Lms.Application.Queries.QuestBoardQuery
         private readonly IVideoTimeCodeRepository _videoTimeCodeRepository;
         private readonly IVideoRepository _videoRepository;
         private readonly IQuestionRepository _questionRepository;
+        private readonly IVideoTimeCodeResultRepository _videoTimeCodeResultRepository;
         private readonly IVideoTimeCodeAnswerRepository _videoTimeCodeAnswerRepository;
         private readonly ITimeCodeExerciseRepository _timeCodeExerciseRepository;
         private readonly IExerciseQuestionRepository _exerciseQuestionRepository;
@@ -36,6 +37,7 @@ namespace Fsel.Course.Lms.Application.Queries.QuestBoardQuery
             , IVideoTimeCodeRepository videoTimeCodeRepository
             , IVideoRepository videoRepository
             , IQuestionRepository questionRepository
+            , IVideoTimeCodeResultRepository videoTimeCodeResultRepository
             , IVideoTimeCodeAnswerRepository videoTimeCodeAnswerRepository
             , ITimeCodeExerciseRepository timeCodeExerciseRepository
             , IExerciseQuestionRepository exerciseQuestionRepository
@@ -45,6 +47,7 @@ namespace Fsel.Course.Lms.Application.Queries.QuestBoardQuery
             _videoTimeCodeRepository = videoTimeCodeRepository;
             _videoRepository = videoRepository;
             _questionRepository = questionRepository;
+            _videoTimeCodeResultRepository = videoTimeCodeResultRepository;
             _videoTimeCodeAnswerRepository = videoTimeCodeAnswerRepository;
             _timeCodeExerciseRepository = timeCodeExerciseRepository;
             _exerciseQuestionRepository = exerciseQuestionRepository;
@@ -138,7 +141,8 @@ namespace Fsel.Course.Lms.Application.Queries.QuestBoardQuery
         private async Task<double> GetDoubleAsync(VideoResult videoResult, CancellationToken cancellationToken)
         {
             var answerQuery = from baseQ in _videoResultRepository.Queryable
-                              join vtca in _videoTimeCodeAnswerRepository.Queryable on baseQ.Id equals vtca.VideoResultId
+                              join vtcr in _videoTimeCodeResultRepository.Queryable on baseQ.Id equals vtcr.VideoResultId
+                              join vtca in _videoTimeCodeAnswerRepository.Queryable on vtcr.Id equals vtca.VideoTimeCodeResultId
                               join e in _exerciseRepository.Queryable on vtca.ExerciseId equals e.Id
                               join te in _timeCodeExerciseRepository.Queryable on e.Id equals te.ExerciseId
                               join vt in _videoTimeCodeRepository.Queryable on te.VideoTimeCodeId equals vt.Id

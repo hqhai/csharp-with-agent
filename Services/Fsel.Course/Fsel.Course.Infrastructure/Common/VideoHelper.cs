@@ -442,7 +442,7 @@ namespace Fsel.Course.Infrastructure.Common
             return videoTimeCodeModels;
         }
 
-        public VideoTimeCodeModel GetVideoTimeCode(VideoTimeCode videoTimeCode)
+        public VideoTimeCodeModel GetVideoTimeCode(VideoTimeCode? videoTimeCode)
         {
             ArgumentNullException.ThrowIfNull(videoTimeCode);
             var videoTimeCodeResult = videoTimeCode.VideoTimeCodeResults.FirstOrDefault();
