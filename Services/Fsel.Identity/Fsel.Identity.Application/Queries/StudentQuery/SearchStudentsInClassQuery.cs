@@ -2,6 +2,7 @@
 
 namespace Fsel.Identity.Application.Queries.StudentQuery
 {
+    using System.Globalization;
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
@@ -63,7 +64,7 @@ namespace Fsel.Identity.Application.Queries.StudentQuery
 
             if (!string.IsNullOrEmpty(request.Keyword))
             {
-                students = students.Where(m => m.FullName != null && m.FullName.Contains(request.Keyword));
+                students = students.Where(m => (m.FullName ?? string.Empty).ToLower().Trim().Contains(request.Keyword.ToLower().Trim()));
             }
 
             int totalItem = await students.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);

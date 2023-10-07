@@ -2,6 +2,7 @@
 
 namespace Fsel.Interaction.Application.Queries.SupportCategoryQuery
 {
+    using System.Globalization;
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
@@ -10,6 +11,7 @@ namespace Fsel.Interaction.Application.Queries.SupportCategoryQuery
     using Fsel.Interaction.Domain.IRepositories;
     using Fsel.Interaction.Domain.Models.EntityModels;
     using Fsel.Interaction.Domain.Models.QueryModels.SupportCategorys;
+    using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -48,7 +50,7 @@ namespace Fsel.Interaction.Application.Queries.SupportCategoryQuery
                                 });
             if (!string.IsNullOrEmpty(request.Keyword))
             {
-                supportCategoryQuery = supportCategoryQuery.Where(m => m.Id.ToString() == request.Keyword || (m.Name ?? string.Empty).Contains(request.Keyword));
+                supportCategoryQuery = supportCategoryQuery.Where(m => m.Id.ToString() == request.Keyword || (m.Name ?? string.Empty).ToLower().Trim().Contains(request.Keyword.ToLower().Trim()));
             }
             int totalItem = await supportCategoryQuery.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
             var lists = await supportCategoryQuery

@@ -1,5 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
+using System.Globalization;
 using Fsel.Common.ActionResults;
 using Fsel.Core.Base.BaseModels;
 using Fsel.Core.Extensions;
@@ -8,6 +9,7 @@ using Fsel.Course.Application.Services.UserServices.Models;
 using Fsel.Course.Domain.IRepositories;
 using Fsel.Course.Domain.Models.EntityModels;
 using Fsel.Course.Domain.Models.QueryModels.Courses;
+using Fsel.Shared.Helpers;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
@@ -60,7 +62,7 @@ namespace Fsel.Course.Application.Queries.CourseQuery
 
             if (!string.IsNullOrEmpty(request.Keyword))
             {
-                courseQuery = courseQuery.Where(m => m.Id.ToString() == request.Keyword || (m.Name ?? string.Empty).Contains(request.Keyword));
+                courseQuery = courseQuery.Where(m => m.Id.ToString() == request.Keyword || (m.Name ?? string.Empty).ToLower().Trim().Contains(request.Keyword.ToLower().Trim()));
             }
 
             if (request.CourseLevel != null)
@@ -70,7 +72,7 @@ namespace Fsel.Course.Application.Queries.CourseQuery
 
             if (request.TeacherId != null)
             {
-                courseQuery = courseQuery.Where(m => m!.TeacherIds!.Any(x => x == request.TeacherId));
+                courseQuery = courseQuery.Where(m => m.TeacherIds!.Any(x => x == request.TeacherId));
             }
 
             int totalItem = await courseQuery.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
@@ -80,12 +82,13 @@ namespace Fsel.Course.Application.Queries.CourseQuery
                     .ToListAsync(cancellationToken: cancellationToken)
                     .ConfigureAwait(false);
 
-            var teachers = await _userService.GetTeacherByIdsAsync(new GetTeacherByIdsQueryModel { Ids = courseQuery.SelectMany(x => x.TeacherIds!).Distinct().ToList() });
-            if (teachers.IsSuccessStatusCode)
+            var teacherResults = await _userService.GetTeacherByIdsAsync(new GetTeacherByIdsQueryModel { Ids = courseQuery.SelectMany(x => x.TeacherIds!).Distinct().ToList() });
+            if (teacherResults.IsSuccessStatusCode)
             {
+                var teachers = teacherResults.Content?.Result;
                 foreach (var item in lists)
                 {
-                    item.TeacherNames = teachers.Content?.Result?.Where(x => item.TeacherIds!.Contains(x.Id)).Select(x => x.Human?.FullName ?? string.Empty).ToList();
+                    item.TeacherNames = teachers?.Where(x => item.TeacherIds!.Contains(x.Id)).Select(x => x.Human?.FullName ?? string.Empty).ToList();
                 }
             }
 
