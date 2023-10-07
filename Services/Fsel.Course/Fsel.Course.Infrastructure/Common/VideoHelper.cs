@@ -18,10 +18,11 @@ namespace Fsel.Course.Infrastructure.Common
     using Fsel.Shared.Helpers;
     using Microsoft.EntityFrameworkCore;
 
-    public class VideoConverter
+    public class VideoHelper
     {
         private readonly IVideoRepository _videoRepository;
         private readonly IQuestionRepository _questionRepository;
+        private readonly IVideoTimeCodeResultRepository _videoTimeCodeResultRepository;
         private readonly IExerciseRepository _exerciseRepository;
         private readonly QuestionTypeConverter _questionTypeConverter;
         private readonly IVideoResultRepository _videoResultRepository;
@@ -31,8 +32,9 @@ namespace Fsel.Course.Infrastructure.Common
         private readonly ITimeCodeExerciseRepository _timeCodeExerciseRepository;
         private readonly IMapper _mapper;
 
-        public VideoConverter(IVideoRepository videoRepository
+        public VideoHelper(IVideoRepository videoRepository
             , IQuestionRepository questionRepository
+            , IVideoTimeCodeResultRepository videoTimeCodeResultRepository
             , IExerciseRepository exerciseRepository
             , QuestionTypeConverter questionTypeConverter
             , IVideoResultRepository videoResultRepository
@@ -44,6 +46,7 @@ namespace Fsel.Course.Infrastructure.Common
         {
             _videoRepository = videoRepository;
             _questionRepository = questionRepository;
+            _videoTimeCodeResultRepository = videoTimeCodeResultRepository;
             _exerciseRepository = exerciseRepository;
             _questionTypeConverter = questionTypeConverter;
             _videoResultRepository = videoResultRepository;
@@ -258,7 +261,8 @@ namespace Fsel.Course.Infrastructure.Common
             VoidMethodResult methodResult = new VoidMethodResult();
 
             var answerQuery = from baseQ in _videoResultRepository.Queryable
-                              join vtca in _videoTimeCodeAnswerRepository.Queryable on baseQ.Id equals vtca.VideoResultId
+                              join vtcr in _videoTimeCodeResultRepository.Queryable on baseQ.Id equals vtcr.VideoResultId
+                              join vtca in _videoTimeCodeAnswerRepository.Queryable on vtcr.Id equals vtca.VideoTimeCodeResultId
                               join e in _exerciseRepository.Queryable on vtca.ExerciseId equals e.Id
                               join te in _timeCodeExerciseRepository.Queryable on e.Id equals te.ExerciseId
                               join vt in _videoTimeCodeRepository.Queryable on te.VideoTimeCodeId equals vt.Id
@@ -326,12 +330,41 @@ namespace Fsel.Course.Infrastructure.Common
             return methodResult;
         }
 
+        private static EnumTimeCodeStatus GetTimeCodeStatus(int? indexProcess, int indexTimeCode)
+        {
+            var timeCodeStatus = EnumTimeCodeStatus.Lock;
+            if (indexProcess < indexTimeCode)
+            {
+                return timeCodeStatus;
+            }
+            else if (indexProcess == indexTimeCode)
+            {
+                timeCodeStatus = EnumTimeCodeStatus.Process;
+            }
+            else if (indexProcess > indexTimeCode || indexProcess == null)
+            {
+                timeCodeStatus = EnumTimeCodeStatus.Done;
+            }
+            return timeCodeStatus;
+        }
+
+        private static int? GetIndexProcess(List<VideoTimeCode> videoTimeCodes, Guid videoResultId)
+        {
+            var timeCode = videoTimeCodes.Where(x => !x.VideoTimeCodeResults.Any() || x.VideoTimeCodeResults.Any(x => x.VideoResultId == videoResultId)).FirstOrDefault();
+            if (timeCode == null)
+            {
+                return null;
+            }
+            return videoTimeCodes.IndexOf(timeCode);
+        }
+
         public async Task<VoidMethodResult> GetVideoSkillScores(VideoResult videoResult, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(videoResult);
             VoidMethodResult methodResult = new VoidMethodResult();
             var answerQuery = from baseQ in _videoResultRepository.Queryable
-                              join vtca in _videoTimeCodeAnswerRepository.Queryable on baseQ.Id equals vtca.VideoResultId
+                              join vtcr in _videoTimeCodeResultRepository.Queryable on baseQ.Id equals vtcr.VideoResultId
+                              join vtca in _videoTimeCodeAnswerRepository.Queryable on vtcr.Id equals vtca.VideoTimeCodeResultId
                               join e in _exerciseRepository.Queryable on vtca.ExerciseId equals e.Id
                               join te in _timeCodeExerciseRepository.Queryable on e.Id equals te.ExerciseId
                               join vt in _videoTimeCodeRepository.Queryable on te.VideoTimeCodeId equals vt.Id

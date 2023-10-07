@@ -17,7 +17,7 @@ namespace Fsel.Course.Infrastructure.Common
     {
         private readonly IExtraPracticeRepository _extraPracticeRepository;
         private readonly IMapper _mapper;
-        private readonly VideoConverter _videoConverter;
+        private readonly VideoHelper _videoConverter;
         private readonly IMockTestRepository _mockTestRepository;
         private readonly IVideoRepository _videoRepository;
         private readonly SectionConverter _sectionConverter;
@@ -28,7 +28,7 @@ namespace Fsel.Course.Infrastructure.Common
         private readonly QuestionTypeConverter _questionTypeConverter;
 
         public ExtraPracticeConverter(IExtraPracticeRepository extraPracticeRepository, IMapper mapper
-            , VideoConverter videoConverter
+            , VideoHelper videoConverter
             , IMockTestRepository mockTestRepository
             , IVideoRepository videoRepository
             , SectionConverter sectionConverter

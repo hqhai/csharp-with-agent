@@ -20,11 +20,11 @@ namespace Fsel.Course.Application.Commands.VideoCmd
     {
         private readonly IVideoRepository _videoRepository;
         private readonly IMapper _mapper;
-        private readonly VideoConverter _videoConverter;
+        private readonly VideoHelper _videoConverter;
 
         public UpdateVideoCommandHandler(IVideoRepository videoRepository
             , IMapper mapper
-            , VideoConverter videoConverter)
+            , VideoHelper videoConverter)
         {
             _videoRepository = videoRepository;
             _mapper = mapper;

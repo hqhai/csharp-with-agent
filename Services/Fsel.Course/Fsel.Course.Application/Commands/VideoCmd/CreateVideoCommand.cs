@@ -19,11 +19,11 @@ namespace Fsel.Course.Application.Commands.VideoCmd
     public class CreateVideoCommandHandler : IRequestHandler<CreateVideoCommand, MethodResult<VideoModel>>
     {
         private readonly IVideoRepository _videoRepository;
-        private readonly VideoConverter _videoConverter;
+        private readonly VideoHelper _videoConverter;
         private readonly IMapper _mapper;
 
         public CreateVideoCommandHandler(IVideoRepository videoRepository
-            , VideoConverter videoConverter
+            , VideoHelper videoConverter
             , IMapper mapper)
         {
             _videoRepository = videoRepository;

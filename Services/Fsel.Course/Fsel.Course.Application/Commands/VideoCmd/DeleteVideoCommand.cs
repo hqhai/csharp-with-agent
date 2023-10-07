@@ -19,9 +19,9 @@ namespace Fsel.Course.Application.Commands.VideoCmd
     public class DeleteVideoCommandHandler : IRequestHandler<DeleteVideoCommand, MethodResult<bool>>
     {
         private readonly IVideoRepository _videoRepository;
-        private readonly VideoConverter _videoConverter;
+        private readonly VideoHelper _videoConverter;
 
-        public DeleteVideoCommandHandler(IVideoRepository videoRepository, VideoConverter videoConverter)
+        public DeleteVideoCommandHandler(IVideoRepository videoRepository, VideoHelper videoConverter)
         {
             _videoRepository = videoRepository;
             _videoConverter = videoConverter;
