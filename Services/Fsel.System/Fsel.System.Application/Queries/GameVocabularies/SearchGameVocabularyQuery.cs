@@ -9,6 +9,7 @@ namespace Fsel.System.Application.Queries.GameVocabularies
     using Fsel.System.Domain.IRepositories;
     using Fsel.System.Domain.Models.EntityModels;
     using Fsel.System.Domain.Models.QueryModels;
+    using global::System.Globalization;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -65,7 +66,7 @@ namespace Fsel.System.Application.Queries.GameVocabularies
             });
             if (!string.IsNullOrEmpty(request.Keyword))
             {
-                query = query.Where(p => p.Key!.Contains(request.Keyword));
+                query = query.Where(p => (p.Key ?? string.Empty).ToLower().Trim().Contains(request.Keyword.ToLower().Trim()));
             }
             if (request.CourseLevel.HasValue)
             {
