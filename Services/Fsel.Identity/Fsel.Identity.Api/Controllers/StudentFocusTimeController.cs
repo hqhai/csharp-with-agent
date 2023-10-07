@@ -13,7 +13,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace Fsel.Identity.Api.Controllers
 {
     [ApiVersion(Settings.APIVersion)]
-    [Route(Settings.APIDefaultRoute + "/student-ranking")]
+    [Route(Settings.APIDefaultRoute + "/student-focus-time")]
     [ApiController]
     public class StudentFocusTimeController : ControllerBase
     {
