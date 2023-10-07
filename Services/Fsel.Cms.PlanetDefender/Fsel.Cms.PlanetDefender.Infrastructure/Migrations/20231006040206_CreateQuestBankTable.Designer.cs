@@ -4,6 +4,7 @@ using Fsel.Cms.PlanetDefender.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fsel.Cms.PlanetDefender.Infrastructure.Migrations
 {
     [DbContext(typeof(CmsPlanetDefenderDbContext))]
-    partial class CmsPlanetDefenderDbContextModelSnapshot : ModelSnapshot
+    [Migration("20231006040206_CreateQuestBankTable")]
+    partial class CreateQuestBankTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -117,11 +120,6 @@ namespace Fsel.Cms.PlanetDefender.Infrastructure.Migrations
                     b.Property<Guid?>("DeletedUserId")
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(103);
-
-                    b.Property<string>("Gender")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit")

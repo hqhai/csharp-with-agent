@@ -22,6 +22,7 @@ namespace Fsel.Cms.PlanetDefender.Infrastructure
         }
 
         public DbSet<StudentGameInfo> StudentGameInfos { get; set; }
+        public DbSet<QuestBank> QuestBanks { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
