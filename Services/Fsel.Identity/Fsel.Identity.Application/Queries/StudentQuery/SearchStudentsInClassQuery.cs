@@ -64,7 +64,7 @@ namespace Fsel.Identity.Application.Queries.StudentQuery
 
             if (!string.IsNullOrEmpty(request.Keyword))
             {
-                students = students.Where(m => (m.FullName ?? string.Empty).ToLower().Trim().Contains(request.Keyword.ToLower().Trim()));
+                students = students.Where(m => (m.FullName ?? string.Empty).ToLower(CultureInfo.CurrentCulture).Trim().Contains(request.Keyword.ToLower(CultureInfo.CurrentCulture).Trim()));
             }
 
             int totalItem = await students.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
@@ -74,12 +74,15 @@ namespace Fsel.Identity.Application.Queries.StudentQuery
                     .ToListAsync(cancellationToken: cancellationToken)
                     .ConfigureAwait(false);
 
-            var ptrResult = await _lmsCourseService.GetPTPointByIds(lists.Select(p => p.Id).ToList());
-            var ptr = ptrResult.Content?.Result;
-
-            foreach (var item in lists)
+            if (studentIds?.Count > 0)
             {
-                item.PTPoint = ptr!.FirstOrDefault(p => p.StudentId == item.Id) == null ? 0 : ptr!.FirstOrDefault(p => p.StudentId == item.Id)!.PTPoint;
+                var ptrResult = await _lmsCourseService.GetPTPointByIds(lists.Select(p => p.Id).ToList());
+                var ptr = ptrResult.Content?.Result;
+
+                foreach (var item in lists)
+                {
+                    item.PTPoint = ptr!.FirstOrDefault(p => p.StudentId == item.Id) == null ? 0 : Math.Round(ptr!.FirstOrDefault(p => p.StudentId == item.Id)!.PTPoint, 2);
+                }
             }
 
             methodResult.Result = new PagingItemsModel<SearchStudentsInClassModel>(lists, request, totalItem);
