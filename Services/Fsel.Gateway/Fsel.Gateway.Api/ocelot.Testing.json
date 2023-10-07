@@ -1,6 +1,6 @@
 {
   "GlobalConfiguration": {
-    "BaseUrl": "http://42.96.58.145:5200"
+    "BaseUrl": "http://gateway-testing.fsel-testing.svc"
   },
   "Routes": [
     // Auth Service
