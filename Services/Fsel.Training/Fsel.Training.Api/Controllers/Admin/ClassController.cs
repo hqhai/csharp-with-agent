@@ -103,7 +103,7 @@ namespace Fsel.Training.Api.Controllers.Admin
         [HttpPut]
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> TransferStudent([FromQuery] TransferStudentCommand command)
+        public async Task<IActionResult> TransferStudent([FromBody] TransferStudentCommand command)
         {
             MethodResult<bool> commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();
