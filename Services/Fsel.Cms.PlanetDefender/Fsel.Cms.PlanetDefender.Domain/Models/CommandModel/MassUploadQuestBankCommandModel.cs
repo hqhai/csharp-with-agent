@@ -6,6 +6,6 @@ namespace Fsel.Cms.PlanetDefender.Domain.Models.CommandModel
 
     public class MassUploadQuestBankCommandModel
     {
-        public IList<CreateQuestBankCommandModel>? QuestBanks { get; set; }
+        public IList<Guid>? GameVocabularyIds { get; set; }
     }
 }

@@ -14,8 +14,9 @@ namespace Fsel.Cms.PlanetDefender.Infrastructure.Maps
         public QuestBankProfile()
         {
             CreateMap<QuestBank, QuestBankModel>().IgnoreAllNonExisting();
-            CreateMap<CreateQuestBankCommandModel, QuestBank>().IgnoreAllNonExisting();
             CreateMap<SearchQuestBankQueryModel, SearchGameVocabularyQueryModel>().IgnoreAllNonExisting();
+            CreateMap<MassUploadQuestBankCommandModel, QuestBank>().IgnoreAllNonExisting();
+            CreateMap<UpdateStatusQuestBankCommandModel, QuestBank>().IgnoreAllNonExisting();
         }
     }
 }

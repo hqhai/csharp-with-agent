@@ -2,16 +2,16 @@
 
 namespace Fsel.Cms.PlanetDefender.Api.Controllers
 {
-    using Fsel.Common.ActionResults;
     using System.Net;
-    using Microsoft.AspNetCore.Mvc;
-    using Fsel.Cms.PlanetDefender.Domain.Models.EntityModels;
-    using MediatR;
-    using Fsel.Common.Constants;
     using Fsel.Cms.PlanetDefender.Application.Commands.QuestBankCmd;
-    using Fsel.Cms.PlanetDefender.Application.Services.SystemServices.Models;
-    using Fsel.Core.Base.BaseModels;
     using Fsel.Cms.PlanetDefender.Application.Queries.QuestBankQuery;
+    using Fsel.Cms.PlanetDefender.Application.Services.SystemServices.Models;
+    using Fsel.Cms.PlanetDefender.Domain.Models.EntityModels;
+    using Fsel.Common.ActionResults;
+    using Fsel.Common.Constants;
+    using Fsel.Core.Base.BaseModels;
+    using MediatR;
+    using Microsoft.AspNetCore.Mvc;
 
     [ApiVersion(Settings.APIVersion)]
     [Route(Settings.APIDefaultRoute + "/quest-bank")]
@@ -52,18 +52,6 @@ namespace Fsel.Cms.PlanetDefender.Api.Controllers
         /// <summary>
         /// Search game vocabulary
         /// </summary>
-        [HttpGet("all")]
-        [ProducesResponseType(typeof(MethodResult<PagingItemsModel<GameVocabularyModel>>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> SearchAll([FromQuery] SearchAllQuestBankQuery query)
-        {
-            var queryResult = await _mediator.Send(query).ConfigureAwait(false);
-            return queryResult.GetActionResult();
-        }
-
-        /// <summary>
-        /// Search game vocabulary
-        /// </summary>
         [HttpGet]
         [ProducesResponseType(typeof(MethodResult<PagingItemsModel<GameVocabularyModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
@@ -71,6 +59,20 @@ namespace Fsel.Cms.PlanetDefender.Api.Controllers
         {
             var queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Update status quest bank
+        /// </summary>
+        [HttpPut("update-status/{id}")]
+        [ProducesResponseType(typeof(MethodResult<QuestBankModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> UpdateStatus([FromRoute] Guid id, [FromBody] UpdateStatusQuestBankCommand command)
+        {
+            ArgumentNullException.ThrowIfNull(command);
+            command.Id = id;
+            MethodResult<QuestBankModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
         }
     }
 }

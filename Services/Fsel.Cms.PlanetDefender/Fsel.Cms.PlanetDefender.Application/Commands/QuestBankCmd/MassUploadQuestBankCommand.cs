@@ -35,15 +35,20 @@ namespace Fsel.Cms.PlanetDefender.Application.Commands.QuestBankCmd
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<IList<QuestBankModel>>();
 
-            if (request.QuestBanks == null || request.QuestBanks.Count == 0)
-            {
-                return methodResult;
-            }
+            var questBanks = new List<QuestBank>();
 
+            foreach (var item in request.GameVocabularyIds!)
+            {
+                var questBank = new QuestBank
+                {
+                    GameVocabularyId = item,
+                    IsActive = false,
+                };
+
+                questBanks.Add(questBank);
+            }
             await _questBankRepository.ExecuteTransactionAsync(async () =>
             {
-                var questBanks = _mapper.Map<IList<QuestBank>>(request.QuestBanks);
-
                 await _questBankRepository.AddList(questBanks);
                 await _questBankRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
                 methodResult.StatusCode = StatusCodes.Status201Created;
