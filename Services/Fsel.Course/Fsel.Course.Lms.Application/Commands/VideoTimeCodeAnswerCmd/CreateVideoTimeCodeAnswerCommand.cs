@@ -150,7 +150,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
                 }
                 skillScores.Add(new SkillScores
                 {
-                    Skill = exercise.CourseSkill,
+                    Skill = exercise?.CourseSkill ?? default,
                     CorrectCount = correctCount,
                     TotalCount = question.CorrectTotal,
                     CountQuestion = 1,
