@@ -4,12 +4,8 @@ namespace Fsel.System.Api.Controllers
 {
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
-    using Fsel.Shared.Enums;
-    using Fsel.System.Application.Commands.FeatureAccessTimeCmd;
-    using Fsel.System.Application.Queries.FeatureAccessTimeQuery;
     using Fsel.System.Application.Queries.FocusTimeConfigQuery;
     using Fsel.System.Domain.Entities;
-    using Fsel.System.Domain.Models.EntityModels;
     using global::System.Collections.Generic;
     using global::System.Net;
     using MediatR;

@@ -3,9 +3,8 @@
 using System.Net;
 using Fsel.Common.ActionResults;
 using Fsel.Common.Constants;
-using Fsel.Core.Base.BaseModels;
-using Fsel.Identity.Application.Commands.StudentRankingCmd;
-using Fsel.Identity.Application.Queries.StudentRanking;
+using Fsel.Identity.Application.Commands.StudentFocusTimeCmd;
+using Fsel.Identity.Application.Queries.StudentFocusTimeQuery;
 using Fsel.Identity.Domain.Models.EntityModels;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -30,9 +29,19 @@ namespace Fsel.Identity.Api.Controllers
         [HttpPost]
         [ProducesResponseType(typeof(MethodResult<List<StudentRankingModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> CreateStudentFocusTime([FromBody] CreateStudentRankingsCommand query)
+        public async Task<IActionResult> CreateStudentFocusTime([FromBody] CreateStudentFocusTimeCommand cmd)
         {
-            MethodResult<List<StudentRankingModel>> commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            MethodResult<StudentFocusTimeModel> commandResult = await _mediator.Send(cmd).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+
+        [HttpGet]
+        [ProducesResponseType(typeof(MethodResult<List<StudentFocusTimeModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetStudentFocusTime([FromQuery] GetStudentFocusTimeQuery query)
+        {
+            MethodResult<StudentFocusTimeModel> commandResult = await _mediator.Send(query).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
 
