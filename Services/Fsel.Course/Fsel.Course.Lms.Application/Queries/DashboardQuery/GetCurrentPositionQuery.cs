@@ -4,90 +4,78 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
 {
     using System.Collections.Generic;
     using Fsel.Common.ActionResults;
+    using Fsel.Core.Base;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Services.SystemService;
     using Fsel.Course.Lms.Application.Services.UserServices;
-    using Fsel.Shared.Enums;
     using Fsel.Shared.Enums.ErrorCodes;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class GetLeaderBoardQuery : IRequest<MethodResult<LeaderBoardSearchModel>>
+    public class GetCurrentPositionQuery : IRequest<MethodResult<LeaderBoardSearchModel>>
     {
     }
 
-    public class GetLeaderBoardQueryHandler : IRequestHandler<GetLeaderBoardQuery, MethodResult<LeaderBoardSearchModel>>
+    public class GetCurrentPositionQueryHandler : IRequestHandler<GetCurrentPositionQuery, MethodResult<LeaderBoardSearchModel>>
     {
         private readonly IUserService _userService;
-        private readonly ISystemService _systemService;
         private readonly IUnitResultRepository _unitResultRepository;
         private readonly ICourseResultRepository _courseResultRepository;
-        private const int LEADERBOARD_TOP = 50; // Chỉ lấy ra 50 người đứng đầu , sau đó sẽ lọc theo daily streak để lấy ra 30 người đứng đầu
+        private readonly AuthContext _authContext;
         private const int ROUND_DIGIT = 2; // Làm tròn đến số thập phân thú 2
 
-        public GetLeaderBoardQueryHandler(IUserService userService
-            , ISystemService systemService
+
+        public GetCurrentPositionQueryHandler(IUserService userService
             , IUnitResultRepository unitResultRepository
-            , ICourseResultRepository courseResultRepository)
+            , ICourseResultRepository courseResultRepository
+            , AuthContext authContext)
         {
             _userService = userService;
-            _systemService = systemService;
+
             _unitResultRepository = unitResultRepository;
             _courseResultRepository = courseResultRepository;
+            _authContext = authContext;
         }
 
-        public async Task<MethodResult<LeaderBoardSearchModel>> Handle(GetLeaderBoardQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<LeaderBoardSearchModel>> Handle(GetCurrentPositionQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<LeaderBoardSearchModel> methodResult = new MethodResult<LeaderBoardSearchModel>();
 
-            //List CourseLevel hiện có
-            EnumCourseLevel[] enumValues = (EnumCourseLevel[])Enum.GetValues(typeof(EnumCourseLevel));
-
             // Lấy ra danh sách StudentId đã hoàn thành khóa học
             var studentIds = await _courseResultRepository.Queryable.Where(x => x.Status != EnumResultStatus.New).Select(c => c.StudentId).Distinct().ToListAsync(cancellationToken);
-
             var studentResults = await _userService.GetStudentsByStudentIdsAsync(studentIds);
             if (!studentResults.IsSuccessStatusCode)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError), nameof(studentResults));
                 return methodResult;
             }
+            var student = studentResults?.Content?.Result?.Where(x => x.Human!.UserId == _authContext.CurrentUserId);
 
             LeaderBoardSearchModel leaderBoardSearch = new LeaderBoardSearchModel();
             IList<LeaderBoardModel> leaderBoards = new List<LeaderBoardModel>();
-
-            // Duyệt dữ liệu của từng Level
-            foreach (EnumCourseLevel courseLevel in enumValues!)
+            var leaderBoardsToAdd = student!.Select(student =>
             {
-                var students = studentResults?.Content?.Result?.Where(x => x.CourseLevel == courseLevel);
-                if (students == null || !students.Any())
+                var unitResultCaculate = _unitResultRepository.Queryable.Where(x => x.StudentId == student.Id && x.Status != EnumResultStatus.Unfinished);
+                double totalQuestion = unitResultCaculate.Sum(x => x.CorrectTotal);
+                var scores = unitResultCaculate.Sum(x => x.CorrectCount);
+                return new LeaderBoardModel
                 {
-                    continue;
-                }
-                var userIds = students.Select(x => x.Human).Where(x => x != null && x.UserId != null).Select(x => x!.UserId ?? default).ToList();
-                var leaderBoardsToAdd = students.Select(student =>
-                {
-                    var unitResultCaculate = _unitResultRepository.Queryable.Where(x => x.StudentId == student.Id && x.Status != EnumResultStatus.Unfinished);
-                    double totalQuestion = unitResultCaculate.Sum(x => x.CorrectTotal);
-                    var scores = unitResultCaculate.Sum(x => x.CorrectCount);
+                    Id = student.Id,
+                    AvatarPath = student.Human?.AvatarPath,
+                    FullName = student.Human?.FullName,
+                    TotalScore = totalQuestion != 0 ? Math.Round((scores / totalQuestion) * 100, ROUND_DIGIT) : 0,
+                    CourseLevel = student.CourseLevel
+                };
+            }).ToList();
 
-                    return new LeaderBoardModel
-                    {
-                        Id = student.Id,
-                        TotalScore = totalQuestion != 0 ? Math.Round((scores / totalQuestion) * 100, ROUND_DIGIT) : 0,
-                        CourseLevel = student.CourseLevel
-                    };
-                }).ToList();
-
-                // Add items to leaderBoards
-                foreach (var leaderBoardToAdd in leaderBoardsToAdd)
-                {
-                    leaderBoards.Add(leaderBoardToAdd);
-                }
+            //Add Item vào leaderBoard
+            foreach (var leaderBoardToAdd in leaderBoardsToAdd)
+            {
+                leaderBoards.Add(leaderBoardToAdd);
             }
 
             // Nhóm dữ liệu theo CourseLevel
@@ -96,7 +84,7 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
                                     .SelectMany(group => group
                                         .OrderByDescending(x => x.TotalScore)
                                         .Select((item, index) => { item.DisplayOrder = index + 1; return item; })
-                                        .Take(LEADERBOARD_TOP)
+                                        .Take(1)
                                     )
                                     .OrderBy(x => x.CourseLevel)
                                     .ToList();
