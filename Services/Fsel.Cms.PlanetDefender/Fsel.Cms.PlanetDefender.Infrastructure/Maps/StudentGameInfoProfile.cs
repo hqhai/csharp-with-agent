@@ -5,6 +5,7 @@ namespace Fsel.Cms.PlanetDefender.Infrastructure.Maps
     using AutoMapper;
     using Fsel.Cms.PlanetDefender.Domain.Entities;
     using Fsel.Cms.PlanetDefender.Domain.Models.EntityModels;
+    using Fsel.Cms.PlanetDefender.Domain.Models.QueryModels.StudentGameInfos;
     using Fsel.Core.Extensions;
 
     public class StudentGameInfoProfile : Profile
@@ -12,6 +13,8 @@ namespace Fsel.Cms.PlanetDefender.Infrastructure.Maps
         public StudentGameInfoProfile()
         {
             CreateMap<StudentGameInfo, StudentGameInfoModel>().IgnoreAllNonExisting();
+            CreateMap<ChooseCharacterGenderCommandModel, StudentGameInfo>().IgnoreAllNonExisting();
+            CreateMap<ChooseLevelCommandModel, StudentGameInfo>().IgnoreAllNonExisting();
         }
     }
 }
