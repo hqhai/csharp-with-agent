@@ -11,7 +11,7 @@ namespace Fsel.Identity.Domain.Entities
 
         public int DailyStreak { get; set; }
 
-        public int TotalScore { get; set; }
+        public double TotalScore { get; set; }
 
         public int PositionChange { get; set; }
 
