@@ -15,6 +15,7 @@ namespace Fsel.Course.Lms.Application.Queries.ExtraPracticeQuery
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Infrastructure.Common;
     using Fsel.Course.Lms.Application.Services.UserServices;
+    using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -93,7 +94,7 @@ namespace Fsel.Course.Lms.Application.Queries.ExtraPracticeQuery
                 ExecutionTime = videoTimeCode.ExecutionTime,
                 TimeCodeType = videoTimeCode.TimeCodeType,
                 VideoId = videoTimeCode.VideoId,
-                Status = (videoTimeCode.ExtraPracticeAnswers.Count > 0 && videoTimeCode.ExtraPracticeAnswers.All(y => y.ExtraPracticeResultId == extraPracticeResult.Id && y.Status == EnumCurrentStatus.Done)) ? EnumCurrentStatus.Done : EnumCurrentStatus.Process,
+                Status = (videoTimeCode.ExtraPracticeAnswers.Count > 0 && videoTimeCode.ExtraPracticeAnswers.All(y => y.ExtraPracticeResultId == extraPracticeResult.Id && y.Status == EnumTimeCodeStatus.Done)) ? EnumTimeCodeStatus.Done : EnumTimeCodeStatus.Process,
                 Ungraded = videoTimeCode.TimeCodeExercises.Select(x => x.Exercise).SelectMany(x => x!.ExerciseQuestions).Select(x => x.Question).FirstOrDefault()?.Ungraded ?? default,
                 CorrectCount = GetCorrectcount(videoTimeCode),
                 CorrectTotal = videoTimeCode.TimeCodeExercises.Select(x => x.Exercise).SelectMany(x => x!.ExerciseQuestions).Select(x => x.Question).Sum(x => x!.CorrectTotal),

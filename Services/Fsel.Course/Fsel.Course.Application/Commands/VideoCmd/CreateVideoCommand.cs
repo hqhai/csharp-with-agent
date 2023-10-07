@@ -19,15 +19,15 @@ namespace Fsel.Course.Application.Commands.VideoCmd
     public class CreateVideoCommandHandler : IRequestHandler<CreateVideoCommand, MethodResult<VideoModel>>
     {
         private readonly IVideoRepository _videoRepository;
-        private readonly VideoHelper _videoConverter;
+        private readonly VideoHelper _videoHelper;
         private readonly IMapper _mapper;
 
         public CreateVideoCommandHandler(IVideoRepository videoRepository
-            , VideoHelper videoConverter
+            , VideoHelper videoHelper
             , IMapper mapper)
         {
             _videoRepository = videoRepository;
-            _videoConverter = videoConverter;
+            _videoHelper = videoHelper;
             _mapper = mapper;
         }
 
@@ -39,7 +39,7 @@ namespace Fsel.Course.Application.Commands.VideoCmd
             #region Validation
 
             Video video = _mapper.Map<Video>(request);
-            var method = await _videoConverter.CreateTimeCodeToVideo(video, request);
+            var method = await _videoHelper.CreateTimeCodeToVideo(video, request);
             if (!method.IsOK)
             {
                 methodResult.AddErrorBadRequest(method.ErrorMessages);

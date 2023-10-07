@@ -4,7 +4,6 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
 {
     using System.Linq.Dynamic.Core;
     using System.Threading;
-    using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Course.Domain.Entities;
@@ -30,11 +29,9 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
     {
         private readonly IVideoTimeCodeAnswerRepository _videoTimeCodeAnswerRepository;
         private readonly IVideoResultRepository _videoResultRepository;
-        private readonly IMapper _mapper;
         private readonly VideoHelper _videoHelper;
         private readonly IVideoTimeCodeResultRepository _videoTimeCodeResultRepository;
         private readonly FinishOneUnitTestPublisher _finishOneUnitTestPublisher;
-        private readonly QuestionTypeConverter _questionTypeConverter;
         private readonly IVideoTimeCodeRepository _videoTimeCodeRepository;
         private readonly IQuestionRepository _questionRepository;
         private readonly AnswerTypeConverter _answerTypeConverter;
@@ -42,22 +39,18 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
         public CreateVideoTimeCodeAnswerCommandHandler(
              IVideoTimeCodeAnswerRepository videoTimeCodeAnswerRepository
             , IVideoResultRepository videoResultRepository
-            , IMapper mapper
             , VideoHelper videoHelper
             , IVideoTimeCodeResultRepository videoTimeCodeResultRepository
             , FinishOneUnitTestPublisher finishOneUnitTestPublisher
-            , QuestionTypeConverter questionTypeConverter
             , IVideoTimeCodeRepository videoTimeCodeRepository
             , IQuestionRepository questionRepository
             , AnswerTypeConverter answerTypeConverter)
         {
             _videoTimeCodeAnswerRepository = videoTimeCodeAnswerRepository;
             _videoResultRepository = videoResultRepository;
-            _mapper = mapper;
             _videoHelper = videoHelper;
             _videoTimeCodeResultRepository = videoTimeCodeResultRepository;
             _finishOneUnitTestPublisher = finishOneUnitTestPublisher;
-            _questionTypeConverter = questionTypeConverter;
             _videoTimeCodeRepository = videoTimeCodeRepository;
             _questionRepository = questionRepository;
             _answerTypeConverter = answerTypeConverter;
@@ -100,7 +93,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
             #region Chặn Time Code Chưa Done
 
             //var videoTimeCode = await _videoTimeCodeRepository.Queryable.Include(x => x.VideoTimeCodeAnswers.Where(x => x.VideoResultId == videoResult.Id)).Where(x => x.Id == videoResult.CurrentVideoTimeCodeId).FirstOrDefaultAsync(cancellationToken);
-            //if (videoTimeCode != null && videoTimeCode.Id != videoTimeCodeQuestion?.Id && videoTimeCode.VideoTimeCodeAnswers.Any() && videoTimeCode.VideoTimeCodeAnswers.All(x => x.Status == EnumCurrentStatus.Process))
+            //if (videoTimeCode != null && videoTimeCode.Id != videoTimeCodeQuestion?.Id && videoTimeCode.VideoTimeCodeAnswers.Any() && videoTimeCode.VideoTimeCodeAnswers.All(x => x.Status == EnumTimeCodeStatus.Process))
             //{
             //    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(EnumVideoTimeCodeErrorCode.VideoTimeCodePreviousNotDone));
             //    return methodResult;

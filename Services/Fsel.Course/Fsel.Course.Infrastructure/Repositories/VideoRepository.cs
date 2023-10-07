@@ -142,7 +142,9 @@ namespace Fsel.Course.Infrastructure.Repositories
             {
                 return null;
             }
-            return await Queryable.Include(x => x.VideoTimeCodes).ThenInclude(x => x.VideoTimeCodeAnswers.Where(y => videoResultIds.Contains(y.VideoResultId)))
+            return await Queryable.Include(x => x.VideoTimeCodes)
+                                                             .ThenInclude(x => x.VideoTimeCodeResults.Where(y => videoResultIds.Contains(y.VideoResultId)))
+                                                             .ThenInclude(x => x.VideoTimeCodeAnswers)
                                                              .Include(x => x.VideoTimeCodes)
                                                              .ThenInclude(x => x.TimeCodeExercises)
                                                              .ThenInclude(x => x.Exercise)

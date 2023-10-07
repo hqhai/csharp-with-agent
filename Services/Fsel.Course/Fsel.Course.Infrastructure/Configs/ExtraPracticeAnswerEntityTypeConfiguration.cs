@@ -19,7 +19,7 @@ namespace Fsel.Course.Infrastructure.Configs
                 .HasMaxLength(100)
                 .HasConversion(
                     v => v.ToString(),
-                    v => v.EnumParse<EnumCurrentStatus>());
+                    v => v.EnumParse<EnumTimeCodeStatus>());
 
             builder.HasOne(a => a.Question)
                 .WithMany(b => b.ExtraPracticeAnswers)

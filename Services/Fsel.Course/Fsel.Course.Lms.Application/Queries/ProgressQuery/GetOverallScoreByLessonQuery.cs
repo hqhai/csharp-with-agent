@@ -75,7 +75,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
                                                     .Include(x => x.VideoTimeCodes)
                                                     .ThenInclude(x => x.TimeCodeExercises)
                                                     .ThenInclude(x => x.Exercise)
-                                                    .ThenInclude(x => x!.VideoTimeCodeAnswers.Where(y => videoResultIds.Contains(y.VideoResultId)))
+                                                    .ThenInclude(x => x!.VideoTimeCodeAnswers)
                                                     .Where(x => videoIds.Contains(x.Id))
                                                     .AsNoTracking()
                                                     .ToListAsync(cancellationToken);
