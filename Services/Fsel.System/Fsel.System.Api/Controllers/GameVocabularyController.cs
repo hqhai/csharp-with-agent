@@ -65,10 +65,10 @@ namespace Fsel.System.Api.Controllers
         /// <summary>
         /// Search game vocabulary
         /// </summary>
-        [HttpPost("search")]
+        [HttpGet("search")]
         [ProducesResponseType(typeof(MethodResult<PagingItemsModel<GameVocabularyModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> Search([FromBody] SearchGameVocabularyQuery query)
+        public async Task<IActionResult> Search([FromQuery] SearchGameVocabularyQuery query)
         {
             var queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();

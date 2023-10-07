@@ -4,6 +4,7 @@ namespace Fsel.Cms.PlanetDefender.Domain.Models.QueryModels.QuestBanks
 {
     using Fsel.Core.Base.BaseModels;
     using Fsel.Shared.Enums;
+    using Refit;
 
     public class SearchGameVocabularyQueryModel : BaseQueryModel
     {
@@ -11,6 +12,8 @@ namespace Fsel.Cms.PlanetDefender.Domain.Models.QueryModels.QuestBanks
         public EnumRole? Role { get; set; }
         public EnumUserPlatformStatus UserPlatformStatus { get; set; }
         public EnumGameCourseLevel? Level { get; set; }
+
+        [Query(CollectionFormat.Multi)]
         public IList<Guid>? GameVocabularyIds { get; set; }
     }
 }

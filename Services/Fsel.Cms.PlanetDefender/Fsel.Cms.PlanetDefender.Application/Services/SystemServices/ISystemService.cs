@@ -10,7 +10,7 @@ namespace Fsel.Cms.PlanetDefender.Application.Services.SystemServices
 
     public interface ISystemService
     {
-        [Post("/game-vocabulary/search")]
-        Task<IApiResponse<MethodResult<PagingItemsModel<GameVocabularyModel>>>> SearchGameVocabularyAsync([Body] SearchGameVocabularyQueryModel model);
+        [Get("/game-vocabulary/search")]
+        Task<IApiResponse<MethodResult<PagingItemsModel<GameVocabularyModel>>>> SearchGameVocabularyAsync([Query] SearchGameVocabularyQueryModel model);
     }
 }
