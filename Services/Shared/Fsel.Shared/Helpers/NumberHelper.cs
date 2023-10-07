@@ -64,7 +64,7 @@ namespace Fsel.Shared.Helpers
             return convertedValue;
         }
 
-        public static double ConvertNumberOfStarDouble(double value)
+        public static double ConvertRatingToDouble(double value)
         {
             if (value - Math.Floor(value) == 0.5)
             {

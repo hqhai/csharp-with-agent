@@ -58,7 +58,6 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             var lessonResult = await _lessonResultRepository.Queryable.FirstOrDefaultAsync(x => x.UnitId == request.UnitId && x.CourseId == request.CourseId && x.LessonId == request.LessonId && x.StudentId == request.StudentId, cancellationToken);
             if (lessonResult == null || lessonResult.Status == EnumResultStatus.Unfinished)
             {
-                methodResult.Result = default;
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
             }
@@ -66,7 +65,6 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             var videoResult = await _videoResultRepository.Queryable.Include(x => x.Video).FirstOrDefaultAsync(x => x.LessonResultId == lessonResult.Id && x.StudentId == request.StudentId, cancellationToken);
             if (videoResult == null)
             {
-                methodResult.Result = default;
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
             }

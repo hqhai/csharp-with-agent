@@ -71,12 +71,12 @@ namespace Fsel.Interaction.Application.Queries.ReviewFselQuery
             {
                 query = query.Where(x => x.CourseLevel == request.CourseLevel).ToList();
             }
-            var stars = query.Any() ? NumberHelper.ConvertNumberOfStarDouble(query.Average(x => x.Stars)) : default;
+            var stars = query.Any() ? NumberHelper.ConvertRatingToDouble(query.Average(x => x.Stars)) : default;
             int totalItem = query.Count;
             var lists = query.ApplySortAndPaging(request).ToList();
             foreach (var item in lists)
             {
-                item.Stars = NumberHelper.ConvertNumberOfStarDouble(item.Stars);
+                item.Stars = NumberHelper.ConvertRatingToDouble(item.Stars);
             }
             methodResult.Result = new CourseReviewSearchModel { Stars = stars, PagingItemsModel = new PagingItemsModel<CourseReviewModel>(lists, request, totalItem) };
             methodResult.StatusCode = StatusCodes.Status200OK;

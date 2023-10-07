@@ -59,20 +59,20 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             var course = await _courseRepository.GetByIdAsync(request.CourseId);
             if (course == null)
             {
-                methodResult.Result = default;
+               
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
             }
             var courseUnitMockTests = await _courseUnitMockTestRepository.Queryable.Where(x => x.CourseId == request.CourseId).OrderBy(x => x.DisplayOrder).ToListAsync(cancellationToken);
             if (courseUnitMockTests == null || !courseUnitMockTests.Any())
             {
-                methodResult.Result = default;
+               
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
             }
             if (course.CourseType == EnumCourseType.Ielts)
             {
-                methodResult.Result = default;
+               
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
             }
@@ -81,7 +81,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             var finalTestResult = await _finalTestResultRepository.Queryable.Where(x => x.FinalTestId == finalTestId && x.CourseId == request.CourseId && x.StudentId == request.StudentId).FirstOrDefaultAsync(cancellationToken);
             if (finalTestResult == null)
             {
-                methodResult.Result = default;
+               
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
             }
