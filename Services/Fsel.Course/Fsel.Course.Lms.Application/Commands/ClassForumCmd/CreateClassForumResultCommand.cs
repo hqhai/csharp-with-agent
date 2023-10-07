@@ -133,7 +133,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
                 }
                 else
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumClassForumErrorCode.ClassForumHasNotSubmit));
+                    methodResult.AddErrorBadRequest(nameof(EnumClassForumErrorCode.ClassForumHasSubmitted));
                     return methodResult;
                 }
 

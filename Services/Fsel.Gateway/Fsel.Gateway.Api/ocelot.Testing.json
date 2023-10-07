@@ -1,6 +1,6 @@
 {
   "GlobalConfiguration": {
-    "BaseUrl": "http://42.96.58.145:5200"
+    "BaseUrl": "http://gateway-testing.fsel-testing.svc"
   },
   "Routes": [
     // Auth Service
@@ -29,11 +29,7 @@
           "Host": "user-testing.fsel-testing.svc",
           "Port": 80
         }
-      ],
-      "AuthenticationOptions": {
-        "AuthenticationProviderKey": "Bearer",
-        "AllowedScopes": []
-      }
+      ]
     },
     // Lcms Course Service
     {
@@ -47,11 +43,7 @@
           "Host": "lcmsapi-testing.fsel-testing.svc",
           "Port": 80
         }
-      ],
-      "AuthenticationOptions": {
-        "AuthenticationProviderKey": "Bearer",
-        "AllowedScopes": []
-      }
+      ]
     },
     // Lms Course Service
     {
@@ -65,11 +57,7 @@
           "Host": "lmsapi-testing.fsel-testing.svc",
           "Port": 80
         }
-      ],
-      "AuthenticationOptions": {
-        "AuthenticationProviderKey": "Bearer",
-        "AllowedScopes": []
-      }
+      ]
     },
     // Storage Service
     {

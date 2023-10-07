@@ -73,10 +73,10 @@ namespace Fsel.Identity.Authentication.Controllers
         /// <summary>
         /// Send otp email user
         /// </summary>
-        [HttpGet("send-otp-profile")]
+        [HttpPost("send-otp-profile")]
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> SendOtpProfile([FromQuery] SendOtpProfileCommand command)
+        public async Task<IActionResult> SendOtpProfile([FromBody] SendOtpProfileCommand command)
         {
             MethodResult<bool> commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();
@@ -85,10 +85,10 @@ namespace Fsel.Identity.Authentication.Controllers
         /// <summary>
         /// Check Otp
         /// </summary>
-        [HttpGet("check-otp")]
+        [HttpPost("check-otp")]
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> CheckOtp([FromQuery] CheckOtpCommand command)
+        public async Task<IActionResult> CheckOtp([FromBody] CheckOtpCommand command)
         {
             MethodResult<bool> commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();
@@ -97,10 +97,10 @@ namespace Fsel.Identity.Authentication.Controllers
         /// <summary>
         /// Confirm Otp Profile
         /// </summary>
-        [HttpGet("confirm-otp-profile")]
+        [HttpPost("confirm-otp-profile")]
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> ConfirmOtpProfile([FromQuery] ConfirmOtpProfileCommand command)
+        public async Task<IActionResult> ConfirmOtpProfile([FromBody] ConfirmOtpProfileCommand command)
         {
             MethodResult<bool> commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();

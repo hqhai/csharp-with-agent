@@ -2,11 +2,11 @@
 
 namespace Fsel.Course.Domain.Enums.ErrorCodes
 {
-    public enum EnumClassForumErrorCode
+    public enum EnumLessonResultErrorCode
     {
         /// <summary>
-        /// ClassForumHasNotSubmit
+        /// Lesson Result Not New
         /// </summary>
-        ClassForumHasSubmitted
+        LessonResultNotNew
     }
 }

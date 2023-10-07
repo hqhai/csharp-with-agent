@@ -29,11 +29,7 @@
           "Host": "localhost",
           "Port": 5202
         }
-      ],
-      "AuthenticationOptions": {
-        "AuthenticationProviderKey": "Bearer",
-        "AllowedScopes": []
-      }
+      ]
     },
     // Lcms Course Service
     {
@@ -47,11 +43,7 @@
           "Host": "localhost",
           "Port": 5203
         }
-      ],
-      "AuthenticationOptions": {
-        "AuthenticationProviderKey": "Bearer",
-        "AllowedScopes": []
-      }
+      ]
     },
     // Lms Course Service
     {
@@ -65,11 +57,7 @@
           "Host": "localhost",
           "Port": 5204
         }
-      ],
-      "AuthenticationOptions": {
-        "AuthenticationProviderKey": "Bearer",
-        "AllowedScopes": []
-      }
+      ]
     },
     // Storage Service
     {
