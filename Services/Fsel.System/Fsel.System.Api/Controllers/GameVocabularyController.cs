@@ -65,7 +65,7 @@ namespace Fsel.System.Api.Controllers
         /// <summary>
         /// Search game vocabulary
         /// </summary>
-        [HttpGet]
+        [HttpGet("search")]
         [ProducesResponseType(typeof(MethodResult<PagingItemsModel<GameVocabularyModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> Search([FromQuery] SearchGameVocabularyQuery query)

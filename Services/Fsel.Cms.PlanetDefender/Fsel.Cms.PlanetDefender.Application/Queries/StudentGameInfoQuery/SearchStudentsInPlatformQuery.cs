@@ -7,7 +7,6 @@ using Fsel.Core.Base.BaseModels;
 using Fsel.Core.Extensions;
 using MediatR;
 using Microsoft.AspNetCore.Http;
-using Microsoft.EntityFrameworkCore;
 
 namespace Fsel.Cms.PlanetDefender.Application.Queries.StudentGameInfoQuery
 {
@@ -49,7 +48,6 @@ namespace Fsel.Cms.PlanetDefender.Application.Queries.StudentGameInfoQuery
             {
                 p.Level = _studentGameInfoRepository.Queryable.FirstOrDefault(x => x.StudentId == p.StudentId)?.Level;
             });
-
 
             if (request.Level.HasValue)
             {
