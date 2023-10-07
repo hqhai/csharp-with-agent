@@ -5,7 +5,9 @@ namespace Fsel.Identity.Api.Controllers
     using System.Net;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
+    using Fsel.Identity.Application.Commands.UserCmd;
     using Fsel.Identity.Application.Queries.PlatformQuery;
+    using Fsel.Identity.Application.Queries.StudentQuery;
     using Fsel.Identity.Domain.Models.EntityModels;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
@@ -43,6 +45,30 @@ namespace Fsel.Identity.Api.Controllers
         public async Task<IActionResult> GetPlatformByType([FromQuery] GetPlatformsByTypeQuery query)
         {
             MethodResult<IList<PlatformModel>> commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Get all platform
+        /// </summary>
+        [HttpGet("get-students-in-platform")]
+        [ProducesResponseType(typeof(MethodResult<IList<StudentInPlatformModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetStudentsInPlatform([FromQuery] GetStudentsInPlatformQuery query)
+        {
+            MethodResult<IList<StudentInPlatformModel>> commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// change status account
+        /// </summary>
+        [HttpPost("change-status-account")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetAll([FromBody] ChangeAccountStatusCommand command)
+        {
+            MethodResult<bool> commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
     }
