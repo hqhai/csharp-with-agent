@@ -1,5 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
+using System.Globalization;
 using Fsel.Common.ActionResults;
 using Fsel.Core.Base.BaseModels;
 using Fsel.Core.Extensions;
@@ -70,7 +71,7 @@ namespace Fsel.Course.Application.Queries.LessonQuery
 
             if (!string.IsNullOrEmpty(request.Keyword))
             {
-                lessonQuery = lessonQuery.Where(m => m.Id.ToString() == request.Keyword || (m.Name ?? string.Empty).Contains(request.Keyword));
+                lessonQuery = lessonQuery.Where(m => m.Id.ToString() == request.Keyword || (m.Name ?? string.Empty).ToLower().Trim().Contains(request.Keyword.ToLower().Trim()));
             }
 
             if (request.TeacherId != null)
@@ -95,12 +96,13 @@ namespace Fsel.Course.Application.Queries.LessonQuery
                     .ToListAsync(cancellationToken: cancellationToken)
                     .ConfigureAwait(false);
 
-            var teachers = await _userService.GetTeacherByIdsAsync(new GetTeacherByIdsQueryModel { Ids = lessonQuery.Select(x => x.TeacherId ?? Guid.Empty).ToList() });
-            if (teachers.IsSuccessStatusCode)
+            var teacherResults = await _userService.GetTeacherByIdsAsync(new GetTeacherByIdsQueryModel { Ids = lessonQuery.Select(x => x.TeacherId ?? Guid.Empty).ToList() });
+            if (teacherResults.IsSuccessStatusCode)
             {
+                var teachers = teacherResults.Content?.Result;
                 foreach (var item in lists)
                 {
-                    item.TeacherName = teachers.Content?.Result?.FirstOrDefault(x => x.Id == item.TeacherId)?.Human?.FullName;
+                    item.TeacherName = teachers?.FirstOrDefault(x => x.Id == item.TeacherId)?.Human?.FullName;
                 }
             }
 

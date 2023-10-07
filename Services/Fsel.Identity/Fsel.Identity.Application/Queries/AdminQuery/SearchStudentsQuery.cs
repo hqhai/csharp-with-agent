@@ -2,6 +2,7 @@
 
 namespace Fsel.Identity.Application.Queries.AdminQuery
 {
+    using System.Globalization;
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Core.Extensions;
@@ -45,7 +46,7 @@ namespace Fsel.Identity.Application.Queries.AdminQuery
             });
             if (!string.IsNullOrEmpty(request.Keyword))
             {
-                query = query.Where(m => m.Id.ToString() == request.Keyword || (m.FullName ?? string.Empty).Contains(request.Keyword));
+                query = query.Where(m => m.Id.ToString() == request.Keyword || (m.FullName ?? string.Empty).ToLower().Trim().Contains(request.Keyword.ToLower().Trim()));
             }
             int totalItem = await query.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
             var lists = await query

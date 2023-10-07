@@ -41,7 +41,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
         private const int PercentVideoAcademic = 9;
         private const double PercentVideoIELSTWS = 3.5;
         private const double PercentVideoIELST = 3.25;
-        private const int PercentUnitTest = 25;
+        private const int PercentUnitTest = 24;
         private const int PercentSkillTest = 18;
 
         public BaseInternalEventHandler(IVideoResultRepository videoResultRepository,
@@ -94,7 +94,15 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             if (type == EnumCourseType.Academic)
             {
                 var (unitSkillScores, percentUnitSkill) = await GetSkillScoreByCourses(unitIds, studentId, EnumTimeCodeType.UnitTest, PercentUnitTest);
+                if (!unitSkillScores.Any())
+                {
+                    percentUnitSkill = PercentUnitTest;
+                }
                 var (skillSkillScores, percentSkill) = await GetSkillScoreByCourses(unitIds, studentId, EnumTimeCodeType.SkillTest, PercentSkillTest);
+                if (!skillSkillScores.Any())
+                {
+                    percentSkill = PercentSkillTest;
+                }
                 var (finalTestSkillScores, percentFinalTest) = await GetFinalTestSkillScore(finalTestId, studentId);
                 mergedSkillScores = mergedSkillScores.Concat(skillSkillScores).Concat(unitSkillScores).Concat(finalTestSkillScores).ToList();
                 percent = percent + percentUnitSkill + percentSkill + percentFinalTest;
@@ -145,7 +153,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                     skillScore.CountQuestion = 1;
                     skillScore.TotalCount = TotalScoreClassForum;
                     skillScore.CorrectCount = x.ClassForumScores.Sum(x => x.Score);
-                    skillScore.Percent = NumberHelper.ConvertPercentDouble(x.ClassForumScores.Sum(x => x.Score) / TotalScoreClassForum);
+                    skillScore.Percent = NumberHelper.ConvertPercentDouble((double)x.ClassForumScores.Sum(x => x.Score) / TotalScoreClassForum);
                     return skillScore;
                 }).ToList().GroupBy(x => x.Skill).Select(x => GetSkillScore(x)).ToList();
                 if (courseType != null && courseType == EnumCourseType.Academic)
@@ -194,7 +202,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 }
                 else
                 {
-                    return NumberHelper.ConvertDoublePercent(skillScores.Average(x => x.Percent * percentOccupy / skillScores.Count));
+                    return NumberHelper.ConvertDoublePercent(skillScores.Sum(x => x.Percent * percentOccupy / skillScores.Count));
                 }
             }
 

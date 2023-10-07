@@ -2,6 +2,7 @@
 
 namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
 {
+    using System.Globalization;
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base;
     using Fsel.Core.Base.BaseModels;
@@ -77,7 +78,7 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
             //Keyword
             if (!string.IsNullOrEmpty(request.Keyword))
             {
-                mockTestResultQuery = mockTestResultQuery.Where(m => m.Id.ToString() == request.Keyword || (m.CreatedFullName ?? string.Empty).Contains(request.Keyword));
+                mockTestResultQuery = mockTestResultQuery.Where(m => m.Id.ToString() == request.Keyword || (m.CreatedFullName ?? string.Empty).ToLower().Trim().Contains(request.Keyword.ToLower().Trim()));
             }
 
             if (request.MockTestFilter != null)

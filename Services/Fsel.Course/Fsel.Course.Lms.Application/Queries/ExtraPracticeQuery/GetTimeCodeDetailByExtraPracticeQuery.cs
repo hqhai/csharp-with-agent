@@ -69,12 +69,12 @@ namespace Fsel.Course.Lms.Application.Queries.ExtraPracticeQuery
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(extraPracticeResult));
                 return methodResult;
             }
-            var videoTimeCode = await _videoTimeCodeRepository.Queryable
+            var videoTimeCode = await _videoTimeCodeRepository.Queryable.Include(x => x!.ExtraPracticeAnswers)
                                     .Include(x => x.TimeCodeExercises.Where(x => !x.IsDeleted && x.Exercise != null))
                                     .ThenInclude(x => x.Exercise)
                                     .ThenInclude(x => x!.ExerciseQuestions.Where(x => !x.IsDeleted))
                                     .ThenInclude(x => x.Question)
-                                    .ThenInclude(x => x!.ExtraPracticeAnswers!.Where(x => extraPracticeResult != null && x.ExtraPracticeResultId == extraPracticeResult.Id))
+                                    .ThenInclude(x => x!.ExtraPracticeAnswers)
                                 .Where(x => x.Id == request.VideoTimeCodeId && x.VideoId == request.VideoId)
                                 .AsNoTracking()
                                 .FirstOrDefaultAsync(cancellationToken: cancellationToken);
@@ -93,6 +93,7 @@ namespace Fsel.Course.Lms.Application.Queries.ExtraPracticeQuery
                 ExecutionTime = videoTimeCode.ExecutionTime,
                 TimeCodeType = videoTimeCode.TimeCodeType,
                 VideoId = videoTimeCode.VideoId,
+                Status = (videoTimeCode.ExtraPracticeAnswers.Count > 0 && videoTimeCode.ExtraPracticeAnswers.All(y => y.ExtraPracticeResultId == extraPracticeResult.Id && y.Status == EnumCurrentStatus.Done)) ? EnumCurrentStatus.Done : EnumCurrentStatus.Process,
                 Ungraded = videoTimeCode.TimeCodeExercises.Select(x => x.Exercise).SelectMany(x => x!.ExerciseQuestions).Select(x => x.Question).FirstOrDefault()?.Ungraded ?? default,
                 CorrectCount = GetCorrectcount(videoTimeCode),
                 CorrectTotal = videoTimeCode.TimeCodeExercises.Select(x => x.Exercise).SelectMany(x => x!.ExerciseQuestions).Select(x => x.Question).Sum(x => x!.CorrectTotal),
@@ -114,6 +115,7 @@ namespace Fsel.Course.Lms.Application.Queries.ExtraPracticeQuery
                     }).ToList()
                 }).ToList(),
             };
+
             methodResult.Result = videoTimeCodeModel;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;

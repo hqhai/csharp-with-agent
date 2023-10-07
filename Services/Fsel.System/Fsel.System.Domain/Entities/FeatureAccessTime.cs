@@ -29,7 +29,7 @@ namespace Fsel.System.Domain.Entities
 
         public Guid ObjectId { get; set; }
 
-        public Guid CourseId { get; set; }
+        public Guid? CourseId { get; set; }
         public Guid? UnitId { get; set; }
         public Guid? LessonId { get; set; }
     }

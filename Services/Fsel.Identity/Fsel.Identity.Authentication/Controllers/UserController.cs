@@ -37,10 +37,10 @@ namespace Fsel.Identity.Authentication.Controllers
         /// <summary>
         /// Confirm OTP SignUp
         /// </summary>
-        [HttpPost("confirm-otp-signup")]
+        [HttpPost("confirm-otp-sign-up")]
         [ProducesResponseType(typeof(MethodResult<ConfirmOtpModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> ConfirmOTPSignUp([FromBody] ComfirmOTPSignUpCommand command)
+        public async Task<IActionResult> ConfirmOTPSignUp([FromBody] ConfirmOtpSignUpCommand command)
         {
             MethodResult<ConfirmOtpModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();
@@ -59,12 +59,12 @@ namespace Fsel.Identity.Authentication.Controllers
         }
 
         /// <summary>
-        /// Comfirm OTP Reset Password
+        /// Com-firm OTP Reset Password
         /// </summary>
-        [HttpPost("comfirm-otp-reset-password")]
+        [HttpPost("confirm-otp-reset-password")]
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> ComfirmOTPResetPassword([FromBody] ComfirmOTPResetPasswordCommand command)
+        public async Task<IActionResult> ConfirmOTPResetPassword([FromBody] ConfirmOtpResetPasswordCommand command)
         {
             MethodResult<bool> commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();
@@ -73,10 +73,10 @@ namespace Fsel.Identity.Authentication.Controllers
         /// <summary>
         /// Send otp email user
         /// </summary>
-        [HttpGet("send-otp-profile")]
+        [HttpPost("send-otp-profile")]
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> SendOtpProfile([FromQuery] SendOtpProfileCommand command)
+        public async Task<IActionResult> SendOtpProfile([FromBody] SendOtpProfileCommand command)
         {
             MethodResult<bool> commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();
@@ -85,24 +85,36 @@ namespace Fsel.Identity.Authentication.Controllers
         /// <summary>
         /// Check Otp
         /// </summary>
-        [HttpGet("check-otp")]
+        [HttpPost("check-otp")]
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> CheckOtp([FromQuery] CheckOtpCommand command)
+        public async Task<IActionResult> CheckOtp([FromBody] CheckOtpCommand command)
         {
             MethodResult<bool> commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
 
         /// <summary>
-        /// Comfirm Otp Profile
+        /// Confirm Otp Profile
         /// </summary>
-        [HttpGet("comfirm-otp-profile")]
+        [HttpPost("confirm-otp-profile")]
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> ComfirmOtpProfile([FromQuery] ComfirmOtpProfileCommand command)
+        public async Task<IActionResult> ConfirmOtpProfile([FromBody] ConfirmOtpProfileCommand command)
         {
             MethodResult<bool> commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Sign Up as Guest
+        /// </summary>
+        [HttpPost("sign-up-as-guest")]
+        [ProducesResponseType(typeof(MethodResult<TokenModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> SignUpAsGuest([FromBody] CreateGuestAccountCommand command)
+        {
+            MethodResult<TokenModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
     }

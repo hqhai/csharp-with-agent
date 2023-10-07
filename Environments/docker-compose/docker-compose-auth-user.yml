@@ -21,11 +21,11 @@ services:
             - Otp__StepTime=3
             - Otp__StepDayWithAdmin=7
             - ConstantUrl__ConfirmOtpUrl=http://42.96.58.145:4300/login/first-login?otp={0}
-            - SERVICES_SenderApiUrl=http://42.96.58.145:5206/api/v1
-            - SERVICES_InteractionApiUrl=http://42.96.58.145:5208/api/
-            - SERVICES_ClassApiUrl=http://42.96.58.145:5207/api/v1
-            - SERVICES_OrderApiUrl=http://42.96.58.145:5209/api/v1
-            - SERVICES_LmsCourseApiUrl=http://42.96.58.145:5204/api/v1
+            - SERVICES_SenderApiUrl=http://sender-testing.fsel-testing.svc/api/v1
+            - SERVICES_InteractionApiUrl=http://interaction-testing.fsel-testing.svc/api/
+            - SERVICES_ClassApiUrl=http://training-testing.fsel-testing.svc/api/v1
+            - SERVICES_OrderApiUrl=http://ordering-testing.fsel-testing.svc/api/v1
+            - SERVICES_LmsCourseApiUrl=http://lmsapi-testing.fsel-testing.svc/api/v1
         ports:
             - 5201:80
             - 7201:443
@@ -50,11 +50,11 @@ services:
             - Otp__StepTime=3
             - Otp__StepDayWithAdmin=7
             - ConstantUrl__ConfirmOtpUrl=http://42.96.58.145:4300/login/first-login?otp={0}
-            - SERVICES_SenderApiUrl=http://42.96.58.145:5206/api/v1
-            - SERVICES_InteractionApiUrl=http://42.96.58.145:5208/api/
-            - SERVICES_ClassApiUrl=http://42.96.58.145:5207/api/v1
-            - SERVICES_OrderApiUrl=http://42.96.58.145:5209/api/v1
-            - SERVICES_LmsCourseApiUrl=http://42.96.58.145:5204/api/v1
+            - SERVICES_SenderApiUrl=http://sender-testing.fsel-testing.svc/api/v1
+            - SERVICES_InteractionApiUrl=http://interaction-testing.fsel-testing.svc/api/
+            - SERVICES_ClassApiUrl=http://training-testing.fsel-testing.svc/api/v1
+            - SERVICES_OrderApiUrl=http://ordering-testing.fsel-testing.svc/api/v1
+            - SERVICES_LmsCourseApiUrl=http://lmsapi-testing.fsel-testing.svc/api/v1
         ports:
             - 5202:80
             - 7202:443

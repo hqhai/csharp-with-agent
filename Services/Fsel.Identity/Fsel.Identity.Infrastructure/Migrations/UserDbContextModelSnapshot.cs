@@ -405,6 +405,44 @@ namespace Fsel.Identity.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Platform");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("c9c55ef5-01e0-4fa6-b68a-3aaea1089548"),
+                            Code = "LCMS",
+                            CreatedDate = new DateTime(2023, 10, 6, 16, 16, 6, 665, DateTimeKind.Local).AddTicks(443),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            Description = "",
+                            IsDeleted = false,
+                            Name = "Learning Content Management System",
+                            Type = "Content"
+                        },
+                        new
+                        {
+                            Id = new Guid("856818e6-9e20-43d8-964f-5dab2ba1a355"),
+                            Code = "LMS",
+                            CreatedDate = new DateTime(2023, 10, 6, 16, 16, 6, 665, DateTimeKind.Local).AddTicks(707),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            Description = "",
+                            IsDeleted = false,
+                            Name = "Learning Management System",
+                            Type = "Learn"
+                        },
+                        new
+                        {
+                            Id = new Guid("f144a094-3f49-4ca8-8f1e-7234289dd1a5"),
+                            Code = "PlanetDefender",
+                            CreatedDate = new DateTime(2023, 10, 6, 16, 16, 6, 665, DateTimeKind.Local).AddTicks(733),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            Description = "",
+                            IsDeleted = false,
+                            Name = "Planet Defender",
+                            Type = "Game"
+                        });
                 });
 
             modelBuilder.Entity("Fsel.Identity.Domain.Entities.Role", b =>

@@ -97,7 +97,7 @@ namespace Fsel.System.Infrastructure.Migrations
                     b.Property<long>("AccessTime")
                         .HasColumnType("bigint");
 
-                    b.Property<Guid>("CourseId")
+                    b.Property<Guid?>("CourseId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("CreatedDate")

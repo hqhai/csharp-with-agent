@@ -3,11 +3,11 @@
 namespace Fsel.Identity.Infrastructure.Configs
 {
     using System;
-    using Fsel.Identity.Domain.Entities;
-    using Microsoft.EntityFrameworkCore.Metadata.Builders;
-    using Microsoft.EntityFrameworkCore;
-    using Fsel.Identity.Domain.Enums;
     using Fsel.Common.Helpers;
+    using Fsel.Identity.Domain.Entities;
+    using Fsel.Shared.Enums;
+    using Microsoft.EntityFrameworkCore;
+    using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
     internal class UserPlatformEntityTypeConfiguration : IEntityTypeConfiguration<UserPlatform>
     {

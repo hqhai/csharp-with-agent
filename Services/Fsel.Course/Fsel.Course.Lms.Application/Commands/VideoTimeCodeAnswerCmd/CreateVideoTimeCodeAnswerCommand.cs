@@ -2,6 +2,7 @@
 
 namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
 {
+    using System.Linq.Dynamic.Core;
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
@@ -81,6 +82,18 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
 
             var exercise = questions.SelectMany(x => x.ExerciseQuestions).Select(x => x.Exercise).FirstOrDefault();
             var videoTimeCodeQuestion = exercise?.TimeCodeExercises.Select(x => x.VideoTimeCode).FirstOrDefault();
+
+            #region Chặn Time Code Chưa Done
+
+            //var videoTimeCode = await _videoTimeCodeRepository.Queryable.Include(x => x.VideoTimeCodeAnswers.Where(x => x.VideoResultId == videoResult.Id)).Where(x => x.Id == videoResult.CurrentVideoTimeCodeId).FirstOrDefaultAsync(cancellationToken);
+            //if (videoTimeCode != null && videoTimeCode.Id != videoTimeCodeQuestion?.Id && videoTimeCode.VideoTimeCodeAnswers.Any() && videoTimeCode.VideoTimeCodeAnswers.All(x => x.Status == EnumCurrentStatus.Process))
+            //{
+            //    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(EnumVideoTimeCodeErrorCode.VideoTimeCodePreviousNotDone));
+            //    return methodResult;
+            //}
+
+            #endregion Chặn Time Code Chưa Done
+
             videoResult.CurrentVideoTimeCodeId = videoTimeCodeQuestion?.Id ?? default;
 
             #endregion Validation
@@ -121,8 +134,9 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
                 else if (answer.Status == EnumTimeCodeStatus.Process)
                 {
                     answer.Answer = answerConfig ?? item.Answer;
+                    answer.Status = EnumCurrentStatus.Done;
                     answer.CorrectCount = question.Ungraded ? default : correctCount;
-                    answer.Status = EnumTimeCodeStatus.Done;
+                    answer.Status = EnumCurrentStatus.Done;
                     updateVideoTimeCodeAnswers.Add(answer);
                 }
                 else if (answer.Status == EnumTimeCodeStatus.Done)

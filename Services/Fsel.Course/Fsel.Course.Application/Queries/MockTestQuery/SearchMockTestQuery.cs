@@ -2,6 +2,7 @@
 
 namespace Fsel.Course.Application.Queries.MockTestQuery
 {
+    using System.Globalization;
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
@@ -10,6 +11,7 @@ namespace Fsel.Course.Application.Queries.MockTestQuery
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Domain.Models.QueryModels.MockTests;
+    using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -50,7 +52,7 @@ namespace Fsel.Course.Application.Queries.MockTestQuery
                                       });
             if (!string.IsNullOrEmpty(request.Keyword))
             {
-                mockTestQuery = mockTestQuery.Where(m => m.Id.ToString() == request.Keyword || (m.Name ?? string.Empty).Contains(request.Keyword));
+                mockTestQuery = mockTestQuery.Where(m => m.Id.ToString() == request.Keyword || (m.Name ?? string.Empty).ToLower().Trim().Contains(request.Keyword.ToLower().Trim()));
             }
 
             if (request.MockTestType != null)
