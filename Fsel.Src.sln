@@ -142,6 +142,16 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Fsel.Notification.Infrastru
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Fsel.Notification.Domain", "Services\Fsel.Notification\Fsel.Notification.Domain\Fsel.Notification.Domain.csproj", "{8B1C6EF9-3383-4929-AD40-9B4E83AFB45A}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Fsel.CMS.PlanetDefender", "Fsel.CMS.PlanetDefender", "{50DA47A2-4089-49C6-B722-BEF748FCE4BF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Fsel.CMS.PlanetDefender.Api", "Services\Fsel.Cms.PlanetDefender\Fsel.Cms.PlanetDefender.Api\Fsel.Cms.PlanetDefender.Api.csproj", "{76F333BF-314F-4B86-AA27-490C3663A6A2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Fsel.CMS.PlanetDefender.Application", "Services\Fsel.Cms.PlanetDefender\Fsel.Cms.PlanetDefender.Application\Fsel.Cms.PlanetDefender.Application.csproj", "{696BD951-6A69-4C6B-8DB6-70BD949407A8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Fsel.CMS.PlanetDefender.Domain", "Services\Fsel.Cms.PlanetDefender\Fsel.Cms.PlanetDefender.Domain\Fsel.Cms.PlanetDefender.Domain.csproj", "{6E49E475-F589-425C-93CC-A00E041B5DBD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Fsel.CMS.PlanetDefender.Infrastructure", "Services\Fsel.Cms.PlanetDefender\Fsel.Cms.PlanetDefender.Infrastructure\Fsel.Cms.PlanetDefender.Infrastructure.csproj", "{2A6B8E1E-085F-418A-B645-1B9823AADE17}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -344,6 +354,22 @@ Global
 		{8B1C6EF9-3383-4929-AD40-9B4E83AFB45A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8B1C6EF9-3383-4929-AD40-9B4E83AFB45A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8B1C6EF9-3383-4929-AD40-9B4E83AFB45A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{76F333BF-314F-4B86-AA27-490C3663A6A2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{76F333BF-314F-4B86-AA27-490C3663A6A2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{76F333BF-314F-4B86-AA27-490C3663A6A2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{76F333BF-314F-4B86-AA27-490C3663A6A2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{696BD951-6A69-4C6B-8DB6-70BD949407A8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{696BD951-6A69-4C6B-8DB6-70BD949407A8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{696BD951-6A69-4C6B-8DB6-70BD949407A8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{696BD951-6A69-4C6B-8DB6-70BD949407A8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6E49E475-F589-425C-93CC-A00E041B5DBD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6E49E475-F589-425C-93CC-A00E041B5DBD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6E49E475-F589-425C-93CC-A00E041B5DBD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6E49E475-F589-425C-93CC-A00E041B5DBD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2A6B8E1E-085F-418A-B645-1B9823AADE17}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2A6B8E1E-085F-418A-B645-1B9823AADE17}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2A6B8E1E-085F-418A-B645-1B9823AADE17}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2A6B8E1E-085F-418A-B645-1B9823AADE17}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -411,6 +437,11 @@ Global
 		{BC7DD186-96EE-45BD-A6AD-724998A736FB} = {3E7A5683-AFB7-448C-84D2-5504864E51E4}
 		{B3AA081A-A3E9-415B-A9DD-81AC03E7DFE0} = {3E7A5683-AFB7-448C-84D2-5504864E51E4}
 		{8B1C6EF9-3383-4929-AD40-9B4E83AFB45A} = {3E7A5683-AFB7-448C-84D2-5504864E51E4}
+		{50DA47A2-4089-49C6-B722-BEF748FCE4BF} = {5E7078A9-8DE2-459D-854D-7D8625E92C43}
+		{76F333BF-314F-4B86-AA27-490C3663A6A2} = {50DA47A2-4089-49C6-B722-BEF748FCE4BF}
+		{696BD951-6A69-4C6B-8DB6-70BD949407A8} = {50DA47A2-4089-49C6-B722-BEF748FCE4BF}
+		{6E49E475-F589-425C-93CC-A00E041B5DBD} = {50DA47A2-4089-49C6-B722-BEF748FCE4BF}
+		{2A6B8E1E-085F-418A-B645-1B9823AADE17} = {50DA47A2-4089-49C6-B722-BEF748FCE4BF}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {C3F5014D-C4B6-471E-9F07-3E7AE3B37304}

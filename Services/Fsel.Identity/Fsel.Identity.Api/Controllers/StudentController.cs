@@ -148,5 +148,17 @@ namespace Fsel.Identity.Api.Controllers
             }
             return File(commandResult.Result, Settings.Excels.ContentType, "import-student-to-course.xlsx");
         }
+
+        /// <summary>
+        /// Update Referral Code
+        /// </summary>
+        [HttpPut("update-referral-code")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> UpdateReferralCode([FromBody] UpdateReferralCodeStudentCommand command)
+        {
+            MethodResult<bool> commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
     }
 }

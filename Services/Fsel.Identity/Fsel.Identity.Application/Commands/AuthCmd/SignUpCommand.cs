@@ -6,19 +6,17 @@ using System.Transactions;
 using AutoMapper;
 using Fsel.Common.ActionResults;
 using Fsel.Common.Helpers;
+using Fsel.Identity.Application.Commands.StudentCmd;
 using Fsel.Identity.Application.Services.OrderService;
-using Fsel.Identity.Application.Services.OrderService.Model;
 using Fsel.Identity.Domain.Entities;
 using Fsel.Identity.Domain.Enums;
 using Fsel.Identity.Domain.Enums.ErrorCodes;
 using Fsel.Identity.Domain.IRepositories;
 using Fsel.Identity.Domain.Models.CommandModels.Auths;
 using Fsel.Identity.Domain.Models.EntityModels;
-using Fsel.Identity.Infrastructure.Repositories;
 using Fsel.Identity.Infrastructure.ValueSettings;
 using Fsel.Shared.Constants;
 using Fsel.Shared.Enums;
-using Fsel.Shared.Enums.ErrorCodes;
 using Fsel.Shared.Models.SenderTemplates;
 using MediatR;
 using Microsoft.AspNetCore.Http;
@@ -109,6 +107,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                                 user.UserName = request.Email;
 
                                 #region Add Platform to User
+
                                 request.PlatformCode ??= EnumPlatformCode.LMS;
                                 var platform = await _platformRepository.GetPlatformAsync(request.PlatformCode.Value, cancellationToken);
                                 if (platform != null)
@@ -118,7 +117,8 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                                         PlatformId = platform.Id
                                     });
                                 }
-                                #endregion
+
+                                #endregion Add Platform to User
 
                                 result = await _userManager.CreateAsync(user, request.Password ?? string.Empty);
                                 if (!result.Succeeded)
@@ -130,18 +130,10 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
 
                                 if (!string.IsNullOrEmpty(request.ReferralCode))
                                 {
-                                    var userReferral = await _userManager.Users.Include(x => x.Human).FirstOrDefaultAsync(x => x.Human!.Code == request.ReferralCode, cancellationToken);
-                                    if (userReferral == null)
+                                    var updateReferralCodeResult = await _mediator.Send(new UpdateReferralCodeStudentCommand { ReferralCode = request.ReferralCode, UserId = new Guid(user.Id) }, cancellationToken).ConfigureAwait(false);
+                                    if (!updateReferralCodeResult.IsOK)
                                     {
-                                        scope.Dispose();
-                                        methodResult.AddErrorBadRequest(nameof(EnumAuthErrorCode.UserNotExistByCode));
-                                        return methodResult;
-                                    }
-                                    var userReferralResult = await _orderService.CreateUserReferralAsync(new CreateUserReferralCommandModel { SenderId = new Guid(userReferral.Id), ReceiverId = new Guid(user.Id) });
-                                    if (!userReferralResult.IsSuccessStatusCode)
-                                    {
-                                        scope.Dispose();
-                                        methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallOrderServiceError));
+                                        methodResult.AddError(updateReferralCodeResult.ErrorMessages);
                                         return methodResult;
                                     }
                                 }
