@@ -113,7 +113,7 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
                     .ConfigureAwait(false);
             foreach (var item in lists)
             {
-                item.NumberOfStars = NumberHelper.ConvertDoubleDecimal(item.NumberOfStars);
+                item.NumberOfStars = NumberHelper.ConvertNumberOfStarDouble(item.NumberOfStars);
             }
             methodResult.Result = new PagingItemsModel<FeedbackClassForumAIModel>(lists, request, totalItem);
             methodResult.StatusCode = StatusCodes.Status200OK;
