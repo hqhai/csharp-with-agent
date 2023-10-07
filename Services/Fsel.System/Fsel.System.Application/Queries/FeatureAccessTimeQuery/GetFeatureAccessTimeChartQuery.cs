@@ -39,7 +39,7 @@ namespace Fsel.System.Application.Queries.FeatureAccessTimeQuery
             MethodResult<IList<FeatureAcessTimeChartModel>> methodResult = new MethodResult<IList<FeatureAcessTimeChartModel>>();
 
             var featureAccessTimes = await _featureAccessTimeRepository.Queryable
-                .Where(x => x.CreatedUserId == _authContext.CurrentUserId)
+                .Where(x => x.CreatedUserId == _authContext.CurrentUserId && x.ObjectId == null && x.LessonId == null)
                 .OrderByDescending(x => x.LastVisited)
                 .ToListAsync(cancellationToken);
 
@@ -78,12 +78,12 @@ namespace Fsel.System.Application.Queries.FeatureAccessTimeQuery
         {
             var chartModel = new FeatureAcessTimeChartModel();
 
-            var currentDate = DateTime.Now.Date;
+            var currentDate = DateTime.UtcNow.Date;
 
             var groupedData = featureAccessTimes
                 .Where(f =>
                     f.LastVisited.HasValue &&
-                    f.LastVisited.Value.Date == currentDate && 
+                    f.LastVisited.Value.Date == currentDate &&
                     features.Contains(f.EnumFeature))
                 .GroupBy(f => f.LastVisited!.Value.Hour)
                 .ToDictionary(g => g.Key, g => g.Sum(f => f.AccessTime));
