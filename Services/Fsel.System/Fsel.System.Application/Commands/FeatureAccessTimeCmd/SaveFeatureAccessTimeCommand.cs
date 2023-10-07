@@ -37,7 +37,7 @@ namespace Fsel.System.Application.Commands.FeatureAccessTimeCmd
 
             await _featureAccessTimeRepository.ExecuteTransactionAsync(async () =>
             {
-                var featureAccessTime = await _featureAccessTimeRepository.Queryable.OrderByDescending(x => x.LastVisited).FirstOrDefaultAsync(x => x.CreatedUserId == _authContext.CurrentUserId && x.ObjectId == request.ObjectId && x.EnumFeature == request.EnumFeature, cancellationToken);
+                var featureAccessTime = await _featureAccessTimeRepository.Queryable.OrderByDescending(x => x.LastVisited).FirstOrDefaultAsync(x => x.CreatedUserId == _authContext.CurrentUserId && (x.ObjectId == request.ObjectId || (x.ObjectId == null && x.LessonId == null)) && x.EnumFeature == request.EnumFeature, cancellationToken);
 
                 if (featureAccessTime == null)
                 {
@@ -69,7 +69,7 @@ namespace Fsel.System.Application.Commands.FeatureAccessTimeCmd
         {
             var featureAccessTime = _mapper.Map<FeatureAccessTime>(request);
             featureAccessTime.Visit = 1;
-            featureAccessTime.LastVisited = DateTime.Now;
+            featureAccessTime.LastVisited = DateTime.UtcNow;
             return _featureAccessTimeRepository.Add(featureAccessTime);
         }
 
@@ -80,7 +80,7 @@ namespace Fsel.System.Application.Commands.FeatureAccessTimeCmd
                 featureAccessTime.Visit += 1;
             }
             featureAccessTime.AccessTime += request.AccessTime ?? default;
-            featureAccessTime.LastVisited = DateTime.Now;
+            featureAccessTime.LastVisited = DateTime.UtcNow;
             return _featureAccessTimeRepository.Update(featureAccessTime);
         }
 
@@ -88,7 +88,7 @@ namespace Fsel.System.Application.Commands.FeatureAccessTimeCmd
         private static bool IsSameRangeHour(FeatureAccessTime featureAccessTime)
         {
             bool isValid = false;
-            var now = DateTime.Now;
+            var now = DateTime.UtcNow;
             var lastVisited = featureAccessTime.LastVisited;
 
             if (lastVisited!.Value.Year == now.Year

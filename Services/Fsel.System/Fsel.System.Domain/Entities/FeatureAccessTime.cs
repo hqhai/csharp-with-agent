@@ -27,7 +27,7 @@ namespace Fsel.System.Domain.Entities
         /// </summary>
         public DateTime? LastVisited { get; set; }
 
-        public Guid ObjectId { get; set; }
+        public Guid? ObjectId { get; set; }
 
         public Guid? CourseId { get; set; }
         public Guid? UnitId { get; set; }
