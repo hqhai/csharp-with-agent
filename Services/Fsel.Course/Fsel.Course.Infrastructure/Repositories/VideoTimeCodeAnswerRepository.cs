@@ -13,11 +13,11 @@ namespace Fsel.Course.Infrastructure.Repositories
         {
         }
 
-        public async Task<VideoTimeCodeAnswer?> GetAsync(Guid videoResultId, Guid questionId, Guid? exerciseId, Guid? videoTimeCodeId)
+        public async Task<VideoTimeCodeAnswer?> GetAsync(Guid videoTimeCodeResultId, Guid questionId, Guid? exerciseId)
         {
             try
             {
-                return await Queryable.FirstOrDefaultAsync(x => x.QuestionId == questionId && x.ExerciseId == exerciseId && x.VideoTimeCodeId == videoTimeCodeId && x.VideoResultId == videoResultId);
+                return await Queryable.FirstOrDefaultAsync(x => x.QuestionId == questionId && x.ExerciseId == exerciseId && x.VideoTimeCodeResultId == videoTimeCodeResultId);
             }
             catch (Exception)
             {

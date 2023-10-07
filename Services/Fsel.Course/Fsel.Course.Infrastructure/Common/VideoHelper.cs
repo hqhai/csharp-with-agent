@@ -14,6 +14,7 @@ namespace Fsel.Course.Infrastructure.Common
     using Fsel.Course.Domain.Models.CommandModels.Exercises;
     using Fsel.Course.Domain.Models.CommandModels.Videos;
     using Fsel.Course.Domain.Models.CommandModels.VideoTimeCodes;
+    using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
     using Microsoft.EntityFrameworkCore;
@@ -330,34 +331,6 @@ namespace Fsel.Course.Infrastructure.Common
             return methodResult;
         }
 
-        private static EnumTimeCodeStatus GetTimeCodeStatus(int? indexProcess, int indexTimeCode)
-        {
-            var timeCodeStatus = EnumTimeCodeStatus.Lock;
-            if (indexProcess < indexTimeCode)
-            {
-                return timeCodeStatus;
-            }
-            else if (indexProcess == indexTimeCode)
-            {
-                timeCodeStatus = EnumTimeCodeStatus.Process;
-            }
-            else if (indexProcess > indexTimeCode || indexProcess == null)
-            {
-                timeCodeStatus = EnumTimeCodeStatus.Done;
-            }
-            return timeCodeStatus;
-        }
-
-        private static int? GetIndexProcess(List<VideoTimeCode> videoTimeCodes, Guid videoResultId)
-        {
-            var timeCode = videoTimeCodes.Where(x => !x.VideoTimeCodeResults.Any() || x.VideoTimeCodeResults.Any(x => x.VideoResultId == videoResultId)).FirstOrDefault();
-            if (timeCode == null)
-            {
-                return null;
-            }
-            return videoTimeCodes.IndexOf(timeCode);
-        }
-
         public async Task<VoidMethodResult> GetVideoSkillScores(VideoResult videoResult, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(videoResult);
@@ -420,6 +393,144 @@ namespace Fsel.Course.Infrastructure.Common
                              };
             videoResult.VideoSkillScores = scoreQuery.ToList();
             return methodResult;
+        }
+
+        public bool GetUngraded(VideoTimeCode? videoTimeCode)
+        {
+            return videoTimeCode?.TimeCodeExercises.Select(x => x.Exercise).SelectMany(x => x!.ExerciseQuestions).Select(x => x.Question).FirstOrDefault()?.Ungraded ?? default;
+        }
+
+        public int GetCorrectCount(VideoTimeCodeResult? videoTimeCodeResult)
+        {
+            return (videoTimeCodeResult != null && videoTimeCodeResult.VideoTimeCodeAnswers.Any()) ? videoTimeCodeResult.VideoTimeCodeAnswers.Sum(x => x.CorrectCount) : default;
+        }
+
+        public int GetCorrectTotal(VideoTimeCode? videoTimeCode)
+        {
+            return videoTimeCode?.TimeCodeExercises.Select(x => x.Exercise).SelectMany(x => x!.ExerciseQuestions).Select(x => x.Question).Sum(x => x!.CorrectTotal) ?? default;
+        }
+
+        public static int GetTotalQuestion(VideoTimeCode? videoTimeCode)
+        {
+            return videoTimeCode?.TimeCodeExercises.Where(x => !x.IsDeleted && x.Exercise != null)
+                                                  .Select(x => x.Exercise)
+                                                  .SelectMany(x => x!.ExerciseQuestions.Where(x => !x.IsDeleted && x.Question != null))
+                                                  .Select(m => m.Question)
+                                                  .Count() ?? default;
+        }
+
+        public IList<VideoTimeCodeModel> GetTimeCodes(Video? video, Guid videoResultId)
+        {
+            ArgumentNullException.ThrowIfNull(video);
+            var videoTimeCodes = video.VideoTimeCodes.OrderBy(x => x!.DisplayTime).ToList();
+            var videoTimeCodeModels = new List<VideoTimeCodeModel>();
+            var indexProcess = GetIndexProcess(videoTimeCodes, videoResultId);
+            foreach (var item in videoTimeCodes)
+            {
+                var indexTimeCode = videoTimeCodes.IndexOf(item);
+                videoTimeCodeModels.Add(new VideoTimeCodeModel
+                {
+                    Id = item.Id,
+                    TotalCount = GetTotalQuestion(item),
+                    DisplayTime = item.DisplayTime,
+                    ExecutionTime = item.ExecutionTime,
+                    TimeCodeType = item.TimeCodeType,
+                    VideoId = item.VideoId,
+                    Status = GetTimeCodeStatus(indexProcess, indexTimeCode)
+                });
+            }
+            return videoTimeCodeModels;
+        }
+
+        public VideoTimeCodeModel GetVideoTimeCode(VideoTimeCode videoTimeCode)
+        {
+            ArgumentNullException.ThrowIfNull(videoTimeCode);
+            var videoTimeCodeResult = videoTimeCode.VideoTimeCodeResults.FirstOrDefault();
+            return new VideoTimeCodeModel
+            {
+                Id = videoTimeCode.Id,
+                TotalCount = GetTotalQuestion(videoTimeCode),
+                DisplayTime = videoTimeCode.DisplayTime,
+                ExecutionTime = videoTimeCode.ExecutionTime,
+                TimeCodeType = videoTimeCode.TimeCodeType,
+                VideoId = videoTimeCode.VideoId,
+                Ungraded = GetUngraded(videoTimeCode),
+                CorrectCount = GetCorrectCount(videoTimeCodeResult),
+                CorrectTotal = GetCorrectTotal(videoTimeCode),
+                Status = GetTimeCodeStatus(videoTimeCodeResult),
+                Exercises = videoTimeCode.TimeCodeExercises.OrderBy(x => x!.CreatedDate).Select(n => n.Exercise).Select(n => GetExercise(n)).ToList(),
+            };
+        }
+
+        private ExerciseModel GetExercise(Exercise? n)
+        {
+            ArgumentNullException.ThrowIfNull(n);
+            return new ExerciseModel
+            {
+                Id = n.Id,
+                MediaPost = n.MediaPost,
+                Name = n.Name,
+                CourseSkill = n.CourseSkill,
+                Questions = n.ExerciseQuestions.OrderBy(x => x!.CreatedDate).Select(m => m.Question).Select(m => GetQuestion(m)).ToList()
+            };
+        }
+
+        private QuestionModel GetQuestion(Question? question)
+        {
+            ArgumentNullException.ThrowIfNull(question);
+            var isCheck = question.VideoTimeCodeAnswers.FirstOrDefault()?.Status == EnumTimeCodeStatus.Done;
+            return new QuestionModel
+            {
+                Id = question.Id,
+                QuestionType = question.QuestionType,
+                CorrectTotal = question.CorrectTotal,
+                Explanation = question.Explanation,
+                Ungraded = question.Ungraded,
+                Config = _questionTypeConverter.QuestionTypeConverterObject(question.Config, question.QuestionType, isDisableAnswers: !(isCheck)).Item1,
+                ResultAnswer = _mapper.Map<AnswerModel>(question.VideoTimeCodeAnswers.FirstOrDefault())
+            };
+        }
+
+        public EnumTimeCodeStatus GetTimeCodeStatus(VideoTimeCodeResult? videoTimeCodeResult)
+        {
+            var learnProcess = EnumTimeCodeStatus.Process;
+            if (videoTimeCodeResult != null)
+            {
+                if (videoTimeCodeResult.VideoTimeCodeAnswers.All(x => x.Status == EnumTimeCodeStatus.Done))
+                {
+                    learnProcess = EnumTimeCodeStatus.Done;
+                }
+            }
+            return learnProcess;
+        }
+
+        public EnumTimeCodeStatus GetTimeCodeStatus(int? indexProcess, int indexTimeCode)
+        {
+            var timeCodeStatus = EnumTimeCodeStatus.Lock;
+            if (indexProcess < indexTimeCode)
+            {
+                return timeCodeStatus;
+            }
+            else if (indexProcess == indexTimeCode)
+            {
+                timeCodeStatus = EnumTimeCodeStatus.Process;
+            }
+            else if (indexProcess > indexTimeCode || indexProcess == null)
+            {
+                timeCodeStatus = EnumTimeCodeStatus.Done;
+            }
+            return timeCodeStatus;
+        }
+
+        public int? GetIndexProcess(IList<VideoTimeCode>? videoTimeCodes, Guid videoResultId)
+        {
+            ArgumentNullException.ThrowIfNull(videoTimeCodes);
+            var timeCode = videoTimeCodes.Where(x => !x.VideoTimeCodeResults.Any() || x.VideoTimeCodeResults.Any(x => x.VideoResultId == videoResultId)).FirstOrDefault();
+            if (timeCode == null)
+            {
+                return null;
+            }
+            return videoTimeCodes.IndexOf(timeCode);
         }
     }
 }

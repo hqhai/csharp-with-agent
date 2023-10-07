@@ -3,10 +3,12 @@
 namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
 {
     using System.Linq.Dynamic.Core;
+    using System.Threading;
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Course.Domain.Entities;
+    using Fsel.Course.Domain.Entities.SkillScoresConfigs;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
@@ -15,6 +17,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
     using Fsel.Course.Infrastructure.Common;
     using Fsel.Course.Lms.Application.Queues.Publishers;
     using Fsel.Shared.Enums;
+    using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -28,6 +31,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
         private readonly IVideoTimeCodeAnswerRepository _videoTimeCodeAnswerRepository;
         private readonly IVideoResultRepository _videoResultRepository;
         private readonly IMapper _mapper;
+        private readonly IVideoTimeCodeResultRepository _videoTimeCodeResultRepository;
         private readonly FinishOneUnitTestPublisher _finishOneUnitTestPublisher;
         private readonly QuestionTypeConverter _questionTypeConverter;
         private readonly IVideoTimeCodeRepository _videoTimeCodeRepository;
@@ -38,6 +42,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
              IVideoTimeCodeAnswerRepository videoTimeCodeAnswerRepository
             , IVideoResultRepository videoResultRepository
             , IMapper mapper
+            , IVideoTimeCodeResultRepository videoTimeCodeResultRepository
             , FinishOneUnitTestPublisher finishOneUnitTestPublisher
             , QuestionTypeConverter questionTypeConverter
             , IVideoTimeCodeRepository videoTimeCodeRepository
@@ -47,6 +52,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
             _videoTimeCodeAnswerRepository = videoTimeCodeAnswerRepository;
             _videoResultRepository = videoResultRepository;
             _mapper = mapper;
+            _videoTimeCodeResultRepository = videoTimeCodeResultRepository;
             _finishOneUnitTestPublisher = finishOneUnitTestPublisher;
             _questionTypeConverter = questionTypeConverter;
             _videoTimeCodeRepository = videoTimeCodeRepository;
@@ -67,21 +73,26 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
                 return methodResult;
             }
 
-            var videoResult = await _videoResultRepository.Queryable.Include(x => x!.VideoTimeCodeResults).FirstOrDefaultAsync(x => x.LessonResultId == request.LessonResultId, cancellationToken);
+            var videoResult = await _videoResultRepository.Queryable.Include(x => x.VideoTimeCodeResults).FirstOrDefaultAsync(x => x.LessonResultId == request.LessonResultId, cancellationToken);
             if (videoResult == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(videoResult));
                 return methodResult;
             }
-            var questions = await _questionRepository.GetIncludeTimeCodeByIdAsync(request.Answers.Select(x => x.QuestionId).ToList());
-            if (questions == null || questions.Count == 0)
+            var (questions, videoTimeCode) = await GetQuestionsAndVideoTimeCodeAsyns(request.Answers.Select(x => x.QuestionId).ToList());
+            if (questions == null || !questions.Any())
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(questions));
                 return methodResult;
             }
-
-            var exercise = questions.SelectMany(x => x.ExerciseQuestions).Select(x => x.Exercise).FirstOrDefault();
-            var videoTimeCodeQuestion = exercise?.TimeCodeExercises.Select(x => x.VideoTimeCode).FirstOrDefault();
+            if (videoTimeCode == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(videoTimeCode));
+                return methodResult;
+            }
+            var videoTimeCodeId = videoTimeCode.Id;
+            var videoTimeCodeResult = await GetVideoTimeCodeResultAsync(videoResult, videoTimeCodeId);
+            videoResult.CurrentVideoTimeCodeId = videoTimeCodeId;
 
             #region Chặn Time Code Chưa Done
 
@@ -94,13 +105,11 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
 
             #endregion Chặn Time Code Chưa Done
 
-            videoResult.CurrentVideoTimeCodeId = videoTimeCodeQuestion?.Id ?? default;
-
             #endregion Validation
 
             var videoTimeCodeAnswers = new List<VideoTimeCodeAnswer>();
             var updateVideoTimeCodeAnswers = new List<VideoTimeCodeAnswer>();
-            int correctTotal = 0;
+            var skillScores = new List<SkillScores>();
             foreach (var item in request.Answers)
             {
                 var question = questions.FirstOrDefault(x => x.Id == item.QuestionId);
@@ -109,8 +118,9 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
                     methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(question));
                     return methodResult;
                 }
-                var exerciseId = question.ExerciseQuestions.FirstOrDefault()?.ExerciseId ?? default;
-                var answer = await _videoTimeCodeAnswerRepository.GetAsync(videoResult.Id, question.Id, exerciseId, videoTimeCodeQuestion?.Id);
+                var exercise = question.ExerciseQuestions.Select(x => x.Exercise).FirstOrDefault();
+                var exerciseId = exercise?.Id ?? default;
+                var answer = await _videoTimeCodeAnswerRepository.GetAsync(videoTimeCodeResult.Id, question.Id, exerciseId);
                 var (answerConfig, correctCount) = _answerTypeConverter.GetTotalCorrectByAsnwerType(item.Answer, question.Config, question.QuestionType);
                 if (!string.IsNullOrEmpty(item.Answer?.ToString()) && answerConfig == null)
                 {
@@ -124,19 +134,17 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
                         Answer = answerConfig ?? item.Answer,
                         ExerciseId = exerciseId,
                         QuestionId = question.Id,
-                        VideoTimeCodeResultId =
+                        VideoTimeCodeResultId = videoTimeCodeResult.Id,
                         CorrectCount = question.Ungraded ? default : correctCount,
-                        Status = videoTimeCodeQuestion?.TimeCodeType != EnumTimeCodeType.Standalone ? EnumTimeCodeStatus.Done : EnumTimeCodeStatus.Process
+                        Status = videoTimeCode.TimeCodeType != EnumTimeCodeType.Standalone ? EnumTimeCodeStatus.Done : EnumTimeCodeStatus.Process
                     };
-
                     videoTimeCodeAnswers.Add(answer);
                 }
                 else if (answer.Status == EnumTimeCodeStatus.Process)
                 {
                     answer.Answer = answerConfig ?? item.Answer;
-                    answer.Status = EnumCurrentStatus.Done;
                     answer.CorrectCount = question.Ungraded ? default : correctCount;
-                    answer.Status = EnumCurrentStatus.Done;
+                    answer.Status = EnumTimeCodeStatus.Done;
                     updateVideoTimeCodeAnswers.Add(answer);
                 }
                 else if (answer.Status == EnumTimeCodeStatus.Done)
@@ -144,14 +152,34 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
                     methodResult.AddErrorBadRequest(nameof(EnumVideoTimeCodeAnswerErrorCode.AnswersDone));
                     return methodResult;
                 }
-                correctTotal += question.CorrectTotal;
+                skillScores.Add(new SkillScores
+                {
+                    Skill = exercise.CourseSkill,
+                    CorrectCount = correctCount,
+                    TotalCount = question.CorrectTotal,
+                    CountQuestion = 1,
+                    TotalQuestion = 1,
+                });
             }
-
+            skillScores = skillScores.GroupBy(x => x.Skill).Select(x => new SkillScores
+            {
+                Skill = x.Key,
+                CorrectCount = x.Sum(x => x.CorrectCount),
+                TotalCount = x.Sum(x => x.TotalCount),
+                CountQuestion = x.Sum(x => x.CountQuestion),
+                TotalQuestion = x.Sum(x => x.TotalQuestion),
+                Percent = x.Sum(x => x.CorrectCount).GetPercent(x.Sum(x => x.TotalCount))
+            }).ToList();
+            videoTimeCodeResult.CorrectCount = (int)skillScores.Sum(x => x.CorrectCount);
+            videoTimeCodeResult.CorrectTotal = (int)skillScores.Sum(x => x.TotalCount);
+            videoTimeCodeResult.Percent = skillScores.Sum(x => x.CorrectCount).GetPercent(skillScores.Sum(x => x.TotalCount));
+            videoTimeCodeResult.SkillScores = skillScores;
             await _videoTimeCodeAnswerRepository.ExecuteTransactionAsync(async () =>
             {
                 if (videoTimeCodeQuestion?.TimeCodeType == EnumTimeCodeType.UnitTest)
                 {
                     await _finishOneUnitTestPublisher.Publish(videoResult, cancellationToken);
+                    videoTimeCodeResult.Status =
                 }
 
                 if (videoTimeCodeAnswers.Count > 0)
@@ -175,16 +203,40 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
                 await _videoResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
                 return methodResult;
             });
-            var videoTimeCode = await _videoTimeCodeRepository.Queryable.Include(x => x.TimeCodeExercises)
+            videoTimeCode = await _videoTimeCodeRepository.Queryable.Include(x => x.TimeCodeExercises)
                 .ThenInclude(x => x.Exercise)
                 .ThenInclude(x => x!.ExerciseQuestions)
                 .ThenInclude(x => x.Question)
                 .ThenInclude(x => x!.VideoTimeCodeAnswers.Where(x => x.VideoTimeCodeResultId == videoResult.Id))
                 .FirstOrDefaultAsync(x => x.Id == videoResult.CurrentVideoTimeCodeId, cancellationToken);
-            var videoTimeCodeModel = GetTimeCode();
+            var videoTimeCodeModel = GetTimeCode(videoTimeCode, videoTimeCodeResult.Id);
             methodResult.Result = videoTimeCodeModel;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
+        }
+
+        private async Task<VideoTimeCodeResult> GetVideoTimeCodeResultAsync(VideoResult videoResult, Guid videoTimeCodeId)
+        {
+            var videoTimeCodeResult = videoResult.VideoTimeCodeResults.Where(x => x.VideoTimeCodeId == videoResult.CurrentVideoTimeCodeId && x.VideoResultId == videoResult.Id).FirstOrDefault();
+            if (videoTimeCodeResult == null)
+            {
+                videoTimeCodeResult = new VideoTimeCodeResult
+                {
+                    VideoResultId = videoResult.Id,
+                    VideoTimeCodeId = videoTimeCodeId,
+                };
+                videoTimeCodeResult = _videoTimeCodeResultRepository.Add(videoTimeCodeResult);
+                await _videoTimeCodeResultRepository.UnitOfWork.SaveEntitiesAsync().ConfigureAwait(false);
+            }
+            return videoTimeCodeResult;
+        }
+
+        private async Task<(IList<Question>?, VideoTimeCode?)> GetQuestionsAndVideoTimeCodeAsyns(IList<Guid> questionIds)
+        {
+            var questions = await _questionRepository.GetIncludeTimeCodeByIdAsync(questionIds);
+            var exercise = questions?.SelectMany(x => x.ExerciseQuestions).Select(x => x.Exercise).FirstOrDefault();
+            var videoTimeCode = exercise?.TimeCodeExercises.Select(x => x.VideoTimeCode).FirstOrDefault();
+            return (questions, videoTimeCode);
         }
 
         private VideoTimeCodeModel? GetTimeCode(VideoTimeCode? videoTimeCode, Guid videoTimeCodeResultId)
