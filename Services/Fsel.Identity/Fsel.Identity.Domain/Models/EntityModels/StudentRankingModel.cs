@@ -12,11 +12,15 @@ namespace Fsel.Identity.Domain.Models.EntityModels
 
         public int DailyStreak { get; set; }
 
-        public int TotalScore { get; set; }
+        public double TotalScore { get; set; }
 
         public int PositionChange { get; set; }
 
         public int CurrentPosition { get; set; }
+
+        public string? AvatarPath { get; set; }
+
+        public string? FullName { get; set; }
 
         public EnumCourseLevel Level { get; set; }
 
