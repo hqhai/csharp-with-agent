@@ -13,8 +13,8 @@ namespace Fsel.Cms.PlanetDefender.Infrastructure.Maps
         public StudentGameInfoProfile()
         {
             CreateMap<StudentGameInfo, StudentGameInfoModel>().IgnoreAllNonExisting();
-            CreateMap<ChooseCharacterGenderCommandModel, StudentGameInfo>().IgnoreAllNonExisting();
-            CreateMap<ChooseLevelCommandModel, StudentGameInfo>().IgnoreAllNonExisting();
+            CreateMap<ChooseStudentGenderCommandModel, StudentGameInfo>().IgnoreAllNonExisting();
+            CreateMap<ChooseUserLevelCommandModel, StudentGameInfo>().IgnoreAllNonExisting();
         }
     }
 }

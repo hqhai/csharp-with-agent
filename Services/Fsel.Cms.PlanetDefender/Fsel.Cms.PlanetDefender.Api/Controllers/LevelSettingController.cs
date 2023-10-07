@@ -42,7 +42,7 @@ namespace Fsel.Cms.PlanetDefender.Api.Controllers
         [HttpPost("choose-gender")]
         [ProducesResponseType(typeof(MethodResult<StudentGameInfoModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> Create([FromBody] ChooseCharacterGenderCommand command)
+        public async Task<IActionResult> Create([FromBody] ChooseStudentGenderCommand command)
         {
             MethodResult<StudentGameInfoModel> queryResult = await _mediator.Send(command).ConfigureAwait(false);
             return queryResult.GetActionResult();
@@ -54,7 +54,7 @@ namespace Fsel.Cms.PlanetDefender.Api.Controllers
         [HttpPut("choose-level")]
         [ProducesResponseType(typeof(MethodResult<StudentGameInfoModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> Update([FromBody] ChooseLevelCommand command)
+        public async Task<IActionResult> Update([FromBody] ChooseUserLevelCommand command)
         {
             ArgumentNullException.ThrowIfNull(command);
             MethodResult<StudentGameInfoModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);

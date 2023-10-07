@@ -12,7 +12,6 @@ namespace Fsel.Cms.PlanetDefender.Application.Queries.LevelSettingQuery
 
     public class GetAllEnumCourseLevelQuery : IRequest<MethodResult<object>>
     {
-        public EnumCourseType? CourseType { get; set; }
     }
 
     public class GetAllEnumCourseLevelQueryHandler : IRequestHandler<GetAllEnumCourseLevelQuery, MethodResult<object>>

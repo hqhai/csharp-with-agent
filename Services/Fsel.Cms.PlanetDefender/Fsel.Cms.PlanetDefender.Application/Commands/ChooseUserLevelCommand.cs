@@ -17,18 +17,18 @@ namespace Fsel.Cms.PlanetDefender.Application.Commands
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class ChooseLevelCommand : ChooseLevelCommandModel, IRequest<MethodResult<StudentGameInfoModel>>
+    public class ChooseUserLevelCommand : ChooseUserLevelCommandModel, IRequest<MethodResult<StudentGameInfoModel>>
     {
     }
 
-    public class ChooseLevelCommandHandler : IRequestHandler<ChooseLevelCommand, MethodResult<StudentGameInfoModel>>
+    public class ChooseUserLevelCommandHandler : IRequestHandler<ChooseUserLevelCommand, MethodResult<StudentGameInfoModel>>
     {
         private readonly IMapper _mapper;
         private readonly IStudentGameInfoRepository _studentGameInfoRepository;
         private readonly IUserService _userService;
         private readonly AuthContext _authContext;
 
-        public ChooseLevelCommandHandler(IMapper mapper, IStudentGameInfoRepository studentGameInfoRepository, IUserService userService, AuthContext authContext)
+        public ChooseUserLevelCommandHandler(IMapper mapper, IStudentGameInfoRepository studentGameInfoRepository, IUserService userService, AuthContext authContext)
         {
             _mapper = mapper;
             _studentGameInfoRepository = studentGameInfoRepository;
@@ -36,7 +36,7 @@ namespace Fsel.Cms.PlanetDefender.Application.Commands
             _authContext = authContext;
         }
 
-        public async Task<MethodResult<StudentGameInfoModel>> Handle(ChooseLevelCommand request, CancellationToken cancellationToken)
+        public async Task<MethodResult<StudentGameInfoModel>> Handle(ChooseUserLevelCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<StudentGameInfoModel> methodResult = new MethodResult<StudentGameInfoModel>();
@@ -44,22 +44,22 @@ namespace Fsel.Cms.PlanetDefender.Application.Commands
             var studentResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
             var student = studentResult?.Content?.Result;
 
-            var chooseLevel = await _studentGameInfoRepository.Queryable.FirstOrDefaultAsync(x => x.StudentId == student!.Id, cancellationToken);
+            var studentGameInfo = await _studentGameInfoRepository.Queryable.FirstOrDefaultAsync(x => x.StudentId == student!.Id, cancellationToken);
 
-            if (chooseLevel == null)
+            if (studentGameInfo == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(chooseLevel));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(studentGameInfo));
                 return methodResult;
             }
-            _mapper.Map(request, chooseLevel);
+            _mapper.Map(request, studentGameInfo);
 
             await _studentGameInfoRepository.ExecuteTransactionAsync(async () =>
             {
-                chooseLevel = _studentGameInfoRepository.Update(chooseLevel);
+                studentGameInfo = _studentGameInfoRepository.Update(studentGameInfo);
 
                 await _studentGameInfoRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
                 methodResult.StatusCode = StatusCodes.Status200OK;
-                methodResult.Result = _mapper.Map<StudentGameInfoModel>(chooseLevel);
+                methodResult.Result = _mapper.Map<StudentGameInfoModel>(studentGameInfo);
                 return methodResult;
             });
 

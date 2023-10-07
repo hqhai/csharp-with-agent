@@ -2,11 +2,9 @@
 
 namespace Fsel.Cms.PlanetDefender.Domain.Models.QueryModels.StudentGameInfos
 {
-    using System;
     using Fsel.Cms.PlanetDefender.Domain.Enums;
-    using Fsel.Core.Base.BaseModels;
 
-    public class ChooseCharacterGenderCommandModel : BaseCommandModel
+    public class ChooseStudentGenderCommandModel
     {
         public EnumGender Gender { get; set; }
     }
